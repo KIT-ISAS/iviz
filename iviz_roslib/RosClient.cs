@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using Iviz.Msgs;
 
 namespace Iviz.RoslibSharp
 {
     public class RosClient
     {
-        internal readonly string CallerId;
+        public readonly string CallerId;
         internal readonly RpcMaster Master;
         internal readonly RpcNodeClient Talker;
         internal readonly RpcNodeServer Listener;
@@ -81,7 +82,16 @@ namespace Iviz.RoslibSharp
 
             Logger.Log($"Starting: My id is {CallerId}, my uri is {CallerUri}, and I'm talking to {MasterUri}");
 
-            EnsureCleanSlate();
+            try
+            {
+                // check if the system thinks we are subscribed to or advertise topic, possibly from a previous session
+                // if so, remove them
+                EnsureCleanSlate();
+            }
+            catch (WebException e)
+            {
+                throw new ArgumentException($"RosClient: Failed to contact the master URI '{masterUri.ToString()}'", e);
+            }
         }
 
         /// <summary>
@@ -95,6 +105,9 @@ namespace Iviz.RoslibSharp
         {
         }
 
+        /// <summary>
+        /// Asks the master which topics we advertise and are subscribed to, and removes them.
+        /// </summary>
         void EnsureCleanSlate()
         {
             SystemState state = GetSystemState();
@@ -234,7 +247,6 @@ namespace Iviz.RoslibSharp
                 publishersByTopic[topic] = publisher;
             }
 
-            //Logger.Log("Registering topic " + topic);
             Master.RegisterPublisher(topic, topicInfo.Type);
 
             return publisher;
@@ -339,6 +351,11 @@ namespace Iviz.RoslibSharp
                 Select(x => new PublishedTopic(x.Item1, x.Item2)).ToArray();
         }
 
+        /// <summary>
+        /// Asks the master for the nodes and topics in the system.
+        /// Corresponds to the function 'getSystemState' in the ROS Master API.
+        /// </summary>
+        /// <returns></returns>
         public SystemState GetSystemState()
         {
             RpcMaster.GetSystemStateResponse response = Master.GetSystemState();
