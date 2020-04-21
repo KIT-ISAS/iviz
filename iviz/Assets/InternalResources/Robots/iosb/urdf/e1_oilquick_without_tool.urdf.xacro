@@ -1,0 +1,37 @@
+<?xml version="1.0" ?>
+<!-- Copyright (c) 2013-2019 Fraunhofer IOSB, Karlsruhe, Germany. All rights reserved. -->
+<robot name="e1_oilquick_without_tool" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find e1_description)/urdf/e1_without_tool.urdf.xacro" />
+
+  <xacro:include filename="$(find e1_description)/urdf/oilquick_without_tool.urdf" />
+
+  <joint name="bucket_revolute" type="revolute">
+    <parent link="stick"/>
+    <child link="quickcoupler"/>
+    <origin rpy="0 -2.65 0" xyz="0.996 0 0.615"/>
+    <axis xyz="0  1  0"/>
+    <limit effort="0" lower="-0.005246877670288086" upper="3.0338263511657715" velocity="0"/>
+  </joint>
+  <joint name="bucket_lever_3" type="revolute">
+    <parent link="quickcoupler"/>
+    <child link="bucket_lever_2"/>
+    <origin rpy="0 0.25 0" xyz="0.144 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="0" lower="0" upper="0" velocity="0"/>
+  </joint>
+  <link name="bucket_lever_2">
+    <inertial>
+      <mass value="1"/>
+      <origin rpy="0  0  0" xyz="-0.09  0   -0.03"/>
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+    </inertial>
+    <visual name="visual_bucket_lever_2">
+      <origin rpy="-3.14158 -0.05     0" xyz="-0.181  0    -0.06"/>
+      <geometry>
+        <mesh filename="package://e1_description/meshes/lever.dae" scale="0.916 0.75 0.9"/>
+      </geometry>
+    </visual>
+  </link>
+
+</robot>

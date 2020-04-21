@@ -1,0 +1,60 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29806.167
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "iviz_msgs_gen", "iviz_msgs_gen\iviz_msgs_gen.csproj", "{99BE0812-5AEA-43A0-96B3-9CF230465E86}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "iviz_msgs", "iviz_msgs\iviz_msgs.csproj", "{E1F93DB5-4465-4E95-A8F5-DCD79C84859D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "iviz_roslib", "iviz_roslib\iviz_roslib.csproj", "{77FFF20F-C197-4364-BABC-7C7D0AC06914}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "iviz_test", "iviz_test\iviz_test.csproj", "{31BE8877-06FD-41AE-9AFE-55C420060723}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_kinect", "iviz_kinect\iviz_kinect.csproj", "{7E395D08-F373-4AA0-B1BF-32D3F97E3D7B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "iviz_bridge", "iviz_bridge\iviz_bridge.csproj", "{C4E99EC9-02D5-4770-B748-116127B2BA5E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_bridge_test", "iviz_bridge_test\iviz_bridge_test.csproj", "{F5740FE9-4C47-4FB7-A125-ED8ADF6FD4B6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{99BE0812-5AEA-43A0-96B3-9CF230465E86}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99BE0812-5AEA-43A0-96B3-9CF230465E86}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99BE0812-5AEA-43A0-96B3-9CF230465E86}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99BE0812-5AEA-43A0-96B3-9CF230465E86}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1F93DB5-4465-4E95-A8F5-DCD79C84859D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1F93DB5-4465-4E95-A8F5-DCD79C84859D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1F93DB5-4465-4E95-A8F5-DCD79C84859D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1F93DB5-4465-4E95-A8F5-DCD79C84859D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77FFF20F-C197-4364-BABC-7C7D0AC06914}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77FFF20F-C197-4364-BABC-7C7D0AC06914}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77FFF20F-C197-4364-BABC-7C7D0AC06914}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77FFF20F-C197-4364-BABC-7C7D0AC06914}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31BE8877-06FD-41AE-9AFE-55C420060723}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31BE8877-06FD-41AE-9AFE-55C420060723}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31BE8877-06FD-41AE-9AFE-55C420060723}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31BE8877-06FD-41AE-9AFE-55C420060723}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E395D08-F373-4AA0-B1BF-32D3F97E3D7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E395D08-F373-4AA0-B1BF-32D3F97E3D7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E395D08-F373-4AA0-B1BF-32D3F97E3D7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E395D08-F373-4AA0-B1BF-32D3F97E3D7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4E99EC9-02D5-4770-B748-116127B2BA5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4E99EC9-02D5-4770-B748-116127B2BA5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4E99EC9-02D5-4770-B748-116127B2BA5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4E99EC9-02D5-4770-B748-116127B2BA5E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5740FE9-4C47-4FB7-A125-ED8ADF6FD4B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5740FE9-4C47-4FB7-A125-ED8ADF6FD4B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5740FE9-4C47-4FB7-A125-ED8ADF6FD4B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5740FE9-4C47-4FB7-A125-ED8ADF6FD4B6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CD75037C-000A-41E1-9A6F-CB04A6B033C1}
+	EndGlobalSection
+EndGlobal

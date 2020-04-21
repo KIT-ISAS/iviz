@@ -1,0 +1,230 @@
+<?xml version="1.0" ?>
+<!-- Copyright (c) 2013-2017 Fraunhofer IOSB, Karlsruhe, Germany. All rights reserved. -->
+<robot name="WackerNeusonET18">
+  <joint name="slewing_prismatic" type="prismatic">
+    <parent link="cylinder_slewing"/>
+    <child link="piston_slewing"/>
+    <origin rpy="0 0 0." xyz="0  0  0"/>
+    <axis xyz="0  0  1"/>
+    <limit effort="0.0" lower="0.4" upper="0.8" velocity="0.0"/>
+  </joint>
+  <joint name="boom_prismatic" type="prismatic">
+    <parent link="cylinder_boom"/>
+    <child link="piston_boom"/>
+    <origin rpy="0 0.0  0" xyz="0  0  0"/>
+    <axis xyz="0  0  1"/>
+    <limit effort="0.0" lower="0.78" upper="1.14" velocity="0.0"/>
+  </joint>
+  <joint name="stick_prismatic" type="prismatic">
+    <parent link="cylinder_stick"/>
+    <child link="piston_stick"/>
+    <origin rpy="0 0. 0" xyz="0  0  0"/>
+    <axis xyz="0  0  1"/>
+    <limit effort="0.0" lower="0.77" upper="1.23" velocity="0.0"/>
+  </joint>
+  <joint name="bucket_prismatic" type="prismatic">
+    <parent link="cylinder_bucket"/>
+    <child link="piston_bucket"/>
+    <origin rpy="0 0 0" xyz="0  0  0"/>
+    <axis xyz="0  0  1"/>
+    <limit effort="0.0" lower="0.64" upper="0.983" velocity="0.0"/>
+    <!--limit effort="0.0" lower="0.61" upper="1.02" velocity="0.0"/-->
+    <!-- cylinder only 49cm, mit Gelenkpunkt 56cm, gemessen 2.218rad 93.5cm umgerechnet 97.0cm -->
+    <!-- stick cylinder 68cm, boom 64cm mit Gelenkpunkt -->
+    <!-- gemessen min/max 63.5cm, 98.0cm, umgerechnet alt 60.4cm, 100.9cm -->
+  </joint>
+  <joint name="cylinder_slewing" type="revolute">
+    <parent link="cabin"/>
+    <child link="cylinder_slewing"/>
+    <origin rpy="-0.4 1.5707  0.1098" xyz="-0.05 -0.36 0.54"/>
+    <axis xyz="1  0  0"/>
+    <limit effort="0" lower="0" upper="0" velocity="0.1"/>
+  </joint>
+  <joint name="cylinder_boom" type="revolute">
+    <parent link="intermediate_cabin_boom"/>
+    <child link="cylinder_boom"/>
+    <origin rpy="0  -0.55  0" xyz="0.21  0   -0.02"/>
+    <axis xyz="0  1  0"/>
+    <limit effort="0" lower="0" upper="0" velocity="0.1"/>
+  </joint>
+  <joint name="cylinder_stick" type="revolute">
+    <parent link="boom"/>
+    <child link="cylinder_stick"/>
+    <origin rpy="0 1.0276 0" xyz="-0.13   0     1.135"/>
+    <axis xyz="0  -1  0"/>
+    <limit effort="0" lower="0" upper="0" velocity="0.1"/>
+  </joint>
+  <joint name="cylinder_bucket" type="revolute">
+    <parent link="stick"/>
+    <child link="cylinder_bucket"/>
+    <origin rpy="0  1.242  0" xyz="0.14   0     0.315"/>
+    <axis xyz="0  -1  0"/>
+    <limit effort="0" lower="0" upper="0" velocity="0.1"/>
+  </joint>
+  <joint name="bucket_lever" type="revolute">
+    <parent link="stick"/>
+    <child link="bucket_lever_1_link"/>
+    <origin rpy="0  0.05  0" xyz="0.89    0       0.56499"/>
+    <axis xyz="0  1  0"/>
+    <limit effort="0" lower="0" upper="0" velocity="0.1"/>
+  </joint>
+  <link name="cylinder_slewing">
+    <inertial>
+      <mass value="5"/>
+      <origin rpy="0  0  0" xyz="0.  0   0"/>
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+    </inertial>
+    <visual name="visual_c_slewing">
+      <origin rpy="0 0 0" xyz="0. 0  0.06"/>
+      <geometry>
+        <cylinder length=".640" radius=".034"/>
+      </geometry>
+      <material name="material_cylinder"/>
+    </visual>
+  </link>
+  <link name="piston_slewing">
+    <inertial>
+      <mass value="5"/>
+      <origin rpy="0  0  0" xyz="-0. -0.0  0.22"/>
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+    </inertial>
+    <visual name="visual_p_slewing">
+      <origin rpy="0 0 0" xyz="-0. -0.0  -0.24"/>
+      <geometry>
+        <cylinder length=".600" radius=".020"/>
+      </geometry>
+      <material name="material_piston"/>
+    </visual>
+  </link>
+  <link name="cylinder_boom">
+    <inertial>
+      <mass value="10"/>
+      <origin rpy="0  0  0" xyz="0.00    0       0.28999"/>
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+    </inertial>
+    <collision name="collision_cylinder_boom">
+      <origin rpy="0     0.0  0" xyz="0.00    0       0.28999"/>
+      <geometry>
+        <cylinder length=".584" radius=".034"/>
+      </geometry>
+    </collision>
+    <visual name="visual_cylinder_boom">
+      <origin rpy="0     0.0  0" xyz="0.00    0       0.31799"/>
+      <geometry>
+        <cylinder length=".64" radius=".034"/>
+      </geometry>
+      <material name="material_cylinder"/>
+    </visual>
+  </link>
+  <link name="piston_boom">
+    <inertial>
+      <mass value="5"/>
+      <origin rpy="0  0  0" xyz="-0.00  0    0.8"/>
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+    </inertial>
+    <collision name="collision_piston_boom">
+      <origin rpy="0     0.0  0" xyz="-0.00  0    -0.31"/>
+      <geometry>
+        <cylinder length=".600" radius=".020"/>
+      </geometry>
+    </collision>
+    <visual name="visual_piston_boom">
+      <origin rpy="0     0.0  0" xyz="-0.00  0    -0.31"/>
+      <geometry>
+        <cylinder length=".600" radius=".020"/>
+      </geometry>
+      <material name="material_piston"/>
+    </visual>
+  </link>
+  <link name="cylinder_stick">
+    <inertial>
+      <mass value="10"/>
+      <origin rpy="0  0  0" xyz="0.  0     0.201"/>
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+    </inertial>
+    <collision name="collision_cylinder_ds">
+      <origin rpy="0      0  0" xyz="0.  0     0.261"/>
+      <geometry>
+        <cylinder length=".594" radius=".034"/>
+      </geometry>
+    </collision>
+    <visual name="visual_cylinder_ds">
+      <origin rpy="0      0  0" xyz="0.  0     0.304"/>
+      <geometry>
+        <cylinder length=".68" radius=".034"/>
+      </geometry>
+      <material name="material_cylinder"/>
+    </visual>
+  </link>
+  <link name="piston_stick">
+    <inertial>
+      <mass value="5"/>
+      <origin rpy="0  0  0" xyz="-0.  0    0.4"/>
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+    </inertial>
+    <collision name="collision_piston_ds">
+      <origin rpy="0      0.  0" xyz="-0.  0    -0.34"/>
+      <geometry>
+        <cylinder length=".655" radius=".020"/>
+      </geometry>
+    </collision>
+    <visual name="visual_piston_ds">
+      <origin rpy="0      0.  0" xyz="-0.  0    -0.34"/>
+      <geometry>
+        <cylinder length=".655" radius=".020"/>
+      </geometry>
+      <material name="material_piston"/>
+    </visual>
+  </link>
+  <link name="cylinder_bucket">
+    <inertial>
+      <mass value="8"/>
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+    </inertial>
+    <collision name="collision_cylinder_bucket">
+      <origin rpy="0      0  0" xyz="0  0     0.204"/>
+      <geometry>
+        <cylinder length=".456" radius=".034"/>
+      </geometry>
+    </collision>
+    <visual name="visual_cylinder_bucket">
+      <origin rpy="0      0 0" xyz="0  0     0.256"/>
+      <geometry>
+        <cylinder length=".56" radius=".034"/>
+      </geometry>
+      <material name="material_cylinder"/>
+    </visual>
+  </link>
+  <link name="piston_bucket">
+    <inertial>
+      <mass value="3"/>
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+    </inertial>
+    <collision name="collision_piston_bucket">
+      <origin rpy="0      0 0" xyz="-0   0    -0.304"/>
+      <geometry>
+        <cylinder length=".602" radius=".020"/>
+      </geometry>
+    </collision>
+    <visual name="visual_piston_bucket">
+      <origin rpy="0      0  0" xyz="-0   0    -0.304"/>
+      <geometry>
+        <cylinder length=".602" radius=".020"/>
+      </geometry>
+      <material name="material_piston"/>
+    </visual>
+  </link>
+  <link name="bucket_lever_1_link">
+    <inertial>
+      <mass value="1"/>
+      <origin rpy="0  0  0" xyz="-0.2   0    0.05"/>
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+    </inertial>
+    <visual name="visual_bucket lever">
+      <origin rpy="0  0  0" xyz="-0.2   0    0.05"/>
+      <geometry>
+        <mesh filename="package://e1_description/meshes/lever.dae" scale="0.953 1 0.9"/>
+      </geometry>
+    </visual>
+  </link>
+</robot>

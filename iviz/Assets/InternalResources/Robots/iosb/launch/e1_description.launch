@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<!-- Copyright (c) 2013-2019 Fraunhofer IOSB, Karlsruhe, Germany. All rights reserved. -->
+<launch>
+  <arg name="tool" default="true" />
+
+  <!-- Load universal robotic description format (URDF) -->
+  <param if="$(arg tool)" name="e1_description" command="$(find xacro)/xacro --inorder '$(find e1_description)/urdf/e1_oilquick_bucket_raedlinger.urdf.xacro'"/>
+  <param unless="$(arg tool)" name="e1_description" command="$(find xacro)/xacro --inorder '$(find e1_description)/urdf/e1_oilquick_without_tool.urdf.xacro'"/>
+  
+</launch>

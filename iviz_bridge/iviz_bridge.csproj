@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\iviz_msgs\iviz_msgs.csproj" />
+    <ProjectReference Include="..\iviz_roslib\iviz_roslib.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Utf8Json" Version="1.3.7" />
+    <PackageReference Include="websocketsharp.core" Version="1.0.0" />
+  </ItemGroup>
+</Project>

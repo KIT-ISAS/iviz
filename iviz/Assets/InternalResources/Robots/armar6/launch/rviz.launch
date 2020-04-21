@@ -1,0 +1,24 @@
+<?xml version='1.0'?>
+<launch>
+  <arg name="rvizconfig" default="$(find armar6)/rviz/urdf.rviz"/>
+
+  <arg name="prefix" value="isas_h2t_kitchen/armar6"/>
+
+  <node name="change_notifier" pkg="tf" type="tf_change_notifier" args="_angular_update_distance:=0.01"/>
+ 
+  <group ns="$(arg prefix)">
+      <param name="tf_prefix" value="$(arg prefix)"/>
+      <param name="robot_description" command="$(find xacro)/xacro.py $(find armar6)/robot.urdf.xacro"/>
+
+
+      <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" args="_use_gui:=true"/>
+      <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+      <node name="static_transform_publisher" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 base_link $(arg prefix)/base_link 100"/>
+  </group>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+
+</launch>
+
+
+
