@@ -9,22 +9,6 @@ namespace Iviz.Msgs.rosbridge_library
             public string @string;
             public bool @bool;
         
-            /// <summary> Full ROS name of the parent service. </summary>
-            public const string MessageType = TestMultipleRequestFields.MessageType;
-        
-            /// <summary> MD5 hash of a compact representation of the parent service. </summary>
-            public const string Md5Sum = TestMultipleRequestFields.Md5Sum;
-        
-            /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-            public const string DependenciesBase64 = TestMultipleRequestFields.DependenciesBase64;
-        
-            public IResponse CreateResponse() => new Response();
-        
-            public bool IsResponseType<T>()
-            {
-                return typeof(T).Equals(typeof(Response));
-            }
-        
             public int GetLength()
             {
                 int size = 13;
@@ -80,6 +64,33 @@ namespace Iviz.Msgs.rosbridge_library
             "H4sIAAAAAAAACsvMKzE2UsjMK+HlSsvJTwRxwDQvV3FJUWZeugKE4uVKys/PUQARvFy6urq8XACZOOXH" +
             "OQAAAA==";
             
+        
+        /// <summary> Request message. </summary>
+        public readonly Request request;
+        
+        /// <summary> Response message. </summary>
+        public Response response;
+        
+        /// <summary> Empty constructor. </summary>
+        public TestMultipleRequestFields()
+        {
+            request = new Request();
+        }
+        
+        /// <summary> Setter constructor. </summary>
+        public TestMultipleRequestFields(Request request)
+        {
+            this.request = request;
+        }
+        
+        public IResponse CreateResponse() => new Response();
+        
+        public IRequest GetRequest() => request;
+        
+        public void SetResponse(IResponse response)
+        {
+            this.response = (Response)response;
+        }
     }
 
 }

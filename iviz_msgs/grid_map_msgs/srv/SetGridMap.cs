@@ -8,22 +8,6 @@ namespace Iviz.Msgs.grid_map_msgs
             public grid_map_msgs.GridMap map;
             
         
-            /// <summary> Full ROS name of the parent service. </summary>
-            public const string MessageType = SetGridMap.MessageType;
-        
-            /// <summary> MD5 hash of a compact representation of the parent service. </summary>
-            public const string Md5Sum = SetGridMap.Md5Sum;
-        
-            /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-            public const string DependenciesBase64 = SetGridMap.DependenciesBase64;
-        
-            public IResponse CreateResponse() => new Response();
-        
-            public bool IsResponseType<T>()
-            {
-                return typeof(T).Equals(typeof(Response));
-            }
-        
             public int GetLength()
             {
                 int size = 0;
@@ -95,6 +79,33 @@ namespace Iviz.Msgs.grid_map_msgs
             "PGsLeNMxcqebKtoQoFrSE4JeYqwzG/L2A10KiLTANjvfCMbRSToBYd4Mfr9XTFETxfT0VHUn+wf9gqTY" +
             "OQ8AAA==";
             
+        
+        /// <summary> Request message. </summary>
+        public readonly Request request;
+        
+        /// <summary> Response message. </summary>
+        public Response response;
+        
+        /// <summary> Empty constructor. </summary>
+        public SetGridMap()
+        {
+            request = new Request();
+        }
+        
+        /// <summary> Setter constructor. </summary>
+        public SetGridMap(Request request)
+        {
+            this.request = request;
+        }
+        
+        public IResponse CreateResponse() => new Response();
+        
+        public IRequest GetRequest() => request;
+        
+        public void SetResponse(IResponse response)
+        {
+            this.response = (Response)response;
+        }
     }
 
 }

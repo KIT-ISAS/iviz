@@ -16,22 +16,6 @@ namespace Iviz.Msgs.nav_msgs
             // relax the constraint in x and y before failing. 
             public float tolerance;
         
-            /// <summary> Full ROS name of the parent service. </summary>
-            public const string MessageType = GetPlan.MessageType;
-        
-            /// <summary> MD5 hash of a compact representation of the parent service. </summary>
-            public const string Md5Sum = GetPlan.Md5Sum;
-        
-            /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-            public const string DependenciesBase64 = GetPlan.DependenciesBase64;
-        
-            public IResponse CreateResponse() => new Response();
-        
-            public bool IsResponseType<T>()
-            {
-                return typeof(T).Equals(typeof(Response));
-            }
-        
             public int GetLength()
             {
                 int size = 4;
@@ -112,6 +96,33 @@ namespace Iviz.Msgs.nav_msgs
             "RGOSC1Y6qupx/unp/lB9DJpmqf5CarzbPR+9o48IOF3ARN5zP9ouqYPx8Zgk5e9NmpRM3q1dTHOvcsa4" +
             "3S9T/cmvxrfvAzh4/QTn44CeDAgAAA==";
             
+        
+        /// <summary> Request message. </summary>
+        public readonly Request request;
+        
+        /// <summary> Response message. </summary>
+        public Response response;
+        
+        /// <summary> Empty constructor. </summary>
+        public GetPlan()
+        {
+            request = new Request();
+        }
+        
+        /// <summary> Setter constructor. </summary>
+        public GetPlan(Request request)
+        {
+            this.request = request;
+        }
+        
+        public IResponse CreateResponse() => new Response();
+        
+        public IRequest GetRequest() => request;
+        
+        public void SetResponse(IResponse response)
+        {
+            this.response = (Response)response;
+        }
     }
 
 }

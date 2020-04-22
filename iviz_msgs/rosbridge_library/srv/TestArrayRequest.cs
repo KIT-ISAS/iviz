@@ -6,22 +6,6 @@ namespace Iviz.Msgs.rosbridge_library
         {
             public int[] @int;
         
-            /// <summary> Full ROS name of the parent service. </summary>
-            public const string MessageType = TestArrayRequest.MessageType;
-        
-            /// <summary> MD5 hash of a compact representation of the parent service. </summary>
-            public const string Md5Sum = TestArrayRequest.Md5Sum;
-        
-            /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-            public const string DependenciesBase64 = TestArrayRequest.DependenciesBase64;
-        
-            public IResponse CreateResponse() => new Response();
-        
-            public bool IsResponseType<T>()
-            {
-                return typeof(T).Equals(typeof(Response));
-            }
-        
             public int GetLength()
             {
                 int size = 4;
@@ -70,6 +54,33 @@ namespace Iviz.Msgs.rosbridge_library
         public const string DependenciesBase64 =
             "H4sIAAAAAAAACsvMKzE2io5VyMwr4eXS1dXl5QIAVi7OQxIAAAA=";
             
+        
+        /// <summary> Request message. </summary>
+        public readonly Request request;
+        
+        /// <summary> Response message. </summary>
+        public Response response;
+        
+        /// <summary> Empty constructor. </summary>
+        public TestArrayRequest()
+        {
+            request = new Request();
+        }
+        
+        /// <summary> Setter constructor. </summary>
+        public TestArrayRequest(Request request)
+        {
+            this.request = request;
+        }
+        
+        public IResponse CreateResponse() => new Response();
+        
+        public IRequest GetRequest() => request;
+        
+        public void SetResponse(IResponse response)
+        {
+            this.response = (Response)response;
+        }
     }
 
 }

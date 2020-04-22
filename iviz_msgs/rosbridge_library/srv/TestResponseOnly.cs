@@ -5,22 +5,6 @@ namespace Iviz.Msgs.rosbridge_library
         public sealed class Request : IRequest
         {
         
-            /// <summary> Full ROS name of the parent service. </summary>
-            public const string MessageType = TestResponseOnly.MessageType;
-        
-            /// <summary> MD5 hash of a compact representation of the parent service. </summary>
-            public const string Md5Sum = TestResponseOnly.Md5Sum;
-        
-            /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-            public const string DependenciesBase64 = TestResponseOnly.DependenciesBase64;
-        
-            public IResponse CreateResponse() => new Response();
-        
-            public bool IsResponseType<T>()
-            {
-                return typeof(T).Equals(typeof(Response));
-            }
-        
             public int GetLength() => 0;
         
             public unsafe void Deserialize(ref byte* ptr, byte* end)
@@ -59,6 +43,33 @@ namespace Iviz.Msgs.rosbridge_library
         public const string DependenciesBase64 =
             "H4sIAAAAAAAACtPV1eXlyswrMTZSSEksSeTlAgBuTv+KEQAAAA==";
             
+        
+        /// <summary> Request message. </summary>
+        public readonly Request request;
+        
+        /// <summary> Response message. </summary>
+        public Response response;
+        
+        /// <summary> Empty constructor. </summary>
+        public TestResponseOnly()
+        {
+            request = new Request();
+        }
+        
+        /// <summary> Setter constructor. </summary>
+        public TestResponseOnly(Request request)
+        {
+            this.request = request;
+        }
+        
+        public IResponse CreateResponse() => new Response();
+        
+        public IRequest GetRequest() => request;
+        
+        public void SetResponse(IResponse response)
+        {
+            this.response = (Response)response;
+        }
     }
 
 }

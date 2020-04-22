@@ -22,22 +22,6 @@ namespace Iviz.Msgs.diagnostic_msgs
             // loaded into the namespace.
             public string load_namespace;
         
-            /// <summary> Full ROS name of the parent service. </summary>
-            public const string MessageType = AddDiagnostics.MessageType;
-        
-            /// <summary> MD5 hash of a compact representation of the parent service. </summary>
-            public const string Md5Sum = AddDiagnostics.Md5Sum;
-        
-            /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-            public const string DependenciesBase64 = AddDiagnostics.DependenciesBase64;
-        
-            public IResponse CreateResponse() => new Response();
-        
-            public bool IsResponseType<T>()
-            {
-                return typeof(T).Equals(typeof(Response));
-            }
-        
             public int GetLength()
             {
                 int size = 4;
@@ -121,6 +105,33 @@ namespace Iviz.Msgs.diagnostic_msgs
             "MkYq81X+pW4Xhc1heaa0uCg/J0lK6lzPWr2ve7eTqsyuZ1X9CiuvdiE4SlOjD6bK8Bm/3OEJ0CJPLxYG" +
             "wD571kqblouaUgHRr5PIYKM4qxer388qDeS0BQAA";
             
+        
+        /// <summary> Request message. </summary>
+        public readonly Request request;
+        
+        /// <summary> Response message. </summary>
+        public Response response;
+        
+        /// <summary> Empty constructor. </summary>
+        public AddDiagnostics()
+        {
+            request = new Request();
+        }
+        
+        /// <summary> Setter constructor. </summary>
+        public AddDiagnostics(Request request)
+        {
+            this.request = request;
+        }
+        
+        public IResponse CreateResponse() => new Response();
+        
+        public IRequest GetRequest() => request;
+        
+        public void SetResponse(IResponse response)
+        {
+            this.response = (Response)response;
+        }
     }
 
 }

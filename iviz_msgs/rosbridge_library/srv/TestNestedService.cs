@@ -7,22 +7,6 @@ namespace Iviz.Msgs.rosbridge_library
             //request definition
             public geometry_msgs.Pose pose;
         
-            /// <summary> Full ROS name of the parent service. </summary>
-            public const string MessageType = TestNestedService.MessageType;
-        
-            /// <summary> MD5 hash of a compact representation of the parent service. </summary>
-            public const string Md5Sum = TestNestedService.Md5Sum;
-        
-            /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-            public const string DependenciesBase64 = TestNestedService.DependenciesBase64;
-        
-            public IResponse CreateResponse() => new Response();
-        
-            public bool IsResponseType<T>()
-            {
-                return typeof(T).Equals(typeof(Response));
-            }
-        
             public int GetLength() => 56;
         
             public unsafe void Deserialize(ref byte* ptr, byte* end)
@@ -74,6 +58,33 @@ namespace Iviz.Msgs.rosbridge_library
             "zLsco4kpkC/rKEZg7WMS1DWNCIbjzSuqz4ghHF7lo1q7an1eimBR51cx6nOJjf90quf6i7cZpx84d1P4" +
             "Bepovf8f3vdP72rT/e//AuElY/VeAwAA";
             
+        
+        /// <summary> Request message. </summary>
+        public readonly Request request;
+        
+        /// <summary> Response message. </summary>
+        public Response response;
+        
+        /// <summary> Empty constructor. </summary>
+        public TestNestedService()
+        {
+            request = new Request();
+        }
+        
+        /// <summary> Setter constructor. </summary>
+        public TestNestedService(Request request)
+        {
+            this.request = request;
+        }
+        
+        public IResponse CreateResponse() => new Response();
+        
+        public IRequest GetRequest() => request;
+        
+        public void SetResponse(IResponse response)
+        {
+            this.response = (Response)response;
+        }
     }
 
 }

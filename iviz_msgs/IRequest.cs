@@ -3,14 +3,6 @@
     public interface IRequest
     {
         /// <summary>
-        /// Create an empty response to this message
-        /// </summary>
-        /// <returns>New message</returns>
-        IResponse CreateResponse();
-
-        bool IsResponseType<T>();
-
-        /// <summary>
         /// Fills this message with the information from the buffer.
         /// </summary>
         /// <param name="ptr">

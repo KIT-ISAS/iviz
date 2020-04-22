@@ -86,26 +86,6 @@ namespace Iviz.MsgsGen
                 lines.Add("    " + element.ToCString());
             }
 
-            if (isRequest)
-            {
-                lines.Add("");
-                lines.Add("    /// <summary> Full ROS name of the parent service. </summary>");
-                lines.Add("    public const string MessageType = " + service + ".MessageType;");
-                lines.Add("");
-                lines.Add("    /// <summary> MD5 hash of a compact representation of the parent service. </summary>");
-                lines.Add("    public const string Md5Sum = " + service + ".Md5Sum;");
-                lines.Add("");
-                lines.Add("    /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>");
-                lines.Add("    public const string DependenciesBase64 = " + service + ".DependenciesBase64;");
-                lines.Add("");
-                lines.Add("    public IResponse CreateResponse() => new Response();");
-                lines.Add("");
-                lines.Add("    public bool IsResponseType<T>()");
-                lines.Add("    {");
-                lines.Add("        return typeof(T).Equals(typeof(Response));");
-                lines.Add("    }");
-            }
-
             lines.Add("");
 
 
@@ -210,6 +190,27 @@ namespace Iviz.MsgsGen
         {
             List<string> lines = new List<string>();
 
+            /*
+            {
+                lines.Add("");
+                lines.Add("    /// <summary> Full ROS name of the parent service. </summary>");
+                lines.Add("    public const string MessageType = " + service + ".MessageType;");
+                lines.Add("");
+                lines.Add("    /// <summary> MD5 hash of a compact representation of the parent service. </summary>");
+                lines.Add("    public const string Md5Sum = " + service + ".Md5Sum;");
+                lines.Add("");
+                lines.Add("    /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>");
+                lines.Add("    public const string DependenciesBase64 = " + service + ".DependenciesBase64;");
+                lines.Add("");
+                lines.Add("    public IResponse CreateResponse() => new Response();");
+                lines.Add("");
+                lines.Add("    public bool IsResponseType<T>()");
+                lines.Add("    {");
+                lines.Add("        return typeof(T).Equals(typeof(Response));");
+                lines.Add("    }");
+                lines.Add("");
+                */
+
             lines.Add("");
             lines.Add("/// <summary> Full ROS name of this service. </summary>");
             lines.Add("public const string MessageType = \"" + package + "/" + name + "\";");
@@ -228,6 +229,40 @@ namespace Iviz.MsgsGen
             {
                 lines.Add("    " + entry);
             }
+
+            lines.Add("");
+            lines.Add("/// <summary> Request message. </summary>");
+            lines.Add("public readonly Request request;");
+
+            lines.Add("");
+            lines.Add("/// <summary> Response message. </summary>");
+            lines.Add("public Response response;");
+
+            lines.Add("");
+            lines.Add("/// <summary> Empty constructor. </summary>");
+            lines.Add("public " + name + "()");
+            lines.Add("{");
+            lines.Add("    request = new Request();");
+            lines.Add("}");
+
+            lines.Add("");
+            lines.Add("/// <summary> Setter constructor. </summary>");
+            lines.Add("public " + name + "(Request request)");
+            lines.Add("{");
+            lines.Add("    this.request = request;");
+            lines.Add("}");
+
+            lines.Add("");
+            lines.Add("public IResponse CreateResponse() => new Response();");
+
+            lines.Add("");
+            lines.Add("public IRequest GetRequest() => request;");
+
+            lines.Add("");
+            lines.Add("public void SetResponse(IResponse response)");
+            lines.Add("{");
+            lines.Add("    this.response = (Response)response;");
+            lines.Add("}");
 
             return lines;
         }

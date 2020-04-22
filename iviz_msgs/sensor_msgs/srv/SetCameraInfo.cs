@@ -14,22 +14,6 @@ namespace Iviz.Msgs.sensor_msgs
             
             public sensor_msgs.CameraInfo camera_info; // The camera_info to store
         
-            /// <summary> Full ROS name of the parent service. </summary>
-            public const string MessageType = SetCameraInfo.MessageType;
-        
-            /// <summary> MD5 hash of a compact representation of the parent service. </summary>
-            public const string Md5Sum = SetCameraInfo.Md5Sum;
-        
-            /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-            public const string DependenciesBase64 = SetCameraInfo.DependenciesBase64;
-        
-            public IResponse CreateResponse() => new Response();
-        
-            public bool IsResponseType<T>()
-            {
-                return typeof(T).Equals(typeof(Response));
-            }
-        
             public int GetLength()
             {
                 int size = 0;
@@ -145,6 +129,33 @@ namespace Iviz.Msgs.sensor_msgs
             "4u/+PQHP32rjHhWjFnDlMsjX0QyZ7rYAPkpxjIzWdXZHmNIcUS5lkcOdGsMY3UiL60WOmPy8p/QGnVt3" +
             "l87mdFN8mLs3ohgTUeRERjOyLuGvF7fP1Lt7+KYNO+buKj81fO8KN4B7/wcq0lQUnyEAAA==";
             
+        
+        /// <summary> Request message. </summary>
+        public readonly Request request;
+        
+        /// <summary> Response message. </summary>
+        public Response response;
+        
+        /// <summary> Empty constructor. </summary>
+        public SetCameraInfo()
+        {
+            request = new Request();
+        }
+        
+        /// <summary> Setter constructor. </summary>
+        public SetCameraInfo(Request request)
+        {
+            this.request = request;
+        }
+        
+        public IResponse CreateResponse() => new Response();
+        
+        public IRequest GetRequest() => request;
+        
+        public void SetResponse(IResponse response)
+        {
+            this.response = (Response)response;
+        }
     }
 
 }

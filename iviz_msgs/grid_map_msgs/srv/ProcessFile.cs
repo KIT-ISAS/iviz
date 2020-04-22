@@ -11,22 +11,6 @@ namespace Iviz.Msgs.grid_map_msgs
             public string topic_name;
             
         
-            /// <summary> Full ROS name of the parent service. </summary>
-            public const string MessageType = ProcessFile.MessageType;
-        
-            /// <summary> MD5 hash of a compact representation of the parent service. </summary>
-            public const string Md5Sum = ProcessFile.Md5Sum;
-        
-            /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-            public const string DependenciesBase64 = ProcessFile.DependenciesBase64;
-        
-            public IResponse CreateResponse() => new Response();
-        
-            public bool IsResponseType<T>()
-            {
-                return typeof(T).Equals(typeof(Response));
-            }
-        
             public int GetLength()
             {
                 int size = 8;
@@ -86,6 +70,33 @@ namespace Iviz.Msgs.grid_map_msgs
             "1WgcSLSkZd7I2AhRhzMXXC83WDPLEcprcljMw0OjUUjkmifYd6Gw8yJ+wp5XTbyYfPgXN21sGlHf9617" +
             "L9Ujhe/7j9ymTyOQ6toZah7IMucfoB29AHvJfdW5AAAA";
             
+        
+        /// <summary> Request message. </summary>
+        public readonly Request request;
+        
+        /// <summary> Response message. </summary>
+        public Response response;
+        
+        /// <summary> Empty constructor. </summary>
+        public ProcessFile()
+        {
+            request = new Request();
+        }
+        
+        /// <summary> Setter constructor. </summary>
+        public ProcessFile(Request request)
+        {
+            this.request = request;
+        }
+        
+        public IResponse CreateResponse() => new Response();
+        
+        public IRequest GetRequest() => request;
+        
+        public void SetResponse(IResponse response)
+        {
+            this.response = (Response)response;
+        }
     }
 
 }

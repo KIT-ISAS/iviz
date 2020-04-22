@@ -5,22 +5,6 @@ namespace Iviz.Msgs.grid_map_msgs
         public sealed class Request : IRequest
         {
         
-            /// <summary> Full ROS name of the parent service. </summary>
-            public const string MessageType = GetGridMapInfo.MessageType;
-        
-            /// <summary> MD5 hash of a compact representation of the parent service. </summary>
-            public const string Md5Sum = GetGridMapInfo.Md5Sum;
-        
-            /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-            public const string DependenciesBase64 = GetGridMapInfo.DependenciesBase64;
-        
-            public IResponse CreateResponse() => new Response();
-        
-            public bool IsResponseType<T>()
-            {
-                return typeof(T).Equals(typeof(Response));
-            }
-        
             public int GetLength() => 0;
         
             public unsafe void Deserialize(ref byte* ptr, byte* end)
@@ -82,6 +66,33 @@ namespace Iviz.Msgs.grid_map_msgs
             "HQlMeqXpNTcab5uHc1ts+RoJ0W59l1JcBDTEbCC+DSAafcHd2b0cRySz2M4POiIr61PRbKYAOhiQkvUe" +
             "Y7G9hTbz1zh//XopBrv6zTRmudBKe1Xdz59Xt7vq46LpluIJUtuve9D7DRkqgEDZBgAA";
             
+        
+        /// <summary> Request message. </summary>
+        public readonly Request request;
+        
+        /// <summary> Response message. </summary>
+        public Response response;
+        
+        /// <summary> Empty constructor. </summary>
+        public GetGridMapInfo()
+        {
+            request = new Request();
+        }
+        
+        /// <summary> Setter constructor. </summary>
+        public GetGridMapInfo(Request request)
+        {
+            this.request = request;
+        }
+        
+        public IResponse CreateResponse() => new Response();
+        
+        public IRequest GetRequest() => request;
+        
+        public void SetResponse(IResponse response)
+        {
+            this.response = (Response)response;
+        }
     }
 
 }

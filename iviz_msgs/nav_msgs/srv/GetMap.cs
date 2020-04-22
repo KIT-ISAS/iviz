@@ -6,22 +6,6 @@ namespace Iviz.Msgs.nav_msgs
         {
             // Get the map as a nav_msgs/OccupancyGrid
         
-            /// <summary> Full ROS name of the parent service. </summary>
-            public const string MessageType = GetMap.MessageType;
-        
-            /// <summary> MD5 hash of a compact representation of the parent service. </summary>
-            public const string Md5Sum = GetMap.Md5Sum;
-        
-            /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-            public const string DependenciesBase64 = GetMap.DependenciesBase64;
-        
-            public IResponse CreateResponse() => new Response();
-        
-            public bool IsResponseType<T>()
-            {
-                return typeof(T).Equals(typeof(Response));
-            }
-        
             public int GetLength() => 0;
         
             public unsafe void Deserialize(ref byte* ptr, byte* end)
@@ -85,6 +69,33 @@ namespace Iviz.Msgs.nav_msgs
             "7slOfTOMKGaeY6x9ZGOPn64JAuBABXPVZ4hVnqwf3tCn+W6Y7/76VghO/H32i33G6nn96enjif20t/go" +
             "fx3UdHcAvL8B9AgLWdoIAAA=";
             
+        
+        /// <summary> Request message. </summary>
+        public readonly Request request;
+        
+        /// <summary> Response message. </summary>
+        public Response response;
+        
+        /// <summary> Empty constructor. </summary>
+        public GetMap()
+        {
+            request = new Request();
+        }
+        
+        /// <summary> Setter constructor. </summary>
+        public GetMap(Request request)
+        {
+            this.request = request;
+        }
+        
+        public IResponse CreateResponse() => new Response();
+        
+        public IRequest GetRequest() => request;
+        
+        public void SetResponse(IResponse response)
+        {
+            this.response = (Response)response;
+        }
     }
 
 }
