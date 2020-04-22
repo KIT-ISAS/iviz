@@ -12,7 +12,7 @@ namespace Iviz.MsgsGen
     {
         public readonly string package;
         public readonly string name;
-        public readonly string[] lines;
+        //public readonly string[] lines;
         public readonly string fullMessage;
         public readonly List<MsgParser.IElement> elements;
         public int fixedSize = -2;
@@ -44,7 +44,7 @@ namespace Iviz.MsgsGen
             };
 
 
-        public static readonly HashSet<string> BuiltInDeserializer = new HashSet<string>
+        public static readonly HashSet<string> BuiltInTypes = new HashSet<string>
             {
                  "bool" ,
                  "int8",
@@ -80,12 +80,18 @@ namespace Iviz.MsgsGen
 
             this.package = package;
             name = Path.GetFileNameWithoutExtension(path);
-            lines = File.ReadAllLines(path);
+            string[] lines = File.ReadAllLines(path);
             fullMessage = File.ReadAllText(path);
             elements = MsgParser.ParseFile(lines);
 
             forceStruct = ForceStructs.Contains(package + "/" + name);
 
+            variables = elements.
+                Where(x => x.Type == MsgParser.ElementType.Variable).
+                Cast<MsgParser.Variable>().
+                ToList();
+
+            /*
             foreach (var element in elements)
             {
                 if (element.Type == MsgParser.ElementType.Variable)
@@ -93,9 +99,10 @@ namespace Iviz.MsgsGen
                     variables.Add((MsgParser.Variable)element);
                 }
             }
+            */
         }
 
-        public void ResolveClasses(PackageInfo packageInfo)
+        public static void DoResolveClasses(PackageInfo packageInfo, string package, List<MsgParser.Variable> variables)
         {
             foreach (var variable in variables)
             {
@@ -106,8 +113,12 @@ namespace Iviz.MsgsGen
                 }
             }
         }
+        public void ResolveClasses(PackageInfo packageInfo)
+        {
+            DoResolveClasses(packageInfo, package, variables);
+        }
 
-        public int CheckFixedSize()
+        public static int DoCheckFixedSize(ref int fixedSize, List<MsgParser.Variable> variables)
         {
             if (fixedSize != -2)
             {
@@ -145,13 +156,24 @@ namespace Iviz.MsgsGen
             return fixedSize;
         }
 
+        public int CheckFixedSize()
+        {
+            return DoCheckFixedSize(ref fixedSize, variables);
+        }
 
-        List<string> CreateLengthProperty()
+
+        internal static List<string> CreateLengthProperty(List<MsgParser.Variable> variables, int fixedSize)
         {
             if (fixedSize != -1)
             {
                 return new List<string> {
                             "public int GetLength() => " + fixedSize + ";"
+                };
+            }
+            else if (variables.Count == 0)
+            {
+                return new List<string> {
+                            "public int GetLength() => 0;"
                 };
             }
 
@@ -239,7 +261,7 @@ namespace Iviz.MsgsGen
             return lines;
         }
 
-        List<string> CreateConstructors()
+        internal static List<string> CreateConstructors(List<MsgParser.Variable> variables, string name, bool forceStruct)
         {
             List<string> lines = new List<string>();
 
@@ -250,7 +272,7 @@ namespace Iviz.MsgsGen
                 lines.Add("{");
                 foreach (var variable in variables)
                 {
-                    if (BuiltInDeserializer.Contains(variable.rosClassName))
+                    if (BuiltInTypes.Contains(variable.rosClassName))
                     {
                         if (variable.rosClassName == "string" && variable.arraySize == -1)
                         {
@@ -292,7 +314,7 @@ namespace Iviz.MsgsGen
             {
                 foreach (var variable in variables)
                 {
-                    if (BuiltInDeserializer.Contains(variable.rosClassName))
+                    if (BuiltInTypes.Contains(variable.rosClassName))
                     {
                         if (variable.arraySize == -1)
                         {
@@ -325,35 +347,10 @@ namespace Iviz.MsgsGen
             }
             lines.Add("}");
 
-            /*
-            lines.Add("");
-            lines.Add("/// Deserializer for array");
-            lines.Add("public static unsafe " + name + "[] DeserializeArray(ref byte* ptr, byte* end, uint count)");
-            lines.Add("{");
-            if (forceStruct)
-            {
-                lines.Add("    BuiltIns.DeserializeStructArray(out " + name + "[] obj, ref ptr, end, count);");
-                lines.Add("    return obj;");
-            }
-            else
-            {
-                lines.Add("    BuiltIns.DeserializeArray(out " + name + "[] obj, ref ptr, end, count);");
-                lines.Add("    return obj;");
-            }
-            lines.Add("}");
-
-            lines.Add("");
-            lines.Add("/// Deserializer constructor caller for interface");
-            lines.Add("public unsafe IMessage Deserialize(ref byte* ptr, byte* end)");
-            lines.Add("{");
-            lines.Add("    return new " + name + "(ref ptr, end);");
-            lines.Add("}");
-            */
-
             return lines;
         }
 
-        public List<string> CreateSerializers()
+        public static List<string> CreateSerializers(List<MsgParser.Variable> variables, bool forceStruct)
         {
             List<string> lines = new List<string>();
 
@@ -367,7 +364,7 @@ namespace Iviz.MsgsGen
             {
                 foreach (var variable in variables)
                 {
-                    if (BuiltInDeserializer.Contains(variable.rosClassName))
+                    if (BuiltInTypes.Contains(variable.rosClassName))
                     {
                         if (variable.arraySize == -1)
                         {
@@ -400,153 +397,178 @@ namespace Iviz.MsgsGen
             }
             lines.Add("}");
 
-            /*
-            lines.Add("");
-            lines.Add("// Serializer for array");
-            lines.Add("public static unsafe void SerializeArray(" + name + "[] obj, ref byte* ptr, byte* end, uint count)");
-            lines.Add("{");
-            if (forceStruct)
-            {
-                lines.Add("    BuiltIns.SerializeStructArray(obj, ref ptr, end, count);");
-            }
-            else
-            {
-                lines.Add("    BuiltIns.SerializeArray(obj, ref ptr, end, count);");
-            }
-            lines.Add("}");
-            */
-            return lines;
-        }
-
-        public List<string> CreateJsonSerializers()
-        {
-            HashSet<string> jsonBuiltIns = new HashSet<string>(BuiltInDeserializer);
-            jsonBuiltIns.Remove("time");
-            jsonBuiltIns.Remove("duration");
-
-            List<string> lines = new List<string>();
-            lines.Add("public void ToJson(JsonWriter _w)");
-            lines.Add("{");
-            lines.Add("    _w.WriteStartObject();");
-            foreach (var variable in variables)
-            {
-                lines.Add("    _w.WritePropertyName(\"" + variable.fieldName + "\");");
-                if (variable.arraySize == -1)
-                {
-                    if (jsonBuiltIns.Contains(variable.rosClassName))
-                    {
-                        lines.Add("    _w.WriteValue(" + variable.fieldName + ");");
-                    }
-                    else
-                    {
-                        lines.Add("    " + variable.fieldName + ".ToJson(_w);");
-                    }
-                }
-                else
-                {
-                    lines.Add("    _w.WriteStartArray();");
-                    lines.Add("    for (int i = 0; i < " + variable.fieldName + ".Length; i++)");
-                    lines.Add("    {");
-                    if (jsonBuiltIns.Contains(variable.rosClassName))
-                    {
-                        lines.Add("        _w.WriteValue(" + variable.fieldName + "[i]);");
-                    }
-                    else
-                    {
-                        lines.Add("        " + variable.fieldName + "[i].ToJson(_w);");
-                    }
-                    lines.Add("    }");
-                    lines.Add("    _w.WriteEndArray();");
-                }
-            }
-            lines.Add("    _w.WriteEndObject();");
-            lines.Add("}");
-            return lines;
-        }
-
-        public string ReadJsonForType(string className)
-        {
-            switch (className)
-            {
-                case "bool":
-                    return "(bool)_r.ReadAsBoolean();";
-                case "int8":
-                    return "(sbyte)_r.ReadAsInt32();";
-                case "char":
-                    return "(char)_r.ReadAsInt32();";
-                case "uint8":
-                case "byte":
-                    return "(byte)_r.ReadAsInt32();";
-                case "int16":
-                    return "(short)_r.ReadAsInt32();";
-                case "uint16":
-                    return "(ushort)_r.ReadAsInt32();";
-                case "int32":
-                case "int64":
-                    return "(int)_r.ReadAsInt32();";
-                case "uint64":
-                    return "(ulong)_r.ReadAsInt32();";
-                case "uint32":
-                    return "(uint)_r.ReadAsInt32();";
-                case "float32":
-                    return "(float)_r.ReadAsDouble();";
-                case "float64":
-                    return "(double)_r.ReadAsDouble();";
-                case "string":
-                    return "_r.ReadAsString();";
-                case "duration":
-                    return "new duration(_r);";
-                case "time":
-                    return "new time(_r);";
-            }
-            return null;
-        }
-
-        public List<string> CreateJsonDeserializers()
-        {
-            List<string> lines = new List<string>();
-            lines.Add("public void FromJson(JsonReader _r)");
-            lines.Add("{");
-            lines.Add("    _r.Read();");
-            foreach (var variable in variables)
-            {
-                lines.Add("    _r.Read();");
-                if (variable.arraySize == -1)
-                {
-
-                    if (BuiltInDeserializer.Contains(variable.rosClassName))
-                    {
-                        lines.Add("    " + variable.fieldName + " = " + ReadJsonForType(variable.rosClassName));
-                    }
-                    else
-                    {
-                        lines.Add("    " + variable.fieldName + ".FromJson(_r);");
-                    }
-                }
-                else
-                {
-                    lines.Add("    _r.Read();");
-                    lines.Add("    for (int i = 0; i < " + variable.fieldName + ".Length; i++)");
-                    lines.Add("    {");
-                    if (BuiltInDeserializer.Contains(variable.rosClassName))
-                    {
-                        lines.Add("       " + variable.fieldName + "[i] = " + ReadJsonForType(variable.rosClassName));
-                    }
-                    else
-                    {
-                        lines.Add("        " + variable.fieldName + "[i].FromJson(_r);");
-                    }
-                    lines.Add("    }");
-                    lines.Add("    _r.Read();");
-                }
-            }
-            lines.Add("    _r.Read();");
-            lines.Add("}");
             return lines;
         }
 
         public string ToCString()
         {
+            StringBuilder str = new StringBuilder();
+            str.AppendLine();
+
+            str.AppendLine("namespace Iviz.Msgs." + package);
+            str.AppendLine("{");
+
+            foreach (var entry in CreateClassContent())
+            {
+                str.Append("    ").AppendLine(entry);
+            }
+
+            str.AppendLine("}");
+
+            return str.ToString();
+        }
+
+        public static List<string> Compress(string catDependencies)
+        {
+            List<string> lines = new List<string>();
+
+            byte[] inputBytes = Encoding.UTF8.GetBytes(catDependencies);
+            using (var outputStream = new MemoryStream())
+            {
+                using (var gZipStream = new GZipStream(outputStream, CompressionMode.Compress))
+                {
+                    gZipStream.Write(inputBytes, 0, inputBytes.Length);
+                }
+                string base64 = Convert.ToBase64String(outputStream.ToArray());
+
+                for (int i = 0; i < base64.Length; i += 80)
+                {
+                    bool last;
+                    int end;
+                    if (i + 80 < base64.Length)
+                    {
+                        last = false;
+                        end = i + 80;
+                    }
+                    else
+                    {
+                        last = true;
+                        end = base64.Length;
+                    }
+                    string sub = base64.Substring(i, end - i);
+                    if (!last)
+                    {
+                        lines.Add("\"" + sub + "\" +");
+                    }
+                    else
+                    {
+                        lines.Add("\"" + sub + "\";");
+                    }
+                }
+                lines.Add("");
+            }
+            return lines;
+        }
+
+        List<string> CreateClassContent()
+        {
+            List<string> lines = new List<string>();
+            if (forceStruct)
+            {
+                lines.Add("public struct " + name + " : IMessage");
+            }
+            else
+            {
+                lines.Add("public sealed class " + name + " : IMessage");
+            }
+            lines.Add("{");
+            foreach (var element in elements)
+            {
+                lines.Add("    " + element.ToCString());
+            }
+
+            lines.Add("");
+            lines.Add("    /// <summary> Full ROS name of this message. </summary>");
+            lines.Add("    public const string MessageType = \"" + package + "/" + name + "\";");
+
+            lines.Add("");
+            lines.Add("    public IMessage Create() => new " + name + "();");
+
+            lines.Add("");
+
+
+            List<string> lengthProperty = CreateLengthProperty(variables, fixedSize);
+            foreach (var entry in lengthProperty)
+            {
+                lines.Add("    " + entry);
+            }
+
+            lines.Add("");
+            List<string> deserializer = CreateConstructors(variables, name, forceStruct);
+            foreach (var entry in deserializer)
+            {
+                lines.Add("    " + entry);
+            }
+
+            lines.Add("");
+            List<string> serializer = CreateSerializers(variables, forceStruct);
+            foreach (var entry in serializer)
+            {
+                lines.Add("    " + entry);
+            }
+
+            lines.Add("");
+            string md5 = GetMd5Property();
+            lines.Add("    /// <summary> MD5 hash of a compact representation of the message. </summary>");
+            lines.Add("    public const string Md5Sum = \"" + md5 + "\";");
+
+            lines.Add("");
+
+            lines.Add("    /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>");
+            lines.Add("    public const string DependenciesBase64 =");
+
+            /*
+            byte[] inputBytes = Encoding.UTF8.GetBytes(catDependencies);
+            using (var outputStream = new MemoryStream())
+            {
+                using (var gZipStream = new GZipStream(outputStream, CompressionMode.Compress))
+                {
+                    gZipStream.Write(inputBytes, 0, inputBytes.Length);
+                }
+                string base64 = Convert.ToBase64String(outputStream.ToArray());
+
+                for (int i = 0; i < base64.Length; i += 80)
+                {
+                    bool last;
+                    int end;
+                    if (i + 80 < base64.Length)
+                    {
+                        last = false;
+                        end = i + 80;
+                    }
+                    else
+                    {
+                        last = true;
+                        end = base64.Length;
+                    }
+                    string sub = base64.Substring(i, end - i);
+                    if (!last)
+                    {
+                        lines.Add("            \"" + sub + "\" +");
+                    }
+                    else
+                    {
+                        lines.Add("            \"" + sub + "\";");
+                    }
+                }
+                lines.Add("");
+            }
+            */
+
+            string catDependencies = GetCatDependencies();
+            List<string> compressedDeps = Compress(catDependencies);
+            foreach (var entry in compressedDeps)
+            {
+                lines.Add("            " + entry);
+            }
+
+            lines.Add("}");
+
+            return lines;
+
+
+
+            /*
             StringBuilder str = new StringBuilder();
             str.AppendLine();
 
@@ -641,32 +663,15 @@ namespace Iviz.MsgsGen
                 str.AppendLine();
             }
 
-            /*
-            str.AppendLine();
-            List<string> jsonSerializer = CreateJsonSerializers();
-            foreach (var entry in jsonSerializer)
-            {
-                str.Append("        ").Append(entry).AppendLine();
-            }
-            */
-
-            /*
-            str.AppendLine();
-            List<string> jsonDeserializer = CreateJsonDeserializers();
-            foreach (var entry in jsonDeserializer)
-            {
-                str.Append("        ").Append(entry).AppendLine();
-            }
-            */
-
             str.AppendLine("    }");
             str.AppendLine("}");
 
 
             return str.ToString();
+            */
         }
 
-        void AddDependencies(List<ClassInfo> dependencies)
+        public void AddDependencies(List<ClassInfo> dependencies)
         {
             foreach (var variable in variables)
             {
@@ -708,6 +713,22 @@ namespace Iviz.MsgsGen
             if (md5 != null) return md5;
 
             StringBuilder str = new StringBuilder();
+
+            var constants = elements.Where(x => x.Type == MsgParser.ElementType.Constant).
+                Cast<MsgParser.Constant>().
+                Select(x => x.ToMd5String());
+            if (constants.Any())
+            {
+                str.AppendJoin("\n", constants);
+                if (variables.Any())
+                {
+                    str.Append("\n");
+                }
+            }
+            str.AppendJoin("\n", variables.Select(x => x.GetMd5Entry()));
+
+            /*
+            StringBuilder str = new StringBuilder();
             var constants = elements.Where(x => x.Type == MsgParser.ElementType.Constant).
                 Cast<MsgParser.Constant>().
                 Select(x => x.ToMd5String());
@@ -718,13 +739,21 @@ namespace Iviz.MsgsGen
                 str.Append("\n");
             }
             str.Append(string.Join("\n", variables.Select(x => x.GetMd5Entry())));
+            */
+
             md5File = str.ToString();
 
+            //Console.WriteLine("------" + package + "/" + name);
+            //Console.WriteLine(md5File);
+
+
             md5 = GetMd5Hash(MD5.Create(), md5File);
+            //Console.WriteLine(">>>" + md5);
+
             return md5;
         }
 
-        static string GetMd5Hash(MD5 md5Hash, string input)
+        public static string GetMd5Hash(MD5 md5Hash, string input)
         {
             byte[] data = md5Hash.ComputeHash(Encoding.UTF8.GetBytes(input));
             StringBuilder sBuilder = new StringBuilder();

@@ -33,7 +33,8 @@ namespace Iviz.MsgsGen
             Comment,
             Variable,
             Constant,
-            Invalid
+            Invalid,
+            ServiceSeparator
         }
 
         public interface IElement
@@ -95,6 +96,25 @@ namespace Iviz.MsgsGen
 
             public ClassInfo classInfo;
 
+            static readonly HashSet<string> Keywords = new HashSet<string>
+            {
+                "default", 
+                "byte", 
+                "sbyte", 
+                "char", 
+                "short", 
+                "ushort", 
+                "int",
+                "uint",
+                "float", 
+                "double",
+                "long",
+                "ulong",
+                "bool", 
+                "string",
+                "readonly",
+            };
+
             public Variable(string comment, string classToken, string fieldName)
             {
                 this.comment = comment;
@@ -102,9 +122,10 @@ namespace Iviz.MsgsGen
 
                 rosFieldName = fieldName;
                 this.fieldName = fieldName;
-                if (fieldName == "default")
+
+                if (Keywords.Contains(fieldName))
                 {
-                    this.fieldName = "_default";
+                    this.fieldName = "@" + fieldName;
                 }
 
                 int bracketLeft = classToken.IndexOf('[');
@@ -185,6 +206,7 @@ namespace Iviz.MsgsGen
                     else
                     {
                         return rosClassName + "[" + arraySize + "] " + rosFieldName;
+                        //return rosClassName + "[] " + rosFieldName;
                     }
                 }
             }
@@ -258,6 +280,21 @@ namespace Iviz.MsgsGen
             }
         }
 
+        public class ServiceSeparator : IElement
+        {
+            public ElementType Type => ElementType.ServiceSeparator;
+
+            public override string ToString()
+            {
+                return "[---]";
+            }
+
+            public string ToCString()
+            {
+                return "";
+            }
+        }
+
 
         static bool IsIdentifierLetter(char c)
         {
@@ -275,6 +312,12 @@ namespace Iviz.MsgsGen
 
             foreach (string line in lines)
             {
+                if (line == "---")
+                {
+                    elements.Add(new ServiceSeparator());
+                    continue;
+                }
+
                 int index = 0;
                 List<string> terms = new List<string>();
                 while (index < line.Length)

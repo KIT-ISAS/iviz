@@ -117,7 +117,7 @@ namespace Iviz.RoslibSharp
             httpRequest.Method = "POST";
             httpRequest.ContentType = "text/xml";
             httpRequest.Host = callerUri.Host;
-            httpRequest.UserAgent = "iviz.roslibsharp";
+            httpRequest.UserAgent = "iviz.roslib";
 
             byte[] outData = Encoding.UTF8.GetBytes(buffer.ToString());
             httpRequest.ContentLength = outData.Length;

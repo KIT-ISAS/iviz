@@ -79,6 +79,11 @@ namespace Iviz.RoslibSharp
             IsAlive = false;
         }
 
+        public bool MessageTypeMatches(Type type)
+        {
+            return type.Equals(Manager.TopicInfo.Generator.GetType());
+        }
+
         public string Subscribe(Action<IMessage> callback)
         {
             AssertIsAlive();

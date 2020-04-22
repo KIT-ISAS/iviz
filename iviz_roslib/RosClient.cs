@@ -165,6 +165,11 @@ namespace Iviz.RoslibSharp
                 subscriber = CreateSubscriber(topic, requestNoDelay, typeof(T), new T());
             }
 
+            if (!subscriber.MessageTypeMatches(typeof(T)))
+            {
+                throw new ArgumentException("Incorrect message type.");
+            }
+
             // local lambda wrapper for casting
             void wrapper(IMessage x) { callback((T)x); }
 
@@ -173,10 +178,21 @@ namespace Iviz.RoslibSharp
 
         public string Subscribe(string topic, Action<IMessage> callback, Type type, out RosSubscriber subscriber, bool requestNoDelay = false)
         {
+            if (!typeof(IMessage).IsAssignableFrom(type))
+            {
+                throw new ArgumentException("Incorrect message type.");
+            }
+
             if (!TryGetSubscriber(topic, out subscriber))
             {
                 subscriber = CreateSubscriber(topic, requestNoDelay, type, BuiltIns.CreateGenerator(type));
             }
+
+            if (!subscriber.MessageTypeMatches(type))
+            {
+                throw new ArgumentException("Incorrect message type.");
+            }
+
             return subscriber.Subscribe(callback);
         }
 

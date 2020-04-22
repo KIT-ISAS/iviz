@@ -6,8 +6,8 @@ namespace Iviz.MsgsGen
     {
         static void Main(string[] args)
         {
-            string RosBasePath = args.Length > 0 ? args[0] : "/Users/akzeac/Downloads/msgs/";
-            string IvizMsgPaths = args.Length > 1 ? args[1] : "/Users/akzeac/Documents/iviz_utils/iviz_utils/iviz_msgs"; 
+            string RosBasePath = args.Length > 0 ? args[0] : @"D:\Ant\msgs";
+            string IvizMsgPaths = args.Length > 1 ? args[1] : @"D:\Ant\iviz\iviz_msgs"; 
 
 
             PackageInfo p = new PackageInfo();
@@ -21,9 +21,17 @@ namespace Iviz.MsgsGen
 
             p.ResolveAll();
 
-            foreach(ClassInfo classInfo in p.classes.Values)
+            foreach(ClassInfo classInfo in p.messages.Values)
             {
-                string packageDir = IvizMsgPaths + "/" + classInfo.package + "/";
+                string packageDir = IvizMsgPaths + "/" + classInfo.package + "/msg/";
+                Directory.CreateDirectory(packageDir);
+                string text = classInfo.ToCString();
+                File.WriteAllText(packageDir + classInfo.name + ".cs", text);
+            }
+
+            foreach (ServiceInfo classInfo in p.services.Values)
+            {
+                string packageDir = IvizMsgPaths + "/" + classInfo.package + "/srv/";
                 Directory.CreateDirectory(packageDir);
                 string text = classInfo.ToCString();
                 File.WriteAllText(packageDir + classInfo.name + ".cs", text);

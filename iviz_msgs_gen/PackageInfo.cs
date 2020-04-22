@@ -6,14 +6,15 @@ namespace Iviz.MsgsGen
 {
     public class PackageInfo
     {
-        public readonly Dictionary<string, ClassInfo> classes = new Dictionary<string, ClassInfo>();
+        public readonly Dictionary<string, ClassInfo> messages = new Dictionary<string, ClassInfo>();
+        public readonly Dictionary<string, ServiceInfo> services = new Dictionary<string, ServiceInfo>();
 
-        static void GetMessages(string path, List<string> msgs)
+        static void GetFilesWithExtension(string path, List<string> msgs, string ext)
         {
             string[] files = Directory.GetFiles(path);
             foreach (string file in files)
             {
-                if (Path.GetExtension(file) == ".msg")
+                if (Path.GetExtension(file) == ext && Path.GetFileName(file)[0] != '.')
                 {
                     msgs.Add(file);
                 }
@@ -21,9 +22,20 @@ namespace Iviz.MsgsGen
             string[] dirs = Directory.GetDirectories(path);
             foreach (string dir in dirs)
             {
-                GetMessages(dir, msgs);
+                GetFilesWithExtension(dir, msgs, ext);
             }
         }
+
+        static void GetMessages(string path, List<string> msgs)
+        {
+            GetFilesWithExtension(path, msgs, ".msg");
+        }
+
+        static void GetServices(string path, List<string> srvs)
+        {
+            GetFilesWithExtension(path, srvs, ".srv");
+        }
+
 
         public void Create(string path, string package)
         {
@@ -33,32 +45,46 @@ namespace Iviz.MsgsGen
             foreach (string msg in msgs)
             {
                 ClassInfo classInfo = new ClassInfo(package, msg);
-                classes.Add(classInfo.package + "/" + classInfo.name, classInfo);
+                messages.Add(classInfo.package + "/" + classInfo.name, classInfo);
+            }
+
+            List<string> srvs = new List<string>();
+            GetServices(path, srvs);
+
+            foreach (string srv in srvs)
+            {
+                ServiceInfo classInfo = new ServiceInfo(package, srv);
+                services.Add(classInfo.package + "/" + classInfo.name, classInfo);
             }
         }
 
         public bool TryGet(string name, string package, out ClassInfo classInfo)
         {
             return
-                classes.TryGetValue(name, out classInfo) ||
-                classes.TryGetValue(package + "/" + name, out classInfo);
+                messages.TryGetValue(name, out classInfo) ||
+                messages.TryGetValue(package + "/" + name, out classInfo);
         }
 
         public void ResolveAll()
         {
-            foreach (var classInfo in classes.Values)
+            foreach (var classInfo in messages.Values)
             {
                 classInfo.ResolveClasses(this);
             }
-            foreach (var classInfo in classes.Values)
+            foreach (var classInfo in messages.Values)
             {
+                classInfo.CheckFixedSize();
+            }
+            foreach (var classInfo in services.Values)
+            {
+                classInfo.ResolveClasses(this);
                 classInfo.CheckFixedSize();
             }
         }
 
         public void ToCString()
         {
-            foreach (var classInfo in classes.Values)
+            foreach (var classInfo in messages.Values)
             {
                 Console.WriteLine(classInfo.ToCString());
             }

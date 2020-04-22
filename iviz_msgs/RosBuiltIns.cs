@@ -77,12 +77,22 @@ namespace Iviz.Msgs
             obj = new time(secs, nsecs);
         }
 
+        public static void Deserialize(out time[] obj, ref byte* ptr, byte* end, uint count)
+        {
+            DeserializeStructArray(out obj, ref ptr, end, count);
+        }
+
         public static void Deserialize(out duration obj, ref byte* ptr, byte* end)
         {
             AssertInRange(ptr, 8, end);
             int secs = *(int*)ptr; ptr += 4;
             int nsecs = *(int*)ptr; ptr += 4;
             obj = new duration(secs, nsecs);
+        }
+
+        public static void Deserialize(out duration[] obj, ref byte* ptr, byte* end, uint count)
+        {
+            DeserializeStructArray(out obj, ref ptr, end, count);
         }
 
         public static void Deserialize(out bool[] obj, ref byte* ptr, byte* end, uint count)
@@ -109,6 +119,12 @@ namespace Iviz.Msgs
             ptr += 1;
         }
 
+        public static void Deserialize(out char[] obj, ref byte* ptr, byte* end, uint count)
+        {
+            DeserializeStructArray(out obj, ref ptr, end, count);
+        }
+
+
         public static void Deserialize(out byte obj, ref byte* ptr, byte* end)
         {
             AssertInRange(ptr, 1, end);
@@ -118,22 +134,6 @@ namespace Iviz.Msgs
 
         public static void Deserialize(out byte[] obj, ref byte* ptr, byte* end, uint count)
         {
-            /*
-            if (count == 0)
-            {
-                AssertInRange(ptr, 4, end);
-                count = *(uint*)ptr; ptr += 4;
-                if (count == 0) { obj = zc_byte; return; }
-            }
-            AssertInRange(ptr, count * 1, end);
-            obj = new byte[count];
-            fixed (byte* obj_ptr = obj)
-            {
-                uint size = count * 1;
-                Memcpy(obj_ptr, ptr, size);
-                ptr += size;
-            }
-            */
             DeserializeStructArray(out obj, ref ptr, end, count);
         }
 
@@ -146,22 +146,6 @@ namespace Iviz.Msgs
 
         public static void Deserialize(out sbyte[] obj, ref byte* ptr, byte* end, uint count)
         {
-            /*
-            if (count == 0)
-            {
-                AssertInRange(ptr, 4, end);
-                count = *(uint*)ptr; ptr += 4;
-                if (count == 0) { obj = zc_sbyte; return; }
-            }
-            AssertInRange(ptr, count * 1, end);
-            obj = new sbyte[count];
-            fixed (sbyte* obj_ptr = obj)
-            {
-                uint size = count * 1;
-                Memcpy(obj_ptr, ptr, size);
-                ptr += size;
-            }
-            */
             DeserializeStructArray(out obj, ref ptr, end, count);
         }
 
@@ -174,22 +158,6 @@ namespace Iviz.Msgs
 
         public static void Deserialize(out short[] obj, ref byte* ptr, byte* end, uint count)
         {
-            /*
-            if (count == 0)
-            {
-                AssertInRange(ptr, 4, end);
-                count = *(uint*)ptr; ptr += 4;
-                if (count == 0) { obj = zc_short; return; }
-            }
-            AssertInRange(ptr, count * 2, end);
-            obj = new short[count];
-            fixed (short* obj_ptr = obj)
-            {
-                uint size = count * 2;
-                Memcpy(obj_ptr, ptr, size);
-                ptr += size;
-            }
-            */
             DeserializeStructArray(out obj, ref ptr, end, count);
         }
 
@@ -202,22 +170,6 @@ namespace Iviz.Msgs
 
         public static void Deserialize(out ushort[] obj, ref byte* ptr, byte* end, uint count)
         {
-            /*
-            if (count == 0)
-            {
-                AssertInRange(ptr, 4, end);
-                count = *(uint*)ptr; ptr += 4;
-                if (count == 0) { obj = zc_ushort; return; }
-            }
-            AssertInRange(ptr, count * 2, end);
-            obj = new ushort[count];
-            fixed (ushort* obj_ptr = obj)
-            {
-                uint size = count * 2;
-                Memcpy(obj_ptr, ptr, size);
-                ptr += size;
-            }
-            */
             DeserializeStructArray(out obj, ref ptr, end, count);
         }
 
@@ -230,22 +182,6 @@ namespace Iviz.Msgs
 
         public static void Deserialize(out int[] obj, ref byte* ptr, byte* end, uint count)
         {
-            /*
-            if (count == 0)
-            {
-                AssertInRange(ptr, 4, end);
-                count = *(uint*)ptr; ptr += 4;
-                if (count == 0) { obj = zc_int; return; }
-            }
-            AssertInRange(ptr, count * 4, end);
-            obj = new int[count];
-            fixed (int* obj_ptr = obj)
-            {
-                uint size = count * 4;
-                Memcpy(obj_ptr, ptr, size);
-                ptr += size;
-            }
-            */
             DeserializeStructArray(out obj, ref ptr, end, count);
         }
 
@@ -258,22 +194,6 @@ namespace Iviz.Msgs
 
         public static void Deserialize(out uint[] obj, ref byte* ptr, byte* end, uint count)
         {
-            /*
-            if (count == 0)
-            {
-                AssertInRange(ptr, 4, end);
-                count = *(uint*)ptr; ptr += 4;
-                if (count == 0) { obj = zc_uint; return; }
-            }
-            AssertInRange(ptr, count * 4, end);
-            obj = new uint[count];
-            fixed (uint* obj_ptr = obj)
-            {
-                uint size = count * 4;
-                Memcpy(obj_ptr, ptr, size);
-                ptr += size;
-            }
-            */
             DeserializeStructArray(out obj, ref ptr, end, count);
         }
 
@@ -286,22 +206,6 @@ namespace Iviz.Msgs
 
         public static void Deserialize(out long[] obj, ref byte* ptr, byte* end, uint count)
         {
-            /*
-            if (count == 0)
-            {
-                AssertInRange(ptr, 4, end);
-                count = *(uint*)ptr; ptr += 4;
-                if (count == 0) { obj = zc_long; return; }
-            }
-            AssertInRange(ptr, count * 8, end);
-            obj = new long[count];
-            fixed (long* obj_ptr = obj)
-            {
-                uint size = count * 8;
-                Memcpy(obj_ptr, ptr, size);
-                ptr += size;
-            }
-            */
             DeserializeStructArray(out obj, ref ptr, end, count);
         }
 
@@ -314,22 +218,6 @@ namespace Iviz.Msgs
 
         public static void Deserialize(out ulong[] obj, ref byte* ptr, byte* end, uint count)
         {
-            /*
-            if (count == 0)
-            {
-                AssertInRange(ptr, 4, end);
-                count = *(uint*)ptr; ptr += 4;
-                if (count == 0) { obj = zc_ulong; return; }
-            }
-            AssertInRange(ptr, count * 8, end);
-            obj = new ulong[count];
-            fixed (ulong* obj_ptr = obj)
-            {
-                uint size = count * 8;
-                Memcpy(obj_ptr, ptr, size);
-                ptr += size;
-            }
-            */
             DeserializeStructArray(out obj, ref ptr, end, count);
         }
 
@@ -342,22 +230,6 @@ namespace Iviz.Msgs
 
         public static void Deserialize(out float[] obj, ref byte* ptr, byte* end, uint count)
         {
-            /*
-            if (count == 0)
-            {
-                AssertInRange(ptr, 4, end);
-                count = *(uint*)ptr; ptr += 4;
-                if (count == 0) { obj = zc_float; return; }
-            }
-            AssertInRange(ptr, count * 4, end);
-            obj = new float[count];
-            fixed (float* obj_ptr = obj)
-            {
-                uint size = count * 4;
-                Memcpy(obj_ptr, ptr, size);
-                ptr += size;
-            }
-            */
             DeserializeStructArray(out obj, ref ptr, end, count);
         }
 
@@ -370,22 +242,6 @@ namespace Iviz.Msgs
 
         public static void Deserialize(out double[] obj, ref byte* ptr, byte* end, uint count)
         {
-            /*
-            if (count == 0)
-            {
-                AssertInRange(ptr, 4, end);
-                count = *(uint*)ptr; ptr += 4;
-                if (count == 0) { obj = zc_double; return; }
-            }
-            AssertInRange(ptr, count * 8, end);
-            obj = new double[count];
-            fixed (double* obj_ptr = obj)
-            {
-                uint size = count * 8;
-                Memcpy(obj_ptr, ptr, size);
-                ptr += size;
-            }
-            */
             DeserializeStructArray(out obj, ref ptr, end, count);
         }
 
@@ -437,16 +293,22 @@ namespace Iviz.Msgs
 
         public static void Serialize(in time obj, ref byte* ptr, byte* end)
         {
-            AssertInRange(ptr, 8, end);
-            *(uint*)ptr = obj.secs; ptr += 4;
-            *(uint*)ptr = obj.nsecs; ptr += 4;
+            SerializeStruct(obj, ref ptr, end);
+        }
+
+        public static void Serialize(time[] obj, ref byte* ptr, byte* end, uint count)
+        {
+            SerializeStructArray(obj, ref ptr, end, count);
         }
 
         public static void Serialize(in duration obj, ref byte* ptr, byte* end)
         {
-            AssertInRange(ptr, 8, end);
-            *(int*)ptr = obj.secs; ptr += 4;
-            *(int*)ptr = obj.nsecs; ptr += 4;
+            SerializeStruct(obj, ref ptr, end);
+        }
+
+        public static void Serialize(duration[] obj, ref byte* ptr, byte* end, uint count)
+        {
+            SerializeStructArray(obj, ref ptr, end, count);
         }
 
         public static void Serialize(bool obj, ref byte* ptr, byte* end)
@@ -509,30 +371,24 @@ namespace Iviz.Msgs
         public static void Serialize(byte obj, ref byte* ptr, byte* end)
         {
             AssertInRange(ptr, 1, end);
-            *(byte*)ptr = obj;
+            *ptr = obj;
             ptr += 1;
         }
 
         public static void Serialize(byte[] obj, ref byte* ptr, byte* end, uint count)
         {
-            /*
-            if (count == 0)
-            {
-                AssertInRange(ptr, (uint)(4 + obj.Length * 1), end);
-                *(int*)ptr = obj.Length; ptr += 4;
-            }
-            else
-            {
-                AssertSize(obj, count);
-                AssertInRange(ptr, count * 1, end);
-            }
-            fixed (byte* obj_ptr = obj)
-            {
-                uint size = (uint)(obj.Length * 1);
-                Memcpy(ptr, obj_ptr, size);
-                ptr += size;
-            }
-            */
+            SerializeStructArray(obj, ref ptr, end, count);
+        }
+
+        public static void Serialize(char obj, ref byte* ptr, byte* end)
+        {
+            AssertInRange(ptr, 1, end);
+            *(char*)ptr = obj;
+            ptr += 1;
+        }
+
+        public static void Serialize(char[] obj, ref byte* ptr, byte* end, uint count)
+        {
             SerializeStructArray(obj, ref ptr, end, count);
         }
 
@@ -545,24 +401,6 @@ namespace Iviz.Msgs
 
         public static void Serialize(sbyte[] obj, ref byte* ptr, byte* end, uint count)
         {
-            /*
-            if (count == 0)
-            {
-                AssertInRange(ptr, (uint)(4 + obj.Length * 1), end);
-                *(int*)ptr = obj.Length; ptr += 4;
-            }
-            else
-            {
-                AssertSize(obj, count);
-                AssertInRange(ptr, count * 1, end);
-            }
-            fixed (sbyte* obj_ptr = obj)
-            {
-                uint size = (uint)(obj.Length * 1);
-                Memcpy(ptr, obj_ptr, size);
-                ptr += size;
-            }
-            */
             SerializeStructArray(obj, ref ptr, end, count);
         }
 
@@ -575,24 +413,6 @@ namespace Iviz.Msgs
 
         public static void Serialize(short[] obj, ref byte* ptr, byte* end, uint count)
         {
-            /*
-            if (count == 0)
-            {
-                AssertInRange(ptr, (uint)(4 + obj.Length * 2), end);
-                *(int*)ptr = obj.Length; ptr += 4;
-            }
-            else
-            {
-                AssertSize(obj, count);
-                AssertInRange(ptr, count * 2, end);
-            }
-            fixed (short* obj_ptr = obj)
-            {
-                uint size = (uint)(obj.Length * 2);
-                Memcpy(ptr, obj_ptr, size);
-                ptr += size;
-            }
-            */
             SerializeStructArray(obj, ref ptr, end, count);
         }
 
@@ -605,24 +425,6 @@ namespace Iviz.Msgs
 
         public static void Serialize(ushort[] obj, ref byte* ptr, byte* end, uint count)
         {
-            /*
-            if (count == 0)
-            {
-                AssertInRange(ptr, (uint)(4 + obj.Length * 2), end);
-                *(int*)ptr = obj.Length; ptr += 4;
-            }
-            else
-            {
-                AssertSize(obj, count);
-                AssertInRange(ptr, count * 2, end);
-            }
-            fixed (ushort* obj_ptr = obj)
-            {
-                uint size = (uint)(obj.Length * 2);
-                Memcpy(ptr, obj_ptr, size);
-                ptr += size;
-            }
-            */
             SerializeStructArray(obj, ref ptr, end, count);
         }
 
@@ -635,24 +437,6 @@ namespace Iviz.Msgs
 
         public static void Serialize(int[] obj, ref byte* ptr, byte* end, uint count)
         {
-            /*
-            if (count == 0)
-            {
-                AssertInRange(ptr, (uint)(4 + obj.Length * 4), end);
-                *(int*)ptr = obj.Length; ptr += 4;
-            }
-            else
-            {
-                AssertSize(obj, count);
-                AssertInRange(ptr, count * 4, end);
-            }
-            fixed (int* obj_ptr = obj)
-            {
-                uint size = (uint)(obj.Length * 4);
-                Memcpy(ptr, obj_ptr, size);
-                ptr += size;
-            }
-            */
             SerializeStructArray(obj, ref ptr, end, count);
         }
 
@@ -665,24 +449,6 @@ namespace Iviz.Msgs
 
         public static void Serialize(uint[] obj, ref byte* ptr, byte* end, uint count)
         {
-            /*
-            if (count == 0)
-            {
-                AssertInRange(ptr, (uint)(4 + obj.Length * 4), end);
-                *(int*)ptr = obj.Length; ptr += 4;
-            }
-            else
-            {
-                AssertSize(obj, count);
-                AssertInRange(ptr, count * 4, end);
-            }
-            fixed (uint* obj_ptr = obj)
-            {
-                uint size = (uint)(obj.Length * 4);
-                Memcpy(ptr, obj_ptr, size);
-                ptr += size;
-            }
-            */
             SerializeStructArray(obj, ref ptr, end, count);
         }
 
@@ -695,24 +461,6 @@ namespace Iviz.Msgs
 
         public static void Serialize(long[] obj, ref byte* ptr, byte* end, uint count)
         {
-            /*
-            if (count == 0)
-            {
-                AssertInRange(ptr, (uint)(4 + obj.Length * 8), end);
-                *(int*)ptr = obj.Length; ptr += 4;
-            }
-            else
-            {
-                AssertSize(obj, count);
-                AssertInRange(ptr, count * 8, end);
-            }
-            fixed (long* obj_ptr = obj)
-            {
-                uint size = (uint)(obj.Length * 8);
-                Memcpy(ptr, obj_ptr, size);
-                ptr += size;
-            }
-            */
             SerializeStructArray(obj, ref ptr, end, count);
         }
 
@@ -725,25 +473,6 @@ namespace Iviz.Msgs
 
         public static void Serialize(ulong[] obj, ref byte* ptr, byte* end, uint count)
         {
-            /*
-            if (count == 0)
-            {
-                AssertInRange(ptr, (uint)(4 + obj.Length * 8), end);
-                *(int*)ptr = obj.Length; ptr += 4;
-            }
-            else
-            {
-                AssertSize(obj, count);
-                AssertInRange(ptr, count * 8, end);
-            }
-            fixed (ulong* obj_ptr = obj)
-            {
-                uint size = (uint)(obj.Length * 8);
-                Memcpy(ptr, obj_ptr, size);
-                ptr += size;
-            }
-
-            */
             SerializeStructArray(obj, ref ptr, end, count);
         }
 
@@ -756,24 +485,6 @@ namespace Iviz.Msgs
 
         public static void Serialize(float[] obj, ref byte* ptr, byte* end, uint count)
         {
-            /*
-            if (count == 0)
-            {
-                AssertInRange(ptr, (uint)(4 + obj.Length * 4), end);
-                *(int*)ptr = obj.Length; ptr += 4;
-            }
-            else
-            {
-                AssertSize(obj, count);
-                AssertInRange(ptr, count * 4, end);
-            }
-            fixed (float* obj_ptr = obj)
-            {
-                uint size = (uint)(obj.Length * 4);
-                Memcpy(ptr, obj_ptr, size);
-                ptr += size;
-            }
-            */
             SerializeStructArray(obj, ref ptr, end, count);
         }
 
@@ -786,24 +497,6 @@ namespace Iviz.Msgs
 
         public static void Serialize(double[] obj, ref byte* ptr, byte* end, uint count)
         {
-            /*
-            if (count == 0)
-            {
-                AssertInRange(ptr, (uint)(4 + obj.Length * 8), end);
-                *(int*)ptr = obj.Length; ptr += 4;
-            }
-            else
-            {
-                AssertSize(obj, count);
-                AssertInRange(ptr, count * 8, end);
-            }
-            fixed (double* obj_ptr = obj)
-            {
-                uint size = (uint)(obj.Length * 8);
-                Memcpy(ptr, obj_ptr, size);
-                ptr += size;
-            }
-            */
             SerializeStructArray(obj, ref ptr, end, count);
         }
 
@@ -878,7 +571,7 @@ namespace Iviz.Msgs
 
         public static string GetClassStringConstant(Type type, string name)
         {
-            return (string)type?.GetField(name).GetRawConstantValue();
+            return (string)type?.GetField(name)?.GetRawConstantValue();
         }
 
         public static string GetMessageType(Type type)
