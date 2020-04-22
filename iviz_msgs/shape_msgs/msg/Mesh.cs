@@ -27,8 +27,8 @@ namespace Iviz.Msgs.shape_msgs
         /// <summary> Constructor for empty message. </summary>
         public Mesh()
         {
-            triangles = new MeshTriangle[0];
-            vertices = new geometry_msgs.Point[0];
+            triangles = System.Array.Empty<MeshTriangle>();
+            vertices = System.Array.Empty<geometry_msgs.Point>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

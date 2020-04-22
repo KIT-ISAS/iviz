@@ -26,8 +26,8 @@ namespace Iviz.Msgs.sensor_msgs
         public Joy()
         {
             header = new std_msgs.Header();
-            axes = new float[0];
-            buttons = new int[0];
+            axes = System.Array.Empty<0>();
+            buttons = System.Array.Empty<0>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

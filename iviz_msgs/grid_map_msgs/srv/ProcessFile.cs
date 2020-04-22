@@ -37,6 +37,13 @@ namespace Iviz.Msgs.grid_map_msgs
                 BuiltIns.Serialize(file_path, ref ptr, end);
                 BuiltIns.Serialize(topic_name, ref ptr, end);
             }
+        
+            public Response Call(IServiceCaller caller)
+            {
+                ProcessFile s = new ProcessFile(this);
+                caller.Call(s);
+                return s.response;
+            }
         }
 
         public sealed class Response : IResponse
@@ -59,7 +66,7 @@ namespace Iviz.Msgs.grid_map_msgs
         }
         
         /// <summary> Full ROS name of this service. </summary>
-        public const string MessageType = "grid_map_msgs/ProcessFile";
+        public const string ServiceType = "grid_map_msgs/ProcessFile";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
         public const string Md5Sum = "03f389710f49a6dd2a8b447bb2850cd6";

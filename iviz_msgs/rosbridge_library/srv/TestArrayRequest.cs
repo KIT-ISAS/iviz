@@ -16,7 +16,7 @@ namespace Iviz.Msgs.rosbridge_library
             /// <summary> Constructor for empty message. </summary>
             public Request()
             {
-                @int = new int[0];
+                @int = System.Array.Empty<0>();
             }
             
             public unsafe void Deserialize(ref byte* ptr, byte* end)
@@ -27,6 +27,13 @@ namespace Iviz.Msgs.rosbridge_library
             public unsafe void Serialize(ref byte* ptr, byte* end)
             {
                 BuiltIns.Serialize(@int, ref ptr, end, 0);
+            }
+        
+            public Response Call(IServiceCaller caller)
+            {
+                TestArrayRequest s = new TestArrayRequest(this);
+                caller.Call(s);
+                return s.response;
             }
         }
 
@@ -45,7 +52,7 @@ namespace Iviz.Msgs.rosbridge_library
         }
         
         /// <summary> Full ROS name of this service. </summary>
-        public const string MessageType = "rosbridge_library/TestArrayRequest";
+        public const string ServiceType = "rosbridge_library/TestArrayRequest";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
         public const string Md5Sum = "3d7cfb7e4aa0844868966efa8a264398";

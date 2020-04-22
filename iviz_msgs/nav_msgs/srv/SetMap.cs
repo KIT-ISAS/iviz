@@ -34,6 +34,13 @@ namespace Iviz.Msgs.nav_msgs
                 map.Serialize(ref ptr, end);
                 initial_pose.Serialize(ref ptr, end);
             }
+        
+            public Response Call(IServiceCaller caller)
+            {
+                SetMap s = new SetMap(this);
+                caller.Call(s);
+                return s.response;
+            }
         }
 
         public sealed class Response : IResponse
@@ -55,7 +62,7 @@ namespace Iviz.Msgs.nav_msgs
         }
         
         /// <summary> Full ROS name of this service. </summary>
-        public const string MessageType = "nav_msgs/SetMap";
+        public const string ServiceType = "nav_msgs/SetMap";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
         public const string Md5Sum = "c36922319011e63ed7784112ad4fdd32";

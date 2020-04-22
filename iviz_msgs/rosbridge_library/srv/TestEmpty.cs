@@ -14,6 +14,13 @@ namespace Iviz.Msgs.rosbridge_library
             public unsafe void Serialize(ref byte* ptr, byte* end)
             {
             }
+        
+            public Response Call(IServiceCaller caller)
+            {
+                TestEmpty s = new TestEmpty(this);
+                caller.Call(s);
+                return s.response;
+            }
         }
 
         public sealed class Response : IResponse
@@ -31,7 +38,7 @@ namespace Iviz.Msgs.rosbridge_library
         }
         
         /// <summary> Full ROS name of this service. </summary>
-        public const string MessageType = "rosbridge_library/TestEmpty";
+        public const string ServiceType = "rosbridge_library/TestEmpty";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
         public const string Md5Sum = "d41d8cd98f00b204e9800998ecf8427e";

@@ -33,7 +33,7 @@ namespace Iviz.Msgs.nav_msgs
         {
             header = new std_msgs.Header();
             info = new MapMetaData();
-            data = new sbyte[0];
+            data = System.Array.Empty<0>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

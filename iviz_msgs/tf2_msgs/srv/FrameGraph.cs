@@ -14,6 +14,13 @@ namespace Iviz.Msgs.tf2_msgs
             public unsafe void Serialize(ref byte* ptr, byte* end)
             {
             }
+        
+            public Response Call(IServiceCaller caller)
+            {
+                FrameGraph s = new FrameGraph(this);
+                caller.Call(s);
+                return s.response;
+            }
         }
 
         public sealed class Response : IResponse
@@ -45,7 +52,7 @@ namespace Iviz.Msgs.tf2_msgs
         }
         
         /// <summary> Full ROS name of this service. </summary>
-        public const string MessageType = "tf2_msgs/FrameGraph";
+        public const string ServiceType = "tf2_msgs/FrameGraph";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
         public const string Md5Sum = "437ea58e9463815a0d511c7326b686b0";

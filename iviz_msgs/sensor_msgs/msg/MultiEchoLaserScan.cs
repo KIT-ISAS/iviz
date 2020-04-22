@@ -59,8 +59,8 @@ namespace Iviz.Msgs.sensor_msgs
         public MultiEchoLaserScan()
         {
             header = new std_msgs.Header();
-            ranges = new LaserEcho[0];
-            intensities = new LaserEcho[0];
+            ranges = System.Array.Empty<LaserEcho>();
+            intensities = System.Array.Empty<LaserEcho>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

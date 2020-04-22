@@ -15,6 +15,13 @@ namespace Iviz.Msgs.nav_msgs
             public unsafe void Serialize(ref byte* ptr, byte* end)
             {
             }
+        
+            public Response Call(IServiceCaller caller)
+            {
+                GetMap s = new GetMap(this);
+                caller.Call(s);
+                return s.response;
+            }
         }
 
         public sealed class Response : IResponse
@@ -46,7 +53,7 @@ namespace Iviz.Msgs.nav_msgs
         }
         
         /// <summary> Full ROS name of this service. </summary>
-        public const string MessageType = "nav_msgs/GetMap";
+        public const string ServiceType = "nav_msgs/GetMap";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
         public const string Md5Sum = "6cdd0a18e0aff5b0a3ca2326a89b54ff";

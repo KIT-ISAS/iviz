@@ -45,7 +45,7 @@ namespace Iviz.Msgs.sensor_msgs
         public ChannelFloat32()
         {
             name = "";
-            values = new float[0];
+            values = System.Array.Empty<0>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

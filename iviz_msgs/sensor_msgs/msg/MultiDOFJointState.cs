@@ -53,10 +53,10 @@ namespace Iviz.Msgs.sensor_msgs
         public MultiDOFJointState()
         {
             header = new std_msgs.Header();
-            joint_names = new string[0];
-            transforms = new geometry_msgs.Transform[0];
-            twist = new geometry_msgs.Twist[0];
-            wrench = new geometry_msgs.Wrench[0];
+            joint_names = System.Array.Empty<0>();
+            transforms = System.Array.Empty<geometry_msgs.Transform>();
+            twist = System.Array.Empty<geometry_msgs.Twist>();
+            wrench = System.Array.Empty<geometry_msgs.Wrench>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

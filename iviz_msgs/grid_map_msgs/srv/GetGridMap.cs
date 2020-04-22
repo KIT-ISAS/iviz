@@ -38,7 +38,7 @@ namespace Iviz.Msgs.grid_map_msgs
             public Request()
             {
                 frame_id = "";
-                layers = new string[0];
+                layers = System.Array.Empty<0>();
             }
             
             public unsafe void Deserialize(ref byte* ptr, byte* end)
@@ -59,6 +59,13 @@ namespace Iviz.Msgs.grid_map_msgs
                 BuiltIns.Serialize(length_x, ref ptr, end);
                 BuiltIns.Serialize(length_y, ref ptr, end);
                 BuiltIns.Serialize(layers, ref ptr, end, 0);
+            }
+        
+            public Response Call(IServiceCaller caller)
+            {
+                GetGridMap s = new GetGridMap(this);
+                caller.Call(s);
+                return s.response;
             }
         }
 
@@ -93,7 +100,7 @@ namespace Iviz.Msgs.grid_map_msgs
         }
         
         /// <summary> Full ROS name of this service. </summary>
-        public const string MessageType = "grid_map_msgs/GetGridMap";
+        public const string ServiceType = "grid_map_msgs/GetGridMap";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
         public const string Md5Sum = "802c2cbc7b10fada2d44db75ddb8c738";

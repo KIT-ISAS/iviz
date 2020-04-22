@@ -58,8 +58,8 @@ namespace Iviz.Msgs.visualization_msgs
             header = new std_msgs.Header();
             name = "";
             description = "";
-            menu_entries = new MenuEntry[0];
-            controls = new InteractiveMarkerControl[0];
+            menu_entries = System.Array.Empty<MenuEntry>();
+            controls = System.Array.Empty<InteractiveMarkerControl>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

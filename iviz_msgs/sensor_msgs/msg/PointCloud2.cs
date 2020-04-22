@@ -52,8 +52,8 @@ namespace Iviz.Msgs.sensor_msgs
         public PointCloud2()
         {
             header = new std_msgs.Header();
-            fields = new PointField[0];
-            data = new byte[0];
+            fields = System.Array.Empty<PointField>();
+            data = System.Array.Empty<0>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

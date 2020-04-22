@@ -38,8 +38,8 @@ namespace Iviz.Msgs.trajectory_msgs
         public MultiDOFJointTrajectory()
         {
             header = new std_msgs.Header();
-            joint_names = new string[0];
-            points = new MultiDOFJointTrajectoryPoint[0];
+            joint_names = System.Array.Empty<0>();
+            points = System.Array.Empty<MultiDOFJointTrajectoryPoint>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

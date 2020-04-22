@@ -31,9 +31,9 @@ namespace Iviz.Msgs.trajectory_msgs
         /// <summary> Constructor for empty message. </summary>
         public MultiDOFJointTrajectoryPoint()
         {
-            transforms = new geometry_msgs.Transform[0];
-            velocities = new geometry_msgs.Twist[0];
-            accelerations = new geometry_msgs.Twist[0];
+            transforms = System.Array.Empty<geometry_msgs.Transform>();
+            velocities = System.Array.Empty<geometry_msgs.Twist>();
+            accelerations = System.Array.Empty<geometry_msgs.Twist>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

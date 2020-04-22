@@ -51,8 +51,8 @@ namespace Iviz.Msgs.sensor_msgs
         public LaserScan()
         {
             header = new std_msgs.Header();
-            ranges = new float[0];
-            intensities = new float[0];
+            ranges = System.Array.Empty<0>();
+            intensities = System.Array.Empty<0>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

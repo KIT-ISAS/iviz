@@ -76,8 +76,8 @@ namespace Iviz.Msgs.sensor_msgs
         public BatteryState()
         {
             header = new std_msgs.Header();
-            cell_voltage = new float[0];
-            cell_temperature = new float[0];
+            cell_voltage = System.Array.Empty<0>();
+            cell_temperature = System.Array.Empty<0>();
             location = "";
             serial_number = "";
         }

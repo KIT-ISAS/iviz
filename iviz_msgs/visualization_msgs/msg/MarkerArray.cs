@@ -23,7 +23,7 @@ namespace Iviz.Msgs.visualization_msgs
         /// <summary> Constructor for empty message. </summary>
         public MarkerArray()
         {
-            markers = new Marker[0];
+            markers = System.Array.Empty<Marker>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

@@ -5,19 +5,24 @@ using System.Text;
 
 namespace Iviz.Msgs
 {
+    public interface IServiceCaller
+    {
+        void CallService<T>(string name, T service) where T : IService;
+    }
+
     public unsafe static class BuiltIns
     {
-        public static readonly double[] zc_double = new double[0];
-        public static readonly float[] zc_float = new float[0];
-        public static readonly ushort[] zc_ushort = new ushort[0];
-        public static readonly short[] zc_short = new short[0];
-        public static readonly uint[] zc_uint = new uint[0];
-        public static readonly int[] zc_int = new int[0];
-        public static readonly string[] zc_string = new string[0];
-        public static readonly long[] zc_long = new long[0];
-        public static readonly ulong[] zc_ulong = new ulong[0];
-        public static readonly byte[] zc_byte = new byte[0];
-        public static readonly sbyte[] zc_sbyte = new sbyte[0];
+        static readonly double[] zc_double = Array.Empty<double>();
+        static readonly float[] zc_float = Array.Empty<float>();
+        static readonly ushort[] zc_ushort = Array.Empty<ushort>();
+        static readonly short[] zc_short = Array.Empty<short>();
+        static readonly uint[] zc_uint = Array.Empty<uint>();
+        static readonly int[] zc_int = Array.Empty<int>();
+        static readonly string[] zc_string = Array.Empty<string>();
+        static readonly long[] zc_long = Array.Empty<long>();
+        static readonly ulong[] zc_ulong = Array.Empty<ulong>();
+        static readonly byte[] zc_byte = Array.Empty<byte>();
+        static readonly sbyte[] zc_sbyte = Array.Empty<sbyte>();
 
         static void Memcpy(void* dst, void* src, uint size)
         {
@@ -27,7 +32,7 @@ namespace Iviz.Msgs
         public static void AssertInRange(byte* ptr, uint off, byte* end)
         {
             if (ptr + off > end)
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(ptr));
         }
 
         public static void AssertSize<T>(T[] array, uint size)
@@ -44,7 +49,7 @@ namespace Iviz.Msgs
             uint count = *(uint*)ptr; ptr += 4;
             if (count == 0) { obj = string.Empty; return; }
             AssertInRange(ptr, count, end);
-            obj = System.Text.Encoding.UTF8.GetString(ptr, (int)count);
+            obj = Encoding.UTF8.GetString(ptr, (int)count);
             ptr += count;
         }
 
@@ -577,6 +582,11 @@ namespace Iviz.Msgs
         public static string GetMessageType(Type type)
         {
             return GetClassStringConstant(type, "MessageType");
+        }
+
+        public static string GetServiceType(Type type)
+        {
+            return GetClassStringConstant(type, "ServiceType");
         }
 
         public static string GetMd5Sum(Type type)

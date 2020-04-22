@@ -27,7 +27,7 @@ namespace Iviz.Msgs.std_msgs
         public UInt64MultiArray()
         {
             layout = new MultiArrayLayout();
-            data = new ulong[0];
+            data = System.Array.Empty<0>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

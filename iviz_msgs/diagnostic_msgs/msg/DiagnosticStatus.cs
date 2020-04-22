@@ -43,7 +43,7 @@ namespace Iviz.Msgs.diagnostic_msgs
             name = "";
             message = "";
             hardware_id = "";
-            values = new KeyValue[0];
+            values = System.Array.Empty<KeyValue>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

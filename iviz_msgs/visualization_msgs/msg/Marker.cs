@@ -70,8 +70,8 @@ namespace Iviz.Msgs.visualization_msgs
         {
             header = new std_msgs.Header();
             ns = "";
-            points = new geometry_msgs.Point[0];
-            colors = new std_msgs.ColorRGBA[0];
+            points = System.Array.Empty<geometry_msgs.Point>();
+            colors = System.Array.Empty<std_msgs.ColorRGBA>();
             text = "";
             mesh_resource = "";
         }

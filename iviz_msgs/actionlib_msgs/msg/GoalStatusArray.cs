@@ -29,7 +29,7 @@ namespace Iviz.Msgs.actionlib_msgs
         public GoalStatusArray()
         {
             header = new std_msgs.Header();
-            status_list = new GoalStatus[0];
+            status_list = System.Array.Empty<GoalStatus>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

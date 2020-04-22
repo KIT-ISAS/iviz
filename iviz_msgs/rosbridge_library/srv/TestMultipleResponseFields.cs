@@ -14,6 +14,13 @@ namespace Iviz.Msgs.rosbridge_library
             public unsafe void Serialize(ref byte* ptr, byte* end)
             {
             }
+        
+            public Response Call(IServiceCaller caller)
+            {
+                TestMultipleResponseFields s = new TestMultipleResponseFields(this);
+                caller.Call(s);
+                return s.response;
+            }
         }
 
         public sealed class Response : IResponse
@@ -54,7 +61,7 @@ namespace Iviz.Msgs.rosbridge_library
         }
         
         /// <summary> Full ROS name of this service. </summary>
-        public const string MessageType = "rosbridge_library/TestMultipleResponseFields";
+        public const string ServiceType = "rosbridge_library/TestMultipleResponseFields";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
         public const string Md5Sum = "6cce9fb727dd0f31d504d7d198a1f4ef";

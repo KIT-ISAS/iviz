@@ -102,7 +102,7 @@ namespace Iviz.Msgs.visualization_msgs
         public InteractiveMarkerControl()
         {
             name = "";
-            markers = new Marker[0];
+            markers = System.Array.Empty<Marker>();
             description = "";
         }
         

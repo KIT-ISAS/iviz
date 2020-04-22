@@ -44,6 +44,13 @@ namespace Iviz.Msgs.diagnostic_msgs
             {
                 BuiltIns.Serialize(load_namespace, ref ptr, end);
             }
+        
+            public Response Call(IServiceCaller caller)
+            {
+                AddDiagnostics s = new AddDiagnostics(this);
+                caller.Call(s);
+                return s.response;
+            }
         }
 
         public sealed class Response : IResponse
@@ -85,7 +92,7 @@ namespace Iviz.Msgs.diagnostic_msgs
         }
         
         /// <summary> Full ROS name of this service. </summary>
-        public const string MessageType = "diagnostic_msgs/AddDiagnostics";
+        public const string ServiceType = "diagnostic_msgs/AddDiagnostics";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
         public const string Md5Sum = "e6ac9bbde83d0d3186523c3687aecaee";

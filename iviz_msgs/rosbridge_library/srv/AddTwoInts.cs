@@ -20,6 +20,13 @@ namespace Iviz.Msgs.rosbridge_library
                 BuiltIns.Serialize(a, ref ptr, end);
                 BuiltIns.Serialize(b, ref ptr, end);
             }
+        
+            public Response Call(IServiceCaller caller)
+            {
+                AddTwoInts s = new AddTwoInts(this);
+                caller.Call(s);
+                return s.response;
+            }
         }
 
         public sealed class Response : IResponse
@@ -40,7 +47,7 @@ namespace Iviz.Msgs.rosbridge_library
         }
         
         /// <summary> Full ROS name of this service. </summary>
-        public const string MessageType = "rosbridge_library/AddTwoInts";
+        public const string ServiceType = "rosbridge_library/AddTwoInts";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
         public const string Md5Sum = "6a2e34150c00229791cc89ff309fff21";

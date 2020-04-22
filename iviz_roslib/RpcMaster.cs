@@ -166,13 +166,53 @@ namespace Iviz.RoslibSharp
             }
         }
 
-        public readonly Uri Uri;
+        public readonly struct LookupServiceResponse
+        {
+            public readonly RpcStatusCode code;
+            public readonly string statusMessage;
+            public readonly string serviceUrl;
+
+            public LookupServiceResponse(object[] a)
+            {
+                code = (RpcStatusCode)a[0];
+                statusMessage = (string)a[1];
+                serviceUrl = (string)a[2];
+            }
+        }
+
+        public readonly struct RegisterServiceResponse
+        {
+            public readonly RpcStatusCode code;
+            public readonly string statusMessage;
+
+            public RegisterServiceResponse(object[] a)
+            {
+                code = (RpcStatusCode)a[0];
+                statusMessage = (string)a[1];
+            }
+        }
+
+        public readonly struct UnregisterServiceResponse
+        {
+            public readonly RpcStatusCode code;
+            public readonly string statusMessage;
+            public readonly int numUnregistered;
+
+            public UnregisterServiceResponse(object[] a)
+            {
+                code = (RpcStatusCode)a[0];
+                statusMessage = (string)a[1];
+                numUnregistered = (int)a[2];
+            }
+        }
+
+        public readonly Uri MasterUri;
         public readonly Uri CallerUri;
         readonly string CallerId;
 
         public RpcMaster(Uri masterUri, string callerId, Uri callerUri)
         {
-            Uri = masterUri;
+            MasterUri = masterUri;
             CallerUri = callerUri;
             CallerId = callerId;
         }
@@ -180,7 +220,7 @@ namespace Iviz.RoslibSharp
         public GetUriResponse GetUri()
         {
             Arg[] args = { new Arg(CallerId) };
-            object response = XmlRpc.MethodCall(Uri, CallerUri, "getUri", args);
+            object response = XmlRpc.MethodCall(MasterUri, CallerUri, "getUri", args);
             return new GetUriResponse((object[])response);
         }
 
@@ -190,7 +230,7 @@ namespace Iviz.RoslibSharp
                 new Arg(CallerId),
                 new Arg(nodeId),
             };
-            object response = XmlRpc.MethodCall(Uri, CallerUri, "lookupNode", args);
+            object response = XmlRpc.MethodCall(MasterUri, CallerUri, "lookupNode", args);
             return new LookupNodeResponse((object[])response);
         }
 
@@ -200,7 +240,7 @@ namespace Iviz.RoslibSharp
                 new Arg(CallerId),
                 new Arg(subgraph),
             };
-            object response = XmlRpc.MethodCall(Uri, CallerUri, "getPublishedTopics", args);
+            object response = XmlRpc.MethodCall(MasterUri, CallerUri, "getPublishedTopics", args);
             return new GetPublishedTopicsResponse((object[])response);
         }
 
@@ -212,7 +252,7 @@ namespace Iviz.RoslibSharp
                 new Arg(topicType),
                 new Arg(CallerUri.ToString()),
             };
-            object response = XmlRpc.MethodCall(Uri, CallerUri, "registerSubscriber", args);
+            object response = XmlRpc.MethodCall(MasterUri, CallerUri, "registerSubscriber", args);
             return new RegisterSubscriberResponse((object[])response);
         }
 
@@ -223,7 +263,7 @@ namespace Iviz.RoslibSharp
                 new Arg(topic),
                 new Arg(CallerUri.ToString()),
             };
-            object response = XmlRpc.MethodCall(Uri, CallerUri, "unregisterSubscriber", args);
+            object response = XmlRpc.MethodCall(MasterUri, CallerUri, "unregisterSubscriber", args);
             return new UnregisterSubscriberResponse((object[])response);
         }
 
@@ -235,7 +275,7 @@ namespace Iviz.RoslibSharp
                 new Arg(topicType),
                 new Arg(CallerUri.ToString()),
             };
-            object response = XmlRpc.MethodCall(Uri, CallerUri, "registerPublisher", args);
+            object response = XmlRpc.MethodCall(MasterUri, CallerUri, "registerPublisher", args);
             return new RegisterPublisherResponse((object[])response);
         }
 
@@ -246,7 +286,7 @@ namespace Iviz.RoslibSharp
                 new Arg(topic),
                 new Arg(CallerUri.ToString()),
             };
-            object response = XmlRpc.MethodCall(Uri, CallerUri, "unregisterPublisher", args);
+            object response = XmlRpc.MethodCall(MasterUri, CallerUri, "unregisterPublisher", args);
             return new UnregisterPublisherResponse((object[])response);
         }
 
@@ -255,8 +295,41 @@ namespace Iviz.RoslibSharp
             Arg[] args = {
                 new Arg(CallerId),
             };
-            object response = XmlRpc.MethodCall(Uri, CallerUri, "getSystemState", args);
+            object response = XmlRpc.MethodCall(MasterUri, CallerUri, "getSystemState", args);
             return new GetSystemStateResponse((object[])response);
+        }
+
+        public LookupServiceResponse LookupService(string service)
+        {
+            Arg[] args = {
+                new Arg(CallerId),
+                new Arg(service),
+            };
+            object response = XmlRpc.MethodCall(MasterUri, CallerUri, "lookupService", args);
+            return new LookupServiceResponse((object[])response);
+        }
+
+        public RegisterServiceResponse RegisterService(string service)
+        {
+            Arg[] args = {
+                new Arg(CallerId),
+                new Arg(service),
+                new Arg(CallerUri.ToString()),
+                new Arg(CallerUri.ToString()),
+            };
+            object response = XmlRpc.MethodCall(MasterUri, CallerUri, "registerService", args);
+            return new RegisterServiceResponse((object[])response);
+        }
+
+        public UnregisterServiceResponse UnregisterService(string service)
+        {
+            Arg[] args = {
+                new Arg(CallerId),
+                new Arg(service),
+                new Arg(CallerUri.ToString()),
+            };
+            object response = XmlRpc.MethodCall(MasterUri, CallerUri, "unregisterService", args);
+            return new UnregisterServiceResponse((object[])response);
         }
     }
 }

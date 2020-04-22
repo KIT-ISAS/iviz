@@ -38,7 +38,7 @@ namespace Iviz.Msgs.visualization_msgs
         public InteractiveMarkerInit()
         {
             server_id = "";
-            markers = new InteractiveMarker[0];
+            markers = System.Array.Empty<InteractiveMarker>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

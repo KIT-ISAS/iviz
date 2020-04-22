@@ -23,7 +23,7 @@ namespace Iviz.Msgs.tf
         /// <summary> Constructor for empty message. </summary>
         public tfMessage()
         {
-            transforms = new geometry_msgs.TransformStamped[0];
+            transforms = System.Array.Empty<geometry_msgs.TransformStamped>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

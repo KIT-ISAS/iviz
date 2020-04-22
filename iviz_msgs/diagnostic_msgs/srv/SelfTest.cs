@@ -14,6 +14,13 @@ namespace Iviz.Msgs.diagnostic_msgs
             public unsafe void Serialize(ref byte* ptr, byte* end)
             {
             }
+        
+            public Response Call(IServiceCaller caller)
+            {
+                SelfTest s = new SelfTest(this);
+                caller.Call(s);
+                return s.response;
+            }
         }
 
         public sealed class Response : IResponse
@@ -37,7 +44,7 @@ namespace Iviz.Msgs.diagnostic_msgs
             public Response()
             {
                 id = "";
-                status = new DiagnosticStatus[0];
+                status = System.Array.Empty<DiagnosticStatus>();
             }
             
             public unsafe void Deserialize(ref byte* ptr, byte* end)
@@ -56,7 +63,7 @@ namespace Iviz.Msgs.diagnostic_msgs
         }
         
         /// <summary> Full ROS name of this service. </summary>
-        public const string MessageType = "diagnostic_msgs/SelfTest";
+        public const string ServiceType = "diagnostic_msgs/SelfTest";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
         public const string Md5Sum = "ac21b1bab7ab17546986536c22eb34e9";

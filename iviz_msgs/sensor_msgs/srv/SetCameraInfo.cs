@@ -36,6 +36,13 @@ namespace Iviz.Msgs.sensor_msgs
             {
                 camera_info.Serialize(ref ptr, end);
             }
+        
+            public Response Call(IServiceCaller caller)
+            {
+                SetCameraInfo s = new SetCameraInfo(this);
+                caller.Call(s);
+                return s.response;
+            }
         }
 
         public sealed class Response : IResponse
@@ -70,7 +77,7 @@ namespace Iviz.Msgs.sensor_msgs
         }
         
         /// <summary> Full ROS name of this service. </summary>
-        public const string MessageType = "sensor_msgs/SetCameraInfo";
+        public const string ServiceType = "sensor_msgs/SetCameraInfo";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
         public const string Md5Sum = "bef1df590ed75ed1f393692395e15482";

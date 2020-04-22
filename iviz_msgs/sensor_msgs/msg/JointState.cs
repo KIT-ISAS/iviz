@@ -53,10 +53,10 @@ namespace Iviz.Msgs.sensor_msgs
         public JointState()
         {
             header = new std_msgs.Header();
-            name = new string[0];
-            position = new double[0];
-            velocity = new double[0];
-            effort = new double[0];
+            name = System.Array.Empty<0>();
+            position = System.Array.Empty<0>();
+            velocity = System.Array.Empty<0>();
+            effort = System.Array.Empty<0>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

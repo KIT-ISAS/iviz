@@ -21,7 +21,7 @@ namespace Iviz.Msgs.sensor_msgs
         /// <summary> Constructor for empty message. </summary>
         public JoyFeedbackArray()
         {
-            array = new JoyFeedback[0];
+            array = System.Array.Empty<JoyFeedback>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

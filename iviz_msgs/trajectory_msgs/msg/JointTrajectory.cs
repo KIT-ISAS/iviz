@@ -31,8 +31,8 @@ namespace Iviz.Msgs.trajectory_msgs
         public JointTrajectory()
         {
             header = new std_msgs.Header();
-            joint_names = new string[0];
-            points = new JointTrajectoryPoint[0];
+            joint_names = System.Array.Empty<0>();
+            points = System.Array.Empty<JointTrajectoryPoint>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

@@ -26,7 +26,7 @@ namespace Iviz.Msgs.nav_msgs
         public GridCells()
         {
             header = new std_msgs.Header();
-            cells = new geometry_msgs.Point[0];
+            cells = System.Array.Empty<geometry_msgs.Point>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

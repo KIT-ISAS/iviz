@@ -44,6 +44,13 @@ namespace Iviz.Msgs.nav_msgs
                 goal.Serialize(ref ptr, end);
                 BuiltIns.Serialize(tolerance, ref ptr, end);
             }
+        
+            public Response Call(IServiceCaller caller)
+            {
+                GetPlan s = new GetPlan(this);
+                caller.Call(s);
+                return s.response;
+            }
         }
 
         public sealed class Response : IResponse
@@ -75,7 +82,7 @@ namespace Iviz.Msgs.nav_msgs
         }
         
         /// <summary> Full ROS name of this service. </summary>
-        public const string MessageType = "nav_msgs/GetPlan";
+        public const string ServiceType = "nav_msgs/GetPlan";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
         public const string Md5Sum = "421c8ea4d21c6c9db7054b4bbdf1e024";

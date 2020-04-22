@@ -48,8 +48,8 @@ namespace Iviz.Msgs.visualization_msgs
         {
             header = new std_msgs.Header();
             ns = "";
-            points = new geometry_msgs.Point[0];
-            outline_colors = new std_msgs.ColorRGBA[0];
+            points = System.Array.Empty<geometry_msgs.Point>();
+            outline_colors = System.Array.Empty<std_msgs.ColorRGBA>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

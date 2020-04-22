@@ -63,9 +63,9 @@ namespace Iviz.Msgs.visualization_msgs
         public InteractiveMarkerUpdate()
         {
             server_id = "";
-            markers = new InteractiveMarker[0];
-            poses = new InteractiveMarkerPose[0];
-            erases = new string[0];
+            markers = System.Array.Empty<InteractiveMarker>();
+            poses = System.Array.Empty<InteractiveMarkerPose>();
+            erases = System.Array.Empty<0>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

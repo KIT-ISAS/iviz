@@ -51,9 +51,9 @@ namespace Iviz.Msgs.grid_map_msgs
         public GridMap()
         {
             info = new GridMapInfo();
-            layers = new string[0];
-            basic_layers = new string[0];
-            data = new std_msgs.Float32MultiArray[0];
+            layers = System.Array.Empty<0>();
+            basic_layers = System.Array.Empty<0>();
+            data = System.Array.Empty<std_msgs.Float32MultiArray>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

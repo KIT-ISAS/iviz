@@ -278,6 +278,10 @@ namespace Iviz.MsgsGen
                         {
                             lines.Add("    " + variable.fieldName + " = \"\";");
                         }
+                        else if (variable.arraySize == 0)
+                        {
+                            lines.Add("    " + variable.fieldName + " = System.Array.Empty<" + variable.arraySize + ">();");
+                        }
                         else if (variable.arraySize != -1)
                         {
                             lines.Add("    " + variable.fieldName + " = new " + variable.className + "[" + variable.arraySize + "];");
@@ -285,9 +289,13 @@ namespace Iviz.MsgsGen
                     }
                     else
                     {
-                        if (variable.arraySize != -1)
+                        if (variable.arraySize == 0)
                         {
-                            lines.Add("    " + variable.fieldName + " = new " + variable.className + "[0];");
+                            lines.Add("    " + variable.fieldName + " = System.Array.Empty<" + variable.className + ">();");
+                        }
+                        else if (variable.arraySize != -1)
+                        {
+                            lines.Add("    " + variable.fieldName + " = new " + variable.className + "[" + variable.arraySize + "];");
                         }
                         else if (!variable.classInfo.forceStruct)
                         {

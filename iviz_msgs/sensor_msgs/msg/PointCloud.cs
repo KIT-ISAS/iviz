@@ -39,8 +39,8 @@ namespace Iviz.Msgs.sensor_msgs
         public PointCloud()
         {
             header = new std_msgs.Header();
-            points = new geometry_msgs.Point32[0];
-            channels = new ChannelFloat32[0];
+            points = System.Array.Empty<geometry_msgs.Point32>();
+            channels = System.Array.Empty<ChannelFloat32>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

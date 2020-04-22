@@ -21,7 +21,7 @@ namespace Iviz.Msgs.geometry_msgs
         /// <summary> Constructor for empty message. </summary>
         public Polygon()
         {
-            points = new Point32[0];
+            points = System.Array.Empty<Point32>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

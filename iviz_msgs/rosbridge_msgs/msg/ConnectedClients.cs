@@ -23,7 +23,7 @@ namespace Iviz.Msgs.rosbridge_msgs
         /// <summary> Constructor for empty message. </summary>
         public ConnectedClients()
         {
-            clients = new ConnectedClient[0];
+            clients = System.Array.Empty<ConnectedClient>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

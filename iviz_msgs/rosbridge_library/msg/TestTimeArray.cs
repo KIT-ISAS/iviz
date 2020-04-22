@@ -20,7 +20,7 @@ namespace Iviz.Msgs.rosbridge_library
         /// <summary> Constructor for empty message. </summary>
         public TestTimeArray()
         {
-            times = new time[0];
+            times = System.Array.Empty<0>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

@@ -6,7 +6,7 @@ using Iviz.Msgs;
 
 namespace Iviz.RoslibSharp
 {
-    public class RosClient
+    public class RosClient : IServiceCaller
     {
         public readonly string CallerId;
         internal readonly RpcMaster Master;
@@ -37,7 +37,7 @@ namespace Iviz.RoslibSharp
         /// <summary>
         /// URI of the master node.
         /// </summary>
-        public Uri MasterUri => Master.Uri;
+        public Uri MasterUri => Master.MasterUri;
 
         /// <summary>
         /// URI of this node.
@@ -513,5 +513,11 @@ namespace Iviz.RoslibSharp
             return busInfos;
         }
 
+        public void CallService<T>(string name, T service) where T : IService
+        {
+            string serviceType = BuiltIns.GetServiceType(typeof(T));
+            string serviceUrl = Master.LookupService()
+            throw new NotImplementedException();
+        }
     }
 }

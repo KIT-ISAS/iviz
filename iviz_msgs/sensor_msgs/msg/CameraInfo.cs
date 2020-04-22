@@ -154,7 +154,7 @@ namespace Iviz.Msgs.sensor_msgs
         {
             header = new std_msgs.Header();
             distortion_model = "";
-            D = new double[0];
+            D = System.Array.Empty<0>();
             K = new double[9];
             R = new double[9];
             P = new double[12];

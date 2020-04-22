@@ -27,7 +27,7 @@ namespace Iviz.Msgs.nav_msgs
         public Path()
         {
             header = new std_msgs.Header();
-            poses = new geometry_msgs.PoseStamped[0];
+            poses = System.Array.Empty<geometry_msgs.PoseStamped>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

@@ -50,7 +50,7 @@ namespace Iviz.Msgs.sensor_msgs
         {
             header = new std_msgs.Header();
             encoding = "";
-            data = new byte[0];
+            data = System.Array.Empty<0>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

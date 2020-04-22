@@ -24,7 +24,7 @@ namespace Iviz.Msgs.sensor_msgs
         /// <summary> Constructor for empty message. </summary>
         public LaserEcho()
         {
-            echoes = new float[0];
+            echoes = System.Array.Empty<0>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

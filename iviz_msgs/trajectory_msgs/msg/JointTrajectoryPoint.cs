@@ -31,10 +31,10 @@ namespace Iviz.Msgs.trajectory_msgs
         /// <summary> Constructor for empty message. </summary>
         public JointTrajectoryPoint()
         {
-            positions = new double[0];
-            velocities = new double[0];
-            accelerations = new double[0];
-            effort = new double[0];
+            positions = System.Array.Empty<0>();
+            velocities = System.Array.Empty<0>();
+            accelerations = System.Array.Empty<0>();
+            effort = System.Array.Empty<0>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

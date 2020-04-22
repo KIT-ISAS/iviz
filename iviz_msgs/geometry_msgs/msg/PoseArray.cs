@@ -26,7 +26,7 @@ namespace Iviz.Msgs.geometry_msgs
         public PoseArray()
         {
             header = new std_msgs.Header();
-            poses = new Pose[0];
+            poses = System.Array.Empty<Pose>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

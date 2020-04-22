@@ -61,7 +61,7 @@ namespace Iviz.Msgs.shape_msgs
         /// <summary> Constructor for empty message. </summary>
         public SolidPrimitive()
         {
-            dimensions = new double[0];
+            dimensions = System.Array.Empty<0>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

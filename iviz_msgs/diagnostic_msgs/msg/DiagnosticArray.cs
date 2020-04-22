@@ -27,7 +27,7 @@ namespace Iviz.Msgs.diagnostic_msgs
         public DiagnosticArray()
         {
             header = new std_msgs.Header();
-            status = new DiagnosticStatus[0];
+            status = System.Array.Empty<DiagnosticStatus>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

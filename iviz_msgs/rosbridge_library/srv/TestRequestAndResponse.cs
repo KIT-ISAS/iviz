@@ -17,6 +17,13 @@ namespace Iviz.Msgs.rosbridge_library
             {
                 BuiltIns.Serialize(data, ref ptr, end);
             }
+        
+            public Response Call(IServiceCaller caller)
+            {
+                TestRequestAndResponse s = new TestRequestAndResponse(this);
+                caller.Call(s);
+                return s.response;
+            }
         }
 
         public sealed class Response : IResponse
@@ -37,7 +44,7 @@ namespace Iviz.Msgs.rosbridge_library
         }
         
         /// <summary> Full ROS name of this service. </summary>
-        public const string MessageType = "rosbridge_library/TestRequestAndResponse";
+        public const string ServiceType = "rosbridge_library/TestRequestAndResponse";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
         public const string Md5Sum = "491d316f183df11876531749005b31d1";

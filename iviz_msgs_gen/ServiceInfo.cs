@@ -109,6 +109,16 @@ namespace Iviz.MsgsGen
                 lines.Add("    " + entry);
             }
 
+            if (isRequest)
+            {
+                lines.Add("");
+                lines.Add("    public Response Call(IServiceCaller caller)");
+                lines.Add("    {");
+                lines.Add("        " + service + " s = new " + service + "(this);");
+                lines.Add("        caller.Call(s);");
+                lines.Add("        return s.response;");
+                lines.Add("    }");
+            }
             lines.Add("}");
 
             return lines;
@@ -213,7 +223,7 @@ namespace Iviz.MsgsGen
 
             lines.Add("");
             lines.Add("/// <summary> Full ROS name of this service. </summary>");
-            lines.Add("public const string MessageType = \"" + package + "/" + name + "\";");
+            lines.Add("public const string ServiceType = \"" + package + "/" + name + "\";");
 
             lines.Add("");
             string md5 = GetMd5();

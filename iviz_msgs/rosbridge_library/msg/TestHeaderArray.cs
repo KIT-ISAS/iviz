@@ -23,7 +23,7 @@ namespace Iviz.Msgs.rosbridge_library
         /// <summary> Constructor for empty message. </summary>
         public TestHeaderArray()
         {
-            header = new std_msgs.Header[0];
+            header = System.Array.Empty<std_msgs.Header>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

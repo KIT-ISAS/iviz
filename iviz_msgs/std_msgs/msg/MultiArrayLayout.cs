@@ -48,7 +48,7 @@ namespace Iviz.Msgs.std_msgs
         /// <summary> Constructor for empty message. </summary>
         public MultiArrayLayout()
         {
-            dim = new MultiArrayDimension[0];
+            dim = System.Array.Empty<MultiArrayDimension>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

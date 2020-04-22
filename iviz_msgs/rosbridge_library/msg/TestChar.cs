@@ -20,7 +20,7 @@ namespace Iviz.Msgs.rosbridge_library
         /// <summary> Constructor for empty message. </summary>
         public TestChar()
         {
-            data = new char[0];
+            data = System.Array.Empty<0>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)
