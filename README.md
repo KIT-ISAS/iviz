@@ -5,13 +5,13 @@ Utilities for working with ROS and C#. Contains the following modules:
 Unity project for ROS data visualization.
 
 ## iviz_bridge
-Small RosBridge reimplementation in C#. Does not support services.
+Small RosBridge server implementation in C#. Does not support services (yet).
 
 ## iviz_kinect
 ROS node to publish data from a Kinect 2.
 
 ## iviz_msgs
-ROS messages as C# files.
+A small set of pre-generated ROS messages as C# files.
 
 ## iviz_msgs_gen
 Parser that reads .msg files and generates C# files.
