@@ -5,8 +5,6 @@ namespace Iviz.Msgs.tf
         public sealed class Request : IRequest
         {
         
-            public int GetLength() => 0;
-        
             public unsafe void Deserialize(ref byte* ptr, byte* end)
             {
             }
@@ -15,24 +13,12 @@ namespace Iviz.Msgs.tf
             {
             }
         
-            public Response Call(IServiceCaller caller)
-            {
-                FrameGraph s = new FrameGraph(this);
-                caller.Call(s);
-                return s.response;
-            }
+            public int GetLength() => 0;
         }
 
         public sealed class Response : IResponse
         {
             public string dot_graph;
-        
-            public int GetLength()
-            {
-                int size = 4;
-                size += dot_graph.Length;
-                return size;
-            }
         
             /// <summary> Constructor for empty message. </summary>
             public Response()
@@ -49,6 +35,13 @@ namespace Iviz.Msgs.tf
             {
                 BuiltIns.Serialize(dot_graph, ref ptr, end);
             }
+        
+            public int GetLength()
+            {
+                int size = 4;
+                size += dot_graph.Length;
+                return size;
+            }
         }
         
         /// <summary> Full ROS name of this service. </summary>
@@ -56,11 +49,6 @@ namespace Iviz.Msgs.tf
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
         public const string Md5Sum = "c4af9ac907e58e906eb0b6e3c58478c0";
-        
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
-            "H4sIAAAAAAAACtPV1eUqLinKzEtXSMkviU8vSizI4OLlAgCI5a/GFwAAAA==";
-            
         
         /// <summary> Request message. </summary>
         public readonly Request request;
@@ -72,22 +60,23 @@ namespace Iviz.Msgs.tf
         public FrameGraph()
         {
             request = new Request();
+            response = new Response();
         }
         
         /// <summary> Setter constructor. </summary>
         public FrameGraph(Request request)
         {
             this.request = request;
+            response = new Response();
         }
         
-        public IResponse CreateResponse() => new Response();
+        public IService Create() => new FrameGraph();
         
-        public IRequest GetRequest() => request;
+        IRequest IService.Request => request;
         
-        public void SetResponse(IResponse response)
-        {
-            this.response = (Response)response;
-        }
+        IResponse IService.Response => response;
+        
+        public string ErrorMessage { get; set; }
     }
 
 }

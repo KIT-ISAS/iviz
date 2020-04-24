@@ -16,14 +16,6 @@ namespace Iviz.Msgs.nav_msgs
             // relax the constraint in x and y before failing. 
             public float tolerance;
         
-            public int GetLength()
-            {
-                int size = 4;
-                size += start.GetLength();
-                size += goal.GetLength();
-                return size;
-            }
-        
             /// <summary> Constructor for empty message. </summary>
             public Request()
             {
@@ -45,24 +37,18 @@ namespace Iviz.Msgs.nav_msgs
                 BuiltIns.Serialize(tolerance, ref ptr, end);
             }
         
-            public Response Call(IServiceCaller caller)
+            public int GetLength()
             {
-                GetPlan s = new GetPlan(this);
-                caller.Call(s);
-                return s.response;
+                int size = 4;
+                size += start.GetLength();
+                size += goal.GetLength();
+                return size;
             }
         }
 
         public sealed class Response : IResponse
         {
             public nav_msgs.Path plan;
-        
-            public int GetLength()
-            {
-                int size = 0;
-                size += plan.GetLength();
-                return size;
-            }
         
             /// <summary> Constructor for empty message. </summary>
             public Response()
@@ -79,6 +65,13 @@ namespace Iviz.Msgs.nav_msgs
             {
                 plan.Serialize(ref ptr, end);
             }
+        
+            public int GetLength()
+            {
+                int size = 0;
+                size += plan.GetLength();
+                return size;
+            }
         }
         
         /// <summary> Full ROS name of this service. </summary>
@@ -86,23 +79,6 @@ namespace Iviz.Msgs.nav_msgs
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
         public const string Md5Sum = "421c8ea4d21c6c9db7054b4bbdf1e024";
-        
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
-            "H4sIAAAAAAAACr1VwWrbQBC9L/gfBnxIUmIX2tKDoYdAaZpDISW5lRLG0shaWO0quyvb6tf37SqS45a0" +
-            "PTQxAkurnbfz5r0ZzelSIjG1hi1V3jUUa6Gi815spNYFHbWzFF1e3zg2dO2CkFJzusVKiOzzPqHK+bwp" +
-            "QamNuEai7++asAmvU8hN5KaVcogYwyttgZjDXXU4Yjz3DzBpX0K5ehSmA7l1iL4ropTnVLsdNWx7AoT4" +
-            "MCVnxVMBuoj2Yng/UHYWkazBWlvaE9uSeloLWCFN1kbbzZJUZRzHt29QECOebSFqsVgoy9uHDDnWQwFm" +
-            "6sN//s3Ul5vLFT1Zkhn4XAzq7DTS8FIJVCwSN+dLVDqCiedGMrmoG4EWTas+C5coSZ3/VAZIijwfhRDL" +
-            "Ifvh5JQ4ONiSfZm04pIjZzvVelOLXxjZiknGycrnt7FvJSyzi6A6ro1AVjampy5gEwxbuKbprC4S7Yns" +
-            "GI9IyAzfw4y66Az736qU0HEFue9yFa8+rrJLpOiiRkI9EAovHOAMvCTVwTywBgLU/HbnFniUDQo7HQ6j" +
-            "MewVSPatl5Dy5LDCGa8GcktgozqCU8pAp3ntDo/hjHAIUpDWFTWdIvPrPtapL+HcLXvNayMJuEAFgHqS" +
-            "gk7OHiGntFdk2boRfkA8nPEvsHbCTZwWNTRLfUGh26CA2Nh6t9Ultq77oauMTnPE6LVn36sUNRyp5p+y" +
-            "E2OSLyuCfw7BFRoClNnBCg2Z0LMad7p8yZ4amslL0gkMOE9BjKg8qlCoyguYtFzIeTJaWi4f3g8TM7WY" +
-            "83qMxei4dmm4TKPtawei3mbcw76X44hkZmP/wBERo+9hRI4UQAcNkrM+YjwMwffvaD/d9dPdj5dicKjf" +
-            "RGOSC1Y6qupx/unp/lB9DJpmqf5CarzbPR+9o48IOF3ARN5zP9ouqYPx8Zgk5e9NmpRM3q1dTHOvcsa4" +
-            "3S9T/cmvxrfvAzh4/QTn44CeDAgAAA==";
-            
         
         /// <summary> Request message. </summary>
         public readonly Request request;
@@ -114,22 +90,23 @@ namespace Iviz.Msgs.nav_msgs
         public GetPlan()
         {
             request = new Request();
+            response = new Response();
         }
         
         /// <summary> Setter constructor. </summary>
         public GetPlan(Request request)
         {
             this.request = request;
+            response = new Response();
         }
         
-        public IResponse CreateResponse() => new Response();
+        public IService Create() => new GetPlan();
         
-        public IRequest GetRequest() => request;
+        IRequest IService.Request => request;
         
-        public void SetResponse(IResponse response)
-        {
-            this.response = (Response)response;
-        }
+        IResponse IService.Response => response;
+        
+        public string ErrorMessage { get; set; }
     }
 
 }

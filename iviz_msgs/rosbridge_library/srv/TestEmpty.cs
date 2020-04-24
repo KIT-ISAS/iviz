@@ -5,8 +5,6 @@ namespace Iviz.Msgs.rosbridge_library
         public sealed class Request : IRequest
         {
         
-            public int GetLength() => 0;
-        
             public unsafe void Deserialize(ref byte* ptr, byte* end)
             {
             }
@@ -15,19 +13,12 @@ namespace Iviz.Msgs.rosbridge_library
             {
             }
         
-            public Response Call(IServiceCaller caller)
-            {
-                TestEmpty s = new TestEmpty(this);
-                caller.Call(s);
-                return s.response;
-            }
+            public int GetLength() => 0;
         }
 
         public sealed class Response : IResponse
         {
         
-            public int GetLength() => 0;
-        
             public unsafe void Deserialize(ref byte* ptr, byte* end)
             {
             }
@@ -35,6 +26,8 @@ namespace Iviz.Msgs.rosbridge_library
             public unsafe void Serialize(ref byte* ptr, byte* end)
             {
             }
+        
+            public int GetLength() => 0;
         }
         
         /// <summary> Full ROS name of this service. </summary>
@@ -42,11 +35,6 @@ namespace Iviz.Msgs.rosbridge_library
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
         public const string Md5Sum = "d41d8cd98f00b204e9800998ecf8427e";
-        
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
-            "H4sIAAAAAAAACtPV1eXlAgCrKcXIBQAAAA==";
-            
         
         /// <summary> Request message. </summary>
         public readonly Request request;
@@ -58,22 +46,23 @@ namespace Iviz.Msgs.rosbridge_library
         public TestEmpty()
         {
             request = new Request();
+            response = new Response();
         }
         
         /// <summary> Setter constructor. </summary>
         public TestEmpty(Request request)
         {
             this.request = request;
+            response = new Response();
         }
         
-        public IResponse CreateResponse() => new Response();
+        public IService Create() => new TestEmpty();
         
-        public IRequest GetRequest() => request;
+        IRequest IService.Request => request;
         
-        public void SetResponse(IResponse response)
-        {
-            this.response = (Response)response;
-        }
+        IResponse IService.Response => response;
+        
+        public string ErrorMessage { get; set; }
     }
 
 }

@@ -1,16 +1,8 @@
-
 namespace Iviz.Msgs.std_msgs
 {
     public sealed class UInt16 : IMessage
     {
         public ushort data;
-    
-        /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "std_msgs/UInt16";
-    
-        public IMessage Create() => new UInt16();
-    
-        public int GetLength() => 2;
     
         public unsafe void Deserialize(ref byte* ptr, byte* end)
         {
@@ -22,12 +14,19 @@ namespace Iviz.Msgs.std_msgs
             BuiltIns.Serialize(data, ref ptr, end);
         }
     
+        public int GetLength() => 2;
+    
+        public IMessage Create() => new UInt16();
+    
+        /// <summary> Full ROS name of this message. </summary>
+        public const string MessageType = "std_msgs/UInt16";
+    
         /// <summary> MD5 hash of a compact representation of the message. </summary>
         public const string Md5Sum = "1df79edf208b629fe6b81923a544552d";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         public const string DependenciesBase64 =
-                "H4sIAAAAAAAACivNzCsxNFNISSxJ5OLlAgDTqJDxDgAAAA==";
+                "H4sIAAAAAAAAEyvNzCsxNFNISSxJ5OICAF50RNUNAAAA";
                 
     }
 }

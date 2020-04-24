@@ -192,7 +192,8 @@ namespace Iviz.RoslibSharp
 
                         try
                         {
-                            BuiltIns.Deserialize(topicInfo.Generator, readBuffer, rcvLength, out IMessage result);
+                            IMessage result = topicInfo.Generator.Create();
+                            BuiltIns.Deserialize(result, readBuffer, rcvLength);
                             callback(result);
                             NumReceived++;
                             BytesReceived += rcvLength + 4;

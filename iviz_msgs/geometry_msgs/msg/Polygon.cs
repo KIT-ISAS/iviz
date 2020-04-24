@@ -1,22 +1,9 @@
-
 namespace Iviz.Msgs.geometry_msgs
 {
     public sealed class Polygon : IMessage
     {
         //A specification of a polygon where the first and last points are assumed to be connected
         public Point32[] points;
-    
-        /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "geometry_msgs/Polygon";
-    
-        public IMessage Create() => new Polygon();
-    
-        public int GetLength()
-        {
-            int size = 4;
-            size += 12 * points.Length;
-            return size;
-        }
     
         /// <summary> Constructor for empty message. </summary>
         public Polygon()
@@ -34,17 +21,29 @@ namespace Iviz.Msgs.geometry_msgs
             BuiltIns.SerializeArray(points, ref ptr, end, 0);
         }
     
+        public int GetLength()
+        {
+            int size = 4;
+            size += 12 * points.Length;
+            return size;
+        }
+    
+        public IMessage Create() => new Polygon();
+    
+        /// <summary> Full ROS name of this message. </summary>
+        public const string MessageType = "geometry_msgs/Polygon";
+    
         /// <summary> MD5 hash of a compact representation of the message. </summary>
         public const string Md5Sum = "cd60a26494a087f577976f0329fa120e";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         public const string DependenciesBase64 =
-                "H4sIAAAAAAAACq1RzUrEMBC+F/YdBvaiICvs3gQP4kE8CILeRCRNp+1gmgmZqWt9eidtd/EB7GmafPP9" +
-                "ZXsHktBTS94pcQRuwUHiMHX2c+wxI2iP0FIWBRcbCM6GxBRVwNmtExkHbEAZagTPMaJXbKrnAjns395X" +
-                "cLWpbv/521RPLw830CEPqHn6GKST61V3U23htScpjtRRlDlGYqG/MQ0KFKHNiNaD83hxJO3hsIeaLJ+h" +
-                "UrZ2xFYud8b4aHABO+LBMi+pR0GYRZe6vjAXGaE6oHGLomsK0eprB2A8J3MrU2yW8u3ECFPmgbUsK2ZO" +
-                "mF1NgXSaV0+bA4q4zkACDQp1cTGj7hNhTBDseklUXEUQ06DY2XbgNdj6hAocPV7ZO5YmSkneWaK5oNnz" +
-                "feCxKdpVG9hZBPg+T9N5+tlUv1GMfyFMAgAA";
+                "H4sIAAAAAAAAE61RzUrEMBC+5ykG9qIgK+zeBA/iQTwIgt5EJG2m7WCaCZlZ1/r0Ttru4gPY0zSZ7zeb" +
+                "O5CMLXXUeiVOwB14yByn3n6OAxYEHRA6KqLgU4DobchMSQW83XqRw4gBlKFBaDklbBWDe64r+93b+7rs" +
+                "3O0/f+7p5eEGeuQRtUwfo/Ryvaq6DbwOJNWOekoyZ8gs9DejbQIl6AqileBbvDiSDrDfQUMWzrZysWrE" +
+                "IJdbY3y0dQE74tECL5EPgjBrLl19YakyQk1E4xZFHyrRamsLYDwncytTCkvzdmKEufDIWsGKhTMW31Ak" +
+                "nWboCTmiiO+xQgIK9Wkxo/4T4ZAh2vWSqLpKIKZBqTd05DXY+n4KnFq8skesTdSSWm+J5oJmz/eRD6Fq" +
+                "uy6ytwjwfZ6m8/TjfgGp0g7/SAIAAA==";
                 
     }
 }

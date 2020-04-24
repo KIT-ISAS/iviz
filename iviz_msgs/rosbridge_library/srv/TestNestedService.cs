@@ -7,8 +7,6 @@ namespace Iviz.Msgs.rosbridge_library
             //request definition
             public geometry_msgs.Pose pose;
         
-            public int GetLength() => 56;
-        
             public unsafe void Deserialize(ref byte* ptr, byte* end)
             {
                 pose.Deserialize(ref ptr, end);
@@ -19,20 +17,13 @@ namespace Iviz.Msgs.rosbridge_library
                 pose.Serialize(ref ptr, end);
             }
         
-            public Response Call(IServiceCaller caller)
-            {
-                TestNestedService s = new TestNestedService(this);
-                caller.Call(s);
-                return s.response;
-            }
+            public int GetLength() => 56;
         }
 
         public sealed class Response : IResponse
         {
             //response definition
             public std_msgs.Float64 data;
-        
-            public int GetLength() => 8;
         
             /// <summary> Constructor for empty message. </summary>
             public Response()
@@ -49,6 +40,8 @@ namespace Iviz.Msgs.rosbridge_library
             {
                 data.Serialize(ref ptr, end);
             }
+        
+            public int GetLength() => 8;
         }
         
         /// <summary> Full ROS name of this service. </summary>
@@ -56,15 +49,6 @@ namespace Iviz.Msgs.rosbridge_library
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
         public const string Md5Sum = "063d2b71e58b5225a457d4ee09dab6f6";
-        
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
-            "H4sIAAAAAAAACr2SsU4DMQyGd0t5B0tdubIgBiQGFpgqtYIdRT2njcTF19gVlKfHuba5FgYWaIbIduz4" +
-            "/5xMMm22JIothZiiRk4OVsQdad69drKS6zkLYW+bg6ZpHEwySc/Jgqc1ou0+/fGNvd7eYOvVO3Bw/8fL" +
-            "wez56Q5/ajRl+ICZetNHSX3RhRwG6RgThkyE0vslXeGSuxJuD+cDA/pkfo7H2inCnGPSmgCLrVfKabh3" +
-            "zLsco4kpkC/rKEZg7WMS1DWNCIbjzSuqz4ghHF7lo1q7an1eimBR51cx6nOJjf90quf6i7cZpx84d1P4" +
-            "Bepovf8f3vdP72rT/e//AuElY/VeAwAA";
-            
         
         /// <summary> Request message. </summary>
         public readonly Request request;
@@ -76,22 +60,23 @@ namespace Iviz.Msgs.rosbridge_library
         public TestNestedService()
         {
             request = new Request();
+            response = new Response();
         }
         
         /// <summary> Setter constructor. </summary>
         public TestNestedService(Request request)
         {
             this.request = request;
+            response = new Response();
         }
         
-        public IResponse CreateResponse() => new Response();
+        public IService Create() => new TestNestedService();
         
-        public IRequest GetRequest() => request;
+        IRequest IService.Request => request;
         
-        public void SetResponse(IResponse response)
-        {
-            this.response = (Response)response;
-        }
+        IResponse IService.Response => response;
+        
+        public string ErrorMessage { get; set; }
     }
 
 }

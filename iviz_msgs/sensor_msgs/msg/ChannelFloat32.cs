@@ -1,4 +1,3 @@
-
 namespace Iviz.Msgs.sensor_msgs
 {
     public sealed class ChannelFloat32 : IMessage
@@ -28,24 +27,11 @@ namespace Iviz.Msgs.sensor_msgs
         // PointCloud.
         public float[] values;
     
-        /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "sensor_msgs/ChannelFloat32";
-    
-        public IMessage Create() => new ChannelFloat32();
-    
-        public int GetLength()
-        {
-            int size = 8;
-            size += name.Length;
-            size += 4 * values.Length;
-            return size;
-        }
-    
         /// <summary> Constructor for empty message. </summary>
         public ChannelFloat32()
         {
             name = "";
-            values = System.Array.Empty<0>();
+            values = System.Array.Empty<float>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)
@@ -60,20 +46,33 @@ namespace Iviz.Msgs.sensor_msgs
             BuiltIns.Serialize(values, ref ptr, end, 0);
         }
     
+        public int GetLength()
+        {
+            int size = 8;
+            size += name.Length;
+            size += 4 * values.Length;
+            return size;
+        }
+    
+        public IMessage Create() => new ChannelFloat32();
+    
+        /// <summary> Full ROS name of this message. </summary>
+        public const string MessageType = "sensor_msgs/ChannelFloat32";
+    
         /// <summary> MD5 hash of a compact representation of the message. </summary>
         public const string Md5Sum = "3d40139cdd33dfedcb71ffeeeb42ae7f";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         public const string DependenciesBase64 =
-                "H4sIAAAAAAAACl1TTYvbMBC9B/ofBu8lC9nApj2UPXahvZbSW+lBlse2qKIxGinZ/Ps+yc6n8UGgmffe" +
-                "vDd6ot+jU9qzqhmYcMzKHbUnSiPTT3EhvXvJ3aUiCY3iO5IpOQnGU2eSWT2RURXrTELz0aWR2NiRptJP" +
-                "LlQwW3C24GPyHAbUSF8vDsZn1oIRozmRjpJB0HK9VLNngNfzfVsF16Vp5gDGVfKGTOhmHZXhBvhRbJUn" +
-                "MbJOEjoXBgBV+O0Kp/fRhMCeAqRoYeIPpwlVNEVjk7PwLVifO35DNVGTmw01h4ZeKMqxqrDi8z7QujAw" +
-                "Wg7sT89nYzz3iTRxZCG3h8nbCnPz1YzwyzSJulRTyJrhvpVw4FCiUGpzosh743DuJT6CACNJdBZdkY2i" +
-                "Yw4j8JHjjW+7S9YjfA/yiKO5JBul9byflTZxaMu03yUukdestVR12c77BAtwvYxpYWU0EJBR/fWOYf1r" +
-                "82Pz7XnZCpqM/QcAlMlillG45YbgeswCrt0Xal3SzR0KrJXYcVwEop0DnDsVmd4oBi5a3QdivdwttR18" +
-                "MsFyU7IvBtmb/M9LNCBCUpgN7y2CmVfyXLnm7VDQbnmRSmKDh9NjN8pszfN2pSmWPSrIZ7Zl7se38Pry" +
-                "et1VhvVI/cJ73ee7F7Bd9V5M+rz78/f8yD6t/gMJcfcf8gMAAA==";
+                "H4sIAAAAAAAAE11Ty47bMAy8+ysI7yUBsgY27aHosQu016LoreiBlhhbqCwaopRs/r6UYudl+CBA5Mxw" +
+                "hnqB36MTmEgEBwI9ZiEL/RnSSPCTXUjvnrO9ViSGkb0FnpPjgB4sJmxeAEXYOEzafHJpBEIzwlz6wYUK" +
+                "ZgpOp3wEnsKgNXyoF0f0maRgxIhnkJGzEvRULwUnUvB6fmyr4LI0XTgU4yZ5BxjsRUdluAN+FlvlcYwk" +
+                "MwfrwqBAFb5r9PQ+YgjkIagUKUz04SRpFcwRTXJGfQvGZ0tftRqgze0O2mMLrxD5VFUY9nkKsCkMpC1H" +
+                "8uftaoynQwJJFInBTWpyV2HuvpqR/jzPLC7VFLJkdd9wOFIoUQj0OUGkCZ2eDxyfQRQjcXRGuyKhaMcl" +
+                "jEAnine+7a9Zj+p74GccySXZyL2n6aK0jUNfpv3OcYm8Zi2lymZz2Se1QK+XMY1aGVEFZK3+8sCw+bX7" +
+                "sfu2XbYCZjT/FEDLeDELRd1yQ3AHnUW59p+hd0l2DyhqLUdLcRGo7RTUuXOR6VF04KLVfWis17ul1qpP" +
+                "GAy1JftikLnLf12iQSMEUbPVeyPrSq6VG+qGgnbPq6kkQltK2zpbu+0aSbHsUUFe2Za5n9/C2+vbbVdJ" +
+                "raey/AvvbZ8fXkDXHDxj+rT/83d9ZM1/XIL8vPEDAAA=";
                 
     }
 }

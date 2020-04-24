@@ -1,4 +1,4 @@
-﻿//#define DEBUG__
+﻿#define DEBUG__
 
 using System;
 using System.Collections.Generic;
@@ -29,6 +29,9 @@ namespace Iviz.RoslibSharp
             public Arg(int f)
             {
                 value = $"<value><i4>{f}</i4></value>\n";
+            }
+            public Arg(Uri f) : this(f.ToString())
+            {
             }
             public Arg(string f)
             {

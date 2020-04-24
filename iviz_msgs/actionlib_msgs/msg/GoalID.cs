@@ -1,4 +1,3 @@
-
 namespace Iviz.Msgs.actionlib_msgs
 {
     public sealed class GoalID : IMessage
@@ -13,18 +12,6 @@ namespace Iviz.Msgs.actionlib_msgs
         // specified must be unique.
         public string id;
         
-    
-        /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "actionlib_msgs/GoalID";
-    
-        public IMessage Create() => new GoalID();
-    
-        public int GetLength()
-        {
-            int size = 12;
-            size += id.Length;
-            return size;
-        }
     
         /// <summary> Constructor for empty message. </summary>
         public GoalID()
@@ -44,15 +31,27 @@ namespace Iviz.Msgs.actionlib_msgs
             BuiltIns.Serialize(id, ref ptr, end);
         }
     
+        public int GetLength()
+        {
+            int size = 12;
+            size += id.Length;
+            return size;
+        }
+    
+        public IMessage Create() => new GoalID();
+    
+        /// <summary> Full ROS name of this message. </summary>
+        public const string MessageType = "actionlib_msgs/GoalID";
+    
         /// <summary> MD5 hash of a compact representation of the message. </summary>
         public const string Md5Sum = "302881f31927c1df708a2dbab0e80ee8";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         public const string DependenciesBase64 =
-                "H4sIAAAAAAAACj2PTW7EIAyF90hzhyfNPveYfS/ggBOsJpBiM9HcviaNuuTxfj4/8ZUZarQf0Fz7lvxR" +
-                "G8NcNtkZZDizxOyKKNZKG05SNP7prMZpCk+8DP7XlRPmD6iAokktUG5vbp7nAjFYE1ZYxdGY98NA2+bp" +
-                "0elyHkvs0//VmHkZLITIzUjKRRQurAs5eHrwS/LK+pbk9eR4nzFCqjUKGWNhTjPFbydLnmisfTPsrEor" +
-                "4xTL0IOjLBL/DrwJdLrbPXQbHGrvak6GXsRdU1A/q6zDFR7hFzUY0x9QAQAA";
+                "H4sIAAAAAAAAEz2PS5LDIAxE95yiq7L3PbKfC8ggG1VscJCIK7cf4XHNkqY/Tw/8ZIYa7Qc0174lf9TG" +
+                "MJdNdgYZziwxuyKKtdKGkxSN353VOE3hgafB/7pywvwFFVA0qQXK7cPN81wgBmvCCqs4GvN+GGjbPD06" +
+                "Xc5jiX36vxozL4OFELkZSbmIwoV1IQdPD35JXlk/kryeHO87Rki1RiFjLMxppvhysuSJxto3w86qtDJO" +
+                "sQw9OMoi8e/Am0Cnu91Dt8Gh9q7mZOhF3DUF9bPKOlwh/AJcvpWYTwEAAA==";
                 
     }
 }

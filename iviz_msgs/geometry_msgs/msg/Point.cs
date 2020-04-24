@@ -1,19 +1,14 @@
+using System.Runtime.InteropServices;
 
 namespace Iviz.Msgs.geometry_msgs
 {
+    [StructLayout(LayoutKind.Sequential)]
     public struct Point : IMessage
     {
         // This contains the position of a point in free space
         public double x;
         public double y;
         public double z;
-    
-        /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "geometry_msgs/Point";
-    
-        public IMessage Create() => new Point();
-    
-        public int GetLength() => 24;
     
         public unsafe void Deserialize(ref byte* ptr, byte* end)
         {
@@ -25,13 +20,20 @@ namespace Iviz.Msgs.geometry_msgs
             BuiltIns.SerializeStruct(this, ref ptr, end);
         }
     
+        public int GetLength() => 24;
+    
+        public IMessage Create() => new Point();
+    
+        /// <summary> Full ROS name of this message. </summary>
+        public const string MessageType = "geometry_msgs/Point";
+    
         /// <summary> MD5 hash of a compact representation of the message. </summary>
         public const string Md5Sum = "4a842b65f413084dc2b10fb484ea7f17";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         public const string DependenciesBase64 =
-                "H4sIAAAAAAAACj3HwQmAMAwF0HvAHT64gjiJC4SS0IAkxeSgTq+n3t5bcXRLtPBi80R1wYi0snCEgv+Z" +
-                "F8yhlwhycBPSM7j2DffUM/XSQh9Q4wl6VgAAAA==";
+                "H4sIAAAAAAAAEz3HwQmAMAwF0Hum+OAK4iQuEEpCA5KUJgd1ej319t6Gs1uihRebJ6oLRqSVhSMU/M+8" +
+                "YA6dIsjBTUiv4Dp23EvP0kv0AQQdt/JVAAAA";
                 
     }
 }

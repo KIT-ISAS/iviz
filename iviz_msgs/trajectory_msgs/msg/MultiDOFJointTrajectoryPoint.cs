@@ -1,4 +1,3 @@
-
 namespace Iviz.Msgs.trajectory_msgs
 {
     public sealed class MultiDOFJointTrajectoryPoint : IMessage
@@ -13,20 +12,6 @@ namespace Iviz.Msgs.trajectory_msgs
         public geometry_msgs.Twist[] accelerations;
         
         public duration time_from_start;
-    
-        /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "trajectory_msgs/MultiDOFJointTrajectoryPoint";
-    
-        public IMessage Create() => new MultiDOFJointTrajectoryPoint();
-    
-        public int GetLength()
-        {
-            int size = 20;
-            size += 56 * transforms.Length;
-            size += 48 * velocities.Length;
-            size += 48 * accelerations.Length;
-            return size;
-        }
     
         /// <summary> Constructor for empty message. </summary>
         public MultiDOFJointTrajectoryPoint()
@@ -52,20 +37,34 @@ namespace Iviz.Msgs.trajectory_msgs
             BuiltIns.Serialize(time_from_start, ref ptr, end);
         }
     
+        public int GetLength()
+        {
+            int size = 20;
+            size += 56 * transforms.Length;
+            size += 48 * velocities.Length;
+            size += 48 * accelerations.Length;
+            return size;
+        }
+    
+        public IMessage Create() => new MultiDOFJointTrajectoryPoint();
+    
+        /// <summary> Full ROS name of this message. </summary>
+        public const string MessageType = "trajectory_msgs/MultiDOFJointTrajectoryPoint";
+    
         /// <summary> MD5 hash of a compact representation of the message. </summary>
         public const string Md5Sum = "3ebe08d1abd5b65862d50e09430db776";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         public const string DependenciesBase64 =
-                "H4sIAAAAAAAACr1UTWvcQAy9D+x/EOSSwNaFtORQyK0f5FDS0tBLKcusLXunGY9cjVzH/fXV2F47Gzb0" +
-                "0LILBtkrPek9vZkzeGfzHdStF/eioBJ+kAsCuQ0QG8xd2YMFYRtiSVzDeduAEFzB29v3F6ZCqlG439Sx" +
-                "ii/v9lnfvi8V0ZgzuNsh44C5RYX7hZ5yJ/3UwWEBmgqyQyB2lQugc6S3cZanbToXRVtMKA6PtAhg8xw9" +
-                "shVH4d/6PEbSVkU7gYqrcVMy1ZsolsWszPV//q3Mxy8f3sAzKq8G1i4CY8MYMUgcyCzL2qJ0iDppR5AT" +
-                "ceGCFYSSbY0RlH7JiCqOzTEz5ivmQvxqrPcDR/O51QIOiS6TjN9OxHMa5xjL5KD05xMKoKk3AppLwfdQ" +
-                "o9WlqlnnSi0sHGup0shGx6hOuAYnUJBKEkgUo7b3CokhqpYEtmn8fAZGWdJnLTnHrMrW0O1U4iHLhUoT" +
-                "FaHCgOxySCYrloXMxRYmdmuQ8hI65/0489hMt6gge8EvMrgpoacWukRIA4bCik5Eyev7uezWp3lpDW0a" +
-                "fIA4VPTT4HJdfbQVqnZR0Ba6+NKTlavX8DBH/Rz9PtG2F6MdXbieVHYajgoerD29/VxsmnT+Gyezj7qT" +
-                "Hdp0l8zM8CExi2q4+SY8pLRluldT6bqS0SJ4F9CyylDoU7Ve40avnJjNh3ZKWd6nPCX4B5ntXPjiBQAA";
+                "H4sIAAAAAAAAE71UTY/TQAy9z6+wtJddqQQJ0B6QuPGhPSBArLggVE0nTjrsZBw8Dtnw6/EkabJdFXEA" +
+                "tVIlT2s/+73nmQt4Y90emi6If1JSBd/JRwFnI6QWna8GsCBsY6qIG7jsWhCCa3j94e2VqZEaFB62TarT" +
+                "09tD1tdva0Uy5gJu98g4Yu5Q4X5iIOdlmDt4LEFTQfYIxL72EXSOfJpmedym90m0xYzi8USLCNY5DMhW" +
+                "PMV/6/MQSVuV3QwqvsFtxdRsk1gWY1795495//ndS/iDxiNln4CxZUwYJY1MVqd2KD2ijtkTOCIufbSC" +
+                "ULFtMIFyrxhRlbEOC2O+oBPi51N9GAmaT50WcMxcmWT67Swk52FOUMy7k/97ND9o6o2A5lIMAzRo1U5d" +
+                "06VSC0vPWqocimlXVCTcgBcoSfWIJIrR2DuFxJgwV9u2Dcv2h9l0yiWXWNTFBvq96jtm+VhroiLUGJG9" +
+                "g7xe5erGUmxhJrcBqZ5B70OYZp6aqYUKclD7qoCbCgbqoM+ENGAordgMtMNlLrsLeV7aQJcHHyGOBf04" +
+                "7rf6nmyNql0StKW6XgWycv0C7pdoWKJfZ7F63bFTbsd8TzWc5DvyPJ9+rAuaRf4roUPUn+mu5gfkQAvv" +
+                "M62kq7a8fsd8dkx3mEmOK5Yg+IiWVYNSv3UXNG71mUnFclfnlPU85xnzG339a7jVBQAA";
                 
     }
 }

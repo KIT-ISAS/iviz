@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using System.Threading;
 using Iviz.Msgs.geometry_msgs;
+using Iviz.Msgs.rosbridge_library;
 using Iviz.Msgs.tf2_msgs;
 using Iviz.RoslibSharp;
 
@@ -11,6 +13,32 @@ namespace iviz_test
     {
         static void Main(string[] args)
         {
+            RosClient client = new RosClient(
+                "http://192.168.0.73:11311",
+                null,
+                "http://192.168.0.157:7613");
+
+            AddTwoInts service = new AddTwoInts();
+            Console.WriteLine(service.ToJsonString());
+
+            client.Close();
+            /*
+            client.AdvertiseService<AddTwoInts>("/add", x =>
+            {
+                x.response = new AddTwoInts.Response()
+                {
+                    sum = x.request.a + x.request.b
+                };
+                throw new ArgumentException();
+            });
+            */
+
+            while (true)
+            {
+                Thread.Sleep(1000);
+            }
+
+            /*
             StringBuilder sb = new StringBuilder();
             StringWriter sw = new StringWriter(sb);
 
@@ -43,6 +71,7 @@ namespace iviz_test
 
 
             Console.WriteLine(tf.ToJsonString());
+            */
 
             /*
             string json = sb.ToString();
@@ -54,53 +83,53 @@ namespace iviz_test
             Console.WriteLine(tf2.ToJsonString());
             */
 
-                /*
-                RosClient client = new RosClient("http://192.168.0.73:11311", null, "http://192.168.0.157:7613");
-                //client.Subscribe<Iviz.Msgs.std_msgs.Int32>("/client_count", Callback);
-                //Console.WriteLine(client.GetSystemState());
+            /*
+            RosClient client = new RosClient("http://192.168.0.73:11311", null, "http://192.168.0.157:7613");
+            //client.Subscribe<Iviz.Msgs.std_msgs.Int32>("/client_count", Callback);
+            //Console.WriteLine(client.GetSystemState());
 
 
-                client.Advertise<TFMessage>("/tf", out RosPublisher publisher);
+            client.Advertise<TFMessage>("/tf", out RosPublisher publisher);
 
 
-                TransformStamped[] tfs = new TransformStamped[1];
-                tfs[0] = new TransformStamped
+            TransformStamped[] tfs = new TransformStamped[1];
+            tfs[0] = new TransformStamped
+            {
+                transform = new Transform
                 {
-                    transform = new Transform
+                    translation = new Vector3{
+                        x = 0,
+                        y = 0,
+                        z = 1
+                    },
+                    rotation = new Quaternion
                     {
-                        translation = new Vector3{
-                            x = 0,
-                            y = 0,
-                            z = 1
-                        },
-                        rotation = new Quaternion
-                        {
-                            x = 0,
-                            y = 0,
-                            z = 0,
-                            w = 1
-                        }
+                        x = 0,
+                        y = 0,
+                        z = 0,
+                        w = 1
                     }
-                };
-                TFMessage tf = new TFMessage
-                {
-                    transforms = tfs
-                };
-
-                client.Subscribe<TFMessage>("/tf", Callback);
-
-                while (true)
-                {
-                    publisher.Publish(tf);
-                    //Console.WriteLine(">> " + tf.ToJsonString());
-                    Thread.Sleep(1000);
                 }
+            };
+            TFMessage tf = new TFMessage
+            {
+                transforms = tfs
+            };
 
-                Console.Read();
-                client.Close();
-                */
+            client.Subscribe<TFMessage>("/tf", Callback);
 
+            while (true)
+            {
+                publisher.Publish(tf);
+                //Console.WriteLine(">> " + tf.ToJsonString());
+                Thread.Sleep(1000);
             }
+
+            Console.Read();
+            client.Close();
+            */
+
+        }
 
         static void Callback(Iviz.Msgs.std_msgs.Int32 value)
         {

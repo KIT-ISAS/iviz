@@ -1,4 +1,3 @@
-
 namespace Iviz.Msgs.shape_msgs
 {
     public sealed class Plane : IMessage
@@ -11,13 +10,6 @@ namespace Iviz.Msgs.shape_msgs
         // d := coef[3]
         
         public double[/*4*/] coef;
-    
-        /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "shape_msgs/Plane";
-    
-        public IMessage Create() => new Plane();
-    
-        public int GetLength() => 32;
     
         /// <summary> Constructor for empty message. </summary>
         public Plane()
@@ -35,14 +27,21 @@ namespace Iviz.Msgs.shape_msgs
             BuiltIns.Serialize(coef, ref ptr, end, 4);
         }
     
+        public int GetLength() => 32;
+    
+        public IMessage Create() => new Plane();
+    
+        /// <summary> Full ROS name of this message. </summary>
+        public const string MessageType = "shape_msgs/Plane";
+    
         /// <summary> MD5 hash of a compact representation of the message. </summary>
         public const string Md5Sum = "2c1b92ed8f31492f8e73f6a4a44ca796";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         public const string DependenciesBase64 =
-                "H4sIAAAAAAAAClNWCEotKEotTs0rSSzJzM9TyE9TSFQoyEnMS9VRKC3OzEtXKMlIhQgopBaWQhQlViho" +
-                "KyRVAonkKiCRomCrYMDFpQzUaWWrkJyfmhZtEAvkJsG5hiBuMpxrBOKmwLnGsVxcaTn5iSVmJtEmsWAx" +
-                "Ll4uAHsFt+abAAAA";
+                "H4sIAAAAAAAAEz3LQQqDMBQE0P0/xYDLdqGtdCF4CbeSxTf+VEESNRGspzdWyGbgDTMZGplX8WIDh9FZ" +
+                "OAPGPLGVJzY/2i/CIHcBWbZ7xDse6H4x9BGjR42cKIvPqoZ2YtpcRXaJxUWd+LrYJ74VkZkch0/Zlurf" +
+                "EZ3An1dFmgAAAA==";
                 
     }
 }

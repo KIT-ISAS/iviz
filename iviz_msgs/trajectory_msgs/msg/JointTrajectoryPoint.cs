@@ -1,4 +1,3 @@
-
 namespace Iviz.Msgs.trajectory_msgs
 {
     public sealed class JointTrajectoryPoint : IMessage
@@ -13,28 +12,13 @@ namespace Iviz.Msgs.trajectory_msgs
         public double[] effort;
         public duration time_from_start;
     
-        /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "trajectory_msgs/JointTrajectoryPoint";
-    
-        public IMessage Create() => new JointTrajectoryPoint();
-    
-        public int GetLength()
-        {
-            int size = 24;
-            size += 8 * positions.Length;
-            size += 8 * velocities.Length;
-            size += 8 * accelerations.Length;
-            size += 8 * effort.Length;
-            return size;
-        }
-    
         /// <summary> Constructor for empty message. </summary>
         public JointTrajectoryPoint()
         {
-            positions = System.Array.Empty<0>();
-            velocities = System.Array.Empty<0>();
-            accelerations = System.Array.Empty<0>();
-            effort = System.Array.Empty<0>();
+            positions = System.Array.Empty<double>();
+            velocities = System.Array.Empty<double>();
+            accelerations = System.Array.Empty<double>();
+            effort = System.Array.Empty<double>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)
@@ -55,15 +39,30 @@ namespace Iviz.Msgs.trajectory_msgs
             BuiltIns.Serialize(time_from_start, ref ptr, end);
         }
     
+        public int GetLength()
+        {
+            int size = 24;
+            size += 8 * positions.Length;
+            size += 8 * velocities.Length;
+            size += 8 * accelerations.Length;
+            size += 8 * effort.Length;
+            return size;
+        }
+    
+        public IMessage Create() => new JointTrajectoryPoint();
+    
+        /// <summary> Full ROS name of this message. </summary>
+        public const string MessageType = "trajectory_msgs/JointTrajectoryPoint";
+    
         /// <summary> MD5 hash of a compact representation of the message. </summary>
         public const string Md5Sum = "f3cd1e1c4d320c79d6985c904ae5dcd3";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         public const string DependenciesBase64 =
-                "H4sIAAAAAAAAClWPsY7CQAxE+5X4B0u0iOp0/RXXUF+HImQ2s7BoE6O1g46/xwlSEpqV5o29M97SL8cr" +
-                "WeUbokl90l1yb6R3xJwylJDtiupYs2Xp9bijB4pEVxgFx4iCypPZNGFL8jmNlKRaQ/6Sf7XOMqEzCP+I" +
-                "g6Hd++5PKXN2Sw8ug1fgCsr9tKzcwQNab8Q6kdvUt3eu49BhlH9zxL7TSwipCNv317FZiq3Ycs4Kfpy1" +
-                "4u9rQju8LbLc4ZSqdCc1dmMTXu0FwIBTAQAA";
+                "H4sIAAAAAAAAE1WPsQ7CMAxE93yFJVbEhNgZWJjZUIVMeoGgtEaxi+DvcYsEZYl07+zceUE7jleyyjdE" +
+                "k/qiu+TeSO+IOWUoIdsV1bFmy9LrcUkPFImuMAqOEQWVJ7NpwoLkfxopSbWG/CX/ap5lQmcQnoiDoV35" +
+                "7raUb3ZLDy6DV+AKyv20rNzBA1pvxDqR29S3d67j0H6Uh2/EqtNLCKkI22Z9bH7FZux3zgz+nTXjn2tC" +
+                "O3wsstzhlKp0JzV2I7wBGsNsNFIBAAA=";
                 
     }
 }

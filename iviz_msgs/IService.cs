@@ -1,23 +1,32 @@
-﻿namespace Iviz.Msgs
+﻿using System.Runtime.Serialization;
+
+namespace Iviz.Msgs
 {
     public interface IService
     {
         /// <summary>
-        /// Create an empty response to this message
+        /// Create an empty service message
         /// </summary>
-        /// <returns>New message</returns>
-        IResponse CreateResponse();
+        /// <returns>New service message</returns>
+        IService Create();
 
         /// <summary>
         /// Returns the request message
         /// </summary>
         /// <returns>Request message</returns>
-        IRequest GetRequest();
+        IRequest Request { get; }
 
-        /// <summary>
-        /// Sets the response message
-        /// </summary>
-        void SetResponse(IResponse response);
+        IResponse Response { get; }
+
+        string ErrorMessage { get; set; }
     }
 
+    public interface IRequest : ISerializable
+    {
+    }
+
+
+    public interface IResponse : ISerializable
+    {
+    }
 }

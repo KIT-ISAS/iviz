@@ -1,4 +1,3 @@
-
 namespace Iviz.Msgs.sensor_msgs
 {
     public sealed class JointState : IMessage
@@ -30,33 +29,14 @@ namespace Iviz.Msgs.sensor_msgs
         public double[] velocity;
         public double[] effort;
     
-        /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "sensor_msgs/JointState";
-    
-        public IMessage Create() => new JointState();
-    
-        public int GetLength()
-        {
-            int size = 20;
-            size += header.GetLength();
-            for (int i = 0; i < name.Length; i++)
-            {
-                size += name[i].Length;
-            }
-            size += 8 * position.Length;
-            size += 8 * velocity.Length;
-            size += 8 * effort.Length;
-            return size;
-        }
-    
         /// <summary> Constructor for empty message. </summary>
         public JointState()
         {
             header = new std_msgs.Header();
-            name = System.Array.Empty<0>();
-            position = System.Array.Empty<0>();
-            velocity = System.Array.Empty<0>();
-            effort = System.Array.Empty<0>();
+            name = System.Array.Empty<string>();
+            position = System.Array.Empty<double>();
+            velocity = System.Array.Empty<double>();
+            effort = System.Array.Empty<double>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)
@@ -77,25 +57,44 @@ namespace Iviz.Msgs.sensor_msgs
             BuiltIns.Serialize(effort, ref ptr, end, 0);
         }
     
+        public int GetLength()
+        {
+            int size = 20;
+            size += header.GetLength();
+            for (int i = 0; i < name.Length; i++)
+            {
+                size += name[i].Length;
+            }
+            size += 8 * position.Length;
+            size += 8 * velocity.Length;
+            size += 8 * effort.Length;
+            return size;
+        }
+    
+        public IMessage Create() => new JointState();
+    
+        /// <summary> Full ROS name of this message. </summary>
+        public const string MessageType = "sensor_msgs/JointState";
+    
         /// <summary> MD5 hash of a compact representation of the message. </summary>
         public const string Md5Sum = "3066dcd76a6cfaef579bd0f34173e9fd";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         public const string DependenciesBase64 =
-                "H4sIAAAAAAAACq1Uy2ocMRC8D/gfGvZgr7HHkIQcFnII5HmICdiQQwhGK/XOKNFIE0njzeTrUy3ty+SS" +
-                "Q8weLE13dXdVqRd039tE+CkaOCXVMeVeZeqDM4mMyopyIMNJR7uWb0wpq8wUNkhJnOWfHOLPiUkHn2Nw" +
-                "jg19D9bn1FKzaBYocZLESvf1M11EfgxukvtIY7RpUNnqpXRjeGM9cNbzCgB0WQqPIdlsgy8lcd6jKCMA" +
-                "w/LqGPrILmib579Db1IJvklLUt7QMYU3mxBznV74GEdn0YH1pwC3g2TfLtsy2NvjLMiYvAULbiZr2Ge7" +
-                "kew1TjmRVwPviOhZGY6URtYSkgp6tgMT6m57C8RjvcJaoi1Hpsg6RMOmpdfO/RUDdHQaPB9k7NUjgAOt" +
-                "j6lSoiiIdkrNOkaxwD4NIiab0HMReJhctqNDczGqOV2VCuCpyjgqEPaE4dKMyF5m7YJywgy6GNQPrkm7" +
-                "eMwuDgujKKpcS1969sRt19IcprhzUJ3CBwDu9FEpQVlUMbS1uZA1XEkKaeXJcZn6KGfpm3gY87xzo7BX" +
-                "p6nansye+jA5s2Nuz1OyvxlzRyGy4uwpk8kQFTw036IKxjx44NDmCTnigkPTIDpClwywqmDbNM2Hao7q" +
-                "kaZJOVrfff1W/bNxQeWXL3DcP4STq73hT64qA81Z8+o//501n+7er9C2eRhSl25q12eY5C7jTalowGhW" +
-                "ZXmIV3rb9RyvHaNJGXYYIV5dLfMogx/57NhzVA4ETglBYFSHYQCrulAJyz7Jr65XxYhWT05FxMPq1kv4" +
-                "JoI2QReOGbp4zfTxzap4nPWULRrCA/U6skpgGh+pmSDV82eS0Czut+EaR+4gyqH4YUXwrzHCOfKukqyp" +
-                "yzpcC2ywgzfnYfCLcveAIzYOimi4aAx4Bxfo/POce+yzsrFUtGqNlwZgDQaAei5J58sTZGl7BTf4sIev" +
-                "iMca/wIrKBVXZrruoZmT6dPUgUAEjjE8YomV9VWsik0I/zq7jirOTdlWpWSzeCcc11dUFJHN+fSF7lxc" +
-                "1XiwBob8AyOv5l52BgAA";
+                "H4sIAAAAAAAAE61UTW/UMBC951eMtId20TaVAHGoxAGJzwMVUitxQKiajWcTg2MH29kl/Hqe7exmq144" +
+                "UO2hdmbezLz3PCu673Qg/Jh6CYFbodhxpM4ZFUhxZIqOlITG6236JhQiRyG3Q0qQmP6Jzv8ahRpno3fG" +
+                "iKIfTtsYaqpW1QolzpKEm658pksve2fGdO9p8Dr0HHWzTt0o2WkLnO10AwB6lgsPLuionc0lcT6isEoA" +
+                "/XqzhO7FuEbH6WnodcjB12FNbBUtKbLbOR/L9ImPYTAaHWh7DnDbp+zbdZ0He7fMgozRarBgJtJKbNQ7" +
+                "nfsnHQNZ7mUmohNW4ikM0qSQkNGj7oVQ99BpIC71MmuBDuKFvDTOK1E1vTHmSQzQ0amzcpKx470k7bZL" +
+                "aiqRFUQ7uWY964Puj2kQMeiAnrPA/WiiHgya856nsMkVwFORcWAfHzOcm0my51lbxyYxgy56/iklaY7H" +
+                "7MlhbkiKsqnpayeWpG5rmtzoZweVKawD4KwPhwBlUUXRQcdMVr9JKdSwJSN56kXO3DdJP8RpdmNir0xT" +
+                "tD2bPXRuNGpm7shT0H9kk1QHkQXnSJku4jkLzQ+ogjFPHji1eUZOcsGpaRDtoUsEWFGwrqrqYzFH8UhV" +
+                "hei1bb99L/7ZGcfx1Uscjw/h7Opo+LOrwkBVvf7Pf9Xnuw83aFo99KEN16VnjHEX8aDYK9AZOW+OZJRO" +
+                "t534KyPoME3aD1Cu7JVpSFMvZLZixbMBe2NAEOhsXN+D0ibzCL8+yi+W5+xC3YyGPeLhc21T+M5z9ncK" +
+                "CwJRbCP06e1NNrg0Y9T7/FZt44UDaMZHqkbo9OJ5SqhW9wd3haO0UORU/LQf5PfgYZv0qELaUc/KcDWw" +
+                "QQ4enIW7L/PdA45YNyiCFmRweASX6PzLFDtXtsueveYtnhmAG84b9CIlXazPkG2GtmzdEb4gLjX+Bdae" +
+                "cNNMVx00M2n6MLYgEIGDd3utyu7KPsUahHmN3nr2U5VXVS5Zrd77vEiSfFmRtDYfP8/ZwkWNB62q6i8m" +
+                "nvAbcgYAAA==";
                 
     }
 }

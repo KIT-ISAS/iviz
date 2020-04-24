@@ -64,8 +64,6 @@ namespace Iviz.MsgsGen
         }
 
         static List<string> CreateClassContent(
-            string service,
-            string package,
             List<MsgParser.IElement> elements, 
             List<MsgParser.Variable> variables, 
             int fixedSize,
@@ -87,15 +85,6 @@ namespace Iviz.MsgsGen
             }
 
             lines.Add("");
-
-
-            List<string> lengthProperty = ClassInfo.CreateLengthProperty(variables, fixedSize);
-            foreach (var entry in lengthProperty)
-            {
-                lines.Add("    " + entry);
-            }
-
-            lines.Add("");
             List<string> deserializer = ClassInfo.CreateConstructors(variables, name, forceStruct);
             foreach (var entry in deserializer)
             {
@@ -109,6 +98,14 @@ namespace Iviz.MsgsGen
                 lines.Add("    " + entry);
             }
 
+            lines.Add("");
+            List<string> lengthProperty = ClassInfo.CreateLengthProperty(variables, fixedSize);
+            foreach (var entry in lengthProperty)
+            {
+                lines.Add("    " + entry);
+            }
+
+            /*
             if (isRequest)
             {
                 lines.Add("");
@@ -119,6 +116,7 @@ namespace Iviz.MsgsGen
                 lines.Add("        return s.response;");
                 lines.Add("    }");
             }
+            */
             lines.Add("}");
 
             return lines;
@@ -196,7 +194,7 @@ namespace Iviz.MsgsGen
             return md5;
         }
 
-        List<string> CreateMainClassLines()
+        List<string> CreateServiceContent()
         {
             List<string> lines = new List<string>();
 
@@ -230,6 +228,7 @@ namespace Iviz.MsgsGen
             lines.Add("/// <summary> MD5 hash of a compact representation of the service. </summary>");
             lines.Add("public const string Md5Sum = \"" + md5 + "\";");
 
+            /*
             lines.Add("");
             lines.Add("/// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>");
             lines.Add("public const string DependenciesBase64 =");
@@ -239,6 +238,7 @@ namespace Iviz.MsgsGen
             {
                 lines.Add("    " + entry);
             }
+            */
 
             lines.Add("");
             lines.Add("/// <summary> Request message. </summary>");
@@ -253,6 +253,7 @@ namespace Iviz.MsgsGen
             lines.Add("public " + name + "()");
             lines.Add("{");
             lines.Add("    request = new Request();");
+            lines.Add("    response = new Response();");
             lines.Add("}");
 
             lines.Add("");
@@ -260,19 +261,20 @@ namespace Iviz.MsgsGen
             lines.Add("public " + name + "(Request request)");
             lines.Add("{");
             lines.Add("    this.request = request;");
+            lines.Add("    response = new Response();");
             lines.Add("}");
 
             lines.Add("");
-            lines.Add("public IResponse CreateResponse() => new Response();");
+            lines.Add("public IService Create() => new " + name + "();");
 
             lines.Add("");
-            lines.Add("public IRequest GetRequest() => request;");
+            lines.Add("IRequest IService.Request => request;");
 
             lines.Add("");
-            lines.Add("public void SetResponse(IResponse response)");
-            lines.Add("{");
-            lines.Add("    this.response = (Response)response;");
-            lines.Add("}");
+            lines.Add("IResponse IService.Response => response;");
+
+            lines.Add("");
+            lines.Add("public string ErrorMessage { get; set; }");
 
             return lines;
         }
@@ -286,7 +288,7 @@ namespace Iviz.MsgsGen
             str.AppendLine("    public class " + name + " : IService");
             str.AppendLine("    {");
 
-            List<string> linesReq = CreateClassContent(name, package, elementsReq, variablesReq, fixedSizeReq, true);
+            List<string> linesReq = CreateClassContent(elementsReq, variablesReq, fixedSizeReq, true);
             foreach (var entry in linesReq)
             {
                 str.Append("        ").AppendLine(entry);
@@ -294,13 +296,13 @@ namespace Iviz.MsgsGen
 
             str.AppendLine();
 
-            List<string> linesResp = CreateClassContent(name, package, elementsResp, variablesResp, fixedSizeResp, false);
+            List<string> linesResp = CreateClassContent(elementsResp, variablesResp, fixedSizeResp, false);
             foreach (var entry in linesResp)
             {
                 str.Append("        ").AppendLine(entry);
             }
 
-            List<string> mainClassLines = CreateMainClassLines();
+            List<string> mainClassLines = CreateServiceContent();
             foreach (var entry in mainClassLines)
             {
                 str.Append("        ").AppendLine(entry);

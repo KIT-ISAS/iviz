@@ -1,4 +1,3 @@
-
 namespace Iviz.Msgs.diagnostic_msgs
 {
     public sealed class DiagnosticStatus : IMessage
@@ -18,24 +17,6 @@ namespace Iviz.Msgs.diagnostic_msgs
         public string hardware_id; // a hardware unique string
         public KeyValue[] values; // an array of values associated with the status
         
-    
-        /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "diagnostic_msgs/DiagnosticStatus";
-    
-        public IMessage Create() => new DiagnosticStatus();
-    
-        public int GetLength()
-        {
-            int size = 17;
-            size += name.Length;
-            size += message.Length;
-            size += hardware_id.Length;
-            for (int i = 0; i < values.Length; i++)
-            {
-                size += values[i].GetLength();
-            }
-            return size;
-        }
     
         /// <summary> Constructor for empty message. </summary>
         public DiagnosticStatus()
@@ -64,17 +45,35 @@ namespace Iviz.Msgs.diagnostic_msgs
             BuiltIns.SerializeArray(values, ref ptr, end, 0);
         }
     
+        public int GetLength()
+        {
+            int size = 17;
+            size += name.Length;
+            size += message.Length;
+            size += hardware_id.Length;
+            for (int i = 0; i < values.Length; i++)
+            {
+                size += values[i].GetLength();
+            }
+            return size;
+        }
+    
+        public IMessage Create() => new DiagnosticStatus();
+    
+        /// <summary> Full ROS name of this message. </summary>
+        public const string MessageType = "diagnostic_msgs/DiagnosticStatus";
+    
         /// <summary> MD5 hash of a compact representation of the message. </summary>
         public const string Md5Sum = "d0ce08bc6e5ba34c7754f563a9cabaf1";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         public const string DependenciesBase64 =
-                "H4sIAAAAAAAACq1STU/DMAy9R9p/sLQ74+OG1MMOE4cBQ90EB4SQ25rWWpuU2G21f0/SrmIXbkSK/By/" +
-                "59hOlnCoWKAhESwJKlcXAloRiKJ2Au4L0ALbgnsuOqwhd03rLFmNoUj0LnN6ZZZgwn5xIpzVBDX1VI9y" +
-                "15JHZWfFZCcl2G2T6wm9rdPn5GbCmzTdpcnt5OwP68dNcmcmb0wFy7O9zAhkuyZiKgAz1xMYUc+2BIsN" +
-                "BQlCQZJ7bkf2uWAl0dVvG55a5zWIZu08iz/k02BmcoW+GNDTJxejYPahs/zdRXakmS2dXrHu6P0D+mgl" +
-                "ki2g93iKic+HKOJyHvsZWKvL+8zCJP+8FuZp/3APBWNpnSjnn42UspprXcw9HukUyh0qVFAHNWbhGTT+" +
-                "mrHqECALPdNwMcMpEgcyoaBTj/kRwiN5UG4o9PMDS9UTGHwCAAA=";
+                "H4sIAAAAAAAAE61STW+DMAy951dY6n3dx20Shx6qHfbRiVbbYZoqQzywCgmLDYh/PwJF62W3RYr8HL/n" +
+                "2E5WcChZoCYRLAhKX1kBLQlEUVsB/wXogJ3ljm2LFeS+brwjpzEUicFnXq/MCsy4X70IZxVBRR1Vk9w3" +
+                "FFDZOzHZoAS7x+R6Ru+b9CW5mfE2TXdpcjs7+8PmaZvcmdmbUsHqbC8zArm2jpgsYOY7AiMa2BXgsKZR" +
+                "gmBJ8sDNxD4XrCS6/m0jUOODjqJFu8ziD/k8mIVcYrA9BjqynQSLD63j7zayI8080vCGVUsfn9BFK5Hs" +
+                "AEPAISY+H6KIz3nqp2ctL+8zJvnnZZ73D/dgGQvnRTk/1lLIeql0afBEw1hrX6KCeqgwG99A45eZSh4D" +
+                "5KBj6i8GOEfiNGY06jRgfoLxhQIo12TMD2XzWS14AgAA";
                 
     }
 }

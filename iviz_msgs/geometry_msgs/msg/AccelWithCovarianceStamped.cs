@@ -1,4 +1,3 @@
-
 namespace Iviz.Msgs.geometry_msgs
 {
     public sealed class AccelWithCovarianceStamped : IMessage
@@ -6,18 +5,6 @@ namespace Iviz.Msgs.geometry_msgs
         // This represents an estimated accel with reference coordinate frame and timestamp.
         public std_msgs.Header header;
         public AccelWithCovariance accel;
-    
-        /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "geometry_msgs/AccelWithCovarianceStamped";
-    
-        public IMessage Create() => new AccelWithCovarianceStamped();
-    
-        public int GetLength()
-        {
-            int size = 336;
-            size += header.GetLength();
-            return size;
-        }
     
         /// <summary> Constructor for empty message. </summary>
         public AccelWithCovarianceStamped()
@@ -38,25 +25,37 @@ namespace Iviz.Msgs.geometry_msgs
             accel.Serialize(ref ptr, end);
         }
     
+        public int GetLength()
+        {
+            int size = 336;
+            size += header.GetLength();
+            return size;
+        }
+    
+        public IMessage Create() => new AccelWithCovarianceStamped();
+    
+        /// <summary> Full ROS name of this message. </summary>
+        public const string MessageType = "geometry_msgs/AccelWithCovarianceStamped";
+    
         /// <summary> MD5 hash of a compact representation of the message. </summary>
         public const string Md5Sum = "96adb295225031ec8d57fb4251b0a886";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         public const string DependenciesBase64 =
-                "H4sIAAAAAAAACr1VTW/UQAy9R9r/YKkHWrS7SBT1UIkDAgE9ICFa8SlUeRMnGUhmgmfS3fDreTPJhkXl" +
-                "ABJ0FWmTif1sPz87R3RVG08qnYoXGzyxJfHBtBykIM5zaWhrQg2TUlRsLpQ7p4WxMKBSuRW4FAQPuHHb" +
-                "rbOXwoUo1ekvexIh3gHhqbthNRwREmy2yB7/498ie3X54px8KK5bX/kHYyaL7IguA5JkLaiVwAUHptIh" +
-                "RVPVoqtGblBlyh41p7dh6MSvs4keXJVYUW6agXoPo+BAQ9v21uSRh7n6vT88jSWmjjWYvG9Yb9EW0XF5" +
-                "+dYnWi+encPGesn7YJDQAIRchb2xFV5S1hsbTh9Gh+zoautWeJQKRM/BKdQcYrKyi+2MebI/R4z7Y3Fr" +
-                "YIMdQZTC03E6u8ajPyEEQQrSubymY2T+egi1swAUSl3bNBKBczAA1HvR6d7JAXJM+5wsW7eHHxF/xvgT" +
-                "WDvjxppWNXrWxOp9X4FAGHbqbkwB082QQPLGQLTUmI2yDln0GkNmR8+TNENsX+oI/tl7l5sk7CjpzAeN" +
-                "6Kkb16b4f4KsxEF3Ooyq/M1ELPZK23cOyUYrSC4YEAbqShXU1jFITfPYw00DQwTDOhunbJorYL1x21XL" +
-                "XyDxebJHIFcm3s52Z9DaPI8YdjW7lIOQUzObQ77gJoj6KHvouTQ7KVa8O9wZyTSq+QL4ioFbphgHvqwS" +
-                "ZXi8W9KwpO9LUjcF4I3rA72niHjr+MPvjz+m45OsbByHs0efTs8+HxRzp138u75t1H2VeIjtYbBqoW2B" +
-                "ruP6ZFulJRH3BfbOW8mD01OaTH4+T3Z3VeQUdy7z8DtBN+nlrzWu40q7SEvIWaywVhjziXpnTzgWRuEa" +
-                "RRMFhw+LU1mCESocCLQuAKPlr4AUbASCN3cdwLCWla1vRm4TiXQs62q9pG0NYpNVnOi0f9PGNjmpqQwW" +
-                "dvREIEh9cmaaqoNcy4cYqqYZcx6DQcIA2UvvZE0XJQ2up20sCDc6fSgcbZDilFdaaMG5ZRqXEeJXRl87" +
-                "tB+0eM8Vdp/1Ad8oDPAkZtrNd8N8932R/QA9KaQHqAcAAA==";
+                "H4sIAAAAAAAAE71VTY/TQAy951dY6mFb1BaJRXtYiQMCAT0gIUB8Cq3cxEkGkpngmWyb/fW8mbShaDmA" +
+                "BFtFajKxn+3nZ2dGb2vjSaVT8WKDJ7YkPpiWgxTEeS4N7UyoYVKKis2Fcue0MBYGVCq3ApeC4AE3brt1" +
+                "9kK4EKU6/WWPI8R7IDxx16yGI0KCzbJH//iXvXzz/JJ8KK5aX/n7Yx7ZjN4EZMhaUCuBCw5MpUN+pqpF" +
+                "V41co8SUOgpOb8PQiV/DMXGDqxIryk0zUO9hFBw4aNvemjySMJV+9IenscTUsQaT9w3rLc4iOi4v3/vE" +
+                "6ebpJWysl7wPBgkNQMhV2Btb4SVlvbHh/EF0yGZvd26FR6nA8hScQs0hJiv72MuYJ/tLxLg3FrcGNsgR" +
+                "RCk8zdPZFR79ghAEKUjn8prmyPzVEGpnASiUWrZtJALnYACoZ9HpbHGCbBO0ZeuO8CPizxh/Amsn3FjT" +
+                "qkbPmli97ysQCMNO3bUpYLodEkjeGCiWGrNV1iGLXmPIbPYs6TLE9qWO4J+9d7lJqo56znzQiJ66cWWK" +
+                "/6XGShxUp8Moyd8Mw1Fmx7b5cTqgt2DAFngrVVBYx2A0TWIPLw0MBQzrbJyv40TN6LXbrVr+Cn1PMz0C" +
+                "uTKRdrG/gNCmScSYq9mnHIScmskc2gUxQdRHzUPMpdlLseL96bZIplHKG+Arhm2ZYpz4skrU4Hy/pGFJ" +
+                "N0tSdwjAW9cH+kAR8dbxx98ff0rHi6xsHIeLh5/PL76cFHOHLfyrpm3VfZN4iL1hsGGhaoGi49ZkW6X1" +
+                "EDcFNs47yYPTczqY/Hw+2N1NhYeoxxpPvw10nd79WuA6brJN2j3OYnO1whhLFDt5wrEwCtcolyg1fEyc" +
+                "yhJ0UOHAnnUBGC1/A6RgEURv7jqAYRsrW9+MxCYGaS7rar2kXQ1Wk1Uc5LR206I2OampTDF6IlA7OTMd" +
+                "ioNQywcYp6YZcx6DQbwAOYpusaZNSYPraRcLwo0evg+OtjLllfZYcG6ZBmWE+JXQVw69By3ec4WVZ33A" +
+                "lwmje5Ax7ae7Ybq7yX4AgIYMhpsHAAA=";
                 
     }
 }

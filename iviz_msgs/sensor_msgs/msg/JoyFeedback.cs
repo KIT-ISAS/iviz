@@ -1,4 +1,3 @@
-
 namespace Iviz.Msgs.sensor_msgs
 {
     public sealed class JoyFeedback : IMessage
@@ -19,13 +18,6 @@ namespace Iviz.Msgs.sensor_msgs
         public float intensity;
         
     
-        /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "sensor_msgs/JoyFeedback";
-    
-        public IMessage Create() => new JoyFeedback();
-    
-        public int GetLength() => 6;
-    
         public unsafe void Deserialize(ref byte* ptr, byte* end)
         {
             BuiltIns.Deserialize(out type, ref ptr, end);
@@ -40,16 +32,23 @@ namespace Iviz.Msgs.sensor_msgs
             BuiltIns.Serialize(intensity, ref ptr, end);
         }
     
+        public int GetLength() => 6;
+    
+        public IMessage Create() => new JoyFeedback();
+    
+        /// <summary> Full ROS name of this message. </summary>
+        public const string MessageType = "sensor_msgs/JoyFeedback";
+    
         /// <summary> MD5 hash of a compact representation of the message. </summary>
         public const string Md5Sum = "f4dcd73460360d98f36e55ee7f2e46f1";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         public const string DependenciesBase64 =
-                "H4sIAAAAAAAAClWPQWvDIBiG78L+wwu9hpB0FHZoLqU5FDoYpT2sl2H0k8iMFjVt8+9nsmZ0nvT59Hlf" +
-                "F9iSMNwTnEJsCXG4THtFJBsuvlmvbXzD8fOj/trXW6RVoXimh9P7Zl8nWj7Tzel8rg+JLtkDj2bGFji2" +
-                "OuCmjUHrjAS30BK27xryUM6DuGj/atB4mLvk6XV9593FUDaVVdqHCEMSN9cnV0PJVRW/w0DC2f+TuaGW" +
-                "Y5GdjWSDjsP89zkng/KuQ5EXiA5lnoTaCtMHfaUc2ClIumqRlCFpuIg9N2ZAoy33Qwbp0z2P0E7J0ROP" +
-                "KNbVfV3kK/CQ0lSW5KsRVeVEbM6UcTy+LlPSoxVjL+wHXvepM58BAAA=";
+                "H4sIAAAAAAAAE1WPQWvCMBiG7/kVL3gtpTqEHexF1oPgYIge5mWkyRcaFhNJUrX/fp+dHS6n5PmS530z" +
+                "wxspJyMhGOSOkIfzuDdEupXqW/TW51fsPz+ar23zBl41qme6O7yvtw3T+TNdH47HZsd0IR74bhZihn1n" +
+                "E67WOXTBaUgPq+H7U0sRJkSQVN1fjfEwdSn5dXOTp7OjYixrbEwZjjSuoWdXS+yqq99hIhX8/8nU0Op7" +
+                "kY3P5JPNw/T3KaeAieGEqqyQA+YlC61Xrk/2QiWwMdB0sYqViTVS5V46N6C1XsahgI58LyJ1Y3KOJDOq" +
+                "VX1bVeUSMnGaKVi+vKN6PhJfCuOCzC8LTnq0EkL8AOJe5DueAQAA";
                 
     }
 }

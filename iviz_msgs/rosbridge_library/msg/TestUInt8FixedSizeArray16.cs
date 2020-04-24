@@ -1,16 +1,8 @@
-
 namespace Iviz.Msgs.rosbridge_library
 {
     public sealed class TestUInt8FixedSizeArray16 : IMessage
     {
         public byte[/*16*/] data;
-    
-        /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "rosbridge_library/TestUInt8FixedSizeArray16";
-    
-        public IMessage Create() => new TestUInt8FixedSizeArray16();
-    
-        public int GetLength() => 16;
     
         /// <summary> Constructor for empty message. </summary>
         public TestUInt8FixedSizeArray16()
@@ -28,12 +20,19 @@ namespace Iviz.Msgs.rosbridge_library
             BuiltIns.Serialize(data, ref ptr, end, 16);
         }
     
+        public int GetLength() => 16;
+    
+        public IMessage Create() => new TestUInt8FixedSizeArray16();
+    
+        /// <summary> Full ROS name of this message. </summary>
+        public const string MessageType = "rosbridge_library/TestUInt8FixedSizeArray16";
+    
         /// <summary> MD5 hash of a compact representation of the message. </summary>
         public const string Md5Sum = "a4e84d0a73514dfe9696b4796e8755e7";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         public const string DependenciesBase64 =
-                "H4sIAAAAAAAACivNzCuxiDY0i1VISSxJ5OLlAgCiI8VsEQAAAA==";
+                "H4sIAAAAAAAAEyvNzCuxiDY0i1VISSxJ5OICANuquFIQAAAA";
                 
     }
 }

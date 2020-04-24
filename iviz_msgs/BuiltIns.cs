@@ -5,10 +5,6 @@ using System.Text;
 
 namespace Iviz.Msgs
 {
-    public interface IServiceCaller
-    {
-        void CallService<T>(string name, T service) where T : IService;
-    }
 
     public unsafe static class BuiltIns
     {
@@ -550,29 +546,28 @@ namespace Iviz.Msgs
             }
         }
 
-        public static uint Deserialize(IMessage generator, byte[] buffer, int size, out IMessage message)
+        #endregion
+
+
+        public static uint Deserialize(ISerializable message, byte[] buffer, int size)
         {
             fixed (byte* buffer_ptr = buffer)
             {
-                message = generator.Create();
                 byte* buffer_ptr_off = buffer_ptr;
                 message.Deserialize(ref buffer_ptr_off, buffer_ptr + size);
                 return (uint)(buffer_ptr_off - buffer_ptr);
             }
-
         }
-        public static uint Serialize(IMessage msg, byte[] buffer)
+
+        public static uint Serialize(ISerializable message, byte[] buffer)
         {
             fixed (byte* buffer_ptr = buffer)
             {
                 byte* buffer_ptr_off = buffer_ptr;
-                msg.Serialize(ref buffer_ptr_off, buffer_ptr + buffer.Length);
+                message.Serialize(ref buffer_ptr_off, buffer_ptr + buffer.Length);
                 return (uint)(buffer_ptr_off - buffer_ptr);
             }
-
         }
-
-        #endregion
 
         public static string GetClassStringConstant(Type type, string name)
         {

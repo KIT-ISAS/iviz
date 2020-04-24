@@ -1,4 +1,3 @@
-
 namespace Iviz.Msgs.sensor_msgs
 {
     public sealed class LaserEcho : IMessage
@@ -9,22 +8,10 @@ namespace Iviz.Msgs.sensor_msgs
         public float[] echoes; // Multiple values of ranges or intensities.
         // Each array represents data from the same angle increment.
     
-        /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "sensor_msgs/LaserEcho";
-    
-        public IMessage Create() => new LaserEcho();
-    
-        public int GetLength()
-        {
-            int size = 4;
-            size += 4 * echoes.Length;
-            return size;
-        }
-    
         /// <summary> Constructor for empty message. </summary>
         public LaserEcho()
         {
-            echoes = System.Array.Empty<0>();
+            echoes = System.Array.Empty<float>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)
@@ -37,15 +24,26 @@ namespace Iviz.Msgs.sensor_msgs
             BuiltIns.Serialize(echoes, ref ptr, end, 0);
         }
     
+        public int GetLength()
+        {
+            int size = 4;
+            size += 4 * echoes.Length;
+            return size;
+        }
+    
+        public IMessage Create() => new LaserEcho();
+    
+        /// <summary> Full ROS name of this message. </summary>
+        public const string MessageType = "sensor_msgs/LaserEcho";
+    
         /// <summary> MD5 hash of a compact representation of the message. </summary>
         public const string Md5Sum = "8bc5ae449b200fba4d552b4225586696";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         public const string DependenciesBase64 =
-                "H4sIAAAAAAAACmWOsQ7CMBBD90j8g6XuHeAb2GCCDTEcjdtGSpPq7orE3xOEmPBkn6zn63Cdk2GhmUxE" +
-                "swLbHr9cR5y37Ok4zPUkRr0MUiAlfpqlOlJxlsgYOnjFg9iMEcZVVJz51Ycw5ip+2N/uYKPQgO4LXTPx" +
-                "lLy1U9tRKdPH6ZdpyROtD/hTh6MMM0RVXlCuSmNxQxQXjFoX+EyYLGyPTm0jlUG5tE6/C28kkSwo8AAA" +
-                "AA==";
+                "H4sIAAAAAAAAE2WOsQ7CMBBD93yFpe4d4BvYYIINMRyN20ZKk+ruitS/Jwgx4ck+Wc/X4TYnw0IzmYhm" +
+                "BbY9f7mOuGzZ02mY61mMeh2kQEr8NEt1pOIskTF08IonsRkjjKuoOPPehzDmKn483B9go9CA7gtdM/GS" +
+                "vLVT21Ep08fpl2nJE60P+FOHkwwzRFV2KFelsbghigtGrQt8JkwWtkentpHKoFxapw9vt18nv+8AAAA=";
                 
     }
 }

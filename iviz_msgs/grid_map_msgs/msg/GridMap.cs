@@ -1,4 +1,3 @@
-
 namespace Iviz.Msgs.grid_map_msgs
 {
     public sealed class GridMap : IMessage
@@ -23,36 +22,12 @@ namespace Iviz.Msgs.grid_map_msgs
         // Column start index (default 0).
         public ushort inner_start_index;
     
-        /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "grid_map_msgs/GridMap";
-    
-        public IMessage Create() => new GridMap();
-    
-        public int GetLength()
-        {
-            int size = 24;
-            size += info.GetLength();
-            for (int i = 0; i < layers.Length; i++)
-            {
-                size += layers[i].Length;
-            }
-            for (int i = 0; i < basic_layers.Length; i++)
-            {
-                size += basic_layers[i].Length;
-            }
-            for (int i = 0; i < data.Length; i++)
-            {
-                size += data[i].GetLength();
-            }
-            return size;
-        }
-    
         /// <summary> Constructor for empty message. </summary>
         public GridMap()
         {
             info = new GridMapInfo();
-            layers = System.Array.Empty<0>();
-            basic_layers = System.Array.Empty<0>();
+            layers = System.Array.Empty<string>();
+            basic_layers = System.Array.Empty<string>();
             data = System.Array.Empty<std_msgs.Float32MultiArray>();
         }
         
@@ -76,34 +51,58 @@ namespace Iviz.Msgs.grid_map_msgs
             BuiltIns.Serialize(inner_start_index, ref ptr, end);
         }
     
+        public int GetLength()
+        {
+            int size = 24;
+            size += info.GetLength();
+            for (int i = 0; i < layers.Length; i++)
+            {
+                size += layers[i].Length;
+            }
+            for (int i = 0; i < basic_layers.Length; i++)
+            {
+                size += basic_layers[i].Length;
+            }
+            for (int i = 0; i < data.Length; i++)
+            {
+                size += data[i].GetLength();
+            }
+            return size;
+        }
+    
+        public IMessage Create() => new GridMap();
+    
+        /// <summary> Full ROS name of this message. </summary>
+        public const string MessageType = "grid_map_msgs/GridMap";
+    
         /// <summary> MD5 hash of a compact representation of the message. </summary>
         public const string Md5Sum = "95681e052b1f73bf87b7eb984382b401";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         public const string DependenciesBase64 =
-                "H4sIAAAAAAAACr1XbU8bORD+vhL/YUQ+lHCQQqjQFYkP6Kr2KrUSd610OiEUzO4kMezaW9shpL++z9j7" +
-                "lnKn3ocrESK79sz4mWdePBnRO6cLqlRNS1YFu0zeP6r6vZlb0viXZaNeplQbdmRUxX6S+eC0WVxdp1W/" +
-                "JXirvM6H4rRn66CtUeV4Qp+XPJTw0Cw4sKu0YVovdb5sNmjubEU36eWGDHNBwdIt04MqdQE9bcg64Ka5" +
-                "daQo57IkO6eAExYtmIHGAHUEMPsH7IUKSuSKWeUX/uXb0qpwMv24KoO+cE5toCsiovOnXZMPygXgKPiR" +
-                "9gqeKwjS0XiSrbQJx6dkV/BsFqVmUUoUf7PlqjI/1NXGfKe7k53/z5+d7OOnd2eRrRncT04PsmAHcH+P" +
-                "uUF7QVdMyhSIC4I6zpr1JnWEEPbwTAK9FYWr6qVE5nqSzYXN01fkOkFR+8BmEZYSzMfDQjvOo4WraqBQ" +
-                "RpHZ47b45gfiGxG/tJ6fJEXOBnERG7Ic/UESzpGBhSzeJJ9uktUF24qD2yRyor0a/35aMLrkSwRLCD4F" +
-                "8K4cwHNQkn8x45d6sWR3WPIDl5JNVQ34cTdsainSEYpNe8LfgpFLqiw3tPKpjHJbVSujcxWYJLJb+qm2" +
-                "FNXIPZ2vSuUgj1LTRsQjX2Idf56/rNjkTO/fnEHGeM4RWADawELuGHVmFtikmNUnU1HIRp/X9hCvvEAQ" +
-                "usMRC4V68MSPNTJEcCp/hjP2k3MT2AY7jFMKtJS4NsOrHxMOAQSuLZrHHpBfbsLSpuA+KKfVbcliOAcD" +
-                "sPpClF6MB5YF9hl6lbGt+WSxP+O/mDWdXfHpcImYleK9Xy1AIARrZx90AdHbTTSSlxqJSKW+dcptslhg" +
-                "8chs9DbmZJDwxYjgW3lvc40AFLTWYdk0sxSNGfrhz+sOTwpAcvICZSxxggeqrXmpC8mcuWN4UqucDyTR" +
-                "ZLlo9nWUlTZinW51J5RdWiREJ5D9sYKjzkS7vdzz+QgwO239ICOC0sbHmHUuwB0USES95XHXhR67p033" +
-                "9PW5POj569zowoVU2mJ1G7+8fenZR6OpJtkPnGqf1j/PvX+/ksXByxKdhqm09p7QRCRQvcAHtcE9jN7p" +
-                "vVo0jT7FEM7J+GHzVdWnMbITc0Ql6krU0UizJ8ZkRonf6YNGWHOu59JPm+SIZZukEj8nUwwP7Sfudp8R" +
-                "xZNatewZaPzeo5QmPPAbROXo/BjfVLo/MLLFXVy7oMvHga4HrmBgcF9099CE6E0rD1OO08yGhhDnuzgh" +
-                "UWV9kL4pY6dp3rdo70zIAKYrMHbRMdZuSX+tGQjYt7eNoJjZ+dzzIFS1KnCTLYhLlrADVBAsKOSOf5jP" +
-                "c+SLxRjql3ZVFnTx4a+Lvz/JMLl2OgSOZSNzq98GIW25YFiQHtdkhXQ/8fNQ/BrIzrUTP+NN2hO/pw/u" +
-                "Du7HdB7BXA19+EWUZ+mIq+Prfb29Mr3ev8PK/XU2ih3aN3PDAZ0c5riPDAaF01dHj69+PSJdSTHITQJH" +
-                "gA0V9ACcuS0xWjTCMpyvo/dwu/clXstSOLq6OrqelOoWdgF3d8kYScJuv+X1Vwbn54QTB6sRLVZP9oFm" +
-                "X9Cc0+vp8enREdGesZgxkmRDptx+dyswF82B7YhdLloROx4iWOsiLHf7nQ4ADhqsbgHA9/Hrabs9HZpr" +
-                "eNjt9zqDJ4O1zlyk5WkkHc/lBw3SWzqTUO7s+oDu8JDHHwMHMVvu5T2dOHnWFvCmzciddqpoKEC1pCeQ" +
-                "vsBYZ/rk7Qa6RIi0wCY63wnG0Uk6AWHeDH7cKSbWRDE9PVXdyb4Bl8WmIqQOAAA=";
+                "H4sIAAAAAAAAE71X224bNxB9368Y2A+xXFux5cBoAuTBaJA0QAykTYCiMAyZ2h1pae+SG5KyrHx9z5B7" +
+                "U5wifagjCNYuOTM8c+bC8T69c7qgWjVUsirYZfJ+qZr3ZmlJ40+W7Q8yldqyI6Nq9tPMB6fN6uo6rfod" +
+                "wYXyOh+L04FtgrZGVZMpfS55LOGhWXBgV2vDtCl1XrYbtHS2ppv0ckOGuaBgacF0rypdQE8bsg64aWkd" +
+                "Kcq5qsguKeCEVQdmpDFCHQHMv4O9UEGJXDGv/co/f1tZFc5ml+sq6Avn1Ba6IiI6f9oN+aBcAI6CH+ig" +
+                "4KWCIJ1Mptlam3B6TnYNz+ZRah6lRPE3W61r80Ndbcy3uq//5092+endq8jVHM4nl0c5AKy/x8Sgg6Br" +
+                "JmUKBAURnWTteps3wgZ7uCVR3gnBVf1cwnI9zZZC5fkLcr2gqH1gswqlRPLhuNCO82jhqh4pVFFk/rAr" +
+                "vv2B+FbEP1rPjzIiZ4OgiA1Zjv4gA5dIv0IWb5JPN8nqim3NwW0TN9Fegz9PFIk+7xK98OBTAOnKATkH" +
+                "JZkXc73Uq5LdccX3XEke1Q2wx92wbaQ891Fm2hO+K0YWqara0tqnAsptXa+NzlVgkrDu6KeqUtQg63S+" +
+                "rpSDPIpMGxGPZIl1fD1/WbPJmd6/eQUZ4zlHVAFoCwu5Y1SYWWGTYj6fzUQh2/+8scd45RUi0B+OQKgg" +
+                "YPmhQXoITuVf4YzD5NwUtkEO45QCzSSuzfHqJ4RDAIEbi7ZxAOQft6G0KbL3ymm1qFgM52AAVp+J0rPJ" +
+                "yLKJpo0ytjOfLA5n/BezprcrPh2XiFkl3vv1CgRCsHH2XhcQXWyjkbzSyEKq9MIpt81idcUjs/23MSGD" +
+                "hC9GBL/Ke5trBKCgjQ5l28ZSNObohE/VFx7lPhy8QAFLkABfddUuFSFps3QMNxqV85FkmSwX7b6OstJA" +
+                "rNOd7pSyjxbZ0Atkf6zhpTPR7iD3sxwElK5ykAtBaeNjtHr88AWlESHvuNs3n4f+ads/ff058AfqOh/6" +
+                "QCGDdvjcBS9vXwbe0V/qafYDj7qnzVP59u83sLT1Ct2FqbL2jtA4JETD/ge1xa2Lfum9WrWdPUUPnsmw" +
+                "YfN1PWQvkhJTQy3qStTRPLNHxmQiib/pg+bXcK6X0kPbtIilmqQSOWczjArdJ+7SoB5P6tSyJ+fwW39i" +
+                "gvDIabCUo9VjUlPpwsB0FndxyYIrH2e3AbWCgdEF0V88U6I3nTxMOU7jGRdplIvDENXWC4Bg04AT33c4" +
+                "703IrKVr0HXR09VtSUNtGAjYd9eLoJjb5dLzKE6NKgpplVxxnQohCBbUb08+zOc5ksVi4vSlXVcFXXz4" +
+                "6+LvTzI3bpwOgWPByIjqd0FIHy6kKUpfa1NCOp74eSx+jWSX2omf8eociD/QR7dHdxN6HcFcjX34RZTn" +
+                "6Yir0+tDvbsyuz68xcrddbYfu7JvB4UjOjvOcQEZTAbnL04eXvx6QrqWSpCrg+TudSife+DMbYVZohWW" +
+                "OXwTvV/wyJd4D0vV6Prq5HpaqQXsAu5eyZhBwt6w5fVXJtnCiaPViBarZ4dAcyhoXtPL2en5yQnRgbEY" +
+                "KpJkS6Zcd7drMBfNge2IfdIaPB0j2OgilHvDTg8AB41WdwDg9/TlrNuejc21POwNe73Bs9Faby7S8jiS" +
+                "jpfyvwvSW9qSUO7s5ohu8ZDHuf8oZsudvKcTpz+x/vva6maI1n+USnoC4ysMcWbI3H58S2xI82tD841g" +
+                "HJSkDRCmy+AnvWKiTBTT03fO+AfkvJGMiw4AAA==";
                 
     }
 }

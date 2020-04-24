@@ -6,8 +6,6 @@ namespace Iviz.Msgs.rosbridge_library
         {
             public int data;
         
-            public int GetLength() => 4;
-        
             public unsafe void Deserialize(ref byte* ptr, byte* end)
             {
                 BuiltIns.Deserialize(out data, ref ptr, end);
@@ -18,20 +16,13 @@ namespace Iviz.Msgs.rosbridge_library
                 BuiltIns.Serialize(data, ref ptr, end);
             }
         
-            public Response Call(IServiceCaller caller)
-            {
-                TestRequestAndResponse s = new TestRequestAndResponse(this);
-                caller.Call(s);
-                return s.response;
-            }
+            public int GetLength() => 4;
         }
 
         public sealed class Response : IResponse
         {
             public int data;
         
-            public int GetLength() => 4;
-        
             public unsafe void Deserialize(ref byte* ptr, byte* end)
             {
                 BuiltIns.Deserialize(out data, ref ptr, end);
@@ -41,6 +32,8 @@ namespace Iviz.Msgs.rosbridge_library
             {
                 BuiltIns.Serialize(data, ref ptr, end);
             }
+        
+            public int GetLength() => 4;
         }
         
         /// <summary> Full ROS name of this service. </summary>
@@ -48,11 +41,6 @@ namespace Iviz.Msgs.rosbridge_library
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
         public const string Md5Sum = "491d316f183df11876531749005b31d1";
-        
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
-            "H4sIAAAAAAAACsvMKzE2UkhJLEnk5dLV1eXlykQSAADITUgBHQAAAA==";
-            
         
         /// <summary> Request message. </summary>
         public readonly Request request;
@@ -64,22 +52,23 @@ namespace Iviz.Msgs.rosbridge_library
         public TestRequestAndResponse()
         {
             request = new Request();
+            response = new Response();
         }
         
         /// <summary> Setter constructor. </summary>
         public TestRequestAndResponse(Request request)
         {
             this.request = request;
+            response = new Response();
         }
         
-        public IResponse CreateResponse() => new Response();
+        public IService Create() => new TestRequestAndResponse();
         
-        public IRequest GetRequest() => request;
+        IRequest IService.Request => request;
         
-        public void SetResponse(IResponse response)
-        {
-            this.response = (Response)response;
-        }
+        IResponse IService.Response => response;
+        
+        public string ErrorMessage { get; set; }
     }
 
 }

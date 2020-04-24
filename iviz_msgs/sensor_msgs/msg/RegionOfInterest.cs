@@ -1,4 +1,3 @@
-
 namespace Iviz.Msgs.sensor_msgs
 {
     public sealed class RegionOfInterest : IMessage
@@ -23,13 +22,6 @@ namespace Iviz.Msgs.sensor_msgs
         // used).
         public bool do_rectify;
     
-        /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "sensor_msgs/RegionOfInterest";
-    
-        public IMessage Create() => new RegionOfInterest();
-    
-        public int GetLength() => 17;
-    
         public unsafe void Deserialize(ref byte* ptr, byte* end)
         {
             BuiltIns.Deserialize(out x_offset, ref ptr, end);
@@ -48,19 +40,26 @@ namespace Iviz.Msgs.sensor_msgs
             BuiltIns.Serialize(do_rectify, ref ptr, end);
         }
     
+        public int GetLength() => 17;
+    
+        public IMessage Create() => new RegionOfInterest();
+    
+        /// <summary> Full ROS name of this message. </summary>
+        public const string MessageType = "sensor_msgs/RegionOfInterest";
+    
         /// <summary> MD5 hash of a compact representation of the message. </summary>
         public const string Md5Sum = "bdb633039d588fcccb441a4d43ccfe09";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         public const string DependenciesBase64 =
-                "H4sIAAAAAAAACq1STWsbMRC9L+Q/PLKXBIIJzbHkWhoIFIohxyBLI0tUKy3SiI3/fUfajd0m0FN9krXz" +
-                "PvTmjdg7XzBRKepIkGMtZMAJZSbt7QkKmY4+RSQLH5kyFcbi2fkIFeEnwe2GcRjx4ih+grMj/PzxhELM" +
-                "Ph4bS7vSaqKssDRI+99psKgiPKx+Ubzr14780bHoGJE07GA9BVNQXKrBgMQGZUyKtfswLzx/IWzKfUKV" +
-                "krRXLC675lfIhw32uEEecS9wH43XMlgEp7iDbQ1B4igpVG6RnF3Le2aumcxuGKqk9PAFb6/JWnk1MOKZ" +
-                "LE9Jcpv9G4X3DCSWAR9/I27u4c8D4kKHaroJQhAekBHNjaIbuH2XPP0huU/z/1DkNP9DcMutk3xfzzLX" +
-                "VLaBNc914KWft++S7z5X4bNSMOOLdEOzRKvZy8LMWpl1yYfWlqBr6EuzOU3dyXVWy7XQrJbl6lLjHfan" +
-                "WXYXQuuf3F+YvqlQuup5nf1Fbd2XJeKmkcbEvc23d71/F7ulHhYpR1o+YYSmI3bDIaUAk17XF52Gq+E3" +
-                "lrDiWGoDAAA=";
+                "H4sIAAAAAAAAE61STWvcMBC9+1c84ksCYQntseRaWigUykKOQSuNViKyZKQRjv99R7I32ybQU32SpXkf" +
+                "82ZGHJ0vmKgUdSbIsRYy4IQyk/Z2hUKms08RycJHpkyFsXh2PkJF+Elwh2EcRjw5ih/g7Ai/fn5HIWYf" +
+                "z42lXWk1UVZYGqT9dxosqggPqxeK9/3akT87Fh0jkoYdrKdgCopLNRiQ2KCMSbF27+qF5y+ETblXqFKS" +
+                "9orFZdf8AnnYYY875BEPAvfReC2FRXCKO9jWECSOkkLlFsmba+ln5prJHIahSkqfP+H1OVkrXQMjfpDl" +
+                "KUlus3+lcMlAYhnw/htx+wD/ViAudKimmyAE4QEZ0dwpuoG7i+T6h+Qxzf9DkdP8D8E9t07ybTtLXVPZ" +
+                "C7Y8t4Knft7fJd9jrtR0FYwvshuaJVrNXgZmtpXZhnxq2xJ0DX1oNqepO7nJarkRms2yXF3X+IDjOsvs" +
+                "Qli3+yvTVxUKXbrt4+wdtXFfh4jbRhoT922+u+/7d7Vb6mmR5UjLB4zQdMRhOKUUYNLz1tE6DL8BsmLy" +
+                "G2kDAAA=";
                 
     }
 }

@@ -287,7 +287,7 @@ namespace Iviz.RoslibSharp
                 }
                 using (tcpClient = task.Result)
                 {
-                    IPEndPoint remoteEndPoint = ((IPEndPoint)tcpClient.Client.RemoteEndPoint);
+                    IPEndPoint remoteEndPoint = (IPEndPoint)tcpClient.Client.RemoteEndPoint;
                     RemoteHostname = remoteEndPoint.Address.ToString();
                     RemotePort = remoteEndPoint.Port;
 

@@ -1,4 +1,3 @@
-
 namespace Iviz.Msgs.std_msgs
 {
     public sealed class Header : IMessage
@@ -16,18 +15,6 @@ namespace Iviz.Msgs.std_msgs
         public time stamp;
         //Frame this data is associated with
         public string frame_id;
-    
-        /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "std_msgs/Header";
-    
-        public IMessage Create() => new Header();
-    
-        public int GetLength()
-        {
-            int size = 16;
-            size += frame_id.Length;
-            return size;
-        }
     
         /// <summary> Constructor for empty message. </summary>
         public Header()
@@ -49,17 +36,29 @@ namespace Iviz.Msgs.std_msgs
             BuiltIns.Serialize(frame_id, ref ptr, end);
         }
     
+        public int GetLength()
+        {
+            int size = 16;
+            size += frame_id.Length;
+            return size;
+        }
+    
+        public IMessage Create() => new Header();
+    
+        /// <summary> Full ROS name of this message. </summary>
+        public const string MessageType = "std_msgs/Header";
+    
         /// <summary> MD5 hash of a compact representation of the message. </summary>
         public const string Md5Sum = "2176decaecbce78abc3b96ef049fabed";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         public const string DependenciesBase64 =
-                "H4sIAAAAAAAACo2RT2vDMAzF74F9B0EObQftYbvlPAa7DdZ7UW01Fjh2Jivt8u0nJ4xut4EhOH7v9/Sn" +
-                "hQ/F5FE8DKToUREuWSBwH0j2ka4UoSgOI3lYXnUeqRyaFo6BC9jpKZFgjDNMxUSaweVhmBI7VALlgf74" +
-                "zckJEEYUZTdFFNNn8Zyq/CI4UKXbKfQ5UXIEby+daVIhNylbQbMRnBAWTr09QjNx0uenamja4y3v7Uo9" +
-                "yT0cNKDWYulrFCq1TiydZTyuzR2M3ZnfUnyB7fLvZNeyAwtxBDRmF2Brlb/PGnIyIMEVhfEcqYKdTcCo" +
-                "m2ra7H6Ra9kdJEz5B78S7xn/wVbKyq097YPtLNbuy9TbAE04Sr6yN+l5XiAuMiWFyGdBmZvqWiOb9rXO" +
-                "2ETmWjZiXywlO7YFeLixhqaoVPqyjRP75qH5BhP+q5MpAgAA";
+                "H4sIAAAAAAAAE42RT2vDMAzF7/4UghzaDtrDdut5DHYbrPei2moscOxMVtrl209O2brdBobg+L3f058O" +
+                "3hVzQAkwkGJARTgXgch9JNkmulCCqjiMFGB51XmkunMdHCJXsNNTJsGUZpiqibSAL8MwZfaoBMoD/fGb" +
+                "kzMgjCjKfkoopi8SODf5WXCgRrdT6WOi7Alen/emyZX8pGwFzUbwQlg59/YIbuKsT4/N4LrDtWztSj3J" +
+                "PRw0orZi6XMUqq1OrHvLeLg1tzP23vyWEiqsl39Hu9YNWIiVQGPxEdZW+dussWQDElxQGE+JGtjbBIy6" +
+                "aqbV5hc5L+iMuXzjb8R7xn+w+YfbetpG21lq3deptwGacJRy4WDS07xAfGLKColPgjK75rpFuu6lzdhE" +
+                "5lo2Yl+stXi2BQS4skZXVRp92caRg3NfAmsPMygCAAA=";
                 
     }
 }

@@ -9,13 +9,6 @@ namespace Iviz.Msgs.rosbridge_library
             public string @string;
             public bool @bool;
         
-            public int GetLength()
-            {
-                int size = 13;
-                size += @string.Length;
-                return size;
-            }
-        
             /// <summary> Constructor for empty message. </summary>
             public Request()
             {
@@ -38,18 +31,16 @@ namespace Iviz.Msgs.rosbridge_library
                 BuiltIns.Serialize(@bool, ref ptr, end);
             }
         
-            public Response Call(IServiceCaller caller)
+            public int GetLength()
             {
-                TestMultipleRequestFields s = new TestMultipleRequestFields(this);
-                caller.Call(s);
-                return s.response;
+                int size = 13;
+                size += @string.Length;
+                return size;
             }
         }
 
         public sealed class Response : IResponse
         {
-        
-            public int GetLength() => 0;
         
             public unsafe void Deserialize(ref byte* ptr, byte* end)
             {
@@ -58,6 +49,8 @@ namespace Iviz.Msgs.rosbridge_library
             public unsafe void Serialize(ref byte* ptr, byte* end)
             {
             }
+        
+            public int GetLength() => 0;
         }
         
         /// <summary> Full ROS name of this service. </summary>
@@ -65,12 +58,6 @@ namespace Iviz.Msgs.rosbridge_library
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
         public const string Md5Sum = "6cce9fb727dd0f31d504d7d198a1f4ef";
-        
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
-            "H4sIAAAAAAAACsvMKzE2UsjMK+HlSsvJTwRxwDQvV3FJUWZeugKE4uVKys/PUQARvFy6urq8XACZOOXH" +
-            "OQAAAA==";
-            
         
         /// <summary> Request message. </summary>
         public readonly Request request;
@@ -82,22 +69,23 @@ namespace Iviz.Msgs.rosbridge_library
         public TestMultipleRequestFields()
         {
             request = new Request();
+            response = new Response();
         }
         
         /// <summary> Setter constructor. </summary>
         public TestMultipleRequestFields(Request request)
         {
             this.request = request;
+            response = new Response();
         }
         
-        public IResponse CreateResponse() => new Response();
+        public IService Create() => new TestMultipleRequestFields();
         
-        public IRequest GetRequest() => request;
+        IRequest IService.Request => request;
         
-        public void SetResponse(IResponse response)
-        {
-            this.response = (Response)response;
-        }
+        IResponse IService.Response => response;
+        
+        public string ErrorMessage { get; set; }
     }
 
 }

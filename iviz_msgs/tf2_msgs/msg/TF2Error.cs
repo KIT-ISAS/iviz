@@ -1,4 +1,3 @@
-
 namespace Iviz.Msgs.tf2_msgs
 {
     public sealed class TF2Error : IMessage
@@ -13,18 +12,6 @@ namespace Iviz.Msgs.tf2_msgs
         
         public byte error;
         public string error_string;
-    
-        /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "tf2_msgs/TF2Error";
-    
-        public IMessage Create() => new TF2Error();
-    
-        public int GetLength()
-        {
-            int size = 5;
-            size += error_string.Length;
-            return size;
-        }
     
         /// <summary> Constructor for empty message. </summary>
         public TF2Error()
@@ -44,14 +31,26 @@ namespace Iviz.Msgs.tf2_msgs
             BuiltIns.Serialize(error_string, ref ptr, end);
         }
     
+        public int GetLength()
+        {
+            int size = 5;
+            size += error_string.Length;
+            return size;
+        }
+    
+        public IMessage Create() => new TF2Error();
+    
+        /// <summary> Full ROS name of this message. </summary>
+        public const string MessageType = "tf2_msgs/TF2Error";
+    
         /// <summary> MD5 hash of a compact representation of the message. </summary>
         public const string Md5Sum = "bc6848fd6fd750c92e38575618a4917d";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         public const string DependenciesBase64 =
-                "H4sIAAAAAAAACkXKywrCMBCF4X3Ad8gjeMeNi1BjGUxmyjgpdpWVSDctxPb9BRvj8vzfmfthOmmkaJmJ" +
-                "9Vmv1fxNjugWmpI3OVeEaCuBFqQruM1oH8KmIWcECIvusgK2xsElGq6DtyjlsM8HAW8p/Pvh19ng/Urs" +
-                "ixxVpmdKY1LvKfXDaxlxGWqlPpexWmnbAAAA";
+                "H4sIAAAAAAAAE0XKuw7CMAyF4T1PkUfgLhaGqARkkdiVcSqYMiHUpUihfX8kasJ4/u9M/TDuLVL2zMT2" +
+                "YBdm+qZAdEltzUvNDSH6RqADuVdcKfqbsGspOAHCqmtVwM4FOGbH5xQ9Sj1s9CAQPaV/3/46O7yeiGOV" +
+                "nVF6lPIq5j2WfnjOI8/DmA8cjH3N2gAAAA==";
                 
     }
 }

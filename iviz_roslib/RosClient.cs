@@ -1,20 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using Iviz.Msgs;
 
 namespace Iviz.RoslibSharp
 {
-    public class RosClient : IServiceCaller
+    public partial class RosClient
     {
         public readonly string CallerId;
-        internal readonly RpcMaster Master;
+        public readonly RpcMaster Master;
+
         internal readonly RpcNodeClient Talker;
         internal readonly RpcNodeServer Listener;
 
         readonly Dictionary<string, RosSubscriber> subscribersByTopic = new Dictionary<string, RosSubscriber>();
         readonly Dictionary<string, RosPublisher> publishersByTopic = new Dictionary<string, RosPublisher>();
+
+        readonly Dictionary<string, ServiceReceiver> subscribedServicesByName = new Dictionary<string, ServiceReceiver>();
+        readonly Dictionary<string, ServiceSenderManager> advertisedServicesByName = new Dictionary<string, ServiceSenderManager>();
+
 
         public delegate void ShutdownActionCall(
             string callerId, string reason,
@@ -52,9 +58,14 @@ namespace Iviz.RoslibSharp
         /// <param name="callerUri">URI of this node. Leave empty to generate one automatically</param>
         public RosClient(Uri masterUri, string callerId = null, Uri callerUri = null)
         {
-            if (callerUri.Scheme != "http" || masterUri.Scheme != "http")
+            if (callerUri.Scheme != "http")
             {
-                throw new ArgumentException("URI scheme must be http for the master and the caller");
+                throw new ArgumentException("URI scheme must be http", nameof(callerUri));
+            }
+
+            if (masterUri.Scheme != "http")
+            {
+                throw new ArgumentException("URI scheme must be http", nameof(masterUri));
             }
 
             if (callerUri == null)
@@ -72,8 +83,6 @@ namespace Iviz.RoslibSharp
             CallerId = callerId ?? "/RosClient";
             CallerUri = callerUri;
 
-
-
             Listener = new RpcNodeServer(this);
             Listener.Start();
 
@@ -90,7 +99,7 @@ namespace Iviz.RoslibSharp
             }
             catch (WebException e)
             {
-                throw new ArgumentException($"RosClient: Failed to contact the master URI '{masterUri.ToString()}'", e);
+                throw new ArgumentException($"RosClient: Failed to contact the master URI '{masterUri}'", nameof(masterUri), e);
             }
         }
 
@@ -141,7 +150,7 @@ namespace Iviz.RoslibSharp
         /// </summary>
         /// <typeparam name="T">Message type.</typeparam>
         /// <param name="callback">Function to be called when a message arrives.</param>
-        /// <returns>A token that can be used to unadvertise from this publisher.</returns>
+        /// <returns>A token that can be used to unsubscribe from this topic.</returns>
         public string Subscribe<T>(string topic, Action<T> callback, bool requestNoDelay = false)
             where T : IMessage, new()
         {
@@ -156,7 +165,7 @@ namespace Iviz.RoslibSharp
         /// <param name="subscriber">
         /// The shared subscriber for this topic, used by all subscribers from this client.
         /// </param>
-        /// <returns>A token that can be used to unadvertise from this publisher.</returns>
+        /// <returns>A token that can be used to unsubscribe from this topic.</returns>
         public string Subscribe<T>(string topic, Action<T> callback, out RosSubscriber subscriber, bool requestNoDelay = false)
             where T : IMessage, new()
         {
@@ -513,11 +522,82 @@ namespace Iviz.RoslibSharp
             return busInfos;
         }
 
-        public void CallService<T>(string name, T service) where T : IService
+        public bool CallService<T>(string serviceName, T service, bool persistent = false) where T : IService
         {
-            string serviceType = BuiltIns.GetServiceType(typeof(T));
-            string serviceUrl = Master.LookupService()
-            throw new NotImplementedException();
+            ServiceReceiver serviceReceiver = null;
+            lock (subscribedServicesByName)
+            {
+                if (subscribedServicesByName.TryGetValue(serviceName, out serviceReceiver))
+                {
+                    if (!serviceReceiver.IsAlive)
+                    {
+                        serviceReceiver.Stop();
+                        subscribedServicesByName.Remove(serviceName);
+                        serviceReceiver = null;
+                    }
+                }
+            }
+
+            if (serviceReceiver != null)
+            {
+                return serviceReceiver.Execute(service);
+            }
+
+            Uri serviceUri = new Uri(Master.LookupService(serviceName).serviceUrl);
+            ServiceInfo serviceInfo = new ServiceInfo(CallerId, serviceName, typeof(T), null);
+            serviceReceiver = new ServiceReceiver(serviceInfo, serviceUri, true, persistent);
+            serviceReceiver.Start();
+            bool result = serviceReceiver.Execute(service);
+
+            if (persistent && serviceReceiver.IsAlive)
+            {
+                lock (subscribedServicesByName)
+                {
+                    subscribedServicesByName.Add(serviceName, serviceReceiver);
+                }
+            }
+
+            return result;
+        }
+
+        public void AdvertiseService<T>(string serviceName, Action<T> callback) where T : IService, new()
+        {
+            ServiceSenderManager advertisedService;
+
+            lock (advertisedServicesByName)
+            {
+                if (advertisedServicesByName.ContainsKey(serviceName))
+                {
+                    throw new ArgumentException("Service already exists", nameof(serviceName));
+                }
+
+                void wrapper(IService x) { callback((T)x); }
+
+                ServiceInfo serviceInfo = new ServiceInfo(CallerId, serviceName, typeof(T), new T());
+                advertisedService = new ServiceSenderManager(serviceInfo, CallerUri.Host, wrapper);
+
+                advertisedServicesByName.Add(serviceName, advertisedService);
+            }
+
+            // local lambda wrapper for casting
+            Master.RegisterService(serviceName, advertisedService.Uri.ToString());
+        }
+
+        public void UnadvertiseService(string name)
+        {
+            ServiceSenderManager advertisedService;
+
+            lock (advertisedServicesByName)
+            {
+                if (!advertisedServicesByName.TryGetValue(name, out advertisedService))
+                {
+                    throw new ArgumentException("Service does not exist", nameof(name));
+                }
+                advertisedServicesByName.Remove(name);
+            }
+            advertisedService.Stop();
+
+            Master.UnregisterService(name, advertisedService.Uri.ToString());
         }
     }
 }

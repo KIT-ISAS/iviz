@@ -11,14 +11,6 @@ namespace Iviz.Msgs.grid_map_msgs
             public string topic_name;
             
         
-            public int GetLength()
-            {
-                int size = 8;
-                size += file_path.Length;
-                size += topic_name.Length;
-                return size;
-            }
-        
             /// <summary> Constructor for empty message. </summary>
             public Request()
             {
@@ -38,11 +30,12 @@ namespace Iviz.Msgs.grid_map_msgs
                 BuiltIns.Serialize(topic_name, ref ptr, end);
             }
         
-            public Response Call(IServiceCaller caller)
+            public int GetLength()
             {
-                ProcessFile s = new ProcessFile(this);
-                caller.Call(s);
-                return s.response;
+                int size = 8;
+                size += file_path.Length;
+                size += topic_name.Length;
+                return size;
             }
         }
 
@@ -51,8 +44,6 @@ namespace Iviz.Msgs.grid_map_msgs
             
             // True if file processing was successful.
             public bool success;
-        
-            public int GetLength() => 1;
         
             public unsafe void Deserialize(ref byte* ptr, byte* end)
             {
@@ -63,6 +54,8 @@ namespace Iviz.Msgs.grid_map_msgs
             {
                 BuiltIns.Serialize(success, ref ptr, end);
             }
+        
+            public int GetLength() => 1;
         }
         
         /// <summary> Full ROS name of this service. </summary>
@@ -70,13 +63,6 @@ namespace Iviz.Msgs.grid_map_msgs
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
         public const string Md5Sum = "03f389710f49a6dd2a8b447bb2850cd6";
-        
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
-            "H4sIAAAAAAAACj2NOw7CMBAF+5W4w5PSQJEcgI6GFgnoI9uxY0smG3nX4vrg8Cl39Ga2w8kK56oeIWWP" +
-            "1WgcSLSkZd7I2AhRhzMXXC83WDPLEcprcljMw0OjUUjkmifYd6Gw8yJ+wp5XTbyYfPgXN21sGlHf9617" +
-            "L9Ujhe/7j9ymTyOQ6toZah7IMucfoB29AHvJfdW5AAAA";
-            
         
         /// <summary> Request message. </summary>
         public readonly Request request;
@@ -88,22 +74,23 @@ namespace Iviz.Msgs.grid_map_msgs
         public ProcessFile()
         {
             request = new Request();
+            response = new Response();
         }
         
         /// <summary> Setter constructor. </summary>
         public ProcessFile(Request request)
         {
             this.request = request;
+            response = new Response();
         }
         
-        public IResponse CreateResponse() => new Response();
+        public IService Create() => new ProcessFile();
         
-        public IRequest GetRequest() => request;
+        IRequest IService.Request => request;
         
-        public void SetResponse(IResponse response)
-        {
-            this.response = (Response)response;
-        }
+        IResponse IService.Response => response;
+        
+        public string ErrorMessage { get; set; }
     }
 
 }

@@ -1,4 +1,3 @@
-
 namespace Iviz.Msgs.geometry_msgs
 {
     public sealed class PoseWithCovariance : IMessage
@@ -12,13 +11,6 @@ namespace Iviz.Msgs.geometry_msgs
         // In order, the parameters are:
         // (x, y, z, rotation about X axis, rotation about Y axis, rotation about Z axis)
         public double[/*36*/] covariance;
-    
-        /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "geometry_msgs/PoseWithCovariance";
-    
-        public IMessage Create() => new PoseWithCovariance();
-    
-        public int GetLength() => 344;
     
         /// <summary> Constructor for empty message. </summary>
         public PoseWithCovariance()
@@ -38,17 +30,24 @@ namespace Iviz.Msgs.geometry_msgs
             BuiltIns.Serialize(covariance, ref ptr, end, 36);
         }
     
+        public int GetLength() => 344;
+    
+        public IMessage Create() => new PoseWithCovariance();
+    
+        /// <summary> Full ROS name of this message. </summary>
+        public const string MessageType = "geometry_msgs/PoseWithCovariance";
+    
         /// <summary> MD5 hash of a compact representation of the message. </summary>
         public const string Md5Sum = "c23e848cf1b7533a8d7c259073a97e6f";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         public const string DependenciesBase64 =
-                "H4sIAAAAAAAACr2TPU/DQAyG95P6Hyx1ASktAyhDJQYmxIDERwc+hJCbOO0hchd8F5r01+NL2ySlFRNq" +
-                "Jsf22X5e3w1hutAOmAomR8Y7QCisI9AGMiYCV2BCsNR+AaVJiD1q4+uxUnchK6QqNYQHuxzl+GG5q4Re" +
-                "WwM2A78giKsYEvuNrFGKQI6edSXnphKzrNv0Ahlz8sQOSimPkOmK0hFW/Rmb1LGcvpH6nBJHTY/eWWSa" +
-                "SPykiqCOYBUB200DnNnSwxOEinvu58Pul8Z9qrJPiz6+eD2P33owaqAu//kbqNvH6wnMyQoP1++5m7uz" +
-                "oPdAoK4OSLy/sUgmzIM73cT1Gsikfb3HIGuUfbYJ6r5EUdA0dbu84zHKMAGyuZSJlfbauPV2twiCE65o" +
-                "mHqHWG3WA1Vr1a21OhZBp1+L0X9bO6r+emPy99Wpn1nO5ZX9DbW1loL3A5Uc8YvKAwAA";
+                "H4sIAAAAAAAAE71TyU7DQAy9z1dY6gWktBxAOVTiwAlxQGLpgUUImcRpB5GZ4JnQpF+PJ22WLuKEmpPj" +
+                "5Y3fsz2C2UI7YCqYHBnvAKGwjkAbyJgIXIEJwVL7BZQmIfaoja8nSt2FrJCq1Age7HKc46flHgm9tgZs" +
+                "Bn5BEFcxJPYHWaOAQI6edSV1M4lZ1l16gYw5eWIHpcAjZLqidIzVsMcmdSLVN4LPKXHUvDGoRaapxE+q" +
+                "COoIVhGw3TyAH7b08AQBcc/9fNj90rhPVfZl0ccXr+fx24CMUpf//Knbx+spzMkKG67fczd3Z0FtYXR1" +
+                "QN/9cUXSXh7c6Sau12xMOhR7AjJDGWaXoO5LFPlMg9vnHYugtNJshIw6sSbsmVvPte1fuITlDC1v0W0H" +
+                "A1Vn1Z21Ok77vXQth+FJbem5c1ry993rnlnO5bj+ZtRaS6V+AcIN90zAAwAA";
                 
     }
 }

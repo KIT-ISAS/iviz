@@ -1,6 +1,8 @@
+using System.Runtime.InteropServices;
 
 namespace Iviz.Msgs.geometry_msgs
 {
+    [StructLayout(LayoutKind.Sequential)]
     public struct Vector3 : IMessage
     {
         // This represents a vector in free space. 
@@ -14,13 +16,6 @@ namespace Iviz.Msgs.geometry_msgs
         public double y;
         public double z;
     
-        /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "geometry_msgs/Vector3";
-    
-        public IMessage Create() => new Vector3();
-    
-        public int GetLength() => 24;
-    
         public unsafe void Deserialize(ref byte* ptr, byte* end)
         {
             BuiltIns.DeserializeStruct(out this, ref ptr, end);
@@ -31,16 +26,23 @@ namespace Iviz.Msgs.geometry_msgs
             BuiltIns.SerializeStruct(this, ref ptr, end);
         }
     
+        public int GetLength() => 24;
+    
+        public IMessage Create() => new Vector3();
+    
+        /// <summary> Full ROS name of this message. </summary>
+        public const string MessageType = "geometry_msgs/Vector3";
+    
         /// <summary> MD5 hash of a compact representation of the message. </summary>
         public const string Md5Sum = "4a842b65f413084dc2b10fb484ea7f17";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         public const string DependenciesBase64 =
-                "H4sIAAAAAAAACkWQwUrFQAxF9wX/4cLbKJQRVPyHt3PxcCt5bTodbCclk2etX2/aSt1dhpyTmznh0qcC" +
-                "5Um5cLYCwhc3JoqU0SkzykQNB1QnnA0+K3lYMDJlg8k/6WCb1NEkObiVlTtRrpEMrXBBFnPHSJ+u5Fx4" +
-                "pWmaXEYwpVwGWtn12ZF7DjHUmHvO+1TK0QfdEDmzpgaaYmp30heNB0x43w54rmHdE+Y0DHvnfZn17BIV" +
-                "24CHgHOHRW6Y14M8KFoybyS4esW/XnQd1r5S47YW3xSRZWTT5WMssTy+SXJ+5FIosv9dMaY2VFU3CNnr" +
-                "C76PtBzp5676BVNGoPyAAQAA";
+                "H4sIAAAAAAAAE0WQQWrEMAxF9znFh9m0EFJoS+8wuy7KbIsmUTymjhVkTdP09JUTSHcfo/f05RM+brFA" +
+                "eVYunK2A8M29iSJmjMqMMlPPHZoTzgaflZxWTEzZYPJPOjhEdTRK7tzKyqMot4iGQbggi7ljoi9Xci5c" +
+                "aZpnlxFMKZdEla3PjjxwF7oWy43zPhVz8EE3BM6ssYfGEIed9EXTARMu2wEvLWx8xhJT2jvvy+zGLlGx" +
+                "DXjscB6xyh1LPciDYiCjKrry0YuuqfaVFvdafFMElolN18+phPL0LtH5iUuhwP53xZiGrmnGJGRvr/g5" +
+                "0nqk3+YP1MrAiH8BAAA=";
                 
     }
 }

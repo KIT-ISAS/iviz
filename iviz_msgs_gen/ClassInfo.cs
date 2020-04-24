@@ -280,7 +280,7 @@ namespace Iviz.MsgsGen
                         }
                         else if (variable.arraySize == 0)
                         {
-                            lines.Add("    " + variable.fieldName + " = System.Array.Empty<" + variable.arraySize + ">();");
+                            lines.Add("    " + variable.fieldName + " = System.Array.Empty<" + variable.className + ">();");
                         }
                         else if (variable.arraySize != -1)
                         {
@@ -411,7 +411,12 @@ namespace Iviz.MsgsGen
         public string ToCString()
         {
             StringBuilder str = new StringBuilder();
-            str.AppendLine();
+
+            if (forceStruct)
+            {
+                str.AppendLine("using System.Runtime.InteropServices;");
+                str.AppendLine();
+            }
 
             str.AppendLine("namespace Iviz.Msgs." + package);
             str.AppendLine("{");
@@ -473,6 +478,7 @@ namespace Iviz.MsgsGen
             List<string> lines = new List<string>();
             if (forceStruct)
             {
+                lines.Add("[StructLayout(LayoutKind.Sequential)]");
                 lines.Add("public struct " + name + " : IMessage");
             }
             else
@@ -483,22 +489,6 @@ namespace Iviz.MsgsGen
             foreach (var element in elements)
             {
                 lines.Add("    " + element.ToCString());
-            }
-
-            lines.Add("");
-            lines.Add("    /// <summary> Full ROS name of this message. </summary>");
-            lines.Add("    public const string MessageType = \"" + package + "/" + name + "\";");
-
-            lines.Add("");
-            lines.Add("    public IMessage Create() => new " + name + "();");
-
-            lines.Add("");
-
-
-            List<string> lengthProperty = CreateLengthProperty(variables, fixedSize);
-            foreach (var entry in lengthProperty)
-            {
-                lines.Add("    " + entry);
             }
 
             lines.Add("");
@@ -514,6 +504,21 @@ namespace Iviz.MsgsGen
             {
                 lines.Add("    " + entry);
             }
+
+            lines.Add("");
+            List<string> lengthProperty = CreateLengthProperty(variables, fixedSize);
+            foreach (var entry in lengthProperty)
+            {
+                lines.Add("    " + entry);
+            }
+
+            lines.Add("");
+            lines.Add("    public IMessage Create() => new " + name + "();");
+
+            lines.Add("");
+            lines.Add("    /// <summary> Full ROS name of this message. </summary>");
+            lines.Add("    public const string MessageType = \"" + package + "/" + name + "\";");
+
 
             lines.Add("");
             string md5 = GetMd5Property();

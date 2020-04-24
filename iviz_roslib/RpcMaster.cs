@@ -11,7 +11,7 @@ namespace Iviz.RoslibSharp
         Success = 1
     }
 
-    class RpcMaster
+    public class RpcMaster
     {
         public readonly struct GetSystemStateResponse
         {
@@ -273,7 +273,7 @@ namespace Iviz.RoslibSharp
                 new Arg(CallerId),
                 new Arg(topic),
                 new Arg(topicType),
-                new Arg(CallerUri.ToString()),
+                new Arg(CallerUri),
             };
             object response = XmlRpc.MethodCall(MasterUri, CallerUri, "registerPublisher", args);
             return new RegisterPublisherResponse((object[])response);
@@ -284,7 +284,7 @@ namespace Iviz.RoslibSharp
             Arg[] args = {
                 new Arg(CallerId),
                 new Arg(topic),
-                new Arg(CallerUri.ToString()),
+                new Arg(CallerUri),
             };
             object response = XmlRpc.MethodCall(MasterUri, CallerUri, "unregisterPublisher", args);
             return new UnregisterPublisherResponse((object[])response);
@@ -309,24 +309,24 @@ namespace Iviz.RoslibSharp
             return new LookupServiceResponse((object[])response);
         }
 
-        public RegisterServiceResponse RegisterService(string service)
+        public RegisterServiceResponse RegisterService(string service, string rosRpcUri)
         {
             Arg[] args = {
                 new Arg(CallerId),
                 new Arg(service),
-                new Arg(CallerUri.ToString()),
-                new Arg(CallerUri.ToString()),
+                new Arg(rosRpcUri),
+                new Arg(CallerUri),
             };
             object response = XmlRpc.MethodCall(MasterUri, CallerUri, "registerService", args);
             return new RegisterServiceResponse((object[])response);
         }
 
-        public UnregisterServiceResponse UnregisterService(string service)
+        public UnregisterServiceResponse UnregisterService(string service, string rosRpcUri)
         {
             Arg[] args = {
                 new Arg(CallerId),
                 new Arg(service),
-                new Arg(CallerUri.ToString()),
+                new Arg(rosRpcUri),
             };
             object response = XmlRpc.MethodCall(MasterUri, CallerUri, "unregisterService", args);
             return new UnregisterServiceResponse((object[])response);

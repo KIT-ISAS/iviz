@@ -1,6 +1,6 @@
 ﻿namespace Iviz.Msgs
 {
-    public interface IRequest
+    public interface ISerializable
     {
         /// <summary>
         /// Fills this message with the information from the buffer.
@@ -27,5 +27,7 @@
         /// </summary>
         int GetLength();
     }
+
+
 
 }

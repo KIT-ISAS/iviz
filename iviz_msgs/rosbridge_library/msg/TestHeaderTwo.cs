@@ -1,21 +1,8 @@
-
 namespace Iviz.Msgs.rosbridge_library
 {
     public sealed class TestHeaderTwo : IMessage
     {
         public std_msgs.Header header;
-    
-        /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "rosbridge_library/TestHeaderTwo";
-    
-        public IMessage Create() => new TestHeaderTwo();
-    
-        public int GetLength()
-        {
-            int size = 0;
-            size += header.GetLength();
-            return size;
-        }
     
         /// <summary> Constructor for empty message. </summary>
         public TestHeaderTwo()
@@ -33,18 +20,30 @@ namespace Iviz.Msgs.rosbridge_library
             header.Serialize(ref ptr, end);
         }
     
+        public int GetLength()
+        {
+            int size = 0;
+            size += header.GetLength();
+            return size;
+        }
+    
+        public IMessage Create() => new TestHeaderTwo();
+    
+        /// <summary> Full ROS name of this message. </summary>
+        public const string MessageType = "rosbridge_library/TestHeaderTwo";
+    
         /// <summary> MD5 hash of a compact representation of the message. </summary>
         public const string Md5Sum = "d7be0bb39af8fb9129d5a76e6b63a290";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         public const string DependenciesBase64 =
-                "H4sIAAAAAAAACq2RT0sDMRDF74F+h4EebIUq6K3gTbQeBMHeyzSZ7g5kkzUzW91v72Tr35sHl0DI5r3f" +
-                "m8xsCAMVaKdt5m7++Zu5x+f7NYiGXSeNXG4+cubwrJgClgAdKQZUhEO2OrhpqawiHSmaC7ueAky3OvYk" +
-                "F2bctixgq6FEBWMcYRATaQafu25I7FEJlDv65TcnJ0DosSj7IWIxfS6BU5UfCnZU6baEXgZKnuDhdm2a" +
-                "JOQHZStoNIIvhMKpsUtwAye9vqoGN9++5pUdqbFufoWDtqi1WHrrC0mtE2VtGeenx10Y27pDlhIEFtO/" +
-                "nR1lCRbiCajPvoWFVf40apuTAQmOWBj3kSrYWweMelZNZ8sf5Fr2GhKm/Ik/Eb8z/oKtlBO3vmnV2sxi" +
-                "fb0MjTXQhH3JRw4m3Y8TxEempBB5X7CMrrpOkW5+V3tsInNNE7EdRbJnG0CAV9bWiZZKn6ax4+Bm7h1N" +
-                "tjVCoAIAAA==";
+                "H4sIAAAAAAAAE62RQWscMQyF7/4Vgj0kKWwC6W2ht9Kmh0IhuS9aW5kReOyppdlk/n2eZ2na3nroYDAe" +
+                "v/c9WXoQTtJo3Lbw6T9/4fvj1wOZp+Nkg909XFJ29OhcErdEkzgndqbniiJ0GKXts5wlw8TTLIm2W19n" +
+                "sVsYn0Y1whqkSOOcV1oMIq8U6zQtRSO7kOskf/nh1EJMMzfXuGRu0NeWtHT5c+NJOh3L5OciJQp9+3yA" +
+                "ppjExRUFrSDEJmxaBlxSWLT4x/tuCLunl7rHUQa08j2cfGTvxcrr3MR6nWwHZHy4PO4WbDRHkJKMrrd/" +
+                "RxzthhCCEmSucaRrVP5j9bEWAIXO3JRPWTo4ogOgXnXT1c0f5LKhC5f6C38h/s74F2x55/Y37UfMLPfX" +
+                "2zKggRDOrZ41QXpaN0jMKsUp66lxW0N3XSLD7kvvMURwbRPBzmY1KgaQ6EV9DOat07dpHDWF8AaoFDiD" +
+                "nAIAAA==";
                 
     }
 }
