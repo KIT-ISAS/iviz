@@ -23,13 +23,13 @@ namespace Iviz.Msgs.geometry_msgs
         public IMessage Create() => new Twist();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "geometry_msgs/Twist";
+        public const string _MessageType = "geometry_msgs/Twist";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "9f195f881246fdfa2798d1d3eebca84a";
+        public const string _Md5Sum = "9f195f881246fdfa2798d1d3eebca84a";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAE61RQUrEQBC8zysKvCiECCoeBM+yB0FQvEpv0skOO5kJPb3uxtfbkyyRvRsY6GSqqqsq" +
                 "V/jY+Qw+jcI5c8Y3h9R4neAjOmFGHqlhbCXtOdpHTfCaEXxkElBs7fSHYPNIorl2n9xoknucIX/vZ5xz" +
                 "z//8uNf3lyf0nAZWmb6G3Ofb81Z3teQTLvk4mnOyiOXuMmANg24Uhk0xTBiYosLCrkwjtl6M6lOsTZWF" +

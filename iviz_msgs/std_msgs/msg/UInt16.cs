@@ -19,13 +19,13 @@ namespace Iviz.Msgs.std_msgs
         public IMessage Create() => new UInt16();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "std_msgs/UInt16";
+        public const string _MessageType = "std_msgs/UInt16";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "1df79edf208b629fe6b81923a544552d";
+        public const string _Md5Sum = "1df79edf208b629fe6b81923a544552d";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAEyvNzCsxNFNISSxJ5OICAF50RNUNAAAA";
                 
     }

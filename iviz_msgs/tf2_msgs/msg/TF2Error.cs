@@ -41,13 +41,13 @@ namespace Iviz.Msgs.tf2_msgs
         public IMessage Create() => new TF2Error();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "tf2_msgs/TF2Error";
+        public const string _MessageType = "tf2_msgs/TF2Error";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "bc6848fd6fd750c92e38575618a4917d";
+        public const string _Md5Sum = "bc6848fd6fd750c92e38575618a4917d";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAE0XKuw7CMAyF4T1PkUfgLhaGqARkkdiVcSqYMiHUpUihfX8kasJ4/u9M/TDuLVL2zMT2" +
                 "YBdm+qZAdEltzUvNDSH6RqADuVdcKfqbsGspOAHCqmtVwM4FOGbH5xQ9Sj1s9CAQPaV/3/46O7yeiGOV" +
                 "nVF6lPIq5j2WfnjOI8/DmA8cjH3N2gAAAA==";

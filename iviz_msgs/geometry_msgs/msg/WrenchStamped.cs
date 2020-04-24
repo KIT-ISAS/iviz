@@ -35,13 +35,13 @@ namespace Iviz.Msgs.geometry_msgs
         public IMessage Create() => new WrenchStamped();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "geometry_msgs/WrenchStamped";
+        public const string _MessageType = "geometry_msgs/WrenchStamped";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "d78d3cb249ce23087ade7e7d0c40cfa7";
+        public const string _Md5Sum = "d78d3cb249ce23087ade7e7d0c40cfa7";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAE71UwW7UMBC9+ytG2kNbtA1SizhU4oCEgB6QKrWCYzUbTxKLxA72ZLfh63l2tikVHDgA" +
                 "q2gTJ35v5s288Ybe0iGKrzs6OO0oSiN5KVSHEK3zrEJN5EGIvSV1gyTlYTQfha1E6srNfDlSlJsxb/7y" +
                 "z3y6/XBFSe39kNr0coltNnSrSIqjpUGULStTE5CTazuJ573spaeSrVgqX3UeJVUA3nUuEa5WvETu+5mm" +

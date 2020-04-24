@@ -33,13 +33,13 @@ namespace Iviz.Msgs.rosbridge_msgs
         public IMessage Create() => new ConnectedClient();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "rosbridge_msgs/ConnectedClient";
+        public const string _MessageType = "rosbridge_msgs/ConnectedClient";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "7f2187ce389b39b2b3bb2a3957e54c04";
+        public const string _Md5Sum = "7f2187ce389b39b2b3bb2a3957e54c04";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAEysuKcrMS1fILIhPTEkpSi0u5irJzE1VSM7Py0tNLsnMz4sH8bm4AFvLoaQoAAAA";
                 
     }

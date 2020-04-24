@@ -48,10 +48,10 @@ namespace Iviz.Msgs.rosbridge_library
         }
         
         /// <summary> Full ROS name of this service. </summary>
-        public const string ServiceType = "rosbridge_library/SendBytes";
+        public const string _ServiceType = "rosbridge_library/SendBytes";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        public const string Md5Sum = "d875457256decc7436099d9d612ebf8a";
+        public const string _Md5Sum = "d875457256decc7436099d9d612ebf8a";
         
         /// <summary> Request message. </summary>
         public readonly Request request;

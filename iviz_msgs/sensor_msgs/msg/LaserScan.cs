@@ -80,13 +80,13 @@ namespace Iviz.Msgs.sensor_msgs
         public IMessage Create() => new LaserScan();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "sensor_msgs/LaserScan";
+        public const string _MessageType = "sensor_msgs/LaserScan";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "90c7ef2dc6895d81024acba2ac42f369";
+        public const string _Md5Sum = "90c7ef2dc6895d81024acba2ac42f369";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAE61VTY/jNgy9+1cQyGGTYpIC3dug7Wmx7RxaFJg9dRAMGJmOhZUljyQn4/76Psr5cBed" +
                 "7B7WCBIoJh/FR/JxQY/W751QMuypiaEjpt6x50iOk0SK7PeybqyvJVaLakEPDY1hoJYPQuxDbk9GwKFa" +
                 "DtYIHW1uqbZNI1F8pp3A2IZIS9nsNwiQAvABxTHyuLpDQEEs0iAEMxOFM8BnEJ2kxHu5o2Q9AnDfO2s4" +

@@ -75,10 +75,10 @@ namespace Iviz.Msgs.nav_msgs
         }
         
         /// <summary> Full ROS name of this service. </summary>
-        public const string ServiceType = "nav_msgs/GetPlan";
+        public const string _ServiceType = "nav_msgs/GetPlan";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        public const string Md5Sum = "421c8ea4d21c6c9db7054b4bbdf1e024";
+        public const string _Md5Sum = "421c8ea4d21c6c9db7054b4bbdf1e024";
         
         /// <summary> Request message. </summary>
         public readonly Request request;

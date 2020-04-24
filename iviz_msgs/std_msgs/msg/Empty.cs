@@ -16,13 +16,13 @@ namespace Iviz.Msgs.std_msgs
         public IMessage Create() => new Empty();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "std_msgs/Empty";
+        public const string _MessageType = "std_msgs/Empty";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "d41d8cd98f00b204e9800998ecf8427e";
+        public const string _Md5Sum = "d41d8cd98f00b204e9800998ecf8427e";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAE+MCAJMG1zIBAAAA";
                 
     }

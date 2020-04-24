@@ -34,13 +34,13 @@ namespace Iviz.Msgs.geometry_msgs
         public IMessage Create() => new PoseStamped();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "geometry_msgs/PoseStamped";
+        public const string _MessageType = "geometry_msgs/PoseStamped";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "d3812c3cbc69362b77dc0b19b345f8f5";
+        public const string _Md5Sum = "d3812c3cbc69362b77dc0b19b345f8f5";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAE71UTY/TMBC9+1eM1MPuIlokQBwqcVgJ8XFAWrR7r6bxJLGU2Fl70m749Ty7JKXiAAfY" +
                 "KErseObNe/ORFd3SXUhCR6ctRakliq+EqhCidZ5VqI7cC7G3pK6XpNwP5rOwlUhteZkCMOBhzPt/fJmv" +
                 "95+2lNTu+tSkV6e4ZkX3CkIcLfWibFmZ6gA+rmklrjs5SEeFqVgqpzoNkjZwfGhdItyNeIncdRONCUYa" +

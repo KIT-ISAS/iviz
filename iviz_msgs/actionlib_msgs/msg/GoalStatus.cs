@@ -58,13 +58,13 @@ namespace Iviz.Msgs.actionlib_msgs
         public IMessage Create() => new GoalStatus();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "actionlib_msgs/GoalStatus";
+        public const string _MessageType = "actionlib_msgs/GoalStatus";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "d388f9b87b3c471f784434d671988d4a";
+        public const string _Md5Sum = "d388f9b87b3c471f784434d671988d4a";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAE71VTY/aMBC951eMtJdWquh3u63EgUKEqPZLC+115TgTcOs41B7D8u87Nkkgu9DlsGok" +
                 "CETjN2/evJmMK6EnI5jz7U7liVeGzsGRIO/qPzfp1WhyNYbm6sMb/j6D2QLjMVgIBxskoAoyhKWtJDqH" +
                 "OWQbII4RklRlwKFdoa0xB8PZ5GcKe5hvu5jKgfTWoiG9YVRl5qcB39ym6eXNLB21wO+6wBYlqhWDCJDC" +

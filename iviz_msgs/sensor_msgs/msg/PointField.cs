@@ -50,13 +50,13 @@ namespace Iviz.Msgs.sensor_msgs
         public IMessage Create() => new PointField();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "sensor_msgs/PointField";
+        public const string _MessageType = "sensor_msgs/PointField";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "268eacb2962780ceac86cbd17e328150";
+        public const string _Md5Sum = "268eacb2962780ceac86cbd17e328150";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAE02Qz06EMBCH7zzFL+FqTJZdkQsHozGamF0P6wNUGJYmtEPaQcPb20LXZU6Tr9/86eQ4" +
                 "99rDkPfqQuh5aD2kJ7TkG6dH0WzBHdgSRtZWQFbcDG2jleX4jPB54Kkt/rt07IyS+2wKTxXej+cKIWrs" +
                 "EvlKqEZxc3blQvYbJ6Iah5uzLxbnYeNEVKNM5PXj9BRRjcctKQ+BVFnmxWl7gVWGsESOY8zDBztNQ7vU" +

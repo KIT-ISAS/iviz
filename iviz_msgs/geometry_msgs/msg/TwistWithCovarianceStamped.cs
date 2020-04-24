@@ -35,13 +35,13 @@ namespace Iviz.Msgs.geometry_msgs
         public IMessage Create() => new TwistWithCovarianceStamped();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "geometry_msgs/TwistWithCovarianceStamped";
+        public const string _MessageType = "geometry_msgs/TwistWithCovarianceStamped";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "8927a1a12fb2607ceea095b2dc440a96";
+        public const string _Md5Sum = "8927a1a12fb2607ceea095b2dc440a96";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAE71VTW/bMAy9+1cQyKHNkGRAO+RQYKcN23oYUKzFPjEUjM3YWm3Jo+Qm3q/fk5y4KdpD" +
                 "D1sDA7Fl8pF8fKQndFUZTyqtihcbPLEl8cE0HKSgsDE+0MaECiZrUbG5UO6cFsbCgNbKjcAFlqaBGzft" +
                 "IvsgXIhSlf6yqwjxBQhv3C2r4YiQYLPs9T/+ZR8v35+RD8V140v/csgjm9BlQIasBTUSuODAtHbIz5SV" +

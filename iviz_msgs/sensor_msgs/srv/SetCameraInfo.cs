@@ -70,10 +70,10 @@ namespace Iviz.Msgs.sensor_msgs
         }
         
         /// <summary> Full ROS name of this service. </summary>
-        public const string ServiceType = "sensor_msgs/SetCameraInfo";
+        public const string _ServiceType = "sensor_msgs/SetCameraInfo";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        public const string Md5Sum = "bef1df590ed75ed1f393692395e15482";
+        public const string _Md5Sum = "bef1df590ed75ed1f393692395e15482";
         
         /// <summary> Request message. </summary>
         public readonly Request request;

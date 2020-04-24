@@ -51,13 +51,13 @@ namespace Iviz.Msgs.grid_map_msgs
         public IMessage Create() => new GridMapInfo();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "grid_map_msgs/GridMapInfo";
+        public const string _MessageType = "grid_map_msgs/GridMapInfo";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "43ee5430e1c253682111cb6bedac0ef9";
+        public const string _Md5Sum = "43ee5430e1c253682111cb6bedac0ef9";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAE71UTWvcMBC961cM7CFJ6W6gLT0EeiiUfkALaZNbKJuJNGsLZMmR5GTdX98nOevN0kN6" +
                 "aLOYtS29efPezMgL+ixsJNJxtp0Qe0ObyJ2cqIf1tt6UWtAPScEN2QZPYUO5FWqiNXTVnWpx7udKbVzg" +
                 "/PYNxRlYwr6Kb3JL1tN2aWwUXRmuukcBrkLW20P4+AR8LPDzkORATsc9afEZ0sFRlqsfMrKxXkxZvJ48" +

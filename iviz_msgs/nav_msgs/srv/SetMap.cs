@@ -55,10 +55,10 @@ namespace Iviz.Msgs.nav_msgs
         }
         
         /// <summary> Full ROS name of this service. </summary>
-        public const string ServiceType = "nav_msgs/SetMap";
+        public const string _ServiceType = "nav_msgs/SetMap";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        public const string Md5Sum = "c36922319011e63ed7784112ad4fdd32";
+        public const string _Md5Sum = "c36922319011e63ed7784112ad4fdd32";
         
         /// <summary> Request message. </summary>
         public readonly Request request;

@@ -188,13 +188,13 @@ namespace Iviz.Msgs.sensor_msgs
         public IMessage Create() => new CameraInfo();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "sensor_msgs/CameraInfo";
+        public const string _MessageType = "sensor_msgs/CameraInfo";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "c9a58c1b0b154e0e6da7578cb991d214";
+        public const string _Md5Sum = "c9a58c1b0b154e0e6da7578cb991d214";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAE8VZbW8buRH+rl8xsD9YyslyHF8L1IU/NBfkauTaM3IG0tYwDGqXK/GyWu4tuZY3v77P" +
                 "DMndleSkd0CCCnEkccmZ4bw+Mzqm27VxtNHOqZWmXBem0vzdKzJVYZuN8sZWhE+kKFMb3agFXXtya9uW" +
                 "OS01tpGaHMdnVOHN1SrThFPe1iajo/DogekdkapyUllmN7WqjAaFjtoaO6kwjxp0zIYFkZNOqOWXk2Os" +

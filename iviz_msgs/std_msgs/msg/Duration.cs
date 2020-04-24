@@ -19,13 +19,13 @@ namespace Iviz.Msgs.std_msgs
         public IMessage Create() => new Duration();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "std_msgs/Duration";
+        public const string _MessageType = "std_msgs/Duration";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "3e286caf4241d664e55f3ad380e2ae46";
+        public const string _Md5Sum = "3e286caf4241d664e55f3ad380e2ae46";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAE0spLUosyczPU0hJLEnk4gIAtVhIcg8AAAA=";
                 
     }

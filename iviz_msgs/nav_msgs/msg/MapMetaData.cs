@@ -39,13 +39,13 @@ namespace Iviz.Msgs.nav_msgs
         public IMessage Create() => new MapMetaData();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "nav_msgs/MapMetaData";
+        public const string _MessageType = "nav_msgs/MapMetaData";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "10cfc8a2818024d3248802c00c95f11b";
+        public const string _Md5Sum = "10cfc8a2818024d3248802c00c95f11b";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAE71TPU8DMQzd8yssdQGpXCtADEgMTJ0qimCrqipN3EukS3IkOR3l1+PkPtrCwIJ6yhDb" +
                 "z/bzc24C70oHUK6SsONBC9B277zhUTsLfOeaCFEhCMU9FxG9DjGA22fnixBNza04LLyWjE2oFkLUBoFH" +
                 "aJUWKsMMr6HlASrHJUqWAeTbJnubrD4z4TwGVzW5+drMBFbVhu0JGO9uT2KUsExFtYwK1gkVNqzRNqGy" +

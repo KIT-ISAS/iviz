@@ -111,13 +111,13 @@ namespace Iviz.Msgs.visualization_msgs
         public IMessage Create() => new Marker();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "visualization_msgs/Marker";
+        public const string _MessageType = "visualization_msgs/Marker";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "4048c9de2a16f4ae8e0538085ebf1b97";
+        public const string _Md5Sum = "4048c9de2a16f4ae8e0538085ebf1b97";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAE71X227bOBB9rr5igKBosnDkXLrdbgA/pLGbGMhtbbfdoigMWqJtNrKoklRc9+t7hpTk" +
                 "uEnafdg2MWKK4sycuZ1htmgoJc2dK47a7eVyGRttY21m7aW6UW1zq762u8oWmViNVoW07QthbqQhkac/" +
                 "FhqVThslslrCPj08fnqw90pYleB7OBfQRlNtaKGNJJVjuRBO6ZzwKa3KZ+TmytJCWitmkpbKzYlVR1Gp" +

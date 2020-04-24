@@ -39,13 +39,13 @@ namespace Iviz.Msgs.std_msgs
         public IMessage Create() => new Int8MultiArray();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "std_msgs/Int8MultiArray";
+        public const string _MessageType = "std_msgs/Int8MultiArray";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "d7c1af35a1b4781bbe79e03dd94b7c13";
+        public const string _Md5Sum = "d7c1af35a1b4781bbe79e03dd94b7c13";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAE71U32vbMBB+919xJC9tlmb5UUpb6ENgsJcWBh2MEUJQrXOsRLaCJDfr/vp9kh3bafc4" +
                 "ZgyW73R33/fpTkP6plk4Jm3MnoQnnzM9VdqrpbXi7VG8mcpTwc6JLZPkTJXKK1NSZmwyJGnSquDSi2jD" +
                 "K7SmIoSLEO4mSfIhGenmWz9DcgdOVabSJklGUnjR7EpU6W9Xa+o90UtdeKx0CkuS5OEfP8nT89d7cl5u" +

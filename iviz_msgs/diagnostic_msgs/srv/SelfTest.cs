@@ -56,10 +56,10 @@ namespace Iviz.Msgs.diagnostic_msgs
         }
         
         /// <summary> Full ROS name of this service. </summary>
-        public const string ServiceType = "diagnostic_msgs/SelfTest";
+        public const string _ServiceType = "diagnostic_msgs/SelfTest";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        public const string Md5Sum = "ac21b1bab7ab17546986536c22eb34e9";
+        public const string _Md5Sum = "ac21b1bab7ab17546986536c22eb34e9";
         
         /// <summary> Request message. </summary>
         public readonly Request request;

@@ -517,18 +517,18 @@ namespace Iviz.MsgsGen
 
             lines.Add("");
             lines.Add("    /// <summary> Full ROS name of this message. </summary>");
-            lines.Add("    public const string MessageType = \"" + package + "/" + name + "\";");
+            lines.Add("    public const string _MessageType = \"" + package + "/" + name + "\";");
 
 
             lines.Add("");
             string md5 = GetMd5Property();
             lines.Add("    /// <summary> MD5 hash of a compact representation of the message. </summary>");
-            lines.Add("    public const string Md5Sum = \"" + md5 + "\";");
+            lines.Add("    public const string _Md5Sum = \"" + md5 + "\";");
 
             lines.Add("");
 
             lines.Add("    /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>");
-            lines.Add("    public const string DependenciesBase64 =");
+            lines.Add("    public const string _DependenciesBase64 =");
 
             /*
             byte[] inputBytes = Encoding.UTF8.GetBytes(catDependencies);

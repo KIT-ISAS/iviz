@@ -56,13 +56,13 @@ namespace Iviz.Msgs.sensor_msgs
         public IMessage Create() => new MagneticField();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "sensor_msgs/MagneticField";
+        public const string _MessageType = "sensor_msgs/MagneticField";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "2f3b0b43eed0c9501de0fa3ff89a45aa";
+        public const string _Md5Sum = "2f3b0b43eed0c9501de0fa3ff89a45aa";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAE7VVXYvbRhR916+4RA/ZDVq3ZEugC30ohLT7sCE0S19KMdfSlTSJNKPOjGxrf33PHVle" +
                 "sTTgQmsMtuV7z/2Yc85QTg/CYfTSi43kaoqt0AM3VqIp6YORrqK9lNF54khMYZDS1PircyVH4+wmyyin" +
                 "+zmxdHv2hm0pC1S/QjeBvlp3sAWZSKF1I7B3QrXpOqnIWAW6MjVx19HkxhSsSYqzxhUu2zVwQbJpNlR7" +

@@ -45,13 +45,13 @@ namespace Iviz.Msgs.sensor_msgs
         public IMessage Create() => new RelativeHumidity();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "sensor_msgs/RelativeHumidity";
+        public const string _MessageType = "sensor_msgs/RelativeHumidity";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "8730015b05955b7e992ce29a2678d90f";
+        public const string _Md5Sum = "8730015b05955b7e992ce29a2678d90f";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAE61Uy27bMBC88ysW0CFJAavuAz0Y6M195FCgQHI31tLaIkqRKknZ9d93loofTZu0hwoG" +
                 "bMkzs7uzQ1FFd9ZvnVAUbvGLNjH0xLh1nO1OqBt729p8oCQ+hVgTLWVjvSTKHVgABQobGjhmy85QRUOU" +
                 "lMYo+njPWSLteAiRciiUxHkETdqHxyc4Z9TN0g8SFSK1MfQZXUGgm74ur4qy7SVl7gctpMq9sAr14rOh" +

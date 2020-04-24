@@ -53,13 +53,13 @@ namespace Iviz.Msgs.trajectory_msgs
         public IMessage Create() => new MultiDOFJointTrajectory();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "trajectory_msgs/MultiDOFJointTrajectory";
+        public const string _MessageType = "trajectory_msgs/MultiDOFJointTrajectory";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "ef145a45a5f47b77b7f5cdde4b16c942";
+        public const string _Md5Sum = "ef145a45a5f47b77b7f5cdde4b16c942";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAE71WS4/bNhC+81cM4EPswusFkiKHBXookKbdAkFTxMilKAxaGklMJFIhqXXUX99vqJft" +
                 "TR9AmzV84Gve33yjFe0rpop1zp5MoC5wTtFRaDkzRU8Rt5lzPjdWR6bC64ZJ2zxdeC7Ys82YosFx4Xw6" +
                 "jl5/4Cw631PeeR2Ns0H9NJgYLCm1ou8h3noObGN6Qq4gTU1XR3OTY/3BGRvPda1ZZxW16RiearmzAUab" +

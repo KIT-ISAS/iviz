@@ -39,13 +39,13 @@ namespace Iviz.Msgs.diagnostic_msgs
         public IMessage Create() => new DiagnosticArray();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "diagnostic_msgs/DiagnosticArray";
+        public const string _MessageType = "diagnostic_msgs/DiagnosticArray";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "60810da900de1dd6ddd437c3503511da";
+        public const string _Md5Sum = "60810da900de1dd6ddd437c3503511da";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAE71UwW7bMAy96ysI5NB2QNutvRXIoUC7rei2FmmwHYahoG3WFmpLniQn89/vSYqTrMCA" +
                 "HbYFDiTZ5CP5+KgZLRvtqRPvuRbCdvBSUbDkxVRUaa6N9UGXpM2TdR0HbQ1xYYdAoRHygYOQfUoHZwsb" +
                 "1HvhShw1eZnBi4JGgMBdr662gA/wHPzXbwli8DQjBrBzPEa40na9NWKCp0K0qclJb11Aatao+V/+qY8P" +

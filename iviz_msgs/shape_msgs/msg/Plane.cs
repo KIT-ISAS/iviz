@@ -32,13 +32,13 @@ namespace Iviz.Msgs.shape_msgs
         public IMessage Create() => new Plane();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "shape_msgs/Plane";
+        public const string _MessageType = "shape_msgs/Plane";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "2c1b92ed8f31492f8e73f6a4a44ca796";
+        public const string _Md5Sum = "2c1b92ed8f31492f8e73f6a4a44ca796";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAEz3LQQqDMBQE0P0/xYDLdqGtdCF4CbeSxTf+VEESNRGspzdWyGbgDTMZGplX8WIDh9FZ" +
                 "OAPGPLGVJzY/2i/CIHcBWbZ7xDse6H4x9BGjR42cKIvPqoZ2YtpcRXaJxUWd+LrYJ74VkZkch0/Zlurf" +
                 "EZ3An1dFmgAAAA==";

@@ -45,10 +45,10 @@ namespace Iviz.Msgs.tf
         }
         
         /// <summary> Full ROS name of this service. </summary>
-        public const string ServiceType = "tf/FrameGraph";
+        public const string _ServiceType = "tf/FrameGraph";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        public const string Md5Sum = "c4af9ac907e58e906eb0b6e3c58478c0";
+        public const string _Md5Sum = "c4af9ac907e58e906eb0b6e3c58478c0";
         
         /// <summary> Request message. </summary>
         public readonly Request request;

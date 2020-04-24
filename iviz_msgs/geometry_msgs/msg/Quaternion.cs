@@ -27,13 +27,13 @@ namespace Iviz.Msgs.geometry_msgs
         public IMessage Create() => new Quaternion();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "geometry_msgs/Quaternion";
+        public const string _MessageType = "geometry_msgs/Quaternion";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "a779879fadf0160734f906b8c19c7004";
+        public const string _Md5Sum = "a779879fadf0160734f906b8c19c7004";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAEz3JTQqAQAhA4b2nENq3ik7SBSQcEkonNfo5fbWZ3fd4HU6LBDpX52DNQFI0l4+UYoqi" +
                 "WJwZo9LMf+0HJbv+r5hvPUBZjXIc8Gq6m56mE+AFLI5yL20AAAA=";
                 

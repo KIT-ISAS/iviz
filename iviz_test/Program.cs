@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using Iviz.Msgs.geometry_msgs;
+using Iviz.Msgs.rosapi;
 using Iviz.Msgs.rosbridge_library;
 using Iviz.Msgs.tf2_msgs;
 using Iviz.RoslibSharp;
@@ -18,8 +19,14 @@ namespace iviz_test
                 null,
                 "http://192.168.0.157:7613");
 
+            /*
             AddTwoInts service = new AddTwoInts();
             Console.WriteLine(service.ToJsonString());
+            */
+
+            Topics topics = new Topics();
+            client.CallService("/rosapi/topics", topics);
+            Console.WriteLine(topics.ToJsonString());
 
             client.Close();
             /*

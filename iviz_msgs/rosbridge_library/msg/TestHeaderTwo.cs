@@ -30,13 +30,13 @@ namespace Iviz.Msgs.rosbridge_library
         public IMessage Create() => new TestHeaderTwo();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "rosbridge_library/TestHeaderTwo";
+        public const string _MessageType = "rosbridge_library/TestHeaderTwo";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "d7be0bb39af8fb9129d5a76e6b63a290";
+        public const string _Md5Sum = "d7be0bb39af8fb9129d5a76e6b63a290";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAE62RQWscMQyF7/4Vgj0kKWwC6W2ht9Kmh0IhuS9aW5kReOyppdlk/n2eZ2na3nroYDAe" +
                 "v/c9WXoQTtJo3Lbw6T9/4fvj1wOZp+Nkg909XFJ29OhcErdEkzgndqbniiJ0GKXts5wlw8TTLIm2W19n" +
                 "sVsYn0Y1whqkSOOcV1oMIq8U6zQtRSO7kOskf/nh1EJMMzfXuGRu0NeWtHT5c+NJOh3L5OciJQp9+3yA" +

@@ -40,10 +40,10 @@ namespace Iviz.Msgs.rosbridge_library
         }
         
         /// <summary> Full ROS name of this service. </summary>
-        public const string ServiceType = "rosbridge_library/AddTwoInts";
+        public const string _ServiceType = "rosbridge_library/AddTwoInts";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        public const string Md5Sum = "6a2e34150c00229791cc89ff309fff21";
+        public const string _Md5Sum = "6a2e34150c00229791cc89ff309fff21";
         
         /// <summary> Request message. </summary>
         public readonly Request request;

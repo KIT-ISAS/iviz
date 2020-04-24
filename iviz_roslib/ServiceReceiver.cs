@@ -1,6 +1,9 @@
-﻿using System;
+﻿//#define DEBUG__
+
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -75,6 +78,11 @@ namespace Iviz.RoslibSharp
             {
                 writer.Write(contents[i].Length);
                 writer.Write(Encoding.UTF8.GetBytes(contents[i]));
+
+#if DEBUG__
+                Logger.Log(">>> " + contents[i]);
+#endif
+
             }
             return totalLength;
         }
@@ -91,6 +99,10 @@ namespace Iviz.RoslibSharp
                 string entry = Encoding.UTF8.GetString(readBuffer, numRead, length);
                 numRead += length;
                 contents.Add(entry);
+
+#if DEBUG__
+                Logger.Log("<<< " + contents.Last());
+#endif
             }
             return contents;
         }
@@ -178,7 +190,6 @@ namespace Iviz.RoslibSharp
         bool ExecuteImpl(IService service)
         {
             const byte ErrorByte = 0;
-            const byte SuccessByte = 1;
 
             IRequest requestMsg = service.Request;
             int msgLength = requestMsg.GetLength();
@@ -188,8 +199,10 @@ namespace Iviz.RoslibSharp
             }
             uint sendLength = BuiltIns.Serialize(requestMsg, writeBuffer);
             writer.Write(sendLength);
+
             writer.Write(writeBuffer, 0, (int)sendLength);
             BytesSent += (int)sendLength + 5;
+
 
             int rcvLength = reader.Read(readBuffer, 0, 1);
             if (rcvLength == 0)
@@ -214,18 +227,12 @@ namespace Iviz.RoslibSharp
                 Logger.Log(service.ErrorMessage);
                 return false;
             }
-            else if (readBuffer[0] == SuccessByte)
+            else 
             {
                 service.ErrorMessage = null;
                 BuiltIns.Deserialize(service.Response, readBuffer, rcvLength);
                 NumReceived++;
                 return true;
-            }
-            else
-            {
-                service.ErrorMessage = $"TCPROS error: expected byte 0 or 1, received byte {(int)readBuffer[0]}";
-                Logger.Log(service.ErrorMessage);
-                return false;
             }
         }
     }

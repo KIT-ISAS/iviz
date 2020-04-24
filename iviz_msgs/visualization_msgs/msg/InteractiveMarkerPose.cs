@@ -44,13 +44,13 @@ namespace Iviz.Msgs.visualization_msgs
         public IMessage Create() => new InteractiveMarkerPose();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "visualization_msgs/InteractiveMarkerPose";
+        public const string _MessageType = "visualization_msgs/InteractiveMarkerPose";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "a6e6833209a196a38d798dadb02c81f8";
+        public const string _Md5Sum = "a6e6833209a196a38d798dadb02c81f8";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAE71UwU7cMBC9+ytG2gNQQZDaqgekHpBQWw5IVHBHs/EkGSmxg+0spF/fZ4csXfXQHlpW" +
                 "0caJZ96892acDd3rIOdN4EFIXeMr803YSqCu3IzZ0LXTpNzT6KNUdNlHf0pWGnUSKXVCo+58wq66RI0P" +
                 "FHzipN7FyrTiB0lhfhhiG89vAVBQCqoVl7SZ1bUUU8CtopspJtoKtb3fct/PNDl9nDIxJORSyY9aY8UJ" +

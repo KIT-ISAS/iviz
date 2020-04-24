@@ -25,13 +25,13 @@ namespace Iviz.Msgs.std_msgs
         public IMessage Create() => new ColorRGBA();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "std_msgs/ColorRGBA";
+        public const string _MessageType = "std_msgs/ColorRGBA";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "a29a96539573343b1310c73607334b00";
+        public const string _Md5Sum = "a29a96539573343b1310c73607334b00";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAE0vLyU8sMTZSKOJKg7LS4awkOCuRiwsAZHVNWikAAAA=";
                 
     }

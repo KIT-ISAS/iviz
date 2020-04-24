@@ -54,10 +54,10 @@ namespace Iviz.Msgs.rosbridge_library
         }
         
         /// <summary> Full ROS name of this service. </summary>
-        public const string ServiceType = "rosbridge_library/TestMultipleRequestFields";
+        public const string _ServiceType = "rosbridge_library/TestMultipleRequestFields";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        public const string Md5Sum = "6cce9fb727dd0f31d504d7d198a1f4ef";
+        public const string _Md5Sum = "6cce9fb727dd0f31d504d7d198a1f4ef";
         
         /// <summary> Request message. </summary>
         public readonly Request request;

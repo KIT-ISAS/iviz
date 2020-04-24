@@ -46,13 +46,13 @@ namespace Iviz.Msgs.std_msgs
         public IMessage Create() => new Header();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "std_msgs/Header";
+        public const string _MessageType = "std_msgs/Header";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "2176decaecbce78abc3b96ef049fabed";
+        public const string _Md5Sum = "2176decaecbce78abc3b96ef049fabed";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAE42RT2vDMAzF7/4UghzaDtrDdut5DHYbrPei2moscOxMVtrl209O2brdBobg+L3f058O" +
                 "3hVzQAkwkGJARTgXgch9JNkmulCCqjiMFGB51XmkunMdHCJXsNNTJsGUZpiqibSAL8MwZfaoBMoD/fGb" +
                 "kzMgjCjKfkoopi8SODf5WXCgRrdT6WOi7Alen/emyZX8pGwFzUbwQlg59/YIbuKsT4/N4LrDtWztSj3J" +

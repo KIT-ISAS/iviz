@@ -93,13 +93,13 @@ namespace Iviz.Msgs.visualization_msgs
         public IMessage Create() => new MenuEntry();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "visualization_msgs/MenuEntry";
+        public const string _MessageType = "visualization_msgs/MenuEntry";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "b90ec63024573de83b57aa93eb39be2d";
+        public const string _Md5Sum = "b90ec63024573de83b57aa93eb39be2d";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAE51Uy27bMBC8+ysWzqEJkFedFigC+JAmThu0Tou0OQeUtLYIS6RKUk78950lJVtuDgF6" +
                 "Epeand3ZBw9ozqadmeA2VLP3asmno9EBzVRe0p0J7FQe9Jrnyq3Y9RAqlSdlSDmnNmQXr0n8KUiuKLdV" +
                 "xSCwZojS7CnYJYcSlAX73OmMScGjBuLMt1n/7Y8ccgqO+ZhCadtliQ9vEJ7JB+u4II1kaFGpAJKY1SnR" +

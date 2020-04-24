@@ -85,10 +85,10 @@ namespace Iviz.Msgs.diagnostic_msgs
         }
         
         /// <summary> Full ROS name of this service. </summary>
-        public const string ServiceType = "diagnostic_msgs/AddDiagnostics";
+        public const string _ServiceType = "diagnostic_msgs/AddDiagnostics";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        public const string Md5Sum = "e6ac9bbde83d0d3186523c3687aecaee";
+        public const string _Md5Sum = "e6ac9bbde83d0d3186523c3687aecaee";
         
         /// <summary> Request message. </summary>
         public readonly Request request;

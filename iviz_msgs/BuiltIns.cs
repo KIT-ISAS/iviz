@@ -25,263 +25,268 @@ namespace Iviz.Msgs
             Buffer.MemoryCopy(src, dst, size, size);
         }
 
-        public static void AssertInRange(byte* ptr, uint off, byte* end)
+        public static void AssertInRange(byte* arrayPtr, uint off, byte* end)
         {
-            if (ptr + off > end)
-                throw new ArgumentOutOfRangeException(nameof(ptr));
+            if (arrayPtr + off > end)
+                throw new ArgumentOutOfRangeException(nameof(arrayPtr));
         }
 
         public static void AssertSize<T>(T[] array, uint size)
         {
+            if (array is null)
+            {
+                throw new ArgumentNullException(nameof(array));
+            }
+
             if (array.Length != size)
                 throw new ArgumentException("Invalid array size. Expected " + size + ", but got " + array.Length + ".");
         }
 
         #region Deserializers
 
-        public static void Deserialize(out string obj, ref byte* ptr, byte* end)
+        public static void Deserialize(out string val, ref byte* arrayPtr, byte* end)
         {
-            AssertInRange(ptr, 4, end);
-            uint count = *(uint*)ptr; ptr += 4;
-            if (count == 0) { obj = string.Empty; return; }
-            AssertInRange(ptr, count, end);
-            obj = Encoding.UTF8.GetString(ptr, (int)count);
-            ptr += count;
+            AssertInRange(arrayPtr, 4, end);
+            uint count = *(uint*)arrayPtr; arrayPtr += 4;
+            if (count == 0) { val = string.Empty; return; }
+            AssertInRange(arrayPtr, count, end);
+            val = Encoding.UTF8.GetString(arrayPtr, (int)count);
+            arrayPtr += count;
         }
 
-        public static void Deserialize(out string[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Deserialize(out string[] val, ref byte* arrayPtr, byte* end, uint count)
         {
             if (count == 0)
             {
-                AssertInRange(ptr, 4, end);
-                count = *(uint*)ptr; ptr += 4;
-                if (count == 0) { obj = zc_string; return; }
+                AssertInRange(arrayPtr, 4, end);
+                count = *(uint*)arrayPtr; arrayPtr += 4;
+                if (count == 0) { val = zc_string; return; }
             }
-            obj = new string[count];
-            for (int i = 0; i < obj.Length; i++)
+            val = new string[count];
+            for (int i = 0; i < val.Length; i++)
             {
-                Deserialize(out obj[i], ref ptr, end);
+                Deserialize(out val[i], ref arrayPtr, end);
             }
         }
 
-        public static void Deserialize(out bool obj, ref byte* ptr, byte* end)
+        public static void Deserialize(out bool val, ref byte* arrayPtr, byte* end)
         {
-            obj = (*ptr != 0);
-            ptr++;
+            val = (*arrayPtr != 0);
+            arrayPtr++;
         }
 
-        public static void Deserialize(out time obj, ref byte* ptr, byte* end)
+        public static void Deserialize(out time val, ref byte* arrayPtr, byte* end)
         {
-            AssertInRange(ptr, 8, end);
-            uint secs = *(uint*)ptr; ptr += 4;
-            uint nsecs = *(uint*)ptr; ptr += 4;
-            obj = new time(secs, nsecs);
+            AssertInRange(arrayPtr, 8, end);
+            uint secs = *(uint*)arrayPtr; arrayPtr += 4;
+            uint nsecs = *(uint*)arrayPtr; arrayPtr += 4;
+            val = new time(secs, nsecs);
         }
 
-        public static void Deserialize(out time[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Deserialize(out time[] val, ref byte* arrayPtr, byte* end, uint count)
         {
-            DeserializeStructArray(out obj, ref ptr, end, count);
+            DeserializeStructArray(out val, ref arrayPtr, end, count);
         }
 
-        public static void Deserialize(out duration obj, ref byte* ptr, byte* end)
+        public static void Deserialize(out duration val, ref byte* arrayPtr, byte* end)
         {
-            AssertInRange(ptr, 8, end);
-            int secs = *(int*)ptr; ptr += 4;
-            int nsecs = *(int*)ptr; ptr += 4;
-            obj = new duration(secs, nsecs);
+            AssertInRange(arrayPtr, 8, end);
+            int secs = *(int*)arrayPtr; arrayPtr += 4;
+            int nsecs = *(int*)arrayPtr; arrayPtr += 4;
+            val = new duration(secs, nsecs);
         }
 
-        public static void Deserialize(out duration[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Deserialize(out duration[] val, ref byte* arrayPtr, byte* end, uint count)
         {
-            DeserializeStructArray(out obj, ref ptr, end, count);
+            DeserializeStructArray(out val, ref arrayPtr, end, count);
         }
 
-        public static void Deserialize(out bool[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Deserialize(out bool[] val, ref byte* arrayPtr, byte* end, uint count)
         {
             if (count == 0)
             {
-                AssertInRange(ptr, 4, end);
-                count = *(uint*)ptr; ptr += 4;
+                AssertInRange(arrayPtr, 4, end);
+                count = *(uint*)arrayPtr; arrayPtr += 4;
             }
-            AssertInRange(ptr, count * 1, end);
-            obj = new bool[count];
-            fixed (bool* obj_ptr = obj)
+            AssertInRange(arrayPtr, count * 1, end);
+            val = new bool[count];
+            fixed (bool* val_arrayPtr = val)
             {
                 uint size = count * 1;
-                Memcpy(obj_ptr, ptr, size);
-                ptr += size;
+                Memcpy(val_arrayPtr, arrayPtr, size);
+                arrayPtr += size;
             }
         }
 
-        public static void Deserialize(out char obj, ref byte* ptr, byte* end)
+        public static void Deserialize(out char val, ref byte* arrayPtr, byte* end)
         {
-            AssertInRange(ptr, 1, end);
-            obj = *(char*)ptr;
-            ptr += 1;
+            AssertInRange(arrayPtr, 1, end);
+            val = *(char*)arrayPtr;
+            arrayPtr += 1;
         }
 
-        public static void Deserialize(out char[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Deserialize(out char[] val, ref byte* arrayPtr, byte* end, uint count)
         {
-            DeserializeStructArray(out obj, ref ptr, end, count);
+            DeserializeStructArray(out val, ref arrayPtr, end, count);
         }
 
 
-        public static void Deserialize(out byte obj, ref byte* ptr, byte* end)
+        public static void Deserialize(out byte val, ref byte* arrayPtr, byte* end)
         {
-            AssertInRange(ptr, 1, end);
-            obj = *ptr;
-            ptr += 1;
+            AssertInRange(arrayPtr, 1, end);
+            val = *arrayPtr;
+            arrayPtr += 1;
         }
 
-        public static void Deserialize(out byte[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Deserialize(out byte[] val, ref byte* arrayPtr, byte* end, uint count)
         {
-            DeserializeStructArray(out obj, ref ptr, end, count);
+            DeserializeStructArray(out val, ref arrayPtr, end, count);
         }
 
-        public static void Deserialize(out sbyte obj, ref byte* ptr, byte* end)
+        public static void Deserialize(out sbyte val, ref byte* arrayPtr, byte* end)
         {
-            AssertInRange(ptr, 1, end);
-            obj = *(sbyte*)ptr;
-            ptr += 1;
+            AssertInRange(arrayPtr, 1, end);
+            val = *(sbyte*)arrayPtr;
+            arrayPtr += 1;
         }
 
-        public static void Deserialize(out sbyte[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Deserialize(out sbyte[] val, ref byte* arrayPtr, byte* end, uint count)
         {
-            DeserializeStructArray(out obj, ref ptr, end, count);
+            DeserializeStructArray(out val, ref arrayPtr, end, count);
         }
 
-        public static void Deserialize(out short obj, ref byte* ptr, byte* end)
+        public static void Deserialize(out short val, ref byte* arrayPtr, byte* end)
         {
-            AssertInRange(ptr, 2, end);
-            obj = *(short*)ptr;
-            ptr += 2;
+            AssertInRange(arrayPtr, 2, end);
+            val = *(short*)arrayPtr;
+            arrayPtr += 2;
         }
 
-        public static void Deserialize(out short[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Deserialize(out short[] val, ref byte* arrayPtr, byte* end, uint count)
         {
-            DeserializeStructArray(out obj, ref ptr, end, count);
+            DeserializeStructArray(out val, ref arrayPtr, end, count);
         }
 
-        public static void Deserialize(out ushort obj, ref byte* ptr, byte* end)
+        public static void Deserialize(out ushort val, ref byte* arrayPtr, byte* end)
         {
-            AssertInRange(ptr, 2, end);
-            obj = *(ushort*)ptr;
-            ptr += 2;
+            AssertInRange(arrayPtr, 2, end);
+            val = *(ushort*)arrayPtr;
+            arrayPtr += 2;
         }
 
-        public static void Deserialize(out ushort[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Deserialize(out ushort[] val, ref byte* arrayPtr, byte* end, uint count)
         {
-            DeserializeStructArray(out obj, ref ptr, end, count);
+            DeserializeStructArray(out val, ref arrayPtr, end, count);
         }
 
-        public static void Deserialize(out int obj, ref byte* ptr, byte* end)
+        public static void Deserialize(out int val, ref byte* arrayPtr, byte* end)
         {
-            AssertInRange(ptr, 4, end);
-            obj = *(int*)ptr;
-            ptr += 4;
+            AssertInRange(arrayPtr, 4, end);
+            val = *(int*)arrayPtr;
+            arrayPtr += 4;
         }
 
-        public static void Deserialize(out int[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Deserialize(out int[] val, ref byte* arrayPtr, byte* end, uint count)
         {
-            DeserializeStructArray(out obj, ref ptr, end, count);
+            DeserializeStructArray(out val, ref arrayPtr, end, count);
         }
 
-        public static void Deserialize(out uint obj, ref byte* ptr, byte* end)
+        public static void Deserialize(out uint val, ref byte* arrayPtr, byte* end)
         {
-            AssertInRange(ptr, 4, end);
-            obj = *(uint*)ptr;
-            ptr += 4;
+            AssertInRange(arrayPtr, 4, end);
+            val = *(uint*)arrayPtr;
+            arrayPtr += 4;
         }
 
-        public static void Deserialize(out uint[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Deserialize(out uint[] val, ref byte* arrayPtr, byte* end, uint count)
         {
-            DeserializeStructArray(out obj, ref ptr, end, count);
+            DeserializeStructArray(out val, ref arrayPtr, end, count);
         }
 
-        public static void Deserialize(out long obj, ref byte* ptr, byte* end)
+        public static void Deserialize(out long val, ref byte* arrayPtr, byte* end)
         {
-            AssertInRange(ptr, 8, end);
-            obj = *(long*)ptr;
-            ptr += 8;
+            AssertInRange(arrayPtr, 8, end);
+            val = *(long*)arrayPtr;
+            arrayPtr += 8;
         }
 
-        public static void Deserialize(out long[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Deserialize(out long[] val, ref byte* arrayPtr, byte* end, uint count)
         {
-            DeserializeStructArray(out obj, ref ptr, end, count);
+            DeserializeStructArray(out val, ref arrayPtr, end, count);
         }
 
-        public static void Deserialize(out ulong obj, ref byte* ptr, byte* end)
+        public static void Deserialize(out ulong val, ref byte* arrayPtr, byte* end)
         {
-            AssertInRange(ptr, 8, end);
-            obj = *(ulong*)ptr;
-            ptr += 8;
+            AssertInRange(arrayPtr, 8, end);
+            val = *(ulong*)arrayPtr;
+            arrayPtr += 8;
         }
 
-        public static void Deserialize(out ulong[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Deserialize(out ulong[] val, ref byte* arrayPtr, byte* end, uint count)
         {
-            DeserializeStructArray(out obj, ref ptr, end, count);
+            DeserializeStructArray(out val, ref arrayPtr, end, count);
         }
 
-        public static void Deserialize(out float obj, ref byte* ptr, byte* end)
+        public static void Deserialize(out float val, ref byte* arrayPtr, byte* end)
         {
-            AssertInRange(ptr, 4, end);
-            obj = *(float*)ptr;
-            ptr += 4;
+            AssertInRange(arrayPtr, 4, end);
+            val = *(float*)arrayPtr;
+            arrayPtr += 4;
         }
 
-        public static void Deserialize(out float[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Deserialize(out float[] val, ref byte* arrayPtr, byte* end, uint count)
         {
-            DeserializeStructArray(out obj, ref ptr, end, count);
+            DeserializeStructArray(out val, ref arrayPtr, end, count);
         }
 
-        public static void Deserialize(out double obj, ref byte* ptr, byte* end)
+        public static void Deserialize(out double val, ref byte* arrayPtr, byte* end)
         {
-            AssertInRange(ptr, 8, end);
-            obj = *(double*)ptr;
-            ptr += 8;
+            AssertInRange(arrayPtr, 8, end);
+            val = *(double*)arrayPtr;
+            arrayPtr += 8;
         }
 
-        public static void Deserialize(out double[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Deserialize(out double[] val, ref byte* arrayPtr, byte* end, uint count)
         {
-            DeserializeStructArray(out obj, ref ptr, end, count);
+            DeserializeStructArray(out val, ref arrayPtr, end, count);
         }
 
-        public static void DeserializeStruct<T>(out T obj, ref byte* ptr, byte* end) where T : unmanaged
+        public static void DeserializeStruct<T>(out T val, ref byte* arrayPtr, byte* end) where T : unmanaged
         {
-            AssertInRange(ptr, (uint)sizeof(T), end);
-            obj = *(T*)ptr;
-            ptr += sizeof(T);
+            AssertInRange(arrayPtr, (uint)sizeof(T), end);
+            val = *(T*)arrayPtr;
+            arrayPtr += sizeof(T);
         }
 
-        public static void DeserializeStructArray<T>(out T[] obj, ref byte* ptr, byte* end, uint count) where T : unmanaged
+        public static void DeserializeStructArray<T>(out T[] val, ref byte* arrayPtr, byte* end, uint count) where T : unmanaged
         {
             if (count == 0)
             {
-                AssertInRange(ptr, 4, end);
-                count = *(uint*)ptr; ptr += 4;
+                AssertInRange(arrayPtr, 4, end);
+                count = *(uint*)arrayPtr; arrayPtr += 4;
             }
-            AssertInRange(ptr, count * (uint)sizeof(T), end);
-            obj = new T[count];
-            fixed (T* obj_ptr = obj)
+            AssertInRange(arrayPtr, count * (uint)sizeof(T), end);
+            val = new T[count];
+            fixed (T* val_arrayPtr = val)
             {
                 uint size = count * (uint)sizeof(T);
-                Memcpy(obj_ptr, ptr, size);
-                ptr += size;
+                Memcpy(val_arrayPtr, arrayPtr, size);
+                arrayPtr += size;
             }
         }
 
-        public static void DeserializeArray<T>(out T[] obj, ref byte* ptr, byte* end, uint count) where T : IMessage, new()
+        public static void DeserializeArray<T>(out T[] val, ref byte* arrayPtr, byte* end, uint count) where T : IMessage, new()
         {
             if (count == 0)
             {
-                AssertInRange(ptr, 4, end);
-                count = *(uint*)ptr; ptr += 4;
+                AssertInRange(arrayPtr, 4, end);
+                count = *(uint*)arrayPtr; arrayPtr += 4;
             }
-            obj = new T[count];
-            for (int i = 0; i < obj.Length; i++)
+            val = new T[count];
+            for (int i = 0; i < val.Length; i++)
             {
-                obj[i] = new T();
-                obj[i].Deserialize(ref ptr, end);
+                val[i] = new T();
+                val[i].Deserialize(ref arrayPtr, end);
             }
         }
 
@@ -292,257 +297,282 @@ namespace Iviz.Msgs
         #region Serializers
 
 
-        public static void Serialize(in time obj, ref byte* ptr, byte* end)
+        public static void Serialize(in time val, ref byte* arrayPtr, byte* end)
         {
-            SerializeStruct(obj, ref ptr, end);
+            SerializeStruct(val, ref arrayPtr, end);
         }
 
-        public static void Serialize(time[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Serialize(time[] val, ref byte* arrayPtr, byte* end, uint count)
         {
-            SerializeStructArray(obj, ref ptr, end, count);
+            SerializeStructArray(val, ref arrayPtr, end, count);
         }
 
-        public static void Serialize(in duration obj, ref byte* ptr, byte* end)
+        public static void Serialize(in duration val, ref byte* arrayPtr, byte* end)
         {
-            SerializeStruct(obj, ref ptr, end);
+            SerializeStruct(val, ref arrayPtr, end);
         }
 
-        public static void Serialize(duration[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Serialize(duration[] val, ref byte* arrayPtr, byte* end, uint count)
         {
-            SerializeStructArray(obj, ref ptr, end, count);
+            SerializeStructArray(val, ref arrayPtr, end, count);
         }
 
-        public static void Serialize(bool obj, ref byte* ptr, byte* end)
+        public static void Serialize(bool val, ref byte* arrayPtr, byte* end)
         {
-            AssertInRange(ptr, 1, end);
-            *ptr = obj ? (byte)1 : (byte)0;
-            ptr++;
+            AssertInRange(arrayPtr, 1, end);
+            *arrayPtr = val ? (byte)1 : (byte)0;
+            arrayPtr++;
         }
 
-        public static void Serialize(string obj, ref byte* ptr, byte* end)
+        public static void Serialize(string val, ref byte* arrayPtr, byte* end)
         {
-            uint count = (uint)Encoding.UTF8.GetByteCount(obj);
-            AssertInRange(ptr, 4 + count, end);
-            *(uint*)ptr = count; ptr += 4;
+            if (val is null)
+            {
+                throw new ArgumentNullException(nameof(val));
+            }
+
+            uint count = (uint)Encoding.UTF8.GetByteCount(val);
+            AssertInRange(arrayPtr, 4 + count, end);
+            *(uint*)arrayPtr = count; arrayPtr += 4;
             if (count == 0) return;
-            fixed (char* obj_ptr = obj)
+            fixed (char* val_arrayPtr = val)
             {
-                Encoding.UTF8.GetBytes(obj_ptr, obj.Length, ptr, (int)count);
-                ptr += count;
+                Encoding.UTF8.GetBytes(val_arrayPtr, val.Length, arrayPtr, (int)count);
+                arrayPtr += count;
             }
         }
 
-        public static void Serialize(string[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Serialize(string[] val, ref byte* arrayPtr, byte* end, uint count)
         {
+            if (val is null)
+            {
+                throw new ArgumentNullException(nameof(val));
+            }
+
             if (count == 0)
             {
-                AssertInRange(ptr, 4, end);
-                *(int*)ptr = obj.Length; ptr += 4;
+                AssertInRange(arrayPtr, 4, end);
+                *(int*)arrayPtr = val.Length; arrayPtr += 4;
             }
             else
             {
-                AssertSize(obj, count);
+                AssertSize(val, count);
             }
-            for (int i = 0; i < obj.Length; i++)
+            for (int i = 0; i < val.Length; i++)
             {
-                Serialize(obj[i], ref ptr, end);
+                Serialize(val[i], ref arrayPtr, end);
             }
         }
 
-        public static void Serialize(bool[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Serialize(bool[] val, ref byte* arrayPtr, byte* end, uint count)
         {
+            if (val is null)
+            {
+                throw new ArgumentNullException(nameof(val));
+            }
+
             if (count == 0)
             {
-                AssertInRange(ptr, (uint)(4 + obj.Length * 1), end);
-                *(int*)ptr = obj.Length; ptr += 4;
+                AssertInRange(arrayPtr, (uint)(4 + val.Length * 1), end);
+                *(int*)arrayPtr = val.Length; arrayPtr += 4;
             }
             else
             {
-                AssertSize(obj, count);
-                AssertInRange(ptr, count * 1, end);
+                AssertSize(val, count);
+                AssertInRange(arrayPtr, count * 1, end);
             }
-            fixed (bool* obj_ptr = obj)
+            fixed (bool* val_arrayPtr = val)
             {
-                uint size = (uint)(obj.Length * 1);
-                Memcpy(ptr, obj_ptr, size);
-                ptr += size;
+                uint size = (uint)(val.Length * 1);
+                Memcpy(arrayPtr, val_arrayPtr, size);
+                arrayPtr += size;
             }
         }
 
-        public static void Serialize(byte obj, ref byte* ptr, byte* end)
+        public static void Serialize(byte val, ref byte* arrayPtr, byte* end)
         {
-            AssertInRange(ptr, 1, end);
-            *ptr = obj;
-            ptr += 1;
+            AssertInRange(arrayPtr, 1, end);
+            *arrayPtr = val;
+            arrayPtr += 1;
         }
 
-        public static void Serialize(byte[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Serialize(byte[] val, ref byte* arrayPtr, byte* end, uint count)
         {
-            SerializeStructArray(obj, ref ptr, end, count);
+            SerializeStructArray(val, ref arrayPtr, end, count);
         }
 
-        public static void Serialize(char obj, ref byte* ptr, byte* end)
+        public static void Serialize(char val, ref byte* arrayPtr, byte* end)
         {
-            AssertInRange(ptr, 1, end);
-            *(char*)ptr = obj;
-            ptr += 1;
+            AssertInRange(arrayPtr, 1, end);
+            *(char*)arrayPtr = val;
+            arrayPtr += 1;
         }
 
-        public static void Serialize(char[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Serialize(char[] val, ref byte* arrayPtr, byte* end, uint count)
         {
-            SerializeStructArray(obj, ref ptr, end, count);
+            SerializeStructArray(val, ref arrayPtr, end, count);
         }
 
-        public static void Serialize(sbyte obj, ref byte* ptr, byte* end)
+        public static void Serialize(sbyte val, ref byte* arrayPtr, byte* end)
         {
-            AssertInRange(ptr, 1, end);
-            *(sbyte*)ptr = obj;
-            ptr += 1;
+            AssertInRange(arrayPtr, 1, end);
+            *(sbyte*)arrayPtr = val;
+            arrayPtr += 1;
         }
 
-        public static void Serialize(sbyte[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Serialize(sbyte[] val, ref byte* arrayPtr, byte* end, uint count)
         {
-            SerializeStructArray(obj, ref ptr, end, count);
+            SerializeStructArray(val, ref arrayPtr, end, count);
         }
 
-        public static void Serialize(short obj, ref byte* ptr, byte* end)
+        public static void Serialize(short val, ref byte* arrayPtr, byte* end)
         {
-            AssertInRange(ptr, 2, end);
-            *(short*)ptr = obj;
-            ptr += 2;
+            AssertInRange(arrayPtr, 2, end);
+            *(short*)arrayPtr = val;
+            arrayPtr += 2;
         }
 
-        public static void Serialize(short[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Serialize(short[] val, ref byte* arrayPtr, byte* end, uint count)
         {
-            SerializeStructArray(obj, ref ptr, end, count);
+            SerializeStructArray(val, ref arrayPtr, end, count);
         }
 
-        public static void Serialize(ushort obj, ref byte* ptr, byte* end)
+        public static void Serialize(ushort val, ref byte* arrayPtr, byte* end)
         {
-            AssertInRange(ptr, 2, end);
-            *(ushort*)ptr = obj;
-            ptr += 2;
+            AssertInRange(arrayPtr, 2, end);
+            *(ushort*)arrayPtr = val;
+            arrayPtr += 2;
         }
 
-        public static void Serialize(ushort[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Serialize(ushort[] val, ref byte* arrayPtr, byte* end, uint count)
         {
-            SerializeStructArray(obj, ref ptr, end, count);
+            SerializeStructArray(val, ref arrayPtr, end, count);
         }
 
-        public static void Serialize(int obj, ref byte* ptr, byte* end)
+        public static void Serialize(int val, ref byte* arrayPtr, byte* end)
         {
-            AssertInRange(ptr, 4, end);
-            *(int*)ptr = obj;
-            ptr += 4;
+            AssertInRange(arrayPtr, 4, end);
+            *(int*)arrayPtr = val;
+            arrayPtr += 4;
         }
 
-        public static void Serialize(int[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Serialize(int[] val, ref byte* arrayPtr, byte* end, uint count)
         {
-            SerializeStructArray(obj, ref ptr, end, count);
+            SerializeStructArray(val, ref arrayPtr, end, count);
         }
 
-        public static void Serialize(uint obj, ref byte* ptr, byte* end)
+        public static void Serialize(uint val, ref byte* arrayPtr, byte* end)
         {
-            AssertInRange(ptr, 4, end);
-            *(uint*)ptr = obj;
-            ptr += 4;
+            AssertInRange(arrayPtr, 4, end);
+            *(uint*)arrayPtr = val;
+            arrayPtr += 4;
         }
 
-        public static void Serialize(uint[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Serialize(uint[] val, ref byte* arrayPtr, byte* end, uint count)
         {
-            SerializeStructArray(obj, ref ptr, end, count);
+            SerializeStructArray(val, ref arrayPtr, end, count);
         }
 
-        public static void Serialize(long obj, ref byte* ptr, byte* end)
+        public static void Serialize(long val, ref byte* arrayPtr, byte* end)
         {
-            AssertInRange(ptr, 8, end);
-            *(long*)ptr = obj;
-            ptr += 8;
+            AssertInRange(arrayPtr, 8, end);
+            *(long*)arrayPtr = val;
+            arrayPtr += 8;
         }
 
-        public static void Serialize(long[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Serialize(long[] val, ref byte* arrayPtr, byte* end, uint count)
         {
-            SerializeStructArray(obj, ref ptr, end, count);
+            SerializeStructArray(val, ref arrayPtr, end, count);
         }
 
-        public static void Serialize(ulong obj, ref byte* ptr, byte* end)
+        public static void Serialize(ulong val, ref byte* arrayPtr, byte* end)
         {
-            AssertInRange(ptr, 8, end);
-            *(ulong*)ptr = obj;
-            ptr += 8;
+            AssertInRange(arrayPtr, 8, end);
+            *(ulong*)arrayPtr = val;
+            arrayPtr += 8;
         }
 
-        public static void Serialize(ulong[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Serialize(ulong[] val, ref byte* arrayPtr, byte* end, uint count)
         {
-            SerializeStructArray(obj, ref ptr, end, count);
+            SerializeStructArray(val, ref arrayPtr, end, count);
         }
 
-        public static void Serialize(float obj, ref byte* ptr, byte* end)
+        public static void Serialize(float val, ref byte* arrayPtr, byte* end)
         {
-            AssertInRange(ptr, 4, end);
-            *(float*)ptr = obj;
-            ptr += 4;
+            AssertInRange(arrayPtr, 4, end);
+            *(float*)arrayPtr = val;
+            arrayPtr += 4;
         }
 
-        public static void Serialize(float[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Serialize(float[] val, ref byte* arrayPtr, byte* end, uint count)
         {
-            SerializeStructArray(obj, ref ptr, end, count);
+            SerializeStructArray(val, ref arrayPtr, end, count);
         }
 
-        public static void Serialize(double obj, ref byte* ptr, byte* end)
+        public static void Serialize(double val, ref byte* arrayPtr, byte* end)
         {
-            AssertInRange(ptr, 8, end);
-            *(double*)ptr = obj;
-            ptr += 8;
+            AssertInRange(arrayPtr, 8, end);
+            *(double*)arrayPtr = val;
+            arrayPtr += 8;
         }
 
-        public static void Serialize(double[] obj, ref byte* ptr, byte* end, uint count)
+        public static void Serialize(double[] val, ref byte* arrayPtr, byte* end, uint count)
         {
-            SerializeStructArray(obj, ref ptr, end, count);
+            SerializeStructArray(val, ref arrayPtr, end, count);
         }
 
-        public static void SerializeStruct<T>(in T obj, ref byte* ptr, byte* end) where T : unmanaged
+        public static void SerializeStruct<T>(in T val, ref byte* arrayPtr, byte* end) where T : unmanaged
         {
-            AssertInRange(ptr, (uint)sizeof(T), end);
-            *(T*)ptr = obj;
-            ptr += sizeof(T);
+            AssertInRange(arrayPtr, (uint)sizeof(T), end);
+            *(T*)arrayPtr = val;
+            arrayPtr += sizeof(T);
         }
 
-        public static void SerializeStructArray<T>(T[] obj, ref byte* ptr, byte* end, uint count) where T : unmanaged
+        public static void SerializeStructArray<T>(T[] val, ref byte* arrayPtr, byte* end, uint count) where T : unmanaged
         {
+            if (val is null)
+            {
+                throw new ArgumentNullException(nameof(val));
+            }
+
             if (count == 0)
             {
-                AssertInRange(ptr, (uint)(4 + obj.Length * sizeof(T)), end);
-                *(int*)ptr = obj.Length; ptr += 4;
+                AssertInRange(arrayPtr, (uint)(4 + val.Length * sizeof(T)), end);
+                *(int*)arrayPtr = val.Length; arrayPtr += 4;
             }
             else
             {
-                AssertSize(obj, count);
-                AssertInRange(ptr, count * (uint)sizeof(T), end);
+                AssertSize(val, count);
+                AssertInRange(arrayPtr, count * (uint)sizeof(T), end);
             }
-            fixed (T* obj_ptr = obj)
+            fixed (T* val_arrayPtr = val)
             {
-                uint size = (uint)(obj.Length * sizeof(T));
-                Memcpy(ptr, obj_ptr, size);
-                ptr += size;
+                uint size = (uint)(val.Length * sizeof(T));
+                Memcpy(arrayPtr, val_arrayPtr, size);
+                arrayPtr += size;
             }
         }
 
 
-        public static void SerializeArray<T>(T[] obj, ref byte* ptr, byte* end, uint count) where T : IMessage
+        public static void SerializeArray<T>(T[] val, ref byte* arrayPtr, byte* end, uint count) where T : IMessage
         {
+            if (val is null)
+            {
+                throw new ArgumentNullException(nameof(val));
+            }
+
             if (count == 0)
             {
-                AssertInRange(ptr, 4, end);
-                *(int*)ptr = obj.Length; ptr += 4;
+                AssertInRange(arrayPtr, 4, end);
+                *(int*)arrayPtr = val.Length; arrayPtr += 4;
             }
             else
             {
-                AssertSize(obj, count);
+                AssertSize(val, count);
             }
-            for (int i = 0; i < obj.Length; i++)
+            for (int i = 0; i < val.Length; i++)
             {
-                obj[i].Serialize(ref ptr, end);
+                val[i].Serialize(ref arrayPtr, end);
             }
         }
 
@@ -551,21 +581,36 @@ namespace Iviz.Msgs
 
         public static uint Deserialize(ISerializable message, byte[] buffer, int size)
         {
-            fixed (byte* buffer_ptr = buffer)
+            if (message is null)
             {
-                byte* buffer_ptr_off = buffer_ptr;
-                message.Deserialize(ref buffer_ptr_off, buffer_ptr + size);
-                return (uint)(buffer_ptr_off - buffer_ptr);
+                throw new ArgumentNullException(nameof(message));
+            }
+
+            fixed (byte* buffer_arrayPtr = buffer)
+            {
+                byte* buffer_arrayPtr_off = buffer_arrayPtr;
+                message.Deserialize(ref buffer_arrayPtr_off, buffer_arrayPtr + size);
+                return (uint)(buffer_arrayPtr_off - buffer_arrayPtr);
             }
         }
 
         public static uint Serialize(ISerializable message, byte[] buffer)
         {
-            fixed (byte* buffer_ptr = buffer)
+            if (message is null)
             {
-                byte* buffer_ptr_off = buffer_ptr;
-                message.Serialize(ref buffer_ptr_off, buffer_ptr + buffer.Length);
-                return (uint)(buffer_ptr_off - buffer_ptr);
+                throw new ArgumentNullException(nameof(message));
+            }
+
+            if (buffer is null)
+            {
+                throw new ArgumentNullException(nameof(buffer));
+            }
+
+            fixed (byte* buffer_arrayPtr = buffer)
+            {
+                byte* buffer_arrayPtr_off = buffer_arrayPtr;
+                message.Serialize(ref buffer_arrayPtr_off, buffer_arrayPtr + buffer.Length);
+                return (uint)(buffer_arrayPtr_off - buffer_arrayPtr);
             }
         }
 
@@ -576,22 +621,22 @@ namespace Iviz.Msgs
 
         public static string GetMessageType(Type type)
         {
-            return GetClassStringConstant(type, "MessageType");
+            return GetClassStringConstant(type, "_MessageType");
         }
 
         public static string GetServiceType(Type type)
         {
-            return GetClassStringConstant(type, "ServiceType");
+            return GetClassStringConstant(type, "_ServiceType");
         }
 
         public static string GetMd5Sum(Type type)
         {
-            return GetClassStringConstant(type, "Md5Sum");
+            return GetClassStringConstant(type, "_Md5Sum");
         }
 
         public static string GetDependenciesBase64(Type type)
         {
-            return GetClassStringConstant(type, "DependenciesBase64");
+            return GetClassStringConstant(type, "_DependenciesBase64");
         }
 
         public static IMessage CreateGenerator(Type type)

@@ -42,13 +42,13 @@ namespace Iviz.Msgs.nav_msgs
         public IMessage Create() => new GridCells();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "nav_msgs/GridCells";
+        public const string _MessageType = "nav_msgs/GridCells";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "b9e4f5df6d28e272ebde00a3994830f5";
+        public const string _Md5Sum = "b9e4f5df6d28e272ebde00a3994830f5";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAE7VTTWvcMBC961cM7CFJYVNISw+B3kI/DoVAcitlmZVm7QFZcqXxbtxf3yebbBvooYfW" +
                 "GGRL772ZeTPacCIuhWfKB/ISYyXFDt3cUVc0uE/CQQr1y+IOMbO9uVmAu5MG619u9aJdb66TPIiVeTfU" +
                 "rr6+z5rs67dV3bn3//hxXx4+3lK1sEZbE3YbejBOgUsgpMKBjemQUQgSlLKNcpQIEg+jBFpObR6lXoP4" +

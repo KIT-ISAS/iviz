@@ -41,13 +41,13 @@ namespace Iviz.Msgs.actionlib_msgs
         public IMessage Create() => new GoalID();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "actionlib_msgs/GoalID";
+        public const string _MessageType = "actionlib_msgs/GoalID";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "302881f31927c1df708a2dbab0e80ee8";
+        public const string _Md5Sum = "302881f31927c1df708a2dbab0e80ee8";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAEz2PS5LDIAxE95yiq7L3PbKfC8ggG1VscJCIK7cf4XHNkqY/Tw/8ZIYa7Qc0174lf9TG" +
                 "MJdNdgYZziwxuyKKtdKGkxSN353VOE3hgafB/7pywvwFFVA0qQXK7cPN81wgBmvCCqs4GvN+GGjbPD06" +
                 "Xc5jiX36vxozL4OFELkZSbmIwoV1IQdPD35JXlk/kryeHO87Rki1RiFjLMxppvhysuSJxto3w86qtDJO" +

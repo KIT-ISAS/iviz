@@ -59,10 +59,10 @@ namespace Iviz.Msgs.grid_map_msgs
         }
         
         /// <summary> Full ROS name of this service. </summary>
-        public const string ServiceType = "grid_map_msgs/ProcessFile";
+        public const string _ServiceType = "grid_map_msgs/ProcessFile";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        public const string Md5Sum = "03f389710f49a6dd2a8b447bb2850cd6";
+        public const string _Md5Sum = "03f389710f49a6dd2a8b447bb2850cd6";
         
         /// <summary> Request message. </summary>
         public readonly Request request;

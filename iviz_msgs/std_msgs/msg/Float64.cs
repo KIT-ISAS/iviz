@@ -19,13 +19,13 @@ namespace Iviz.Msgs.std_msgs
         public IMessage Create() => new Float64();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "std_msgs/Float64";
+        public const string _MessageType = "std_msgs/Float64";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "fdb28210bfa9d7c91146260178d9a584";
+        public const string _Md5Sum = "fdb28210bfa9d7c91146260178d9a584";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAE0vLyU8sMTNRSEksSeQCAPMRveQNAAAA";
                 
     }

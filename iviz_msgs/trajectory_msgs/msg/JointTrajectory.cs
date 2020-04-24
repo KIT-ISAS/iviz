@@ -46,13 +46,13 @@ namespace Iviz.Msgs.trajectory_msgs
         public IMessage Create() => new JointTrajectory();
     
         /// <summary> Full ROS name of this message. </summary>
-        public const string MessageType = "trajectory_msgs/JointTrajectory";
+        public const string _MessageType = "trajectory_msgs/JointTrajectory";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string Md5Sum = "65b4f94a94d1ed67169da35a02f33d3f";
+        public const string _Md5Sum = "65b4f94a94d1ed67169da35a02f33d3f";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string DependenciesBase64 =
+        public const string _DependenciesBase64 =
                 "H4sIAAAAAAAAE7VUTYvbMBC961cM5LC7pUmhLT0Eeij0Y1soLGxuSzATaRJrkSVXkrPrf98neZt4Sw89" +
                 "tMYgS/PmzdeTr4WNRGrrolKO1h/utnQfrM+N506S+la+N5HvRecQx5uyBaQva1Lq/T9+1PfbL2tK2TRd" +
                 "OqRX11NmC7rN7A1HQ51kNpyZ9gGJ20MrcenkKA5O3PViqFrz2EtawXHT2kR4D+IlsnMjDQmgHEiHrhu8" +
