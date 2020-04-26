@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.geometry_msgs
 {
@@ -20,18 +21,22 @@ namespace Iviz.Msgs.geometry_msgs
             BuiltIns.SerializeStruct(this, ref ptr, end);
         }
     
-        public int GetLength() => 24;
+        [IgnoreDataMember]
+        public int RosMessageLength => 24;
     
         public IMessage Create() => new Point();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "geometry_msgs/Point";
+        public const string RosMessageType = "geometry_msgs/Point";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "4a842b65f413084dc2b10fb484ea7f17";
+        public const string RosMd5Sum = "4a842b65f413084dc2b10fb484ea7f17";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAEz3HwQmAMAwF0Hum+OAK4iQuEEpCA5KUJgd1ej319t6Gs1uihRebJ6oLRqSVhSMU/M+8" +
                 "YA6dIsjBTUiv4Dp23EvP0kv0AQQdt/JVAAAA";
                 

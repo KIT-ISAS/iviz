@@ -1,3 +1,6 @@
+using System.Text;
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.trajectory_msgs
 {
     public sealed class JointTrajectory : IMessage
@@ -28,31 +31,38 @@ namespace Iviz.Msgs.trajectory_msgs
             BuiltIns.SerializeArray(points, ref ptr, end, 0);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 12;
-            size += header.GetLength();
-            for (int i = 0; i < joint_names.Length; i++)
-            {
-                size += joint_names[i].Length;
+            get {
+                int size = 8;
+                size += header.RosMessageLength;
+                size += 4 * joint_names.Length;
+                for (int i = 0; i < joint_names.Length; i++)
+                {
+                    size += Encoding.UTF8.GetByteCount(joint_names[i]);
+                }
+                for (int i = 0; i < points.Length; i++)
+                {
+                    size += points[i].RosMessageLength;
+                }
+                return size;
             }
-            for (int i = 0; i < points.Length; i++)
-            {
-                size += points[i].GetLength();
-            }
-            return size;
         }
     
         public IMessage Create() => new JointTrajectory();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "trajectory_msgs/JointTrajectory";
+        public const string RosMessageType = "trajectory_msgs/JointTrajectory";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "65b4f94a94d1ed67169da35a02f33d3f";
+        public const string RosMd5Sum = "65b4f94a94d1ed67169da35a02f33d3f";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE7VUTYvbMBC961cM5LC7pUmhLT0Eeij0Y1soLGxuSzATaRJrkSVXkrPrf98neZt4Sw89" +
                 "tMYgS/PmzdeTr4WNRGrrolKO1h/utnQfrM+N506S+la+N5HvRecQx5uyBaQva1Lq/T9+1PfbL2tK2TRd" +
                 "OqRX11NmC7rN7A1HQ51kNpyZ9gGJ20MrcenkKA5O3PViqFrz2EtawXHT2kR4D+IlsnMjDQmgHEiHrhu8" +

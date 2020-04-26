@@ -1,3 +1,6 @@
+using System.Text;
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.diagnostic_msgs
 {
     public sealed class DiagnosticStatus : IMessage
@@ -45,29 +48,35 @@ namespace Iviz.Msgs.diagnostic_msgs
             BuiltIns.SerializeArray(values, ref ptr, end, 0);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 17;
-            size += name.Length;
-            size += message.Length;
-            size += hardware_id.Length;
-            for (int i = 0; i < values.Length; i++)
-            {
-                size += values[i].GetLength();
+            get {
+                int size = 17;
+                size += Encoding.UTF8.GetByteCount(name);
+                size += Encoding.UTF8.GetByteCount(message);
+                size += Encoding.UTF8.GetByteCount(hardware_id);
+                for (int i = 0; i < values.Length; i++)
+                {
+                    size += values[i].RosMessageLength;
+                }
+                return size;
             }
-            return size;
         }
     
         public IMessage Create() => new DiagnosticStatus();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "diagnostic_msgs/DiagnosticStatus";
+        public const string RosMessageType = "diagnostic_msgs/DiagnosticStatus";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "d0ce08bc6e5ba34c7754f563a9cabaf1";
+        public const string RosMd5Sum = "d0ce08bc6e5ba34c7754f563a9cabaf1";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61STW+DMAy951dY6n3dx20Shx6qHfbRiVbbYZoqQzywCgmLDYh/PwJF62W3RYr8HL/n" +
                 "2E5WcChZoCYRLAhKX1kBLQlEUVsB/wXogJ3ljm2LFeS+brwjpzEUicFnXq/MCsy4X70IZxVBRR1Vk9w3" +
                 "FFDZOzHZoAS7x+R6Ru+b9CW5mfE2TXdpcjs7+8PmaZvcmdmbUsHqbC8zArm2jpgsYOY7AiMa2BXgsKZR" +

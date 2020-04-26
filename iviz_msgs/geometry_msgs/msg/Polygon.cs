@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.geometry_msgs
 {
     public sealed class Polygon : IMessage
@@ -21,23 +23,29 @@ namespace Iviz.Msgs.geometry_msgs
             BuiltIns.SerializeArray(points, ref ptr, end, 0);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 4;
-            size += 12 * points.Length;
-            return size;
+            get {
+                int size = 4;
+                size += 12 * points.Length;
+                return size;
+            }
         }
     
         public IMessage Create() => new Polygon();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "geometry_msgs/Polygon";
+        public const string RosMessageType = "geometry_msgs/Polygon";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "cd60a26494a087f577976f0329fa120e";
+        public const string RosMd5Sum = "cd60a26494a087f577976f0329fa120e";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61RzUrEMBC+5ykG9qIgK+zeBA/iQTwIgt5EJG2m7WCaCZlZ1/r0Ttru4gPY0zSZ7zeb" +
                 "O5CMLXXUeiVOwB14yByn3n6OAxYEHRA6KqLgU4DobchMSQW83XqRw4gBlKFBaDklbBWDe64r+93b+7rs" +
                 "3O0/f+7p5eEGeuQRtUwfo/Ryvaq6DbwOJNWOekoyZ8gs9DejbQIl6AqileBbvDiSDrDfQUMWzrZysWrE" +

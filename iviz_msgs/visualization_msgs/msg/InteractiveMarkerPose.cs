@@ -1,3 +1,6 @@
+using System.Text;
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.visualization_msgs
 {
     public sealed class InteractiveMarkerPose : IMessage
@@ -33,24 +36,30 @@ namespace Iviz.Msgs.visualization_msgs
             BuiltIns.Serialize(name, ref ptr, end);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 60;
-            size += header.GetLength();
-            size += name.Length;
-            return size;
+            get {
+                int size = 60;
+                size += header.RosMessageLength;
+                size += Encoding.UTF8.GetByteCount(name);
+                return size;
+            }
         }
     
         public IMessage Create() => new InteractiveMarkerPose();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "visualization_msgs/InteractiveMarkerPose";
+        public const string RosMessageType = "visualization_msgs/InteractiveMarkerPose";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "a6e6833209a196a38d798dadb02c81f8";
+        public const string RosMd5Sum = "a6e6833209a196a38d798dadb02c81f8";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71UwU7cMBC9+ytG2gNQQZDaqgekHpBQWw5IVHBHs/EkGSmxg+0spF/fZ4csXfXQHlpW" +
                 "0caJZ96892acDd3rIOdN4EFIXeMr803YSqCu3IzZ0LXTpNzT6KNUdNlHf0pWGnUSKXVCo+58wq66RI0P" +
                 "FHzipN7FyrTiB0lhfhhiG89vAVBQCqoVl7SZ1bUUU8CtopspJtoKtb3fct/PNDl9nDIxJORSyY9aY8UJ" +

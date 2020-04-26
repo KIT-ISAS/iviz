@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.nav_msgs
 {
     public sealed class GridCells : IMessage
@@ -31,24 +33,30 @@ namespace Iviz.Msgs.nav_msgs
             BuiltIns.SerializeStructArray(cells, ref ptr, end, 0);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 12;
-            size += header.GetLength();
-            size += 24 * cells.Length;
-            return size;
+            get {
+                int size = 12;
+                size += header.RosMessageLength;
+                size += 24 * cells.Length;
+                return size;
+            }
         }
     
         public IMessage Create() => new GridCells();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "nav_msgs/GridCells";
+        public const string RosMessageType = "nav_msgs/GridCells";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "b9e4f5df6d28e272ebde00a3994830f5";
+        public const string RosMd5Sum = "b9e4f5df6d28e272ebde00a3994830f5";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE7VTTWvcMBC961cM7CFJYVNISw+B3kI/DoVAcitlmZVm7QFZcqXxbtxf3yebbBvooYfW" +
                 "GGRL772ZeTPacCIuhWfKB/ISYyXFDt3cUVc0uE/CQQr1y+IOMbO9uVmAu5MG619u9aJdb66TPIiVeTfU" +
                 "rr6+z5rs67dV3bn3//hxXx4+3lK1sEZbE3YbejBOgUsgpMKBjemQUQgSlLKNcpQIEg+jBFpObR6lXoP4" +

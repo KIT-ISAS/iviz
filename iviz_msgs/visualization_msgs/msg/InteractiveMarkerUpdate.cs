@@ -1,3 +1,6 @@
+using System.Text;
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.visualization_msgs
 {
     public sealed class InteractiveMarkerUpdate : IMessage
@@ -63,35 +66,42 @@ namespace Iviz.Msgs.visualization_msgs
             BuiltIns.Serialize(erases, ref ptr, end, 0);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 29;
-            size += server_id.Length;
-            for (int i = 0; i < markers.Length; i++)
-            {
-                size += markers[i].GetLength();
+            get {
+                int size = 25;
+                size += Encoding.UTF8.GetByteCount(server_id);
+                for (int i = 0; i < markers.Length; i++)
+                {
+                    size += markers[i].RosMessageLength;
+                }
+                for (int i = 0; i < poses.Length; i++)
+                {
+                    size += poses[i].RosMessageLength;
+                }
+                size += 4 * erases.Length;
+                for (int i = 0; i < erases.Length; i++)
+                {
+                    size += Encoding.UTF8.GetByteCount(erases[i]);
+                }
+                return size;
             }
-            for (int i = 0; i < poses.Length; i++)
-            {
-                size += poses[i].GetLength();
-            }
-            for (int i = 0; i < erases.Length; i++)
-            {
-                size += erases[i].Length;
-            }
-            return size;
         }
     
         public IMessage Create() => new InteractiveMarkerUpdate();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "visualization_msgs/InteractiveMarkerUpdate";
+        public const string RosMessageType = "visualization_msgs/InteractiveMarkerUpdate";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "710d308d0a9276d65945e92dd30b3946";
+        public const string RosMd5Sum = "710d308d0a9276d65945e92dd30b3946";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE91aW3PbNhZ+rn4FJp5O7K0s39Jsq10/KJacaOrb2nLaTqejgUhIQk0RDEhaVn59v3MA" +
                 "UKRlJ52dTTqz2c6aAnEOzv0GbolhrNJCT1c6nYm8sPjTEedlXoiJEmWqP5RK6FQUcyUKk+lIpHKh8kxG" +
                 "qrWFVVng/3QucmXvlRVLY+9yYdJOy6Hy62Mdt7D9RgFbGimRlouJsh0sjYA3SjRIEEudJKLMlUNYGBGr" +

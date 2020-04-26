@@ -1,94 +1,105 @@
+using System.Text;
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.rosapi
 {
-    public class Topics : IService
+    public sealed class Topics : IService
     {
-        public sealed class Request : IRequest
-        {
-            
-        
-            public unsafe void Deserialize(ref byte* ptr, byte* end)
-            {
-            }
-        
-            public unsafe void Serialize(ref byte* ptr, byte* end)
-            {
-            }
-        
-            public int GetLength() => 0;
-        }
-
-        public sealed class Response : IResponse
-        {
-            public string[] topics;
-            public string[] types;
-        
-            /// <summary> Constructor for empty message. </summary>
-            public Response()
-            {
-                topics = System.Array.Empty<string>();
-                types = System.Array.Empty<string>();
-            }
-            
-            public unsafe void Deserialize(ref byte* ptr, byte* end)
-            {
-                BuiltIns.Deserialize(out topics, ref ptr, end, 0);
-                BuiltIns.Deserialize(out types, ref ptr, end, 0);
-            }
-        
-            public unsafe void Serialize(ref byte* ptr, byte* end)
-            {
-                BuiltIns.Serialize(topics, ref ptr, end, 0);
-                BuiltIns.Serialize(types, ref ptr, end, 0);
-            }
-        
-            public int GetLength()
-            {
-                int size = 16;
-                for (int i = 0; i < topics.Length; i++)
-                {
-                    size += topics[i].Length;
-                }
-                for (int i = 0; i < types.Length; i++)
-                {
-                    size += types[i].Length;
-                }
-                return size;
-            }
-        }
-        
-        /// <summary> Full ROS name of this service. </summary>
-        public const string _ServiceType = "rosapi/Topics";
-        
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
-        public const string _Md5Sum = "d966d98fc333fa1f3135af765eac1ba8";
-        
         /// <summary> Request message. </summary>
-        public readonly Request request;
+        public TopicsRequest Request { get; }
         
         /// <summary> Response message. </summary>
-        public Response response;
+        public TopicsResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public Topics()
         {
-            request = new Request();
-            response = new Response();
+            Request = new TopicsRequest();
+            Response = new TopicsResponse();
         }
         
         /// <summary> Setter constructor. </summary>
-        public Topics(Request request)
+        public Topics(TopicsRequest request)
         {
-            this.request = request;
-            response = new Response();
+            Request = request;
+            Response = new TopicsResponse();
         }
         
         public IService Create() => new Topics();
         
-        IRequest IService.Request => request;
+        IRequest IService.Request => Request;
         
-        IResponse IService.Response => response;
+        IResponse IService.Response => Response;
         
         public string ErrorMessage { get; set; }
+        
+        [IgnoreDataMember]
+        public string RosType => RosServiceType;
+        
+        /// <summary> Full ROS name of this service. </summary>
+        public const string RosServiceType = "rosapi/Topics";
+        
+        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        public const string RosMd5Sum = "d966d98fc333fa1f3135af765eac1ba8";
     }
 
+    public sealed class TopicsRequest : IRequest
+    {
+        
+    
+        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        {
+        }
+    
+        public unsafe void Serialize(ref byte* ptr, byte* end)
+        {
+        }
+    
+        [IgnoreDataMember]
+        public int RosMessageLength => 0;
+    }
+
+    public sealed class TopicsResponse : IResponse
+    {
+        public string[] topics;
+        public string[] types;
+    
+        /// <summary> Constructor for empty message. </summary>
+        public TopicsResponse()
+        {
+            topics = System.Array.Empty<string>();
+            types = System.Array.Empty<string>();
+        }
+        
+        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        {
+            BuiltIns.Deserialize(out topics, ref ptr, end, 0);
+            BuiltIns.Deserialize(out types, ref ptr, end, 0);
+        }
+    
+        public unsafe void Serialize(ref byte* ptr, byte* end)
+        {
+            BuiltIns.Serialize(topics, ref ptr, end, 0);
+            BuiltIns.Serialize(types, ref ptr, end, 0);
+        }
+    
+        [IgnoreDataMember]
+        public int RosMessageLength
+        {
+            get {
+                int size = 8;
+                size += 4 * topics.Length;
+                for (int i = 0; i < topics.Length; i++)
+                {
+                    size += Encoding.UTF8.GetByteCount(topics[i]);
+                }
+                size += 4 * types.Length;
+                for (int i = 0; i < types.Length; i++)
+                {
+                    size += Encoding.UTF8.GetByteCount(types[i]);
+                }
+                return size;
+            }
+        }
+    }
 }

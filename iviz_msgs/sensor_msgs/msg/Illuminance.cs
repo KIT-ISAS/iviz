@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.sensor_msgs
 {
     public sealed class Illuminance : IMessage
@@ -44,23 +46,29 @@ namespace Iviz.Msgs.sensor_msgs
             BuiltIns.Serialize(variance, ref ptr, end);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 16;
-            size += header.GetLength();
-            return size;
+            get {
+                int size = 16;
+                size += header.RosMessageLength;
+                return size;
+            }
         }
     
         public IMessage Create() => new Illuminance();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "sensor_msgs/Illuminance";
+        public const string RosMessageType = "sensor_msgs/Illuminance";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "8cf5febb0952fca9d650c3d11a81a188";
+        public const string RosMd5Sum = "8cf5febb0952fca9d650c3d11a81a188";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61UwW7bMAy9+ysI5NBmW9JiG3YosMOAYluAFijWHnYrWJmxhcmSJ1FJs68fKduJeyiw" +
                 "wwwDtijq8ZGPIizg3vrGEfRt4NARR2vAOpc769Ebgo4w5UgdeV4D3NimZUhtyK6GJwJMKXdUAwdZVbCY" +
                 "3GtAF3wD3BIk8inEswTPK3y2Cc7ViJEQwhZqYjJsgwfZ0Y3D6g/0Dj0t14r3IKY5nTF0izvBgEsIEfqQ" +

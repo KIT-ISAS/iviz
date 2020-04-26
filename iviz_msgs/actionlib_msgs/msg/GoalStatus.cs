@@ -1,3 +1,6 @@
+using System.Text;
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.actionlib_msgs
 {
     public sealed class GoalStatus : IMessage
@@ -47,24 +50,30 @@ namespace Iviz.Msgs.actionlib_msgs
             BuiltIns.Serialize(text, ref ptr, end);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 5;
-            size += goal_id.GetLength();
-            size += text.Length;
-            return size;
+            get {
+                int size = 5;
+                size += goal_id.RosMessageLength;
+                size += Encoding.UTF8.GetByteCount(text);
+                return size;
+            }
         }
     
         public IMessage Create() => new GoalStatus();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "actionlib_msgs/GoalStatus";
+        public const string RosMessageType = "actionlib_msgs/GoalStatus";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "d388f9b87b3c471f784434d671988d4a";
+        public const string RosMd5Sum = "d388f9b87b3c471f784434d671988d4a";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71VTY/aMBC951eMtJdWquh3u63EgUKEqPZLC+115TgTcOs41B7D8u87Nkkgu9DlsGok" +
                 "CETjN2/evJmMK6EnI5jz7U7liVeGzsGRIO/qPzfp1WhyNYbm6sMb/j6D2QLjMVgIBxskoAoyhKWtJDqH" +
                 "OWQbII4RklRlwKFdoa0xB8PZ5GcKe5hvu5jKgfTWoiG9YVRl5qcB39ym6eXNLB21wO+6wBYlqhWDCJDC" +

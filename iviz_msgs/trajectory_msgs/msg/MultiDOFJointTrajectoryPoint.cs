@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.trajectory_msgs
 {
     public sealed class MultiDOFJointTrajectoryPoint : IMessage
@@ -37,25 +39,31 @@ namespace Iviz.Msgs.trajectory_msgs
             BuiltIns.Serialize(time_from_start, ref ptr, end);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 20;
-            size += 56 * transforms.Length;
-            size += 48 * velocities.Length;
-            size += 48 * accelerations.Length;
-            return size;
+            get {
+                int size = 20;
+                size += 56 * transforms.Length;
+                size += 48 * velocities.Length;
+                size += 48 * accelerations.Length;
+                return size;
+            }
         }
     
         public IMessage Create() => new MultiDOFJointTrajectoryPoint();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "trajectory_msgs/MultiDOFJointTrajectoryPoint";
+        public const string RosMessageType = "trajectory_msgs/MultiDOFJointTrajectoryPoint";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "3ebe08d1abd5b65862d50e09430db776";
+        public const string RosMd5Sum = "3ebe08d1abd5b65862d50e09430db776";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71UTY/TQAy9z6+wtJddqQQJ0B6QuPGhPSBArLggVE0nTjrsZBw8Dtnw6/EkabJdFXEA" +
                 "tVIlT2s/+73nmQt4Y90emi6If1JSBd/JRwFnI6QWna8GsCBsY6qIG7jsWhCCa3j94e2VqZEaFB62TarT" +
                 "09tD1tdva0Uy5gJu98g4Yu5Q4X5iIOdlmDt4LEFTQfYIxL72EXSOfJpmedym90m0xYzi8USLCNY5DMhW" +

@@ -1,68 +1,52 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.rosbridge_library
 {
-    public class TestEmpty : IService
+    public sealed class TestEmpty : IService
     {
-        public sealed class Request : IRequest
-        {
-        
-            public unsafe void Deserialize(ref byte* ptr, byte* end)
-            {
-            }
-        
-            public unsafe void Serialize(ref byte* ptr, byte* end)
-            {
-            }
-        
-            public int GetLength() => 0;
-        }
-
-        public sealed class Response : IResponse
-        {
-        
-            public unsafe void Deserialize(ref byte* ptr, byte* end)
-            {
-            }
-        
-            public unsafe void Serialize(ref byte* ptr, byte* end)
-            {
-            }
-        
-            public int GetLength() => 0;
-        }
-        
-        /// <summary> Full ROS name of this service. </summary>
-        public const string _ServiceType = "rosbridge_library/TestEmpty";
-        
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
-        public const string _Md5Sum = "d41d8cd98f00b204e9800998ecf8427e";
-        
         /// <summary> Request message. </summary>
-        public readonly Request request;
+        public TestEmptyRequest Request { get; }
         
         /// <summary> Response message. </summary>
-        public Response response;
+        public TestEmptyResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public TestEmpty()
         {
-            request = new Request();
-            response = new Response();
+            Request = new TestEmptyRequest();
+            Response = new TestEmptyResponse();
         }
         
         /// <summary> Setter constructor. </summary>
-        public TestEmpty(Request request)
+        public TestEmpty(TestEmptyRequest request)
         {
-            this.request = request;
-            response = new Response();
+            Request = request;
+            Response = new TestEmptyResponse();
         }
         
         public IService Create() => new TestEmpty();
         
-        IRequest IService.Request => request;
+        IRequest IService.Request => Request;
         
-        IResponse IService.Response => response;
+        IResponse IService.Response => Response;
         
         public string ErrorMessage { get; set; }
+        
+        [IgnoreDataMember]
+        public string RosType => RosServiceType;
+        
+        /// <summary> Full ROS name of this service. </summary>
+        public const string RosServiceType = "rosbridge_library/TestEmpty";
+        
+        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        public const string RosMd5Sum = "d41d8cd98f00b204e9800998ecf8427e";
     }
 
+    public sealed class TestEmptyRequest : Internal.EmptyRequest
+    {
+    }
+
+    public sealed class TestEmptyResponse : Internal.EmptyResponse
+    {
+    }
 }

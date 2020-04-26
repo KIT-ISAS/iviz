@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.nav_msgs
 {
     public sealed class Path : IMessage
@@ -25,27 +27,33 @@ namespace Iviz.Msgs.nav_msgs
             BuiltIns.SerializeArray(poses, ref ptr, end, 0);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 4;
-            size += header.GetLength();
-            for (int i = 0; i < poses.Length; i++)
-            {
-                size += poses[i].GetLength();
+            get {
+                int size = 4;
+                size += header.RosMessageLength;
+                for (int i = 0; i < poses.Length; i++)
+                {
+                    size += poses[i].RosMessageLength;
+                }
+                return size;
             }
-            return size;
         }
     
         public IMessage Create() => new Path();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "nav_msgs/Path";
+        public const string RosMessageType = "nav_msgs/Path";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "6227e2b7e9cce15051f669a5e197bbf7";
+        public const string RosMd5Sum = "6227e2b7e9cce15051f669a5e197bbf7";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71UTYvbMBC961cM5LC7pUmhLT0Eelgo/TgUUnZvpSwTe2wLbMk7kpN1f32f5I2zWSjt" +
                 "oY0xWLJm3rw3H1pcO2JVHslX1PsggWLDkVR6lSAuBmLacGyo8oql+q2PFD22bev35rNwKUpN/phafCdR" +
                 "x7su1OHVBnA3kbteyu8/JnBj3v/jx3y9+bSmEMsp5sTHLAiBXclaEghxyZGzgMbWjeiylZ20cMrcKJ/G" +

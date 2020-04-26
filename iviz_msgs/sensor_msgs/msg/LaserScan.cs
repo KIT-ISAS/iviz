@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.sensor_msgs
 {
     public sealed class LaserScan : IMessage
@@ -68,25 +70,31 @@ namespace Iviz.Msgs.sensor_msgs
             BuiltIns.Serialize(intensities, ref ptr, end, 0);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 36;
-            size += header.GetLength();
-            size += 4 * ranges.Length;
-            size += 4 * intensities.Length;
-            return size;
+            get {
+                int size = 36;
+                size += header.RosMessageLength;
+                size += 4 * ranges.Length;
+                size += 4 * intensities.Length;
+                return size;
+            }
         }
     
         public IMessage Create() => new LaserScan();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "sensor_msgs/LaserScan";
+        public const string RosMessageType = "sensor_msgs/LaserScan";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "90c7ef2dc6895d81024acba2ac42f369";
+        public const string RosMd5Sum = "90c7ef2dc6895d81024acba2ac42f369";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61VTY/jNgy9+1cQyGGTYpIC3dug7Wmx7RxaFJg9dRAMGJmOhZUljyQn4/76Psr5cBed" +
                 "7B7WCBIoJh/FR/JxQY/W751QMuypiaEjpt6x50iOk0SK7PeybqyvJVaLakEPDY1hoJYPQuxDbk9GwKFa" +
                 "DtYIHW1uqbZNI1F8pp3A2IZIS9nsNwiQAvABxTHyuLpDQEEs0iAEMxOFM8BnEJ2kxHu5o2Q9AnDfO2s4" +

@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.rosbridge_library
 {
     public sealed class Num : IMessage
@@ -14,18 +16,22 @@ namespace Iviz.Msgs.rosbridge_library
             BuiltIns.Serialize(num, ref ptr, end);
         }
     
-        public int GetLength() => 8;
+        [IgnoreDataMember]
+        public int RosMessageLength => 8;
     
         public IMessage Create() => new Num();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "rosbridge_library/Num";
+        public const string RosMessageType = "rosbridge_library/Num";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "57d3c40ec3ac3754af76a83e6e73127a";
+        public const string RosMd5Sum = "57d3c40ec3ac3754af76a83e6e73127a";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE8vMKzEzUcgrzeXiAgCjoYsaCwAAAA==";
                 
     }

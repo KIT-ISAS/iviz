@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.geometry_msgs
 {
     public sealed class PointStamped : IMessage
@@ -24,23 +26,29 @@ namespace Iviz.Msgs.geometry_msgs
             point.Serialize(ref ptr, end);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 24;
-            size += header.GetLength();
-            return size;
+            get {
+                int size = 24;
+                size += header.RosMessageLength;
+                return size;
+            }
         }
     
         public IMessage Create() => new PointStamped();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "geometry_msgs/PointStamped";
+        public const string RosMessageType = "geometry_msgs/PointStamped";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "c63aecb41bfdfd6b7e1fac37c7cbe7bf";
+        public const string RosMd5Sum = "c63aecb41bfdfd6b7e1fac37c7cbe7bf";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE7VTTYvcMAy9+1cI5rC7hdlCW3oY6K3041BY2L0PGltJDImdWsrspr++zw4zLfTSQxtM" +
                 "bMfWk97Ty46ehqhUZC6ikkyJ6SHHZPQcbcD3TookL+RzLiEmNqGu8CTEKZDFSdR4mt0X4SCFhja5DWGu" +
                 "b+c+/OPHfXv8fCC1cJy019dbZrejR0NJXAJNYhzYmLqMimI/SNmPcpaRWq0SqJ3aOoveI7ApgNFLksLj" +

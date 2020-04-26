@@ -1,93 +1,91 @@
+using System.Text;
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.diagnostic_msgs
 {
-    public class SelfTest : IService
+    public sealed class SelfTest : IService
     {
-        public sealed class Request : IRequest
-        {
-        
-            public unsafe void Deserialize(ref byte* ptr, byte* end)
-            {
-            }
-        
-            public unsafe void Serialize(ref byte* ptr, byte* end)
-            {
-            }
-        
-            public int GetLength() => 0;
-        }
-
-        public sealed class Response : IResponse
-        {
-            public string id;
-            public byte passed;
-            public DiagnosticStatus[] status;
-        
-            /// <summary> Constructor for empty message. </summary>
-            public Response()
-            {
-                id = "";
-                status = System.Array.Empty<DiagnosticStatus>();
-            }
-            
-            public unsafe void Deserialize(ref byte* ptr, byte* end)
-            {
-                BuiltIns.Deserialize(out id, ref ptr, end);
-                BuiltIns.Deserialize(out passed, ref ptr, end);
-                BuiltIns.DeserializeArray(out status, ref ptr, end, 0);
-            }
-        
-            public unsafe void Serialize(ref byte* ptr, byte* end)
-            {
-                BuiltIns.Serialize(id, ref ptr, end);
-                BuiltIns.Serialize(passed, ref ptr, end);
-                BuiltIns.SerializeArray(status, ref ptr, end, 0);
-            }
-        
-            public int GetLength()
-            {
-                int size = 9;
-                size += id.Length;
-                for (int i = 0; i < status.Length; i++)
-                {
-                    size += status[i].GetLength();
-                }
-                return size;
-            }
-        }
-        
-        /// <summary> Full ROS name of this service. </summary>
-        public const string _ServiceType = "diagnostic_msgs/SelfTest";
-        
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
-        public const string _Md5Sum = "ac21b1bab7ab17546986536c22eb34e9";
-        
         /// <summary> Request message. </summary>
-        public readonly Request request;
+        public SelfTestRequest Request { get; }
         
         /// <summary> Response message. </summary>
-        public Response response;
+        public SelfTestResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public SelfTest()
         {
-            request = new Request();
-            response = new Response();
+            Request = new SelfTestRequest();
+            Response = new SelfTestResponse();
         }
         
         /// <summary> Setter constructor. </summary>
-        public SelfTest(Request request)
+        public SelfTest(SelfTestRequest request)
         {
-            this.request = request;
-            response = new Response();
+            Request = request;
+            Response = new SelfTestResponse();
         }
         
         public IService Create() => new SelfTest();
         
-        IRequest IService.Request => request;
+        IRequest IService.Request => Request;
         
-        IResponse IService.Response => response;
+        IResponse IService.Response => Response;
         
         public string ErrorMessage { get; set; }
+        
+        [IgnoreDataMember]
+        public string RosType => RosServiceType;
+        
+        /// <summary> Full ROS name of this service. </summary>
+        public const string RosServiceType = "diagnostic_msgs/SelfTest";
+        
+        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        public const string RosMd5Sum = "ac21b1bab7ab17546986536c22eb34e9";
     }
 
+    public sealed class SelfTestRequest : Internal.EmptyRequest
+    {
+    }
+
+    public sealed class SelfTestResponse : IResponse
+    {
+        public string id;
+        public byte passed;
+        public DiagnosticStatus[] status;
+    
+        /// <summary> Constructor for empty message. </summary>
+        public SelfTestResponse()
+        {
+            id = "";
+            status = System.Array.Empty<DiagnosticStatus>();
+        }
+        
+        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        {
+            BuiltIns.Deserialize(out id, ref ptr, end);
+            BuiltIns.Deserialize(out passed, ref ptr, end);
+            BuiltIns.DeserializeArray(out status, ref ptr, end, 0);
+        }
+    
+        public unsafe void Serialize(ref byte* ptr, byte* end)
+        {
+            BuiltIns.Serialize(id, ref ptr, end);
+            BuiltIns.Serialize(passed, ref ptr, end);
+            BuiltIns.SerializeArray(status, ref ptr, end, 0);
+        }
+    
+        [IgnoreDataMember]
+        public int RosMessageLength
+        {
+            get {
+                int size = 9;
+                size += Encoding.UTF8.GetByteCount(id);
+                for (int i = 0; i < status.Length; i++)
+                {
+                    size += status[i].RosMessageLength;
+                }
+                return size;
+            }
+        }
+    }
 }

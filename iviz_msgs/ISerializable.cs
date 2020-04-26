@@ -23,9 +23,9 @@
         unsafe void Serialize(ref byte* ptr, byte* end);
 
         /// <summary>
-        /// Length of this message in bytes.
+        /// Length of this message in bytes after serialization.
         /// </summary>
-        int GetLength();
+        int RosMessageLength { get; }
     }
 
 

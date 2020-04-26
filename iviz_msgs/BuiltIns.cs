@@ -586,6 +586,11 @@ namespace Iviz.Msgs
                 throw new ArgumentNullException(nameof(message));
             }
 
+            if (buffer is null)
+            {
+                throw new ArgumentNullException(nameof(buffer));
+            }
+
             fixed (byte* buffer_arrayPtr = buffer)
             {
                 byte* buffer_arrayPtr_off = buffer_arrayPtr;
@@ -616,27 +621,32 @@ namespace Iviz.Msgs
 
         public static string GetClassStringConstant(Type type, string name)
         {
-            return (string)type?.GetField(name)?.GetRawConstantValue();
+            string constant = (string)type?.GetField(name)?.GetRawConstantValue();
+            if (constant == null)
+            {
+                throw new ArgumentException("Failed to resolve constant '" + name + "' in class " + type.FullName, nameof(name));
+            }
+            return constant;
         }
 
         public static string GetMessageType(Type type)
         {
-            return GetClassStringConstant(type, "_MessageType");
+            return GetClassStringConstant(type, "RosMessageType");
         }
 
         public static string GetServiceType(Type type)
         {
-            return GetClassStringConstant(type, "_ServiceType");
+            return GetClassStringConstant(type, "RosServiceType");
         }
 
         public static string GetMd5Sum(Type type)
         {
-            return GetClassStringConstant(type, "_Md5Sum");
+            return GetClassStringConstant(type, "RosMd5Sum");
         }
 
         public static string GetDependenciesBase64(Type type)
         {
-            return GetClassStringConstant(type, "_DependenciesBase64");
+            return GetClassStringConstant(type, "RosDependenciesBase64");
         }
 
         public static IMessage CreateGenerator(Type type)

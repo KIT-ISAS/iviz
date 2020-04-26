@@ -1,84 +1,81 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.grid_map_msgs
 {
-    public class SetGridMap : IService
+    public sealed class SetGridMap : IService
     {
-        public sealed class Request : IRequest
-        {
-            // map
-            public grid_map_msgs.GridMap map;
-            
-        
-            /// <summary> Constructor for empty message. </summary>
-            public Request()
-            {
-                map = new grid_map_msgs.GridMap();
-            }
-            
-            public unsafe void Deserialize(ref byte* ptr, byte* end)
-            {
-                map.Deserialize(ref ptr, end);
-            }
-        
-            public unsafe void Serialize(ref byte* ptr, byte* end)
-            {
-                map.Serialize(ref ptr, end);
-            }
-        
-            public int GetLength()
-            {
-                int size = 0;
-                size += map.GetLength();
-                return size;
-            }
-        }
-
-        public sealed class Response : IResponse
-        {
-        
-            public unsafe void Deserialize(ref byte* ptr, byte* end)
-            {
-            }
-        
-            public unsafe void Serialize(ref byte* ptr, byte* end)
-            {
-            }
-        
-            public int GetLength() => 0;
-        }
-        
-        /// <summary> Full ROS name of this service. </summary>
-        public const string _ServiceType = "grid_map_msgs/SetGridMap";
-        
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
-        public const string _Md5Sum = "4f8e24cfd42bc1470fe765b7516ff7e5";
-        
         /// <summary> Request message. </summary>
-        public readonly Request request;
+        public SetGridMapRequest Request { get; }
         
         /// <summary> Response message. </summary>
-        public Response response;
+        public SetGridMapResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public SetGridMap()
         {
-            request = new Request();
-            response = new Response();
+            Request = new SetGridMapRequest();
+            Response = new SetGridMapResponse();
         }
         
         /// <summary> Setter constructor. </summary>
-        public SetGridMap(Request request)
+        public SetGridMap(SetGridMapRequest request)
         {
-            this.request = request;
-            response = new Response();
+            Request = request;
+            Response = new SetGridMapResponse();
         }
         
         public IService Create() => new SetGridMap();
         
-        IRequest IService.Request => request;
+        IRequest IService.Request => Request;
         
-        IResponse IService.Response => response;
+        IResponse IService.Response => Response;
         
         public string ErrorMessage { get; set; }
+        
+        [IgnoreDataMember]
+        public string RosType => RosServiceType;
+        
+        /// <summary> Full ROS name of this service. </summary>
+        public const string RosServiceType = "grid_map_msgs/SetGridMap";
+        
+        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        public const string RosMd5Sum = "4f8e24cfd42bc1470fe765b7516ff7e5";
     }
 
+    public sealed class SetGridMapRequest : IRequest
+    {
+        // map
+        public grid_map_msgs.GridMap map;
+        
+    
+        /// <summary> Constructor for empty message. </summary>
+        public SetGridMapRequest()
+        {
+            map = new grid_map_msgs.GridMap();
+        }
+        
+        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        {
+            map.Deserialize(ref ptr, end);
+        }
+    
+        public unsafe void Serialize(ref byte* ptr, byte* end)
+        {
+            map.Serialize(ref ptr, end);
+        }
+    
+        [IgnoreDataMember]
+        public int RosMessageLength
+        {
+            get {
+                int size = 0;
+                size += map.RosMessageLength;
+                return size;
+            }
+        }
+    }
+
+    public sealed class SetGridMapResponse : Internal.EmptyResponse
+    {
+    }
 }

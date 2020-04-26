@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.actionlib_msgs
 {
     public sealed class GoalStatusArray : IMessage
@@ -27,27 +29,33 @@ namespace Iviz.Msgs.actionlib_msgs
             BuiltIns.SerializeArray(status_list, ref ptr, end, 0);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 4;
-            size += header.GetLength();
-            for (int i = 0; i < status_list.Length; i++)
-            {
-                size += status_list[i].GetLength();
+            get {
+                int size = 4;
+                size += header.RosMessageLength;
+                for (int i = 0; i < status_list.Length; i++)
+                {
+                    size += status_list[i].RosMessageLength;
+                }
+                return size;
             }
-            return size;
         }
     
         public IMessage Create() => new GoalStatusArray();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "actionlib_msgs/GoalStatusArray";
+        public const string RosMessageType = "actionlib_msgs/GoalStatusArray";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "8b2b82f13216d0a8ea88bd3af735e619";
+        public const string RosMd5Sum = "8b2b82f13216d0a8ea88bd3af735e619";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71WwXLbNhC98yswo0PsTq22SZumntFBlVRXHSfxWGovnY4HBFYkWpBUAdCy/j5vQYqi" +
                 "HKnRIalGtoYS8Pbh7dvFDsQiVI68CDkJH2SoPR5WlRNZJS1/LYOQjoSqnaMy2K1IyZSZCE6qf0gnA5Fu" +
                 "hSyFVMFUpfDkHsklv5LU5EQeP5IbQC0i9p9/tUEerPEhSZLRZ34lbxc314ihHwqf+W8aHiCJ8KWWTouC" +

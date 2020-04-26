@@ -21,7 +21,6 @@ namespace Iviz.RoslibSharp
         readonly Dictionary<string, ServiceReceiver> subscribedServicesByName = new Dictionary<string, ServiceReceiver>();
         readonly Dictionary<string, ServiceSenderManager> advertisedServicesByName = new Dictionary<string, ServiceSenderManager>();
 
-
         public delegate void ShutdownActionCall(
             string callerId, string reason,
             out RpcStatusCode status, out string response);
@@ -84,7 +83,14 @@ namespace Iviz.RoslibSharp
             CallerUri = callerUri;
 
             Listener = new RpcNodeServer(this);
-            Listener.Start();
+            try
+            {
+                Listener.Start();
+            }
+            catch (HttpListenerException e)
+            {
+                throw new ArgumentException($"RosClient: Failed to bind to local URI '{callerUri}'", nameof(callerUri), e);
+            }
 
             Master = new RpcMaster(masterUri, CallerId, CallerUri);
             Talker = new RpcNodeClient(CallerId, CallerUri);
@@ -99,6 +105,7 @@ namespace Iviz.RoslibSharp
             }
             catch (WebException e)
             {
+                Listener.Stop();
                 throw new ArgumentException($"RosClient: Failed to contact the master URI '{masterUri}'", nameof(masterUri), e);
             }
         }
@@ -357,35 +364,45 @@ namespace Iviz.RoslibSharp
             }
         }
 
-        [Serializable]
-        public class PublishedTopic : JsonToString
-        {
-            public readonly string topic;
-            public readonly string type;
-
-            public PublishedTopic(string topic, string type)
-            {
-                this.topic = topic;
-                this.type = type;
-            }
-        }
-
-        public PublishedTopic[] GetSystemPublishedTopics()
+        /// <summary>
+        /// Asks the master for all the published nodes in the system.
+        /// Corresponds to the function 'getPublishedTopics' in the ROS Master API.
+        /// </summary>
+        /// <returns>List of topic names and message types.</returns>
+        public BriefTopicInfo[] GetSystemPublishedTopics()
         {
             return Master.GetPublishedTopics().topics.
-                Select(x => new PublishedTopic(x.Item1, x.Item2)).ToArray();
+                Select(x => new BriefTopicInfo(x.Item1, x.Item2)).ToArray();
         }
+
+        /// <summary>
+        /// Gets the topics published by this node.
+        /// </summary>
+        public BriefTopicInfo[] SubscribedTopics =>
+            GetSubscriptionsRcp().
+            Select(x => new BriefTopicInfo(x[0], x[1])).
+            ToArray();
+
 
         /// <summary>
         /// Asks the master for the nodes and topics in the system.
         /// Corresponds to the function 'getSystemState' in the ROS Master API.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>List of advertised topics, subscribed topics, and offered services, together with the involved nodes.</returns>
         public SystemState GetSystemState()
         {
             RpcMaster.GetSystemStateResponse response = Master.GetSystemState();
             return new SystemState(response.publishers, response.subscribers, response.services);
         }
+
+        /// <summary>
+        /// Gets the topics published by this node.
+        /// </summary>
+        public BriefTopicInfo[] PublishedTopics =>
+            GetPublicationsRcp().
+            Select(x => new BriefTopicInfo(x[0], x[1])).
+            ToArray();
+
 
         internal string[][] GetSubscriptionsRcp()
         {
@@ -401,6 +418,7 @@ namespace Iviz.RoslibSharp
             }
         }
 
+
         internal string[][] GetPublicationsRcp()
         {
             lock (publishersByTopic)
@@ -414,6 +432,7 @@ namespace Iviz.RoslibSharp
                 return result;
             }
         }
+
 
         internal void PublisherUpdateRcp(string topic, Uri[] publishers)
         {
@@ -443,17 +462,32 @@ namespace Iviz.RoslibSharp
         /// </summary>
         public void Close()
         {
+            Listener.Stop();
+
+            RosPublisher[] publishers;
             lock (publishersByTopic)
             {
-                RosPublisher[] publishers = publishersByTopic.Values.ToArray();
-                publishers.ForEach(x => x.Stop());
+                publishers = publishersByTopic.Values.ToArray();
                 publishersByTopic.Clear();
             }
+            publishers.ForEach(x => x.Stop());
+
+            RosSubscriber[] subscribers;
             lock (subscribersByTopic)
             {
-                RosSubscriber[] subscribers = subscribersByTopic.Values.ToArray();
-                subscribers.ForEach(x => x.Stop());
+                subscribers = subscribersByTopic.Values.ToArray();
                 subscribersByTopic.Clear();
+            }
+            subscribers.ForEach(x => x.Stop());
+
+            lock (subscribedServicesByName)
+            {
+                subscribedServicesByName.ForEach(x => x.Value.Stop());
+            }
+
+            lock (advertisedServicesByName)
+            {
+                advertisedServicesByName.ForEach(x => x.Value.Stop());
             }
         }
 
@@ -599,5 +633,6 @@ namespace Iviz.RoslibSharp
 
             Master.UnregisterService(name, advertisedService.Uri.ToString());
         }
+
     }
 }

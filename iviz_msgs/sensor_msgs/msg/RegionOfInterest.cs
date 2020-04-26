@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.sensor_msgs
 {
     public sealed class RegionOfInterest : IMessage
@@ -40,18 +42,22 @@ namespace Iviz.Msgs.sensor_msgs
             BuiltIns.Serialize(do_rectify, ref ptr, end);
         }
     
-        public int GetLength() => 17;
+        [IgnoreDataMember]
+        public int RosMessageLength => 17;
     
         public IMessage Create() => new RegionOfInterest();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "sensor_msgs/RegionOfInterest";
+        public const string RosMessageType = "sensor_msgs/RegionOfInterest";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "bdb633039d588fcccb441a4d43ccfe09";
+        public const string RosMd5Sum = "bdb633039d588fcccb441a4d43ccfe09";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61STWvcMBC9+1c84ksCYQntseRaWigUykKOQSuNViKyZKQRjv99R7I32ybQU32SpXkf" +
                 "82ZGHJ0vmKgUdSbIsRYy4IQyk/Z2hUKms08RycJHpkyFsXh2PkJF+Elwh2EcRjw5ih/g7Ai/fn5HIWYf" +
                 "z42lXWk1UVZYGqT9dxosqggPqxeK9/3akT87Fh0jkoYdrKdgCopLNRiQ2KCMSbF27+qF5y+ETblXqFKS" +

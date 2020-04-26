@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.sensor_msgs
 {
     public sealed class Joy : IMessage
@@ -29,25 +31,31 @@ namespace Iviz.Msgs.sensor_msgs
             BuiltIns.Serialize(buttons, ref ptr, end, 0);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 8;
-            size += header.GetLength();
-            size += 4 * axes.Length;
-            size += 4 * buttons.Length;
-            return size;
+            get {
+                int size = 8;
+                size += header.RosMessageLength;
+                size += 4 * axes.Length;
+                size += 4 * buttons.Length;
+                return size;
+            }
         }
     
         public IMessage Create() => new Joy();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "sensor_msgs/Joy";
+        public const string RosMessageType = "sensor_msgs/Joy";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "5a9ea5f83505693b71e785041e67a8bb";
+        public const string RosMd5Sum = "5a9ea5f83505693b71e785041e67a8bb";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61TwW7UMBC9+ytGyqEt0hYJbitxQ1AOSIj2htBq1p4kpokd7Mm2+XuenaZbcUA9YFlJ" +
                 "bM+8eX5v0tB3mWLSTNoLZWUVii0x/YpLVm/vM/Gj4BEcHWfVGPK1uRF2kqhfX+fRkPpRADJO5ENFfIrx" +
                 "K345rh+OlctmEiv+JI7aFMd6stU17RBZ37/78XMl8LIIwureKJznJKME8K8IZ97GhzX7ifVf+dvuvyDI" +

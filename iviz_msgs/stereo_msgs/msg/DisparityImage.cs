@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.stereo_msgs
 {
     public sealed class DisparityImage : IMessage
@@ -64,24 +66,30 @@ namespace Iviz.Msgs.stereo_msgs
             BuiltIns.Serialize(delta_d, ref ptr, end);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 37;
-            size += header.GetLength();
-            size += image.GetLength();
-            return size;
+            get {
+                int size = 37;
+                size += header.RosMessageLength;
+                size += image.RosMessageLength;
+                return size;
+            }
         }
     
         public IMessage Create() => new DisparityImage();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "stereo_msgs/DisparityImage";
+        public const string RosMessageType = "stereo_msgs/DisparityImage";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "04a177815f75271039fa21f16acad8c9";
+        public const string RosMd5Sum = "04a177815f75271039fa21f16acad8c9";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71X247bNhB911cQuw9ZJ15v0LwEKRYt2nTbBVIkyC5QIEVr0OLIYkKRCkn5kq/vGVKS" +
                 "ZefSPKQ1kKxNzY0zZ86MzsUdtdLLSKImqciLynlRuqaVUa+00XEvtjrWouy8JxvFvW7obm/L2jurP5Bf" +
                 "FOfihX5HZi+iEysSnhq3ISW0FVIYGPY4MiQDzUUXSOhGrmnRO9M2RHxbFL/l3/m4gM0b4xCBXYvWabhV" +

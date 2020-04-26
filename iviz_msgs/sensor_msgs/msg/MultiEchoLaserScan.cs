@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.sensor_msgs
 {
     public sealed class MultiEchoLaserScan : IMessage
@@ -70,31 +72,37 @@ namespace Iviz.Msgs.sensor_msgs
             BuiltIns.SerializeArray(intensities, ref ptr, end, 0);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 36;
-            size += header.GetLength();
-            for (int i = 0; i < ranges.Length; i++)
-            {
-                size += ranges[i].GetLength();
+            get {
+                int size = 36;
+                size += header.RosMessageLength;
+                for (int i = 0; i < ranges.Length; i++)
+                {
+                    size += ranges[i].RosMessageLength;
+                }
+                for (int i = 0; i < intensities.Length; i++)
+                {
+                    size += intensities[i].RosMessageLength;
+                }
+                return size;
             }
-            for (int i = 0; i < intensities.Length; i++)
-            {
-                size += intensities[i].GetLength();
-            }
-            return size;
         }
     
         public IMessage Create() => new MultiEchoLaserScan();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "sensor_msgs/MultiEchoLaserScan";
+        public const string RosMessageType = "sensor_msgs/MultiEchoLaserScan";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "6fefb0c6da89d7c8abe4b339f5c2f8fb";
+        public const string RosMd5Sum = "6fefb0c6da89d7c8abe4b339f5c2f8fb";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE7VWwW7jNhC96ysG8GGTNnaB7i1oe9ptG6AbFMieGgQBTY0sYilSISk77tf3DSnJyiJx" +
                 "99AKhhNaM2/INzNvuKI743aWKWrlqAm+I0XdYJNZs2499VY5FciqyIGCcjteN8bVHKpVtaKbho5+oFbt" +
                 "mZTzqR2NAEk1741mOpjUUm2ahgO7RFuGsfGBLniz2yBW9MAHlApBHS+vEJARiyQIwUwHVgngC4iOY1Q7" +

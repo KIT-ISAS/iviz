@@ -10,17 +10,17 @@ namespace Iviz.RoslibSharp
 {
     class RpcNodeServer
     {
-        public readonly Dictionary<string, Func<object[], Arg[]>> Methods;
-
+        readonly Dictionary<string, Func<object[], Arg[]>> Methods;
         readonly HttpListener listener = new HttpListener();
         readonly RosClient client;
         volatile bool keepRunning;
+        Task task;
 
         public Uri Uri => client.CallerUri;
 
-        public RpcNodeServer(RosClient socket)
+        public RpcNodeServer(RosClient client)
         {
-            this.client = socket;
+            this.client = client;
 
             Methods = new Dictionary<string, Func<object[], Arg[]>>()
             {
@@ -45,7 +45,7 @@ namespace Iviz.RoslibSharp
             listener.Prefixes.Add(Uri.ToString());
             listener.Start();
 
-            Task.Run(() =>
+            task = Task.Run(() =>
             {
                 try
                 {
@@ -68,8 +68,8 @@ namespace Iviz.RoslibSharp
                 }
                 catch (Exception e)
                 {
-                    Logger.LogError(e.Message);
-                    Logger.LogError(e.StackTrace);
+                    Logger.LogDebug(e.Message);
+                    Logger.LogDebug(e.StackTrace);
                 }
                 Logger.LogDebug("RcpNodeServer: Leaving thread.");
             });
@@ -79,6 +79,7 @@ namespace Iviz.RoslibSharp
         {
             keepRunning = false;
             listener.Close();
+            task.Wait();
         }
 
         public Arg[] GetBusStats(object[] _)

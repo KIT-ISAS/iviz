@@ -1,3 +1,6 @@
+using System.Text;
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.sensor_msgs
 {
     public sealed class BatteryState : IMessage
@@ -105,27 +108,33 @@ namespace Iviz.Msgs.sensor_msgs
             BuiltIns.Serialize(serial_number, ref ptr, end);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 48;
-            size += header.GetLength();
-            size += 4 * cell_voltage.Length;
-            size += 4 * cell_temperature.Length;
-            size += location.Length;
-            size += serial_number.Length;
-            return size;
+            get {
+                int size = 48;
+                size += header.RosMessageLength;
+                size += 4 * cell_voltage.Length;
+                size += 4 * cell_temperature.Length;
+                size += Encoding.UTF8.GetByteCount(location);
+                size += Encoding.UTF8.GetByteCount(serial_number);
+                return size;
+            }
         }
     
         public IMessage Create() => new BatteryState();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "sensor_msgs/BatteryState";
+        public const string RosMessageType = "sensor_msgs/BatteryState";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "4ddae7f048e32fda22cac764685e3974";
+        public const string RosMd5Sum = "4ddae7f048e32fda22cac764685e3974";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61WbW/iOBD+nl8xEh+WnlS6L3e3q0r7AQEFdDRBJW2vOp0ikwyJVcfmbIeWf3/jvEBo" +
                 "C909XVSpJH7mmRnP+Bl7HRgoaSyT1gDTCHGmDEqwCnJm4wxshoCyyA1wWb4ILotneEQtUXgdSHDFJSZu" +
                 "lctYFAlelIiLtXpCHZlivRbbXgbMgFrBBrXhSsKX3leyDYlOSYSEr1aoUcYI3MBKaTB2KxA0MkPBlW7j" +

@@ -1,3 +1,6 @@
+using System.Text;
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.nav_msgs
 {
     public sealed class Odometry : IMessage
@@ -35,24 +38,30 @@ namespace Iviz.Msgs.nav_msgs
             twist.Serialize(ref ptr, end);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 684;
-            size += header.GetLength();
-            size += child_frame_id.Length;
-            return size;
+            get {
+                int size = 684;
+                size += header.RosMessageLength;
+                size += Encoding.UTF8.GetByteCount(child_frame_id);
+                return size;
+            }
         }
     
         public IMessage Create() => new Odometry();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "nav_msgs/Odometry";
+        public const string RosMessageType = "nav_msgs/Odometry";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "cd5e73d190d741a2f92e81eda573aca7";
+        public const string RosMd5Sum = "cd5e73d190d741a2f92e81eda573aca7";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE+1WTW/bRhC981cM4EPsQmKBuPDBQA9FgrY+FEgbo0lbFMaKOyS3IXeV3aUk5tfnzfJD" +
                 "sqw0OaQ61RBgcjmfb97MzgXd1yaQ57XnwDYGUpY4RNOqyORKUrR2wUTjLL5o2nDjChN7MpZKz0xhrQrO" +
                 "ibILWGIRZvkWxWrLIagKMrXrGk0rkebClIb1IMNUOOe1seKs9KplqsyGLa16qllp9nk6fTA6Hx3ErQnx" +

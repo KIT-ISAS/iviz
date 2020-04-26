@@ -1,96 +1,107 @@
+using System.Text;
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.rosapi
 {
-    public class ServiceNode : IService
+    public sealed class ServiceNode : IService
     {
-        public sealed class Request : IRequest
-        {
-            public string service;
-        
-            /// <summary> Constructor for empty message. </summary>
-            public Request()
-            {
-                service = "";
-            }
-            
-            public unsafe void Deserialize(ref byte* ptr, byte* end)
-            {
-                BuiltIns.Deserialize(out service, ref ptr, end);
-            }
-        
-            public unsafe void Serialize(ref byte* ptr, byte* end)
-            {
-                BuiltIns.Serialize(service, ref ptr, end);
-            }
-        
-            public int GetLength()
-            {
-                int size = 4;
-                size += service.Length;
-                return size;
-            }
-        }
-
-        public sealed class Response : IResponse
-        {
-            public string node;
-        
-            /// <summary> Constructor for empty message. </summary>
-            public Response()
-            {
-                node = "";
-            }
-            
-            public unsafe void Deserialize(ref byte* ptr, byte* end)
-            {
-                BuiltIns.Deserialize(out node, ref ptr, end);
-            }
-        
-            public unsafe void Serialize(ref byte* ptr, byte* end)
-            {
-                BuiltIns.Serialize(node, ref ptr, end);
-            }
-        
-            public int GetLength()
-            {
-                int size = 4;
-                size += node.Length;
-                return size;
-            }
-        }
-        
-        /// <summary> Full ROS name of this service. </summary>
-        public const string _ServiceType = "rosapi/ServiceNode";
-        
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
-        public const string _Md5Sum = "bd2a0a45fd7a73a86c8d6051d5a6db8a";
-        
         /// <summary> Request message. </summary>
-        public readonly Request request;
+        public ServiceNodeRequest Request { get; }
         
         /// <summary> Response message. </summary>
-        public Response response;
+        public ServiceNodeResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public ServiceNode()
         {
-            request = new Request();
-            response = new Response();
+            Request = new ServiceNodeRequest();
+            Response = new ServiceNodeResponse();
         }
         
         /// <summary> Setter constructor. </summary>
-        public ServiceNode(Request request)
+        public ServiceNode(ServiceNodeRequest request)
         {
-            this.request = request;
-            response = new Response();
+            Request = request;
+            Response = new ServiceNodeResponse();
         }
         
         public IService Create() => new ServiceNode();
         
-        IRequest IService.Request => request;
+        IRequest IService.Request => Request;
         
-        IResponse IService.Response => response;
+        IResponse IService.Response => Response;
         
         public string ErrorMessage { get; set; }
+        
+        [IgnoreDataMember]
+        public string RosType => RosServiceType;
+        
+        /// <summary> Full ROS name of this service. </summary>
+        public const string RosServiceType = "rosapi/ServiceNode";
+        
+        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        public const string RosMd5Sum = "bd2a0a45fd7a73a86c8d6051d5a6db8a";
     }
 
+    public sealed class ServiceNodeRequest : IRequest
+    {
+        public string service;
+    
+        /// <summary> Constructor for empty message. </summary>
+        public ServiceNodeRequest()
+        {
+            service = "";
+        }
+        
+        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        {
+            BuiltIns.Deserialize(out service, ref ptr, end);
+        }
+    
+        public unsafe void Serialize(ref byte* ptr, byte* end)
+        {
+            BuiltIns.Serialize(service, ref ptr, end);
+        }
+    
+        [IgnoreDataMember]
+        public int RosMessageLength
+        {
+            get {
+                int size = 4;
+                size += Encoding.UTF8.GetByteCount(service);
+                return size;
+            }
+        }
+    }
+
+    public sealed class ServiceNodeResponse : IResponse
+    {
+        public string node;
+    
+        /// <summary> Constructor for empty message. </summary>
+        public ServiceNodeResponse()
+        {
+            node = "";
+        }
+        
+        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        {
+            BuiltIns.Deserialize(out node, ref ptr, end);
+        }
+    
+        public unsafe void Serialize(ref byte* ptr, byte* end)
+        {
+            BuiltIns.Serialize(node, ref ptr, end);
+        }
+    
+        [IgnoreDataMember]
+        public int RosMessageLength
+        {
+            get {
+                int size = 4;
+                size += Encoding.UTF8.GetByteCount(node);
+                return size;
+            }
+        }
+    }
 }

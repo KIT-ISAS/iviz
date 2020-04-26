@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.geometry_msgs
 {
     public sealed class PoseWithCovarianceStamped : IMessage
@@ -26,23 +28,29 @@ namespace Iviz.Msgs.geometry_msgs
             pose.Serialize(ref ptr, end);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 344;
-            size += header.GetLength();
-            return size;
+            get {
+                int size = 344;
+                size += header.RosMessageLength;
+                return size;
+            }
         }
     
         public IMessage Create() => new PoseWithCovarianceStamped();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "geometry_msgs/PoseWithCovarianceStamped";
+        public const string RosMessageType = "geometry_msgs/PoseWithCovarianceStamped";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "953b798c0f514ff060a53a3498ce6246";
+        public const string RosMd5Sum = "953b798c0f514ff060a53a3498ce6246";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71VwW7TQBC971eMlENblASJohwqcUAgoAekQitRQKia2GN7kb3r7q6buF/P203spKRC" +
                 "HKBRpNjrmTcz771xJnRVaU+ybp14L57YkPigGw6SU2u90EqHipicFOLEZEKZtS7XBhFUOG4EOTkhBXnc" +
                 "tEp9EM7FUZV+1AUwvgDijb1jpzkCRFilXv3jj/p4+f6MfMhvGl/655su1IQuA/pjl1MjgXMOTIVFd7qs" +

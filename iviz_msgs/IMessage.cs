@@ -13,6 +13,8 @@ namespace Iviz.Msgs
         /// </summary>
         /// <returns>New message</returns>
         IMessage Create();
+
+        string RosType { get; }
     }
 
 }

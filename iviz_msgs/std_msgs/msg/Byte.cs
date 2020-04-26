@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.std_msgs
 {
     public sealed class Byte : IMessage
@@ -14,18 +16,22 @@ namespace Iviz.Msgs.std_msgs
             BuiltIns.Serialize(data, ref ptr, end);
         }
     
-        public int GetLength() => 1;
+        [IgnoreDataMember]
+        public int RosMessageLength => 1;
     
         public IMessage Create() => new Byte();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "std_msgs/Byte";
+        public const string RosMessageType = "std_msgs/Byte";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "ad736a2e8818154c487bb80fe42ce43b";
+        public const string RosMd5Sum = "ad736a2e8818154c487bb80fe42ce43b";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE0uqLElVSEksSeTiAgAksd8TCwAAAA==";
                 
     }

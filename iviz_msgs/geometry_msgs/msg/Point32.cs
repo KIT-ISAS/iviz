@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.geometry_msgs
 {
     public sealed class Point32 : IMessage
@@ -28,18 +30,22 @@ namespace Iviz.Msgs.geometry_msgs
             BuiltIns.Serialize(z, ref ptr, end);
         }
     
-        public int GetLength() => 12;
+        [IgnoreDataMember]
+        public int RosMessageLength => 12;
     
         public IMessage Create() => new Point32();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "geometry_msgs/Point32";
+        public const string RosMessageType = "geometry_msgs/Point32";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "cc153912f1453b708d221682bc23d9ac";
+        public const string RosMd5Sum = "cc153912f1453b708d221682bc23d9ac";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAEz1QO27DMAzdfYoHZGmBIkNyhE7dOvQCskXbRGVREOmk6elLKWkADRTJ9+MBXysrJskW" +
                 "OCtsJRRRNpYMmRH8x9nAGXMlgpYw0cuVbcX5hJFN21apNLE65PU4HPDh6wpvybZRpAgT7Er47EzXlSpd" +
                 "qDYZ5TGRc6tRiI2or5xPR8B5/HVzD6YcQ3flHScsVTaxBjaqUqiGkRPbrUP/kRuphoUaJJLyku9mLHwT" +

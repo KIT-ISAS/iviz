@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.geometry_msgs
 {
     public sealed class TwistWithCovariance : IMessage
@@ -31,18 +33,22 @@ namespace Iviz.Msgs.geometry_msgs
             BuiltIns.Serialize(covariance, ref ptr, end, 36);
         }
     
-        public int GetLength() => 336;
+        [IgnoreDataMember]
+        public int RosMessageLength => 336;
     
         public IMessage Create() => new TwistWithCovariance();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "geometry_msgs/TwistWithCovariance";
+        public const string RosMessageType = "geometry_msgs/TwistWithCovariance";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "1fe8a28e6890a4cc3ae4c3ca5c7d82e6";
+        public const string RosMd5Sum = "1fe8a28e6890a4cc3ae4c3ca5c7d82e6";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71TTWvcQAy9+1c8yCUBx4Wm7CHQc8khUNql9INStLbsncQeGc04a+fXV+N1nCzNoYdS" +
                 "g408o/c0enpzhu3eBfDYK4fAAQ/cSuniBOdRKzNCTyXj4OIegy9ZIzkfpyLLtgcXImL6ZtkZPsnhsqM7" +
                 "USgnMvaRohMPqRH3jM24QSkPpI6MBh1FdaPhtrYn6tb0npQ6jqwBQ2AQajdydUmjHfOUuTD0jfFrxZrP" +

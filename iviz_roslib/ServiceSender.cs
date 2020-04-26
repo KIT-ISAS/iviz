@@ -278,7 +278,7 @@ namespace Iviz.RoslibSharp
 
                     if (resultStatus == SuccessByte)
                     {
-                        int msgLength = responseMsg.GetLength();
+                        int msgLength = responseMsg.RosMessageLength;
                         if (writeBuffer.Length < msgLength)
                         {
                             writeBuffer = new byte[msgLength + BufferSizeIncrease];

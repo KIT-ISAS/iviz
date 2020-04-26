@@ -1,3 +1,6 @@
+using System.Text;
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.visualization_msgs
 {
     public sealed class InteractiveMarkerInit : IMessage
@@ -38,27 +41,33 @@ namespace Iviz.Msgs.visualization_msgs
             BuiltIns.SerializeArray(markers, ref ptr, end, 0);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 16;
-            size += server_id.Length;
-            for (int i = 0; i < markers.Length; i++)
-            {
-                size += markers[i].GetLength();
+            get {
+                int size = 16;
+                size += Encoding.UTF8.GetByteCount(server_id);
+                for (int i = 0; i < markers.Length; i++)
+                {
+                    size += markers[i].RosMessageLength;
+                }
+                return size;
             }
-            return size;
         }
     
         public IMessage Create() => new InteractiveMarkerInit();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "visualization_msgs/InteractiveMarkerInit";
+        public const string RosMessageType = "visualization_msgs/InteractiveMarkerInit";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "d5f2c5045a72456d228676ab91048734";
+        public const string RosMd5Sum = "d5f2c5045a72456d228676ab91048734";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE8VabXPbNhL+fPoVmGQ6sa+y7NhprvWdPziWnGjqt7OVvkyno4FISEJDEQxAWlF+/T27" +
                 "APhiOU3n5pJLMjEJAovFvj678FMxTlVe6vlG5wvhSosfA3FZuVLMlKhy/b5SQueiXCpRmkInIpcr5QqZ" +
                 "qN5TjMoS/2knnLL3yoq1se+cMPmg50mF8alOe5h+p0AtT5TIq9VM2QGGJqCbZBosiLXOMlE55QmWRqSq" +

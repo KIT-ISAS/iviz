@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.nav_msgs
 {
     public sealed class OccupancyGrid : IMessage
@@ -36,24 +38,30 @@ namespace Iviz.Msgs.nav_msgs
             BuiltIns.Serialize(data, ref ptr, end, 0);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 80;
-            size += header.GetLength();
-            size += 1 * data.Length;
-            return size;
+            get {
+                int size = 80;
+                size += header.RosMessageLength;
+                size += 1 * data.Length;
+                return size;
+            }
         }
     
         public IMessage Create() => new OccupancyGrid();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "nav_msgs/OccupancyGrid";
+        public const string RosMessageType = "nav_msgs/OccupancyGrid";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "3381f2d731d4076ec5c71b0759edbe4e";
+        public const string RosMd5Sum = "3381f2d731d4076ec5c71b0759edbe4e";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71VTW/TQBC9768YKQdalIS0IIQqcUCqgB4qioBTVEWT9cResHfN7rqp+fW8XcdJChLi" +
                 "QKmsxl7PvHnz5sMT+lyZQF5aL0FsDMR0Pruk0puCGm6nZCxtK6MrEsY/LXV9bB0roda7Na9NbWJPbqMm" +
                 "5LTuWra6nyv1XrgQT9Xwo9TkWiJfcmTaOJ/dEUVdc7s/N3bjYAdi+R0VOMw0vNvOGv4KN+cBNqUQ2Udj" +

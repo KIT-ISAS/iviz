@@ -1,3 +1,6 @@
+using System.Text;
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.sensor_msgs
 {
     public sealed class ChannelFloat32 : IMessage
@@ -46,24 +49,30 @@ namespace Iviz.Msgs.sensor_msgs
             BuiltIns.Serialize(values, ref ptr, end, 0);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 8;
-            size += name.Length;
-            size += 4 * values.Length;
-            return size;
+            get {
+                int size = 8;
+                size += Encoding.UTF8.GetByteCount(name);
+                size += 4 * values.Length;
+                return size;
+            }
         }
     
         public IMessage Create() => new ChannelFloat32();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "sensor_msgs/ChannelFloat32";
+        public const string RosMessageType = "sensor_msgs/ChannelFloat32";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "3d40139cdd33dfedcb71ffeeeb42ae7f";
+        public const string RosMd5Sum = "3d40139cdd33dfedcb71ffeeeb42ae7f";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE11Ty47bMAy8+ysI7yUBsgY27aHosQu016LoreiBlhhbqCwaopRs/r6UYudl+CBA5Mxw" +
                 "hnqB36MTmEgEBwI9ZiEL/RnSSPCTXUjvnrO9ViSGkb0FnpPjgB4sJmxeAEXYOEzafHJpBEIzwlz6wYUK" +
                 "ZgpOp3wEnsKgNXyoF0f0maRgxIhnkJGzEvRULwUnUvB6fmyr4LI0XTgU4yZ5BxjsRUdluAN+FlvlcYwk" +

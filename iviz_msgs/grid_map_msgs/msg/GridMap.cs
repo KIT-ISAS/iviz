@@ -1,3 +1,6 @@
+using System.Text;
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.grid_map_msgs
 {
     public sealed class GridMap : IMessage
@@ -51,35 +54,43 @@ namespace Iviz.Msgs.grid_map_msgs
             BuiltIns.Serialize(inner_start_index, ref ptr, end);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 24;
-            size += info.GetLength();
-            for (int i = 0; i < layers.Length; i++)
-            {
-                size += layers[i].Length;
+            get {
+                int size = 16;
+                size += info.RosMessageLength;
+                size += 4 * layers.Length;
+                for (int i = 0; i < layers.Length; i++)
+                {
+                    size += Encoding.UTF8.GetByteCount(layers[i]);
+                }
+                size += 4 * basic_layers.Length;
+                for (int i = 0; i < basic_layers.Length; i++)
+                {
+                    size += Encoding.UTF8.GetByteCount(basic_layers[i]);
+                }
+                for (int i = 0; i < data.Length; i++)
+                {
+                    size += data[i].RosMessageLength;
+                }
+                return size;
             }
-            for (int i = 0; i < basic_layers.Length; i++)
-            {
-                size += basic_layers[i].Length;
-            }
-            for (int i = 0; i < data.Length; i++)
-            {
-                size += data[i].GetLength();
-            }
-            return size;
         }
     
         public IMessage Create() => new GridMap();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "grid_map_msgs/GridMap";
+        public const string RosMessageType = "grid_map_msgs/GridMap";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "95681e052b1f73bf87b7eb984382b401";
+        public const string RosMd5Sum = "95681e052b1f73bf87b7eb984382b401";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71X224bNxB9368Y2A+xXFux5cBoAuTBaJA0QAykTYCiMAyZ2h1pae+SG5KyrHx9z5B7" +
                 "U5wifagjCNYuOTM8c+bC8T69c7qgWjVUsirYZfJ+qZr3ZmlJ40+W7Q8yldqyI6Nq9tPMB6fN6uo6rfod" +
                 "wYXyOh+L04FtgrZGVZMpfS55LOGhWXBgV2vDtCl1XrYbtHS2ppv0ckOGuaBgacF0rypdQE8bsg64aWkd" +

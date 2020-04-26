@@ -1,3 +1,6 @@
+using System.Text;
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.sensor_msgs
 {
     public sealed class Image : IMessage
@@ -60,25 +63,31 @@ namespace Iviz.Msgs.sensor_msgs
             BuiltIns.Serialize(data, ref ptr, end, 0);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 21;
-            size += header.GetLength();
-            size += encoding.Length;
-            size += 1 * data.Length;
-            return size;
+            get {
+                int size = 21;
+                size += header.RosMessageLength;
+                size += Encoding.UTF8.GetByteCount(encoding);
+                size += 1 * data.Length;
+                return size;
+            }
         }
     
         public IMessage Create() => new Image();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "sensor_msgs/Image";
+        public const string RosMessageType = "sensor_msgs/Image";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "060021388200f6f0f447d0fcd9c64743";
+        public const string RosMd5Sum = "060021388200f6f0f447d0fcd9c64743";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61VTW8bNxC981cQ0CF2YilBewkMFCnQfNSHAgXiW1EII3K0y4RLrvkhefPr+0hqJQu2" +
                 "0xyykCUvyXnz8d4MF/K2N1EOHCN1LJV3iYyLkpzMTvlhDNhhLc2AbbGQF2+u5JtLCRNKMvlxaXmbYBYc" +
                 "B+m38zkh/mTSWOrbz+FZyMNyMvCYaBhl7H22Wm5YkrrLJppkvKv7Jzj51HPE2gYaeG30Ayg/JqPItq2C" +

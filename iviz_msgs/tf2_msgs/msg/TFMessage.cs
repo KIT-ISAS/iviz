@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.tf2_msgs
 {
     public sealed class TFMessage : IMessage
@@ -20,26 +22,32 @@ namespace Iviz.Msgs.tf2_msgs
             BuiltIns.SerializeArray(transforms, ref ptr, end, 0);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 4;
-            for (int i = 0; i < transforms.Length; i++)
-            {
-                size += transforms[i].GetLength();
+            get {
+                int size = 4;
+                for (int i = 0; i < transforms.Length; i++)
+                {
+                    size += transforms[i].RosMessageLength;
+                }
+                return size;
             }
-            return size;
         }
     
         public IMessage Create() => new TFMessage();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "tf2_msgs/TFMessage";
+        public const string RosMessageType = "tf2_msgs/TFMessage";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "94810edda583a504dfda3829e70d7eec";
+        public const string RosMd5Sum = "94810edda583a504dfda3829e70d7eec";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71VTW/UMBC951eM2gMtarMSRRwq4ISAHpCKWnFBqJomk8RqYgd70m349Tw7m6RQBByg" +
                 "q0hrO543H+/NpBbXifrxqgt12Fx6tqFyvrtQ7nopP38hnY9Clr36x7/sw8W7U6p/G0K2T5eNCSR3vZcQ" +
                 "JBCvMVHlXUeFc740llWw506oES7F52lzZSKEOtJGHt4sGtOWV+vF2VsHV1wLxaUL2o40BCnpekwwuPWS" +

@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.sensor_msgs
 {
     public sealed class PointCloud : IMessage
@@ -39,28 +41,34 @@ namespace Iviz.Msgs.sensor_msgs
             BuiltIns.SerializeArray(channels, ref ptr, end, 0);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 8;
-            size += header.GetLength();
-            size += 12 * points.Length;
-            for (int i = 0; i < channels.Length; i++)
-            {
-                size += channels[i].GetLength();
+            get {
+                int size = 8;
+                size += header.RosMessageLength;
+                size += 12 * points.Length;
+                for (int i = 0; i < channels.Length; i++)
+                {
+                    size += channels[i].RosMessageLength;
+                }
+                return size;
             }
-            return size;
         }
     
         public IMessage Create() => new PointCloud();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "sensor_msgs/PointCloud";
+        public const string RosMessageType = "sensor_msgs/PointCloud";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "d8e9c3f5afbdd8a130fd1d2763945fca";
+        public const string RosMd5Sum = "d8e9c3f5afbdd8a130fd1d2763945fca";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE7VWTW8bNxC9768YyIfIgazCTg+FgR7atE5zKBA0vhWFMdod7RLhkmuSK1v99X1D7urD" +
                 "8SGHRhCg1ZJ8M/PmzQwv6L4zkXqJkVuhztsmElPtrZU6Ge/Ib+ldQ4M3LsUVDXaM5AddYUvcNKY8Vhdk" +
                 "3NaHnvMh3vgxkXDdlZPrChvuTS8KF8VFH6jhxMT142hiBlnBqg+NcZyEtoGx+eNv6+oP4UYCdflHYX4J" +

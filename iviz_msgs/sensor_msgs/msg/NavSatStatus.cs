@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.sensor_msgs
 {
     public sealed class NavSatStatus : IMessage
@@ -37,18 +39,22 @@ namespace Iviz.Msgs.sensor_msgs
             BuiltIns.Serialize(service, ref ptr, end);
         }
     
-        public int GetLength() => 3;
+        [IgnoreDataMember]
+        public int RosMessageLength => 3;
     
         public IMessage Create() => new NavSatStatus();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "sensor_msgs/NavSatStatus";
+        public const string RosMessageType = "sensor_msgs/NavSatStatus";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "331cdbddfa4bc96ffc3b9ad98900a54c";
+        public const string RosMd5Sum = "331cdbddfa4bc96ffc3b9ad98900a54c";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE42RT0/DMAzF7/0UlnZmYgghLiB1MKZJY0OUfzeUtm5rKUumxNnYt8ehLWyMA7nV7vvZ" +
                 "fm8AC7WhWjFZA5li1JoYoaIP8Kw4eKisA2V2MNU2V/rv37OdZ1wlyQBeG+QGHbAFG3gdWLSgQr1Cw1h+" +
                 "cclDiYxuRUYq+Q5yyw2IKnYFwbs1iqr8KmnlGZhWCCVVFTrBkGxRWOewiFt42EoV5Atpg+UQIBVGN2ej" +

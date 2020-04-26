@@ -1,3 +1,6 @@
+using System.Text;
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.rosapi
 {
     public sealed class TypeDef : IMessage
@@ -44,44 +47,55 @@ namespace Iviz.Msgs.rosapi
             BuiltIns.Serialize(constvalues, ref ptr, end, 0);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 48;
-            size += type.Length;
-            for (int i = 0; i < fieldnames.Length; i++)
-            {
-                size += fieldnames[i].Length;
+            get {
+                int size = 28;
+                size += Encoding.UTF8.GetByteCount(type);
+                size += 4 * fieldnames.Length;
+                for (int i = 0; i < fieldnames.Length; i++)
+                {
+                    size += Encoding.UTF8.GetByteCount(fieldnames[i]);
+                }
+                size += 4 * fieldtypes.Length;
+                for (int i = 0; i < fieldtypes.Length; i++)
+                {
+                    size += Encoding.UTF8.GetByteCount(fieldtypes[i]);
+                }
+                size += 4 * fieldarraylen.Length;
+                size += 4 * examples.Length;
+                for (int i = 0; i < examples.Length; i++)
+                {
+                    size += Encoding.UTF8.GetByteCount(examples[i]);
+                }
+                size += 4 * constnames.Length;
+                for (int i = 0; i < constnames.Length; i++)
+                {
+                    size += Encoding.UTF8.GetByteCount(constnames[i]);
+                }
+                size += 4 * constvalues.Length;
+                for (int i = 0; i < constvalues.Length; i++)
+                {
+                    size += Encoding.UTF8.GetByteCount(constvalues[i]);
+                }
+                return size;
             }
-            for (int i = 0; i < fieldtypes.Length; i++)
-            {
-                size += fieldtypes[i].Length;
-            }
-            size += 4 * fieldarraylen.Length;
-            for (int i = 0; i < examples.Length; i++)
-            {
-                size += examples[i].Length;
-            }
-            for (int i = 0; i < constnames.Length; i++)
-            {
-                size += constnames[i].Length;
-            }
-            for (int i = 0; i < constvalues.Length; i++)
-            {
-                size += constvalues[i].Length;
-            }
-            return size;
         }
     
         public IMessage Create() => new TypeDef();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "rosapi/TypeDef";
+        public const string RosMessageType = "rosapi/TypeDef";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "80597571d79bbeef6c9c4d98f30116a0";
+        public const string RosMd5Sum = "80597571d79bbeef6c9c4d98f30116a0";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAEysuKcrMS1coqSxI5SoGs6NjFdIyU3NS8hJzU4vRxEDKirky80qMjWBCiUVFiZU5qXkI" +
                 "lakVibkFOch6k/PzikvQzAOLlSXmlAIFuQB/w6D2hgAAAA==";
                 

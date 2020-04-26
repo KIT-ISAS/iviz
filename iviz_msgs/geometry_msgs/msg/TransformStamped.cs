@@ -1,3 +1,6 @@
+using System.Text;
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.geometry_msgs
 {
     public sealed class TransformStamped : IMessage
@@ -34,24 +37,30 @@ namespace Iviz.Msgs.geometry_msgs
             transform.Serialize(ref ptr, end);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 60;
-            size += header.GetLength();
-            size += child_frame_id.Length;
-            return size;
+            get {
+                int size = 60;
+                size += header.RosMessageLength;
+                size += Encoding.UTF8.GetByteCount(child_frame_id);
+                return size;
+            }
         }
     
         public IMessage Create() => new TransformStamped();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "geometry_msgs/TransformStamped";
+        public const string RosMessageType = "geometry_msgs/TransformStamped";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "b5764a33bfeb3588febc2682852579b0";
+        public const string RosMd5Sum = "b5764a33bfeb3588febc2682852579b0";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71VTU/cMBC951eMugeggqwEVQ8IOKG2HCpRgXpFQzJJLBI72BOW9Nf32dnN8iW1h5ZV" +
                 "pLUdz5uP92ayoOvGBJLH3ksIEohJPdtQOd9R5V1HhXO+NJZVsOdOqBEuxedpc2PKbEHqSBt5fbNoTFve" +
                 "bC/iavLWwRXXQnHpgrYjDUFKuh0TDG6dMDVeqtMPjWp/vFyuzJ3JvQu58/VSqw9nWp0s+Yx6Lu4AlEeb" +

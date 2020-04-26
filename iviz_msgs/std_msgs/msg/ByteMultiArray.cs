@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.std_msgs
 {
     public sealed class ByteMultiArray : IMessage
@@ -28,24 +30,30 @@ namespace Iviz.Msgs.std_msgs
             BuiltIns.Serialize(data, ref ptr, end, 0);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 4;
-            size += layout.GetLength();
-            size += 1 * data.Length;
-            return size;
+            get {
+                int size = 4;
+                size += layout.RosMessageLength;
+                size += 1 * data.Length;
+                return size;
+            }
         }
     
         public IMessage Create() => new ByteMultiArray();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "std_msgs/ByteMultiArray";
+        public const string RosMessageType = "std_msgs/ByteMultiArray";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "70ea476cbcfd65ac2f68f3cda1e891fe";
+        public const string RosMd5Sum = "70ea476cbcfd65ac2f68f3cda1e891fe";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71U32vbMBB+919xJC9tlmb5Ucpa6ENgsJcWBh2MEkJRrXOsRLaCJDfL/vp9kh3bafc4" +
                 "ZgyW73R33/fpTkP6rlk4Jm3MjoQnnzM9VtqrpbXi+CCOpvJUsHNiwyQ5U6XyypSUGZsMSZq0Krj0Itrw" +
                 "Cq2pCOEihLtJknxIRrr51s+Q3J5Tlam0SZKRFF40u5LXo+fVmnpP9FIXHiudwpIkuf/HT/L49O2OnJcv" +

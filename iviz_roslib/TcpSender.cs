@@ -319,7 +319,7 @@ namespace Iviz.RoslibSharp
 
                         foreach (IMessage message in tmpQueue)
                         {
-                            int msgLength = message.GetLength();
+                            int msgLength = message.RosMessageLength;
                             if (writeBuffer.Length < msgLength)
                             {
                                 writeBuffer = new byte[msgLength + BufferSizeIncrease];

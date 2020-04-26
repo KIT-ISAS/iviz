@@ -181,13 +181,6 @@ namespace RosSharp.RosBridgeClient
 #if DEBUG
                Console.WriteLine("Received:\n" + JsonConvert.SerializeObject(jObject, Formatting.Indented) + "\n");
 #endif
-               //Debug.Log("t1: " + (DateTime.Now - start).TotalMilliseconds);
-               ConnectionManager.Instance.RunInSocketThread(() =>
-               {
-                   //start = DateTime.Now;
-                   Receive(jObject);
-                   //Debug.Log("t2: " + (DateTime.Now - start).TotalMilliseconds);
-               });
            });
         }
 

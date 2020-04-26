@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.geometry_msgs
 {
     public sealed class Inertia : IMessage
@@ -43,18 +45,22 @@ namespace Iviz.Msgs.geometry_msgs
             BuiltIns.Serialize(izz, ref ptr, end);
         }
     
-        public int GetLength() => 80;
+        [IgnoreDataMember]
+        public int RosMessageLength => 80;
     
         public IMessage Create() => new Inertia();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "geometry_msgs/Inertia";
+        public const string RosMessageType = "geometry_msgs/Inertia";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "1d26e4bb6c83ff141c5cf0d883c2b0fe";
+        public const string RosMd5Sum = "1d26e4bb6c83ff141c5cf0d883c2b0fe";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61STUsDMRC951c86EVhXaGKB6EnD9JDQbB4kSrT3dlt6CYpSWq7S3+8k137IXg0MDC8" +
                 "vPcyHxlhRiHgfV0vVNU4ig/3MEqN8MQ2soerYHqCWaianeHo208T6nD7xkV0/g6F6/lTyz5qwpxtcD4Z" +
                 "3piP8UJu0jlA7/cSrUSHQ+Jj0qOCtCkG9MjtekR3CT2WJQ4XeXuRd+e8vcDbC7zrlJr881Gz1+dH/DkV" +

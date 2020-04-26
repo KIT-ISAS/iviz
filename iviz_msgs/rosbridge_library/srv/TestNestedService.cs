@@ -1,82 +1,88 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.rosbridge_library
 {
-    public class TestNestedService : IService
+    public sealed class TestNestedService : IService
     {
-        public sealed class Request : IRequest
-        {
-            //request definition
-            public geometry_msgs.Pose pose;
-        
-            public unsafe void Deserialize(ref byte* ptr, byte* end)
-            {
-                pose.Deserialize(ref ptr, end);
-            }
-        
-            public unsafe void Serialize(ref byte* ptr, byte* end)
-            {
-                pose.Serialize(ref ptr, end);
-            }
-        
-            public int GetLength() => 56;
-        }
-
-        public sealed class Response : IResponse
-        {
-            //response definition
-            public std_msgs.Float64 data;
-        
-            /// <summary> Constructor for empty message. </summary>
-            public Response()
-            {
-                data = new std_msgs.Float64();
-            }
-            
-            public unsafe void Deserialize(ref byte* ptr, byte* end)
-            {
-                data.Deserialize(ref ptr, end);
-            }
-        
-            public unsafe void Serialize(ref byte* ptr, byte* end)
-            {
-                data.Serialize(ref ptr, end);
-            }
-        
-            public int GetLength() => 8;
-        }
-        
-        /// <summary> Full ROS name of this service. </summary>
-        public const string _ServiceType = "rosbridge_library/TestNestedService";
-        
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
-        public const string _Md5Sum = "063d2b71e58b5225a457d4ee09dab6f6";
-        
         /// <summary> Request message. </summary>
-        public readonly Request request;
+        public TestNestedServiceRequest Request { get; }
         
         /// <summary> Response message. </summary>
-        public Response response;
+        public TestNestedServiceResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public TestNestedService()
         {
-            request = new Request();
-            response = new Response();
+            Request = new TestNestedServiceRequest();
+            Response = new TestNestedServiceResponse();
         }
         
         /// <summary> Setter constructor. </summary>
-        public TestNestedService(Request request)
+        public TestNestedService(TestNestedServiceRequest request)
         {
-            this.request = request;
-            response = new Response();
+            Request = request;
+            Response = new TestNestedServiceResponse();
         }
         
         public IService Create() => new TestNestedService();
         
-        IRequest IService.Request => request;
+        IRequest IService.Request => Request;
         
-        IResponse IService.Response => response;
+        IResponse IService.Response => Response;
         
         public string ErrorMessage { get; set; }
+        
+        [IgnoreDataMember]
+        public string RosType => RosServiceType;
+        
+        /// <summary> Full ROS name of this service. </summary>
+        public const string RosServiceType = "rosbridge_library/TestNestedService";
+        
+        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        public const string RosMd5Sum = "063d2b71e58b5225a457d4ee09dab6f6";
     }
 
+    public sealed class TestNestedServiceRequest : IRequest
+    {
+        //request definition
+        public geometry_msgs.Pose pose;
+    
+        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        {
+            pose.Deserialize(ref ptr, end);
+        }
+    
+        public unsafe void Serialize(ref byte* ptr, byte* end)
+        {
+            pose.Serialize(ref ptr, end);
+        }
+    
+        [IgnoreDataMember]
+        public int RosMessageLength => 56;
+    }
+
+    public sealed class TestNestedServiceResponse : IResponse
+    {
+        //response definition
+        public std_msgs.Float64 data;
+    
+        /// <summary> Constructor for empty message. </summary>
+        public TestNestedServiceResponse()
+        {
+            data = new std_msgs.Float64();
+        }
+        
+        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        {
+            data.Deserialize(ref ptr, end);
+        }
+    
+        public unsafe void Serialize(ref byte* ptr, byte* end)
+        {
+            data.Serialize(ref ptr, end);
+        }
+    
+        [IgnoreDataMember]
+        public int RosMessageLength => 8;
+    }
 }

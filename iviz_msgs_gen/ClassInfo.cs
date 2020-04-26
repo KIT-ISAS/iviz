@@ -21,6 +21,7 @@ namespace Iviz.MsgsGen
         string md5;
 
         readonly bool forceStruct;
+        readonly bool hasStrings;
 
         readonly List<MsgParser.Variable> variables = new List<MsgParser.Variable>();
 
@@ -85,6 +86,10 @@ namespace Iviz.MsgsGen
             elements = MsgParser.ParseFile(lines);
 
             forceStruct = ForceStructs.Contains(package + "/" + name);
+            hasStrings = elements.Any(x =>
+                ((x is MsgParser.Variable xv) && xv.className == "string") ||
+                ((x is MsgParser.Constant xc) && xc.className == "string")
+            );
 
             variables = elements.
                 Where(x => x.Type == MsgParser.ElementType.Variable).
@@ -167,13 +172,15 @@ namespace Iviz.MsgsGen
             if (fixedSize != -1)
             {
                 return new List<string> {
-                            "public int GetLength() => " + fixedSize + ";"
+                            "[IgnoreDataMember]",
+                            "public int RosMessageLength => " + fixedSize + ";"
                 };
             }
             else if (variables.Count == 0)
             {
                 return new List<string> {
-                            "public int GetLength() => 0;"
+                            "[IgnoreDataMember]",
+                            "public int RosMessageLength => 0;"
                 };
             }
 
@@ -210,11 +217,11 @@ namespace Iviz.MsgsGen
                             if (variable.className == "string")
                             {
                                 fieldSize += 4;
-                                fieldsWithSize.Add("size += " + variable.fieldName + ".Length;");
+                                fieldsWithSize.Add("size += Encoding.UTF8.GetByteCount(" + variable.fieldName + ");");
                             }
                             else
                             {
-                                fieldsWithSize.Add("size += " + variable.fieldName + ".GetLength();");
+                                fieldsWithSize.Add("size += " + variable.fieldName + ".RosMessageLength;");
                             }
                         }
                     }
@@ -230,32 +237,39 @@ namespace Iviz.MsgsGen
                         }
                         else
                         {
-                            fieldsWithSize.Add("for (int i = 0; i < " + variable.fieldName + ".Length; i++)");
-                            fieldsWithSize.Add("{");
                             if (variable.className == "string")
                             {
-                                fieldSize += 4;
-                                fieldsWithSize.Add("    size += " + variable.fieldName + "[i].Length;");
+                                fieldsWithSize.Add("size += 4 * " + variable.fieldName + ".Length;");
+                                fieldsWithSize.Add("for (int i = 0; i < " + variable.fieldName + ".Length; i++)");
+                                fieldsWithSize.Add("{");
+                                fieldsWithSize.Add("    size += Encoding.UTF8.GetByteCount(" + variable.fieldName + "[i]);");
+                                fieldsWithSize.Add("}");
                             }
                             else
                             {
-                                fieldsWithSize.Add("    size += " + variable.fieldName + "[i].GetLength();");
+
+                                fieldsWithSize.Add("for (int i = 0; i < " + variable.fieldName + ".Length; i++)");
+                                fieldsWithSize.Add("{");
+                                fieldsWithSize.Add("    size += " + variable.fieldName + "[i].RosMessageLength;");
+                                fieldsWithSize.Add("}");
                             }
-                            fieldsWithSize.Add("}");
                         }
                     }
                 }
             }
 
             List<string> lines = new List<string>();
-            lines.Add("public int GetLength()");
+            lines.Add("[IgnoreDataMember]");
+            lines.Add("public int RosMessageLength");
             lines.Add("{");
-            lines.Add("    int size = " + fieldSize + ";");
+            lines.Add("    get {");
+            lines.Add("        int size = " + fieldSize + ";");
             foreach (string entry in fieldsWithSize)
             {
-                lines.Add("    " + entry);
+                lines.Add("        " + entry);
             }
-            lines.Add("    return size;");
+            lines.Add("        return size;");
+            lines.Add("    }");
             lines.Add("}");
 
             return lines;
@@ -412,11 +426,16 @@ namespace Iviz.MsgsGen
         {
             StringBuilder str = new StringBuilder();
 
+            if (hasStrings)
+            {
+                str.AppendLine("using System.Text;");
+            }
             if (forceStruct)
             {
                 str.AppendLine("using System.Runtime.InteropServices;");
-                str.AppendLine();
             }
+            str.AppendLine("using System.Runtime.Serialization;");
+            str.AppendLine();
 
             str.AppendLine("namespace Iviz.Msgs." + package);
             str.AppendLine("{");
@@ -490,8 +509,10 @@ namespace Iviz.MsgsGen
             {
                 lines.Add("    " + element.ToCString());
             }
-
-            lines.Add("");
+            if (elements.Count != 0)
+            {
+                lines.Add("");
+            }
             List<string> deserializer = CreateConstructors(variables, name, forceStruct);
             foreach (var entry in deserializer)
             {
@@ -516,19 +537,23 @@ namespace Iviz.MsgsGen
             lines.Add("    public IMessage Create() => new " + name + "();");
 
             lines.Add("");
+            lines.Add("    [IgnoreDataMember]");
+            lines.Add("    public string RosType => RosMessageType;");
+
+            lines.Add("");
             lines.Add("    /// <summary> Full ROS name of this message. </summary>");
-            lines.Add("    public const string _MessageType = \"" + package + "/" + name + "\";");
+            lines.Add("    public const string RosMessageType = \"" + package + "/" + name + "\";");
 
 
             lines.Add("");
             string md5 = GetMd5Property();
             lines.Add("    /// <summary> MD5 hash of a compact representation of the message. </summary>");
-            lines.Add("    public const string _Md5Sum = \"" + md5 + "\";");
+            lines.Add("    public const string RosMd5Sum = \"" + md5 + "\";");
 
             lines.Add("");
 
             lines.Add("    /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>");
-            lines.Add("    public const string _DependenciesBase64 =");
+            lines.Add("    public const string RosDependenciesBase64 =");
 
             /*
             byte[] inputBytes = Encoding.UTF8.GetBytes(catDependencies);

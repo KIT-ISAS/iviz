@@ -1,3 +1,6 @@
+using System.Text;
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.sensor_msgs
 {
     public sealed class CameraInfo : IMessage
@@ -176,25 +179,31 @@ namespace Iviz.Msgs.sensor_msgs
             roi.Serialize(ref ptr, end);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 281;
-            size += header.GetLength();
-            size += distortion_model.Length;
-            size += 8 * D.Length;
-            return size;
+            get {
+                int size = 281;
+                size += header.RosMessageLength;
+                size += Encoding.UTF8.GetByteCount(distortion_model);
+                size += 8 * D.Length;
+                return size;
+            }
         }
     
         public IMessage Create() => new CameraInfo();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "sensor_msgs/CameraInfo";
+        public const string RosMessageType = "sensor_msgs/CameraInfo";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "c9a58c1b0b154e0e6da7578cb991d214";
+        public const string RosMd5Sum = "c9a58c1b0b154e0e6da7578cb991d214";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE8VZbW8buRH+rl8xsD9YyslyHF8L1IU/NBfkauTaM3IG0tYwDGqXK/GyWu4tuZY3v77P" +
                 "DMndleSkd0CCCnEkccmZ4bw+Mzqm27VxtNHOqZWmXBem0vzdKzJVYZuN8sZWhE+kKFMb3agFXXtya9uW" +
                 "OS01tpGaHMdnVOHN1SrThFPe1iajo/DogekdkapyUllmN7WqjAaFjtoaO6kwjxp0zIYFkZNOqOWXk2Os" +

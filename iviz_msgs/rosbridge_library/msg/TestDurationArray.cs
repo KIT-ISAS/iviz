@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.rosbridge_library
 {
     public sealed class TestDurationArray : IMessage
@@ -20,23 +22,29 @@ namespace Iviz.Msgs.rosbridge_library
             BuiltIns.Serialize(durations, ref ptr, end, 0);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 4;
-            size += 8 * durations.Length;
-            return size;
+            get {
+                int size = 4;
+                size += 8 * durations.Length;
+                return size;
+            }
         }
     
         public IMessage Create() => new TestDurationArray();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "rosbridge_library/TestDurationArray";
+        public const string RosMessageType = "rosbridge_library/TestDurationArray";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "8b3bcadc803a7fcbc857c6a1dab53bcd";
+        public const string RosMd5Sum = "8b3bcadc803a7fcbc857c6a1dab53bcd";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE0spLUosyczPi45VSIEyi7kADvrU2BUAAAA=";
                 
     }

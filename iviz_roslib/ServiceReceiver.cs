@@ -192,7 +192,7 @@ namespace Iviz.RoslibSharp
             const byte ErrorByte = 0;
 
             IRequest requestMsg = service.Request;
-            int msgLength = requestMsg.GetLength();
+            int msgLength = requestMsg.RosMessageLength;
             if (writeBuffer.Length < msgLength)
             {
                 writeBuffer = new byte[msgLength + BufferSizeIncrease];

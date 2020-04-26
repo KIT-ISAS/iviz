@@ -1,3 +1,6 @@
+using System.Text;
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.std_msgs
 {
     public sealed class MultiArrayDimension : IMessage
@@ -26,23 +29,29 @@ namespace Iviz.Msgs.std_msgs
             BuiltIns.Serialize(stride, ref ptr, end);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 12;
-            size += label.Length;
-            return size;
+            get {
+                int size = 12;
+                size += Encoding.UTF8.GetByteCount(label);
+                return size;
+            }
         }
     
         public IMessage Create() => new MultiArrayDimension();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "std_msgs/MultiArrayDimension";
+        public const string RosMessageType = "std_msgs/MultiArrayDimension";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "4cd0c83a8683deae40ecdac60e53bfa8";
+        public const string RosMd5Sum = "4cd0c83a8683deae40ecdac60e53bfa8";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE22NMQqAMBAEe1+xYKOtvkjJGRbiRbxE0NcrUWy0m2KGsbRSPcIwSgBQPxQneG6icJxF" +
                 "jVGrTE19B+MhKGahr4iGirQvgqxM1r7hdXJSwpt+HicAFGWdjgAAAA==";
                 

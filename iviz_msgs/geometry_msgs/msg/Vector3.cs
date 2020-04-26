@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.geometry_msgs
 {
@@ -26,18 +27,22 @@ namespace Iviz.Msgs.geometry_msgs
             BuiltIns.SerializeStruct(this, ref ptr, end);
         }
     
-        public int GetLength() => 24;
+        [IgnoreDataMember]
+        public int RosMessageLength => 24;
     
         public IMessage Create() => new Vector3();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "geometry_msgs/Vector3";
+        public const string RosMessageType = "geometry_msgs/Vector3";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "4a842b65f413084dc2b10fb484ea7f17";
+        public const string RosMd5Sum = "4a842b65f413084dc2b10fb484ea7f17";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE0WQQWrEMAxF9znFh9m0EFJoS+8wuy7KbIsmUTymjhVkTdP09JUTSHcfo/f05RM+brFA" +
                 "eVYunK2A8M29iSJmjMqMMlPPHZoTzgaflZxWTEzZYPJPOjhEdTRK7tzKyqMot4iGQbggi7ljoi9Xci5c" +
                 "aZpnlxFMKZdEla3PjjxwF7oWy43zPhVz8EE3BM6ssYfGEIed9EXTARMu2wEvLWx8xhJT2jvvy+zGLlGx" +

@@ -1,3 +1,6 @@
+using System.Text;
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.sensor_msgs
 {
     public sealed class MultiDOFJointState : IMessage
@@ -57,30 +60,37 @@ namespace Iviz.Msgs.sensor_msgs
             BuiltIns.SerializeArray(wrench, ref ptr, end, 0);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 20;
-            size += header.GetLength();
-            for (int i = 0; i < joint_names.Length; i++)
-            {
-                size += joint_names[i].Length;
+            get {
+                int size = 16;
+                size += header.RosMessageLength;
+                size += 4 * joint_names.Length;
+                for (int i = 0; i < joint_names.Length; i++)
+                {
+                    size += Encoding.UTF8.GetByteCount(joint_names[i]);
+                }
+                size += 56 * transforms.Length;
+                size += 48 * twist.Length;
+                size += 48 * wrench.Length;
+                return size;
             }
-            size += 56 * transforms.Length;
-            size += 48 * twist.Length;
-            size += 48 * wrench.Length;
-            return size;
         }
     
         public IMessage Create() => new MultiDOFJointState();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "sensor_msgs/MultiDOFJointState";
+        public const string RosMessageType = "sensor_msgs/MultiDOFJointState";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "690f272f0640d2631c305eeb8301e59d";
+        public const string RosMd5Sum = "690f272f0640d2631c305eeb8301e59d";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71WTW/cNhC961cQ8CF2sVaBuOjBQA8FXLcuUDRN3OZQFAZXmpVYU6RCUqsovz5vhpJ2" +
                 "/VE0h9aGYetj5nHmzZsZnai31AeK5JJOxjvldyriktTOB/W3Ny5FNZrUqm6wyfSWVE1NIIpsucNF7buN" +
                 "Kk5gb60fjWtUagkYYajSEIjNfmaYd4xaFicwvUnKRKVjHDqqYa6T0vksZRwu4xQTdaryAZH13tVRJY/n" +

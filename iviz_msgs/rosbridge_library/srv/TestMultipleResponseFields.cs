@@ -1,91 +1,89 @@
+using System.Text;
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.rosbridge_library
 {
-    public class TestMultipleResponseFields : IService
+    public sealed class TestMultipleResponseFields : IService
     {
-        public sealed class Request : IRequest
-        {
-        
-            public unsafe void Deserialize(ref byte* ptr, byte* end)
-            {
-            }
-        
-            public unsafe void Serialize(ref byte* ptr, byte* end)
-            {
-            }
-        
-            public int GetLength() => 0;
-        }
-
-        public sealed class Response : IResponse
-        {
-            public int @int;
-            public float @float;
-            public string @string;
-            public bool @bool;
-        
-            /// <summary> Constructor for empty message. </summary>
-            public Response()
-            {
-                @string = "";
-            }
-            
-            public unsafe void Deserialize(ref byte* ptr, byte* end)
-            {
-                BuiltIns.Deserialize(out @int, ref ptr, end);
-                BuiltIns.Deserialize(out @float, ref ptr, end);
-                BuiltIns.Deserialize(out @string, ref ptr, end);
-                BuiltIns.Deserialize(out @bool, ref ptr, end);
-            }
-        
-            public unsafe void Serialize(ref byte* ptr, byte* end)
-            {
-                BuiltIns.Serialize(@int, ref ptr, end);
-                BuiltIns.Serialize(@float, ref ptr, end);
-                BuiltIns.Serialize(@string, ref ptr, end);
-                BuiltIns.Serialize(@bool, ref ptr, end);
-            }
-        
-            public int GetLength()
-            {
-                int size = 13;
-                size += @string.Length;
-                return size;
-            }
-        }
-        
-        /// <summary> Full ROS name of this service. </summary>
-        public const string _ServiceType = "rosbridge_library/TestMultipleResponseFields";
-        
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
-        public const string _Md5Sum = "6cce9fb727dd0f31d504d7d198a1f4ef";
-        
         /// <summary> Request message. </summary>
-        public readonly Request request;
+        public TestMultipleResponseFieldsRequest Request { get; }
         
         /// <summary> Response message. </summary>
-        public Response response;
+        public TestMultipleResponseFieldsResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public TestMultipleResponseFields()
         {
-            request = new Request();
-            response = new Response();
+            Request = new TestMultipleResponseFieldsRequest();
+            Response = new TestMultipleResponseFieldsResponse();
         }
         
         /// <summary> Setter constructor. </summary>
-        public TestMultipleResponseFields(Request request)
+        public TestMultipleResponseFields(TestMultipleResponseFieldsRequest request)
         {
-            this.request = request;
-            response = new Response();
+            Request = request;
+            Response = new TestMultipleResponseFieldsResponse();
         }
         
         public IService Create() => new TestMultipleResponseFields();
         
-        IRequest IService.Request => request;
+        IRequest IService.Request => Request;
         
-        IResponse IService.Response => response;
+        IResponse IService.Response => Response;
         
         public string ErrorMessage { get; set; }
+        
+        [IgnoreDataMember]
+        public string RosType => RosServiceType;
+        
+        /// <summary> Full ROS name of this service. </summary>
+        public const string RosServiceType = "rosbridge_library/TestMultipleResponseFields";
+        
+        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        public const string RosMd5Sum = "6cce9fb727dd0f31d504d7d198a1f4ef";
     }
 
+    public sealed class TestMultipleResponseFieldsRequest : Internal.EmptyRequest
+    {
+    }
+
+    public sealed class TestMultipleResponseFieldsResponse : IResponse
+    {
+        public int @int;
+        public float @float;
+        public string @string;
+        public bool @bool;
+    
+        /// <summary> Constructor for empty message. </summary>
+        public TestMultipleResponseFieldsResponse()
+        {
+            @string = "";
+        }
+        
+        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        {
+            BuiltIns.Deserialize(out @int, ref ptr, end);
+            BuiltIns.Deserialize(out @float, ref ptr, end);
+            BuiltIns.Deserialize(out @string, ref ptr, end);
+            BuiltIns.Deserialize(out @bool, ref ptr, end);
+        }
+    
+        public unsafe void Serialize(ref byte* ptr, byte* end)
+        {
+            BuiltIns.Serialize(@int, ref ptr, end);
+            BuiltIns.Serialize(@float, ref ptr, end);
+            BuiltIns.Serialize(@string, ref ptr, end);
+            BuiltIns.Serialize(@bool, ref ptr, end);
+        }
+    
+        [IgnoreDataMember]
+        public int RosMessageLength
+        {
+            get {
+                int size = 13;
+                size += Encoding.UTF8.GetByteCount(@string);
+                return size;
+            }
+        }
+    }
 }

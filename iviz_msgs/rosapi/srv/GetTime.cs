@@ -1,71 +1,66 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.rosapi
 {
-    public class GetTime : IService
+    public sealed class GetTime : IService
     {
-        public sealed class Request : IRequest
-        {
-        
-            public unsafe void Deserialize(ref byte* ptr, byte* end)
-            {
-            }
-        
-            public unsafe void Serialize(ref byte* ptr, byte* end)
-            {
-            }
-        
-            public int GetLength() => 0;
-        }
-
-        public sealed class Response : IResponse
-        {
-            public time time;
-        
-            public unsafe void Deserialize(ref byte* ptr, byte* end)
-            {
-                BuiltIns.Deserialize(out time, ref ptr, end);
-            }
-        
-            public unsafe void Serialize(ref byte* ptr, byte* end)
-            {
-                BuiltIns.Serialize(time, ref ptr, end);
-            }
-        
-            public int GetLength() => 8;
-        }
-        
-        /// <summary> Full ROS name of this service. </summary>
-        public const string _ServiceType = "rosapi/GetTime";
-        
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
-        public const string _Md5Sum = "556a4fb76023a469987922359d08a844";
-        
         /// <summary> Request message. </summary>
-        public readonly Request request;
+        public GetTimeRequest Request { get; }
         
         /// <summary> Response message. </summary>
-        public Response response;
+        public GetTimeResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public GetTime()
         {
-            request = new Request();
-            response = new Response();
+            Request = new GetTimeRequest();
+            Response = new GetTimeResponse();
         }
         
         /// <summary> Setter constructor. </summary>
-        public GetTime(Request request)
+        public GetTime(GetTimeRequest request)
         {
-            this.request = request;
-            response = new Response();
+            Request = request;
+            Response = new GetTimeResponse();
         }
         
         public IService Create() => new GetTime();
         
-        IRequest IService.Request => request;
+        IRequest IService.Request => Request;
         
-        IResponse IService.Response => response;
+        IResponse IService.Response => Response;
         
         public string ErrorMessage { get; set; }
+        
+        [IgnoreDataMember]
+        public string RosType => RosServiceType;
+        
+        /// <summary> Full ROS name of this service. </summary>
+        public const string RosServiceType = "rosapi/GetTime";
+        
+        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        public const string RosMd5Sum = "556a4fb76023a469987922359d08a844";
     }
 
+    public sealed class GetTimeRequest : Internal.EmptyRequest
+    {
+    }
+
+    public sealed class GetTimeResponse : IResponse
+    {
+        public time time;
+    
+        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        {
+            BuiltIns.Deserialize(out time, ref ptr, end);
+        }
+    
+        public unsafe void Serialize(ref byte* ptr, byte* end)
+        {
+            BuiltIns.Serialize(time, ref ptr, end);
+        }
+    
+        [IgnoreDataMember]
+        public int RosMessageLength => 8;
+    }
 }

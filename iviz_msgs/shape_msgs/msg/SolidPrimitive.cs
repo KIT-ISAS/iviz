@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.shape_msgs
 {
     public sealed class SolidPrimitive : IMessage
@@ -63,23 +65,29 @@ namespace Iviz.Msgs.shape_msgs
             BuiltIns.Serialize(dimensions, ref ptr, end, 0);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 5;
-            size += 8 * dimensions.Length;
-            return size;
+            get {
+                int size = 5;
+                size += 8 * dimensions.Length;
+                return size;
+            }
         }
     
         public IMessage Create() => new SolidPrimitive();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "shape_msgs/SolidPrimitive";
+        public const string RosMessageType = "shape_msgs/SolidPrimitive";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "d8f8cbc74c5ff283fca29569ccefb45d";
+        public const string RosMd5Sum = "d8f8cbc74c5ff283fca29569ccefb45d";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE3WTbWsbMQzH39+nEPRFW3Yc3VZGGeRF29yWwGhH2kGSUYJ7p+QMF/uwfSX59pNs30Mz" +
                 "SiCcbEl/6Sf5DKa4lQrhVR9SsE2FBlMojrVUJRr60nSXnMFtXYOtRIMWhEEofVAJTkMl3hBchdJQjlaV" +
                 "Uu04GTkWqBylKymCL+AqpV+WJK1U7gbuHpeTz/H76fcsX+STL9G8X/2aP0zzxeRrd/D4kE+uE6rjuSKx" +

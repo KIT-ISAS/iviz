@@ -17,18 +17,20 @@ namespace iviz_test
             RosClient client = new RosClient(
                 "http://192.168.0.73:11311",
                 null,
-                "http://192.168.0.157:7613");
+                "http://192.168.0.157:7614");
 
             /*
             AddTwoInts service = new AddTwoInts();
             Console.WriteLine(service.ToJsonString());
             */
 
+            /*
             Topics topics = new Topics();
             client.CallService("/rosapi/topics", topics);
             Console.WriteLine(topics.ToJsonString());
 
             client.Close();
+            */
             /*
             client.AdvertiseService<AddTwoInts>("/add", x =>
             {
@@ -38,14 +40,13 @@ namespace iviz_test
                 };
                 throw new ArgumentException();
             });
-            */
 
             while (true)
             {
                 Thread.Sleep(1000);
             }
+            */
 
-            /*
             StringBuilder sb = new StringBuilder();
             StringWriter sw = new StringWriter(sb);
 
@@ -78,7 +79,6 @@ namespace iviz_test
 
 
             Console.WriteLine(tf.ToJsonString());
-            */
 
             /*
             string json = sb.ToString();
@@ -91,7 +91,7 @@ namespace iviz_test
             */
 
             /*
-            RosClient client = new RosClient("http://192.168.0.73:11311", null, "http://192.168.0.157:7613");
+            RosClient client = new RosClient("http://192.168.0.73:11311", null, "http://192.168.0.157:7615");
             //client.Subscribe<Iviz.Msgs.std_msgs.Int32>("/client_count", Callback);
             //Console.WriteLine(client.GetSystemState());
 

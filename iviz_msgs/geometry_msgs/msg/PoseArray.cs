@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.geometry_msgs
 {
     public sealed class PoseArray : IMessage
@@ -27,24 +29,30 @@ namespace Iviz.Msgs.geometry_msgs
             BuiltIns.SerializeStructArray(poses, ref ptr, end, 0);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 4;
-            size += header.GetLength();
-            size += 56 * poses.Length;
-            return size;
+            get {
+                int size = 4;
+                size += header.RosMessageLength;
+                size += 56 * poses.Length;
+                return size;
+            }
         }
     
         public IMessage Create() => new PoseArray();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "geometry_msgs/PoseArray";
+        public const string RosMessageType = "geometry_msgs/PoseArray";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "916c28c5764443f268b296bb671b9d97";
+        public const string RosMd5Sum = "916c28c5764443f268b296bb671b9d97";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71UTYvbMBC961cM5LC7pUmhLT0Eelgo/TgUtuzeSlkm1tgWyJJ3JCfr/vo+2RunuZQe" +
                 "2g2GSNabN2/ejLyi60CsyiPFmvqYJNHB5ZaYWmErSnVUanzcsSeVWlRCJRtjPs+nM8iYG0R+/zETGPP+" +
                 "H//M19tPW0rZ3nepSa/m3GZFt5mDZbXUSWbLmSe1rWta0bWXvXgEcdeLpek0j72kDQLvWpcITyNBlL0f" +

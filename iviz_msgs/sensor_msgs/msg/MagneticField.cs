@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.sensor_msgs
 {
     public sealed class MagneticField : IMessage
@@ -46,23 +48,29 @@ namespace Iviz.Msgs.sensor_msgs
             BuiltIns.Serialize(magnetic_field_covariance, ref ptr, end, 9);
         }
     
-        public int GetLength()
+        [IgnoreDataMember]
+        public int RosMessageLength
         {
-            int size = 96;
-            size += header.GetLength();
-            return size;
+            get {
+                int size = 96;
+                size += header.RosMessageLength;
+                return size;
+            }
         }
     
         public IMessage Create() => new MagneticField();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "sensor_msgs/MagneticField";
+        public const string RosMessageType = "sensor_msgs/MagneticField";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "2f3b0b43eed0c9501de0fa3ff89a45aa";
+        public const string RosMd5Sum = "2f3b0b43eed0c9501de0fa3ff89a45aa";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE7VVXYvbRhR916+4RA/ZDVq3ZEugC30ohLT7sCE0S19KMdfSlTSJNKPOjGxrf33PHVle" +
                 "sTTgQmsMtuV7z/2Yc85QTg/CYfTSi43kaoqt0AM3VqIp6YORrqK9lNF54khMYZDS1PircyVH4+wmyyin" +
                 "+zmxdHv2hm0pC1S/QjeBvlp3sAWZSKF1I7B3QrXpOqnIWAW6MjVx19HkxhSsSYqzxhUu2zVwQbJpNlR7" +

@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace Iviz.Msgs.rosbridge_library
 {
     public sealed class TestUInt8FixedSizeArray16 : IMessage
@@ -20,18 +22,22 @@ namespace Iviz.Msgs.rosbridge_library
             BuiltIns.Serialize(data, ref ptr, end, 16);
         }
     
-        public int GetLength() => 16;
+        [IgnoreDataMember]
+        public int RosMessageLength => 16;
     
         public IMessage Create() => new TestUInt8FixedSizeArray16();
     
+        [IgnoreDataMember]
+        public string RosType => RosMessageType;
+    
         /// <summary> Full ROS name of this message. </summary>
-        public const string _MessageType = "rosbridge_library/TestUInt8FixedSizeArray16";
+        public const string RosMessageType = "rosbridge_library/TestUInt8FixedSizeArray16";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public const string _Md5Sum = "a4e84d0a73514dfe9696b4796e8755e7";
+        public const string RosMd5Sum = "a4e84d0a73514dfe9696b4796e8755e7";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        public const string _DependenciesBase64 =
+        public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAEyvNzCuxiDY0i1VISSxJ5OICANuquFIQAAAA";
                 
     }
