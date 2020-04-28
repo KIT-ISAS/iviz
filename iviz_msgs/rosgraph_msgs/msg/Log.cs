@@ -1,4 +1,3 @@
-using System.Text;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.rosgraph_msgs
@@ -66,14 +65,14 @@ namespace Iviz.Msgs.rosgraph_msgs
             get {
                 int size = 25;
                 size += header.RosMessageLength;
-                size += Encoding.UTF8.GetByteCount(name);
-                size += Encoding.UTF8.GetByteCount(msg);
-                size += Encoding.UTF8.GetByteCount(file);
-                size += Encoding.UTF8.GetByteCount(function);
+                size += BuiltIns.UTF8.GetByteCount(name);
+                size += BuiltIns.UTF8.GetByteCount(msg);
+                size += BuiltIns.UTF8.GetByteCount(file);
+                size += BuiltIns.UTF8.GetByteCount(function);
                 size += 4 * topics.Length;
                 for (int i = 0; i < topics.Length; i++)
                 {
-                    size += Encoding.UTF8.GetByteCount(topics[i]);
+                    size += BuiltIns.UTF8.GetByteCount(topics[i]);
                 }
                 return size;
             }

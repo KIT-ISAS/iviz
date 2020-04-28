@@ -1,4 +1,3 @@
-using System.Text;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.rosbridge_msgs
@@ -31,7 +30,7 @@ namespace Iviz.Msgs.rosbridge_msgs
         {
             get {
                 int size = 12;
-                size += Encoding.UTF8.GetByteCount(ip_address);
+                size += BuiltIns.UTF8.GetByteCount(ip_address);
                 return size;
             }
         }

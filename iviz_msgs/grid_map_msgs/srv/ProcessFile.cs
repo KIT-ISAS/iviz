@@ -1,4 +1,3 @@
-using System.Text;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.grid_map_msgs
@@ -76,8 +75,8 @@ namespace Iviz.Msgs.grid_map_msgs
         {
             get {
                 int size = 8;
-                size += Encoding.UTF8.GetByteCount(file_path);
-                size += Encoding.UTF8.GetByteCount(topic_name);
+                size += BuiltIns.UTF8.GetByteCount(file_path);
+                size += BuiltIns.UTF8.GetByteCount(topic_name);
                 return size;
             }
         }

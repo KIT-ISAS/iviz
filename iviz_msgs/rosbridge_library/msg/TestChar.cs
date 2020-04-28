@@ -4,12 +4,12 @@ namespace Iviz.Msgs.rosbridge_library
 {
     public sealed class TestChar : IMessage
     {
-        public char[] data;
+        public sbyte[] data;
     
         /// <summary> Constructor for empty message. </summary>
         public TestChar()
         {
-            data = System.Array.Empty<char>();
+            data = System.Array.Empty<sbyte>();
         }
         
         public unsafe void Deserialize(ref byte* ptr, byte* end)

@@ -1,4 +1,3 @@
-using System.Text;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.sensor_msgs
@@ -48,7 +47,7 @@ namespace Iviz.Msgs.sensor_msgs
         {
             get {
                 int size = 13;
-                size += Encoding.UTF8.GetByteCount(name);
+                size += BuiltIns.UTF8.GetByteCount(name);
                 return size;
             }
         }

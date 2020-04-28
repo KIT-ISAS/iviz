@@ -4,7 +4,7 @@ namespace Iviz.Msgs.std_msgs
 {
     public sealed class Char : IMessage
     {
-        public char data;
+        public sbyte data;
     
         public unsafe void Deserialize(ref byte* ptr, byte* end)
         {

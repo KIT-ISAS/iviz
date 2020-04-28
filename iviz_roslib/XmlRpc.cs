@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Xml;
+using Iviz.Msgs;
 
 namespace Iviz.RoslibSharp
 {
@@ -122,7 +123,7 @@ namespace Iviz.RoslibSharp
             httpRequest.Host = callerUri.Host;
             httpRequest.UserAgent = "iviz.roslib";
 
-            byte[] outData = Encoding.UTF8.GetBytes(buffer.ToString());
+            byte[] outData = BuiltIns.UTF8.GetBytes(buffer.ToString());
             httpRequest.ContentLength = outData.Length;
 
 #if DEBUG__
@@ -138,7 +139,7 @@ namespace Iviz.RoslibSharp
 
             string inData;
             HttpWebResponse httpResponse = (HttpWebResponse)httpRequest.GetResponse();
-            using (StreamReader stream = new StreamReader(httpResponse.GetResponseStream(), Encoding.UTF8))
+            using (StreamReader stream = new StreamReader(httpResponse.GetResponseStream(), BuiltIns.UTF8))
             {
                 inData = stream.ReadToEnd();
             }
@@ -183,7 +184,7 @@ namespace Iviz.RoslibSharp
         public static void MethodResponse(HttpListenerContext httpContext, Dictionary<string, Func<object[], Arg[]>> methods)
         {
             string inData;
-            using (StreamReader stream = new StreamReader(httpContext.Request.InputStream, Encoding.UTF8))
+            using (StreamReader stream = new StreamReader(httpContext.Request.InputStream, BuiltIns.UTF8))
             {
                 inData = stream.ReadToEnd();
             }
@@ -269,7 +270,7 @@ namespace Iviz.RoslibSharp
                 httpContext.Response.ContentLength64 = str.Length;
                 httpContext.Response.ContentType = "text/xml";
 
-                byte[] bytes = Encoding.UTF8.GetBytes(str);
+                byte[] bytes = BuiltIns.UTF8.GetBytes(str);
                 httpContext.Response.OutputStream.Write(bytes, 0, bytes.Length);
                 httpContext.Response.Close();
             }
@@ -282,7 +283,7 @@ namespace Iviz.RoslibSharp
                 buffer.AppendLine(new Arg(e.Message).ToString());
                 buffer.AppendLine("</fault>");
                 buffer.AppendLine("</methodResponse>");
-                using (StreamWriter stream = new StreamWriter(httpContext.Response.OutputStream, Encoding.UTF8))
+                using (StreamWriter stream = new StreamWriter(httpContext.Response.OutputStream, BuiltIns.UTF8))
                 {
                     stream.Write(buffer.ToString());
                     stream.Flush();

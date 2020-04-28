@@ -77,7 +77,7 @@ namespace Iviz.RoslibSharp
             for (int i = 0; i < contents.Length; i++)
             {
                 writer.Write(contents[i].Length);
-                writer.Write(Encoding.UTF8.GetBytes(contents[i]));
+                writer.Write(BuiltIns.UTF8.GetBytes(contents[i]));
 
 #if DEBUG__
                 Logger.Log(">>> " + contents[i]);
@@ -96,7 +96,7 @@ namespace Iviz.RoslibSharp
             {
                 int length = BitConverter.ToInt32(readBuffer, numRead);
                 numRead += 4;
-                string entry = Encoding.UTF8.GetString(readBuffer, numRead, length);
+                string entry = BuiltIns.UTF8.GetString(readBuffer, numRead, length);
                 numRead += length;
                 contents.Add(entry);
 
@@ -223,7 +223,7 @@ namespace Iviz.RoslibSharp
 
             if (readBuffer[0] == ErrorByte)
             {
-                service.ErrorMessage = Encoding.UTF8.GetString(readBuffer, 0, rcvLength);
+                service.ErrorMessage = BuiltIns.UTF8.GetString(readBuffer, 0, rcvLength);
                 Logger.Log(service.ErrorMessage);
                 return false;
             }

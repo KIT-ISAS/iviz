@@ -1,4 +1,3 @@
-using System.Text;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.actionlib_msgs
@@ -39,7 +38,7 @@ namespace Iviz.Msgs.actionlib_msgs
         {
             get {
                 int size = 12;
-                size += Encoding.UTF8.GetByteCount(id);
+                size += BuiltIns.UTF8.GetByteCount(id);
                 return size;
             }
         }

@@ -1,4 +1,3 @@
-using System.Text;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.std_msgs
@@ -44,7 +43,7 @@ namespace Iviz.Msgs.std_msgs
         {
             get {
                 int size = 16;
-                size += Encoding.UTF8.GetByteCount(frame_id);
+                size += BuiltIns.UTF8.GetByteCount(frame_id);
                 return size;
             }
         }

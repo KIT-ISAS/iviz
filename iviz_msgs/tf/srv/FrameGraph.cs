@@ -1,4 +1,3 @@
-using System.Text;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.tf
@@ -72,7 +71,7 @@ namespace Iviz.Msgs.tf
         {
             get {
                 int size = 4;
-                size += Encoding.UTF8.GetByteCount(dot_graph);
+                size += BuiltIns.UTF8.GetByteCount(dot_graph);
                 return size;
             }
         }

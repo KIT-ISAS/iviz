@@ -1,4 +1,3 @@
-using System.Text;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.diagnostic_msgs
@@ -53,9 +52,9 @@ namespace Iviz.Msgs.diagnostic_msgs
         {
             get {
                 int size = 17;
-                size += Encoding.UTF8.GetByteCount(name);
-                size += Encoding.UTF8.GetByteCount(message);
-                size += Encoding.UTF8.GetByteCount(hardware_id);
+                size += BuiltIns.UTF8.GetByteCount(name);
+                size += BuiltIns.UTF8.GetByteCount(message);
+                size += BuiltIns.UTF8.GetByteCount(hardware_id);
                 for (int i = 0; i < values.Length; i++)
                 {
                     size += values[i].RosMessageLength;

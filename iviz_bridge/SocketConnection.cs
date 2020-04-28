@@ -90,7 +90,7 @@ namespace Iviz.Bridge
                 string data;
                 if (e.IsBinary)
                 {
-                    data = Encoding.UTF8.GetString(e.RawData);
+                    data = BuiltIns.UTF8.GetString(e.RawData);
                 }
                 else
                 {

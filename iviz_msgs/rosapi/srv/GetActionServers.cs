@@ -1,4 +1,3 @@
-using System.Text;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.rosapi
@@ -87,7 +86,7 @@ namespace Iviz.Msgs.rosapi
                 size += 4 * action_servers.Length;
                 for (int i = 0; i < action_servers.Length; i++)
                 {
-                    size += Encoding.UTF8.GetByteCount(action_servers[i]);
+                    size += BuiltIns.UTF8.GetByteCount(action_servers[i]);
                 }
                 return size;
             }

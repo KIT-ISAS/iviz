@@ -1,4 +1,3 @@
-using System.Text;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.geometry_msgs
@@ -43,7 +42,7 @@ namespace Iviz.Msgs.geometry_msgs
             get {
                 int size = 60;
                 size += header.RosMessageLength;
-                size += Encoding.UTF8.GetByteCount(child_frame_id);
+                size += BuiltIns.UTF8.GetByteCount(child_frame_id);
                 return size;
             }
         }

@@ -1,4 +1,3 @@
-using System.Text;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.tf2_msgs
@@ -39,7 +38,7 @@ namespace Iviz.Msgs.tf2_msgs
         {
             get {
                 int size = 5;
-                size += Encoding.UTF8.GetByteCount(error_string);
+                size += BuiltIns.UTF8.GetByteCount(error_string);
                 return size;
             }
         }

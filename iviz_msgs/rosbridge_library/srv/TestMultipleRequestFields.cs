@@ -1,4 +1,3 @@
-using System.Text;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.rosbridge_library
@@ -77,7 +76,7 @@ namespace Iviz.Msgs.rosbridge_library
         {
             get {
                 int size = 13;
-                size += Encoding.UTF8.GetByteCount(@string);
+                size += BuiltIns.UTF8.GetByteCount(@string);
                 return size;
             }
         }

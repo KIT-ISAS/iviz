@@ -5,9 +5,10 @@ using System.Text;
 
 namespace Iviz.Msgs
 {
-
     public unsafe static class BuiltIns
     {
+        public static readonly UTF8Encoding UTF8 = new UTF8Encoding(false);
+
         static readonly double[] zc_double = Array.Empty<double>();
         static readonly float[] zc_float = Array.Empty<float>();
         static readonly ushort[] zc_ushort = Array.Empty<ushort>();
@@ -50,7 +51,7 @@ namespace Iviz.Msgs
             uint count = *(uint*)arrayPtr; arrayPtr += 4;
             if (count == 0) { val = string.Empty; return; }
             AssertInRange(arrayPtr, count, end);
-            val = Encoding.UTF8.GetString(arrayPtr, (int)count);
+            val = UTF8.GetString(arrayPtr, (int)count);
             arrayPtr += count;
         }
 
@@ -331,13 +332,13 @@ namespace Iviz.Msgs
                 throw new ArgumentNullException(nameof(val));
             }
 
-            uint count = (uint)Encoding.UTF8.GetByteCount(val);
+            uint count = (uint)UTF8.GetByteCount(val);
             AssertInRange(arrayPtr, 4 + count, end);
             *(uint*)arrayPtr = count; arrayPtr += 4;
             if (count == 0) return;
             fixed (char* val_arrayPtr = val)
             {
-                Encoding.UTF8.GetBytes(val_arrayPtr, val.Length, arrayPtr, (int)count);
+                UTF8.GetBytes(val_arrayPtr, val.Length, arrayPtr, (int)count);
                 arrayPtr += count;
             }
         }
@@ -669,7 +670,7 @@ namespace Iviz.Msgs
                 do
                 {
                     read = gZipStream.Read(outputBytes, 0, outputBytes.Length);
-                    str.Append(Encoding.UTF8.GetString(outputBytes, 0, read));
+                    str.Append(UTF8.GetString(outputBytes, 0, read));
                 }
                 while (read != 0);
                 return str.ToString();

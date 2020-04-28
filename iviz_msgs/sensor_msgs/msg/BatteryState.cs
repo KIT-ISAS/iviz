@@ -1,4 +1,3 @@
-using System.Text;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.sensor_msgs
@@ -116,8 +115,8 @@ namespace Iviz.Msgs.sensor_msgs
                 size += header.RosMessageLength;
                 size += 4 * cell_voltage.Length;
                 size += 4 * cell_temperature.Length;
-                size += Encoding.UTF8.GetByteCount(location);
-                size += Encoding.UTF8.GetByteCount(serial_number);
+                size += BuiltIns.UTF8.GetByteCount(location);
+                size += BuiltIns.UTF8.GetByteCount(serial_number);
                 return size;
             }
         }

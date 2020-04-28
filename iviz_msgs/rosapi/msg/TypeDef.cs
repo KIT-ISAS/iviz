@@ -1,4 +1,3 @@
-using System.Text;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.rosapi
@@ -52,32 +51,32 @@ namespace Iviz.Msgs.rosapi
         {
             get {
                 int size = 28;
-                size += Encoding.UTF8.GetByteCount(type);
+                size += BuiltIns.UTF8.GetByteCount(type);
                 size += 4 * fieldnames.Length;
                 for (int i = 0; i < fieldnames.Length; i++)
                 {
-                    size += Encoding.UTF8.GetByteCount(fieldnames[i]);
+                    size += BuiltIns.UTF8.GetByteCount(fieldnames[i]);
                 }
                 size += 4 * fieldtypes.Length;
                 for (int i = 0; i < fieldtypes.Length; i++)
                 {
-                    size += Encoding.UTF8.GetByteCount(fieldtypes[i]);
+                    size += BuiltIns.UTF8.GetByteCount(fieldtypes[i]);
                 }
                 size += 4 * fieldarraylen.Length;
                 size += 4 * examples.Length;
                 for (int i = 0; i < examples.Length; i++)
                 {
-                    size += Encoding.UTF8.GetByteCount(examples[i]);
+                    size += BuiltIns.UTF8.GetByteCount(examples[i]);
                 }
                 size += 4 * constnames.Length;
                 for (int i = 0; i < constnames.Length; i++)
                 {
-                    size += Encoding.UTF8.GetByteCount(constnames[i]);
+                    size += BuiltIns.UTF8.GetByteCount(constnames[i]);
                 }
                 size += 4 * constvalues.Length;
                 for (int i = 0; i < constvalues.Length; i++)
                 {
-                    size += Encoding.UTF8.GetByteCount(constvalues[i]);
+                    size += BuiltIns.UTF8.GetByteCount(constvalues[i]);
                 }
                 return size;
             }

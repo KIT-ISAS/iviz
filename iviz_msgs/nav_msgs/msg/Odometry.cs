@@ -1,4 +1,3 @@
-using System.Text;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.nav_msgs
@@ -44,7 +43,7 @@ namespace Iviz.Msgs.nav_msgs
             get {
                 int size = 684;
                 size += header.RosMessageLength;
-                size += Encoding.UTF8.GetByteCount(child_frame_id);
+                size += BuiltIns.UTF8.GetByteCount(child_frame_id);
                 return size;
             }
         }

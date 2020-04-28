@@ -217,7 +217,7 @@ namespace Iviz.MsgsGen
                             if (variable.className == "string")
                             {
                                 fieldSize += 4;
-                                fieldsWithSize.Add("size += Encoding.UTF8.GetByteCount(" + variable.fieldName + ");");
+                                fieldsWithSize.Add("size += BuiltIns.UTF8.GetByteCount(" + variable.fieldName + ");");
                             }
                             else
                             {
@@ -242,7 +242,7 @@ namespace Iviz.MsgsGen
                                 fieldsWithSize.Add("size += 4 * " + variable.fieldName + ".Length;");
                                 fieldsWithSize.Add("for (int i = 0; i < " + variable.fieldName + ".Length; i++)");
                                 fieldsWithSize.Add("{");
-                                fieldsWithSize.Add("    size += Encoding.UTF8.GetByteCount(" + variable.fieldName + "[i]);");
+                                fieldsWithSize.Add("    size += BuiltIns.UTF8.GetByteCount(" + variable.fieldName + "[i]);");
                                 fieldsWithSize.Add("}");
                             }
                             else
@@ -428,7 +428,7 @@ namespace Iviz.MsgsGen
 
             if (hasStrings)
             {
-                str.AppendLine("using System.Text;");
+                //str.AppendLine("using System.Text;");
             }
             if (forceStruct)
             {
@@ -450,11 +450,13 @@ namespace Iviz.MsgsGen
             return str.ToString();
         }
 
+        static readonly UTF8Encoding UTF8 = new UTF8Encoding(false);
+
         public static List<string> Compress(string catDependencies)
         {
             List<string> lines = new List<string>();
 
-            byte[] inputBytes = Encoding.UTF8.GetBytes(catDependencies);
+            byte[] inputBytes = UTF8.GetBytes(catDependencies);
             using (var outputStream = new MemoryStream())
             {
                 using (var gZipStream = new GZipStream(outputStream, CompressionMode.Compress))
@@ -793,7 +795,7 @@ namespace Iviz.MsgsGen
 
         public static string GetMd5Hash(MD5 md5Hash, string input)
         {
-            byte[] data = md5Hash.ComputeHash(Encoding.UTF8.GetBytes(input));
+            byte[] data = md5Hash.ComputeHash(UTF8.GetBytes(input));
             StringBuilder sBuilder = new StringBuilder();
             for (int i = 0; i < data.Length; i++)
             {

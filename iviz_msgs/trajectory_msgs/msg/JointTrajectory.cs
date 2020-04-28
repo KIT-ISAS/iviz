@@ -1,4 +1,3 @@
-using System.Text;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.trajectory_msgs
@@ -40,7 +39,7 @@ namespace Iviz.Msgs.trajectory_msgs
                 size += 4 * joint_names.Length;
                 for (int i = 0; i < joint_names.Length; i++)
                 {
-                    size += Encoding.UTF8.GetByteCount(joint_names[i]);
+                    size += BuiltIns.UTF8.GetByteCount(joint_names[i]);
                 }
                 for (int i = 0; i < points.Length; i++)
                 {

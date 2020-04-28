@@ -1,4 +1,3 @@
-using System.Text;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.grid_map_msgs
@@ -63,12 +62,12 @@ namespace Iviz.Msgs.grid_map_msgs
                 size += 4 * layers.Length;
                 for (int i = 0; i < layers.Length; i++)
                 {
-                    size += Encoding.UTF8.GetByteCount(layers[i]);
+                    size += BuiltIns.UTF8.GetByteCount(layers[i]);
                 }
                 size += 4 * basic_layers.Length;
                 for (int i = 0; i < basic_layers.Length; i++)
                 {
-                    size += Encoding.UTF8.GetByteCount(basic_layers[i]);
+                    size += BuiltIns.UTF8.GetByteCount(basic_layers[i]);
                 }
                 for (int i = 0; i < data.Length; i++)
                 {

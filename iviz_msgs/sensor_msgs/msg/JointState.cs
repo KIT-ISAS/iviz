@@ -1,4 +1,3 @@
-using System.Text;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.sensor_msgs
@@ -69,7 +68,7 @@ namespace Iviz.Msgs.sensor_msgs
                 size += 4 * name.Length;
                 for (int i = 0; i < name.Length; i++)
                 {
-                    size += Encoding.UTF8.GetByteCount(name[i]);
+                    size += BuiltIns.UTF8.GetByteCount(name[i]);
                 }
                 size += 8 * position.Length;
                 size += 8 * velocity.Length;

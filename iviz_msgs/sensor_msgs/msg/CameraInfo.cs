@@ -1,4 +1,3 @@
-using System.Text;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.sensor_msgs
@@ -185,7 +184,7 @@ namespace Iviz.Msgs.sensor_msgs
             get {
                 int size = 281;
                 size += header.RosMessageLength;
-                size += Encoding.UTF8.GetByteCount(distortion_model);
+                size += BuiltIns.UTF8.GetByteCount(distortion_model);
                 size += 8 * D.Length;
                 return size;
             }

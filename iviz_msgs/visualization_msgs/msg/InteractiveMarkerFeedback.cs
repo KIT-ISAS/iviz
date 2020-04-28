@@ -1,4 +1,3 @@
-using System.Text;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.visualization_msgs
@@ -89,9 +88,9 @@ namespace Iviz.Msgs.visualization_msgs
             get {
                 int size = 98;
                 size += header.RosMessageLength;
-                size += Encoding.UTF8.GetByteCount(client_id);
-                size += Encoding.UTF8.GetByteCount(marker_name);
-                size += Encoding.UTF8.GetByteCount(control_name);
+                size += BuiltIns.UTF8.GetByteCount(client_id);
+                size += BuiltIns.UTF8.GetByteCount(marker_name);
+                size += BuiltIns.UTF8.GetByteCount(control_name);
                 return size;
             }
         }

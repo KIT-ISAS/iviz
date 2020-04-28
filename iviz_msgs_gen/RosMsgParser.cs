@@ -21,7 +21,7 @@ namespace Iviz.MsgsGen
                 { "string", "string" },
                 { "time", "time" },
                 { "duration", "duration" },
-                { "char", "char" },
+                { "char", "sbyte" },
                 { "byte", "byte" },
             };
 

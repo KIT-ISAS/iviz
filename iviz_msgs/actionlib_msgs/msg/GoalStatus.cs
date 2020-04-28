@@ -1,4 +1,3 @@
-using System.Text;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.actionlib_msgs
@@ -56,7 +55,7 @@ namespace Iviz.Msgs.actionlib_msgs
             get {
                 int size = 5;
                 size += goal_id.RosMessageLength;
-                size += Encoding.UTF8.GetByteCount(text);
+                size += BuiltIns.UTF8.GetByteCount(text);
                 return size;
             }
         }

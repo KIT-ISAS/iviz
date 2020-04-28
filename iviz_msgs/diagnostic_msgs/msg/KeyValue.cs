@@ -1,4 +1,3 @@
-using System.Text;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.diagnostic_msgs
@@ -32,8 +31,8 @@ namespace Iviz.Msgs.diagnostic_msgs
         {
             get {
                 int size = 8;
-                size += Encoding.UTF8.GetByteCount(key);
-                size += Encoding.UTF8.GetByteCount(value);
+                size += BuiltIns.UTF8.GetByteCount(key);
+                size += BuiltIns.UTF8.GetByteCount(value);
                 return size;
             }
         }

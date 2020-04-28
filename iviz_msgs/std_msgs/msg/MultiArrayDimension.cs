@@ -1,4 +1,3 @@
-using System.Text;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.std_msgs
@@ -34,7 +33,7 @@ namespace Iviz.Msgs.std_msgs
         {
             get {
                 int size = 12;
-                size += Encoding.UTF8.GetByteCount(label);
+                size += BuiltIns.UTF8.GetByteCount(label);
                 return size;
             }
         }

@@ -308,7 +308,7 @@ namespace Iviz.MsgsGen
             StringBuilder str = new StringBuilder();
             if (hasStrings)
             {
-                str.AppendLine("using System.Text;");
+                //str.AppendLine("using System.Text;");
             }
             str.AppendLine("using System.Runtime.Serialization;");
             str.AppendLine("");
