@@ -39,12 +39,15 @@ namespace Iviz.Msgs.geometry_msgs
         public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
+        [Preserve]
         public const string RosMessageType = "geometry_msgs/Point32";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
+        [Preserve]
         public const string RosMd5Sum = "cc153912f1453b708d221682bc23d9ac";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        [Preserve]
         public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAEz1QO27DMAzdfYoHZGmBIkNyhE7dOvQCskXbRGVREOmk6elLKWkADRTJ9+MBXysrJskW" +
                 "OCtsJRRRNpYMmRH8x9nAGXMlgpYw0cuVbcX5hJFN21apNLE65PU4HPDh6wpvybZRpAgT7Er47EzXlSpd" +

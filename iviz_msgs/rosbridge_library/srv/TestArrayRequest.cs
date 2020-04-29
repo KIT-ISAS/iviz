@@ -36,9 +36,11 @@ namespace Iviz.Msgs.rosbridge_library
         public string RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
+        [Preserve]
         public const string RosServiceType = "rosbridge_library/TestArrayRequest";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
+        [Preserve]
         public const string RosMd5Sum = "3d7cfb7e4aa0844868966efa8a264398";
     }
 

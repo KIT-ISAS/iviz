@@ -42,12 +42,15 @@ namespace Iviz.Msgs.geometry_msgs
         public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
+        [Preserve]
         public const string RosMessageType = "geometry_msgs/TwistWithCovariance";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
+        [Preserve]
         public const string RosMd5Sum = "1fe8a28e6890a4cc3ae4c3ca5c7d82e6";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        [Preserve]
         public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71TTWvcQAy9+1c8yCUBx4Wm7CHQc8khUNql9INStLbsncQeGc04a+fXV+N1nCzNoYdS" +
                 "g408o/c0enpzhu3eBfDYK4fAAQ/cSuniBOdRKzNCTyXj4OIegy9ZIzkfpyLLtgcXImL6ZtkZPsnhsqM7" +

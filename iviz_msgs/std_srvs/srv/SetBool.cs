@@ -36,9 +36,11 @@ namespace Iviz.Msgs.std_srvs
         public string RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
+        [Preserve]
         public const string RosServiceType = "std_srvs/SetBool";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
+        [Preserve]
         public const string RosMd5Sum = "09fb03525b03e7ea1fd3992bafd87e16";
     }
 

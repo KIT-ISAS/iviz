@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Iviz.MsgsGen
 {
@@ -40,7 +41,7 @@ namespace Iviz.MsgsGen
         public interface IElement
         {
             ElementType Type { get; }
-            string ToCString();
+            string ToCString(bool forceUnroll = false);
         }
 
         public class Empty : IElement
@@ -52,7 +53,7 @@ namespace Iviz.MsgsGen
                 return "[]";
             }
 
-            public string ToCString()
+            public string ToCString(bool forceUnroll)
             {
                 return "";
             }
@@ -74,7 +75,7 @@ namespace Iviz.MsgsGen
                 return "[# '" + text + "']";
             }
 
-            public string ToCString()
+            public string ToCString(bool forceUnroll)
             {
                 return "//" + text;
             }
@@ -98,21 +99,22 @@ namespace Iviz.MsgsGen
 
             static readonly HashSet<string> Keywords = new HashSet<string>
             {
-                "default", 
-                "byte", 
-                "sbyte", 
-                "char", 
-                "short", 
-                "ushort", 
+                "default",
+                "byte",
+                "sbyte",
+                "char",
+                "short",
+                "ushort",
                 "int",
                 "uint",
-                "float", 
+                "float",
                 "double",
                 "long",
                 "ulong",
-                "bool", 
+                "bool",
                 "string",
                 "readonly",
+                "override",
             };
 
             public Variable(string comment, string classToken, string fieldName)
@@ -153,7 +155,11 @@ namespace Iviz.MsgsGen
                     rosClassName = "std_msgs/Header";
                     className = "std_msgs.Header";
                 }
-                else if (!BuiltInsMaps.TryGetValue(rosClassName, out className))
+                else if (BuiltInsMaps.TryGetValue(rosClassName, out className))
+                {
+                    //
+                }
+                else
                 {
                     className = rosClassName.Replace('/', '.');
                 }
@@ -165,7 +171,7 @@ namespace Iviz.MsgsGen
                 return "['" + classToken + "' '" + rosFieldName + "' # '" + comment + "']";
             }
 
-            public string ToCString()
+            public string ToCString(bool forceUnroll)
             {
                 string result;
                 if (arraySize == -1)
@@ -178,7 +184,14 @@ namespace Iviz.MsgsGen
                 }
                 else
                 {
-                    result = "public " + className + "[/*" + arraySize + "*/] " + fieldName + ";";
+                    if (forceUnroll)
+                    {
+                        result = "public " + className + " " + string.Join(", ", Enumerable.Range(0, arraySize).Select(x => fieldName + "_" + x)) + ";";
+                    }
+                    else
+                    {
+                        result = "public " + className + "[/*" + arraySize + "*/] " + fieldName + ";";
+                    }
                 }
                 if (comment != "")
                 {
@@ -234,7 +247,7 @@ namespace Iviz.MsgsGen
                 return "['" + className + "' '" + fieldName + "' = '" + value + "' # '" + comment + "']";
             }
 
-            public string ToCString()
+            public string ToCString(bool forceUnroll)
             {
                 string result = "";
                 if (BuiltInsMaps.TryGetValue(className, out string alias))
@@ -274,7 +287,7 @@ namespace Iviz.MsgsGen
                 return "[XXX '" + text + "']";
             }
 
-            public string ToCString()
+            public string ToCString(bool forceUnroll)
             {
                 return "";
             }
@@ -289,7 +302,7 @@ namespace Iviz.MsgsGen
                 return "[---]";
             }
 
-            public string ToCString()
+            public string ToCString(bool forceUnroll)
             {
                 return "";
             }

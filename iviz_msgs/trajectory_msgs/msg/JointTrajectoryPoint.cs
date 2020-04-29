@@ -60,12 +60,15 @@ namespace Iviz.Msgs.trajectory_msgs
         public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
+        [Preserve]
         public const string RosMessageType = "trajectory_msgs/JointTrajectoryPoint";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
+        [Preserve]
         public const string RosMd5Sum = "f3cd1e1c4d320c79d6985c904ae5dcd3";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        [Preserve]
         public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE1WPsQ7CMAxE93yFJVbEhNgZWJjZUIVMeoGgtEaxi+DvcYsEZYl07+zceUE7jleyyjdE" +
                 "k/qiu+TeSO+IOWUoIdsV1bFmy9LrcUkPFImuMAqOEQWVJ7NpwoLkfxopSbWG/CX/ap5lQmcQnoiDoV35" +

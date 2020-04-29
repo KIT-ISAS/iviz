@@ -87,12 +87,15 @@ namespace Iviz.Msgs.sensor_msgs
         public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
+        [Preserve]
         public const string RosMessageType = "sensor_msgs/PointCloud2";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
+        [Preserve]
         public const string RosMd5Sum = "1158d486dd51d683ce2f1be655c3c181";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        [Preserve]
         public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE7VV32/bNhB+119xqB9qF7GHpF0WBDCGYkHWAF1aoNnTMASUeLaJUaRLUsm0v37fkaLt" +
                 "bHvYwybYkHS6++73xxk97EyknmNUW6adtzqSos5by10y3pHf0P1Sm55dxKuytPfGpXhGzzvT7ahXYzOD" +

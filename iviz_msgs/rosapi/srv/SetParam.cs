@@ -36,9 +36,11 @@ namespace Iviz.Msgs.rosapi
         public string RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
+        [Preserve]
         public const string RosServiceType = "rosapi/SetParam";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
+        [Preserve]
         public const string RosMd5Sum = "bc6ccc4a57f61779c8eaae61e9f422e0";
     }
 

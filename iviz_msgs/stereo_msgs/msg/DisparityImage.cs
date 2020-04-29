@@ -83,12 +83,15 @@ namespace Iviz.Msgs.stereo_msgs
         public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
+        [Preserve]
         public const string RosMessageType = "stereo_msgs/DisparityImage";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
+        [Preserve]
         public const string RosMd5Sum = "04a177815f75271039fa21f16acad8c9";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        [Preserve]
         public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71X247bNhB911cQuw9ZJ15v0LwEKRYt2nTbBVIkyC5QIEVr0OLIYkKRCkn5kq/vGVKS" +
                 "ZefSPKQ1kKxNzY0zZ86MzsUdtdLLSKImqciLynlRuqaVUa+00XEvtjrWouy8JxvFvW7obm/L2jurP5Bf" +

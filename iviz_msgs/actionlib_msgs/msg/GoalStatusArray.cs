@@ -49,12 +49,15 @@ namespace Iviz.Msgs.actionlib_msgs
         public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
+        [Preserve]
         public const string RosMessageType = "actionlib_msgs/GoalStatusArray";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
+        [Preserve]
         public const string RosMd5Sum = "8b2b82f13216d0a8ea88bd3af735e619";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        [Preserve]
         public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71WwXLbNhC98yswo0PsTq22SZumntFBlVRXHSfxWGovnY4HBFYkWpBUAdCy/j5vQYqi" +
                 "HKnRIalGtoYS8Pbh7dvFDsQiVI68CDkJH2SoPR5WlRNZJS1/LYOQjoSqnaMy2K1IyZSZCE6qf0gnA5Fu" +

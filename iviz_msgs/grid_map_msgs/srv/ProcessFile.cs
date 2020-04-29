@@ -36,9 +36,11 @@ namespace Iviz.Msgs.grid_map_msgs
         public string RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
+        [Preserve]
         public const string RosServiceType = "grid_map_msgs/ProcessFile";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
+        [Preserve]
         public const string RosMd5Sum = "03f389710f49a6dd2a8b447bb2850cd6";
     }
 

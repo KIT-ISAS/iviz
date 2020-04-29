@@ -36,9 +36,11 @@ namespace Iviz.Msgs.nav_msgs
         public string RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
+        [Preserve]
         public const string RosServiceType = "nav_msgs/GetMap";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
+        [Preserve]
         public const string RosMd5Sum = "6cdd0a18e0aff5b0a3ca2326a89b54ff";
     }
 

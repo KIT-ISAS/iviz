@@ -457,7 +457,7 @@ namespace Iviz.App
             }
         }
 
-        void OnDestroy()
+       void OnDestroy()
         {
             if (material != null)
             {

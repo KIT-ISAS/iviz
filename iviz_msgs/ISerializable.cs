@@ -1,5 +1,14 @@
-﻿namespace Iviz.Msgs
+﻿using System;
+
+namespace Iviz.Msgs
 {
+    /// <summary>
+    /// Attribute that tells the Unity engine not to strip these fields even if no code accesses them
+    /// (the only requirement is to have the exact name 'Preserve').
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field)]
+    public class PreserveAttribute : System.Attribute { }
+
     public interface ISerializable
     {
         /// <summary>

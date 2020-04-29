@@ -83,12 +83,15 @@ namespace Iviz.Msgs.sensor_msgs
         public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
+        [Preserve]
         public const string RosMessageType = "sensor_msgs/JointState";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
+        [Preserve]
         public const string RosMd5Sum = "3066dcd76a6cfaef579bd0f34173e9fd";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        [Preserve]
         public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61UTW/UMBC951eMtId20TaVAHGoxAGJzwMVUitxQKiajWcTg2MH29kl/Hqe7exmq144" +
                 "UO2hdmbezLz3PCu673Qg/Jh6CYFbodhxpM4ZFUhxZIqOlITG6236JhQiRyG3Q0qQmP6Jzv8ahRpno3fG" +

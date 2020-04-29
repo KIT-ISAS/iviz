@@ -291,11 +291,13 @@ namespace Iviz.MsgsGen
 
             lines.Add("");
             lines.Add("/// <summary> Full ROS name of this service. </summary>");
+            lines.Add("[Preserve]");
             lines.Add("public const string RosServiceType = \"" + package + "/" + name + "\";");
 
             lines.Add("");
             string md5 = GetMd5();
             lines.Add("/// <summary> MD5 hash of a compact representation of the service. </summary>");
+            lines.Add("[Preserve]");
             lines.Add("public const string RosMd5Sum = \"" + md5 + "\";");
 
 

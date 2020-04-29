@@ -73,7 +73,15 @@ namespace Iviz.MsgsGen
             "geometry_msgs/Pose",
             "geometry_msgs/Transform",
             "std_msgs/ColorRGBA",
+            "mesh_msgs/TriangleIndices",
         };
+
+        static readonly HashSet<string> forceSkip = new HashSet<string>
+        {
+            //"mesh_msgs/TriangleIndices",
+        };
+
+        public bool ForceSkip => forceSkip.Contains(package + "/" + name);
 
         public ClassInfo(string package, string path)
         {
@@ -509,7 +517,7 @@ namespace Iviz.MsgsGen
             lines.Add("{");
             foreach (var element in elements)
             {
-                lines.Add("    " + element.ToCString());
+                lines.Add("    " + element.ToCString(forceStruct));
             }
             if (elements.Count != 0)
             {
@@ -544,17 +552,20 @@ namespace Iviz.MsgsGen
 
             lines.Add("");
             lines.Add("    /// <summary> Full ROS name of this message. </summary>");
+            lines.Add("    [Preserve]");
             lines.Add("    public const string RosMessageType = \"" + package + "/" + name + "\";");
 
 
             lines.Add("");
             string md5 = GetMd5Property();
             lines.Add("    /// <summary> MD5 hash of a compact representation of the message. </summary>");
+            lines.Add("    [Preserve]");
             lines.Add("    public const string RosMd5Sum = \"" + md5 + "\";");
 
             lines.Add("");
 
             lines.Add("    /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>");
+            lines.Add("    [Preserve]");
             lines.Add("    public const string RosDependenciesBase64 =");
 
             /*

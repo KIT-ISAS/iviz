@@ -36,9 +36,11 @@ namespace Iviz.Msgs.tf
         public string RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
+        [Preserve]
         public const string RosServiceType = "tf/FrameGraph";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
+        [Preserve]
         public const string RosMd5Sum = "c4af9ac907e58e906eb0b6e3c58478c0";
     }
 

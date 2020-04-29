@@ -43,12 +43,15 @@ namespace Iviz.Msgs.geometry_msgs
         public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
+        [Preserve]
         public const string RosMessageType = "geometry_msgs/AccelStamped";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
+        [Preserve]
         public const string RosMd5Sum = "d8a98a5d81351b6eb0578c78557e7659";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        [Preserve]
         public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71UTWvbQBC961cM+JCk2CokpYdAD4HSNodCIKHXMN4dS0ukXXV3ZEf99X27spWGXnpo" +
                 "awTWx8ybeW/e7IpuPLEx0tHBaUtRdhLFGyETQrTOswrtIvdC7C2p6yUp90P1RdhKpLb8VTcFoeBU1Ye/" +
