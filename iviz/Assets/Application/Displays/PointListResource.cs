@@ -8,21 +8,94 @@ using UnityEngine.EventSystems;
 
 namespace Iviz.App
 {
+    [StructLayout(LayoutKind.Explicit)]
+    public struct PointWithColor
+    {
+        [FieldOffset(0)] public Vector3 position;
+        [FieldOffset(12)] public Color32 color;
+        [FieldOffset(12)] public float intensity;
+
+        public PointWithColor(Vector3 position, Color32 color) : this()
+        {
+            this.position = position;
+            this.color = color;
+        }
+
+        public PointWithColor(Vector3 position, float intensity) : this()
+        {
+            this.position = position;
+            this.intensity = intensity;
+        }
+    };
+
     public class PointListResource : MarkerResource
     {
         Material material;
         BoxCollider boxCollider;
 
-        struct PointWithColor
-        {
-            public Vector3 position;
-            public Color32 color;
-        };
-
         PointWithColor[] pointBuffer = new PointWithColor[0];
         ComputeBuffer pointComputeBuffer;
         ComputeBuffer quadComputeBuffer;
-        int dataSize;
+
+        bool useIntensityTexture;
+        public bool UseIntensityTexture
+        {
+            get => useIntensityTexture;
+            set
+            {
+                useIntensityTexture = value;
+                if (useIntensityTexture)
+                {
+                    material.EnableKeyword("USE_TEXTURE");
+                }
+                else
+                {
+                    material.DisableKeyword("USE_TEXTURE");
+                }
+            }
+        }
+
+        static readonly int PropIntensity = Shader.PropertyToID("_IntensityTexture");
+
+        Resource.Colormaps.Id colormap;
+        public Resource.Colormaps.Id Colormap
+        {
+            get => colormap;
+            set
+            {
+                colormap = value;
+
+                Texture2D texture = Resource.Colormaps.Textures[Colormap];
+                material.SetTexture(PropIntensity, texture);
+            }
+        }
+
+        static readonly int PropIntensityCoeff = Shader.PropertyToID("_IntensityCoeff");
+        static readonly int PropIntensityAdd = Shader.PropertyToID("_IntensityAdd");
+
+        Vector2 intensityBounds;
+        public Vector2 IntensityBounds
+        {
+            get => intensityBounds;
+            set
+            {
+                intensityBounds = value;
+                float intensitySpan = intensityBounds.y - intensityBounds.x;
+
+                if (intensitySpan == 0)
+                {
+                    material.SetFloat(PropIntensityCoeff, 1);
+                    material.SetFloat(PropIntensityAdd, 0);
+                }
+                else
+                {
+                    material.SetFloat(PropIntensityCoeff, 1 / intensitySpan);
+                    material.SetFloat(PropIntensityAdd, -intensityBounds.x / intensitySpan);
+                }
+            }
+        }
+
+        public int Size { get; private set; }
 
         public override void SetColor(Color color)
         {
@@ -37,7 +110,7 @@ namespace Iviz.App
                 int index = 0;
                 if (value == null)
                 {
-                    for (int i = 0; i < dataSize; i++)
+                    for (int i = 0; i < Size; i++)
                     {
                         pointBuffer[index++].color = Color;
                     }
@@ -62,7 +135,24 @@ namespace Iviz.App
                 {
                     pointBuffer[index++].position = pos;
                 }
-                pointComputeBuffer.SetData(pointBuffer, 0, 0, dataSize);
+                pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
+                Bounds = CalculateBounds();
+                boxCollider.center = Bounds.center;
+                boxCollider.size = Bounds.size;
+            }
+        }
+
+        public IEnumerable<PointWithColor> PointsWithColor
+        {
+            get => pointBuffer;
+            set
+            {
+                int index = 0;
+                foreach (PointWithColor pos in value)
+                {
+                    pointBuffer[index++] = pos;
+                }
+                pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
                 Bounds = CalculateBounds();
                 boxCollider.center = Bounds.center;
                 boxCollider.size = Bounds.size;
@@ -84,11 +174,11 @@ namespace Iviz.App
                 pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithColor>());
                 material.SetBuffer(PropPoints, pointComputeBuffer);
             }
-            dataSize = size;
+            Size = size;
         }
 
-        Vector3 scale;
-        public Vector3 Scale
+        Vector2 scale;
+        public Vector2 Scale
         {
             get => scale;
             set
@@ -156,14 +246,14 @@ namespace Iviz.App
             material.SetMatrix(PropWorldToLocal, transform.worldToLocalMatrix);
 
             Bounds worldBounds = boxCollider.bounds;
-            Graphics.DrawProcedural(material, worldBounds, MeshTopology.Quads, 4, dataSize);
+            Graphics.DrawProcedural(material, worldBounds, MeshTopology.Quads, 4, Size);
         }
 
         Bounds CalculateBounds()
         {
             Vector3 positionMin = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
             Vector3 positionMax = new Vector3(float.MinValue, float.MinValue, float.MinValue);
-            for (int i = 0; i < dataSize; i++)
+            for (int i = 0; i < Size; i++)
             {
                 Vector3 position = pointBuffer[i].position;
                 if (float.IsNaN(position.x) ||
@@ -192,6 +282,35 @@ namespace Iviz.App
             {
                 quadComputeBuffer.Release();
             }
+        }
+
+        void OnApplicationFocus(bool hasFocus)
+        {
+            if (!hasFocus)
+            {
+                return;
+            }
+            // unity bug causes all compute buffers to disappear when focus is lost
+            if (pointComputeBuffer != null)
+            {
+                pointComputeBuffer.Release();
+                pointComputeBuffer = null;
+            }
+            if (pointBuffer.Length != 0)
+            {
+                pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithColor>());
+                pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
+                material.SetBuffer(PropPoints, pointComputeBuffer);
+            }
+
+            if (quadComputeBuffer != null)
+            {
+                quadComputeBuffer.Release();
+                quadComputeBuffer = null;
+            }
+            UpdateQuadComputeBuffer();
+
+            Debug.Log("PointCloudListener: Rebuilding compute buffers");
         }
     }
 }
