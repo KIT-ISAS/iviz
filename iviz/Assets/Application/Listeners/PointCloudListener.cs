@@ -10,12 +10,11 @@ namespace Iviz.App
 {
     public class PointCloudListener : DisplayableListener
     {
-        Material material;
-        Mesh mesh;
+        PointListResource pointCloud;
 
         public float MinIntensity { get; private set; }
         public float MaxIntensity { get; private set; }
-        public int Size { get; private set; }
+        public int Size { get; private set; } 
         public bool CalculateMinMax { get; private set; } = true;
 
         [Serializable]
@@ -56,7 +55,7 @@ namespace Iviz.App
             set
             {
                 config.pointSize = value;
-                UpdateQuadComputeBuffer();
+                pointCloud.Scale = value * Vector2.one;
             }
         }
 
@@ -66,44 +65,24 @@ namespace Iviz.App
             set
             {
                 config.colormap = value;
-                UpdateColormap();
+                pointCloud.Colormap = value;
             }
         }
 
         readonly List<string> fieldNames = new List<string>() { "x", "y", "z" };
         public IReadOnlyList<string> FieldNames => fieldNames;
 
-        struct PointWithIntensity
-        {
-            public Vector3 position;
-            public float intensity;
-
-            public PointWithIntensity(Vector3 p, float i)
-            {
-                position = p;
-                intensity = i;
-            }
-        }
-
-        PointWithIntensity[] pointBuffer = new PointWithIntensity[0];
-        ComputeBuffer pointComputeBuffer;
-        ComputeBuffer quadComputeBuffer;
-        Bounds Bounds;
+        PointWithColor[] pointBuffer = new PointWithColor[0];
 
         void Awake()
         {
             Resource.Colormaps.Initialize();
-            Resource.Materials.Initialize();
-
-            material = Instantiate(Resource.Materials.PointCloud);
-            GetComponent<MeshRenderer>().sharedMaterial = material;
+            Resource.Markers.Initialize();
 
             Config = new Configuration();
-
-            mesh = new Mesh();
-            GetComponent<MeshFilter>().sharedMesh = mesh;
-
             transform.localRotation = Quaternion.identity.ToRos().Ros2Unity();
+
+            pointCloud = ResourcePool.GetOrCreate(Resource.Markers.PointList, transform).GetComponent<PointListResource>();
         }
 
         public override void StartListening()
@@ -156,16 +135,12 @@ namespace Iviz.App
             fieldNames.Clear();
             fieldNames.AddRange(msg.fields.Select(x => x.name));
 
-            if (quadComputeBuffer == null)
-            {
-                UpdateQuadComputeBuffer();
-            }
-
             int newSize = (int)(msg.width * msg.height);
             if (newSize > pointBuffer.Length)
             {
-                UpdateComputeBuffers(newSize);
+                pointBuffer = new PointWithColor[newSize * 11 / 10];
             }
+
 
             Task.Run(() =>
             {
@@ -199,89 +174,19 @@ namespace Iviz.App
 
                 GeneratePointBuffer(msg, xOffset, yOffset, zOffset, iOffset, iField.datatype, rgbaHint);
 
-                CalculateBounds(newSize, out Bounds positionBounds, out Vector2 intensityBounds);
+                Vector2 intensityBounds = CalculateBounds(newSize);
 
                 GameThread.RunOnce(() =>
                 {
-                    pointComputeBuffer.SetData(pointBuffer, 0, 0, newSize);
-
-                    bool enableIntensityTexture = !rgbaHint;
-                    if (enableIntensityTexture)
-                    {
-                        material.EnableKeyword("USE_TEXTURE");
-                    }
-                    else
-                    {
-                        material.DisableKeyword("USE_TEXTURE");
-                    }
-
-                    Size = newSize;
-                    Bounds = positionBounds;
-                    MinIntensity = intensityBounds.x;
-                    MaxIntensity = intensityBounds.y;
-                    float intensitySpan = intensityBounds.y - intensityBounds.x;
-
-                    if (intensitySpan == 0)
-                    {
-                        material.SetFloat("_IntensityCoeff", 1);
-                        material.SetFloat("_IntensityAdd", 0);
-                    }
-                    else
-                    {
-                        material.SetFloat("_IntensityCoeff", 1 / intensitySpan);
-                        material.SetFloat("_IntensityAdd", -intensityBounds.x / intensitySpan);
-                    }
+                    pointCloud.IntensityBounds = intensityBounds;
+                    pointCloud.PointsWithColor = pointBuffer;
                 });
             });
         }
 
-        static readonly int PropLocalToWorld = Shader.PropertyToID("_LocalToWorld");
-        static readonly int PropWorldToLocal = Shader.PropertyToID("_WorldToLocal");
-
-        void Update()
+        Vector2 CalculateBounds(int size)
         {
-            material.SetMatrix(PropLocalToWorld, transform.localToWorldMatrix);
-            material.SetMatrix(PropWorldToLocal, transform.worldToLocalMatrix);
 
-            Bounds worldBounds = Utils.TransformBound(Bounds, transform);
-            Graphics.DrawProcedural(material, worldBounds, MeshTopology.Quads, 4, Size);
-        }
-
-        static readonly int PropQuad = Shader.PropertyToID("_Quad");
-
-        void UpdateQuadComputeBuffer()
-        {
-            Vector2[] quad = {
-                    new Vector2( 0.5f,  0.5f) * config.pointSize,
-                    new Vector2( 0.5f, -0.5f) * config.pointSize,
-                    new Vector2(-0.5f, -0.5f) * config.pointSize,
-                    new Vector2(-0.5f,  0.5f) * config.pointSize,
-            };
-            if (quadComputeBuffer == null)
-            {
-                quadComputeBuffer = new ComputeBuffer(4, Marshal.SizeOf<Vector2>());
-                material.SetBuffer(PropQuad, quadComputeBuffer);
-            }
-            quadComputeBuffer.SetData(quad, 0, 0, 4);
-        }
-
-        static readonly int PropPoints = Shader.PropertyToID("_Points");
-
-        void UpdateComputeBuffers(int size)
-        {
-            pointBuffer = new PointWithIntensity[(int)(size * 1.1f)];
-            if (pointComputeBuffer != null)
-            {
-                pointComputeBuffer.Release();
-            }
-            pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithIntensity>());
-            material.SetBuffer(PropPoints, pointComputeBuffer);
-        }
-
-        void CalculateBounds(int size, out Bounds positionBounds, out Vector2 intensitySpan)
-        {
-            Vector3 positionMin = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
-            Vector3 positionMax = new Vector3(float.MinValue, float.MinValue, float.MinValue);
             float intensityMin = float.MaxValue, intensityMax = float.MinValue;
             for (int i = 0; i < size; i++)
             {
@@ -294,22 +199,14 @@ namespace Iviz.App
                 {
                     continue;
                 }
-                positionMin = Vector3.Min(positionMin, position);
-                positionMax = Vector3.Max(positionMax, position);
+
                 intensityMin = Mathf.Min(intensityMin, intensity);
                 intensityMax = Mathf.Max(intensityMax, intensity);
             }
-            positionBounds = new Bounds((positionMax + positionMin) / 2, positionMax - positionMin);
-            intensitySpan = new Vector2(intensityMin, intensityMax);
+
+            return new Vector2(intensityMin, intensityMax);
         }
 
-        static readonly int PropIntensity = Shader.PropertyToID("_IntensityTexture");
-
-        void UpdateColormap()
-        {
-            Texture2D texture = Resource.Colormaps.Textures[Colormap];
-            material.SetTexture(PropIntensity, texture);
-        }
 
         void GeneratePointBuffer(PointCloud2 msg, int xOffset, int yOffset, int zOffset, int iOffset, int iType, bool rgbaHint)
         {
@@ -386,7 +283,7 @@ namespace Iviz.App
                             BitConverter.ToSingle(msg.data, rowOffset + yOffset),
                             BitConverter.ToSingle(msg.data, rowOffset + zOffset)
                         );
-                        pointBuffer[pointOffset] = new PointWithIntensity(
+                        pointBuffer[pointOffset] = new PointWithColor(
                             new Vector3(-xyz.y, xyz.z, xyz.x),
                             intensityFn(msg.data, rowOffset + iOffset)
                         );
@@ -405,9 +302,9 @@ namespace Iviz.App
             unsafe
             {
                 fixed (byte* dataPtr = msg.data)
-                fixed (PointWithIntensity* pointBufferPtr = pointBuffer)
+                fixed (PointWithColor* pointBufferPtr = pointBuffer)
                 {
-                    PointWithIntensity* pointBufferOff = pointBufferPtr;
+                    PointWithColor* pointBufferOff = pointBufferPtr;
                     byte* dataRow = dataPtr;
                     for (int v = height; v > 0; v--, dataRow += rowStep)
                     {
@@ -436,9 +333,9 @@ namespace Iviz.App
             unsafe
             {
                 fixed (byte* dataPtr = msg.data)
-                fixed (PointWithIntensity* pointBufferPtr = pointBuffer)
+                fixed (PointWithColor* pointBufferPtr = pointBuffer)
                 {
-                    PointWithIntensity* pointBufferOff = pointBufferPtr;
+                    PointWithColor* pointBufferOff = pointBufferPtr;
                     byte* dataRow = dataPtr;
                     for (int v = height; v > 0; v--, dataRow += rowStep)
                     {
@@ -457,51 +354,12 @@ namespace Iviz.App
             }
         }
 
-       void OnDestroy()
+        public override void Recycle()
         {
-            if (material != null)
-            {
-                Destroy(material);
-            }
-            if (pointComputeBuffer != null)
-            {
-                pointComputeBuffer.Release();
-            }
-            if (quadComputeBuffer != null)
-            {
-                quadComputeBuffer.Release();
-            }
+            base.Recycle();
+            ResourcePool.Dispose(Resource.Markers.PointList, pointCloud.gameObject);
+            pointCloud = null;
         }
-
-        void OnApplicationFocus(bool hasFocus)
-        {
-            if (!hasFocus)
-            {
-                return;
-            }
-            // unity bug causes all compute buffers to disappear when focus is lost
-            if (pointComputeBuffer != null)
-            {
-                pointComputeBuffer.Release();
-                pointComputeBuffer = null;
-            }
-            if (pointBuffer.Length != 0)
-            {
-                pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithIntensity>());
-                pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
-                material.SetBuffer(PropPoints, pointComputeBuffer);
-            }
-
-            if (quadComputeBuffer != null)
-            {
-                quadComputeBuffer.Release();
-                quadComputeBuffer = null;
-            }
-            UpdateQuadComputeBuffer();
-
-            Debug.Log("PointCloudListener: Rebuilding compute buffers");
-        }
-
     }
 }
 

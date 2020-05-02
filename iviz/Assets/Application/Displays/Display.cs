@@ -48,6 +48,7 @@ namespace Iviz.App
             Stopped?.Invoke();
             Stopped = null;
         }
+
         public virtual void Recycle() { }
     }
 
