@@ -379,9 +379,9 @@ namespace Iviz.RoslibSharp
             }
         }
 
-        public PublisherState.SenderState GetState()
+        public PublisherSenderState GetState()
         {
-            return new PublisherState.SenderState(
+            return new PublisherSenderState(
                 IsAlive, Latching, Status,
                 Hostname, Port, RemoteCallerId, RemoteHostname, RemotePort,
                 CurrentQueueSize, MaxQueueSize, NumSent, BytesSent, NumDropped

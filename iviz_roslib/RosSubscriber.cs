@@ -60,11 +60,11 @@ namespace Iviz.RoslibSharp
             Manager.Cleanup();
         }
 
-        public SubscriberState.TopicState GetState()
+        public SubscriberTopicState GetState()
         {
             AssertIsAlive();
             Cleanup();
-            return new SubscriberState.TopicState(Topic, TopicType, Ids.ToArray(), Manager.GetStates());
+            return new SubscriberTopicState(Topic, TopicType, Ids.ToArray(), Manager.GetStates());
         }
 
         internal void PublisherUpdateRcp(RpcNodeClient talker, Uri[] publisherUris)

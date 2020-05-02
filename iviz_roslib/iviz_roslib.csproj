@@ -22,4 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\iviz_msgs\iviz_msgs.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="POCOs\" />
+  </ItemGroup>
 </Project>

@@ -220,9 +220,9 @@ namespace Iviz.RoslibSharp
             Logger.Log($"{this}: Stopped!");
         }
 
-        public SubscriberState.ReceiverState GetState()
+        public SubscriberReceiverState GetState()
         {
-            return new SubscriberState.ReceiverState(
+            return new SubscriberReceiverState(
                 IsAlive, RequestNoDelay, Hostname, Port,
                 RemoteUri, RemoteHostname, RemotePort,
                 NumReceived, BytesReceived
