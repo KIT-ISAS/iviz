@@ -85,8 +85,8 @@ namespace Iviz.RoslibSharp
         public IPEndPoint Start()
         {
             string localHostname = CallerUri.Host;
-            IPAddress localAddress = Dns.GetHostAddresses(localHostname)[0];
-            tcpListener = new TcpListener(localAddress, 0);
+            //IPAddress localAddress = Dns.GetHostAddresses(localHostname)[0];
+            tcpListener = new TcpListener(IPAddress.Any, 0);
             tcpListener.Start();
 
             //Logger.Log("TcpSender: Listening at " + tcpListener.LocalEndpoint);

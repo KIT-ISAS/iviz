@@ -65,7 +65,7 @@ namespace Iviz.App
 
         public float PointerAltDistance { get; private set; }
 
-        public HashSet<Canvas> Canvases = new HashSet<Canvas>();
+        public HashSet<Canvas> Canvases { get; } = new HashSet<Canvas>();
 
         void Start()
         {
@@ -150,18 +150,6 @@ namespace Iviz.App
                     PointerPosition = Input.mousePosition;
                     PointerOnGui = Canvases.Any(x => x.enabled && x.gameObject.activeInHierarchy &&
                         RectTransformUtility.RectangleContainsScreenPoint(x.transform as RectTransform, PointerPosition, mainCamera));
-                    /*
-                    foreach (Canvas canvas in Canvases)
-                    {
-                        Debug.Log("--------------------------------------- " + PointerPosition);
-                        Debug.Log(canvas.name);
-                        Debug.Log(canvas.enabled);
-                        Debug.Log(canvas.gameObject.activeInHierarchy);
-                        Debug.Log((canvas.transform as RectTransform).rect);
-                        Debug.Log(RectTransformUtility.RectangleContainsScreenPoint(canvas.transform as RectTransform, PointerPosition, GetComponent<Camera>()));
-                    }
-                    Debug.Log(PointerOnGui);
-                    */
                 }
                 /*
                 PointerAltDown = Input.GetMouseButton(1) || (Input.mouseScrollDelta.y != 0);

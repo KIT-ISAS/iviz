@@ -118,7 +118,7 @@ namespace Iviz.App
                     break;
                 case MarkerType.POINTS:
                     PointListResource pointList = resource as PointListResource;
-                    pointList.SetSize(msg.points.Length);
+                    pointList.Size = msg.points.Length;
                     pointList.Scale = msg.scale.Ros2Unity().Abs();
                     pointList.Color = msg.color.ToUnityColor();
                     pointList.Colors = (msg.colors.Length == 0) ? null : msg.colors.Select(x => x.ToUnityColor32());

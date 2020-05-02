@@ -71,7 +71,7 @@ namespace Iviz.App
             Connection = null;
         }
 
-        public void LogMessage(LogLevel logLevel, string message)
+        public void LogMessage(LogLevel logLevel, string message, string file, int line)
         {
             sender.Publish(new Log()
             {
@@ -79,6 +79,8 @@ namespace Iviz.App
                 level = (byte)logLevel,
                 name = Connection.Id,
                 msg = message,
+                file = file,
+                line = (uint)line
             });
         }
 

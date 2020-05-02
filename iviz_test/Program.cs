@@ -6,6 +6,7 @@ using Iviz.Msgs.geometry_msgs;
 using Iviz.Msgs.rosapi;
 using Iviz.Msgs.rosbridge_library;
 using Iviz.Msgs.tf2_msgs;
+using Iviz.Msgs.visualization_msgs;
 using Iviz.RoslibSharp;
 
 namespace iviz_test
@@ -15,9 +16,12 @@ namespace iviz_test
         static void Main(string[] args)
         {
             RosClient client = new RosClient(
-                "http://192.168.0.73:11311",
+                //"http://192.168.0.73:11311",
+                "http://141.3.59.5:11311",
                 null,
-                "http://192.168.0.157:7614");
+                //"http://192.168.0.157:7614"
+                "http://i59-r142-pc01:7614"
+                );
 
             /*
             AddTwoInts service = new AddTwoInts();
@@ -51,7 +55,7 @@ namespace iviz_test
             StringWriter sw = new StringWriter(sb);
 
             Point point = new Point();
-
+            /*
             TransformStamped[] tfs = new TransformStamped[1];
             tfs[0] = new TransformStamped
             {
@@ -79,6 +83,7 @@ namespace iviz_test
 
 
             Console.WriteLine(tf.ToJsonString());
+            */
 
             /*
             string json = sb.ToString();
@@ -98,7 +103,7 @@ namespace iviz_test
 
             client.Advertise<TFMessage>("/tf", out RosPublisher publisher);
 
-
+            */
             TransformStamped[] tfs = new TransformStamped[1];
             tfs[0] = new TransformStamped
             {
@@ -122,7 +127,7 @@ namespace iviz_test
             {
                 transforms = tfs
             };
-
+            /*
             client.Subscribe<TFMessage>("/tf", Callback);
 
             while (true)
@@ -131,10 +136,25 @@ namespace iviz_test
                 //Console.WriteLine(">> " + tf.ToJsonString());
                 Thread.Sleep(1000);
             }
-
+            
             Console.Read();
             client.Close();
             */
+            //client.Subscribe<TFMessage>("/tf", Callback);
+            //client.Advertise<TFMessage>("/tf", out RosPublisher publisher);
+
+            client.Subscribe<Marker>("/hololens/environment", Callback);
+
+
+            while (true)
+            {
+                //publisher.Publish(tf);
+                //Console.WriteLine(">> " + tf.ToJsonString());
+                Thread.Sleep(1000);
+            }
+
+            Console.Read();
+            client.Close();
 
         }
 
@@ -148,5 +168,9 @@ namespace iviz_test
             Console.WriteLine("<< " + value.ToJsonString());
         }
 
+        static void Callback(Marker value)
+        {
+            Console.WriteLine("<< " + value.ToJsonString());
+        }
     }
 }

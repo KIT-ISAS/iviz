@@ -26,10 +26,10 @@ namespace Iviz.RoslibSharp
             RequestNoDelay = requestNoDelay;
         }
 
-        void AddPublisher(RpcNodeClient talker, Uri remoteUri)
+        void AddPublisher(XmlRpc.NodeClient talker, Uri remoteUri)
         {
             talker.Uri = remoteUri;
-            RpcNodeClient.RequestTopicResponse response;
+            XmlRpc.NodeClient.RequestTopicResponse response;
             try
             {
                 response = talker.RequestTopic(Topic, SupportedProtocols);
@@ -60,7 +60,7 @@ namespace Iviz.RoslibSharp
             connection.Start();
         }
 
-        public void PublisherUpdateRpc(RpcNodeClient talker, Uri[] publisherUris)
+        public void PublisherUpdateRpc(XmlRpc.NodeClient talker, Uri[] publisherUris)
         {
             Uri[] toAdd;
             lock (connectionsByUri)

@@ -4,11 +4,10 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using Arg = Iviz.RoslibSharp.XmlRpc.Arg;
 
-namespace Iviz.RoslibSharp
+namespace Iviz.RoslibSharp.XmlRpc
 {
-    class RpcNodeServer
+    class NodeServer
     {
         readonly Dictionary<string, Func<object[], Arg[]>> Methods;
         readonly HttpListener listener = new HttpListener();
@@ -18,7 +17,7 @@ namespace Iviz.RoslibSharp
 
         public Uri Uri => client.CallerUri;
 
-        public RpcNodeServer(RosClient client)
+        public NodeServer(RosClient client)
         {
             this.client = client;
 
@@ -41,8 +40,9 @@ namespace Iviz.RoslibSharp
         {
             keepRunning = true;
 
-            Logger.LogDebug("RcpNodeServer: Starting RPC server on " + Uri);
-            listener.Prefixes.Add(Uri.ToString());
+            string maskUri = "http://+:" + Uri.Port + Uri.AbsolutePath;
+            Logger.Log("RcpNodeServer: Starting RPC server on " + maskUri);
+            listener.Prefixes.Add(maskUri);
             listener.Start();
 
             task = Task.Run(() =>
@@ -56,7 +56,7 @@ namespace Iviz.RoslibSharp
                        {
                            try
                            {
-                               XmlRpc.MethodResponse(context, Methods);
+                               Service.MethodResponse(context, Methods);
                            }
                            catch (Exception e)
                            {
@@ -86,7 +86,7 @@ namespace Iviz.RoslibSharp
         {
             Logger.Log("Was called: getBusStats");
             return new[] {
-                    new Arg((int)RpcStatusCode.Error),
+                    new Arg((int)StatusCode.Error),
                     new Arg("error=NYI"),
                     new Arg(new Arg[0])
                 };
@@ -106,7 +106,7 @@ namespace Iviz.RoslibSharp
                 }).ToArray();
 
             return new[] {
-                    new Arg((int)RpcStatusCode.Success),
+                    new Arg((int)StatusCode.Success),
                     new Arg("ok"),
                     new Arg(response)
                 };
@@ -115,7 +115,7 @@ namespace Iviz.RoslibSharp
         public Arg[] GetMasterUri(object[] _)
         {
             return new[] {
-                    new Arg((int)RpcStatusCode.Success),
+                    new Arg((int)StatusCode.Success),
                     new Arg("ok"),
                     new Arg(client.MasterUri.ToString())
                 };
@@ -126,7 +126,7 @@ namespace Iviz.RoslibSharp
             if (client.ShutdownAction == null)
             {
                 return new[] {
-                    new Arg((int)RpcStatusCode.Failure),
+                    new Arg((int)StatusCode.Failure),
                     new Arg("error=no shutdown handler set"),
                     new Arg(0)
                 };
@@ -135,7 +135,7 @@ namespace Iviz.RoslibSharp
             {
                 string callerId = (string)args[0];
                 string reason = args.Length > 1 ? (string)args[1] : "";
-                client.ShutdownAction(callerId, reason, out RpcStatusCode status, out string response);
+                client.ShutdownAction(callerId, reason, out StatusCode status, out string response);
                 return new[] {
                     new Arg((int)status),
                     new Arg(response),
@@ -147,7 +147,7 @@ namespace Iviz.RoslibSharp
         public Arg[] GetPid(object[] _)
         {
             return new[] {
-                    new Arg((int)RpcStatusCode.Success),
+                    new Arg((int)StatusCode.Success),
                     new Arg("ok"),
                     new Arg(Process.GetCurrentProcess().Id)
                 };
@@ -156,7 +156,7 @@ namespace Iviz.RoslibSharp
         public Arg[] GetSubscriptions(object[] _)
         {
             return new[] {
-                    new Arg((int)RpcStatusCode.Success),
+                    new Arg((int)StatusCode.Success),
                     new Arg(""),
                     new Arg(client.GetSubscriptionsRcp())
                 };
@@ -165,7 +165,7 @@ namespace Iviz.RoslibSharp
         public Arg[] GetPublications(object[] _)
         {
             return new[] {
-                    new Arg((int)RpcStatusCode.Success),
+                    new Arg((int)StatusCode.Success),
                     new Arg("ok"),
                     new Arg(client.GetPublicationsRcp())
                 };
@@ -176,7 +176,7 @@ namespace Iviz.RoslibSharp
             if (client.ParamUpdateAction == null)
             {
                 return new[] {
-                    new Arg((int)RpcStatusCode.Failure),
+                    new Arg((int)StatusCode.Failure),
                     new Arg("error=no paramUpdate handler set"),
                     new Arg(0)
                 };
@@ -186,7 +186,7 @@ namespace Iviz.RoslibSharp
                 string callerId = (string)args[0];
                 string parameterKey = (string)args[1];
                 object parameterValue = args[2];
-                client.ParamUpdateAction(callerId, parameterKey, parameterValue, out RpcStatusCode status, out string response);
+                client.ParamUpdateAction(callerId, parameterKey, parameterValue, out StatusCode status, out string response);
                 return new[] {
                     new Arg((int)status),
                     new Arg(response),
@@ -211,7 +211,7 @@ namespace Iviz.RoslibSharp
                 }
                 client.PublisherUpdateRcp(topic, publisherUris);
                 return new[] {
-                        new Arg((int)RpcStatusCode.Success),
+                        new Arg((int)StatusCode.Success),
                         new Arg("ok"),
                         new Arg(0)
                     };
@@ -220,7 +220,7 @@ namespace Iviz.RoslibSharp
             {
                 Logger.Log(e);
                 return new[] {
-                        new Arg((int)RpcStatusCode.Failure),
+                        new Arg((int)StatusCode.Failure),
                         new Arg("error=Unknown error: " + e.Message),
                         new Arg(0)
                     };
@@ -238,7 +238,7 @@ namespace Iviz.RoslibSharp
                 if (protocols.Length == 0)
                 {
                     return new[] {
-                            new Arg((int)RpcStatusCode.Failure),
+                            new Arg((int)StatusCode.Failure),
                             new Arg($"error=no compatible protocols found"),
                             new Arg(new string[0][])
                         };
@@ -267,7 +267,7 @@ namespace Iviz.RoslibSharp
                 if (!success)
                 {
                     return new[] {
-                            new Arg((int)RpcStatusCode.Failure),
+                            new Arg((int)StatusCode.Failure),
                             new Arg("error=client only supports TCPROS"),
                             new Arg(new string[0][])
                         };
@@ -277,14 +277,14 @@ namespace Iviz.RoslibSharp
                 if (!client.RequestTopicRpc(caller_id, topic, out string hostname, out int port))
                 {
                     return new[] {
-                            new Arg((int)RpcStatusCode.Failure),
+                            new Arg((int)StatusCode.Failure),
                             new Arg($"error=client is not publishing topic '{topic}'"),
                             new Arg(new string[0][])
                         };
                 }
 
                 return new[] {
-                        new Arg((int)RpcStatusCode.Success),
+                        new Arg((int)StatusCode.Success),
                         new Arg(""),
                         new Arg(
                                 new Arg[] {
@@ -299,7 +299,7 @@ namespace Iviz.RoslibSharp
             {
                 Logger.Log(e);
                 return new[] {
-                        new Arg((int)RpcStatusCode.Error),
+                        new Arg((int)StatusCode.Error),
                         new Arg("error=Unknown error: " + e.Message),
                         new Arg(new string[0][])
                     };

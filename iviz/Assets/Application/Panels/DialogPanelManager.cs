@@ -102,6 +102,19 @@ namespace Iviz.App
             }
         }
 
+        public void TogglePanel(DialogData selected)
+        {
+            if (SelectedDialogData == selected)
+            {
+                HideSelectedPanel();
+            }
+            else
+            {
+                SelectPanelFor(selected);
+            }
+        }
+
+
         GameObject CreateItemPanelObject(string name)
         {
             GameObject o = Instantiate(Resources.Load<GameObject>("Widgets/Item List Panel"), transform);

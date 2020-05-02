@@ -9,54 +9,67 @@ using System.Text;
 using System.Xml;
 using Iviz.Msgs;
 
-namespace Iviz.RoslibSharp
+namespace Iviz.RoslibSharp.XmlRpc
 {
-    public static class XmlRpc
+    public class FaultException : Exception
     {
-        public readonly struct Arg
-        {
-            readonly string value;
+        public FaultException() { }
+        public FaultException(string message) : base(message) { }
+    }
 
-            public Arg(bool f)
-            {
-                value = f ?
-                    "<value><boolean>1</boolean></value>\n" :
-                    "<value><boolean>0</boolean></value>\n";
-            }
-            public Arg(double f)
-            {
-                value = $"<value><double>{f}</double></value>\n";
-            }
-            public Arg(int f)
-            {
-                value = $"<value><i4>{f}</i4></value>\n";
-            }
-            public Arg(Uri f) : this(f.ToString())
-            {
-            }
-            public Arg(string f)
-            {
-                //value = $"<value><string>{f}</string></value>\n";
-                value = $"<value>{f}</value>\n";
-            }
-            public Arg(string[] f) : this(f.Select(x => new Arg(x)).ToArray())
-            {
-            }
-            public Arg(string[][] f) : this(f.Select(x => new Arg(x)).ToArray())
-            {
-            }
-            public Arg(Arg[] f)
-            {
-                value = $"<value><array><data>{string.Join("", f)}</data></array></value>";
-            }
-            public Arg(Arg[][] f) : this(f.Select(x => new Arg(x)).ToArray())
-            {
-            }
-            public override string ToString()
-            {
-                return value;
-            }
+    public class ParseException : Exception
+    {
+        public ParseException() { }
+        public ParseException(string message) : base(message) { }
+    }
+
+    public readonly struct Arg
+    {
+        readonly string value;
+
+        public Arg(bool f)
+        {
+            value = f ?
+                "<value><boolean>1</boolean></value>\n" :
+                "<value><boolean>0</boolean></value>\n";
         }
+        public Arg(double f)
+        {
+            value = $"<value><double>{f}</double></value>\n";
+        }
+        public Arg(int f)
+        {
+            value = $"<value><i4>{f}</i4></value>\n";
+        }
+        public Arg(Uri f) : this(f.ToString())
+        {
+        }
+        public Arg(string f)
+        {
+            //value = $"<value><string>{f}</string></value>\n";
+            value = $"<value>{f}</value>\n";
+        }
+        public Arg(string[] f) : this(f.Select(x => new Arg(x)).ToArray())
+        {
+        }
+        public Arg(string[][] f) : this(f.Select(x => new Arg(x)).ToArray())
+        {
+        }
+        public Arg(Arg[] f)
+        {
+            value = $"<value><array><data>{string.Join("", f)}</data></array></value>";
+        }
+        public Arg(Arg[][] f) : this(f.Select(x => new Arg(x)).ToArray())
+        {
+        }
+        public override string ToString()
+        {
+            return value;
+        }
+    }
+
+    public static class Service
+    {
 
         static void Assert(string received, string expected)
         {
@@ -120,8 +133,8 @@ namespace Iviz.RoslibSharp
             httpRequest.Timeout = timeoutInMs;
             httpRequest.Method = "POST";
             httpRequest.ContentType = "text/xml";
-            httpRequest.Host = callerUri.Host;
-            httpRequest.UserAgent = "iviz.roslib";
+            //httpRequest.Host = callerUri.Host;
+            //httpRequest.UserAgent = "iviz.roslib";
 
             byte[] outData = BuiltIns.UTF8.GetBytes(buffer.ToString());
             httpRequest.ContentLength = outData.Length;
@@ -161,11 +174,11 @@ namespace Iviz.RoslibSharp
             {
                 if (child.ChildNodes.Count == 0)
                 {
-                    throw new ArgumentException("Empty response");
+                    throw new ParseException("Empty response");
                 }
                 else if (child.ChildNodes.Count > 1)
                 {
-                    throw new ArgumentException("Function call returned too many arguments");
+                    throw new ParseException("Function call returned too many arguments");
                 }
                 XmlNode param = child.FirstChild;
                 Assert(param.Name, "param");
@@ -173,11 +186,11 @@ namespace Iviz.RoslibSharp
             }
             else if (child.Name == "fault")
             {
-                throw new Exception(child.FirstChild.InnerXml);
+                throw new FaultException(child.FirstChild.InnerXml);
             }
             else
             {
-                throw new ArgumentException("Expected 'params' or 'fault'");
+                throw new ParseException("Expected 'params' or 'fault'");
             }
         }
 
@@ -206,7 +219,7 @@ namespace Iviz.RoslibSharp
                 }
                 if (root == null)
                 {
-                    throw new ArgumentException("Malformed request");
+                    throw new ParseException("Malformed request");
                 }
                 string methodName = null;
                 object[] args = null;
@@ -226,7 +239,7 @@ namespace Iviz.RoslibSharp
                     }
                     else if (child.Name == "fault")
                     {
-                        throw new Exception(child.FirstChild.InnerXml);
+                        throw new FaultException(child.FirstChild.InnerXml);
                     }
                     else if (child.Name == "methodName")
                     {
@@ -234,7 +247,7 @@ namespace Iviz.RoslibSharp
                     }
                     else
                     {
-                        throw new ArgumentException("Expected 'params', 'fault', or 'methodName'");
+                        throw new ParseException("Expected 'params', 'fault', or 'methodName'");
                     }
                 } while ((child = child.NextSibling) != null);
 
@@ -243,7 +256,7 @@ namespace Iviz.RoslibSharp
                     !methods.TryGetValue(methodName, out Func<object[], Arg[]> method) ||
                     args == null)
                 {
-                    throw new ArgumentException($"Unknown function '{methodName}' or invalid arguments");
+                    throw new ParseException($"Unknown function '{methodName}' or invalid arguments");
                 }
                 else
                 {
@@ -274,7 +287,7 @@ namespace Iviz.RoslibSharp
                 httpContext.Response.OutputStream.Write(bytes, 0, bytes.Length);
                 httpContext.Response.Close();
             }
-            catch (ArgumentException e)
+            catch (ParseException e)
             {
                 StringBuilder buffer = new StringBuilder();
                 buffer.AppendLine("<?xml version=\"1.0\"?>");

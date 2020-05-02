@@ -3,6 +3,9 @@ using Iviz.RoslibSharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using UnityEngine;
 
 namespace Iviz.App
@@ -124,9 +127,14 @@ namespace Iviz.App
 
             try
             {
-                Debug.Log($"ConnectionManager: Connecting to '{Uri}'");
+                
+                RoslibSharp.Logger.LogDebug = x => Debug.Log(x.ToString());
+                RoslibSharp.Logger.LogError = x => Debug.LogError(x.ToString());
+                RoslibSharp.Logger.Log = x => Debug.Log(x.ToString());
+                
 
-                Uri callerUri = new Uri("http://192.168.0.157:7613");
+                string hostname = Dns.GetHostName();
+                Uri callerUri = new Uri($"http://{hostname}:7613");
                 client = new RosClient(Uri, Id, callerUri);
 
                 foreach (var entry in publishersByTopic)

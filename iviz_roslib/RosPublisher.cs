@@ -72,7 +72,8 @@ namespace Iviz.RoslibSharp
         internal void RequestTopicRpc(string remoteCallerId, out string hostname, out int port)
         {
             IPEndPoint endPoint = Manager.CreateConnection(remoteCallerId);
-            hostname = endPoint.Address.ToString();
+            //hostname = endPoint.Address.ToString();
+            hostname = Manager.CallerUri.Host;
             port = endPoint.Port;
         }
 

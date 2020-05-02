@@ -10,10 +10,10 @@ namespace Iviz.RoslibSharp
     public partial class RosClient
     {
         public readonly string CallerId;
-        public readonly RpcMaster Master;
+        public readonly XmlRpc.Master Master;
 
-        internal readonly RpcNodeClient Talker;
-        internal readonly RpcNodeServer Listener;
+        internal readonly XmlRpc.NodeClient Talker;
+        internal readonly XmlRpc.NodeServer Listener;
 
         readonly Dictionary<string, RosSubscriber> subscribersByTopic = new Dictionary<string, RosSubscriber>();
         readonly Dictionary<string, RosPublisher> publishersByTopic = new Dictionary<string, RosPublisher>();
@@ -23,7 +23,7 @@ namespace Iviz.RoslibSharp
 
         public delegate void ShutdownActionCall(
             string callerId, string reason,
-            out RpcStatusCode status, out string response);
+            out XmlRpc.StatusCode status, out string response);
 
         /// <summary>
         /// Handler of 'shutdown' XMLRPC calls from the slave API
@@ -32,7 +32,7 @@ namespace Iviz.RoslibSharp
 
         public delegate void ParamUpdateActionCall(
             string callerId, string parameterKey, object parametervalue,
-            out RpcStatusCode status, out string response);
+            out XmlRpc.StatusCode status, out string response);
 
         /// <summary>
         /// Handler of 'paramUpdate' XMLRPC calls from the slave API
@@ -82,7 +82,7 @@ namespace Iviz.RoslibSharp
             CallerId = callerId ?? "/RosClient";
             CallerUri = callerUri;
 
-            Listener = new RpcNodeServer(this);
+            Listener = new XmlRpc.NodeServer(this);
             try
             {
                 Listener.Start();
@@ -92,8 +92,8 @@ namespace Iviz.RoslibSharp
                 throw new ArgumentException($"RosClient: Failed to bind to local URI '{callerUri}'", nameof(callerUri), e);
             }
 
-            Master = new RpcMaster(masterUri, CallerId, CallerUri);
-            Talker = new RpcNodeClient(CallerId, CallerUri);
+            Master = new XmlRpc.Master(masterUri, CallerId, CallerUri);
+            Talker = new XmlRpc.NodeClient(CallerId, CallerUri);
 
             Logger.Log($"Starting: My id is {CallerId}, my uri is {CallerUri}, and I'm talking to {MasterUri}");
 
@@ -146,7 +146,7 @@ namespace Iviz.RoslibSharp
                 subscribersByTopic[topic] = subscription;
             }
 
-            RpcMaster.RegisterSubscriberResponse masterResponse = Master.RegisterSubscriber(topic, topicInfo.Type);
+            XmlRpc.Master.RegisterSubscriberResponse masterResponse = Master.RegisterSubscriber(topic, topicInfo.Type);
             manager.PublisherUpdateRpc(Talker, masterResponse.publishers);
 
             return subscription;
@@ -391,7 +391,7 @@ namespace Iviz.RoslibSharp
         /// <returns>List of advertised topics, subscribed topics, and offered services, together with the involved nodes.</returns>
         public SystemState GetSystemState()
         {
-            RpcMaster.GetSystemStateResponse response = Master.GetSystemState();
+            XmlRpc.Master.GetSystemStateResponse response = Master.GetSystemState();
             return new SystemState(response.publishers, response.subscribers, response.services);
         }
 

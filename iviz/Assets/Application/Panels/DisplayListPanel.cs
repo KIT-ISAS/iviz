@@ -93,9 +93,10 @@ namespace Iviz.App
             ConnectionManager.Connection.ConnectionStateChanged += OnConnectionStateChanged;
 
             TFListener.GuiManager.Canvases.Add(GetComponentInParent<Canvas>());
-            TFListener.GuiManager.Canvases.Add(topicsPanel.GetComponentInParent<Canvas>());
+            //TFListener.GuiManager.Canvases.Add(topicsPanel.GetComponentInParent<Canvas>());
             TFListener.GuiManager.Canvases.Add(dataPanelManager.GetComponentInParent<Canvas>());
-            TFListener.GuiManager.Canvases.Add(newDisplayPanel.GetComponentInParent<Canvas>());
+            TFListener.GuiManager.Canvases.Add(dialogPanelManager.GetComponentInParent<Canvas>());
+            //TFListener.GuiManager.Canvases.Add(newDisplayPanel.GetComponentInParent<Canvas>());
         }
 
         void OnAddressChanged(string newUri)
@@ -151,7 +152,7 @@ namespace Iviz.App
         void OnHideClick()
         {
             AllGuiVisible = !AllGuiVisible;
-            topicsPanel.Active = false;
+            //topicsPanel.Active = false;
             EventSystem.current.SetSelectedGameObject(null);
         }
 

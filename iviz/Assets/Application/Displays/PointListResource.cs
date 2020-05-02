@@ -43,6 +43,10 @@ namespace Iviz.App
             get => useIntensityTexture;
             set
             {
+                if (useIntensityTexture == value)
+                {
+                    return;
+                }
                 useIntensityTexture = value;
                 if (useIntensityTexture)
                 {
@@ -95,7 +99,34 @@ namespace Iviz.App
             }
         }
 
-        public int Size { get; private set; }
+        static readonly int PropPoints = Shader.PropertyToID("_Points");
+
+        int size;
+        public int Size
+        {
+            get => size;
+            set
+            {
+                if (value == size)
+                {
+                    return;
+                }
+                size = value;
+                int reqDataSize = (int)(size * 1.1f);
+                if (pointBuffer == null || pointBuffer.Length < reqDataSize)
+                {
+                    pointBuffer = new PointWithColor[reqDataSize];
+
+                    if (pointComputeBuffer != null)
+                    {
+                        pointComputeBuffer.Release();
+                    }
+                    pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithColor>());
+                    material.SetBuffer(PropPoints, pointComputeBuffer);
+                }
+                Size = size;
+            }
+        }
 
         public override void SetColor(Color color)
         {
@@ -130,6 +161,8 @@ namespace Iviz.App
             get => pointBuffer.Select(x => x.position);
             set
             {
+                Size = value.Count();
+
                 int index = 0;
                 foreach (Vector3 pos in value)
                 {
@@ -147,6 +180,8 @@ namespace Iviz.App
             get => pointBuffer;
             set
             {
+                Size = value.Count();
+
                 int index = 0;
                 foreach (PointWithColor pos in value)
                 {
@@ -159,7 +194,7 @@ namespace Iviz.App
             }
         }
 
-        static readonly int PropPoints = Shader.PropertyToID("_Points");
+        /*
         public void SetSize(int size)
         {
             int reqDataSize = (int)(size * 1.1f);
@@ -176,6 +211,7 @@ namespace Iviz.App
             }
             Size = size;
         }
+        */
 
         Vector2 scale;
         public Vector2 Scale

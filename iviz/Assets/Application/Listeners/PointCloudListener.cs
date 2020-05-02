@@ -15,6 +15,7 @@ namespace Iviz.App
         public float MinIntensity { get; private set; }
         public float MaxIntensity { get; private set; }
         public int Size { get; private set; } 
+        
         public bool CalculateMinMax { get; private set; } = true;
 
         [Serializable]
@@ -79,10 +80,10 @@ namespace Iviz.App
             Resource.Colormaps.Initialize();
             Resource.Markers.Initialize();
 
+            pointCloud = ResourcePool.GetOrCreate(Resource.Markers.PointList, transform).GetComponent<PointListResource>();
+
             Config = new Configuration();
             transform.localRotation = Quaternion.identity.ToRos().Ros2Unity();
-
-            pointCloud = ResourcePool.GetOrCreate(Resource.Markers.PointList, transform).GetComponent<PointListResource>();
         }
 
         public override void StartListening()
@@ -174,11 +175,12 @@ namespace Iviz.App
 
                 GeneratePointBuffer(msg, xOffset, yOffset, zOffset, iOffset, iField.datatype, rgbaHint);
 
-                Vector2 intensityBounds = CalculateBounds(newSize);
+                Vector2 intensityBounds =  rgbaHint ? Vector2.zero : CalculateBounds(newSize);
 
                 GameThread.RunOnce(() =>
                 {
                     pointCloud.IntensityBounds = intensityBounds;
+                    pointCloud.UseIntensityTexture = !rgbaHint;
                     pointCloud.PointsWithColor = pointBuffer;
                 });
             });

@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Iviz.RoslibSharp
+namespace Iviz.RoslibSharp.XmlRpc
 {
-    class RpcNodeClient
+    class NodeClient
     {
         public class ProtocolResponse
         {
@@ -34,13 +34,13 @@ namespace Iviz.RoslibSharp
 
         public class RequestTopicResponse
         {
-            public readonly RpcStatusCode code;
+            public readonly StatusCode code;
             public readonly string statusMessage;
             public readonly ProtocolResponse protocol;
 
             public RequestTopicResponse(object[] a)
             {
-                code = (RpcStatusCode)a[0];
+                code = (StatusCode)a[0];
                 statusMessage = (string)a[1];
                 protocol = new ProtocolResponse((object[])a[2]);
             }
@@ -50,7 +50,7 @@ namespace Iviz.RoslibSharp
         readonly Uri CallerUri;
         public Uri Uri { get; set; }
 
-        public RpcNodeClient(string callerId, Uri callerUri)
+        public NodeClient(string callerId, Uri callerUri)
         {
             CallerId = callerId;
             CallerUri = callerUri;
@@ -58,12 +58,12 @@ namespace Iviz.RoslibSharp
 
         public RequestTopicResponse RequestTopic(string topic, string[][] protocols)
         {
-            XmlRpc.Arg[] args = {
-                new XmlRpc.Arg(CallerId),
-                new XmlRpc.Arg(topic),
-                new XmlRpc.Arg(protocols),
+            Arg[] args = {
+                new Arg(CallerId),
+                new Arg(topic),
+                new Arg(protocols),
             };
-            object response = XmlRpc.MethodCall(Uri, CallerUri, "requestTopic", args);
+            object response = Service.MethodCall(Uri, CallerUri, "requestTopic", args);
             return new RequestTopicResponse((object[])response);
         }
 

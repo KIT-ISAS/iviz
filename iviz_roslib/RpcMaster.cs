@@ -1,21 +1,20 @@
 ﻿using System;
 using System.Linq;
-using Arg = Iviz.RoslibSharp.XmlRpc.Arg;
 
-namespace Iviz.RoslibSharp
+namespace Iviz.RoslibSharp.XmlRpc
 {
-    public enum RpcStatusCode
+    public enum StatusCode
     {
         Error = -1,
         Failure = 0,
         Success = 1
     }
 
-    public class RpcMaster
+    public class Master
     {
         public readonly struct GetSystemStateResponse
         {
-            public readonly RpcStatusCode code;
+            public readonly StatusCode code;
             public readonly string statusMessage;
 
             public readonly Tuple<string, string[]>[] publishers;
@@ -24,7 +23,7 @@ namespace Iviz.RoslibSharp
 
             public GetSystemStateResponse(object[] a)
             {
-                code = (RpcStatusCode)a[0];
+                code = (StatusCode)a[0];
                 statusMessage = (string)a[1];
 
 
@@ -51,13 +50,13 @@ namespace Iviz.RoslibSharp
 
         public readonly struct GetUriResponse
         {
-            public readonly RpcStatusCode code;
+            public readonly StatusCode code;
             public readonly string statusMessage;
             public readonly string uri;
 
             public GetUriResponse(object[] a)
             {
-                code = (RpcStatusCode)a[0];
+                code = (StatusCode)a[0];
                 statusMessage = (string)a[1];
                 uri = (string)a[2];
             }
@@ -65,13 +64,13 @@ namespace Iviz.RoslibSharp
 
         public readonly struct LookupNodeResponse
         {
-            public readonly RpcStatusCode code;
+            public readonly StatusCode code;
             public readonly string statusMessage;
             public readonly string uri;
 
             public LookupNodeResponse(object[] a)
             {
-                code = (RpcStatusCode)a[0];
+                code = (StatusCode)a[0];
                 statusMessage = (string)a[1];
                 uri = (string)a[2];
             }
@@ -79,13 +78,13 @@ namespace Iviz.RoslibSharp
 
         public readonly struct GetPublishedTopicsResponse
         {
-            public readonly RpcStatusCode code;
+            public readonly StatusCode code;
             public readonly string statusMessage;
             public readonly Tuple<string, string>[] topics;
 
             public GetPublishedTopicsResponse(object[] a)
             {
-                code = (RpcStatusCode)a[0];
+                code = (StatusCode)a[0];
                 statusMessage = (string)a[1];
                 object[] tmp = (object[])a[2];
                 topics = new Tuple<string, string>[tmp.Length];
@@ -99,13 +98,13 @@ namespace Iviz.RoslibSharp
 
         public readonly struct RegisterSubscriberResponse
         {
-            public readonly RpcStatusCode code;
+            public readonly StatusCode code;
             public readonly string statusMessage;
             public readonly Uri[] publishers;
 
             public RegisterSubscriberResponse(object[] a)
             {
-                code = (RpcStatusCode)a[0];
+                code = (StatusCode)a[0];
                 statusMessage = (string)a[1];
                 object[] tmp = (object[])a[2];
                 publishers = new Uri[tmp.Length];
@@ -121,13 +120,13 @@ namespace Iviz.RoslibSharp
 
         public readonly struct UnregisterSubscriberResponse
         {
-            public readonly RpcStatusCode code;
+            public readonly StatusCode code;
             public readonly string statusMessage;
             public readonly int numUnsubscribed;
 
             public UnregisterSubscriberResponse(object[] a)
             {
-                code = (RpcStatusCode)a[0];
+                code = (StatusCode)a[0];
                 statusMessage = (string)a[1];
                 numUnsubscribed = (int)a[2];
             }
@@ -135,13 +134,13 @@ namespace Iviz.RoslibSharp
 
         public readonly struct RegisterPublisherResponse
         {
-            public readonly RpcStatusCode code;
+            public readonly StatusCode code;
             public readonly string statusMessage;
             public readonly string[] subscribers;
 
             public RegisterPublisherResponse(object[] a)
             {
-                code = (RpcStatusCode)a[0];
+                code = (StatusCode)a[0];
                 statusMessage = (string)a[1];
                 object[] tmp = (object[])a[2];
                 subscribers = new string[tmp.Length];
@@ -154,13 +153,13 @@ namespace Iviz.RoslibSharp
 
         public readonly struct UnregisterPublisherResponse
         {
-            public readonly RpcStatusCode code;
+            public readonly StatusCode code;
             public readonly string statusMessage;
             public readonly int numUnregistered;
 
             public UnregisterPublisherResponse(object[] a)
             {
-                code = (RpcStatusCode)a[0];
+                code = (StatusCode)a[0];
                 statusMessage = (string)a[1];
                 numUnregistered = (int)a[2];
             }
@@ -168,13 +167,13 @@ namespace Iviz.RoslibSharp
 
         public readonly struct LookupServiceResponse
         {
-            public readonly RpcStatusCode code;
+            public readonly StatusCode code;
             public readonly string statusMessage;
             public readonly string serviceUrl;
 
             public LookupServiceResponse(object[] a)
             {
-                code = (RpcStatusCode)a[0];
+                code = (StatusCode)a[0];
                 statusMessage = (string)a[1];
                 serviceUrl = (string)a[2];
             }
@@ -182,25 +181,25 @@ namespace Iviz.RoslibSharp
 
         public readonly struct RegisterServiceResponse
         {
-            public readonly RpcStatusCode code;
+            public readonly StatusCode code;
             public readonly string statusMessage;
 
             public RegisterServiceResponse(object[] a)
             {
-                code = (RpcStatusCode)a[0];
+                code = (StatusCode)a[0];
                 statusMessage = (string)a[1];
             }
         }
 
         public readonly struct UnregisterServiceResponse
         {
-            public readonly RpcStatusCode code;
+            public readonly StatusCode code;
             public readonly string statusMessage;
             public readonly int numUnregistered;
 
             public UnregisterServiceResponse(object[] a)
             {
-                code = (RpcStatusCode)a[0];
+                code = (StatusCode)a[0];
                 statusMessage = (string)a[1];
                 numUnregistered = (int)a[2];
             }
@@ -210,7 +209,7 @@ namespace Iviz.RoslibSharp
         public readonly Uri CallerUri;
         readonly string CallerId;
 
-        public RpcMaster(Uri masterUri, string callerId, Uri callerUri)
+        public Master(Uri masterUri, string callerId, Uri callerUri)
         {
             MasterUri = masterUri;
             CallerUri = callerUri;
@@ -220,7 +219,7 @@ namespace Iviz.RoslibSharp
         public GetUriResponse GetUri()
         {
             Arg[] args = { new Arg(CallerId) };
-            object response = XmlRpc.MethodCall(MasterUri, CallerUri, "getUri", args);
+            object response = Service.MethodCall(MasterUri, CallerUri, "getUri", args);
             return new GetUriResponse((object[])response);
         }
 
@@ -230,7 +229,7 @@ namespace Iviz.RoslibSharp
                 new Arg(CallerId),
                 new Arg(nodeId),
             };
-            object response = XmlRpc.MethodCall(MasterUri, CallerUri, "lookupNode", args);
+            object response = Service.MethodCall(MasterUri, CallerUri, "lookupNode", args);
             return new LookupNodeResponse((object[])response);
         }
 
@@ -240,7 +239,7 @@ namespace Iviz.RoslibSharp
                 new Arg(CallerId),
                 new Arg(subgraph),
             };
-            object response = XmlRpc.MethodCall(MasterUri, CallerUri, "getPublishedTopics", args);
+            object response = Service.MethodCall(MasterUri, CallerUri, "getPublishedTopics", args);
             return new GetPublishedTopicsResponse((object[])response);
         }
 
@@ -252,7 +251,7 @@ namespace Iviz.RoslibSharp
                 new Arg(topicType),
                 new Arg(CallerUri.ToString()),
             };
-            object response = XmlRpc.MethodCall(MasterUri, CallerUri, "registerSubscriber", args);
+            object response = Service.MethodCall(MasterUri, CallerUri, "registerSubscriber", args);
             return new RegisterSubscriberResponse((object[])response);
         }
 
@@ -263,7 +262,7 @@ namespace Iviz.RoslibSharp
                 new Arg(topic),
                 new Arg(CallerUri.ToString()),
             };
-            object response = XmlRpc.MethodCall(MasterUri, CallerUri, "unregisterSubscriber", args);
+            object response = Service.MethodCall(MasterUri, CallerUri, "unregisterSubscriber", args);
             return new UnregisterSubscriberResponse((object[])response);
         }
 
@@ -275,7 +274,7 @@ namespace Iviz.RoslibSharp
                 new Arg(topicType),
                 new Arg(CallerUri),
             };
-            object response = XmlRpc.MethodCall(MasterUri, CallerUri, "registerPublisher", args);
+            object response = Service.MethodCall(MasterUri, CallerUri, "registerPublisher", args);
             return new RegisterPublisherResponse((object[])response);
         }
 
@@ -286,7 +285,7 @@ namespace Iviz.RoslibSharp
                 new Arg(topic),
                 new Arg(CallerUri),
             };
-            object response = XmlRpc.MethodCall(MasterUri, CallerUri, "unregisterPublisher", args);
+            object response = Service.MethodCall(MasterUri, CallerUri, "unregisterPublisher", args);
             return new UnregisterPublisherResponse((object[])response);
         }
 
@@ -295,7 +294,7 @@ namespace Iviz.RoslibSharp
             Arg[] args = {
                 new Arg(CallerId),
             };
-            object response = XmlRpc.MethodCall(MasterUri, CallerUri, "getSystemState", args);
+            object response = Service.MethodCall(MasterUri, CallerUri, "getSystemState", args);
             return new GetSystemStateResponse((object[])response);
         }
 
@@ -305,7 +304,7 @@ namespace Iviz.RoslibSharp
                 new Arg(CallerId),
                 new Arg(service),
             };
-            object response = XmlRpc.MethodCall(MasterUri, CallerUri, "lookupService", args);
+            object response = Service.MethodCall(MasterUri, CallerUri, "lookupService", args);
             return new LookupServiceResponse((object[])response);
         }
 
@@ -317,7 +316,7 @@ namespace Iviz.RoslibSharp
                 new Arg(rosRpcUri),
                 new Arg(CallerUri),
             };
-            object response = XmlRpc.MethodCall(MasterUri, CallerUri, "registerService", args);
+            object response = Service.MethodCall(MasterUri, CallerUri, "registerService", args);
             return new RegisterServiceResponse((object[])response);
         }
 
@@ -328,7 +327,7 @@ namespace Iviz.RoslibSharp
                 new Arg(service),
                 new Arg(rosRpcUri),
             };
-            object response = XmlRpc.MethodCall(MasterUri, CallerUri, "unregisterService", args);
+            object response = Service.MethodCall(MasterUri, CallerUri, "unregisterService", args);
             return new UnregisterServiceResponse((object[])response);
         }
     }
