@@ -16,8 +16,8 @@ namespace Iviz.App
         {
             base.Initialize(displayList, topic, type);
             
-            Resource.Displays.Initialize();
-            GameObject displayObject = ResourcePool.GetOrCreate(Resource.Displays.InteractiveMarker);
+            Resource.DisplaysType.Initialize();
+            GameObject displayObject = ResourcePool.GetOrCreate(Resource.DisplaysType.InteractiveMarker);
             displayObject.name = "InteractiveMarkers";
 
             display = displayObject.GetComponent<InteractiveMarkerListener>();
@@ -46,7 +46,7 @@ namespace Iviz.App
             base.Cleanup();
 
             display.Stop();
-            ResourcePool.Dispose(Resource.Displays.InteractiveMarker, display.gameObject);
+            ResourcePool.Dispose(Resource.DisplaysType.InteractiveMarker, display.gameObject);
             display = null;
         }
 

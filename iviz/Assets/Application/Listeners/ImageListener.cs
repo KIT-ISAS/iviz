@@ -46,7 +46,7 @@ namespace Iviz.App
             }
         }
 
-        public Resource.Colormaps.Id Colormap
+        public Resource.ColormapsId Colormap
         {
             get => config.colormap;
             set

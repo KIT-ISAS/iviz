@@ -21,7 +21,7 @@ namespace Iviz.App
         {
             base.Initialize(displayList, topic, type);
 
-            GameObject displayObject = ResourcePool.GetOrCreate(Resource.Displays.DepthImageProjector);
+            GameObject displayObject = ResourcePool.GetOrCreate(Resource.DisplaysType.DepthImageProjector);
             display = displayObject.GetComponent<DepthImageProjector>();
             display.Parent = TFListener.DisplaysFrame;
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.DepthImageProjector) as DepthImageProjectorPanelContents;
@@ -42,7 +42,7 @@ namespace Iviz.App
             base.Cleanup();
 
             display.Stop();
-            ResourcePool.Dispose(Resource.Displays.DepthImageProjector, display.gameObject);
+            ResourcePool.Dispose(Resource.DisplaysType.DepthImageProjector, display.gameObject);
             display = null;
         }
 

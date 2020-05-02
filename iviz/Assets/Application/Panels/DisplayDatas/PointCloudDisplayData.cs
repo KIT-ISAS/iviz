@@ -15,8 +15,8 @@ namespace Iviz.App
         public override DisplayData Initialize(DisplayListPanel displayList, string topic, string type)
         {
             base.Initialize(displayList, topic, type);
-            Resource.Displays.Initialize();
-            GameObject displayObject = ResourcePool.GetOrCreate(Resource.Displays.PointCloud);
+            Resource.DisplaysType.Initialize();
+            GameObject displayObject = ResourcePool.GetOrCreate(Resource.DisplaysType.PointCloud);
             displayObject.name = "PointCloud:" + Topic;
 
             display = displayObject.GetComponent<PointCloudListener>();
@@ -45,7 +45,7 @@ namespace Iviz.App
             base.Cleanup();
 
             display.Stop();
-            ResourcePool.Dispose(Resource.Displays.PointCloud, display.gameObject);
+            ResourcePool.Dispose(Resource.DisplaysType.PointCloud, display.gameObject);
             display = null;
         }
 
