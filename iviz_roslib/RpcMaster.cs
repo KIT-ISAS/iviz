@@ -205,11 +205,11 @@ namespace Iviz.RoslibSharp.XmlRpc
             }
         }
 
-        public readonly Uri MasterUri;
-        public readonly Uri CallerUri;
+        public Uri MasterUri { get; }
+        public Uri CallerUri { get; }
         readonly string CallerId;
 
-        public Master(Uri masterUri, string callerId, Uri callerUri)
+        internal RpcMaster(Uri masterUri, string callerId, Uri callerUri)
         {
             MasterUri = masterUri;
             CallerUri = callerUri;

@@ -11,7 +11,7 @@ using Iviz.Msgs;
 
 namespace Iviz.RoslibSharp
 {
-    public class ServiceReceiver
+    class ServiceReceiver
     {
         const int BufferSizeIncrease = 512;
 

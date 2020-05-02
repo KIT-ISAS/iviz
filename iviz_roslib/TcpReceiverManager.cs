@@ -117,7 +117,7 @@ namespace Iviz.RoslibSharp
             }
         }
 
-        public SubscriberState.ReceiverState[] GetStates()
+        public SubscriberReceiverState[] GetStates()
         {
             lock (connectionsByUri)
             {

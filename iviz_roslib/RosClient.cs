@@ -127,12 +127,12 @@ namespace Iviz.RoslibSharp
         void EnsureCleanSlate()
         {
             SystemState state = GetSystemState();
-            state.subscribers.
-                Where(x => x.nodes.Contains(CallerId)).
-                ForEach(x => Master.UnregisterSubscriber(x.name));
-            state.publishers.
-                Where(x => x.nodes.Contains(CallerId)).
-                ForEach(x => Master.UnregisterPublisher(x.name));
+            state.Subscribers.
+                Where(x => x.Nodes.Contains(CallerId)).
+                ForEach(x => Master.UnregisterSubscriber(x.Name));
+            state.Publishers.
+                Where(x => x.Nodes.Contains(CallerId)).
+                ForEach(x => Master.UnregisterPublisher(x.Name));
         }
 
         RosSubscriber CreateSubscriber(string topic, bool requestNoDelay, Type type, IMessage generator)
@@ -503,53 +503,32 @@ namespace Iviz.RoslibSharp
                 return new PublisherState(publishersByTopic.Values.Select(x => x.GetState()).ToArray());
         }
 
-        [Serializable]
-        internal class BusInfo : JsonToString
-        {
-            public readonly int connectionId;
-            public readonly string destinationId;
-            public readonly string direction;
-            public readonly string transport;
-            public readonly string topic;
-            public readonly int connected;
-
-            public BusInfo(int id, string destinationId, string direction, string transport, string topic, int status)
-            {
-                this.connectionId = id;
-                this.destinationId = destinationId;
-                this.direction = direction;
-                this.transport = transport;
-                this.topic = topic;
-                this.connected = status;
-            }
-        }
-
         internal List<BusInfo> GetBusInfoRcp()
         {
             List<BusInfo> busInfos = new List<BusInfo>();
             SubscriberState sstate = GetSubscriberStatistics();
-            foreach (var topic in sstate.topics)
+            foreach (var topic in sstate.Topics)
             {
-                foreach (var receiver in topic.receivers)
+                foreach (var receiver in topic.Receivers)
                 {
                     busInfos.Add(new BusInfo(
                         busInfos.Count,
-                        receiver.remoteUri,
+                        receiver.RemoteUri,
                         "i", "TCPROS",
-                        topic.topic,
+                        topic.Topic,
                         1));
                 }
             }
             PublisherState pstate = GetPublisherStatistics();
-            foreach (var topic in pstate.topics)
+            foreach (var topic in pstate.Topics)
             {
-                foreach (var sender in topic.senders)
+                foreach (var sender in topic.Senders)
                 {
                     busInfos.Add(new BusInfo(
                         busInfos.Count,
-                        Master.LookupNode(sender.remoteId).uri,
+                        Master.LookupNode(sender.RemoteId).uri,
                         "o", "TCPROS",
-                        topic.topic,
+                        topic.Topic,
                         1));
                 }
             }

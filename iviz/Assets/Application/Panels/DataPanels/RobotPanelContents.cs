@@ -14,7 +14,7 @@ namespace Iviz.App
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("Robot");
-            ResourceType = p.AddDropdown("Resource").SetOptions(Resource.Robots.Names);
+            ResourceType = p.AddDropdown("Resource").SetOptions(Resource.RobotsType.Names);
             AttachToTF = p.AddToggle("Attach to TF Frames");
             FramePrefix = p.AddInputField("TF Frame Prefix").SetPlaceholder("<none>");
             FrameSuffix = p.AddInputField("TF Frame Suffix").SetPlaceholder("<none>");

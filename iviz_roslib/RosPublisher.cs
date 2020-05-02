@@ -51,11 +51,11 @@ namespace Iviz.RoslibSharp
             return newId;
         }
 
-        public PublisherState.TopicState GetState()
+        public PublisherTopicState GetState()
         {
             AssertIsAlive();
             Cleanup();
-            return new PublisherState.TopicState(Topic, TopicType, Ids.ToArray(), Manager.GetStates());
+            return new PublisherTopicState(Topic, TopicType, Ids.ToArray(), Manager.GetStates());
         }
 
         public void Publish(IMessage message)

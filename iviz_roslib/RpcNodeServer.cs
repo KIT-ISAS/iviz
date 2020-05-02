@@ -97,12 +97,12 @@ namespace Iviz.RoslibSharp.XmlRpc
             var busInfo = client.GetBusInfoRcp();
             Arg[][] response = busInfo.Select(
                 x => new Arg[] {
-                    new Arg(x.connectionId),
-                    new Arg(x.destinationId),
-                    new Arg(x.direction),
-                    new Arg(x.transport),
-                    new Arg(x.topic),
-                    new Arg(x.connected),
+                    new Arg(x.ConnectionId),
+                    new Arg(x.DestinationId),
+                    new Arg(x.Direction),
+                    new Arg(x.Transport),
+                    new Arg(x.Topic),
+                    new Arg(x.Connected),
                 }).ToArray();
 
             return new[] {

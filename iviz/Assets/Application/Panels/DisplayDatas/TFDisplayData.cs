@@ -15,8 +15,8 @@ namespace Iviz.App
         public override DisplayData Initialize(DisplayListPanel displayList, string topic, string type)
         {
             base.Initialize(displayList, topic, type);
-            Resource.Displays.Initialize();
-            GameObject displayObject = ResourcePool.GetOrCreate(Resource.Displays.TF);
+            Resource.DisplaysType.Initialize();
+            GameObject displayObject = ResourcePool.GetOrCreate(Resource.DisplaysType.TF);
             displayObject.name = "TF";
 
             display = displayObject.GetComponent<TFListener>();
@@ -39,7 +39,7 @@ namespace Iviz.App
             base.Cleanup();
 
             display.Stop();
-            ResourcePool.Dispose(Resource.Displays.TF, display.gameObject);
+            ResourcePool.Dispose(Resource.DisplaysType.TF, display.gameObject);
             display = null;
         }
 

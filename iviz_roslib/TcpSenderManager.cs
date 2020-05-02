@@ -138,7 +138,7 @@ namespace Iviz.RoslibSharp
             }
         }
 
-        public PublisherState.SenderState[] GetStates()
+        public PublisherSenderState[] GetStates()
         {
             lock (connectionsByCallerId)
             {

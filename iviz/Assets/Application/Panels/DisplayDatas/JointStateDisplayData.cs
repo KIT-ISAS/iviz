@@ -18,8 +18,8 @@ namespace Iviz.App
         public override DisplayData Initialize(DisplayListPanel displayList, string topic, string type)
         {
             base.Initialize(displayList, topic, type);
-            Resource.Displays.Initialize();
-            GameObject displayObject = ResourcePool.GetOrCreate(Resource.Displays.JointState);
+            Resource.DisplaysType.Initialize();
+            GameObject displayObject = ResourcePool.GetOrCreate(Resource.DisplaysType.JointState);
             displayObject.name = "JointState:" + Topic;
 
             display = displayObject.GetComponent<JointStateListener>();
@@ -49,7 +49,7 @@ namespace Iviz.App
             base.Cleanup();
 
             display.Stop();
-            ResourcePool.Dispose(Resource.Displays.PointCloud, display.gameObject);
+            ResourcePool.Dispose(Resource.DisplaysType.PointCloud, display.gameObject);
             display = null;
         }
 

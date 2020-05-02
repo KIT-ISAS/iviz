@@ -17,7 +17,7 @@ namespace Iviz.App
         {
             base.Initialize(displayList, topic, type);
 
-            GameObject displayObject = ResourcePool.GetOrCreate(Resource.Displays.Robot);
+            GameObject displayObject = ResourcePool.GetOrCreate(Resource.DisplaysType.Robot);
             display = displayObject.GetComponent<Robot>();
             display.Parent = TFListener.DisplaysFrame;
             display.DisplayData = this;
@@ -42,7 +42,7 @@ namespace Iviz.App
             base.Cleanup();
 
             display.Stop();
-            ResourcePool.Dispose(Resource.Displays.Robot, display.gameObject);
+            ResourcePool.Dispose(Resource.DisplaysType.Robot, display.gameObject);
             display = null;
         }
 

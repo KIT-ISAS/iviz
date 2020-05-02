@@ -213,13 +213,15 @@ namespace Iviz.App
         void GeneratePointBuffer(PointCloud2 msg, int xOffset, int yOffset, int zOffset, int iOffset, int iType, bool rgbaHint)
         {
             bool xyzAligned = xOffset == 0 && yOffset == 4 && zOffset == 8;
-            if (xyzAligned && (rgbaHint || iType == PointField.FLOAT32))
+            if (xyzAligned)
             {
-                GeneratePointBufferXYZ_float(msg, iOffset);
-            }
-            else if (xyzAligned && (iType == PointField.INT32 || iType == PointField.UINT32))
-            {
-                GeneratePointBufferXYZ_int(msg, iOffset);
+                if (rgbaHint)
+                {
+                    GeneratePointBufferXYZ(msg, iOffset, PointField.FLOAT32);
+                } else
+                {
+                    GeneratePointBufferXYZ(msg, iOffset, iType);
+                }
             }
             else
             {
@@ -294,6 +296,7 @@ namespace Iviz.App
             }
         }
 
+        /*
         void GeneratePointBufferXYZ_float(PointCloud2 msg, int iOffset)
         {
             int rowStep = (int)msg.row_step;
@@ -350,6 +353,115 @@ namespace Iviz.App
                             pointBufferOff->position.y = datap[2];
                             pointBufferOff->position.z = datap[0];
                             pointBufferOff->intensity = *datai;
+                        }
+                    }
+                }
+            }
+        }
+        */
+
+        void GeneratePointBufferXYZ(PointCloud2 msg, int iOffset, int iType)
+        {
+            int rowStep = (int)msg.row_step;
+            int pointStep = (int)msg.point_step;
+            int height = (int)msg.height;
+            int width = (int)msg.width;
+
+            unsafe
+            {
+                fixed (byte* dataPtr = msg.data)
+                fixed (PointWithColor* pointBufferPtr = pointBuffer)
+                {
+                    PointWithColor* pointBufferOff = pointBufferPtr;
+                    byte* dataRow = dataPtr;
+                    for (int v = height; v > 0; v--, dataRow += rowStep)
+                    {
+                        byte* dataOff = dataRow;
+                        switch (iType)
+                        {
+                            case PointField.FLOAT32:
+                                for (int u = width; u > 0; u--, dataOff += pointStep, pointBufferOff++)
+                                {
+                                    float* datap = (float*)dataOff;
+                                    pointBufferOff->position.x = -datap[1];
+                                    pointBufferOff->position.y = datap[2];
+                                    pointBufferOff->position.z = datap[0];
+                                    pointBufferOff->intensity = *(float*)(dataOff + iOffset);
+                                }
+                                break;
+                            case PointField.FLOAT64:
+                                for (int u = width; u > 0; u--, dataOff += pointStep, pointBufferOff++)
+                                {
+                                    float* datap = (float*)dataOff;
+                                    pointBufferOff->position.x = -datap[1];
+                                    pointBufferOff->position.y = datap[2];
+                                    pointBufferOff->position.z = datap[0];
+                                    pointBufferOff->intensity = (float)*(double*)(dataOff + iOffset);
+                                }
+                                break;
+                            case PointField.INT8:
+                                for (int u = width; u > 0; u--, dataOff += pointStep, pointBufferOff++)
+                                {
+                                    float* datap = (float*)dataOff;
+                                    pointBufferOff->position.x = -datap[1];
+                                    pointBufferOff->position.y = datap[2];
+                                    pointBufferOff->position.z = datap[0];
+                                    pointBufferOff->intensity = (sbyte)*(dataOff + iOffset);
+                                }
+                                break;
+                            case PointField.UINT8:
+                                for (int u = width; u > 0; u--, dataOff += pointStep, pointBufferOff++)
+                                {
+                                    float* datap = (float*)dataOff;
+                                    pointBufferOff->position.x = -datap[1];
+                                    pointBufferOff->position.y = datap[2];
+                                    pointBufferOff->position.z = datap[0];
+                                    pointBufferOff->intensity = *(dataOff + iOffset);
+                                }
+                                break;
+                            case PointField.INT16:
+                                for (int u = width; u > 0; u--, dataOff += pointStep, pointBufferOff++)
+                                {
+                                    float* datap = (float*)dataOff;
+                                    pointBufferOff->position.x = -datap[1];
+                                    pointBufferOff->position.y = datap[2];
+                                    pointBufferOff->position.z = datap[0];
+                                    pointBufferOff->intensity = *(short*)(dataOff + iOffset);
+                                }
+                                break;
+                            case PointField.UINT16:
+                                for (int u = width; u > 0; u--, dataOff += pointStep, pointBufferOff++)
+                                {
+                                    float* datap = (float*)dataOff;
+                                    pointBufferOff->position.x = -datap[1];
+                                    pointBufferOff->position.y = datap[2];
+                                    pointBufferOff->position.z = datap[0];
+                                    pointBufferOff->intensity = *(ushort*)(dataOff + iOffset);
+                                }
+                                break;
+                            case PointField.INT32:
+                                for (int u = width; u > 0; u--, dataOff += pointStep, pointBufferOff++)
+                                {
+                                    float* datap = (float*)dataOff;
+                                    pointBufferOff->position.x = -datap[1];
+                                    pointBufferOff->position.y = datap[2];
+                                    pointBufferOff->position.z = datap[0];
+                                    pointBufferOff->intensity = *(int*)(dataOff + iOffset);
+                                }
+                                break;
+                            case PointField.UINT32:
+                                for (int u = width; u > 0; u--, dataOff += pointStep, pointBufferOff++)
+                                {
+                                    float* datap = (float*)dataOff;
+                                    pointBufferOff->position.x = -datap[1];
+                                    pointBufferOff->position.y = datap[2];
+                                    pointBufferOff->position.z = datap[0];
+                                    pointBufferOff->intensity = *(uint*)(dataOff + iOffset);
+                                }
+                                break;
+                            default:
+                                //??
+                                break;
                         }
                     }
                 }

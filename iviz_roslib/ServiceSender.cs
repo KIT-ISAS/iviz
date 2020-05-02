@@ -11,7 +11,7 @@ using Iviz.Msgs;
 
 namespace Iviz.RoslibSharp
 {
-    public class ServiceSender
+    class ServiceSender
     {
         const int BufferSizeIncrease = 1024;
 
@@ -36,10 +36,10 @@ namespace Iviz.RoslibSharp
         public int Port => remoteEndPoint.Port;
         public string Hostname => remoteEndPoint.Address.ToString();
 
-        public readonly ServiceInfo ServiceInfo;
+        internal ServiceInfo ServiceInfo { get; }
         public string RemoteCallerId { get; private set; }
 
-        public ServiceSender(ServiceInfo serviceInfo, TcpClient tcpClient, Action<IService> callback)
+        internal ServiceSender(ServiceInfo serviceInfo, TcpClient tcpClient, Action<IService> callback)
         {
             NetworkStream stream = tcpClient.GetStream();
             reader = new BinaryReader(stream);

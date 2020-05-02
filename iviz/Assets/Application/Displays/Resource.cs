@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using System.Collections.ObjectModel;
 
 namespace Iviz.App
 {
@@ -41,21 +42,17 @@ namespace Iviz.App
             }
         }
 
-        public static class Materials
+        public class MaterialsType
         {
-            public static Material Lit { get; private set; }
-            public static Material SimpleLit { get; private set; }
-            public static Material TexturedLit { get; private set; }
-            public static Material ImagePreview { get; private set; }
-            public static Material PointCloud { get; private set; }
-            public static Material MeshList { get; private set; }
+            public Material Lit { get; }
+            public Material SimpleLit { get; }
+            public Material TexturedLit { get; }
+            public Material ImagePreview { get; }
+            public Material PointCloud { get; }
+            public Material MeshList { get; }
 
-            public static void Initialize()
+            public MaterialsType()
             {
-                if (Lit != null)
-                {
-                    return;
-                }
                 SimpleLit = Resources.Load<Material>("BaseMaterials/SimpleWhite");
                 Lit = Resources.Load<Material>("BaseMaterials/White");
                 TexturedLit = Resources.Load<Material>("BaseMaterials/Textured Lit");
@@ -65,57 +62,54 @@ namespace Iviz.App
             }
         }
 
-        public static class Colormaps
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum ColormapId
         {
-            [JsonConverter(typeof(StringEnumConverter))]
-            public enum Id
-            {
-                lines, pink, copper, bone, gray, winter, autumn, summer, spring, cool, hot, hsv, jet, parula
-            };
+            lines, pink, copper, bone, gray, winter, autumn, summer, spring, cool, hot, hsv, jet, parula
+        };
 
-            public static string[] Names { get; } = new string[]
-            {
-                "lines", "pink", "copper", "bone", "gray", "winter", "autumn", "summer", "spring", "cool", "hot", "hsv", "jet", "parula"
-            };
 
-            public static Dictionary<Id, Texture2D> Textures { get; } = new Dictionary<Id, Texture2D>();
+        public class ColormapsType
+        {
+            public ReadOnlyDictionary<ColormapId, Texture2D> Textures { get; }
 
-            public static void Initialize()
+            public ReadOnlyCollection<string> Names { get; }
+
+            public ColormapsType()
             {
-                if (Textures.Count != 0)
+                string[] names = new string[]
                 {
-                    return;
-                }
-                for (int i = 0; i < Names.Length; i++)
+                    "lines", "pink", "copper", "bone", "gray", "winter", "autumn", "summer", "spring", "cool", "hot", "hsv", "jet", "parula"
+                };
+                Names = new ReadOnlyCollection<string>(names);
+
+                Dictionary<ColormapId, Texture2D> textures = new Dictionary<ColormapId, Texture2D>();
+                for (int i = 0; i < Names.Count; i++)
                 {
-                    Textures[(Id)i] = Resources.Load<Texture2D>("Colormaps/" + Names[i]);
+                    textures[(ColormapId)i] = Resources.Load<Texture2D>("Colormaps/" + Names[i]);
                 }
+                Textures = new ReadOnlyDictionary<ColormapId, Texture2D>(textures);
             }
         }
 
-        public static class Markers
+        public class MarkersType
         {
-            public static Info Cube { get; private set; }
-            public static Info Cylinder { get; private set; }
-            public static Info Sphere { get; private set; }
-            public static Info Text { get; private set; }
-            public static Info LineStrip { get; private set; }
-            public static Info LineConnector { get; private set; }
-            public static Info NamedBoundary { get; private set; }
-            public static Info Arrow { get; private set; }
-            public static Info SphereSimple { get; private set; }
-            public static Info MeshList { get; private set; }
-            public static Info PointList { get; private set; }
+            public Info Cube { get; }
+            public Info Cylinder { get; }
+            public Info Sphere { get; }
+            public Info Text { get; }
+            public Info LineStrip { get; }
+            public Info LineConnector { get; }
+            public Info NamedBoundary { get; }
+            public Info Arrow { get; }
+            public Info SphereSimple { get; }
+            public Info MeshList { get; }
+            public Info PointList { get; }
 
-            public static Dictionary<string, Info> Generic { get; private set; }
+            public ReadOnlyDictionary<string, Info> Generic { get; }
 
-            public static void Initialize()
+            public MarkersType()
             {
-                if (Cube != null)
-                {
-                    return;
-                }
-
                 Cube = new Info(Resources.Load<GameObject>("Markers/Cube"));
                 Cylinder = new Info(Resources.Load<GameObject>("Markers/Cylinder"));
                 Sphere = new Info(Resources.Load<GameObject>("Markers/Sphere"));
@@ -128,39 +122,35 @@ namespace Iviz.App
                 MeshList = new Info(Resources.Load<GameObject>("Markers/MeshList"));
                 PointList = new Info(Resources.Load<GameObject>("Markers/PointList"));
 
-                Generic = new Dictionary<string, Info>()
-                {
-                    ["Cube"] = Cube,
-                    ["Cylinder"] = Cylinder,
-                    ["Sphere"] = Sphere,
-                    ["RightHand"] = new Info(Resources.Load<GameObject>("Markers/RightHand")),
-                };
+                Generic = new ReadOnlyDictionary<string, Info>(
+                    new Dictionary<string, Info>()
+                    {
+                        ["Cube"] = Cube,
+                        ["Cylinder"] = Cylinder,
+                        ["Sphere"] = Sphere,
+                        ["RightHand"] = new Info(Resources.Load<GameObject>("Markers/RightHand")),
+                    });
             }
         }
 
-        public static class Displays
+        public class DisplaysType
         {
-            public static Info TFFrame { get; private set; }
-            public static Info PointCloud { get; private set; }
-            public static Info Grid { get; private set; }
-            public static Info TF { get; private set; }
-            public static Info Image { get; private set; }
-            public static Info Robot { get; private set; }
-            public static Info MarkerObject { get; private set; }
-            public static Info Marker { get; private set; }
-            public static Info InteractiveMarkerControlObject { get; private set; }
-            public static Info InteractiveMarkerObject { get; private set; }
-            public static Info InteractiveMarker { get; private set; }
-            public static Info JointState { get; private set; }
-            public static Info DepthImageProjector { get; private set; }
+            public Info TFFrame { get; }
+            public Info PointCloud { get; }
+            public Info Grid { get; }
+            public Info TF { get; }
+            public Info Image { get; }
+            public Info Robot { get; }
+            public Info MarkerObject { get; }
+            public Info Marker { get; }
+            public Info InteractiveMarkerControlObject { get; }
+            public Info InteractiveMarkerObject { get; }
+            public Info InteractiveMarker { get; }
+            public Info JointState { get; }
+            public Info DepthImageProjector { get; }
 
-            public static void Initialize()
+            public DisplaysType()
             {
-                if (TFFrame != null)
-                {
-                    return;
-                }
-
                 TFFrame = new Info(Resources.Load<GameObject>("Displays/TFFrame"));
                 PointCloud = new Info(Resources.Load<GameObject>("Displays/PointCloud"));
                 Grid = new Info(Resources.Load<GameObject>("Displays/Grid"));
@@ -177,27 +167,28 @@ namespace Iviz.App
             }
         }
 
-        public static class Widgets
+        public class WidgetsType
         {
-            public static Info DisplayButton { get; private set; }
-            public static Info TopicsButton { get; private set; }
+            public Info DisplayButton { get; }
+            public Info TopicsButton { get; }
 
-            public static void Initialize()
+            public WidgetsType()
             {
-                if (DisplayButton != null)
-                {
-                    return;
-                }
-
                 DisplayButton = new Info(Resources.Load<GameObject>("Widgets/Display Button"));
                 TopicsButton = new Info(Resources.Load<GameObject>("Widgets/Topics Button"));
             }
         }
 
-        public static class Robots
+        public class RobotsType
         {
-            public static string[] Names { get; } = new string[]
+            public ReadOnlyCollection<string> Names { get; }
+
+            readonly Dictionary<string, Info> Objects = new Dictionary<string, Info>();
+
+            public RobotsType()
             {
+                string[] names = new string[]
+                {
                 "edu.iviz.dummybot",
                 "com.clearpath.husky",
                 "com.robotis.turtlebot3.burger",
@@ -205,11 +196,12 @@ namespace Iviz.App
                 "com.willowgarage.pr2",
                 "edu.fraunhofer.iosb.bob",
                 "edu.kit.h2t.armar6"
-            };
+                };
 
-            static Dictionary<string, Info> Objects { get; } = new Dictionary<string, Info>();
+                Names = new ReadOnlyCollection<string>(names);
+            }
 
-            public static Info GetObject(string name)
+            public Info GetObject(string name)
             {
                 // robots are huge so they are only loaded on demand
                 if (!Objects.TryGetValue(name, out Info info))
@@ -222,5 +214,23 @@ namespace Iviz.App
         }
 
         public const int ClickableLayer = 8;
+
+        static MaterialsType materials;
+        public static MaterialsType Materials => materials ?? (materials = new MaterialsType());
+
+        static ColormapsType colormaps;
+        public static ColormapsType Colormaps => colormaps ?? (colormaps = new ColormapsType());
+
+        static MarkersType markers;
+        public static MarkersType Markers => markers ?? (markers = new MarkersType());
+
+        static DisplaysType displays;
+        public static DisplaysType Displays => displays ?? (displays = new DisplaysType());
+
+        static WidgetsType widgets;
+        public static WidgetsType Widgets => widgets ?? (widgets = new WidgetsType());
+
+        static RobotsType robots;
+        public static RobotsType Robots => robots ?? (robots = new RobotsType());
     }
 }
