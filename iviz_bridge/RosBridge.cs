@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using Iviz.RoslibSharp;
+using Iviz.RoslibSharp.XmlRpc;
 using WebSocketSharp.Server;
 
 namespace Iviz.Bridge
@@ -29,9 +30,9 @@ namespace Iviz.Bridge
             Logger.Log("Bridge: Started!");
         }
 
-        void OnShutdownActionCall(string callerId, string reason, out RpcStatusCode status, out string response)
+        void OnShutdownActionCall(string callerId, string reason, out StatusCode status, out string response)
         {
-            status = RpcStatusCode.Success;
+            status = StatusCode.Success;
             response = "ok";
             keepGoing = false;
         }

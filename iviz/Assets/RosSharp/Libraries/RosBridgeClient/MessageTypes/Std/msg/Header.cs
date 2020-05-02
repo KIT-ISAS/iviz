@@ -9,8 +9,6 @@
 
 using Newtonsoft.Json;
 
-using RosSharp.RosBridgeClient.MessageTypes.Std;
-
 namespace RosSharp.RosBridgeClient.MessageTypes.Std
 {
     public class Header : Message

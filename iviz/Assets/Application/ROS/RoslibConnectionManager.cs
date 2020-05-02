@@ -2,10 +2,8 @@
 using Iviz.RoslibSharp;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
-using System.Linq;
+using System.Collections.ObjectModel;
 using System.Net;
-using System.Net.Sockets;
 using UnityEngine;
 
 namespace Iviz.App
@@ -120,10 +118,12 @@ namespace Iviz.App
 
         protected override bool Connect()
         {
+            //Debug.Log("Connecting! '" + Uri + "'");
             if (Uri == null || Uri.Scheme != "http")
             {
                 return false;
             }
+            //Debug.Log("Valid");
 
             try
             {
@@ -360,12 +360,18 @@ namespace Iviz.App
             }
         }
 
-        public override BriefTopicInfo[] GetSystemPublishedTopics() =>
-            client?.GetSystemPublishedTopics() ??
-            Array.Empty<BriefTopicInfo>();
+        public override ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics() =>
+            client?.GetSystemPublishedTopics() ?? EmptyTopics;
 
         protected override void Update()
         {
+        }
+
+        public override void Stop()
+        {
+            base.Stop();
+            client?.Close();
+            client = null;
         }
     }
 }

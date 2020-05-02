@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Iviz.Msgs;
 
@@ -47,7 +48,7 @@ namespace Iviz.RoslibSharp
             }
 
             TcpReceiver connection = new TcpReceiver(
-                remoteUri.ToString(),
+                remoteUri,
                 response.protocol.hostname,
                 response.protocol.port,
                 TopicInfo, Callback,
@@ -109,19 +110,21 @@ namespace Iviz.RoslibSharp
             }
         }
 
-        public IReadOnlyDictionary<Uri, TcpReceiver> GetConnections()
+        public ReadOnlyDictionary<Uri, TcpReceiver> GetConnections()
         {
             lock (connectionsByUri)
             {
-                return new Dictionary<Uri, TcpReceiver>(connectionsByUri);
+                return new ReadOnlyDictionary<Uri, TcpReceiver>(connectionsByUri);
             }
         }
 
-        public SubscriberReceiverState[] GetStates()
+        public ReadOnlyCollection<SubscriberReceiverState> GetStates()
         {
             lock (connectionsByUri)
             {
-                return connectionsByUri.Values.Select(x => x.GetState()).ToArray();
+                return new ReadOnlyCollection<SubscriberReceiverState>(
+                    connectionsByUri.Values.Select(x => x.State).ToList()
+                    );
             }
         }
 

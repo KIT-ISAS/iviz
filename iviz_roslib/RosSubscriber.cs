@@ -64,7 +64,7 @@ namespace Iviz.RoslibSharp
         {
             AssertIsAlive();
             Cleanup();
-            return new SubscriberTopicState(Topic, TopicType, Ids.ToArray(), Manager.GetStates());
+            return new SubscriberTopicState(Topic, TopicType, Ids, Manager.GetStates());
         }
 
         internal void PublisherUpdateRcp(XmlRpc.NodeClient talker, Uri[] publisherUris)
@@ -81,6 +81,11 @@ namespace Iviz.RoslibSharp
 
         public bool MessageTypeMatches(Type type)
         {
+            if (type is null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
             return type.Equals(Manager.TopicInfo.Generator.GetType());
         }
 

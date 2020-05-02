@@ -1,7 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
 using UnityEngine.UI;
-using Iviz.App;
 using System;
 using System.Collections.Generic;
 using System.Linq;

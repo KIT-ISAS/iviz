@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Iviz.App
+﻿namespace Iviz.App
 {
     public class ImagePanelContents : ListenerPanelContents
     {
@@ -21,7 +19,7 @@ namespace Iviz.App
             Topic = p.AddDataLabel("");
             Colormap = p.AddDropdown("Colormap")
                 .SetOptions(Resource.Colormaps.Names)
-                .SetIndex((int)Resource.Colormaps.Id.gray);
+                .SetIndex((int)Resource.ColormapId.gray);
             Min = p.AddSlider("Min Value").SetMinValue(0).SetMaxValue(1);
             Max = p.AddSlider("Max Value").SetMinValue(0).SetMaxValue(1);
             Anchor = p.AddDropdown("Anchor")

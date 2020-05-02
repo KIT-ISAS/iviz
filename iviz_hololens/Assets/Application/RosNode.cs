@@ -20,7 +20,7 @@ public class RosNode : MonoBehaviour
         RosClient client = new RosClient(
             "http://141.3.59.5:11311",
             "/IvizHololens",
-            "http://141.3.59.140:7613"
+            "http://141.3.59.140:9014"
             );
 
         Debug.Log(client.CallerUri);
@@ -127,7 +127,7 @@ public class RosNode : MonoBehaviour
                 }
 
                 points.Clear();
-                for (int i = 0; i < indices.Length; i += 3)
+                for (int i = 0; i < indices.Length; i++)
                 {
                     points.Add(ToRos(vertices[indices[i]]));
                 }

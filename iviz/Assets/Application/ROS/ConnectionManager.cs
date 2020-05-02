@@ -3,7 +3,7 @@ using Iviz.Msgs.rosgraph_msgs;
 using Iviz.RoslibSharp;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -24,7 +24,7 @@ namespace Iviz.App
         ConnectionState ConnectionState { get; }
         Uri Uri { get; }
         string Id { get; }
-        BriefTopicInfo[] PublishedTopics { get; }
+        ReadOnlyCollection<BriefTopicInfo> PublishedTopics { get; }
 
         bool TrySetUri(string uri);
 
@@ -36,8 +36,7 @@ namespace Iviz.App
         void Publish(RosSender advertiser, IMessage msg);
         void Stop();
 
-
-        BriefTopicInfo[] GetSystemPublishedTopics();
+        ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics();
     }
 
 
@@ -97,7 +96,7 @@ namespace Iviz.App
         public static void Unadvertise(RosSender advertiser) => Connection.Unadvertise(advertiser);
         public static void Publish(RosSender advertiser, IMessage msg) => Connection.Publish(advertiser, msg);
 
-        public static BriefTopicInfo[] GetSystemPublishedTopics() => Connection.GetSystemPublishedTopics();
+        public static ReadOnlyCollection<BriefTopicInfo>  GetSystemPublishedTopics() => Connection.GetSystemPublishedTopics();
     }
 
     public abstract class RosConnection : IRosConnection
@@ -117,7 +116,11 @@ namespace Iviz.App
         public ConnectionState ConnectionState { get; private set; } = ConnectionState.Disconnected;
         public virtual Uri Uri { get; protected set; }
         public abstract string Id { get; }
-        public BriefTopicInfo[] PublishedTopics { get; protected set; }
+
+        protected static readonly ReadOnlyCollection<BriefTopicInfo> EmptyTopics =
+            new ReadOnlyCollection<BriefTopicInfo>(new List<BriefTopicInfo>());
+
+        public ReadOnlyCollection<BriefTopicInfo> PublishedTopics { get; protected set; } = EmptyTopics;
 
         public RosConnection()
         {
@@ -231,7 +234,7 @@ namespace Iviz.App
         public abstract void Advertise<T>(RosSender<T> advertiser) where T : IMessage;
         public abstract void Unadvertise(RosSender advertiser);
         public abstract void Publish(RosSender advertiser, IMessage msg);
-        public abstract BriefTopicInfo[] GetSystemPublishedTopics();
+        public abstract ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics();
 
         protected virtual void Update()
         {

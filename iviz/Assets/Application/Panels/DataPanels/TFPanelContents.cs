@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Iviz.App
+﻿namespace Iviz.App
 {
     public class TFPanelContents : ListenerPanelContents
     {

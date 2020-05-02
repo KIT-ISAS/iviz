@@ -1,5 +1,4 @@
-﻿using System;
-using Iviz.Msgs.nav_msgs;
+﻿using Iviz.Msgs.nav_msgs;
 using UnityEngine;
 
 namespace Iviz.App

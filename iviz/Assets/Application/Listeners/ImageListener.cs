@@ -25,7 +25,7 @@ namespace Iviz.App
             public Resource.Module module => Resource.Module.Image;
             public string topic = "";
             public string type = "";
-            public Resource.Colormaps.Id colormap = Resource.Colormaps.Id.gray;
+            public Resource.ColormapId colormap = Resource.ColormapId.gray;
             public AnchorCanvas.AnchorType anchor = AnchorCanvas.AnchorType.None;
             public float minIntensity = 0.0f;
             public float maxIntensity = 1.0f;
@@ -46,7 +46,7 @@ namespace Iviz.App
             }
         }
 
-        public Resource.ColormapsId Colormap
+        public Resource.ColormapId Colormap
         {
             get => config.colormap;
             set
@@ -104,9 +104,6 @@ namespace Iviz.App
 
         void Awake()
         {
-            Resource.Materials.Initialize();
-            Resource.Colormaps.Initialize();
-
             Material = Instantiate(Resource.Materials.ImagePreview);
 
             Config = new Configuration();

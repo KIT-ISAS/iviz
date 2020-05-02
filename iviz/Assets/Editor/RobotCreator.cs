@@ -8,7 +8,6 @@ using RosSharp.Urdf;
 using Joint = RosSharp.Urdf.Joint;
 using RosSharp;
 using UnityEditor;
-using RosSharp.Urdf.Editor;
 
 namespace Iviz.App
 {

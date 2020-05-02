@@ -1,14 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RosSharp.RosBridgeClient.MessageTypes.Sensor;
-using RosSharp.RosBridgeClient.MessageTypes.Std;
-using RosSharp.RosBridgeClient.MessageTypes.Tf2;
-using UnityEngine;
-using UnityEngine.EventSystems;
-
+﻿
 #if USING_VR
 using Valve.VR;
 

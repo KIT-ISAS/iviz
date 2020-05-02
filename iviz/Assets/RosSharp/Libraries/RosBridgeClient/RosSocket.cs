@@ -23,11 +23,9 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Iviz.App;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RosSharp.RosBridgeClient.Protocols;
-using UnityEngine;
 
 namespace RosSharp.RosBridgeClient
 {

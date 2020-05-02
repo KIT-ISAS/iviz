@@ -11,7 +11,7 @@ namespace Iviz.App
         public int Width;
         public int Height;
 
-        public Resource.Colormaps.Id colorMap = Resource.Colormaps.Id.hsv;
+        public Resource.ColormapId colorMap = Resource.ColormapId.hsv;
 
         Mesh mesh;
         Material material;

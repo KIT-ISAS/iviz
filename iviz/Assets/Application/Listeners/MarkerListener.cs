@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System;
 using Iviz.Msgs.visualization_msgs;
 
@@ -54,7 +51,7 @@ namespace Iviz.App
             foreach (MarkerObject marker in markers.Values)
             {
                 marker.Stop();
-                ResourcePool.Dispose(Resource.DisplaysType.MarkerObject, marker.gameObject);
+                ResourcePool.Dispose(Resource.Displays.MarkerObject, marker.gameObject);
             }
             markers.Clear();
         }
@@ -117,7 +114,7 @@ namespace Iviz.App
                 case Marker.ADD:
                     if (!markers.TryGetValue(id, out MarkerObject markerToAdd))
                     {
-                        markerToAdd = ResourcePool.GetOrCreate(Resource.DisplaysType.MarkerObject, transform).GetComponent<MarkerObject>();
+                        markerToAdd = ResourcePool.GetOrCreate(Resource.Displays.MarkerObject, transform).GetComponent<MarkerObject>();
                         markerToAdd.Parent = TFListener.DisplaysFrame;
                         markers[id] = markerToAdd;
                     }
@@ -127,7 +124,7 @@ namespace Iviz.App
                     if (markers.TryGetValue(id, out MarkerObject markerToDelete))
                     {
                         markerToDelete.Stop();
-                        ResourcePool.Dispose(Resource.DisplaysType.MarkerObject, markerToDelete.gameObject);
+                        ResourcePool.Dispose(Resource.Displays.MarkerObject, markerToDelete.gameObject);
                         markers.Remove(id);
                     }
                     break;

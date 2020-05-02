@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Iviz.Msgs;
 using Newtonsoft.Json.Linq;
 
@@ -28,8 +29,15 @@ namespace Iviz.RoslibSharp
 
     public static class Utils
     {
+        public static CultureInfo Culture { get; } = CultureInfo.InvariantCulture;
+
         public static void ForEach<T>(this IEnumerable<T> ts, Action<T> action)
         {
+            if (ts is null)
+            {
+                throw new ArgumentNullException(nameof(ts));
+            }
+
             foreach (T t in ts)
             {
                 action(t);
@@ -46,6 +54,16 @@ namespace Iviz.RoslibSharp
 
         public static bool HasPrefix(this string check, string prefix)
         {
+            if (check is null)
+            {
+                throw new ArgumentNullException(nameof(check));
+            }
+
+            if (prefix is null)
+            {
+                throw new ArgumentNullException(nameof(prefix));
+            }
+
             if (check.Length < prefix.Length)
             {
                 return false;
@@ -62,6 +80,16 @@ namespace Iviz.RoslibSharp
 
         public static bool HasSuffix(this string check, string suffix)
         {
+            if (check is null)
+            {
+                throw new ArgumentNullException(nameof(check));
+            }
+
+            if (suffix is null)
+            {
+                throw new ArgumentNullException(nameof(suffix));
+            }
+
             if (check.Length < suffix.Length)
             {
                 return false;

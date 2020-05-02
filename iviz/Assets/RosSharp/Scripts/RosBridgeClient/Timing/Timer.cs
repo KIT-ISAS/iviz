@@ -19,7 +19,6 @@ limitations under the License.
 // Siemens AG , 2019, Berkay Alp Cakal (berkay_alp.cakal.ct@siemens.com) 
 
 using System;
-using RosSharp.RosBridgeClient.MessageTypes.Std;
 
 namespace RosSharp.RosBridgeClient
 {

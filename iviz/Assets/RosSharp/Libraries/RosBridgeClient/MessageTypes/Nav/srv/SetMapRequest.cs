@@ -8,8 +8,6 @@
  */
 
 using Newtonsoft.Json;
-
-using RosSharp.RosBridgeClient.MessageTypes.Nav;
 using RosSharp.RosBridgeClient.MessageTypes.Geometry;
 
 namespace RosSharp.RosBridgeClient.MessageTypes.Nav

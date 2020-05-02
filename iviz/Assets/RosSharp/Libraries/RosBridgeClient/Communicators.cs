@@ -16,7 +16,6 @@ limitations under the License.
 using Newtonsoft.Json.Linq;
 using System;
 using System.Threading.Tasks;
-using UnityEngine;
 
 namespace RosSharp.RosBridgeClient
 {

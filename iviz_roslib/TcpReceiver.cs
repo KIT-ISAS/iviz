@@ -16,6 +16,7 @@ namespace Iviz.RoslibSharp
 
         TcpClient tcpClient;
         NetworkStream stream;
+        BinaryWriter writer;
 
         const int BufferSizeIncrease = 1024;
         byte[] readBuffer = new byte[BufferSizeIncrease];
@@ -23,7 +24,7 @@ namespace Iviz.RoslibSharp
         bool keepRunning;
         Task task;
 
-        public readonly string RemoteUri;
+        public readonly Uri RemoteUri;
         public readonly string RemoteHostname;
         public readonly int RemotePort;
         public string Hostname { get; private set; }
@@ -37,7 +38,7 @@ namespace Iviz.RoslibSharp
         public readonly bool RequestNoDelay;
 
         public TcpReceiver(
-            string remoteUri,
+            Uri remoteUri,
             string remoteHostname,
             int remotePort,
             TopicInfo topicInfo,
@@ -71,7 +72,7 @@ namespace Iviz.RoslibSharp
         }
 
 
-        int SerializeHeader(BinaryWriter writer)
+        int SerializeHeader()
         {
             string[] contents = {
                 $"message_definition={topicInfo.MessageDefinition}",
@@ -145,7 +146,7 @@ namespace Iviz.RoslibSharp
 
         List<string> DoHandshake()
         {
-            SerializeHeader(new BinaryWriter(stream));
+            SerializeHeader();
 
             int totalLength = ReceivePacket();
             return ParseHeader(totalLength);
@@ -164,6 +165,7 @@ namespace Iviz.RoslibSharp
                     Port = endPoint.Port;
 
                     stream = tcpClient.GetStream();
+                    writer = new BinaryWriter(stream);
 
                     List<string> responses = DoHandshake();
                     if (responses.Count != 0 && responses[0].HasPrefix("error"))
@@ -220,14 +222,11 @@ namespace Iviz.RoslibSharp
             Logger.Log($"{this}: Stopped!");
         }
 
-        public SubscriberReceiverState GetState()
-        {
-            return new SubscriberReceiverState(
+        public SubscriberReceiverState State => new SubscriberReceiverState(
                 IsAlive, RequestNoDelay, Hostname, Port,
                 RemoteUri, RemoteHostname, RemotePort,
                 NumReceived, BytesReceived
             );
-        }
 
         public override string ToString()
         {

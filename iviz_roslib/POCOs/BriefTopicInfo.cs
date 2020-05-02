@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Iviz.RoslibSharp
+﻿namespace Iviz.RoslibSharp
 {
     /// <summary>
     /// Topic name and message type.

@@ -16,8 +16,7 @@ namespace Iviz.App
         {
             base.Initialize(displayList, topic, type);
 
-            Resource.DisplaysType.Initialize();
-            GameObject displayObject = ResourcePool.GetOrCreate(Resource.DisplaysType.Grid);
+            GameObject displayObject = ResourcePool.GetOrCreate(Resource.Displays.Grid);
             displayObject.name = "Grid";
 
             display = displayObject.GetComponent<Grid>();
@@ -40,7 +39,7 @@ namespace Iviz.App
             base.Cleanup();
 
             display.Stop();
-            ResourcePool.Dispose(Resource.DisplaysType.Grid, display.gameObject);
+            ResourcePool.Dispose(Resource.Displays.Grid, display.gameObject);
             display = null;
         }
 

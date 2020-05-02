@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
 namespace Iviz.App
@@ -140,9 +139,6 @@ namespace Iviz.App
         {
             if (axisObjects == null)
             {
-                Resource.Markers.Initialize();
-                Resource.Materials.Initialize();
-
                 axisObjects = new GameObject[3];
                 axisRenderers = new MeshRenderer[3];
                 for (int i = 0; i < 3; i++)
@@ -316,7 +312,6 @@ namespace Iviz.App
         {
             boxCollider = GetComponent<BoxCollider>();
 
-            Resource.Markers.Initialize();
             labelObject = ResourcePool.GetOrCreate(Resource.Markers.Text, transform);
             labelObject.gameObject.SetActive(false);
             labelObject.name = "Frame Axis Label";

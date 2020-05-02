@@ -44,6 +44,7 @@ namespace Iviz.RoslibSharp.XmlRpc
             Logger.Log("RcpNodeServer: Starting RPC server on " + maskUri);
             listener.Prefixes.Add(maskUri);
             listener.Start();
+            Logger.Log("RcpNodeServer: Started!");
 
             task = Task.Run(() =>
             {
@@ -75,7 +76,7 @@ namespace Iviz.RoslibSharp.XmlRpc
             });
         }
 
-        public void Stop()
+        public void Close()
         {
             keepRunning = false;
             listener.Close();
@@ -88,7 +89,7 @@ namespace Iviz.RoslibSharp.XmlRpc
             return new[] {
                     new Arg((int)StatusCode.Error),
                     new Arg("error=NYI"),
-                    new Arg(new Arg[0])
+                    new Arg(Array.Empty<Arg>())
                 };
         }
 
@@ -240,7 +241,7 @@ namespace Iviz.RoslibSharp.XmlRpc
                     return new[] {
                             new Arg((int)StatusCode.Failure),
                             new Arg($"error=no compatible protocols found"),
-                            new Arg(new string[0][])
+                            new Arg(Array.Empty<string[]>())
                         };
                 }
 
@@ -269,7 +270,7 @@ namespace Iviz.RoslibSharp.XmlRpc
                     return new[] {
                             new Arg((int)StatusCode.Failure),
                             new Arg("error=client only supports TCPROS"),
-                            new Arg(new string[0][])
+                            new Arg(Array.Empty<string[]>())
                         };
                 }
 
@@ -279,7 +280,7 @@ namespace Iviz.RoslibSharp.XmlRpc
                     return new[] {
                             new Arg((int)StatusCode.Failure),
                             new Arg($"error=client is not publishing topic '{topic}'"),
-                            new Arg(new string[0][])
+                            new Arg(Array.Empty<string[]>())
                         };
                 }
 
@@ -301,10 +302,9 @@ namespace Iviz.RoslibSharp.XmlRpc
                 return new[] {
                         new Arg((int)StatusCode.Error),
                         new Arg("error=Unknown error: " + e.Message),
-                        new Arg(new string[0][])
+                        new Arg(Array.Empty<string[]>())
                     };
             }
         }
-
     }
 }

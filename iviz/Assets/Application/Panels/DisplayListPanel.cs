@@ -1,10 +1,8 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -37,8 +35,6 @@ namespace Iviz.App
         public GameObject contentObject;
         public DataPanelManager dataPanelManager;
         public DialogPanelManager dialogPanelManager;
-        public TopicSelectionPanel topicsPanel;
-        public NewDisplayPanel newDisplayPanel;
         public Button addDisplayByTopic;
         public Button addDisplay;
         public Toggle keepReconnecting;
@@ -65,8 +61,6 @@ namespace Iviz.App
 
         void Start()
         {
-            Resource.Widgets.Initialize();
-
             parentCanvas = transform.parent.parent.GetComponentInParent<Canvas>();
 
             buttonHeight = Resource.Widgets.DisplayButton.GameObject.GetComponent<RectTransform>().rect.height;
@@ -93,10 +87,8 @@ namespace Iviz.App
             ConnectionManager.Connection.ConnectionStateChanged += OnConnectionStateChanged;
 
             TFListener.GuiManager.Canvases.Add(GetComponentInParent<Canvas>());
-            //TFListener.GuiManager.Canvases.Add(topicsPanel.GetComponentInParent<Canvas>());
             TFListener.GuiManager.Canvases.Add(dataPanelManager.GetComponentInParent<Canvas>());
             TFListener.GuiManager.Canvases.Add(dialogPanelManager.GetComponentInParent<Canvas>());
-            //TFListener.GuiManager.Canvases.Add(newDisplayPanel.GetComponentInParent<Canvas>());
         }
 
         void OnAddressChanged(string newUri)
@@ -224,16 +216,11 @@ namespace Iviz.App
 
         void OnAddDisplayByTopicClick()
         {
-            //topicsPanel.Active = !topicsPanel.Active;
-            //newDisplayPanel.Active = false;
-            //availableDisplays.Select();
             availableTopics.Select();
         }
 
         void OnAddDisplayClick()
         {
-            //newDisplayPanel.Active = !newDisplayPanel.Active;
-            //topicsPanel.Active = false;
             availableDisplays.Select();
         }
 

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Iviz.App
 {
@@ -18,6 +17,7 @@ namespace Iviz.App
                 case Resource.Module.InteractiveMarker: return o.AddComponent<InteractiveMarkerPanelContents>();
                 case Resource.Module.JointState: return o.AddComponent<JointStatePanelContents>();
                 case Resource.Module.DepthImageProjector: return o.AddComponent<DepthImageProjectorPanelContents>();
+                case Resource.Module.LaserScan: return o.AddComponent<LaserScanPanelContents>();
                 default: return o.AddComponent<DefaultPanelContents>();
             }
         }

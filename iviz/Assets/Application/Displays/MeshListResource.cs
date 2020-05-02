@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using Unity.Collections;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace Iviz.App
 {
@@ -127,10 +124,6 @@ namespace Iviz.App
         protected override void Awake()
         {
             base.Awake();
-
-            Resource.Colormaps.Initialize();
-            Resource.Materials.Initialize();
-            Resource.Markers.Initialize();
 
             material = Instantiate(Resource.Materials.MeshList);
             material.enableInstancing = true;

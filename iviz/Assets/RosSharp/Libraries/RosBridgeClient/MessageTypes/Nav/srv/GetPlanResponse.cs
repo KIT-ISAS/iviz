@@ -9,8 +9,6 @@
 
 using Newtonsoft.Json;
 
-using RosSharp.RosBridgeClient.MessageTypes.Nav;
-
 namespace RosSharp.RosBridgeClient.MessageTypes.Nav
 {
     public class GetPlanResponse : Message

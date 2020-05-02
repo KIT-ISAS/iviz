@@ -58,7 +58,7 @@ namespace Iviz.Msgs
             }
         }
 
-        internal static void Deserialize(out bool val, ref byte* arrayPtr, byte* end)
+        internal static void Deserialize(out bool val, ref byte* arrayPtr, byte* _)
         {
             val = (*arrayPtr != 0);
             arrayPtr++;

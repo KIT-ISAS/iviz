@@ -146,7 +146,6 @@ namespace Iviz.App
 
         void Awake()
         {
-            Resource.Colormaps.Initialize();
             material = Instantiate(Resources.Load<Material>(MaterialResourcePath));
 
             Config = new Configuration();

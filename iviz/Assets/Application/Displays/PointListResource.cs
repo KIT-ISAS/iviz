@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using Unity.Collections;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace Iviz.App
 {
@@ -61,8 +59,8 @@ namespace Iviz.App
 
         static readonly int PropIntensity = Shader.PropertyToID("_IntensityTexture");
 
-        Resource.Colormaps.Id colormap;
-        public Resource.Colormaps.Id Colormap
+        Resource.ColormapId colormap;
+        public Resource.ColormapId Colormap
         {
             get => colormap;
             set
@@ -139,19 +137,25 @@ namespace Iviz.App
             set
             {
                 int index = 0;
-                if (value == null)
+                if (value == null || value.Count() == 0)
                 {
                     for (int i = 0; i < Size; i++)
                     {
                         pointBuffer[index++].color = Color;
                     }
                 }
-                else
+                else if (value.Count() == pointBuffer.Length)
                 {
                     foreach (Color32 color in value)
                     {
                         pointBuffer[index++].color = Color * color;
                     }
+                }
+                else
+                {
+                    throw new ArgumentException(
+                        "Input color has size " + value.Count() + ", but buffer size is " + pointBuffer.Length,
+                        nameof(value));
                 }
             }
         }
@@ -175,43 +179,23 @@ namespace Iviz.App
             }
         }
 
-        public IEnumerable<PointWithColor> PointsWithColor
+        public IList<PointWithColor> PointsWithColor
         {
             get => pointBuffer;
-            set
-            {
-                Size = value.Count();
-
-                int index = 0;
-                foreach (PointWithColor pos in value)
-                {
-                    pointBuffer[index++] = pos;
-                }
-                pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
-                Bounds = CalculateBounds();
-                boxCollider.center = Bounds.center;
-                boxCollider.size = Bounds.size;
-            }
         }
 
-        /*
-        public void SetSize(int size)
+        public void SetPointsWithColor(IList<PointWithColor> points, int size)
         {
-            int reqDataSize = (int)(size * 1.1f);
-            if (pointBuffer == null || pointBuffer.Length < reqDataSize)
-            {
-                pointBuffer = new PointWithColor[reqDataSize];
-
-                if (pointComputeBuffer != null)
-                {
-                    pointComputeBuffer.Release();
-                }
-                pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithColor>());
-                material.SetBuffer(PropPoints, pointComputeBuffer);
-            }
             Size = size;
+            for (int i = 0; i < size; i++)
+            {
+                pointBuffer[i] = points[i];
+            }
+            pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
+            Bounds = CalculateBounds();
+            boxCollider.center = Bounds.center;
+            boxCollider.size = Bounds.size;
         }
-        */
 
         Vector2 scale;
         public Vector2 Scale
@@ -230,7 +214,6 @@ namespace Iviz.App
         protected override void Awake()
         {
             base.Awake();
-            Resource.Materials.Initialize();
             boxCollider = Collider as BoxCollider;
 
             material = Instantiate(Resource.Materials.PointCloud);

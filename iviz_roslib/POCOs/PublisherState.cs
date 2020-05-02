@@ -1,6 +1,9 @@
-﻿namespace Iviz.RoslibSharp
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+
+namespace Iviz.RoslibSharp
 {
-    public class PublisherSenderState
+    public class PublisherSenderState : JsonToString
     {
         public bool Alive { get; }
         public bool Latching { get; }
@@ -46,29 +49,29 @@
         }
     }
 
-    public class PublisherTopicState
+    public class PublisherTopicState : JsonToString
     {
         public string Topic { get; }
         public string Type { get; }
-        public string[] TopicIds { get; }
-        public PublisherSenderState[] Senders { get; }
+        public ReadOnlyCollection<string> TopicIds { get; }
+        public ReadOnlyCollection<PublisherSenderState> Senders { get; }
 
-        internal PublisherTopicState(string topic, string type, string[] topicIds, PublisherSenderState[] senders)
+        internal PublisherTopicState(string topic, string type, IList<string> topicIds, IList<PublisherSenderState> senders)
         {
             Topic = topic;
             Type = type;
-            TopicIds = topicIds;
-            Senders = senders;
+            TopicIds = new ReadOnlyCollection<string>(topicIds);
+            Senders = new ReadOnlyCollection<PublisherSenderState>(senders);
         }
     }
 
     public class PublisherState : JsonToString
     {
-        public PublisherTopicState[] Topics { get; }
+        public ReadOnlyCollection<PublisherTopicState> Topics { get; }
 
-        internal PublisherState(PublisherTopicState[] topics)
+        internal PublisherState(IList<PublisherTopicState> topics)
         {
-            Topics = topics;
+            Topics = new ReadOnlyCollection<PublisherTopicState>(topics);
         }
     }
 }

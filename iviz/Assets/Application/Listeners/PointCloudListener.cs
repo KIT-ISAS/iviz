@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Iviz.Msgs.sensor_msgs;
 using UnityEngine;
@@ -25,7 +24,7 @@ namespace Iviz.App
             public string topic = "";
             public string intensityChannel = "x";
             public float pointSize = 0.03f;
-            public Resource.Colormaps.Id colormap = Resource.Colormaps.Id.hsv;
+            public Resource.ColormapId colormap = Resource.ColormapId.hsv;
         }
 
         readonly Configuration config = new Configuration();
@@ -60,7 +59,7 @@ namespace Iviz.App
             }
         }
 
-        public Resource.Colormaps.Id Colormap
+        public Resource.ColormapId Colormap
         {
             get => config.colormap;
             set
@@ -77,9 +76,6 @@ namespace Iviz.App
 
         void Awake()
         {
-            Resource.Colormaps.Initialize();
-            Resource.Markers.Initialize();
-
             pointCloud = ResourcePool.GetOrCreate(Resource.Markers.PointList, transform).GetComponent<PointListResource>();
 
             Config = new Configuration();
@@ -179,9 +175,10 @@ namespace Iviz.App
 
                 GameThread.RunOnce(() =>
                 {
+                    Size = newSize;
                     pointCloud.IntensityBounds = intensityBounds;
                     pointCloud.UseIntensityTexture = !rgbaHint;
-                    pointCloud.PointsWithColor = pointBuffer;
+                    pointCloud.SetPointsWithColor(pointBuffer, Size);
                 });
             });
         }

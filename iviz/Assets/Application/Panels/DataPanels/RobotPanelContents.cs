@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Iviz.App
+﻿namespace Iviz.App
 {
     public class RobotPanelContents : DataPanelContents
     {
@@ -14,7 +12,7 @@ namespace Iviz.App
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("Robot");
-            ResourceType = p.AddDropdown("Resource").SetOptions(Resource.RobotsType.Names);
+            ResourceType = p.AddDropdown("Resource").SetOptions(Resource.Robots.Names);
             AttachToTF = p.AddToggle("Attach to TF Frames");
             FramePrefix = p.AddInputField("TF Frame Prefix").SetPlaceholder("<none>");
             FrameSuffix = p.AddInputField("TF Frame Suffix").SetPlaceholder("<none>");

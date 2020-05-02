@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -7,10 +8,10 @@ using Iviz.Msgs;
 
 namespace Iviz.RoslibSharp
 {
-    public partial class RosClient
+    public class RosClient
     {
-        public readonly string CallerId;
-        public readonly XmlRpc.Master Master;
+        public string CallerId { get; }
+        public XmlRpc.Master Master { get; }
 
         internal readonly XmlRpc.NodeClient Talker;
         internal readonly XmlRpc.NodeServer Listener;
@@ -57,9 +58,9 @@ namespace Iviz.RoslibSharp
         /// <param name="callerUri">URI of this node. Leave empty to generate one automatically</param>
         public RosClient(Uri masterUri, string callerId = null, Uri callerUri = null)
         {
-            if (callerUri.Scheme != "http")
+            if (masterUri is null)
             {
-                throw new ArgumentException("URI scheme must be http", nameof(callerUri));
+                throw new ArgumentNullException(nameof(masterUri));
             }
 
             if (masterUri.Scheme != "http")
@@ -70,6 +71,11 @@ namespace Iviz.RoslibSharp
             if (callerUri == null)
             {
                 callerUri = new Uri($"http://localhost:7613/");
+            }
+
+            if (callerUri.Scheme != "http")
+            {
+                throw new ArgumentException("URI scheme must be http", nameof(callerUri));
             }
 
             /*
@@ -105,7 +111,7 @@ namespace Iviz.RoslibSharp
             }
             catch (WebException e)
             {
-                Listener.Stop();
+                Listener.Close();
                 throw new ArgumentException($"RosClient: Failed to contact the master URI '{masterUri}'", nameof(masterUri), e);
             }
         }
@@ -183,7 +189,7 @@ namespace Iviz.RoslibSharp
 
             if (!subscriber.MessageTypeMatches(typeof(T)))
             {
-                throw new ArgumentException("Incorrect message type.");
+                throw new ArgumentException("Type does not match subscriber.", nameof(T));
             }
 
             // local lambda wrapper for casting
@@ -196,7 +202,7 @@ namespace Iviz.RoslibSharp
         {
             if (!typeof(IMessage).IsAssignableFrom(type))
             {
-                throw new ArgumentException("Incorrect message type.");
+                throw new ArgumentException("Type does not appear to be a message.", nameof(type));
             }
 
             if (!TryGetSubscriber(topic, out subscriber))
@@ -206,7 +212,7 @@ namespace Iviz.RoslibSharp
 
             if (!subscriber.MessageTypeMatches(type))
             {
-                throw new ArgumentException("Incorrect message type.");
+                throw new ArgumentException("Message type does not match subscriber.", nameof(type));
             }
 
             return subscriber.Subscribe(callback);
@@ -369,19 +375,20 @@ namespace Iviz.RoslibSharp
         /// Corresponds to the function 'getPublishedTopics' in the ROS Master API.
         /// </summary>
         /// <returns>List of topic names and message types.</returns>
-        public BriefTopicInfo[] GetSystemPublishedTopics()
+        public ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics()
         {
-            return Master.GetPublishedTopics().topics.
-                Select(x => new BriefTopicInfo(x.Item1, x.Item2)).ToArray();
+            return new ReadOnlyCollection<BriefTopicInfo>(
+                Master.GetPublishedTopics().topics.
+                Select(x => new BriefTopicInfo(x.Item1, x.Item2)).ToArray()
+                );
         }
 
         /// <summary>
         /// Gets the topics published by this node.
         /// </summary>
-        public BriefTopicInfo[] SubscribedTopics =>
-            GetSubscriptionsRcp().
-            Select(x => new BriefTopicInfo(x[0], x[1])).
-            ToArray();
+        public ReadOnlyCollection<BriefTopicInfo> SubscribedTopics =>
+            new ReadOnlyCollection<BriefTopicInfo>(
+                GetSubscriptionsRcp().Select(x => new BriefTopicInfo(x[0], x[1])).ToArray());
 
 
         /// <summary>
@@ -398,10 +405,9 @@ namespace Iviz.RoslibSharp
         /// <summary>
         /// Gets the topics published by this node.
         /// </summary>
-        public BriefTopicInfo[] PublishedTopics =>
-            GetPublicationsRcp().
-            Select(x => new BriefTopicInfo(x[0], x[1])).
-            ToArray();
+        public ReadOnlyCollection<BriefTopicInfo> PublishedTopics =>
+            new ReadOnlyCollection<BriefTopicInfo>(
+                GetPublicationsRcp().Select(x => new BriefTopicInfo(x[0], x[1])).ToArray());
 
 
         internal string[][] GetSubscriptionsRcp()
@@ -462,7 +468,7 @@ namespace Iviz.RoslibSharp
         /// </summary>
         public void Close()
         {
-            Listener.Stop();
+            Listener.Close();
 
             RosPublisher[] publishers;
             lock (publishersByTopic)
@@ -513,7 +519,7 @@ namespace Iviz.RoslibSharp
                 {
                     busInfos.Add(new BusInfo(
                         busInfos.Count,
-                        receiver.RemoteUri,
+                        receiver.RemoteUri.ToString(),
                         "i", "TCPROS",
                         topic.Topic,
                         1));

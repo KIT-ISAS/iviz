@@ -4,7 +4,6 @@ using System.Linq;
 using System.Collections.Generic;
 using RosSharp.Urdf;
 using System;
-using UnityEngine.EventSystems;
 
 namespace Iviz.App
 {
@@ -32,7 +31,7 @@ namespace Iviz.App
         {
             public Resource.Module module => Resource.Module.Robot;
             public string robotName = "";
-            public string robotResource = Resource.RobotsType.Names[0];
+            public string robotResource = Resource.Robots.Names[0];
             public string framePrefix = "";
             public string frameSuffix = "";
             public bool attachToTF = false;
@@ -188,8 +187,6 @@ namespace Iviz.App
 
         void Awake()
         {
-            Resource.Materials.Initialize();
-
             gameObject.layer = Resource.ClickableLayer;
             boxCollider = GetComponent<BoxCollider>();
 
@@ -209,7 +206,7 @@ namespace Iviz.App
 
             config.robotResource = newResource;
 
-            RobotObject = ResourcePool.GetOrCreate(Resource.RobotsType.GetObject(newResource), TFListener.BaseFrame.transform);
+            RobotObject = ResourcePool.GetOrCreate(Resource.Robots.GetObject(newResource), TFListener.BaseFrame.transform);
             RobotObject.name = newResource;
 
             Name = Name; // update name;
@@ -336,7 +333,7 @@ namespace Iviz.App
 
             if (RobotObject != null)
             {
-                ResourcePool.Dispose(Resource.RobotsType.GetObject(config.robotResource), RobotObject);
+                ResourcePool.Dispose(Resource.Robots.GetObject(config.robotResource), RobotObject);
             }
             config.robotResource = null;
             RobotObject = null;

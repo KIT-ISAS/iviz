@@ -3,7 +3,6 @@ using System.Linq;
 using System.Collections.Generic;
 using System;
 using UnityEngine.EventSystems;
-using RosSharp.RosBridgeClient.MessageTypes.Std;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json;
 
@@ -136,9 +135,6 @@ namespace Iviz.App
 
         void Awake()
         {
-            Resource.Materials.Initialize();
-            Resource.Markers.Initialize();
-
             mesh = new Mesh();
             GetComponent<MeshFilter>().sharedMesh = mesh;
             meshRenderer = GetComponent<MeshRenderer>();

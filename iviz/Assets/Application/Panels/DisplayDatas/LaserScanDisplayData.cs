@@ -3,32 +3,32 @@ using UnityEngine;
 
 namespace Iviz.App
 {
-    public class PointCloudDisplayData : DisplayableListenerData
+    public class LaserScanDisplayData : DisplayableListenerData
     {
-        PointCloudListener display;
-        PointCloudPanelContents panel;
+        LaserScanListener display;
+        LaserScanPanelContents panel;
 
         public override DataPanelContents Panel => panel;
         public override DisplayableListener Display => display;
-        public override Resource.Module Module => Resource.Module.PointCloud;
+        public override Resource.Module Module => Resource.Module.LaserScan;
 
         public override DisplayData Initialize(DisplayListPanel displayList, string topic, string type)
         {
             base.Initialize(displayList, topic, type);
-            GameObject displayObject = ResourcePool.GetOrCreate(Resource.Displays.PointCloud);
-            displayObject.name = "PointCloud:" + Topic;
+            GameObject displayObject = ResourcePool.GetOrCreate(Resource.Displays.LaserScan);
+            displayObject.name = "LaserScan:" + Topic;
 
-            display = displayObject.GetComponent<PointCloudListener>();
+            display = displayObject.GetComponent<LaserScanListener>();
             display.Parent = TFListener.DisplaysFrame;
             display.Config.topic = Topic;
-            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.PointCloud) as PointCloudPanelContents;
+            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.LaserScan) as LaserScanPanelContents;
 
             return this;
         }
 
         public override DisplayData Deserialize(JToken j)
         {
-            display.Config = j.ToObject<PointCloudListener.Configuration>();
+            display.Config = j.ToObject<LaserScanListener.Configuration>();
             Topic = display.Config.topic;
             return this;
         }
@@ -54,16 +54,15 @@ namespace Iviz.App
 
             panel.Colormap.Index = (int)display.Colormap;
             panel.PointSize.Value = display.PointSize;
-            panel.IntensityChannel.Options = display.FieldNames;
-            panel.IntensityChannel.Value = display.IntensityChannel;
+            panel.IgnoreIntensity.Value = display.IgnoreIntensity;
 
+            panel.IgnoreIntensity.ValueChanged += f =>
+            {
+                display.IgnoreIntensity = f;
+            };
             panel.PointSize.ValueChanged += f =>
             {
                 display.PointSize = f;
-            };
-            panel.IntensityChannel.ValueChanged += (_, s) =>
-            {
-                display.IntensityChannel = s;
             };
             panel.Colormap.ValueChanged += (i, _) =>
             {
@@ -74,12 +73,6 @@ namespace Iviz.App
                 DataPanelManager.HideSelectedPanel();
                 DisplayListPanel.RemoveDisplay(this);
             };
-        }
-
-        public override void UpdatePanel()
-        {
-            base.UpdatePanel();
-            panel.IntensityChannel.Options = display.FieldNames;
         }
 
         public override JToken Serialize()

@@ -70,7 +70,6 @@ namespace Iviz.App
         void Start()
         {
             mainCamera = GetComponent<Camera>();
-            Resource.Markers.Initialize();
             namedBoundary = ResourcePool.GetOrCreate(Resource.Markers.NamedBoundary, transform).GetComponent<NamedBoundary>();
             StartOrbiting();
         }

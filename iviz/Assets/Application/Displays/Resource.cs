@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.Collections.ObjectModel;
@@ -20,7 +19,8 @@ namespace Iviz.App
             Marker,
             InteractiveMarker,
             JointState,
-            DepthImageProjector
+            DepthImageProjector,
+            LaserScan
         }
 
         public class Info
@@ -105,6 +105,7 @@ namespace Iviz.App
             public Info SphereSimple { get; }
             public Info MeshList { get; }
             public Info PointList { get; }
+            public Info MeshMarker { get; }
 
             public ReadOnlyDictionary<string, Info> Generic { get; }
 
@@ -121,6 +122,7 @@ namespace Iviz.App
                 SphereSimple = new Info(Resources.Load<GameObject>("Spheres/sphere-LOD1"));
                 MeshList = new Info(Resources.Load<GameObject>("Markers/MeshList"));
                 PointList = new Info(Resources.Load<GameObject>("Markers/PointList"));
+                MeshMarker = new Info(Resources.Load<GameObject>("Markers/MeshMarker"));
 
                 Generic = new ReadOnlyDictionary<string, Info>(
                     new Dictionary<string, Info>()
@@ -148,6 +150,7 @@ namespace Iviz.App
             public Info InteractiveMarker { get; }
             public Info JointState { get; }
             public Info DepthImageProjector { get; }
+            public Info LaserScan { get; }
 
             public DisplaysType()
             {
@@ -164,6 +167,7 @@ namespace Iviz.App
                 InteractiveMarker = new Info(Resources.Load<GameObject>("Displays/InteractiveMarker"));
                 JointState = new Info(Resources.Load<GameObject>("Displays/JointState"));
                 DepthImageProjector = new Info(Resources.Load<GameObject>("Displays/DepthImageProjector"));
+                LaserScan = new Info(Resources.Load<GameObject>("Displays/LaserScan"));
             }
         }
 

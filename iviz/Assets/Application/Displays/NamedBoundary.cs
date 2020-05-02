@@ -69,8 +69,6 @@ namespace Iviz.App
 
         void Awake()
         {
-            Resource.Materials.Initialize();
-
             Holder = CreateSelectionFrame();
             Holder.transform.SetParentLocal(transform);
 

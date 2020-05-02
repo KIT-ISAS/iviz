@@ -10,7 +10,6 @@
 using Newtonsoft.Json;
 
 using RosSharp.RosBridgeClient.MessageTypes.Geometry;
-using RosSharp.RosBridgeClient.MessageTypes.Tf2;
 
 namespace RosSharp.RosBridgeClient.MessageTypes.Tf2
 {

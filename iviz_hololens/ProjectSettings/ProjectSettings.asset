@@ -541,7 +541,8 @@ PlayerSettings:
     7: 
     14: DOTNETWINRT_PRESENT
   platformArchitecture: {}
-  scriptingBackend: {}
+  scriptingBackend:
+    Metro: 1
   il2cppCompilerConfiguration: {}
   managedStrippingLevel: {}
   incrementalIl2cppBuild: {}

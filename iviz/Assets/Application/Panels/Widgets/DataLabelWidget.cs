@@ -1,7 +1,4 @@
-﻿using System;
-using System.Globalization;
-using UnityEngine;
-using UnityEngine.UI;
+﻿using UnityEngine.UI;
 
 namespace Iviz.App
 {

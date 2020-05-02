@@ -1,7 +1,4 @@
 ﻿using Newtonsoft.Json.Linq;
-using System.Linq;
-using UnityEngine;
-using UnityEngine.UI;
 
 namespace Iviz.App
 {
@@ -20,6 +17,7 @@ namespace Iviz.App
                 case Resource.Module.InteractiveMarker: return new InteractiveMarkerDisplayData();
                 case Resource.Module.JointState: return new JointStateDisplayData();
                 case Resource.Module.DepthImageProjector: return new DepthImageProjectorDisplayData();
+                case Resource.Module.LaserScan: return new LaserScanDisplayData();
                 default: return null;
             }
         }

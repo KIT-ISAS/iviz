@@ -15,6 +15,7 @@ namespace Iviz.App
             { MarkerArray.RosMessageType, Resource.Module.Marker },
             { InteractiveMarkerUpdate.RosMessageType, Resource.Module.InteractiveMarker },
             { JointState.RosMessageType, Resource.Module.JointState },
+            { LaserScan.RosMessageType, Resource.Module.LaserScan },
         };
 
         public static IReadOnlyDictionary<string, Resource.Module> ResourceByRosMessageType => resourceByRosMessageType;

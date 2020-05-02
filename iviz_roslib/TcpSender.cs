@@ -14,16 +14,7 @@ using Newtonsoft.Json.Converters;
 
 namespace Iviz.RoslibSharp
 {
-    public class BufferOverflowException : Exception
-    {
-        public readonly uint missing;
-
-        public BufferOverflowException(uint missing)
-        {
-            this.missing = missing;
-        }
-    }
-
+ 
     [JsonConverter(typeof(StringEnumConverter))]
     public enum SenderStatus
     {
@@ -115,7 +106,7 @@ namespace Iviz.RoslibSharp
             task = null;
         }
 
-        List<string> ParseHeader(byte[] readBuffer)
+        static List<string> ParseHeader(byte[] readBuffer)
         {
             int numRead = 0;
 
@@ -336,7 +327,7 @@ namespace Iviz.RoslibSharp
                                 BytesSent += (int)sendLength + 4;
                             }
                             catch (Exception e) when
-                            (e is ArgumentException || e is IndexOutOfRangeException || e is BufferOverflowException)
+                            (e is ArgumentException || e is IndexOutOfRangeException)
                             {
                                 Logger.LogDebug($"{this}: {e.Message}");
                                 Logger.LogDebug(e.StackTrace);

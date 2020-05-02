@@ -15,15 +15,18 @@ namespace Iviz.RoslibSharp.XmlRpc
     {
         public FaultException() { }
         public FaultException(string message) : base(message) { }
+
+        public FaultException(string message, Exception innerException) : base(message, innerException) { }
     }
 
     public class ParseException : Exception
     {
         public ParseException() { }
         public ParseException(string message) : base(message) { }
+        public ParseException(string message, Exception innerException) : base(message, innerException) { }
     }
 
-    public readonly struct Arg
+    public class Arg
     {
         readonly string value;
 
@@ -41,7 +44,7 @@ namespace Iviz.RoslibSharp.XmlRpc
         {
             value = $"<value><i4>{f}</i4></value>\n";
         }
-        public Arg(Uri f) : this(f.ToString())
+        public Arg(Uri f) : this(f?.ToString() ?? throw new ArgumentNullException(nameof(f)))
         {
         }
         public Arg(string f)
@@ -57,7 +60,7 @@ namespace Iviz.RoslibSharp.XmlRpc
         }
         public Arg(Arg[] f)
         {
-            value = $"<value><array><data>{string.Join("", f)}</data></array></value>";
+            value = $"<value><array><data>{string.Join<Arg>("", f)}</data></array></value>";
         }
         public Arg(Arg[][] f) : this(f.Select(x => new Arg(x)).ToArray())
         {
@@ -94,9 +97,9 @@ namespace Iviz.RoslibSharp.XmlRpc
             };
             switch (primitive.Name)
             {
-                case "double": return double.Parse(primitive.InnerText);
-                case "i4": return int.Parse(primitive.InnerText);
-                case "int": return int.Parse(primitive.InnerText);
+                case "double": return double.Parse(primitive.InnerText, Utils.Culture);
+                case "i4": return int.Parse(primitive.InnerText, Utils.Culture);
+                case "int": return int.Parse(primitive.InnerText, Utils.Culture);
                 case "boolean": return primitive.InnerText == "1";
                 case "string": return primitive.InnerText;
                 case "array":
@@ -113,8 +116,13 @@ namespace Iviz.RoslibSharp.XmlRpc
             }
         }
 
-        public static object MethodCall(Uri remoteUri, Uri callerUri, string method, Arg[] args, int timeoutInMs = 3000)
+        public static object MethodCall(Uri remoteUri, Uri _, string method, Arg[] args, int timeoutInMs = 3000)
         {
+            if (args is null)
+            {
+                throw new ArgumentNullException(nameof(args));
+            }
+
             StringBuilder buffer = new StringBuilder();
             buffer.AppendLine("<?xml version=\"1.0\"?>");
             buffer.AppendLine("<methodCall>");
@@ -196,6 +204,16 @@ namespace Iviz.RoslibSharp.XmlRpc
 
         public static void MethodResponse(HttpListenerContext httpContext, Dictionary<string, Func<object[], Arg[]>> methods)
         {
+            if (httpContext is null)
+            {
+                throw new ArgumentNullException(nameof(httpContext));
+            }
+
+            if (methods is null)
+            {
+                throw new ArgumentNullException(nameof(methods));
+            }
+
             string inData;
             using (StreamReader stream = new StreamReader(httpContext.Request.InputStream, BuiltIns.UTF8))
             {

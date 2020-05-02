@@ -1,8 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-using Iviz.RoslibSharp;
-
-namespace Iviz.App
+﻿namespace Iviz.App
 {
     public abstract class DialogData
     {

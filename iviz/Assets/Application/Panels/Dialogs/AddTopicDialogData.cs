@@ -40,8 +40,8 @@ namespace Iviz.App
             var newTopics = ConnectionManager.GetSystemPublishedTopics();
             foreach (var entry in newTopics)
             {
-                string topic = entry.topic;
-                string msgType = entry.type;
+                string topic = entry.Topic;
+                string msgType = entry.Type;
                 if (!DisplayableListener.ResourceByRosMessageType.TryGetValue(msgType, out Resource.Module resource) ||
                     DisplayListPanel.DisplayedTopics.Contains(topic))
                 {

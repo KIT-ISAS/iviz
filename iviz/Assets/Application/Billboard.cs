@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
-using System.Collections;
 
-namespace Iviz.App {
+namespace Iviz.App
+{
     public class Billboard : MonoBehaviour
     {
         public Camera mainCamera;

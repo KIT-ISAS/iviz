@@ -41,7 +41,7 @@ namespace Iviz.App
                 if (!controls.TryGetValue(id, out InteractiveMarkerControlObject control))
                 {
                     control = ResourcePool.
-                        GetOrCreate(Resource.DisplaysType.InteractiveMarkerControlObject, transform).
+                        GetOrCreate(Resource.Displays.InteractiveMarkerControlObject, transform).
                         GetComponent<InteractiveMarkerControlObject>();
                     control.Parent = TFListener.DisplaysFrame;
                     control.Clicked += (pose, point, button) => Clicked?.Invoke(id, pose, point, button);
@@ -56,7 +56,7 @@ namespace Iviz.App
             {
                 InteractiveMarkerControlObject control = controls[x];
                 control.Stop();
-                ResourcePool.Dispose(Resource.DisplaysType.InteractiveMarkerControlObject, control.gameObject);
+                ResourcePool.Dispose(Resource.Displays.InteractiveMarkerControlObject, control.gameObject);
                 controls.Remove(x);
             });
 
@@ -79,7 +79,7 @@ namespace Iviz.App
             controls.Values.ForEach(control =>
             {
                 control.Stop();
-                ResourcePool.Dispose(Resource.DisplaysType.InteractiveMarkerControlObject, control.gameObject);
+                ResourcePool.Dispose(Resource.Displays.InteractiveMarkerControlObject, control.gameObject);
             });
             controls.Clear();
             controlsToDelete.Clear();

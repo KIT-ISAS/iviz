@@ -1,4 +1,8 @@
-﻿namespace Iviz.RoslibSharp
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+
+namespace Iviz.RoslibSharp
 {
     public class SubscriberReceiverState
     {
@@ -6,7 +10,7 @@
         public bool RequestNoDelay { get; }
         public string Hostname { get; }
         public int Port { get; }
-        public string RemoteUri { get; }
+        public Uri RemoteUri { get; }
         public string RemoteHostname { get; }
         public int RemotePort { get; }
         public int NumReceived { get; }
@@ -14,7 +18,7 @@
 
         internal SubscriberReceiverState(bool alive, bool requestNoDelay,
             string hostname, int port,
-            string remoteUri, string remoteHostname, int remotePort,
+            Uri remoteUri, string remoteHostname, int remotePort,
             int numReceived, int bytesReceived)
         {
             Alive = alive;
@@ -34,25 +38,25 @@
     {
         public string Topic { get; }
         public string Type { get; }
-        public string[] TopicIds { get; }
-        public SubscriberReceiverState[] Receivers { get; }
+        public ReadOnlyCollection<string> TopicIds { get; }
+        public ReadOnlyCollection<SubscriberReceiverState> Receivers { get; }
 
-        public SubscriberTopicState(string topic, string type, string[] topicIds, SubscriberReceiverState[] receivers)
+        public SubscriberTopicState(string topic, string type, IList<string> topicIds, IList<SubscriberReceiverState> receivers)
         {
             Topic = topic;
             Type = type;
-            TopicIds = topicIds;
-            Receivers = receivers;
+            TopicIds = new ReadOnlyCollection<string>(topicIds);
+            Receivers = new ReadOnlyCollection<SubscriberReceiverState>(receivers);
         }
     }
 
     public class SubscriberState
     {
-        public SubscriberTopicState[] Topics { get; }
+        public ReadOnlyCollection<SubscriberTopicState> Topics { get; }
 
         internal SubscriberState(SubscriberTopicState[] topics)
         {
-            Topics = topics;
+            Topics = new ReadOnlyCollection<SubscriberTopicState>(topics);
         }
     }
 }

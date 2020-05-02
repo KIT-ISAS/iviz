@@ -131,9 +131,6 @@ namespace Iviz.App
             mainCamera = GameObject.Find("MainCamera").GetComponent<Camera>();
             guiManager = mainCamera.GetComponent<FlyCamera>();
 
-            Resource.Materials.Initialize();
-            Resource.DisplaysType.Initialize();
-
             Config = new Configuration();
 
             BaseFrame = Add(CreateFrameObject("world", gameObject));
@@ -257,7 +254,7 @@ namespace Iviz.App
 
         TFFrame CreateFrameObject(string id, GameObject parent)
         {
-            GameObject o = ResourcePool.GetOrCreate(Resource.DisplaysType.TFFrame, parent.transform);
+            GameObject o = ResourcePool.GetOrCreate(Resource.Displays.TFFrame, parent.transform);
             o.name = id;
 
             TFFrame frame = o.GetComponent<TFFrame>();
@@ -291,7 +288,7 @@ namespace Iviz.App
             frames.Remove(frame.Id);
             GuiManager.Unselect(frame);
             frame.Parent = null;
-            ResourcePool.Dispose(Resource.DisplaysType.TFFrame, frame.gameObject);
+            ResourcePool.Dispose(Resource.Displays.TFFrame, frame.gameObject);
         }
 
         public override void Recycle()

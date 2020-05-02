@@ -9,8 +9,6 @@
 
 using Newtonsoft.Json;
 
-using RosSharp.RosBridgeClient.MessageTypes.Geometry;
-
 namespace RosSharp.RosBridgeClient.MessageTypes.Geometry
 {
     public class Inertia : Message

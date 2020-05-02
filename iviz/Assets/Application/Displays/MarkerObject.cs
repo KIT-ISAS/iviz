@@ -38,10 +38,8 @@ namespace Iviz.App
 
         void Awake()
         {
-            Resource.Markers.Initialize();
             cacheCube = Resource.Markers.Cube.GameObject.GetComponent<MeshFilter>().sharedMesh;
             cacheSphere = Resource.Markers.SphereSimple.GameObject.GetComponent<MeshFilter>().sharedMesh;
-
         }
 
         public void Set(Marker msg)
@@ -124,6 +122,11 @@ namespace Iviz.App
                     pointList.Colors = (msg.colors.Length == 0) ? null : msg.colors.Select(x => x.ToUnityColor32());
                     pointList.Points = msg.points.Select(x => x.Ros2Unity());
                     break;
+                case MarkerType.TRIANGLE_LIST:
+                    MeshMarkerResource meshMarker = resource as MeshMarkerResource;
+                    meshMarker.Color = msg.color.ToUnityColor();
+                    meshMarker.Set(msg.points.Select(x => x.Ros2Unity()).ToArray());
+                    break;
             }
         }
 
@@ -173,6 +176,8 @@ namespace Iviz.App
                     return Resource.Markers.MeshList;
                 case MarkerType.POINTS:
                     return Resource.Markers.PointList;
+                case MarkerType.TRIANGLE_LIST:
+                    return Resource.Markers.MeshMarker;
                 default:
                     return null;
             }

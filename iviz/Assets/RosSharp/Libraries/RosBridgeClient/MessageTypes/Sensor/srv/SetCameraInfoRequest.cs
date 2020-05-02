@@ -9,8 +9,6 @@
 
 using Newtonsoft.Json;
 
-using RosSharp.RosBridgeClient.MessageTypes.Sensor;
-
 namespace RosSharp.RosBridgeClient.MessageTypes.Sensor
 {
     public class SetCameraInfoRequest : Message
