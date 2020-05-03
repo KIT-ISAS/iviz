@@ -152,8 +152,8 @@ namespace Iviz.RoslibSharp
                 subscribersByTopic[topic] = subscription;
             }
 
-            XmlRpc.Master.RegisterSubscriberResponse masterResponse = Master.RegisterSubscriber(topic, topicInfo.Type);
-            manager.PublisherUpdateRpc(Talker, masterResponse.publishers);
+            XmlRpc.RegisterSubscriberResponse masterResponse = Master.RegisterSubscriber(topic, topicInfo.Type);
+            manager.PublisherUpdateRpc(Talker, masterResponse.Publishers);
 
             return subscription;
         }
@@ -189,9 +189,9 @@ namespace Iviz.RoslibSharp
 
             if (!subscriber.MessageTypeMatches(typeof(T)))
             {
-                throw new ArgumentException("Type does not match subscriber.", nameof(T));
+                throw new InvalidOperationException("Type does not match subscriber.");
             }
-
+                
             // local lambda wrapper for casting
             void wrapper(IMessage x) { callback((T)x); }
 
@@ -378,7 +378,7 @@ namespace Iviz.RoslibSharp
         public ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics()
         {
             return new ReadOnlyCollection<BriefTopicInfo>(
-                Master.GetPublishedTopics().topics.
+                Master.GetPublishedTopics().Topics.
                 Select(x => new BriefTopicInfo(x.Item1, x.Item2)).ToArray()
                 );
         }
@@ -398,8 +398,8 @@ namespace Iviz.RoslibSharp
         /// <returns>List of advertised topics, subscribed topics, and offered services, together with the involved nodes.</returns>
         public SystemState GetSystemState()
         {
-            XmlRpc.Master.GetSystemStateResponse response = Master.GetSystemState();
-            return new SystemState(response.publishers, response.subscribers, response.services);
+            XmlRpc.GetSystemStateResponse response = Master.GetSystemState();
+            return new SystemState(response.Publishers, response.Subscribers, response.Services);
         }
 
         /// <summary>
@@ -519,7 +519,7 @@ namespace Iviz.RoslibSharp
                 {
                     busInfos.Add(new BusInfo(
                         busInfos.Count,
-                        receiver.RemoteUri.ToString(),
+                        receiver.RemoteUri,
                         "i", "TCPROS",
                         topic.Topic,
                         1));
@@ -532,7 +532,7 @@ namespace Iviz.RoslibSharp
                 {
                     busInfos.Add(new BusInfo(
                         busInfos.Count,
-                        Master.LookupNode(sender.RemoteId).uri,
+                        Master.LookupNode(sender.RemoteId).Uri,
                         "o", "TCPROS",
                         topic.Topic,
                         1));
@@ -562,7 +562,7 @@ namespace Iviz.RoslibSharp
                 return serviceReceiver.Execute(service);
             }
 
-            Uri serviceUri = new Uri(Master.LookupService(serviceName).serviceUrl);
+            Uri serviceUri = Master.LookupService(serviceName).ServiceUrl;
             ServiceInfo serviceInfo = new ServiceInfo(CallerId, serviceName, typeof(T), null);
             serviceReceiver = new ServiceReceiver(serviceInfo, serviceUri, true, persistent);
             serviceReceiver.Start();
@@ -599,7 +599,7 @@ namespace Iviz.RoslibSharp
             }
 
             // local lambda wrapper for casting
-            Master.RegisterService(serviceName, advertisedService.Uri.ToString());
+            Master.RegisterService(serviceName, advertisedService.Uri);
         }
 
         public void UnadvertiseService(string name)
@@ -616,7 +616,7 @@ namespace Iviz.RoslibSharp
             }
             advertisedService.Stop();
 
-            Master.UnregisterService(name, advertisedService.Uri.ToString());
+            Master.UnregisterService(name, advertisedService.Uri);
         }
 
     }

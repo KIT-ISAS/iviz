@@ -61,16 +61,14 @@ namespace Iviz.RoslibSharp.XmlRpc
                            }
                            catch (Exception e)
                            {
-                               Logger.LogError(e.Message);
-                               Logger.LogError(e.StackTrace);
+                               Logger.LogError(e);
                            }
                        });
                     }
                 }
                 catch (Exception e)
                 {
-                    Logger.LogDebug(e.Message);
-                    Logger.LogDebug(e.StackTrace);
+                    Logger.LogDebug(e);
                 }
                 Logger.LogDebug("RcpNodeServer: Leaving thread.");
             });

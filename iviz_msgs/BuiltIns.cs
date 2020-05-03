@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
@@ -8,6 +9,8 @@ namespace Iviz.Msgs
     public unsafe static class BuiltIns
     {
         public static UTF8Encoding UTF8 { get; } = new UTF8Encoding(false);
+
+        public static CultureInfo Culture { get; } = CultureInfo.InvariantCulture;
 
         static void Memcpy(void* dst, void* src, uint size)
         {
@@ -581,6 +584,10 @@ namespace Iviz.Msgs
             if (buffer is null)
             {
                 throw new ArgumentNullException(nameof(buffer));
+            }
+            if (size > buffer.Length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(buffer));
             }
 
             fixed (byte* buffer_arrayPtr = buffer)

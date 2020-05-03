@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\iviz_msgs\iviz_msgs.csproj" />
     <ProjectReference Include="..\iviz_roslib\iviz_roslib.csproj" />
+    <ProjectReference Include="..\iviz_bridge_client\iviz_bridge_client.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.Security.Permissions" Version="4.7.0" />

@@ -97,9 +97,9 @@ namespace Iviz.RoslibSharp.XmlRpc
             };
             switch (primitive.Name)
             {
-                case "double": return double.Parse(primitive.InnerText, Utils.Culture);
-                case "i4": return int.Parse(primitive.InnerText, Utils.Culture);
-                case "int": return int.Parse(primitive.InnerText, Utils.Culture);
+                case "double": return double.Parse(primitive.InnerText, BuiltIns.Culture);
+                case "i4": return int.Parse(primitive.InnerText, BuiltIns.Culture);
+                case "int": return int.Parse(primitive.InnerText, BuiltIns.Culture);
                 case "boolean": return primitive.InnerText == "1";
                 case "string": return primitive.InnerText;
                 case "array":

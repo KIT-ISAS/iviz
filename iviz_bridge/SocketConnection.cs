@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Linq;
 using Iviz.Msgs;
 using Iviz.RoslibSharp;
 using Utf8Json;
@@ -17,16 +15,23 @@ namespace Iviz.Bridge
 
         readonly Dictionary<string, Subscription> subscriptions = new Dictionary<string, Subscription>();
         readonly Dictionary<string, Advertisement> advertisements = new Dictionary<string, Advertisement>();
-        readonly object condVar = new object();
+
+        readonly Dictionary<string, Listener> listeners = new Dictionary<string, Listener>();
+        readonly Dictionary<string, Sender> senders = new Dictionary<string, Sender>();
+
         string endPoint = "";
 
-        readonly Queue<PublishMessage> queue = new Queue<PublishMessage>();
-        readonly Task task;
-        bool keepGoing = true;
+        //readonly Queue<PublishMessage> queue = new Queue<PublishMessage>();
+        //readonly Task task;
+        //bool keepGoing = true;
+        readonly ParallelQueue<PublishMessage> queue;
+
 
         public SocketConnection()
         {
-            task = Task.Run(Run);
+            //task = Task.Run(Run);
+            queue = new ParallelQueue<PublishMessage>(Process);
+            queue.MaxSize = 3;
         }
 
         protected override void OnOpen()
@@ -71,14 +76,34 @@ namespace Iviz.Bridge
                 advertisements.Clear();
             }
 
+            lock (listeners)
+            {
+                foreach (var listener in listeners.Values)
+                {
+                    listener.Stop();
+                }
+                listeners.Clear();
+            }
+            lock (senders)
+            {
+                foreach (var sender in senders.Values)
+                {
+                    sender.Stop();
+                }
+                senders.Clear();
+            }
+
             client.RemoveConnection(this);
 
+            /*
             keepGoing = false;
             lock (condVar)
             {
                 Monitor.Pulse(condVar);
             }
             task.Wait();
+            */
+            queue.Stop();
         }
 
         protected override void OnMessage(MessageEventArgs e)
@@ -99,11 +124,12 @@ namespace Iviz.Bridge
 
                 Subscription subscription;
                 Advertisement advertisement;
+
                 GenericMessage msg = JsonSerializer.Deserialize<GenericMessage>(data);
-                switch (msg.op)
+                switch (msg.Op)
                 {
                     case "publish":
-                        if (!TryGetAdvertisement(msg.topic, out advertisement) ||
+                        if (!TryGet(advertisements, msg.Topic, out advertisement) ||
                             advertisement.publisher.NumSubscribers == 0)
                         {
                             break;
@@ -112,58 +138,98 @@ namespace Iviz.Bridge
                         advertisement.publisher.Publish(outMsg);
                         break;
                     case "subscribe":
-                        if (!TryGetSubscription(msg.topic, out subscription))
+                        if (!TryGet(subscriptions, msg.Topic, out subscription))
                         {
-                            client.types.TryGetType(msg.type, out TypeInfo typeInfo);
-                            string subscriptionId = client.rosClient.Subscribe(
-                                msg.topic,
-                                x => MessageCallback(msg.topic, x),
+                            client.Types.TryGetType(msg.Type, out TypeInfo typeInfo);
+                            string subscriptionId = client.RosClient.Subscribe(
+                                msg.Topic,
+                                x => MessageCallback(msg.Topic, x),
                                 typeInfo.msgType,
                                 out RosSubscriber subscriber,
                                 true);
                             subscription = new Subscription(
-                                msg.topic, typeInfo, subscriber, subscriptionId);
-                            AddSubscription(msg.topic, subscription);
+                                msg.Topic, typeInfo, subscriber, subscriptionId);
+                            Add(subscriptions, msg.Topic, subscription);
                         }
-                        subscription.AddId(msg.id);
+                        subscription.AddId(msg.Id);
                         break;
                     case "unsubscribe":
-                        if (TryGetSubscription(msg.topic, out subscription))
+                        if (TryGet(subscriptions, msg.Topic, out subscription))
                         {
-                            subscription.RemoveId(msg.id);
+                            subscription.RemoveId(msg.Id);
                             if (subscription.Empty())
                             {
                                 subscription.Close();
-                                RemoveSubscription(msg.topic);
+                                Remove(subscriptions, msg.Topic);
                             }
                         }
                         break;
                     case "advertise":
-                        if (!TryGetAdvertisement(msg.topic, out advertisement))
+                        if (!TryGet(advertisements, msg.Topic, out advertisement))
                         {
-                            client.types.TryGetType(msg.type, out TypeInfo typeInfo);
-                            string advertisementId = client.rosClient.Advertise(
-                                msg.topic,
+                            client.Types.TryGetType(msg.Type, out TypeInfo typeInfo);
+                            string advertisementId = client.RosClient.Advertise(
+                                msg.Topic,
                                 typeInfo.msgType,
                                 out RosPublisher publisher
                                 );
                             advertisement = new Advertisement(
-                                msg.topic, typeInfo, publisher, advertisementId);
-                            AddAdvertisement(msg.topic, advertisement);
+                                msg.Topic, typeInfo, publisher, advertisementId);
+                            Add(advertisements, msg.Topic, advertisement);
                         }
-                        advertisement.AddId(msg.id);
+                        advertisement.AddId(msg.Id);
                         break;
                     case "unadvertise":
-                        if (TryGetAdvertisement(msg.topic, out advertisement))
+                        if (TryGet(advertisements, msg.Topic, out advertisement))
                         {
-                            advertisement.RemoveId(msg.id);
+                            advertisement.RemoveId(msg.Id);
                             if (advertisement.Empty())
                             {
                                 advertisement.Close();
-                                RemoveAdvertisement(msg.topic);
+                                Remove(advertisements, msg.Topic);
                             }
                         }
                         break;
+                    case "iviz:advertise":
+                        {
+                            //Console.WriteLine("iviz:advertise");
+                            if (!TryGet(senders, msg.Topic, out Sender sender))
+                            {
+                                client.Types.TryGetType(msg.Type, out TypeInfo typeInfo);
+
+                                sender = Sender.Instantiate(typeInfo.msgType);
+                                sender.Start(client.RosClient, msg.Topic, typeInfo);
+                                Add(senders, msg.Topic, sender);
+                            }
+                            GenericResponse response = new GenericResponse()
+                            {
+                                Op = msg.Op,
+                                Id = msg.Id,
+                                Value = sender.Port.ToString()
+                            };
+                            Send(JsonSerializer.ToJsonString(response));
+                            break;
+                        }
+                    case "iviz:subscribe":
+                        {
+                            //Console.WriteLine("iviz:subscribe");
+                            if (!TryGet(listeners, msg.Topic, out Listener listener))
+                            {
+                                client.Types.TryGetType(msg.Type, out TypeInfo typeInfo);
+
+                                listener = Listener.Instantiate(typeInfo.msgType);
+                                listener.Start(client.RosClient, msg.Topic, typeInfo);
+                                Add(listeners, msg.Topic, listener);
+                            }
+                            GenericResponse response = new GenericResponse()
+                            {
+                                Op = msg.Op,
+                                Id = msg.Id,
+                                Value = listener.Port.ToString()
+                            };
+                            Send(JsonSerializer.ToJsonString(response));
+                            break;
+                        }
                 }
             }
             catch (Exception ee)
@@ -174,7 +240,7 @@ namespace Iviz.Bridge
 
         public void MessageCallback(string topic, IMessage inMsg)
         {
-            if (!TryGetSubscription(topic, out Subscription subscription))
+            if (!TryGet(subscriptions, topic, out Subscription subscription))
             {
                 return;
             }
@@ -183,6 +249,7 @@ namespace Iviz.Bridge
             msg.topic = topic;
             msg.SetMessage(inMsg);
 
+            /*
             lock (condVar)
             {
                 queue.Enqueue(msg);
@@ -192,8 +259,49 @@ namespace Iviz.Bridge
                 }
                 Monitor.Pulse(condVar);
             }
+            */
+            queue.Enqueue(msg);
         }
 
+        public void Cleanup()
+        {
+            lock (listeners)
+            {
+                foreach (var listener in listeners.Values)
+                {
+                    listener.Cleanup();
+                }
+                var empties = listeners.Where(x => !x.Value.IsAlive);
+                if (empties.Any())
+                {
+                    var deads = empties.ToArray();
+                    foreach (var dead in deads)
+                    {
+                        dead.Value.Stop();
+                        listeners.Remove(dead.Key);
+                    }
+                }
+            }
+            lock (senders)
+            {
+                foreach (var sender in senders.Values)
+                {
+                    sender.Cleanup();
+                }
+                var empties = senders.Where(x => !x.Value.IsAlive);
+                if (empties.Any())
+                {
+                    var deads = empties.ToArray();
+                    foreach (var dead in deads)
+                    {
+                        dead.Value.Stop();
+                        senders.Remove(dead.Key);
+                    }
+                }
+            }
+        }
+
+        /*
         void Run()
         {
             try
@@ -221,56 +329,38 @@ namespace Iviz.Bridge
             }
             catch (Exception e)
             {
-                Console.Error.WriteLine(e.Message);
-                Console.Error.WriteLine(e.StackTrace);
+                Console.Error.WriteLine(e);
+            }
+        }
+        */
+        bool Process(PublishMessage msg)
+        {
+            Send(msg.Serialize());
+            return true;
+        }
+
+
+        static bool TryGet<T>(Dictionary<string, T> dict, string topic, out T t)
+        {
+            lock (dict)
+            {
+                return dict.TryGetValue(topic, out t);
             }
         }
 
-        bool TryGetSubscription(string topic, out Subscription subscription)
+        static void Add<T>(Dictionary<string, T> dict, string topic, T t)
         {
-            lock (subscriptions)
+            lock (dict)
             {
-                return subscriptions.TryGetValue(topic, out subscription);
+                dict.Add(topic, t);
             }
         }
 
-        bool TryGetAdvertisement(string topic, out Advertisement advertisement)
+        static bool Remove<T>(Dictionary<string, T> dict, string topic)
         {
-            lock (subscriptions)
+            lock (dict)
             {
-                return advertisements.TryGetValue(topic, out advertisement);
-            }
-        }
-
-        void AddSubscription(string topic, Subscription subscription)
-        {
-            lock (subscriptions)
-            {
-                subscriptions.Add(topic, subscription);
-            }
-        }
-
-        void AddAdvertisement(string topic, Advertisement advertisement)
-        {
-            lock (advertisements)
-            {
-                advertisements.Add(topic, advertisement);
-            }
-        }
-
-        void RemoveSubscription(string topic)
-        {
-            lock (subscriptions)
-            {
-                subscriptions.Remove(topic);
-            }
-        }
-
-        void RemoveAdvertisement(string topic)
-        {
-            lock (advertisements)
-            {
-                advertisements.Remove(topic);
+                return dict.Remove(topic);
             }
         }
     }

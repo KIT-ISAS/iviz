@@ -1,15 +1,17 @@
-﻿namespace Iviz.RoslibSharp
+﻿using System;
+
+namespace Iviz.RoslibSharp
 {
     class BusInfo : JsonToString
     {
         public int ConnectionId { get; }
-        public string DestinationId { get; }
+        public Uri DestinationId { get; }
         public string Direction { get; }
         public string Transport { get; }
         public string Topic { get; }
         public int Connected { get; }
 
-        public BusInfo(int id, string destinationId, string direction, string transport, string topic, int status)
+        public BusInfo(int id, Uri destinationId, string direction, string transport, string topic, int status)
         {
             ConnectionId = id;
             DestinationId = destinationId;

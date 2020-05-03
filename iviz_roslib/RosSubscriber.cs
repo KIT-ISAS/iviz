@@ -92,7 +92,6 @@ namespace Iviz.RoslibSharp
         public string Subscribe(Action<IMessage> callback)
         {
             AssertIsAlive();
-            string id = GenerateId();
 
 #if DEBUG__
             Logger.LogDebug($"{this}: Subscribing to '{Topic}' with type '{TopicType}'");
@@ -100,10 +99,11 @@ namespace Iviz.RoslibSharp
 
             lock (CallbackList)
             {
+                string id = GenerateId();
                 Ids.Add(id);
                 CallbackList.Add(callback);
+                return id;
             }
-            return id;
         }
 
         public bool ContainsId(string id)

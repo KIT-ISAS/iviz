@@ -9,8 +9,8 @@ namespace Iviz.Bridge
 {
     class RosBridge
     {
-        public readonly RosClient rosClient;
-        public readonly TypeDictionary types = new TypeDictionary();
+        public RosClient RosClient { get; }
+        public TypeDictionary Types { get; } = new TypeDictionary();
         readonly WebSocketServer server;
         readonly HashSet<SocketConnection> connections = new HashSet<SocketConnection>();
         volatile bool keepGoing;
@@ -18,7 +18,7 @@ namespace Iviz.Bridge
         public RosBridge(RosClient rosClient, string websocketUrl)
         {
             SocketConnection.client = this;
-            this.rosClient = rosClient;
+            RosClient = rosClient;
             
             Logger.Log("Bridge: Starting with url '" + websocketUrl + "'");
 
@@ -45,17 +45,29 @@ namespace Iviz.Bridge
 
         public void Run()
         {
-            rosClient.ShutdownAction = OnShutdownActionCall;
+            RosClient.ShutdownAction = OnShutdownActionCall;
             Console.CancelKeyPress += Console_CancelKeyPress;
 
             keepGoing = true;
             while (keepGoing)
             {
                 Thread.Sleep(1000);
+                Cleanup();
             }
 
             server.Stop();
-            rosClient.Close();
+            RosClient.Close();
+        }
+
+        void Cleanup()
+        {
+            lock (connections)
+            {
+                foreach (SocketConnection connection in connections)
+                {
+                    connection.Cleanup();
+                }
+            }
         }
 
         public void AddConnection(SocketConnection connection)

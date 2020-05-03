@@ -1,5 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+
+using TopicTuple = System.Tuple<string, string>;
+using TopicTuples = System.Tuple<string, string[]>;
 
 namespace Iviz.RoslibSharp.XmlRpc
 {
@@ -12,199 +17,6 @@ namespace Iviz.RoslibSharp.XmlRpc
 
     public class Master
     {
-        public readonly struct GetSystemStateResponse
-        {
-            public readonly StatusCode code;
-            public readonly string statusMessage;
-
-            public readonly Tuple<string, string[]>[] publishers;
-            public readonly Tuple<string, string[]>[] subscribers;
-            public readonly Tuple<string, string[]>[] services;
-
-            public GetSystemStateResponse(object[] a)
-            {
-                code = (StatusCode)a[0];
-                statusMessage = (string)a[1];
-
-
-                object[] root = (object[])a[2];
-                publishers = CreateTuple(root[0]);
-                subscribers = CreateTuple(root[1]);
-                services = CreateTuple(root[2]);
-            }
-
-            static Tuple<string, string[]>[] CreateTuple(object root)
-            {
-                object[] list = (object[])root;
-                Tuple<string, string[]>[] result = new Tuple<string, string[]>[list.Length];
-                for (int i = 0; i < list.Length; i++)
-                {
-                    object[] tuple = (object[])list[i];
-                    string topic = (string)tuple[0];
-                    string[] members = ((object[])tuple[1]).Cast<string>().ToArray();
-                    result[i] = Tuple.Create(topic, members);
-                }
-                return result;
-            }
-        }
-
-        public readonly struct GetUriResponse
-        {
-            public readonly StatusCode code;
-            public readonly string statusMessage;
-            public readonly string uri;
-
-            public GetUriResponse(object[] a)
-            {
-                code = (StatusCode)a[0];
-                statusMessage = (string)a[1];
-                uri = (string)a[2];
-            }
-        }
-
-        public readonly struct LookupNodeResponse
-        {
-            public readonly StatusCode code;
-            public readonly string statusMessage;
-            public readonly string uri;
-
-            public LookupNodeResponse(object[] a)
-            {
-                code = (StatusCode)a[0];
-                statusMessage = (string)a[1];
-                uri = (string)a[2];
-            }
-        }
-
-        public readonly struct GetPublishedTopicsResponse
-        {
-            public readonly StatusCode code;
-            public readonly string statusMessage;
-            public readonly Tuple<string, string>[] topics;
-
-            public GetPublishedTopicsResponse(object[] a)
-            {
-                code = (StatusCode)a[0];
-                statusMessage = (string)a[1];
-                object[] tmp = (object[])a[2];
-                topics = new Tuple<string, string>[tmp.Length];
-                for (int i = 0; i < topics.Length; i++)
-                {
-                    object[] topic = (object[])tmp[i];
-                    topics[i] = Tuple.Create((string)topic[0], (string)topic[1]);
-                }
-            }
-        }
-
-        public readonly struct RegisterSubscriberResponse
-        {
-            public readonly StatusCode code;
-            public readonly string statusMessage;
-            public readonly Uri[] publishers;
-
-            public RegisterSubscriberResponse(object[] a)
-            {
-                code = (StatusCode)a[0];
-                statusMessage = (string)a[1];
-                object[] tmp = (object[])a[2];
-                publishers = new Uri[tmp.Length];
-                for (int i = 0; i < publishers.Length; i++)
-                {
-                    if (!Uri.TryCreate((string)tmp[i], UriKind.Absolute, out publishers[i]))
-                    {
-                        Logger.Log($"RcpMaster: Invalid uri '{tmp[i]}'");
-                    }
-                }
-            }
-        }
-
-        public readonly struct UnregisterSubscriberResponse
-        {
-            public readonly StatusCode code;
-            public readonly string statusMessage;
-            public readonly int numUnsubscribed;
-
-            public UnregisterSubscriberResponse(object[] a)
-            {
-                code = (StatusCode)a[0];
-                statusMessage = (string)a[1];
-                numUnsubscribed = (int)a[2];
-            }
-        }
-
-        public readonly struct RegisterPublisherResponse
-        {
-            public readonly StatusCode code;
-            public readonly string statusMessage;
-            public readonly string[] subscribers;
-
-            public RegisterPublisherResponse(object[] a)
-            {
-                code = (StatusCode)a[0];
-                statusMessage = (string)a[1];
-                object[] tmp = (object[])a[2];
-                subscribers = new string[tmp.Length];
-                for (int i = 0; i < subscribers.Length; i++)
-                {
-                    subscribers[i] = (string)tmp[i];
-                }
-            }
-        }
-
-        public readonly struct UnregisterPublisherResponse
-        {
-            public readonly StatusCode code;
-            public readonly string statusMessage;
-            public readonly int numUnregistered;
-
-            public UnregisterPublisherResponse(object[] a)
-            {
-                code = (StatusCode)a[0];
-                statusMessage = (string)a[1];
-                numUnregistered = (int)a[2];
-            }
-        }
-
-        public readonly struct LookupServiceResponse
-        {
-            public readonly StatusCode code;
-            public readonly string statusMessage;
-            public readonly string serviceUrl;
-
-            public LookupServiceResponse(object[] a)
-            {
-                code = (StatusCode)a[0];
-                statusMessage = (string)a[1];
-                serviceUrl = (string)a[2];
-            }
-        }
-
-        public readonly struct RegisterServiceResponse
-        {
-            public readonly StatusCode code;
-            public readonly string statusMessage;
-
-            public RegisterServiceResponse(object[] a)
-            {
-                code = (StatusCode)a[0];
-                statusMessage = (string)a[1];
-            }
-        }
-
-        public readonly struct UnregisterServiceResponse
-        {
-            public readonly StatusCode code;
-            public readonly string statusMessage;
-            public readonly int numUnregistered;
-
-            public UnregisterServiceResponse(object[] a)
-            {
-                code = (StatusCode)a[0];
-                statusMessage = (string)a[1];
-                numUnregistered = (int)a[2];
-            }
-        }
-
         public Uri MasterUri { get; }
         public Uri CallerUri { get; }
         readonly string CallerId;
@@ -308,7 +120,7 @@ namespace Iviz.RoslibSharp.XmlRpc
             return new LookupServiceResponse((object[])response);
         }
 
-        public RegisterServiceResponse RegisterService(string service, string rosRpcUri)
+        public RegisterServiceResponse RegisterService(string service, Uri rosRpcUri)
         {
             Arg[] args = {
                 new Arg(CallerId),
@@ -320,7 +132,7 @@ namespace Iviz.RoslibSharp.XmlRpc
             return new RegisterServiceResponse((object[])response);
         }
 
-        public UnregisterServiceResponse UnregisterService(string service, string rosRpcUri)
+        public UnregisterServiceResponse UnregisterService(string service, Uri rosRpcUri)
         {
             Arg[] args = {
                 new Arg(CallerId),
@@ -331,4 +143,203 @@ namespace Iviz.RoslibSharp.XmlRpc
             return new UnregisterServiceResponse((object[])response);
         }
     }
+
+    public class GetSystemStateResponse
+    {
+        public StatusCode Code { get; }
+        public string StatusMessage { get; }
+
+        public ReadOnlyCollection<TopicTuples> Publishers { get; }
+        public ReadOnlyCollection<TopicTuples> Subscribers { get; }
+        public ReadOnlyCollection<TopicTuples> Services { get; }
+
+        internal GetSystemStateResponse(object[] a)
+        {
+            Code = (StatusCode)a[0];
+            StatusMessage = (string)a[1];
+
+
+            object[] root = (object[])a[2];
+            Publishers = CreateTuple(root[0]);
+            Subscribers = CreateTuple(root[1]);
+            Services = CreateTuple(root[2]);
+        }
+
+        static ReadOnlyCollection<TopicTuples> CreateTuple(object root)
+        {
+            object[] list = (object[])root;
+            TopicTuples[] result = new TopicTuples[list.Length];
+            for (int i = 0; i < list.Length; i++)
+            {
+                object[] tuple = (object[])list[i];
+                string topic = (string)tuple[0];
+                string[] members = ((object[])tuple[1]).Cast<string>().ToArray();
+                result[i] = Tuple.Create(topic, members);
+            }
+            return new ReadOnlyCollection<TopicTuples>(result);
+        }
+    }
+
+    public class GetUriResponse
+    {
+        public StatusCode Code { get; }
+        public string StatusMessage { get; }
+        public Uri Uri { get; }
+
+        internal GetUriResponse(object[] a)
+        {
+            Code = (StatusCode)a[0];
+            StatusMessage = (string)a[1];
+            Uri = new Uri((string)a[2]);
+        }
+    }
+
+    public class LookupNodeResponse
+    {
+        public StatusCode Code { get; }
+        public string StatusMessage { get; }
+        public Uri Uri { get; }
+
+        internal LookupNodeResponse(object[] a)
+        {
+            Code = (StatusCode)a[0];
+            StatusMessage = (string)a[1];
+            Uri = new Uri((string)a[2]);
+        }
+    }
+
+    public class GetPublishedTopicsResponse
+    {
+        public StatusCode Code { get; }
+        public string StatusMessage { get; }
+        public ReadOnlyCollection<TopicTuple> Topics { get; }
+
+        internal GetPublishedTopicsResponse(object[] a)
+        {
+            Code = (StatusCode)a[0];
+            StatusMessage = (string)a[1];
+            object[] tmp = (object[])a[2];
+
+            TopicTuple[] topics = new TopicTuple[tmp.Length];
+            for (int i = 0; i < topics.Length; i++)
+            {
+                object[] topic = (object[])tmp[i];
+                topics[i] = Tuple.Create((string)topic[0], (string)topic[1]);
+            }
+            Topics = new ReadOnlyCollection<TopicTuple>(topics);
+        }
+    }
+
+    public class RegisterSubscriberResponse
+    {
+        public StatusCode Code { get; }
+        public string StatusMessage { get; }
+        public ReadOnlyCollection<Uri> Publishers { get; }
+
+        internal RegisterSubscriberResponse(object[] a)
+        {
+            Code = (StatusCode)a[0];
+            StatusMessage = (string)a[1];
+            object[] tmp = (object[])a[2];
+            Uri[] publishers = new Uri[tmp.Length];
+            for (int i = 0; i < publishers.Length; i++)
+            {
+                if (!Uri.TryCreate((string)tmp[i], UriKind.Absolute, out publishers[i]))
+                {
+                    Logger.Log($"RcpMaster: Invalid uri '{tmp[i]}'");
+                }
+            }
+            Publishers = new ReadOnlyCollection<Uri>(publishers);
+        }
+    }
+
+    public class UnregisterSubscriberResponse
+    {
+        public StatusCode Code { get; }
+        public string StatusMessage { get; }
+        public int NumUnsubscribed { get; }
+
+        internal UnregisterSubscriberResponse(object[] a)
+        {
+            Code = (StatusCode)a[0];
+            StatusMessage = (string)a[1];
+            NumUnsubscribed = (int)a[2];
+        }
+    }
+
+    public class RegisterPublisherResponse
+    {
+        public StatusCode Code { get; }
+        public string StatusMessage { get; }
+        public ReadOnlyCollection<string> Subscribers { get; }
+
+        internal RegisterPublisherResponse(object[] a)
+        {
+            Code = (StatusCode)a[0];
+            StatusMessage = (string)a[1];
+            object[] tmp = (object[])a[2];
+            string[] subscribers = new string[tmp.Length];
+            for (int i = 0; i < subscribers.Length; i++)
+            {
+                subscribers[i] = (string)tmp[i];
+            }
+            Subscribers = new ReadOnlyCollection<string>(subscribers);
+        }
+    }
+
+    public class UnregisterPublisherResponse
+    {
+        public StatusCode Code { get; }
+        public string StatusMessage { get; }
+        public int NumUnregistered { get; }
+
+        internal UnregisterPublisherResponse(object[] a)
+        {
+            Code = (StatusCode)a[0];
+            StatusMessage = (string)a[1];
+            NumUnregistered = (int)a[2];
+        }
+    }
+
+    public class LookupServiceResponse
+    {
+        public StatusCode Code { get; }
+        public string StatusMessage { get; }
+        public Uri ServiceUrl { get; }
+
+        internal LookupServiceResponse(object[] a)
+        {
+            Code = (StatusCode)a[0];
+            StatusMessage = (string)a[1];
+            ServiceUrl = new Uri((string)a[2]);
+        }
+    }
+
+    public class RegisterServiceResponse
+    {
+        public StatusCode Code { get; }
+        public string StatusMessage { get; }
+
+        internal RegisterServiceResponse(object[] a)
+        {
+            Code = (StatusCode)a[0];
+            StatusMessage = (string)a[1];
+        }
+    }
+
+    public class UnregisterServiceResponse
+    {
+        public StatusCode Code { get; }
+        public string StatusMessage { get; }
+        public int NumUnregistered { get; }
+
+        internal UnregisterServiceResponse(object[] a)
+        {
+            Code = (StatusCode)a[0];
+            StatusMessage = (string)a[1];
+            NumUnregistered = (int)a[2];
+        }
+    }
+
+
 }

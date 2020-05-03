@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using System.Threading;
+using Iviz.Bridge.Client;
 using Iviz.Msgs.geometry_msgs;
 using Iviz.Msgs.rosapi;
 using Iviz.Msgs.rosbridge_library;
@@ -14,6 +15,45 @@ namespace iviz_test
     class Program
     {
         static void Main(string[] args)
+        {
+            BridgeClient client = new BridgeClient("ws://192.168.0.157:8080");
+
+            TransformStamped[] tfs = new TransformStamped[1];
+            tfs[0] = new TransformStamped
+            {
+                transform = new Transform
+                {
+                    translation = new Vector3
+                    {
+                        x = 0,
+                        y = 0,
+                        z = 1
+                    },
+                    rotation = new Quaternion
+                    {
+                        x = 0,
+                        y = 0,
+                        z = 0,
+                        w = 1
+                    }
+                }
+            };
+            TFMessage tf = new TFMessage
+            {
+                transforms = tfs
+            };
+
+            BridgePublisher<TFMessage> publisher = client.Advertise<TFMessage>("/tf");
+
+            while (true)
+            {
+                publisher.Publish(tf);
+                //Console.WriteLine(">> " + tf.ToJsonString());
+                Thread.Sleep(1000);
+            }
+        }
+
+        static void Main_Old(string[] args)
         {
             RosClient client = new RosClient(
                 //"http://192.168.0.73:11311",

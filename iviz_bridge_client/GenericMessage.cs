@@ -1,7 +1,6 @@
-﻿using System;
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 
-namespace Iviz.Bridge
+namespace Iviz.Bridge.Client
 {
     [DataContract]
     public sealed class GenericMessage

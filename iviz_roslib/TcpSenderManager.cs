@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -138,19 +139,21 @@ namespace Iviz.RoslibSharp
             }
         }
 
-        public PublisherSenderState[] GetStates()
+        public ReadOnlyCollection<PublisherSenderState> GetStates()
         {
             lock (connectionsByCallerId)
             {
-                return connectionsByCallerId.Values.Select(x => x.GetState()).ToArray();
+                return new ReadOnlyCollection<PublisherSenderState>(
+                    connectionsByCallerId.Values.Select(x => x.State).ToArray()
+                    );
             }
         }
 
-        public IReadOnlyDictionary<string, TcpSender> GetConnections()
+        public ReadOnlyDictionary<string, TcpSender> GetConnections()
         {
             lock (connectionsByCallerId)
             {
-                return new Dictionary<string, TcpSender>(connectionsByCallerId);
+                return new ReadOnlyDictionary<string, TcpSender>(connectionsByCallerId);
             }
         }
 

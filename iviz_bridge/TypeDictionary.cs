@@ -20,13 +20,6 @@ namespace Iviz.Bridge
                 string rosType = BuiltIns.GetMessageType(messageType);
                 types.Add(rosType, messageType);
             }
-            /*
-            foreach (Type messageType in messageTypes)
-            {
-                string rosType = BuiltIns.GetMessageType(messageType);
-                typeInfos.Add(rosType, new TypeInfo(rosType, messageType));
-            }
-            */
         }
 
         bool IsMessageType(Type type)

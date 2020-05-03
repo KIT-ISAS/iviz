@@ -61,7 +61,7 @@ namespace Iviz.RoslibSharp
             connection.Start();
         }
 
-        public void PublisherUpdateRpc(XmlRpc.NodeClient talker, Uri[] publisherUris)
+        public void PublisherUpdateRpc(XmlRpc.NodeClient talker, IList<Uri> publisherUris)
         {
             Uri[] toAdd;
             lock (connectionsByUri)

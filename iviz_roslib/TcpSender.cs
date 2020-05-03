@@ -14,7 +14,7 @@ using Newtonsoft.Json.Converters;
 
 namespace Iviz.RoslibSharp
 {
- 
+
     [JsonConverter(typeof(StringEnumConverter))]
     public enum SenderStatus
     {
@@ -329,8 +329,7 @@ namespace Iviz.RoslibSharp
                             catch (Exception e) when
                             (e is ArgumentException || e is IndexOutOfRangeException)
                             {
-                                Logger.LogDebug($"{this}: {e.Message}");
-                                Logger.LogDebug(e.StackTrace);
+                                Logger.LogDebug($"{this}: {e}");
                             }
                         }
                     }
@@ -338,13 +337,11 @@ namespace Iviz.RoslibSharp
             }
             catch (IOException e)
             {
-                Logger.LogDebug($"{this}: {e.Message}");
-                Logger.LogDebug(e.StackTrace);
+                Logger.LogDebug($"{this}: {e}");
             }
             catch (Exception e)
             {
-                Logger.LogError($"{this}: {e.Message}");
-                Logger.LogError(e.StackTrace);
+                Logger.LogError($"{this}: {e}");
             }
             Status = SenderStatus.Dead;
             tcpClient = null;
@@ -370,14 +367,12 @@ namespace Iviz.RoslibSharp
             }
         }
 
-        public PublisherSenderState GetState()
-        {
-            return new PublisherSenderState(
+        public PublisherSenderState State =>
+            new PublisherSenderState(
                 IsAlive, Latching, Status,
                 Hostname, Port, RemoteCallerId, RemoteHostname, RemotePort,
                 CurrentQueueSize, MaxQueueSize, NumSent, BytesSent, NumDropped
             );
-        }
 
         public override string ToString()
         {

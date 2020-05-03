@@ -29,7 +29,6 @@ namespace Iviz.RoslibSharp
 
     public static class Utils
     {
-        public static CultureInfo Culture { get; } = CultureInfo.InvariantCulture;
 
         public static void ForEach<T>(this IEnumerable<T> ts, Action<T> action)
         {
