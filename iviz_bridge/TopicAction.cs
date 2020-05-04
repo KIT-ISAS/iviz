@@ -44,7 +44,7 @@ namespace Iviz.Bridge
             this.subscriber = subscriber;
         }
 
-        public void Close()
+        public void Stop()
         {
             subscriber.Unsubscribe(topicId);
         }
@@ -65,7 +65,7 @@ namespace Iviz.Bridge
             this.publisher = publisher;
         }
 
-        public void Close()
+        public void Stop()
         {
             publisher.Unadvertise(topicId);
         }

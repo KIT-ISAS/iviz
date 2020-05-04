@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Iviz.App
 {
-    public class MeshListResource : MarkerResource
+    public class TriangleListResource : MarkerResource
     {
         Material material;
         BoxCollider boxCollider;

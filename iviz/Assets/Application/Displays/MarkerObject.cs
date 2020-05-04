@@ -102,7 +102,7 @@ namespace Iviz.App
                     break;
                 case MarkerType.CUBE_LIST:
                 case MarkerType.SPHERE_LIST:
-                    MeshListResource meshList = resource as MeshListResource;
+                    TriangleListResource meshList = resource as TriangleListResource;
                     meshList.Mesh = (msg.Type() == MarkerType.CUBE_LIST) ? cacheCube : cacheSphere;
                     meshList.SetSize(msg.points.Length);
                     meshList.Scale = msg.scale.Ros2Unity().Abs();
@@ -123,8 +123,8 @@ namespace Iviz.App
                     pointList.Points = msg.points.Select(x => x.Ros2Unity());
                     break;
                 case MarkerType.TRIANGLE_LIST:
-                    MeshMarkerResource meshMarker = resource as MeshMarkerResource;
-                    meshMarker.Color = msg.color.ToUnityColor();
+                    MeshTrianglesResource meshMarker = resource as MeshTrianglesResource;
+                    meshMarker.Color = Color.white ;// msg.color.ToUnityColor();
                     meshMarker.Set(msg.points.Select(x => x.Ros2Unity()).ToArray());
                     break;
             }
@@ -177,7 +177,7 @@ namespace Iviz.App
                 case MarkerType.POINTS:
                     return Resource.Markers.PointList;
                 case MarkerType.TRIANGLE_LIST:
-                    return Resource.Markers.MeshMarker;
+                    return Resource.Markers.MeshTriangles;
                 default:
                     return null;
             }

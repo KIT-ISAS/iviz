@@ -8,11 +8,8 @@ using Iviz.Msgs;
 
 namespace Iviz.RoslibSharp
 {
-    public class RosClient
+    public sealed class RosClient : IDisposable
     {
-        public string CallerId { get; }
-        public XmlRpc.Master Master { get; }
-
         internal readonly XmlRpc.NodeClient Talker;
         internal readonly XmlRpc.NodeServer Listener;
 
@@ -39,6 +36,16 @@ namespace Iviz.RoslibSharp
         /// Handler of 'paramUpdate' XMLRPC calls from the slave API
         /// </summary>
         public ParamUpdateActionCall ParamUpdateAction { get; set; }
+
+        /// <summary>
+        /// ID of this node.
+        /// </summary>
+        public string CallerId { get; }
+
+        /// <summary>
+        /// Wrapper for XML-RPC calls to the master.
+        /// </summary>
+        public XmlRpc.Master Master { get; }
 
         /// <summary>
         /// URI of the master node.
@@ -95,13 +102,14 @@ namespace Iviz.RoslibSharp
             }
             catch (HttpListenerException e)
             {
+                Listener.Stop();
                 throw new ArgumentException($"RosClient: Failed to bind to local URI '{callerUri}'", nameof(callerUri), e);
             }
 
             Master = new XmlRpc.Master(masterUri, CallerId, CallerUri);
             Talker = new XmlRpc.NodeClient(CallerId, CallerUri);
 
-            Logger.Log($"Starting: My id is {CallerId}, my uri is {CallerUri}, and I'm talking to {MasterUri}");
+            Logger.Log($"RosClient: Starting: My id is {CallerId}, my uri is {CallerUri}, and I'm talking to {MasterUri}");
 
             try
             {
@@ -111,9 +119,10 @@ namespace Iviz.RoslibSharp
             }
             catch (WebException e)
             {
-                Listener.Close();
+                Listener.Stop();
                 throw new ArgumentException($"RosClient: Failed to contact the master URI '{masterUri}'", nameof(masterUri), e);
             }
+            Logger.Log("RosClient: Initialized.");
         }
 
         /// <summary>
@@ -468,7 +477,7 @@ namespace Iviz.RoslibSharp
         /// </summary>
         public void Close()
         {
-            Listener.Close();
+            Listener.Stop();
 
             RosPublisher[] publishers;
             lock (publishersByTopic)
@@ -489,11 +498,13 @@ namespace Iviz.RoslibSharp
             lock (subscribedServicesByName)
             {
                 subscribedServicesByName.ForEach(x => x.Value.Stop());
+                subscribedServicesByName.Clear();
             }
 
             lock (advertisedServicesByName)
             {
                 advertisedServicesByName.ForEach(x => x.Value.Stop());
+                advertisedServicesByName.Clear();
             }
         }
 
@@ -619,5 +630,10 @@ namespace Iviz.RoslibSharp
             Master.UnregisterService(name, advertisedService.Uri);
         }
 
+        public void Dispose()
+        {
+            Close();
+            Listener.Dispose();
+        }
     }
 }

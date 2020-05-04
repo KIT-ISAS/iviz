@@ -143,7 +143,7 @@ namespace Iviz.Bridge
         readonly string id;
         readonly TcpClient client;
         readonly BinaryWriter writer;
-        byte[] buffer = new byte[0];
+        byte[] buffer = Array.Empty<byte>();
 
         readonly ParallelQueue<T> queue;
 

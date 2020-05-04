@@ -1,16 +1,29 @@
-﻿using Iviz.Msgs.visualization_msgs;
+﻿using Iviz.Msgs.sensor_msgs;
+using Iviz.Msgs.tf2_msgs;
+using Iviz.Msgs.visualization_msgs;
 using Iviz.RoslibSharp;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.XR.WSA;
 
 public class RosNode : MonoBehaviour
 {
     SurfaceObserver surfaceObserver;
-    const string topic = "/hololens/environment";
-    RosPublisher publisher;
+
+    const string markerTopic = "/hololens/environment";
+    RosPublisher markerPublisher;
+
+    const string tfTopic = "/tf";
+    RosPublisher tfPublisher;
+
+    const string imageTopic = "/hololens/image_color";
+    RosPublisher imagePublisher;
+
+    WebCamTexture texture;
 
     void Start()
     {
@@ -23,14 +36,17 @@ public class RosNode : MonoBehaviour
             "http://141.3.59.140:9014"
             );
 
-        Debug.Log(client.CallerUri);
-        Debug.Log(client.MasterUri);
-
-        client.Advertise<Marker>(topic, out publisher);
+        client.Advertise<Marker>(markerTopic, out markerPublisher);
+        client.Advertise<TFMessage>(tfTopic, out tfPublisher);
+        client.Advertise<Image>(imageTopic, out imagePublisher);
 
         surfaceObserver = new SurfaceObserver();
-        surfaceObserver.SetVolumeAsAxisAlignedBox(Vector3.zero, new Vector3(10, 3, 10));
+        surfaceObserver.SetVolumeAsAxisAlignedBox(Vector3.zero, new Vector3(20, 20, 20));
         StartCoroutine(UpdateLoop());
+
+        texture = new WebCamTexture(1280, 720, 15);
+        texture.Play();
+        StartCoroutine(ImageLoop());
     }
 
     IEnumerator UpdateLoop()
@@ -42,12 +58,22 @@ public class RosNode : MonoBehaviour
             yield return wait;
         }
     }
-    
+
     readonly Dictionary<SurfaceId, GameObject> spatialMeshObjects = new Dictionary<SurfaceId, GameObject>();
 
     static Iviz.Msgs.geometry_msgs.Point ToRos(Vector3 v)
     {
         return new Iviz.Msgs.geometry_msgs.Point
+        {
+            x = v.z,
+            y = -v.x,
+            z = v.y
+        };
+    }
+
+    static Iviz.Msgs.geometry_msgs.Vector3 ToRosVector(Vector3 v)
+    {
+        return new Iviz.Msgs.geometry_msgs.Vector3
         {
             x = v.z,
             y = -v.x,
@@ -75,12 +101,19 @@ public class RosNode : MonoBehaviour
         };
     }
 
+    static Iviz.Msgs.geometry_msgs.Transform ToRosTransform(Transform t)
+    {
+        return new Iviz.Msgs.geometry_msgs.Transform
+        {
+            rotation = ToRos(t.rotation),
+            translation = ToRosVector(t.position)
+        };
+    }
+
     static readonly Iviz.Msgs.geometry_msgs.Vector3 One = new Iviz.Msgs.geometry_msgs.Vector3 { x = 1, y = 1, z = 1 };
     readonly List<Iviz.Msgs.geometry_msgs.Point> points = new List<Iviz.Msgs.geometry_msgs.Point>();
 
-    uint seq = 0;
-
-
+    uint markerSeq = 0;
     void OnSurfaceChanged(SurfaceId surfaceId, SurfaceChange changeType, Bounds bounds, System.DateTime updateTime)
     {
         switch (changeType)
@@ -143,11 +176,12 @@ public class RosNode : MonoBehaviour
                     ns = "",
                     header = new Iviz.Msgs.std_msgs.Header
                     {
-                        seq = seq++,
-                        frame_id = "/base_link"
+                        seq = markerSeq++,
+                        frame_id = "base_link"
                     },
+                    color = new Iviz.Msgs.std_msgs.ColorRGBA { r = 255, g = 255, b = 255, a = 255 }
                 };
-                publisher.Publish(marker);
+                markerPublisher.Publish(marker);
 
                 break;
             case SurfaceChange.Removed:
@@ -158,6 +192,15 @@ public class RosNode : MonoBehaviour
                 {
                     GameObject.Destroy(obj);
                 }
+                Marker del = new Marker()
+                {
+                    points = points.ToArray(),
+                    action = Marker.DELETE,
+                    id = surfaceId.handle,
+                    ns = "",
+                };
+                markerPublisher.Publish(del);
+
                 break;
             default:
                 break;
@@ -170,8 +213,96 @@ public class RosNode : MonoBehaviour
     }
 
 
-    // Update is called once per frame
+    uint tfSeq = 0;
     void Update()
     {
+        Iviz.Msgs.geometry_msgs.TransformStamped tf = new Iviz.Msgs.geometry_msgs.TransformStamped
+        {
+            header = new Iviz.Msgs.std_msgs.Header
+            {
+                seq = tfSeq++,
+                frame_id = "base_link"
+            },
+            child_frame_id = "hololens",
+            transform = ToRosTransform(transform)
+        };
+
+        TFMessage tfMessage = new TFMessage
+        {
+            transforms = new[] { tf }
+        };
+        tfPublisher.Publish(tfMessage);
+    }
+
+    uint imgSeq = 0;
+    Image image;
+    Color32[] srcColors;
+    IEnumerator ImageLoop()
+    {
+        var wait = new WaitForSeconds(0.5f);
+        while (true)
+        {
+            if (imagePublisher.NumSubscribers == 0)
+            {
+                yield return wait;
+                continue;
+            }
+
+            srcColors = texture.GetPixels32(srcColors);
+
+            if (image == null)
+            {
+                image = new Image
+                {
+                    header = new Iviz.Msgs.std_msgs.Header
+                    {
+                        frame_id = "hololens",
+                        seq = imgSeq++
+                    },
+                    width = (uint)(texture.width / 2),
+                    height = (uint)(texture.height / 2),
+                    encoding = "rgb8",
+                    step = (uint)(texture.width * 3 / 2),
+                    data = new byte[texture.width * texture.height * 3 / 4]
+                };
+            }
+
+            Task.Run(() =>
+            {
+                try
+                {
+                    CaptureImage();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e);
+                }
+            });
+
+            yield return wait;
+        }
+    }
+
+    void CaptureImage()
+    {
+        image.header.seq = tfSeq++;
+
+        int textureWidth = (int)(image.width * 2);
+        int textureHeight = (int)(image.height * 2);
+
+        for (int v = 0; v < image.height; v++)
+        {
+            int srcOff = (textureHeight - 1 - v * 2) * textureWidth;
+            int dstOff = v * (int)image.step;
+            for (int u = 0; u < image.width; u++)
+            {
+                Color32 srcColor = srcColors[srcOff++];
+                image.data[dstOff++] = srcColor.r;
+                image.data[dstOff++] = srcColor.g;
+                image.data[dstOff++] = srcColor.b;
+                srcOff++;
+            }
+        }
+        imagePublisher.Publish(image);
     }
 }

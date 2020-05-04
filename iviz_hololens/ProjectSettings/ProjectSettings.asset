@@ -139,7 +139,7 @@ PlayerSettings:
       minimumSupportedHeadTracking: 0
       maximumSupportedHeadTracking: 1
     hololens:
-      depthFormat: 1
+      depthFormat: 0
       depthBufferSharingEnabled: 1
     oculus:
       sharedDepthBuffer: 1
@@ -599,7 +599,7 @@ PlayerSettings:
       PhoneCallHistoryPublic: False
       PicturesLibrary: False
       PointOfService: False
-      PrivateNetworkClientServer: False
+      PrivateNetworkClientServer: True
       Proximity: False
       RecordedCallsFolder: False
       RemoteSystem: False

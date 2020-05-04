@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Iviz
 {
-    public class ParallelQueue<T>
+    public sealed class ParallelQueue<T> : IDisposable
     {
         readonly ConcurrentQueue<T> queue = new ConcurrentQueue<T>();
         readonly object condVar = new object();
@@ -40,6 +40,11 @@ namespace Iviz
         public ParallelQueue(Predicate<T> callback) : this()
         {
             Callback = callback;
+        }
+
+        public ParallelQueue(Predicate<T> callback, int maxSize) : this(callback)
+        {
+            MaxSize = maxSize;
         }
 
         void Run()
@@ -92,7 +97,16 @@ namespace Iviz
             {
                 Monitor.Pulse(condVar);
             }
-            task.Wait();
+            if (!task.IsCompleted)
+            {
+                task.Wait();
+            }
+        }
+
+        public void Dispose()
+        {
+            Stop();
+            task.Dispose();
         }
     }
 }

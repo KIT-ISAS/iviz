@@ -57,10 +57,7 @@ namespace Iviz.RoslibSharp
         {
             keepRunning = false;
             tcpClient?.Close();
-            if (!task.IsCompleted)
-            {
-                task.Wait();
-            }
+            task?.Wait();
         }
 
         int ReceivePacket()

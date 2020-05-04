@@ -105,7 +105,7 @@ namespace Iviz.App
             public Info SphereSimple { get; }
             public Info MeshList { get; }
             public Info PointList { get; }
-            public Info MeshMarker { get; }
+            public Info MeshTriangles { get; }
 
             public ReadOnlyDictionary<string, Info> Generic { get; }
 
@@ -122,7 +122,7 @@ namespace Iviz.App
                 SphereSimple = new Info(Resources.Load<GameObject>("Spheres/sphere-LOD1"));
                 MeshList = new Info(Resources.Load<GameObject>("Markers/MeshList"));
                 PointList = new Info(Resources.Load<GameObject>("Markers/PointList"));
-                MeshMarker = new Info(Resources.Load<GameObject>("Markers/MeshMarker"));
+                MeshTriangles = new Info(Resources.Load<GameObject>("Markers/MeshTriangles"));
 
                 Generic = new ReadOnlyDictionary<string, Info>(
                     new Dictionary<string, Info>()

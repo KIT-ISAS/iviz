@@ -25,7 +25,7 @@ namespace Iviz.RoslibSharp
     }
 
 
-    class TcpSender
+    sealed class TcpSender : IDisposable
     {
         readonly object condVar = new object();
         readonly List<IMessage> messageQueue = new List<IMessage>();
@@ -97,10 +97,7 @@ namespace Iviz.RoslibSharp
             keepRunning = false;
             tcpClient?.Close();
             tcpListener?.Stop();
-            if (task != null && !task.IsCompleted)
-            {
-                task.Wait();
-            }
+            task?.Wait();
             tcpClient = null;
             tcpListener = null;
             task = null;
@@ -365,6 +362,16 @@ namespace Iviz.RoslibSharp
                 }
                 Monitor.Pulse(condVar);
             }
+        }
+
+        public void Dispose()
+        {
+            tcpClient.Dispose();
+            stream.Dispose();
+
+            keepRunning = false;
+            task?.Wait();
+            task?.Dispose();
         }
 
         public PublisherSenderState State =>

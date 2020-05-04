@@ -6,7 +6,7 @@ using WebSocketSharp;
 
 namespace Iviz.Bridge.Client
 {
-    public class BridgeClient
+    public sealed class BridgeClient : IDisposable
     {
         readonly WebSocket socket;
 
@@ -60,7 +60,7 @@ namespace Iviz.Bridge.Client
         {
             if (string.IsNullOrEmpty(topic))
             {
-                throw new ArgumentException(nameof(topic));
+                throw new ArgumentException("Empty topic", nameof(topic));
             }
 
             GenericMessage msgOut = new GenericMessage()
@@ -82,7 +82,7 @@ namespace Iviz.Bridge.Client
         {
             if (string.IsNullOrEmpty(topic))
             {
-                throw new ArgumentException(nameof(topic));
+                throw new ArgumentException("Empty topic", nameof(topic));
             }
 
             GenericMessage msgOut = new GenericMessage()
@@ -98,6 +98,16 @@ namespace Iviz.Bridge.Client
                 throw new TimeoutException();
             }
             return new BridgePublisher<T>(Uri.Host, int.Parse(msgIn.Value, BuiltIns.Culture));
+        }
+
+        public void Stop()
+        {
+            socket.Close();
+        }
+
+        public void Dispose()
+        {
+            Stop();
         }
     }
 }
