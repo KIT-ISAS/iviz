@@ -9,6 +9,7 @@ using System.Net;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.XR.WSA;
+using UnityEngine.XR.WSA.WebCam;
 
 public class RosNode : MonoBehaviour
 {
@@ -47,6 +48,9 @@ public class RosNode : MonoBehaviour
         texture = new WebCamTexture(1280, 720, 15);
         texture.Play();
         StartCoroutine(ImageLoop());
+
+        //PhotoCapture.CreateAsync(false, OnPhotoCaptureCreated);
+        //StartCoroutine(ImageLoop());
     }
 
     IEnumerator UpdateLoop()
@@ -120,7 +124,7 @@ public class RosNode : MonoBehaviour
         {
             case SurfaceChange.Added:
             case SurfaceChange.Updated:
-                Debug.Log("Updated " + spatialMeshObjects.Count);
+                //Debug.Log("Updated " + spatialMeshObjects.Count);
                 if (!spatialMeshObjects.ContainsKey(surfaceId))
                 {
                     spatialMeshObjects[surfaceId] = new GameObject("spatial-mapping-" + surfaceId);
@@ -185,7 +189,7 @@ public class RosNode : MonoBehaviour
 
                 break;
             case SurfaceChange.Removed:
-                Debug.Log("Removed " + spatialMeshObjects.Count);
+                //Debug.Log("Removed " + spatialMeshObjects.Count);
                 var obj = spatialMeshObjects[surfaceId];
                 spatialMeshObjects.Remove(surfaceId);
                 if (obj != null)
@@ -304,5 +308,121 @@ public class RosNode : MonoBehaviour
             }
         }
         imagePublisher.Publish(image);
+        imagePublisher.Cleanup();
     }
+
+    /*
+    bool sendImage = false;
+    IEnumerator ImageLoop()
+    {
+        var wait = new WaitForSeconds(0.5f);
+        while (true)
+        {
+            sendImage = true;
+            Debug.Log("Setting flag true");
+            yield return wait;
+        }
+    }
+
+    PhotoCapture photoCaptureObject;
+    readonly Resolution cameraResolution = new Resolution
+    {
+        width = 1280,
+        height = 720,
+        refreshRate = 15
+    };
+
+    void OnPhotoCaptureCreated(PhotoCapture captureObject)
+    {
+        photoCaptureObject = captureObject;
+
+
+        CameraParameters c = new CameraParameters
+        {
+            hologramOpacity = 0.0f,
+            //frameRate = cameraResolution.refreshRate,
+            cameraResolutionWidth = cameraResolution.width,
+            cameraResolutionHeight = cameraResolution.height,
+            pixelFormat = CapturePixelFormat.BGRA32
+        };
+
+        Debug.Log("Starting photo mode");
+        captureObject.StartPhotoModeAsync(c, OnPhotoModeStarted);
+    }
+
+    private void OnPhotoModeStarted(PhotoCapture.PhotoCaptureResult result)
+    {
+        if (result.success)
+        {
+            Debug.Log("Starting take photo");
+            photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
+        }
+        else
+        {
+            Debug.LogError("Unable to start photo mode!");
+        }
+    }
+
+
+    readonly List<byte> srcData = new List<byte>();
+    void OnCapturedPhotoToMemory(PhotoCapture.PhotoCaptureResult result, PhotoCaptureFrame photoCaptureFrame)
+    {
+        if (result.success)
+        {
+            Debug.Log("Entering OnCaptured");
+            if (!sendImage)
+            {
+                return;
+            }
+            Debug.Log("Copying raw data");
+            photoCaptureFrame.CopyRawImageDataIntoBuffer(srcData);
+            Debug.Log("CaptureImage");
+            CaptureImage();
+        }
+        photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
+    }
+
+    Image image;
+    uint imgSeq = 0;
+    void CaptureImage()
+    {
+        sendImage = false;
+        Debug.Log("Setting flag false");
+
+        if (image == null)
+        {
+            Debug.Log("Creating image message");
+            image = new Image
+            {
+                header = new Iviz.Msgs.std_msgs.Header
+                {
+                    frame_id = "hololens",
+                    seq = 0
+                },
+                width = (uint)(cameraResolution.width / 2),
+                height = (uint)(cameraResolution.height / 2),
+                encoding = "rgb8",
+                step = (uint)(cameraResolution.width * 3 / 2),
+                data = new byte[cameraResolution.width * cameraResolution.height * 3 / 4]
+            };
+        }
+
+        image.header.seq = imgSeq++;
+
+        for (int v = 0; v < image.height; v++)
+        {
+            int srcOff = (cameraResolution.height - 1 - v * 2) * cameraResolution.width * 4;
+            int dstOff = v * (int)image.step;
+            for (int u = 0; u < image.width; u++)
+            {
+                image.data[dstOff++] = srcData[srcOff++];
+                image.data[dstOff++] = srcData[srcOff++];
+                image.data[dstOff++] = srcData[srcOff++];
+                srcOff += 5;
+            }
+        }
+        Debug.Log("Publishing message");
+        imagePublisher.Publish(image);
+    }
+    */
 }
