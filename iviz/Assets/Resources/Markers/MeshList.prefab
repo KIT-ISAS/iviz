@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8497843833201729869}
   - component: {fileID: 8497843833201729866}
-  - component: {fileID: 8497843833201729868}
+  - component: {fileID: 7801008200408983455}
   m_Layer: 0
   m_Name: MeshList
   m_TagString: Untagged
@@ -45,7 +45,7 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &8497843833201729868
+--- !u!114 &7801008200408983455
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -54,6 +54,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 8497843833201729871}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fc82557e311ac6e4ebd571c8b381a9ba, type: 3}
+  m_Script: {fileID: 11500000, guid: 2f1a5766e4eb5494b810ab9c05093707, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

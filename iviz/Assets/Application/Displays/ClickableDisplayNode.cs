@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 
 namespace Iviz.App
 {
-    public abstract class ClickableDisplay : Display, IPointerClickHandler
+    public abstract class ClickableDisplayNode : DisplayNode, IPointerClickHandler
     {
         public Bounds Bounds { get; protected set; }
 

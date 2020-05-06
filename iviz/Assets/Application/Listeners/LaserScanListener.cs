@@ -6,9 +6,10 @@ using UnityEngine;
 
 namespace Iviz.App
 {
-    public class LaserScanListener : DisplayableListener
+    public class LaserScanListener : TopicListener, IRecyclable
     {
         PointListResource pointCloud;
+        DisplayNode node;
 
         public float MinIntensity { get; private set; }
         public float MaxIntensity { get; private set; }
@@ -89,22 +90,12 @@ namespace Iviz.App
 
         public override void StartListening()
         {
-            Topic = config.topic;
+            base.StartListening();
             Listener = new RosListener<LaserScan>(config.topic, Handler);
-            GameThread.EverySecond += UpdateStats;
-        }
-
-        public override void Unsubscribe()
-        {
-            GameThread.EverySecond -= UpdateStats;
-            Listener?.Stop();
-            Listener = null;
         }
 
         void Handler(LaserScan msg)
         {
-            SetParent(msg.header.frame_id);
-
             int newSize = msg.ranges.Length;
             if (newSize > pointBuffer.Length)
             {
@@ -194,10 +185,14 @@ namespace Iviz.App
             return new Vector2(intensityMin, intensityMax);
         }
 
-
-        public override void Recycle()
+        public override void Stop()
         {
-            base.Recycle();
+            base.Stop();
+            pointCloud.Parent = node.transform;
+        }
+
+        public void Recycle()
+        {
             ResourcePool.Dispose(Resource.Markers.PointList, pointCloud.gameObject);
             pointCloud = null;
         }

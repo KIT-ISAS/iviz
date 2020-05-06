@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 namespace Iviz.App
 {
-    public class Grid : ClickableDisplay
+    public class Grid : ClickableDisplayNode, IRecyclable
     {
 
         Mesh mesh;
@@ -138,7 +138,7 @@ namespace Iviz.App
             mesh = new Mesh();
             GetComponent<MeshFilter>().sharedMesh = mesh;
             meshRenderer = GetComponent<MeshRenderer>();
-            meshRenderer.sharedMaterial = Resources.Load<Material>("BaseMaterials/Grid");
+            meshRenderer.sharedMaterial = Resource.Materials.Grid;
             meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             //meshRenderer.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
 
@@ -236,7 +236,7 @@ namespace Iviz.App
             Config = new Configuration();
         }
 
-        public override void Recycle()
+        public void Recycle()
         {
             //interiorRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
             interiorRenderer.receiveShadows = false;

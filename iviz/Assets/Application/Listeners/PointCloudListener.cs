@@ -7,8 +7,9 @@ using UnityEngine;
 
 namespace Iviz.App
 {
-    public class PointCloudListener : DisplayableListener
+    public class PointCloudListener : TopicListener, IRecyclable
     {
+        DisplayNode node;
         PointListResource pointCloud;
 
         public float MinIntensity { get; private set; }
@@ -76,7 +77,8 @@ namespace Iviz.App
 
         void Awake()
         {
-            pointCloud = ResourcePool.GetOrCreate(Resource.Markers.PointList, transform).GetComponent<PointListResource>();
+            node = SimpleDisplayNode.Instantiate(transform);
+            pointCloud = ResourcePool.GetOrCreate(Resource.Markers.PointList, node.transform).GetComponent<PointListResource>();
 
             Config = new Configuration();
             transform.localRotation = Quaternion.identity.ToRos().Ros2Unity();
@@ -84,16 +86,8 @@ namespace Iviz.App
 
         public override void StartListening()
         {
-            Topic = config.topic;
+            base.StartListening();
             Listener = new RosListener<PointCloud2>(config.topic, Handler);
-            GameThread.EverySecond += UpdateStats;
-        }
-
-        public override void Unsubscribe()
-        {
-            GameThread.EverySecond -= UpdateStats;
-            Listener?.Stop();
-            Listener = null;
         }
 
         static int FieldSizeFromType(int datatype)
@@ -119,7 +113,7 @@ namespace Iviz.App
 
         void Handler(PointCloud2 msg)
         {
-            SetParent(msg.header.frame_id);
+            node.SetParent(msg.header.frame_id);
 
             if (msg.point_step < 3 * 4 ||
                 msg.row_step < msg.point_step * msg.width ||
@@ -465,9 +459,14 @@ namespace Iviz.App
             }
         }
 
-        public override void Recycle()
+        public override void Stop()
         {
-            base.Recycle();
+            base.Stop();
+            pointCloud.Parent = node.transform;
+        }
+
+        public void Recycle()
+        {
             ResourcePool.Dispose(Resource.Markers.PointList, pointCloud.gameObject);
             pointCloud = null;
         }

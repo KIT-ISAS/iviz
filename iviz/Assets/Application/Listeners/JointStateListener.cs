@@ -5,7 +5,7 @@ using Iviz.Msgs.sensor_msgs;
 
 namespace Iviz.App
 {
-    public class JointStateListener : DisplayableListener
+    public class JointStateListener : TopicListener
     {
         [Serializable]
         public class Configuration
@@ -97,16 +97,13 @@ namespace Iviz.App
 
         public override void StartListening()
         {
-            Topic = config.topic;
+            base.StartListening();
             Listener = new RosListener<JointState>(config.topic, Handler);
-            GameThread.EverySecond += UpdateStats;
         }
 
-        public override void Unsubscribe()
+        public override void Stop()
         {
-            GameThread.EverySecond -= UpdateStats;
-            Listener?.Stop();
-            Listener = null;
+            base.Stop();
             Robot = null;
             warnNotFound.Clear();
         }

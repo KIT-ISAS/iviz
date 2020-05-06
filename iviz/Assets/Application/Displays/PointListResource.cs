@@ -72,6 +72,8 @@ namespace Iviz.App
             }
         }
 
+        public Color Color { get; set; } = Color.white;
+
         static readonly int PropIntensityCoeff = Shader.PropertyToID("_IntensityCoeff");
         static readonly int PropIntensityAdd = Shader.PropertyToID("_IntensityAdd");
 
@@ -124,11 +126,6 @@ namespace Iviz.App
                 }
                 Size = size;
             }
-        }
-
-        public override void SetColor(Color color)
-        {
-            // do nothing
         }
 
         public IEnumerable<Color32> Colors
@@ -210,6 +207,8 @@ namespace Iviz.App
                 }
             }
         }
+
+        public override string Name => throw new NotImplementedException();
 
         protected override void Awake()
         {

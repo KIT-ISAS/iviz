@@ -2,34 +2,34 @@
 
 namespace Iviz.App
 {
-    public abstract class MarkerResource : MonoBehaviour
+    public abstract class MarkerResource : MonoBehaviour, IDisplay
     {
-        Color color = Color.white;
-        public Color Color {
-            get => color;
-            set {
-                color = value;
-                SetColor(value);
-            }
-        }
-
-        public Collider Collider { get; private set; }
+        protected Collider Collider;
 
         public Bounds Bounds { get; protected set; }
         public Bounds WorldBounds => Collider.bounds;
 
-        public virtual float Width
-        {
-            get => 0;
-            set { }
-        }
+        public abstract string Name { get; }
 
-        public abstract void SetColor(Color color);
+        public bool ColliderEnabled
+        {
+            get => Collider.enabled;
+            set => Collider.enabled = value;
+        }
+        public Transform Parent
+        {
+            get => transform.parent;
+            set => transform.parent = value;
+        }
 
         protected virtual void Awake()
         {
             Collider = GetComponent<Collider>();
             Bounds = Collider.bounds;
+        }
+
+        public virtual void Stop()
+        {
         }
     }
 }

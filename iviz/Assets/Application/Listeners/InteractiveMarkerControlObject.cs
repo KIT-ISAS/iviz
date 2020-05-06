@@ -5,7 +5,7 @@ using Iviz.Msgs.visualization_msgs;
 
 namespace Iviz.App
 {
-    public class InteractiveMarkerControlObject : Display
+    public class InteractiveMarkerControlObject : DisplayNode
     {
         public string Description { get; private set; }
         public string Id { get; private set; }
@@ -65,8 +65,8 @@ namespace Iviz.App
                     case Marker.ADD:
                         if (!markers.TryGetValue(id, out MarkerObject markerToAdd))
                         {
-                            markerToAdd = ResourcePool.GetOrCreate(Resource.Displays.MarkerObject, transform).GetComponent<MarkerObject>();
-                            markerToAdd.Parent = TFListener.DisplaysFrame;
+                            markerToAdd = ResourcePool.GetOrCreate(Resource.Listeners.MarkerObject, transform).GetComponent<MarkerObject>();
+                            markerToAdd.Parent = TFListener.ListenersFrame;
                             markerToAdd.Clicked += (point, button) => Clicked?.Invoke(transform.AsPose(), point, button);
                             markers[id] = markerToAdd;
                         }
@@ -81,7 +81,7 @@ namespace Iviz.App
                         if (markers.TryGetValue(id, out MarkerObject markerToDelete))
                         {
                             markerToDelete.Stop();
-                            ResourcePool.Dispose(Resource.Displays.MarkerObject, markerToDelete.gameObject);
+                            ResourcePool.Dispose(Resource.Listeners.MarkerObject, markerToDelete.gameObject);
                             markers.Remove(id);
                             markersToDelete.Remove(id);
                         }
@@ -92,7 +92,7 @@ namespace Iviz.App
             {
                 MarkerObject markerToDelete = markers[x];
                 markerToDelete.Stop();
-                ResourcePool.Dispose(Resource.Displays.MarkerObject, markerToDelete.gameObject);
+                ResourcePool.Dispose(Resource.Listeners.MarkerObject, markerToDelete.gameObject);
                 markers.Remove(x);
             });
         }
@@ -102,7 +102,7 @@ namespace Iviz.App
             markers.Values.ForEach(markerToDelete =>
             {
                 markerToDelete.Stop();
-                ResourcePool.Dispose(Resource.Displays.MarkerObject, markerToDelete.gameObject);
+                ResourcePool.Dispose(Resource.Listeners.MarkerObject, markerToDelete.gameObject);
             });
             markers.Clear();
             markersToDelete.Clear();

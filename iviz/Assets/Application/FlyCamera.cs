@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Iviz.App
 {
-    public class FlyCamera : Display
+    public class FlyCamera : DisplayNode
     {
         Vector2 lastPointer;
         Vector2 lastPointerAlt;
@@ -53,7 +53,7 @@ namespace Iviz.App
                 false;
 #endif
 
-        public ClickableDisplay SelectedDisplay { get; private set; }
+        public ClickableDisplayNode SelectedDisplay { get; private set; }
 
         public bool PointerDown { get; private set; }
 
@@ -74,7 +74,7 @@ namespace Iviz.App
             StartOrbiting();
         }
 
-        public void Unselect(ClickableDisplay display)
+        public void Unselect(ClickableDisplayNode display)
         {
             if (SelectedDisplay != display)
             {
@@ -86,7 +86,7 @@ namespace Iviz.App
             namedBoundary.transform.SetParentLocal(transform);
         }
 
-        public void Select(ClickableDisplay display)
+        public void Select(ClickableDisplayNode display)
         {
             if (SelectedDisplay == display)
             {
@@ -105,7 +105,7 @@ namespace Iviz.App
             }
         }
 
-        public void ShowBoundary(ClickableDisplay display, Bounds bounds, string name, Transform parent)
+        public void ShowBoundary(ClickableDisplayNode display, Bounds bounds, string name, Transform parent)
         {
             if (display != SelectedDisplay)
             {

@@ -12,7 +12,7 @@ namespace Iviz.App
         public Robot owner;
     }
 
-    public class Robot : ClickableDisplay
+    public class Robot : ClickableDisplayNode
     {
         public GameObject RobotObject { get; private set; }
         public GameObject BaseLink { get; private set; }

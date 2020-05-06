@@ -10,20 +10,20 @@ namespace Iviz.App
 
         public override Resource.Module Module => Resource.Module.Grid;
         public override DataPanelContents Panel => panel;
-        public Display Display => display;
+        public DisplayNode Display => display;
 
         public override DisplayData Initialize(DisplayListPanel displayList, string topic, string type)
         {
             base.Initialize(displayList, topic, type);
 
-            GameObject displayObject = ResourcePool.GetOrCreate(Resource.Displays.Grid);
+            GameObject displayObject = ResourcePool.GetOrCreate(Resource.Listeners.Grid);
             displayObject.name = "Grid";
 
             display = displayObject.GetComponent<Grid>();
             display.DisplayData = this;
 
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Grid) as GridPanelContents;
-            display.Parent = TFListener.DisplaysFrame;
+            display.Parent = TFListener.ListenersFrame;
 
             return this;
         }
@@ -39,7 +39,7 @@ namespace Iviz.App
             base.Cleanup();
 
             display.Stop();
-            ResourcePool.Dispose(Resource.Displays.Grid, display.gameObject);
+            ResourcePool.Dispose(Resource.Listeners.Grid, display.gameObject);
             display = null;
         }
 

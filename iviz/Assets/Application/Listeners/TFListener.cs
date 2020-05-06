@@ -9,7 +9,7 @@ using Iviz.RoslibSharp;
 
 namespace Iviz.App
 {
-    public class TFListener : DisplayableListener
+    public class TFListener : TopicListener
     {
         public static TFListener Instance { get; private set; }
         public static Camera MainCamera => Instance.mainCamera;
@@ -17,10 +17,11 @@ namespace Iviz.App
 
         public static TFFrame BaseFrame { get; private set; }
 
-        public static TFFrame DisplaysFrame { get; private set; }
+        public static TFFrame ListenersFrame { get; private set; }
 
         Camera mainCamera;
         FlyCamera guiManager;
+        DisplayNode dummy;
 
         readonly Dictionary<string, TFFrame> frames = new Dictionary<string, TFFrame>();
 
@@ -114,12 +115,12 @@ namespace Iviz.App
                 config.showAllFrames = value;
                 if (value)
                 {
-                    frames.Values.ForEach(x => x.AddListener(this));
+                    frames.Values.ForEach(x => x.AddListener(dummy));
                 }
                 else
                 {
                     // we create a copy because this generally modifies the collection
-                    frames.Values.ToArray().ForEach(x => x.RemoveListener(this));
+                    frames.Values.ToArray().ForEach(x => x.RemoveListener(dummy));
                 }
             }
         }
@@ -127,6 +128,8 @@ namespace Iviz.App
         void Awake()
         {
             Instance = this;
+
+            dummy = SimpleDisplayNode.Instantiate(transform);
 
             mainCamera = GameObject.Find("MainCamera").GetComponent<Camera>();
             guiManager = mainCamera.GetComponent<FlyCamera>();
@@ -136,28 +139,20 @@ namespace Iviz.App
             BaseFrame = Add(CreateFrameObject("world", gameObject));
             BaseFrame.AddListener(null);
 
-            DisplaysFrame = Add(CreateFrameObject("_displays_", gameObject));
-            DisplaysFrame.AddListener(null);
-            DisplaysFrame.ForceInvisible = true;
+            ListenersFrame = Add(CreateFrameObject("_displays_", gameObject));
+            ListenersFrame.AddListener(null);
+            ListenersFrame.ForceInvisible = true;
 
             TFFrame f;
-            f = GetOrCreateFrame("navigation", this);
+            f = GetOrCreateFrame("navigation", dummy);
             f.AddListener(null);
             f.IgnoreUpdates = true;
         }
 
         public override void StartListening()
         {
-            Topic = config.topic;
-            GameThread.EverySecond += UpdateStats;
-            Listener = new RosListener<tfMessage_v2>(Topic, SubscriptionHandler_v2);
-        }
-
-        public override void Unsubscribe()
-        {
-            GameThread.EverySecond -= UpdateStats;
-            Listener?.Stop();
-            Listener = null;
+            base.StartListening();
+            Listener = new RosListener<tfMessage_v2>(Config.topic, SubscriptionHandler_v2);
         }
 
         void TopicsUpdated()
@@ -191,7 +186,7 @@ namespace Iviz.App
                 TFFrame child;
                 if (config.showAllFrames)
                 {
-                    child = GetOrCreateFrame(childId, this); ;
+                    child = GetOrCreateFrame(childId, dummy); ;
                 }
                 else if (!TryGetFrameImpl(childId, out child))
                 {
@@ -225,7 +220,7 @@ namespace Iviz.App
         }
 
 
-        public static TFFrame GetOrCreateFrame(string id, Display listener = null)
+        public static TFFrame GetOrCreateFrame(string id, DisplayNode listener = null)
         {
             if (id.Length != 0 && id[0] == '/')
             {
@@ -254,7 +249,7 @@ namespace Iviz.App
 
         TFFrame CreateFrameObject(string id, GameObject parent)
         {
-            GameObject o = ResourcePool.GetOrCreate(Resource.Displays.TFFrame, parent.transform);
+            GameObject o = ResourcePool.GetOrCreate(Resource.Markers.TFFrame, parent.transform);
             o.name = id;
 
             TFFrame frame = o.GetComponent<TFFrame>();
@@ -288,11 +283,7 @@ namespace Iviz.App
             frames.Remove(frame.Id);
             GuiManager.Unselect(frame);
             frame.Parent = null;
-            ResourcePool.Dispose(Resource.Displays.TFFrame, frame.gameObject);
-        }
-
-        public override void Recycle()
-        {
+            ResourcePool.Dispose(Resource.Markers.TFFrame, frame.gameObject);
         }
     }
 }

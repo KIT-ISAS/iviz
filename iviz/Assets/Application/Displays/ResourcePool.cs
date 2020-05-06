@@ -60,8 +60,8 @@ namespace Iviz.App
 
             objectsToDestroy.ForEach(deadObject =>
             {
-                Display display = deadObject.GetComponent<Display>();
-                display?.Recycle();
+                IRecyclable recyclable = deadObject.GetComponent<IRecyclable>();
+                recyclable?.Recycle();
                 Debug.Log("ResourcePool: Destroying object of type '" + deadObject.name + "'");
                 Destroy(deadObject);
             });

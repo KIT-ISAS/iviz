@@ -34,8 +34,8 @@ namespace Iviz.App
             set
             {
                 slider.interactable = value;
-                label.color = value ? Display.EnabledFontColor : Display.DisabledFontColor;
-                this.value.color = value ? Display.EnabledFontColor : Display.DisabledFontColor;
+                label.color = value ? DisplayNode.EnabledFontColor : DisplayNode.DisabledFontColor;
+                this.value.color = value ? DisplayNode.EnabledFontColor : DisplayNode.DisabledFontColor;
             }
         }
 

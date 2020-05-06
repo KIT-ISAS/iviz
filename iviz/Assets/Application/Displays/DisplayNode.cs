@@ -3,10 +3,26 @@ using System;
 
 namespace Iviz.App
 {
-    public abstract class Display : MonoBehaviour
+    public interface IRecyclable
     {
-        public static readonly Color EnabledFontColor = new Color(0.196f, 0.196f, 0.196f);
-        public static readonly Color DisabledFontColor = EnabledFontColor * 3;
+        void Recycle();
+    }
+
+    public interface IDisplay
+    {
+        string Name { get; }
+        Bounds Bounds { get; }
+        Bounds WorldBounds { get; }
+        bool ColliderEnabled { get; set; }
+        void Stop();
+        Transform Parent { get; set; }
+    }
+
+
+    public abstract class DisplayNode : MonoBehaviour
+    {
+        public static Color EnabledFontColor { get; } = new Color(0.196f, 0.196f, 0.196f);
+        public static Color DisabledFontColor { get; } = EnabledFontColor * 3;
 
         TFFrame parent;
         public virtual TFFrame Parent
@@ -30,13 +46,13 @@ namespace Iviz.App
                         //Debug.LogWarning("Display: Setting parent of " + name + " to null! (ok if removing)");
                     }
                 }
-                transform.SetParentLocal(value == null ? null : value.transform);
+                transform.SetParentLocal(value?.transform);
             }
         }
 
         public virtual void SetParent(string parentId)
         {
-            Parent = (parentId == "") ? TFListener.DisplaysFrame : TFListener.GetOrCreateFrame(parentId);
+            Parent = (parentId == "") ? TFListener.ListenersFrame : TFListener.GetOrCreateFrame(parentId);
         }
 
         public event Action Stopped;
@@ -47,9 +63,18 @@ namespace Iviz.App
             Stopped?.Invoke();
             Stopped = null;
         }
-
-        public virtual void Recycle() { }
     }
+
+    public sealed class SimpleDisplayNode : DisplayNode
+    {
+        public static SimpleDisplayNode Instantiate(Transform transform)
+        {
+            GameObject obj = new GameObject("DisplayNode");
+            obj.transform.parent = transform;
+            return obj.AddComponent<SimpleDisplayNode>();
+        }
+    }
+
 
 
 }

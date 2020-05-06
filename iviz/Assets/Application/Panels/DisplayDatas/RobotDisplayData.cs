@@ -17,9 +17,9 @@ namespace Iviz.App
         {
             base.Initialize(displayList, topic, type);
 
-            GameObject displayObject = ResourcePool.GetOrCreate(Resource.Displays.Robot);
+            GameObject displayObject = ResourcePool.GetOrCreate(Resource.Listeners.Robot);
             display = displayObject.GetComponent<Robot>();
-            display.Parent = TFListener.DisplaysFrame;
+            display.Parent = TFListener.ListenersFrame;
             display.DisplayData = this;
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Robot) as RobotPanelContents;
             return this;
@@ -42,7 +42,7 @@ namespace Iviz.App
             base.Cleanup();
 
             display.Stop();
-            ResourcePool.Dispose(Resource.Displays.Robot, display.gameObject);
+            ResourcePool.Dispose(Resource.Listeners.Robot, display.gameObject);
             display = null;
         }
 

@@ -7,23 +7,22 @@ namespace Iviz.App
 {
     public class JointStateDisplayData : DisplayableListenerData
     {
-        JointStateListener display;
+        JointStateListener listener;
         JointStatePanelContents panel;
         readonly List<string> robotNames = new List<string>();
 
         public override DataPanelContents Panel => panel;
-        public override DisplayableListener Display => display;
+        public override TopicListener Listener => listener;
         public override Resource.Module Module => Resource.Module.JointState;
 
         public override DisplayData Initialize(DisplayListPanel displayList, string topic, string type)
         {
             base.Initialize(displayList, topic, type);
-            GameObject displayObject = ResourcePool.GetOrCreate(Resource.Displays.JointState);
+            GameObject displayObject = ResourcePool.GetOrCreate(Resource.Listeners.JointState);
             displayObject.name = "JointState:" + Topic;
 
-            display = displayObject.GetComponent<JointStateListener>();
-            display.Parent = TFListener.DisplaysFrame;
-            display.Config.topic = Topic;
+            listener = displayObject.GetComponent<JointStateListener>();
+            listener.Config.topic = Topic;
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.JointState) as JointStatePanelContents;
 
             return this;
@@ -31,25 +30,25 @@ namespace Iviz.App
 
         public override DisplayData Deserialize(JToken j)
         {
-            display.Config = j.ToObject<JointStateListener.Configuration>();
-            Topic = display.Config.topic;
-            display.Robot = GetRobotWithName(display.RobotName);
+            listener.Config = j.ToObject<JointStateListener.Configuration>();
+            Topic = listener.Config.topic;
+            listener.Robot = GetRobotWithName(listener.RobotName);
             return this;
         }
 
         public override void Start()
         {
             base.Start();
-            display.StartListening();
+            listener.StartListening();
         }
 
         public override void Cleanup()
         {
             base.Cleanup();
 
-            display.Stop();
-            ResourcePool.Dispose(Resource.Displays.PointCloud, display.gameObject);
-            display = null;
+            listener.Stop();
+            ResourcePool.Dispose(Resource.Listeners.PointCloud, listener.gameObject);
+            listener = null;
         }
 
         public override void SetupPanel()
@@ -64,35 +63,35 @@ namespace Iviz.App
                 Select(x => (x as RobotDisplayData).RobotName)
             );
             panel.Robot.Options = robotNames;
-            panel.Robot.Value = display.RobotName;
+            panel.Robot.Value = listener.RobotName;
 
-            panel.JointPrefix.Value = display.MsgJointPrefix;
-            panel.JointSuffix.Value = display.MsgJointSuffix;
-            panel.TrimFromEnd.Value = display.MsgTrimFromEnd;
+            panel.JointPrefix.Value = listener.MsgJointPrefix;
+            panel.JointSuffix.Value = listener.MsgJointSuffix;
+            panel.TrimFromEnd.Value = listener.MsgTrimFromEnd;
 
             panel.JointPrefix.EndEdit += f =>
             {
-                display.MsgJointPrefix = f;
+                listener.MsgJointPrefix = f;
             };
             panel.JointSuffix.EndEdit += f =>
             {
-                display.MsgJointSuffix = f;
+                listener.MsgJointSuffix = f;
             };
             panel.TrimFromEnd.ValueChanged += f =>
             {
-                display.MsgTrimFromEnd = (int)f;
+                listener.MsgTrimFromEnd = (int)f;
             };
             panel.Robot.ValueChanged += (i, s) =>
             {
                 if (i == 0)
                 {
-                    display.Robot = null;
+                    listener.Robot = null;
                 }
                 else
                 {
-                    display.Robot = GetRobotWithName(s);
+                    listener.Robot = GetRobotWithName(s);
                 }
-                display.RobotName = s;
+                listener.RobotName = s;
             };
             panel.CloseButton.Clicked += () =>
             {
@@ -111,7 +110,7 @@ namespace Iviz.App
 
         public override JToken Serialize()
         {
-            return JToken.FromObject(display.Config);
+            return JToken.FromObject(listener.Config);
         }
     }
 }

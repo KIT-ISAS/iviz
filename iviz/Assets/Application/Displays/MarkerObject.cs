@@ -22,7 +22,7 @@ namespace Iviz.App
         TRIANGLE_LIST = Marker.TRIANGLE_LIST,
     }
 
-    public class MarkerObject : ClickableDisplay
+    public class MarkerObject : ClickableDisplayNode
     {
         const string packagePrefix = "package://ibis/";
 
@@ -87,22 +87,24 @@ namespace Iviz.App
 
             Bounds = resource.Bounds;
             resource.gameObject.layer = Resource.ClickableLayer;
-            resource.Color = msg.color.ToUnityColor();
-
 
             switch(msg.Type()) {
                 case MarkerType.CUBE:
                 case MarkerType.SPHERE:
                 case MarkerType.CYLINDER:
+                    MeshMarkerResource meshMarker = resource as MeshMarkerResource;
+                    meshMarker.Color = msg.color.ToUnityColor();
                     transform.localScale = msg.scale.Ros2Unity().Abs();
                     break;
                 case MarkerType.TEXT_VIEW_FACING:
-                    (resource as TextMarkerResource).Text = msg.text;
+                    TextMarkerResource textResource = (resource as TextMarkerResource);
+                    textResource.Text = msg.text;
+                    textResource.Color = msg.color.ToUnityColor();
                     transform.localScale = (float)msg.scale.z * Vector3.one;
                     break;
                 case MarkerType.CUBE_LIST:
                 case MarkerType.SPHERE_LIST:
-                    TriangleListResource meshList = resource as TriangleListResource;
+                    MeshListResource meshList = resource as MeshListResource;
                     meshList.Mesh = (msg.Type() == MarkerType.CUBE_LIST) ? cacheCube : cacheSphere;
                     meshList.SetSize(msg.points.Length);
                     meshList.Scale = msg.scale.Ros2Unity().Abs();
@@ -112,7 +114,9 @@ namespace Iviz.App
                     break;
                 case MarkerType.LINE_LIST:
                 case MarkerType.LINE_STRIP:
-                    resource.Width = (float)msg.scale.x;
+                    //LineRes meshList = resource as MeshListResource;
+                    //resource.Width = (float)msg.scale.x;
+                    // NYI!
                     break;
                 case MarkerType.POINTS:
                     PointListResource pointList = resource as PointListResource;
@@ -123,9 +127,9 @@ namespace Iviz.App
                     pointList.Points = msg.points.Select(x => x.Ros2Unity());
                     break;
                 case MarkerType.TRIANGLE_LIST:
-                    MeshTrianglesResource meshMarker = resource as MeshTrianglesResource;
-                    meshMarker.Color = Color.white ;// msg.color.ToUnityColor();
-                    meshMarker.Set(msg.points.Select(x => x.Ros2Unity()).ToArray());
+                    MeshTrianglesResource meshTriangles = resource as MeshTrianglesResource;
+                    meshTriangles.Color = msg.color.ToUnityColor();
+                    meshTriangles.Set(msg.points.Select(x => x.Ros2Unity()).ToArray());
                     break;
             }
         }
@@ -138,7 +142,7 @@ namespace Iviz.App
             }
             else if (msg.header.frame_id == "")
             {
-                Parent = TFListener.DisplaysFrame;
+                Parent = TFListener.ListenersFrame;
             }
             else
             {
@@ -190,7 +194,7 @@ namespace Iviz.App
             {
                 return;
             }
-            resource.Collider.enabled = false;
+            resource.ColliderEnabled = false;
             ResourcePool.Dispose(resourceType, resource.gameObject);
             resource = null;
             resourceType = null;
@@ -199,7 +203,7 @@ namespace Iviz.App
 
         public void EnableColliders(bool b)
         {
-            resource.Collider.enabled = b;
+            resource.ColliderEnabled = b;
         }
 
         public override void OnPointerClick(PointerEventData eventData)

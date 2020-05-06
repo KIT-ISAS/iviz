@@ -2,7 +2,7 @@
 
 namespace Iviz.App
 {
-    public class NamedBoundary : MonoBehaviour
+    public class NamedBoundary : MonoBehaviour, IDisplay, IRecyclable
     {
         const float FrameAxisLength = 0.15f;
         const float FrameAxisWidth = FrameAxisLength / 16;
@@ -66,6 +66,10 @@ namespace Iviz.App
                 bounds = value;
             }
         }
+
+        public Bounds WorldBounds => throw new System.NotImplementedException();
+
+        public bool ColliderEnabled { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
 
         void Awake()
         {
@@ -160,6 +164,17 @@ namespace Iviz.App
             labelObject = null;
             labelObjectText = null;
             labelBillboard = null;
+        }
+
+        public Transform Parent
+        {
+            get => transform.parent;
+            set => transform.parent = value;
+        }
+
+
+        public void Stop()
+        {
         }
     }
 

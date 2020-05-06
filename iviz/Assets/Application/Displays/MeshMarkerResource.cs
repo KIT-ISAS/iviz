@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Iviz.App
 {
-    public class MeshMarkerResource : MarkerResource
+    public sealed class MeshMarkerResource : MarkerResource
     {
         MeshRenderer mainRenderer;
         protected override void Awake()
@@ -14,9 +14,17 @@ namespace Iviz.App
             mainRenderer = GetComponent<MeshRenderer>();
         }
 
-        public override void SetColor(Color color)
+        public Color color;
+        public Color Color
         {
-            mainRenderer.SetPropertyColor(color);
+            get => color;
+            set
+            {
+                color = value;
+                mainRenderer.SetPropertyColor(color);
+            }
         }
+
+        public override string Name => "MeshMarker";
     }
 }

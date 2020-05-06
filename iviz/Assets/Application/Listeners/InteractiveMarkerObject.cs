@@ -5,7 +5,7 @@ using Iviz.Msgs.visualization_msgs;
 
 namespace Iviz.App
 {
-    public class InteractiveMarkerObject : Display
+    public class InteractiveMarkerObject : DisplayNode
     {
         public string Description { get; private set; }
         public string Id { get; private set; }
@@ -41,9 +41,9 @@ namespace Iviz.App
                 if (!controls.TryGetValue(id, out InteractiveMarkerControlObject control))
                 {
                     control = ResourcePool.
-                        GetOrCreate(Resource.Displays.InteractiveMarkerControlObject, transform).
+                        GetOrCreate(Resource.Listeners.InteractiveMarkerControlObject, transform).
                         GetComponent<InteractiveMarkerControlObject>();
-                    control.Parent = TFListener.DisplaysFrame;
+                    control.Parent = TFListener.ListenersFrame;
                     control.Clicked += (pose, point, button) => Clicked?.Invoke(id, pose, point, button);
                     control.transform.SetParentLocal(transform);
                     controls[id] = control;
@@ -56,7 +56,7 @@ namespace Iviz.App
             {
                 InteractiveMarkerControlObject control = controls[x];
                 control.Stop();
-                ResourcePool.Dispose(Resource.Displays.InteractiveMarkerControlObject, control.gameObject);
+                ResourcePool.Dispose(Resource.Listeners.InteractiveMarkerControlObject, control.gameObject);
                 controls.Remove(x);
             });
 
@@ -79,7 +79,7 @@ namespace Iviz.App
             controls.Values.ForEach(control =>
             {
                 control.Stop();
-                ResourcePool.Dispose(Resource.Displays.InteractiveMarkerControlObject, control.gameObject);
+                ResourcePool.Dispose(Resource.Listeners.InteractiveMarkerControlObject, control.gameObject);
             });
             controls.Clear();
             controlsToDelete.Clear();

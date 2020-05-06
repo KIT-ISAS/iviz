@@ -4,7 +4,7 @@ using Iviz.Msgs.visualization_msgs;
 
 namespace Iviz.App
 {
-    public class MarkerListener : DisplayableListener
+    public class MarkerListener : TopicListener
     {
         readonly Dictionary<string, MarkerObject> markers = new Dictionary<string, MarkerObject>();
 
@@ -29,8 +29,7 @@ namespace Iviz.App
 
         public override void StartListening()
         {
-            Topic = config.topic;
-
+            base.StartListening();
             if (config.type == Marker.RosMessageType)
             {
                 Listener = new RosListener<Marker>(config.topic, Handler);
@@ -39,19 +38,16 @@ namespace Iviz.App
             {
                 Listener = new RosListener<MarkerArray>(config.topic, ArrayHandler);
             }
-            GameThread.EverySecond += UpdateStats;
         }
 
-        public override void Unsubscribe()
+        public override void Stop()
         {
-            GameThread.EverySecond -= UpdateStats;
-            Listener?.Stop();
-            Listener = null;
+            base.Stop();
 
             foreach (MarkerObject marker in markers.Values)
             {
                 marker.Stop();
-                ResourcePool.Dispose(Resource.Displays.MarkerObject, marker.gameObject);
+                ResourcePool.Dispose(Resource.Listeners.MarkerObject, marker.gameObject);
             }
             markers.Clear();
         }
@@ -114,8 +110,8 @@ namespace Iviz.App
                 case Marker.ADD:
                     if (!markers.TryGetValue(id, out MarkerObject markerToAdd))
                     {
-                        markerToAdd = ResourcePool.GetOrCreate(Resource.Displays.MarkerObject, transform).GetComponent<MarkerObject>();
-                        markerToAdd.Parent = TFListener.DisplaysFrame;
+                        markerToAdd = ResourcePool.GetOrCreate(Resource.Listeners.MarkerObject, transform).GetComponent<MarkerObject>();
+                        markerToAdd.Parent = TFListener.ListenersFrame;
                         markers[id] = markerToAdd;
                     }
                     markerToAdd.Set(msg);
@@ -124,7 +120,7 @@ namespace Iviz.App
                     if (markers.TryGetValue(id, out MarkerObject markerToDelete))
                     {
                         markerToDelete.Stop();
-                        ResourcePool.Dispose(Resource.Displays.MarkerObject, markerToDelete.gameObject);
+                        ResourcePool.Dispose(Resource.Listeners.MarkerObject, markerToDelete.gameObject);
                         markers.Remove(id);
                     }
                     break;

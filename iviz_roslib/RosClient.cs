@@ -191,6 +191,16 @@ namespace Iviz.RoslibSharp
         public string Subscribe<T>(string topic, Action<T> callback, out RosSubscriber subscriber, bool requestNoDelay = false)
             where T : IMessage, new()
         {
+            if (topic is null)
+            {
+                throw new ArgumentNullException(nameof(topic));
+            }
+
+            if (callback is null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
             if (!TryGetSubscriber(topic, out subscriber))
             {
                 subscriber = CreateSubscriber(topic, requestNoDelay, typeof(T), new T());
@@ -209,6 +219,16 @@ namespace Iviz.RoslibSharp
 
         public string Subscribe(string topic, Action<IMessage> callback, Type type, out RosSubscriber subscriber, bool requestNoDelay = false)
         {
+            if (topic is null)
+            {
+                throw new ArgumentNullException(nameof(topic));
+            }
+
+            if (callback is null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
             if (!typeof(IMessage).IsAssignableFrom(type))
             {
                 throw new ArgumentException("Type does not appear to be a message.", nameof(type));
@@ -234,6 +254,11 @@ namespace Iviz.RoslibSharp
         /// <returns>Whether the unsubscription succeeded.</returns>
         public bool Unsubscribe(string topicId)
         {
+            if (topicId is null)
+            {
+                throw new ArgumentNullException(nameof(topicId));
+            }
+
             RosSubscriber subscriber;
             lock (subscribersByTopic)
             {
@@ -260,6 +285,11 @@ namespace Iviz.RoslibSharp
         /// <returns>Whether the subscriber was found.</returns>
         public bool TryGetSubscriber(string topic, out RosSubscriber subscriber)
         {
+            if (topic is null)
+            {
+                throw new ArgumentNullException(nameof(topic));
+            }
+
             lock (subscribersByTopic)
             {
                 return subscribersByTopic.TryGetValue(topic, out subscriber);
@@ -273,6 +303,11 @@ namespace Iviz.RoslibSharp
         /// <returns></returns>
         public RosSubscriber GetSubscriber(string topic)
         {
+            if (topic is null)
+            {
+                throw new ArgumentNullException(nameof(topic));
+            }
+
             if (TryGetSubscriber(topic, out RosSubscriber subscriber))
             {
                 return subscriber;
@@ -316,6 +351,16 @@ namespace Iviz.RoslibSharp
 
         public string Advertise(string topic, Type type, out RosPublisher publisher)
         {
+            if (topic is null)
+            {
+                throw new ArgumentNullException(nameof(topic));
+            }
+
+            if (type is null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
             if (!TryGetPublisher(topic, out publisher))
             {
                 publisher = CreatePublisher(topic, type);
@@ -330,6 +375,11 @@ namespace Iviz.RoslibSharp
         /// <returns>Whether the unadvertisement succeeded.</returns>
         public bool Unadvertise(string topicId)
         {
+            if (topicId is null)
+            {
+                throw new ArgumentNullException(nameof(topicId));
+            }
+
             RosPublisher publisher;
             lock (publishersByTopic)
             {
@@ -356,6 +406,11 @@ namespace Iviz.RoslibSharp
         /// <returns>Whether the publisher was found.</returns>
         public bool TryGetPublisher(string topic, out RosPublisher publisher)
         {
+            if (topic is null)
+            {
+                throw new ArgumentNullException(nameof(topic));
+            }
+
             lock (publishersByTopic)
             {
                 return publishersByTopic.TryGetValue(topic, out publisher);
@@ -575,19 +630,20 @@ namespace Iviz.RoslibSharp
 
             Uri serviceUri = Master.LookupService(serviceName).ServiceUrl;
             ServiceInfo serviceInfo = new ServiceInfo(CallerId, serviceName, typeof(T), null);
-            serviceReceiver = new ServiceReceiver(serviceInfo, serviceUri, true, persistent);
-            serviceReceiver.Start();
-            bool result = serviceReceiver.Execute(service);
-
-            if (persistent && serviceReceiver.IsAlive)
+            using (serviceReceiver = new ServiceReceiver(serviceInfo, serviceUri, true, persistent))
             {
-                lock (subscribedServicesByName)
-                {
-                    subscribedServicesByName.Add(serviceName, serviceReceiver);
-                }
-            }
+                serviceReceiver.Start();
+                bool result = serviceReceiver.Execute(service);
 
-            return result;
+                if (persistent && serviceReceiver.IsAlive)
+                {
+                    lock (subscribedServicesByName)
+                    {
+                        subscribedServicesByName.Add(serviceName, serviceReceiver);
+                    }
+                }
+                return result;
+            }
         }
 
         public void AdvertiseService<T>(string serviceName, Action<T> callback) where T : IService, new()

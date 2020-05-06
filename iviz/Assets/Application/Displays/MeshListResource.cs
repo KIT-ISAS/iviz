@@ -5,12 +5,12 @@ using UnityEngine;
 
 namespace Iviz.App
 {
-    public class TriangleListResource : MarkerResource
+    public sealed class MeshListResource : MarkerResource
     {
         Material material;
         BoxCollider boxCollider;
         Bounds baseBounds;
-        
+
         struct PointWithColor
         {
             public Vector3 position;
@@ -37,6 +37,8 @@ namespace Iviz.App
             }
         }
 
+        public Color Color { get; set; } = Color.white;
+
         static readonly int PropPoints = Shader.PropertyToID("_Points");
         void SetCapacity(int reqDataSize)
         {
@@ -51,11 +53,6 @@ namespace Iviz.App
                 pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithColor>());
                 material.SetBuffer(PropPoints, pointComputeBuffer);
             }
-        }
-
-        public override void SetColor(Color color)
-        {
-            // do nothing
         }
 
         public IEnumerable<Color32> Colors
@@ -111,6 +108,8 @@ namespace Iviz.App
                 material.SetVector(PropLocalScale, new Vector4(scale.x, scale.y, scale.z, 1));
             }
         }
+
+        public override string Name => "MeshListResource";
 
         void UpdateBounds()
         {

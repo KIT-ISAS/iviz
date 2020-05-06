@@ -5,22 +5,21 @@ namespace Iviz.App
 {
     public class LaserScanDisplayData : DisplayableListenerData
     {
-        LaserScanListener display;
+        LaserScanListener listener;
         LaserScanPanelContents panel;
 
         public override DataPanelContents Panel => panel;
-        public override DisplayableListener Display => display;
+        public override TopicListener Listener => listener;
         public override Resource.Module Module => Resource.Module.LaserScan;
 
         public override DisplayData Initialize(DisplayListPanel displayList, string topic, string type)
         {
             base.Initialize(displayList, topic, type);
-            GameObject displayObject = ResourcePool.GetOrCreate(Resource.Displays.LaserScan);
-            displayObject.name = "LaserScan:" + Topic;
+            GameObject listenerObject = ResourcePool.GetOrCreate(Resource.Listeners.LaserScan);
+            listenerObject.name = "LaserScan:" + Topic;
 
-            display = displayObject.GetComponent<LaserScanListener>();
-            display.Parent = TFListener.DisplaysFrame;
-            display.Config.topic = Topic;
+            listener = listenerObject.GetComponent<LaserScanListener>();
+            listener.Config.topic = Topic;
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.LaserScan) as LaserScanPanelContents;
 
             return this;
@@ -28,45 +27,45 @@ namespace Iviz.App
 
         public override DisplayData Deserialize(JToken j)
         {
-            display.Config = j.ToObject<LaserScanListener.Configuration>();
-            Topic = display.Config.topic;
+            listener.Config = j.ToObject<LaserScanListener.Configuration>();
+            Topic = listener.Config.topic;
             return this;
         }
 
         public override void Start()
         {
             base.Start();
-            display.StartListening();
+            listener.StartListening();
         }
 
         public override void Cleanup()
         {
             base.Cleanup();
 
-            display.Stop();
-            ResourcePool.Dispose(Resource.Displays.PointCloud, display.gameObject);
-            display = null;
+            listener.Stop();
+            ResourcePool.Dispose(Resource.Listeners.PointCloud, listener.gameObject);
+            listener = null;
         }
 
         public override void SetupPanel()
         {
             panel.Topic.Label = Topic;
 
-            panel.Colormap.Index = (int)display.Colormap;
-            panel.PointSize.Value = display.PointSize;
-            panel.IgnoreIntensity.Value = display.IgnoreIntensity;
+            panel.Colormap.Index = (int)listener.Colormap;
+            panel.PointSize.Value = listener.PointSize;
+            panel.IgnoreIntensity.Value = listener.IgnoreIntensity;
 
             panel.IgnoreIntensity.ValueChanged += f =>
             {
-                display.IgnoreIntensity = f;
+                listener.IgnoreIntensity = f;
             };
             panel.PointSize.ValueChanged += f =>
             {
-                display.PointSize = f;
+                listener.PointSize = f;
             };
             panel.Colormap.ValueChanged += (i, _) =>
             {
-                display.Colormap = (Resource.ColormapId)i;
+                listener.Colormap = (Resource.ColormapId)i;
             };
             panel.CloseButton.Clicked += () =>
             {
@@ -77,7 +76,7 @@ namespace Iviz.App
 
         public override JToken Serialize()
         {
-            return JToken.FromObject(display.Config);
+            return JToken.FromObject(listener.Config);
         }
     }
 }

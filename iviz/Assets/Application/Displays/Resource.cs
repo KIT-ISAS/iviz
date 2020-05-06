@@ -30,7 +30,7 @@ namespace Iviz.App
 
             public Info(GameObject resource)
             {
-                GameObject = resource;
+                GameObject = resource ?? throw new System.ArgumentNullException(nameof(resource));
                 Id = resource.GetInstanceID();
             }
 
@@ -50,15 +50,18 @@ namespace Iviz.App
             public Material ImagePreview { get; }
             public Material PointCloud { get; }
             public Material MeshList { get; }
+            public Material DepthImageProjector { get; }
+            public Material Grid { get; }
 
             public MaterialsType()
             {
-                SimpleLit = Resources.Load<Material>("BaseMaterials/SimpleWhite");
-                Lit = Resources.Load<Material>("BaseMaterials/White");
-                TexturedLit = Resources.Load<Material>("BaseMaterials/Textured Lit");
-                ImagePreview = Resources.Load<Material>("BaseMaterials/ImagePreview");
-                PointCloud = Resources.Load<Material>("Displays/PointCloud Material");
-                MeshList = Resources.Load<Material>("Displays/MeshList Material");
+                SimpleLit = Resources.Load<Material>("Materials/SimpleWhite");
+                Lit = Resources.Load<Material>("Materials/White");
+                TexturedLit = Resources.Load<Material>("Materials/Textured Lit");
+                ImagePreview = Resources.Load<Material>("Materials/ImagePreview");
+                PointCloud = Resources.Load<Material>("Materials/PointCloud Material");
+                MeshList = Resources.Load<Material>("Materials/MeshList Material");
+                Grid = Resources.Load<Material>("Materials/Grid");
             }
         }
 
@@ -106,6 +109,8 @@ namespace Iviz.App
             public Info MeshList { get; }
             public Info PointList { get; }
             public Info MeshTriangles { get; }
+            public Info TFFrame { get; }
+            public Info Image { get; }
 
             public ReadOnlyDictionary<string, Info> Generic { get; }
 
@@ -123,6 +128,8 @@ namespace Iviz.App
                 MeshList = new Info(Resources.Load<GameObject>("Markers/MeshList"));
                 PointList = new Info(Resources.Load<GameObject>("Markers/PointList"));
                 MeshTriangles = new Info(Resources.Load<GameObject>("Markers/MeshTriangles"));
+                TFFrame = new Info(Resources.Load<GameObject>("Markers/TFFrame"));
+                Image = new Info(Resources.Load<GameObject>("Markers/ImageResource"));
 
                 Generic = new ReadOnlyDictionary<string, Info>(
                     new Dictionary<string, Info>()
@@ -135,9 +142,8 @@ namespace Iviz.App
             }
         }
 
-        public class DisplaysType
+        public class ListenersType
         {
-            public Info TFFrame { get; }
             public Info PointCloud { get; }
             public Info Grid { get; }
             public Info TF { get; }
@@ -152,22 +158,21 @@ namespace Iviz.App
             public Info DepthImageProjector { get; }
             public Info LaserScan { get; }
 
-            public DisplaysType()
+            public ListenersType()
             {
-                TFFrame = new Info(Resources.Load<GameObject>("Displays/TFFrame"));
-                PointCloud = new Info(Resources.Load<GameObject>("Displays/PointCloud"));
-                Grid = new Info(Resources.Load<GameObject>("Displays/Grid"));
-                TF = new Info(Resources.Load<GameObject>("Displays/TF"));
-                Image = new Info(Resources.Load<GameObject>("Displays/Image"));
-                Robot = new Info(Resources.Load<GameObject>("Displays/Robot"));
-                MarkerObject = new Info(Resources.Load<GameObject>("Displays/MarkerObject"));
-                Marker = new Info(Resources.Load<GameObject>("Displays/Marker"));
-                InteractiveMarkerControlObject = new Info(Resources.Load<GameObject>("Displays/InteractiveMarkerControlObject"));
-                InteractiveMarkerObject = new Info(Resources.Load<GameObject>("Displays/InteractiveMarkerObject"));
-                InteractiveMarker = new Info(Resources.Load<GameObject>("Displays/InteractiveMarker"));
-                JointState = new Info(Resources.Load<GameObject>("Displays/JointState"));
-                DepthImageProjector = new Info(Resources.Load<GameObject>("Displays/DepthImageProjector"));
-                LaserScan = new Info(Resources.Load<GameObject>("Displays/LaserScan"));
+                PointCloud = new Info(Resources.Load<GameObject>("Listeners/PointCloud"));
+                Grid = new Info(Resources.Load<GameObject>("Listeners/Grid"));
+                TF = new Info(Resources.Load<GameObject>("Listeners/TF"));
+                Image = new Info(Resources.Load<GameObject>("Listeners/Image"));
+                Robot = new Info(Resources.Load<GameObject>("Listeners/Robot"));
+                MarkerObject = new Info(Resources.Load<GameObject>("Listeners/MarkerObject"));
+                Marker = new Info(Resources.Load<GameObject>("Listeners/Marker"));
+                InteractiveMarkerControlObject = new Info(Resources.Load<GameObject>("Listeners/InteractiveMarkerControlObject"));
+                InteractiveMarkerObject = new Info(Resources.Load<GameObject>("Listeners/InteractiveMarkerObject"));
+                InteractiveMarker = new Info(Resources.Load<GameObject>("Listeners/InteractiveMarker"));
+                JointState = new Info(Resources.Load<GameObject>("Listeners/JointState"));
+                DepthImageProjector = new Info(Resources.Load<GameObject>("Listeners/DepthImageProjector"));
+                LaserScan = new Info(Resources.Load<GameObject>("Listeners/LaserScan"));
             }
         }
 
@@ -228,8 +233,8 @@ namespace Iviz.App
         static MarkersType markers;
         public static MarkersType Markers => markers ?? (markers = new MarkersType());
 
-        static DisplaysType displays;
-        public static DisplaysType Displays => displays ?? (displays = new DisplaysType());
+        static ListenersType listeners;
+        public static ListenersType Listeners => listeners ?? (listeners = new ListenersType());
 
         static WidgetsType widgets;
         public static WidgetsType Widgets => widgets ?? (widgets = new WidgetsType());

@@ -9,6 +9,19 @@ namespace Iviz.App
     {
         public Mesh Mesh { get; private set; }
 
+        public Color color;
+        public Color Color
+        {
+            get => color;
+            set
+            {
+                color = value;
+                mainRenderer.SetPropertyColor(color);
+            }
+        }
+
+        public override string Name => "MeshTriangles";
+
         MeshRenderer mainRenderer;
         protected override void Awake()
         {
@@ -17,11 +30,6 @@ namespace Iviz.App
             Mesh = new Mesh();
             Mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
             GetComponent<MeshFilter>().mesh = Mesh;
-        }
-
-        public override void SetColor(Color color)
-        {
-            mainRenderer.SetPropertyColor(color);
         }
 
         void SetVertices(IList<Vector3> points)

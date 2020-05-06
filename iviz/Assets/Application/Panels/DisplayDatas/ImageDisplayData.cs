@@ -6,71 +6,71 @@ namespace Iviz.App
 {
     public class ImageDisplayData : DisplayableListenerData
     {
-        ImageListener display;
+        ImageListener listener;
         ImagePanelContents panel;
         RawImage anchor;
 
-        public override DisplayableListener Display => display;
+        public override TopicListener Listener => listener;
         public override DataPanelContents Panel => panel;
         public override Resource.Module Module => Resource.Module.Image;
 
-        public ImageListener Image => display;
+        public ImageListener Image => listener;
 
         public override DisplayData Initialize(DisplayListPanel displayList, string topic, string type)
         {
             base.Initialize(displayList, topic, type);
-            GameObject displayObject = ResourcePool.GetOrCreate(Resource.Displays.Image);
+            GameObject displayObject = ResourcePool.GetOrCreate(Resource.Listeners.Image);
             displayObject.name = "Image";
 
-            display = displayObject.GetComponent<ImageListener>();
-            display.Parent = TFListener.DisplaysFrame;
-            display.Config.topic = Topic;
-            display.Config.type = Type;
+            listener = displayObject.GetComponent<ImageListener>();
+            //display.Parent = TFListener.DisplaysFrame;
+            listener.Config.topic = Topic;
+            listener.Config.type = Type;
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Image) as ImagePanelContents;
             return this;
         }
 
         public override DisplayData Deserialize(JToken j)
         {
-            display.Config = j.ToObject<ImageListener.Configuration>();
-            Topic = display.Config.topic;
+            listener.Config = j.ToObject<ImageListener.Configuration>();
+            Topic = listener.Config.topic;
             return this;
         }
 
         public override void Start()
         {
             base.Start();
-            display.StartListening();
+            listener.StartListening();
         }
 
         public override void Cleanup()
         {
             base.Cleanup();
 
-            display.Stop();
-            ResourcePool.Dispose(Resource.Displays.Image, display.gameObject);
-            display = null;
+            listener.Stop();
+            ResourcePool.Dispose(Resource.Listeners.Image, listener.gameObject);
+            listener = null;
         }
 
         public override void SetupPanel()
         {
             panel.Topic.Label = Topic;
-            panel.Description.Label = display.Description;
+            panel.Description.Label = listener.Description;
 
-            panel.PreviewWidget.Material = display.Material;
+            panel.PreviewWidget.Material = listener.Material;
 
-            panel.Min.Value = display.MinIntensity;
-            panel.Max.Value = display.MaxIntensity;
+            panel.Min.Value = listener.MinIntensity;
+            panel.Max.Value = listener.MaxIntensity;
 
-            panel.Colormap.Index = (int)display.Colormap;
+            panel.Colormap.Index = (int)listener.Colormap;
 
-            panel.Colormap.Interactable = display.IsMono;
-            panel.Min.Interactable = display.IsMono;
-            panel.Max.Interactable = display.IsMono;
+            panel.Colormap.Interactable = listener.IsMono;
+            panel.Min.Interactable = listener.IsMono;
+            panel.Max.Interactable = listener.IsMono;
 
             panel.Colormap.ValueChanged += (i, _) =>
             {
-                display.Colormap = (Resource.ColormapId)i;
+                listener.Colormap = (Resource.ColormapId)i;
             };
             panel.Anchor.ValueChanged += (i, _) =>
             {
@@ -79,7 +79,7 @@ namespace Iviz.App
                 {
                     return;
                 }
-                if (anchor != null && anchor.material == display.Material)
+                if (anchor != null && anchor.material == listener.Material)
                 {
                     anchor.material = null;
                     anchor.gameObject.SetActive(false);
@@ -87,17 +87,17 @@ namespace Iviz.App
                 anchor = newAnchor;
                 if (anchor != null)
                 {
-                    anchor.material = display.Material;
+                    anchor.material = listener.Material;
                     anchor.gameObject.SetActive(true);
                 }
             };
             panel.Min.ValueChanged += f =>
             {
-                display.MinIntensity = f;
+                listener.MinIntensity = f;
             };
             panel.Max.ValueChanged += f =>
             {
-                display.MaxIntensity = f;
+                listener.MaxIntensity = f;
             };
             panel.CloseButton.Clicked += () =>
             {
@@ -109,17 +109,17 @@ namespace Iviz.App
         public override void UpdatePanel()
         {
             base.UpdatePanel();
-            panel.Colormap.Interactable = display.IsMono;
-            panel.Min.Interactable = display.IsMono;
-            panel.Max.Interactable = display.IsMono;
-            panel.Description.Label = display.Description;
+            panel.Colormap.Interactable = listener.IsMono;
+            panel.Min.Interactable = listener.IsMono;
+            panel.Max.Interactable = listener.IsMono;
+            panel.Description.Label = listener.Description;
             panel.PreviewWidget.image.enabled = false;
             panel.PreviewWidget.image.enabled = true;
         }
 
         public override JToken Serialize()
         {
-            return JToken.FromObject(display.Config);
+            return JToken.FromObject(listener.Config);
         }
     }
 }
