@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Iviz.App
+namespace Iviz.App.Displays
 {
     public class LineConnector : MonoBehaviour, IDisplay
     {

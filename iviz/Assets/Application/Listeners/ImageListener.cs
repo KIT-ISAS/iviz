@@ -3,13 +3,14 @@ using System.Threading.Tasks;
 using System;
 using Unity.Collections;
 using Iviz.Msgs.sensor_msgs;
+using Iviz.App.Displays;
 
 namespace Iviz.App
 {
     public class ImageListener : TopicListener
     {
         ImageTexture texture;
-        DisplayNode node;
+        SimpleClickableDisplayNode node;
         ImageResource marker;
 
         public ImageTexture ImageTexture => texture;
@@ -113,10 +114,13 @@ namespace Iviz.App
 
         void Awake()
         {
+            transform.parent = TFListener.ListenersFrame.transform;
+
             texture = new ImageTexture();
-            node = SimpleDisplayNode.Instantiate(transform);
+            node = SimpleClickableDisplayNode.Instantiate("ImageNode", transform);
             marker = ResourcePool.GetOrCreate(Resource.Markers.Image, node.transform).GetComponent<ImageResource>();
             marker.Texture = texture;
+            node.Target = marker;
 
             Config = new Configuration();
         }
@@ -132,6 +136,8 @@ namespace Iviz.App
             {
                 Listener = new RosListener<CompressedImage>(config.topic, HandlerCompressed);
             }
+            name = "Image:" + config.topic;
+            node.name = "ImageNode:" + config.topic;
         }
 
         void HandlerCompressed(CompressedImage msg)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System;
 using Iviz.Msgs.visualization_msgs;
+using Iviz.App.Displays;
 
 namespace Iviz.App
 {
@@ -36,11 +37,11 @@ namespace Iviz.App
             switch (InteractionMode)
             {
                 case InteractiveMarkerControl.NONE:
-                    markers.Values.ForEach(x => x.EnableColliders(false));
+                    markers.Values.ForEach(x => x.ColliderEnabled = false);
                     break;
                 case InteractiveMarkerControl.MENU:
                 case InteractiveMarkerControl.BUTTON:
-                    markers.Values.ForEach(x => x.EnableColliders(true));
+                    markers.Values.ForEach(x => x.ColliderEnabled = true);
                     break;
                 case InteractiveMarkerControl.MOVE_AXIS:
                 case InteractiveMarkerControl.MOVE_PLANE:

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.EventSystems;
 
-namespace Iviz.App
+namespace Iviz.App.Displays
 {
     public sealed class TFFrame : ClickableDisplayNode, IRecyclable
     {
@@ -85,6 +85,10 @@ namespace Iviz.App
         readonly HashSet<DisplayNode> listeners = new HashSet<DisplayNode>();
         readonly Dictionary<string, TFFrame> children = new Dictionary<string, TFFrame>();
 
+        public override Bounds Bounds => new Bounds(boxCollider.center, boxCollider.size);
+        public override Bounds WorldBounds => boxCollider.bounds;
+        
+
         public void AddListener(DisplayNode display)
         {
             /*
@@ -164,8 +168,6 @@ namespace Iviz.App
 
             boxCollider.center = 0.5f * (newFrameAxisLength - newFrameAxisWidth / 2) * new Vector3(-1, 1, -1);
             boxCollider.size = (newFrameAxisLength + newFrameAxisWidth / 2) * Vector3.one;
-
-            Bounds = boxCollider.bounds;
         }
 
         public bool AxisVisible

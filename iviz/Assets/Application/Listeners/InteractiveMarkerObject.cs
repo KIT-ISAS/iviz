@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System;
 using Iviz.Msgs.visualization_msgs;
+using Iviz.App.Displays;
 
 namespace Iviz.App
 {

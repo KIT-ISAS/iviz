@@ -5,17 +5,21 @@ using System;
 using UnityEngine.EventSystems;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json;
+using Iviz.App.Displays;
 
 namespace Iviz.App
 {
     public class Grid : ClickableDisplayNode, IRecyclable
     {
-
         Mesh mesh;
         MeshRenderer meshRenderer;
         ReflectionProbe reflectionProbe;
         GameObject interiorObject;
         MeshRenderer interiorRenderer;
+
+        BoxCollider boxCollider;
+        public override Bounds Bounds => new Bounds(boxCollider.center, boxCollider.size);
+        public override Bounds WorldBounds => boxCollider.bounds;
 
         [JsonConverter(typeof(StringEnumConverter))]
         public enum OrientationType
@@ -163,12 +167,12 @@ namespace Iviz.App
             gameObject.layer = Resource.ClickableLayer;
 
             Parent = TFListener.BaseFrame;
-            Bounds = GetComponent<BoxCollider>().bounds;
+            boxCollider = GetComponent<BoxCollider>();
         }
 
         void UpdateMesh()
         {
-            Mesh squareMesh = Resources.Load<GameObject>("Markers/Square").GetComponent<MeshFilter>().sharedMesh;
+            Mesh squareMesh = Resource.Markers.Square.GameObject.GetComponent<MeshFilter>().sharedMesh;
             IEnumerable<int> squareIndices = squareMesh.GetIndices(0);
 
             float totalSize = GridCellSize * NumberOfGridCells + GridLineWidth;

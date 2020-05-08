@@ -6,22 +6,9 @@ using UnityEngine;
 
 namespace Iviz.App
 {
+    /*
     public abstract class DisplayableListener : DisplayNode
     {
-        static readonly Dictionary<string, Resource.Module> resourceByRosMessageType = new Dictionary<string, Resource.Module>
-        {
-            { PointCloud2.RosMessageType, Resource.Module.PointCloud },
-            { Image.RosMessageType, Resource.Module.Image },
-            { CompressedImage.RosMessageType, Resource.Module.Image },
-            { Marker.RosMessageType, Resource.Module.Marker },
-            { MarkerArray.RosMessageType, Resource.Module.Marker },
-            { InteractiveMarkerUpdate.RosMessageType, Resource.Module.InteractiveMarker },
-            { JointState.RosMessageType, Resource.Module.JointState },
-            { LaserScan.RosMessageType, Resource.Module.LaserScan },
-        };
-
-        public static IReadOnlyDictionary<string, Resource.Module> ResourceByRosMessageType => resourceByRosMessageType;
-
         public string Topic { get; set; }
         public bool Connected;
         public bool Subscribed;
@@ -43,7 +30,6 @@ namespace Iviz.App
 
         public void UpdateStats()
         {
-            /*
             if (Listener == null)
             {
                 return;
@@ -56,10 +42,10 @@ namespace Iviz.App
             MessagesPerSecond = stats.MessagesPerSecond;
             MessagesJitterMax = stats.JitterMax;
             MessagesJitterMin = stats.JitterMin;
-            */
         }
 
     }
+*/
 
     public abstract class TopicListener : MonoBehaviour
     {

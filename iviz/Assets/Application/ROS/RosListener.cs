@@ -33,7 +33,7 @@ namespace Iviz.App
     {
         public string Topic { get; }
         public string Type { get; }
-        public RosListenerStats Stats { get; protected set; }
+        public RosListenerStats Stats { get; protected set; } = new RosListenerStats();
 
         protected RosListener(string topic, string type)
         {

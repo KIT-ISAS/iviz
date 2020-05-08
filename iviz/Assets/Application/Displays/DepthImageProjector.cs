@@ -2,7 +2,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Iviz.App
+namespace Iviz.App.Displays
 {
     public class DepthImageProjector : MonoBehaviour, IDisplay
     {

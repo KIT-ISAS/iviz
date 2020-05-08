@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Iviz.App
+namespace Iviz.App.Displays
 {
     public class ImageResource : MonoBehaviour, IDisplay
     {
@@ -44,10 +44,10 @@ namespace Iviz.App
             }
         }
         public float Width => Scale;
-        float AspectRatio => (Texture == null || Texture.Width == 0) ? 1 : Texture.Height / Texture.Width;
+        float AspectRatio => (Texture == null || Texture.Width == 0) ? 1 : (float)Texture.Height / Texture.Width;
         public float Height => Width * AspectRatio;
         public string Name => "ImageResource";
-        public Bounds Bounds => new Bounds(Vector3.zero, Scale * new Vector3(1, 0.02f, AspectRatio));
+        public Bounds Bounds => new Bounds(Collider.center, Collider.size);
         public Bounds WorldBounds => Collider.bounds;
 
         public bool ColliderEnabled

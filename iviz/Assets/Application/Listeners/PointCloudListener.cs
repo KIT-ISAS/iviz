@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Iviz.App.Displays;
 using Iviz.Msgs.sensor_msgs;
 using UnityEngine;
 
@@ -77,7 +78,7 @@ namespace Iviz.App
 
         void Awake()
         {
-            node = SimpleDisplayNode.Instantiate(transform);
+            node = SimpleDisplayNode.Instantiate("PointCloudNode", transform);
             pointCloud = ResourcePool.GetOrCreate(Resource.Markers.PointList, node.transform).GetComponent<PointListResource>();
 
             Config = new Configuration();
@@ -88,6 +89,8 @@ namespace Iviz.App
         {
             base.StartListening();
             Listener = new RosListener<PointCloud2>(config.topic, Handler);
+            name = "PointCloud:" + config.topic;
+            node.name = "PointCloudNode:" + config.topic;
         }
 
         static int FieldSizeFromType(int datatype)

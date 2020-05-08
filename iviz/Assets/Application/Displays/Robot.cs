@@ -4,6 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 using RosSharp.Urdf;
 using System;
+using Iviz.App.Displays;
 
 namespace Iviz.App
 {
@@ -14,6 +15,10 @@ namespace Iviz.App
 
     public class Robot : ClickableDisplayNode
     {
+        BoxCollider robotCollider;
+        public override Bounds Bounds => robotCollider != null ? new Bounds(robotCollider.center, robotCollider.size) : new Bounds();
+        public override Bounds WorldBounds => robotCollider?.bounds ?? new Bounds();
+
         public GameObject RobotObject { get; private set; }
         public GameObject BaseLink { get; private set; }
 
@@ -185,6 +190,7 @@ namespace Iviz.App
             }
         }
 
+        
         void Awake()
         {
             gameObject.layer = Resource.ClickableLayer;
@@ -211,11 +217,10 @@ namespace Iviz.App
 
             Name = Name; // update name;
 
-            BoxCollider robotCollider = RobotObject.GetComponent<BoxCollider>();
+            robotCollider = RobotObject.GetComponent<BoxCollider>();
             boxCollider.size = robotCollider.size;
             boxCollider.center = robotCollider.center;
 
-            Bounds = robotCollider.bounds;
             if (Selected)
             {
                 Selected = true; // update bounds
@@ -337,6 +342,7 @@ namespace Iviz.App
             }
             config.robotResource = null;
             RobotObject = null;
+            robotCollider = null;
             if (robotInfo != null)
             {
                 robotInfo.owner = null;

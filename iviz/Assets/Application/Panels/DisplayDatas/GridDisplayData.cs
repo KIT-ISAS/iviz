@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Iviz.App.Displays;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 namespace Iviz.App

@@ -1,17 +1,28 @@
-﻿
-#if USING_VR
-using Valve.VR;
+﻿#define USING_VR
 
-namespace ISAS
+#if USING_VR
+using Iviz.App.Displays;
+using Iviz.Msgs.sensor_msgs;
+using Iviz.Msgs.std_msgs;
+using Iviz.Msgs.tf2_msgs;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using Valve.VR;
+using Valve.VR.InteractionSystem;
+
+namespace Iviz.App
 {
     public class ControllerManager : MonoBehaviour
     {
         const float SendPeriod = 0.033f;
         public GameObject LeftController;
         public GameObject RightController;
-        public GameObject LeftCollider;
-        public GameObject RightCollider;
+        //public GameObject LeftCollider;
+        //public GameObject RightCollider;
         public GameObject RightShoulderMarker;
+        public GameObject CameraRig;
         bool prevLeftDown;
         bool prevRightDown;
 
@@ -19,65 +30,76 @@ namespace ISAS
         public SteamVR_Input_Sources RightInputSource = SteamVR_Input_Sources.RightHand;
         public SteamVR_Input_Sources RightShoulderSource = SteamVR_Input_Sources.RightShoulder;
 
-        public string LeftControllerTopic = "/vr/left_controller";
-        public string RightControllerTopic = "/vr/right_controller";
-        public string RightShoulderMarkerTopic = "/vr/marker_rs";
-        public string TfTopic = "/tf";
-        public string LeftFrameName = "vr/left_controller";
-        public string RightFrameName = "vr/right_controller";
-        public string RightShoulderMarkerName = "vr/marker_rs";
+        public string LeftControllerTopic { get; } = "/holodeck/vive_left";
+        public string RightControllerTopic { get; } = "/holodeck/vive_right";
+        public string RightShoulderMarkerTopic { get; } = "/holodeck/marker_rs";
+        public string TfTopic { get; } = "/tf";
+        public string LeftFrameName { get; } = "/holodeck/left_controller";
+        public string RightFrameName { get; } = "/holodeck/right_controller";
+        public string RightShoulderMarkerName { get; } = "/holodeck/marker_rs";
 
-        /*
         RosSender<Joy> rosSenderLeft, rosSenderRight;
         RosSender<TFMessage> rosSenderTF;
-        */
 
         public InteractiveMarkerListener interactiveMarkerListener;
 
 
         public void Start()
         {
+            Teleport.instance.CancelTeleportHint();
             //LeftCollider.GetComponent<MeshRenderer>().enabled = false;
             //RightCollider.GetComponent<MeshRenderer>().enabled = false;
 
-            /*
+
             rosSenderLeft = new RosSender<Joy>(LeftControllerTopic);
             rosSenderRight = new RosSender<Joy>(RightControllerTopic);
             rosSenderTF = new RosSender<TFMessage>(TfTopic);
-            */
-            ConnectionManager.Instance.Advertise<Joy>(LeftControllerTopic);
-            ConnectionManager.Instance.Advertise<Joy>(RightControllerTopic);
-            ConnectionManager.Instance.Advertise<TFMessage>(TfTopic);
+            
+            //ConnectionManager.Instance.Advertise<Joy>(LeftControllerTopic);
+            //ConnectionManager.Instance.Advertise<Joy>(RightControllerTopic);
+            //ConnectionManager.Instance.Advertise<TFMessage>(TfTopic);
         }
 
         enum Button
         {
-            Grip = 0,
-            Menu = 1,
-            Trackpad = 2
+            Trigger = 0,
+            Trackpad_Touched = 1,
+            Trackpad_Pressed = 2,
+            Menu = 3,
+            Gripper = 3,
         }
+
+        uint joySeq = 0;
 
         Joy CreateJoyMessage(SteamVR_Input_Sources inputSource, string frameName)
         {
-            List<int> buttons = new List<int>();
+            int[] buttons = { 0, 0, 0, 0, 0 };
             float squeeze = SteamVR_Actions._default.Squeeze.GetAxis(inputSource);
             if (squeeze > 0.7f)
             {
-                buttons.Add((int)Button.Grip);
+                buttons[(int)Button.Trigger] = 1;
             }
             if (SteamVR_Actions._default.MenuClick.GetState(inputSource))
             {
-                buttons.Add((int)Button.Menu);
+                buttons[(int)Button.Menu] = 1;
             }
             if (SteamVR_Actions._default.TrackpadClick.GetState(inputSource))
             {
-                buttons.Add((int)Button.Trackpad);
+                buttons[(int)Button.Trackpad_Pressed] = 1;
             }
             Vector2 trackpadPos = SteamVR_Actions._default.TrackpadTouch.GetAxis(inputSource);
+            if (trackpadPos.sqrMagnitude != 0.0f)
+            {
+                buttons[(int)Button.Trackpad_Touched] = 1;
+            }
 
             return new Joy()
             {
-                header = new Header(0, Utils.GetRosTime(), frameName),
+                header = new Header {
+                    seq = joySeq++,
+                    stamp = Utils.GetRosTime(), 
+                    frame_id = frameName
+                },
                 buttons = buttons.ToArray(),
                 axes = new[]
                 {
@@ -86,21 +108,22 @@ namespace ISAS
             };
         }
 
+        uint tfSeq = 0;
         TFMessage CreateTfMessage()
         {
             return new TFMessage
             {
                 transforms = new[]
                 {
-                    new RosSharp.RosBridgeClient.MessageTypes.Geometry.TransformStamped
+                    new Msgs.geometry_msgs.TransformStamped
                     {
-                        header = Utils.CreateHeader(0, TFListener.BaseFrame.Id),
+                        header = Utils.CreateHeader(tfSeq++, TFListener.BaseFrame.Id),
                         child_frame_id = LeftFrameName,
                         transform = LeftController.transform.AsPose().Unity2RosTransform(),
                     },
-                    new RosSharp.RosBridgeClient.MessageTypes.Geometry.TransformStamped
+                    new Msgs.geometry_msgs.TransformStamped
                     {
-                        header = Utils.CreateHeader(0, TFListener.BaseFrame.Id),
+                        header = Utils.CreateHeader(tfSeq++, TFListener.BaseFrame.Id),
                         child_frame_id = RightFrameName,
                         transform = RightController.transform.AsPose().Unity2RosTransform()
                     },
@@ -124,12 +147,12 @@ namespace ISAS
 
             Collider hitCollider = null;
 
-            List<ClickableDisplay> hitObjects = new List<ClickableDisplay>();
+            List<ClickableDisplayNode> hitObjects = new List<ClickableDisplayNode>();
             List<Collider> hitColliders = new List<Collider>();
 
             foreach (Collider c in colliders)
             {
-                ClickableDisplay obj = c.GetComponentInParent<ClickableDisplay>();
+                ClickableDisplayNode obj = c.GetComponentInParent<ClickableDisplayNode>();
                 if (obj == null)
                 {
                     continue;
@@ -138,7 +161,7 @@ namespace ISAS
                 hitColliders.Add(c);
             }
 
-            ClickableDisplay hitObject;
+            ClickableDisplayNode hitObject;
             if (!hitObjects.Any())
             {
                 hitObject = null;
@@ -180,7 +203,7 @@ namespace ISAS
 
             if (rightClick)
             {
-                interactiveMarkerListener = GameObject.Find("InteractiveMarkers").GetComponent<InteractiveMarkerListener>();
+                interactiveMarkerListener = GameObject.Find("InteractiveMarkers")?.GetComponent<InteractiveMarkerListener>();
                 if (interactiveMarkerListener != null)
                 {
                     interactiveMarkerListener.ClearAll();
@@ -223,21 +246,21 @@ namespace ISAS
         int frame = 0;
         public void Update()
         {
-            frame++;
-            if ((frame % 10) == 0)
-            {
+            //frame++;
+            //if ((frame % 10) == 0)
+            //{
 
                 Joy leftMsg = CreateJoyMessage(LeftInputSource, LeftFrameName);
-                ConnectionManager.Instance.Publish(LeftControllerTopic, leftMsg);
-                //rosSenderLeft.PublishPeriodic(leftMsg, 0.033f);
+                //ConnectionManager.Instance.Publish(LeftControllerTopic, leftMsg);
+                rosSenderLeft.Publish(leftMsg);
 
                 Joy rightMsg = CreateJoyMessage(RightInputSource, RightFrameName);
-                ConnectionManager.Instance.Publish(RightControllerTopic, rightMsg);
-                //rosSenderRight.PublishPeriodic(rightMsg, 0.033f);
+                //ConnectionManager.Instance.Publish(RightControllerTopic, rightMsg);
+                rosSenderRight.Publish(rightMsg);
 
                 TFMessage tFMsg = CreateTfMessage();
-                ConnectionManager.Instance.Publish(TfTopic, tFMsg);
-            }
+                rosSenderTF.Publish(tFMsg);
+            //}
 
             CheckForSelectClick();
         }

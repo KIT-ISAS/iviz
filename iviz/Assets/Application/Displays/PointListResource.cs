@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
-namespace Iviz.App
+namespace Iviz.App.Displays
 {
     [StructLayout(LayoutKind.Explicit)]
     public struct PointWithColor
@@ -29,7 +29,6 @@ namespace Iviz.App
     public class PointListResource : MarkerResource
     {
         Material material;
-        BoxCollider boxCollider;
 
         PointWithColor[] pointBuffer = new PointWithColor[0];
         ComputeBuffer pointComputeBuffer;
@@ -170,9 +169,9 @@ namespace Iviz.App
                     pointBuffer[index++].position = pos;
                 }
                 pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
-                Bounds = CalculateBounds();
-                boxCollider.center = Bounds.center;
-                boxCollider.size = Bounds.size;
+                Bounds bounds = CalculateBounds();
+                Collider.center = bounds.center;
+                Collider.size = bounds.size;
             }
         }
 
@@ -189,9 +188,9 @@ namespace Iviz.App
                 pointBuffer[i] = points[i];
             }
             pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
-            Bounds = CalculateBounds();
-            boxCollider.center = Bounds.center;
-            boxCollider.size = Bounds.size;
+            Bounds bounds = CalculateBounds();
+            Collider.center = bounds.center;
+            Collider.size = bounds.size;
         }
 
         Vector2 scale;
@@ -213,7 +212,6 @@ namespace Iviz.App
         protected override void Awake()
         {
             base.Awake();
-            boxCollider = Collider as BoxCollider;
 
             material = Instantiate(Resource.Materials.PointCloud);
             material.DisableKeyword("USE_TEXTURE");
@@ -263,7 +261,7 @@ namespace Iviz.App
             material.SetMatrix(PropLocalToWorld, transform.localToWorldMatrix);
             material.SetMatrix(PropWorldToLocal, transform.worldToLocalMatrix);
 
-            Bounds worldBounds = boxCollider.bounds;
+            Bounds worldBounds = Collider.bounds;
             Graphics.DrawProcedural(material, worldBounds, MeshTopology.Quads, 4, Size);
         }
 
@@ -295,10 +293,12 @@ namespace Iviz.App
             if (pointComputeBuffer != null)
             {
                 pointComputeBuffer.Release();
+                pointComputeBuffer = null;
             }
             if (quadComputeBuffer != null)
             {
                 quadComputeBuffer.Release();
+                quadComputeBuffer = null;
             }
         }
 

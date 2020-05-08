@@ -3,7 +3,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
-namespace Iviz.App
+namespace Iviz.App.Displays
 {
     public sealed class MeshListResource : MarkerResource
     {
@@ -115,7 +115,6 @@ namespace Iviz.App
         {
             baseBounds = CalculateBounds();
 
-            Bounds = new Bounds(baseBounds.center, baseBounds.size + Scale);
             boxCollider.center = Bounds.center;
             boxCollider.size = Bounds.size;
         }

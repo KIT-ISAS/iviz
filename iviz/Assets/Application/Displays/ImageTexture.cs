@@ -9,7 +9,7 @@ namespace Iviz.App
     {
         byte[] rgbaBuffer;
         byte[] pngBuffer;
-        
+
         public event Action<Texture2D> TextureChanged;
 
         public event Action<Texture2D> ColormapChanged;
@@ -176,18 +176,35 @@ namespace Iviz.App
                 return;
             }
 
-            IsMono = false;
-
-            Material.DisableKeyword("FLIP_RB");
-            Material.DisableKeyword("USE_INTENSITY");
+            Description = $"Format: {width}x{height} {encoding}";
 
             switch (encoding)
             {
                 case "rgba8":
+                    IsMono = false;
+                    Material.DisableKeyword("USE_INTENSITY");
+                    Material.DisableKeyword("FLIP_RB");
+                    ApplyTexture(width, height, data, encoding, size * 4);
+                    break;
                 case "bgra8":
+                    IsMono = false;
+                    Material.DisableKeyword("USE_INTENSITY");
+                    Material.EnableKeyword("FLIP_RB");
                     ApplyTexture(width, height, data, encoding, size * 4);
                     break;
                 case "rgb8":
+                    Task.Run(() =>
+                    {
+                        FillRGBABuffer(width, height, data);
+                        GameThread.RunOnce(() =>
+                        {
+                            ApplyTexture(width, height, rgbaBuffer, encoding, size * 4);
+                            IsMono = false;
+                            Material.DisableKeyword("USE_INTENSITY");
+                            Material.DisableKeyword("FLIP_RB");
+                        });
+                    });
+                    break;
                 case "bgr8":
                     Task.Run(() =>
                     {
@@ -195,29 +212,23 @@ namespace Iviz.App
                         GameThread.RunOnce(() =>
                         {
                             ApplyTexture(width, height, rgbaBuffer, encoding, size * 4);
-                            if (encoding == "bgr8")
-                            {
-                                Material.EnableKeyword("FLIP_RB");
-                            }
+                            IsMono = false;
+                            Material.DisableKeyword("USE_INTENSITY");
+                            Material.EnableKeyword("FLIP_RB");
                         });
                     });
                     break;
                 case "mono16":
                     IsMono = true;
+                    Material.EnableKeyword("USE_INTENSITY");
                     ApplyTexture(width, height, data, encoding, size * 2);
                     break;
                 case "mono8":
                     IsMono = true;
+                    Material.EnableKeyword("USE_INTENSITY");
                     ApplyTexture(width, height, data, encoding, size);
                     break;
             }
-
-            if (IsMono)
-            {
-                Material.EnableKeyword("USE_INTENSITY");
-            }
-
-            Description = $"Format: {width}x{height} {encoding}";
         }
 
 

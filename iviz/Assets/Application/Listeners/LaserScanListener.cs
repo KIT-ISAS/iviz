@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Iviz.App.Displays;
 using Iviz.Msgs.sensor_msgs;
 using RosSharp;
 using UnityEngine;
@@ -84,7 +85,10 @@ namespace Iviz.App
 
         void Awake()
         {
-            pointCloud = ResourcePool.GetOrCreate(Resource.Markers.PointList, transform).GetComponent<PointListResource>();
+            transform.parent = TFListener.ListenersFrame.transform;
+
+            node = SimpleDisplayNode.Instantiate("LaserScanNode", transform);
+            pointCloud = ResourcePool.GetOrCreate(Resource.Markers.PointList, node.transform).GetComponent<PointListResource>();
             Config = new Configuration();
         }
 
@@ -92,6 +96,8 @@ namespace Iviz.App
         {
             base.StartListening();
             Listener = new RosListener<LaserScan>(config.topic, Handler);
+            name = "LaserScan:" + config.topic;
+            node.name = "LaserScanNode:" + config.topic;
         }
 
         void Handler(LaserScan msg)

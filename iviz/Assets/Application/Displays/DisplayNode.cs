@@ -7,7 +7,10 @@ namespace Iviz.App
     {
         void Recycle();
     }
+}
 
+namespace Iviz.App.Displays
+{
     public interface IDisplay
     {
         string Name { get; }
@@ -21,9 +24,6 @@ namespace Iviz.App
 
     public abstract class DisplayNode : MonoBehaviour
     {
-        public static Color EnabledFontColor { get; } = new Color(0.196f, 0.196f, 0.196f);
-        public static Color DisabledFontColor { get; } = EnabledFontColor * 3;
-
         TFFrame parent;
         public virtual TFFrame Parent
         {
@@ -67,9 +67,9 @@ namespace Iviz.App
 
     public sealed class SimpleDisplayNode : DisplayNode
     {
-        public static SimpleDisplayNode Instantiate(Transform transform)
+        public static SimpleDisplayNode Instantiate(string name, Transform transform)
         {
-            GameObject obj = new GameObject("DisplayNode");
+            GameObject obj = new GameObject(name);
             obj.transform.parent = transform;
             return obj.AddComponent<SimpleDisplayNode>();
         }

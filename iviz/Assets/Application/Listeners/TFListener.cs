@@ -6,6 +6,7 @@ using System.Linq;
 using Iviz.Msgs.tf;
 using Iviz.Msgs.geometry_msgs;
 using Iviz.RoslibSharp;
+using Iviz.App.Displays;
 
 namespace Iviz.App
 {
@@ -129,14 +130,14 @@ namespace Iviz.App
         {
             Instance = this;
 
-            dummy = SimpleDisplayNode.Instantiate(transform);
+            dummy = SimpleDisplayNode.Instantiate("TFNode", transform);
 
             mainCamera = GameObject.Find("MainCamera").GetComponent<Camera>();
             guiManager = mainCamera.GetComponent<FlyCamera>();
 
             Config = new Configuration();
 
-            BaseFrame = Add(CreateFrameObject("world", gameObject));
+            BaseFrame = Add(CreateFrameObject("map", gameObject));
             BaseFrame.AddListener(null);
 
             ListenersFrame = Add(CreateFrameObject("_displays_", gameObject));

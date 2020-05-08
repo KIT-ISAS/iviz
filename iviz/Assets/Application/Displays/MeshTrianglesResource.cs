@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace Iviz.App
+namespace Iviz.App.Displays
 {
     public class MeshTrianglesResource : MarkerResource
     {
         public Mesh Mesh { get; private set; }
 
-        public Color color;
+        Color color;
         public Color Color
         {
             get => color;
@@ -79,11 +79,11 @@ namespace Iviz.App
             Mesh.Clear();
             SetVertices(points);
             Mesh.SetTriangles(triangles, 0);
-            Mesh.RecalculateBounds();
             Mesh.RecalculateNormals();
 
-            ((BoxCollider)Collider).center = Mesh.bounds.center;
-            ((BoxCollider)Collider).size = Mesh.bounds.size;
+            Collider.center = Mesh.bounds.center;
+            Collider.size = Mesh.bounds.size;
+            //Bounds = Mesh.bounds;
         }
 
         public void Set(IList<Vector3> points, IList<int> triangles)

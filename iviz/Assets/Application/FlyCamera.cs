@@ -1,4 +1,5 @@
 ﻿
+using Iviz.App.Displays;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -70,7 +71,7 @@ namespace Iviz.App
         void Start()
         {
             mainCamera = GetComponent<Camera>();
-            namedBoundary = ResourcePool.GetOrCreate(Resource.Markers.NamedBoundary, transform).GetComponent<NamedBoundary>();
+            namedBoundary = ResourcePool.GetOrCreate(Resource.Markers.NamedBoundary).GetComponent<NamedBoundary>();
             StartOrbiting();
         }
 
@@ -82,8 +83,9 @@ namespace Iviz.App
             }
             SelectedDisplay.Selected = false;
             SelectedDisplay = null;
-            namedBoundary.Active = false;
-            namedBoundary.transform.SetParentLocal(transform);
+            namedBoundary.Target = null;
+            //namedBoundary.Active = false;
+            //namedBoundary.transform.SetParentLocal(transform);
         }
 
         public void Select(ClickableDisplayNode display)
@@ -92,7 +94,7 @@ namespace Iviz.App
             {
                 return;
             }
-            namedBoundary.Active = false;
+            //namedBoundary.Active = false;
 
             if (SelectedDisplay != null)
             {
@@ -111,13 +113,15 @@ namespace Iviz.App
             {
                 return;
             }
-
+            namedBoundary.Target = display;
+            /*
             float maxSize = Mathf.Max(Mathf.Max(bounds.size.x, bounds.size.y), bounds.size.z);
             namedBoundary.Bounds = bounds;
             namedBoundary.LabelOffset = parent.TransformDirection(bounds.center) + new Vector3(0, maxSize / 2 + 0.15f, 0);
             namedBoundary.Name = name;
             namedBoundary.transform.SetParentLocal(parent);
             namedBoundary.Active = true;
+            */
         }
 
         float tmpAltDistance;

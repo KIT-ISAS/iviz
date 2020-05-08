@@ -22,7 +22,7 @@ namespace Iviz.App
             set
             {
                 interactable = value;
-                label.color = value ? DisplayNode.EnabledFontColor : DisplayNode.DisabledFontColor;
+                label.color = value ? Resource.Colors.EnabledFontColor : Resource.Colors.DisabledFontColor;
             }
         }
 

@@ -270,7 +270,7 @@ namespace Iviz.App
 
         public DisplayData CreateDisplayForTopic(string topic, string type)
         {
-            if (!DisplayableListener.ResourceByRosMessageType.TryGetValue(type, out Resource.Module resource))
+            if (!Resource.ResourceByRosMessageType.TryGetValue(type, out Resource.Module resource))
             {
                 return null;
             }

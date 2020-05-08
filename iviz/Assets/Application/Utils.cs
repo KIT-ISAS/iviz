@@ -68,12 +68,12 @@ namespace Iviz.App
             return ToRosVector3(p.Unity2Ros());
         }
 
-        public static Vector3 ToUnity(this Iviz.Msgs.geometry_msgs.Point p)
+        public static Vector3 ToUnity(this Msgs.geometry_msgs.Point p)
         {
             return new Vector3((float)p.x, (float)p.y, (float)p.z);
         }
 
-        public static Vector3 Ros2Unity(this Iviz.Msgs.geometry_msgs.Point p)
+        public static Vector3 Ros2Unity(this Msgs.geometry_msgs.Point p)
         {
             return ToUnity(p).Ros2Unity();
         }
@@ -81,6 +81,17 @@ namespace Iviz.App
         public static Color ToUnityColor(this ColorRGBA p)
         {
             return new Color(p.r, p.g, p.b, p.a);
+        }
+
+        public static ColorRGBA Sanitize(this ColorRGBA p)
+        {
+            return new ColorRGBA
+            {
+                r = Mathf.Max(Mathf.Min(p.r, 1), 0),
+                g = Mathf.Max(Mathf.Min(p.g, 1), 0),
+                b = Mathf.Max(Mathf.Min(p.b, 1), 0),
+                a = Mathf.Max(Mathf.Min(p.a, 1), 0),
+            };
         }
 
         public static Color32 ToUnityColor32(this ColorRGBA p)

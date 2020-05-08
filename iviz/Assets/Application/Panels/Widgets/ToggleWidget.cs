@@ -32,7 +32,7 @@ namespace Iviz.App
             set
             {
                 toggle.interactable = value;
-                label.color = value ? DisplayNode.EnabledFontColor : DisplayNode.DisabledFontColor;
+                label.color = value ? Resource.Colors.EnabledFontColor : Resource.Colors.DisabledFontColor;
             }
         }
 

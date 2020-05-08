@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace Iviz.App
+namespace Iviz.App.Displays
 {
     public sealed class MeshMarkerResource : MarkerResource
     {
@@ -14,7 +14,7 @@ namespace Iviz.App
             mainRenderer = GetComponent<MeshRenderer>();
         }
 
-        public Color color;
+        Color color;
         public Color Color
         {
             get => color;
