@@ -5,10 +5,10 @@ namespace Iviz.Msgs.nav_msgs
     public sealed class GridCells : IMessage
     {
         //an array of cells in a 2D grid
-        public std_msgs.Header header;
-        public float cell_width;
-        public float cell_height;
-        public geometry_msgs.Point[] cells;
+        public std_msgs.Header header { get; set; }
+        public float cell_width { get; set; }
+        public float cell_height { get; set; }
+        public geometry_msgs.Point[] cells { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GridCells()
@@ -17,20 +17,43 @@ namespace Iviz.Msgs.nav_msgs
             cells = System.Array.Empty<geometry_msgs.Point>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public GridCells(std_msgs.Header header, float cell_width, float cell_height, geometry_msgs.Point[] cells)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out cell_width, ref ptr, end);
-            BuiltIns.Deserialize(out cell_height, ref ptr, end);
-            BuiltIns.DeserializeStructArray(out cells, ref ptr, end, 0);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.cell_width = cell_width;
+            this.cell_height = cell_height;
+            this.cells = cells ?? throw new System.ArgumentNullException(nameof(cells));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal GridCells(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.cell_width = BuiltIns.DeserializeStruct<float>(b);
+            this.cell_height = BuiltIns.DeserializeStruct<float>(b);
+            this.cells = BuiltIns.DeserializeStructArray<geometry_msgs.Point>(b, 0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new GridCells(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.Serialize(cell_width, ref ptr, end);
-            BuiltIns.Serialize(cell_height, ref ptr, end);
-            BuiltIns.SerializeStructArray(cells, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            BuiltIns.Serialize(this.cell_width, b);
+            BuiltIns.Serialize(this.cell_height, b);
+            BuiltIns.SerializeStructArray(this.cells, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (cells is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -43,8 +66,6 @@ namespace Iviz.Msgs.nav_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new GridCells();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

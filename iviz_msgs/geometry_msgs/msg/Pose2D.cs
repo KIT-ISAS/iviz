@@ -14,28 +14,51 @@ namespace Iviz.Msgs.geometry_msgs
         
         // This expresses a position and orientation on a 2D manifold.
         
-        public double x;
-        public double y;
-        public double theta;
+        public double x { get; set; }
+        public double y { get; set; }
+        public double theta { get; set; }
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public Pose2D()
         {
-            BuiltIns.Deserialize(out x, ref ptr, end);
-            BuiltIns.Deserialize(out y, ref ptr, end);
-            BuiltIns.Deserialize(out theta, ref ptr, end);
+        }
+        
+        /// <summary> Explicit constructor. </summary>
+        public Pose2D(double x, double y, double theta)
+        {
+            this.x = x;
+            this.y = y;
+            this.theta = theta;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal Pose2D(Buffer b)
+        {
+            this.x = BuiltIns.DeserializeStruct<double>(b);
+            this.y = BuiltIns.DeserializeStruct<double>(b);
+            this.theta = BuiltIns.DeserializeStruct<double>(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new Pose2D(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(x, ref ptr, end);
-            BuiltIns.Serialize(y, ref ptr, end);
-            BuiltIns.Serialize(theta, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.x, b);
+            BuiltIns.Serialize(this.y, b);
+            BuiltIns.Serialize(this.theta, b);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 24;
-    
-        public IMessage Create() => new Pose2D();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

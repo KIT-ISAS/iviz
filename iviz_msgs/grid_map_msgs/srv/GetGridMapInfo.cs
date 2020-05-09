@@ -5,7 +5,7 @@ namespace Iviz.Msgs.grid_map_msgs
     public sealed class GetGridMapInfo : IService
     {
         /// <summary> Request message. </summary>
-        public GetGridMapInfoRequest Request { get; }
+        public GetGridMapInfoRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public GetGridMapInfoResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.grid_map_msgs
         
         public IService Create() => new GetGridMapInfo();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (GetGridMapInfoRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (GetGridMapInfoResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -52,7 +60,7 @@ namespace Iviz.Msgs.grid_map_msgs
     {
         
         // Grid map info
-        public grid_map_msgs.GridMapInfo info;
+        public grid_map_msgs.GridMapInfo info { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetGridMapInfoResponse()
@@ -60,14 +68,33 @@ namespace Iviz.Msgs.grid_map_msgs
             info = new grid_map_msgs.GridMapInfo();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public GetGridMapInfoResponse(grid_map_msgs.GridMapInfo info)
         {
-            info.Deserialize(ref ptr, end);
+            this.info = info ?? throw new System.ArgumentNullException(nameof(info));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal GetGridMapInfoResponse(Buffer b)
+        {
+            this.info = new grid_map_msgs.GridMapInfo(b);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new GetGridMapInfoResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            info.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.info.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (info is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

@@ -5,9 +5,9 @@ namespace Iviz.Msgs.mesh_msgs
     public sealed class MeshGeometry : IMessage
     {
         // Mesh Geometry Message
-        public geometry_msgs.Point[] vertices;
-        public geometry_msgs.Point[] vertex_normals;
-        public mesh_msgs.TriangleIndices[] faces;
+        public geometry_msgs.Point[] vertices { get; set; }
+        public geometry_msgs.Point[] vertex_normals { get; set; }
+        public mesh_msgs.TriangleIndices[] faces { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshGeometry()
@@ -17,18 +17,41 @@ namespace Iviz.Msgs.mesh_msgs
             faces = System.Array.Empty<mesh_msgs.TriangleIndices>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public MeshGeometry(geometry_msgs.Point[] vertices, geometry_msgs.Point[] vertex_normals, mesh_msgs.TriangleIndices[] faces)
         {
-            BuiltIns.DeserializeStructArray(out vertices, ref ptr, end, 0);
-            BuiltIns.DeserializeStructArray(out vertex_normals, ref ptr, end, 0);
-            BuiltIns.DeserializeStructArray(out faces, ref ptr, end, 0);
+            this.vertices = vertices ?? throw new System.ArgumentNullException(nameof(vertices));
+            this.vertex_normals = vertex_normals ?? throw new System.ArgumentNullException(nameof(vertex_normals));
+            this.faces = faces ?? throw new System.ArgumentNullException(nameof(faces));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal MeshGeometry(Buffer b)
+        {
+            this.vertices = BuiltIns.DeserializeStructArray<geometry_msgs.Point>(b, 0);
+            this.vertex_normals = BuiltIns.DeserializeStructArray<geometry_msgs.Point>(b, 0);
+            this.faces = BuiltIns.DeserializeArray<mesh_msgs.TriangleIndices>(b, 0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new MeshGeometry(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.SerializeStructArray(vertices, ref ptr, end, 0);
-            BuiltIns.SerializeStructArray(vertex_normals, ref ptr, end, 0);
-            BuiltIns.SerializeStructArray(faces, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.SerializeStructArray(this.vertices, b, 0);
+            BuiltIns.SerializeStructArray(this.vertex_normals, b, 0);
+            BuiltIns.SerializeArray(this.faces, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (vertices is null) throw new System.NullReferenceException();
+            if (vertex_normals is null) throw new System.NullReferenceException();
+            if (faces is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -42,8 +65,6 @@ namespace Iviz.Msgs.mesh_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new MeshGeometry();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

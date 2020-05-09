@@ -247,7 +247,7 @@ namespace Iviz.RoslibSharp
                     }
 
                     IService serviceMsg = ServiceInfo.Generator.Create();
-                    BuiltIns.Deserialize(serviceMsg.Request, readBuffer, rcvLength);
+                    serviceMsg.Request = BuiltIns.Deserialize(serviceMsg.Request, readBuffer, rcvLength);
                     NumReceived++;
                     BytesReceived += rcvLength + 4;
 

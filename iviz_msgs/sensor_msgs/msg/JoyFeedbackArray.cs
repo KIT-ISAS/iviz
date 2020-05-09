@@ -5,7 +5,7 @@ namespace Iviz.Msgs.sensor_msgs
     public sealed class JoyFeedbackArray : IMessage
     {
         // This message publishes values for multiple feedback at once. 
-        public JoyFeedback[] array;
+        public JoyFeedback[] array { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public JoyFeedbackArray()
@@ -13,14 +13,33 @@ namespace Iviz.Msgs.sensor_msgs
             array = System.Array.Empty<JoyFeedback>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public JoyFeedbackArray(JoyFeedback[] array)
         {
-            BuiltIns.DeserializeArray(out array, ref ptr, end, 0);
+            this.array = array ?? throw new System.ArgumentNullException(nameof(array));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal JoyFeedbackArray(Buffer b)
+        {
+            this.array = BuiltIns.DeserializeArray<JoyFeedback>(b, 0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new JoyFeedbackArray(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.SerializeArray(array, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.SerializeArray(this.array, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (array is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -32,8 +51,6 @@ namespace Iviz.Msgs.sensor_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new JoyFeedbackArray();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

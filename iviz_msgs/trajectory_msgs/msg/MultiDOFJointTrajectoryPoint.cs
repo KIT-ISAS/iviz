@@ -5,15 +5,15 @@ namespace Iviz.Msgs.trajectory_msgs
     public sealed class MultiDOFJointTrajectoryPoint : IMessage
     {
         // Each multi-dof joint can specify a transform (up to 6 DOF)
-        public geometry_msgs.Transform[] transforms;
+        public geometry_msgs.Transform[] transforms { get; set; }
         
         // There can be a velocity specified for the origin of the joint 
-        public geometry_msgs.Twist[] velocities;
+        public geometry_msgs.Twist[] velocities { get; set; }
         
         // There can be an acceleration specified for the origin of the joint 
-        public geometry_msgs.Twist[] accelerations;
+        public geometry_msgs.Twist[] accelerations { get; set; }
         
-        public duration time_from_start;
+        public duration time_from_start { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MultiDOFJointTrajectoryPoint()
@@ -23,20 +23,44 @@ namespace Iviz.Msgs.trajectory_msgs
             accelerations = System.Array.Empty<geometry_msgs.Twist>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public MultiDOFJointTrajectoryPoint(geometry_msgs.Transform[] transforms, geometry_msgs.Twist[] velocities, geometry_msgs.Twist[] accelerations, duration time_from_start)
         {
-            BuiltIns.DeserializeStructArray(out transforms, ref ptr, end, 0);
-            BuiltIns.DeserializeArray(out velocities, ref ptr, end, 0);
-            BuiltIns.DeserializeArray(out accelerations, ref ptr, end, 0);
-            BuiltIns.Deserialize(out time_from_start, ref ptr, end);
+            this.transforms = transforms ?? throw new System.ArgumentNullException(nameof(transforms));
+            this.velocities = velocities ?? throw new System.ArgumentNullException(nameof(velocities));
+            this.accelerations = accelerations ?? throw new System.ArgumentNullException(nameof(accelerations));
+            this.time_from_start = time_from_start;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal MultiDOFJointTrajectoryPoint(Buffer b)
+        {
+            this.transforms = BuiltIns.DeserializeStructArray<geometry_msgs.Transform>(b, 0);
+            this.velocities = BuiltIns.DeserializeArray<geometry_msgs.Twist>(b, 0);
+            this.accelerations = BuiltIns.DeserializeArray<geometry_msgs.Twist>(b, 0);
+            this.time_from_start = BuiltIns.DeserializeStruct<duration>(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new MultiDOFJointTrajectoryPoint(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.SerializeStructArray(transforms, ref ptr, end, 0);
-            BuiltIns.SerializeArray(velocities, ref ptr, end, 0);
-            BuiltIns.SerializeArray(accelerations, ref ptr, end, 0);
-            BuiltIns.Serialize(time_from_start, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.SerializeStructArray(this.transforms, b, 0);
+            BuiltIns.SerializeArray(this.velocities, b, 0);
+            BuiltIns.SerializeArray(this.accelerations, b, 0);
+            BuiltIns.Serialize(this.time_from_start, b);
+        }
+        
+        public void Validate()
+        {
+            if (transforms is null) throw new System.NullReferenceException();
+            if (velocities is null) throw new System.NullReferenceException();
+            if (accelerations is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -50,8 +74,6 @@ namespace Iviz.Msgs.trajectory_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new MultiDOFJointTrajectoryPoint();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

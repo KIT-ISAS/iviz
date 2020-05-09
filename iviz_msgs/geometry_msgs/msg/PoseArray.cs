@@ -6,9 +6,9 @@ namespace Iviz.Msgs.geometry_msgs
     {
         // An array of poses with a header for global reference.
         
-        public std_msgs.Header header;
+        public std_msgs.Header header { get; set; }
         
-        public Pose[] poses;
+        public Pose[] poses { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public PoseArray()
@@ -17,16 +17,37 @@ namespace Iviz.Msgs.geometry_msgs
             poses = System.Array.Empty<Pose>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public PoseArray(std_msgs.Header header, Pose[] poses)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.DeserializeStructArray(out poses, ref ptr, end, 0);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.poses = poses ?? throw new System.ArgumentNullException(nameof(poses));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal PoseArray(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.poses = BuiltIns.DeserializeStructArray<Pose>(b, 0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new PoseArray(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.SerializeStructArray(poses, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            BuiltIns.SerializeStructArray(this.poses, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (poses is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -39,8 +60,6 @@ namespace Iviz.Msgs.geometry_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new PoseArray();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

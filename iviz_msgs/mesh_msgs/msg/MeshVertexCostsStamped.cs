@@ -5,10 +5,10 @@ namespace Iviz.Msgs.mesh_msgs
     public sealed class MeshVertexCostsStamped : IMessage
     {
         // Mesh Attribute Message
-        public std_msgs.Header header;
-        public string uuid;
-        public string type;
-        public mesh_msgs.MeshVertexCosts mesh_vertex_costs;
+        public std_msgs.Header header { get; set; }
+        public string uuid { get; set; }
+        public string type { get; set; }
+        public mesh_msgs.MeshVertexCosts mesh_vertex_costs { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshVertexCostsStamped()
@@ -19,20 +19,45 @@ namespace Iviz.Msgs.mesh_msgs
             mesh_vertex_costs = new mesh_msgs.MeshVertexCosts();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public MeshVertexCostsStamped(std_msgs.Header header, string uuid, string type, mesh_msgs.MeshVertexCosts mesh_vertex_costs)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out uuid, ref ptr, end);
-            BuiltIns.Deserialize(out type, ref ptr, end);
-            mesh_vertex_costs.Deserialize(ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.uuid = uuid ?? throw new System.ArgumentNullException(nameof(uuid));
+            this.type = type ?? throw new System.ArgumentNullException(nameof(type));
+            this.mesh_vertex_costs = mesh_vertex_costs ?? throw new System.ArgumentNullException(nameof(mesh_vertex_costs));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal MeshVertexCostsStamped(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.uuid = BuiltIns.DeserializeString(b);
+            this.type = BuiltIns.DeserializeString(b);
+            this.mesh_vertex_costs = new mesh_msgs.MeshVertexCosts(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new MeshVertexCostsStamped(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.Serialize(uuid, ref ptr, end);
-            BuiltIns.Serialize(type, ref ptr, end);
-            mesh_vertex_costs.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            BuiltIns.Serialize(this.uuid, b);
+            BuiltIns.Serialize(this.type, b);
+            this.mesh_vertex_costs.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (uuid is null) throw new System.NullReferenceException();
+            if (type is null) throw new System.NullReferenceException();
+            if (mesh_vertex_costs is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -47,8 +72,6 @@ namespace Iviz.Msgs.mesh_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new MeshVertexCostsStamped();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

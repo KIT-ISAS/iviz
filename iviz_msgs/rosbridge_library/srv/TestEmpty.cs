@@ -5,7 +5,7 @@ namespace Iviz.Msgs.rosbridge_library
     public sealed class TestEmpty : IService
     {
         /// <summary> Request message. </summary>
-        public TestEmptyRequest Request { get; }
+        public TestEmptyRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public TestEmptyResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.rosbridge_library
         
         public IService Create() => new TestEmpty();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (TestEmptyRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (TestEmptyResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         

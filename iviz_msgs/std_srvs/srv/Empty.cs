@@ -5,7 +5,7 @@ namespace Iviz.Msgs.std_srvs
     public sealed class Empty : IService
     {
         /// <summary> Request message. </summary>
-        public EmptyRequest Request { get; }
+        public EmptyRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public EmptyResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.std_srvs
         
         public IService Create() => new Empty();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (EmptyRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (EmptyResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         

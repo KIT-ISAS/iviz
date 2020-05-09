@@ -5,16 +5,16 @@ namespace Iviz.Msgs.mesh_msgs
     public sealed class MeshFaceClusterStamped : IMessage
     {
         // header
-        public std_msgs.Header header;
+        public std_msgs.Header header { get; set; }
         
         // mesh uuid
-        public string uuid;
+        public string uuid { get; set; }
         
         // Cluster
-        public MeshFaceCluster cluster;
+        public MeshFaceCluster cluster { get; set; }
         
         // overwrite existing labeled faces
-        public bool @override;
+        public bool @override { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshFaceClusterStamped()
@@ -24,20 +24,44 @@ namespace Iviz.Msgs.mesh_msgs
             cluster = new MeshFaceCluster();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public MeshFaceClusterStamped(std_msgs.Header header, string uuid, MeshFaceCluster cluster, bool @override)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out uuid, ref ptr, end);
-            cluster.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out @override, ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.uuid = uuid ?? throw new System.ArgumentNullException(nameof(uuid));
+            this.cluster = cluster ?? throw new System.ArgumentNullException(nameof(cluster));
+            this.@override = @override;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal MeshFaceClusterStamped(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.uuid = BuiltIns.DeserializeString(b);
+            this.cluster = new MeshFaceCluster(b);
+            this.@override = BuiltIns.DeserializeStruct<bool>(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new MeshFaceClusterStamped(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.Serialize(uuid, ref ptr, end);
-            cluster.Serialize(ref ptr, end);
-            BuiltIns.Serialize(@override, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            BuiltIns.Serialize(this.uuid, b);
+            this.cluster.Serialize(b);
+            BuiltIns.Serialize(this.@override, b);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (uuid is null) throw new System.NullReferenceException();
+            if (cluster is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -51,8 +75,6 @@ namespace Iviz.Msgs.mesh_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new MeshFaceClusterStamped();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

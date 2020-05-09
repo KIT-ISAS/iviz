@@ -6,8 +6,8 @@ namespace Iviz.Msgs.geometry_msgs
     {
         // This expresses an estimated pose with a reference coordinate frame and timestamp
         
-        public std_msgs.Header header;
-        public PoseWithCovariance pose;
+        public std_msgs.Header header { get; set; }
+        public PoseWithCovariance pose { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public PoseWithCovarianceStamped()
@@ -16,16 +16,37 @@ namespace Iviz.Msgs.geometry_msgs
             pose = new PoseWithCovariance();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public PoseWithCovarianceStamped(std_msgs.Header header, PoseWithCovariance pose)
         {
-            header.Deserialize(ref ptr, end);
-            pose.Deserialize(ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.pose = pose ?? throw new System.ArgumentNullException(nameof(pose));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal PoseWithCovarianceStamped(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.pose = new PoseWithCovariance(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new PoseWithCovarianceStamped(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            pose.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            this.pose.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (pose is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -37,8 +58,6 @@ namespace Iviz.Msgs.geometry_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new PoseWithCovarianceStamped();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

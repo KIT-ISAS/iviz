@@ -4,7 +4,7 @@ namespace Iviz.Msgs.std_msgs
 {
     public sealed class String : IMessage
     {
-        public string data;
+        public string data { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public String()
@@ -12,14 +12,33 @@ namespace Iviz.Msgs.std_msgs
             data = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public String(string data)
         {
-            BuiltIns.Deserialize(out data, ref ptr, end);
+            this.data = data ?? throw new System.ArgumentNullException(nameof(data));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal String(Buffer b)
+        {
+            this.data = BuiltIns.DeserializeString(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new String(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(data, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.data, b);
+        }
+        
+        public void Validate()
+        {
+            if (data is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -31,8 +50,6 @@ namespace Iviz.Msgs.std_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new String();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

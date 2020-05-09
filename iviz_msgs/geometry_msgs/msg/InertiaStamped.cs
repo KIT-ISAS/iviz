@@ -4,8 +4,8 @@ namespace Iviz.Msgs.geometry_msgs
 {
     public sealed class InertiaStamped : IMessage
     {
-        public std_msgs.Header header;
-        public Inertia inertia;
+        public std_msgs.Header header { get; set; }
+        public Inertia inertia { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public InertiaStamped()
@@ -14,16 +14,37 @@ namespace Iviz.Msgs.geometry_msgs
             inertia = new Inertia();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public InertiaStamped(std_msgs.Header header, Inertia inertia)
         {
-            header.Deserialize(ref ptr, end);
-            inertia.Deserialize(ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.inertia = inertia ?? throw new System.ArgumentNullException(nameof(inertia));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal InertiaStamped(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.inertia = new Inertia(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new InertiaStamped(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            inertia.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            this.inertia.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (inertia is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -35,8 +56,6 @@ namespace Iviz.Msgs.geometry_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new InertiaStamped();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

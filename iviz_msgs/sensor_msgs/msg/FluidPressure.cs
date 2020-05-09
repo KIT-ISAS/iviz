@@ -10,12 +10,12 @@ namespace Iviz.Msgs.sensor_msgs
         
         // This message is not appropriate for force/pressure contact sensors.
         
-        public std_msgs.Header header; // timestamp of the measurement
+        public std_msgs.Header header { get; set; } // timestamp of the measurement
         // frame_id is the location of the pressure sensor
         
-        public double fluid_pressure; // Absolute pressure reading in Pascals.
+        public double fluid_pressure { get; set; } // Absolute pressure reading in Pascals.
         
-        public double variance; // 0 is interpreted as variance unknown
+        public double variance { get; set; } // 0 is interpreted as variance unknown
     
         /// <summary> Constructor for empty message. </summary>
         public FluidPressure()
@@ -23,18 +23,39 @@ namespace Iviz.Msgs.sensor_msgs
             header = new std_msgs.Header();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public FluidPressure(std_msgs.Header header, double fluid_pressure, double variance)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out fluid_pressure, ref ptr, end);
-            BuiltIns.Deserialize(out variance, ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.fluid_pressure = fluid_pressure;
+            this.variance = variance;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal FluidPressure(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.fluid_pressure = BuiltIns.DeserializeStruct<double>(b);
+            this.variance = BuiltIns.DeserializeStruct<double>(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new FluidPressure(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.Serialize(fluid_pressure, ref ptr, end);
-            BuiltIns.Serialize(variance, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            BuiltIns.Serialize(this.fluid_pressure, b);
+            BuiltIns.Serialize(this.variance, b);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -46,8 +67,6 @@ namespace Iviz.Msgs.sensor_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new FluidPressure();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

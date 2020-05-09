@@ -23,11 +23,11 @@ namespace Iviz.Msgs.sensor_msgs
         
         // The channel name should give semantics of the channel (e.g.
         // "intensity" instead of "value").
-        public string name;
+        public string name { get; set; }
         
         // The values array should be 1-1 with the elements of the associated
         // PointCloud.
-        public float[] values;
+        public float[] values { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ChannelFloat32()
@@ -36,16 +36,37 @@ namespace Iviz.Msgs.sensor_msgs
             values = System.Array.Empty<float>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public ChannelFloat32(string name, float[] values)
         {
-            BuiltIns.Deserialize(out name, ref ptr, end);
-            BuiltIns.Deserialize(out values, ref ptr, end, 0);
+            this.name = name ?? throw new System.ArgumentNullException(nameof(name));
+            this.values = values ?? throw new System.ArgumentNullException(nameof(values));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal ChannelFloat32(Buffer b)
+        {
+            this.name = BuiltIns.DeserializeString(b);
+            this.values = BuiltIns.DeserializeStructArray<float>(b, 0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new ChannelFloat32(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(name, ref ptr, end);
-            BuiltIns.Serialize(values, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.name, b);
+            BuiltIns.Serialize(this.values, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (name is null) throw new System.NullReferenceException();
+            if (values is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -58,8 +79,6 @@ namespace Iviz.Msgs.sensor_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new ChannelFloat32();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

@@ -5,7 +5,7 @@ namespace Iviz.Msgs.rosapi
     public sealed class TopicType : IService
     {
         /// <summary> Request message. </summary>
-        public TopicTypeRequest Request { get; }
+        public TopicTypeRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public TopicTypeResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.rosapi
         
         public IService Create() => new TopicType();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (TopicTypeRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (TopicTypeResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -46,7 +54,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class TopicTypeRequest : IRequest
     {
-        public string topic;
+        public string topic { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TopicTypeRequest()
@@ -54,14 +62,33 @@ namespace Iviz.Msgs.rosapi
             topic = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public TopicTypeRequest(string topic)
         {
-            BuiltIns.Deserialize(out topic, ref ptr, end);
+            this.topic = topic ?? throw new System.ArgumentNullException(nameof(topic));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TopicTypeRequest(Buffer b)
+        {
+            this.topic = BuiltIns.DeserializeString(b);
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TopicTypeRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(topic, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.topic, b);
+        }
+        
+        public void Validate()
+        {
+            if (topic is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -77,7 +104,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class TopicTypeResponse : IResponse
     {
-        public string type;
+        public string type { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TopicTypeResponse()
@@ -85,14 +112,33 @@ namespace Iviz.Msgs.rosapi
             type = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public TopicTypeResponse(string type)
         {
-            BuiltIns.Deserialize(out type, ref ptr, end);
+            this.type = type ?? throw new System.ArgumentNullException(nameof(type));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TopicTypeResponse(Buffer b)
+        {
+            this.type = BuiltIns.DeserializeString(b);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TopicTypeResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(type, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.type, b);
+        }
+        
+        public void Validate()
+        {
+            if (type is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

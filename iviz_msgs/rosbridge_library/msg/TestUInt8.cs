@@ -4,7 +4,7 @@ namespace Iviz.Msgs.rosbridge_library
 {
     public sealed class TestUInt8 : IMessage
     {
-        public byte[] data;
+        public byte[] data { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestUInt8()
@@ -12,14 +12,33 @@ namespace Iviz.Msgs.rosbridge_library
             data = System.Array.Empty<byte>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public TestUInt8(byte[] data)
         {
-            BuiltIns.Deserialize(out data, ref ptr, end, 0);
+            this.data = data ?? throw new System.ArgumentNullException(nameof(data));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TestUInt8(Buffer b)
+        {
+            this.data = BuiltIns.DeserializeStructArray<byte>(b, 0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TestUInt8(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(data, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.data, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (data is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -31,8 +50,6 @@ namespace Iviz.Msgs.rosbridge_library
                 return size;
             }
         }
-    
-        public IMessage Create() => new TestUInt8();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

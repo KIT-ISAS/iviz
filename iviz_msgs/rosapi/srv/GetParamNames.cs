@@ -5,7 +5,7 @@ namespace Iviz.Msgs.rosapi
     public sealed class GetParamNames : IService
     {
         /// <summary> Request message. </summary>
-        public GetParamNamesRequest Request { get; }
+        public GetParamNamesRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public GetParamNamesResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.rosapi
         
         public IService Create() => new GetParamNames();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (GetParamNamesRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (GetParamNamesResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -50,7 +58,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class GetParamNamesResponse : IResponse
     {
-        public string[] names;
+        public string[] names { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetParamNamesResponse()
@@ -58,14 +66,33 @@ namespace Iviz.Msgs.rosapi
             names = System.Array.Empty<string>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public GetParamNamesResponse(string[] names)
         {
-            BuiltIns.Deserialize(out names, ref ptr, end, 0);
+            this.names = names ?? throw new System.ArgumentNullException(nameof(names));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal GetParamNamesResponse(Buffer b)
+        {
+            this.names = BuiltIns.DeserializeStringArray(b, 0);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new GetParamNamesResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(names, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.names, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (names is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

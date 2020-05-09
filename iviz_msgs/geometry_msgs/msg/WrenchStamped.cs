@@ -5,8 +5,8 @@ namespace Iviz.Msgs.geometry_msgs
     public sealed class WrenchStamped : IMessage
     {
         // A wrench with reference coordinate frame and timestamp
-        public std_msgs.Header header;
-        public Wrench wrench;
+        public std_msgs.Header header { get; set; }
+        public Wrench wrench { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public WrenchStamped()
@@ -15,16 +15,37 @@ namespace Iviz.Msgs.geometry_msgs
             wrench = new Wrench();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public WrenchStamped(std_msgs.Header header, Wrench wrench)
         {
-            header.Deserialize(ref ptr, end);
-            wrench.Deserialize(ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.wrench = wrench ?? throw new System.ArgumentNullException(nameof(wrench));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal WrenchStamped(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.wrench = new Wrench(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new WrenchStamped(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            wrench.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            this.wrench.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (wrench is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -36,8 +57,6 @@ namespace Iviz.Msgs.geometry_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new WrenchStamped();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

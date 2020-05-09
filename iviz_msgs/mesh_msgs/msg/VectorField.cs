@@ -4,8 +4,8 @@ namespace Iviz.Msgs.mesh_msgs
 {
     public sealed class VectorField : IMessage
     {
-        public geometry_msgs.Point[] positions;
-        public geometry_msgs.Vector3[] vectors;
+        public geometry_msgs.Point[] positions { get; set; }
+        public geometry_msgs.Vector3[] vectors { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public VectorField()
@@ -14,16 +14,37 @@ namespace Iviz.Msgs.mesh_msgs
             vectors = System.Array.Empty<geometry_msgs.Vector3>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public VectorField(geometry_msgs.Point[] positions, geometry_msgs.Vector3[] vectors)
         {
-            BuiltIns.DeserializeStructArray(out positions, ref ptr, end, 0);
-            BuiltIns.DeserializeStructArray(out vectors, ref ptr, end, 0);
+            this.positions = positions ?? throw new System.ArgumentNullException(nameof(positions));
+            this.vectors = vectors ?? throw new System.ArgumentNullException(nameof(vectors));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal VectorField(Buffer b)
+        {
+            this.positions = BuiltIns.DeserializeStructArray<geometry_msgs.Point>(b, 0);
+            this.vectors = BuiltIns.DeserializeStructArray<geometry_msgs.Vector3>(b, 0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new VectorField(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.SerializeStructArray(positions, ref ptr, end, 0);
-            BuiltIns.SerializeStructArray(vectors, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.SerializeStructArray(this.positions, b, 0);
+            BuiltIns.SerializeStructArray(this.vectors, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (positions is null) throw new System.NullReferenceException();
+            if (vectors is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -36,8 +57,6 @@ namespace Iviz.Msgs.mesh_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new VectorField();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

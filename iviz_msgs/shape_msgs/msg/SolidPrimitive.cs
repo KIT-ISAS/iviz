@@ -13,11 +13,11 @@ namespace Iviz.Msgs.shape_msgs
         public const byte CONE = 4;
         
         // The type of the shape
-        public byte type;
+        public byte type { get; set; }
         
         
         // The dimensions of the shape
-        public double[] dimensions;
+        public double[] dimensions { get; set; }
         
         // The meaning of the shape dimensions: each constant defines the index in the 'dimensions' array
         
@@ -53,16 +53,36 @@ namespace Iviz.Msgs.shape_msgs
             dimensions = System.Array.Empty<double>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public SolidPrimitive(byte type, double[] dimensions)
         {
-            BuiltIns.Deserialize(out type, ref ptr, end);
-            BuiltIns.Deserialize(out dimensions, ref ptr, end, 0);
+            this.type = type;
+            this.dimensions = dimensions ?? throw new System.ArgumentNullException(nameof(dimensions));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal SolidPrimitive(Buffer b)
+        {
+            this.type = BuiltIns.DeserializeStruct<byte>(b);
+            this.dimensions = BuiltIns.DeserializeStructArray<double>(b, 0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new SolidPrimitive(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(type, ref ptr, end);
-            BuiltIns.Serialize(dimensions, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.type, b);
+            BuiltIns.Serialize(this.dimensions, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (dimensions is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -74,8 +94,6 @@ namespace Iviz.Msgs.shape_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new SolidPrimitive();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

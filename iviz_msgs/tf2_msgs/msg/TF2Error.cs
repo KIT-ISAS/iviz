@@ -12,8 +12,8 @@ namespace Iviz.Msgs.tf2_msgs
         public const byte TIMEOUT_ERROR = 5;
         public const byte TRANSFORM_ERROR = 6;
         
-        public byte error;
-        public string error_string;
+        public byte error { get; set; }
+        public string error_string { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TF2Error()
@@ -21,16 +21,36 @@ namespace Iviz.Msgs.tf2_msgs
             error_string = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public TF2Error(byte error, string error_string)
         {
-            BuiltIns.Deserialize(out error, ref ptr, end);
-            BuiltIns.Deserialize(out error_string, ref ptr, end);
+            this.error = error;
+            this.error_string = error_string ?? throw new System.ArgumentNullException(nameof(error_string));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TF2Error(Buffer b)
+        {
+            this.error = BuiltIns.DeserializeStruct<byte>(b);
+            this.error_string = BuiltIns.DeserializeString(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TF2Error(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(error, ref ptr, end);
-            BuiltIns.Serialize(error_string, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.error, b);
+            BuiltIns.Serialize(this.error_string, b);
+        }
+        
+        public void Validate()
+        {
+            if (error_string is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -42,8 +62,6 @@ namespace Iviz.Msgs.tf2_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new TF2Error();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

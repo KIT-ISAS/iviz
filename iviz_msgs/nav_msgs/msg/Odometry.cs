@@ -7,10 +7,10 @@ namespace Iviz.Msgs.nav_msgs
         // This represents an estimate of a position and velocity in free space.  
         // The pose in this message should be specified in the coordinate frame given by header.frame_id.
         // The twist in this message should be specified in the coordinate frame given by the child_frame_id
-        public std_msgs.Header header;
-        public string child_frame_id;
-        public geometry_msgs.PoseWithCovariance pose;
-        public geometry_msgs.TwistWithCovariance twist;
+        public std_msgs.Header header { get; set; }
+        public string child_frame_id { get; set; }
+        public geometry_msgs.PoseWithCovariance pose { get; set; }
+        public geometry_msgs.TwistWithCovariance twist { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Odometry()
@@ -21,20 +21,45 @@ namespace Iviz.Msgs.nav_msgs
             twist = new geometry_msgs.TwistWithCovariance();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public Odometry(std_msgs.Header header, string child_frame_id, geometry_msgs.PoseWithCovariance pose, geometry_msgs.TwistWithCovariance twist)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out child_frame_id, ref ptr, end);
-            pose.Deserialize(ref ptr, end);
-            twist.Deserialize(ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.child_frame_id = child_frame_id ?? throw new System.ArgumentNullException(nameof(child_frame_id));
+            this.pose = pose ?? throw new System.ArgumentNullException(nameof(pose));
+            this.twist = twist ?? throw new System.ArgumentNullException(nameof(twist));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal Odometry(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.child_frame_id = BuiltIns.DeserializeString(b);
+            this.pose = new geometry_msgs.PoseWithCovariance(b);
+            this.twist = new geometry_msgs.TwistWithCovariance(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new Odometry(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.Serialize(child_frame_id, ref ptr, end);
-            pose.Serialize(ref ptr, end);
-            twist.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            BuiltIns.Serialize(this.child_frame_id, b);
+            this.pose.Serialize(b);
+            this.twist.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (child_frame_id is null) throw new System.NullReferenceException();
+            if (pose is null) throw new System.NullReferenceException();
+            if (twist is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -47,8 +72,6 @@ namespace Iviz.Msgs.nav_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new Odometry();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

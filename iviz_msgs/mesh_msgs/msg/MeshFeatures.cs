@@ -4,8 +4,8 @@ namespace Iviz.Msgs.mesh_msgs
 {
     public sealed class MeshFeatures : IMessage
     {
-        public string map_uuid;
-        public mesh_msgs.Feature[] features;
+        public string map_uuid { get; set; }
+        public mesh_msgs.Feature[] features { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshFeatures()
@@ -14,16 +14,37 @@ namespace Iviz.Msgs.mesh_msgs
             features = System.Array.Empty<mesh_msgs.Feature>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public MeshFeatures(string map_uuid, mesh_msgs.Feature[] features)
         {
-            BuiltIns.Deserialize(out map_uuid, ref ptr, end);
-            BuiltIns.DeserializeArray(out features, ref ptr, end, 0);
+            this.map_uuid = map_uuid ?? throw new System.ArgumentNullException(nameof(map_uuid));
+            this.features = features ?? throw new System.ArgumentNullException(nameof(features));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal MeshFeatures(Buffer b)
+        {
+            this.map_uuid = BuiltIns.DeserializeString(b);
+            this.features = BuiltIns.DeserializeArray<mesh_msgs.Feature>(b, 0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new MeshFeatures(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(map_uuid, ref ptr, end);
-            BuiltIns.SerializeArray(features, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.map_uuid, b);
+            BuiltIns.SerializeArray(this.features, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (map_uuid is null) throw new System.NullReferenceException();
+            if (features is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -39,8 +60,6 @@ namespace Iviz.Msgs.mesh_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new MeshFeatures();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

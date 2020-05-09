@@ -6,13 +6,13 @@ namespace Iviz.Msgs.geometry_msgs
     {
         // This represents a pose in free space with uncertainty.
         
-        public Pose pose;
+        public Pose pose { get; set; }
         
         // Row-major representation of the 6x6 covariance matrix
         // The orientation parameters use a fixed-axis representation.
         // In order, the parameters are:
         // (x, y, z, rotation about X axis, rotation about Y axis, rotation about Z axis)
-        public double[/*36*/] covariance;
+        public double[/*36*/] covariance { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public PoseWithCovariance()
@@ -20,22 +20,41 @@ namespace Iviz.Msgs.geometry_msgs
             covariance = new double[36];
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public PoseWithCovariance(Pose pose, double[] covariance)
         {
-            pose.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out covariance, ref ptr, end, 36);
+            this.pose = pose;
+            BuiltIns.AssertSize(covariance, 36);
+            this.covariance = covariance;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal PoseWithCovariance(Buffer b)
+        {
+            this.pose = new Pose(b);
+            this.covariance = BuiltIns.DeserializeStructArray<double>(b, 36);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new PoseWithCovariance(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            pose.Serialize(ref ptr, end);
-            BuiltIns.Serialize(covariance, ref ptr, end, 36);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.pose.Serialize(b);
+            BuiltIns.Serialize(this.covariance, b, 36);
+        }
+        
+        public void Validate()
+        {
+            BuiltIns.AssertSize(covariance, 36);
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 344;
-    
-        public IMessage Create() => new PoseWithCovariance();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

@@ -4,9 +4,9 @@ namespace Iviz.Msgs.trajectory_msgs
 {
     public sealed class JointTrajectory : IMessage
     {
-        public std_msgs.Header header;
-        public string[] joint_names;
-        public JointTrajectoryPoint[] points;
+        public std_msgs.Header header { get; set; }
+        public string[] joint_names { get; set; }
+        public JointTrajectoryPoint[] points { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public JointTrajectory()
@@ -16,18 +16,41 @@ namespace Iviz.Msgs.trajectory_msgs
             points = System.Array.Empty<JointTrajectoryPoint>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public JointTrajectory(std_msgs.Header header, string[] joint_names, JointTrajectoryPoint[] points)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out joint_names, ref ptr, end, 0);
-            BuiltIns.DeserializeArray(out points, ref ptr, end, 0);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.joint_names = joint_names ?? throw new System.ArgumentNullException(nameof(joint_names));
+            this.points = points ?? throw new System.ArgumentNullException(nameof(points));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal JointTrajectory(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.joint_names = BuiltIns.DeserializeStringArray(b, 0);
+            this.points = BuiltIns.DeserializeArray<JointTrajectoryPoint>(b, 0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new JointTrajectory(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.Serialize(joint_names, ref ptr, end, 0);
-            BuiltIns.SerializeArray(points, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            BuiltIns.Serialize(this.joint_names, b, 0);
+            BuiltIns.SerializeArray(this.points, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (joint_names is null) throw new System.NullReferenceException();
+            if (points is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -48,8 +71,6 @@ namespace Iviz.Msgs.trajectory_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new JointTrajectory();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

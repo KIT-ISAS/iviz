@@ -7,39 +7,64 @@ namespace Iviz.Msgs.nav_msgs
         // This hold basic information about the characterists of the OccupancyGrid
         
         // The time at which the map was loaded
-        public time map_load_time;
+        public time map_load_time { get; set; }
         // The map resolution [m/cell]
-        public float resolution;
+        public float resolution { get; set; }
         // Map width [cells]
-        public uint width;
+        public uint width { get; set; }
         // Map height [cells]
-        public uint height;
+        public uint height { get; set; }
         // The origin of the map [m, m, rad].  This is the real-world pose of the
         // cell (0,0) in the map.
-        public geometry_msgs.Pose origin;
+        public geometry_msgs.Pose origin { get; set; }
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public MapMetaData()
         {
-            BuiltIns.Deserialize(out map_load_time, ref ptr, end);
-            BuiltIns.Deserialize(out resolution, ref ptr, end);
-            BuiltIns.Deserialize(out width, ref ptr, end);
-            BuiltIns.Deserialize(out height, ref ptr, end);
-            origin.Deserialize(ref ptr, end);
+        }
+        
+        /// <summary> Explicit constructor. </summary>
+        public MapMetaData(time map_load_time, float resolution, uint width, uint height, geometry_msgs.Pose origin)
+        {
+            this.map_load_time = map_load_time;
+            this.resolution = resolution;
+            this.width = width;
+            this.height = height;
+            this.origin = origin;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal MapMetaData(Buffer b)
+        {
+            this.map_load_time = BuiltIns.DeserializeStruct<time>(b);
+            this.resolution = BuiltIns.DeserializeStruct<float>(b);
+            this.width = BuiltIns.DeserializeStruct<uint>(b);
+            this.height = BuiltIns.DeserializeStruct<uint>(b);
+            this.origin = new geometry_msgs.Pose(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new MapMetaData(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(map_load_time, ref ptr, end);
-            BuiltIns.Serialize(resolution, ref ptr, end);
-            BuiltIns.Serialize(width, ref ptr, end);
-            BuiltIns.Serialize(height, ref ptr, end);
-            origin.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.map_load_time, b);
+            BuiltIns.Serialize(this.resolution, b);
+            BuiltIns.Serialize(this.width, b);
+            BuiltIns.Serialize(this.height, b);
+            this.origin.Serialize(b);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 76;
-    
-        public IMessage Create() => new MapMetaData();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

@@ -5,7 +5,7 @@ namespace Iviz.Msgs.rosapi
     public sealed class ServiceProviders : IService
     {
         /// <summary> Request message. </summary>
-        public ServiceProvidersRequest Request { get; }
+        public ServiceProvidersRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public ServiceProvidersResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.rosapi
         
         public IService Create() => new ServiceProviders();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (ServiceProvidersRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (ServiceProvidersResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -46,7 +54,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class ServiceProvidersRequest : IRequest
     {
-        public string service;
+        public string service { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ServiceProvidersRequest()
@@ -54,14 +62,33 @@ namespace Iviz.Msgs.rosapi
             service = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public ServiceProvidersRequest(string service)
         {
-            BuiltIns.Deserialize(out service, ref ptr, end);
+            this.service = service ?? throw new System.ArgumentNullException(nameof(service));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal ServiceProvidersRequest(Buffer b)
+        {
+            this.service = BuiltIns.DeserializeString(b);
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new ServiceProvidersRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(service, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.service, b);
+        }
+        
+        public void Validate()
+        {
+            if (service is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -77,7 +104,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class ServiceProvidersResponse : IResponse
     {
-        public string[] providers;
+        public string[] providers { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ServiceProvidersResponse()
@@ -85,14 +112,33 @@ namespace Iviz.Msgs.rosapi
             providers = System.Array.Empty<string>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public ServiceProvidersResponse(string[] providers)
         {
-            BuiltIns.Deserialize(out providers, ref ptr, end, 0);
+            this.providers = providers ?? throw new System.ArgumentNullException(nameof(providers));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal ServiceProvidersResponse(Buffer b)
+        {
+            this.providers = BuiltIns.DeserializeStringArray(b, 0);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new ServiceProvidersResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(providers, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.providers, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (providers is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

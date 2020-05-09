@@ -15,14 +15,14 @@ namespace Iviz.Msgs.rosgraph_msgs
         //#
         //# Fields
         //#
-        public std_msgs.Header header;
-        public byte level;
-        public string name; // name of the node
-        public string msg; // message 
-        public string file; // file the message came from
-        public string function; // function the message came from
-        public uint line; // line the message came from
-        public string[] topics; // topic names that the node publishes
+        public std_msgs.Header header { get; set; }
+        public byte level { get; set; }
+        public string name { get; set; } // name of the node
+        public string msg { get; set; } // message 
+        public string file { get; set; } // file the message came from
+        public string function { get; set; } // function the message came from
+        public uint line { get; set; } // line the message came from
+        public string[] topics { get; set; } // topic names that the node publishes
     
         /// <summary> Constructor for empty message. </summary>
         public Log()
@@ -35,28 +35,59 @@ namespace Iviz.Msgs.rosgraph_msgs
             topics = System.Array.Empty<string>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public Log(std_msgs.Header header, byte level, string name, string msg, string file, string function, uint line, string[] topics)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out level, ref ptr, end);
-            BuiltIns.Deserialize(out name, ref ptr, end);
-            BuiltIns.Deserialize(out msg, ref ptr, end);
-            BuiltIns.Deserialize(out file, ref ptr, end);
-            BuiltIns.Deserialize(out function, ref ptr, end);
-            BuiltIns.Deserialize(out line, ref ptr, end);
-            BuiltIns.Deserialize(out topics, ref ptr, end, 0);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.level = level;
+            this.name = name ?? throw new System.ArgumentNullException(nameof(name));
+            this.msg = msg ?? throw new System.ArgumentNullException(nameof(msg));
+            this.file = file ?? throw new System.ArgumentNullException(nameof(file));
+            this.function = function ?? throw new System.ArgumentNullException(nameof(function));
+            this.line = line;
+            this.topics = topics ?? throw new System.ArgumentNullException(nameof(topics));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal Log(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.level = BuiltIns.DeserializeStruct<byte>(b);
+            this.name = BuiltIns.DeserializeString(b);
+            this.msg = BuiltIns.DeserializeString(b);
+            this.file = BuiltIns.DeserializeString(b);
+            this.function = BuiltIns.DeserializeString(b);
+            this.line = BuiltIns.DeserializeStruct<uint>(b);
+            this.topics = BuiltIns.DeserializeStringArray(b, 0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new Log(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.Serialize(level, ref ptr, end);
-            BuiltIns.Serialize(name, ref ptr, end);
-            BuiltIns.Serialize(msg, ref ptr, end);
-            BuiltIns.Serialize(file, ref ptr, end);
-            BuiltIns.Serialize(function, ref ptr, end);
-            BuiltIns.Serialize(line, ref ptr, end);
-            BuiltIns.Serialize(topics, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            BuiltIns.Serialize(this.level, b);
+            BuiltIns.Serialize(this.name, b);
+            BuiltIns.Serialize(this.msg, b);
+            BuiltIns.Serialize(this.file, b);
+            BuiltIns.Serialize(this.function, b);
+            BuiltIns.Serialize(this.line, b);
+            BuiltIns.Serialize(this.topics, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (name is null) throw new System.NullReferenceException();
+            if (msg is null) throw new System.NullReferenceException();
+            if (file is null) throw new System.NullReferenceException();
+            if (function is null) throw new System.NullReferenceException();
+            if (topics is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -77,8 +108,6 @@ namespace Iviz.Msgs.rosgraph_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new Log();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

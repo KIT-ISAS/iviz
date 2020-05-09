@@ -4,7 +4,7 @@ namespace Iviz.Msgs.tf
 {
     public sealed class tfMessage : IMessage
     {
-        public geometry_msgs.TransformStamped[] transforms;
+        public geometry_msgs.TransformStamped[] transforms { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public tfMessage()
@@ -12,14 +12,33 @@ namespace Iviz.Msgs.tf
             transforms = System.Array.Empty<geometry_msgs.TransformStamped>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public tfMessage(geometry_msgs.TransformStamped[] transforms)
         {
-            BuiltIns.DeserializeArray(out transforms, ref ptr, end, 0);
+            this.transforms = transforms ?? throw new System.ArgumentNullException(nameof(transforms));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal tfMessage(Buffer b)
+        {
+            this.transforms = BuiltIns.DeserializeArray<geometry_msgs.TransformStamped>(b, 0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new tfMessage(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.SerializeArray(transforms, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.SerializeArray(this.transforms, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (transforms is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -34,8 +53,6 @@ namespace Iviz.Msgs.tf
                 return size;
             }
         }
-    
-        public IMessage Create() => new tfMessage();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

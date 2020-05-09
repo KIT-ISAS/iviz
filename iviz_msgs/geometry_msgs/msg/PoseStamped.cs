@@ -5,8 +5,8 @@ namespace Iviz.Msgs.geometry_msgs
     public sealed class PoseStamped : IMessage
     {
         // A Pose with reference coordinate frame and timestamp
-        public std_msgs.Header header;
-        public Pose pose;
+        public std_msgs.Header header { get; set; }
+        public Pose pose { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public PoseStamped()
@@ -14,16 +14,36 @@ namespace Iviz.Msgs.geometry_msgs
             header = new std_msgs.Header();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public PoseStamped(std_msgs.Header header, Pose pose)
         {
-            header.Deserialize(ref ptr, end);
-            pose.Deserialize(ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.pose = pose;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal PoseStamped(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.pose = new Pose(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new PoseStamped(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            pose.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            this.pose.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -35,8 +55,6 @@ namespace Iviz.Msgs.geometry_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new PoseStamped();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

@@ -4,8 +4,8 @@ namespace Iviz.Msgs.actionlib_msgs
 {
     public sealed class GoalStatus : IMessage
     {
-        public GoalID goal_id;
-        public byte status;
+        public GoalID goal_id { get; set; }
+        public byte status { get; set; }
         public const byte PENDING = 0; // The goal has yet to be processed by the action server
         public const byte ACTIVE = 1; // The goal is currently being processed by the action server
         public const byte PREEMPTED = 2; // The goal received a cancel request after it started executing
@@ -25,7 +25,7 @@ namespace Iviz.Msgs.actionlib_msgs
         //    sent over the wire by an action server
         
         //Allow for the user to associate a string with GoalStatus for debugging
-        public string text;
+        public string text { get; set; }
         
     
         /// <summary> Constructor for empty message. </summary>
@@ -35,18 +35,40 @@ namespace Iviz.Msgs.actionlib_msgs
             text = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public GoalStatus(GoalID goal_id, byte status, string text)
         {
-            goal_id.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out status, ref ptr, end);
-            BuiltIns.Deserialize(out text, ref ptr, end);
+            this.goal_id = goal_id ?? throw new System.ArgumentNullException(nameof(goal_id));
+            this.status = status;
+            this.text = text ?? throw new System.ArgumentNullException(nameof(text));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal GoalStatus(Buffer b)
+        {
+            this.goal_id = new GoalID(b);
+            this.status = BuiltIns.DeserializeStruct<byte>(b);
+            this.text = BuiltIns.DeserializeString(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new GoalStatus(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            goal_id.Serialize(ref ptr, end);
-            BuiltIns.Serialize(status, ref ptr, end);
-            BuiltIns.Serialize(text, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.goal_id.Serialize(b);
+            BuiltIns.Serialize(this.status, b);
+            BuiltIns.Serialize(this.text, b);
+        }
+        
+        public void Validate()
+        {
+            if (goal_id is null) throw new System.NullReferenceException();
+            if (text is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -59,8 +81,6 @@ namespace Iviz.Msgs.actionlib_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new GoalStatus();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

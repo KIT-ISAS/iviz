@@ -15,22 +15,22 @@ namespace Iviz.Msgs.sensor_msgs
         
         // Time of sensor data acquisition, and the coordinate frame ID (for 3d
         // points).
-        public std_msgs.Header header;
+        public std_msgs.Header header { get; set; }
         
         // 2D structure of the point cloud. If the cloud is unordered, height is
         // 1 and width is the length of the point cloud.
-        public uint height;
-        public uint width;
+        public uint height { get; set; }
+        public uint width { get; set; }
         
         // Describes the channels and their layout in the binary data blob.
-        public PointField[] fields;
+        public PointField[] fields { get; set; }
         
-        public bool is_bigendian; // Is this data bigendian?
-        public uint point_step; // Length of a point in bytes
-        public uint row_step; // Length of a row in bytes
-        public byte[] data; // Actual point data, size is (row_step*height)
+        public bool is_bigendian { get; set; } // Is this data bigendian?
+        public uint point_step { get; set; } // Length of a point in bytes
+        public uint row_step { get; set; } // Length of a row in bytes
+        public byte[] data { get; set; } // Actual point data, size is (row_step*height)
         
-        public bool is_dense; // True if there are no invalid points
+        public bool is_dense { get; set; } // True if there are no invalid points
     
         /// <summary> Constructor for empty message. </summary>
         public PointCloud2()
@@ -40,30 +40,59 @@ namespace Iviz.Msgs.sensor_msgs
             data = System.Array.Empty<byte>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public PointCloud2(std_msgs.Header header, uint height, uint width, PointField[] fields, bool is_bigendian, uint point_step, uint row_step, byte[] data, bool is_dense)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out height, ref ptr, end);
-            BuiltIns.Deserialize(out width, ref ptr, end);
-            BuiltIns.DeserializeArray(out fields, ref ptr, end, 0);
-            BuiltIns.Deserialize(out is_bigendian, ref ptr, end);
-            BuiltIns.Deserialize(out point_step, ref ptr, end);
-            BuiltIns.Deserialize(out row_step, ref ptr, end);
-            BuiltIns.Deserialize(out data, ref ptr, end, 0);
-            BuiltIns.Deserialize(out is_dense, ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.height = height;
+            this.width = width;
+            this.fields = fields ?? throw new System.ArgumentNullException(nameof(fields));
+            this.is_bigendian = is_bigendian;
+            this.point_step = point_step;
+            this.row_step = row_step;
+            this.data = data ?? throw new System.ArgumentNullException(nameof(data));
+            this.is_dense = is_dense;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal PointCloud2(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.height = BuiltIns.DeserializeStruct<uint>(b);
+            this.width = BuiltIns.DeserializeStruct<uint>(b);
+            this.fields = BuiltIns.DeserializeArray<PointField>(b, 0);
+            this.is_bigendian = BuiltIns.DeserializeStruct<bool>(b);
+            this.point_step = BuiltIns.DeserializeStruct<uint>(b);
+            this.row_step = BuiltIns.DeserializeStruct<uint>(b);
+            this.data = BuiltIns.DeserializeStructArray<byte>(b, 0);
+            this.is_dense = BuiltIns.DeserializeStruct<bool>(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new PointCloud2(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.Serialize(height, ref ptr, end);
-            BuiltIns.Serialize(width, ref ptr, end);
-            BuiltIns.SerializeArray(fields, ref ptr, end, 0);
-            BuiltIns.Serialize(is_bigendian, ref ptr, end);
-            BuiltIns.Serialize(point_step, ref ptr, end);
-            BuiltIns.Serialize(row_step, ref ptr, end);
-            BuiltIns.Serialize(data, ref ptr, end, 0);
-            BuiltIns.Serialize(is_dense, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            BuiltIns.Serialize(this.height, b);
+            BuiltIns.Serialize(this.width, b);
+            BuiltIns.SerializeArray(this.fields, b, 0);
+            BuiltIns.Serialize(this.is_bigendian, b);
+            BuiltIns.Serialize(this.point_step, b);
+            BuiltIns.Serialize(this.row_step, b);
+            BuiltIns.Serialize(this.data, b, 0);
+            BuiltIns.Serialize(this.is_dense, b);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (fields is null) throw new System.NullReferenceException();
+            if (data is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -80,8 +109,6 @@ namespace Iviz.Msgs.sensor_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new PointCloud2();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

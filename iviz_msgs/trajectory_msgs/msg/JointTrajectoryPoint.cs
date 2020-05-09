@@ -8,11 +8,11 @@ namespace Iviz.Msgs.trajectory_msgs
         // or positions[, effort] for the trajectory to be executed.
         // All specified values are in the same order as the joint names in JointTrajectory.msg
         
-        public double[] positions;
-        public double[] velocities;
-        public double[] accelerations;
-        public double[] effort;
-        public duration time_from_start;
+        public double[] positions { get; set; }
+        public double[] velocities { get; set; }
+        public double[] accelerations { get; set; }
+        public double[] effort { get; set; }
+        public duration time_from_start { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public JointTrajectoryPoint()
@@ -23,22 +23,48 @@ namespace Iviz.Msgs.trajectory_msgs
             effort = System.Array.Empty<double>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public JointTrajectoryPoint(double[] positions, double[] velocities, double[] accelerations, double[] effort, duration time_from_start)
         {
-            BuiltIns.Deserialize(out positions, ref ptr, end, 0);
-            BuiltIns.Deserialize(out velocities, ref ptr, end, 0);
-            BuiltIns.Deserialize(out accelerations, ref ptr, end, 0);
-            BuiltIns.Deserialize(out effort, ref ptr, end, 0);
-            BuiltIns.Deserialize(out time_from_start, ref ptr, end);
+            this.positions = positions ?? throw new System.ArgumentNullException(nameof(positions));
+            this.velocities = velocities ?? throw new System.ArgumentNullException(nameof(velocities));
+            this.accelerations = accelerations ?? throw new System.ArgumentNullException(nameof(accelerations));
+            this.effort = effort ?? throw new System.ArgumentNullException(nameof(effort));
+            this.time_from_start = time_from_start;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal JointTrajectoryPoint(Buffer b)
+        {
+            this.positions = BuiltIns.DeserializeStructArray<double>(b, 0);
+            this.velocities = BuiltIns.DeserializeStructArray<double>(b, 0);
+            this.accelerations = BuiltIns.DeserializeStructArray<double>(b, 0);
+            this.effort = BuiltIns.DeserializeStructArray<double>(b, 0);
+            this.time_from_start = BuiltIns.DeserializeStruct<duration>(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new JointTrajectoryPoint(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(positions, ref ptr, end, 0);
-            BuiltIns.Serialize(velocities, ref ptr, end, 0);
-            BuiltIns.Serialize(accelerations, ref ptr, end, 0);
-            BuiltIns.Serialize(effort, ref ptr, end, 0);
-            BuiltIns.Serialize(time_from_start, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.positions, b, 0);
+            BuiltIns.Serialize(this.velocities, b, 0);
+            BuiltIns.Serialize(this.accelerations, b, 0);
+            BuiltIns.Serialize(this.effort, b, 0);
+            BuiltIns.Serialize(this.time_from_start, b);
+        }
+        
+        public void Validate()
+        {
+            if (positions is null) throw new System.NullReferenceException();
+            if (velocities is null) throw new System.NullReferenceException();
+            if (accelerations is null) throw new System.NullReferenceException();
+            if (effort is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -53,8 +79,6 @@ namespace Iviz.Msgs.trajectory_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new JointTrajectoryPoint();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

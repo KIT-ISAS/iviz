@@ -5,7 +5,7 @@ namespace Iviz.Msgs.rosbridge_library
     public sealed class TestMultipleResponseFields : IService
     {
         /// <summary> Request message. </summary>
-        public TestMultipleResponseFieldsRequest Request { get; }
+        public TestMultipleResponseFieldsRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public TestMultipleResponseFieldsResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.rosbridge_library
         
         public IService Create() => new TestMultipleResponseFields();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (TestMultipleResponseFieldsRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (TestMultipleResponseFieldsResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -50,10 +58,10 @@ namespace Iviz.Msgs.rosbridge_library
 
     public sealed class TestMultipleResponseFieldsResponse : IResponse
     {
-        public int @int;
-        public float @float;
-        public string @string;
-        public bool @bool;
+        public int @int { get; set; }
+        public float @float { get; set; }
+        public string @string { get; set; }
+        public bool @bool { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestMultipleResponseFieldsResponse()
@@ -61,20 +69,42 @@ namespace Iviz.Msgs.rosbridge_library
             @string = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public TestMultipleResponseFieldsResponse(int @int, float @float, string @string, bool @bool)
         {
-            BuiltIns.Deserialize(out @int, ref ptr, end);
-            BuiltIns.Deserialize(out @float, ref ptr, end);
-            BuiltIns.Deserialize(out @string, ref ptr, end);
-            BuiltIns.Deserialize(out @bool, ref ptr, end);
+            this.@int = @int;
+            this.@float = @float;
+            this.@string = @string ?? throw new System.ArgumentNullException(nameof(@string));
+            this.@bool = @bool;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TestMultipleResponseFieldsResponse(Buffer b)
+        {
+            this.@int = BuiltIns.DeserializeStruct<int>(b);
+            this.@float = BuiltIns.DeserializeStruct<float>(b);
+            this.@string = BuiltIns.DeserializeString(b);
+            this.@bool = BuiltIns.DeserializeStruct<bool>(b);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TestMultipleResponseFieldsResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(@int, ref ptr, end);
-            BuiltIns.Serialize(@float, ref ptr, end);
-            BuiltIns.Serialize(@string, ref ptr, end);
-            BuiltIns.Serialize(@bool, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.@int, b);
+            BuiltIns.Serialize(this.@float, b);
+            BuiltIns.Serialize(this.@string, b);
+            BuiltIns.Serialize(this.@bool, b);
+        }
+        
+        public void Validate()
+        {
+            if (@string is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

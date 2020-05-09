@@ -5,24 +5,24 @@ namespace Iviz.Msgs.grid_map_msgs
     public sealed class GridMap : IMessage
     {
         // Grid map header
-        public GridMapInfo info;
+        public GridMapInfo info { get; set; }
         
         // Grid map layer names.
-        public string[] layers;
+        public string[] layers { get; set; }
         
         // Grid map basic layer names (optional). The basic layers
         // determine which layers from `layers` need to be valid
         // in order for a cell of the grid map to be valid.
-        public string[] basic_layers;
+        public string[] basic_layers { get; set; }
         
         // Grid map data.
-        public std_msgs.Float32MultiArray[] data;
+        public std_msgs.Float32MultiArray[] data { get; set; }
         
         // Row start index (default 0).
-        public ushort outer_start_index;
+        public ushort outer_start_index { get; set; }
         
         // Column start index (default 0).
-        public ushort inner_start_index;
+        public ushort inner_start_index { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GridMap()
@@ -33,24 +33,51 @@ namespace Iviz.Msgs.grid_map_msgs
             data = System.Array.Empty<std_msgs.Float32MultiArray>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public GridMap(GridMapInfo info, string[] layers, string[] basic_layers, std_msgs.Float32MultiArray[] data, ushort outer_start_index, ushort inner_start_index)
         {
-            info.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out layers, ref ptr, end, 0);
-            BuiltIns.Deserialize(out basic_layers, ref ptr, end, 0);
-            BuiltIns.DeserializeArray(out data, ref ptr, end, 0);
-            BuiltIns.Deserialize(out outer_start_index, ref ptr, end);
-            BuiltIns.Deserialize(out inner_start_index, ref ptr, end);
+            this.info = info ?? throw new System.ArgumentNullException(nameof(info));
+            this.layers = layers ?? throw new System.ArgumentNullException(nameof(layers));
+            this.basic_layers = basic_layers ?? throw new System.ArgumentNullException(nameof(basic_layers));
+            this.data = data ?? throw new System.ArgumentNullException(nameof(data));
+            this.outer_start_index = outer_start_index;
+            this.inner_start_index = inner_start_index;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal GridMap(Buffer b)
+        {
+            this.info = new GridMapInfo(b);
+            this.layers = BuiltIns.DeserializeStringArray(b, 0);
+            this.basic_layers = BuiltIns.DeserializeStringArray(b, 0);
+            this.data = BuiltIns.DeserializeArray<std_msgs.Float32MultiArray>(b, 0);
+            this.outer_start_index = BuiltIns.DeserializeStruct<ushort>(b);
+            this.inner_start_index = BuiltIns.DeserializeStruct<ushort>(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new GridMap(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            info.Serialize(ref ptr, end);
-            BuiltIns.Serialize(layers, ref ptr, end, 0);
-            BuiltIns.Serialize(basic_layers, ref ptr, end, 0);
-            BuiltIns.SerializeArray(data, ref ptr, end, 0);
-            BuiltIns.Serialize(outer_start_index, ref ptr, end);
-            BuiltIns.Serialize(inner_start_index, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.info.Serialize(b);
+            BuiltIns.Serialize(this.layers, b, 0);
+            BuiltIns.Serialize(this.basic_layers, b, 0);
+            BuiltIns.SerializeArray(this.data, b, 0);
+            BuiltIns.Serialize(this.outer_start_index, b);
+            BuiltIns.Serialize(this.inner_start_index, b);
+        }
+        
+        public void Validate()
+        {
+            if (info is null) throw new System.NullReferenceException();
+            if (layers is null) throw new System.NullReferenceException();
+            if (basic_layers is null) throw new System.NullReferenceException();
+            if (data is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -76,8 +103,6 @@ namespace Iviz.Msgs.grid_map_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new GridMap();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

@@ -5,9 +5,9 @@ namespace Iviz.Msgs.mesh_msgs
     public sealed class MeshTexture : IMessage
     {
         // Mesh Attribute Message
-        public string uuid;
-        public uint texture_index;
-        public sensor_msgs.Image image;
+        public string uuid { get; set; }
+        public uint texture_index { get; set; }
+        public sensor_msgs.Image image { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshTexture()
@@ -16,18 +16,40 @@ namespace Iviz.Msgs.mesh_msgs
             image = new sensor_msgs.Image();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public MeshTexture(string uuid, uint texture_index, sensor_msgs.Image image)
         {
-            BuiltIns.Deserialize(out uuid, ref ptr, end);
-            BuiltIns.Deserialize(out texture_index, ref ptr, end);
-            image.Deserialize(ref ptr, end);
+            this.uuid = uuid ?? throw new System.ArgumentNullException(nameof(uuid));
+            this.texture_index = texture_index;
+            this.image = image ?? throw new System.ArgumentNullException(nameof(image));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal MeshTexture(Buffer b)
+        {
+            this.uuid = BuiltIns.DeserializeString(b);
+            this.texture_index = BuiltIns.DeserializeStruct<uint>(b);
+            this.image = new sensor_msgs.Image(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new MeshTexture(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(uuid, ref ptr, end);
-            BuiltIns.Serialize(texture_index, ref ptr, end);
-            image.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.uuid, b);
+            BuiltIns.Serialize(this.texture_index, b);
+            this.image.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (uuid is null) throw new System.NullReferenceException();
+            if (image is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -40,8 +62,6 @@ namespace Iviz.Msgs.mesh_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new MeshTexture();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

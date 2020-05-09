@@ -4,7 +4,7 @@ namespace Iviz.Msgs.visualization_msgs
 {
     public sealed class MarkerArray : IMessage
     {
-        public Marker[] markers;
+        public Marker[] markers { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MarkerArray()
@@ -12,14 +12,33 @@ namespace Iviz.Msgs.visualization_msgs
             markers = System.Array.Empty<Marker>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public MarkerArray(Marker[] markers)
         {
-            BuiltIns.DeserializeArray(out markers, ref ptr, end, 0);
+            this.markers = markers ?? throw new System.ArgumentNullException(nameof(markers));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal MarkerArray(Buffer b)
+        {
+            this.markers = BuiltIns.DeserializeArray<Marker>(b, 0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new MarkerArray(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.SerializeArray(markers, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.SerializeArray(this.markers, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (markers is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -34,8 +53,6 @@ namespace Iviz.Msgs.visualization_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new MarkerArray();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

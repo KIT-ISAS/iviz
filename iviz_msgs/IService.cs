@@ -2,45 +2,68 @@
 
 namespace Iviz.Msgs
 {
+    /// <summary>
+    /// Interface for all ROS services.
+    /// All classes representing ROS services derive from this.
+    /// </summary>
     public interface IService
     {
         /// <summary>
-        /// Create an empty service message
+        /// Create an empty service message.
         /// </summary>
         /// <returns>New service message</returns>
         IService Create();
 
         /// <summary>
-        /// Returns the request message
+        /// The request message.
         /// </summary>
-        /// <returns>Request message</returns>
-        IRequest Request { get; }
+        IRequest Request { get; set; }
 
-        IResponse Response { get; }
+        /// <summary>
+        /// The response message.
+        /// </summary>
+        IResponse Response { get; set; }
 
+        /// <summary>
+        /// The error message. Can be null. If not null, overrides the response.
+        /// </summary>
         string ErrorMessage { get; set; }
 
+        /// <summary>
+        /// Full ROS name of the service.
+        /// </summary>
         string RosType { get; }
     }
 
-    public interface IRequest : ISerializable
+    /// <summary>
+    /// Interface for all ROS service requests.
+    /// All classes representing ROS requests derive from this.
+    /// </summary>
+    public interface IRequest : ISerializable<IRequest>
     {
     }
 
-
-    public interface IResponse : ISerializable
+    /// <summary>
+    /// Interface for all ROS service responses.
+    /// All classes representing ROS responses derive from this.
+    /// </summary>
+    public interface IResponse : ISerializable<IResponse>
     {
     }
 
     namespace Internal
     {
+        /// <summary>
+        /// Class that represents an empty service request.
+        /// </summary>
         public class EmptyRequest : IRequest
         {
-            public unsafe void Deserialize(ref byte* ptr, byte* end)
+            public IRequest Deserialize(Buffer b)
             {
+                return new EmptyRequest();
             }
 
-            public unsafe void Serialize(ref byte* ptr, byte* end)
+            public void Serialize(Buffer b)
             {
             }
 
@@ -48,13 +71,17 @@ namespace Iviz.Msgs
             public int RosMessageLength => 0;
         }
 
+        /// <summary>
+        /// Class that represents an empty service response.
+        /// </summary>
         public class EmptyResponse : IResponse
         {
-            public unsafe void Deserialize(ref byte* ptr, byte* end)
+            public IResponse Deserialize(Buffer b)
             {
+                return new EmptyResponse();
             }
 
-            public unsafe void Serialize(ref byte* ptr, byte* end)
+            public void Serialize(Buffer b)
             {
             }
 

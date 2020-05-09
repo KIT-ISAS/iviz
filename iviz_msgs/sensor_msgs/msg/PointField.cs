@@ -15,10 +15,10 @@ namespace Iviz.Msgs.sensor_msgs
         public const byte FLOAT32 = 7;
         public const byte FLOAT64 = 8;
         
-        public string name; // Name of field
-        public uint offset; // Offset from start of point struct
-        public byte datatype; // Datatype enumeration, see above
-        public uint count; // How many elements in the field
+        public string name { get; set; } // Name of field
+        public uint offset { get; set; } // Offset from start of point struct
+        public byte datatype { get; set; } // Datatype enumeration, see above
+        public uint count { get; set; } // How many elements in the field
     
         /// <summary> Constructor for empty message. </summary>
         public PointField()
@@ -26,20 +26,42 @@ namespace Iviz.Msgs.sensor_msgs
             name = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public PointField(string name, uint offset, byte datatype, uint count)
         {
-            BuiltIns.Deserialize(out name, ref ptr, end);
-            BuiltIns.Deserialize(out offset, ref ptr, end);
-            BuiltIns.Deserialize(out datatype, ref ptr, end);
-            BuiltIns.Deserialize(out count, ref ptr, end);
+            this.name = name ?? throw new System.ArgumentNullException(nameof(name));
+            this.offset = offset;
+            this.datatype = datatype;
+            this.count = count;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal PointField(Buffer b)
+        {
+            this.name = BuiltIns.DeserializeString(b);
+            this.offset = BuiltIns.DeserializeStruct<uint>(b);
+            this.datatype = BuiltIns.DeserializeStruct<byte>(b);
+            this.count = BuiltIns.DeserializeStruct<uint>(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new PointField(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(name, ref ptr, end);
-            BuiltIns.Serialize(offset, ref ptr, end);
-            BuiltIns.Serialize(datatype, ref ptr, end);
-            BuiltIns.Serialize(count, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.name, b);
+            BuiltIns.Serialize(this.offset, b);
+            BuiltIns.Serialize(this.datatype, b);
+            BuiltIns.Serialize(this.count, b);
+        }
+        
+        public void Validate()
+        {
+            if (name is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -51,8 +73,6 @@ namespace Iviz.Msgs.sensor_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new PointField();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

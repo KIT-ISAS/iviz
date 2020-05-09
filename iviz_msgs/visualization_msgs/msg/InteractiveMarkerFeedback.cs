@@ -5,17 +5,17 @@ namespace Iviz.Msgs.visualization_msgs
     public sealed class InteractiveMarkerFeedback : IMessage
     {
         // Time/frame info.
-        public std_msgs.Header header;
+        public std_msgs.Header header { get; set; }
         
         // Identifying string. Must be unique in the topic namespace.
-        public string client_id;
+        public string client_id { get; set; }
         
         // Feedback message sent back from the GUI, e.g.
         // when the status of an interactive marker was modified by the user.
         
         // Specifies which interactive marker and control this message refers to
-        public string marker_name;
-        public string control_name;
+        public string marker_name { get; set; }
+        public string control_name { get; set; }
         
         // Type of the event
         // KEEP_ALIVE: sent while dragging to keep up control of the marker
@@ -30,22 +30,22 @@ namespace Iviz.Msgs.visualization_msgs
         public const byte MOUSE_DOWN = 4;
         public const byte MOUSE_UP = 5;
         
-        public byte event_type;
+        public byte event_type { get; set; }
         
         // Current pose of the marker
         // Note: Has to be valid for all feedback types.
-        public geometry_msgs.Pose pose;
+        public geometry_msgs.Pose pose { get; set; }
         
         // Contains the ID of the selected menu entry
         // Only valid for MENU_SELECT events.
-        public uint menu_entry_id;
+        public uint menu_entry_id { get; set; }
         
         // If event_type is BUTTON_CLICK, MOUSE_DOWN, or MOUSE_UP, mouse_point
         // may contain the 3 dimensional position of the event on the
         // control.  If it does, mouse_point_valid will be true.  mouse_point
         // will be relative to the frame listed in the header.
-        public geometry_msgs.Point mouse_point;
-        public bool mouse_point_valid;
+        public geometry_msgs.Point mouse_point { get; set; }
+        public bool mouse_point_valid { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarkerFeedback()
@@ -56,30 +56,60 @@ namespace Iviz.Msgs.visualization_msgs
             control_name = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public InteractiveMarkerFeedback(std_msgs.Header header, string client_id, string marker_name, string control_name, byte event_type, geometry_msgs.Pose pose, uint menu_entry_id, geometry_msgs.Point mouse_point, bool mouse_point_valid)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out client_id, ref ptr, end);
-            BuiltIns.Deserialize(out marker_name, ref ptr, end);
-            BuiltIns.Deserialize(out control_name, ref ptr, end);
-            BuiltIns.Deserialize(out event_type, ref ptr, end);
-            pose.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out menu_entry_id, ref ptr, end);
-            mouse_point.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out mouse_point_valid, ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.client_id = client_id ?? throw new System.ArgumentNullException(nameof(client_id));
+            this.marker_name = marker_name ?? throw new System.ArgumentNullException(nameof(marker_name));
+            this.control_name = control_name ?? throw new System.ArgumentNullException(nameof(control_name));
+            this.event_type = event_type;
+            this.pose = pose;
+            this.menu_entry_id = menu_entry_id;
+            this.mouse_point = mouse_point;
+            this.mouse_point_valid = mouse_point_valid;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal InteractiveMarkerFeedback(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.client_id = BuiltIns.DeserializeString(b);
+            this.marker_name = BuiltIns.DeserializeString(b);
+            this.control_name = BuiltIns.DeserializeString(b);
+            this.event_type = BuiltIns.DeserializeStruct<byte>(b);
+            this.pose = new geometry_msgs.Pose(b);
+            this.menu_entry_id = BuiltIns.DeserializeStruct<uint>(b);
+            this.mouse_point = new geometry_msgs.Point(b);
+            this.mouse_point_valid = BuiltIns.DeserializeStruct<bool>(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new InteractiveMarkerFeedback(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.Serialize(client_id, ref ptr, end);
-            BuiltIns.Serialize(marker_name, ref ptr, end);
-            BuiltIns.Serialize(control_name, ref ptr, end);
-            BuiltIns.Serialize(event_type, ref ptr, end);
-            pose.Serialize(ref ptr, end);
-            BuiltIns.Serialize(menu_entry_id, ref ptr, end);
-            mouse_point.Serialize(ref ptr, end);
-            BuiltIns.Serialize(mouse_point_valid, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            BuiltIns.Serialize(this.client_id, b);
+            BuiltIns.Serialize(this.marker_name, b);
+            BuiltIns.Serialize(this.control_name, b);
+            BuiltIns.Serialize(this.event_type, b);
+            this.pose.Serialize(b);
+            BuiltIns.Serialize(this.menu_entry_id, b);
+            this.mouse_point.Serialize(b);
+            BuiltIns.Serialize(this.mouse_point_valid, b);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (client_id is null) throw new System.NullReferenceException();
+            if (marker_name is null) throw new System.NullReferenceException();
+            if (control_name is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -94,8 +124,6 @@ namespace Iviz.Msgs.visualization_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new InteractiveMarkerFeedback();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

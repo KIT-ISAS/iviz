@@ -6,16 +6,16 @@ namespace Iviz.Msgs.mesh_msgs
     {
         //# Definition of a triangle mesh
         
-        public TriangleIndices[] triangles; // list of triangles; the index values refer to positions in vertices (and vertex_normals, if given)
-        public geometry_msgs.Point[] vertices; // the actual vertices that make up the mesh
+        public TriangleIndices[] triangles { get; set; } // list of triangles; the index values refer to positions in vertices (and vertex_normals, if given)
+        public geometry_msgs.Point[] vertices { get; set; } // the actual vertices that make up the mesh
         //optional:
-        public geometry_msgs.Point[] vertex_normals;
-        public std_msgs.ColorRGBA[] vertex_colors;
-        public std_msgs.ColorRGBA[] triangle_colors;
-        public geometry_msgs.Point[] vertex_texture_coords;
-        public mesh_msgs.MeshMaterial[] face_materials;
-        public sensor_msgs.Image[] textures;
-        public mesh_msgs.MeshFaceCluster[] clusters;
+        public geometry_msgs.Point[] vertex_normals { get; set; }
+        public std_msgs.ColorRGBA[] vertex_colors { get; set; }
+        public std_msgs.ColorRGBA[] triangle_colors { get; set; }
+        public geometry_msgs.Point[] vertex_texture_coords { get; set; }
+        public mesh_msgs.MeshMaterial[] face_materials { get; set; }
+        public sensor_msgs.Image[] textures { get; set; }
+        public mesh_msgs.MeshFaceCluster[] clusters { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TriangleMesh()
@@ -31,30 +31,65 @@ namespace Iviz.Msgs.mesh_msgs
             clusters = System.Array.Empty<mesh_msgs.MeshFaceCluster>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public TriangleMesh(TriangleIndices[] triangles, geometry_msgs.Point[] vertices, geometry_msgs.Point[] vertex_normals, std_msgs.ColorRGBA[] vertex_colors, std_msgs.ColorRGBA[] triangle_colors, geometry_msgs.Point[] vertex_texture_coords, mesh_msgs.MeshMaterial[] face_materials, sensor_msgs.Image[] textures, mesh_msgs.MeshFaceCluster[] clusters)
         {
-            BuiltIns.DeserializeStructArray(out triangles, ref ptr, end, 0);
-            BuiltIns.DeserializeStructArray(out vertices, ref ptr, end, 0);
-            BuiltIns.DeserializeStructArray(out vertex_normals, ref ptr, end, 0);
-            BuiltIns.DeserializeStructArray(out vertex_colors, ref ptr, end, 0);
-            BuiltIns.DeserializeStructArray(out triangle_colors, ref ptr, end, 0);
-            BuiltIns.DeserializeStructArray(out vertex_texture_coords, ref ptr, end, 0);
-            BuiltIns.DeserializeArray(out face_materials, ref ptr, end, 0);
-            BuiltIns.DeserializeArray(out textures, ref ptr, end, 0);
-            BuiltIns.DeserializeArray(out clusters, ref ptr, end, 0);
+            this.triangles = triangles ?? throw new System.ArgumentNullException(nameof(triangles));
+            this.vertices = vertices ?? throw new System.ArgumentNullException(nameof(vertices));
+            this.vertex_normals = vertex_normals ?? throw new System.ArgumentNullException(nameof(vertex_normals));
+            this.vertex_colors = vertex_colors ?? throw new System.ArgumentNullException(nameof(vertex_colors));
+            this.triangle_colors = triangle_colors ?? throw new System.ArgumentNullException(nameof(triangle_colors));
+            this.vertex_texture_coords = vertex_texture_coords ?? throw new System.ArgumentNullException(nameof(vertex_texture_coords));
+            this.face_materials = face_materials ?? throw new System.ArgumentNullException(nameof(face_materials));
+            this.textures = textures ?? throw new System.ArgumentNullException(nameof(textures));
+            this.clusters = clusters ?? throw new System.ArgumentNullException(nameof(clusters));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TriangleMesh(Buffer b)
+        {
+            this.triangles = BuiltIns.DeserializeArray<TriangleIndices>(b, 0);
+            this.vertices = BuiltIns.DeserializeStructArray<geometry_msgs.Point>(b, 0);
+            this.vertex_normals = BuiltIns.DeserializeStructArray<geometry_msgs.Point>(b, 0);
+            this.vertex_colors = BuiltIns.DeserializeStructArray<std_msgs.ColorRGBA>(b, 0);
+            this.triangle_colors = BuiltIns.DeserializeStructArray<std_msgs.ColorRGBA>(b, 0);
+            this.vertex_texture_coords = BuiltIns.DeserializeStructArray<geometry_msgs.Point>(b, 0);
+            this.face_materials = BuiltIns.DeserializeArray<mesh_msgs.MeshMaterial>(b, 0);
+            this.textures = BuiltIns.DeserializeArray<sensor_msgs.Image>(b, 0);
+            this.clusters = BuiltIns.DeserializeArray<mesh_msgs.MeshFaceCluster>(b, 0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TriangleMesh(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.SerializeStructArray(triangles, ref ptr, end, 0);
-            BuiltIns.SerializeStructArray(vertices, ref ptr, end, 0);
-            BuiltIns.SerializeStructArray(vertex_normals, ref ptr, end, 0);
-            BuiltIns.SerializeStructArray(vertex_colors, ref ptr, end, 0);
-            BuiltIns.SerializeStructArray(triangle_colors, ref ptr, end, 0);
-            BuiltIns.SerializeStructArray(vertex_texture_coords, ref ptr, end, 0);
-            BuiltIns.SerializeArray(face_materials, ref ptr, end, 0);
-            BuiltIns.SerializeArray(textures, ref ptr, end, 0);
-            BuiltIns.SerializeArray(clusters, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.SerializeArray(this.triangles, b, 0);
+            BuiltIns.SerializeStructArray(this.vertices, b, 0);
+            BuiltIns.SerializeStructArray(this.vertex_normals, b, 0);
+            BuiltIns.SerializeStructArray(this.vertex_colors, b, 0);
+            BuiltIns.SerializeStructArray(this.triangle_colors, b, 0);
+            BuiltIns.SerializeStructArray(this.vertex_texture_coords, b, 0);
+            BuiltIns.SerializeArray(this.face_materials, b, 0);
+            BuiltIns.SerializeArray(this.textures, b, 0);
+            BuiltIns.SerializeArray(this.clusters, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (triangles is null) throw new System.NullReferenceException();
+            if (vertices is null) throw new System.NullReferenceException();
+            if (vertex_normals is null) throw new System.NullReferenceException();
+            if (vertex_colors is null) throw new System.NullReferenceException();
+            if (triangle_colors is null) throw new System.NullReferenceException();
+            if (vertex_texture_coords is null) throw new System.NullReferenceException();
+            if (face_materials is null) throw new System.NullReferenceException();
+            if (textures is null) throw new System.NullReferenceException();
+            if (clusters is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -80,8 +115,6 @@ namespace Iviz.Msgs.mesh_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new TriangleMesh();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

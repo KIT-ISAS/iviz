@@ -11,41 +11,66 @@ namespace Iviz.Msgs.sensor_msgs
         // width fields for the associated image; or height = width = 0
         // indicates that the full resolution image was captured.
         
-        public uint x_offset; // Leftmost pixel of the ROI
+        public uint x_offset { get; set; } // Leftmost pixel of the ROI
         // (0 if the ROI includes the left edge of the image)
-        public uint y_offset; // Topmost pixel of the ROI
+        public uint y_offset { get; set; } // Topmost pixel of the ROI
         // (0 if the ROI includes the top edge of the image)
-        public uint height; // Height of ROI
-        public uint width; // Width of ROI
+        public uint height { get; set; } // Height of ROI
+        public uint width { get; set; } // Width of ROI
         
         // True if a distinct rectified ROI should be calculated from the "raw"
         // ROI in this message. Typically this should be False if the full image
         // is captured (ROI not used), and True if a subwindow is captured (ROI
         // used).
-        public bool do_rectify;
+        public bool do_rectify { get; set; }
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public RegionOfInterest()
         {
-            BuiltIns.Deserialize(out x_offset, ref ptr, end);
-            BuiltIns.Deserialize(out y_offset, ref ptr, end);
-            BuiltIns.Deserialize(out height, ref ptr, end);
-            BuiltIns.Deserialize(out width, ref ptr, end);
-            BuiltIns.Deserialize(out do_rectify, ref ptr, end);
+        }
+        
+        /// <summary> Explicit constructor. </summary>
+        public RegionOfInterest(uint x_offset, uint y_offset, uint height, uint width, bool do_rectify)
+        {
+            this.x_offset = x_offset;
+            this.y_offset = y_offset;
+            this.height = height;
+            this.width = width;
+            this.do_rectify = do_rectify;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal RegionOfInterest(Buffer b)
+        {
+            this.x_offset = BuiltIns.DeserializeStruct<uint>(b);
+            this.y_offset = BuiltIns.DeserializeStruct<uint>(b);
+            this.height = BuiltIns.DeserializeStruct<uint>(b);
+            this.width = BuiltIns.DeserializeStruct<uint>(b);
+            this.do_rectify = BuiltIns.DeserializeStruct<bool>(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new RegionOfInterest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(x_offset, ref ptr, end);
-            BuiltIns.Serialize(y_offset, ref ptr, end);
-            BuiltIns.Serialize(height, ref ptr, end);
-            BuiltIns.Serialize(width, ref ptr, end);
-            BuiltIns.Serialize(do_rectify, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.x_offset, b);
+            BuiltIns.Serialize(this.y_offset, b);
+            BuiltIns.Serialize(this.height, b);
+            BuiltIns.Serialize(this.width, b);
+            BuiltIns.Serialize(this.do_rectify, b);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 17;
-    
-        public IMessage Create() => new RegionOfInterest();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

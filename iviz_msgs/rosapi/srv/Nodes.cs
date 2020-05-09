@@ -5,7 +5,7 @@ namespace Iviz.Msgs.rosapi
     public sealed class Nodes : IService
     {
         /// <summary> Request message. </summary>
-        public NodesRequest Request { get; }
+        public NodesRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public NodesResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.rosapi
         
         public IService Create() => new Nodes();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (NodesRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (NodesResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -48,11 +56,28 @@ namespace Iviz.Msgs.rosapi
     {
         
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public NodesRequest()
         {
         }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal NodesRequest(Buffer b)
+        {
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new NodesRequest(b);
+        }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+        }
+        
+        public void Validate()
         {
         }
     
@@ -62,7 +87,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class NodesResponse : IResponse
     {
-        public string[] nodes;
+        public string[] nodes { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public NodesResponse()
@@ -70,14 +95,33 @@ namespace Iviz.Msgs.rosapi
             nodes = System.Array.Empty<string>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public NodesResponse(string[] nodes)
         {
-            BuiltIns.Deserialize(out nodes, ref ptr, end, 0);
+            this.nodes = nodes ?? throw new System.ArgumentNullException(nameof(nodes));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal NodesResponse(Buffer b)
+        {
+            this.nodes = BuiltIns.DeserializeStringArray(b, 0);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new NodesResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(nodes, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.nodes, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (nodes is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

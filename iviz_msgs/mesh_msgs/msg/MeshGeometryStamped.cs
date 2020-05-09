@@ -5,9 +5,9 @@ namespace Iviz.Msgs.mesh_msgs
     public sealed class MeshGeometryStamped : IMessage
     {
         // Mesh Geometry Message
-        public std_msgs.Header header;
-        public string uuid;
-        public mesh_msgs.MeshGeometry mesh_geometry;
+        public std_msgs.Header header { get; set; }
+        public string uuid { get; set; }
+        public mesh_msgs.MeshGeometry mesh_geometry { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshGeometryStamped()
@@ -17,18 +17,41 @@ namespace Iviz.Msgs.mesh_msgs
             mesh_geometry = new mesh_msgs.MeshGeometry();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public MeshGeometryStamped(std_msgs.Header header, string uuid, mesh_msgs.MeshGeometry mesh_geometry)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out uuid, ref ptr, end);
-            mesh_geometry.Deserialize(ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.uuid = uuid ?? throw new System.ArgumentNullException(nameof(uuid));
+            this.mesh_geometry = mesh_geometry ?? throw new System.ArgumentNullException(nameof(mesh_geometry));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal MeshGeometryStamped(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.uuid = BuiltIns.DeserializeString(b);
+            this.mesh_geometry = new mesh_msgs.MeshGeometry(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new MeshGeometryStamped(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.Serialize(uuid, ref ptr, end);
-            mesh_geometry.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            BuiltIns.Serialize(this.uuid, b);
+            this.mesh_geometry.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (uuid is null) throw new System.NullReferenceException();
+            if (mesh_geometry is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -42,8 +65,6 @@ namespace Iviz.Msgs.mesh_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new MeshGeometryStamped();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

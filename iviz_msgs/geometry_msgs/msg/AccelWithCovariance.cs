@@ -6,13 +6,13 @@ namespace Iviz.Msgs.geometry_msgs
     {
         // This expresses acceleration in free space with uncertainty.
         
-        public Accel accel;
+        public Accel accel { get; set; }
         
         // Row-major representation of the 6x6 covariance matrix
         // The orientation parameters use a fixed-axis representation.
         // In order, the parameters are:
         // (x, y, z, rotation about X axis, rotation about Y axis, rotation about Z axis)
-        public double[/*36*/] covariance;
+        public double[/*36*/] covariance { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public AccelWithCovariance()
@@ -21,22 +21,42 @@ namespace Iviz.Msgs.geometry_msgs
             covariance = new double[36];
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public AccelWithCovariance(Accel accel, double[] covariance)
         {
-            accel.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out covariance, ref ptr, end, 36);
+            this.accel = accel ?? throw new System.ArgumentNullException(nameof(accel));
+            BuiltIns.AssertSize(covariance, 36);
+            this.covariance = covariance;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal AccelWithCovariance(Buffer b)
+        {
+            this.accel = new Accel(b);
+            this.covariance = BuiltIns.DeserializeStructArray<double>(b, 36);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new AccelWithCovariance(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            accel.Serialize(ref ptr, end);
-            BuiltIns.Serialize(covariance, ref ptr, end, 36);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.accel.Serialize(b);
+            BuiltIns.Serialize(this.covariance, b, 36);
+        }
+        
+        public void Validate()
+        {
+            if (accel is null) throw new System.NullReferenceException();
+            BuiltIns.AssertSize(covariance, 36);
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 336;
-    
-        public IMessage Create() => new AccelWithCovariance();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

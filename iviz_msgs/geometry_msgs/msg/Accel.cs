@@ -5,25 +5,47 @@ namespace Iviz.Msgs.geometry_msgs
     public sealed class Accel : IMessage
     {
         // This expresses acceleration in free space broken into its linear and angular parts.
-        public Vector3 linear;
-        public Vector3 angular;
+        public Vector3 linear { get; set; }
+        public Vector3 angular { get; set; }
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public Accel()
         {
-            linear.Deserialize(ref ptr, end);
-            angular.Deserialize(ref ptr, end);
+        }
+        
+        /// <summary> Explicit constructor. </summary>
+        public Accel(Vector3 linear, Vector3 angular)
+        {
+            this.linear = linear;
+            this.angular = angular;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal Accel(Buffer b)
+        {
+            this.linear = new Vector3(b);
+            this.angular = new Vector3(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new Accel(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            linear.Serialize(ref ptr, end);
-            angular.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.linear.Serialize(b);
+            this.angular.Serialize(b);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 48;
-    
-        public IMessage Create() => new Accel();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

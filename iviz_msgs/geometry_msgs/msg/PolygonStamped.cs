@@ -5,8 +5,8 @@ namespace Iviz.Msgs.geometry_msgs
     public sealed class PolygonStamped : IMessage
     {
         // This represents a Polygon with reference coordinate frame and timestamp
-        public std_msgs.Header header;
-        public Polygon polygon;
+        public std_msgs.Header header { get; set; }
+        public Polygon polygon { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public PolygonStamped()
@@ -15,16 +15,37 @@ namespace Iviz.Msgs.geometry_msgs
             polygon = new Polygon();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public PolygonStamped(std_msgs.Header header, Polygon polygon)
         {
-            header.Deserialize(ref ptr, end);
-            polygon.Deserialize(ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.polygon = polygon ?? throw new System.ArgumentNullException(nameof(polygon));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal PolygonStamped(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.polygon = new Polygon(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new PolygonStamped(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            polygon.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            this.polygon.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (polygon is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -37,8 +58,6 @@ namespace Iviz.Msgs.geometry_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new PolygonStamped();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

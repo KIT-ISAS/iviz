@@ -4,7 +4,7 @@ namespace Iviz.Msgs.rosbridge_library
 {
     public sealed class TestHeaderTwo : IMessage
     {
-        public std_msgs.Header header;
+        public std_msgs.Header header { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestHeaderTwo()
@@ -12,14 +12,33 @@ namespace Iviz.Msgs.rosbridge_library
             header = new std_msgs.Header();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public TestHeaderTwo(std_msgs.Header header)
         {
-            header.Deserialize(ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TestHeaderTwo(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TestHeaderTwo(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -31,8 +50,6 @@ namespace Iviz.Msgs.rosbridge_library
                 return size;
             }
         }
-    
-        public IMessage Create() => new TestHeaderTwo();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

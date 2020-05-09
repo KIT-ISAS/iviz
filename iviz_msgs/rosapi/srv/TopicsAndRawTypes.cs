@@ -5,7 +5,7 @@ namespace Iviz.Msgs.rosapi
     public sealed class TopicsAndRawTypes : IService
     {
         /// <summary> Request message. </summary>
-        public TopicsAndRawTypesRequest Request { get; }
+        public TopicsAndRawTypesRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public TopicsAndRawTypesResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.rosapi
         
         public IService Create() => new TopicsAndRawTypes();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (TopicsAndRawTypesRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (TopicsAndRawTypesResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -48,11 +56,28 @@ namespace Iviz.Msgs.rosapi
     {
         
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public TopicsAndRawTypesRequest()
         {
         }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TopicsAndRawTypesRequest(Buffer b)
+        {
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TopicsAndRawTypesRequest(b);
+        }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+        }
+        
+        public void Validate()
         {
         }
     
@@ -62,9 +87,9 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class TopicsAndRawTypesResponse : IResponse
     {
-        public string[] topics;
-        public string[] types;
-        public string[] typedefs_full_text;
+        public string[] topics { get; set; }
+        public string[] types { get; set; }
+        public string[] typedefs_full_text { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TopicsAndRawTypesResponse()
@@ -74,18 +99,41 @@ namespace Iviz.Msgs.rosapi
             typedefs_full_text = System.Array.Empty<string>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public TopicsAndRawTypesResponse(string[] topics, string[] types, string[] typedefs_full_text)
         {
-            BuiltIns.Deserialize(out topics, ref ptr, end, 0);
-            BuiltIns.Deserialize(out types, ref ptr, end, 0);
-            BuiltIns.Deserialize(out typedefs_full_text, ref ptr, end, 0);
+            this.topics = topics ?? throw new System.ArgumentNullException(nameof(topics));
+            this.types = types ?? throw new System.ArgumentNullException(nameof(types));
+            this.typedefs_full_text = typedefs_full_text ?? throw new System.ArgumentNullException(nameof(typedefs_full_text));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TopicsAndRawTypesResponse(Buffer b)
+        {
+            this.topics = BuiltIns.DeserializeStringArray(b, 0);
+            this.types = BuiltIns.DeserializeStringArray(b, 0);
+            this.typedefs_full_text = BuiltIns.DeserializeStringArray(b, 0);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TopicsAndRawTypesResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(topics, ref ptr, end, 0);
-            BuiltIns.Serialize(types, ref ptr, end, 0);
-            BuiltIns.Serialize(typedefs_full_text, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.topics, b, 0);
+            BuiltIns.Serialize(this.types, b, 0);
+            BuiltIns.Serialize(this.typedefs_full_text, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (topics is null) throw new System.NullReferenceException();
+            if (types is null) throw new System.NullReferenceException();
+            if (typedefs_full_text is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

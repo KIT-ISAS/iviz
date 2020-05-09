@@ -4,22 +4,43 @@ namespace Iviz.Msgs.std_msgs
 {
     public sealed class Int8 : IMessage
     {
-        public sbyte data;
+        public sbyte data { get; set; }
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public Int8()
         {
-            BuiltIns.Deserialize(out data, ref ptr, end);
+        }
+        
+        /// <summary> Explicit constructor. </summary>
+        public Int8(sbyte data)
+        {
+            this.data = data;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal Int8(Buffer b)
+        {
+            this.data = BuiltIns.DeserializeStruct<sbyte>(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new Int8(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(data, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.data, b);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 1;
-    
-        public IMessage Create() => new Int8();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

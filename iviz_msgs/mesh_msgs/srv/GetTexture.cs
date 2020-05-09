@@ -5,7 +5,7 @@ namespace Iviz.Msgs.mesh_msgs
     public sealed class GetTexture : IService
     {
         /// <summary> Request message. </summary>
-        public GetTextureRequest Request { get; }
+        public GetTextureRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public GetTextureResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.mesh_msgs
         
         public IService Create() => new GetTexture();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (GetTextureRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (GetTextureResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -46,8 +54,8 @@ namespace Iviz.Msgs.mesh_msgs
 
     public sealed class GetTextureRequest : IRequest
     {
-        public string uuid;
-        public uint texture_index;
+        public string uuid { get; set; }
+        public uint texture_index { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetTextureRequest()
@@ -55,16 +63,36 @@ namespace Iviz.Msgs.mesh_msgs
             uuid = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public GetTextureRequest(string uuid, uint texture_index)
         {
-            BuiltIns.Deserialize(out uuid, ref ptr, end);
-            BuiltIns.Deserialize(out texture_index, ref ptr, end);
+            this.uuid = uuid ?? throw new System.ArgumentNullException(nameof(uuid));
+            this.texture_index = texture_index;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal GetTextureRequest(Buffer b)
+        {
+            this.uuid = BuiltIns.DeserializeString(b);
+            this.texture_index = BuiltIns.DeserializeStruct<uint>(b);
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new GetTextureRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(uuid, ref ptr, end);
-            BuiltIns.Serialize(texture_index, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.uuid, b);
+            BuiltIns.Serialize(this.texture_index, b);
+        }
+        
+        public void Validate()
+        {
+            if (uuid is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -80,7 +108,7 @@ namespace Iviz.Msgs.mesh_msgs
 
     public sealed class GetTextureResponse : IResponse
     {
-        public mesh_msgs.MeshTexture texture;
+        public mesh_msgs.MeshTexture texture { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetTextureResponse()
@@ -88,14 +116,33 @@ namespace Iviz.Msgs.mesh_msgs
             texture = new mesh_msgs.MeshTexture();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public GetTextureResponse(mesh_msgs.MeshTexture texture)
         {
-            texture.Deserialize(ref ptr, end);
+            this.texture = texture ?? throw new System.ArgumentNullException(nameof(texture));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal GetTextureResponse(Buffer b)
+        {
+            this.texture = new mesh_msgs.MeshTexture(b);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new GetTextureResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            texture.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.texture.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (texture is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

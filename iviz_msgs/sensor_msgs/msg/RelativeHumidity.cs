@@ -7,15 +7,15 @@ namespace Iviz.Msgs.sensor_msgs
         // Single reading from a relative humidity sensor.  Defines the ratio of partial
         // pressure of water vapor to the saturated vapor pressure at a temperature.
         
-        public std_msgs.Header header; // timestamp of the measurement
+        public std_msgs.Header header { get; set; } // timestamp of the measurement
         // frame_id is the location of the humidity sensor
         
-        public double relative_humidity; // Expression of the relative humidity
+        public double relative_humidity { get; set; } // Expression of the relative humidity
         // from 0.0 to 1.0.
         // 0.0 is no partial pressure of water vapor
         // 1.0 represents partial pressure of saturation
         
-        public double variance; // 0 is interpreted as variance unknown
+        public double variance { get; set; } // 0 is interpreted as variance unknown
     
         /// <summary> Constructor for empty message. </summary>
         public RelativeHumidity()
@@ -23,18 +23,39 @@ namespace Iviz.Msgs.sensor_msgs
             header = new std_msgs.Header();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public RelativeHumidity(std_msgs.Header header, double relative_humidity, double variance)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out relative_humidity, ref ptr, end);
-            BuiltIns.Deserialize(out variance, ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.relative_humidity = relative_humidity;
+            this.variance = variance;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal RelativeHumidity(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.relative_humidity = BuiltIns.DeserializeStruct<double>(b);
+            this.variance = BuiltIns.DeserializeStruct<double>(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new RelativeHumidity(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.Serialize(relative_humidity, ref ptr, end);
-            BuiltIns.Serialize(variance, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            BuiltIns.Serialize(this.relative_humidity, b);
+            BuiltIns.Serialize(this.variance, b);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -46,8 +67,6 @@ namespace Iviz.Msgs.sensor_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new RelativeHumidity();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

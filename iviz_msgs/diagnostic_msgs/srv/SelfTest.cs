@@ -5,7 +5,7 @@ namespace Iviz.Msgs.diagnostic_msgs
     public sealed class SelfTest : IService
     {
         /// <summary> Request message. </summary>
-        public SelfTestRequest Request { get; }
+        public SelfTestRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public SelfTestResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.diagnostic_msgs
         
         public IService Create() => new SelfTest();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (SelfTestRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (SelfTestResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -50,9 +58,9 @@ namespace Iviz.Msgs.diagnostic_msgs
 
     public sealed class SelfTestResponse : IResponse
     {
-        public string id;
-        public byte passed;
-        public DiagnosticStatus[] status;
+        public string id { get; set; }
+        public byte passed { get; set; }
+        public DiagnosticStatus[] status { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public SelfTestResponse()
@@ -61,18 +69,40 @@ namespace Iviz.Msgs.diagnostic_msgs
             status = System.Array.Empty<DiagnosticStatus>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public SelfTestResponse(string id, byte passed, DiagnosticStatus[] status)
         {
-            BuiltIns.Deserialize(out id, ref ptr, end);
-            BuiltIns.Deserialize(out passed, ref ptr, end);
-            BuiltIns.DeserializeArray(out status, ref ptr, end, 0);
+            this.id = id ?? throw new System.ArgumentNullException(nameof(id));
+            this.passed = passed;
+            this.status = status ?? throw new System.ArgumentNullException(nameof(status));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal SelfTestResponse(Buffer b)
+        {
+            this.id = BuiltIns.DeserializeString(b);
+            this.passed = BuiltIns.DeserializeStruct<byte>(b);
+            this.status = BuiltIns.DeserializeArray<DiagnosticStatus>(b, 0);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new SelfTestResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(id, ref ptr, end);
-            BuiltIns.Serialize(passed, ref ptr, end);
-            BuiltIns.SerializeArray(status, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.id, b);
+            BuiltIns.Serialize(this.passed, b);
+            BuiltIns.SerializeArray(this.status, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (id is null) throw new System.NullReferenceException();
+            if (status is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

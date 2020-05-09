@@ -5,7 +5,7 @@ namespace Iviz.Msgs.mesh_msgs
     public sealed class MeshVertexColors : IMessage
     {
         // Mesh Attribute Message
-        public std_msgs.ColorRGBA[] vertex_colors;
+        public std_msgs.ColorRGBA[] vertex_colors { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshVertexColors()
@@ -13,14 +13,33 @@ namespace Iviz.Msgs.mesh_msgs
             vertex_colors = System.Array.Empty<std_msgs.ColorRGBA>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public MeshVertexColors(std_msgs.ColorRGBA[] vertex_colors)
         {
-            BuiltIns.DeserializeStructArray(out vertex_colors, ref ptr, end, 0);
+            this.vertex_colors = vertex_colors ?? throw new System.ArgumentNullException(nameof(vertex_colors));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal MeshVertexColors(Buffer b)
+        {
+            this.vertex_colors = BuiltIns.DeserializeStructArray<std_msgs.ColorRGBA>(b, 0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new MeshVertexColors(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.SerializeStructArray(vertex_colors, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.SerializeStructArray(this.vertex_colors, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (vertex_colors is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -32,8 +51,6 @@ namespace Iviz.Msgs.mesh_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new MeshVertexColors();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

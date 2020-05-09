@@ -5,7 +5,7 @@ namespace Iviz.Msgs.rosapi
     public sealed class ServiceHost : IService
     {
         /// <summary> Request message. </summary>
-        public ServiceHostRequest Request { get; }
+        public ServiceHostRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public ServiceHostResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.rosapi
         
         public IService Create() => new ServiceHost();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (ServiceHostRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (ServiceHostResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -46,7 +54,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class ServiceHostRequest : IRequest
     {
-        public string service;
+        public string service { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ServiceHostRequest()
@@ -54,14 +62,33 @@ namespace Iviz.Msgs.rosapi
             service = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public ServiceHostRequest(string service)
         {
-            BuiltIns.Deserialize(out service, ref ptr, end);
+            this.service = service ?? throw new System.ArgumentNullException(nameof(service));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal ServiceHostRequest(Buffer b)
+        {
+            this.service = BuiltIns.DeserializeString(b);
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new ServiceHostRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(service, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.service, b);
+        }
+        
+        public void Validate()
+        {
+            if (service is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -77,7 +104,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class ServiceHostResponse : IResponse
     {
-        public string host;
+        public string host { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ServiceHostResponse()
@@ -85,14 +112,33 @@ namespace Iviz.Msgs.rosapi
             host = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public ServiceHostResponse(string host)
         {
-            BuiltIns.Deserialize(out host, ref ptr, end);
+            this.host = host ?? throw new System.ArgumentNullException(nameof(host));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal ServiceHostResponse(Buffer b)
+        {
+            this.host = BuiltIns.DeserializeString(b);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new ServiceHostResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(host, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.host, b);
+        }
+        
+        public void Validate()
+        {
+            if (host is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

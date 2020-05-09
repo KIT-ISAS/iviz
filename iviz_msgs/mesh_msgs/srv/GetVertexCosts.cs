@@ -5,7 +5,7 @@ namespace Iviz.Msgs.mesh_msgs
     public sealed class GetVertexCosts : IService
     {
         /// <summary> Request message. </summary>
-        public GetVertexCostsRequest Request { get; }
+        public GetVertexCostsRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public GetVertexCostsResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.mesh_msgs
         
         public IService Create() => new GetVertexCosts();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (GetVertexCostsRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (GetVertexCostsResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -46,7 +54,7 @@ namespace Iviz.Msgs.mesh_msgs
 
     public sealed class GetVertexCostsRequest : IRequest
     {
-        public string uuid;
+        public string uuid { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetVertexCostsRequest()
@@ -54,14 +62,33 @@ namespace Iviz.Msgs.mesh_msgs
             uuid = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public GetVertexCostsRequest(string uuid)
         {
-            BuiltIns.Deserialize(out uuid, ref ptr, end);
+            this.uuid = uuid ?? throw new System.ArgumentNullException(nameof(uuid));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal GetVertexCostsRequest(Buffer b)
+        {
+            this.uuid = BuiltIns.DeserializeString(b);
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new GetVertexCostsRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(uuid, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.uuid, b);
+        }
+        
+        public void Validate()
+        {
+            if (uuid is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -77,7 +104,7 @@ namespace Iviz.Msgs.mesh_msgs
 
     public sealed class GetVertexCostsResponse : IResponse
     {
-        public mesh_msgs.MeshVertexCostsStamped mesh_vertex_costs_stamped;
+        public mesh_msgs.MeshVertexCostsStamped mesh_vertex_costs_stamped { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetVertexCostsResponse()
@@ -85,14 +112,33 @@ namespace Iviz.Msgs.mesh_msgs
             mesh_vertex_costs_stamped = new mesh_msgs.MeshVertexCostsStamped();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public GetVertexCostsResponse(mesh_msgs.MeshVertexCostsStamped mesh_vertex_costs_stamped)
         {
-            mesh_vertex_costs_stamped.Deserialize(ref ptr, end);
+            this.mesh_vertex_costs_stamped = mesh_vertex_costs_stamped ?? throw new System.ArgumentNullException(nameof(mesh_vertex_costs_stamped));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal GetVertexCostsResponse(Buffer b)
+        {
+            this.mesh_vertex_costs_stamped = new mesh_msgs.MeshVertexCostsStamped(b);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new GetVertexCostsResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            mesh_vertex_costs_stamped.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.mesh_vertex_costs_stamped.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (mesh_vertex_costs_stamped is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

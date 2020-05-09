@@ -5,7 +5,7 @@ namespace Iviz.Msgs.rosapi
     public sealed class SetParam : IService
     {
         /// <summary> Request message. </summary>
-        public SetParamRequest Request { get; }
+        public SetParamRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public SetParamResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.rosapi
         
         public IService Create() => new SetParam();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (SetParamRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (SetParamResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -46,8 +54,8 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class SetParamRequest : IRequest
     {
-        public string name;
-        public string value;
+        public string name { get; set; }
+        public string value { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public SetParamRequest()
@@ -56,16 +64,37 @@ namespace Iviz.Msgs.rosapi
             value = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public SetParamRequest(string name, string value)
         {
-            BuiltIns.Deserialize(out name, ref ptr, end);
-            BuiltIns.Deserialize(out value, ref ptr, end);
+            this.name = name ?? throw new System.ArgumentNullException(nameof(name));
+            this.value = value ?? throw new System.ArgumentNullException(nameof(value));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal SetParamRequest(Buffer b)
+        {
+            this.name = BuiltIns.DeserializeString(b);
+            this.value = BuiltIns.DeserializeString(b);
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new SetParamRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(name, ref ptr, end);
-            BuiltIns.Serialize(value, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.name, b);
+            BuiltIns.Serialize(this.value, b);
+        }
+        
+        public void Validate()
+        {
+            if (name is null) throw new System.NullReferenceException();
+            if (value is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

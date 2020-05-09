@@ -14,17 +14,17 @@ namespace Iviz.Msgs.sensor_msgs
         // other source
         
         
-        public std_msgs.Header header; // timestamp is the time the
+        public std_msgs.Header header { get; set; } // timestamp is the time the
         // field was measured
         // frame_id is the location and orientation
         // of the field measurement
         
-        public geometry_msgs.Vector3 magnetic_field; // x, y, and z components of the
+        public geometry_msgs.Vector3 magnetic_field { get; set; } // x, y, and z components of the
         // field vector in Tesla
         // If your sensor does not output 3 axes,
         // put NaNs in the components not reported.
         
-        public double[/*9*/] magnetic_field_covariance; // Row major about x, y, z axes
+        public double[/*9*/] magnetic_field_covariance { get; set; } // Row major about x, y, z axes
         // 0 is interpreted as variance unknown
     
         /// <summary> Constructor for empty message. </summary>
@@ -34,18 +34,41 @@ namespace Iviz.Msgs.sensor_msgs
             magnetic_field_covariance = new double[9];
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public MagneticField(std_msgs.Header header, geometry_msgs.Vector3 magnetic_field, double[] magnetic_field_covariance)
         {
-            header.Deserialize(ref ptr, end);
-            magnetic_field.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out magnetic_field_covariance, ref ptr, end, 9);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.magnetic_field = magnetic_field;
+            BuiltIns.AssertSize(magnetic_field_covariance, 9);
+            this.magnetic_field_covariance = magnetic_field_covariance;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal MagneticField(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.magnetic_field = new geometry_msgs.Vector3(b);
+            this.magnetic_field_covariance = BuiltIns.DeserializeStructArray<double>(b, 9);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new MagneticField(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            magnetic_field.Serialize(ref ptr, end);
-            BuiltIns.Serialize(magnetic_field_covariance, ref ptr, end, 9);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            this.magnetic_field.Serialize(b);
+            BuiltIns.Serialize(this.magnetic_field_covariance, b, 9);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            BuiltIns.AssertSize(magnetic_field_covariance, 9);
         }
     
         [IgnoreDataMember]
@@ -57,8 +80,6 @@ namespace Iviz.Msgs.sensor_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new MagneticField();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

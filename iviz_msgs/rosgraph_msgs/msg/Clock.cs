@@ -7,22 +7,43 @@ namespace Iviz.Msgs.rosgraph_msgs
         // roslib/Clock is used for publishing simulated time in ROS. 
         // This message simply communicates the current time.
         // For more information, see http://www.ros.org/wiki/Clock
-        public time clock;
+        public time clock { get; set; }
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public Clock()
         {
-            BuiltIns.Deserialize(out clock, ref ptr, end);
+        }
+        
+        /// <summary> Explicit constructor. </summary>
+        public Clock(time clock)
+        {
+            this.clock = clock;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal Clock(Buffer b)
+        {
+            this.clock = BuiltIns.DeserializeStruct<time>(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new Clock(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(clock, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.clock, b);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 8;
-    
-        public IMessage Create() => new Clock();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

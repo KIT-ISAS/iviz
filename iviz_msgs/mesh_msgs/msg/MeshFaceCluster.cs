@@ -5,9 +5,9 @@ namespace Iviz.Msgs.mesh_msgs
     public sealed class MeshFaceCluster : IMessage
     {
         //Cluster
-        public uint[] face_indices;
+        public uint[] face_indices { get; set; }
         //optional
-        public string label;
+        public string label { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshFaceCluster()
@@ -16,16 +16,37 @@ namespace Iviz.Msgs.mesh_msgs
             label = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public MeshFaceCluster(uint[] face_indices, string label)
         {
-            BuiltIns.Deserialize(out face_indices, ref ptr, end, 0);
-            BuiltIns.Deserialize(out label, ref ptr, end);
+            this.face_indices = face_indices ?? throw new System.ArgumentNullException(nameof(face_indices));
+            this.label = label ?? throw new System.ArgumentNullException(nameof(label));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal MeshFaceCluster(Buffer b)
+        {
+            this.face_indices = BuiltIns.DeserializeStructArray<uint>(b, 0);
+            this.label = BuiltIns.DeserializeString(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new MeshFaceCluster(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(face_indices, ref ptr, end, 0);
-            BuiltIns.Serialize(label, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.face_indices, b, 0);
+            BuiltIns.Serialize(this.label, b);
+        }
+        
+        public void Validate()
+        {
+            if (face_indices is null) throw new System.NullReferenceException();
+            if (label is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -38,8 +59,6 @@ namespace Iviz.Msgs.mesh_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new MeshFaceCluster();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

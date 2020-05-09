@@ -5,7 +5,7 @@ namespace Iviz.Msgs.rosapi
     public sealed class SearchParam : IService
     {
         /// <summary> Request message. </summary>
-        public SearchParamRequest Request { get; }
+        public SearchParamRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public SearchParamResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.rosapi
         
         public IService Create() => new SearchParam();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (SearchParamRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (SearchParamResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -46,7 +54,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class SearchParamRequest : IRequest
     {
-        public string name;
+        public string name { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public SearchParamRequest()
@@ -54,14 +62,33 @@ namespace Iviz.Msgs.rosapi
             name = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public SearchParamRequest(string name)
         {
-            BuiltIns.Deserialize(out name, ref ptr, end);
+            this.name = name ?? throw new System.ArgumentNullException(nameof(name));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal SearchParamRequest(Buffer b)
+        {
+            this.name = BuiltIns.DeserializeString(b);
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new SearchParamRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(name, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.name, b);
+        }
+        
+        public void Validate()
+        {
+            if (name is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -77,7 +104,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class SearchParamResponse : IResponse
     {
-        public string global_name;
+        public string global_name { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public SearchParamResponse()
@@ -85,14 +112,33 @@ namespace Iviz.Msgs.rosapi
             global_name = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public SearchParamResponse(string global_name)
         {
-            BuiltIns.Deserialize(out global_name, ref ptr, end);
+            this.global_name = global_name ?? throw new System.ArgumentNullException(nameof(global_name));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal SearchParamResponse(Buffer b)
+        {
+            this.global_name = BuiltIns.DeserializeString(b);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new SearchParamResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(global_name, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.global_name, b);
+        }
+        
+        public void Validate()
+        {
+            if (global_name is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

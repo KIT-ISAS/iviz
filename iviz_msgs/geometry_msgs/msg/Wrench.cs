@@ -6,25 +6,47 @@ namespace Iviz.Msgs.geometry_msgs
     {
         // This represents force in free space, separated into
         // its linear and angular parts.
-        public Vector3 force;
-        public Vector3 torque;
+        public Vector3 force { get; set; }
+        public Vector3 torque { get; set; }
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public Wrench()
         {
-            force.Deserialize(ref ptr, end);
-            torque.Deserialize(ref ptr, end);
+        }
+        
+        /// <summary> Explicit constructor. </summary>
+        public Wrench(Vector3 force, Vector3 torque)
+        {
+            this.force = force;
+            this.torque = torque;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal Wrench(Buffer b)
+        {
+            this.force = new Vector3(b);
+            this.torque = new Vector3(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new Wrench(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            force.Serialize(ref ptr, end);
-            torque.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.force.Serialize(b);
+            this.torque.Serialize(b);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 48;
-    
-        public IMessage Create() => new Wrench();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

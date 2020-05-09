@@ -4,8 +4,8 @@ namespace Iviz.Msgs.rosbridge_msgs
 {
     public sealed class ConnectedClient : IMessage
     {
-        public string ip_address;
-        public time connection_time;
+        public string ip_address { get; set; }
+        public time connection_time { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ConnectedClient()
@@ -13,16 +13,36 @@ namespace Iviz.Msgs.rosbridge_msgs
             ip_address = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public ConnectedClient(string ip_address, time connection_time)
         {
-            BuiltIns.Deserialize(out ip_address, ref ptr, end);
-            BuiltIns.Deserialize(out connection_time, ref ptr, end);
+            this.ip_address = ip_address ?? throw new System.ArgumentNullException(nameof(ip_address));
+            this.connection_time = connection_time;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal ConnectedClient(Buffer b)
+        {
+            this.ip_address = BuiltIns.DeserializeString(b);
+            this.connection_time = BuiltIns.DeserializeStruct<time>(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new ConnectedClient(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(ip_address, ref ptr, end);
-            BuiltIns.Serialize(connection_time, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.ip_address, b);
+            BuiltIns.Serialize(this.connection_time, b);
+        }
+        
+        public void Validate()
+        {
+            if (ip_address is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -34,8 +54,6 @@ namespace Iviz.Msgs.rosbridge_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new ConnectedClient();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

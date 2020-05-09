@@ -6,19 +6,19 @@ namespace Iviz.Msgs.stereo_msgs
     {
         // Separate header for compatibility with current TimeSynchronizer.
         // Likely to be removed in a later release, use image.header instead.
-        public std_msgs.Header header;
+        public std_msgs.Header header { get; set; }
         
         // Floating point disparity image. The disparities are pre-adjusted for any
         // x-offset between the principal points of the two cameras (in the case
         // that they are verged). That is: d = x_l - x_r - (cx_l - cx_r)
-        public sensor_msgs.Image image;
+        public sensor_msgs.Image image { get; set; }
         
         // Stereo geometry. For disparity d, the depth from the camera is Z = fT/d.
-        public float f; // Focal length, pixels
-        public float T; // Baseline, world units
+        public float f { get; set; } // Focal length, pixels
+        public float T { get; set; } // Baseline, world units
         
         // Subwindow of (potentially) valid disparity values.
-        public sensor_msgs.RegionOfInterest valid_window;
+        public sensor_msgs.RegionOfInterest valid_window { get; set; }
         
         // The range of disparities searched.
         // In the disparity image, any disparity less than min_disparity is invalid.
@@ -27,12 +27,12 @@ namespace Iviz.Msgs.stereo_msgs
         //     Z_min = fT / max_disparity
         //     Z_max = fT / min_disparity
         // could not be found.
-        public float min_disparity;
-        public float max_disparity;
+        public float min_disparity { get; set; }
+        public float max_disparity { get; set; }
         
         // Smallest allowed disparity increment. The smallest achievable depth range
         // resolution is delta_Z = (Z^2/fT)*delta_d.
-        public float delta_d;
+        public float delta_d { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public DisparityImage()
@@ -42,28 +42,56 @@ namespace Iviz.Msgs.stereo_msgs
             valid_window = new sensor_msgs.RegionOfInterest();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public DisparityImage(std_msgs.Header header, sensor_msgs.Image image, float f, float T, sensor_msgs.RegionOfInterest valid_window, float min_disparity, float max_disparity, float delta_d)
         {
-            header.Deserialize(ref ptr, end);
-            image.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out f, ref ptr, end);
-            BuiltIns.Deserialize(out T, ref ptr, end);
-            valid_window.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out min_disparity, ref ptr, end);
-            BuiltIns.Deserialize(out max_disparity, ref ptr, end);
-            BuiltIns.Deserialize(out delta_d, ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.image = image ?? throw new System.ArgumentNullException(nameof(image));
+            this.f = f;
+            this.T = T;
+            this.valid_window = valid_window ?? throw new System.ArgumentNullException(nameof(valid_window));
+            this.min_disparity = min_disparity;
+            this.max_disparity = max_disparity;
+            this.delta_d = delta_d;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal DisparityImage(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.image = new sensor_msgs.Image(b);
+            this.f = BuiltIns.DeserializeStruct<float>(b);
+            this.T = BuiltIns.DeserializeStruct<float>(b);
+            this.valid_window = new sensor_msgs.RegionOfInterest(b);
+            this.min_disparity = BuiltIns.DeserializeStruct<float>(b);
+            this.max_disparity = BuiltIns.DeserializeStruct<float>(b);
+            this.delta_d = BuiltIns.DeserializeStruct<float>(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new DisparityImage(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            image.Serialize(ref ptr, end);
-            BuiltIns.Serialize(f, ref ptr, end);
-            BuiltIns.Serialize(T, ref ptr, end);
-            valid_window.Serialize(ref ptr, end);
-            BuiltIns.Serialize(min_disparity, ref ptr, end);
-            BuiltIns.Serialize(max_disparity, ref ptr, end);
-            BuiltIns.Serialize(delta_d, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            this.image.Serialize(b);
+            BuiltIns.Serialize(this.f, b);
+            BuiltIns.Serialize(this.T, b);
+            this.valid_window.Serialize(b);
+            BuiltIns.Serialize(this.min_disparity, b);
+            BuiltIns.Serialize(this.max_disparity, b);
+            BuiltIns.Serialize(this.delta_d, b);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (image is null) throw new System.NullReferenceException();
+            if (valid_window is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -76,8 +104,6 @@ namespace Iviz.Msgs.stereo_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new DisparityImage();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

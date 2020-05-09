@@ -5,7 +5,7 @@ namespace Iviz.Msgs.rosapi
     public sealed class GetActionServers : IService
     {
         /// <summary> Request message. </summary>
-        public GetActionServersRequest Request { get; }
+        public GetActionServersRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public GetActionServersResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.rosapi
         
         public IService Create() => new GetActionServers();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (GetActionServersRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (GetActionServersResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -48,11 +56,28 @@ namespace Iviz.Msgs.rosapi
     {
         
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public GetActionServersRequest()
         {
         }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal GetActionServersRequest(Buffer b)
+        {
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new GetActionServersRequest(b);
+        }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+        }
+        
+        public void Validate()
         {
         }
     
@@ -62,7 +87,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class GetActionServersResponse : IResponse
     {
-        public string[] action_servers;
+        public string[] action_servers { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetActionServersResponse()
@@ -70,14 +95,33 @@ namespace Iviz.Msgs.rosapi
             action_servers = System.Array.Empty<string>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public GetActionServersResponse(string[] action_servers)
         {
-            BuiltIns.Deserialize(out action_servers, ref ptr, end, 0);
+            this.action_servers = action_servers ?? throw new System.ArgumentNullException(nameof(action_servers));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal GetActionServersResponse(Buffer b)
+        {
+            this.action_servers = BuiltIns.DeserializeStringArray(b, 0);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new GetActionServersResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(action_servers, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.action_servers, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (action_servers is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

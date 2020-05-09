@@ -4,7 +4,7 @@ namespace Iviz.Msgs.rosbridge_library
 {
     public sealed class TestHeaderArray : IMessage
     {
-        public std_msgs.Header[] header;
+        public std_msgs.Header[] header { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestHeaderArray()
@@ -12,14 +12,33 @@ namespace Iviz.Msgs.rosbridge_library
             header = System.Array.Empty<std_msgs.Header>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public TestHeaderArray(std_msgs.Header[] header)
         {
-            BuiltIns.DeserializeArray(out header, ref ptr, end, 0);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TestHeaderArray(Buffer b)
+        {
+            this.header = BuiltIns.DeserializeArray<std_msgs.Header>(b, 0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TestHeaderArray(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.SerializeArray(header, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.SerializeArray(this.header, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -34,8 +53,6 @@ namespace Iviz.Msgs.rosbridge_library
                 return size;
             }
         }
-    
-        public IMessage Create() => new TestHeaderArray();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

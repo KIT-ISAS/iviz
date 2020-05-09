@@ -5,25 +5,47 @@ namespace Iviz.Msgs.mesh_msgs
     public sealed class MeshVertexTexCoords : IMessage
     {
         // Mesh Attribute Type
-        public float u;
-        public float v;
+        public float u { get; set; }
+        public float v { get; set; }
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public MeshVertexTexCoords()
         {
-            BuiltIns.Deserialize(out u, ref ptr, end);
-            BuiltIns.Deserialize(out v, ref ptr, end);
+        }
+        
+        /// <summary> Explicit constructor. </summary>
+        public MeshVertexTexCoords(float u, float v)
+        {
+            this.u = u;
+            this.v = v;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal MeshVertexTexCoords(Buffer b)
+        {
+            this.u = BuiltIns.DeserializeStruct<float>(b);
+            this.v = BuiltIns.DeserializeStruct<float>(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new MeshVertexTexCoords(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(u, ref ptr, end);
-            BuiltIns.Serialize(v, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.u, b);
+            BuiltIns.Serialize(this.v, b);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 8;
-    
-        public IMessage Create() => new MeshVertexTexCoords();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

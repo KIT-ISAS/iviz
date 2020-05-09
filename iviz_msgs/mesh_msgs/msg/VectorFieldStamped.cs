@@ -4,8 +4,8 @@ namespace Iviz.Msgs.mesh_msgs
 {
     public sealed class VectorFieldStamped : IMessage
     {
-        public std_msgs.Header header;
-        public mesh_msgs.VectorField vector_field;
+        public std_msgs.Header header { get; set; }
+        public mesh_msgs.VectorField vector_field { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public VectorFieldStamped()
@@ -14,16 +14,37 @@ namespace Iviz.Msgs.mesh_msgs
             vector_field = new mesh_msgs.VectorField();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public VectorFieldStamped(std_msgs.Header header, mesh_msgs.VectorField vector_field)
         {
-            header.Deserialize(ref ptr, end);
-            vector_field.Deserialize(ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.vector_field = vector_field ?? throw new System.ArgumentNullException(nameof(vector_field));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal VectorFieldStamped(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.vector_field = new mesh_msgs.VectorField(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new VectorFieldStamped(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            vector_field.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            this.vector_field.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (vector_field is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -36,8 +57,6 @@ namespace Iviz.Msgs.mesh_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new VectorFieldStamped();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

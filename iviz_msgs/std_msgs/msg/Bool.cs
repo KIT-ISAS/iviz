@@ -4,22 +4,43 @@ namespace Iviz.Msgs.std_msgs
 {
     public sealed class Bool : IMessage
     {
-        public bool data;
+        public bool data { get; set; }
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public Bool()
         {
-            BuiltIns.Deserialize(out data, ref ptr, end);
+        }
+        
+        /// <summary> Explicit constructor. </summary>
+        public Bool(bool data)
+        {
+            this.data = data;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal Bool(Buffer b)
+        {
+            this.data = BuiltIns.DeserializeStruct<bool>(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new Bool(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(data, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.data, b);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 1;
-    
-        public IMessage Create() => new Bool();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

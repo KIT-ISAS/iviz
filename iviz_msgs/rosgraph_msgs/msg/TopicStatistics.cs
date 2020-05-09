@@ -5,37 +5,37 @@ namespace Iviz.Msgs.rosgraph_msgs
     public sealed class TopicStatistics : IMessage
     {
         // name of the topic
-        public string topic;
+        public string topic { get; set; }
         
         // node id of the publisher
-        public string node_pub;
+        public string node_pub { get; set; }
         
         // node id of the subscriber
-        public string node_sub;
+        public string node_sub { get; set; }
         
         // the statistics apply to this time window
-        public time window_start;
-        public time window_stop;
+        public time window_start { get; set; }
+        public time window_stop { get; set; }
         
         // number of messages delivered during the window
-        public int delivered_msgs;
+        public int delivered_msgs { get; set; }
         // numbers of messages dropped during the window
-        public int dropped_msgs;
+        public int dropped_msgs { get; set; }
         
         // traffic during the window, in bytes
-        public int traffic;
+        public int traffic { get; set; }
         
         // mean/stddev/max period between two messages
-        public duration period_mean;
-        public duration period_stddev;
-        public duration period_max;
+        public duration period_mean { get; set; }
+        public duration period_stddev { get; set; }
+        public duration period_max { get; set; }
         
         // mean/stddev/max age of the message based on the
         // timestamp in the message header. In case the
         // message does not have a header, it will be 0.
-        public duration stamp_age_mean;
-        public duration stamp_age_stddev;
-        public duration stamp_age_max;
+        public duration stamp_age_mean { get; set; }
+        public duration stamp_age_stddev { get; set; }
+        public duration stamp_age_max { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TopicStatistics()
@@ -45,40 +45,74 @@ namespace Iviz.Msgs.rosgraph_msgs
             node_sub = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public TopicStatistics(string topic, string node_pub, string node_sub, time window_start, time window_stop, int delivered_msgs, int dropped_msgs, int traffic, duration period_mean, duration period_stddev, duration period_max, duration stamp_age_mean, duration stamp_age_stddev, duration stamp_age_max)
         {
-            BuiltIns.Deserialize(out topic, ref ptr, end);
-            BuiltIns.Deserialize(out node_pub, ref ptr, end);
-            BuiltIns.Deserialize(out node_sub, ref ptr, end);
-            BuiltIns.Deserialize(out window_start, ref ptr, end);
-            BuiltIns.Deserialize(out window_stop, ref ptr, end);
-            BuiltIns.Deserialize(out delivered_msgs, ref ptr, end);
-            BuiltIns.Deserialize(out dropped_msgs, ref ptr, end);
-            BuiltIns.Deserialize(out traffic, ref ptr, end);
-            BuiltIns.Deserialize(out period_mean, ref ptr, end);
-            BuiltIns.Deserialize(out period_stddev, ref ptr, end);
-            BuiltIns.Deserialize(out period_max, ref ptr, end);
-            BuiltIns.Deserialize(out stamp_age_mean, ref ptr, end);
-            BuiltIns.Deserialize(out stamp_age_stddev, ref ptr, end);
-            BuiltIns.Deserialize(out stamp_age_max, ref ptr, end);
+            this.topic = topic ?? throw new System.ArgumentNullException(nameof(topic));
+            this.node_pub = node_pub ?? throw new System.ArgumentNullException(nameof(node_pub));
+            this.node_sub = node_sub ?? throw new System.ArgumentNullException(nameof(node_sub));
+            this.window_start = window_start;
+            this.window_stop = window_stop;
+            this.delivered_msgs = delivered_msgs;
+            this.dropped_msgs = dropped_msgs;
+            this.traffic = traffic;
+            this.period_mean = period_mean;
+            this.period_stddev = period_stddev;
+            this.period_max = period_max;
+            this.stamp_age_mean = stamp_age_mean;
+            this.stamp_age_stddev = stamp_age_stddev;
+            this.stamp_age_max = stamp_age_max;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TopicStatistics(Buffer b)
+        {
+            this.topic = BuiltIns.DeserializeString(b);
+            this.node_pub = BuiltIns.DeserializeString(b);
+            this.node_sub = BuiltIns.DeserializeString(b);
+            this.window_start = BuiltIns.DeserializeStruct<time>(b);
+            this.window_stop = BuiltIns.DeserializeStruct<time>(b);
+            this.delivered_msgs = BuiltIns.DeserializeStruct<int>(b);
+            this.dropped_msgs = BuiltIns.DeserializeStruct<int>(b);
+            this.traffic = BuiltIns.DeserializeStruct<int>(b);
+            this.period_mean = BuiltIns.DeserializeStruct<duration>(b);
+            this.period_stddev = BuiltIns.DeserializeStruct<duration>(b);
+            this.period_max = BuiltIns.DeserializeStruct<duration>(b);
+            this.stamp_age_mean = BuiltIns.DeserializeStruct<duration>(b);
+            this.stamp_age_stddev = BuiltIns.DeserializeStruct<duration>(b);
+            this.stamp_age_max = BuiltIns.DeserializeStruct<duration>(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TopicStatistics(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(topic, ref ptr, end);
-            BuiltIns.Serialize(node_pub, ref ptr, end);
-            BuiltIns.Serialize(node_sub, ref ptr, end);
-            BuiltIns.Serialize(window_start, ref ptr, end);
-            BuiltIns.Serialize(window_stop, ref ptr, end);
-            BuiltIns.Serialize(delivered_msgs, ref ptr, end);
-            BuiltIns.Serialize(dropped_msgs, ref ptr, end);
-            BuiltIns.Serialize(traffic, ref ptr, end);
-            BuiltIns.Serialize(period_mean, ref ptr, end);
-            BuiltIns.Serialize(period_stddev, ref ptr, end);
-            BuiltIns.Serialize(period_max, ref ptr, end);
-            BuiltIns.Serialize(stamp_age_mean, ref ptr, end);
-            BuiltIns.Serialize(stamp_age_stddev, ref ptr, end);
-            BuiltIns.Serialize(stamp_age_max, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.topic, b);
+            BuiltIns.Serialize(this.node_pub, b);
+            BuiltIns.Serialize(this.node_sub, b);
+            BuiltIns.Serialize(this.window_start, b);
+            BuiltIns.Serialize(this.window_stop, b);
+            BuiltIns.Serialize(this.delivered_msgs, b);
+            BuiltIns.Serialize(this.dropped_msgs, b);
+            BuiltIns.Serialize(this.traffic, b);
+            BuiltIns.Serialize(this.period_mean, b);
+            BuiltIns.Serialize(this.period_stddev, b);
+            BuiltIns.Serialize(this.period_max, b);
+            BuiltIns.Serialize(this.stamp_age_mean, b);
+            BuiltIns.Serialize(this.stamp_age_stddev, b);
+            BuiltIns.Serialize(this.stamp_age_max, b);
+        }
+        
+        public void Validate()
+        {
+            if (topic is null) throw new System.NullReferenceException();
+            if (node_pub is null) throw new System.NullReferenceException();
+            if (node_sub is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -92,8 +126,6 @@ namespace Iviz.Msgs.rosgraph_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new TopicStatistics();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

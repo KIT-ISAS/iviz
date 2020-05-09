@@ -37,25 +37,25 @@ namespace Iviz.Msgs.sensor_msgs
         public const byte POWER_SUPPLY_TECHNOLOGY_NICD = 5;
         public const byte POWER_SUPPLY_TECHNOLOGY_LIMN = 6;
         
-        public std_msgs.Header header;
-        public float voltage; // Voltage in Volts (Mandatory)
-        public float temperature; // Temperature in Degrees Celsius (If unmeasured NaN)
-        public float current; // Negative when discharging (A)  (If unmeasured NaN)
-        public float charge; // Current charge in Ah  (If unmeasured NaN)
-        public float capacity; // Capacity in Ah (last full capacity)  (If unmeasured NaN)
-        public float design_capacity; // Capacity in Ah (design capacity)  (If unmeasured NaN)
-        public float percentage; // Charge percentage on 0 to 1 range  (If unmeasured NaN)
-        public byte power_supply_status; // The charging status as reported. Values defined above
-        public byte power_supply_health; // The battery health metric. Values defined above
-        public byte power_supply_technology; // The battery chemistry. Values defined above
-        public bool present; // True if the battery is present
+        public std_msgs.Header header { get; set; }
+        public float voltage { get; set; } // Voltage in Volts (Mandatory)
+        public float temperature { get; set; } // Temperature in Degrees Celsius (If unmeasured NaN)
+        public float current { get; set; } // Negative when discharging (A)  (If unmeasured NaN)
+        public float charge { get; set; } // Current charge in Ah  (If unmeasured NaN)
+        public float capacity { get; set; } // Capacity in Ah (last full capacity)  (If unmeasured NaN)
+        public float design_capacity { get; set; } // Capacity in Ah (design capacity)  (If unmeasured NaN)
+        public float percentage { get; set; } // Charge percentage on 0 to 1 range  (If unmeasured NaN)
+        public byte power_supply_status { get; set; } // The charging status as reported. Values defined above
+        public byte power_supply_health { get; set; } // The battery health metric. Values defined above
+        public byte power_supply_technology { get; set; } // The battery chemistry. Values defined above
+        public bool present { get; set; } // True if the battery is present
         
-        public float[] cell_voltage; // An array of individual cell voltages for each cell in the pack
+        public float[] cell_voltage { get; set; } // An array of individual cell voltages for each cell in the pack
         // If individual voltages unknown but number of cells known set each to NaN
-        public float[] cell_temperature; // An array of individual cell temperatures for each cell in the pack
+        public float[] cell_temperature { get; set; } // An array of individual cell temperatures for each cell in the pack
         // If individual temperatures unknown but number of cells known set each to NaN
-        public string location; // The location into which the battery is inserted. (slot number or plug)
-        public string serial_number; // The best approximation of the battery serial number
+        public string location { get; set; } // The location into which the battery is inserted. (slot number or plug)
+        public string serial_number { get; set; } // The best approximation of the battery serial number
     
         /// <summary> Constructor for empty message. </summary>
         public BatteryState()
@@ -67,44 +67,82 @@ namespace Iviz.Msgs.sensor_msgs
             serial_number = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public BatteryState(std_msgs.Header header, float voltage, float temperature, float current, float charge, float capacity, float design_capacity, float percentage, byte power_supply_status, byte power_supply_health, byte power_supply_technology, bool present, float[] cell_voltage, float[] cell_temperature, string location, string serial_number)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out voltage, ref ptr, end);
-            BuiltIns.Deserialize(out temperature, ref ptr, end);
-            BuiltIns.Deserialize(out current, ref ptr, end);
-            BuiltIns.Deserialize(out charge, ref ptr, end);
-            BuiltIns.Deserialize(out capacity, ref ptr, end);
-            BuiltIns.Deserialize(out design_capacity, ref ptr, end);
-            BuiltIns.Deserialize(out percentage, ref ptr, end);
-            BuiltIns.Deserialize(out power_supply_status, ref ptr, end);
-            BuiltIns.Deserialize(out power_supply_health, ref ptr, end);
-            BuiltIns.Deserialize(out power_supply_technology, ref ptr, end);
-            BuiltIns.Deserialize(out present, ref ptr, end);
-            BuiltIns.Deserialize(out cell_voltage, ref ptr, end, 0);
-            BuiltIns.Deserialize(out cell_temperature, ref ptr, end, 0);
-            BuiltIns.Deserialize(out location, ref ptr, end);
-            BuiltIns.Deserialize(out serial_number, ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.voltage = voltage;
+            this.temperature = temperature;
+            this.current = current;
+            this.charge = charge;
+            this.capacity = capacity;
+            this.design_capacity = design_capacity;
+            this.percentage = percentage;
+            this.power_supply_status = power_supply_status;
+            this.power_supply_health = power_supply_health;
+            this.power_supply_technology = power_supply_technology;
+            this.present = present;
+            this.cell_voltage = cell_voltage ?? throw new System.ArgumentNullException(nameof(cell_voltage));
+            this.cell_temperature = cell_temperature ?? throw new System.ArgumentNullException(nameof(cell_temperature));
+            this.location = location ?? throw new System.ArgumentNullException(nameof(location));
+            this.serial_number = serial_number ?? throw new System.ArgumentNullException(nameof(serial_number));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal BatteryState(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.voltage = BuiltIns.DeserializeStruct<float>(b);
+            this.temperature = BuiltIns.DeserializeStruct<float>(b);
+            this.current = BuiltIns.DeserializeStruct<float>(b);
+            this.charge = BuiltIns.DeserializeStruct<float>(b);
+            this.capacity = BuiltIns.DeserializeStruct<float>(b);
+            this.design_capacity = BuiltIns.DeserializeStruct<float>(b);
+            this.percentage = BuiltIns.DeserializeStruct<float>(b);
+            this.power_supply_status = BuiltIns.DeserializeStruct<byte>(b);
+            this.power_supply_health = BuiltIns.DeserializeStruct<byte>(b);
+            this.power_supply_technology = BuiltIns.DeserializeStruct<byte>(b);
+            this.present = BuiltIns.DeserializeStruct<bool>(b);
+            this.cell_voltage = BuiltIns.DeserializeStructArray<float>(b, 0);
+            this.cell_temperature = BuiltIns.DeserializeStructArray<float>(b, 0);
+            this.location = BuiltIns.DeserializeString(b);
+            this.serial_number = BuiltIns.DeserializeString(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new BatteryState(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.Serialize(voltage, ref ptr, end);
-            BuiltIns.Serialize(temperature, ref ptr, end);
-            BuiltIns.Serialize(current, ref ptr, end);
-            BuiltIns.Serialize(charge, ref ptr, end);
-            BuiltIns.Serialize(capacity, ref ptr, end);
-            BuiltIns.Serialize(design_capacity, ref ptr, end);
-            BuiltIns.Serialize(percentage, ref ptr, end);
-            BuiltIns.Serialize(power_supply_status, ref ptr, end);
-            BuiltIns.Serialize(power_supply_health, ref ptr, end);
-            BuiltIns.Serialize(power_supply_technology, ref ptr, end);
-            BuiltIns.Serialize(present, ref ptr, end);
-            BuiltIns.Serialize(cell_voltage, ref ptr, end, 0);
-            BuiltIns.Serialize(cell_temperature, ref ptr, end, 0);
-            BuiltIns.Serialize(location, ref ptr, end);
-            BuiltIns.Serialize(serial_number, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            BuiltIns.Serialize(this.voltage, b);
+            BuiltIns.Serialize(this.temperature, b);
+            BuiltIns.Serialize(this.current, b);
+            BuiltIns.Serialize(this.charge, b);
+            BuiltIns.Serialize(this.capacity, b);
+            BuiltIns.Serialize(this.design_capacity, b);
+            BuiltIns.Serialize(this.percentage, b);
+            BuiltIns.Serialize(this.power_supply_status, b);
+            BuiltIns.Serialize(this.power_supply_health, b);
+            BuiltIns.Serialize(this.power_supply_technology, b);
+            BuiltIns.Serialize(this.present, b);
+            BuiltIns.Serialize(this.cell_voltage, b, 0);
+            BuiltIns.Serialize(this.cell_temperature, b, 0);
+            BuiltIns.Serialize(this.location, b);
+            BuiltIns.Serialize(this.serial_number, b);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (cell_voltage is null) throw new System.NullReferenceException();
+            if (cell_temperature is null) throw new System.NullReferenceException();
+            if (location is null) throw new System.NullReferenceException();
+            if (serial_number is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -120,8 +158,6 @@ namespace Iviz.Msgs.sensor_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new BatteryState();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

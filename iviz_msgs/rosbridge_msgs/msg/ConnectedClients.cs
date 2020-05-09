@@ -4,7 +4,7 @@ namespace Iviz.Msgs.rosbridge_msgs
 {
     public sealed class ConnectedClients : IMessage
     {
-        public ConnectedClient[] clients;
+        public ConnectedClient[] clients { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ConnectedClients()
@@ -12,14 +12,33 @@ namespace Iviz.Msgs.rosbridge_msgs
             clients = System.Array.Empty<ConnectedClient>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public ConnectedClients(ConnectedClient[] clients)
         {
-            BuiltIns.DeserializeArray(out clients, ref ptr, end, 0);
+            this.clients = clients ?? throw new System.ArgumentNullException(nameof(clients));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal ConnectedClients(Buffer b)
+        {
+            this.clients = BuiltIns.DeserializeArray<ConnectedClient>(b, 0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new ConnectedClients(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.SerializeArray(clients, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.SerializeArray(this.clients, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (clients is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -34,8 +53,6 @@ namespace Iviz.Msgs.rosbridge_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new ConnectedClients();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

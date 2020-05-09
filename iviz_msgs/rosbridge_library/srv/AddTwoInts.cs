@@ -5,7 +5,7 @@ namespace Iviz.Msgs.rosbridge_library
     public sealed class AddTwoInts : IService
     {
         /// <summary> Request message. </summary>
-        public AddTwoIntsRequest Request { get; }
+        public AddTwoIntsRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public AddTwoIntsResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.rosbridge_library
         
         public IService Create() => new AddTwoInts();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (AddTwoIntsRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (AddTwoIntsResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -46,19 +54,43 @@ namespace Iviz.Msgs.rosbridge_library
 
     public sealed class AddTwoIntsRequest : IRequest
     {
-        public long a;
-        public long b;
+        public long a { get; set; }
+        public long b { get; set; }
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public AddTwoIntsRequest()
         {
-            BuiltIns.Deserialize(out a, ref ptr, end);
-            BuiltIns.Deserialize(out b, ref ptr, end);
+        }
+        
+        /// <summary> Explicit constructor. </summary>
+        public AddTwoIntsRequest(long a, long b)
+        {
+            this.a = a;
+            this.b = b;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal AddTwoIntsRequest(Buffer b)
+        {
+            this.a = BuiltIns.DeserializeStruct<long>(b);
+            this.b = BuiltIns.DeserializeStruct<long>(b);
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new AddTwoIntsRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(a, ref ptr, end);
-            BuiltIns.Serialize(b, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.a, b);
+            BuiltIns.Serialize(this.b, b);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]
@@ -67,16 +99,39 @@ namespace Iviz.Msgs.rosbridge_library
 
     public sealed class AddTwoIntsResponse : IResponse
     {
-        public long sum;
+        public long sum { get; set; }
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public AddTwoIntsResponse()
         {
-            BuiltIns.Deserialize(out sum, ref ptr, end);
+        }
+        
+        /// <summary> Explicit constructor. </summary>
+        public AddTwoIntsResponse(long sum)
+        {
+            this.sum = sum;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal AddTwoIntsResponse(Buffer b)
+        {
+            this.sum = BuiltIns.DeserializeStruct<long>(b);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new AddTwoIntsResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(sum, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.sum, b);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]

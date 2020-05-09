@@ -5,7 +5,7 @@ namespace Iviz.Msgs.rosapi
     public sealed class ServiceType : IService
     {
         /// <summary> Request message. </summary>
-        public ServiceTypeRequest Request { get; }
+        public ServiceTypeRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public ServiceTypeResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.rosapi
         
         public IService Create() => new ServiceType();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (ServiceTypeRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (ServiceTypeResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -46,7 +54,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class ServiceTypeRequest : IRequest
     {
-        public string service;
+        public string service { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ServiceTypeRequest()
@@ -54,14 +62,33 @@ namespace Iviz.Msgs.rosapi
             service = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public ServiceTypeRequest(string service)
         {
-            BuiltIns.Deserialize(out service, ref ptr, end);
+            this.service = service ?? throw new System.ArgumentNullException(nameof(service));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal ServiceTypeRequest(Buffer b)
+        {
+            this.service = BuiltIns.DeserializeString(b);
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new ServiceTypeRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(service, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.service, b);
+        }
+        
+        public void Validate()
+        {
+            if (service is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -77,7 +104,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class ServiceTypeResponse : IResponse
     {
-        public string type;
+        public string type { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ServiceTypeResponse()
@@ -85,14 +112,33 @@ namespace Iviz.Msgs.rosapi
             type = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public ServiceTypeResponse(string type)
         {
-            BuiltIns.Deserialize(out type, ref ptr, end);
+            this.type = type ?? throw new System.ArgumentNullException(nameof(type));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal ServiceTypeResponse(Buffer b)
+        {
+            this.type = BuiltIns.DeserializeString(b);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new ServiceTypeResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(type, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.type, b);
+        }
+        
+        public void Validate()
+        {
+            if (type is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

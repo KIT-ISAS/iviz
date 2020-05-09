@@ -5,7 +5,7 @@ namespace Iviz.Msgs.rosbridge_library
     public sealed class TestRequestAndResponse : IService
     {
         /// <summary> Request message. </summary>
-        public TestRequestAndResponseRequest Request { get; }
+        public TestRequestAndResponseRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public TestRequestAndResponseResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.rosbridge_library
         
         public IService Create() => new TestRequestAndResponse();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (TestRequestAndResponseRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (TestRequestAndResponseResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -46,16 +54,39 @@ namespace Iviz.Msgs.rosbridge_library
 
     public sealed class TestRequestAndResponseRequest : IRequest
     {
-        public int data;
+        public int data { get; set; }
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public TestRequestAndResponseRequest()
         {
-            BuiltIns.Deserialize(out data, ref ptr, end);
+        }
+        
+        /// <summary> Explicit constructor. </summary>
+        public TestRequestAndResponseRequest(int data)
+        {
+            this.data = data;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TestRequestAndResponseRequest(Buffer b)
+        {
+            this.data = BuiltIns.DeserializeStruct<int>(b);
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TestRequestAndResponseRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(data, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.data, b);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]
@@ -64,16 +95,39 @@ namespace Iviz.Msgs.rosbridge_library
 
     public sealed class TestRequestAndResponseResponse : IResponse
     {
-        public int data;
+        public int data { get; set; }
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public TestRequestAndResponseResponse()
         {
-            BuiltIns.Deserialize(out data, ref ptr, end);
+        }
+        
+        /// <summary> Explicit constructor. </summary>
+        public TestRequestAndResponseResponse(int data)
+        {
+            this.data = data;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TestRequestAndResponseResponse(Buffer b)
+        {
+            this.data = BuiltIns.DeserializeStruct<int>(b);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TestRequestAndResponseResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(data, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.data, b);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]

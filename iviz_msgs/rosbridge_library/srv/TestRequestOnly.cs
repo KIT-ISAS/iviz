@@ -5,7 +5,7 @@ namespace Iviz.Msgs.rosbridge_library
     public sealed class TestRequestOnly : IService
     {
         /// <summary> Request message. </summary>
-        public TestRequestOnlyRequest Request { get; }
+        public TestRequestOnlyRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public TestRequestOnlyResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.rosbridge_library
         
         public IService Create() => new TestRequestOnly();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (TestRequestOnlyRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (TestRequestOnlyResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -46,16 +54,39 @@ namespace Iviz.Msgs.rosbridge_library
 
     public sealed class TestRequestOnlyRequest : IRequest
     {
-        public int data;
+        public int data { get; set; }
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public TestRequestOnlyRequest()
         {
-            BuiltIns.Deserialize(out data, ref ptr, end);
+        }
+        
+        /// <summary> Explicit constructor. </summary>
+        public TestRequestOnlyRequest(int data)
+        {
+            this.data = data;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TestRequestOnlyRequest(Buffer b)
+        {
+            this.data = BuiltIns.DeserializeStruct<int>(b);
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TestRequestOnlyRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(data, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.data, b);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]

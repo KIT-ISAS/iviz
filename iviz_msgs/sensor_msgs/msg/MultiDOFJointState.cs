@@ -24,12 +24,12 @@ namespace Iviz.Msgs.sensor_msgs
         // This is the only way to uniquely associate the joint name with the correct
         // states.
         
-        public std_msgs.Header header;
+        public std_msgs.Header header { get; set; }
         
-        public string[] joint_names;
-        public geometry_msgs.Transform[] transforms;
-        public geometry_msgs.Twist[] twist;
-        public geometry_msgs.Wrench[] wrench;
+        public string[] joint_names { get; set; }
+        public geometry_msgs.Transform[] transforms { get; set; }
+        public geometry_msgs.Twist[] twist { get; set; }
+        public geometry_msgs.Wrench[] wrench { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MultiDOFJointState()
@@ -41,22 +41,49 @@ namespace Iviz.Msgs.sensor_msgs
             wrench = System.Array.Empty<geometry_msgs.Wrench>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public MultiDOFJointState(std_msgs.Header header, string[] joint_names, geometry_msgs.Transform[] transforms, geometry_msgs.Twist[] twist, geometry_msgs.Wrench[] wrench)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out joint_names, ref ptr, end, 0);
-            BuiltIns.DeserializeStructArray(out transforms, ref ptr, end, 0);
-            BuiltIns.DeserializeArray(out twist, ref ptr, end, 0);
-            BuiltIns.DeserializeArray(out wrench, ref ptr, end, 0);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.joint_names = joint_names ?? throw new System.ArgumentNullException(nameof(joint_names));
+            this.transforms = transforms ?? throw new System.ArgumentNullException(nameof(transforms));
+            this.twist = twist ?? throw new System.ArgumentNullException(nameof(twist));
+            this.wrench = wrench ?? throw new System.ArgumentNullException(nameof(wrench));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal MultiDOFJointState(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.joint_names = BuiltIns.DeserializeStringArray(b, 0);
+            this.transforms = BuiltIns.DeserializeStructArray<geometry_msgs.Transform>(b, 0);
+            this.twist = BuiltIns.DeserializeArray<geometry_msgs.Twist>(b, 0);
+            this.wrench = BuiltIns.DeserializeArray<geometry_msgs.Wrench>(b, 0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new MultiDOFJointState(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.Serialize(joint_names, ref ptr, end, 0);
-            BuiltIns.SerializeStructArray(transforms, ref ptr, end, 0);
-            BuiltIns.SerializeArray(twist, ref ptr, end, 0);
-            BuiltIns.SerializeArray(wrench, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            BuiltIns.Serialize(this.joint_names, b, 0);
+            BuiltIns.SerializeStructArray(this.transforms, b, 0);
+            BuiltIns.SerializeArray(this.twist, b, 0);
+            BuiltIns.SerializeArray(this.wrench, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (joint_names is null) throw new System.NullReferenceException();
+            if (transforms is null) throw new System.NullReferenceException();
+            if (twist is null) throw new System.NullReferenceException();
+            if (wrench is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -76,8 +103,6 @@ namespace Iviz.Msgs.sensor_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new MultiDOFJointState();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

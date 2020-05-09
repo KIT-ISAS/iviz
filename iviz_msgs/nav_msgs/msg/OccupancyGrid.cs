@@ -7,14 +7,14 @@ namespace Iviz.Msgs.nav_msgs
         // This represents a 2-D grid map, in which each cell represents the probability of
         // occupancy.
         
-        public std_msgs.Header header;
+        public std_msgs.Header header { get; set; }
         
         //MetaData for the map
-        public MapMetaData info;
+        public MapMetaData info { get; set; }
         
         // The map data, in row-major order, starting with (0,0).  Occupancy
         // probabilities are in the range [0,100].  Unknown is -1.
-        public sbyte[] data;
+        public sbyte[] data { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public OccupancyGrid()
@@ -24,18 +24,41 @@ namespace Iviz.Msgs.nav_msgs
             data = System.Array.Empty<sbyte>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public OccupancyGrid(std_msgs.Header header, MapMetaData info, sbyte[] data)
         {
-            header.Deserialize(ref ptr, end);
-            info.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out data, ref ptr, end, 0);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.info = info ?? throw new System.ArgumentNullException(nameof(info));
+            this.data = data ?? throw new System.ArgumentNullException(nameof(data));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal OccupancyGrid(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.info = new MapMetaData(b);
+            this.data = BuiltIns.DeserializeStructArray<sbyte>(b, 0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new OccupancyGrid(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            info.Serialize(ref ptr, end);
-            BuiltIns.Serialize(data, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            this.info.Serialize(b);
+            BuiltIns.Serialize(this.data, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (info is null) throw new System.NullReferenceException();
+            if (data is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -48,8 +71,6 @@ namespace Iviz.Msgs.nav_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new OccupancyGrid();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

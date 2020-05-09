@@ -24,12 +24,12 @@ namespace Iviz.Msgs.sensor_msgs
         // states.
         
         
-        public std_msgs.Header header;
+        public std_msgs.Header header { get; set; }
         
-        public string[] name;
-        public double[] position;
-        public double[] velocity;
-        public double[] effort;
+        public string[] name { get; set; }
+        public double[] position { get; set; }
+        public double[] velocity { get; set; }
+        public double[] effort { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public JointState()
@@ -41,22 +41,49 @@ namespace Iviz.Msgs.sensor_msgs
             effort = System.Array.Empty<double>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public JointState(std_msgs.Header header, string[] name, double[] position, double[] velocity, double[] effort)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out name, ref ptr, end, 0);
-            BuiltIns.Deserialize(out position, ref ptr, end, 0);
-            BuiltIns.Deserialize(out velocity, ref ptr, end, 0);
-            BuiltIns.Deserialize(out effort, ref ptr, end, 0);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.name = name ?? throw new System.ArgumentNullException(nameof(name));
+            this.position = position ?? throw new System.ArgumentNullException(nameof(position));
+            this.velocity = velocity ?? throw new System.ArgumentNullException(nameof(velocity));
+            this.effort = effort ?? throw new System.ArgumentNullException(nameof(effort));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal JointState(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.name = BuiltIns.DeserializeStringArray(b, 0);
+            this.position = BuiltIns.DeserializeStructArray<double>(b, 0);
+            this.velocity = BuiltIns.DeserializeStructArray<double>(b, 0);
+            this.effort = BuiltIns.DeserializeStructArray<double>(b, 0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new JointState(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.Serialize(name, ref ptr, end, 0);
-            BuiltIns.Serialize(position, ref ptr, end, 0);
-            BuiltIns.Serialize(velocity, ref ptr, end, 0);
-            BuiltIns.Serialize(effort, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            BuiltIns.Serialize(this.name, b, 0);
+            BuiltIns.Serialize(this.position, b, 0);
+            BuiltIns.Serialize(this.velocity, b, 0);
+            BuiltIns.Serialize(this.effort, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (name is null) throw new System.NullReferenceException();
+            if (position is null) throw new System.NullReferenceException();
+            if (velocity is null) throw new System.NullReferenceException();
+            if (effort is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -76,8 +103,6 @@ namespace Iviz.Msgs.sensor_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new JointState();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

@@ -7,10 +7,10 @@ namespace Iviz.Msgs.shape_msgs
         // Definition of a mesh
         
         // list of triangles; the index values refer to positions in vertices[]
-        public MeshTriangle[] triangles;
+        public MeshTriangle[] triangles { get; set; }
         
         // the actual vertices that make up the mesh
-        public geometry_msgs.Point[] vertices;
+        public geometry_msgs.Point[] vertices { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Mesh()
@@ -19,16 +19,37 @@ namespace Iviz.Msgs.shape_msgs
             vertices = System.Array.Empty<geometry_msgs.Point>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public Mesh(MeshTriangle[] triangles, geometry_msgs.Point[] vertices)
         {
-            BuiltIns.DeserializeArray(out triangles, ref ptr, end, 0);
-            BuiltIns.DeserializeStructArray(out vertices, ref ptr, end, 0);
+            this.triangles = triangles ?? throw new System.ArgumentNullException(nameof(triangles));
+            this.vertices = vertices ?? throw new System.ArgumentNullException(nameof(vertices));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal Mesh(Buffer b)
+        {
+            this.triangles = BuiltIns.DeserializeArray<MeshTriangle>(b, 0);
+            this.vertices = BuiltIns.DeserializeStructArray<geometry_msgs.Point>(b, 0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new Mesh(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.SerializeArray(triangles, ref ptr, end, 0);
-            BuiltIns.SerializeStructArray(vertices, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.SerializeArray(this.triangles, b, 0);
+            BuiltIns.SerializeStructArray(this.vertices, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (triangles is null) throw new System.NullReferenceException();
+            if (vertices is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -41,8 +62,6 @@ namespace Iviz.Msgs.shape_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new Mesh();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

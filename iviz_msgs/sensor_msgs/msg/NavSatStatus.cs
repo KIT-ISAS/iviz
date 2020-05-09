@@ -15,7 +15,7 @@ namespace Iviz.Msgs.sensor_msgs
         public const sbyte STATUS_SBAS_FIX = 1; // with satellite-based augmentation
         public const sbyte STATUS_GBAS_FIX = 2; // with ground-based augmentation
         
-        public sbyte status;
+        public sbyte status { get; set; }
         
         // Bits defining which Global Navigation Satellite System signals were
         // used by the receiver.
@@ -25,24 +25,46 @@ namespace Iviz.Msgs.sensor_msgs
         public const ushort SERVICE_COMPASS = 4; // includes BeiDou.
         public const ushort SERVICE_GALILEO = 8;
         
-        public ushort service;
+        public ushort service { get; set; }
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public NavSatStatus()
         {
-            BuiltIns.Deserialize(out status, ref ptr, end);
-            BuiltIns.Deserialize(out service, ref ptr, end);
+        }
+        
+        /// <summary> Explicit constructor. </summary>
+        public NavSatStatus(sbyte status, ushort service)
+        {
+            this.status = status;
+            this.service = service;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal NavSatStatus(Buffer b)
+        {
+            this.status = BuiltIns.DeserializeStruct<sbyte>(b);
+            this.service = BuiltIns.DeserializeStruct<ushort>(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new NavSatStatus(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(status, ref ptr, end);
-            BuiltIns.Serialize(service, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.status, b);
+            BuiltIns.Serialize(this.service, b);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 3;
-    
-        public IMessage Create() => new NavSatStatus();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

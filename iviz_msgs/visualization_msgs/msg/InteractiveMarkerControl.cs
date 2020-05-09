@@ -9,13 +9,13 @@ namespace Iviz.Msgs.visualization_msgs
         // Identifying string for this control.
         // You need to assign a unique value to this to receive feedback from the GUI
         // on what actions the user performs on this control (e.g. a button click).
-        public string name;
+        public string name { get; set; }
         
         
         // Defines the local coordinate frame (relative to the pose of the parent
         // interactive marker) in which is being rotated and translated.
         // Default: Identity
-        public geometry_msgs.Quaternion orientation;
+        public geometry_msgs.Quaternion orientation { get; set; }
         
         
         // Orientation mode: controls how orientation changes.
@@ -26,7 +26,7 @@ namespace Iviz.Msgs.visualization_msgs
         public const byte FIXED = 1;
         public const byte VIEW_FACING = 2;
         
-        public byte orientation_mode;
+        public byte orientation_mode { get; set; }
         
         // Interaction mode for this control
         // 
@@ -52,12 +52,12 @@ namespace Iviz.Msgs.visualization_msgs
         public const byte ROTATE_3D = 8;
         public const byte MOVE_ROTATE_3D = 9;
         
-        public byte interaction_mode;
+        public byte interaction_mode { get; set; }
         
         
         // If true, the contained markers will also be visible
         // when the gui is not in interactive mode.
-        public bool always_visible;
+        public bool always_visible { get; set; }
         
         
         // Markers to be displayed as custom visual representation.
@@ -68,19 +68,19 @@ namespace Iviz.Msgs.visualization_msgs
         //   but will be transformed into the local frame of the interactive marker.
         // - If the header of a marker is empty, its pose will be interpreted as 
         //   relative to the pose of the parent interactive marker.
-        public Marker[] markers;
+        public Marker[] markers { get; set; }
         
         
         // In VIEW_FACING mode, set this to true if you don't want the markers
         // to be aligned with the camera view point. The markers will show up
         // as in INHERIT mode.
-        public bool independent_marker_orientation;
+        public bool independent_marker_orientation { get; set; }
         
         
         // Short description (< 40 characters) of what this control does,
         // e.g. "Move the robot". 
         // Default: A generic description based on the interaction mode
-        public string description;
+        public string description { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarkerControl()
@@ -90,28 +90,56 @@ namespace Iviz.Msgs.visualization_msgs
             description = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public InteractiveMarkerControl(string name, geometry_msgs.Quaternion orientation, byte orientation_mode, byte interaction_mode, bool always_visible, Marker[] markers, bool independent_marker_orientation, string description)
         {
-            BuiltIns.Deserialize(out name, ref ptr, end);
-            orientation.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out orientation_mode, ref ptr, end);
-            BuiltIns.Deserialize(out interaction_mode, ref ptr, end);
-            BuiltIns.Deserialize(out always_visible, ref ptr, end);
-            BuiltIns.DeserializeArray(out markers, ref ptr, end, 0);
-            BuiltIns.Deserialize(out independent_marker_orientation, ref ptr, end);
-            BuiltIns.Deserialize(out description, ref ptr, end);
+            this.name = name ?? throw new System.ArgumentNullException(nameof(name));
+            this.orientation = orientation;
+            this.orientation_mode = orientation_mode;
+            this.interaction_mode = interaction_mode;
+            this.always_visible = always_visible;
+            this.markers = markers ?? throw new System.ArgumentNullException(nameof(markers));
+            this.independent_marker_orientation = independent_marker_orientation;
+            this.description = description ?? throw new System.ArgumentNullException(nameof(description));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal InteractiveMarkerControl(Buffer b)
+        {
+            this.name = BuiltIns.DeserializeString(b);
+            this.orientation = new geometry_msgs.Quaternion(b);
+            this.orientation_mode = BuiltIns.DeserializeStruct<byte>(b);
+            this.interaction_mode = BuiltIns.DeserializeStruct<byte>(b);
+            this.always_visible = BuiltIns.DeserializeStruct<bool>(b);
+            this.markers = BuiltIns.DeserializeArray<Marker>(b, 0);
+            this.independent_marker_orientation = BuiltIns.DeserializeStruct<bool>(b);
+            this.description = BuiltIns.DeserializeString(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new InteractiveMarkerControl(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(name, ref ptr, end);
-            orientation.Serialize(ref ptr, end);
-            BuiltIns.Serialize(orientation_mode, ref ptr, end);
-            BuiltIns.Serialize(interaction_mode, ref ptr, end);
-            BuiltIns.Serialize(always_visible, ref ptr, end);
-            BuiltIns.SerializeArray(markers, ref ptr, end, 0);
-            BuiltIns.Serialize(independent_marker_orientation, ref ptr, end);
-            BuiltIns.Serialize(description, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.name, b);
+            this.orientation.Serialize(b);
+            BuiltIns.Serialize(this.orientation_mode, b);
+            BuiltIns.Serialize(this.interaction_mode, b);
+            BuiltIns.Serialize(this.always_visible, b);
+            BuiltIns.SerializeArray(this.markers, b, 0);
+            BuiltIns.Serialize(this.independent_marker_orientation, b);
+            BuiltIns.Serialize(this.description, b);
+        }
+        
+        public void Validate()
+        {
+            if (name is null) throw new System.NullReferenceException();
+            if (markers is null) throw new System.NullReferenceException();
+            if (description is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -128,8 +156,6 @@ namespace Iviz.Msgs.visualization_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new InteractiveMarkerControl();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

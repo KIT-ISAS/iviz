@@ -5,7 +5,7 @@ namespace Iviz.Msgs.tf2_msgs
     public sealed class FrameGraph : IService
     {
         /// <summary> Request message. </summary>
-        public FrameGraphRequest Request { get; }
+        public FrameGraphRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public FrameGraphResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.tf2_msgs
         
         public IService Create() => new FrameGraph();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (FrameGraphRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (FrameGraphResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -50,7 +58,7 @@ namespace Iviz.Msgs.tf2_msgs
 
     public sealed class FrameGraphResponse : IResponse
     {
-        public string frame_yaml;
+        public string frame_yaml { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public FrameGraphResponse()
@@ -58,14 +66,33 @@ namespace Iviz.Msgs.tf2_msgs
             frame_yaml = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public FrameGraphResponse(string frame_yaml)
         {
-            BuiltIns.Deserialize(out frame_yaml, ref ptr, end);
+            this.frame_yaml = frame_yaml ?? throw new System.ArgumentNullException(nameof(frame_yaml));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal FrameGraphResponse(Buffer b)
+        {
+            this.frame_yaml = BuiltIns.DeserializeString(b);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new FrameGraphResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(frame_yaml, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.frame_yaml, b);
+        }
+        
+        public void Validate()
+        {
+            if (frame_yaml is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

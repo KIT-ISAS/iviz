@@ -4,22 +4,43 @@ namespace Iviz.Msgs.rosbridge_library
 {
     public sealed class Num : IMessage
     {
-        public long num;
+        public long num { get; set; }
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public Num()
         {
-            BuiltIns.Deserialize(out num, ref ptr, end);
+        }
+        
+        /// <summary> Explicit constructor. </summary>
+        public Num(long num)
+        {
+            this.num = num;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal Num(Buffer b)
+        {
+            this.num = BuiltIns.DeserializeStruct<long>(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new Num(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(num, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.num, b);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 8;
-    
-        public IMessage Create() => new Num();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

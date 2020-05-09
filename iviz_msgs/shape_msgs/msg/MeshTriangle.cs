@@ -5,7 +5,7 @@ namespace Iviz.Msgs.shape_msgs
     public sealed class MeshTriangle : IMessage
     {
         // Definition of a triangle's vertices
-        public uint[/*3*/] vertex_indices;
+        public uint[/*3*/] vertex_indices { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshTriangle()
@@ -13,20 +13,38 @@ namespace Iviz.Msgs.shape_msgs
             vertex_indices = new uint[3];
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public MeshTriangle(uint[] vertex_indices)
         {
-            BuiltIns.Deserialize(out vertex_indices, ref ptr, end, 3);
+            BuiltIns.AssertSize(vertex_indices, 3);
+            this.vertex_indices = vertex_indices;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal MeshTriangle(Buffer b)
+        {
+            this.vertex_indices = BuiltIns.DeserializeStructArray<uint>(b, 3);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new MeshTriangle(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(vertex_indices, ref ptr, end, 3);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.vertex_indices, b, 3);
+        }
+        
+        public void Validate()
+        {
+            BuiltIns.AssertSize(vertex_indices, 3);
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 12;
-    
-        public IMessage Create() => new MeshTriangle();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

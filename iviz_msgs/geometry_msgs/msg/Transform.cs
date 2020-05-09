@@ -4,27 +4,44 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.geometry_msgs
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct Transform : IMessage
+    public readonly struct Transform : IMessage
     {
         // This represents the transform between two coordinate frames in free space.
         
-        public Vector3 translation;
-        public Quaternion rotation;
+        public Vector3 translation { get; }
+        public Quaternion rotation { get; }
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public Transform(Vector3 translation, Quaternion rotation)
         {
-            BuiltIns.DeserializeStruct(out this, ref ptr, end);
+            this.translation = translation;
+            this.rotation = rotation;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal Transform(Buffer b)
+        {
+            BuiltIns.DeserializeStruct(out this, b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new Transform(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.SerializeStruct(this, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.SerializeStruct(this, b);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 56;
-    
-        public IMessage Create() => new Transform();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

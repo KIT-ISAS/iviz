@@ -5,7 +5,7 @@ namespace Iviz.Msgs.sensor_msgs
     public sealed class SetCameraInfo : IService
     {
         /// <summary> Request message. </summary>
-        public SetCameraInfoRequest Request { get; }
+        public SetCameraInfoRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public SetCameraInfoResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.sensor_msgs
         
         public IService Create() => new SetCameraInfo();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (SetCameraInfoRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (SetCameraInfoResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -54,7 +62,7 @@ namespace Iviz.Msgs.sensor_msgs
         // will assume that the region of the imager that is being referred to is
         // the region that the camera is currently capturing.
         
-        public sensor_msgs.CameraInfo camera_info; // The camera_info to store
+        public sensor_msgs.CameraInfo camera_info { get; set; } // The camera_info to store
     
         /// <summary> Constructor for empty message. </summary>
         public SetCameraInfoRequest()
@@ -62,14 +70,33 @@ namespace Iviz.Msgs.sensor_msgs
             camera_info = new sensor_msgs.CameraInfo();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public SetCameraInfoRequest(sensor_msgs.CameraInfo camera_info)
         {
-            camera_info.Deserialize(ref ptr, end);
+            this.camera_info = camera_info ?? throw new System.ArgumentNullException(nameof(camera_info));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal SetCameraInfoRequest(Buffer b)
+        {
+            this.camera_info = new sensor_msgs.CameraInfo(b);
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new SetCameraInfoRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            camera_info.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.camera_info.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (camera_info is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -85,8 +112,8 @@ namespace Iviz.Msgs.sensor_msgs
 
     public sealed class SetCameraInfoResponse : IResponse
     {
-        public bool success; // True if the call succeeded
-        public string status_message; // Used to give details about success
+        public bool success { get; set; } // True if the call succeeded
+        public string status_message { get; set; } // Used to give details about success
     
         /// <summary> Constructor for empty message. </summary>
         public SetCameraInfoResponse()
@@ -94,16 +121,36 @@ namespace Iviz.Msgs.sensor_msgs
             status_message = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public SetCameraInfoResponse(bool success, string status_message)
         {
-            BuiltIns.Deserialize(out success, ref ptr, end);
-            BuiltIns.Deserialize(out status_message, ref ptr, end);
+            this.success = success;
+            this.status_message = status_message ?? throw new System.ArgumentNullException(nameof(status_message));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal SetCameraInfoResponse(Buffer b)
+        {
+            this.success = BuiltIns.DeserializeStruct<bool>(b);
+            this.status_message = BuiltIns.DeserializeString(b);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new SetCameraInfoResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(success, ref ptr, end);
-            BuiltIns.Serialize(status_message, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.success, b);
+            BuiltIns.Serialize(this.status_message, b);
+        }
+        
+        public void Validate()
+        {
+            if (status_message is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

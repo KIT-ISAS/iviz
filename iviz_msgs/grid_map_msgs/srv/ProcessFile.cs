@@ -5,7 +5,7 @@ namespace Iviz.Msgs.grid_map_msgs
     public sealed class ProcessFile : IService
     {
         /// <summary> Request message. </summary>
-        public ProcessFileRequest Request { get; }
+        public ProcessFileRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public ProcessFileResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.grid_map_msgs
         
         public IService Create() => new ProcessFile();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (ProcessFileRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (ProcessFileResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -47,10 +55,10 @@ namespace Iviz.Msgs.grid_map_msgs
     public sealed class ProcessFileRequest : IRequest
     {
         // Absolute file path.
-        public string file_path;
+        public string file_path { get; set; }
         
         // For ROS bags: topic name that should be processed (optional).
-        public string topic_name;
+        public string topic_name { get; set; }
         
     
         /// <summary> Constructor for empty message. </summary>
@@ -60,16 +68,37 @@ namespace Iviz.Msgs.grid_map_msgs
             topic_name = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public ProcessFileRequest(string file_path, string topic_name)
         {
-            BuiltIns.Deserialize(out file_path, ref ptr, end);
-            BuiltIns.Deserialize(out topic_name, ref ptr, end);
+            this.file_path = file_path ?? throw new System.ArgumentNullException(nameof(file_path));
+            this.topic_name = topic_name ?? throw new System.ArgumentNullException(nameof(topic_name));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal ProcessFileRequest(Buffer b)
+        {
+            this.file_path = BuiltIns.DeserializeString(b);
+            this.topic_name = BuiltIns.DeserializeString(b);
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new ProcessFileRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(file_path, ref ptr, end);
-            BuiltIns.Serialize(topic_name, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.file_path, b);
+            BuiltIns.Serialize(this.topic_name, b);
+        }
+        
+        public void Validate()
+        {
+            if (file_path is null) throw new System.NullReferenceException();
+            if (topic_name is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -88,16 +117,39 @@ namespace Iviz.Msgs.grid_map_msgs
     {
         
         // True if file processing was successful.
-        public bool success;
+        public bool success { get; set; }
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public ProcessFileResponse()
         {
-            BuiltIns.Deserialize(out success, ref ptr, end);
+        }
+        
+        /// <summary> Explicit constructor. </summary>
+        public ProcessFileResponse(bool success)
+        {
+            this.success = success;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal ProcessFileResponse(Buffer b)
+        {
+            this.success = BuiltIns.DeserializeStruct<bool>(b);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new ProcessFileResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(success, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.success, b);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]

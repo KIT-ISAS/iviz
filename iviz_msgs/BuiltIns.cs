@@ -12,15 +12,17 @@ namespace Iviz.Msgs
 
         public static CultureInfo Culture { get; } = CultureInfo.InvariantCulture;
 
+        public static string InvalidArrayLengthStr { get; } = "Invalid array length.";
+
         static void Memcpy(void* dst, void* src, uint size)
         {
-            Buffer.MemoryCopy(src, dst, size, size);
+            System.Buffer.MemoryCopy(src, dst, size, size);
         }
 
-        internal static void AssertInRange(byte* arrayPtr, uint off, byte* end)
+        internal static void AssertInRange(byte* ptr, uint off, byte* end)
         {
-            if (arrayPtr + off > end)
-                throw new ArgumentOutOfRangeException(nameof(arrayPtr));
+            if (ptr + off > end)
+                throw new ArgumentOutOfRangeException(nameof(ptr));
         }
 
         internal static void AssertSize<T>(T[] array, uint size)
@@ -36,253 +38,285 @@ namespace Iviz.Msgs
 
         #region Deserializers
 
-        internal static void Deserialize(out string val, ref byte* arrayPtr, byte* end)
+        internal static void Deserialize(out string val, Buffer b)
         {
-            AssertInRange(arrayPtr, 4, end);
-            uint count = *(uint*)arrayPtr; arrayPtr += 4;
+            AssertInRange(b.ptr, 4, b.end);
+            uint count = *(uint*)b.ptr; b.ptr += 4;
             if (count == 0) { val = string.Empty; return; }
-            AssertInRange(arrayPtr, count, end);
-            val = UTF8.GetString(arrayPtr, (int)count);
-            arrayPtr += count;
+            AssertInRange(b.ptr, count, b.end);
+            val = UTF8.GetString(b.ptr, (int)count);
+            b.ptr += count;
         }
 
-        internal static void Deserialize(out string[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static string DeserializeString(Buffer b)
+        {
+            Deserialize(out string str, b);
+            return str;
+        }
+
+        internal static void Deserialize(out string[] val, Buffer b, uint count)
         {
             if (count == 0)
             {
-                AssertInRange(arrayPtr, 4, end);
-                count = *(uint*)arrayPtr; arrayPtr += 4;
+                AssertInRange(b.ptr, 4, b.end);
+                count = *(uint*)b.ptr; b.ptr += 4;
                 if (count == 0) { val = Array.Empty<string>(); return; }
             }
             val = new string[count];
             for (int i = 0; i < val.Length; i++)
             {
-                Deserialize(out val[i], ref arrayPtr, end);
+                Deserialize(out val[i], b);
             }
         }
 
-        internal static void Deserialize(out bool val, ref byte* arrayPtr, byte* _)
+        internal static string[] DeserializeStringArray(Buffer b, uint count)
         {
-            val = (*arrayPtr != 0);
-            arrayPtr++;
+            Deserialize(out string[] str, b, count);
+            return str;
         }
 
-        internal static void Deserialize(out time val, ref byte* arrayPtr, byte* end)
+        internal static void Deserialize(out bool val, Buffer b)
         {
-            AssertInRange(arrayPtr, 8, end);
-            uint secs = *(uint*)arrayPtr; arrayPtr += 4;
-            uint nsecs = *(uint*)arrayPtr; arrayPtr += 4;
+            val = (*b.ptr != 0);
+            b.ptr++;
+        }
+
+        internal static void Deserialize(out time val, Buffer b)
+        {
+            AssertInRange(b.ptr, 8, b.end);
+            uint secs = *(uint*)b.ptr; b.ptr += 4;
+            uint nsecs = *(uint*)b.ptr; b.ptr += 4;
             val = new time(secs, nsecs);
         }
 
-        internal static void Deserialize(out time[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static void Deserialize(out time[] val, Buffer b, uint count)
         {
-            DeserializeStructArray(out val, ref arrayPtr, end, count);
+            DeserializeStructArray(out val, b, count);
         }
 
-        internal static void Deserialize(out duration val, ref byte* arrayPtr, byte* end)
+        internal static void Deserialize(out duration val, Buffer b)
         {
-            AssertInRange(arrayPtr, 8, end);
-            int secs = *(int*)arrayPtr; arrayPtr += 4;
-            int nsecs = *(int*)arrayPtr; arrayPtr += 4;
+            AssertInRange(b.ptr, 8, b.end);
+            int secs = *(int*)b.ptr; b.ptr += 4;
+            int nsecs = *(int*)b.ptr; b.ptr += 4;
             val = new duration(secs, nsecs);
         }
 
-        internal static void Deserialize(out duration[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static void Deserialize(out duration[] val, Buffer b, uint count)
         {
-            DeserializeStructArray(out val, ref arrayPtr, end, count);
+            DeserializeStructArray(out val, b, count);
         }
 
-        internal static void Deserialize(out bool[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static void Deserialize(out bool[] val, Buffer b, uint count)
         {
             if (count == 0)
             {
-                AssertInRange(arrayPtr, 4, end);
-                count = *(uint*)arrayPtr; arrayPtr += 4;
+                AssertInRange(b.ptr, 4, b.end);
+                count = *(uint*)b.ptr; b.ptr += 4;
                 if (count == 0) { val = Array.Empty<bool>(); return; }
             }
-            AssertInRange(arrayPtr, count * 1, end);
+            AssertInRange(b.ptr, count * 1, b.end);
             val = new bool[count];
-            fixed (bool* val_arrayPtr = val)
+            fixed (bool* b_ptr = val)
             {
                 uint size = count * 1;
-                Memcpy(val_arrayPtr, arrayPtr, size);
-                arrayPtr += size;
+                Memcpy(b_ptr, b.ptr, size);
+                b.ptr += size;
             }
         }
 
-        internal static void Deserialize(out char val, ref byte* arrayPtr, byte* end)
+        internal static void Deserialize(out char val, Buffer b)
         {
-            AssertInRange(arrayPtr, 1, end);
-            val = *(char*)arrayPtr;
-            arrayPtr += 1;
+            AssertInRange(b.ptr, 1, b.end);
+            val = *(char*)b.ptr;
+            b.ptr += 1;
         }
 
-        internal static void Deserialize(out char[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static void Deserialize(out char[] val, Buffer b, uint count)
         {
-            DeserializeStructArray(out val, ref arrayPtr, end, count);
+            DeserializeStructArray(out val, b, count);
         }
 
 
-        internal static void Deserialize(out byte val, ref byte* arrayPtr, byte* end)
+        internal static void Deserialize(out byte val, Buffer b)
         {
-            AssertInRange(arrayPtr, 1, end);
-            val = *arrayPtr;
-            arrayPtr += 1;
+            AssertInRange(b.ptr, 1, b.end);
+            val = *b.ptr;
+            b.ptr += 1;
         }
 
-        internal static void Deserialize(out byte[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static void Deserialize(out byte[] val, Buffer b, uint count)
         {
-            DeserializeStructArray(out val, ref arrayPtr, end, count);
+            DeserializeStructArray(out val, b, count);
         }
 
-        internal static void Deserialize(out sbyte val, ref byte* arrayPtr, byte* end)
+        internal static void Deserialize(out sbyte val, Buffer b)
         {
-            AssertInRange(arrayPtr, 1, end);
-            val = *(sbyte*)arrayPtr;
-            arrayPtr += 1;
+            AssertInRange(b.ptr, 1, b.end);
+            val = *(sbyte*)b.ptr;
+            b.ptr += 1;
         }
 
-        internal static void Deserialize(out sbyte[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static void Deserialize(out sbyte[] val, Buffer b, uint count)
         {
-            DeserializeStructArray(out val, ref arrayPtr, end, count);
+            DeserializeStructArray(out val, b, count);
         }
 
-        internal static void Deserialize(out short val, ref byte* arrayPtr, byte* end)
+        internal static void Deserialize(out short val, Buffer b)
         {
-            AssertInRange(arrayPtr, 2, end);
-            val = *(short*)arrayPtr;
-            arrayPtr += 2;
+            AssertInRange(b.ptr, 2, b.end);
+            val = *(short*)b.ptr;
+            b.ptr += 2;
         }
 
-        internal static void Deserialize(out short[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static void Deserialize(out short[] val, Buffer b, uint count)
         {
-            DeserializeStructArray(out val, ref arrayPtr, end, count);
+            DeserializeStructArray(out val, b, count);
         }
 
-        internal static void Deserialize(out ushort val, ref byte* arrayPtr, byte* end)
+        internal static void Deserialize(out ushort val, Buffer b)
         {
-            AssertInRange(arrayPtr, 2, end);
-            val = *(ushort*)arrayPtr;
-            arrayPtr += 2;
+            AssertInRange(b.ptr, 2, b.end);
+            val = *(ushort*)b.ptr;
+            b.ptr += 2;
         }
 
-        internal static void Deserialize(out ushort[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static void Deserialize(out ushort[] val, Buffer b, uint count)
         {
-            DeserializeStructArray(out val, ref arrayPtr, end, count);
+            DeserializeStructArray(out val, b, count);
         }
 
-        internal static void Deserialize(out int val, ref byte* arrayPtr, byte* end)
+        internal static void Deserialize(out int val, Buffer b)
         {
-            AssertInRange(arrayPtr, 4, end);
-            val = *(int*)arrayPtr;
-            arrayPtr += 4;
+            AssertInRange(b.ptr, 4, b.end);
+            val = *(int*)b.ptr;
+            b.ptr += 4;
         }
 
-        internal static void Deserialize(out int[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static void Deserialize(out int[] val, Buffer b, uint count)
         {
-            DeserializeStructArray(out val, ref arrayPtr, end, count);
+            DeserializeStructArray(out val, b, count);
         }
 
-        internal static void Deserialize(out uint val, ref byte* arrayPtr, byte* end)
+        internal static void Deserialize(out uint val, Buffer b)
         {
-            AssertInRange(arrayPtr, 4, end);
-            val = *(uint*)arrayPtr;
-            arrayPtr += 4;
+            AssertInRange(b.ptr, 4, b.end);
+            val = *(uint*)b.ptr;
+            b.ptr += 4;
         }
 
-        internal static void Deserialize(out uint[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static void Deserialize(out uint[] val, Buffer b, uint count)
         {
-            DeserializeStructArray(out val, ref arrayPtr, end, count);
+            DeserializeStructArray(out val, b, count);
         }
 
-        internal static void Deserialize(out long val, ref byte* arrayPtr, byte* end)
+        internal static void Deserialize(out long val, Buffer b)
         {
-            AssertInRange(arrayPtr, 8, end);
-            val = *(long*)arrayPtr;
-            arrayPtr += 8;
+            AssertInRange(b.ptr, 8, b.end);
+            val = *(long*)b.ptr;
+            b.ptr += 8;
         }
 
-        internal static void Deserialize(out long[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static void Deserialize(out long[] val, Buffer b, uint count)
         {
-            DeserializeStructArray(out val, ref arrayPtr, end, count);
+            DeserializeStructArray(out val, b, count);
         }
 
-        internal static void Deserialize(out ulong val, ref byte* arrayPtr, byte* end)
+        internal static void Deserialize(out ulong val, Buffer b)
         {
-            AssertInRange(arrayPtr, 8, end);
-            val = *(ulong*)arrayPtr;
-            arrayPtr += 8;
+            AssertInRange(b.ptr, 8, b.end);
+            val = *(ulong*)b.ptr;
+            b.ptr += 8;
         }
 
-        internal static void Deserialize(out ulong[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static void Deserialize(out ulong[] val, Buffer b, uint count)
         {
-            DeserializeStructArray(out val, ref arrayPtr, end, count);
+            DeserializeStructArray(out val, b, count);
         }
 
-        internal static void Deserialize(out float val, ref byte* arrayPtr, byte* end)
+        internal static void Deserialize(out float val, Buffer b)
         {
-            AssertInRange(arrayPtr, 4, end);
-            val = *(float*)arrayPtr;
-            arrayPtr += 4;
+            AssertInRange(b.ptr, 4, b.end);
+            val = *(float*)b.ptr;
+            b.ptr += 4;
         }
 
-        internal static void Deserialize(out float[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static void Deserialize(out float[] val, Buffer b, uint count)
         {
-            DeserializeStructArray(out val, ref arrayPtr, end, count);
+            DeserializeStructArray(out val, b, count);
         }
 
-        internal static void Deserialize(out double val, ref byte* arrayPtr, byte* end)
+        internal static void Deserialize(out double val, Buffer b)
         {
-            AssertInRange(arrayPtr, 8, end);
-            val = *(double*)arrayPtr;
-            arrayPtr += 8;
+            AssertInRange(b.ptr, 8, b.end);
+            val = *(double*)b.ptr;
+            b.ptr += 8;
         }
 
-        internal static void Deserialize(out double[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static void Deserialize(out double[] val, Buffer b, uint count)
         {
-            DeserializeStructArray(out val, ref arrayPtr, end, count);
+            DeserializeStructArray(out val, b, count);
         }
 
-        internal static void DeserializeStruct<T>(out T val, ref byte* arrayPtr, byte* end) where T : unmanaged
+        internal static void DeserializeStruct<T>(out T val, Buffer b) where T : unmanaged
         {
-            AssertInRange(arrayPtr, (uint)sizeof(T), end);
-            val = *(T*)arrayPtr;
-            arrayPtr += sizeof(T);
+            AssertInRange(b.ptr, (uint)sizeof(T), b.end);
+            val = *(T*)b.ptr;
+            b.ptr += sizeof(T);
         }
 
-        internal static void DeserializeStructArray<T>(out T[] val, ref byte* arrayPtr, byte* end, uint count) where T : unmanaged
+        internal static T DeserializeStruct<T>(Buffer b) where T : unmanaged
+        {
+            AssertInRange(b.ptr, (uint)sizeof(T), b.end);
+            T val = *(T*)b.ptr;
+            b.ptr += sizeof(T);
+            return val;
+        }
+
+        internal static void DeserializeStructArray<T>(out T[] val, Buffer b, uint count) where T : unmanaged
         {
             if (count == 0)
             {
-                AssertInRange(arrayPtr, 4, end);
-                count = *(uint*)arrayPtr; arrayPtr += 4;
+                AssertInRange(b.ptr, 4, b.end);
+                count = *(uint*)b.ptr; b.ptr += 4;
                 if (count == 0) { val = Array.Empty<T>(); return; }
             }
-            AssertInRange(arrayPtr, count * (uint)sizeof(T), end);
+            AssertInRange(b.ptr, count * (uint)sizeof(T), b.end);
             val = new T[count];
-            fixed (T* val_arrayPtr = val)
+            fixed (T* b_ptr = val)
             {
                 uint size = count * (uint)sizeof(T);
-                Memcpy(val_arrayPtr, arrayPtr, size);
-                arrayPtr += size;
+                Memcpy(b_ptr, b.ptr, size);
+                b.ptr += size;
             }
         }
 
-        internal static void DeserializeArray<T>(out T[] val, ref byte* arrayPtr, byte* end, uint count) where T : IMessage, new()
+        internal static T[] DeserializeStructArray<T>(Buffer b, uint count) where T : unmanaged
+        {
+            DeserializeStructArray(out T[] val, b, count);
+            return val;
+        }
+
+        internal static void DeserializeArray<T>(out T[] val, Buffer b, uint count) where T : IMessage, new()
         {
             if (count == 0)
             {
-                AssertInRange(arrayPtr, 4, end);
-                count = *(uint*)arrayPtr; arrayPtr += 4;
+                AssertInRange(b.ptr, 4, b.end);
+                count = *(uint*)b.ptr; b.ptr += 4;
                 if (count == 0) { val = Array.Empty<T>(); return; }
             }
             val = new T[count];
             for (int i = 0; i < val.Length; i++)
             {
                 val[i] = new T();
-                val[i].Deserialize(ref arrayPtr, end);
+                val[i].Deserialize(b);
             }
+        }
+
+        internal static T[] DeserializeArray<T>(Buffer b, uint count) where T : IMessage, new()
+        {
+            DeserializeArray(out T[] val, b, count);
+            return val;
         }
 
         #endregion
@@ -291,35 +325,34 @@ namespace Iviz.Msgs
 
         #region Serializers
 
-
-        internal static void Serialize(in time val, ref byte* arrayPtr, byte* end)
+        internal static void Serialize(in time val, Buffer b)
         {
-            SerializeStruct(val, ref arrayPtr, end);
+            SerializeStruct(val, b);
         }
 
-        internal static void Serialize(time[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static void Serialize(time[] val, Buffer b, uint count)
         {
-            SerializeStructArray(val, ref arrayPtr, end, count);
+            SerializeStructArray(val, b, count);
         }
 
-        internal static void Serialize(in duration val, ref byte* arrayPtr, byte* end)
+        internal static void Serialize(in duration val, Buffer b)
         {
-            SerializeStruct(val, ref arrayPtr, end);
+            SerializeStruct(val, b);
         }
 
-        internal static void Serialize(duration[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static void Serialize(duration[] val, Buffer b, uint count)
         {
-            SerializeStructArray(val, ref arrayPtr, end, count);
+            SerializeStructArray(val, b, count);
         }
 
-        internal static void Serialize(bool val, ref byte* arrayPtr, byte* end)
+        internal static void Serialize(bool val, Buffer b)
         {
-            AssertInRange(arrayPtr, 1, end);
-            *arrayPtr = val ? (byte)1 : (byte)0;
-            arrayPtr++;
+            AssertInRange(b.ptr, 1, b.end);
+            *b.ptr = val ? (byte)1 : (byte)0;
+            b.ptr++;
         }
 
-        internal static void Serialize(string val, ref byte* arrayPtr, byte* end)
+        internal static void Serialize(string val, Buffer b)
         {
             if (val is null)
             {
@@ -327,17 +360,17 @@ namespace Iviz.Msgs
             }
 
             uint count = (uint)UTF8.GetByteCount(val);
-            AssertInRange(arrayPtr, 4 + count, end);
-            *(uint*)arrayPtr = count; arrayPtr += 4;
+            AssertInRange(b.ptr, 4 + count, b.end);
+            *(uint*)b.ptr = count; b.ptr += 4;
             if (count == 0) return;
-            fixed (char* val_arrayPtr = val)
+            fixed (char* b_ptr = val)
             {
-                UTF8.GetBytes(val_arrayPtr, val.Length, arrayPtr, (int)count);
-                arrayPtr += count;
+                UTF8.GetBytes(b_ptr, val.Length, b.ptr, (int)count);
+                b.ptr += count;
             }
         }
 
-        internal static void Serialize(string[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static void Serialize(string[] val, Buffer b, uint count)
         {
             if (val is null)
             {
@@ -346,8 +379,8 @@ namespace Iviz.Msgs
 
             if (count == 0)
             {
-                AssertInRange(arrayPtr, 4, end);
-                *(int*)arrayPtr = val.Length; arrayPtr += 4;
+                AssertInRange(b.ptr, 4, b.end);
+                *(int*)b.ptr = val.Length; b.ptr += 4;
             }
             else
             {
@@ -355,11 +388,11 @@ namespace Iviz.Msgs
             }
             for (int i = 0; i < val.Length; i++)
             {
-                Serialize(val[i], ref arrayPtr, end);
+                Serialize(val[i], b);
             }
         }
 
-        internal static void Serialize(bool[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static void Serialize(bool[] val, Buffer b, uint count)
         {
             if (val is null)
             {
@@ -368,162 +401,162 @@ namespace Iviz.Msgs
 
             if (count == 0)
             {
-                AssertInRange(arrayPtr, (uint)(4 + val.Length * 1), end);
-                *(int*)arrayPtr = val.Length; arrayPtr += 4;
+                AssertInRange(b.ptr, (uint)(4 + val.Length * 1), b.end);
+                *(int*)b.ptr = val.Length; b.ptr += 4;
             }
             else
             {
                 AssertSize(val, count);
-                AssertInRange(arrayPtr, count * 1, end);
+                AssertInRange(b.ptr, count * 1, b.end);
             }
-            fixed (bool* val_arrayPtr = val)
+            fixed (bool* b_ptr = val)
             {
                 uint size = (uint)(val.Length * 1);
-                Memcpy(arrayPtr, val_arrayPtr, size);
-                arrayPtr += size;
+                Memcpy(b.ptr, b_ptr, size);
+                b.ptr += size;
             }
         }
 
-        internal static void Serialize(byte val, ref byte* arrayPtr, byte* end)
+        internal static void Serialize(byte val, Buffer b)
         {
-            AssertInRange(arrayPtr, 1, end);
-            *arrayPtr = val;
-            arrayPtr += 1;
+            AssertInRange(b.ptr, 1, b.end);
+            *b.ptr = val;
+            b.ptr += 1;
         }
 
-        internal static void Serialize(byte[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static void Serialize(byte[] val, Buffer b, uint count)
         {
-            SerializeStructArray(val, ref arrayPtr, end, count);
+            SerializeStructArray(val, b, count);
         }
 
-        internal static void Serialize(char val, ref byte* arrayPtr, byte* end)
+        internal static void Serialize(char val, Buffer b)
         {
-            AssertInRange(arrayPtr, 1, end);
-            *(char*)arrayPtr = val;
-            arrayPtr += 1;
+            AssertInRange(b.ptr, 1, b.end);
+            *(char*)b.ptr = val;
+            b.ptr += 1;
         }
 
-        internal static void Serialize(char[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static void Serialize(char[] val, Buffer b, uint count)
         {
-            SerializeStructArray(val, ref arrayPtr, end, count);
+            SerializeStructArray(val, b, count);
         }
 
-        internal static void Serialize(sbyte val, ref byte* arrayPtr, byte* end)
+        internal static void Serialize(sbyte val, Buffer b)
         {
-            AssertInRange(arrayPtr, 1, end);
-            *(sbyte*)arrayPtr = val;
-            arrayPtr += 1;
+            AssertInRange(b.ptr, 1, b.end);
+            *(sbyte*)b.ptr = val;
+            b.ptr += 1;
         }
 
-        internal static void Serialize(sbyte[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static void Serialize(sbyte[] val, Buffer b, uint count)
         {
-            SerializeStructArray(val, ref arrayPtr, end, count);
+            SerializeStructArray(val, b, count);
         }
 
-        internal static void Serialize(short val, ref byte* arrayPtr, byte* end)
+        internal static void Serialize(short val, Buffer b)
         {
-            AssertInRange(arrayPtr, 2, end);
-            *(short*)arrayPtr = val;
-            arrayPtr += 2;
+            AssertInRange(b.ptr, 2, b.end);
+            *(short*)b.ptr = val;
+            b.ptr += 2;
         }
 
-        internal static void Serialize(short[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static void Serialize(short[] val, Buffer b, uint count)
         {
-            SerializeStructArray(val, ref arrayPtr, end, count);
+            SerializeStructArray(val, b, count);
         }
 
-        internal static void Serialize(ushort val, ref byte* arrayPtr, byte* end)
+        internal static void Serialize(ushort val, Buffer b)
         {
-            AssertInRange(arrayPtr, 2, end);
-            *(ushort*)arrayPtr = val;
-            arrayPtr += 2;
+            AssertInRange(b.ptr, 2, b.end);
+            *(ushort*)b.ptr = val;
+            b.ptr += 2;
         }
 
-        internal static void Serialize(ushort[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static void Serialize(ushort[] val, Buffer b, uint count)
         {
-            SerializeStructArray(val, ref arrayPtr, end, count);
+            SerializeStructArray(val, b, count);
         }
 
-        internal static void Serialize(int val, ref byte* arrayPtr, byte* end)
+        internal static void Serialize(int val, Buffer b)
         {
-            AssertInRange(arrayPtr, 4, end);
-            *(int*)arrayPtr = val;
-            arrayPtr += 4;
+            AssertInRange(b.ptr, 4, b.end);
+            *(int*)b.ptr = val;
+            b.ptr += 4;
         }
 
-        internal static void Serialize(int[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static void Serialize(int[] val, Buffer b, uint count)
         {
-            SerializeStructArray(val, ref arrayPtr, end, count);
+            SerializeStructArray(val, b, count);
         }
 
-        internal static void Serialize(uint val, ref byte* arrayPtr, byte* end)
+        internal static void Serialize(uint val, Buffer b)
         {
-            AssertInRange(arrayPtr, 4, end);
-            *(uint*)arrayPtr = val;
-            arrayPtr += 4;
+            AssertInRange(b.ptr, 4, b.end);
+            *(uint*)b.ptr = val;
+            b.ptr += 4;
         }
 
-        internal static void Serialize(uint[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static void Serialize(uint[] val, Buffer b, uint count)
         {
-            SerializeStructArray(val, ref arrayPtr, end, count);
+            SerializeStructArray(val, b, count);
         }
 
-        internal static void Serialize(long val, ref byte* arrayPtr, byte* end)
+        internal static void Serialize(long val, Buffer b)
         {
-            AssertInRange(arrayPtr, 8, end);
-            *(long*)arrayPtr = val;
-            arrayPtr += 8;
+            AssertInRange(b.ptr, 8, b.end);
+            *(long*)b.ptr = val;
+            b.ptr += 8;
         }
 
-        internal static void Serialize(long[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static void Serialize(long[] val, Buffer b, uint count)
         {
-            SerializeStructArray(val, ref arrayPtr, end, count);
+            SerializeStructArray(val, b, count);
         }
 
-        internal static void Serialize(ulong val, ref byte* arrayPtr, byte* end)
+        internal static void Serialize(ulong val, Buffer b)
         {
-            AssertInRange(arrayPtr, 8, end);
-            *(ulong*)arrayPtr = val;
-            arrayPtr += 8;
+            AssertInRange(b.ptr, 8, b.end);
+            *(ulong*)b.ptr = val;
+            b.ptr += 8;
         }
 
-        internal static void Serialize(ulong[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static void Serialize(ulong[] val, Buffer b, uint count)
         {
-            SerializeStructArray(val, ref arrayPtr, end, count);
+            SerializeStructArray(val, b, count);
         }
 
-        internal static void Serialize(float val, ref byte* arrayPtr, byte* end)
+        internal static void Serialize(float val, Buffer b)
         {
-            AssertInRange(arrayPtr, 4, end);
-            *(float*)arrayPtr = val;
-            arrayPtr += 4;
+            AssertInRange(b.ptr, 4, b.end);
+            *(float*)b.ptr = val;
+            b.ptr += 4;
         }
 
-        internal static void Serialize(float[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static void Serialize(float[] val, Buffer b, uint count)
         {
-            SerializeStructArray(val, ref arrayPtr, end, count);
+            SerializeStructArray(val, b, count);
         }
 
-        internal static void Serialize(double val, ref byte* arrayPtr, byte* end)
+        internal static void Serialize(double val, Buffer b)
         {
-            AssertInRange(arrayPtr, 8, end);
-            *(double*)arrayPtr = val;
-            arrayPtr += 8;
+            AssertInRange(b.ptr, 8, b.end);
+            *(double*)b.ptr = val;
+            b.ptr += 8;
         }
 
-        internal static void Serialize(double[] val, ref byte* arrayPtr, byte* end, uint count)
+        internal static void Serialize(double[] val, Buffer b, uint count)
         {
-            SerializeStructArray(val, ref arrayPtr, end, count);
+            SerializeStructArray(val, b, count);
         }
 
-        internal static void SerializeStruct<T>(in T val, ref byte* arrayPtr, byte* end) where T : unmanaged
+        internal static void SerializeStruct<T>(in T val, Buffer b) where T : unmanaged
         {
-            AssertInRange(arrayPtr, (uint)sizeof(T), end);
-            *(T*)arrayPtr = val;
-            arrayPtr += sizeof(T);
+            AssertInRange(b.ptr, (uint)sizeof(T), b.end);
+            *(T*)b.ptr = val;
+            b.ptr += sizeof(T);
         }
 
-        internal static void SerializeStructArray<T>(T[] val, ref byte* arrayPtr, byte* end, uint count) where T : unmanaged
+        internal static void SerializeStructArray<T>(T[] val, Buffer b, uint count) where T : unmanaged
         {
             if (val is null)
             {
@@ -532,24 +565,24 @@ namespace Iviz.Msgs
 
             if (count == 0)
             {
-                AssertInRange(arrayPtr, (uint)(4 + val.Length * sizeof(T)), end);
-                *(int*)arrayPtr = val.Length; arrayPtr += 4;
+                AssertInRange(b.ptr, (uint)(4 + val.Length * sizeof(T)), b.end);
+                *(int*)b.ptr = val.Length; b.ptr += 4;
             }
             else
             {
                 AssertSize(val, count);
-                AssertInRange(arrayPtr, count * (uint)sizeof(T), end);
+                AssertInRange(b.ptr, count * (uint)sizeof(T), b.end);
             }
-            fixed (T* val_arrayPtr = val)
+            fixed (T* b_ptr = val)
             {
                 uint size = (uint)(val.Length * sizeof(T));
-                Memcpy(arrayPtr, val_arrayPtr, size);
-                arrayPtr += size;
+                Memcpy(b.ptr, b_ptr, size);
+                b.ptr += size;
             }
         }
 
 
-        internal static void SerializeArray<T>(T[] val, ref byte* arrayPtr, byte* end, uint count) where T : IMessage
+        internal static void SerializeArray<T>(T[] val, Buffer b, uint count) where T : IMessage
         {
             if (val is null)
             {
@@ -558,8 +591,8 @@ namespace Iviz.Msgs
 
             if (count == 0)
             {
-                AssertInRange(arrayPtr, 4, end);
-                *(int*)arrayPtr = val.Length; arrayPtr += 4;
+                AssertInRange(b.ptr, 4, b.end);
+                *(int*)b.ptr = val.Length; b.ptr += 4;
             }
             else
             {
@@ -567,18 +600,17 @@ namespace Iviz.Msgs
             }
             for (int i = 0; i < val.Length; i++)
             {
-                val[i].Serialize(ref arrayPtr, end);
+                val[i].Serialize(b);
             }
         }
 
         #endregion
 
-
-        public static uint Deserialize(ISerializable message, byte[] buffer, int size)
+        public static T Deserialize<T>(ISerializable<T> generator, byte[] buffer, int size)
         {
-            if (message is null)
+            if (generator is null)
             {
-                throw new ArgumentNullException(nameof(message));
+                throw new ArgumentNullException(nameof(generator));
             }
 
             if (buffer is null)
@@ -590,15 +622,15 @@ namespace Iviz.Msgs
                 throw new ArgumentOutOfRangeException(nameof(buffer));
             }
 
-            fixed (byte* buffer_arrayPtr = buffer)
+            fixed (byte* b_ptr = buffer)
             {
-                byte* buffer_arrayPtr_off = buffer_arrayPtr;
-                message.Deserialize(ref buffer_arrayPtr_off, buffer_arrayPtr + size);
-                return (uint)(buffer_arrayPtr_off - buffer_arrayPtr);
+                Buffer b = new Buffer(b_ptr, b_ptr + size);
+                return generator.Deserialize(b);
+                //return (uint)(b.ptr - b_ptr);
             }
         }
-
-        public static uint Serialize(ISerializable message, byte[] buffer)
+        
+        public static uint Serialize<T>(ISerializable<T> message, byte[] buffer)
         {
             if (message is null)
             {
@@ -610,11 +642,11 @@ namespace Iviz.Msgs
                 throw new ArgumentNullException(nameof(buffer));
             }
 
-            fixed (byte* buffer_arrayPtr = buffer)
+            fixed (byte* b_ptr = buffer)
             {
-                byte* buffer_arrayPtr_off = buffer_arrayPtr;
-                message.Serialize(ref buffer_arrayPtr_off, buffer_arrayPtr + buffer.Length);
-                return (uint)(buffer_arrayPtr_off - buffer_arrayPtr);
+                Buffer b = new Buffer(b_ptr, b_ptr + buffer.Length);
+                message.Serialize(b);
+                return (uint)(b.ptr - b_ptr);
             }
         }
 
@@ -645,7 +677,7 @@ namespace Iviz.Msgs
 
         public static string GetDependenciesBase64(Type type)
         {
-            return GetClassStringConstant(type, "RosDependenciesBase64");
+            return GetClassStringConstant(type, "RosDepb.endenciesBase64");
         }
 
         public static IMessage CreateGenerator(Type type)

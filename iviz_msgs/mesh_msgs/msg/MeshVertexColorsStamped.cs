@@ -5,9 +5,9 @@ namespace Iviz.Msgs.mesh_msgs
     public sealed class MeshVertexColorsStamped : IMessage
     {
         // Mesh Attribute Message
-        public std_msgs.Header header;
-        public string uuid;
-        public mesh_msgs.MeshVertexColors mesh_vertex_colors;
+        public std_msgs.Header header { get; set; }
+        public string uuid { get; set; }
+        public mesh_msgs.MeshVertexColors mesh_vertex_colors { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshVertexColorsStamped()
@@ -17,18 +17,41 @@ namespace Iviz.Msgs.mesh_msgs
             mesh_vertex_colors = new mesh_msgs.MeshVertexColors();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public MeshVertexColorsStamped(std_msgs.Header header, string uuid, mesh_msgs.MeshVertexColors mesh_vertex_colors)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out uuid, ref ptr, end);
-            mesh_vertex_colors.Deserialize(ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.uuid = uuid ?? throw new System.ArgumentNullException(nameof(uuid));
+            this.mesh_vertex_colors = mesh_vertex_colors ?? throw new System.ArgumentNullException(nameof(mesh_vertex_colors));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal MeshVertexColorsStamped(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.uuid = BuiltIns.DeserializeString(b);
+            this.mesh_vertex_colors = new mesh_msgs.MeshVertexColors(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new MeshVertexColorsStamped(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.Serialize(uuid, ref ptr, end);
-            mesh_vertex_colors.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            BuiltIns.Serialize(this.uuid, b);
+            this.mesh_vertex_colors.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (uuid is null) throw new System.NullReferenceException();
+            if (mesh_vertex_colors is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -42,8 +65,6 @@ namespace Iviz.Msgs.mesh_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new MeshVertexColorsStamped();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

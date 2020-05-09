@@ -5,7 +5,7 @@ namespace Iviz.Msgs.tf
     public sealed class FrameGraph : IService
     {
         /// <summary> Request message. </summary>
-        public FrameGraphRequest Request { get; }
+        public FrameGraphRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public FrameGraphResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.tf
         
         public IService Create() => new FrameGraph();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (FrameGraphRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (FrameGraphResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -50,7 +58,7 @@ namespace Iviz.Msgs.tf
 
     public sealed class FrameGraphResponse : IResponse
     {
-        public string dot_graph;
+        public string dot_graph { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public FrameGraphResponse()
@@ -58,14 +66,33 @@ namespace Iviz.Msgs.tf
             dot_graph = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public FrameGraphResponse(string dot_graph)
         {
-            BuiltIns.Deserialize(out dot_graph, ref ptr, end);
+            this.dot_graph = dot_graph ?? throw new System.ArgumentNullException(nameof(dot_graph));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal FrameGraphResponse(Buffer b)
+        {
+            this.dot_graph = BuiltIns.DeserializeString(b);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new FrameGraphResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(dot_graph, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.dot_graph, b);
+        }
+        
+        public void Validate()
+        {
+            if (dot_graph is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

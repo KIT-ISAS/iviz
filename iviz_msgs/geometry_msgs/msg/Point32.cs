@@ -12,28 +12,51 @@ namespace Iviz.Msgs.geometry_msgs
         // This message is designed to take up less space when sending
         // lots of points at once, as in the case of a PointCloud.  
         
-        public float x;
-        public float y;
-        public float z;
+        public float x { get; set; }
+        public float y { get; set; }
+        public float z { get; set; }
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public Point32()
         {
-            BuiltIns.Deserialize(out x, ref ptr, end);
-            BuiltIns.Deserialize(out y, ref ptr, end);
-            BuiltIns.Deserialize(out z, ref ptr, end);
+        }
+        
+        /// <summary> Explicit constructor. </summary>
+        public Point32(float x, float y, float z)
+        {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal Point32(Buffer b)
+        {
+            this.x = BuiltIns.DeserializeStruct<float>(b);
+            this.y = BuiltIns.DeserializeStruct<float>(b);
+            this.z = BuiltIns.DeserializeStruct<float>(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new Point32(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(x, ref ptr, end);
-            BuiltIns.Serialize(y, ref ptr, end);
-            BuiltIns.Serialize(z, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.x, b);
+            BuiltIns.Serialize(this.y, b);
+            BuiltIns.Serialize(this.z, b);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 12;
-    
-        public IMessage Create() => new Point32();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

@@ -5,7 +5,7 @@ namespace Iviz.Msgs.std_srvs
     public sealed class SetBool : IService
     {
         /// <summary> Request message. </summary>
-        public SetBoolRequest Request { get; }
+        public SetBoolRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public SetBoolResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.std_srvs
         
         public IService Create() => new SetBool();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (SetBoolRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (SetBoolResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -46,16 +54,39 @@ namespace Iviz.Msgs.std_srvs
 
     public sealed class SetBoolRequest : IRequest
     {
-        public bool data; // e.g. for hardware enabling / disabling
+        public bool data { get; set; } // e.g. for hardware enabling / disabling
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public SetBoolRequest()
         {
-            BuiltIns.Deserialize(out data, ref ptr, end);
+        }
+        
+        /// <summary> Explicit constructor. </summary>
+        public SetBoolRequest(bool data)
+        {
+            this.data = data;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal SetBoolRequest(Buffer b)
+        {
+            this.data = BuiltIns.DeserializeStruct<bool>(b);
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new SetBoolRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(data, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.data, b);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]
@@ -64,8 +95,8 @@ namespace Iviz.Msgs.std_srvs
 
     public sealed class SetBoolResponse : IResponse
     {
-        public bool success; // indicate successful run of triggered service
-        public string message; // informational, e.g. for error messages
+        public bool success { get; set; } // indicate successful run of triggered service
+        public string message { get; set; } // informational, e.g. for error messages
     
         /// <summary> Constructor for empty message. </summary>
         public SetBoolResponse()
@@ -73,16 +104,36 @@ namespace Iviz.Msgs.std_srvs
             message = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public SetBoolResponse(bool success, string message)
         {
-            BuiltIns.Deserialize(out success, ref ptr, end);
-            BuiltIns.Deserialize(out message, ref ptr, end);
+            this.success = success;
+            this.message = message ?? throw new System.ArgumentNullException(nameof(message));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal SetBoolResponse(Buffer b)
+        {
+            this.success = BuiltIns.DeserializeStruct<bool>(b);
+            this.message = BuiltIns.DeserializeString(b);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new SetBoolResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(success, ref ptr, end);
-            BuiltIns.Serialize(message, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.success, b);
+            BuiltIns.Serialize(this.message, b);
+        }
+        
+        public void Validate()
+        {
+            if (message is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

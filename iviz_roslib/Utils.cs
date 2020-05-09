@@ -112,7 +112,7 @@ namespace Iviz.RoslibSharp
             }
         }
 
-        public static string ToJsonString(this ISerializable o)
+        public static string ToJsonString<T>(this ISerializable<T> o)
         {
             return JToken.FromObject(o).ToString();
         }

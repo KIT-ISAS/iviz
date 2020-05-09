@@ -4,28 +4,51 @@ namespace Iviz.Msgs.mesh_msgs
 {
     public sealed class MeshMaterial : IMessage
     {
-        public uint texture_index;
-        public std_msgs.ColorRGBA color;
-        public bool has_texture;
+        public uint texture_index { get; set; }
+        public std_msgs.ColorRGBA color { get; set; }
+        public bool has_texture { get; set; }
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public MeshMaterial()
         {
-            BuiltIns.Deserialize(out texture_index, ref ptr, end);
-            color.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out has_texture, ref ptr, end);
+        }
+        
+        /// <summary> Explicit constructor. </summary>
+        public MeshMaterial(uint texture_index, std_msgs.ColorRGBA color, bool has_texture)
+        {
+            this.texture_index = texture_index;
+            this.color = color;
+            this.has_texture = has_texture;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal MeshMaterial(Buffer b)
+        {
+            this.texture_index = BuiltIns.DeserializeStruct<uint>(b);
+            this.color = new std_msgs.ColorRGBA(b);
+            this.has_texture = BuiltIns.DeserializeStruct<bool>(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new MeshMaterial(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(texture_index, ref ptr, end);
-            color.Serialize(ref ptr, end);
-            BuiltIns.Serialize(has_texture, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.texture_index, b);
+            this.color.Serialize(b);
+            BuiltIns.Serialize(this.has_texture, b);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 21;
-    
-        public IMessage Create() => new MeshMaterial();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

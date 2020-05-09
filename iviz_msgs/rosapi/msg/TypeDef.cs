@@ -4,13 +4,13 @@ namespace Iviz.Msgs.rosapi
 {
     public sealed class TypeDef : IMessage
     {
-        public string type;
-        public string[] fieldnames;
-        public string[] fieldtypes;
-        public int[] fieldarraylen;
-        public string[] examples;
-        public string[] constnames;
-        public string[] constvalues;
+        public string type { get; set; }
+        public string[] fieldnames { get; set; }
+        public string[] fieldtypes { get; set; }
+        public int[] fieldarraylen { get; set; }
+        public string[] examples { get; set; }
+        public string[] constnames { get; set; }
+        public string[] constvalues { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TypeDef()
@@ -24,26 +24,57 @@ namespace Iviz.Msgs.rosapi
             constvalues = System.Array.Empty<string>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public TypeDef(string type, string[] fieldnames, string[] fieldtypes, int[] fieldarraylen, string[] examples, string[] constnames, string[] constvalues)
         {
-            BuiltIns.Deserialize(out type, ref ptr, end);
-            BuiltIns.Deserialize(out fieldnames, ref ptr, end, 0);
-            BuiltIns.Deserialize(out fieldtypes, ref ptr, end, 0);
-            BuiltIns.Deserialize(out fieldarraylen, ref ptr, end, 0);
-            BuiltIns.Deserialize(out examples, ref ptr, end, 0);
-            BuiltIns.Deserialize(out constnames, ref ptr, end, 0);
-            BuiltIns.Deserialize(out constvalues, ref ptr, end, 0);
+            this.type = type ?? throw new System.ArgumentNullException(nameof(type));
+            this.fieldnames = fieldnames ?? throw new System.ArgumentNullException(nameof(fieldnames));
+            this.fieldtypes = fieldtypes ?? throw new System.ArgumentNullException(nameof(fieldtypes));
+            this.fieldarraylen = fieldarraylen ?? throw new System.ArgumentNullException(nameof(fieldarraylen));
+            this.examples = examples ?? throw new System.ArgumentNullException(nameof(examples));
+            this.constnames = constnames ?? throw new System.ArgumentNullException(nameof(constnames));
+            this.constvalues = constvalues ?? throw new System.ArgumentNullException(nameof(constvalues));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TypeDef(Buffer b)
+        {
+            this.type = BuiltIns.DeserializeString(b);
+            this.fieldnames = BuiltIns.DeserializeStringArray(b, 0);
+            this.fieldtypes = BuiltIns.DeserializeStringArray(b, 0);
+            this.fieldarraylen = BuiltIns.DeserializeStructArray<int>(b, 0);
+            this.examples = BuiltIns.DeserializeStringArray(b, 0);
+            this.constnames = BuiltIns.DeserializeStringArray(b, 0);
+            this.constvalues = BuiltIns.DeserializeStringArray(b, 0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TypeDef(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(type, ref ptr, end);
-            BuiltIns.Serialize(fieldnames, ref ptr, end, 0);
-            BuiltIns.Serialize(fieldtypes, ref ptr, end, 0);
-            BuiltIns.Serialize(fieldarraylen, ref ptr, end, 0);
-            BuiltIns.Serialize(examples, ref ptr, end, 0);
-            BuiltIns.Serialize(constnames, ref ptr, end, 0);
-            BuiltIns.Serialize(constvalues, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.type, b);
+            BuiltIns.Serialize(this.fieldnames, b, 0);
+            BuiltIns.Serialize(this.fieldtypes, b, 0);
+            BuiltIns.Serialize(this.fieldarraylen, b, 0);
+            BuiltIns.Serialize(this.examples, b, 0);
+            BuiltIns.Serialize(this.constnames, b, 0);
+            BuiltIns.Serialize(this.constvalues, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (type is null) throw new System.NullReferenceException();
+            if (fieldnames is null) throw new System.NullReferenceException();
+            if (fieldtypes is null) throw new System.NullReferenceException();
+            if (fieldarraylen is null) throw new System.NullReferenceException();
+            if (examples is null) throw new System.NullReferenceException();
+            if (constnames is null) throw new System.NullReferenceException();
+            if (constvalues is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -81,8 +112,6 @@ namespace Iviz.Msgs.rosapi
                 return size;
             }
         }
-    
-        public IMessage Create() => new TypeDef();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

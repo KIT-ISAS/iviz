@@ -13,21 +13,21 @@ namespace Iviz.Msgs.visualization_msgs
         public const byte ADD = 0;
         public const byte REMOVE = 1;
         
-        public std_msgs.Header header;
-        public string ns; // namespace, used with id to form a unique id
-        public int id; // unique id within the namespace
-        public int type; // CIRCLE/LINE_STRIP/etc.
-        public int action; // ADD/REMOVE
-        public geometry_msgs.Point position; // 2D, in pixel-coords
-        public float scale; // the diameter for a circle, etc.
-        public std_msgs.ColorRGBA outline_color;
-        public byte filled; // whether to fill in the shape with color
-        public std_msgs.ColorRGBA fill_color; // color [0.0-1.0]
-        public duration lifetime; // How long the object should last before being automatically deleted.  0 means forever
+        public std_msgs.Header header { get; set; }
+        public string ns { get; set; } // namespace, used with id to form a unique id
+        public int id { get; set; } // unique id within the namespace
+        public int type { get; set; } // CIRCLE/LINE_STRIP/etc.
+        public int action { get; set; } // ADD/REMOVE
+        public geometry_msgs.Point position { get; set; } // 2D, in pixel-coords
+        public float scale { get; set; } // the diameter for a circle, etc.
+        public std_msgs.ColorRGBA outline_color { get; set; }
+        public byte filled { get; set; } // whether to fill in the shape with color
+        public std_msgs.ColorRGBA fill_color { get; set; } // color [0.0-1.0]
+        public duration lifetime { get; set; } // How long the object should last before being automatically deleted.  0 means forever
         
         
-        public geometry_msgs.Point[] points; // used for LINE_STRIP/LINE_LIST/POINTS/etc., 2D in pixel coords
-        public std_msgs.ColorRGBA[] outline_colors; // a color for each line, point, etc.
+        public geometry_msgs.Point[] points { get; set; } // used for LINE_STRIP/LINE_LIST/POINTS/etc., 2D in pixel coords
+        public std_msgs.ColorRGBA[] outline_colors { get; set; } // a color for each line, point, etc.
     
         /// <summary> Constructor for empty message. </summary>
         public ImageMarker()
@@ -38,38 +38,72 @@ namespace Iviz.Msgs.visualization_msgs
             outline_colors = System.Array.Empty<std_msgs.ColorRGBA>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public ImageMarker(std_msgs.Header header, string ns, int id, int type, int action, geometry_msgs.Point position, float scale, std_msgs.ColorRGBA outline_color, byte filled, std_msgs.ColorRGBA fill_color, duration lifetime, geometry_msgs.Point[] points, std_msgs.ColorRGBA[] outline_colors)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out ns, ref ptr, end);
-            BuiltIns.Deserialize(out id, ref ptr, end);
-            BuiltIns.Deserialize(out type, ref ptr, end);
-            BuiltIns.Deserialize(out action, ref ptr, end);
-            position.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out scale, ref ptr, end);
-            outline_color.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out filled, ref ptr, end);
-            fill_color.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out lifetime, ref ptr, end);
-            BuiltIns.DeserializeStructArray(out points, ref ptr, end, 0);
-            BuiltIns.DeserializeStructArray(out outline_colors, ref ptr, end, 0);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.ns = ns ?? throw new System.ArgumentNullException(nameof(ns));
+            this.id = id;
+            this.type = type;
+            this.action = action;
+            this.position = position;
+            this.scale = scale;
+            this.outline_color = outline_color;
+            this.filled = filled;
+            this.fill_color = fill_color;
+            this.lifetime = lifetime;
+            this.points = points ?? throw new System.ArgumentNullException(nameof(points));
+            this.outline_colors = outline_colors ?? throw new System.ArgumentNullException(nameof(outline_colors));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal ImageMarker(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.ns = BuiltIns.DeserializeString(b);
+            this.id = BuiltIns.DeserializeStruct<int>(b);
+            this.type = BuiltIns.DeserializeStruct<int>(b);
+            this.action = BuiltIns.DeserializeStruct<int>(b);
+            this.position = new geometry_msgs.Point(b);
+            this.scale = BuiltIns.DeserializeStruct<float>(b);
+            this.outline_color = new std_msgs.ColorRGBA(b);
+            this.filled = BuiltIns.DeserializeStruct<byte>(b);
+            this.fill_color = new std_msgs.ColorRGBA(b);
+            this.lifetime = BuiltIns.DeserializeStruct<duration>(b);
+            this.points = BuiltIns.DeserializeStructArray<geometry_msgs.Point>(b, 0);
+            this.outline_colors = BuiltIns.DeserializeStructArray<std_msgs.ColorRGBA>(b, 0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new ImageMarker(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.Serialize(ns, ref ptr, end);
-            BuiltIns.Serialize(id, ref ptr, end);
-            BuiltIns.Serialize(type, ref ptr, end);
-            BuiltIns.Serialize(action, ref ptr, end);
-            position.Serialize(ref ptr, end);
-            BuiltIns.Serialize(scale, ref ptr, end);
-            outline_color.Serialize(ref ptr, end);
-            BuiltIns.Serialize(filled, ref ptr, end);
-            fill_color.Serialize(ref ptr, end);
-            BuiltIns.Serialize(lifetime, ref ptr, end);
-            BuiltIns.SerializeStructArray(points, ref ptr, end, 0);
-            BuiltIns.SerializeStructArray(outline_colors, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            BuiltIns.Serialize(this.ns, b);
+            BuiltIns.Serialize(this.id, b);
+            BuiltIns.Serialize(this.type, b);
+            BuiltIns.Serialize(this.action, b);
+            this.position.Serialize(b);
+            BuiltIns.Serialize(this.scale, b);
+            this.outline_color.Serialize(b);
+            BuiltIns.Serialize(this.filled, b);
+            this.fill_color.Serialize(b);
+            BuiltIns.Serialize(this.lifetime, b);
+            BuiltIns.SerializeStructArray(this.points, b, 0);
+            BuiltIns.SerializeStructArray(this.outline_colors, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (ns is null) throw new System.NullReferenceException();
+            if (points is null) throw new System.NullReferenceException();
+            if (outline_colors is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -84,8 +118,6 @@ namespace Iviz.Msgs.visualization_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new ImageMarker();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

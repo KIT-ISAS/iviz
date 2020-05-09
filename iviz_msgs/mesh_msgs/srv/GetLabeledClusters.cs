@@ -5,7 +5,7 @@ namespace Iviz.Msgs.mesh_msgs
     public sealed class GetLabeledClusters : IService
     {
         /// <summary> Request message. </summary>
-        public GetLabeledClustersRequest Request { get; }
+        public GetLabeledClustersRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public GetLabeledClustersResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.mesh_msgs
         
         public IService Create() => new GetLabeledClusters();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (GetLabeledClustersRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (GetLabeledClustersResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -46,7 +54,7 @@ namespace Iviz.Msgs.mesh_msgs
 
     public sealed class GetLabeledClustersRequest : IRequest
     {
-        public string uuid;
+        public string uuid { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetLabeledClustersRequest()
@@ -54,14 +62,33 @@ namespace Iviz.Msgs.mesh_msgs
             uuid = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public GetLabeledClustersRequest(string uuid)
         {
-            BuiltIns.Deserialize(out uuid, ref ptr, end);
+            this.uuid = uuid ?? throw new System.ArgumentNullException(nameof(uuid));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal GetLabeledClustersRequest(Buffer b)
+        {
+            this.uuid = BuiltIns.DeserializeString(b);
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new GetLabeledClustersRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(uuid, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.Serialize(this.uuid, b);
+        }
+        
+        public void Validate()
+        {
+            if (uuid is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -77,7 +104,7 @@ namespace Iviz.Msgs.mesh_msgs
 
     public sealed class GetLabeledClustersResponse : IResponse
     {
-        public MeshFaceCluster[] clusters;
+        public MeshFaceCluster[] clusters { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetLabeledClustersResponse()
@@ -85,14 +112,33 @@ namespace Iviz.Msgs.mesh_msgs
             clusters = System.Array.Empty<MeshFaceCluster>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public GetLabeledClustersResponse(MeshFaceCluster[] clusters)
         {
-            BuiltIns.DeserializeArray(out clusters, ref ptr, end, 0);
+            this.clusters = clusters ?? throw new System.ArgumentNullException(nameof(clusters));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal GetLabeledClustersResponse(Buffer b)
+        {
+            this.clusters = BuiltIns.DeserializeArray<MeshFaceCluster>(b, 0);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new GetLabeledClustersResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.SerializeArray(clusters, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            BuiltIns.SerializeArray(this.clusters, b, 0);
+        }
+        
+        public void Validate()
+        {
+            if (clusters is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

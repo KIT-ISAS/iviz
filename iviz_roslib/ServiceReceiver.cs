@@ -230,7 +230,7 @@ namespace Iviz.RoslibSharp
             else 
             {
                 service.ErrorMessage = null;
-                BuiltIns.Deserialize(service.Response, readBuffer, rcvLength);
+                service.Response = BuiltIns.Deserialize(service.Response, readBuffer, rcvLength);
                 NumReceived++;
                 return true;
             }
