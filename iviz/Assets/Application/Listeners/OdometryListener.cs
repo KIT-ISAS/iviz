@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace Iviz.App
 {
+    /*
     public class OdometryListener : MonoBehaviour
     {
         RosListener<Odometry> listener;
@@ -42,8 +43,9 @@ namespace Iviz.App
         {
             Connected = listener.Connected;
             Subscribed = listener.Subscribed;
-            MessagesPerSecond = listener.CalculateStats().MessagesPerSecond;
+            MessagesPerSecond = listener.UpdateStats().MessagesPerSecond;
         }
 
     }
+    */
 }

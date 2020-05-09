@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace Iviz.App
 {
+    /*
     public class GridMapListener : DisplayableListener
     {
         RosListener<GridMap> listener;
@@ -141,7 +142,7 @@ namespace Iviz.App
         {
             Connected = listener.Connected;
             Subscribed = listener.Subscribed;
-            MessagesPerSecond = listener.CalculateStats().MessagesPerSecond;
+            MessagesPerSecond = listener.UpdateStats().MessagesPerSecond;
 
             if (colorMap.ToString() != colorMapTexture.name)
             {
@@ -172,4 +173,5 @@ namespace Iviz.App
             throw new System.NotImplementedException();
         }
     }
+    */
 }

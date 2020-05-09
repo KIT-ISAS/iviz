@@ -87,10 +87,7 @@ namespace Iviz.RoslibSharp
             }
             keepGoing = false;
             listener.Stop();
-            if (!task.IsCompleted)
-            {
-                task.Wait();
-            }
+            task?.Wait();
         }
     }
 }

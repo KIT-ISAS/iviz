@@ -9,12 +9,12 @@ namespace Iviz.App
 {
     public class RosListenerStats : JsonToString
     {
-        public readonly int TotalMessages;
-        public readonly float JitterMin;
-        public readonly float JitterMax;
-        public readonly float JitterMean;
-        public readonly float MessagesPerSecond;
-        public readonly int MessagesInQueue;
+        public int TotalMessages { get; }
+        public float JitterMin { get; }
+        public float JitterMax { get; }
+        public float JitterMean { get; }
+        public float MessagesPerSecond { get; }
+        public int MessagesInQueue { get; }
 
         public RosListenerStats() { }
 
@@ -33,16 +33,15 @@ namespace Iviz.App
     {
         public string Topic { get; }
         public string Type { get; }
-        public bool Connected => true;
-        public bool Subscribed => true;
+        public RosListenerStats Stats { get; protected set; } = new RosListenerStats();
 
         protected RosListener(string topic, string type)
         {
-            Topic = topic;
-            Type = type;
+            Topic = topic ?? throw new ArgumentNullException(nameof(topic));
+            Type = type ?? throw new ArgumentNullException(nameof(type));
         }
 
-        public abstract RosListenerStats CalculateStats();
+        public abstract void UpdateStats();
         public abstract void Stop();
     }
 
@@ -93,11 +92,11 @@ namespace Iviz.App
         }
 
 
-        public override RosListenerStats CalculateStats()
+        public override void UpdateStats()
         {
             if (!timesOfArrival.Any())
             {
-                return new RosListenerStats();
+                return;
             }
             else
             {
@@ -111,7 +110,7 @@ namespace Iviz.App
                     if (jitter > jitterMax) jitterMax = jitter;
                 }
 
-                RosListenerStats stats = new RosListenerStats(
+                Stats = new RosListenerStats(
                     totalMsgCounter,
                     jitterMin,
                     jitterMax,
@@ -120,7 +119,6 @@ namespace Iviz.App
                     msgInQueue
                 );
                 timesOfArrival.Clear();
-                return stats;
             }
         }
     }

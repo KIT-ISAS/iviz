@@ -1,35 +1,36 @@
 ﻿using UnityEngine;
 
-namespace Iviz.App
+namespace Iviz.App.Displays
 {
-    public abstract class MarkerResource : MonoBehaviour
+    public abstract class MarkerResource : MonoBehaviour, IDisplay
     {
-        Color color = Color.white;
-        public Color Color {
-            get => color;
-            set {
-                color = value;
-                SetColor(value);
-            }
-        }
+        protected BoxCollider Collider;
 
-        public Collider Collider { get; private set; }
-
-        public Bounds Bounds { get; protected set; }
+        //public Bounds Bounds { get; protected set; }
+        public Bounds Bounds => new Bounds(Collider.center, Collider.size);
         public Bounds WorldBounds => Collider.bounds;
 
-        public virtual float Width
-        {
-            get => 0;
-            set { }
-        }
+        public abstract string Name { get; }
 
-        public abstract void SetColor(Color color);
+        public bool ColliderEnabled
+        {
+            get => Collider.enabled;
+            set => Collider.enabled = value;
+        }
+        public Transform Parent
+        {
+            get => transform.parent;
+            set => transform.parent = value;
+        }
 
         protected virtual void Awake()
         {
-            Collider = GetComponent<Collider>();
-            Bounds = Collider.bounds;
+            Collider = GetComponent<BoxCollider>();
+            //Bounds = Collider.bounds;
+        }
+
+        public virtual void Stop()
+        {
         }
     }
 }

@@ -10,7 +10,7 @@ using Iviz.Msgs.visualization_msgs;
 namespace Iviz.App
 {
 
-    public class InteractiveMarkerListener : DisplayableListener
+    public class InteractiveMarkerListener : TopicListener
     {
         RosSender<InteractiveMarkerFeedback> rosSender;
 
@@ -47,25 +47,21 @@ namespace Iviz.App
 
         public override void StartListening()
         {
-            Topic = config.topic;
+            base.StartListening();
             Listener = new RosListener<InteractiveMarkerUpdate>(config.topic, Handler);
-            GameThread.EverySecond += UpdateStats;
             GameThread.EverySecond += CheckForExpiredMarkers;
-
             rosSender = new RosSender<InteractiveMarkerFeedback>("/interactive_markers/feedback");
         }
 
-        public override void Unsubscribe()
+        public override void Stop()
         {
-            GameThread.EverySecond -= UpdateStats;
+            base.Stop();
             GameThread.EverySecond -= CheckForExpiredMarkers;
-            Listener?.Stop();
-            Listener = null;
 
             foreach (InteractiveMarkerObject imarker in imarkers.Values)
             {
                 imarker.Stop();
-                ResourcePool.Dispose(Resource.Displays.MarkerObject, imarker.gameObject);
+                ResourcePool.Dispose(Resource.Listeners.MarkerObject, imarker.gameObject);
             }
             imarkers.Clear();
             rosSender.Stop();
@@ -76,7 +72,7 @@ namespace Iviz.App
             foreach (InteractiveMarkerObject imarker in imarkers.Values)
             {
                 imarker.Stop();
-                ResourcePool.Dispose(Resource.Displays.MarkerObject, imarker.gameObject);
+                ResourcePool.Dispose(Resource.Listeners.MarkerObject, imarker.gameObject);
             }
             imarkers.Clear();
         }
@@ -99,9 +95,9 @@ namespace Iviz.App
             if (!imarkers.TryGetValue(id, out InteractiveMarkerObject imarker))
             {
                 imarker = ResourcePool.
-                    GetOrCreate(Resource.Displays.InteractiveMarkerObject, transform).
+                    GetOrCreate(Resource.Listeners.InteractiveMarkerObject, transform).
                     GetComponent<InteractiveMarkerObject>();
-                imarker.Parent = TFListener.DisplaysFrame;
+                imarker.Parent = TFListener.ListenersFrame;
                 imarker.Clicked += (control, pose, point, button) => OnInteractiveControlObjectClicked(id, pose, control, point, button);
                 imarker.transform.SetParentLocal(transform);
                 imarkers[id] = imarker;
@@ -128,7 +124,7 @@ namespace Iviz.App
             }
 
             imarker.Stop();
-            ResourcePool.Dispose(Resource.Displays.InteractiveMarkerObject, imarker.gameObject);
+            ResourcePool.Dispose(Resource.Listeners.InteractiveMarkerObject, imarker.gameObject);
             imarkers.Remove(id);
         }
 

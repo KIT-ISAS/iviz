@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Iviz.App.Displays;
 using Iviz.Msgs.sensor_msgs;
 using RosSharp;
 using UnityEngine;
 
 namespace Iviz.App
 {
-    public class LaserScanListener : DisplayableListener
+    public class LaserScanListener : TopicListener, IRecyclable
     {
         PointListResource pointCloud;
+        DisplayNode node;
 
         public float MinIntensity { get; private set; }
         public float MaxIntensity { get; private set; }
@@ -83,28 +85,23 @@ namespace Iviz.App
 
         void Awake()
         {
-            pointCloud = ResourcePool.GetOrCreate(Resource.Markers.PointList, transform).GetComponent<PointListResource>();
+            transform.parent = TFListener.ListenersFrame.transform;
+
+            node = SimpleDisplayNode.Instantiate("LaserScanNode", transform);
+            pointCloud = ResourcePool.GetOrCreate(Resource.Markers.PointList, node.transform).GetComponent<PointListResource>();
             Config = new Configuration();
         }
 
         public override void StartListening()
         {
-            Topic = config.topic;
+            base.StartListening();
             Listener = new RosListener<LaserScan>(config.topic, Handler);
-            GameThread.EverySecond += UpdateStats;
-        }
-
-        public override void Unsubscribe()
-        {
-            GameThread.EverySecond -= UpdateStats;
-            Listener?.Stop();
-            Listener = null;
+            name = "LaserScan:" + config.topic;
+            node.name = "LaserScanNode:" + config.topic;
         }
 
         void Handler(LaserScan msg)
         {
-            SetParent(msg.header.frame_id);
-
             int newSize = msg.ranges.Length;
             if (newSize > pointBuffer.Length)
             {
@@ -194,10 +191,14 @@ namespace Iviz.App
             return new Vector2(intensityMin, intensityMax);
         }
 
-
-        public override void Recycle()
+        public override void Stop()
         {
-            base.Recycle();
+            base.Stop();
+            pointCloud.Parent = node.transform;
+        }
+
+        public void Recycle()
+        {
             ResourcePool.Dispose(Resource.Markers.PointList, pointCloud.gameObject);
             pointCloud = null;
         }

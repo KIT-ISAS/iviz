@@ -53,7 +53,6 @@ namespace Iviz.Bridge
             catch (Exception e)
             {
                 Console.Error.WriteLine(e);
-                throw e;
             }
         }
 

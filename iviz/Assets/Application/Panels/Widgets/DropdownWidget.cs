@@ -43,7 +43,7 @@ namespace Iviz.App
             get => dropdown.interactable;
             set
             {
-                label.color = value ? Display.EnabledFontColor : Display.DisabledFontColor;
+                label.color = value ? Resource.Colors.EnabledFontColor : Resource.Colors.DisabledFontColor;
                 dropdown.interactable = value;
             }
         }

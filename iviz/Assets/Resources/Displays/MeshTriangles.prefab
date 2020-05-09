@@ -10,11 +10,11 @@ GameObject:
   m_Component:
   - component: {fileID: 6472923824794949483}
   - component: {fileID: 6472923824794949482}
-  - component: {fileID: 5397270569925917494}
   - component: {fileID: 4433133577431835768}
   - component: {fileID: 984272949927778880}
+  - component: {fileID: 456716393333586943}
   m_Layer: 0
-  m_Name: MeshMarker
+  m_Name: MeshTriangles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -47,18 +47,6 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &5397270569925917494
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6472923824794949481}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 91e53ae859eaa2a449bf829338ecce5a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!33 &4433133577431835768
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -105,3 +93,15 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!114 &456716393333586943
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6472923824794949481}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3455a5dc1e9e7814284a01e807ebf3f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

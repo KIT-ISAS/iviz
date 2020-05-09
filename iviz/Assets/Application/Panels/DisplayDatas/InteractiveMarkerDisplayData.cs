@@ -5,38 +5,37 @@ namespace Iviz.App
 {
     public class InteractiveMarkerDisplayData : DisplayableListenerData
     {
-        InteractiveMarkerListener display;
+        InteractiveMarkerListener listener;
         InteractiveMarkerPanelContents panel;
 
         public override DataPanelContents Panel => panel;
-        public override DisplayableListener Display => display;
+        public override TopicListener Listener => listener;
         public override Resource.Module Module => Resource.Module.InteractiveMarker;
 
         public override DisplayData Initialize(DisplayListPanel displayList, string topic, string type)
         {
             base.Initialize(displayList, topic, type);
             
-            GameObject displayObject = ResourcePool.GetOrCreate(Resource.Displays.InteractiveMarker);
-            displayObject.name = "InteractiveMarkers";
+            GameObject listenerObject = ResourcePool.GetOrCreate(Resource.Listeners.InteractiveMarker);
+            listenerObject.name = "InteractiveMarkers";
 
-            display = displayObject.GetComponent<InteractiveMarkerListener>();
-            display.Parent = TFListener.DisplaysFrame;
-            display.Config.topic = topic;
+            listener = listenerObject.GetComponent<InteractiveMarkerListener>();
+            listener.Config.topic = topic;
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.InteractiveMarker) as InteractiveMarkerPanelContents;
             return this;
         }
 
         public override DisplayData Deserialize(JToken j)
         {
-            display.Config = j.ToObject<InteractiveMarkerListener.Configuration>();
-            Topic = display.Config.topic;
+            listener.Config = j.ToObject<InteractiveMarkerListener.Configuration>();
+            Topic = listener.Config.topic;
             return this;
         }
 
         public override void Start()
         {
             base.Start();
-            display.StartListening();
+            listener.StartListening();
         }
 
 
@@ -44,19 +43,19 @@ namespace Iviz.App
         {
             base.Cleanup();
 
-            display.Stop();
-            ResourcePool.Dispose(Resource.Displays.InteractiveMarker, display.gameObject);
-            display = null;
+            listener.Stop();
+            ResourcePool.Dispose(Resource.Listeners.InteractiveMarker, listener.gameObject);
+            listener = null;
         }
 
         public override void SetupPanel()
         {
             panel.Topic.Label = Topic;
-            panel.DisableExpiration.Value = display.DisableExpiration;
+            panel.DisableExpiration.Value = listener.DisableExpiration;
 
             panel.DisableExpiration.ValueChanged += f =>
             {
-                display.DisableExpiration = f;
+                listener.DisableExpiration = f;
             };
             panel.CloseButton.Clicked += () =>
             {
@@ -67,7 +66,7 @@ namespace Iviz.App
 
         public override JToken Serialize()
         {
-            return JToken.FromObject(display.Config);
+            return JToken.FromObject(listener.Config);
         }
     }
 }

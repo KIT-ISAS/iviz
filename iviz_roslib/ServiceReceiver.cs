@@ -11,7 +11,7 @@ using Iviz.Msgs;
 
 namespace Iviz.RoslibSharp
 {
-    class ServiceReceiver
+    sealed class ServiceReceiver : IDisposable
     {
         const int BufferSizeIncrease = 512;
 
@@ -234,6 +234,14 @@ namespace Iviz.RoslibSharp
                 NumReceived++;
                 return true;
             }
+        }
+
+        public void Dispose()
+        {
+            Stop();
+            reader.Dispose();
+            writer.Dispose();
+            tcpClient.Dispose();
         }
     }
 }

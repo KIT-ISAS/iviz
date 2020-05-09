@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Iviz.App.Displays;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -21,9 +22,8 @@ namespace Iviz.App
         {
             base.Initialize(displayList, topic, type);
 
-            GameObject displayObject = ResourcePool.GetOrCreate(Resource.Displays.DepthImageProjector);
+            GameObject displayObject = ResourcePool.GetOrCreate(Resource.Listeners.DepthImageProjector);
             display = displayObject.GetComponent<DepthImageProjector>();
-            display.Parent = TFListener.DisplaysFrame;
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.DepthImageProjector) as DepthImageProjectorPanelContents;
             return this;
         }
@@ -42,7 +42,7 @@ namespace Iviz.App
             base.Cleanup();
 
             display.Stop();
-            ResourcePool.Dispose(Resource.Displays.DepthImageProjector, display.gameObject);
+            ResourcePool.Dispose(Resource.Listeners.DepthImageProjector, display.gameObject);
             display = null;
         }
 

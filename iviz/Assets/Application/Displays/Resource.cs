@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.Collections.ObjectModel;
+using Iviz.Msgs.sensor_msgs;
+using Iviz.Msgs.visualization_msgs;
+using System;
 
 namespace Iviz.App
 {
@@ -23,14 +26,56 @@ namespace Iviz.App
             LaserScan
         }
 
+        static readonly Dictionary<string, Module> resourceByRosMessageType = new Dictionary<string, Module>
+        {
+            { PointCloud2.RosMessageType, Module.PointCloud },
+            { Image.RosMessageType, Module.Image },
+            { CompressedImage.RosMessageType, Module.Image },
+            { Marker.RosMessageType, Module.Marker },
+            { MarkerArray.RosMessageType, Module.Marker },
+            { InteractiveMarkerUpdate.RosMessageType, Module.InteractiveMarker },
+            { JointState.RosMessageType, Module.JointState },
+            { LaserScan.RosMessageType, Module.LaserScan },
+        };
+
+        public static ReadOnlyDictionary<string, Module> ResourceByRosMessageType { get; }
+            = new ReadOnlyDictionary<string, Module>(resourceByRosMessageType);
+
+        public class ColorScheme
+        {
+            public Color EnabledFontColor { get; }
+            public Color DisabledFontColor { get; }
+
+            public ColorScheme()
+            {
+                EnabledFontColor = new Color(0.196f, 0.196f, 0.196f);
+                DisabledFontColor = EnabledFontColor * 3;
+            }
+        }
+
         public class Info
         {
             public int Id { get; }
             public GameObject GameObject { get; }
 
+            public Info(string resourceName)
+            {
+                if (resourceName is null)
+                {
+                    throw new ArgumentNullException(nameof(resourceName));
+                }
+
+                GameObject = Resources.Load<GameObject>(resourceName);
+                if (GameObject == null)
+                {
+                    throw new ArgumentException("Cannot find resource '" + resourceName + "'", nameof(resourceName));
+                }
+                Id = GameObject.GetInstanceID();
+            }
+
             public Info(GameObject resource)
             {
-                GameObject = resource;
+                GameObject = resource ?? throw new System.ArgumentNullException(nameof(resource));
                 Id = resource.GetInstanceID();
             }
 
@@ -50,15 +95,18 @@ namespace Iviz.App
             public Material ImagePreview { get; }
             public Material PointCloud { get; }
             public Material MeshList { get; }
+            public Material DepthImageProjector { get; }
+            public Material Grid { get; }
 
             public MaterialsType()
             {
-                SimpleLit = Resources.Load<Material>("BaseMaterials/SimpleWhite");
-                Lit = Resources.Load<Material>("BaseMaterials/White");
-                TexturedLit = Resources.Load<Material>("BaseMaterials/Textured Lit");
-                ImagePreview = Resources.Load<Material>("BaseMaterials/ImagePreview");
-                PointCloud = Resources.Load<Material>("Displays/PointCloud Material");
-                MeshList = Resources.Load<Material>("Displays/MeshList Material");
+                SimpleLit = Resources.Load<Material>("Materials/SimpleWhite");
+                Lit = Resources.Load<Material>("Materials/White");
+                TexturedLit = Resources.Load<Material>("Materials/Textured Lit");
+                ImagePreview = Resources.Load<Material>("Materials/ImagePreview");
+                PointCloud = Resources.Load<Material>("Materials/PointCloud Material");
+                MeshList = Resources.Load<Material>("Materials/MeshList Material");
+                Grid = Resources.Load<Material>("Materials/Grid");
             }
         }
 
@@ -77,9 +125,22 @@ namespace Iviz.App
 
             public ColormapsType()
             {
-                string[] names = new string[]
+                string[] names = 
                 {
-                    "lines", "pink", "copper", "bone", "gray", "winter", "autumn", "summer", "spring", "cool", "hot", "hsv", "jet", "parula"
+                    "lines", 
+                    "pink", 
+                    "copper", 
+                    "bone", 
+                    "gray", 
+                    "winter", 
+                    "autumn", 
+                    "summer", 
+                    "spring", 
+                    "cool", 
+                    "hot", 
+                    "hsv", 
+                    "jet", 
+                    "parula"
                 };
                 Names = new ReadOnlyCollection<string>(names);
 
@@ -105,24 +166,30 @@ namespace Iviz.App
             public Info SphereSimple { get; }
             public Info MeshList { get; }
             public Info PointList { get; }
-            public Info MeshMarker { get; }
+            public Info MeshTriangles { get; }
+            public Info TFFrame { get; }
+            public Info Image { get; }
+            public Info Square { get; }
 
             public ReadOnlyDictionary<string, Info> Generic { get; }
 
             public MarkersType()
             {
-                Cube = new Info(Resources.Load<GameObject>("Markers/Cube"));
-                Cylinder = new Info(Resources.Load<GameObject>("Markers/Cylinder"));
-                Sphere = new Info(Resources.Load<GameObject>("Markers/Sphere"));
-                Text = new Info(Resources.Load<GameObject>("Markers/Text"));
-                LineStrip = new Info(Resources.Load<GameObject>("Markers/LineStrip"));
-                LineConnector = new Info(Resources.Load<GameObject>("Markers/LineConnector"));
-                NamedBoundary = new Info(Resources.Load<GameObject>("Markers/NamedBoundary"));
-                Arrow = new Info(Resources.Load<GameObject>("Markers/Arrow"));
-                SphereSimple = new Info(Resources.Load<GameObject>("Spheres/sphere-LOD1"));
-                MeshList = new Info(Resources.Load<GameObject>("Markers/MeshList"));
-                PointList = new Info(Resources.Load<GameObject>("Markers/PointList"));
-                MeshMarker = new Info(Resources.Load<GameObject>("Markers/MeshMarker"));
+                Cube = new Info("Displays/Cube");
+                Cylinder = new Info("Displays/Cylinder");
+                Sphere = new Info("Displays/Sphere");
+                Text = new Info("Displays/Text");
+                LineStrip = new Info("Displays/LineStrip");
+                LineConnector = new Info("Displays/LineConnector");
+                NamedBoundary = new Info("Displays/NamedBoundary");
+                Arrow = new Info("Displays/Arrow");
+                SphereSimple = new Info("Spheres/sphere-LOD1");
+                MeshList = new Info("Displays/MeshList");
+                PointList = new Info("Displays/PointList");
+                MeshTriangles = new Info("Displays/MeshTriangles");
+                TFFrame = new Info("Displays/TFFrame");
+                Image = new Info("Displays/ImageResource");
+                Square = new Info("Displays/Square");
 
                 Generic = new ReadOnlyDictionary<string, Info>(
                     new Dictionary<string, Info>()
@@ -130,14 +197,13 @@ namespace Iviz.App
                         ["Cube"] = Cube,
                         ["Cylinder"] = Cylinder,
                         ["Sphere"] = Sphere,
-                        ["RightHand"] = new Info(Resources.Load<GameObject>("Markers/RightHand")),
+                        ["RightHand"] = new Info("Displays/RightHand"),
                     });
             }
         }
 
-        public class DisplaysType
+        public class ListenersType
         {
-            public Info TFFrame { get; }
             public Info PointCloud { get; }
             public Info Grid { get; }
             public Info TF { get; }
@@ -152,22 +218,21 @@ namespace Iviz.App
             public Info DepthImageProjector { get; }
             public Info LaserScan { get; }
 
-            public DisplaysType()
+            public ListenersType()
             {
-                TFFrame = new Info(Resources.Load<GameObject>("Displays/TFFrame"));
-                PointCloud = new Info(Resources.Load<GameObject>("Displays/PointCloud"));
-                Grid = new Info(Resources.Load<GameObject>("Displays/Grid"));
-                TF = new Info(Resources.Load<GameObject>("Displays/TF"));
-                Image = new Info(Resources.Load<GameObject>("Displays/Image"));
-                Robot = new Info(Resources.Load<GameObject>("Displays/Robot"));
-                MarkerObject = new Info(Resources.Load<GameObject>("Displays/MarkerObject"));
-                Marker = new Info(Resources.Load<GameObject>("Displays/Marker"));
-                InteractiveMarkerControlObject = new Info(Resources.Load<GameObject>("Displays/InteractiveMarkerControlObject"));
-                InteractiveMarkerObject = new Info(Resources.Load<GameObject>("Displays/InteractiveMarkerObject"));
-                InteractiveMarker = new Info(Resources.Load<GameObject>("Displays/InteractiveMarker"));
-                JointState = new Info(Resources.Load<GameObject>("Displays/JointState"));
-                DepthImageProjector = new Info(Resources.Load<GameObject>("Displays/DepthImageProjector"));
-                LaserScan = new Info(Resources.Load<GameObject>("Displays/LaserScan"));
+                PointCloud = new Info("Listeners/PointCloud");
+                Grid = new Info("Listeners/Grid");
+                TF = new Info("Listeners/TF");
+                Image = new Info("Listeners/Image");
+                Robot = new Info("Listeners/Robot");
+                MarkerObject = new Info("Listeners/MarkerObject");
+                Marker = new Info("Listeners/Marker");
+                InteractiveMarkerControlObject = new Info("Listeners/InteractiveMarkerControlObject");
+                InteractiveMarkerObject = new Info("Listeners/InteractiveMarkerObject");
+                InteractiveMarker = new Info("Listeners/InteractiveMarker");
+                JointState = new Info("Listeners/JointState");
+                DepthImageProjector = new Info("Listeners/DepthImageProjector");
+                LaserScan = new Info("Listeners/LaserScan");
             }
         }
 
@@ -178,8 +243,8 @@ namespace Iviz.App
 
             public WidgetsType()
             {
-                DisplayButton = new Info(Resources.Load<GameObject>("Widgets/Display Button"));
-                TopicsButton = new Info(Resources.Load<GameObject>("Widgets/Topics Button"));
+                DisplayButton = new Info("Widgets/Display Button");
+                TopicsButton = new Info("Widgets/Topics Button");
             }
         }
 
@@ -191,7 +256,7 @@ namespace Iviz.App
 
             public RobotsType()
             {
-                string[] names = new string[]
+                string[] names =
                 {
                 "edu.iviz.dummybot",
                 "com.clearpath.husky",
@@ -210,7 +275,7 @@ namespace Iviz.App
                 // robots are huge so they are only loaded on demand
                 if (!Objects.TryGetValue(name, out Info info))
                 {
-                    info = new Info(Resources.Load<GameObject>("Robots/" + name));
+                    info = new Info("Robots/" + name);
                     Objects.Add(name, info);
                 }
                 return info;
@@ -228,13 +293,15 @@ namespace Iviz.App
         static MarkersType markers;
         public static MarkersType Markers => markers ?? (markers = new MarkersType());
 
-        static DisplaysType displays;
-        public static DisplaysType Displays => displays ?? (displays = new DisplaysType());
+        static ListenersType listeners;
+        public static ListenersType Listeners => listeners ?? (listeners = new ListenersType());
 
         static WidgetsType widgets;
         public static WidgetsType Widgets => widgets ?? (widgets = new WidgetsType());
 
         static RobotsType robots;
         public static RobotsType Robots => robots ?? (robots = new RobotsType());
+
+        public static ColorScheme Colors { get; } = new ColorScheme();
     }
 }

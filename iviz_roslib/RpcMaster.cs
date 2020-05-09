@@ -15,11 +15,11 @@ namespace Iviz.RoslibSharp.XmlRpc
         Success = 1
     }
 
-    public class Master
+    public sealed class Master
     {
         public Uri MasterUri { get; }
         public Uri CallerUri { get; }
-        readonly string CallerId;
+        public string CallerId { get; }
 
         internal Master(Uri masterUri, string callerId, Uri callerUri)
         {
@@ -144,7 +144,7 @@ namespace Iviz.RoslibSharp.XmlRpc
         }
     }
 
-    public class GetSystemStateResponse
+    public sealed class GetSystemStateResponse
     {
         public StatusCode Code { get; }
         public string StatusMessage { get; }
@@ -180,7 +180,7 @@ namespace Iviz.RoslibSharp.XmlRpc
         }
     }
 
-    public class GetUriResponse
+    public sealed class GetUriResponse
     {
         public StatusCode Code { get; }
         public string StatusMessage { get; }
@@ -194,7 +194,7 @@ namespace Iviz.RoslibSharp.XmlRpc
         }
     }
 
-    public class LookupNodeResponse
+    public sealed class LookupNodeResponse
     {
         public StatusCode Code { get; }
         public string StatusMessage { get; }
@@ -208,7 +208,7 @@ namespace Iviz.RoslibSharp.XmlRpc
         }
     }
 
-    public class GetPublishedTopicsResponse
+    public sealed class GetPublishedTopicsResponse
     {
         public StatusCode Code { get; }
         public string StatusMessage { get; }
@@ -230,7 +230,7 @@ namespace Iviz.RoslibSharp.XmlRpc
         }
     }
 
-    public class RegisterSubscriberResponse
+    public sealed class RegisterSubscriberResponse
     {
         public StatusCode Code { get; }
         public string StatusMessage { get; }
@@ -253,7 +253,7 @@ namespace Iviz.RoslibSharp.XmlRpc
         }
     }
 
-    public class UnregisterSubscriberResponse
+    public sealed class UnregisterSubscriberResponse
     {
         public StatusCode Code { get; }
         public string StatusMessage { get; }
@@ -267,7 +267,7 @@ namespace Iviz.RoslibSharp.XmlRpc
         }
     }
 
-    public class RegisterPublisherResponse
+    public sealed class RegisterPublisherResponse
     {
         public StatusCode Code { get; }
         public string StatusMessage { get; }
@@ -287,7 +287,7 @@ namespace Iviz.RoslibSharp.XmlRpc
         }
     }
 
-    public class UnregisterPublisherResponse
+    public sealed class UnregisterPublisherResponse
     {
         public StatusCode Code { get; }
         public string StatusMessage { get; }
@@ -301,7 +301,7 @@ namespace Iviz.RoslibSharp.XmlRpc
         }
     }
 
-    public class LookupServiceResponse
+    public sealed class LookupServiceResponse
     {
         public StatusCode Code { get; }
         public string StatusMessage { get; }
@@ -315,7 +315,7 @@ namespace Iviz.RoslibSharp.XmlRpc
         }
     }
 
-    public class RegisterServiceResponse
+    public sealed class RegisterServiceResponse
     {
         public StatusCode Code { get; }
         public string StatusMessage { get; }
@@ -327,7 +327,7 @@ namespace Iviz.RoslibSharp.XmlRpc
         }
     }
 
-    public class UnregisterServiceResponse
+    public sealed class UnregisterServiceResponse
     {
         public StatusCode Code { get; }
         public string StatusMessage { get; }

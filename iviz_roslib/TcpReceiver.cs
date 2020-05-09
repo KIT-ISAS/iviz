@@ -9,7 +9,7 @@ using Iviz.Msgs;
 
 namespace Iviz.RoslibSharp
 {
-    class TcpReceiver
+    sealed class TcpReceiver : IDisposable
     {
         readonly TopicInfo topicInfo;
         readonly Action<IMessage> callback;
@@ -63,10 +63,7 @@ namespace Iviz.RoslibSharp
         {
             keepRunning = false;
             tcpClient?.Close();
-            if (!task.IsCompleted)
-            {
-                task.Wait();
-            }
+            task?.Wait();
             tcpClient = null;
             task = null;
         }
@@ -232,5 +229,14 @@ namespace Iviz.RoslibSharp
             return $"[TcpSender {RemoteHostname}:{RemotePort} '{Topic}']";
         }
 
+        public void Dispose()
+        {
+            tcpClient.Dispose();
+            stream.Dispose();
+
+            keepRunning = false;
+            task?.Wait();
+            task?.Dispose();
+        }
     }
 }

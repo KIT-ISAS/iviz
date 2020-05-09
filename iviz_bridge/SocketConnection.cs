@@ -9,7 +9,7 @@ using WebSocketSharp.Server;
 
 namespace Iviz.Bridge
 {
-    class SocketConnection : WebSocketBehavior
+    sealed class SocketConnection : WebSocketBehavior, IDisposable
     {
         public static RosBridge client;
 
@@ -29,9 +29,7 @@ namespace Iviz.Bridge
 
         public SocketConnection()
         {
-            //task = Task.Run(Run);
-            queue = new ParallelQueue<PublishMessage>(Process);
-            queue.MaxSize = 3;
+            queue = new ParallelQueue<PublishMessage>(Process, 3);
         }
 
         protected override void OnOpen()
@@ -47,23 +45,23 @@ namespace Iviz.Bridge
         {
             base.OnError(e);
             Console.WriteLine("EE " + endPoint + ": " + e.Message);
-            Close();
+            Stop();
         }
 
         protected override void OnClose(CloseEventArgs e)
         {
             base.OnClose(e);
             Console.WriteLine("-- " + endPoint + ": " + e.Reason);
-            Close();
+            Stop();
         }
 
-        void Close()
+        void Stop()
         {
             lock (subscriptions)
             {
                 foreach (Subscription subscription in subscriptions.Values)
                 {
-                    subscription.Close();
+                    subscription.Stop();
                 }
                 subscriptions.Clear();
             }
@@ -71,7 +69,7 @@ namespace Iviz.Bridge
             {
                 foreach (Advertisement advertisement in advertisements.Values)
                 {
-                    advertisement.Close();
+                    advertisement.Stop();
                 }
                 advertisements.Clear();
             }
@@ -159,7 +157,7 @@ namespace Iviz.Bridge
                             subscription.RemoveId(msg.Id);
                             if (subscription.Empty())
                             {
-                                subscription.Close();
+                                subscription.Stop();
                                 Remove(subscriptions, msg.Topic);
                             }
                         }
@@ -185,7 +183,7 @@ namespace Iviz.Bridge
                             advertisement.RemoveId(msg.Id);
                             if (advertisement.Empty())
                             {
-                                advertisement.Close();
+                                advertisement.Stop();
                                 Remove(advertisements, msg.Topic);
                             }
                         }
@@ -205,7 +203,7 @@ namespace Iviz.Bridge
                             {
                                 Op = msg.Op,
                                 Id = msg.Id,
-                                Value = sender.Port.ToString()
+                                Value = sender.Port.ToString(BuiltIns.Culture)
                             };
                             Send(JsonSerializer.ToJsonString(response));
                             break;
@@ -225,7 +223,7 @@ namespace Iviz.Bridge
                             {
                                 Op = msg.Op,
                                 Id = msg.Id,
-                                Value = listener.Port.ToString()
+                                Value = listener.Port.ToString(BuiltIns.Culture)
                             };
                             Send(JsonSerializer.ToJsonString(response));
                             break;
@@ -362,6 +360,12 @@ namespace Iviz.Bridge
             {
                 return dict.Remove(topic);
             }
+        }
+
+        public void Dispose()
+        {
+            Stop();
+            queue.Dispose();
         }
     }
 }

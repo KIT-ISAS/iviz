@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Iviz.App
+namespace Iviz.App.Displays
 {
     public class TextMarkerResource : MarkerResource
     {
@@ -21,9 +21,12 @@ namespace Iviz.App
             }
         }
 
-        public override void SetColor(Color color)
+        public override string Name => "TextMarker";
+
+        public Color Color
         {
-            textMesh.color = color;
+            get => textMesh.color;
+            set => textMesh.color = value;
         }
     }
 }

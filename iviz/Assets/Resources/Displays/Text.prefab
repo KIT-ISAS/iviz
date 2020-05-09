@@ -11,9 +11,8 @@ GameObject:
   - component: {fileID: 3616584195209632828}
   - component: {fileID: 3616584195209632819}
   - component: {fileID: 3616584195209632818}
-  - component: {fileID: 3616584195209632829}
-  - component: {fileID: 202683811240019858}
   - component: {fileID: 1128600323534261624}
+  - component: {fileID: 3697026927689715932}
   m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
@@ -95,33 +94,6 @@ TextMesh:
   m_Color:
     serializedVersion: 2
     rgba: 4294967295
---- !u!114 &3616584195209632829
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3616584195209632817}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 23efd89e2af2444fdb9129c26304128b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mainCamera: {fileID: 0}
-  parent: {fileID: 0}
-  offset: {x: 0, y: 0.05, z: 0}
---- !u!114 &202683811240019858
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3616584195209632817}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ff47e7a304145d845a14d3aa9746b2e0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!65 &1128600323534261624
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -135,3 +107,18 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 2, y: 0.65826005, z: 0.01}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &3697026927689715932
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3616584195209632817}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 324060ae832b2fa4b9586127ccacd339, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainCamera: {fileID: 0}
+  parent: {fileID: 0}
+  offset: {x: 0, y: 0, z: 0}

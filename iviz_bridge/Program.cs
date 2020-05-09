@@ -16,9 +16,9 @@ namespace Iviz.Bridge
             string myWebsocketUrl = "ws://141.3.59.11:8080";
             */
 
-            RosClient rosClient = new RosClient(
-                "http://192.168.0.73:11311",
-                "/Iviz_Rosbridge",
+            using RosClient rosClient = new RosClient(
+                "http://192.168.0.73:11311", 
+                "/Iviz_Rosbridge", 
                 $"http://192.168.0.157:7614");
 
             string myWebsocketUrl = "ws://192.168.0.157:8080";

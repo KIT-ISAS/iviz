@@ -49,7 +49,7 @@ namespace Iviz.App
                 sliderY.Interactable = value;
                 sliderZ.Interactable = value;
                 button.interactable = value;
-                label.color = value ? Display.EnabledFontColor : Display.DisabledFontColor;
+                label.color = value ? Resource.Colors.EnabledFontColor : Resource.Colors.DisabledFontColor;
             }
         }
 

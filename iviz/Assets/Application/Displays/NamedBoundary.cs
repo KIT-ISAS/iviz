@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 
-namespace Iviz.App
+namespace Iviz.App.Displays
 {
-    public class NamedBoundary : MonoBehaviour
+    public class NamedBoundary : MonoBehaviour, IDisplay, IRecyclable
     {
         const float FrameAxisLength = 0.15f;
         const float FrameAxisWidth = FrameAxisLength / 16;
@@ -32,6 +32,7 @@ namespace Iviz.App
             }
         }
 
+        /*
         public bool Active
         {
             get => gameObject.activeSelf;
@@ -41,6 +42,27 @@ namespace Iviz.App
                 if (value)
                 {
                     labelObject.transform.localScale = TFListener.Instance.AxisLabelSize * Vector3.one;
+                }
+            }
+        }
+        */
+
+        ClickableDisplayNode target;
+        public ClickableDisplayNode Target
+        {
+            get => target;
+            set
+            {
+                target = value;
+                if (target == null)
+                {
+                    gameObject.SetActive(false);
+                }
+                else
+                {
+                    gameObject.SetActive(true);
+                    labelObject.transform.localScale = TFListener.Instance.AxisLabelSize * Vector3.one;
+                    Name = target.name;
                 }
             }
         }
@@ -67,6 +89,10 @@ namespace Iviz.App
             }
         }
 
+        public Bounds WorldBounds => bounds;
+
+        public bool ColliderEnabled { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+
         void Awake()
         {
             Holder = CreateSelectionFrame();
@@ -79,7 +105,8 @@ namespace Iviz.App
 
             labelBillboard = labelObject.GetComponent<Billboard>();
 
-            Active = false;
+            //Active = false;
+            Target = null;
         }
 
         GameObject CreateSelectionFrame()
@@ -160,6 +187,29 @@ namespace Iviz.App
             labelObject = null;
             labelObjectText = null;
             labelBillboard = null;
+        }
+
+        public Transform Parent
+        {
+            get => transform.parent;
+            set => transform.parent = value;
+        }
+
+        void Update()
+        {
+            if (target == null)
+            {
+                return;
+            }
+
+            float maxSize = Mathf.Max(Mathf.Max(bounds.size.x, bounds.size.y), bounds.size.z);
+            Bounds = Target.WorldBounds;
+            LabelOffset = Target.transform.TransformDirection(bounds.center) + new Vector3(0, maxSize / 2 + 0.15f, 0);
+        }
+
+
+        public void Stop()
+        {
         }
     }
 

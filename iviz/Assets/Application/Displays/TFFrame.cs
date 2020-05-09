@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.EventSystems;
 
-namespace Iviz.App
+namespace Iviz.App.Displays
 {
-    public sealed class TFFrame : ClickableDisplay
+    public sealed class TFFrame : ClickableDisplayNode, IRecyclable
     {
         public const int Layer = 9;
         static readonly string[] names = { "Axis-X", "Axis-Y", "Axis-Z" };
@@ -74,7 +74,7 @@ namespace Iviz.App
             }
         }
 
-        public bool IgnoreUpdates;
+        public bool IgnoreUpdates { get; set; }
 
         GameObject labelObject;
         TextMesh labelObjectText;
@@ -82,10 +82,14 @@ namespace Iviz.App
         MeshRenderer[] axisRenderers;
         LineConnector parentConnector;
         BoxCollider boxCollider;
-        readonly HashSet<Display> listeners = new HashSet<Display>();
+        readonly HashSet<DisplayNode> listeners = new HashSet<DisplayNode>();
         readonly Dictionary<string, TFFrame> children = new Dictionary<string, TFFrame>();
 
-        public void AddListener(Display display)
+        public override Bounds Bounds => new Bounds(boxCollider.center, boxCollider.size);
+        public override Bounds WorldBounds => boxCollider.bounds;
+        
+
+        public void AddListener(DisplayNode display)
         {
             /*
             if (isDead)
@@ -96,7 +100,7 @@ namespace Iviz.App
             listeners.Add(display);
         }
 
-        public void RemoveListener(Display display)
+        public void RemoveListener(DisplayNode display)
         {
             if (HasNoListeners)
             {
@@ -164,8 +168,6 @@ namespace Iviz.App
 
             boxCollider.center = 0.5f * (newFrameAxisLength - newFrameAxisWidth / 2) * new Vector3(-1, 1, -1);
             boxCollider.size = (newFrameAxisLength + newFrameAxisWidth / 2) * Vector3.one;
-
-            Bounds = boxCollider.bounds;
         }
 
         public bool AxisVisible
@@ -334,7 +336,7 @@ namespace Iviz.App
             parentConnector.gameObject.SetActive(false);
         }
 
-        public override void Recycle()
+        public void Recycle()
         {
             ResourcePool.Dispose(Resource.Markers.Cube, axisObjects[0]);
             ResourcePool.Dispose(Resource.Markers.Cube, axisObjects[1]);

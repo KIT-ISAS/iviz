@@ -2,11 +2,11 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Iviz.App
+namespace Iviz.App.Displays
 {
-    public class DepthImageProjector : Display
+    public class DepthImageProjector : MonoBehaviour, IDisplay
     {
-        const string MaterialResourcePath = "Displays/DepthImage Material";
+        //const string MaterialResourcePath = "Displays/DepthImage Material";
 
         public Material material;
 
@@ -91,13 +91,13 @@ namespace Iviz.App
             {
                 if (colorImage != null)
                 {
-                    colorImage.TextureChanged -= UpdateColorTexture;
+                    colorImage.ImageTexture.TextureChanged -= UpdateColorTexture;
                 }
                 colorImage = value;
                 if (colorImage != null)
                 {
                     UpdateColorTexture(colorImage.Texture);
-                    colorImage.TextureChanged += UpdateColorTexture;
+                    colorImage.ImageTexture.TextureChanged += UpdateColorTexture;
                 }
                 else
                 {
@@ -114,39 +114,46 @@ namespace Iviz.App
             {
                 if (depthImage != null)
                 {
-                    depthImage.TextureChanged -= UpdatePointComputeBuffers;
-                    depthImage.ColormapChanged -= UpdateColormap;
+                    depthImage.ImageTexture.TextureChanged -= UpdatePointComputeBuffers;
+                    depthImage.ImageTexture.ColormapChanged -= UpdateColormap;
                 }
                 depthImage = value;
                 if (depthImage != null)
                 {
                     UpdateDepthTexture(depthImage.Texture);
                     UpdateColormap(depthImage.ColormapTexture);
-                    depthImage.TextureChanged += UpdateDepthTexture;
-                    depthImage.ColormapChanged += UpdateColormap;
-                    
-                    Parent = null;
-                    transform.SetParentLocal(depthImage.transform);
+                    depthImage.ImageTexture.TextureChanged += UpdateDepthTexture;
+                    depthImage.ImageTexture.ColormapChanged += UpdateColormap;
                 }
                 else
                 {
                     UpdateDepthTexture(null);
-                    Parent = TFListener.DisplaysFrame;
                 }
             }
         }
 
+        public string Name => "DepthImageProjector";
+
+
+        public Bounds WorldBounds { get; private set; }
+        public Bounds Bounds { get; private set; }
+        public bool ColliderEnabled { get => false; set { } }
+
+        public Transform Parent
+        {
+            get => transform.parent;
+            set => transform.parent = value;
+        }
 
         int width, height;
         Vector2[] uvs = new Vector2[0];
 
         ComputeBuffer pointComputeBuffer;
         ComputeBuffer quadComputeBuffer;
-        Bounds Bounds;
 
         void Awake()
         {
-            material = Instantiate(Resources.Load<Material>(MaterialResourcePath));
+            material = Instantiate(Resource.Materials.DepthImageProjector);
 
             Config = new Configuration();
 
@@ -274,22 +281,21 @@ namespace Iviz.App
             material.SetMatrix(PropLocalToWorld, transform.localToWorldMatrix);
             material.SetMatrix(PropWorldToLocal, transform.worldToLocalMatrix);
 
-            Bounds worldBounds = Utils.TransformBound(Bounds, transform);
-            Graphics.DrawProcedural(material, worldBounds, MeshTopology.Quads, 4, uvs.Length);
+            WorldBounds = Utils.TransformBound(Bounds, transform);
+            Graphics.DrawProcedural(material, WorldBounds, MeshTopology.Quads, 4, uvs.Length);
         }
 
-        public override void Stop()
+        public void Stop()
         {
-            base.Stop();
             if (colorImage != null)
             {
-                colorImage.TextureChanged -= UpdateColorTexture;
+                colorImage.ImageTexture.TextureChanged -= UpdateColorTexture;
                 colorImage = null;
             }
             if (depthImage != null)
             {
-                depthImage.TextureChanged -= UpdateDepthTexture;
-                depthImage.ColormapChanged -= UpdateColormap;
+                depthImage.ImageTexture.TextureChanged -= UpdateDepthTexture;
+                depthImage.ImageTexture.ColormapChanged -= UpdateColormap;
                 depthImage = null;
             }
             if (pointComputeBuffer != null)
@@ -342,7 +348,7 @@ namespace Iviz.App
                 quadComputeBuffer.Release();
                 quadComputeBuffer = null;
             }
-            
+
             uvs = new Vector2[0];
             width = 0;
             height = 0;

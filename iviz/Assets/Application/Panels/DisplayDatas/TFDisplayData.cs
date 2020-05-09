@@ -5,22 +5,21 @@ namespace Iviz.App
 {
     public class TFDisplayData : DisplayableListenerData
     {
-        TFListener display;
+        TFListener listener;
         TFPanelContents panel;
 
-        public override DisplayableListener Display => display;
+        public override TopicListener Listener => listener;
         public override DataPanelContents Panel => panel;
         public override Resource.Module Module => Resource.Module.TF;
 
         public override DisplayData Initialize(DisplayListPanel displayList, string topic, string type)
         {
             base.Initialize(displayList, topic, type);
-            GameObject displayObject = ResourcePool.GetOrCreate(Resource.Displays.TF);
-            displayObject.name = "TF";
+            GameObject listenerObject = ResourcePool.GetOrCreate(Resource.Listeners.TF);
+            listenerObject.name = "TF";
 
-            display = displayObject.GetComponent<TFListener>();
-            display.Parent = null;
-            display.Config.topic = Topic;
+            listener = listenerObject.GetComponent<TFListener>();
+            listener.Config.topic = Topic;
 
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.TF) as TFPanelContents;
 
@@ -30,65 +29,65 @@ namespace Iviz.App
         public override void Start()
         {
             base.Start();
-            display.StartListening();
+            listener.StartListening();
         }
 
         public override void Cleanup()
         {
             base.Cleanup();
 
-            display.Stop();
-            ResourcePool.Dispose(Resource.Displays.TF, display.gameObject);
-            display = null;
+            listener.Stop();
+            ResourcePool.Dispose(Resource.Listeners.TF, listener.gameObject);
+            listener = null;
         }
 
         public override void SetupPanel()
         {
-            panel.ShowAxes.Value = display.AxisVisible;
-            panel.FrameSize.Value = display.AxisSize;
-            panel.ShowAxes.Value = display.AxisVisible;
-            panel.FrameLabelSize.Value = display.AxisLabelSize;
-            panel.FrameLabelSize.Interactable = display.AxisLabelVisible;
-            panel.ConnectToParent.Value = display.ParentConnectorVisible;
-            panel.ShowAllFrames.Value = display.ShowAllFrames;
+            panel.ShowAxes.Value = listener.AxisVisible;
+            panel.FrameSize.Value = listener.AxisSize;
+            panel.ShowAxes.Value = listener.AxisVisible;
+            panel.FrameLabelSize.Value = listener.AxisLabelSize;
+            panel.FrameLabelSize.Interactable = listener.AxisLabelVisible;
+            panel.ConnectToParent.Value = listener.ParentConnectorVisible;
+            panel.ShowAllFrames.Value = listener.ShowAllFrames;
 
             panel.ShowAxes.ValueChanged += f =>
             {
-                display.AxisVisible = f;
+                listener.AxisVisible = f;
             };
             panel.ShowFrameLabels.ValueChanged += f =>
             {
-                display.AxisLabelVisible = f;
+                listener.AxisLabelVisible = f;
                 panel.FrameLabelSize.Interactable = f;
             };
             panel.FrameSize.ValueChanged += f =>
             {
-                display.AxisSize = f;
+                listener.AxisSize = f;
             };
             panel.FrameLabelSize.ValueChanged += f =>
             {
-                display.AxisLabelSize = f;
+                listener.AxisLabelSize = f;
             };
             panel.ConnectToParent.ValueChanged += f =>
             {
-                display.ParentConnectorVisible = f;
+                listener.ParentConnectorVisible = f;
             };
             panel.ShowAllFrames.ValueChanged += f =>
             {
-                display.ShowAllFrames = f;
+                listener.ShowAllFrames = f;
             };
         }
 
         public override DisplayData Deserialize(JToken j)
         {
-            display.Config = j.ToObject<TFListener.Configuration>();
-            Topic = display.Config.topic;
+            listener.Config = j.ToObject<TFListener.Configuration>();
+            Topic = listener.Config.topic;
             return this;
         }
 
         public override JToken Serialize()
         {
-            return JToken.FromObject(display.Config);
+            return JToken.FromObject(listener.Config);
         }
     }
 }

@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 
-namespace Iviz.App
+namespace Iviz.App.Displays
 {
-    public class LineConnector : MonoBehaviour
+    public class LineConnector : MonoBehaviour, IDisplay
     {
         public Transform A;
         public Transform B;
@@ -19,6 +19,14 @@ namespace Iviz.App
                 line.endWidth = value;
             }
         }
+
+        public string Name => "LineConnector";
+
+        public Bounds Bounds => new Bounds();
+
+        public Bounds WorldBounds => new Bounds();
+
+        public bool ColliderEnabled { get => false; set { } }
 
         void Awake()
         {
@@ -37,6 +45,17 @@ namespace Iviz.App
             positions[0] = A.position;
             positions[1] = B.position;
             line.SetPositions(positions);
+        }
+
+        public Transform Parent
+        {
+            get => transform.parent;
+            set => transform.parent = value;
+        }
+
+
+        public void Stop()
+        {
         }
     }
 }

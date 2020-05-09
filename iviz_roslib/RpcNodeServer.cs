@@ -3,17 +3,20 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Iviz.RoslibSharp.XmlRpc
 {
-    class NodeServer
+    sealed class NodeServer : IDisposable
     {
         readonly Dictionary<string, Func<object[], Arg[]>> Methods;
         readonly HttpListener listener = new HttpListener();
         readonly RosClient client;
         volatile bool keepRunning;
         Task task;
+        
+        CancellationTokenSource tokenSource = new CancellationTokenSource();
 
         public Uri Uri => client.CallerUri;
 
@@ -52,9 +55,12 @@ namespace Iviz.RoslibSharp.XmlRpc
                 {
                     while (keepRunning)
                     {
-                        HttpListenerContext context = listener.GetContext();
+                        Task<HttpListenerContext> task = listener.GetContextAsync();
+                        task.Wait(tokenSource.Token);
+                        
+                        HttpListenerContext context = task.Result;
                         Task.Run(() =>
-                       {
+                        {
                            try
                            {
                                Service.MethodResponse(context, Methods);
@@ -63,7 +69,7 @@ namespace Iviz.RoslibSharp.XmlRpc
                            {
                                Logger.LogError(e);
                            }
-                       });
+                        });
                     }
                 }
                 catch (Exception e)
@@ -74,11 +80,18 @@ namespace Iviz.RoslibSharp.XmlRpc
             });
         }
 
-        public void Close()
+        public void Stop()
         {
             keepRunning = false;
             listener.Close();
-            task.Wait();
+            tokenSource.Cancel();
+            task?.Wait();
+        }
+
+        public void Dispose()
+        {
+            Stop();
+            task.Dispose();
         }
 
         public Arg[] GetBusStats(object[] _)

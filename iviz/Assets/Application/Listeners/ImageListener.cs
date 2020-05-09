@@ -3,21 +3,21 @@ using System.Threading.Tasks;
 using System;
 using Unity.Collections;
 using Iviz.Msgs.sensor_msgs;
+using Iviz.App.Displays;
 
 namespace Iviz.App
 {
-    public class ImageListener : DisplayableListener
+    public class ImageListener : TopicListener
     {
-        byte[] rgbaBuffer;
-        byte[] pngBuffer;
+        ImageTexture texture;
+        SimpleClickableDisplayNode node;
+        ImageResource marker;
 
-        public Texture2D Texture { get; private set; }
-        public Material Material { get; private set; }
-        public string Description { get; private set; }
-        public bool IsMono { get; private set; }
-
-        public event Action<Texture2D> TextureChanged;
-        public event Action<Texture2D> ColormapChanged;
+        public ImageTexture ImageTexture => texture;
+        public Texture2D Texture => texture.Texture;
+        public Material Material => texture.Material;
+        public string Description => texture.Description;
+        public bool IsMono => texture.IsMono;
 
         [Serializable]
         public class Configuration
@@ -29,6 +29,8 @@ namespace Iviz.App
             public AnchorCanvas.AnchorType anchor = AnchorCanvas.AnchorType.None;
             public float minIntensity = 0.0f;
             public float maxIntensity = 1.0f;
+            public bool enableMarker;
+            public float markerScale;
         }
 
         readonly Configuration config = new Configuration();
@@ -40,7 +42,7 @@ namespace Iviz.App
                 config.topic = value.topic;
                 config.type = value.type;
                 Colormap = value.colormap;
-                Anchor = value.anchor;
+                //Anchor = value.anchor;
                 MinIntensity = value.minIntensity;
                 MaxIntensity = value.maxIntensity;
             }
@@ -52,12 +54,13 @@ namespace Iviz.App
             set
             {
                 config.colormap = value;
-                UpdateColormap();
+                texture.Colormap = value;
             }
         }
 
         public Texture2D ColormapTexture => Resource.Colormaps.Textures[Colormap];
 
+        /*
         public AnchorCanvas.AnchorType Anchor
         {
             get => config.anchor;
@@ -66,6 +69,7 @@ namespace Iviz.App
                 config.anchor = value;
             }
         }
+        */
 
         public float MinIntensity
         {
@@ -73,7 +77,7 @@ namespace Iviz.App
             set
             {
                 config.minIntensity = value;
-                UpdateIntensitySpan();
+                texture.MinIntensity = value;
             }
         }
 
@@ -83,35 +87,47 @@ namespace Iviz.App
             set
             {
                 config.maxIntensity = value;
-                UpdateIntensitySpan();
+                texture.MaxIntensity = value;
             }
         }
 
-        void UpdateIntensitySpan()
+        public bool EnableMarker
         {
-            float intensitySpan = MaxIntensity - MinIntensity;
-            if (intensitySpan == 0)
+            get => config.enableMarker;
+            set
             {
-                Material.SetFloat("_IntensityCoeff", 1);
-                Material.SetFloat("_IntensityAdd", 0);
-            }
-            else
-            {
-                Material.SetFloat("_IntensityCoeff", 1 / intensitySpan);
-                Material.SetFloat("_IntensityAdd", -MinIntensity / intensitySpan);
+                config.enableMarker = value;
+                marker.Active = value;
             }
         }
+
+        public float MarkerScale
+        {
+            get => config.markerScale;
+            set
+            {
+                config.markerScale = value;
+                marker.Scale = value;
+            }
+        }
+
 
         void Awake()
         {
-            Material = Instantiate(Resource.Materials.ImagePreview);
+            transform.parent = TFListener.ListenersFrame.transform;
+
+            texture = new ImageTexture();
+            node = SimpleClickableDisplayNode.Instantiate("ImageNode", transform);
+            marker = ResourcePool.GetOrCreate(Resource.Markers.Image, node.transform).GetComponent<ImageResource>();
+            marker.Texture = texture;
+            node.Target = marker;
 
             Config = new Configuration();
         }
 
         public override void StartListening()
         {
-            Topic = config.topic;
+            base.StartListening();
             if (config.type == Image.RosMessageType)
             {
                 Listener = new RosListener<Image>(config.topic, Handler);
@@ -120,279 +136,39 @@ namespace Iviz.App
             {
                 Listener = new RosListener<CompressedImage>(config.topic, HandlerCompressed);
             }
-            GameThread.EverySecond += UpdateStats;
-        }
-
-        public override void Unsubscribe()
-        {
-            GameThread.EverySecond -= UpdateStats;
-            Listener?.Stop();
-            Listener = null;
-
-            TextureChanged?.Invoke(null);
-            TextureChanged = null;
-            ColormapChanged?.Invoke(null);
-            ColormapChanged = null;
+            name = "Image:" + config.topic;
+            node.name = "ImageNode:" + config.topic;
         }
 
         void HandlerCompressed(CompressedImage msg)
         {
+            node.SetParent(msg.header.frame_id);
+
             if (msg.format != "png")
             {
                 Logger.Error("ImageListener: Can only handle png compression");
                 return;
             }
-            Task.Run(() =>
-            {
-                BigGustave.Png png = BigGustave.Png.Open(msg.data);
-
-                Image newMsg = new Image()
-                {
-                    header = msg.header,
-                    width = (uint)png.Width,
-                    height = (uint)png.Height,
-                    step = (uint)png.RowStep,
-                    encoding = EncodingFromPng(png),
-                    is_bigendian = 0
-                };
-
-                if (png.RowOffset != 0)
-                {
-                    int reqSize = png.Height * png.RowSize;
-                    if (pngBuffer == null || pngBuffer.Length < reqSize)
-                    {
-                        pngBuffer = new byte[reqSize];
-                    }
-
-                    int srcOffset = png.RowOffset;
-                    int dstOffset = 0;
-                    int rowSize = png.RowSize;
-                    for (int i = png.Height; i != 0; i--, srcOffset += png.RowStep, dstOffset += rowSize)
-                    {
-                        Buffer.BlockCopy(png.Data, srcOffset, pngBuffer, dstOffset, rowSize);
-                    }
-                    newMsg.data = pngBuffer;
-                }
-                else
-                {
-                    newMsg.data = png.Data;
-                }
-
-                GameThread.RunOnce(() => Handler(newMsg));
-            });
+            texture.SetPng(msg.data);
         }
-
-        static string EncodingFromPng(BigGustave.Png png)
-        {
-            switch (png.Header.ColorType)
-            {
-                case BigGustave.ColorType.None:
-                    switch (png.Header.BitDepth)
-                    {
-                        case 8: return "mono8";
-                        case 16: return "mono16";
-                    }
-                    break;
-                case BigGustave.ColorType.ColorUsed:
-                    switch (png.Header.BitDepth)
-                    {
-                        case 8: return "rgb8";
-                        case 16: return "rgb16";
-                    }
-                    break;
-                case BigGustave.ColorType.AlphaChannelUsed:
-                    switch (png.Header.BitDepth)
-                    {
-                        case 8: return "rgba8";
-                        case 16: return "rgba16";
-                    }
-                    break;
-            }
-            return null;
-        }
-
-        /*
-        
-        void PngToNativeArray(BigGustave.Png src, NativeArray<byte> dst)
-        {
-            int srcOffset = src.RowOffset;
-            int dstOffset = 0;
-            int rowSize = src.RowSize;
-            for (int i = src.Height; i != 0; i--, srcOffset += src.RowStep, dstOffset += rowSize)
-            {
-                NativeArray<byte>.Copy(src.Data, srcOffset, dst, dstOffset, rowSize);
-            }
-        }
-        */
-
-
 
         void Handler(Image msg)
         {
-            SetParent(msg.header.frame_id);
+            node.SetParent(msg.header.frame_id);
 
             int width = (int)msg.width;
             int height = (int)msg.height;
-            int size = width * height;
-            int bpp = FieldSizeFromEncoding(msg);
-
-            if (bpp == -1)
-            {
-                Logger.Error("ImageListener: Unsupported encoding '" + msg.encoding + "'");
-                return;
-            }
-            else if (msg.data.Length < size * bpp)
-            {
-                Debug.Log($"ImageListener: Invalid image! Expected at least {size * bpp} bytes, received {msg.data.Length}");
-                return;
-            }
-
-            IsMono = false;
-
-            Material.DisableKeyword("FLIP_RB");
-            Material.DisableKeyword("USE_INTENSITY");
-
-            switch (msg.encoding)
-            {
-                case "rgba8":
-                case "bgra8":
-                    ApplyTexture(msg.data, width, height, msg.encoding, size * 4);
-                    break;
-                case "rgb8":
-                case "bgr8":
-                    Task.Run(() =>
-                    {
-                        FillRGBABuffer(msg);
-                        GameThread.RunOnce(() =>
-                        {
-                            ApplyTexture(rgbaBuffer, width, height, msg.encoding, size * 4);
-                            if (msg.encoding == "bgr8")
-                            {
-                                Material.EnableKeyword("FLIP_RB");
-                            }
-                        });
-                    });
-                    break;
-                case "mono16":
-                    IsMono = true;
-                    ApplyTexture(msg.data, width, height, msg.encoding, size * 2);
-                    break;
-                case "mono8":
-                    IsMono = true;
-                    ApplyTexture(msg.data, width, height, msg.encoding, size);
-                    break;
-            }
-
-            if (IsMono)
-            {
-                Material.EnableKeyword("USE_INTENSITY");
-            }
-
-            Description = $"Format: {msg.width}x{msg.height} {msg.encoding}";
+            texture.Set(width, height, msg.encoding, msg.data);
         }
 
-        static int FieldSizeFromEncoding(Image msg)
+        public override void Stop()
         {
-            switch (msg.encoding)
-            {
-                case "rgba8":
-                case "bgra8":
-                    return 4;
-                case "rgb8":
-                case "bgr8":
-                    return 3;
-                case "mono16":
-                    return 2;
-                case "mono8":
-                    return 1;
-                default:
-                    return -1;
-            }
+            texture.Stop();
         }
-
-        void FillRGBABuffer(Image msg)
-        {
-            int size = (int)(msg.width * msg.height);
-            if (rgbaBuffer == null || rgbaBuffer.Length < size * 4)
-            {
-                rgbaBuffer = new byte[size * 4];
-            }
-            unsafe
-            {
-                fixed (byte* tmpBufferPtr = rgbaBuffer, dataPtr = msg.data)
-                {
-                    byte* tmpOff = tmpBufferPtr, dataOff = dataPtr;
-                    for (int i = size; i > 0; i--)
-                    {
-                        *tmpOff++ = *dataOff++;
-                        *tmpOff++ = *dataOff++;
-                        *tmpOff++ = *dataOff++;
-                        *tmpOff++ = 255;
-                    }
-                }
-            }
-        }
-
-        void UpdateColormap()
-        {
-            Material.SetTexture("_IntensityTex", ColormapTexture);
-            ColormapChanged?.Invoke(ColormapTexture);
-        }
-
-        void ApplyTexture(byte[] data, int width, int height, string type, int length)
-        {
-            switch (type)
-            {
-                case "rgb8":
-                case "bgr8":
-                case "rgba8":
-                case "bgra8":
-                    EnsureSize(width, height, TextureFormat.RGBA32);
-                    break;
-                case "mono16":
-                    EnsureSize(width, height, TextureFormat.R16);
-                    break;
-                case "mono8":
-                    EnsureSize(width, height, TextureFormat.R8);
-                    break;
-                default:
-                    return;
-            }
-            NativeArray<byte>.Copy(data, Texture.GetRawTextureData<byte>(), length);
-            Texture.Apply(false, false);
-        }
-
-        void EnsureSize(int width, int height, TextureFormat format)
-        {
-
-            if (Texture == null ||
-                Texture.width != width ||
-                Texture.height != height ||
-                Texture.format != format)
-            {
-                if (Texture != null)
-                {
-                    Destroy(Texture);
-                }
-                Texture = new Texture2D(width, height, format, false);
-                Material.SetTexture("_MainTex", Texture);
-                TextureChanged?.Invoke(Texture);
-            }
-        }
-
-        /*
-        void ApplyTexturePng(BigGustave.Png png)
-        {
-            EnsureSize(png.Width, png.Height);
-            PngToNativeArray(png, texture.GetRawTextureData<byte>());
-            texture.Apply(false, false);
-        }
-        */
 
         void OnDestroy()
         {
-            if (Texture != null) Destroy(Texture);
-            if (Material != null) Destroy(Material);
+            texture.Destroy();
         }
 
     }

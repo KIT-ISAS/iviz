@@ -3,14 +3,14 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
-namespace Iviz.App
+namespace Iviz.App.Displays
 {
-    public class MeshListResource : MarkerResource
+    public sealed class MeshListResource : MarkerResource
     {
         Material material;
         BoxCollider boxCollider;
         Bounds baseBounds;
-        
+
         struct PointWithColor
         {
             public Vector3 position;
@@ -37,6 +37,8 @@ namespace Iviz.App
             }
         }
 
+        public Color Color { get; set; } = Color.white;
+
         static readonly int PropPoints = Shader.PropertyToID("_Points");
         void SetCapacity(int reqDataSize)
         {
@@ -51,11 +53,6 @@ namespace Iviz.App
                 pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithColor>());
                 material.SetBuffer(PropPoints, pointComputeBuffer);
             }
-        }
-
-        public override void SetColor(Color color)
-        {
-            // do nothing
         }
 
         public IEnumerable<Color32> Colors
@@ -112,11 +109,12 @@ namespace Iviz.App
             }
         }
 
+        public override string Name => "MeshListResource";
+
         void UpdateBounds()
         {
             baseBounds = CalculateBounds();
 
-            Bounds = new Bounds(baseBounds.center, baseBounds.size + Scale);
             boxCollider.center = Bounds.center;
             boxCollider.size = Bounds.size;
         }

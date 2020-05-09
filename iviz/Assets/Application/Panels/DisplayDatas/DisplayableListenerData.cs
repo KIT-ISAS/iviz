@@ -6,7 +6,7 @@ namespace Iviz.App
     {
         ListenerPanelContents ListenerPanel => Panel as ListenerPanelContents;
 
-        public abstract DisplayableListener Display { get; }
+        public abstract TopicListener Listener { get; }
 
         public override void Start()
         {
@@ -16,10 +16,10 @@ namespace Iviz.App
 
         public override void UpdatePanel()
         {
-            string subscribedStatus = Display.Subscribed ? "On" : "Off";
-            string messagesPerSecond = Display.MessagesPerSecond.ToString("0.##", CultureInfo.InvariantCulture);
-            string minJitter = Display.MessagesJitterMin.ToString("0.##", CultureInfo.InvariantCulture);
-            string maxJitter = Display.MessagesJitterMax.ToString("0.##", CultureInfo.InvariantCulture);
+            string subscribedStatus = Listener.Subscribed ? "On" : "Off";
+            string messagesPerSecond = Listener.MessagesPerSecond.ToString("0.##", CultureInfo.InvariantCulture);
+            string minJitter = Listener.MessagesJitterMin.ToString("0.##", CultureInfo.InvariantCulture);
+            string maxJitter = Listener.MessagesJitterMax.ToString("0.##", CultureInfo.InvariantCulture);
 
             ListenerPanel.Stats.Label = $"{subscribedStatus} | {messagesPerSecond} Hz | {minJitter} - {maxJitter} sec";
         }

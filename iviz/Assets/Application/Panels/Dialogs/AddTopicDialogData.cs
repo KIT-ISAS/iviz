@@ -42,7 +42,7 @@ namespace Iviz.App
             {
                 string topic = entry.Topic;
                 string msgType = entry.Type;
-                if (!DisplayableListener.ResourceByRosMessageType.TryGetValue(msgType, out Resource.Module resource) ||
+                if (!Resource.ResourceByRosMessageType.TryGetValue(msgType, out Resource.Module resource) ||
                     DisplayListPanel.DisplayedTopics.Contains(topic))
                 {
                     continue;

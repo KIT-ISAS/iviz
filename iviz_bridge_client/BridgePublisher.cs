@@ -5,7 +5,7 @@ using Iviz.Msgs;
 
 namespace Iviz.Bridge.Client
 {
-    public class BridgePublisher<T> where T : IMessage
+    public sealed class BridgePublisher<T> : IDisposable where T : IMessage
     {
         readonly TcpClient client;
         readonly BinaryWriter writer;
@@ -41,6 +41,13 @@ namespace Iviz.Bridge.Client
         public void Stop()
         {
             client.Close();
+        }
+
+        public void Dispose()
+        {
+            Stop();
+            writer.Dispose();
+            client.Dispose();
         }
     }
 }

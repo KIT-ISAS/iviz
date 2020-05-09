@@ -1,11 +1,12 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace Iviz.App
+namespace Iviz.App.Displays
 {
-    public abstract class ClickableDisplay : Display, IPointerClickHandler
+    public abstract class ClickableDisplayNode : DisplayNode, IPointerClickHandler
     {
-        public Bounds Bounds { get; protected set; }
+        public abstract Bounds Bounds { get; }
+        public abstract Bounds WorldBounds { get; }
 
         public DisplayData DisplayData;
 
@@ -18,7 +19,7 @@ namespace Iviz.App
                 selected = value;
                 if (value)
                 {
-                    TFListener.GuiManager.ShowBoundary(this, Bounds, name, transform);
+                    TFListener.GuiManager.ShowBoundary(this, WorldBounds, name, transform);
                 }
             }
         }
@@ -72,7 +73,7 @@ namespace Iviz.App
                     TFListener.GuiManager.Select(this);
                     break;
                 case 2:
-                    TFListener.GuiManager.OrbitCenter = transform.TransformPoint(Bounds.center);
+                    TFListener.GuiManager.OrbitCenter = transform.TransformPoint(WorldBounds.center);
                     break;
                 case 3:
                     DisplayData?.Select();
@@ -88,5 +89,34 @@ namespace Iviz.App
         }
     }
 
+    public class SimpleClickableDisplayNode : ClickableDisplayNode
+    {
+        IDisplay target;
+        public IDisplay Target {
+            get => target;
+            set
+            {
+                if (target != null)
+                {
+                    ((MonoBehaviour)target).gameObject.layer = 0;
+                }
+                target = value;
+                if (target != null)
+                {
+                    ((MonoBehaviour)target).gameObject.layer = Resource.ClickableLayer;
+                }
+            }
+        }
+
+        public override Bounds Bounds => Target?.Bounds ?? new Bounds();
+        public override Bounds WorldBounds => Target?.WorldBounds ?? new Bounds();
+
+        public static SimpleClickableDisplayNode Instantiate(string name, Transform transform)
+        {
+            GameObject obj = new GameObject(name);
+            obj.transform.parent = transform;
+            return obj.AddComponent<SimpleClickableDisplayNode>();
+        }
+    }
 
 }
