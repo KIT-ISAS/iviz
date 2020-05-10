@@ -32,7 +32,7 @@ namespace Iviz.Bridge.Client
                 buffer = new byte[size + size / 10];
             }
             reader.Read(buffer, 0, size);
-            return (T)BuiltIns.Deserialize(generator, buffer, size);
+            return (T)Msgs.Buffer.Deserialize(generator, buffer, size);
         }
 
         public void Stop()

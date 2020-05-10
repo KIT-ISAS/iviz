@@ -190,7 +190,7 @@ namespace Iviz.Bridge
                     }
                     reader.Read(buffer, 0, length);
 
-                    IMessage msg = BuiltIns.Deserialize(generator, buffer, length);
+                    IMessage msg = Msgs.Buffer.Deserialize(generator, buffer, length);
                     publisher.Publish(msg);
                 }
             }
