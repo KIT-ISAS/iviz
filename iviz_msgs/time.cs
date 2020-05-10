@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace Iviz.Msgs
 {
+    [StructLayout(LayoutKind.Sequential)]
     public readonly struct time : IEquatable<time>
     {
         public uint secs { get; }

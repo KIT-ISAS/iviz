@@ -69,6 +69,10 @@ namespace Iviz.Msgs
 
             [IgnoreDataMember]
             public int RosMessageLength => 0;
+
+            public void Validate()
+            {
+            }
         }
 
         /// <summary>
@@ -87,6 +91,10 @@ namespace Iviz.Msgs
 
             [IgnoreDataMember]
             public int RosMessageLength => 0;
+
+            public void Validate()
+            {
+            }
         }
     }
 }
