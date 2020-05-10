@@ -60,18 +60,18 @@ namespace Iviz.Msgs.visualization_msgs
         internal ImageMarker(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.ns = BuiltIns.DeserializeString(b);
-            this.id = BuiltIns.DeserializeStruct<int>(b);
-            this.type = BuiltIns.DeserializeStruct<int>(b);
-            this.action = BuiltIns.DeserializeStruct<int>(b);
+            this.ns = b.DeserializeString();
+            this.id = b.Deserialize<int>();
+            this.type = b.Deserialize<int>();
+            this.action = b.Deserialize<int>();
             this.position = new geometry_msgs.Point(b);
-            this.scale = BuiltIns.DeserializeStruct<float>(b);
+            this.scale = b.Deserialize<float>();
             this.outline_color = new std_msgs.ColorRGBA(b);
-            this.filled = BuiltIns.DeserializeStruct<byte>(b);
+            this.filled = b.Deserialize<byte>();
             this.fill_color = new std_msgs.ColorRGBA(b);
-            this.lifetime = BuiltIns.DeserializeStruct<duration>(b);
-            this.points = BuiltIns.DeserializeStructArray<geometry_msgs.Point>(b, 0);
-            this.outline_colors = BuiltIns.DeserializeStructArray<std_msgs.ColorRGBA>(b, 0);
+            this.lifetime = b.Deserialize<duration>();
+            this.points = b.DeserializeStructArray<geometry_msgs.Point>(0);
+            this.outline_colors = b.DeserializeStructArray<std_msgs.ColorRGBA>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -84,18 +84,18 @@ namespace Iviz.Msgs.visualization_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
-            BuiltIns.Serialize(this.ns, b);
-            BuiltIns.Serialize(this.id, b);
-            BuiltIns.Serialize(this.type, b);
-            BuiltIns.Serialize(this.action, b);
+            b.Serialize(this.ns);
+            b.Serialize(this.id);
+            b.Serialize(this.type);
+            b.Serialize(this.action);
             this.position.Serialize(b);
-            BuiltIns.Serialize(this.scale, b);
+            b.Serialize(this.scale);
             this.outline_color.Serialize(b);
-            BuiltIns.Serialize(this.filled, b);
+            b.Serialize(this.filled);
             this.fill_color.Serialize(b);
-            BuiltIns.Serialize(this.lifetime, b);
-            BuiltIns.SerializeStructArray(this.points, b, 0);
-            BuiltIns.SerializeStructArray(this.outline_colors, b, 0);
+            b.Serialize(this.lifetime);
+            b.SerializeStructArray(this.points, 0);
+            b.SerializeStructArray(this.outline_colors, 0);
         }
         
         public void Validate()

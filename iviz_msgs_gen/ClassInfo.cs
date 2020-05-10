@@ -348,8 +348,8 @@ namespace Iviz.MsgsGen
                 {
                     if (variable.arraySize > 0)
                     {
-                        lines.Add("    BuiltIns.AssertSize(" + variable.fieldName + ", " + variable.arraySize + ");");
-                        lines.Add("    this." + variable.fieldName + " = " + variable.fieldName + ";");
+                        lines.Add("    this." + variable.fieldName + " = " + variable.fieldName + " ?? throw new System.ArgumentNullException(nameof(" + variable.fieldName + "));");
+                        lines.Add("    if (this." + variable.fieldName + ".Length != " + variable.arraySize + ") throw new System.ArgumentException(\"Invalid size\", nameof(" + variable.fieldName + "));");
                     }
                     else if (variable.arraySize == -1 &&
                       ((BuiltInTypes.Contains(variable.rosClassName) && variable.rosClassName != "string") ||
@@ -377,7 +377,8 @@ namespace Iviz.MsgsGen
                 //lines.Add("{");
                 //lines.Add("    return new " + name + "(b);");
                 //lines.Add("}");
-                lines.Add("    BuiltIns.DeserializeStruct(out this, b);");
+                //lines.Add("    BuiltIns.DeserializeStruct(out this, b);");
+                lines.Add("    this = b.Deserialize<" + name + ">();");
             }
             else
             {
@@ -390,11 +391,13 @@ namespace Iviz.MsgsGen
                             if (variable.className == "string")
                             {
                                 //lines.Add("    BuiltIns.Deserialize(out this." + variable.fieldName + ", b);");
-                                lines.Add("    this." + variable.fieldName + " = BuiltIns.DeserializeString(b);");
+                                //lines.Add("    this." + variable.fieldName + " = BuiltIns.DeserializeString(b);");
+                                lines.Add("    this." + variable.fieldName + " = b.DeserializeString();");
                             }
                             else
                             {
-                                lines.Add("    this." + variable.fieldName + " = BuiltIns.DeserializeStruct<" + variable.className + ">(b);");
+                                //lines.Add("    this." + variable.fieldName + " = BuiltIns.DeserializeStruct<" + variable.className + ">(b);");
+                                lines.Add("    this." + variable.fieldName + " = b.Deserialize<" + variable.className + ">();");
                             }
                         }
                         else
@@ -402,11 +405,13 @@ namespace Iviz.MsgsGen
                             if (variable.className == "string")
                             {
                                 //lines.Add("    BuiltIns.Deserialize(out this." + variable.fieldName + ", b);");
-                                lines.Add("    this." + variable.fieldName + " = BuiltIns.DeserializeStringArray(b, " + variable.arraySize + ");");
+                                //lines.Add("    this." + variable.fieldName + " = BuiltIns.DeserializeStringArray(b, " + variable.arraySize + ");");
+                                lines.Add("    this." + variable.fieldName + " = b.DeserializeStringArray(" + variable.arraySize + ");");
                             }
                             else
                             {
-                                lines.Add("    this." + variable.fieldName + " = BuiltIns.DeserializeStructArray<" + variable.className + ">(b, " + variable.arraySize + ");");
+                                //lines.Add("    this." + variable.fieldName + " = BuiltIns.DeserializeStructArray<" + variable.className + ">(b, " + variable.arraySize + ");");
+                                lines.Add("    this." + variable.fieldName + " = b.DeserializeStructArray<" + variable.className + ">(" + variable.arraySize + ");");
                             }
                             //lines.Add("    BuiltIns.Deserialize(out this." + variable.fieldName + ", b, " + variable.arraySize + ");");
                         }
@@ -421,13 +426,15 @@ namespace Iviz.MsgsGen
                         {
                             if (variable.classInfo.forceStruct)
                             {
-                                lines.Add("    this." + variable.fieldName + " = BuiltIns.DeserializeStructArray<" + variable.className + ">(b, " + variable.arraySize + ");");
+                                //lines.Add("    this." + variable.fieldName + " = BuiltIns.DeserializeStructArray<" + variable.className + ">(b, " + variable.arraySize + ");");
                                 //lines.Add("    BuiltIns.DeserializeStructArray(out this." + variable.fieldName + ", b, " + variable.arraySize + ");");
+                                lines.Add("    this." + variable.fieldName + " = b.DeserializeStructArray<" + variable.className + ">(" + variable.arraySize + ");");
                             }
                             else
                             {
-                                lines.Add("    this." + variable.fieldName + " = BuiltIns.DeserializeArray<" + variable.className + ">(b, " + variable.arraySize + ");");
+                                //lines.Add("    this." + variable.fieldName + " = BuiltIns.DeserializeArray<" + variable.className + ">(b, " + variable.arraySize + ");");
                                 //lines.Add("    BuiltIns.DeserializeArray(out this." + variable.fieldName + ", b, " + variable.arraySize + ");");
+                                lines.Add("    this." + variable.fieldName + " = b.DeserializeArray<" + variable.className + ">(" + variable.arraySize + ");");
                             }
                         }
                     }
@@ -454,7 +461,8 @@ namespace Iviz.MsgsGen
             lines.Add("    if (b is null) throw new System.ArgumentNullException(nameof(b));");
             if (forceStruct)
             {
-                lines.Add("    BuiltIns.SerializeStruct(this, b);");
+                //lines.Add("    BuiltIns.SerializeStruct(this, b);");
+                lines.Add("    b.Serialize(this);");
             }
             else
             {
@@ -464,11 +472,20 @@ namespace Iviz.MsgsGen
                     {
                         if (variable.arraySize == -1)
                         {
-                            lines.Add("    BuiltIns.Serialize(this." + variable.fieldName + ", b);");
+                            //lines.Add("    BuiltIns.Serialize(this." + variable.fieldName + ", b);");
+                            lines.Add("    b.Serialize(this." + variable.fieldName + ");");
                         }
                         else
                         {
-                            lines.Add("    BuiltIns.Serialize(this." + variable.fieldName + ", b, " + variable.arraySize + ");");
+                            //lines.Add("    BuiltIns.Serialize(this." + variable.fieldName + ", b, " + variable.arraySize + ");");
+                            if (variable.className == "string")
+                            {
+                                lines.Add("    b.SerializeArray(this." + variable.fieldName + ", " + variable.arraySize + ");");
+                            }
+                            else
+                            {
+                                lines.Add("    b.SerializeStructArray(this." + variable.fieldName + ", " + variable.arraySize + ");");
+                            }
                         }
                     }
                     else
@@ -481,11 +498,13 @@ namespace Iviz.MsgsGen
                         {
                             if (variable.classInfo.forceStruct)
                             {
-                                lines.Add("    BuiltIns.SerializeStructArray(this." + variable.fieldName + ", b, " + variable.arraySize + ");");
+                                //lines.Add("    BuiltIns.SerializeStructArray(this." + variable.fieldName + ", b, " + variable.arraySize + ");");
+                                lines.Add("    b.SerializeStructArray(this." + variable.fieldName + ", " + variable.arraySize + ");");
                             }
                             else
                             {
-                                lines.Add("    BuiltIns.SerializeArray(this." + variable.fieldName + ", b, " + variable.arraySize + ");");
+                                //lines.Add("    BuiltIns.SerializeArray(this." + variable.fieldName + ", b, " + variable.arraySize + ");");
+                                lines.Add("    b.SerializeArray(this." + variable.fieldName + ", " + variable.arraySize + ");");
                             }
                         }
                     }
@@ -500,7 +519,9 @@ namespace Iviz.MsgsGen
             {
                 if (variable.arraySize > 0)
                 {
-                    lines.Add("    BuiltIns.AssertSize(" + variable.fieldName + ", " + variable.arraySize + ");");
+                    lines.Add("    if (" + variable.fieldName + " is null) throw new System.NullReferenceException();");
+                    lines.Add("    if (" + variable.fieldName + ".Length != " + variable.arraySize + ") throw new System.IndexOutOfRangeException();");
+                    //lines.Add("    BuiltIns.AssertSize(" + variable.fieldName + ", " + variable.arraySize + ");");
                 }
                 else if (variable.arraySize == -1 &&
                   ((BuiltInTypes.Contains(variable.rosClassName) && variable.rosClassName != "string") ||

@@ -22,14 +22,14 @@ namespace Iviz.Msgs.shape_msgs
         /// <summary> Explicit constructor. </summary>
         public Plane(double[] coef)
         {
-            BuiltIns.AssertSize(coef, 4);
-            this.coef = coef;
+            this.coef = coef ?? throw new System.ArgumentNullException(nameof(coef));
+            if (this.coef.Length != 4) throw new System.ArgumentException("Invalid size", nameof(coef));
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal Plane(Buffer b)
         {
-            this.coef = BuiltIns.DeserializeStructArray<double>(b, 4);
+            this.coef = b.DeserializeStructArray<double>(4);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -41,12 +41,13 @@ namespace Iviz.Msgs.shape_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.coef, b, 4);
+            b.SerializeStructArray(this.coef, 4);
         }
         
         public void Validate()
         {
-            BuiltIns.AssertSize(coef, 4);
+            if (coef is null) throw new System.NullReferenceException();
+            if (coef.Length != 4) throw new System.IndexOutOfRangeException();
         }
     
         [IgnoreDataMember]

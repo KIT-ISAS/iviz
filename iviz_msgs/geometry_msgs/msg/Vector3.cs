@@ -28,7 +28,7 @@ namespace Iviz.Msgs.geometry_msgs
         /// <summary> Constructor with buffer. </summary>
         internal Vector3(Buffer b)
         {
-            BuiltIns.DeserializeStruct(out this, b);
+            this = b.Deserialize<Vector3>();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -40,7 +40,7 @@ namespace Iviz.Msgs.geometry_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.SerializeStruct(this, b);
+            b.Serialize(this);
         }
         
         public void Validate()

@@ -25,7 +25,7 @@ namespace Iviz.Msgs.sensor_msgs
         /// <summary> Constructor with buffer. </summary>
         internal LaserEcho(Buffer b)
         {
-            this.echoes = BuiltIns.DeserializeStructArray<float>(b, 0);
+            this.echoes = b.DeserializeStructArray<float>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -37,7 +37,7 @@ namespace Iviz.Msgs.sensor_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.echoes, b, 0);
+            b.SerializeStructArray(this.echoes, 0);
         }
         
         public void Validate()

@@ -37,9 +37,9 @@ namespace Iviz.Msgs.mesh_msgs
         internal MeshFaceClusterStamped(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.uuid = BuiltIns.DeserializeString(b);
+            this.uuid = b.DeserializeString();
             this.cluster = new MeshFaceCluster(b);
-            this.@override = BuiltIns.DeserializeStruct<bool>(b);
+            this.@override = b.Deserialize<bool>();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -52,9 +52,9 @@ namespace Iviz.Msgs.mesh_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
-            BuiltIns.Serialize(this.uuid, b);
+            b.Serialize(this.uuid);
             this.cluster.Serialize(b);
-            BuiltIns.Serialize(this.@override, b);
+            b.Serialize(this.@override);
         }
         
         public void Validate()

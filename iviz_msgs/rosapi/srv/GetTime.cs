@@ -74,7 +74,7 @@ namespace Iviz.Msgs.rosapi
         /// <summary> Constructor with buffer. </summary>
         internal GetTimeResponse(Buffer b)
         {
-            this.time = BuiltIns.DeserializeStruct<time>(b);
+            this.time = b.Deserialize<time>();
         }
         
         public IResponse Deserialize(Buffer b)
@@ -86,7 +86,7 @@ namespace Iviz.Msgs.rosapi
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.time, b);
+            b.Serialize(this.time);
         }
         
         public void Validate()

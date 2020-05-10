@@ -34,7 +34,7 @@ namespace Iviz.Msgs.nav_msgs
         internal Odometry(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.child_frame_id = BuiltIns.DeserializeString(b);
+            this.child_frame_id = b.DeserializeString();
             this.pose = new geometry_msgs.PoseWithCovariance(b);
             this.twist = new geometry_msgs.TwistWithCovariance(b);
         }
@@ -49,7 +49,7 @@ namespace Iviz.Msgs.nav_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
-            BuiltIns.Serialize(this.child_frame_id, b);
+            b.Serialize(this.child_frame_id);
             this.pose.Serialize(b);
             this.twist.Serialize(b);
         }

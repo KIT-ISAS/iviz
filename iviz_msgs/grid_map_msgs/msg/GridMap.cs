@@ -48,11 +48,11 @@ namespace Iviz.Msgs.grid_map_msgs
         internal GridMap(Buffer b)
         {
             this.info = new GridMapInfo(b);
-            this.layers = BuiltIns.DeserializeStringArray(b, 0);
-            this.basic_layers = BuiltIns.DeserializeStringArray(b, 0);
-            this.data = BuiltIns.DeserializeArray<std_msgs.Float32MultiArray>(b, 0);
-            this.outer_start_index = BuiltIns.DeserializeStruct<ushort>(b);
-            this.inner_start_index = BuiltIns.DeserializeStruct<ushort>(b);
+            this.layers = b.DeserializeStringArray(0);
+            this.basic_layers = b.DeserializeStringArray(0);
+            this.data = b.DeserializeArray<std_msgs.Float32MultiArray>(0);
+            this.outer_start_index = b.Deserialize<ushort>();
+            this.inner_start_index = b.Deserialize<ushort>();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -65,11 +65,11 @@ namespace Iviz.Msgs.grid_map_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.info.Serialize(b);
-            BuiltIns.Serialize(this.layers, b, 0);
-            BuiltIns.Serialize(this.basic_layers, b, 0);
-            BuiltIns.SerializeArray(this.data, b, 0);
-            BuiltIns.Serialize(this.outer_start_index, b);
-            BuiltIns.Serialize(this.inner_start_index, b);
+            b.SerializeArray(this.layers, 0);
+            b.SerializeArray(this.basic_layers, 0);
+            b.SerializeArray(this.data, 0);
+            b.Serialize(this.outer_start_index);
+            b.Serialize(this.inner_start_index);
         }
         
         public void Validate()

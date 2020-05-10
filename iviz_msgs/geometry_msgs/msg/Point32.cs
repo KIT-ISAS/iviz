@@ -32,9 +32,9 @@ namespace Iviz.Msgs.geometry_msgs
         /// <summary> Constructor with buffer. </summary>
         internal Point32(Buffer b)
         {
-            this.x = BuiltIns.DeserializeStruct<float>(b);
-            this.y = BuiltIns.DeserializeStruct<float>(b);
-            this.z = BuiltIns.DeserializeStruct<float>(b);
+            this.x = b.Deserialize<float>();
+            this.y = b.Deserialize<float>();
+            this.z = b.Deserialize<float>();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -46,9 +46,9 @@ namespace Iviz.Msgs.geometry_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.x, b);
-            BuiltIns.Serialize(this.y, b);
-            BuiltIns.Serialize(this.z, b);
+            b.Serialize(this.x);
+            b.Serialize(this.y);
+            b.Serialize(this.z);
         }
         
         public void Validate()

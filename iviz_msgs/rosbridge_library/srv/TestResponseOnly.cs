@@ -74,7 +74,7 @@ namespace Iviz.Msgs.rosbridge_library
         /// <summary> Constructor with buffer. </summary>
         internal TestResponseOnlyResponse(Buffer b)
         {
-            this.data = BuiltIns.DeserializeStruct<int>(b);
+            this.data = b.Deserialize<int>();
         }
         
         public IResponse Deserialize(Buffer b)
@@ -86,7 +86,7 @@ namespace Iviz.Msgs.rosbridge_library
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.data, b);
+            b.Serialize(this.data);
         }
         
         public void Validate()

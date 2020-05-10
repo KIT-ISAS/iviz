@@ -34,7 +34,7 @@ namespace Iviz.Msgs.geometry_msgs
         internal TransformStamped(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.child_frame_id = BuiltIns.DeserializeString(b);
+            this.child_frame_id = b.DeserializeString();
             this.transform = new Transform(b);
         }
         
@@ -48,7 +48,7 @@ namespace Iviz.Msgs.geometry_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
-            BuiltIns.Serialize(this.child_frame_id, b);
+            b.Serialize(this.child_frame_id);
             this.transform.Serialize(b);
         }
         

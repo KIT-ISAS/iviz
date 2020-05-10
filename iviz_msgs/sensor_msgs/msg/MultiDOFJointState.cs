@@ -55,10 +55,10 @@ namespace Iviz.Msgs.sensor_msgs
         internal MultiDOFJointState(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.joint_names = BuiltIns.DeserializeStringArray(b, 0);
-            this.transforms = BuiltIns.DeserializeStructArray<geometry_msgs.Transform>(b, 0);
-            this.twist = BuiltIns.DeserializeArray<geometry_msgs.Twist>(b, 0);
-            this.wrench = BuiltIns.DeserializeArray<geometry_msgs.Wrench>(b, 0);
+            this.joint_names = b.DeserializeStringArray(0);
+            this.transforms = b.DeserializeStructArray<geometry_msgs.Transform>(0);
+            this.twist = b.DeserializeArray<geometry_msgs.Twist>(0);
+            this.wrench = b.DeserializeArray<geometry_msgs.Wrench>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -71,10 +71,10 @@ namespace Iviz.Msgs.sensor_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
-            BuiltIns.Serialize(this.joint_names, b, 0);
-            BuiltIns.SerializeStructArray(this.transforms, b, 0);
-            BuiltIns.SerializeArray(this.twist, b, 0);
-            BuiltIns.SerializeArray(this.wrench, b, 0);
+            b.SerializeArray(this.joint_names, 0);
+            b.SerializeStructArray(this.transforms, 0);
+            b.SerializeArray(this.twist, 0);
+            b.SerializeArray(this.wrench, 0);
         }
         
         public void Validate()

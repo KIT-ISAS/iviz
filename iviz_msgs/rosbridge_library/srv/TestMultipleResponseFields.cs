@@ -81,10 +81,10 @@ namespace Iviz.Msgs.rosbridge_library
         /// <summary> Constructor with buffer. </summary>
         internal TestMultipleResponseFieldsResponse(Buffer b)
         {
-            this.@int = BuiltIns.DeserializeStruct<int>(b);
-            this.@float = BuiltIns.DeserializeStruct<float>(b);
-            this.@string = BuiltIns.DeserializeString(b);
-            this.@bool = BuiltIns.DeserializeStruct<bool>(b);
+            this.@int = b.Deserialize<int>();
+            this.@float = b.Deserialize<float>();
+            this.@string = b.DeserializeString();
+            this.@bool = b.Deserialize<bool>();
         }
         
         public IResponse Deserialize(Buffer b)
@@ -96,10 +96,10 @@ namespace Iviz.Msgs.rosbridge_library
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.@int, b);
-            BuiltIns.Serialize(this.@float, b);
-            BuiltIns.Serialize(this.@string, b);
-            BuiltIns.Serialize(this.@bool, b);
+            b.Serialize(this.@int);
+            b.Serialize(this.@float);
+            b.Serialize(this.@string);
+            b.Serialize(this.@bool);
         }
         
         public void Validate()

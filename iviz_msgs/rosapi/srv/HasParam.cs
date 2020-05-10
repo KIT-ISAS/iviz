@@ -71,7 +71,7 @@ namespace Iviz.Msgs.rosapi
         /// <summary> Constructor with buffer. </summary>
         internal HasParamRequest(Buffer b)
         {
-            this.name = BuiltIns.DeserializeString(b);
+            this.name = b.DeserializeString();
         }
         
         public IRequest Deserialize(Buffer b)
@@ -83,7 +83,7 @@ namespace Iviz.Msgs.rosapi
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.name, b);
+            b.Serialize(this.name);
         }
         
         public void Validate()
@@ -120,7 +120,7 @@ namespace Iviz.Msgs.rosapi
         /// <summary> Constructor with buffer. </summary>
         internal HasParamResponse(Buffer b)
         {
-            this.exists = BuiltIns.DeserializeStruct<bool>(b);
+            this.exists = b.Deserialize<bool>();
         }
         
         public IResponse Deserialize(Buffer b)
@@ -132,7 +132,7 @@ namespace Iviz.Msgs.rosapi
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.exists, b);
+            b.Serialize(this.exists);
         }
         
         public void Validate()

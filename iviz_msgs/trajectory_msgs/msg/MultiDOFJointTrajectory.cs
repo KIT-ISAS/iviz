@@ -35,8 +35,8 @@ namespace Iviz.Msgs.trajectory_msgs
         internal MultiDOFJointTrajectory(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.joint_names = BuiltIns.DeserializeStringArray(b, 0);
-            this.points = BuiltIns.DeserializeArray<MultiDOFJointTrajectoryPoint>(b, 0);
+            this.joint_names = b.DeserializeStringArray(0);
+            this.points = b.DeserializeArray<MultiDOFJointTrajectoryPoint>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -49,8 +49,8 @@ namespace Iviz.Msgs.trajectory_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
-            BuiltIns.Serialize(this.joint_names, b, 0);
-            BuiltIns.SerializeArray(this.points, b, 0);
+            b.SerializeArray(this.joint_names, 0);
+            b.SerializeArray(this.points, 0);
         }
         
         public void Validate()

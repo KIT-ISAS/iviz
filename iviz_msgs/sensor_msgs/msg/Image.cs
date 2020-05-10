@@ -56,12 +56,12 @@ namespace Iviz.Msgs.sensor_msgs
         internal Image(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.height = BuiltIns.DeserializeStruct<uint>(b);
-            this.width = BuiltIns.DeserializeStruct<uint>(b);
-            this.encoding = BuiltIns.DeserializeString(b);
-            this.is_bigendian = BuiltIns.DeserializeStruct<byte>(b);
-            this.step = BuiltIns.DeserializeStruct<uint>(b);
-            this.data = BuiltIns.DeserializeStructArray<byte>(b, 0);
+            this.height = b.Deserialize<uint>();
+            this.width = b.Deserialize<uint>();
+            this.encoding = b.DeserializeString();
+            this.is_bigendian = b.Deserialize<byte>();
+            this.step = b.Deserialize<uint>();
+            this.data = b.DeserializeStructArray<byte>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -74,12 +74,12 @@ namespace Iviz.Msgs.sensor_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
-            BuiltIns.Serialize(this.height, b);
-            BuiltIns.Serialize(this.width, b);
-            BuiltIns.Serialize(this.encoding, b);
-            BuiltIns.Serialize(this.is_bigendian, b);
-            BuiltIns.Serialize(this.step, b);
-            BuiltIns.Serialize(this.data, b, 0);
+            b.Serialize(this.height);
+            b.Serialize(this.width);
+            b.Serialize(this.encoding);
+            b.Serialize(this.is_bigendian);
+            b.Serialize(this.step);
+            b.SerializeStructArray(this.data, 0);
         }
         
         public void Validate()

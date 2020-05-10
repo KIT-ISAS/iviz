@@ -71,7 +71,7 @@ namespace Iviz.Msgs.rosapi
         /// <summary> Constructor with buffer. </summary>
         internal DeleteParamRequest(Buffer b)
         {
-            this.name = BuiltIns.DeserializeString(b);
+            this.name = b.DeserializeString();
         }
         
         public IRequest Deserialize(Buffer b)
@@ -83,7 +83,7 @@ namespace Iviz.Msgs.rosapi
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.name, b);
+            b.Serialize(this.name);
         }
         
         public void Validate()

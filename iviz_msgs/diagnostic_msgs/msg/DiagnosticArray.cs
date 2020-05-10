@@ -26,7 +26,7 @@ namespace Iviz.Msgs.diagnostic_msgs
         internal DiagnosticArray(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.status = BuiltIns.DeserializeArray<DiagnosticStatus>(b, 0);
+            this.status = b.DeserializeArray<DiagnosticStatus>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -39,7 +39,7 @@ namespace Iviz.Msgs.diagnostic_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
-            BuiltIns.SerializeArray(this.status, b, 0);
+            b.SerializeArray(this.status, 0);
         }
         
         public void Validate()

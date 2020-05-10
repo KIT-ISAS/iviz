@@ -94,12 +94,12 @@ namespace Iviz.Msgs.grid_map_msgs
         /// <summary> Constructor with buffer. </summary>
         internal GetGridMapRequest(Buffer b)
         {
-            this.frame_id = BuiltIns.DeserializeString(b);
-            this.position_x = BuiltIns.DeserializeStruct<double>(b);
-            this.position_y = BuiltIns.DeserializeStruct<double>(b);
-            this.length_x = BuiltIns.DeserializeStruct<double>(b);
-            this.length_y = BuiltIns.DeserializeStruct<double>(b);
-            this.layers = BuiltIns.DeserializeStringArray(b, 0);
+            this.frame_id = b.DeserializeString();
+            this.position_x = b.Deserialize<double>();
+            this.position_y = b.Deserialize<double>();
+            this.length_x = b.Deserialize<double>();
+            this.length_y = b.Deserialize<double>();
+            this.layers = b.DeserializeStringArray(0);
         }
         
         public IRequest Deserialize(Buffer b)
@@ -111,12 +111,12 @@ namespace Iviz.Msgs.grid_map_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.frame_id, b);
-            BuiltIns.Serialize(this.position_x, b);
-            BuiltIns.Serialize(this.position_y, b);
-            BuiltIns.Serialize(this.length_x, b);
-            BuiltIns.Serialize(this.length_y, b);
-            BuiltIns.Serialize(this.layers, b, 0);
+            b.Serialize(this.frame_id);
+            b.Serialize(this.position_x);
+            b.Serialize(this.position_y);
+            b.Serialize(this.length_x);
+            b.Serialize(this.length_y);
+            b.SerializeArray(this.layers, 0);
         }
         
         public void Validate()

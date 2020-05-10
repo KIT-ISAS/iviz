@@ -31,8 +31,8 @@ namespace Iviz.Msgs.sensor_msgs
         internal TimeReference(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.time_ref = BuiltIns.DeserializeStruct<time>(b);
-            this.source = BuiltIns.DeserializeString(b);
+            this.time_ref = b.Deserialize<time>();
+            this.source = b.DeserializeString();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -45,8 +45,8 @@ namespace Iviz.Msgs.sensor_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
-            BuiltIns.Serialize(this.time_ref, b);
-            BuiltIns.Serialize(this.source, b);
+            b.Serialize(this.time_ref);
+            b.Serialize(this.source);
         }
         
         public void Validate()

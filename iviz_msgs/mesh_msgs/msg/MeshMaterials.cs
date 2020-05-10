@@ -31,10 +31,10 @@ namespace Iviz.Msgs.mesh_msgs
         /// <summary> Constructor with buffer. </summary>
         internal MeshMaterials(Buffer b)
         {
-            this.clusters = BuiltIns.DeserializeArray<mesh_msgs.MeshFaceCluster>(b, 0);
-            this.materials = BuiltIns.DeserializeArray<mesh_msgs.MeshMaterial>(b, 0);
-            this.cluster_materials = BuiltIns.DeserializeStructArray<uint>(b, 0);
-            this.vertex_tex_coords = BuiltIns.DeserializeArray<mesh_msgs.MeshVertexTexCoords>(b, 0);
+            this.clusters = b.DeserializeArray<mesh_msgs.MeshFaceCluster>(0);
+            this.materials = b.DeserializeArray<mesh_msgs.MeshMaterial>(0);
+            this.cluster_materials = b.DeserializeStructArray<uint>(0);
+            this.vertex_tex_coords = b.DeserializeArray<mesh_msgs.MeshVertexTexCoords>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -46,10 +46,10 @@ namespace Iviz.Msgs.mesh_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.SerializeArray(this.clusters, b, 0);
-            BuiltIns.SerializeArray(this.materials, b, 0);
-            BuiltIns.Serialize(this.cluster_materials, b, 0);
-            BuiltIns.SerializeArray(this.vertex_tex_coords, b, 0);
+            b.SerializeArray(this.clusters, 0);
+            b.SerializeArray(this.materials, 0);
+            b.SerializeStructArray(this.cluster_materials, 0);
+            b.SerializeArray(this.vertex_tex_coords, 0);
         }
         
         public void Validate()

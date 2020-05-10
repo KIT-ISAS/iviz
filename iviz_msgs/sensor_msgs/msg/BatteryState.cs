@@ -92,21 +92,21 @@ namespace Iviz.Msgs.sensor_msgs
         internal BatteryState(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.voltage = BuiltIns.DeserializeStruct<float>(b);
-            this.temperature = BuiltIns.DeserializeStruct<float>(b);
-            this.current = BuiltIns.DeserializeStruct<float>(b);
-            this.charge = BuiltIns.DeserializeStruct<float>(b);
-            this.capacity = BuiltIns.DeserializeStruct<float>(b);
-            this.design_capacity = BuiltIns.DeserializeStruct<float>(b);
-            this.percentage = BuiltIns.DeserializeStruct<float>(b);
-            this.power_supply_status = BuiltIns.DeserializeStruct<byte>(b);
-            this.power_supply_health = BuiltIns.DeserializeStruct<byte>(b);
-            this.power_supply_technology = BuiltIns.DeserializeStruct<byte>(b);
-            this.present = BuiltIns.DeserializeStruct<bool>(b);
-            this.cell_voltage = BuiltIns.DeserializeStructArray<float>(b, 0);
-            this.cell_temperature = BuiltIns.DeserializeStructArray<float>(b, 0);
-            this.location = BuiltIns.DeserializeString(b);
-            this.serial_number = BuiltIns.DeserializeString(b);
+            this.voltage = b.Deserialize<float>();
+            this.temperature = b.Deserialize<float>();
+            this.current = b.Deserialize<float>();
+            this.charge = b.Deserialize<float>();
+            this.capacity = b.Deserialize<float>();
+            this.design_capacity = b.Deserialize<float>();
+            this.percentage = b.Deserialize<float>();
+            this.power_supply_status = b.Deserialize<byte>();
+            this.power_supply_health = b.Deserialize<byte>();
+            this.power_supply_technology = b.Deserialize<byte>();
+            this.present = b.Deserialize<bool>();
+            this.cell_voltage = b.DeserializeStructArray<float>(0);
+            this.cell_temperature = b.DeserializeStructArray<float>(0);
+            this.location = b.DeserializeString();
+            this.serial_number = b.DeserializeString();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -119,21 +119,21 @@ namespace Iviz.Msgs.sensor_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
-            BuiltIns.Serialize(this.voltage, b);
-            BuiltIns.Serialize(this.temperature, b);
-            BuiltIns.Serialize(this.current, b);
-            BuiltIns.Serialize(this.charge, b);
-            BuiltIns.Serialize(this.capacity, b);
-            BuiltIns.Serialize(this.design_capacity, b);
-            BuiltIns.Serialize(this.percentage, b);
-            BuiltIns.Serialize(this.power_supply_status, b);
-            BuiltIns.Serialize(this.power_supply_health, b);
-            BuiltIns.Serialize(this.power_supply_technology, b);
-            BuiltIns.Serialize(this.present, b);
-            BuiltIns.Serialize(this.cell_voltage, b, 0);
-            BuiltIns.Serialize(this.cell_temperature, b, 0);
-            BuiltIns.Serialize(this.location, b);
-            BuiltIns.Serialize(this.serial_number, b);
+            b.Serialize(this.voltage);
+            b.Serialize(this.temperature);
+            b.Serialize(this.current);
+            b.Serialize(this.charge);
+            b.Serialize(this.capacity);
+            b.Serialize(this.design_capacity);
+            b.Serialize(this.percentage);
+            b.Serialize(this.power_supply_status);
+            b.Serialize(this.power_supply_health);
+            b.Serialize(this.power_supply_technology);
+            b.Serialize(this.present);
+            b.SerializeStructArray(this.cell_voltage, 0);
+            b.SerializeStructArray(this.cell_temperature, 0);
+            b.Serialize(this.location);
+            b.Serialize(this.serial_number);
         }
         
         public void Validate()

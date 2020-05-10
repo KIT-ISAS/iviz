@@ -79,11 +79,11 @@ namespace Iviz.Msgs.visualization_msgs
         /// <summary> Constructor with buffer. </summary>
         internal MenuEntry(Buffer b)
         {
-            this.id = BuiltIns.DeserializeStruct<uint>(b);
-            this.parent_id = BuiltIns.DeserializeStruct<uint>(b);
-            this.title = BuiltIns.DeserializeString(b);
-            this.command = BuiltIns.DeserializeString(b);
-            this.command_type = BuiltIns.DeserializeStruct<byte>(b);
+            this.id = b.Deserialize<uint>();
+            this.parent_id = b.Deserialize<uint>();
+            this.title = b.DeserializeString();
+            this.command = b.DeserializeString();
+            this.command_type = b.Deserialize<byte>();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -95,11 +95,11 @@ namespace Iviz.Msgs.visualization_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.id, b);
-            BuiltIns.Serialize(this.parent_id, b);
-            BuiltIns.Serialize(this.title, b);
-            BuiltIns.Serialize(this.command, b);
-            BuiltIns.Serialize(this.command_type, b);
+            b.Serialize(this.id);
+            b.Serialize(this.parent_id);
+            b.Serialize(this.title);
+            b.Serialize(this.command);
+            b.Serialize(this.command_type);
         }
         
         public void Validate()

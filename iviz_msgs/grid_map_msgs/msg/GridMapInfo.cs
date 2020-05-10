@@ -39,9 +39,9 @@ namespace Iviz.Msgs.grid_map_msgs
         internal GridMapInfo(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.resolution = BuiltIns.DeserializeStruct<double>(b);
-            this.length_x = BuiltIns.DeserializeStruct<double>(b);
-            this.length_y = BuiltIns.DeserializeStruct<double>(b);
+            this.resolution = b.Deserialize<double>();
+            this.length_x = b.Deserialize<double>();
+            this.length_y = b.Deserialize<double>();
             this.pose = new geometry_msgs.Pose(b);
         }
         
@@ -55,9 +55,9 @@ namespace Iviz.Msgs.grid_map_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
-            BuiltIns.Serialize(this.resolution, b);
-            BuiltIns.Serialize(this.length_x, b);
-            BuiltIns.Serialize(this.length_y, b);
+            b.Serialize(this.resolution);
+            b.Serialize(this.length_x);
+            b.Serialize(this.length_y);
             this.pose.Serialize(b);
         }
         

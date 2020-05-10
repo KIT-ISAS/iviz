@@ -39,8 +39,8 @@ namespace Iviz.Msgs.sensor_msgs
         {
             this.header = header ?? throw new System.ArgumentNullException(nameof(header));
             this.magnetic_field = magnetic_field;
-            BuiltIns.AssertSize(magnetic_field_covariance, 9);
-            this.magnetic_field_covariance = magnetic_field_covariance;
+            this.magnetic_field_covariance = magnetic_field_covariance ?? throw new System.ArgumentNullException(nameof(magnetic_field_covariance));
+            if (this.magnetic_field_covariance.Length != 9) throw new System.ArgumentException("Invalid size", nameof(magnetic_field_covariance));
         }
         
         /// <summary> Constructor with buffer. </summary>
@@ -48,7 +48,7 @@ namespace Iviz.Msgs.sensor_msgs
         {
             this.header = new std_msgs.Header(b);
             this.magnetic_field = new geometry_msgs.Vector3(b);
-            this.magnetic_field_covariance = BuiltIns.DeserializeStructArray<double>(b, 9);
+            this.magnetic_field_covariance = b.DeserializeStructArray<double>(9);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -62,13 +62,14 @@ namespace Iviz.Msgs.sensor_msgs
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
             this.magnetic_field.Serialize(b);
-            BuiltIns.Serialize(this.magnetic_field_covariance, b, 9);
+            b.SerializeStructArray(this.magnetic_field_covariance, 9);
         }
         
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
-            BuiltIns.AssertSize(magnetic_field_covariance, 9);
+            if (magnetic_field_covariance is null) throw new System.NullReferenceException();
+            if (magnetic_field_covariance.Length != 9) throw new System.IndexOutOfRangeException();
         }
     
         [IgnoreDataMember]

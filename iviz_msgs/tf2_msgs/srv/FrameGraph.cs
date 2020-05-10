@@ -75,7 +75,7 @@ namespace Iviz.Msgs.tf2_msgs
         /// <summary> Constructor with buffer. </summary>
         internal FrameGraphResponse(Buffer b)
         {
-            this.frame_yaml = BuiltIns.DeserializeString(b);
+            this.frame_yaml = b.DeserializeString();
         }
         
         public IResponse Deserialize(Buffer b)
@@ -87,7 +87,7 @@ namespace Iviz.Msgs.tf2_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.frame_yaml, b);
+            b.Serialize(this.frame_yaml);
         }
         
         public void Validate()

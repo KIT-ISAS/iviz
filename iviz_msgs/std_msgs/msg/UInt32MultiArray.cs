@@ -29,7 +29,7 @@ namespace Iviz.Msgs.std_msgs
         internal UInt32MultiArray(Buffer b)
         {
             this.layout = new MultiArrayLayout(b);
-            this.data = BuiltIns.DeserializeStructArray<uint>(b, 0);
+            this.data = b.DeserializeStructArray<uint>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -42,7 +42,7 @@ namespace Iviz.Msgs.std_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.layout.Serialize(b);
-            BuiltIns.Serialize(this.data, b, 0);
+            b.SerializeStructArray(this.data, 0);
         }
         
         public void Validate()

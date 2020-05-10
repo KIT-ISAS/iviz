@@ -39,8 +39,8 @@ namespace Iviz.Msgs.sensor_msgs
         internal PointCloud(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.points = BuiltIns.DeserializeArray<geometry_msgs.Point32>(b, 0);
-            this.channels = BuiltIns.DeserializeArray<ChannelFloat32>(b, 0);
+            this.points = b.DeserializeArray<geometry_msgs.Point32>(0);
+            this.channels = b.DeserializeArray<ChannelFloat32>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -53,8 +53,8 @@ namespace Iviz.Msgs.sensor_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
-            BuiltIns.SerializeArray(this.points, b, 0);
-            BuiltIns.SerializeArray(this.channels, b, 0);
+            b.SerializeArray(this.points, 0);
+            b.SerializeArray(this.channels, 0);
         }
         
         public void Validate()

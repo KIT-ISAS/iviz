@@ -16,14 +16,14 @@ namespace Iviz.Msgs.mesh_msgs
         /// <summary> Explicit constructor. </summary>
         public TriangleIndices(uint[] vertex_indices)
         {
-            BuiltIns.AssertSize(vertex_indices, 3);
-            this.vertex_indices = vertex_indices;
+            this.vertex_indices = vertex_indices ?? throw new System.ArgumentNullException(nameof(vertex_indices));
+            if (this.vertex_indices.Length != 3) throw new System.ArgumentException("Invalid size", nameof(vertex_indices));
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal TriangleIndices(Buffer b)
         {
-            this.vertex_indices = BuiltIns.DeserializeStructArray<uint>(b, 3);
+            this.vertex_indices = b.DeserializeStructArray<uint>(3);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -35,12 +35,13 @@ namespace Iviz.Msgs.mesh_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.vertex_indices, b, 3);
+            b.SerializeStructArray(this.vertex_indices, 3);
         }
         
         public void Validate()
         {
-            BuiltIns.AssertSize(vertex_indices, 3);
+            if (vertex_indices is null) throw new System.NullReferenceException();
+            if (vertex_indices.Length != 3) throw new System.IndexOutOfRangeException();
         }
     
         [IgnoreDataMember]

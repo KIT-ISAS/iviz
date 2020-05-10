@@ -39,13 +39,13 @@ namespace Iviz.Msgs.rosapi
         /// <summary> Constructor with buffer. </summary>
         internal TypeDef(Buffer b)
         {
-            this.type = BuiltIns.DeserializeString(b);
-            this.fieldnames = BuiltIns.DeserializeStringArray(b, 0);
-            this.fieldtypes = BuiltIns.DeserializeStringArray(b, 0);
-            this.fieldarraylen = BuiltIns.DeserializeStructArray<int>(b, 0);
-            this.examples = BuiltIns.DeserializeStringArray(b, 0);
-            this.constnames = BuiltIns.DeserializeStringArray(b, 0);
-            this.constvalues = BuiltIns.DeserializeStringArray(b, 0);
+            this.type = b.DeserializeString();
+            this.fieldnames = b.DeserializeStringArray(0);
+            this.fieldtypes = b.DeserializeStringArray(0);
+            this.fieldarraylen = b.DeserializeStructArray<int>(0);
+            this.examples = b.DeserializeStringArray(0);
+            this.constnames = b.DeserializeStringArray(0);
+            this.constvalues = b.DeserializeStringArray(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -57,13 +57,13 @@ namespace Iviz.Msgs.rosapi
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.type, b);
-            BuiltIns.Serialize(this.fieldnames, b, 0);
-            BuiltIns.Serialize(this.fieldtypes, b, 0);
-            BuiltIns.Serialize(this.fieldarraylen, b, 0);
-            BuiltIns.Serialize(this.examples, b, 0);
-            BuiltIns.Serialize(this.constnames, b, 0);
-            BuiltIns.Serialize(this.constvalues, b, 0);
+            b.Serialize(this.type);
+            b.SerializeArray(this.fieldnames, 0);
+            b.SerializeArray(this.fieldtypes, 0);
+            b.SerializeStructArray(this.fieldarraylen, 0);
+            b.SerializeArray(this.examples, 0);
+            b.SerializeArray(this.constnames, 0);
+            b.SerializeArray(this.constvalues, 0);
         }
         
         public void Validate()

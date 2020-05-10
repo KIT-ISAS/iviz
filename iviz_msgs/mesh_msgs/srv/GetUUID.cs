@@ -75,7 +75,7 @@ namespace Iviz.Msgs.mesh_msgs
         /// <summary> Constructor with buffer. </summary>
         internal GetUUIDResponse(Buffer b)
         {
-            this.uuid = BuiltIns.DeserializeString(b);
+            this.uuid = b.DeserializeString();
         }
         
         public IResponse Deserialize(Buffer b)
@@ -87,7 +87,7 @@ namespace Iviz.Msgs.mesh_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.uuid, b);
+            b.Serialize(this.uuid);
         }
         
         public void Validate()

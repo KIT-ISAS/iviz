@@ -36,10 +36,10 @@ namespace Iviz.Msgs.nav_msgs
         /// <summary> Constructor with buffer. </summary>
         internal MapMetaData(Buffer b)
         {
-            this.map_load_time = BuiltIns.DeserializeStruct<time>(b);
-            this.resolution = BuiltIns.DeserializeStruct<float>(b);
-            this.width = BuiltIns.DeserializeStruct<uint>(b);
-            this.height = BuiltIns.DeserializeStruct<uint>(b);
+            this.map_load_time = b.Deserialize<time>();
+            this.resolution = b.Deserialize<float>();
+            this.width = b.Deserialize<uint>();
+            this.height = b.Deserialize<uint>();
             this.origin = new geometry_msgs.Pose(b);
         }
         
@@ -52,10 +52,10 @@ namespace Iviz.Msgs.nav_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.map_load_time, b);
-            BuiltIns.Serialize(this.resolution, b);
-            BuiltIns.Serialize(this.width, b);
-            BuiltIns.Serialize(this.height, b);
+            b.Serialize(this.map_load_time);
+            b.Serialize(this.resolution);
+            b.Serialize(this.width);
+            b.Serialize(this.height);
             this.origin.Serialize(b);
         }
         

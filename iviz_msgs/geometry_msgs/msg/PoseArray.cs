@@ -28,7 +28,7 @@ namespace Iviz.Msgs.geometry_msgs
         internal PoseArray(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.poses = BuiltIns.DeserializeStructArray<Pose>(b, 0);
+            this.poses = b.DeserializeStructArray<Pose>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -41,7 +41,7 @@ namespace Iviz.Msgs.geometry_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
-            BuiltIns.SerializeStructArray(this.poses, b, 0);
+            b.SerializeStructArray(this.poses, 0);
         }
         
         public void Validate()

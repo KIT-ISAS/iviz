@@ -23,7 +23,7 @@ namespace Iviz.Msgs.rosgraph_msgs
         /// <summary> Constructor with buffer. </summary>
         internal Clock(Buffer b)
         {
-            this.clock = BuiltIns.DeserializeStruct<time>(b);
+            this.clock = b.Deserialize<time>();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -35,7 +35,7 @@ namespace Iviz.Msgs.rosgraph_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.clock, b);
+            b.Serialize(this.clock);
         }
         
         public void Validate()

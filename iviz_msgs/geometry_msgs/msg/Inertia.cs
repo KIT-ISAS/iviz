@@ -42,14 +42,14 @@ namespace Iviz.Msgs.geometry_msgs
         /// <summary> Constructor with buffer. </summary>
         internal Inertia(Buffer b)
         {
-            this.m = BuiltIns.DeserializeStruct<double>(b);
+            this.m = b.Deserialize<double>();
             this.com = new geometry_msgs.Vector3(b);
-            this.ixx = BuiltIns.DeserializeStruct<double>(b);
-            this.ixy = BuiltIns.DeserializeStruct<double>(b);
-            this.ixz = BuiltIns.DeserializeStruct<double>(b);
-            this.iyy = BuiltIns.DeserializeStruct<double>(b);
-            this.iyz = BuiltIns.DeserializeStruct<double>(b);
-            this.izz = BuiltIns.DeserializeStruct<double>(b);
+            this.ixx = b.Deserialize<double>();
+            this.ixy = b.Deserialize<double>();
+            this.ixz = b.Deserialize<double>();
+            this.iyy = b.Deserialize<double>();
+            this.iyz = b.Deserialize<double>();
+            this.izz = b.Deserialize<double>();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -61,14 +61,14 @@ namespace Iviz.Msgs.geometry_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.m, b);
+            b.Serialize(this.m);
             this.com.Serialize(b);
-            BuiltIns.Serialize(this.ixx, b);
-            BuiltIns.Serialize(this.ixy, b);
-            BuiltIns.Serialize(this.ixz, b);
-            BuiltIns.Serialize(this.iyy, b);
-            BuiltIns.Serialize(this.iyz, b);
-            BuiltIns.Serialize(this.izz, b);
+            b.Serialize(this.ixx);
+            b.Serialize(this.ixy);
+            b.Serialize(this.ixz);
+            b.Serialize(this.iyy);
+            b.Serialize(this.iyz);
+            b.Serialize(this.izz);
         }
         
         public void Validate()

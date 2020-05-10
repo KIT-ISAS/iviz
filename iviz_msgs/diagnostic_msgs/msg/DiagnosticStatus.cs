@@ -42,11 +42,11 @@ namespace Iviz.Msgs.diagnostic_msgs
         /// <summary> Constructor with buffer. </summary>
         internal DiagnosticStatus(Buffer b)
         {
-            this.level = BuiltIns.DeserializeStruct<byte>(b);
-            this.name = BuiltIns.DeserializeString(b);
-            this.message = BuiltIns.DeserializeString(b);
-            this.hardware_id = BuiltIns.DeserializeString(b);
-            this.values = BuiltIns.DeserializeArray<KeyValue>(b, 0);
+            this.level = b.Deserialize<byte>();
+            this.name = b.DeserializeString();
+            this.message = b.DeserializeString();
+            this.hardware_id = b.DeserializeString();
+            this.values = b.DeserializeArray<KeyValue>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -58,11 +58,11 @@ namespace Iviz.Msgs.diagnostic_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.level, b);
-            BuiltIns.Serialize(this.name, b);
-            BuiltIns.Serialize(this.message, b);
-            BuiltIns.Serialize(this.hardware_id, b);
-            BuiltIns.SerializeArray(this.values, b, 0);
+            b.Serialize(this.level);
+            b.Serialize(this.name);
+            b.Serialize(this.message);
+            b.Serialize(this.hardware_id);
+            b.SerializeArray(this.values, 0);
         }
         
         public void Validate()

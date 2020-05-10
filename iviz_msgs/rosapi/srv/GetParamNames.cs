@@ -75,7 +75,7 @@ namespace Iviz.Msgs.rosapi
         /// <summary> Constructor with buffer. </summary>
         internal GetParamNamesResponse(Buffer b)
         {
-            this.names = BuiltIns.DeserializeStringArray(b, 0);
+            this.names = b.DeserializeStringArray(0);
         }
         
         public IResponse Deserialize(Buffer b)
@@ -87,7 +87,7 @@ namespace Iviz.Msgs.rosapi
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.names, b, 0);
+            b.SerializeArray(this.names, 0);
         }
         
         public void Validate()

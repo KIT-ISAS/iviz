@@ -36,9 +36,9 @@ namespace Iviz.Msgs.sensor_msgs
         /// <summary> Constructor with buffer. </summary>
         internal JoyFeedback(Buffer b)
         {
-            this.type = BuiltIns.DeserializeStruct<byte>(b);
-            this.id = BuiltIns.DeserializeStruct<byte>(b);
-            this.intensity = BuiltIns.DeserializeStruct<float>(b);
+            this.type = b.Deserialize<byte>();
+            this.id = b.Deserialize<byte>();
+            this.intensity = b.Deserialize<float>();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -50,9 +50,9 @@ namespace Iviz.Msgs.sensor_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.type, b);
-            BuiltIns.Serialize(this.id, b);
-            BuiltIns.Serialize(this.intensity, b);
+            b.Serialize(this.type);
+            b.Serialize(this.id);
+            b.Serialize(this.intensity);
         }
         
         public void Validate()

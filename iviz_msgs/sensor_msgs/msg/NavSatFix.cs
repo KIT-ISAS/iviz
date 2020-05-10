@@ -67,8 +67,8 @@ namespace Iviz.Msgs.sensor_msgs
             this.latitude = latitude;
             this.longitude = longitude;
             this.altitude = altitude;
-            BuiltIns.AssertSize(position_covariance, 9);
-            this.position_covariance = position_covariance;
+            this.position_covariance = position_covariance ?? throw new System.ArgumentNullException(nameof(position_covariance));
+            if (this.position_covariance.Length != 9) throw new System.ArgumentException("Invalid size", nameof(position_covariance));
             this.position_covariance_type = position_covariance_type;
         }
         
@@ -77,11 +77,11 @@ namespace Iviz.Msgs.sensor_msgs
         {
             this.header = new std_msgs.Header(b);
             this.status = new NavSatStatus(b);
-            this.latitude = BuiltIns.DeserializeStruct<double>(b);
-            this.longitude = BuiltIns.DeserializeStruct<double>(b);
-            this.altitude = BuiltIns.DeserializeStruct<double>(b);
-            this.position_covariance = BuiltIns.DeserializeStructArray<double>(b, 9);
-            this.position_covariance_type = BuiltIns.DeserializeStruct<byte>(b);
+            this.latitude = b.Deserialize<double>();
+            this.longitude = b.Deserialize<double>();
+            this.altitude = b.Deserialize<double>();
+            this.position_covariance = b.DeserializeStructArray<double>(9);
+            this.position_covariance_type = b.Deserialize<byte>();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -95,18 +95,19 @@ namespace Iviz.Msgs.sensor_msgs
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
             this.status.Serialize(b);
-            BuiltIns.Serialize(this.latitude, b);
-            BuiltIns.Serialize(this.longitude, b);
-            BuiltIns.Serialize(this.altitude, b);
-            BuiltIns.Serialize(this.position_covariance, b, 9);
-            BuiltIns.Serialize(this.position_covariance_type, b);
+            b.Serialize(this.latitude);
+            b.Serialize(this.longitude);
+            b.Serialize(this.altitude);
+            b.SerializeStructArray(this.position_covariance, 9);
+            b.Serialize(this.position_covariance_type);
         }
         
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
             if (status is null) throw new System.NullReferenceException();
-            BuiltIns.AssertSize(position_covariance, 9);
+            if (position_covariance is null) throw new System.NullReferenceException();
+            if (position_covariance.Length != 9) throw new System.IndexOutOfRangeException();
         }
     
         [IgnoreDataMember]

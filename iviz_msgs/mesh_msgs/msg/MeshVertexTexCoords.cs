@@ -23,8 +23,8 @@ namespace Iviz.Msgs.mesh_msgs
         /// <summary> Constructor with buffer. </summary>
         internal MeshVertexTexCoords(Buffer b)
         {
-            this.u = BuiltIns.DeserializeStruct<float>(b);
-            this.v = BuiltIns.DeserializeStruct<float>(b);
+            this.u = b.Deserialize<float>();
+            this.v = b.Deserialize<float>();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -36,8 +36,8 @@ namespace Iviz.Msgs.mesh_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.u, b);
-            BuiltIns.Serialize(this.v, b);
+            b.Serialize(this.u);
+            b.Serialize(this.v);
         }
         
         public void Validate()

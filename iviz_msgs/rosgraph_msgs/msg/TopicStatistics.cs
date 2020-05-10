@@ -67,20 +67,20 @@ namespace Iviz.Msgs.rosgraph_msgs
         /// <summary> Constructor with buffer. </summary>
         internal TopicStatistics(Buffer b)
         {
-            this.topic = BuiltIns.DeserializeString(b);
-            this.node_pub = BuiltIns.DeserializeString(b);
-            this.node_sub = BuiltIns.DeserializeString(b);
-            this.window_start = BuiltIns.DeserializeStruct<time>(b);
-            this.window_stop = BuiltIns.DeserializeStruct<time>(b);
-            this.delivered_msgs = BuiltIns.DeserializeStruct<int>(b);
-            this.dropped_msgs = BuiltIns.DeserializeStruct<int>(b);
-            this.traffic = BuiltIns.DeserializeStruct<int>(b);
-            this.period_mean = BuiltIns.DeserializeStruct<duration>(b);
-            this.period_stddev = BuiltIns.DeserializeStruct<duration>(b);
-            this.period_max = BuiltIns.DeserializeStruct<duration>(b);
-            this.stamp_age_mean = BuiltIns.DeserializeStruct<duration>(b);
-            this.stamp_age_stddev = BuiltIns.DeserializeStruct<duration>(b);
-            this.stamp_age_max = BuiltIns.DeserializeStruct<duration>(b);
+            this.topic = b.DeserializeString();
+            this.node_pub = b.DeserializeString();
+            this.node_sub = b.DeserializeString();
+            this.window_start = b.Deserialize<time>();
+            this.window_stop = b.Deserialize<time>();
+            this.delivered_msgs = b.Deserialize<int>();
+            this.dropped_msgs = b.Deserialize<int>();
+            this.traffic = b.Deserialize<int>();
+            this.period_mean = b.Deserialize<duration>();
+            this.period_stddev = b.Deserialize<duration>();
+            this.period_max = b.Deserialize<duration>();
+            this.stamp_age_mean = b.Deserialize<duration>();
+            this.stamp_age_stddev = b.Deserialize<duration>();
+            this.stamp_age_max = b.Deserialize<duration>();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -92,20 +92,20 @@ namespace Iviz.Msgs.rosgraph_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.topic, b);
-            BuiltIns.Serialize(this.node_pub, b);
-            BuiltIns.Serialize(this.node_sub, b);
-            BuiltIns.Serialize(this.window_start, b);
-            BuiltIns.Serialize(this.window_stop, b);
-            BuiltIns.Serialize(this.delivered_msgs, b);
-            BuiltIns.Serialize(this.dropped_msgs, b);
-            BuiltIns.Serialize(this.traffic, b);
-            BuiltIns.Serialize(this.period_mean, b);
-            BuiltIns.Serialize(this.period_stddev, b);
-            BuiltIns.Serialize(this.period_max, b);
-            BuiltIns.Serialize(this.stamp_age_mean, b);
-            BuiltIns.Serialize(this.stamp_age_stddev, b);
-            BuiltIns.Serialize(this.stamp_age_max, b);
+            b.Serialize(this.topic);
+            b.Serialize(this.node_pub);
+            b.Serialize(this.node_sub);
+            b.Serialize(this.window_start);
+            b.Serialize(this.window_stop);
+            b.Serialize(this.delivered_msgs);
+            b.Serialize(this.dropped_msgs);
+            b.Serialize(this.traffic);
+            b.Serialize(this.period_mean);
+            b.Serialize(this.period_stddev);
+            b.Serialize(this.period_max);
+            b.Serialize(this.stamp_age_mean);
+            b.Serialize(this.stamp_age_stddev);
+            b.Serialize(this.stamp_age_max);
         }
         
         public void Validate()

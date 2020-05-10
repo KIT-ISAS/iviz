@@ -80,9 +80,9 @@ namespace Iviz.Msgs.diagnostic_msgs
         /// <summary> Constructor with buffer. </summary>
         internal SelfTestResponse(Buffer b)
         {
-            this.id = BuiltIns.DeserializeString(b);
-            this.passed = BuiltIns.DeserializeStruct<byte>(b);
-            this.status = BuiltIns.DeserializeArray<DiagnosticStatus>(b, 0);
+            this.id = b.DeserializeString();
+            this.passed = b.Deserialize<byte>();
+            this.status = b.DeserializeArray<DiagnosticStatus>(0);
         }
         
         public IResponse Deserialize(Buffer b)
@@ -94,9 +94,9 @@ namespace Iviz.Msgs.diagnostic_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.id, b);
-            BuiltIns.Serialize(this.passed, b);
-            BuiltIns.SerializeArray(this.status, b, 0);
+            b.Serialize(this.id);
+            b.Serialize(this.passed);
+            b.SerializeArray(this.status, 0);
         }
         
         public void Validate()

@@ -21,7 +21,7 @@ namespace Iviz.Msgs.rosbridge_library
         /// <summary> Constructor with buffer. </summary>
         internal TestDurationArray(Buffer b)
         {
-            this.durations = BuiltIns.DeserializeStructArray<duration>(b, 0);
+            this.durations = b.DeserializeStructArray<duration>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -33,7 +33,7 @@ namespace Iviz.Msgs.rosbridge_library
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.durations, b, 0);
+            b.SerializeStructArray(this.durations, 0);
         }
         
         public void Validate()

@@ -77,8 +77,8 @@ namespace Iviz.Msgs.std_srvs
         /// <summary> Constructor with buffer. </summary>
         internal TriggerResponse(Buffer b)
         {
-            this.success = BuiltIns.DeserializeStruct<bool>(b);
-            this.message = BuiltIns.DeserializeString(b);
+            this.success = b.Deserialize<bool>();
+            this.message = b.DeserializeString();
         }
         
         public IResponse Deserialize(Buffer b)
@@ -90,8 +90,8 @@ namespace Iviz.Msgs.std_srvs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.success, b);
-            BuiltIns.Serialize(this.message, b);
+            b.Serialize(this.success);
+            b.Serialize(this.message);
         }
         
         public void Validate()

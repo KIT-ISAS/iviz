@@ -46,8 +46,8 @@ namespace Iviz.Msgs.sensor_msgs
         /// <summary> Constructor with buffer. </summary>
         internal ChannelFloat32(Buffer b)
         {
-            this.name = BuiltIns.DeserializeString(b);
-            this.values = BuiltIns.DeserializeStructArray<float>(b, 0);
+            this.name = b.DeserializeString();
+            this.values = b.DeserializeStructArray<float>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -59,8 +59,8 @@ namespace Iviz.Msgs.sensor_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.name, b);
-            BuiltIns.Serialize(this.values, b, 0);
+            b.Serialize(this.name);
+            b.SerializeStructArray(this.values, 0);
         }
         
         public void Validate()

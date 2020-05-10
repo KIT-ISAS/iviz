@@ -22,7 +22,7 @@ namespace Iviz.Msgs.mesh_msgs
         /// <summary> Constructor with buffer. </summary>
         internal MeshVertexCosts(Buffer b)
         {
-            this.costs = BuiltIns.DeserializeStructArray<float>(b, 0);
+            this.costs = b.DeserializeStructArray<float>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -34,7 +34,7 @@ namespace Iviz.Msgs.mesh_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.costs, b, 0);
+            b.SerializeStructArray(this.costs, 0);
         }
         
         public void Validate()

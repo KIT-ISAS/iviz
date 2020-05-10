@@ -74,14 +74,14 @@ namespace Iviz.Msgs.visualization_msgs
         internal InteractiveMarkerFeedback(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.client_id = BuiltIns.DeserializeString(b);
-            this.marker_name = BuiltIns.DeserializeString(b);
-            this.control_name = BuiltIns.DeserializeString(b);
-            this.event_type = BuiltIns.DeserializeStruct<byte>(b);
+            this.client_id = b.DeserializeString();
+            this.marker_name = b.DeserializeString();
+            this.control_name = b.DeserializeString();
+            this.event_type = b.Deserialize<byte>();
             this.pose = new geometry_msgs.Pose(b);
-            this.menu_entry_id = BuiltIns.DeserializeStruct<uint>(b);
+            this.menu_entry_id = b.Deserialize<uint>();
             this.mouse_point = new geometry_msgs.Point(b);
-            this.mouse_point_valid = BuiltIns.DeserializeStruct<bool>(b);
+            this.mouse_point_valid = b.Deserialize<bool>();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -94,14 +94,14 @@ namespace Iviz.Msgs.visualization_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
-            BuiltIns.Serialize(this.client_id, b);
-            BuiltIns.Serialize(this.marker_name, b);
-            BuiltIns.Serialize(this.control_name, b);
-            BuiltIns.Serialize(this.event_type, b);
+            b.Serialize(this.client_id);
+            b.Serialize(this.marker_name);
+            b.Serialize(this.control_name);
+            b.Serialize(this.event_type);
             this.pose.Serialize(b);
-            BuiltIns.Serialize(this.menu_entry_id, b);
+            b.Serialize(this.menu_entry_id);
             this.mouse_point.Serialize(b);
-            BuiltIns.Serialize(this.mouse_point_valid, b);
+            b.Serialize(this.mouse_point_valid);
         }
         
         public void Validate()

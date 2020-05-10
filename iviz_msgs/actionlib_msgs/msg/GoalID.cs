@@ -31,8 +31,8 @@ namespace Iviz.Msgs.actionlib_msgs
         /// <summary> Constructor with buffer. </summary>
         internal GoalID(Buffer b)
         {
-            this.stamp = BuiltIns.DeserializeStruct<time>(b);
-            this.id = BuiltIns.DeserializeString(b);
+            this.stamp = b.Deserialize<time>();
+            this.id = b.DeserializeString();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -44,8 +44,8 @@ namespace Iviz.Msgs.actionlib_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.stamp, b);
-            BuiltIns.Serialize(this.id, b);
+            b.Serialize(this.stamp);
+            b.Serialize(this.id);
         }
         
         public void Validate()

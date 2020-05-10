@@ -43,14 +43,14 @@ namespace Iviz.Msgs.sensor_msgs
         {
             this.header = header ?? throw new System.ArgumentNullException(nameof(header));
             this.orientation = orientation;
-            BuiltIns.AssertSize(orientation_covariance, 9);
-            this.orientation_covariance = orientation_covariance;
+            this.orientation_covariance = orientation_covariance ?? throw new System.ArgumentNullException(nameof(orientation_covariance));
+            if (this.orientation_covariance.Length != 9) throw new System.ArgumentException("Invalid size", nameof(orientation_covariance));
             this.angular_velocity = angular_velocity;
-            BuiltIns.AssertSize(angular_velocity_covariance, 9);
-            this.angular_velocity_covariance = angular_velocity_covariance;
+            this.angular_velocity_covariance = angular_velocity_covariance ?? throw new System.ArgumentNullException(nameof(angular_velocity_covariance));
+            if (this.angular_velocity_covariance.Length != 9) throw new System.ArgumentException("Invalid size", nameof(angular_velocity_covariance));
             this.linear_acceleration = linear_acceleration;
-            BuiltIns.AssertSize(linear_acceleration_covariance, 9);
-            this.linear_acceleration_covariance = linear_acceleration_covariance;
+            this.linear_acceleration_covariance = linear_acceleration_covariance ?? throw new System.ArgumentNullException(nameof(linear_acceleration_covariance));
+            if (this.linear_acceleration_covariance.Length != 9) throw new System.ArgumentException("Invalid size", nameof(linear_acceleration_covariance));
         }
         
         /// <summary> Constructor with buffer. </summary>
@@ -58,11 +58,11 @@ namespace Iviz.Msgs.sensor_msgs
         {
             this.header = new std_msgs.Header(b);
             this.orientation = new geometry_msgs.Quaternion(b);
-            this.orientation_covariance = BuiltIns.DeserializeStructArray<double>(b, 9);
+            this.orientation_covariance = b.DeserializeStructArray<double>(9);
             this.angular_velocity = new geometry_msgs.Vector3(b);
-            this.angular_velocity_covariance = BuiltIns.DeserializeStructArray<double>(b, 9);
+            this.angular_velocity_covariance = b.DeserializeStructArray<double>(9);
             this.linear_acceleration = new geometry_msgs.Vector3(b);
-            this.linear_acceleration_covariance = BuiltIns.DeserializeStructArray<double>(b, 9);
+            this.linear_acceleration_covariance = b.DeserializeStructArray<double>(9);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -76,19 +76,22 @@ namespace Iviz.Msgs.sensor_msgs
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
             this.orientation.Serialize(b);
-            BuiltIns.Serialize(this.orientation_covariance, b, 9);
+            b.SerializeStructArray(this.orientation_covariance, 9);
             this.angular_velocity.Serialize(b);
-            BuiltIns.Serialize(this.angular_velocity_covariance, b, 9);
+            b.SerializeStructArray(this.angular_velocity_covariance, 9);
             this.linear_acceleration.Serialize(b);
-            BuiltIns.Serialize(this.linear_acceleration_covariance, b, 9);
+            b.SerializeStructArray(this.linear_acceleration_covariance, 9);
         }
         
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
-            BuiltIns.AssertSize(orientation_covariance, 9);
-            BuiltIns.AssertSize(angular_velocity_covariance, 9);
-            BuiltIns.AssertSize(linear_acceleration_covariance, 9);
+            if (orientation_covariance is null) throw new System.NullReferenceException();
+            if (orientation_covariance.Length != 9) throw new System.IndexOutOfRangeException();
+            if (angular_velocity_covariance is null) throw new System.NullReferenceException();
+            if (angular_velocity_covariance.Length != 9) throw new System.IndexOutOfRangeException();
+            if (linear_acceleration_covariance is null) throw new System.NullReferenceException();
+            if (linear_acceleration_covariance.Length != 9) throw new System.IndexOutOfRangeException();
         }
     
         [IgnoreDataMember]

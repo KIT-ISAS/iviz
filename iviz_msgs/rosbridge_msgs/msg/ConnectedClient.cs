@@ -23,8 +23,8 @@ namespace Iviz.Msgs.rosbridge_msgs
         /// <summary> Constructor with buffer. </summary>
         internal ConnectedClient(Buffer b)
         {
-            this.ip_address = BuiltIns.DeserializeString(b);
-            this.connection_time = BuiltIns.DeserializeStruct<time>(b);
+            this.ip_address = b.DeserializeString();
+            this.connection_time = b.Deserialize<time>();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -36,8 +36,8 @@ namespace Iviz.Msgs.rosbridge_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.ip_address, b);
-            BuiltIns.Serialize(this.connection_time, b);
+            b.Serialize(this.ip_address);
+            b.Serialize(this.connection_time);
         }
         
         public void Validate()

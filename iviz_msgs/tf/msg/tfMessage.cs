@@ -21,7 +21,7 @@ namespace Iviz.Msgs.tf
         /// <summary> Constructor with buffer. </summary>
         internal tfMessage(Buffer b)
         {
-            this.transforms = BuiltIns.DeserializeArray<geometry_msgs.TransformStamped>(b, 0);
+            this.transforms = b.DeserializeArray<geometry_msgs.TransformStamped>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -33,7 +33,7 @@ namespace Iviz.Msgs.tf
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.SerializeArray(this.transforms, b, 0);
+            b.SerializeArray(this.transforms, 0);
         }
         
         public void Validate()

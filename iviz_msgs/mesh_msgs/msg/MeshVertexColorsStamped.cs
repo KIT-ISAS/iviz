@@ -29,7 +29,7 @@ namespace Iviz.Msgs.mesh_msgs
         internal MeshVertexColorsStamped(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.uuid = BuiltIns.DeserializeString(b);
+            this.uuid = b.DeserializeString();
             this.mesh_vertex_colors = new mesh_msgs.MeshVertexColors(b);
         }
         
@@ -43,7 +43,7 @@ namespace Iviz.Msgs.mesh_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
-            BuiltIns.Serialize(this.uuid, b);
+            b.Serialize(this.uuid);
             this.mesh_vertex_colors.Serialize(b);
         }
         

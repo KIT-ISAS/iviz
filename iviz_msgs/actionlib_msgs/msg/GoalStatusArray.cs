@@ -28,7 +28,7 @@ namespace Iviz.Msgs.actionlib_msgs
         internal GoalStatusArray(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.status_list = BuiltIns.DeserializeArray<GoalStatus>(b, 0);
+            this.status_list = b.DeserializeArray<GoalStatus>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -41,7 +41,7 @@ namespace Iviz.Msgs.actionlib_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
-            BuiltIns.SerializeArray(this.status_list, b, 0);
+            b.SerializeArray(this.status_list, 0);
         }
         
         public void Validate()

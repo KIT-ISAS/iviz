@@ -31,8 +31,8 @@ namespace Iviz.Msgs.tf2_msgs
         /// <summary> Constructor with buffer. </summary>
         internal TF2Error(Buffer b)
         {
-            this.error = BuiltIns.DeserializeStruct<byte>(b);
-            this.error_string = BuiltIns.DeserializeString(b);
+            this.error = b.Deserialize<byte>();
+            this.error_string = b.DeserializeString();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -44,8 +44,8 @@ namespace Iviz.Msgs.tf2_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.error, b);
-            BuiltIns.Serialize(this.error_string, b);
+            b.Serialize(this.error);
+            b.Serialize(this.error_string);
         }
         
         public void Validate()

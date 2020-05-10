@@ -52,13 +52,13 @@ namespace Iviz.Msgs.rosgraph_msgs
         internal Log(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.level = BuiltIns.DeserializeStruct<byte>(b);
-            this.name = BuiltIns.DeserializeString(b);
-            this.msg = BuiltIns.DeserializeString(b);
-            this.file = BuiltIns.DeserializeString(b);
-            this.function = BuiltIns.DeserializeString(b);
-            this.line = BuiltIns.DeserializeStruct<uint>(b);
-            this.topics = BuiltIns.DeserializeStringArray(b, 0);
+            this.level = b.Deserialize<byte>();
+            this.name = b.DeserializeString();
+            this.msg = b.DeserializeString();
+            this.file = b.DeserializeString();
+            this.function = b.DeserializeString();
+            this.line = b.Deserialize<uint>();
+            this.topics = b.DeserializeStringArray(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -71,13 +71,13 @@ namespace Iviz.Msgs.rosgraph_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
-            BuiltIns.Serialize(this.level, b);
-            BuiltIns.Serialize(this.name, b);
-            BuiltIns.Serialize(this.msg, b);
-            BuiltIns.Serialize(this.file, b);
-            BuiltIns.Serialize(this.function, b);
-            BuiltIns.Serialize(this.line, b);
-            BuiltIns.Serialize(this.topics, b, 0);
+            b.Serialize(this.level);
+            b.Serialize(this.name);
+            b.Serialize(this.msg);
+            b.Serialize(this.file);
+            b.Serialize(this.function);
+            b.Serialize(this.line);
+            b.SerializeArray(this.topics, 0);
         }
         
         public void Validate()

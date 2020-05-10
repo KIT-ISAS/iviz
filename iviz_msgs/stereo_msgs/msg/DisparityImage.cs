@@ -60,12 +60,12 @@ namespace Iviz.Msgs.stereo_msgs
         {
             this.header = new std_msgs.Header(b);
             this.image = new sensor_msgs.Image(b);
-            this.f = BuiltIns.DeserializeStruct<float>(b);
-            this.T = BuiltIns.DeserializeStruct<float>(b);
+            this.f = b.Deserialize<float>();
+            this.T = b.Deserialize<float>();
             this.valid_window = new sensor_msgs.RegionOfInterest(b);
-            this.min_disparity = BuiltIns.DeserializeStruct<float>(b);
-            this.max_disparity = BuiltIns.DeserializeStruct<float>(b);
-            this.delta_d = BuiltIns.DeserializeStruct<float>(b);
+            this.min_disparity = b.Deserialize<float>();
+            this.max_disparity = b.Deserialize<float>();
+            this.delta_d = b.Deserialize<float>();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -79,12 +79,12 @@ namespace Iviz.Msgs.stereo_msgs
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
             this.image.Serialize(b);
-            BuiltIns.Serialize(this.f, b);
-            BuiltIns.Serialize(this.T, b);
+            b.Serialize(this.f);
+            b.Serialize(this.T);
             this.valid_window.Serialize(b);
-            BuiltIns.Serialize(this.min_disparity, b);
-            BuiltIns.Serialize(this.max_disparity, b);
-            BuiltIns.Serialize(this.delta_d, b);
+            b.Serialize(this.min_disparity);
+            b.Serialize(this.max_disparity);
+            b.Serialize(this.delta_d);
         }
         
         public void Validate()

@@ -61,15 +61,15 @@ namespace Iviz.Msgs.sensor_msgs
         internal LaserScan(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.angle_min = BuiltIns.DeserializeStruct<float>(b);
-            this.angle_max = BuiltIns.DeserializeStruct<float>(b);
-            this.angle_increment = BuiltIns.DeserializeStruct<float>(b);
-            this.time_increment = BuiltIns.DeserializeStruct<float>(b);
-            this.scan_time = BuiltIns.DeserializeStruct<float>(b);
-            this.range_min = BuiltIns.DeserializeStruct<float>(b);
-            this.range_max = BuiltIns.DeserializeStruct<float>(b);
-            this.ranges = BuiltIns.DeserializeStructArray<float>(b, 0);
-            this.intensities = BuiltIns.DeserializeStructArray<float>(b, 0);
+            this.angle_min = b.Deserialize<float>();
+            this.angle_max = b.Deserialize<float>();
+            this.angle_increment = b.Deserialize<float>();
+            this.time_increment = b.Deserialize<float>();
+            this.scan_time = b.Deserialize<float>();
+            this.range_min = b.Deserialize<float>();
+            this.range_max = b.Deserialize<float>();
+            this.ranges = b.DeserializeStructArray<float>(0);
+            this.intensities = b.DeserializeStructArray<float>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -82,15 +82,15 @@ namespace Iviz.Msgs.sensor_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
-            BuiltIns.Serialize(this.angle_min, b);
-            BuiltIns.Serialize(this.angle_max, b);
-            BuiltIns.Serialize(this.angle_increment, b);
-            BuiltIns.Serialize(this.time_increment, b);
-            BuiltIns.Serialize(this.scan_time, b);
-            BuiltIns.Serialize(this.range_min, b);
-            BuiltIns.Serialize(this.range_max, b);
-            BuiltIns.Serialize(this.ranges, b, 0);
-            BuiltIns.Serialize(this.intensities, b, 0);
+            b.Serialize(this.angle_min);
+            b.Serialize(this.angle_max);
+            b.Serialize(this.angle_increment);
+            b.Serialize(this.time_increment);
+            b.Serialize(this.scan_time);
+            b.Serialize(this.range_min);
+            b.Serialize(this.range_max);
+            b.SerializeStructArray(this.ranges, 0);
+            b.SerializeStructArray(this.intensities, 0);
         }
         
         public void Validate()

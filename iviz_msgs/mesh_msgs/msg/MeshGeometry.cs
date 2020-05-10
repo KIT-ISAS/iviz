@@ -28,9 +28,9 @@ namespace Iviz.Msgs.mesh_msgs
         /// <summary> Constructor with buffer. </summary>
         internal MeshGeometry(Buffer b)
         {
-            this.vertices = BuiltIns.DeserializeStructArray<geometry_msgs.Point>(b, 0);
-            this.vertex_normals = BuiltIns.DeserializeStructArray<geometry_msgs.Point>(b, 0);
-            this.faces = BuiltIns.DeserializeArray<mesh_msgs.TriangleIndices>(b, 0);
+            this.vertices = b.DeserializeStructArray<geometry_msgs.Point>(0);
+            this.vertex_normals = b.DeserializeStructArray<geometry_msgs.Point>(0);
+            this.faces = b.DeserializeArray<mesh_msgs.TriangleIndices>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -42,9 +42,9 @@ namespace Iviz.Msgs.mesh_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.SerializeStructArray(this.vertices, b, 0);
-            BuiltIns.SerializeStructArray(this.vertex_normals, b, 0);
-            BuiltIns.SerializeArray(this.faces, b, 0);
+            b.SerializeStructArray(this.vertices, 0);
+            b.SerializeStructArray(this.vertex_normals, 0);
+            b.SerializeArray(this.faces, 0);
         }
         
         public void Validate()

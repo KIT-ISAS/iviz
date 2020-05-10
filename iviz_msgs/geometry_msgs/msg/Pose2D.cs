@@ -34,9 +34,9 @@ namespace Iviz.Msgs.geometry_msgs
         /// <summary> Constructor with buffer. </summary>
         internal Pose2D(Buffer b)
         {
-            this.x = BuiltIns.DeserializeStruct<double>(b);
-            this.y = BuiltIns.DeserializeStruct<double>(b);
-            this.theta = BuiltIns.DeserializeStruct<double>(b);
+            this.x = b.Deserialize<double>();
+            this.y = b.Deserialize<double>();
+            this.theta = b.Deserialize<double>();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -48,9 +48,9 @@ namespace Iviz.Msgs.geometry_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.x, b);
-            BuiltIns.Serialize(this.y, b);
-            BuiltIns.Serialize(this.theta, b);
+            b.Serialize(this.x);
+            b.Serialize(this.y);
+            b.Serialize(this.theta);
         }
         
         public void Validate()

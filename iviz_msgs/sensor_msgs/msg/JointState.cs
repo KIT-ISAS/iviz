@@ -55,10 +55,10 @@ namespace Iviz.Msgs.sensor_msgs
         internal JointState(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.name = BuiltIns.DeserializeStringArray(b, 0);
-            this.position = BuiltIns.DeserializeStructArray<double>(b, 0);
-            this.velocity = BuiltIns.DeserializeStructArray<double>(b, 0);
-            this.effort = BuiltIns.DeserializeStructArray<double>(b, 0);
+            this.name = b.DeserializeStringArray(0);
+            this.position = b.DeserializeStructArray<double>(0);
+            this.velocity = b.DeserializeStructArray<double>(0);
+            this.effort = b.DeserializeStructArray<double>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -71,10 +71,10 @@ namespace Iviz.Msgs.sensor_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
-            BuiltIns.Serialize(this.name, b, 0);
-            BuiltIns.Serialize(this.position, b, 0);
-            BuiltIns.Serialize(this.velocity, b, 0);
-            BuiltIns.Serialize(this.effort, b, 0);
+            b.SerializeArray(this.name, 0);
+            b.SerializeStructArray(this.position, 0);
+            b.SerializeStructArray(this.velocity, 0);
+            b.SerializeStructArray(this.effort, 0);
         }
         
         public void Validate()

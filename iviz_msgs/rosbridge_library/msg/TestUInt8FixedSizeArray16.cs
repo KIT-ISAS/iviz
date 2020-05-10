@@ -15,14 +15,14 @@ namespace Iviz.Msgs.rosbridge_library
         /// <summary> Explicit constructor. </summary>
         public TestUInt8FixedSizeArray16(byte[] data)
         {
-            BuiltIns.AssertSize(data, 16);
-            this.data = data;
+            this.data = data ?? throw new System.ArgumentNullException(nameof(data));
+            if (this.data.Length != 16) throw new System.ArgumentException("Invalid size", nameof(data));
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal TestUInt8FixedSizeArray16(Buffer b)
         {
-            this.data = BuiltIns.DeserializeStructArray<byte>(b, 16);
+            this.data = b.DeserializeStructArray<byte>(16);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -34,12 +34,13 @@ namespace Iviz.Msgs.rosbridge_library
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.data, b, 16);
+            b.SerializeStructArray(this.data, 16);
         }
         
         public void Validate()
         {
-            BuiltIns.AssertSize(data, 16);
+            if (data is null) throw new System.NullReferenceException();
+            if (data.Length != 16) throw new System.IndexOutOfRangeException();
         }
     
         [IgnoreDataMember]

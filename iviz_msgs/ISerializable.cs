@@ -9,21 +9,6 @@ namespace Iviz.Msgs
     [AttributeUsage(AttributeTargets.Field)]
     public class PreserveAttribute : System.Attribute { }
 
-    /// <summary>
-    /// Class that contains information about an underlying buffer.
-    /// </summary>
-    public unsafe class Buffer
-    {
-        internal byte* ptr;
-        internal readonly byte* end;
-
-        internal Buffer(byte* ptr, byte* end)
-        {
-            this.ptr = ptr;
-            this.end = end;
-        }
-    }
-
     public interface ISerializable<T> 
     {
         /// <summary>

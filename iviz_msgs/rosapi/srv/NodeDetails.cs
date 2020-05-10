@@ -71,7 +71,7 @@ namespace Iviz.Msgs.rosapi
         /// <summary> Constructor with buffer. </summary>
         internal NodeDetailsRequest(Buffer b)
         {
-            this.node = BuiltIns.DeserializeString(b);
+            this.node = b.DeserializeString();
         }
         
         public IRequest Deserialize(Buffer b)
@@ -83,7 +83,7 @@ namespace Iviz.Msgs.rosapi
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.node, b);
+            b.Serialize(this.node);
         }
         
         public void Validate()
@@ -127,9 +127,9 @@ namespace Iviz.Msgs.rosapi
         /// <summary> Constructor with buffer. </summary>
         internal NodeDetailsResponse(Buffer b)
         {
-            this.subscribing = BuiltIns.DeserializeStringArray(b, 0);
-            this.publishing = BuiltIns.DeserializeStringArray(b, 0);
-            this.services = BuiltIns.DeserializeStringArray(b, 0);
+            this.subscribing = b.DeserializeStringArray(0);
+            this.publishing = b.DeserializeStringArray(0);
+            this.services = b.DeserializeStringArray(0);
         }
         
         public IResponse Deserialize(Buffer b)
@@ -141,9 +141,9 @@ namespace Iviz.Msgs.rosapi
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.subscribing, b, 0);
-            BuiltIns.Serialize(this.publishing, b, 0);
-            BuiltIns.Serialize(this.services, b, 0);
+            b.SerializeArray(this.subscribing, 0);
+            b.SerializeArray(this.publishing, 0);
+            b.SerializeArray(this.services, 0);
         }
         
         public void Validate()

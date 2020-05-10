@@ -26,8 +26,8 @@ namespace Iviz.Msgs.mesh_msgs
         /// <summary> Constructor with buffer. </summary>
         internal MeshFaceCluster(Buffer b)
         {
-            this.face_indices = BuiltIns.DeserializeStructArray<uint>(b, 0);
-            this.label = BuiltIns.DeserializeString(b);
+            this.face_indices = b.DeserializeStructArray<uint>(0);
+            this.label = b.DeserializeString();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -39,8 +39,8 @@ namespace Iviz.Msgs.mesh_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.face_indices, b, 0);
-            BuiltIns.Serialize(this.label, b);
+            b.SerializeStructArray(this.face_indices, 0);
+            b.Serialize(this.label);
         }
         
         public void Validate()

@@ -86,7 +86,7 @@ namespace Iviz.Msgs.nav_msgs
         {
             this.start = new geometry_msgs.PoseStamped(b);
             this.goal = new geometry_msgs.PoseStamped(b);
-            this.tolerance = BuiltIns.DeserializeStruct<float>(b);
+            this.tolerance = b.Deserialize<float>();
         }
         
         public IRequest Deserialize(Buffer b)
@@ -100,7 +100,7 @@ namespace Iviz.Msgs.nav_msgs
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.start.Serialize(b);
             this.goal.Serialize(b);
-            BuiltIns.Serialize(this.tolerance, b);
+            b.Serialize(this.tolerance);
         }
         
         public void Validate()

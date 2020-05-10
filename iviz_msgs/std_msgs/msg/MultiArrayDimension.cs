@@ -25,9 +25,9 @@ namespace Iviz.Msgs.std_msgs
         /// <summary> Constructor with buffer. </summary>
         internal MultiArrayDimension(Buffer b)
         {
-            this.label = BuiltIns.DeserializeString(b);
-            this.size = BuiltIns.DeserializeStruct<uint>(b);
-            this.stride = BuiltIns.DeserializeStruct<uint>(b);
+            this.label = b.DeserializeString();
+            this.size = b.Deserialize<uint>();
+            this.stride = b.Deserialize<uint>();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -39,9 +39,9 @@ namespace Iviz.Msgs.std_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.label, b);
-            BuiltIns.Serialize(this.size, b);
-            BuiltIns.Serialize(this.stride, b);
+            b.Serialize(this.label);
+            b.Serialize(this.size);
+            b.Serialize(this.stride);
         }
         
         public void Validate()

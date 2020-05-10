@@ -21,7 +21,7 @@ namespace Iviz.Msgs.rosbridge_msgs
         /// <summary> Constructor with buffer. </summary>
         internal ConnectedClients(Buffer b)
         {
-            this.clients = BuiltIns.DeserializeArray<ConnectedClient>(b, 0);
+            this.clients = b.DeserializeArray<ConnectedClient>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -33,7 +33,7 @@ namespace Iviz.Msgs.rosbridge_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.SerializeArray(this.clients, b, 0);
+            b.SerializeArray(this.clients, 0);
         }
         
         public void Validate()

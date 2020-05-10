@@ -20,7 +20,7 @@ namespace Iviz.Msgs.rosbridge_library
         /// <summary> Constructor with buffer. </summary>
         internal Num(Buffer b)
         {
-            this.num = BuiltIns.DeserializeStruct<long>(b);
+            this.num = b.Deserialize<long>();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -32,7 +32,7 @@ namespace Iviz.Msgs.rosbridge_library
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.num, b);
+            b.Serialize(this.num);
         }
         
         public void Validate()

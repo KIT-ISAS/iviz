@@ -129,7 +129,7 @@ namespace Iviz.Msgs.nav_msgs
         /// <summary> Constructor with buffer. </summary>
         internal SetMapResponse(Buffer b)
         {
-            this.success = BuiltIns.DeserializeStruct<bool>(b);
+            this.success = b.Deserialize<bool>();
         }
         
         public IResponse Deserialize(Buffer b)
@@ -141,7 +141,7 @@ namespace Iviz.Msgs.nav_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.success, b);
+            b.Serialize(this.success);
         }
         
         public void Validate()

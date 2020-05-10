@@ -36,11 +36,11 @@ namespace Iviz.Msgs.trajectory_msgs
         /// <summary> Constructor with buffer. </summary>
         internal JointTrajectoryPoint(Buffer b)
         {
-            this.positions = BuiltIns.DeserializeStructArray<double>(b, 0);
-            this.velocities = BuiltIns.DeserializeStructArray<double>(b, 0);
-            this.accelerations = BuiltIns.DeserializeStructArray<double>(b, 0);
-            this.effort = BuiltIns.DeserializeStructArray<double>(b, 0);
-            this.time_from_start = BuiltIns.DeserializeStruct<duration>(b);
+            this.positions = b.DeserializeStructArray<double>(0);
+            this.velocities = b.DeserializeStructArray<double>(0);
+            this.accelerations = b.DeserializeStructArray<double>(0);
+            this.effort = b.DeserializeStructArray<double>(0);
+            this.time_from_start = b.Deserialize<duration>();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -52,11 +52,11 @@ namespace Iviz.Msgs.trajectory_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.positions, b, 0);
-            BuiltIns.Serialize(this.velocities, b, 0);
-            BuiltIns.Serialize(this.accelerations, b, 0);
-            BuiltIns.Serialize(this.effort, b, 0);
-            BuiltIns.Serialize(this.time_from_start, b);
+            b.SerializeStructArray(this.positions, 0);
+            b.SerializeStructArray(this.velocities, 0);
+            b.SerializeStructArray(this.accelerations, 0);
+            b.SerializeStructArray(this.effort, 0);
+            b.Serialize(this.time_from_start);
         }
         
         public void Validate()

@@ -106,14 +106,14 @@ namespace Iviz.Msgs.visualization_msgs
         /// <summary> Constructor with buffer. </summary>
         internal InteractiveMarkerControl(Buffer b)
         {
-            this.name = BuiltIns.DeserializeString(b);
+            this.name = b.DeserializeString();
             this.orientation = new geometry_msgs.Quaternion(b);
-            this.orientation_mode = BuiltIns.DeserializeStruct<byte>(b);
-            this.interaction_mode = BuiltIns.DeserializeStruct<byte>(b);
-            this.always_visible = BuiltIns.DeserializeStruct<bool>(b);
-            this.markers = BuiltIns.DeserializeArray<Marker>(b, 0);
-            this.independent_marker_orientation = BuiltIns.DeserializeStruct<bool>(b);
-            this.description = BuiltIns.DeserializeString(b);
+            this.orientation_mode = b.Deserialize<byte>();
+            this.interaction_mode = b.Deserialize<byte>();
+            this.always_visible = b.Deserialize<bool>();
+            this.markers = b.DeserializeArray<Marker>(0);
+            this.independent_marker_orientation = b.Deserialize<bool>();
+            this.description = b.DeserializeString();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -125,14 +125,14 @@ namespace Iviz.Msgs.visualization_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.name, b);
+            b.Serialize(this.name);
             this.orientation.Serialize(b);
-            BuiltIns.Serialize(this.orientation_mode, b);
-            BuiltIns.Serialize(this.interaction_mode, b);
-            BuiltIns.Serialize(this.always_visible, b);
-            BuiltIns.SerializeArray(this.markers, b, 0);
-            BuiltIns.Serialize(this.independent_marker_orientation, b);
-            BuiltIns.Serialize(this.description, b);
+            b.Serialize(this.orientation_mode);
+            b.Serialize(this.interaction_mode);
+            b.Serialize(this.always_visible);
+            b.SerializeArray(this.markers, 0);
+            b.Serialize(this.independent_marker_orientation);
+            b.Serialize(this.description);
         }
         
         public void Validate()

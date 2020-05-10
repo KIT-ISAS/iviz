@@ -72,8 +72,8 @@ namespace Iviz.Msgs.rosbridge_library
         /// <summary> Constructor with buffer. </summary>
         internal AddTwoIntsRequest(Buffer b)
         {
-            this.a = BuiltIns.DeserializeStruct<long>(b);
-            this.b = BuiltIns.DeserializeStruct<long>(b);
+            this.a = b.Deserialize<long>();
+            this.b = b.Deserialize<long>();
         }
         
         public IRequest Deserialize(Buffer b)
@@ -85,8 +85,8 @@ namespace Iviz.Msgs.rosbridge_library
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.a, b);
-            BuiltIns.Serialize(this.b, b);
+            b.Serialize(this.a);
+            b.Serialize(this.b);
         }
         
         public void Validate()
@@ -115,7 +115,7 @@ namespace Iviz.Msgs.rosbridge_library
         /// <summary> Constructor with buffer. </summary>
         internal AddTwoIntsResponse(Buffer b)
         {
-            this.sum = BuiltIns.DeserializeStruct<long>(b);
+            this.sum = b.Deserialize<long>();
         }
         
         public IResponse Deserialize(Buffer b)
@@ -127,7 +127,7 @@ namespace Iviz.Msgs.rosbridge_library
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.sum, b);
+            b.Serialize(this.sum);
         }
         
         public void Validate()

@@ -74,8 +74,8 @@ namespace Iviz.Msgs.rosapi
         /// <summary> Constructor with buffer. </summary>
         internal GetParamRequest(Buffer b)
         {
-            this.name = BuiltIns.DeserializeString(b);
-            this.@default = BuiltIns.DeserializeString(b);
+            this.name = b.DeserializeString();
+            this.@default = b.DeserializeString();
         }
         
         public IRequest Deserialize(Buffer b)
@@ -87,8 +87,8 @@ namespace Iviz.Msgs.rosapi
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.name, b);
-            BuiltIns.Serialize(this.@default, b);
+            b.Serialize(this.name);
+            b.Serialize(this.@default);
         }
         
         public void Validate()
@@ -128,7 +128,7 @@ namespace Iviz.Msgs.rosapi
         /// <summary> Constructor with buffer. </summary>
         internal GetParamResponse(Buffer b)
         {
-            this.value = BuiltIns.DeserializeString(b);
+            this.value = b.DeserializeString();
         }
         
         public IResponse Deserialize(Buffer b)
@@ -140,7 +140,7 @@ namespace Iviz.Msgs.rosapi
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.value, b);
+            b.Serialize(this.value);
         }
         
         public void Validate()

@@ -78,8 +78,8 @@ namespace Iviz.Msgs.grid_map_msgs
         /// <summary> Constructor with buffer. </summary>
         internal ProcessFileRequest(Buffer b)
         {
-            this.file_path = BuiltIns.DeserializeString(b);
-            this.topic_name = BuiltIns.DeserializeString(b);
+            this.file_path = b.DeserializeString();
+            this.topic_name = b.DeserializeString();
         }
         
         public IRequest Deserialize(Buffer b)
@@ -91,8 +91,8 @@ namespace Iviz.Msgs.grid_map_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.file_path, b);
-            BuiltIns.Serialize(this.topic_name, b);
+            b.Serialize(this.file_path);
+            b.Serialize(this.topic_name);
         }
         
         public void Validate()
@@ -133,7 +133,7 @@ namespace Iviz.Msgs.grid_map_msgs
         /// <summary> Constructor with buffer. </summary>
         internal ProcessFileResponse(Buffer b)
         {
-            this.success = BuiltIns.DeserializeStruct<bool>(b);
+            this.success = b.Deserialize<bool>();
         }
         
         public IResponse Deserialize(Buffer b)
@@ -145,7 +145,7 @@ namespace Iviz.Msgs.grid_map_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.success, b);
+            b.Serialize(this.success);
         }
         
         public void Validate()

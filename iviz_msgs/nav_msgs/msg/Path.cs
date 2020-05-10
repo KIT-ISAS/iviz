@@ -26,7 +26,7 @@ namespace Iviz.Msgs.nav_msgs
         internal Path(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.poses = BuiltIns.DeserializeArray<geometry_msgs.PoseStamped>(b, 0);
+            this.poses = b.DeserializeArray<geometry_msgs.PoseStamped>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -39,7 +39,7 @@ namespace Iviz.Msgs.nav_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
-            BuiltIns.SerializeArray(this.poses, b, 0);
+            b.SerializeArray(this.poses, 0);
         }
         
         public void Validate()

@@ -35,10 +35,10 @@ namespace Iviz.Msgs.trajectory_msgs
         /// <summary> Constructor with buffer. </summary>
         internal MultiDOFJointTrajectoryPoint(Buffer b)
         {
-            this.transforms = BuiltIns.DeserializeStructArray<geometry_msgs.Transform>(b, 0);
-            this.velocities = BuiltIns.DeserializeArray<geometry_msgs.Twist>(b, 0);
-            this.accelerations = BuiltIns.DeserializeArray<geometry_msgs.Twist>(b, 0);
-            this.time_from_start = BuiltIns.DeserializeStruct<duration>(b);
+            this.transforms = b.DeserializeStructArray<geometry_msgs.Transform>(0);
+            this.velocities = b.DeserializeArray<geometry_msgs.Twist>(0);
+            this.accelerations = b.DeserializeArray<geometry_msgs.Twist>(0);
+            this.time_from_start = b.Deserialize<duration>();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -50,10 +50,10 @@ namespace Iviz.Msgs.trajectory_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.SerializeStructArray(this.transforms, b, 0);
-            BuiltIns.SerializeArray(this.velocities, b, 0);
-            BuiltIns.SerializeArray(this.accelerations, b, 0);
-            BuiltIns.Serialize(this.time_from_start, b);
+            b.SerializeStructArray(this.transforms, 0);
+            b.SerializeArray(this.velocities, 0);
+            b.SerializeArray(this.accelerations, 0);
+            b.Serialize(this.time_from_start);
         }
         
         public void Validate()

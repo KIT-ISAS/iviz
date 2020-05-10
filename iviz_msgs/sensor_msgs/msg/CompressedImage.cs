@@ -38,8 +38,8 @@ namespace Iviz.Msgs.sensor_msgs
         internal CompressedImage(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.format = BuiltIns.DeserializeString(b);
-            this.data = BuiltIns.DeserializeStructArray<byte>(b, 0);
+            this.format = b.DeserializeString();
+            this.data = b.DeserializeStructArray<byte>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -52,8 +52,8 @@ namespace Iviz.Msgs.sensor_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
-            BuiltIns.Serialize(this.format, b);
-            BuiltIns.Serialize(this.data, b, 0);
+            b.Serialize(this.format);
+            b.SerializeStructArray(this.data, 0);
         }
         
         public void Validate()

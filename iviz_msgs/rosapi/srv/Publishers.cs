@@ -71,7 +71,7 @@ namespace Iviz.Msgs.rosapi
         /// <summary> Constructor with buffer. </summary>
         internal PublishersRequest(Buffer b)
         {
-            this.topic = BuiltIns.DeserializeString(b);
+            this.topic = b.DeserializeString();
         }
         
         public IRequest Deserialize(Buffer b)
@@ -83,7 +83,7 @@ namespace Iviz.Msgs.rosapi
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.topic, b);
+            b.Serialize(this.topic);
         }
         
         public void Validate()
@@ -121,7 +121,7 @@ namespace Iviz.Msgs.rosapi
         /// <summary> Constructor with buffer. </summary>
         internal PublishersResponse(Buffer b)
         {
-            this.publishers = BuiltIns.DeserializeStringArray(b, 0);
+            this.publishers = b.DeserializeStringArray(0);
         }
         
         public IResponse Deserialize(Buffer b)
@@ -133,7 +133,7 @@ namespace Iviz.Msgs.rosapi
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.publishers, b, 0);
+            b.SerializeArray(this.publishers, 0);
         }
         
         public void Validate()

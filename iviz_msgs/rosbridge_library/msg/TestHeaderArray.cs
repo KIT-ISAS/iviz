@@ -21,7 +21,7 @@ namespace Iviz.Msgs.rosbridge_library
         /// <summary> Constructor with buffer. </summary>
         internal TestHeaderArray(Buffer b)
         {
-            this.header = BuiltIns.DeserializeArray<std_msgs.Header>(b, 0);
+            this.header = b.DeserializeArray<std_msgs.Header>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -33,7 +33,7 @@ namespace Iviz.Msgs.rosbridge_library
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.SerializeArray(this.header, b, 0);
+            b.SerializeArray(this.header, 0);
         }
         
         public void Validate()

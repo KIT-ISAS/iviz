@@ -24,7 +24,7 @@ namespace Iviz.Msgs.mesh_msgs
         internal Feature(Buffer b)
         {
             this.location = new geometry_msgs.Point(b);
-            this.descriptor = BuiltIns.DeserializeArray<std_msgs.Float32>(b, 0);
+            this.descriptor = b.DeserializeArray<std_msgs.Float32>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -37,7 +37,7 @@ namespace Iviz.Msgs.mesh_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.location.Serialize(b);
-            BuiltIns.SerializeArray(this.descriptor, b, 0);
+            b.SerializeArray(this.descriptor, 0);
         }
         
         public void Validate()

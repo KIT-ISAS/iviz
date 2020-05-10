@@ -84,20 +84,20 @@ namespace Iviz.Msgs.visualization_msgs
         internal Marker(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.ns = BuiltIns.DeserializeString(b);
-            this.id = BuiltIns.DeserializeStruct<int>(b);
-            this.type = BuiltIns.DeserializeStruct<int>(b);
-            this.action = BuiltIns.DeserializeStruct<int>(b);
+            this.ns = b.DeserializeString();
+            this.id = b.Deserialize<int>();
+            this.type = b.Deserialize<int>();
+            this.action = b.Deserialize<int>();
             this.pose = new geometry_msgs.Pose(b);
             this.scale = new geometry_msgs.Vector3(b);
             this.color = new std_msgs.ColorRGBA(b);
-            this.lifetime = BuiltIns.DeserializeStruct<duration>(b);
-            this.frame_locked = BuiltIns.DeserializeStruct<bool>(b);
-            this.points = BuiltIns.DeserializeStructArray<geometry_msgs.Point>(b, 0);
-            this.colors = BuiltIns.DeserializeStructArray<std_msgs.ColorRGBA>(b, 0);
-            this.text = BuiltIns.DeserializeString(b);
-            this.mesh_resource = BuiltIns.DeserializeString(b);
-            this.mesh_use_embedded_materials = BuiltIns.DeserializeStruct<bool>(b);
+            this.lifetime = b.Deserialize<duration>();
+            this.frame_locked = b.Deserialize<bool>();
+            this.points = b.DeserializeStructArray<geometry_msgs.Point>(0);
+            this.colors = b.DeserializeStructArray<std_msgs.ColorRGBA>(0);
+            this.text = b.DeserializeString();
+            this.mesh_resource = b.DeserializeString();
+            this.mesh_use_embedded_materials = b.Deserialize<bool>();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -110,20 +110,20 @@ namespace Iviz.Msgs.visualization_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
-            BuiltIns.Serialize(this.ns, b);
-            BuiltIns.Serialize(this.id, b);
-            BuiltIns.Serialize(this.type, b);
-            BuiltIns.Serialize(this.action, b);
+            b.Serialize(this.ns);
+            b.Serialize(this.id);
+            b.Serialize(this.type);
+            b.Serialize(this.action);
             this.pose.Serialize(b);
             this.scale.Serialize(b);
             this.color.Serialize(b);
-            BuiltIns.Serialize(this.lifetime, b);
-            BuiltIns.Serialize(this.frame_locked, b);
-            BuiltIns.SerializeStructArray(this.points, b, 0);
-            BuiltIns.SerializeStructArray(this.colors, b, 0);
-            BuiltIns.Serialize(this.text, b);
-            BuiltIns.Serialize(this.mesh_resource, b);
-            BuiltIns.Serialize(this.mesh_use_embedded_materials, b);
+            b.Serialize(this.lifetime);
+            b.Serialize(this.frame_locked);
+            b.SerializeStructArray(this.points, 0);
+            b.SerializeStructArray(this.colors, 0);
+            b.Serialize(this.text);
+            b.Serialize(this.mesh_resource);
+            b.Serialize(this.mesh_use_embedded_materials);
         }
         
         public void Validate()

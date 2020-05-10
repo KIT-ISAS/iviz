@@ -29,8 +29,8 @@ namespace Iviz.Msgs.sensor_msgs
         internal Joy(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.axes = BuiltIns.DeserializeStructArray<float>(b, 0);
-            this.buttons = BuiltIns.DeserializeStructArray<int>(b, 0);
+            this.axes = b.DeserializeStructArray<float>(0);
+            this.buttons = b.DeserializeStructArray<int>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -43,8 +43,8 @@ namespace Iviz.Msgs.sensor_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
-            BuiltIns.Serialize(this.axes, b, 0);
-            BuiltIns.Serialize(this.buttons, b, 0);
+            b.SerializeStructArray(this.axes, 0);
+            b.SerializeStructArray(this.buttons, 0);
         }
         
         public void Validate()

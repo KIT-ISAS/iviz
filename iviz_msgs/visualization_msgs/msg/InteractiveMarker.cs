@@ -58,11 +58,11 @@ namespace Iviz.Msgs.visualization_msgs
         {
             this.header = new std_msgs.Header(b);
             this.pose = new geometry_msgs.Pose(b);
-            this.name = BuiltIns.DeserializeString(b);
-            this.description = BuiltIns.DeserializeString(b);
-            this.scale = BuiltIns.DeserializeStruct<float>(b);
-            this.menu_entries = BuiltIns.DeserializeArray<MenuEntry>(b, 0);
-            this.controls = BuiltIns.DeserializeArray<InteractiveMarkerControl>(b, 0);
+            this.name = b.DeserializeString();
+            this.description = b.DeserializeString();
+            this.scale = b.Deserialize<float>();
+            this.menu_entries = b.DeserializeArray<MenuEntry>(0);
+            this.controls = b.DeserializeArray<InteractiveMarkerControl>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -76,11 +76,11 @@ namespace Iviz.Msgs.visualization_msgs
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
             this.pose.Serialize(b);
-            BuiltIns.Serialize(this.name, b);
-            BuiltIns.Serialize(this.description, b);
-            BuiltIns.Serialize(this.scale, b);
-            BuiltIns.SerializeArray(this.menu_entries, b, 0);
-            BuiltIns.SerializeArray(this.controls, b, 0);
+            b.Serialize(this.name);
+            b.Serialize(this.description);
+            b.Serialize(this.scale);
+            b.SerializeArray(this.menu_entries, 0);
+            b.SerializeArray(this.controls, 0);
         }
         
         public void Validate()

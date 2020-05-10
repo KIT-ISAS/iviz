@@ -24,9 +24,9 @@ namespace Iviz.Msgs.mesh_msgs
         /// <summary> Constructor with buffer. </summary>
         internal MeshMaterial(Buffer b)
         {
-            this.texture_index = BuiltIns.DeserializeStruct<uint>(b);
+            this.texture_index = b.Deserialize<uint>();
             this.color = new std_msgs.ColorRGBA(b);
-            this.has_texture = BuiltIns.DeserializeStruct<bool>(b);
+            this.has_texture = b.Deserialize<bool>();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -38,9 +38,9 @@ namespace Iviz.Msgs.mesh_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.texture_index, b);
+            b.Serialize(this.texture_index);
             this.color.Serialize(b);
-            BuiltIns.Serialize(this.has_texture, b);
+            b.Serialize(this.has_texture);
         }
         
         public void Validate()

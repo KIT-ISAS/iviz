@@ -37,9 +37,9 @@ namespace Iviz.Msgs.visualization_msgs
         /// <summary> Constructor with buffer. </summary>
         internal InteractiveMarkerInit(Buffer b)
         {
-            this.server_id = BuiltIns.DeserializeString(b);
-            this.seq_num = BuiltIns.DeserializeStruct<ulong>(b);
-            this.markers = BuiltIns.DeserializeArray<InteractiveMarker>(b, 0);
+            this.server_id = b.DeserializeString();
+            this.seq_num = b.Deserialize<ulong>();
+            this.markers = b.DeserializeArray<InteractiveMarker>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -51,9 +51,9 @@ namespace Iviz.Msgs.visualization_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.server_id, b);
-            BuiltIns.Serialize(this.seq_num, b);
-            BuiltIns.SerializeArray(this.markers, b, 0);
+            b.Serialize(this.server_id);
+            b.Serialize(this.seq_num);
+            b.SerializeArray(this.markers, 0);
         }
         
         public void Validate()

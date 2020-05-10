@@ -24,8 +24,8 @@ namespace Iviz.Msgs.diagnostic_msgs
         /// <summary> Constructor with buffer. </summary>
         internal KeyValue(Buffer b)
         {
-            this.key = BuiltIns.DeserializeString(b);
-            this.value = BuiltIns.DeserializeString(b);
+            this.key = b.DeserializeString();
+            this.value = b.DeserializeString();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -37,8 +37,8 @@ namespace Iviz.Msgs.diagnostic_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.key, b);
-            BuiltIns.Serialize(this.value, b);
+            b.Serialize(this.key);
+            b.Serialize(this.value);
         }
         
         public void Validate()

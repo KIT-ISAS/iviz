@@ -63,8 +63,8 @@ namespace Iviz.Msgs.shape_msgs
         /// <summary> Constructor with buffer. </summary>
         internal SolidPrimitive(Buffer b)
         {
-            this.type = BuiltIns.DeserializeStruct<byte>(b);
-            this.dimensions = BuiltIns.DeserializeStructArray<double>(b, 0);
+            this.type = b.Deserialize<byte>();
+            this.dimensions = b.DeserializeStructArray<double>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -76,8 +76,8 @@ namespace Iviz.Msgs.shape_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.type, b);
-            BuiltIns.Serialize(this.dimensions, b, 0);
+            b.Serialize(this.type);
+            b.SerializeStructArray(this.dimensions, 0);
         }
         
         public void Validate()

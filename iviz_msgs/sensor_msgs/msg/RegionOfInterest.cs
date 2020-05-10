@@ -42,11 +42,11 @@ namespace Iviz.Msgs.sensor_msgs
         /// <summary> Constructor with buffer. </summary>
         internal RegionOfInterest(Buffer b)
         {
-            this.x_offset = BuiltIns.DeserializeStruct<uint>(b);
-            this.y_offset = BuiltIns.DeserializeStruct<uint>(b);
-            this.height = BuiltIns.DeserializeStruct<uint>(b);
-            this.width = BuiltIns.DeserializeStruct<uint>(b);
-            this.do_rectify = BuiltIns.DeserializeStruct<bool>(b);
+            this.x_offset = b.Deserialize<uint>();
+            this.y_offset = b.Deserialize<uint>();
+            this.height = b.Deserialize<uint>();
+            this.width = b.Deserialize<uint>();
+            this.do_rectify = b.Deserialize<bool>();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -58,11 +58,11 @@ namespace Iviz.Msgs.sensor_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.x_offset, b);
-            BuiltIns.Serialize(this.y_offset, b);
-            BuiltIns.Serialize(this.height, b);
-            BuiltIns.Serialize(this.width, b);
-            BuiltIns.Serialize(this.do_rectify, b);
+            b.Serialize(this.x_offset);
+            b.Serialize(this.y_offset);
+            b.Serialize(this.height);
+            b.Serialize(this.width);
+            b.Serialize(this.do_rectify);
         }
         
         public void Validate()

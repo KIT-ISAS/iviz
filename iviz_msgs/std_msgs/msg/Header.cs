@@ -35,9 +35,9 @@ namespace Iviz.Msgs.std_msgs
         /// <summary> Constructor with buffer. </summary>
         internal Header(Buffer b)
         {
-            this.seq = BuiltIns.DeserializeStruct<uint>(b);
-            this.stamp = BuiltIns.DeserializeStruct<time>(b);
-            this.frame_id = BuiltIns.DeserializeString(b);
+            this.seq = b.Deserialize<uint>();
+            this.stamp = b.Deserialize<time>();
+            this.frame_id = b.DeserializeString();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -49,9 +49,9 @@ namespace Iviz.Msgs.std_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.seq, b);
-            BuiltIns.Serialize(this.stamp, b);
-            BuiltIns.Serialize(this.frame_id, b);
+            b.Serialize(this.seq);
+            b.Serialize(this.stamp);
+            b.Serialize(this.frame_id);
         }
         
         public void Validate()

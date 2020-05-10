@@ -59,12 +59,12 @@ namespace Iviz.Msgs.visualization_msgs
         /// <summary> Constructor with buffer. </summary>
         internal InteractiveMarkerUpdate(Buffer b)
         {
-            this.server_id = BuiltIns.DeserializeString(b);
-            this.seq_num = BuiltIns.DeserializeStruct<ulong>(b);
-            this.type = BuiltIns.DeserializeStruct<byte>(b);
-            this.markers = BuiltIns.DeserializeArray<InteractiveMarker>(b, 0);
-            this.poses = BuiltIns.DeserializeArray<InteractiveMarkerPose>(b, 0);
-            this.erases = BuiltIns.DeserializeStringArray(b, 0);
+            this.server_id = b.DeserializeString();
+            this.seq_num = b.Deserialize<ulong>();
+            this.type = b.Deserialize<byte>();
+            this.markers = b.DeserializeArray<InteractiveMarker>(0);
+            this.poses = b.DeserializeArray<InteractiveMarkerPose>(0);
+            this.erases = b.DeserializeStringArray(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -76,12 +76,12 @@ namespace Iviz.Msgs.visualization_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.server_id, b);
-            BuiltIns.Serialize(this.seq_num, b);
-            BuiltIns.Serialize(this.type, b);
-            BuiltIns.SerializeArray(this.markers, b, 0);
-            BuiltIns.SerializeArray(this.poses, b, 0);
-            BuiltIns.Serialize(this.erases, b, 0);
+            b.Serialize(this.server_id);
+            b.Serialize(this.seq_num);
+            b.Serialize(this.type);
+            b.SerializeArray(this.markers, 0);
+            b.SerializeArray(this.poses, 0);
+            b.SerializeArray(this.erases, 0);
         }
         
         public void Validate()

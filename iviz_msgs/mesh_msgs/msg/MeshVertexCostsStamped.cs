@@ -32,8 +32,8 @@ namespace Iviz.Msgs.mesh_msgs
         internal MeshVertexCostsStamped(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.uuid = BuiltIns.DeserializeString(b);
-            this.type = BuiltIns.DeserializeString(b);
+            this.uuid = b.DeserializeString();
+            this.type = b.DeserializeString();
             this.mesh_vertex_costs = new mesh_msgs.MeshVertexCosts(b);
         }
         
@@ -47,8 +47,8 @@ namespace Iviz.Msgs.mesh_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
-            BuiltIns.Serialize(this.uuid, b);
-            BuiltIns.Serialize(this.type, b);
+            b.Serialize(this.uuid);
+            b.Serialize(this.type);
             this.mesh_vertex_costs.Serialize(b);
         }
         

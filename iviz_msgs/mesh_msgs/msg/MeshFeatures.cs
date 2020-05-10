@@ -24,8 +24,8 @@ namespace Iviz.Msgs.mesh_msgs
         /// <summary> Constructor with buffer. </summary>
         internal MeshFeatures(Buffer b)
         {
-            this.map_uuid = BuiltIns.DeserializeString(b);
-            this.features = BuiltIns.DeserializeArray<mesh_msgs.Feature>(b, 0);
+            this.map_uuid = b.DeserializeString();
+            this.features = b.DeserializeArray<mesh_msgs.Feature>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -37,8 +37,8 @@ namespace Iviz.Msgs.mesh_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.map_uuid, b);
-            BuiltIns.SerializeArray(this.features, b, 0);
+            b.Serialize(this.map_uuid);
+            b.SerializeArray(this.features, 0);
         }
         
         public void Validate()

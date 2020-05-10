@@ -87,7 +87,7 @@ namespace Iviz.Msgs.diagnostic_msgs
         /// <summary> Constructor with buffer. </summary>
         internal AddDiagnosticsRequest(Buffer b)
         {
-            this.load_namespace = BuiltIns.DeserializeString(b);
+            this.load_namespace = b.DeserializeString();
         }
         
         public IRequest Deserialize(Buffer b)
@@ -99,7 +99,7 @@ namespace Iviz.Msgs.diagnostic_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.load_namespace, b);
+            b.Serialize(this.load_namespace);
         }
         
         public void Validate()
@@ -146,8 +146,8 @@ namespace Iviz.Msgs.diagnostic_msgs
         /// <summary> Constructor with buffer. </summary>
         internal AddDiagnosticsResponse(Buffer b)
         {
-            this.success = BuiltIns.DeserializeStruct<bool>(b);
-            this.message = BuiltIns.DeserializeString(b);
+            this.success = b.Deserialize<bool>();
+            this.message = b.DeserializeString();
         }
         
         public IResponse Deserialize(Buffer b)
@@ -159,8 +159,8 @@ namespace Iviz.Msgs.diagnostic_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.success, b);
-            BuiltIns.Serialize(this.message, b);
+            b.Serialize(this.success);
+            b.Serialize(this.message);
         }
         
         public void Validate()

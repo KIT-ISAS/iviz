@@ -31,8 +31,8 @@ namespace Iviz.Msgs.sensor_msgs
         internal Temperature(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.temperature = BuiltIns.DeserializeStruct<double>(b);
-            this.variance = BuiltIns.DeserializeStruct<double>(b);
+            this.temperature = b.Deserialize<double>();
+            this.variance = b.Deserialize<double>();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -45,8 +45,8 @@ namespace Iviz.Msgs.sensor_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
-            BuiltIns.Serialize(this.temperature, b);
-            BuiltIns.Serialize(this.variance, b);
+            b.Serialize(this.temperature);
+            b.Serialize(this.variance);
         }
         
         public void Validate()

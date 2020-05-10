@@ -48,15 +48,15 @@ namespace Iviz.Msgs.mesh_msgs
         /// <summary> Constructor with buffer. </summary>
         internal TriangleMesh(Buffer b)
         {
-            this.triangles = BuiltIns.DeserializeArray<TriangleIndices>(b, 0);
-            this.vertices = BuiltIns.DeserializeStructArray<geometry_msgs.Point>(b, 0);
-            this.vertex_normals = BuiltIns.DeserializeStructArray<geometry_msgs.Point>(b, 0);
-            this.vertex_colors = BuiltIns.DeserializeStructArray<std_msgs.ColorRGBA>(b, 0);
-            this.triangle_colors = BuiltIns.DeserializeStructArray<std_msgs.ColorRGBA>(b, 0);
-            this.vertex_texture_coords = BuiltIns.DeserializeStructArray<geometry_msgs.Point>(b, 0);
-            this.face_materials = BuiltIns.DeserializeArray<mesh_msgs.MeshMaterial>(b, 0);
-            this.textures = BuiltIns.DeserializeArray<sensor_msgs.Image>(b, 0);
-            this.clusters = BuiltIns.DeserializeArray<mesh_msgs.MeshFaceCluster>(b, 0);
+            this.triangles = b.DeserializeArray<TriangleIndices>(0);
+            this.vertices = b.DeserializeStructArray<geometry_msgs.Point>(0);
+            this.vertex_normals = b.DeserializeStructArray<geometry_msgs.Point>(0);
+            this.vertex_colors = b.DeserializeStructArray<std_msgs.ColorRGBA>(0);
+            this.triangle_colors = b.DeserializeStructArray<std_msgs.ColorRGBA>(0);
+            this.vertex_texture_coords = b.DeserializeStructArray<geometry_msgs.Point>(0);
+            this.face_materials = b.DeserializeArray<mesh_msgs.MeshMaterial>(0);
+            this.textures = b.DeserializeArray<sensor_msgs.Image>(0);
+            this.clusters = b.DeserializeArray<mesh_msgs.MeshFaceCluster>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -68,15 +68,15 @@ namespace Iviz.Msgs.mesh_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.SerializeArray(this.triangles, b, 0);
-            BuiltIns.SerializeStructArray(this.vertices, b, 0);
-            BuiltIns.SerializeStructArray(this.vertex_normals, b, 0);
-            BuiltIns.SerializeStructArray(this.vertex_colors, b, 0);
-            BuiltIns.SerializeStructArray(this.triangle_colors, b, 0);
-            BuiltIns.SerializeStructArray(this.vertex_texture_coords, b, 0);
-            BuiltIns.SerializeArray(this.face_materials, b, 0);
-            BuiltIns.SerializeArray(this.textures, b, 0);
-            BuiltIns.SerializeArray(this.clusters, b, 0);
+            b.SerializeArray(this.triangles, 0);
+            b.SerializeStructArray(this.vertices, 0);
+            b.SerializeStructArray(this.vertex_normals, 0);
+            b.SerializeStructArray(this.vertex_colors, 0);
+            b.SerializeStructArray(this.triangle_colors, 0);
+            b.SerializeStructArray(this.vertex_texture_coords, 0);
+            b.SerializeArray(this.face_materials, 0);
+            b.SerializeArray(this.textures, 0);
+            b.SerializeArray(this.clusters, 0);
         }
         
         public void Validate()

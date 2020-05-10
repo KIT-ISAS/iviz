@@ -156,12 +156,12 @@ namespace Iviz.Msgs.sensor_msgs
             this.width = width;
             this.distortion_model = distortion_model ?? throw new System.ArgumentNullException(nameof(distortion_model));
             this.D = D ?? throw new System.ArgumentNullException(nameof(D));
-            BuiltIns.AssertSize(K, 9);
-            this.K = K;
-            BuiltIns.AssertSize(R, 9);
-            this.R = R;
-            BuiltIns.AssertSize(P, 12);
-            this.P = P;
+            this.K = K ?? throw new System.ArgumentNullException(nameof(K));
+            if (this.K.Length != 9) throw new System.ArgumentException("Invalid size", nameof(K));
+            this.R = R ?? throw new System.ArgumentNullException(nameof(R));
+            if (this.R.Length != 9) throw new System.ArgumentException("Invalid size", nameof(R));
+            this.P = P ?? throw new System.ArgumentNullException(nameof(P));
+            if (this.P.Length != 12) throw new System.ArgumentException("Invalid size", nameof(P));
             this.binning_x = binning_x;
             this.binning_y = binning_y;
             this.roi = roi ?? throw new System.ArgumentNullException(nameof(roi));
@@ -171,15 +171,15 @@ namespace Iviz.Msgs.sensor_msgs
         internal CameraInfo(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.height = BuiltIns.DeserializeStruct<uint>(b);
-            this.width = BuiltIns.DeserializeStruct<uint>(b);
-            this.distortion_model = BuiltIns.DeserializeString(b);
-            this.D = BuiltIns.DeserializeStructArray<double>(b, 0);
-            this.K = BuiltIns.DeserializeStructArray<double>(b, 9);
-            this.R = BuiltIns.DeserializeStructArray<double>(b, 9);
-            this.P = BuiltIns.DeserializeStructArray<double>(b, 12);
-            this.binning_x = BuiltIns.DeserializeStruct<uint>(b);
-            this.binning_y = BuiltIns.DeserializeStruct<uint>(b);
+            this.height = b.Deserialize<uint>();
+            this.width = b.Deserialize<uint>();
+            this.distortion_model = b.DeserializeString();
+            this.D = b.DeserializeStructArray<double>(0);
+            this.K = b.DeserializeStructArray<double>(9);
+            this.R = b.DeserializeStructArray<double>(9);
+            this.P = b.DeserializeStructArray<double>(12);
+            this.binning_x = b.Deserialize<uint>();
+            this.binning_y = b.Deserialize<uint>();
             this.roi = new RegionOfInterest(b);
         }
         
@@ -193,15 +193,15 @@ namespace Iviz.Msgs.sensor_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
-            BuiltIns.Serialize(this.height, b);
-            BuiltIns.Serialize(this.width, b);
-            BuiltIns.Serialize(this.distortion_model, b);
-            BuiltIns.Serialize(this.D, b, 0);
-            BuiltIns.Serialize(this.K, b, 9);
-            BuiltIns.Serialize(this.R, b, 9);
-            BuiltIns.Serialize(this.P, b, 12);
-            BuiltIns.Serialize(this.binning_x, b);
-            BuiltIns.Serialize(this.binning_y, b);
+            b.Serialize(this.height);
+            b.Serialize(this.width);
+            b.Serialize(this.distortion_model);
+            b.SerializeStructArray(this.D, 0);
+            b.SerializeStructArray(this.K, 9);
+            b.SerializeStructArray(this.R, 9);
+            b.SerializeStructArray(this.P, 12);
+            b.Serialize(this.binning_x);
+            b.Serialize(this.binning_y);
             this.roi.Serialize(b);
         }
         
@@ -210,9 +210,12 @@ namespace Iviz.Msgs.sensor_msgs
             if (header is null) throw new System.NullReferenceException();
             if (distortion_model is null) throw new System.NullReferenceException();
             if (D is null) throw new System.NullReferenceException();
-            BuiltIns.AssertSize(K, 9);
-            BuiltIns.AssertSize(R, 9);
-            BuiltIns.AssertSize(P, 12);
+            if (K is null) throw new System.NullReferenceException();
+            if (K.Length != 9) throw new System.IndexOutOfRangeException();
+            if (R is null) throw new System.NullReferenceException();
+            if (R.Length != 9) throw new System.IndexOutOfRangeException();
+            if (P is null) throw new System.NullReferenceException();
+            if (P.Length != 12) throw new System.IndexOutOfRangeException();
             if (roi is null) throw new System.NullReferenceException();
         }
     

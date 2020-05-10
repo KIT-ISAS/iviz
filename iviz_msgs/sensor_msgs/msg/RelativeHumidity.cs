@@ -35,8 +35,8 @@ namespace Iviz.Msgs.sensor_msgs
         internal RelativeHumidity(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.relative_humidity = BuiltIns.DeserializeStruct<double>(b);
-            this.variance = BuiltIns.DeserializeStruct<double>(b);
+            this.relative_humidity = b.Deserialize<double>();
+            this.variance = b.Deserialize<double>();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -49,8 +49,8 @@ namespace Iviz.Msgs.sensor_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
-            BuiltIns.Serialize(this.relative_humidity, b);
-            BuiltIns.Serialize(this.variance, b);
+            b.Serialize(this.relative_humidity);
+            b.Serialize(this.variance);
         }
         
         public void Validate()

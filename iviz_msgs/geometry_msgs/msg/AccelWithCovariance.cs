@@ -25,15 +25,15 @@ namespace Iviz.Msgs.geometry_msgs
         public AccelWithCovariance(Accel accel, double[] covariance)
         {
             this.accel = accel ?? throw new System.ArgumentNullException(nameof(accel));
-            BuiltIns.AssertSize(covariance, 36);
-            this.covariance = covariance;
+            this.covariance = covariance ?? throw new System.ArgumentNullException(nameof(covariance));
+            if (this.covariance.Length != 36) throw new System.ArgumentException("Invalid size", nameof(covariance));
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal AccelWithCovariance(Buffer b)
         {
             this.accel = new Accel(b);
-            this.covariance = BuiltIns.DeserializeStructArray<double>(b, 36);
+            this.covariance = b.DeserializeStructArray<double>(36);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -46,13 +46,14 @@ namespace Iviz.Msgs.geometry_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.accel.Serialize(b);
-            BuiltIns.Serialize(this.covariance, b, 36);
+            b.SerializeStructArray(this.covariance, 36);
         }
         
         public void Validate()
         {
             if (accel is null) throw new System.NullReferenceException();
-            BuiltIns.AssertSize(covariance, 36);
+            if (covariance is null) throw new System.NullReferenceException();
+            if (covariance.Length != 36) throw new System.IndexOutOfRangeException();
         }
     
         [IgnoreDataMember]

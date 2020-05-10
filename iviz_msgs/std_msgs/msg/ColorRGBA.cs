@@ -23,7 +23,7 @@ namespace Iviz.Msgs.std_msgs
         /// <summary> Constructor with buffer. </summary>
         internal ColorRGBA(Buffer b)
         {
-            BuiltIns.DeserializeStruct(out this, b);
+            this = b.Deserialize<ColorRGBA>();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -35,7 +35,7 @@ namespace Iviz.Msgs.std_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.SerializeStruct(this, b);
+            b.Serialize(this);
         }
         
         public void Validate()

@@ -104,7 +104,7 @@ namespace Iviz.Msgs.rosapi
         /// <summary> Constructor with buffer. </summary>
         internal GetActionServersResponse(Buffer b)
         {
-            this.action_servers = BuiltIns.DeserializeStringArray(b, 0);
+            this.action_servers = b.DeserializeStringArray(0);
         }
         
         public IResponse Deserialize(Buffer b)
@@ -116,7 +116,7 @@ namespace Iviz.Msgs.rosapi
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.action_servers, b, 0);
+            b.SerializeArray(this.action_servers, 0);
         }
         
         public void Validate()

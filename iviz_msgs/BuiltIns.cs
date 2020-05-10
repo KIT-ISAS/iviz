@@ -14,6 +14,7 @@ namespace Iviz.Msgs
 
         public static string InvalidArrayLengthStr { get; } = "Invalid array length.";
 
+        /*
         static void Memcpy(void* dst, void* src, uint size)
         {
             System.Buffer.MemoryCopy(src, dst, size, size);
@@ -649,6 +650,7 @@ namespace Iviz.Msgs
                 return (uint)(b.ptr - b_ptr);
             }
         }
+        */
 
         public static string GetClassStringConstant(Type type, string name)
         {

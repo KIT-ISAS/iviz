@@ -66,11 +66,11 @@ namespace Iviz.Msgs.sensor_msgs
         internal Range(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.radiation_type = BuiltIns.DeserializeStruct<byte>(b);
-            this.field_of_view = BuiltIns.DeserializeStruct<float>(b);
-            this.min_range = BuiltIns.DeserializeStruct<float>(b);
-            this.max_range = BuiltIns.DeserializeStruct<float>(b);
-            this.range = BuiltIns.DeserializeStruct<float>(b);
+            this.radiation_type = b.Deserialize<byte>();
+            this.field_of_view = b.Deserialize<float>();
+            this.min_range = b.Deserialize<float>();
+            this.max_range = b.Deserialize<float>();
+            this.range = b.Deserialize<float>();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -83,11 +83,11 @@ namespace Iviz.Msgs.sensor_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
-            BuiltIns.Serialize(this.radiation_type, b);
-            BuiltIns.Serialize(this.field_of_view, b);
-            BuiltIns.Serialize(this.min_range, b);
-            BuiltIns.Serialize(this.max_range, b);
-            BuiltIns.Serialize(this.range, b);
+            b.Serialize(this.radiation_type);
+            b.Serialize(this.field_of_view);
+            b.Serialize(this.min_range);
+            b.Serialize(this.max_range);
+            b.Serialize(this.range);
         }
         
         public void Validate()

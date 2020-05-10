@@ -22,7 +22,7 @@ namespace Iviz.Msgs.geometry_msgs
         /// <summary> Constructor with buffer. </summary>
         internal Polygon(Buffer b)
         {
-            this.points = BuiltIns.DeserializeArray<Point32>(b, 0);
+            this.points = b.DeserializeArray<Point32>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -34,7 +34,7 @@ namespace Iviz.Msgs.geometry_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.SerializeArray(this.points, b, 0);
+            b.SerializeArray(this.points, 0);
         }
         
         public void Validate()

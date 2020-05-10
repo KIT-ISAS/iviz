@@ -21,7 +21,7 @@ namespace Iviz.Msgs.visualization_msgs
         /// <summary> Constructor with buffer. </summary>
         internal MarkerArray(Buffer b)
         {
-            this.markers = BuiltIns.DeserializeArray<Marker>(b, 0);
+            this.markers = b.DeserializeArray<Marker>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -33,7 +33,7 @@ namespace Iviz.Msgs.visualization_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.SerializeArray(this.markers, b, 0);
+            b.SerializeArray(this.markers, 0);
         }
         
         public void Validate()

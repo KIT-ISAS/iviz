@@ -47,8 +47,8 @@ namespace Iviz.Msgs.actionlib_msgs
         internal GoalStatus(Buffer b)
         {
             this.goal_id = new GoalID(b);
-            this.status = BuiltIns.DeserializeStruct<byte>(b);
-            this.text = BuiltIns.DeserializeString(b);
+            this.status = b.Deserialize<byte>();
+            this.text = b.DeserializeString();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -61,8 +61,8 @@ namespace Iviz.Msgs.actionlib_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.goal_id.Serialize(b);
-            BuiltIns.Serialize(this.status, b);
-            BuiltIns.Serialize(this.text, b);
+            b.Serialize(this.status);
+            b.Serialize(this.text);
         }
         
         public void Validate()

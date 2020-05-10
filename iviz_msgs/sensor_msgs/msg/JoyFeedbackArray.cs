@@ -22,7 +22,7 @@ namespace Iviz.Msgs.sensor_msgs
         /// <summary> Constructor with buffer. </summary>
         internal JoyFeedbackArray(Buffer b)
         {
-            this.array = BuiltIns.DeserializeArray<JoyFeedback>(b, 0);
+            this.array = b.DeserializeArray<JoyFeedback>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -34,7 +34,7 @@ namespace Iviz.Msgs.sensor_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.SerializeArray(this.array, b, 0);
+            b.SerializeArray(this.array, 0);
         }
         
         public void Validate()

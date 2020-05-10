@@ -27,8 +27,8 @@ namespace Iviz.Msgs.mesh_msgs
         /// <summary> Constructor with buffer. </summary>
         internal MeshTexture(Buffer b)
         {
-            this.uuid = BuiltIns.DeserializeString(b);
-            this.texture_index = BuiltIns.DeserializeStruct<uint>(b);
+            this.uuid = b.DeserializeString();
+            this.texture_index = b.Deserialize<uint>();
             this.image = new sensor_msgs.Image(b);
         }
         
@@ -41,8 +41,8 @@ namespace Iviz.Msgs.mesh_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.uuid, b);
-            BuiltIns.Serialize(this.texture_index, b);
+            b.Serialize(this.uuid);
+            b.Serialize(this.texture_index);
             this.image.Serialize(b);
         }
         

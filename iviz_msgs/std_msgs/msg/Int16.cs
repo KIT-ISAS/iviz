@@ -20,7 +20,7 @@ namespace Iviz.Msgs.std_msgs
         /// <summary> Constructor with buffer. </summary>
         internal Int16(Buffer b)
         {
-            this.data = BuiltIns.DeserializeStruct<short>(b);
+            this.data = b.Deserialize<short>();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -32,7 +32,7 @@ namespace Iviz.Msgs.std_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.data, b);
+            b.Serialize(this.data);
         }
         
         public void Validate()

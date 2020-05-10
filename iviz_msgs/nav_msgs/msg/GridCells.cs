@@ -30,9 +30,9 @@ namespace Iviz.Msgs.nav_msgs
         internal GridCells(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.cell_width = BuiltIns.DeserializeStruct<float>(b);
-            this.cell_height = BuiltIns.DeserializeStruct<float>(b);
-            this.cells = BuiltIns.DeserializeStructArray<geometry_msgs.Point>(b, 0);
+            this.cell_width = b.Deserialize<float>();
+            this.cell_height = b.Deserialize<float>();
+            this.cells = b.DeserializeStructArray<geometry_msgs.Point>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -45,9 +45,9 @@ namespace Iviz.Msgs.nav_msgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
-            BuiltIns.Serialize(this.cell_width, b);
-            BuiltIns.Serialize(this.cell_height, b);
-            BuiltIns.SerializeStructArray(this.cells, b, 0);
+            b.Serialize(this.cell_width);
+            b.Serialize(this.cell_height);
+            b.SerializeStructArray(this.cells, 0);
         }
         
         public void Validate()

@@ -75,7 +75,7 @@ namespace Iviz.Msgs.tf
         /// <summary> Constructor with buffer. </summary>
         internal FrameGraphResponse(Buffer b)
         {
-            this.dot_graph = BuiltIns.DeserializeString(b);
+            this.dot_graph = b.DeserializeString();
         }
         
         public IResponse Deserialize(Buffer b)
@@ -87,7 +87,7 @@ namespace Iviz.Msgs.tf
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.dot_graph, b);
+            b.Serialize(this.dot_graph);
         }
         
         public void Validate()

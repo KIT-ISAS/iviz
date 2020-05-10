@@ -38,10 +38,10 @@ namespace Iviz.Msgs.sensor_msgs
         /// <summary> Constructor with buffer. </summary>
         internal PointField(Buffer b)
         {
-            this.name = BuiltIns.DeserializeString(b);
-            this.offset = BuiltIns.DeserializeStruct<uint>(b);
-            this.datatype = BuiltIns.DeserializeStruct<byte>(b);
-            this.count = BuiltIns.DeserializeStruct<uint>(b);
+            this.name = b.DeserializeString();
+            this.offset = b.Deserialize<uint>();
+            this.datatype = b.Deserialize<byte>();
+            this.count = b.Deserialize<uint>();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -53,10 +53,10 @@ namespace Iviz.Msgs.sensor_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.name, b);
-            BuiltIns.Serialize(this.offset, b);
-            BuiltIns.Serialize(this.datatype, b);
-            BuiltIns.Serialize(this.count, b);
+            b.Serialize(this.name);
+            b.Serialize(this.offset);
+            b.Serialize(this.datatype);
+            b.Serialize(this.count);
         }
         
         public void Validate()

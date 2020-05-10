@@ -71,7 +71,7 @@ namespace Iviz.Msgs.rosapi
         /// <summary> Constructor with buffer. </summary>
         internal ServiceNodeRequest(Buffer b)
         {
-            this.service = BuiltIns.DeserializeString(b);
+            this.service = b.DeserializeString();
         }
         
         public IRequest Deserialize(Buffer b)
@@ -83,7 +83,7 @@ namespace Iviz.Msgs.rosapi
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.service, b);
+            b.Serialize(this.service);
         }
         
         public void Validate()
@@ -121,7 +121,7 @@ namespace Iviz.Msgs.rosapi
         /// <summary> Constructor with buffer. </summary>
         internal ServiceNodeResponse(Buffer b)
         {
-            this.node = BuiltIns.DeserializeString(b);
+            this.node = b.DeserializeString();
         }
         
         public IResponse Deserialize(Buffer b)
@@ -133,7 +133,7 @@ namespace Iviz.Msgs.rosapi
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.Serialize(this.node, b);
+            b.Serialize(this.node);
         }
         
         public void Validate()

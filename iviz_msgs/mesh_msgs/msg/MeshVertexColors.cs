@@ -22,7 +22,7 @@ namespace Iviz.Msgs.mesh_msgs
         /// <summary> Constructor with buffer. </summary>
         internal MeshVertexColors(Buffer b)
         {
-            this.vertex_colors = BuiltIns.DeserializeStructArray<std_msgs.ColorRGBA>(b, 0);
+            this.vertex_colors = b.DeserializeStructArray<std_msgs.ColorRGBA>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -34,7 +34,7 @@ namespace Iviz.Msgs.mesh_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.SerializeStructArray(this.vertex_colors, b, 0);
+            b.SerializeStructArray(this.vertex_colors, 0);
         }
         
         public void Validate()

@@ -24,8 +24,8 @@ namespace Iviz.Msgs.mesh_msgs
         /// <summary> Constructor with buffer. </summary>
         internal VectorField(Buffer b)
         {
-            this.positions = BuiltIns.DeserializeStructArray<geometry_msgs.Point>(b, 0);
-            this.vectors = BuiltIns.DeserializeStructArray<geometry_msgs.Vector3>(b, 0);
+            this.positions = b.DeserializeStructArray<geometry_msgs.Point>(0);
+            this.vectors = b.DeserializeStructArray<geometry_msgs.Vector3>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -37,8 +37,8 @@ namespace Iviz.Msgs.mesh_msgs
         public void Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            BuiltIns.SerializeStructArray(this.positions, b, 0);
-            BuiltIns.SerializeStructArray(this.vectors, b, 0);
+            b.SerializeStructArray(this.positions, 0);
+            b.SerializeStructArray(this.vectors, 0);
         }
         
         public void Validate()

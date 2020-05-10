@@ -34,7 +34,7 @@ namespace Iviz.Msgs.visualization_msgs
         {
             this.header = new std_msgs.Header(b);
             this.pose = new geometry_msgs.Pose(b);
-            this.name = BuiltIns.DeserializeString(b);
+            this.name = b.DeserializeString();
         }
         
         public IMessage Deserialize(Buffer b)
@@ -48,7 +48,7 @@ namespace Iviz.Msgs.visualization_msgs
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
             this.pose.Serialize(b);
-            BuiltIns.Serialize(this.name, b);
+            b.Serialize(this.name);
         }
         
         public void Validate()

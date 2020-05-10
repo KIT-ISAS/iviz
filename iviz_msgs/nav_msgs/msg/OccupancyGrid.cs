@@ -37,7 +37,7 @@ namespace Iviz.Msgs.nav_msgs
         {
             this.header = new std_msgs.Header(b);
             this.info = new MapMetaData(b);
-            this.data = BuiltIns.DeserializeStructArray<sbyte>(b, 0);
+            this.data = b.DeserializeStructArray<sbyte>(0);
         }
         
         public IMessage Deserialize(Buffer b)
@@ -51,7 +51,7 @@ namespace Iviz.Msgs.nav_msgs
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             this.header.Serialize(b);
             this.info.Serialize(b);
-            BuiltIns.Serialize(this.data, b, 0);
+            b.SerializeStructArray(this.data, 0);
         }
         
         public void Validate()
