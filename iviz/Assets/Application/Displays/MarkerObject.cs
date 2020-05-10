@@ -4,6 +4,7 @@ using System;
 using UnityEngine.EventSystems;
 using Iviz.Msgs.visualization_msgs;
 using Iviz.App.Displays;
+using System.Collections.Generic;
 
 namespace Iviz.App
 {
@@ -123,11 +124,12 @@ namespace Iviz.App
                     break;
                 case MarkerType.POINTS:
                     PointListResource pointList = resource as PointListResource;
-                    pointList.Size = msg.points.Length;
                     pointList.Scale = msg.scale.Ros2Unity().Abs();
                     pointList.Color = msg.color.Sanitize().ToUnityColor();
-                    pointList.Colors = (msg.colors.Length == 0) ? null : msg.colors.Select(x => x.ToUnityColor32());
-                    pointList.Points = msg.points.Select(x => x.Ros2Unity());
+                    IList<Color> colors = (msg.colors.Length == 0) ? null : msg.colors.Select(x => x.ToUnityColor()).ToList();
+                    IList<Vector3> positions = msg.points.Select(x => x.Ros2Unity()).ToList();
+                    pointList.Set(positions, colors);
+                    pointList.UseIntensityTexture = false;
                     break;
                 case MarkerType.TRIANGLE_LIST:
                     MeshTrianglesResource meshTriangles = resource as MeshTrianglesResource;

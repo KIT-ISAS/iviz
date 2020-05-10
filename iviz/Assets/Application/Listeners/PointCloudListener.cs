@@ -175,7 +175,7 @@ namespace Iviz.App
                     Size = newSize;
                     pointCloud.IntensityBounds = intensityBounds;
                     pointCloud.UseIntensityTexture = !rgbaHint;
-                    pointCloud.SetPointsWithColor(pointBuffer, Size);
+                    pointCloud.Set(pointBuffer, Size);
                 });
             });
         }

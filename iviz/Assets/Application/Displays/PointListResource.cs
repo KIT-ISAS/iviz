@@ -104,7 +104,7 @@ namespace Iviz.App.Displays
         public int Size
         {
             get => size;
-            set
+            private set
             {
                 if (value == size)
                 {
@@ -130,7 +130,7 @@ namespace Iviz.App.Displays
         public IEnumerable<Color32> Colors
         {
             get => pointBuffer.Select(x => x.color);
-            set
+            private set
             {
                 int index = 0;
                 if (value == null || value.Count() == 0)
@@ -159,7 +159,7 @@ namespace Iviz.App.Displays
         public IEnumerable<Vector3> Points
         {
             get => pointBuffer.Select(x => x.position);
-            set
+            private set
             {
                 Size = value.Count();
 
@@ -180,12 +180,37 @@ namespace Iviz.App.Displays
             get => pointBuffer;
         }
 
-        public void SetPointsWithColor(IList<PointWithColor> points, int size)
+        public void Set(IList<PointWithColor> points, int size)
         {
             Size = size;
             for (int i = 0; i < size; i++)
             {
                 pointBuffer[i] = points[i];
+            }
+            pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
+            Bounds bounds = CalculateBounds();
+            Collider.center = bounds.center;
+            Collider.size = bounds.size;
+        }
+
+        public void Set(IList<Vector3> points, IList<Color> colors)
+        {
+            Size = points.Count;
+            if (colors == null)
+            {
+                for (int i = 0; i < size; i++)
+                {
+                    pointBuffer[i].position = points[i];
+                    pointBuffer[i].color = Color;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < size; i++)
+                {
+                    pointBuffer[i].position = points[i];
+                    pointBuffer[i].color = Color * colors[i];
+                }
             }
             pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
             Bounds bounds = CalculateBounds();
@@ -207,7 +232,7 @@ namespace Iviz.App.Displays
             }
         }
 
-        public override string Name => throw new NotImplementedException();
+        public override string Name => "PointList";
 
         protected override void Awake()
         {

@@ -97,6 +97,7 @@ namespace Iviz.App
             public Material MeshList { get; }
             public Material DepthImageProjector { get; }
             public Material Grid { get; }
+            public Material Line { get; }
 
             public MaterialsType()
             {
@@ -107,6 +108,7 @@ namespace Iviz.App
                 PointCloud = Resources.Load<Material>("Materials/PointCloud Material");
                 MeshList = Resources.Load<Material>("Materials/MeshList Material");
                 Grid = Resources.Load<Material>("Materials/Grid");
+                Line = Resources.Load<Material>("Materials/Line Material");
             }
         }
 
