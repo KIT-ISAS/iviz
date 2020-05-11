@@ -5,7 +5,7 @@ namespace Iviz.Msgs.rosapi
     public sealed class ServiceRequestDetails : IService
     {
         /// <summary> Request message. </summary>
-        public ServiceRequestDetailsRequest Request { get; }
+        public ServiceRequestDetailsRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public ServiceRequestDetailsResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.rosapi
         
         public IService Create() => new ServiceRequestDetails();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (ServiceRequestDetailsRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (ServiceRequestDetailsResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -46,7 +54,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class ServiceRequestDetailsRequest : IRequest
     {
-        public string type;
+        public string type { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ServiceRequestDetailsRequest()
@@ -54,14 +62,33 @@ namespace Iviz.Msgs.rosapi
             type = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public ServiceRequestDetailsRequest(string type)
         {
-            BuiltIns.Deserialize(out type, ref ptr, end);
+            this.type = type ?? throw new System.ArgumentNullException(nameof(type));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal ServiceRequestDetailsRequest(Buffer b)
+        {
+            this.type = b.DeserializeString();
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new ServiceRequestDetailsRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(type, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this.type);
+        }
+        
+        public void Validate()
+        {
+            if (type is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -77,7 +104,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class ServiceRequestDetailsResponse : IResponse
     {
-        public TypeDef[] typedefs;
+        public TypeDef[] typedefs { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ServiceRequestDetailsResponse()
@@ -85,14 +112,33 @@ namespace Iviz.Msgs.rosapi
             typedefs = System.Array.Empty<TypeDef>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public ServiceRequestDetailsResponse(TypeDef[] typedefs)
         {
-            BuiltIns.DeserializeArray(out typedefs, ref ptr, end, 0);
+            this.typedefs = typedefs ?? throw new System.ArgumentNullException(nameof(typedefs));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal ServiceRequestDetailsResponse(Buffer b)
+        {
+            this.typedefs = b.DeserializeArray<TypeDef>(0);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new ServiceRequestDetailsResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.SerializeArray(typedefs, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.SerializeArray(this.typedefs, 0);
+        }
+        
+        public void Validate()
+        {
+            if (typedefs is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

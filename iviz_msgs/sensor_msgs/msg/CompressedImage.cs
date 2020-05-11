@@ -6,17 +6,17 @@ namespace Iviz.Msgs.sensor_msgs
     {
         // This message contains a compressed image
         
-        public std_msgs.Header header; // Header timestamp should be acquisition time of image
+        public std_msgs.Header header { get; set; } // Header timestamp should be acquisition time of image
         // Header frame_id should be optical frame of camera
         // origin of frame should be optical center of camera
         // +x should point to the right in the image
         // +y should point down in the image
         // +z should point into to plane of the image
         
-        public string format; // Specifies the format of the data
+        public string format { get; set; } // Specifies the format of the data
         //   Acceptable values:
         //     jpeg, png
-        public byte[] data; // Compressed image buffer
+        public byte[] data { get; set; } // Compressed image buffer
     
         /// <summary> Constructor for empty message. </summary>
         public CompressedImage()
@@ -26,18 +26,41 @@ namespace Iviz.Msgs.sensor_msgs
             data = System.Array.Empty<byte>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public CompressedImage(std_msgs.Header header, string format, byte[] data)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out format, ref ptr, end);
-            BuiltIns.Deserialize(out data, ref ptr, end, 0);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.format = format ?? throw new System.ArgumentNullException(nameof(format));
+            this.data = data ?? throw new System.ArgumentNullException(nameof(data));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal CompressedImage(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.format = b.DeserializeString();
+            this.data = b.DeserializeStructArray<byte>(0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new CompressedImage(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.Serialize(format, ref ptr, end);
-            BuiltIns.Serialize(data, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            b.Serialize(this.format);
+            b.SerializeStructArray(this.data, 0);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (format is null) throw new System.NullReferenceException();
+            if (data is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -51,8 +74,6 @@ namespace Iviz.Msgs.sensor_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new CompressedImage();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

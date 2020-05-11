@@ -197,7 +197,7 @@ namespace Iviz.RoslibSharp
             {
                 writeBuffer = new byte[msgLength + BufferSizeIncrease];
             }
-            uint sendLength = BuiltIns.Serialize(requestMsg, writeBuffer);
+            uint sendLength = Msgs.Buffer.Serialize(requestMsg, writeBuffer);
             writer.Write(sendLength);
 
             writer.Write(writeBuffer, 0, (int)sendLength);
@@ -230,7 +230,7 @@ namespace Iviz.RoslibSharp
             else 
             {
                 service.ErrorMessage = null;
-                BuiltIns.Deserialize(service.Response, readBuffer, rcvLength);
+                service.Response = Msgs.Buffer.Deserialize(service.Response, readBuffer, rcvLength);
                 NumReceived++;
                 return true;
             }

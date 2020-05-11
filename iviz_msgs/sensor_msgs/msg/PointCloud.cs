@@ -8,16 +8,16 @@ namespace Iviz.Msgs.sensor_msgs
         // information about each point.
         
         // Time of sensor data acquisition, coordinate frame ID.
-        public std_msgs.Header header;
+        public std_msgs.Header header { get; set; }
         
         // Array of 3d points. Each Point32 should be interpreted as a 3d point
         // in the frame given in the header.
-        public geometry_msgs.Point32[] points;
+        public geometry_msgs.Point32[] points { get; set; }
         
         // Each channel should have the same number of elements as points array,
         // and the data in each channel should correspond 1:1 with each point.
         // Channel names in common practice are listed in ChannelFloat32.msg.
-        public ChannelFloat32[] channels;
+        public ChannelFloat32[] channels { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public PointCloud()
@@ -27,18 +27,41 @@ namespace Iviz.Msgs.sensor_msgs
             channels = System.Array.Empty<ChannelFloat32>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public PointCloud(std_msgs.Header header, geometry_msgs.Point32[] points, ChannelFloat32[] channels)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.DeserializeArray(out points, ref ptr, end, 0);
-            BuiltIns.DeserializeArray(out channels, ref ptr, end, 0);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.points = points ?? throw new System.ArgumentNullException(nameof(points));
+            this.channels = channels ?? throw new System.ArgumentNullException(nameof(channels));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal PointCloud(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.points = b.DeserializeArray<geometry_msgs.Point32>(0);
+            this.channels = b.DeserializeArray<ChannelFloat32>(0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new PointCloud(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.SerializeArray(points, ref ptr, end, 0);
-            BuiltIns.SerializeArray(channels, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            b.SerializeArray(this.points, 0);
+            b.SerializeArray(this.channels, 0);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (points is null) throw new System.NullReferenceException();
+            if (channels is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -55,8 +78,6 @@ namespace Iviz.Msgs.sensor_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new PointCloud();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

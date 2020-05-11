@@ -5,7 +5,7 @@ namespace Iviz.Msgs.rosapi
     public sealed class NodeDetails : IService
     {
         /// <summary> Request message. </summary>
-        public NodeDetailsRequest Request { get; }
+        public NodeDetailsRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public NodeDetailsResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.rosapi
         
         public IService Create() => new NodeDetails();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (NodeDetailsRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (NodeDetailsResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -46,7 +54,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class NodeDetailsRequest : IRequest
     {
-        public string node;
+        public string node { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public NodeDetailsRequest()
@@ -54,14 +62,33 @@ namespace Iviz.Msgs.rosapi
             node = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public NodeDetailsRequest(string node)
         {
-            BuiltIns.Deserialize(out node, ref ptr, end);
+            this.node = node ?? throw new System.ArgumentNullException(nameof(node));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal NodeDetailsRequest(Buffer b)
+        {
+            this.node = b.DeserializeString();
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new NodeDetailsRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(node, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this.node);
+        }
+        
+        public void Validate()
+        {
+            if (node is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -77,9 +104,9 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class NodeDetailsResponse : IResponse
     {
-        public string[] subscribing;
-        public string[] publishing;
-        public string[] services;
+        public string[] subscribing { get; set; }
+        public string[] publishing { get; set; }
+        public string[] services { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public NodeDetailsResponse()
@@ -89,18 +116,41 @@ namespace Iviz.Msgs.rosapi
             services = System.Array.Empty<string>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public NodeDetailsResponse(string[] subscribing, string[] publishing, string[] services)
         {
-            BuiltIns.Deserialize(out subscribing, ref ptr, end, 0);
-            BuiltIns.Deserialize(out publishing, ref ptr, end, 0);
-            BuiltIns.Deserialize(out services, ref ptr, end, 0);
+            this.subscribing = subscribing ?? throw new System.ArgumentNullException(nameof(subscribing));
+            this.publishing = publishing ?? throw new System.ArgumentNullException(nameof(publishing));
+            this.services = services ?? throw new System.ArgumentNullException(nameof(services));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal NodeDetailsResponse(Buffer b)
+        {
+            this.subscribing = b.DeserializeStringArray(0);
+            this.publishing = b.DeserializeStringArray(0);
+            this.services = b.DeserializeStringArray(0);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new NodeDetailsResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(subscribing, ref ptr, end, 0);
-            BuiltIns.Serialize(publishing, ref ptr, end, 0);
-            BuiltIns.Serialize(services, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.SerializeArray(this.subscribing, 0);
+            b.SerializeArray(this.publishing, 0);
+            b.SerializeArray(this.services, 0);
+        }
+        
+        public void Validate()
+        {
+            if (subscribing is null) throw new System.NullReferenceException();
+            if (publishing is null) throw new System.NullReferenceException();
+            if (services is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

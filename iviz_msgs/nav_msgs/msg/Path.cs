@@ -5,8 +5,8 @@ namespace Iviz.Msgs.nav_msgs
     public sealed class Path : IMessage
     {
         //An array of poses that represents a Path for a robot to follow
-        public std_msgs.Header header;
-        public geometry_msgs.PoseStamped[] poses;
+        public std_msgs.Header header { get; set; }
+        public geometry_msgs.PoseStamped[] poses { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Path()
@@ -15,16 +15,37 @@ namespace Iviz.Msgs.nav_msgs
             poses = System.Array.Empty<geometry_msgs.PoseStamped>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public Path(std_msgs.Header header, geometry_msgs.PoseStamped[] poses)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.DeserializeArray(out poses, ref ptr, end, 0);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.poses = poses ?? throw new System.ArgumentNullException(nameof(poses));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal Path(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.poses = b.DeserializeArray<geometry_msgs.PoseStamped>(0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new Path(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.SerializeArray(poses, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            b.SerializeArray(this.poses, 0);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (poses is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -40,8 +61,6 @@ namespace Iviz.Msgs.nav_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new Path();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

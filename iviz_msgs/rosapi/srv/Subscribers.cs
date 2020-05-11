@@ -5,7 +5,7 @@ namespace Iviz.Msgs.rosapi
     public sealed class Subscribers : IService
     {
         /// <summary> Request message. </summary>
-        public SubscribersRequest Request { get; }
+        public SubscribersRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public SubscribersResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.rosapi
         
         public IService Create() => new Subscribers();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (SubscribersRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (SubscribersResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -46,7 +54,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class SubscribersRequest : IRequest
     {
-        public string topic;
+        public string topic { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public SubscribersRequest()
@@ -54,14 +62,33 @@ namespace Iviz.Msgs.rosapi
             topic = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public SubscribersRequest(string topic)
         {
-            BuiltIns.Deserialize(out topic, ref ptr, end);
+            this.topic = topic ?? throw new System.ArgumentNullException(nameof(topic));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal SubscribersRequest(Buffer b)
+        {
+            this.topic = b.DeserializeString();
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new SubscribersRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(topic, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this.topic);
+        }
+        
+        public void Validate()
+        {
+            if (topic is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -77,7 +104,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class SubscribersResponse : IResponse
     {
-        public string[] subscribers;
+        public string[] subscribers { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public SubscribersResponse()
@@ -85,14 +112,33 @@ namespace Iviz.Msgs.rosapi
             subscribers = System.Array.Empty<string>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public SubscribersResponse(string[] subscribers)
         {
-            BuiltIns.Deserialize(out subscribers, ref ptr, end, 0);
+            this.subscribers = subscribers ?? throw new System.ArgumentNullException(nameof(subscribers));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal SubscribersResponse(Buffer b)
+        {
+            this.subscribers = b.DeserializeStringArray(0);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new SubscribersResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(subscribers, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.SerializeArray(this.subscribers, 0);
+        }
+        
+        public void Validate()
+        {
+            if (subscribers is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

@@ -102,14 +102,16 @@ namespace Iviz.MsgsGen
 
             lines.Add("");
 
-            List<string> deserializer = ClassInfo.CreateConstructors(variables, name, forceStruct);
+            string type = (isRequest ? "IRequest" : "IResponse");
+
+            List<string> deserializer = ClassInfo.CreateConstructors(variables, name, forceStruct, type);
             foreach (var entry in deserializer)
             {
                 lines.Add("    " + entry);
             }
 
             lines.Add("");
-            List<string> serializer = ClassInfo.CreateSerializers(variables, forceStruct);
+            List<string> serializer = ClassInfo.CreateSerializers(variables, forceStruct, type);
             foreach (var entry in serializer)
             {
                 lines.Add("    " + entry);
@@ -251,7 +253,7 @@ namespace Iviz.MsgsGen
             */
 
             lines.Add("/// <summary> Request message. </summary>");
-            lines.Add("public " + name + "Request Request { get; }");
+            lines.Add("public " + name + "Request Request { get; set; }");
 
             lines.Add("");
             lines.Add("/// <summary> Response message. </summary>");
@@ -277,10 +279,18 @@ namespace Iviz.MsgsGen
             lines.Add("public IService Create() => new " + name + "();");
 
             lines.Add("");
-            lines.Add("IRequest IService.Request => Request;");
+            lines.Add("IRequest IService.Request");
+            lines.Add("{");
+            lines.Add("    get => Request;");
+            lines.Add("    set => Request = (" + name + "Request)value;");
+            lines.Add("}");
 
             lines.Add("");
-            lines.Add("IResponse IService.Response => Response;");
+            lines.Add("IResponse IService.Response");
+            lines.Add("{");
+            lines.Add("    get => Response;");
+            lines.Add("    set => Response = (" + name + "Response)value;");
+            lines.Add("}");
 
             lines.Add("");
             lines.Add("public string ErrorMessage { get; set; }");

@@ -315,7 +315,7 @@ namespace Iviz.RoslibSharp
 
                             try
                             {
-                                uint sendLength = BuiltIns.Serialize(message, writeBuffer);
+                                uint sendLength = Msgs.Buffer.Serialize(message, writeBuffer);
 
                                 //Debug.Log($"{this}: sending {sendLength}");
                                 writer.Write(sendLength);

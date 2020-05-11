@@ -5,7 +5,7 @@ namespace Iviz.Msgs.rosapi
     public sealed class ServicesForType : IService
     {
         /// <summary> Request message. </summary>
-        public ServicesForTypeRequest Request { get; }
+        public ServicesForTypeRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public ServicesForTypeResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.rosapi
         
         public IService Create() => new ServicesForType();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (ServicesForTypeRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (ServicesForTypeResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -46,7 +54,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class ServicesForTypeRequest : IRequest
     {
-        public string type;
+        public string type { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ServicesForTypeRequest()
@@ -54,14 +62,33 @@ namespace Iviz.Msgs.rosapi
             type = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public ServicesForTypeRequest(string type)
         {
-            BuiltIns.Deserialize(out type, ref ptr, end);
+            this.type = type ?? throw new System.ArgumentNullException(nameof(type));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal ServicesForTypeRequest(Buffer b)
+        {
+            this.type = b.DeserializeString();
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new ServicesForTypeRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(type, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this.type);
+        }
+        
+        public void Validate()
+        {
+            if (type is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -77,7 +104,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class ServicesForTypeResponse : IResponse
     {
-        public string[] services;
+        public string[] services { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ServicesForTypeResponse()
@@ -85,14 +112,33 @@ namespace Iviz.Msgs.rosapi
             services = System.Array.Empty<string>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public ServicesForTypeResponse(string[] services)
         {
-            BuiltIns.Deserialize(out services, ref ptr, end, 0);
+            this.services = services ?? throw new System.ArgumentNullException(nameof(services));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal ServicesForTypeResponse(Buffer b)
+        {
+            this.services = b.DeserializeStringArray(0);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new ServicesForTypeResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(services, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.SerializeArray(this.services, 0);
+        }
+        
+        public void Validate()
+        {
+            if (services is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

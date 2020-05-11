@@ -6,8 +6,8 @@ namespace Iviz.Msgs.actionlib_msgs
     {
         // Stores the statuses for goals that are currently being tracked
         // by an action server
-        public std_msgs.Header header;
-        public GoalStatus[] status_list;
+        public std_msgs.Header header { get; set; }
+        public GoalStatus[] status_list { get; set; }
         
     
         /// <summary> Constructor for empty message. </summary>
@@ -17,16 +17,37 @@ namespace Iviz.Msgs.actionlib_msgs
             status_list = System.Array.Empty<GoalStatus>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public GoalStatusArray(std_msgs.Header header, GoalStatus[] status_list)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.DeserializeArray(out status_list, ref ptr, end, 0);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.status_list = status_list ?? throw new System.ArgumentNullException(nameof(status_list));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal GoalStatusArray(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.status_list = b.DeserializeArray<GoalStatus>(0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new GoalStatusArray(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.SerializeArray(status_list, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            b.SerializeArray(this.status_list, 0);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (status_list is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -42,8 +63,6 @@ namespace Iviz.Msgs.actionlib_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new GoalStatusArray();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

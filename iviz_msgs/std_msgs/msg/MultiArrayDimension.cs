@@ -4,9 +4,9 @@ namespace Iviz.Msgs.std_msgs
 {
     public sealed class MultiArrayDimension : IMessage
     {
-        public string label; // label of given dimension
-        public uint size; // size of given dimension (in type units)
-        public uint stride; // stride of given dimension
+        public string label { get; set; } // label of given dimension
+        public uint size { get; set; } // size of given dimension (in type units)
+        public uint stride { get; set; } // stride of given dimension
     
         /// <summary> Constructor for empty message. </summary>
         public MultiArrayDimension()
@@ -14,18 +14,39 @@ namespace Iviz.Msgs.std_msgs
             label = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public MultiArrayDimension(string label, uint size, uint stride)
         {
-            BuiltIns.Deserialize(out label, ref ptr, end);
-            BuiltIns.Deserialize(out size, ref ptr, end);
-            BuiltIns.Deserialize(out stride, ref ptr, end);
+            this.label = label ?? throw new System.ArgumentNullException(nameof(label));
+            this.size = size;
+            this.stride = stride;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal MultiArrayDimension(Buffer b)
+        {
+            this.label = b.DeserializeString();
+            this.size = b.Deserialize<uint>();
+            this.stride = b.Deserialize<uint>();
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new MultiArrayDimension(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(label, ref ptr, end);
-            BuiltIns.Serialize(size, ref ptr, end);
-            BuiltIns.Serialize(stride, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this.label);
+            b.Serialize(this.size);
+            b.Serialize(this.stride);
+        }
+        
+        public void Validate()
+        {
+            if (label is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -37,8 +58,6 @@ namespace Iviz.Msgs.std_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new MultiArrayDimension();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

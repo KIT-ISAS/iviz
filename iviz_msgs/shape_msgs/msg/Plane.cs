@@ -11,7 +11,7 @@ namespace Iviz.Msgs.shape_msgs
         // c := coef[2]
         // d := coef[3]
         
-        public double[/*4*/] coef;
+        public double[/*4*/] coef { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Plane()
@@ -19,20 +19,39 @@ namespace Iviz.Msgs.shape_msgs
             coef = new double[4];
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public Plane(double[] coef)
         {
-            BuiltIns.Deserialize(out coef, ref ptr, end, 4);
+            this.coef = coef ?? throw new System.ArgumentNullException(nameof(coef));
+            if (this.coef.Length != 4) throw new System.ArgumentException("Invalid size", nameof(coef));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal Plane(Buffer b)
+        {
+            this.coef = b.DeserializeStructArray<double>(4);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new Plane(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(coef, ref ptr, end, 4);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.SerializeStructArray(this.coef, 4);
+        }
+        
+        public void Validate()
+        {
+            if (coef is null) throw new System.NullReferenceException();
+            if (coef.Length != 4) throw new System.IndexOutOfRangeException();
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 32;
-    
-        public IMessage Create() => new Plane();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

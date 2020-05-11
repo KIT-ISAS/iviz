@@ -5,7 +5,7 @@ namespace Iviz.Msgs.rosapi
     public sealed class Publishers : IService
     {
         /// <summary> Request message. </summary>
-        public PublishersRequest Request { get; }
+        public PublishersRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public PublishersResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.rosapi
         
         public IService Create() => new Publishers();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (PublishersRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (PublishersResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -46,7 +54,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class PublishersRequest : IRequest
     {
-        public string topic;
+        public string topic { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public PublishersRequest()
@@ -54,14 +62,33 @@ namespace Iviz.Msgs.rosapi
             topic = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public PublishersRequest(string topic)
         {
-            BuiltIns.Deserialize(out topic, ref ptr, end);
+            this.topic = topic ?? throw new System.ArgumentNullException(nameof(topic));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal PublishersRequest(Buffer b)
+        {
+            this.topic = b.DeserializeString();
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new PublishersRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(topic, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this.topic);
+        }
+        
+        public void Validate()
+        {
+            if (topic is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -77,7 +104,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class PublishersResponse : IResponse
     {
-        public string[] publishers;
+        public string[] publishers { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public PublishersResponse()
@@ -85,14 +112,33 @@ namespace Iviz.Msgs.rosapi
             publishers = System.Array.Empty<string>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public PublishersResponse(string[] publishers)
         {
-            BuiltIns.Deserialize(out publishers, ref ptr, end, 0);
+            this.publishers = publishers ?? throw new System.ArgumentNullException(nameof(publishers));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal PublishersResponse(Buffer b)
+        {
+            this.publishers = b.DeserializeStringArray(0);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new PublishersResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(publishers, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.SerializeArray(this.publishers, 0);
+        }
+        
+        public void Validate()
+        {
+            if (publishers is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

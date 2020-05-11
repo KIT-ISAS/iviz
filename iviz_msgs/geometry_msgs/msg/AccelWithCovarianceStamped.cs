@@ -5,8 +5,8 @@ namespace Iviz.Msgs.geometry_msgs
     public sealed class AccelWithCovarianceStamped : IMessage
     {
         // This represents an estimated accel with reference coordinate frame and timestamp.
-        public std_msgs.Header header;
-        public AccelWithCovariance accel;
+        public std_msgs.Header header { get; set; }
+        public AccelWithCovariance accel { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public AccelWithCovarianceStamped()
@@ -15,16 +15,37 @@ namespace Iviz.Msgs.geometry_msgs
             accel = new AccelWithCovariance();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public AccelWithCovarianceStamped(std_msgs.Header header, AccelWithCovariance accel)
         {
-            header.Deserialize(ref ptr, end);
-            accel.Deserialize(ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.accel = accel ?? throw new System.ArgumentNullException(nameof(accel));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal AccelWithCovarianceStamped(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.accel = new AccelWithCovariance(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new AccelWithCovarianceStamped(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            accel.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            this.accel.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (accel is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -36,8 +57,6 @@ namespace Iviz.Msgs.geometry_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new AccelWithCovarianceStamped();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

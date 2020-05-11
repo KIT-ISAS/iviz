@@ -6,7 +6,7 @@ namespace Iviz.Msgs.visualization_msgs
     {
         // Identifying string. Must be unique in the topic namespace
         // that this server works on.
-        public string server_id;
+        public string server_id { get; set; }
         
         // Sequence number.
         // The client will use this to detect if it has missed a subsequent
@@ -14,10 +14,10 @@ namespace Iviz.Msgs.visualization_msgs
         // an init message.  Clients will likely want to unsubscribe from the
         // init topic after a successful initialization to avoid receiving
         // duplicate data.
-        public ulong seq_num;
+        public ulong seq_num { get; set; }
         
         // All markers.
-        public InteractiveMarker[] markers;
+        public InteractiveMarker[] markers { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarkerInit()
@@ -26,18 +26,40 @@ namespace Iviz.Msgs.visualization_msgs
             markers = System.Array.Empty<InteractiveMarker>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public InteractiveMarkerInit(string server_id, ulong seq_num, InteractiveMarker[] markers)
         {
-            BuiltIns.Deserialize(out server_id, ref ptr, end);
-            BuiltIns.Deserialize(out seq_num, ref ptr, end);
-            BuiltIns.DeserializeArray(out markers, ref ptr, end, 0);
+            this.server_id = server_id ?? throw new System.ArgumentNullException(nameof(server_id));
+            this.seq_num = seq_num;
+            this.markers = markers ?? throw new System.ArgumentNullException(nameof(markers));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal InteractiveMarkerInit(Buffer b)
+        {
+            this.server_id = b.DeserializeString();
+            this.seq_num = b.Deserialize<ulong>();
+            this.markers = b.DeserializeArray<InteractiveMarker>(0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new InteractiveMarkerInit(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(server_id, ref ptr, end);
-            BuiltIns.Serialize(seq_num, ref ptr, end);
-            BuiltIns.SerializeArray(markers, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this.server_id);
+            b.Serialize(this.seq_num);
+            b.SerializeArray(this.markers, 0);
+        }
+        
+        public void Validate()
+        {
+            if (server_id is null) throw new System.NullReferenceException();
+            if (markers is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -53,8 +75,6 @@ namespace Iviz.Msgs.visualization_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new InteractiveMarkerInit();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

@@ -10,29 +10,29 @@ namespace Iviz.Msgs.sensor_msgs
         // array), please find or create a different message, since applications
         // will make fairly laser-specific assumptions about this data
         
-        public std_msgs.Header header; // timestamp in the header is the acquisition time of 
+        public std_msgs.Header header { get; set; } // timestamp in the header is the acquisition time of 
         // the first ray in the scan.
         //
         // in frame frame_id, angles are measured around 
         // the positive Z axis (counterclockwise, if Z is up)
         // with zero angle being forward along the x axis
         
-        public float angle_min; // start angle of the scan [rad]
-        public float angle_max; // end angle of the scan [rad]
-        public float angle_increment; // angular distance between measurements [rad]
+        public float angle_min { get; set; } // start angle of the scan [rad]
+        public float angle_max { get; set; } // end angle of the scan [rad]
+        public float angle_increment { get; set; } // angular distance between measurements [rad]
         
-        public float time_increment; // time between measurements [seconds] - if your scanner
+        public float time_increment { get; set; } // time between measurements [seconds] - if your scanner
         // is moving, this will be used in interpolating position
         // of 3d points
-        public float scan_time; // time between scans [seconds]
+        public float scan_time { get; set; } // time between scans [seconds]
         
-        public float range_min; // minimum range value [m]
-        public float range_max; // maximum range value [m]
+        public float range_min { get; set; } // minimum range value [m]
+        public float range_max { get; set; } // maximum range value [m]
         
-        public LaserEcho[] ranges; // range data [m] (Note: NaNs, values < range_min or > range_max should be discarded)
+        public LaserEcho[] ranges { get; set; } // range data [m] (Note: NaNs, values < range_min or > range_max should be discarded)
         // +Inf measurements are out of range
         // -Inf measurements are too close to determine exact distance.
-        public LaserEcho[] intensities; // intensity data [device-specific units].  If your
+        public LaserEcho[] intensities { get; set; } // intensity data [device-specific units].  If your
         // device does not provide intensities, please leave
         // the array empty.
     
@@ -44,32 +44,62 @@ namespace Iviz.Msgs.sensor_msgs
             intensities = System.Array.Empty<LaserEcho>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public MultiEchoLaserScan(std_msgs.Header header, float angle_min, float angle_max, float angle_increment, float time_increment, float scan_time, float range_min, float range_max, LaserEcho[] ranges, LaserEcho[] intensities)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out angle_min, ref ptr, end);
-            BuiltIns.Deserialize(out angle_max, ref ptr, end);
-            BuiltIns.Deserialize(out angle_increment, ref ptr, end);
-            BuiltIns.Deserialize(out time_increment, ref ptr, end);
-            BuiltIns.Deserialize(out scan_time, ref ptr, end);
-            BuiltIns.Deserialize(out range_min, ref ptr, end);
-            BuiltIns.Deserialize(out range_max, ref ptr, end);
-            BuiltIns.DeserializeArray(out ranges, ref ptr, end, 0);
-            BuiltIns.DeserializeArray(out intensities, ref ptr, end, 0);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.angle_min = angle_min;
+            this.angle_max = angle_max;
+            this.angle_increment = angle_increment;
+            this.time_increment = time_increment;
+            this.scan_time = scan_time;
+            this.range_min = range_min;
+            this.range_max = range_max;
+            this.ranges = ranges ?? throw new System.ArgumentNullException(nameof(ranges));
+            this.intensities = intensities ?? throw new System.ArgumentNullException(nameof(intensities));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal MultiEchoLaserScan(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.angle_min = b.Deserialize<float>();
+            this.angle_max = b.Deserialize<float>();
+            this.angle_increment = b.Deserialize<float>();
+            this.time_increment = b.Deserialize<float>();
+            this.scan_time = b.Deserialize<float>();
+            this.range_min = b.Deserialize<float>();
+            this.range_max = b.Deserialize<float>();
+            this.ranges = b.DeserializeArray<LaserEcho>(0);
+            this.intensities = b.DeserializeArray<LaserEcho>(0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new MultiEchoLaserScan(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.Serialize(angle_min, ref ptr, end);
-            BuiltIns.Serialize(angle_max, ref ptr, end);
-            BuiltIns.Serialize(angle_increment, ref ptr, end);
-            BuiltIns.Serialize(time_increment, ref ptr, end);
-            BuiltIns.Serialize(scan_time, ref ptr, end);
-            BuiltIns.Serialize(range_min, ref ptr, end);
-            BuiltIns.Serialize(range_max, ref ptr, end);
-            BuiltIns.SerializeArray(ranges, ref ptr, end, 0);
-            BuiltIns.SerializeArray(intensities, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            b.Serialize(this.angle_min);
+            b.Serialize(this.angle_max);
+            b.Serialize(this.angle_increment);
+            b.Serialize(this.time_increment);
+            b.Serialize(this.scan_time);
+            b.Serialize(this.range_min);
+            b.Serialize(this.range_max);
+            b.SerializeArray(this.ranges, 0);
+            b.SerializeArray(this.intensities, 0);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (ranges is null) throw new System.NullReferenceException();
+            if (intensities is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -89,8 +119,6 @@ namespace Iviz.Msgs.sensor_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new MultiEchoLaserScan();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

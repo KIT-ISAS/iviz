@@ -4,8 +4,8 @@ namespace Iviz.Msgs.mesh_msgs
 {
     public sealed class TriangleMeshStamped : IMessage
     {
-        public std_msgs.Header header;
-        public mesh_msgs.TriangleMesh mesh;
+        public std_msgs.Header header { get; set; }
+        public mesh_msgs.TriangleMesh mesh { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TriangleMeshStamped()
@@ -14,16 +14,37 @@ namespace Iviz.Msgs.mesh_msgs
             mesh = new mesh_msgs.TriangleMesh();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public TriangleMeshStamped(std_msgs.Header header, mesh_msgs.TriangleMesh mesh)
         {
-            header.Deserialize(ref ptr, end);
-            mesh.Deserialize(ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.mesh = mesh ?? throw new System.ArgumentNullException(nameof(mesh));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TriangleMeshStamped(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.mesh = new mesh_msgs.TriangleMesh(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TriangleMeshStamped(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            mesh.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            this.mesh.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (mesh is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -36,8 +57,6 @@ namespace Iviz.Msgs.mesh_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new TriangleMeshStamped();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

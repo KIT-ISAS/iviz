@@ -8,8 +8,8 @@ namespace Iviz.Msgs.std_msgs
         // particular data type.  Dimensions are ordered from outer most
         // to inner most.
         
-        public MultiArrayDimension[] dim; // Array of dimension properties
-        public uint data_offset; // padding elements at front of data
+        public MultiArrayDimension[] dim { get; set; } // Array of dimension properties
+        public uint data_offset { get; set; } // padding elements at front of data
         
         // Accessors should ALWAYS be written in terms of dimension stride
         // and specified outer-most dimension first.
@@ -37,16 +37,36 @@ namespace Iviz.Msgs.std_msgs
             dim = System.Array.Empty<MultiArrayDimension>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public MultiArrayLayout(MultiArrayDimension[] dim, uint data_offset)
         {
-            BuiltIns.DeserializeArray(out dim, ref ptr, end, 0);
-            BuiltIns.Deserialize(out data_offset, ref ptr, end);
+            this.dim = dim ?? throw new System.ArgumentNullException(nameof(dim));
+            this.data_offset = data_offset;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal MultiArrayLayout(Buffer b)
+        {
+            this.dim = b.DeserializeArray<MultiArrayDimension>(0);
+            this.data_offset = b.Deserialize<uint>();
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new MultiArrayLayout(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.SerializeArray(dim, ref ptr, end, 0);
-            BuiltIns.Serialize(data_offset, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.SerializeArray(this.dim, 0);
+            b.Serialize(this.data_offset);
+        }
+        
+        public void Validate()
+        {
+            if (dim is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -61,8 +81,6 @@ namespace Iviz.Msgs.std_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new MultiArrayLayout();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

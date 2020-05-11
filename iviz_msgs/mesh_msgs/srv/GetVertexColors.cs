@@ -5,7 +5,7 @@ namespace Iviz.Msgs.mesh_msgs
     public sealed class GetVertexColors : IService
     {
         /// <summary> Request message. </summary>
-        public GetVertexColorsRequest Request { get; }
+        public GetVertexColorsRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public GetVertexColorsResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.mesh_msgs
         
         public IService Create() => new GetVertexColors();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (GetVertexColorsRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (GetVertexColorsResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -46,7 +54,7 @@ namespace Iviz.Msgs.mesh_msgs
 
     public sealed class GetVertexColorsRequest : IRequest
     {
-        public string uuid;
+        public string uuid { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetVertexColorsRequest()
@@ -54,14 +62,33 @@ namespace Iviz.Msgs.mesh_msgs
             uuid = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public GetVertexColorsRequest(string uuid)
         {
-            BuiltIns.Deserialize(out uuid, ref ptr, end);
+            this.uuid = uuid ?? throw new System.ArgumentNullException(nameof(uuid));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal GetVertexColorsRequest(Buffer b)
+        {
+            this.uuid = b.DeserializeString();
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new GetVertexColorsRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(uuid, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this.uuid);
+        }
+        
+        public void Validate()
+        {
+            if (uuid is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -77,7 +104,7 @@ namespace Iviz.Msgs.mesh_msgs
 
     public sealed class GetVertexColorsResponse : IResponse
     {
-        public mesh_msgs.MeshVertexColorsStamped mesh_vertex_colors_stamped;
+        public mesh_msgs.MeshVertexColorsStamped mesh_vertex_colors_stamped { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetVertexColorsResponse()
@@ -85,14 +112,33 @@ namespace Iviz.Msgs.mesh_msgs
             mesh_vertex_colors_stamped = new mesh_msgs.MeshVertexColorsStamped();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public GetVertexColorsResponse(mesh_msgs.MeshVertexColorsStamped mesh_vertex_colors_stamped)
         {
-            mesh_vertex_colors_stamped.Deserialize(ref ptr, end);
+            this.mesh_vertex_colors_stamped = mesh_vertex_colors_stamped ?? throw new System.ArgumentNullException(nameof(mesh_vertex_colors_stamped));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal GetVertexColorsResponse(Buffer b)
+        {
+            this.mesh_vertex_colors_stamped = new mesh_msgs.MeshVertexColorsStamped(b);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new GetVertexColorsResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            mesh_vertex_colors_stamped.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.mesh_vertex_colors_stamped.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (mesh_vertex_colors_stamped is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

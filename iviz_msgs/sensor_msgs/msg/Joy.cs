@@ -5,9 +5,9 @@ namespace Iviz.Msgs.sensor_msgs
     public sealed class Joy : IMessage
     {
         // Reports the state of a joysticks axes and buttons.
-        public std_msgs.Header header; // timestamp in the header is the time the data is received from the joystick
-        public float[] axes; // the axes measurements from a joystick
-        public int[] buttons; // the buttons measurements from a joystick 
+        public std_msgs.Header header { get; set; } // timestamp in the header is the time the data is received from the joystick
+        public float[] axes { get; set; } // the axes measurements from a joystick
+        public int[] buttons { get; set; } // the buttons measurements from a joystick 
     
         /// <summary> Constructor for empty message. </summary>
         public Joy()
@@ -17,18 +17,41 @@ namespace Iviz.Msgs.sensor_msgs
             buttons = System.Array.Empty<int>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public Joy(std_msgs.Header header, float[] axes, int[] buttons)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out axes, ref ptr, end, 0);
-            BuiltIns.Deserialize(out buttons, ref ptr, end, 0);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.axes = axes ?? throw new System.ArgumentNullException(nameof(axes));
+            this.buttons = buttons ?? throw new System.ArgumentNullException(nameof(buttons));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal Joy(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.axes = b.DeserializeStructArray<float>(0);
+            this.buttons = b.DeserializeStructArray<int>(0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new Joy(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.Serialize(axes, ref ptr, end, 0);
-            BuiltIns.Serialize(buttons, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            b.SerializeStructArray(this.axes, 0);
+            b.SerializeStructArray(this.buttons, 0);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (axes is null) throw new System.NullReferenceException();
+            if (buttons is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -42,8 +65,6 @@ namespace Iviz.Msgs.sensor_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new Joy();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

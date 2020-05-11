@@ -4,7 +4,7 @@ namespace Iviz.Msgs.rosbridge_library
 {
     public sealed class TestUInt8FixedSizeArray16 : IMessage
     {
-        public byte[/*16*/] data;
+        public byte[/*16*/] data { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestUInt8FixedSizeArray16()
@@ -12,20 +12,39 @@ namespace Iviz.Msgs.rosbridge_library
             data = new byte[16];
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public TestUInt8FixedSizeArray16(byte[] data)
         {
-            BuiltIns.Deserialize(out data, ref ptr, end, 16);
+            this.data = data ?? throw new System.ArgumentNullException(nameof(data));
+            if (this.data.Length != 16) throw new System.ArgumentException("Invalid size", nameof(data));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TestUInt8FixedSizeArray16(Buffer b)
+        {
+            this.data = b.DeserializeStructArray<byte>(16);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TestUInt8FixedSizeArray16(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(data, ref ptr, end, 16);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.SerializeStructArray(this.data, 16);
+        }
+        
+        public void Validate()
+        {
+            if (data is null) throw new System.NullReferenceException();
+            if (data.Length != 16) throw new System.IndexOutOfRangeException();
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 16;
-    
-        public IMessage Create() => new TestUInt8FixedSizeArray16();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

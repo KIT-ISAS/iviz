@@ -13,11 +13,11 @@ namespace Iviz.Msgs.diagnostic_msgs
         public const byte ERROR = 2;
         public const byte STALE = 3;
         
-        public byte level; // level of operation enumerated above 
-        public string name; // a description of the test/component reporting
-        public string message; // a description of the status
-        public string hardware_id; // a hardware unique string
-        public KeyValue[] values; // an array of values associated with the status
+        public byte level { get; set; } // level of operation enumerated above 
+        public string name { get; set; } // a description of the test/component reporting
+        public string message { get; set; } // a description of the status
+        public string hardware_id { get; set; } // a hardware unique string
+        public KeyValue[] values { get; set; } // an array of values associated with the status
         
     
         /// <summary> Constructor for empty message. </summary>
@@ -29,22 +29,48 @@ namespace Iviz.Msgs.diagnostic_msgs
             values = System.Array.Empty<KeyValue>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public DiagnosticStatus(byte level, string name, string message, string hardware_id, KeyValue[] values)
         {
-            BuiltIns.Deserialize(out level, ref ptr, end);
-            BuiltIns.Deserialize(out name, ref ptr, end);
-            BuiltIns.Deserialize(out message, ref ptr, end);
-            BuiltIns.Deserialize(out hardware_id, ref ptr, end);
-            BuiltIns.DeserializeArray(out values, ref ptr, end, 0);
+            this.level = level;
+            this.name = name ?? throw new System.ArgumentNullException(nameof(name));
+            this.message = message ?? throw new System.ArgumentNullException(nameof(message));
+            this.hardware_id = hardware_id ?? throw new System.ArgumentNullException(nameof(hardware_id));
+            this.values = values ?? throw new System.ArgumentNullException(nameof(values));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal DiagnosticStatus(Buffer b)
+        {
+            this.level = b.Deserialize<byte>();
+            this.name = b.DeserializeString();
+            this.message = b.DeserializeString();
+            this.hardware_id = b.DeserializeString();
+            this.values = b.DeserializeArray<KeyValue>(0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new DiagnosticStatus(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(level, ref ptr, end);
-            BuiltIns.Serialize(name, ref ptr, end);
-            BuiltIns.Serialize(message, ref ptr, end);
-            BuiltIns.Serialize(hardware_id, ref ptr, end);
-            BuiltIns.SerializeArray(values, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this.level);
+            b.Serialize(this.name);
+            b.Serialize(this.message);
+            b.Serialize(this.hardware_id);
+            b.SerializeArray(this.values, 0);
+        }
+        
+        public void Validate()
+        {
+            if (name is null) throw new System.NullReferenceException();
+            if (message is null) throw new System.NullReferenceException();
+            if (hardware_id is null) throw new System.NullReferenceException();
+            if (values is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -62,8 +88,6 @@ namespace Iviz.Msgs.diagnostic_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new DiagnosticStatus();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

@@ -20,24 +20,26 @@ namespace iviz_test
 
             TransformStamped[] tfs = new TransformStamped[1];
             tfs[0] = new TransformStamped
-            {
-                transform = new Transform
-                {
-                    translation = new Vector3
-                    {
-                        x = 0,
-                        y = 0,
-                        z = 1
-                    },
-                    rotation = new Quaternion
-                    {
-                        x = 0,
-                        y = 0,
-                        z = 0,
-                        w = 1
-                    }
-                }
-            };
+            (
+                header: new Iviz.Msgs.std_msgs.Header(),
+                child_frame_id: "",
+                transform: new Transform
+                (
+                    translation: new Vector3
+                    (
+                        x: 0,
+                        y: 0,
+                        z: 1
+                    ),
+                    rotation: new Quaternion
+                    (
+                        x: 0,
+                        y: 0,
+                        z: 0,
+                        w: 1
+                    )
+                )
+            );
             TFMessage tf = new TFMessage
             {
                 transforms = tfs
@@ -146,23 +148,26 @@ namespace iviz_test
             */
             TransformStamped[] tfs = new TransformStamped[1];
             tfs[0] = new TransformStamped
-            {
-                transform = new Transform
-                {
-                    translation = new Vector3{
-                        x = 0,
-                        y = 0,
-                        z = 1
-                    },
-                    rotation = new Quaternion
-                    {
-                        x = 0,
-                        y = 0,
-                        z = 0,
-                        w = 1
-                    }
-                }
-            };
+            (
+                header: new Iviz.Msgs.std_msgs.Header(),
+                child_frame_id: "",
+                transform: new Transform
+                (
+                    translation: new Vector3
+                    (
+                        x: 0,
+                        y: 0,
+                        z: 1
+                    ),
+                    rotation: new Quaternion
+                    (
+                        x: 0,
+                        y: 0,
+                        z: 0,
+                        w: 1
+                    )
+                )
+            );
             TFMessage tf = new TFMessage
             {
                 transforms = tfs

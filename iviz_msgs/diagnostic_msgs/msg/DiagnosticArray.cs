@@ -5,8 +5,8 @@ namespace Iviz.Msgs.diagnostic_msgs
     public sealed class DiagnosticArray : IMessage
     {
         // This message is used to send diagnostic information about the state of the robot
-        public std_msgs.Header header; //for timestamp
-        public DiagnosticStatus[] status; // an array of components being reported on
+        public std_msgs.Header header { get; set; } //for timestamp
+        public DiagnosticStatus[] status { get; set; } // an array of components being reported on
     
         /// <summary> Constructor for empty message. </summary>
         public DiagnosticArray()
@@ -15,16 +15,37 @@ namespace Iviz.Msgs.diagnostic_msgs
             status = System.Array.Empty<DiagnosticStatus>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public DiagnosticArray(std_msgs.Header header, DiagnosticStatus[] status)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.DeserializeArray(out status, ref ptr, end, 0);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.status = status ?? throw new System.ArgumentNullException(nameof(status));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal DiagnosticArray(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.status = b.DeserializeArray<DiagnosticStatus>(0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new DiagnosticArray(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.SerializeArray(status, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            b.SerializeArray(this.status, 0);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (status is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -40,8 +61,6 @@ namespace Iviz.Msgs.diagnostic_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new DiagnosticArray();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

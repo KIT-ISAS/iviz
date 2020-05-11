@@ -6,11 +6,11 @@ namespace Iviz.Msgs.sensor_msgs
     {
         // Measurement from an external time source not actively synchronized with the system clock.
         
-        public std_msgs.Header header; // stamp is system time for which measurement was valid
+        public std_msgs.Header header { get; set; } // stamp is system time for which measurement was valid
         // frame_id is not used 
         
-        public time time_ref; // corresponding time from this external source
-        public string source; // (optional) name of time source
+        public time time_ref { get; set; } // corresponding time from this external source
+        public string source { get; set; } // (optional) name of time source
     
         /// <summary> Constructor for empty message. </summary>
         public TimeReference()
@@ -19,18 +19,40 @@ namespace Iviz.Msgs.sensor_msgs
             source = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public TimeReference(std_msgs.Header header, time time_ref, string source)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out time_ref, ref ptr, end);
-            BuiltIns.Deserialize(out source, ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.time_ref = time_ref;
+            this.source = source ?? throw new System.ArgumentNullException(nameof(source));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TimeReference(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.time_ref = b.Deserialize<time>();
+            this.source = b.DeserializeString();
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TimeReference(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.Serialize(time_ref, ref ptr, end);
-            BuiltIns.Serialize(source, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            b.Serialize(this.time_ref);
+            b.Serialize(this.source);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (source is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -43,8 +65,6 @@ namespace Iviz.Msgs.sensor_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new TimeReference();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

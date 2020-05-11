@@ -5,7 +5,7 @@ namespace Iviz.Msgs.rosapi
     public sealed class Services : IService
     {
         /// <summary> Request message. </summary>
-        public ServicesRequest Request { get; }
+        public ServicesRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public ServicesResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.rosapi
         
         public IService Create() => new Services();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (ServicesRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (ServicesResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -48,11 +56,28 @@ namespace Iviz.Msgs.rosapi
     {
         
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public ServicesRequest()
         {
         }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal ServicesRequest(Buffer b)
+        {
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new ServicesRequest(b);
+        }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+        }
+        
+        public void Validate()
         {
         }
     
@@ -62,7 +87,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class ServicesResponse : IResponse
     {
-        public string[] services;
+        public string[] services { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ServicesResponse()
@@ -70,14 +95,33 @@ namespace Iviz.Msgs.rosapi
             services = System.Array.Empty<string>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public ServicesResponse(string[] services)
         {
-            BuiltIns.Deserialize(out services, ref ptr, end, 0);
+            this.services = services ?? throw new System.ArgumentNullException(nameof(services));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal ServicesResponse(Buffer b)
+        {
+            this.services = b.DeserializeStringArray(0);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new ServicesResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(services, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.SerializeArray(this.services, 0);
+        }
+        
+        public void Validate()
+        {
+            if (services is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

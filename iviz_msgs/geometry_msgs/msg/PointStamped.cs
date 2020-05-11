@@ -5,8 +5,8 @@ namespace Iviz.Msgs.geometry_msgs
     public sealed class PointStamped : IMessage
     {
         // This represents a Point with reference coordinate frame and timestamp
-        public std_msgs.Header header;
-        public Point point;
+        public std_msgs.Header header { get; set; }
+        public Point point { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public PointStamped()
@@ -14,16 +14,36 @@ namespace Iviz.Msgs.geometry_msgs
             header = new std_msgs.Header();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public PointStamped(std_msgs.Header header, Point point)
         {
-            header.Deserialize(ref ptr, end);
-            point.Deserialize(ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.point = point;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal PointStamped(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.point = new Point(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new PointStamped(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            point.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            this.point.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -35,8 +55,6 @@ namespace Iviz.Msgs.geometry_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new PointStamped();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

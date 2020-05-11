@@ -5,7 +5,7 @@ namespace Iviz.Msgs.shape_msgs
     public sealed class MeshTriangle : IMessage
     {
         // Definition of a triangle's vertices
-        public uint[/*3*/] vertex_indices;
+        public uint[/*3*/] vertex_indices { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshTriangle()
@@ -13,20 +13,39 @@ namespace Iviz.Msgs.shape_msgs
             vertex_indices = new uint[3];
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public MeshTriangle(uint[] vertex_indices)
         {
-            BuiltIns.Deserialize(out vertex_indices, ref ptr, end, 3);
+            this.vertex_indices = vertex_indices ?? throw new System.ArgumentNullException(nameof(vertex_indices));
+            if (this.vertex_indices.Length != 3) throw new System.ArgumentException("Invalid size", nameof(vertex_indices));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal MeshTriangle(Buffer b)
+        {
+            this.vertex_indices = b.DeserializeStructArray<uint>(3);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new MeshTriangle(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(vertex_indices, ref ptr, end, 3);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.SerializeStructArray(this.vertex_indices, 3);
+        }
+        
+        public void Validate()
+        {
+            if (vertex_indices is null) throw new System.NullReferenceException();
+            if (vertex_indices.Length != 3) throw new System.IndexOutOfRangeException();
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 12;
-    
-        public IMessage Create() => new MeshTriangle();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

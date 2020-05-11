@@ -5,7 +5,7 @@ namespace Iviz.Msgs.nav_msgs
     public sealed class GetPlan : IService
     {
         /// <summary> Request message. </summary>
-        public GetPlanRequest Request { get; }
+        public GetPlanRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public GetPlanResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.nav_msgs
         
         public IService Create() => new GetPlan();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (GetPlanRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (GetPlanResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -49,14 +57,14 @@ namespace Iviz.Msgs.nav_msgs
         // Get a plan from the current position to the goal Pose 
         
         // The start pose for the plan
-        public geometry_msgs.PoseStamped start;
+        public geometry_msgs.PoseStamped start { get; set; }
         
         // The final pose of the goal position
-        public geometry_msgs.PoseStamped goal;
+        public geometry_msgs.PoseStamped goal { get; set; }
         
         // If the goal is obstructed, how many meters the planner can 
         // relax the constraint in x and y before failing. 
-        public float tolerance;
+        public float tolerance { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetPlanRequest()
@@ -65,18 +73,40 @@ namespace Iviz.Msgs.nav_msgs
             goal = new geometry_msgs.PoseStamped();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public GetPlanRequest(geometry_msgs.PoseStamped start, geometry_msgs.PoseStamped goal, float tolerance)
         {
-            start.Deserialize(ref ptr, end);
-            goal.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out tolerance, ref ptr, end);
+            this.start = start ?? throw new System.ArgumentNullException(nameof(start));
+            this.goal = goal ?? throw new System.ArgumentNullException(nameof(goal));
+            this.tolerance = tolerance;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal GetPlanRequest(Buffer b)
+        {
+            this.start = new geometry_msgs.PoseStamped(b);
+            this.goal = new geometry_msgs.PoseStamped(b);
+            this.tolerance = b.Deserialize<float>();
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new GetPlanRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            start.Serialize(ref ptr, end);
-            goal.Serialize(ref ptr, end);
-            BuiltIns.Serialize(tolerance, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.start.Serialize(b);
+            this.goal.Serialize(b);
+            b.Serialize(this.tolerance);
+        }
+        
+        public void Validate()
+        {
+            if (start is null) throw new System.NullReferenceException();
+            if (goal is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -93,7 +123,7 @@ namespace Iviz.Msgs.nav_msgs
 
     public sealed class GetPlanResponse : IResponse
     {
-        public nav_msgs.Path plan;
+        public nav_msgs.Path plan { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetPlanResponse()
@@ -101,14 +131,33 @@ namespace Iviz.Msgs.nav_msgs
             plan = new nav_msgs.Path();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public GetPlanResponse(nav_msgs.Path plan)
         {
-            plan.Deserialize(ref ptr, end);
+            this.plan = plan ?? throw new System.ArgumentNullException(nameof(plan));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal GetPlanResponse(Buffer b)
+        {
+            this.plan = new nav_msgs.Path(b);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new GetPlanResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            plan.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.plan.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (plan is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

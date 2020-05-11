@@ -5,7 +5,7 @@ namespace Iviz.Msgs.mesh_msgs
     public sealed class GetMaterials : IService
     {
         /// <summary> Request message. </summary>
-        public GetMaterialsRequest Request { get; }
+        public GetMaterialsRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public GetMaterialsResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.mesh_msgs
         
         public IService Create() => new GetMaterials();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (GetMaterialsRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (GetMaterialsResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -46,7 +54,7 @@ namespace Iviz.Msgs.mesh_msgs
 
     public sealed class GetMaterialsRequest : IRequest
     {
-        public string uuid;
+        public string uuid { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetMaterialsRequest()
@@ -54,14 +62,33 @@ namespace Iviz.Msgs.mesh_msgs
             uuid = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public GetMaterialsRequest(string uuid)
         {
-            BuiltIns.Deserialize(out uuid, ref ptr, end);
+            this.uuid = uuid ?? throw new System.ArgumentNullException(nameof(uuid));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal GetMaterialsRequest(Buffer b)
+        {
+            this.uuid = b.DeserializeString();
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new GetMaterialsRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(uuid, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this.uuid);
+        }
+        
+        public void Validate()
+        {
+            if (uuid is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -77,7 +104,7 @@ namespace Iviz.Msgs.mesh_msgs
 
     public sealed class GetMaterialsResponse : IResponse
     {
-        public mesh_msgs.MeshMaterialsStamped mesh_materials_stamped;
+        public mesh_msgs.MeshMaterialsStamped mesh_materials_stamped { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetMaterialsResponse()
@@ -85,14 +112,33 @@ namespace Iviz.Msgs.mesh_msgs
             mesh_materials_stamped = new mesh_msgs.MeshMaterialsStamped();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public GetMaterialsResponse(mesh_msgs.MeshMaterialsStamped mesh_materials_stamped)
         {
-            mesh_materials_stamped.Deserialize(ref ptr, end);
+            this.mesh_materials_stamped = mesh_materials_stamped ?? throw new System.ArgumentNullException(nameof(mesh_materials_stamped));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal GetMaterialsResponse(Buffer b)
+        {
+            this.mesh_materials_stamped = new mesh_msgs.MeshMaterialsStamped(b);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new GetMaterialsResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            mesh_materials_stamped.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.mesh_materials_stamped.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (mesh_materials_stamped is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

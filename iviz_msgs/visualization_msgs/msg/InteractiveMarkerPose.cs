@@ -5,14 +5,14 @@ namespace Iviz.Msgs.visualization_msgs
     public sealed class InteractiveMarkerPose : IMessage
     {
         // Time/frame info.
-        public std_msgs.Header header;
+        public std_msgs.Header header { get; set; }
         
         // Initial pose. Also, defines the pivot point for rotations.
-        public geometry_msgs.Pose pose;
+        public geometry_msgs.Pose pose { get; set; }
         
         // Identifying string. Must be globally unique in
         // the topic that this message is sent through.
-        public string name;
+        public string name { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarkerPose()
@@ -21,18 +21,40 @@ namespace Iviz.Msgs.visualization_msgs
             name = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public InteractiveMarkerPose(std_msgs.Header header, geometry_msgs.Pose pose, string name)
         {
-            header.Deserialize(ref ptr, end);
-            pose.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out name, ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.pose = pose;
+            this.name = name ?? throw new System.ArgumentNullException(nameof(name));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal InteractiveMarkerPose(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.pose = new geometry_msgs.Pose(b);
+            this.name = b.DeserializeString();
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new InteractiveMarkerPose(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            pose.Serialize(ref ptr, end);
-            BuiltIns.Serialize(name, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            this.pose.Serialize(b);
+            b.Serialize(this.name);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (name is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -45,8 +67,6 @@ namespace Iviz.Msgs.visualization_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new InteractiveMarkerPose();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

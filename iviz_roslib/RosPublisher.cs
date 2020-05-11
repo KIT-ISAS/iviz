@@ -64,7 +64,7 @@ namespace Iviz.RoslibSharp
             {
                 throw new ArgumentNullException(nameof(message));
             }
-
+            message.Validate();
             AssertIsAlive();
             Manager.Publish(message);
         }

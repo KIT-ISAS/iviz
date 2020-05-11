@@ -5,7 +5,7 @@ namespace Iviz.Msgs.rosapi
     public sealed class ServiceNode : IService
     {
         /// <summary> Request message. </summary>
-        public ServiceNodeRequest Request { get; }
+        public ServiceNodeRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public ServiceNodeResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.rosapi
         
         public IService Create() => new ServiceNode();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (ServiceNodeRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (ServiceNodeResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -46,7 +54,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class ServiceNodeRequest : IRequest
     {
-        public string service;
+        public string service { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ServiceNodeRequest()
@@ -54,14 +62,33 @@ namespace Iviz.Msgs.rosapi
             service = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public ServiceNodeRequest(string service)
         {
-            BuiltIns.Deserialize(out service, ref ptr, end);
+            this.service = service ?? throw new System.ArgumentNullException(nameof(service));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal ServiceNodeRequest(Buffer b)
+        {
+            this.service = b.DeserializeString();
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new ServiceNodeRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(service, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this.service);
+        }
+        
+        public void Validate()
+        {
+            if (service is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -77,7 +104,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class ServiceNodeResponse : IResponse
     {
-        public string node;
+        public string node { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ServiceNodeResponse()
@@ -85,14 +112,33 @@ namespace Iviz.Msgs.rosapi
             node = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public ServiceNodeResponse(string node)
         {
-            BuiltIns.Deserialize(out node, ref ptr, end);
+            this.node = node ?? throw new System.ArgumentNullException(nameof(node));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal ServiceNodeResponse(Buffer b)
+        {
+            this.node = b.DeserializeString();
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new ServiceNodeResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(node, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this.node);
+        }
+        
+        public void Validate()
+        {
+            if (node is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

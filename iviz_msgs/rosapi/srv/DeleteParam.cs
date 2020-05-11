@@ -5,7 +5,7 @@ namespace Iviz.Msgs.rosapi
     public sealed class DeleteParam : IService
     {
         /// <summary> Request message. </summary>
-        public DeleteParamRequest Request { get; }
+        public DeleteParamRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public DeleteParamResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.rosapi
         
         public IService Create() => new DeleteParam();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (DeleteParamRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (DeleteParamResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -46,7 +54,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class DeleteParamRequest : IRequest
     {
-        public string name;
+        public string name { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public DeleteParamRequest()
@@ -54,14 +62,33 @@ namespace Iviz.Msgs.rosapi
             name = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public DeleteParamRequest(string name)
         {
-            BuiltIns.Deserialize(out name, ref ptr, end);
+            this.name = name ?? throw new System.ArgumentNullException(nameof(name));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal DeleteParamRequest(Buffer b)
+        {
+            this.name = b.DeserializeString();
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new DeleteParamRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(name, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this.name);
+        }
+        
+        public void Validate()
+        {
+            if (name is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

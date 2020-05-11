@@ -5,10 +5,10 @@ namespace Iviz.Msgs.mesh_msgs
     public sealed class MeshMaterials : IMessage
     {
         // Mesh Attribute Message
-        public mesh_msgs.MeshFaceCluster[] clusters;
-        public mesh_msgs.MeshMaterial[] materials;
-        public uint[] cluster_materials;
-        public mesh_msgs.MeshVertexTexCoords[] vertex_tex_coords;
+        public mesh_msgs.MeshFaceCluster[] clusters { get; set; }
+        public mesh_msgs.MeshMaterial[] materials { get; set; }
+        public uint[] cluster_materials { get; set; }
+        public mesh_msgs.MeshVertexTexCoords[] vertex_tex_coords { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshMaterials()
@@ -19,20 +19,45 @@ namespace Iviz.Msgs.mesh_msgs
             vertex_tex_coords = System.Array.Empty<mesh_msgs.MeshVertexTexCoords>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public MeshMaterials(mesh_msgs.MeshFaceCluster[] clusters, mesh_msgs.MeshMaterial[] materials, uint[] cluster_materials, mesh_msgs.MeshVertexTexCoords[] vertex_tex_coords)
         {
-            BuiltIns.DeserializeArray(out clusters, ref ptr, end, 0);
-            BuiltIns.DeserializeArray(out materials, ref ptr, end, 0);
-            BuiltIns.Deserialize(out cluster_materials, ref ptr, end, 0);
-            BuiltIns.DeserializeArray(out vertex_tex_coords, ref ptr, end, 0);
+            this.clusters = clusters ?? throw new System.ArgumentNullException(nameof(clusters));
+            this.materials = materials ?? throw new System.ArgumentNullException(nameof(materials));
+            this.cluster_materials = cluster_materials ?? throw new System.ArgumentNullException(nameof(cluster_materials));
+            this.vertex_tex_coords = vertex_tex_coords ?? throw new System.ArgumentNullException(nameof(vertex_tex_coords));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal MeshMaterials(Buffer b)
+        {
+            this.clusters = b.DeserializeArray<mesh_msgs.MeshFaceCluster>(0);
+            this.materials = b.DeserializeArray<mesh_msgs.MeshMaterial>(0);
+            this.cluster_materials = b.DeserializeStructArray<uint>(0);
+            this.vertex_tex_coords = b.DeserializeArray<mesh_msgs.MeshVertexTexCoords>(0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new MeshMaterials(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.SerializeArray(clusters, ref ptr, end, 0);
-            BuiltIns.SerializeArray(materials, ref ptr, end, 0);
-            BuiltIns.Serialize(cluster_materials, ref ptr, end, 0);
-            BuiltIns.SerializeArray(vertex_tex_coords, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.SerializeArray(this.clusters, 0);
+            b.SerializeArray(this.materials, 0);
+            b.SerializeStructArray(this.cluster_materials, 0);
+            b.SerializeArray(this.vertex_tex_coords, 0);
+        }
+        
+        public void Validate()
+        {
+            if (clusters is null) throw new System.NullReferenceException();
+            if (materials is null) throw new System.NullReferenceException();
+            if (cluster_materials is null) throw new System.NullReferenceException();
+            if (vertex_tex_coords is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -50,8 +75,6 @@ namespace Iviz.Msgs.mesh_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new MeshMaterials();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

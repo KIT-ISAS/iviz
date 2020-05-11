@@ -33,7 +33,7 @@ namespace Iviz.Bridge.Client
                 buffer = new byte[size + size / 10];
             }
 
-            BuiltIns.Serialize(msg, buffer);
+            Msgs.Buffer.Serialize(msg, buffer);
             writer.Write(size);
             writer.Write(buffer, 0, size);
         }

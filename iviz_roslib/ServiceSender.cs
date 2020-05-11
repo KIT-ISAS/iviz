@@ -244,7 +244,7 @@ namespace Iviz.RoslibSharp
                     }
 
                     IService serviceMsg = ServiceInfo.Generator.Create();
-                    BuiltIns.Deserialize(serviceMsg.Request, readBuffer, rcvLength);
+                    serviceMsg.Request = Msgs.Buffer.Deserialize(serviceMsg.Request, readBuffer, rcvLength);
                     NumReceived++;
                     BytesReceived += rcvLength + 4;
 
@@ -280,7 +280,7 @@ namespace Iviz.RoslibSharp
                         {
                             writeBuffer = new byte[msgLength + BufferSizeIncrease];
                         }
-                        uint sendLength = BuiltIns.Serialize(responseMsg, writeBuffer);
+                        uint sendLength = Msgs.Buffer.Serialize(responseMsg, writeBuffer);
                         writer.Write(SuccessByte);
                         writer.Write(sendLength);
                         writer.Write(writeBuffer, 0, (int)sendLength);

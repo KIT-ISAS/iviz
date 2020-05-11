@@ -5,7 +5,7 @@ namespace Iviz.Msgs.mesh_msgs
     public sealed class GetUUID : IService
     {
         /// <summary> Request message. </summary>
-        public GetUUIDRequest Request { get; }
+        public GetUUIDRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public GetUUIDResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.mesh_msgs
         
         public IService Create() => new GetUUID();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (GetUUIDRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (GetUUIDResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -50,7 +58,7 @@ namespace Iviz.Msgs.mesh_msgs
 
     public sealed class GetUUIDResponse : IResponse
     {
-        public string uuid;
+        public string uuid { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetUUIDResponse()
@@ -58,14 +66,33 @@ namespace Iviz.Msgs.mesh_msgs
             uuid = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public GetUUIDResponse(string uuid)
         {
-            BuiltIns.Deserialize(out uuid, ref ptr, end);
+            this.uuid = uuid ?? throw new System.ArgumentNullException(nameof(uuid));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal GetUUIDResponse(Buffer b)
+        {
+            this.uuid = b.DeserializeString();
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new GetUUIDResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(uuid, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this.uuid);
+        }
+        
+        public void Validate()
+        {
+            if (uuid is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

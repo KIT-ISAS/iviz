@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.geometry_msgs
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct Vector3 : IMessage
+    public readonly struct Vector3 : IMessage
     {
         // This represents a vector in free space. 
         // It is only meant to represent a direction. Therefore, it does not
@@ -13,24 +13,42 @@ namespace Iviz.Msgs.geometry_msgs
         // rotation). If you want your data to be translatable too, use the
         // geometry_msgs/Point message instead.
         
-        public double x;
-        public double y;
-        public double z;
+        public double x { get; }
+        public double y { get; }
+        public double z { get; }
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public Vector3(double x, double y, double z)
         {
-            BuiltIns.DeserializeStruct(out this, ref ptr, end);
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal Vector3(Buffer b)
+        {
+            this = b.Deserialize<Vector3>();
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new Vector3(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.SerializeStruct(this, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 24;
-    
-        public IMessage Create() => new Vector3();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

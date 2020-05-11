@@ -16,20 +16,20 @@ namespace Iviz.Msgs.sensor_msgs
         //        receiver, usually the location of the antenna.  This is a
         //        Euclidean frame relative to the vehicle, not a reference
         //        ellipsoid.
-        public std_msgs.Header header;
+        public std_msgs.Header header { get; set; }
         
         // satellite fix status information
-        public NavSatStatus status;
+        public NavSatStatus status { get; set; }
         
         // Latitude [degrees]. Positive is north of equator; negative is south.
-        public double latitude;
+        public double latitude { get; set; }
         
         // Longitude [degrees]. Positive is east of prime meridian; negative is west.
-        public double longitude;
+        public double longitude { get; set; }
         
         // Altitude [m]. Positive is above the WGS 84 ellipsoid
         // (quiet NaN if no altitude is available).
-        public double altitude;
+        public double altitude { get; set; }
         
         // Position covariance [m^2] defined relative to a tangential plane
         // through the reported position. The components are East, North, and
@@ -37,7 +37,7 @@ namespace Iviz.Msgs.sensor_msgs
         //
         // Beware: this coordinate system exhibits singularities at the poles.
         
-        public double[/*9*/] position_covariance;
+        public double[/*9*/] position_covariance { get; set; }
         
         // If the covariance of the fix is known, fill it in completely. If the
         // GPS receiver provides the variance of each measurement, put them
@@ -49,7 +49,7 @@ namespace Iviz.Msgs.sensor_msgs
         public const byte COVARIANCE_TYPE_DIAGONAL_KNOWN = 2;
         public const byte COVARIANCE_TYPE_KNOWN = 3;
         
-        public byte position_covariance_type;
+        public byte position_covariance_type { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public NavSatFix()
@@ -59,26 +59,55 @@ namespace Iviz.Msgs.sensor_msgs
             position_covariance = new double[9];
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public NavSatFix(std_msgs.Header header, NavSatStatus status, double latitude, double longitude, double altitude, double[] position_covariance, byte position_covariance_type)
         {
-            header.Deserialize(ref ptr, end);
-            status.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out latitude, ref ptr, end);
-            BuiltIns.Deserialize(out longitude, ref ptr, end);
-            BuiltIns.Deserialize(out altitude, ref ptr, end);
-            BuiltIns.Deserialize(out position_covariance, ref ptr, end, 9);
-            BuiltIns.Deserialize(out position_covariance_type, ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.status = status ?? throw new System.ArgumentNullException(nameof(status));
+            this.latitude = latitude;
+            this.longitude = longitude;
+            this.altitude = altitude;
+            this.position_covariance = position_covariance ?? throw new System.ArgumentNullException(nameof(position_covariance));
+            if (this.position_covariance.Length != 9) throw new System.ArgumentException("Invalid size", nameof(position_covariance));
+            this.position_covariance_type = position_covariance_type;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal NavSatFix(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.status = new NavSatStatus(b);
+            this.latitude = b.Deserialize<double>();
+            this.longitude = b.Deserialize<double>();
+            this.altitude = b.Deserialize<double>();
+            this.position_covariance = b.DeserializeStructArray<double>(9);
+            this.position_covariance_type = b.Deserialize<byte>();
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new NavSatFix(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            status.Serialize(ref ptr, end);
-            BuiltIns.Serialize(latitude, ref ptr, end);
-            BuiltIns.Serialize(longitude, ref ptr, end);
-            BuiltIns.Serialize(altitude, ref ptr, end);
-            BuiltIns.Serialize(position_covariance, ref ptr, end, 9);
-            BuiltIns.Serialize(position_covariance_type, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            this.status.Serialize(b);
+            b.Serialize(this.latitude);
+            b.Serialize(this.longitude);
+            b.Serialize(this.altitude);
+            b.SerializeStructArray(this.position_covariance, 9);
+            b.Serialize(this.position_covariance_type);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (status is null) throw new System.NullReferenceException();
+            if (position_covariance is null) throw new System.NullReferenceException();
+            if (position_covariance.Length != 9) throw new System.IndexOutOfRangeException();
         }
     
         [IgnoreDataMember]
@@ -90,8 +119,6 @@ namespace Iviz.Msgs.sensor_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new NavSatFix();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

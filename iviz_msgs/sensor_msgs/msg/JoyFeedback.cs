@@ -9,35 +9,58 @@ namespace Iviz.Msgs.sensor_msgs
         public const byte TYPE_RUMBLE = 1;
         public const byte TYPE_BUZZER = 2;
         
-        public byte type;
+        public byte type { get; set; }
         
         // This will hold an id number for each type of each feedback.
         // Example, the first led would be id=0, the second would be id=1
-        public byte id;
+        public byte id { get; set; }
         
         // Intensity of the feedback, from 0.0 to 1.0, inclusive.  If device is
         // actually binary, driver should treat 0<=x<0.5 as off, 0.5<=x<=1 as on.
-        public float intensity;
+        public float intensity { get; set; }
         
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public JoyFeedback()
         {
-            BuiltIns.Deserialize(out type, ref ptr, end);
-            BuiltIns.Deserialize(out id, ref ptr, end);
-            BuiltIns.Deserialize(out intensity, ref ptr, end);
+        }
+        
+        /// <summary> Explicit constructor. </summary>
+        public JoyFeedback(byte type, byte id, float intensity)
+        {
+            this.type = type;
+            this.id = id;
+            this.intensity = intensity;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal JoyFeedback(Buffer b)
+        {
+            this.type = b.Deserialize<byte>();
+            this.id = b.Deserialize<byte>();
+            this.intensity = b.Deserialize<float>();
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new JoyFeedback(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(type, ref ptr, end);
-            BuiltIns.Serialize(id, ref ptr, end);
-            BuiltIns.Serialize(intensity, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this.type);
+            b.Serialize(this.id);
+            b.Serialize(this.intensity);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 6;
-    
-        public IMessage Create() => new JoyFeedback();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

@@ -4,27 +4,45 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.geometry_msgs
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct Point : IMessage
+    public readonly struct Point : IMessage
     {
         // This contains the position of a point in free space
-        public double x;
-        public double y;
-        public double z;
+        public double x { get; }
+        public double y { get; }
+        public double z { get; }
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public Point(double x, double y, double z)
         {
-            BuiltIns.DeserializeStruct(out this, ref ptr, end);
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal Point(Buffer b)
+        {
+            this = b.Deserialize<Point>();
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new Point(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.SerializeStruct(this, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 24;
-    
-        public IMessage Create() => new Point();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

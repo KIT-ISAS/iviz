@@ -4,8 +4,8 @@ namespace Iviz.Msgs.mesh_msgs
 {
     public sealed class Feature : IMessage
     {
-        public geometry_msgs.Point location;
-        public std_msgs.Float32[] descriptor;
+        public geometry_msgs.Point location { get; set; }
+        public std_msgs.Float32[] descriptor { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Feature()
@@ -13,16 +13,36 @@ namespace Iviz.Msgs.mesh_msgs
             descriptor = System.Array.Empty<std_msgs.Float32>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public Feature(geometry_msgs.Point location, std_msgs.Float32[] descriptor)
         {
-            location.Deserialize(ref ptr, end);
-            BuiltIns.DeserializeArray(out descriptor, ref ptr, end, 0);
+            this.location = location;
+            this.descriptor = descriptor ?? throw new System.ArgumentNullException(nameof(descriptor));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal Feature(Buffer b)
+        {
+            this.location = new geometry_msgs.Point(b);
+            this.descriptor = b.DeserializeArray<std_msgs.Float32>(0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new Feature(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            location.Serialize(ref ptr, end);
-            BuiltIns.SerializeArray(descriptor, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.location.Serialize(b);
+            b.SerializeArray(this.descriptor, 0);
+        }
+        
+        public void Validate()
+        {
+            if (descriptor is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -34,8 +54,6 @@ namespace Iviz.Msgs.mesh_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new Feature();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

@@ -5,7 +5,7 @@ namespace Iviz.Msgs.rosapi
     public sealed class TopicsForType : IService
     {
         /// <summary> Request message. </summary>
-        public TopicsForTypeRequest Request { get; }
+        public TopicsForTypeRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public TopicsForTypeResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.rosapi
         
         public IService Create() => new TopicsForType();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (TopicsForTypeRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (TopicsForTypeResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -46,7 +54,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class TopicsForTypeRequest : IRequest
     {
-        public string type;
+        public string type { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TopicsForTypeRequest()
@@ -54,14 +62,33 @@ namespace Iviz.Msgs.rosapi
             type = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public TopicsForTypeRequest(string type)
         {
-            BuiltIns.Deserialize(out type, ref ptr, end);
+            this.type = type ?? throw new System.ArgumentNullException(nameof(type));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TopicsForTypeRequest(Buffer b)
+        {
+            this.type = b.DeserializeString();
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TopicsForTypeRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(type, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this.type);
+        }
+        
+        public void Validate()
+        {
+            if (type is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -77,7 +104,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class TopicsForTypeResponse : IResponse
     {
-        public string[] topics;
+        public string[] topics { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TopicsForTypeResponse()
@@ -85,14 +112,33 @@ namespace Iviz.Msgs.rosapi
             topics = System.Array.Empty<string>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public TopicsForTypeResponse(string[] topics)
         {
-            BuiltIns.Deserialize(out topics, ref ptr, end, 0);
+            this.topics = topics ?? throw new System.ArgumentNullException(nameof(topics));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TopicsForTypeResponse(Buffer b)
+        {
+            this.topics = b.DeserializeStringArray(0);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TopicsForTypeResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(topics, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.SerializeArray(this.topics, 0);
+        }
+        
+        public void Validate()
+        {
+            if (topics is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

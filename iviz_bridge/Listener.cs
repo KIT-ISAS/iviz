@@ -181,7 +181,7 @@ namespace Iviz.Bridge
             {
                 buffer = new byte[length + length / 10];
             }
-            BuiltIns.Serialize(msg, buffer);
+            Msgs.Buffer.Serialize(msg, buffer);
             try
             {
                 writer.Write(length);

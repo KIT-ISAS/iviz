@@ -7,7 +7,7 @@ namespace Iviz.Msgs.sensor_msgs
         // This message is a submessage of MultiEchoLaserScan and is not intended
         // to be used separately.
         
-        public float[] echoes; // Multiple values of ranges or intensities.
+        public float[] echoes { get; set; } // Multiple values of ranges or intensities.
         // Each array represents data from the same angle increment.
     
         /// <summary> Constructor for empty message. </summary>
@@ -16,14 +16,33 @@ namespace Iviz.Msgs.sensor_msgs
             echoes = System.Array.Empty<float>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public LaserEcho(float[] echoes)
         {
-            BuiltIns.Deserialize(out echoes, ref ptr, end, 0);
+            this.echoes = echoes ?? throw new System.ArgumentNullException(nameof(echoes));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal LaserEcho(Buffer b)
+        {
+            this.echoes = b.DeserializeStructArray<float>(0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new LaserEcho(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(echoes, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.SerializeStructArray(this.echoes, 0);
+        }
+        
+        public void Validate()
+        {
+            if (echoes is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -35,8 +54,6 @@ namespace Iviz.Msgs.sensor_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new LaserEcho();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

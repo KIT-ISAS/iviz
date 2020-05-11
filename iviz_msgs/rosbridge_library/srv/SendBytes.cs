@@ -5,7 +5,7 @@ namespace Iviz.Msgs.rosbridge_library
     public sealed class SendBytes : IService
     {
         /// <summary> Request message. </summary>
-        public SendBytesRequest Request { get; }
+        public SendBytesRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public SendBytesResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.rosbridge_library
         
         public IService Create() => new SendBytes();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (SendBytesRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (SendBytesResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -46,16 +54,39 @@ namespace Iviz.Msgs.rosbridge_library
 
     public sealed class SendBytesRequest : IRequest
     {
-        public long count;
+        public long count { get; set; }
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public SendBytesRequest()
         {
-            BuiltIns.Deserialize(out count, ref ptr, end);
+        }
+        
+        /// <summary> Explicit constructor. </summary>
+        public SendBytesRequest(long count)
+        {
+            this.count = count;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal SendBytesRequest(Buffer b)
+        {
+            this.count = b.Deserialize<long>();
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new SendBytesRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(count, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this.count);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]
@@ -64,7 +95,7 @@ namespace Iviz.Msgs.rosbridge_library
 
     public sealed class SendBytesResponse : IResponse
     {
-        public string data;
+        public string data { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public SendBytesResponse()
@@ -72,14 +103,33 @@ namespace Iviz.Msgs.rosbridge_library
             data = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public SendBytesResponse(string data)
         {
-            BuiltIns.Deserialize(out data, ref ptr, end);
+            this.data = data ?? throw new System.ArgumentNullException(nameof(data));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal SendBytesResponse(Buffer b)
+        {
+            this.data = b.DeserializeString();
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new SendBytesResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(data, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this.data);
+        }
+        
+        public void Validate()
+        {
+            if (data is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

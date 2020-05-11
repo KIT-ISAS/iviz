@@ -6,11 +6,11 @@ namespace Iviz.Msgs.visualization_msgs
     {
         // Identifying string. Must be unique in the topic namespace
         // that this server works on.
-        public string server_id;
+        public string server_id { get; set; }
         
         // Sequence number.
         // The client will use this to detect if it has missed an update.
-        public ulong seq_num;
+        public ulong seq_num { get; set; }
         
         // Type holds the purpose of this message.  It must be one of UPDATE or KEEP_ALIVE.
         // UPDATE: Incremental update to previous state. 
@@ -22,19 +22,19 @@ namespace Iviz.Msgs.visualization_msgs
         public const byte KEEP_ALIVE = 0;
         public const byte UPDATE = 1;
         
-        public byte type;
+        public byte type { get; set; }
         
         //Note: No guarantees on the order of processing.
         //      Contents must be kept consistent by sender.
         
         //Markers to be added or updated
-        public InteractiveMarker[] markers;
+        public InteractiveMarker[] markers { get; set; }
         
         //Poses of markers that should be moved
-        public InteractiveMarkerPose[] poses;
+        public InteractiveMarkerPose[] poses { get; set; }
         
         //Names of markers to be erased
-        public string[] erases;
+        public string[] erases { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarkerUpdate()
@@ -45,24 +45,51 @@ namespace Iviz.Msgs.visualization_msgs
             erases = System.Array.Empty<string>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public InteractiveMarkerUpdate(string server_id, ulong seq_num, byte type, InteractiveMarker[] markers, InteractiveMarkerPose[] poses, string[] erases)
         {
-            BuiltIns.Deserialize(out server_id, ref ptr, end);
-            BuiltIns.Deserialize(out seq_num, ref ptr, end);
-            BuiltIns.Deserialize(out type, ref ptr, end);
-            BuiltIns.DeserializeArray(out markers, ref ptr, end, 0);
-            BuiltIns.DeserializeArray(out poses, ref ptr, end, 0);
-            BuiltIns.Deserialize(out erases, ref ptr, end, 0);
+            this.server_id = server_id ?? throw new System.ArgumentNullException(nameof(server_id));
+            this.seq_num = seq_num;
+            this.type = type;
+            this.markers = markers ?? throw new System.ArgumentNullException(nameof(markers));
+            this.poses = poses ?? throw new System.ArgumentNullException(nameof(poses));
+            this.erases = erases ?? throw new System.ArgumentNullException(nameof(erases));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal InteractiveMarkerUpdate(Buffer b)
+        {
+            this.server_id = b.DeserializeString();
+            this.seq_num = b.Deserialize<ulong>();
+            this.type = b.Deserialize<byte>();
+            this.markers = b.DeserializeArray<InteractiveMarker>(0);
+            this.poses = b.DeserializeArray<InteractiveMarkerPose>(0);
+            this.erases = b.DeserializeStringArray(0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new InteractiveMarkerUpdate(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(server_id, ref ptr, end);
-            BuiltIns.Serialize(seq_num, ref ptr, end);
-            BuiltIns.Serialize(type, ref ptr, end);
-            BuiltIns.SerializeArray(markers, ref ptr, end, 0);
-            BuiltIns.SerializeArray(poses, ref ptr, end, 0);
-            BuiltIns.Serialize(erases, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this.server_id);
+            b.Serialize(this.seq_num);
+            b.Serialize(this.type);
+            b.SerializeArray(this.markers, 0);
+            b.SerializeArray(this.poses, 0);
+            b.SerializeArray(this.erases, 0);
+        }
+        
+        public void Validate()
+        {
+            if (server_id is null) throw new System.NullReferenceException();
+            if (markers is null) throw new System.NullReferenceException();
+            if (poses is null) throw new System.NullReferenceException();
+            if (erases is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -87,8 +114,6 @@ namespace Iviz.Msgs.visualization_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new InteractiveMarkerUpdate();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

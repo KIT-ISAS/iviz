@@ -5,7 +5,7 @@ namespace Iviz.Msgs.diagnostic_msgs
     public sealed class AddDiagnostics : IService
     {
         /// <summary> Request message. </summary>
-        public AddDiagnosticsRequest Request { get; }
+        public AddDiagnosticsRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public AddDiagnosticsResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.diagnostic_msgs
         
         public IService Create() => new AddDiagnostics();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (AddDiagnosticsRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (AddDiagnosticsResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -62,7 +70,7 @@ namespace Iviz.Msgs.diagnostic_msgs
         // and http://wiki.ros.org/diagnostics/Tutorials/Using%20the%20GenericAnalyzer
         // for examples of the structure of yaml files which are expected to have been
         // loaded into the namespace.
-        public string load_namespace;
+        public string load_namespace { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public AddDiagnosticsRequest()
@@ -70,14 +78,33 @@ namespace Iviz.Msgs.diagnostic_msgs
             load_namespace = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public AddDiagnosticsRequest(string load_namespace)
         {
-            BuiltIns.Deserialize(out load_namespace, ref ptr, end);
+            this.load_namespace = load_namespace ?? throw new System.ArgumentNullException(nameof(load_namespace));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal AddDiagnosticsRequest(Buffer b)
+        {
+            this.load_namespace = b.DeserializeString();
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new AddDiagnosticsRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(load_namespace, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this.load_namespace);
+        }
+        
+        public void Validate()
+        {
+            if (load_namespace is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -98,10 +125,10 @@ namespace Iviz.Msgs.diagnostic_msgs
         // otherwise. A false return value means that either there is a bond in the
         // aggregator which already used the requested namespace, or the initialization
         // of analyzers failed.
-        public bool success;
+        public bool success { get; set; }
         
         // Message with additional information about the success or failure
-        public string message;
+        public string message { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public AddDiagnosticsResponse()
@@ -109,16 +136,36 @@ namespace Iviz.Msgs.diagnostic_msgs
             message = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public AddDiagnosticsResponse(bool success, string message)
         {
-            BuiltIns.Deserialize(out success, ref ptr, end);
-            BuiltIns.Deserialize(out message, ref ptr, end);
+            this.success = success;
+            this.message = message ?? throw new System.ArgumentNullException(nameof(message));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal AddDiagnosticsResponse(Buffer b)
+        {
+            this.success = b.Deserialize<bool>();
+            this.message = b.DeserializeString();
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new AddDiagnosticsResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(success, ref ptr, end);
-            BuiltIns.Serialize(message, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this.success);
+            b.Serialize(this.message);
+        }
+        
+        public void Validate()
+        {
+            if (message is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

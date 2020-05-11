@@ -5,8 +5,8 @@ namespace Iviz.Msgs.geometry_msgs
     public sealed class TwistStamped : IMessage
     {
         // A twist with reference coordinate frame and timestamp
-        public std_msgs.Header header;
-        public Twist twist;
+        public std_msgs.Header header { get; set; }
+        public Twist twist { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TwistStamped()
@@ -15,16 +15,37 @@ namespace Iviz.Msgs.geometry_msgs
             twist = new Twist();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public TwistStamped(std_msgs.Header header, Twist twist)
         {
-            header.Deserialize(ref ptr, end);
-            twist.Deserialize(ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.twist = twist ?? throw new System.ArgumentNullException(nameof(twist));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TwistStamped(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.twist = new Twist(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TwistStamped(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            twist.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            this.twist.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (twist is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -36,8 +57,6 @@ namespace Iviz.Msgs.geometry_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new TwistStamped();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

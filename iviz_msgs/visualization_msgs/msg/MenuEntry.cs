@@ -37,17 +37,17 @@ namespace Iviz.Msgs.visualization_msgs
         
         // ID is a number for each menu entry.  Must be unique within the
         // control, and should never be 0.
-        public uint id;
+        public uint id { get; set; }
         
         // ID of the parent of this menu entry, if it is a submenu.  If this
         // menu entry is a top-level entry, set parent_id to 0.
-        public uint parent_id;
+        public uint parent_id { get; set; }
         
         // menu / entry title
-        public string title;
+        public string title { get; set; }
         
         // Arguments to command indicated by command_type (below)
-        public string command;
+        public string command { get; set; }
         
         // Command_type stores the type of response desired when this menu
         // entry is clicked.
@@ -57,7 +57,7 @@ namespace Iviz.Msgs.visualization_msgs
         public const byte FEEDBACK = 0;
         public const byte ROSRUN = 1;
         public const byte ROSLAUNCH = 2;
-        public byte command_type;
+        public byte command_type { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MenuEntry()
@@ -66,22 +66,46 @@ namespace Iviz.Msgs.visualization_msgs
             command = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public MenuEntry(uint id, uint parent_id, string title, string command, byte command_type)
         {
-            BuiltIns.Deserialize(out id, ref ptr, end);
-            BuiltIns.Deserialize(out parent_id, ref ptr, end);
-            BuiltIns.Deserialize(out title, ref ptr, end);
-            BuiltIns.Deserialize(out command, ref ptr, end);
-            BuiltIns.Deserialize(out command_type, ref ptr, end);
+            this.id = id;
+            this.parent_id = parent_id;
+            this.title = title ?? throw new System.ArgumentNullException(nameof(title));
+            this.command = command ?? throw new System.ArgumentNullException(nameof(command));
+            this.command_type = command_type;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal MenuEntry(Buffer b)
+        {
+            this.id = b.Deserialize<uint>();
+            this.parent_id = b.Deserialize<uint>();
+            this.title = b.DeserializeString();
+            this.command = b.DeserializeString();
+            this.command_type = b.Deserialize<byte>();
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new MenuEntry(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(id, ref ptr, end);
-            BuiltIns.Serialize(parent_id, ref ptr, end);
-            BuiltIns.Serialize(title, ref ptr, end);
-            BuiltIns.Serialize(command, ref ptr, end);
-            BuiltIns.Serialize(command_type, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this.id);
+            b.Serialize(this.parent_id);
+            b.Serialize(this.title);
+            b.Serialize(this.command);
+            b.Serialize(this.command_type);
+        }
+        
+        public void Validate()
+        {
+            if (title is null) throw new System.NullReferenceException();
+            if (command is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -94,8 +118,6 @@ namespace Iviz.Msgs.visualization_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new MenuEntry();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

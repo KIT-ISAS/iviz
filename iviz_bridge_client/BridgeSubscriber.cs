@@ -10,6 +10,7 @@ namespace Iviz.Bridge.Client
         readonly TcpClient client;
         readonly BinaryReader reader;
         byte[] buffer = Array.Empty<byte>();
+        readonly T generator;
 
         public bool IsAlive => client.Connected;
 
@@ -18,6 +19,7 @@ namespace Iviz.Bridge.Client
             client = new TcpClient();
             client.Connect(hostname, port);
             reader = new BinaryReader(client.GetStream());
+            generator = new T();
 
             Console.WriteLine("+++ " + hostname + ":" + port);
         }
@@ -30,9 +32,7 @@ namespace Iviz.Bridge.Client
                 buffer = new byte[size + size / 10];
             }
             reader.Read(buffer, 0, size);
-            T msg = new T();
-            BuiltIns.Deserialize(msg, buffer, size);
-            return msg;
+            return (T)Msgs.Buffer.Deserialize(generator, buffer, size);
         }
 
         public void Stop()

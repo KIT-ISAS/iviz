@@ -5,8 +5,8 @@ namespace Iviz.Msgs.geometry_msgs
     public sealed class AccelStamped : IMessage
     {
         // An accel with reference coordinate frame and timestamp
-        public std_msgs.Header header;
-        public Accel accel;
+        public std_msgs.Header header { get; set; }
+        public Accel accel { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public AccelStamped()
@@ -15,16 +15,37 @@ namespace Iviz.Msgs.geometry_msgs
             accel = new Accel();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public AccelStamped(std_msgs.Header header, Accel accel)
         {
-            header.Deserialize(ref ptr, end);
-            accel.Deserialize(ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.accel = accel ?? throw new System.ArgumentNullException(nameof(accel));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal AccelStamped(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.accel = new Accel(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new AccelStamped(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            accel.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            this.accel.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (accel is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -36,8 +57,6 @@ namespace Iviz.Msgs.geometry_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new AccelStamped();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

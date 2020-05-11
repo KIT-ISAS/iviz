@@ -7,8 +7,8 @@ namespace Iviz.Msgs.std_msgs
         // Please look at the MultiArrayLayout message definition for
         // documentation on all multiarrays.
         
-        public MultiArrayLayout layout; // specification of data layout
-        public ushort[] data; // array of data
+        public MultiArrayLayout layout { get; set; } // specification of data layout
+        public ushort[] data { get; set; } // array of data
         
     
         /// <summary> Constructor for empty message. </summary>
@@ -18,16 +18,37 @@ namespace Iviz.Msgs.std_msgs
             data = System.Array.Empty<ushort>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public UInt16MultiArray(MultiArrayLayout layout, ushort[] data)
         {
-            layout.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out data, ref ptr, end, 0);
+            this.layout = layout ?? throw new System.ArgumentNullException(nameof(layout));
+            this.data = data ?? throw new System.ArgumentNullException(nameof(data));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal UInt16MultiArray(Buffer b)
+        {
+            this.layout = new MultiArrayLayout(b);
+            this.data = b.DeserializeStructArray<ushort>(0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new UInt16MultiArray(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            layout.Serialize(ref ptr, end);
-            BuiltIns.Serialize(data, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.layout.Serialize(b);
+            b.SerializeStructArray(this.data, 0);
+        }
+        
+        public void Validate()
+        {
+            if (layout is null) throw new System.NullReferenceException();
+            if (data is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -40,8 +61,6 @@ namespace Iviz.Msgs.std_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new UInt16MultiArray();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

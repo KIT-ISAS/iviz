@@ -4,26 +4,43 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.geometry_msgs
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct Pose : IMessage
+    public readonly struct Pose : IMessage
     {
         // A representation of pose in free space, composed of position and orientation. 
-        public Point position;
-        public Quaternion orientation;
+        public Point position { get; }
+        public Quaternion orientation { get; }
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public Pose(Point position, Quaternion orientation)
         {
-            BuiltIns.DeserializeStruct(out this, ref ptr, end);
+            this.position = position;
+            this.orientation = orientation;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal Pose(Buffer b)
+        {
+            this = b.Deserialize<Pose>();
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new Pose(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.SerializeStruct(this, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 56;
-    
-        public IMessage Create() => new Pose();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

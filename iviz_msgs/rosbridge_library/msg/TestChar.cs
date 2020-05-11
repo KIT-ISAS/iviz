@@ -4,7 +4,7 @@ namespace Iviz.Msgs.rosbridge_library
 {
     public sealed class TestChar : IMessage
     {
-        public sbyte[] data;
+        public sbyte[] data { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestChar()
@@ -12,14 +12,33 @@ namespace Iviz.Msgs.rosbridge_library
             data = System.Array.Empty<sbyte>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public TestChar(sbyte[] data)
         {
-            BuiltIns.Deserialize(out data, ref ptr, end, 0);
+            this.data = data ?? throw new System.ArgumentNullException(nameof(data));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TestChar(Buffer b)
+        {
+            this.data = b.DeserializeStructArray<sbyte>(0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TestChar(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(data, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.SerializeStructArray(this.data, 0);
+        }
+        
+        public void Validate()
+        {
+            if (data is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -31,8 +50,6 @@ namespace Iviz.Msgs.rosbridge_library
                 return size;
             }
         }
-    
-        public IMessage Create() => new TestChar();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

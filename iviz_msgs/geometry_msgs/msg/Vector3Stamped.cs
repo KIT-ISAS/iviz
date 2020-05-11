@@ -5,8 +5,8 @@ namespace Iviz.Msgs.geometry_msgs
     public sealed class Vector3Stamped : IMessage
     {
         // This represents a Vector3 with reference coordinate frame and timestamp
-        public std_msgs.Header header;
-        public Vector3 vector;
+        public std_msgs.Header header { get; set; }
+        public Vector3 vector { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Vector3Stamped()
@@ -14,16 +14,36 @@ namespace Iviz.Msgs.geometry_msgs
             header = new std_msgs.Header();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public Vector3Stamped(std_msgs.Header header, Vector3 vector)
         {
-            header.Deserialize(ref ptr, end);
-            vector.Deserialize(ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.vector = vector;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal Vector3Stamped(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.vector = new Vector3(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new Vector3Stamped(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            vector.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            this.vector.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -35,8 +55,6 @@ namespace Iviz.Msgs.geometry_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new Vector3Stamped();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

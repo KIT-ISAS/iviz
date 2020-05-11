@@ -4,7 +4,7 @@ namespace Iviz.Msgs.rosbridge_library
 {
     public sealed class TestDurationArray : IMessage
     {
-        public duration[] durations;
+        public duration[] durations { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestDurationArray()
@@ -12,14 +12,33 @@ namespace Iviz.Msgs.rosbridge_library
             durations = System.Array.Empty<duration>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public TestDurationArray(duration[] durations)
         {
-            BuiltIns.Deserialize(out durations, ref ptr, end, 0);
+            this.durations = durations ?? throw new System.ArgumentNullException(nameof(durations));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TestDurationArray(Buffer b)
+        {
+            this.durations = b.DeserializeStructArray<duration>(0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TestDurationArray(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(durations, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.SerializeStructArray(this.durations, 0);
+        }
+        
+        public void Validate()
+        {
+            if (durations is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -31,8 +50,6 @@ namespace Iviz.Msgs.rosbridge_library
                 return size;
             }
         }
-    
-        public IMessage Create() => new TestDurationArray();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

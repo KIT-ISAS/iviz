@@ -176,22 +176,29 @@ namespace Iviz.MsgsGen
                 string result;
                 if (arraySize == -1)
                 {
-                    result = "public " + className + " " + fieldName + ";";
+                    if (forceUnroll)
+                    {
+                        result = "public " + className + " " + fieldName + " { get; }";
+                    } else
+                    {
+                        result = "public " + className + " " + fieldName + " { get; set; }";
+                    }
                 }
                 else if (arraySize == 0)
                 {
-                    result = "public " + className + "[] " + fieldName + ";";
+                    result = "public " + className + "[] " + fieldName + " { get; set; }";
                 }
                 else
                 {
-                    if (forceUnroll)
-                    {
-                        result = "public " + className + " " + string.Join(", ", Enumerable.Range(0, arraySize).Select(x => fieldName + "_" + x)) + ";";
-                    }
-                    else
-                    {
-                        result = "public " + className + "[/*" + arraySize + "*/] " + fieldName + ";";
-                    }
+                    
+                    //if (forceUnroll)
+                    //{
+                    //    result = "public " + className + " " + string.Join(", ", Enumerable.Range(0, arraySize).Select(x => fieldName + "_" + x)) + ";";
+                    //}
+                    //else
+                    //{
+                        result = "public " + className + "[/*" + arraySize + "*/] " + fieldName + " { get; set; }";
+                    //}
                 }
                 if (comment != "")
                 {

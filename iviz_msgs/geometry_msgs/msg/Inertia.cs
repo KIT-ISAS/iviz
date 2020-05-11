@@ -5,50 +5,78 @@ namespace Iviz.Msgs.geometry_msgs
     public sealed class Inertia : IMessage
     {
         // Mass [kg]
-        public double m;
+        public double m { get; set; }
         
         // Center of mass [m]
-        public geometry_msgs.Vector3 com;
+        public geometry_msgs.Vector3 com { get; set; }
         
         // Inertia Tensor [kg-m^2]
         //     | ixx ixy ixz |
         // I = | ixy iyy iyz |
         //     | ixz iyz izz |
-        public double ixx;
-        public double ixy;
-        public double ixz;
-        public double iyy;
-        public double iyz;
-        public double izz;
+        public double ixx { get; set; }
+        public double ixy { get; set; }
+        public double ixz { get; set; }
+        public double iyy { get; set; }
+        public double iyz { get; set; }
+        public double izz { get; set; }
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public Inertia()
         {
-            BuiltIns.Deserialize(out m, ref ptr, end);
-            com.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out ixx, ref ptr, end);
-            BuiltIns.Deserialize(out ixy, ref ptr, end);
-            BuiltIns.Deserialize(out ixz, ref ptr, end);
-            BuiltIns.Deserialize(out iyy, ref ptr, end);
-            BuiltIns.Deserialize(out iyz, ref ptr, end);
-            BuiltIns.Deserialize(out izz, ref ptr, end);
+        }
+        
+        /// <summary> Explicit constructor. </summary>
+        public Inertia(double m, geometry_msgs.Vector3 com, double ixx, double ixy, double ixz, double iyy, double iyz, double izz)
+        {
+            this.m = m;
+            this.com = com;
+            this.ixx = ixx;
+            this.ixy = ixy;
+            this.ixz = ixz;
+            this.iyy = iyy;
+            this.iyz = iyz;
+            this.izz = izz;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal Inertia(Buffer b)
+        {
+            this.m = b.Deserialize<double>();
+            this.com = new geometry_msgs.Vector3(b);
+            this.ixx = b.Deserialize<double>();
+            this.ixy = b.Deserialize<double>();
+            this.ixz = b.Deserialize<double>();
+            this.iyy = b.Deserialize<double>();
+            this.iyz = b.Deserialize<double>();
+            this.izz = b.Deserialize<double>();
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new Inertia(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(m, ref ptr, end);
-            com.Serialize(ref ptr, end);
-            BuiltIns.Serialize(ixx, ref ptr, end);
-            BuiltIns.Serialize(ixy, ref ptr, end);
-            BuiltIns.Serialize(ixz, ref ptr, end);
-            BuiltIns.Serialize(iyy, ref ptr, end);
-            BuiltIns.Serialize(iyz, ref ptr, end);
-            BuiltIns.Serialize(izz, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this.m);
+            this.com.Serialize(b);
+            b.Serialize(this.ixx);
+            b.Serialize(this.ixy);
+            b.Serialize(this.ixz);
+            b.Serialize(this.iyy);
+            b.Serialize(this.iyz);
+            b.Serialize(this.izz);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 80;
-    
-        public IMessage Create() => new Inertia();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

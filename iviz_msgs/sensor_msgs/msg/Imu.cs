@@ -18,16 +18,16 @@ namespace Iviz.Msgs.sensor_msgs
         // If you are interpreting this message, please check for a value of -1 in the first element of each 
         // covariance matrix, and disregard the associated estimate.
         
-        public std_msgs.Header header;
+        public std_msgs.Header header { get; set; }
         
-        public geometry_msgs.Quaternion orientation;
-        public double[/*9*/] orientation_covariance; // Row major about x, y, z axes
+        public geometry_msgs.Quaternion orientation { get; set; }
+        public double[/*9*/] orientation_covariance { get; set; } // Row major about x, y, z axes
         
-        public geometry_msgs.Vector3 angular_velocity;
-        public double[/*9*/] angular_velocity_covariance; // Row major about x, y, z axes
+        public geometry_msgs.Vector3 angular_velocity { get; set; }
+        public double[/*9*/] angular_velocity_covariance { get; set; } // Row major about x, y, z axes
         
-        public geometry_msgs.Vector3 linear_acceleration;
-        public double[/*9*/] linear_acceleration_covariance; // Row major x, y z 
+        public geometry_msgs.Vector3 linear_acceleration { get; set; }
+        public double[/*9*/] linear_acceleration_covariance { get; set; } // Row major x, y z 
     
         /// <summary> Constructor for empty message. </summary>
         public Imu()
@@ -38,26 +38,60 @@ namespace Iviz.Msgs.sensor_msgs
             linear_acceleration_covariance = new double[9];
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public Imu(std_msgs.Header header, geometry_msgs.Quaternion orientation, double[] orientation_covariance, geometry_msgs.Vector3 angular_velocity, double[] angular_velocity_covariance, geometry_msgs.Vector3 linear_acceleration, double[] linear_acceleration_covariance)
         {
-            header.Deserialize(ref ptr, end);
-            orientation.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out orientation_covariance, ref ptr, end, 9);
-            angular_velocity.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out angular_velocity_covariance, ref ptr, end, 9);
-            linear_acceleration.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out linear_acceleration_covariance, ref ptr, end, 9);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.orientation = orientation;
+            this.orientation_covariance = orientation_covariance ?? throw new System.ArgumentNullException(nameof(orientation_covariance));
+            if (this.orientation_covariance.Length != 9) throw new System.ArgumentException("Invalid size", nameof(orientation_covariance));
+            this.angular_velocity = angular_velocity;
+            this.angular_velocity_covariance = angular_velocity_covariance ?? throw new System.ArgumentNullException(nameof(angular_velocity_covariance));
+            if (this.angular_velocity_covariance.Length != 9) throw new System.ArgumentException("Invalid size", nameof(angular_velocity_covariance));
+            this.linear_acceleration = linear_acceleration;
+            this.linear_acceleration_covariance = linear_acceleration_covariance ?? throw new System.ArgumentNullException(nameof(linear_acceleration_covariance));
+            if (this.linear_acceleration_covariance.Length != 9) throw new System.ArgumentException("Invalid size", nameof(linear_acceleration_covariance));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal Imu(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.orientation = new geometry_msgs.Quaternion(b);
+            this.orientation_covariance = b.DeserializeStructArray<double>(9);
+            this.angular_velocity = new geometry_msgs.Vector3(b);
+            this.angular_velocity_covariance = b.DeserializeStructArray<double>(9);
+            this.linear_acceleration = new geometry_msgs.Vector3(b);
+            this.linear_acceleration_covariance = b.DeserializeStructArray<double>(9);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new Imu(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            orientation.Serialize(ref ptr, end);
-            BuiltIns.Serialize(orientation_covariance, ref ptr, end, 9);
-            angular_velocity.Serialize(ref ptr, end);
-            BuiltIns.Serialize(angular_velocity_covariance, ref ptr, end, 9);
-            linear_acceleration.Serialize(ref ptr, end);
-            BuiltIns.Serialize(linear_acceleration_covariance, ref ptr, end, 9);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            this.orientation.Serialize(b);
+            b.SerializeStructArray(this.orientation_covariance, 9);
+            this.angular_velocity.Serialize(b);
+            b.SerializeStructArray(this.angular_velocity_covariance, 9);
+            this.linear_acceleration.Serialize(b);
+            b.SerializeStructArray(this.linear_acceleration_covariance, 9);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (orientation_covariance is null) throw new System.NullReferenceException();
+            if (orientation_covariance.Length != 9) throw new System.IndexOutOfRangeException();
+            if (angular_velocity_covariance is null) throw new System.NullReferenceException();
+            if (angular_velocity_covariance.Length != 9) throw new System.IndexOutOfRangeException();
+            if (linear_acceleration_covariance is null) throw new System.NullReferenceException();
+            if (linear_acceleration_covariance.Length != 9) throw new System.IndexOutOfRangeException();
         }
     
         [IgnoreDataMember]
@@ -69,8 +103,6 @@ namespace Iviz.Msgs.sensor_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new Imu();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

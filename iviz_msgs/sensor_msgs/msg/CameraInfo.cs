@@ -33,7 +33,7 @@ namespace Iviz.Msgs.sensor_msgs
         //######################################################################
         
         // Time of image acquisition, camera coordinate frame ID
-        public std_msgs.Header header; // Header timestamp should be acquisition time of image
+        public std_msgs.Header header { get; set; } // Header timestamp should be acquisition time of image
         // Header frame_id should be optical frame of camera
         // origin of frame should be optical center of camera
         // +x should point to the right in the image
@@ -57,17 +57,17 @@ namespace Iviz.Msgs.sensor_msgs
         
         // The image dimensions with which the camera was calibrated. Normally
         // this will be the full camera resolution in pixels.
-        public uint height;
-        public uint width;
+        public uint height { get; set; }
+        public uint width { get; set; }
         
         // The distortion model used. Supported models are listed in
         // sensor_msgs/distortion_models.h. For most cameras, "plumb_bob" - a
         // simple model of radial and tangential distortion - is sufficient.
-        public string distortion_model;
+        public string distortion_model { get; set; }
         
         // The distortion parameters, size depending on the distortion model.
         // For "plumb_bob", the 5 parameters are: (k1, k2, t1, t2, k3).
-        public double[] D;
+        public double[] D { get; set; }
         
         // Intrinsic camera matrix for the raw (distorted) images.
         //     [fx  0 cx]
@@ -76,13 +76,13 @@ namespace Iviz.Msgs.sensor_msgs
         // Projects 3D points in the camera coordinate frame to 2D pixel
         // coordinates using the focal lengths (fx, fy) and principal point
         // (cx, cy).
-        public double[/*9*/] K; // 3x3 row-major matrix
+        public double[/*9*/] K { get; set; } // 3x3 row-major matrix
         
         // Rectification matrix (stereo cameras only)
         // A rotation matrix aligning the camera coordinate system to the ideal
         // stereo image plane so that epipolar lines in both stereo images are
         // parallel.
-        public double[/*9*/] R; // 3x3 row-major matrix
+        public double[/*9*/] R { get; set; } // 3x3 row-major matrix
         
         // Projection/camera matrix
         //     [fx'  0  cx' Tx]
@@ -108,7 +108,7 @@ namespace Iviz.Msgs.sensor_msgs
         //         x = u / w
         //         y = v / w
         //  This holds for both images of a stereo pair.
-        public double[/*12*/] P; // 3x4 row-major matrix
+        public double[/*12*/] P { get; set; } // 3x4 row-major matrix
         
         
         //######################################################################
@@ -125,8 +125,8 @@ namespace Iviz.Msgs.sensor_msgs
         //  (width / binning_x) x (height / binning_y).
         // The default values binning_x = binning_y = 0 is considered the same
         //  as binning_x = binning_y = 1 (no subsampling).
-        public uint binning_x;
-        public uint binning_y;
+        public uint binning_x { get; set; }
+        public uint binning_y { get; set; }
         
         // Region of interest (subwindow of full camera resolution), given in
         //  full resolution (unbinned) image coordinates. A particular ROI
@@ -134,7 +134,7 @@ namespace Iviz.Msgs.sensor_msgs
         //  regardless of binning settings.
         // The default setting of roi (all values 0) is considered the same as
         //  full resolution (roi.width = width, roi.height = height).
-        public RegionOfInterest roi;
+        public RegionOfInterest roi { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public CameraInfo()
@@ -148,34 +148,75 @@ namespace Iviz.Msgs.sensor_msgs
             roi = new RegionOfInterest();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public CameraInfo(std_msgs.Header header, uint height, uint width, string distortion_model, double[] D, double[] K, double[] R, double[] P, uint binning_x, uint binning_y, RegionOfInterest roi)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out height, ref ptr, end);
-            BuiltIns.Deserialize(out width, ref ptr, end);
-            BuiltIns.Deserialize(out distortion_model, ref ptr, end);
-            BuiltIns.Deserialize(out D, ref ptr, end, 0);
-            BuiltIns.Deserialize(out K, ref ptr, end, 9);
-            BuiltIns.Deserialize(out R, ref ptr, end, 9);
-            BuiltIns.Deserialize(out P, ref ptr, end, 12);
-            BuiltIns.Deserialize(out binning_x, ref ptr, end);
-            BuiltIns.Deserialize(out binning_y, ref ptr, end);
-            roi.Deserialize(ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.height = height;
+            this.width = width;
+            this.distortion_model = distortion_model ?? throw new System.ArgumentNullException(nameof(distortion_model));
+            this.D = D ?? throw new System.ArgumentNullException(nameof(D));
+            this.K = K ?? throw new System.ArgumentNullException(nameof(K));
+            if (this.K.Length != 9) throw new System.ArgumentException("Invalid size", nameof(K));
+            this.R = R ?? throw new System.ArgumentNullException(nameof(R));
+            if (this.R.Length != 9) throw new System.ArgumentException("Invalid size", nameof(R));
+            this.P = P ?? throw new System.ArgumentNullException(nameof(P));
+            if (this.P.Length != 12) throw new System.ArgumentException("Invalid size", nameof(P));
+            this.binning_x = binning_x;
+            this.binning_y = binning_y;
+            this.roi = roi ?? throw new System.ArgumentNullException(nameof(roi));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal CameraInfo(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.height = b.Deserialize<uint>();
+            this.width = b.Deserialize<uint>();
+            this.distortion_model = b.DeserializeString();
+            this.D = b.DeserializeStructArray<double>(0);
+            this.K = b.DeserializeStructArray<double>(9);
+            this.R = b.DeserializeStructArray<double>(9);
+            this.P = b.DeserializeStructArray<double>(12);
+            this.binning_x = b.Deserialize<uint>();
+            this.binning_y = b.Deserialize<uint>();
+            this.roi = new RegionOfInterest(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new CameraInfo(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.Serialize(height, ref ptr, end);
-            BuiltIns.Serialize(width, ref ptr, end);
-            BuiltIns.Serialize(distortion_model, ref ptr, end);
-            BuiltIns.Serialize(D, ref ptr, end, 0);
-            BuiltIns.Serialize(K, ref ptr, end, 9);
-            BuiltIns.Serialize(R, ref ptr, end, 9);
-            BuiltIns.Serialize(P, ref ptr, end, 12);
-            BuiltIns.Serialize(binning_x, ref ptr, end);
-            BuiltIns.Serialize(binning_y, ref ptr, end);
-            roi.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            b.Serialize(this.height);
+            b.Serialize(this.width);
+            b.Serialize(this.distortion_model);
+            b.SerializeStructArray(this.D, 0);
+            b.SerializeStructArray(this.K, 9);
+            b.SerializeStructArray(this.R, 9);
+            b.SerializeStructArray(this.P, 12);
+            b.Serialize(this.binning_x);
+            b.Serialize(this.binning_y);
+            this.roi.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (distortion_model is null) throw new System.NullReferenceException();
+            if (D is null) throw new System.NullReferenceException();
+            if (K is null) throw new System.NullReferenceException();
+            if (K.Length != 9) throw new System.IndexOutOfRangeException();
+            if (R is null) throw new System.NullReferenceException();
+            if (R.Length != 9) throw new System.IndexOutOfRangeException();
+            if (P is null) throw new System.NullReferenceException();
+            if (P.Length != 12) throw new System.IndexOutOfRangeException();
+            if (roi is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -189,8 +230,6 @@ namespace Iviz.Msgs.sensor_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new CameraInfo();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

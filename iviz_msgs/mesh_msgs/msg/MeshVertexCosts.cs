@@ -5,7 +5,7 @@ namespace Iviz.Msgs.mesh_msgs
     public sealed class MeshVertexCosts : IMessage
     {
         // Mesh Attribute Message
-        public float[] costs;
+        public float[] costs { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshVertexCosts()
@@ -13,14 +13,33 @@ namespace Iviz.Msgs.mesh_msgs
             costs = System.Array.Empty<float>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public MeshVertexCosts(float[] costs)
         {
-            BuiltIns.Deserialize(out costs, ref ptr, end, 0);
+            this.costs = costs ?? throw new System.ArgumentNullException(nameof(costs));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal MeshVertexCosts(Buffer b)
+        {
+            this.costs = b.DeserializeStructArray<float>(0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new MeshVertexCosts(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(costs, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.SerializeStructArray(this.costs, 0);
+        }
+        
+        public void Validate()
+        {
+            if (costs is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -32,8 +51,6 @@ namespace Iviz.Msgs.mesh_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new MeshVertexCosts();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

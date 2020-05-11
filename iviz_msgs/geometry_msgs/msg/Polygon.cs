@@ -5,7 +5,7 @@ namespace Iviz.Msgs.geometry_msgs
     public sealed class Polygon : IMessage
     {
         //A specification of a polygon where the first and last points are assumed to be connected
-        public Point32[] points;
+        public Point32[] points { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Polygon()
@@ -13,14 +13,33 @@ namespace Iviz.Msgs.geometry_msgs
             points = System.Array.Empty<Point32>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public Polygon(Point32[] points)
         {
-            BuiltIns.DeserializeArray(out points, ref ptr, end, 0);
+            this.points = points ?? throw new System.ArgumentNullException(nameof(points));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal Polygon(Buffer b)
+        {
+            this.points = b.DeserializeArray<Point32>(0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new Polygon(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.SerializeArray(points, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.SerializeArray(this.points, 0);
+        }
+        
+        public void Validate()
+        {
+            if (points is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -32,8 +51,6 @@ namespace Iviz.Msgs.geometry_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new Polygon();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

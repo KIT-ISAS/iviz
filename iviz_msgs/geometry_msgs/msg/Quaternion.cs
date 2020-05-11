@@ -4,29 +4,48 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.geometry_msgs
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct Quaternion : IMessage
+    public readonly struct Quaternion : IMessage
     {
         // This represents an orientation in free space in quaternion form.
         
-        public double x;
-        public double y;
-        public double z;
-        public double w;
+        public double x { get; }
+        public double y { get; }
+        public double z { get; }
+        public double w { get; }
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public Quaternion(double x, double y, double z, double w)
         {
-            BuiltIns.DeserializeStruct(out this, ref ptr, end);
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.w = w;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal Quaternion(Buffer b)
+        {
+            this = b.Deserialize<Quaternion>();
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new Quaternion(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.SerializeStruct(this, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 32;
-    
-        public IMessage Create() => new Quaternion();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

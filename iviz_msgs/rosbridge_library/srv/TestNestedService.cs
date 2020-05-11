@@ -5,7 +5,7 @@ namespace Iviz.Msgs.rosbridge_library
     public sealed class TestNestedService : IService
     {
         /// <summary> Request message. </summary>
-        public TestNestedServiceRequest Request { get; }
+        public TestNestedServiceRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public TestNestedServiceResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.rosbridge_library
         
         public IService Create() => new TestNestedService();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (TestNestedServiceRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (TestNestedServiceResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -47,16 +55,39 @@ namespace Iviz.Msgs.rosbridge_library
     public sealed class TestNestedServiceRequest : IRequest
     {
         //request definition
-        public geometry_msgs.Pose pose;
+        public geometry_msgs.Pose pose { get; set; }
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public TestNestedServiceRequest()
         {
-            pose.Deserialize(ref ptr, end);
+        }
+        
+        /// <summary> Explicit constructor. </summary>
+        public TestNestedServiceRequest(geometry_msgs.Pose pose)
+        {
+            this.pose = pose;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TestNestedServiceRequest(Buffer b)
+        {
+            this.pose = new geometry_msgs.Pose(b);
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TestNestedServiceRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            pose.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.pose.Serialize(b);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]
@@ -66,7 +97,7 @@ namespace Iviz.Msgs.rosbridge_library
     public sealed class TestNestedServiceResponse : IResponse
     {
         //response definition
-        public std_msgs.Float64 data;
+        public std_msgs.Float64 data { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestNestedServiceResponse()
@@ -74,14 +105,33 @@ namespace Iviz.Msgs.rosbridge_library
             data = new std_msgs.Float64();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public TestNestedServiceResponse(std_msgs.Float64 data)
         {
-            data.Deserialize(ref ptr, end);
+            this.data = data ?? throw new System.ArgumentNullException(nameof(data));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TestNestedServiceResponse(Buffer b)
+        {
+            this.data = new std_msgs.Float64(b);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TestNestedServiceResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            data.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.data.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (data is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

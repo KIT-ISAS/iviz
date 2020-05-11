@@ -11,9 +11,9 @@ namespace Iviz.Msgs.geometry_msgs
         // <a href="http://wiki.ros.org/tf">tf</a> package. 
         // See its documentation for more information.
         
-        public std_msgs.Header header;
-        public string child_frame_id; // the frame id of the child frame
-        public Transform transform;
+        public std_msgs.Header header { get; set; }
+        public string child_frame_id { get; set; } // the frame id of the child frame
+        public Transform transform { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TransformStamped()
@@ -22,18 +22,40 @@ namespace Iviz.Msgs.geometry_msgs
             child_frame_id = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public TransformStamped(std_msgs.Header header, string child_frame_id, Transform transform)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out child_frame_id, ref ptr, end);
-            transform.Deserialize(ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.child_frame_id = child_frame_id ?? throw new System.ArgumentNullException(nameof(child_frame_id));
+            this.transform = transform;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TransformStamped(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.child_frame_id = b.DeserializeString();
+            this.transform = new Transform(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TransformStamped(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.Serialize(child_frame_id, ref ptr, end);
-            transform.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            b.Serialize(this.child_frame_id);
+            this.transform.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (child_frame_id is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -46,8 +68,6 @@ namespace Iviz.Msgs.geometry_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new TransformStamped();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

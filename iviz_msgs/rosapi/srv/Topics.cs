@@ -5,7 +5,7 @@ namespace Iviz.Msgs.rosapi
     public sealed class Topics : IService
     {
         /// <summary> Request message. </summary>
-        public TopicsRequest Request { get; }
+        public TopicsRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public TopicsResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.rosapi
         
         public IService Create() => new Topics();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (TopicsRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (TopicsResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -48,11 +56,28 @@ namespace Iviz.Msgs.rosapi
     {
         
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public TopicsRequest()
         {
         }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TopicsRequest(Buffer b)
+        {
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TopicsRequest(b);
+        }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+        }
+        
+        public void Validate()
         {
         }
     
@@ -62,8 +87,8 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class TopicsResponse : IResponse
     {
-        public string[] topics;
-        public string[] types;
+        public string[] topics { get; set; }
+        public string[] types { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TopicsResponse()
@@ -72,16 +97,37 @@ namespace Iviz.Msgs.rosapi
             types = System.Array.Empty<string>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public TopicsResponse(string[] topics, string[] types)
         {
-            BuiltIns.Deserialize(out topics, ref ptr, end, 0);
-            BuiltIns.Deserialize(out types, ref ptr, end, 0);
+            this.topics = topics ?? throw new System.ArgumentNullException(nameof(topics));
+            this.types = types ?? throw new System.ArgumentNullException(nameof(types));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TopicsResponse(Buffer b)
+        {
+            this.topics = b.DeserializeStringArray(0);
+            this.types = b.DeserializeStringArray(0);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TopicsResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(topics, ref ptr, end, 0);
-            BuiltIns.Serialize(types, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.SerializeArray(this.topics, 0);
+            b.SerializeArray(this.types, 0);
+        }
+        
+        public void Validate()
+        {
+            if (topics is null) throw new System.NullReferenceException();
+            if (types is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

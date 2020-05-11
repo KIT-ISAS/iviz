@@ -8,7 +8,7 @@ namespace Iviz.Msgs.sensor_msgs
         // (0, 0) is at top-left corner of image
         //
         
-        public std_msgs.Header header; // Header timestamp should be acquisition time of image
+        public std_msgs.Header header { get; set; } // Header timestamp should be acquisition time of image
         // Header frame_id should be optical frame of camera
         // origin of frame should be optical center of camera
         // +x should point to the right in the image
@@ -18,19 +18,19 @@ namespace Iviz.Msgs.sensor_msgs
         // message associated with the image conflict
         // the behavior is undefined
         
-        public uint height; // image height, that is, number of rows
-        public uint width; // image width, that is, number of columns
+        public uint height { get; set; } // image height, that is, number of rows
+        public uint width { get; set; } // image width, that is, number of columns
         
         // The legal values for encoding are in file src/image_encodings.cpp
         // If you want to standardize a new string format, join
         // ros-users@lists.sourceforge.net and send an email proposing a new encoding.
         
-        public string encoding; // Encoding of pixels -- channel meaning, ordering, size
+        public string encoding { get; set; } // Encoding of pixels -- channel meaning, ordering, size
         // taken from the list of strings in include/sensor_msgs/image_encodings.h
         
-        public byte is_bigendian; // is this data bigendian?
-        public uint step; // Full row length in bytes
-        public byte[] data; // actual matrix data, size is (step * rows)
+        public byte is_bigendian { get; set; } // is this data bigendian?
+        public uint step { get; set; } // Full row length in bytes
+        public byte[] data { get; set; } // actual matrix data, size is (step * rows)
     
         /// <summary> Constructor for empty message. </summary>
         public Image()
@@ -40,26 +40,53 @@ namespace Iviz.Msgs.sensor_msgs
             data = System.Array.Empty<byte>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public Image(std_msgs.Header header, uint height, uint width, string encoding, byte is_bigendian, uint step, byte[] data)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out height, ref ptr, end);
-            BuiltIns.Deserialize(out width, ref ptr, end);
-            BuiltIns.Deserialize(out encoding, ref ptr, end);
-            BuiltIns.Deserialize(out is_bigendian, ref ptr, end);
-            BuiltIns.Deserialize(out step, ref ptr, end);
-            BuiltIns.Deserialize(out data, ref ptr, end, 0);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.height = height;
+            this.width = width;
+            this.encoding = encoding ?? throw new System.ArgumentNullException(nameof(encoding));
+            this.is_bigendian = is_bigendian;
+            this.step = step;
+            this.data = data ?? throw new System.ArgumentNullException(nameof(data));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal Image(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.height = b.Deserialize<uint>();
+            this.width = b.Deserialize<uint>();
+            this.encoding = b.DeserializeString();
+            this.is_bigendian = b.Deserialize<byte>();
+            this.step = b.Deserialize<uint>();
+            this.data = b.DeserializeStructArray<byte>(0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new Image(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.Serialize(height, ref ptr, end);
-            BuiltIns.Serialize(width, ref ptr, end);
-            BuiltIns.Serialize(encoding, ref ptr, end);
-            BuiltIns.Serialize(is_bigendian, ref ptr, end);
-            BuiltIns.Serialize(step, ref ptr, end);
-            BuiltIns.Serialize(data, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            b.Serialize(this.height);
+            b.Serialize(this.width);
+            b.Serialize(this.encoding);
+            b.Serialize(this.is_bigendian);
+            b.Serialize(this.step);
+            b.SerializeStructArray(this.data, 0);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (encoding is null) throw new System.NullReferenceException();
+            if (data is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -73,8 +100,6 @@ namespace Iviz.Msgs.sensor_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new Image();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

@@ -5,7 +5,7 @@ namespace Iviz.Msgs.rosbridge_library
     public sealed class TestArrayRequest : IService
     {
         /// <summary> Request message. </summary>
-        public TestArrayRequestRequest Request { get; }
+        public TestArrayRequestRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public TestArrayRequestResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.rosbridge_library
         
         public IService Create() => new TestArrayRequest();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (TestArrayRequestRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (TestArrayRequestResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -46,7 +54,7 @@ namespace Iviz.Msgs.rosbridge_library
 
     public sealed class TestArrayRequestRequest : IRequest
     {
-        public int[] @int;
+        public int[] @int { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestArrayRequestRequest()
@@ -54,14 +62,33 @@ namespace Iviz.Msgs.rosbridge_library
             @int = System.Array.Empty<int>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public TestArrayRequestRequest(int[] @int)
         {
-            BuiltIns.Deserialize(out @int, ref ptr, end, 0);
+            this.@int = @int ?? throw new System.ArgumentNullException(nameof(@int));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TestArrayRequestRequest(Buffer b)
+        {
+            this.@int = b.DeserializeStructArray<int>(0);
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TestArrayRequestRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(@int, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.SerializeStructArray(this.@int, 0);
+        }
+        
+        public void Validate()
+        {
+            if (@int is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

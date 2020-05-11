@@ -4,7 +4,7 @@ namespace Iviz.Msgs.rosbridge_library
 {
     public sealed class TestTimeArray : IMessage
     {
-        public time[] times;
+        public time[] times { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestTimeArray()
@@ -12,14 +12,33 @@ namespace Iviz.Msgs.rosbridge_library
             times = System.Array.Empty<time>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public TestTimeArray(time[] times)
         {
-            BuiltIns.Deserialize(out times, ref ptr, end, 0);
+            this.times = times ?? throw new System.ArgumentNullException(nameof(times));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TestTimeArray(Buffer b)
+        {
+            this.times = b.DeserializeStructArray<time>(0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TestTimeArray(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(times, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.SerializeStructArray(this.times, 0);
+        }
+        
+        public void Validate()
+        {
+            if (times is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -31,8 +50,6 @@ namespace Iviz.Msgs.rosbridge_library
                 return size;
             }
         }
-    
-        public IMessage Create() => new TestTimeArray();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

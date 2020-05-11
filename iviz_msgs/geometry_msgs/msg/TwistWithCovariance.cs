@@ -6,13 +6,13 @@ namespace Iviz.Msgs.geometry_msgs
     {
         // This expresses velocity in free space with uncertainty.
         
-        public Twist twist;
+        public Twist twist { get; set; }
         
         // Row-major representation of the 6x6 covariance matrix
         // The orientation parameters use a fixed-axis representation.
         // In order, the parameters are:
         // (x, y, z, rotation about X axis, rotation about Y axis, rotation about Z axis)
-        public double[/*36*/] covariance;
+        public double[/*36*/] covariance { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TwistWithCovariance()
@@ -21,22 +21,43 @@ namespace Iviz.Msgs.geometry_msgs
             covariance = new double[36];
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public TwistWithCovariance(Twist twist, double[] covariance)
         {
-            twist.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out covariance, ref ptr, end, 36);
+            this.twist = twist ?? throw new System.ArgumentNullException(nameof(twist));
+            this.covariance = covariance ?? throw new System.ArgumentNullException(nameof(covariance));
+            if (this.covariance.Length != 36) throw new System.ArgumentException("Invalid size", nameof(covariance));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TwistWithCovariance(Buffer b)
+        {
+            this.twist = new Twist(b);
+            this.covariance = b.DeserializeStructArray<double>(36);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TwistWithCovariance(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            twist.Serialize(ref ptr, end);
-            BuiltIns.Serialize(covariance, ref ptr, end, 36);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.twist.Serialize(b);
+            b.SerializeStructArray(this.covariance, 36);
+        }
+        
+        public void Validate()
+        {
+            if (twist is null) throw new System.NullReferenceException();
+            if (covariance is null) throw new System.NullReferenceException();
+            if (covariance.Length != 36) throw new System.IndexOutOfRangeException();
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 336;
-    
-        public IMessage Create() => new TwistWithCovariance();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

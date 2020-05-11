@@ -4,18 +4,33 @@ namespace Iviz.Msgs.std_msgs
 {
     public sealed class Empty : IMessage
     {
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public Empty()
         {
         }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal Empty(Buffer b)
+        {
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new Empty(b);
+        }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+        }
+        
+        public void Validate()
         {
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 0;
-    
-        public IMessage Create() => new Empty();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

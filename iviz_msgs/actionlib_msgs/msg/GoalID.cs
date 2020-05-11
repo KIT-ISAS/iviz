@@ -7,12 +7,12 @@ namespace Iviz.Msgs.actionlib_msgs
         // The stamp should store the time at which this goal was requested.
         // It is used by an action server when it tries to preempt all
         // goals that were requested before a certain time
-        public time stamp;
+        public time stamp { get; set; }
         
         // The id provides a way to associate feedback and
         // result message with specific goal requests. The id
         // specified must be unique.
-        public string id;
+        public string id { get; set; }
         
     
         /// <summary> Constructor for empty message. </summary>
@@ -21,16 +21,36 @@ namespace Iviz.Msgs.actionlib_msgs
             id = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public GoalID(time stamp, string id)
         {
-            BuiltIns.Deserialize(out stamp, ref ptr, end);
-            BuiltIns.Deserialize(out id, ref ptr, end);
+            this.stamp = stamp;
+            this.id = id ?? throw new System.ArgumentNullException(nameof(id));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal GoalID(Buffer b)
+        {
+            this.stamp = b.Deserialize<time>();
+            this.id = b.DeserializeString();
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new GoalID(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(stamp, ref ptr, end);
-            BuiltIns.Serialize(id, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this.stamp);
+            b.Serialize(this.id);
+        }
+        
+        public void Validate()
+        {
+            if (id is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -42,8 +62,6 @@ namespace Iviz.Msgs.actionlib_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new GoalID();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

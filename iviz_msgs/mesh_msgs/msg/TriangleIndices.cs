@@ -1,28 +1,51 @@
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.mesh_msgs
 {
-    [StructLayout(LayoutKind.Sequential)]
-    public struct TriangleIndices : IMessage
+    public sealed class TriangleIndices : IMessage
     {
         // Definition of a triangle's vertices
-        public uint vertex_indices_0, vertex_indices_1, vertex_indices_2;
+        public uint[/*3*/] vertex_indices { get; set; }
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public TriangleIndices()
         {
-            BuiltIns.DeserializeStruct(out this, ref ptr, end);
+            vertex_indices = new uint[3];
+        }
+        
+        /// <summary> Explicit constructor. </summary>
+        public TriangleIndices(uint[] vertex_indices)
+        {
+            this.vertex_indices = vertex_indices ?? throw new System.ArgumentNullException(nameof(vertex_indices));
+            if (this.vertex_indices.Length != 3) throw new System.ArgumentException("Invalid size", nameof(vertex_indices));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TriangleIndices(Buffer b)
+        {
+            this.vertex_indices = b.DeserializeStructArray<uint>(3);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TriangleIndices(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.SerializeStruct(this, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.SerializeStructArray(this.vertex_indices, 3);
+        }
+        
+        public void Validate()
+        {
+            if (vertex_indices is null) throw new System.NullReferenceException();
+            if (vertex_indices.Length != 3) throw new System.IndexOutOfRangeException();
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 12;
-    
-        public IMessage Create() => new TriangleIndices();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

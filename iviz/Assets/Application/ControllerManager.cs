@@ -1,4 +1,4 @@
-﻿#define USING_VR
+﻿//#define USING_VR
 
 #if USING_VR
 using Iviz.App.Displays;

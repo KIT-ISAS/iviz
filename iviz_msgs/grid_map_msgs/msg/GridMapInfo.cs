@@ -5,19 +5,19 @@ namespace Iviz.Msgs.grid_map_msgs
     public sealed class GridMapInfo : IMessage
     {
         // Header (time and frame)
-        public std_msgs.Header header;
+        public std_msgs.Header header { get; set; }
         
         // Resolution of the grid [m/cell].
-        public double resolution;
+        public double resolution { get; set; }
         
         // Length in x-direction [m].
-        public double length_x;
+        public double length_x { get; set; }
         
         // Length in y-direction [m].
-        public double length_y;
+        public double length_y { get; set; }
         
         // Pose of the grid map center in the frame defined in `header` [m].
-        public geometry_msgs.Pose pose;
+        public geometry_msgs.Pose pose { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GridMapInfo()
@@ -25,22 +25,45 @@ namespace Iviz.Msgs.grid_map_msgs
             header = new std_msgs.Header();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public GridMapInfo(std_msgs.Header header, double resolution, double length_x, double length_y, geometry_msgs.Pose pose)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out resolution, ref ptr, end);
-            BuiltIns.Deserialize(out length_x, ref ptr, end);
-            BuiltIns.Deserialize(out length_y, ref ptr, end);
-            pose.Deserialize(ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.resolution = resolution;
+            this.length_x = length_x;
+            this.length_y = length_y;
+            this.pose = pose;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal GridMapInfo(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.resolution = b.Deserialize<double>();
+            this.length_x = b.Deserialize<double>();
+            this.length_y = b.Deserialize<double>();
+            this.pose = new geometry_msgs.Pose(b);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new GridMapInfo(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.Serialize(resolution, ref ptr, end);
-            BuiltIns.Serialize(length_x, ref ptr, end);
-            BuiltIns.Serialize(length_y, ref ptr, end);
-            pose.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            b.Serialize(this.resolution);
+            b.Serialize(this.length_x);
+            b.Serialize(this.length_y);
+            this.pose.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -52,8 +75,6 @@ namespace Iviz.Msgs.grid_map_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new GridMapInfo();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

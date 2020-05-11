@@ -10,26 +10,26 @@ namespace Iviz.Msgs.visualization_msgs
         // in the same frame.
         // Otherwise, you might receive feedback in a different frame.
         // For rviz, this will be the current 'fixed frame' set by the user.
-        public std_msgs.Header header;
+        public std_msgs.Header header { get; set; }
         
         // Initial pose. Also, defines the pivot point for rotations.
-        public geometry_msgs.Pose pose;
+        public geometry_msgs.Pose pose { get; set; }
         
         // Identifying string. Must be globally unique in
         // the topic that this message is sent through.
-        public string name;
+        public string name { get; set; }
         
         // Short description (< 40 characters).
-        public string description;
+        public string description { get; set; }
         
         // Scale to be used for default controls (default=1).
-        public float scale;
+        public float scale { get; set; }
         
         // All menu and submenu entries associated with this marker.
-        public MenuEntry[] menu_entries;
+        public MenuEntry[] menu_entries { get; set; }
         
         // List of controls displayed for this marker.
-        public InteractiveMarkerControl[] controls;
+        public InteractiveMarkerControl[] controls { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarker()
@@ -41,26 +41,55 @@ namespace Iviz.Msgs.visualization_msgs
             controls = System.Array.Empty<InteractiveMarkerControl>();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public InteractiveMarker(std_msgs.Header header, geometry_msgs.Pose pose, string name, string description, float scale, MenuEntry[] menu_entries, InteractiveMarkerControl[] controls)
         {
-            header.Deserialize(ref ptr, end);
-            pose.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out name, ref ptr, end);
-            BuiltIns.Deserialize(out description, ref ptr, end);
-            BuiltIns.Deserialize(out scale, ref ptr, end);
-            BuiltIns.DeserializeArray(out menu_entries, ref ptr, end, 0);
-            BuiltIns.DeserializeArray(out controls, ref ptr, end, 0);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.pose = pose;
+            this.name = name ?? throw new System.ArgumentNullException(nameof(name));
+            this.description = description ?? throw new System.ArgumentNullException(nameof(description));
+            this.scale = scale;
+            this.menu_entries = menu_entries ?? throw new System.ArgumentNullException(nameof(menu_entries));
+            this.controls = controls ?? throw new System.ArgumentNullException(nameof(controls));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal InteractiveMarker(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.pose = new geometry_msgs.Pose(b);
+            this.name = b.DeserializeString();
+            this.description = b.DeserializeString();
+            this.scale = b.Deserialize<float>();
+            this.menu_entries = b.DeserializeArray<MenuEntry>(0);
+            this.controls = b.DeserializeArray<InteractiveMarkerControl>(0);
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new InteractiveMarker(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            pose.Serialize(ref ptr, end);
-            BuiltIns.Serialize(name, ref ptr, end);
-            BuiltIns.Serialize(description, ref ptr, end);
-            BuiltIns.Serialize(scale, ref ptr, end);
-            BuiltIns.SerializeArray(menu_entries, ref ptr, end, 0);
-            BuiltIns.SerializeArray(controls, ref ptr, end, 0);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            this.pose.Serialize(b);
+            b.Serialize(this.name);
+            b.Serialize(this.description);
+            b.Serialize(this.scale);
+            b.SerializeArray(this.menu_entries, 0);
+            b.SerializeArray(this.controls, 0);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
+            if (name is null) throw new System.NullReferenceException();
+            if (description is null) throw new System.NullReferenceException();
+            if (menu_entries is null) throw new System.NullReferenceException();
+            if (controls is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -82,8 +111,6 @@ namespace Iviz.Msgs.visualization_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new InteractiveMarker();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

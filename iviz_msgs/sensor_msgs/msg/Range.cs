@@ -14,7 +14,7 @@ namespace Iviz.Msgs.sensor_msgs
         // These sensors follow REP 117 and will output -Inf if the object is detected
         // and +Inf if the object is outside of the detection range.
         
-        public std_msgs.Header header; // timestamp in the header is the time the ranger
+        public std_msgs.Header header { get; set; } // timestamp in the header is the time the ranger
         // returned the distance reading
         
         // Radiation type enums
@@ -22,21 +22,21 @@ namespace Iviz.Msgs.sensor_msgs
         public const byte ULTRASOUND = 0;
         public const byte INFRARED = 1;
         
-        public byte radiation_type; // the type of radiation used by the sensor
+        public byte radiation_type { get; set; } // the type of radiation used by the sensor
         // (sound, IR, etc) [enum]
         
-        public float field_of_view; // the size of the arc that the distance reading is
+        public float field_of_view { get; set; } // the size of the arc that the distance reading is
         // valid for [rad]
         // the object causing the range reading may have
         // been anywhere within -field_of_view/2 and
         // field_of_view/2 at the measured range. 
         // 0 angle corresponds to the x-axis of the sensor.
         
-        public float min_range; // minimum range value [m]
-        public float max_range; // maximum range value [m]
+        public float min_range { get; set; } // minimum range value [m]
+        public float max_range { get; set; } // maximum range value [m]
         // Fixed distance rangers require min_range==max_range
         
-        public float range; // range data [m]
+        public float range { get; set; } // range data [m]
         // (Note: values < range_min or > range_max
         // should be discarded)
         // Fixed distance rangers only output -Inf or +Inf.
@@ -51,24 +51,48 @@ namespace Iviz.Msgs.sensor_msgs
             header = new std_msgs.Header();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public Range(std_msgs.Header header, byte radiation_type, float field_of_view, float min_range, float max_range, float range)
         {
-            header.Deserialize(ref ptr, end);
-            BuiltIns.Deserialize(out radiation_type, ref ptr, end);
-            BuiltIns.Deserialize(out field_of_view, ref ptr, end);
-            BuiltIns.Deserialize(out min_range, ref ptr, end);
-            BuiltIns.Deserialize(out max_range, ref ptr, end);
-            BuiltIns.Deserialize(out range, ref ptr, end);
+            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.radiation_type = radiation_type;
+            this.field_of_view = field_of_view;
+            this.min_range = min_range;
+            this.max_range = max_range;
+            this.range = range;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal Range(Buffer b)
+        {
+            this.header = new std_msgs.Header(b);
+            this.radiation_type = b.Deserialize<byte>();
+            this.field_of_view = b.Deserialize<float>();
+            this.min_range = b.Deserialize<float>();
+            this.max_range = b.Deserialize<float>();
+            this.range = b.Deserialize<float>();
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new Range(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            header.Serialize(ref ptr, end);
-            BuiltIns.Serialize(radiation_type, ref ptr, end);
-            BuiltIns.Serialize(field_of_view, ref ptr, end);
-            BuiltIns.Serialize(min_range, ref ptr, end);
-            BuiltIns.Serialize(max_range, ref ptr, end);
-            BuiltIns.Serialize(range, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.header.Serialize(b);
+            b.Serialize(this.radiation_type);
+            b.Serialize(this.field_of_view);
+            b.Serialize(this.min_range);
+            b.Serialize(this.max_range);
+            b.Serialize(this.range);
+        }
+        
+        public void Validate()
+        {
+            if (header is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -80,8 +104,6 @@ namespace Iviz.Msgs.sensor_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new Range();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

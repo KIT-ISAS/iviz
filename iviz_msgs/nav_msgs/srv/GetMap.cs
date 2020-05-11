@@ -5,7 +5,7 @@ namespace Iviz.Msgs.nav_msgs
     public sealed class GetMap : IService
     {
         /// <summary> Request message. </summary>
-        public GetMapRequest Request { get; }
+        public GetMapRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public GetMapResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.nav_msgs
         
         public IService Create() => new GetMap();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (GetMapRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (GetMapResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -48,11 +56,28 @@ namespace Iviz.Msgs.nav_msgs
     {
         // Get the map as a nav_msgs/OccupancyGrid
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Constructor for empty message. </summary>
+        public GetMapRequest()
         {
         }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal GetMapRequest(Buffer b)
+        {
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new GetMapRequest(b);
+        }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+        }
+        
+        public void Validate()
         {
         }
     
@@ -62,7 +87,7 @@ namespace Iviz.Msgs.nav_msgs
 
     public sealed class GetMapResponse : IResponse
     {
-        public nav_msgs.OccupancyGrid map;
+        public nav_msgs.OccupancyGrid map { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetMapResponse()
@@ -70,14 +95,33 @@ namespace Iviz.Msgs.nav_msgs
             map = new nav_msgs.OccupancyGrid();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public GetMapResponse(nav_msgs.OccupancyGrid map)
         {
-            map.Deserialize(ref ptr, end);
+            this.map = map ?? throw new System.ArgumentNullException(nameof(map));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal GetMapResponse(Buffer b)
+        {
+            this.map = new nav_msgs.OccupancyGrid(b);
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new GetMapResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            map.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.map.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (map is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

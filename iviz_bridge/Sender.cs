@@ -146,6 +146,7 @@ namespace Iviz.Bridge
         readonly TcpClient client;
         readonly BinaryReader reader;
         byte[] buffer = new byte[0];
+        readonly T generator;
 
         bool keepRunning;
         readonly Task task;
@@ -162,6 +163,7 @@ namespace Iviz.Bridge
             this.client = client;
             reader = new BinaryReader(client.GetStream());
             task = Task.Run(Run);
+            generator = new T();
         }
 
         public void Stop()
@@ -188,8 +190,7 @@ namespace Iviz.Bridge
                     }
                     reader.Read(buffer, 0, length);
 
-                    T msg = new T();
-                    BuiltIns.Deserialize(msg, buffer, length);
+                    IMessage msg = Msgs.Buffer.Deserialize(generator, buffer, length);
                     publisher.Publish(msg);
                 }
             }

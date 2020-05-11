@@ -4,8 +4,8 @@ namespace Iviz.Msgs.diagnostic_msgs
 {
     public sealed class KeyValue : IMessage
     {
-        public string key; // what to label this value when viewing
-        public string value; // a value to track over time
+        public string key { get; set; } // what to label this value when viewing
+        public string value { get; set; } // a value to track over time
     
         /// <summary> Constructor for empty message. </summary>
         public KeyValue()
@@ -14,16 +14,37 @@ namespace Iviz.Msgs.diagnostic_msgs
             value = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public KeyValue(string key, string value)
         {
-            BuiltIns.Deserialize(out key, ref ptr, end);
-            BuiltIns.Deserialize(out value, ref ptr, end);
+            this.key = key ?? throw new System.ArgumentNullException(nameof(key));
+            this.value = value ?? throw new System.ArgumentNullException(nameof(value));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal KeyValue(Buffer b)
+        {
+            this.key = b.DeserializeString();
+            this.value = b.DeserializeString();
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new KeyValue(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(key, ref ptr, end);
-            BuiltIns.Serialize(value, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this.key);
+            b.Serialize(this.value);
+        }
+        
+        public void Validate()
+        {
+            if (key is null) throw new System.NullReferenceException();
+            if (value is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
@@ -36,8 +57,6 @@ namespace Iviz.Msgs.diagnostic_msgs
                 return size;
             }
         }
-    
-        public IMessage Create() => new KeyValue();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

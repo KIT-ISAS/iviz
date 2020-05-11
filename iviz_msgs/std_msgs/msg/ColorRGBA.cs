@@ -4,27 +4,46 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.std_msgs
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct ColorRGBA : IMessage
+    public readonly struct ColorRGBA : IMessage
     {
-        public float r;
-        public float g;
-        public float b;
-        public float a;
+        public float r { get; }
+        public float g { get; }
+        public float b { get; }
+        public float a { get; }
     
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public ColorRGBA(float r, float g, float b, float a)
         {
-            BuiltIns.DeserializeStruct(out this, ref ptr, end);
+            this.r = r;
+            this.g = g;
+            this.b = b;
+            this.a = a;
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal ColorRGBA(Buffer b)
+        {
+            this = b.Deserialize<ColorRGBA>();
+        }
+        
+        public IMessage Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new ColorRGBA(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.SerializeStruct(this, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this);
+        }
+        
+        public void Validate()
+        {
         }
     
         [IgnoreDataMember]
         public int RosMessageLength => 16;
-    
-        public IMessage Create() => new ColorRGBA();
     
         [IgnoreDataMember]
         public string RosType => RosMessageType;

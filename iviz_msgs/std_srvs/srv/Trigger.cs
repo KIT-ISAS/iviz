@@ -5,7 +5,7 @@ namespace Iviz.Msgs.std_srvs
     public sealed class Trigger : IService
     {
         /// <summary> Request message. </summary>
-        public TriggerRequest Request { get; }
+        public TriggerRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public TriggerResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.std_srvs
         
         public IService Create() => new Trigger();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (TriggerRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (TriggerResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -50,8 +58,8 @@ namespace Iviz.Msgs.std_srvs
 
     public sealed class TriggerResponse : IResponse
     {
-        public bool success; // indicate successful run of triggered service
-        public string message; // informational, e.g. for error messages
+        public bool success { get; set; } // indicate successful run of triggered service
+        public string message { get; set; } // informational, e.g. for error messages
     
         /// <summary> Constructor for empty message. </summary>
         public TriggerResponse()
@@ -59,16 +67,36 @@ namespace Iviz.Msgs.std_srvs
             message = "";
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public TriggerResponse(bool success, string message)
         {
-            BuiltIns.Deserialize(out success, ref ptr, end);
-            BuiltIns.Deserialize(out message, ref ptr, end);
+            this.success = success;
+            this.message = message ?? throw new System.ArgumentNullException(nameof(message));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal TriggerResponse(Buffer b)
+        {
+            this.success = b.Deserialize<bool>();
+            this.message = b.DeserializeString();
+        }
+        
+        public IResponse Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new TriggerResponse(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            BuiltIns.Serialize(success, ref ptr, end);
-            BuiltIns.Serialize(message, ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(this.success);
+            b.Serialize(this.message);
+        }
+        
+        public void Validate()
+        {
+            if (message is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]

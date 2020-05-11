@@ -5,7 +5,7 @@ namespace Iviz.Msgs.grid_map_msgs
     public sealed class SetGridMap : IService
     {
         /// <summary> Request message. </summary>
-        public SetGridMapRequest Request { get; }
+        public SetGridMapRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
         public SetGridMapResponse Response { get; set; }
@@ -26,9 +26,17 @@ namespace Iviz.Msgs.grid_map_msgs
         
         public IService Create() => new SetGridMap();
         
-        IRequest IService.Request => Request;
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (SetGridMapRequest)value;
+        }
         
-        IResponse IService.Response => Response;
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (SetGridMapResponse)value;
+        }
         
         public string ErrorMessage { get; set; }
         
@@ -47,7 +55,7 @@ namespace Iviz.Msgs.grid_map_msgs
     public sealed class SetGridMapRequest : IRequest
     {
         // map
-        public grid_map_msgs.GridMap map;
+        public grid_map_msgs.GridMap map { get; set; }
         
     
         /// <summary> Constructor for empty message. </summary>
@@ -56,14 +64,33 @@ namespace Iviz.Msgs.grid_map_msgs
             map = new grid_map_msgs.GridMap();
         }
         
-        public unsafe void Deserialize(ref byte* ptr, byte* end)
+        /// <summary> Explicit constructor. </summary>
+        public SetGridMapRequest(grid_map_msgs.GridMap map)
         {
-            map.Deserialize(ref ptr, end);
+            this.map = map ?? throw new System.ArgumentNullException(nameof(map));
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        internal SetGridMapRequest(Buffer b)
+        {
+            this.map = new grid_map_msgs.GridMap(b);
+        }
+        
+        public IRequest Deserialize(Buffer b)
+        {
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            return new SetGridMapRequest(b);
         }
     
-        public unsafe void Serialize(ref byte* ptr, byte* end)
+        public void Serialize(Buffer b)
         {
-            map.Serialize(ref ptr, end);
+            if (b is null) throw new System.ArgumentNullException(nameof(b));
+            this.map.Serialize(b);
+        }
+        
+        public void Validate()
+        {
+            if (map is null) throw new System.NullReferenceException();
         }
     
         [IgnoreDataMember]
