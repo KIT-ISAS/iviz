@@ -91,6 +91,11 @@ namespace Iviz.RoslibSharp
 
         public string Subscribe(Action<IMessage> callback)
         {
+            if (callback is null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
             AssertIsAlive();
 
 #if DEBUG__
@@ -108,11 +113,21 @@ namespace Iviz.RoslibSharp
 
         public bool ContainsId(string id)
         {
+            if (id is null)
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
+
             return Ids.Contains(id);
         }
 
         public bool Unsubscribe(string id)
         {
+            if (id is null)
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
+
             AssertIsAlive();
             lock (CallbackList)
             {

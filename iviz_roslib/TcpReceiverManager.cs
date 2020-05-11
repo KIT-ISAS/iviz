@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net;
 using Iviz.Msgs;
 
 namespace Iviz.RoslibSharp
@@ -27,7 +28,7 @@ namespace Iviz.RoslibSharp
             RequestNoDelay = requestNoDelay;
         }
 
-        void AddPublisher(XmlRpc.NodeClient talker, Uri remoteUri)
+        bool AddPublisher(XmlRpc.NodeClient talker, Uri remoteUri)
         {
             talker.Uri = remoteUri;
             XmlRpc.NodeClient.RequestTopicResponse response;
@@ -35,16 +36,20 @@ namespace Iviz.RoslibSharp
             {
                 response = talker.RequestTopic(Topic, SupportedProtocols);
             }
+            catch (Exception e) when (e is TimeoutException || e is WebException)
+            {
+                Logger.Log($"{this}: Failed to add publisher {remoteUri}: {e}");
+                return false;
+            }
             catch (Exception e)
             {
-                Logger.LogError($"{this}: Failed to add publisher {remoteUri}: {e.Message}");
-                Logger.LogError($"{this}: " + e.StackTrace);
-                return;
+                Logger.LogError($"{this}: Failed to add publisher {remoteUri}: {e}");
+                return false;
             }
             if (response.protocol.type == null)
             {
                 Logger.Log($"{this}: {response.protocol.hostname}:{response.protocol.port} has no suitable protocols");
-                return;
+                return false;
             }
 
             TcpReceiver connection = new TcpReceiver(
@@ -59,6 +64,7 @@ namespace Iviz.RoslibSharp
                 connectionsByUri[remoteUri] = connection;
             }
             connection.Start();
+            return true;
         }
 
         public void PublisherUpdateRpc(XmlRpc.NodeClient talker, IList<Uri> publisherUris)

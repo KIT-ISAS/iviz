@@ -60,6 +60,11 @@ namespace Iviz.RoslibSharp
 
         public void Publish(IMessage message)
         {
+            if (message is null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
+
             AssertIsAlive();
             Manager.Publish(message);
         }
@@ -99,6 +104,11 @@ namespace Iviz.RoslibSharp
 
         public bool Unadvertise(string topicId)
         {
+            if (topicId is null)
+            {
+                throw new ArgumentNullException(nameof(topicId));
+            }
+
             AssertIsAlive();
             int index = Ids.IndexOf(topicId);
             if (index < 0)
@@ -125,6 +135,11 @@ namespace Iviz.RoslibSharp
 
         public bool ContainsId(string id)
         {
+            if (id is null)
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
+
             return Ids.Contains(id);
         }
     }
