@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.sensor_msgs
 {
+    [DataContract]
     public sealed class MultiEchoLaserScan : IMessage
     {
         // Single scan from a multi-echo planar laser range-finder
@@ -10,29 +11,29 @@ namespace Iviz.Msgs.sensor_msgs
         // array), please find or create a different message, since applications
         // will make fairly laser-specific assumptions about this data
         
-        public std_msgs.Header header { get; set; } // timestamp in the header is the acquisition time of 
+        [DataMember] public std_msgs.Header header { get; set; } // timestamp in the header is the acquisition time of 
         // the first ray in the scan.
         //
         // in frame frame_id, angles are measured around 
         // the positive Z axis (counterclockwise, if Z is up)
         // with zero angle being forward along the x axis
         
-        public float angle_min { get; set; } // start angle of the scan [rad]
-        public float angle_max { get; set; } // end angle of the scan [rad]
-        public float angle_increment { get; set; } // angular distance between measurements [rad]
+        [DataMember] public float angle_min { get; set; } // start angle of the scan [rad]
+        [DataMember] public float angle_max { get; set; } // end angle of the scan [rad]
+        [DataMember] public float angle_increment { get; set; } // angular distance between measurements [rad]
         
-        public float time_increment { get; set; } // time between measurements [seconds] - if your scanner
+        [DataMember] public float time_increment { get; set; } // time between measurements [seconds] - if your scanner
         // is moving, this will be used in interpolating position
         // of 3d points
-        public float scan_time { get; set; } // time between scans [seconds]
+        [DataMember] public float scan_time { get; set; } // time between scans [seconds]
         
-        public float range_min { get; set; } // minimum range value [m]
-        public float range_max { get; set; } // maximum range value [m]
+        [DataMember] public float range_min { get; set; } // minimum range value [m]
+        [DataMember] public float range_max { get; set; } // maximum range value [m]
         
-        public LaserEcho[] ranges { get; set; } // range data [m] (Note: NaNs, values < range_min or > range_max should be discarded)
+        [DataMember] public LaserEcho[] ranges { get; set; } // range data [m] (Note: NaNs, values < range_min or > range_max should be discarded)
         // +Inf measurements are out of range
         // -Inf measurements are too close to determine exact distance.
-        public LaserEcho[] intensities { get; set; } // intensity data [device-specific units].  If your
+        [DataMember] public LaserEcho[] intensities { get; set; } // intensity data [device-specific units].  If your
         // device does not provide intensities, please leave
         // the array empty.
     
@@ -70,20 +71,27 @@ namespace Iviz.Msgs.sensor_msgs
             this.scan_time = b.Deserialize<float>();
             this.range_min = b.Deserialize<float>();
             this.range_max = b.Deserialize<float>();
-            this.ranges = b.DeserializeArray<LaserEcho>(0);
-            this.intensities = b.DeserializeArray<LaserEcho>(0);
+            this.ranges = b.DeserializeArray<LaserEcho>();
+            for (int i = 0; i < this.ranges.Length; i++)
+            {
+                this.ranges[i] = new LaserEcho(b);
+            }
+            this.intensities = b.DeserializeArray<LaserEcho>();
+            for (int i = 0; i < this.intensities.Length; i++)
+            {
+                this.intensities[i] = new LaserEcho(b);
+            }
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new MultiEchoLaserScan(b);
+            return new MultiEchoLaserScan(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.Serialize(this.angle_min);
             b.Serialize(this.angle_max);
             b.Serialize(this.angle_increment);
@@ -98,11 +106,11 @@ namespace Iviz.Msgs.sensor_msgs
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (ranges is null) throw new System.NullReferenceException();
             if (intensities is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -120,20 +128,16 @@ namespace Iviz.Msgs.sensor_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "sensor_msgs/MultiEchoLaserScan";
+        [Preserve] public const string RosMessageType = "sensor_msgs/MultiEchoLaserScan";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "6fefb0c6da89d7c8abe4b339f5c2f8fb";
+        [Preserve] public const string RosMd5Sum = "6fefb0c6da89d7c8abe4b339f5c2f8fb";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE7VWwW7jNhC96ysG8GGTNnaB7i1oe9ptG6AbFMieGgQBTY0sYilSISk77tf3DSnJyiJx" +
                 "99AKhhNaM2/INzNvuKI743aWKWrlqAm+I0XdYJNZs2499VY5FciqyIGCcjteN8bVHKpVtaKbho5+oFbt" +
                 "mZTzqR2NAEk1741mOpjUUm2ahgO7RFuGsfGBLniz2yBW9MAHlApBHS+vEJARiyQIwUwHVgngC4iOY1Q7" +

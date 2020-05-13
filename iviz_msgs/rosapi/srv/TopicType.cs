@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.rosapi
 {
+    [DataContract]
     public sealed class TopicType : IService
     {
         /// <summary> Request message. </summary>
-        public TopicTypeRequest Request { get; set; }
+        [DataMember] public TopicTypeRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public TopicTypeResponse Response { get; set; }
+        [DataMember] public TopicTypeResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public TopicType()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.rosapi
             Response = new TopicTypeResponse();
         }
         
-        public IService Create() => new TopicType();
+        IService IService.Create() => new TopicType();
         
         IRequest IService.Request
         {
@@ -40,21 +41,18 @@ namespace Iviz.Msgs.rosapi
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "rosapi/TopicType";
+        [Preserve] public const string RosServiceType = "rosapi/TopicType";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "0d30b3f53a0fd5036523a7141e524ddf";
+        [Preserve] public const string RosMd5Sum = "0d30b3f53a0fd5036523a7141e524ddf";
     }
 
     public sealed class TopicTypeRequest : IRequest
     {
-        public string topic { get; set; }
+        [DataMember] public string topic { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TopicTypeRequest()
@@ -74,13 +72,12 @@ namespace Iviz.Msgs.rosapi
             this.topic = b.DeserializeString();
         }
         
-        public IRequest Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new TopicTypeRequest(b);
+            return new TopicTypeRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.topic);
@@ -91,7 +88,6 @@ namespace Iviz.Msgs.rosapi
             if (topic is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -104,7 +100,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class TopicTypeResponse : IResponse
     {
-        public string type { get; set; }
+        [DataMember] public string type { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TopicTypeResponse()
@@ -124,13 +120,12 @@ namespace Iviz.Msgs.rosapi
             this.type = b.DeserializeString();
         }
         
-        public IResponse Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new TopicTypeResponse(b);
+            return new TopicTypeResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.type);
@@ -141,7 +136,6 @@ namespace Iviz.Msgs.rosapi
             if (type is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {

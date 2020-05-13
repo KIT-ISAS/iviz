@@ -2,17 +2,18 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.trajectory_msgs
 {
+    [DataContract]
     public sealed class JointTrajectoryPoint : IMessage
     {
         // Each trajectory point specifies either positions[, velocities[, accelerations]]
         // or positions[, effort] for the trajectory to be executed.
         // All specified values are in the same order as the joint names in JointTrajectory.msg
         
-        public double[] positions { get; set; }
-        public double[] velocities { get; set; }
-        public double[] accelerations { get; set; }
-        public double[] effort { get; set; }
-        public duration time_from_start { get; set; }
+        [DataMember] public double[] positions { get; set; }
+        [DataMember] public double[] velocities { get; set; }
+        [DataMember] public double[] accelerations { get; set; }
+        [DataMember] public double[] effort { get; set; }
+        [DataMember] public duration time_from_start { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public JointTrajectoryPoint()
@@ -36,20 +37,19 @@ namespace Iviz.Msgs.trajectory_msgs
         /// <summary> Constructor with buffer. </summary>
         internal JointTrajectoryPoint(Buffer b)
         {
-            this.positions = b.DeserializeStructArray<double>(0);
-            this.velocities = b.DeserializeStructArray<double>(0);
-            this.accelerations = b.DeserializeStructArray<double>(0);
-            this.effort = b.DeserializeStructArray<double>(0);
+            this.positions = b.DeserializeStructArray<double>();
+            this.velocities = b.DeserializeStructArray<double>();
+            this.accelerations = b.DeserializeStructArray<double>();
+            this.effort = b.DeserializeStructArray<double>();
             this.time_from_start = b.Deserialize<duration>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new JointTrajectoryPoint(b);
+            return new JointTrajectoryPoint(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeStructArray(this.positions, 0);
@@ -67,7 +67,6 @@ namespace Iviz.Msgs.trajectory_msgs
             if (effort is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -80,20 +79,16 @@ namespace Iviz.Msgs.trajectory_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "trajectory_msgs/JointTrajectoryPoint";
+        [Preserve] public const string RosMessageType = "trajectory_msgs/JointTrajectoryPoint";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "f3cd1e1c4d320c79d6985c904ae5dcd3";
+        [Preserve] public const string RosMd5Sum = "f3cd1e1c4d320c79d6985c904ae5dcd3";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE1WPsQ7CMAxE93yFJVbEhNgZWJjZUIVMeoGgtEaxi+DvcYsEZYl07+zceUE7jleyyjdE" +
                 "k/qiu+TeSO+IOWUoIdsV1bFmy9LrcUkPFImuMAqOEQWVJ7NpwoLkfxopSbWG/CX/ap5lQmcQnoiDoV35" +
                 "7raUb3ZLDy6DV+AKyv20rNzBA1pvxDqR29S3d67j0H6Uh2/EqtNLCKkI22Z9bH7FZux3zgz+nTXjn2tC" +

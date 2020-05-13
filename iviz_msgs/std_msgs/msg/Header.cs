@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.std_msgs
 {
+    [DataContract]
     public sealed class Header : IMessage
     {
         // Standard metadata for higher-level stamped data types.
@@ -9,14 +10,14 @@ namespace Iviz.Msgs.std_msgs
         // in a particular coordinate frame.
         // 
         // sequence ID: consecutively increasing ID 
-        public uint seq { get; set; }
+        [DataMember] public uint seq { get; set; }
         //Two-integer timestamp that is expressed as:
         // * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')
         // * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')
         // time-handling sugar is provided by the client library
-        public time stamp { get; set; }
+        [DataMember] public time stamp { get; set; }
         //Frame this data is associated with
-        public string frame_id { get; set; }
+        [DataMember] public string frame_id { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Header()
@@ -40,13 +41,12 @@ namespace Iviz.Msgs.std_msgs
             this.frame_id = b.DeserializeString();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new Header(b);
+            return new Header(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.seq);
@@ -59,7 +59,6 @@ namespace Iviz.Msgs.std_msgs
             if (frame_id is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -69,20 +68,16 @@ namespace Iviz.Msgs.std_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "std_msgs/Header";
+        [Preserve] public const string RosMessageType = "std_msgs/Header";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "2176decaecbce78abc3b96ef049fabed";
+        [Preserve] public const string RosMd5Sum = "2176decaecbce78abc3b96ef049fabed";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE42RT2vDMAzF7/4UghzaDtrDdut5DHYbrPei2moscOxMVtrl209O2brdBobg+L3f058O" +
                 "3hVzQAkwkGJARTgXgch9JNkmulCCqjiMFGB51XmkunMdHCJXsNNTJsGUZpiqibSAL8MwZfaoBMoD/fGb" +
                 "kzMgjCjKfkoopi8SODf5WXCgRrdT6WOi7Alen/emyZX8pGwFzUbwQlg59/YIbuKsT4/N4LrDtWztSj3J" +

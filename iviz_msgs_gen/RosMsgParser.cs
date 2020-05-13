@@ -178,15 +178,15 @@ namespace Iviz.MsgsGen
                 {
                     if (forceUnroll)
                     {
-                        result = "public " + className + " " + fieldName + " { get; }";
+                        result = "[DataMember] public " + className + " " + fieldName + " { get; }";
                     } else
                     {
-                        result = "public " + className + " " + fieldName + " { get; set; }";
+                        result = "[DataMember] public " + className + " " + fieldName + " { get; set; }";
                     }
                 }
                 else if (arraySize == 0)
                 {
-                    result = "public " + className + "[] " + fieldName + " { get; set; }";
+                    result = "[DataMember] public " + className + "[] " + fieldName + " { get; set; }";
                 }
                 else
                 {
@@ -197,7 +197,7 @@ namespace Iviz.MsgsGen
                     //}
                     //else
                     //{
-                        result = "public " + className + "[/*" + arraySize + "*/] " + fieldName + " { get; set; }";
+                        result = "[DataMember] public " + className + "[/*" + arraySize + "*/] " + fieldName + " { get; set; }";
                     //}
                 }
                 if (comment != "")

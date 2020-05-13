@@ -2,11 +2,12 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.trajectory_msgs
 {
+    [DataContract]
     public sealed class JointTrajectory : IMessage
     {
-        public std_msgs.Header header { get; set; }
-        public string[] joint_names { get; set; }
-        public JointTrajectoryPoint[] points { get; set; }
+        [DataMember] public std_msgs.Header header { get; set; }
+        [DataMember] public string[] joint_names { get; set; }
+        [DataMember] public JointTrajectoryPoint[] points { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public JointTrajectory()
@@ -28,20 +29,23 @@ namespace Iviz.Msgs.trajectory_msgs
         internal JointTrajectory(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.joint_names = b.DeserializeStringArray(0);
-            this.points = b.DeserializeArray<JointTrajectoryPoint>(0);
+            this.joint_names = b.DeserializeStringArray();
+            this.points = b.DeserializeArray<JointTrajectoryPoint>();
+            for (int i = 0; i < this.points.Length; i++)
+            {
+                this.points[i] = new JointTrajectoryPoint(b);
+            }
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new JointTrajectory(b);
+            return new JointTrajectory(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.SerializeArray(this.joint_names, 0);
             b.SerializeArray(this.points, 0);
         }
@@ -49,11 +53,11 @@ namespace Iviz.Msgs.trajectory_msgs
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (joint_names is null) throw new System.NullReferenceException();
             if (points is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -72,20 +76,16 @@ namespace Iviz.Msgs.trajectory_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "trajectory_msgs/JointTrajectory";
+        [Preserve] public const string RosMessageType = "trajectory_msgs/JointTrajectory";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "65b4f94a94d1ed67169da35a02f33d3f";
+        [Preserve] public const string RosMd5Sum = "65b4f94a94d1ed67169da35a02f33d3f";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE7VUTYvbMBC961cM5LC7pUmhLT0Eeij0Y1soLGxuSzATaRJrkSVXkrPrf98neZt4Sw89" +
                 "tMYgS/PmzdeTr4WNRGrrolKO1h/utnQfrM+N506S+la+N5HvRecQx5uyBaQva1Lq/T9+1PfbL2tK2TRd" +
                 "OqRX11NmC7rN7A1HQ51kNpyZ9gGJ20MrcenkKA5O3PViqFrz2EtawXHT2kR4D+IlsnMjDQmgHEiHrhu8" +

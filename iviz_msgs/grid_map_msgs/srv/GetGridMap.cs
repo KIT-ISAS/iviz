@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.grid_map_msgs
 {
+    [DataContract]
     public sealed class GetGridMap : IService
     {
         /// <summary> Request message. </summary>
-        public GetGridMapRequest Request { get; set; }
+        [DataMember] public GetGridMapRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public GetGridMapResponse Response { get; set; }
+        [DataMember] public GetGridMapResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public GetGridMap()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.grid_map_msgs
             Response = new GetGridMapResponse();
         }
         
-        public IService Create() => new GetGridMap();
+        IService IService.Create() => new GetGridMap();
         
         IRequest IService.Request
         {
@@ -40,37 +41,34 @@ namespace Iviz.Msgs.grid_map_msgs
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "grid_map_msgs/GetGridMap";
+        [Preserve] public const string RosServiceType = "grid_map_msgs/GetGridMap";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "802c2cbc7b10fada2d44db75ddb8c738";
+        [Preserve] public const string RosMd5Sum = "802c2cbc7b10fada2d44db75ddb8c738";
     }
 
     public sealed class GetGridMapRequest : IRequest
     {
         // Frame id of the submap position request.
-        public string frame_id { get; set; }
+        [DataMember] public string frame_id { get; set; }
         
         // Requested submap position in x-direction [m].
-        public double position_x { get; set; }
+        [DataMember] public double position_x { get; set; }
         
         // Requested submap position in y-direction [m].
-        public double position_y { get; set; }
+        [DataMember] public double position_y { get; set; }
         
         // Requested submap length in x-direction [m].
-        public double length_x { get; set; }
+        [DataMember] public double length_x { get; set; }
         
         // Requested submap width in y-direction [m].
-        public double length_y { get; set; }
+        [DataMember] public double length_y { get; set; }
         
         // Requested layers. If empty, get all layers.
-        public string[] layers { get; set; }
+        [DataMember] public string[] layers { get; set; }
         
     
         /// <summary> Constructor for empty message. </summary>
@@ -99,16 +97,15 @@ namespace Iviz.Msgs.grid_map_msgs
             this.position_y = b.Deserialize<double>();
             this.length_x = b.Deserialize<double>();
             this.length_y = b.Deserialize<double>();
-            this.layers = b.DeserializeStringArray(0);
+            this.layers = b.DeserializeStringArray();
         }
         
-        public IRequest Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new GetGridMapRequest(b);
+            return new GetGridMapRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.frame_id);
@@ -125,7 +122,6 @@ namespace Iviz.Msgs.grid_map_msgs
             if (layers is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -145,7 +141,7 @@ namespace Iviz.Msgs.grid_map_msgs
     {
         
         // Submap
-        public grid_map_msgs.GridMap map { get; set; }
+        [DataMember] public grid_map_msgs.GridMap map { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetGridMapResponse()
@@ -165,24 +161,23 @@ namespace Iviz.Msgs.grid_map_msgs
             this.map = new grid_map_msgs.GridMap(b);
         }
         
-        public IResponse Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new GetGridMapResponse(b);
+            return new GetGridMapResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.map.Serialize(b);
+            b.Serialize(this.map);
         }
         
         public void Validate()
         {
             if (map is null) throw new System.NullReferenceException();
+            map.Validate();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {

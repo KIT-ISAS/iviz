@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.visualization_msgs
 {
+    [DataContract]
     public sealed class MenuEntry : IMessage
     {
         // MenuEntry message.
@@ -37,17 +38,17 @@ namespace Iviz.Msgs.visualization_msgs
         
         // ID is a number for each menu entry.  Must be unique within the
         // control, and should never be 0.
-        public uint id { get; set; }
+        [DataMember] public uint id { get; set; }
         
         // ID of the parent of this menu entry, if it is a submenu.  If this
         // menu entry is a top-level entry, set parent_id to 0.
-        public uint parent_id { get; set; }
+        [DataMember] public uint parent_id { get; set; }
         
         // menu / entry title
-        public string title { get; set; }
+        [DataMember] public string title { get; set; }
         
         // Arguments to command indicated by command_type (below)
-        public string command { get; set; }
+        [DataMember] public string command { get; set; }
         
         // Command_type stores the type of response desired when this menu
         // entry is clicked.
@@ -57,7 +58,7 @@ namespace Iviz.Msgs.visualization_msgs
         public const byte FEEDBACK = 0;
         public const byte ROSRUN = 1;
         public const byte ROSLAUNCH = 2;
-        public byte command_type { get; set; }
+        [DataMember] public byte command_type { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MenuEntry()
@@ -86,13 +87,12 @@ namespace Iviz.Msgs.visualization_msgs
             this.command_type = b.Deserialize<byte>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new MenuEntry(b);
+            return new MenuEntry(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.id);
@@ -108,7 +108,6 @@ namespace Iviz.Msgs.visualization_msgs
             if (command is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -119,20 +118,16 @@ namespace Iviz.Msgs.visualization_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "visualization_msgs/MenuEntry";
+        [Preserve] public const string RosMessageType = "visualization_msgs/MenuEntry";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "b90ec63024573de83b57aa93eb39be2d";
+        [Preserve] public const string RosMd5Sum = "b90ec63024573de83b57aa93eb39be2d";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE51Uy27bMBC8+ysWzqEJkFedFigC+JAmThu0Tou0OQeUtLYIS6RKUk78950lJVtuDgF6" +
                 "Epeand3ZBw9ozqadmeA2VLP3asmno9EBzVRe0p0J7FQe9Jrnyq3Y9RAqlSdlSDmnNmQXr0n8KUiuKLdV" +
                 "xSCwZojS7CnYJYcSlAX73OmMScGjBuLMt1n/7Y8ccgqO+ZhCadtliQ9vEJ7JB+u4II1kaFGpAJKY1SnR" +

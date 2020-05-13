@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.rosbridge_library
 {
+    [DataContract]
     public sealed class SendBytes : IService
     {
         /// <summary> Request message. </summary>
-        public SendBytesRequest Request { get; set; }
+        [DataMember] public SendBytesRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public SendBytesResponse Response { get; set; }
+        [DataMember] public SendBytesResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public SendBytes()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.rosbridge_library
             Response = new SendBytesResponse();
         }
         
-        public IService Create() => new SendBytes();
+        IService IService.Create() => new SendBytes();
         
         IRequest IService.Request
         {
@@ -40,21 +41,18 @@ namespace Iviz.Msgs.rosbridge_library
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "rosbridge_library/SendBytes";
+        [Preserve] public const string RosServiceType = "rosbridge_library/SendBytes";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "d875457256decc7436099d9d612ebf8a";
+        [Preserve] public const string RosMd5Sum = "d875457256decc7436099d9d612ebf8a";
     }
 
     public sealed class SendBytesRequest : IRequest
     {
-        public long count { get; set; }
+        [DataMember] public long count { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public SendBytesRequest()
@@ -73,13 +71,12 @@ namespace Iviz.Msgs.rosbridge_library
             this.count = b.Deserialize<long>();
         }
         
-        public IRequest Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new SendBytesRequest(b);
+            return new SendBytesRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.count);
@@ -89,13 +86,12 @@ namespace Iviz.Msgs.rosbridge_library
         {
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength => 8;
     }
 
     public sealed class SendBytesResponse : IResponse
     {
-        public string data { get; set; }
+        [DataMember] public string data { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public SendBytesResponse()
@@ -115,13 +111,12 @@ namespace Iviz.Msgs.rosbridge_library
             this.data = b.DeserializeString();
         }
         
-        public IResponse Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new SendBytesResponse(b);
+            return new SendBytesResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.data);
@@ -132,7 +127,6 @@ namespace Iviz.Msgs.rosbridge_library
             if (data is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {

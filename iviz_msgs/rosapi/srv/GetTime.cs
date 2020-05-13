@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.rosapi
 {
+    [DataContract]
     public sealed class GetTime : IService
     {
         /// <summary> Request message. </summary>
-        public GetTimeRequest Request { get; set; }
+        [DataMember] public GetTimeRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public GetTimeResponse Response { get; set; }
+        [DataMember] public GetTimeResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public GetTime()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.rosapi
             Response = new GetTimeResponse();
         }
         
-        public IService Create() => new GetTime();
+        IService IService.Create() => new GetTime();
         
         IRequest IService.Request
         {
@@ -40,16 +41,13 @@ namespace Iviz.Msgs.rosapi
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "rosapi/GetTime";
+        [Preserve] public const string RosServiceType = "rosapi/GetTime";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "556a4fb76023a469987922359d08a844";
+        [Preserve] public const string RosMd5Sum = "556a4fb76023a469987922359d08a844";
     }
 
     public sealed class GetTimeRequest : Internal.EmptyRequest
@@ -58,7 +56,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class GetTimeResponse : IResponse
     {
-        public time time { get; set; }
+        [DataMember] public time time { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetTimeResponse()
@@ -77,13 +75,12 @@ namespace Iviz.Msgs.rosapi
             this.time = b.Deserialize<time>();
         }
         
-        public IResponse Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new GetTimeResponse(b);
+            return new GetTimeResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.time);
@@ -93,7 +90,6 @@ namespace Iviz.Msgs.rosapi
         {
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength => 8;
     }
 }

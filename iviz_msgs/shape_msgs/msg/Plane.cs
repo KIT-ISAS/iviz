@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.shape_msgs
 {
+    [DataContract]
     public sealed class Plane : IMessage
     {
         // Representation of a plane, using the plane equation ax + by + cz + d = 0
@@ -11,7 +12,7 @@ namespace Iviz.Msgs.shape_msgs
         // c := coef[2]
         // d := coef[3]
         
-        public double[/*4*/] coef { get; set; }
+        [DataMember] public double[/*4*/] coef { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Plane()
@@ -32,13 +33,12 @@ namespace Iviz.Msgs.shape_msgs
             this.coef = b.DeserializeStructArray<double>(4);
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new Plane(b);
+            return new Plane(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeStructArray(this.coef, 4);
@@ -50,23 +50,18 @@ namespace Iviz.Msgs.shape_msgs
             if (coef.Length != 4) throw new System.IndexOutOfRangeException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength => 32;
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "shape_msgs/Plane";
+        [Preserve] public const string RosMessageType = "shape_msgs/Plane";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "2c1b92ed8f31492f8e73f6a4a44ca796";
+        [Preserve] public const string RosMd5Sum = "2c1b92ed8f31492f8e73f6a4a44ca796";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAEz3LQQqDMBQE0P0/xYDLdqGtdCF4CbeSxTf+VEESNRGspzdWyGbgDTMZGplX8WIDh9FZ" +
                 "OAPGPLGVJzY/2i/CIHcBWbZ7xDse6H4x9BGjR42cKIvPqoZ2YtpcRXaJxUWd+LrYJ74VkZkch0/Zlurf" +
                 "EZ3An1dFmgAAAA==";

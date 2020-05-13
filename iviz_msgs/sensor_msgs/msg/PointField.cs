@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.sensor_msgs
 {
+    [DataContract]
     public sealed class PointField : IMessage
     {
         // This message holds the description of one point entry in the
@@ -15,10 +16,10 @@ namespace Iviz.Msgs.sensor_msgs
         public const byte FLOAT32 = 7;
         public const byte FLOAT64 = 8;
         
-        public string name { get; set; } // Name of field
-        public uint offset { get; set; } // Offset from start of point struct
-        public byte datatype { get; set; } // Datatype enumeration, see above
-        public uint count { get; set; } // How many elements in the field
+        [DataMember] public string name { get; set; } // Name of field
+        [DataMember] public uint offset { get; set; } // Offset from start of point struct
+        [DataMember] public byte datatype { get; set; } // Datatype enumeration, see above
+        [DataMember] public uint count { get; set; } // How many elements in the field
     
         /// <summary> Constructor for empty message. </summary>
         public PointField()
@@ -44,13 +45,12 @@ namespace Iviz.Msgs.sensor_msgs
             this.count = b.Deserialize<uint>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new PointField(b);
+            return new PointField(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.name);
@@ -64,7 +64,6 @@ namespace Iviz.Msgs.sensor_msgs
             if (name is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -74,20 +73,16 @@ namespace Iviz.Msgs.sensor_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "sensor_msgs/PointField";
+        [Preserve] public const string RosMessageType = "sensor_msgs/PointField";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "268eacb2962780ceac86cbd17e328150";
+        [Preserve] public const string RosMd5Sum = "268eacb2962780ceac86cbd17e328150";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE02Qz06EMBCH7zzFL+FqTJZdkQsHozGamF0P6wNUGJYmtEPaQcPb20LXZU6Tr9/86eQ4" +
                 "99rDkPfqQuh5aD2kJ7TkG6dH0WzBHdgSRtZWQFbcDG2jleX4jPB54Kkt/rt07IyS+2wKTxXej+cKIWrs" +
                 "EvlKqEZxc3blQvYbJ6Iah5uzLxbnYeNEVKNM5PXj9BRRjcctKQ+BVFnmxWl7gVWGsESOY8zDBztNQ7vU" +

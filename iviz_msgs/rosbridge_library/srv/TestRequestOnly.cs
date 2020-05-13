@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.rosbridge_library
 {
+    [DataContract]
     public sealed class TestRequestOnly : IService
     {
         /// <summary> Request message. </summary>
-        public TestRequestOnlyRequest Request { get; set; }
+        [DataMember] public TestRequestOnlyRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public TestRequestOnlyResponse Response { get; set; }
+        [DataMember] public TestRequestOnlyResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public TestRequestOnly()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.rosbridge_library
             Response = new TestRequestOnlyResponse();
         }
         
-        public IService Create() => new TestRequestOnly();
+        IService IService.Create() => new TestRequestOnly();
         
         IRequest IService.Request
         {
@@ -40,21 +41,18 @@ namespace Iviz.Msgs.rosbridge_library
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "rosbridge_library/TestRequestOnly";
+        [Preserve] public const string RosServiceType = "rosbridge_library/TestRequestOnly";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "da5909fbe378aeaf85e547e830cc1bb7";
+        [Preserve] public const string RosMd5Sum = "da5909fbe378aeaf85e547e830cc1bb7";
     }
 
     public sealed class TestRequestOnlyRequest : IRequest
     {
-        public int data { get; set; }
+        [DataMember] public int data { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestRequestOnlyRequest()
@@ -73,13 +71,12 @@ namespace Iviz.Msgs.rosbridge_library
             this.data = b.Deserialize<int>();
         }
         
-        public IRequest Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new TestRequestOnlyRequest(b);
+            return new TestRequestOnlyRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.data);
@@ -89,7 +86,6 @@ namespace Iviz.Msgs.rosbridge_library
         {
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength => 4;
     }
 

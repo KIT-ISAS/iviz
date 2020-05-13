@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.diagnostic_msgs
 {
+    [DataContract]
     public sealed class SelfTest : IService
     {
         /// <summary> Request message. </summary>
-        public SelfTestRequest Request { get; set; }
+        [DataMember] public SelfTestRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public SelfTestResponse Response { get; set; }
+        [DataMember] public SelfTestResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public SelfTest()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.diagnostic_msgs
             Response = new SelfTestResponse();
         }
         
-        public IService Create() => new SelfTest();
+        IService IService.Create() => new SelfTest();
         
         IRequest IService.Request
         {
@@ -40,16 +41,13 @@ namespace Iviz.Msgs.diagnostic_msgs
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "diagnostic_msgs/SelfTest";
+        [Preserve] public const string RosServiceType = "diagnostic_msgs/SelfTest";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "ac21b1bab7ab17546986536c22eb34e9";
+        [Preserve] public const string RosMd5Sum = "ac21b1bab7ab17546986536c22eb34e9";
     }
 
     public sealed class SelfTestRequest : Internal.EmptyRequest
@@ -58,9 +56,9 @@ namespace Iviz.Msgs.diagnostic_msgs
 
     public sealed class SelfTestResponse : IResponse
     {
-        public string id { get; set; }
-        public byte passed { get; set; }
-        public DiagnosticStatus[] status { get; set; }
+        [DataMember] public string id { get; set; }
+        [DataMember] public byte passed { get; set; }
+        [DataMember] public DiagnosticStatus[] status { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public SelfTestResponse()
@@ -82,16 +80,19 @@ namespace Iviz.Msgs.diagnostic_msgs
         {
             this.id = b.DeserializeString();
             this.passed = b.Deserialize<byte>();
-            this.status = b.DeserializeArray<DiagnosticStatus>(0);
+            this.status = b.DeserializeArray<DiagnosticStatus>();
+            for (int i = 0; i < this.status.Length; i++)
+            {
+                this.status[i] = new DiagnosticStatus(b);
+            }
         }
         
-        public IResponse Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new SelfTestResponse(b);
+            return new SelfTestResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.id);
@@ -105,7 +106,6 @@ namespace Iviz.Msgs.diagnostic_msgs
             if (status is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {

@@ -7,7 +7,7 @@ namespace Iviz.Msgs
     /// Interface for all ROS messages.
     /// All classes or structs representing ROS messages derive from this.
     /// </summary>
-    public interface IMessage : ISerializable<IMessage>
+    public interface IMessage : ISerializable
     {
         /// <summary>
         /// Full ROS name of the message.

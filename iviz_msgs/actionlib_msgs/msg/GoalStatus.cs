@@ -2,10 +2,11 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.actionlib_msgs
 {
+    [DataContract]
     public sealed class GoalStatus : IMessage
     {
-        public GoalID goal_id { get; set; }
-        public byte status { get; set; }
+        [DataMember] public GoalID goal_id { get; set; }
+        [DataMember] public byte status { get; set; }
         public const byte PENDING = 0; // The goal has yet to be processed by the action server
         public const byte ACTIVE = 1; // The goal is currently being processed by the action server
         public const byte PREEMPTED = 2; // The goal received a cancel request after it started executing
@@ -25,7 +26,7 @@ namespace Iviz.Msgs.actionlib_msgs
         //    sent over the wire by an action server
         
         //Allow for the user to associate a string with GoalStatus for debugging
-        public string text { get; set; }
+        [DataMember] public string text { get; set; }
         
     
         /// <summary> Constructor for empty message. </summary>
@@ -51,16 +52,15 @@ namespace Iviz.Msgs.actionlib_msgs
             this.text = b.DeserializeString();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new GoalStatus(b);
+            return new GoalStatus(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.goal_id.Serialize(b);
+            b.Serialize(this.goal_id);
             b.Serialize(this.status);
             b.Serialize(this.text);
         }
@@ -68,10 +68,10 @@ namespace Iviz.Msgs.actionlib_msgs
         public void Validate()
         {
             if (goal_id is null) throw new System.NullReferenceException();
+            goal_id.Validate();
             if (text is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -82,20 +82,16 @@ namespace Iviz.Msgs.actionlib_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "actionlib_msgs/GoalStatus";
+        [Preserve] public const string RosMessageType = "actionlib_msgs/GoalStatus";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "d388f9b87b3c471f784434d671988d4a";
+        [Preserve] public const string RosMd5Sum = "d388f9b87b3c471f784434d671988d4a";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71VTY/aMBC951eMtJdWquh3u63EgUKEqPZLC+115TgTcOs41B7D8u87Nkkgu9DlsGok" +
                 "CETjN2/evJmMK6EnI5jz7U7liVeGzsGRIO/qPzfp1WhyNYbm6sMb/j6D2QLjMVgIBxskoAoyhKWtJDqH" +
                 "OWQbII4RklRlwKFdoa0xB8PZ5GcKe5hvu5jKgfTWoiG9YVRl5qcB39ym6eXNLB21wO+6wBYlqhWDCJDC" +

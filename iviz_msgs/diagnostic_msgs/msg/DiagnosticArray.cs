@@ -2,11 +2,12 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.diagnostic_msgs
 {
+    [DataContract]
     public sealed class DiagnosticArray : IMessage
     {
         // This message is used to send diagnostic information about the state of the robot
-        public std_msgs.Header header { get; set; } //for timestamp
-        public DiagnosticStatus[] status { get; set; } // an array of components being reported on
+        [DataMember] public std_msgs.Header header { get; set; } //for timestamp
+        [DataMember] public DiagnosticStatus[] status { get; set; } // an array of components being reported on
     
         /// <summary> Constructor for empty message. </summary>
         public DiagnosticArray()
@@ -26,29 +27,32 @@ namespace Iviz.Msgs.diagnostic_msgs
         internal DiagnosticArray(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.status = b.DeserializeArray<DiagnosticStatus>(0);
+            this.status = b.DeserializeArray<DiagnosticStatus>();
+            for (int i = 0; i < this.status.Length; i++)
+            {
+                this.status[i] = new DiagnosticStatus(b);
+            }
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new DiagnosticArray(b);
+            return new DiagnosticArray(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.SerializeArray(this.status, 0);
         }
         
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (status is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -62,20 +66,16 @@ namespace Iviz.Msgs.diagnostic_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "diagnostic_msgs/DiagnosticArray";
+        [Preserve] public const string RosMessageType = "diagnostic_msgs/DiagnosticArray";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "60810da900de1dd6ddd437c3503511da";
+        [Preserve] public const string RosMd5Sum = "60810da900de1dd6ddd437c3503511da";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71UwW7bMAy96ysI5NB2QNutvRXIoUC7rei2FmmwHYahoG3WFmpLniQn89/vSYqTrMCA" +
                 "HbYFDiTZ5CP5+KgZLRvtqRPvuRbCdvBSUbDkxVRUaa6N9UGXpM2TdR0HbQ1xYYdAoRHygYOQfUoHZwsb" +
                 "1HvhShw1eZnBi4JGgMBdr662gA/wHPzXbwli8DQjBrBzPEa40na9NWKCp0K0qclJb11Aatao+V/+qY8P" +

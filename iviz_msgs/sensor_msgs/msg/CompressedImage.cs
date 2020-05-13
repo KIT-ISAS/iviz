@@ -2,21 +2,22 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.sensor_msgs
 {
+    [DataContract]
     public sealed class CompressedImage : IMessage
     {
         // This message contains a compressed image
         
-        public std_msgs.Header header { get; set; } // Header timestamp should be acquisition time of image
+        [DataMember] public std_msgs.Header header { get; set; } // Header timestamp should be acquisition time of image
         // Header frame_id should be optical frame of camera
         // origin of frame should be optical center of camera
         // +x should point to the right in the image
         // +y should point down in the image
         // +z should point into to plane of the image
         
-        public string format { get; set; } // Specifies the format of the data
+        [DataMember] public string format { get; set; } // Specifies the format of the data
         //   Acceptable values:
         //     jpeg, png
-        public byte[] data { get; set; } // Compressed image buffer
+        [DataMember] public byte[] data { get; set; } // Compressed image buffer
     
         /// <summary> Constructor for empty message. </summary>
         public CompressedImage()
@@ -39,19 +40,18 @@ namespace Iviz.Msgs.sensor_msgs
         {
             this.header = new std_msgs.Header(b);
             this.format = b.DeserializeString();
-            this.data = b.DeserializeStructArray<byte>(0);
+            this.data = b.DeserializeStructArray<byte>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new CompressedImage(b);
+            return new CompressedImage(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.Serialize(this.format);
             b.SerializeStructArray(this.data, 0);
         }
@@ -59,11 +59,11 @@ namespace Iviz.Msgs.sensor_msgs
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (format is null) throw new System.NullReferenceException();
             if (data is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -75,20 +75,16 @@ namespace Iviz.Msgs.sensor_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "sensor_msgs/CompressedImage";
+        [Preserve] public const string RosMessageType = "sensor_msgs/CompressedImage";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "8f7a12909da2c9d3332d540a0977563f";
+        [Preserve] public const string RosMd5Sum = "8f7a12909da2c9d3332d540a0977563f";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE62UTW/UMBCG7/4VI+2hLaVFgguqxAFRAT0gIbU3hKpZezYxcmzXdrYNv57Xzn60lEIP" +
                 "RFl5bc88850FXfU20yA5cyekgy9sfSbG3yEmHIshO+BOqc/CRhL187J5FrQ5LhaQwkOk3IfRGVoKsb4Z" +
                 "bbbFBt/uKaw2MPrTs2OtEg9ybc09VIjFanbzVeVorImfAoVkO+ur3KzwGKTFF5j6J+n4bqscg/WFSqDS" +

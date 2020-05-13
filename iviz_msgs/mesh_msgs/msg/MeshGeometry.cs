@@ -2,12 +2,13 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.mesh_msgs
 {
+    [DataContract]
     public sealed class MeshGeometry : IMessage
     {
         // Mesh Geometry Message
-        public geometry_msgs.Point[] vertices { get; set; }
-        public geometry_msgs.Point[] vertex_normals { get; set; }
-        public mesh_msgs.TriangleIndices[] faces { get; set; }
+        [DataMember] public geometry_msgs.Point[] vertices { get; set; }
+        [DataMember] public geometry_msgs.Point[] vertex_normals { get; set; }
+        [DataMember] public mesh_msgs.TriangleIndices[] faces { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshGeometry()
@@ -28,18 +29,21 @@ namespace Iviz.Msgs.mesh_msgs
         /// <summary> Constructor with buffer. </summary>
         internal MeshGeometry(Buffer b)
         {
-            this.vertices = b.DeserializeStructArray<geometry_msgs.Point>(0);
-            this.vertex_normals = b.DeserializeStructArray<geometry_msgs.Point>(0);
-            this.faces = b.DeserializeArray<mesh_msgs.TriangleIndices>(0);
+            this.vertices = b.DeserializeStructArray<geometry_msgs.Point>();
+            this.vertex_normals = b.DeserializeStructArray<geometry_msgs.Point>();
+            this.faces = b.DeserializeArray<mesh_msgs.TriangleIndices>();
+            for (int i = 0; i < this.faces.Length; i++)
+            {
+                this.faces[i] = new mesh_msgs.TriangleIndices(b);
+            }
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new MeshGeometry(b);
+            return new MeshGeometry(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeStructArray(this.vertices, 0);
@@ -54,7 +58,6 @@ namespace Iviz.Msgs.mesh_msgs
             if (faces is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -66,20 +69,16 @@ namespace Iviz.Msgs.mesh_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "mesh_msgs/MeshGeometry";
+        [Preserve] public const string RosMessageType = "mesh_msgs/MeshGeometry";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "9a7ed3efa2a35ef81abaf7dcc675ed20";
+        [Preserve] public const string RosMd5Sum = "9a7ed3efa2a35ef81abaf7dcc675ed20";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE7VRsQrCQAzd7ysCDo6CFQfBTSgOBcFuRcpRc22gzZXLKa1f7xVLdVAnzfSSvISXvBkk" +
                 "KBXEaBv0rh8y0SWqcizkjZSyOFhin53gis5TgfKljV3O1jW6FtWEzQ9C6khzWeOez8N4oBo9rFHbH4dK" +
                 "jvEG3qhTM0grEigse00s4CuE1gp5sgzWgA5Z4AExGIcI0gaFytRW+/UKugn1E7r9S/7Hv4UjdmiIX0T7" +

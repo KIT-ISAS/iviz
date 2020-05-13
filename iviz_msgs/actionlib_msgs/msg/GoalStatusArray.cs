@@ -2,12 +2,13 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.actionlib_msgs
 {
+    [DataContract]
     public sealed class GoalStatusArray : IMessage
     {
         // Stores the statuses for goals that are currently being tracked
         // by an action server
-        public std_msgs.Header header { get; set; }
-        public GoalStatus[] status_list { get; set; }
+        [DataMember] public std_msgs.Header header { get; set; }
+        [DataMember] public GoalStatus[] status_list { get; set; }
         
     
         /// <summary> Constructor for empty message. </summary>
@@ -28,29 +29,32 @@ namespace Iviz.Msgs.actionlib_msgs
         internal GoalStatusArray(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.status_list = b.DeserializeArray<GoalStatus>(0);
+            this.status_list = b.DeserializeArray<GoalStatus>();
+            for (int i = 0; i < this.status_list.Length; i++)
+            {
+                this.status_list[i] = new GoalStatus(b);
+            }
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new GoalStatusArray(b);
+            return new GoalStatusArray(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.SerializeArray(this.status_list, 0);
         }
         
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (status_list is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -64,20 +68,16 @@ namespace Iviz.Msgs.actionlib_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "actionlib_msgs/GoalStatusArray";
+        [Preserve] public const string RosMessageType = "actionlib_msgs/GoalStatusArray";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "8b2b82f13216d0a8ea88bd3af735e619";
+        [Preserve] public const string RosMd5Sum = "8b2b82f13216d0a8ea88bd3af735e619";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71WwXLbNhC98yswo0PsTq22SZumntFBlVRXHSfxWGovnY4HBFYkWpBUAdCy/j5vQYqi" +
                 "HKnRIalGtoYS8Pbh7dvFDsQiVI68CDkJH2SoPR5WlRNZJS1/LYOQjoSqnaMy2K1IyZSZCE6qf0gnA5Fu" +
                 "hSyFVMFUpfDkHsklv5LU5EQeP5IbQC0i9p9/tUEerPEhSZLRZ34lbxc314ihHwqf+W8aHiCJ8KWWTouC" +

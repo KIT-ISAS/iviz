@@ -2,9 +2,10 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.tf2_msgs
 {
+    [DataContract]
     public sealed class TFMessage : IMessage
     {
-        public geometry_msgs.TransformStamped[] transforms { get; set; }
+        [DataMember] public geometry_msgs.TransformStamped[] transforms { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TFMessage()
@@ -21,16 +22,19 @@ namespace Iviz.Msgs.tf2_msgs
         /// <summary> Constructor with buffer. </summary>
         internal TFMessage(Buffer b)
         {
-            this.transforms = b.DeserializeArray<geometry_msgs.TransformStamped>(0);
+            this.transforms = b.DeserializeArray<geometry_msgs.TransformStamped>();
+            for (int i = 0; i < this.transforms.Length; i++)
+            {
+                this.transforms[i] = new geometry_msgs.TransformStamped(b);
+            }
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new TFMessage(b);
+            return new TFMessage(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeArray(this.transforms, 0);
@@ -41,7 +45,6 @@ namespace Iviz.Msgs.tf2_msgs
             if (transforms is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -54,20 +57,16 @@ namespace Iviz.Msgs.tf2_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "tf2_msgs/TFMessage";
+        [Preserve] public const string RosMessageType = "tf2_msgs/TFMessage";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "94810edda583a504dfda3829e70d7eec";
+        [Preserve] public const string RosMd5Sum = "94810edda583a504dfda3829e70d7eec";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71VTW/UMBC951eM2gMtarMSRRwq4ISAHpCKWnFBqJomk8RqYgd70m349Tw7m6RQBByg" +
                 "q0hrO543H+/NpBbXifrxqgt12Fx6tqFyvrtQ7nopP38hnY9Clr36x7/sw8W7U6p/G0K2T5eNCSR3vZcQ" +
                 "JBCvMVHlXUeFc740llWw506oES7F52lzZSKEOtJGHt4sGtOWV+vF2VsHV1wLxaUL2o40BCnpekwwuPWS" +

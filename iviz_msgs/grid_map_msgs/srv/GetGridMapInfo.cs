@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.grid_map_msgs
 {
+    [DataContract]
     public sealed class GetGridMapInfo : IService
     {
         /// <summary> Request message. </summary>
-        public GetGridMapInfoRequest Request { get; set; }
+        [DataMember] public GetGridMapInfoRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public GetGridMapInfoResponse Response { get; set; }
+        [DataMember] public GetGridMapInfoResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public GetGridMapInfo()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.grid_map_msgs
             Response = new GetGridMapInfoResponse();
         }
         
-        public IService Create() => new GetGridMapInfo();
+        IService IService.Create() => new GetGridMapInfo();
         
         IRequest IService.Request
         {
@@ -40,16 +41,13 @@ namespace Iviz.Msgs.grid_map_msgs
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "grid_map_msgs/GetGridMapInfo";
+        [Preserve] public const string RosServiceType = "grid_map_msgs/GetGridMapInfo";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "a0be1719725f7fd7b490db4d64321ff2";
+        [Preserve] public const string RosMd5Sum = "a0be1719725f7fd7b490db4d64321ff2";
     }
 
     public sealed class GetGridMapInfoRequest : Internal.EmptyRequest
@@ -60,7 +58,7 @@ namespace Iviz.Msgs.grid_map_msgs
     {
         
         // Grid map info
-        public grid_map_msgs.GridMapInfo info { get; set; }
+        [DataMember] public grid_map_msgs.GridMapInfo info { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetGridMapInfoResponse()
@@ -80,24 +78,23 @@ namespace Iviz.Msgs.grid_map_msgs
             this.info = new grid_map_msgs.GridMapInfo(b);
         }
         
-        public IResponse Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new GetGridMapInfoResponse(b);
+            return new GetGridMapInfoResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.info.Serialize(b);
+            b.Serialize(this.info);
         }
         
         public void Validate()
         {
             if (info is null) throw new System.NullReferenceException();
+            info.Validate();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {

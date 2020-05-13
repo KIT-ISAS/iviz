@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.rosapi
 {
+    [DataContract]
     public sealed class DeleteParam : IService
     {
         /// <summary> Request message. </summary>
-        public DeleteParamRequest Request { get; set; }
+        [DataMember] public DeleteParamRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public DeleteParamResponse Response { get; set; }
+        [DataMember] public DeleteParamResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public DeleteParam()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.rosapi
             Response = new DeleteParamResponse();
         }
         
-        public IService Create() => new DeleteParam();
+        IService IService.Create() => new DeleteParam();
         
         IRequest IService.Request
         {
@@ -40,21 +41,18 @@ namespace Iviz.Msgs.rosapi
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "rosapi/DeleteParam";
+        [Preserve] public const string RosServiceType = "rosapi/DeleteParam";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "c1f3d28f1b044c871e6eff2e9fc3c667";
+        [Preserve] public const string RosMd5Sum = "c1f3d28f1b044c871e6eff2e9fc3c667";
     }
 
     public sealed class DeleteParamRequest : IRequest
     {
-        public string name { get; set; }
+        [DataMember] public string name { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public DeleteParamRequest()
@@ -74,13 +72,12 @@ namespace Iviz.Msgs.rosapi
             this.name = b.DeserializeString();
         }
         
-        public IRequest Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new DeleteParamRequest(b);
+            return new DeleteParamRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.name);
@@ -91,7 +88,6 @@ namespace Iviz.Msgs.rosapi
             if (name is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {

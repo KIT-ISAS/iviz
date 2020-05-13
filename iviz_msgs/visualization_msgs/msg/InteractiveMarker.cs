@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.visualization_msgs
 {
+    [DataContract]
     public sealed class InteractiveMarker : IMessage
     {
         // Time/frame info.
@@ -10,26 +11,26 @@ namespace Iviz.Msgs.visualization_msgs
         // in the same frame.
         // Otherwise, you might receive feedback in a different frame.
         // For rviz, this will be the current 'fixed frame' set by the user.
-        public std_msgs.Header header { get; set; }
+        [DataMember] public std_msgs.Header header { get; set; }
         
         // Initial pose. Also, defines the pivot point for rotations.
-        public geometry_msgs.Pose pose { get; set; }
+        [DataMember] public geometry_msgs.Pose pose { get; set; }
         
         // Identifying string. Must be globally unique in
         // the topic that this message is sent through.
-        public string name { get; set; }
+        [DataMember] public string name { get; set; }
         
         // Short description (< 40 characters).
-        public string description { get; set; }
+        [DataMember] public string description { get; set; }
         
         // Scale to be used for default controls (default=1).
-        public float scale { get; set; }
+        [DataMember] public float scale { get; set; }
         
         // All menu and submenu entries associated with this marker.
-        public MenuEntry[] menu_entries { get; set; }
+        [DataMember] public MenuEntry[] menu_entries { get; set; }
         
         // List of controls displayed for this marker.
-        public InteractiveMarkerControl[] controls { get; set; }
+        [DataMember] public InteractiveMarkerControl[] controls { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarker()
@@ -61,21 +62,28 @@ namespace Iviz.Msgs.visualization_msgs
             this.name = b.DeserializeString();
             this.description = b.DeserializeString();
             this.scale = b.Deserialize<float>();
-            this.menu_entries = b.DeserializeArray<MenuEntry>(0);
-            this.controls = b.DeserializeArray<InteractiveMarkerControl>(0);
+            this.menu_entries = b.DeserializeArray<MenuEntry>();
+            for (int i = 0; i < this.menu_entries.Length; i++)
+            {
+                this.menu_entries[i] = new MenuEntry(b);
+            }
+            this.controls = b.DeserializeArray<InteractiveMarkerControl>();
+            for (int i = 0; i < this.controls.Length; i++)
+            {
+                this.controls[i] = new InteractiveMarkerControl(b);
+            }
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new InteractiveMarker(b);
+            return new InteractiveMarker(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
-            this.pose.Serialize(b);
+            b.Serialize(this.header);
+            b.Serialize(this.pose);
             b.Serialize(this.name);
             b.Serialize(this.description);
             b.Serialize(this.scale);
@@ -86,13 +94,13 @@ namespace Iviz.Msgs.visualization_msgs
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (name is null) throw new System.NullReferenceException();
             if (description is null) throw new System.NullReferenceException();
             if (menu_entries is null) throw new System.NullReferenceException();
             if (controls is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -112,20 +120,16 @@ namespace Iviz.Msgs.visualization_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "visualization_msgs/InteractiveMarker";
+        [Preserve] public const string RosMessageType = "visualization_msgs/InteractiveMarker";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "dd86d22909d5a3364b384492e35c10af";
+        [Preserve] public const string RosMd5Sum = "dd86d22909d5a3364b384492e35c10af";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71aW3PbNhZ+rn4Fxp5O7K1M39Js610/KJacaOrb2nIv0+loIBKS0FAEA5KWlV+/3zkA" +
                 "KNKym87OJk5mTII4B+d+g7fFSC/U/tTKhRI6m5qosy2GUzFXMlE2KjUtF6JQpSiNOOiKcq7EQtoPyoql" +
                 "TlMxUcKq0sqsmBq7UAmQlAY4dFkIh9VkQsl4LghXUao8Er+ZygFbFSv9oBhpbgolpkolExl/IAQZLxeE" +

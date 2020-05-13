@@ -2,23 +2,24 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.stereo_msgs
 {
+    [DataContract]
     public sealed class DisparityImage : IMessage
     {
         // Separate header for compatibility with current TimeSynchronizer.
         // Likely to be removed in a later release, use image.header instead.
-        public std_msgs.Header header { get; set; }
+        [DataMember] public std_msgs.Header header { get; set; }
         
         // Floating point disparity image. The disparities are pre-adjusted for any
         // x-offset between the principal points of the two cameras (in the case
         // that they are verged). That is: d = x_l - x_r - (cx_l - cx_r)
-        public sensor_msgs.Image image { get; set; }
+        [DataMember] public sensor_msgs.Image image { get; set; }
         
         // Stereo geometry. For disparity d, the depth from the camera is Z = fT/d.
-        public float f { get; set; } // Focal length, pixels
-        public float T { get; set; } // Baseline, world units
+        [DataMember] public float f { get; set; } // Focal length, pixels
+        [DataMember] public float T { get; set; } // Baseline, world units
         
         // Subwindow of (potentially) valid disparity values.
-        public sensor_msgs.RegionOfInterest valid_window { get; set; }
+        [DataMember] public sensor_msgs.RegionOfInterest valid_window { get; set; }
         
         // The range of disparities searched.
         // In the disparity image, any disparity less than min_disparity is invalid.
@@ -27,12 +28,12 @@ namespace Iviz.Msgs.stereo_msgs
         //     Z_min = fT / max_disparity
         //     Z_max = fT / min_disparity
         // could not be found.
-        public float min_disparity { get; set; }
-        public float max_disparity { get; set; }
+        [DataMember] public float min_disparity { get; set; }
+        [DataMember] public float max_disparity { get; set; }
         
         // Smallest allowed disparity increment. The smallest achievable depth range
         // resolution is delta_Z = (Z^2/fT)*delta_d.
-        public float delta_d { get; set; }
+        [DataMember] public float delta_d { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public DisparityImage()
@@ -68,20 +69,19 @@ namespace Iviz.Msgs.stereo_msgs
             this.delta_d = b.Deserialize<float>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new DisparityImage(b);
+            return new DisparityImage(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
-            this.image.Serialize(b);
+            b.Serialize(this.header);
+            b.Serialize(this.image);
             b.Serialize(this.f);
             b.Serialize(this.T);
-            this.valid_window.Serialize(b);
+            b.Serialize(this.valid_window);
             b.Serialize(this.min_disparity);
             b.Serialize(this.max_disparity);
             b.Serialize(this.delta_d);
@@ -90,11 +90,13 @@ namespace Iviz.Msgs.stereo_msgs
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (image is null) throw new System.NullReferenceException();
+            image.Validate();
             if (valid_window is null) throw new System.NullReferenceException();
+            valid_window.Validate();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -105,20 +107,16 @@ namespace Iviz.Msgs.stereo_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "stereo_msgs/DisparityImage";
+        [Preserve] public const string RosMessageType = "stereo_msgs/DisparityImage";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "04a177815f75271039fa21f16acad8c9";
+        [Preserve] public const string RosMd5Sum = "04a177815f75271039fa21f16acad8c9";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71X247bNhB911cQuw9ZJ15v0LwEKRYt2nTbBVIkyC5QIEVr0OLIYkKRCkn5kq/vGVKS" +
                 "ZefSPKQ1kKxNzY0zZ86MzsUdtdLLSKImqciLynlRuqaVUa+00XEvtjrWouy8JxvFvW7obm/L2jurP5Bf" +
                 "FOfihX5HZi+iEysSnhq3ISW0FVIYGPY4MiQDzUUXSOhGrmnRO9M2RHxbFL/l3/m4gM0b4xCBXYvWabhV" +

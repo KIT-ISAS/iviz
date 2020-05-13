@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.sensor_msgs
 {
+    [DataContract]
     public sealed class PointCloud2 : IMessage
     {
         // This message holds a collection of N-dimensional points, which may
@@ -15,22 +16,22 @@ namespace Iviz.Msgs.sensor_msgs
         
         // Time of sensor data acquisition, and the coordinate frame ID (for 3d
         // points).
-        public std_msgs.Header header { get; set; }
+        [DataMember] public std_msgs.Header header { get; set; }
         
         // 2D structure of the point cloud. If the cloud is unordered, height is
         // 1 and width is the length of the point cloud.
-        public uint height { get; set; }
-        public uint width { get; set; }
+        [DataMember] public uint height { get; set; }
+        [DataMember] public uint width { get; set; }
         
         // Describes the channels and their layout in the binary data blob.
-        public PointField[] fields { get; set; }
+        [DataMember] public PointField[] fields { get; set; }
         
-        public bool is_bigendian { get; set; } // Is this data bigendian?
-        public uint point_step { get; set; } // Length of a point in bytes
-        public uint row_step { get; set; } // Length of a row in bytes
-        public byte[] data { get; set; } // Actual point data, size is (row_step*height)
+        [DataMember] public bool is_bigendian { get; set; } // Is this data bigendian?
+        [DataMember] public uint point_step { get; set; } // Length of a point in bytes
+        [DataMember] public uint row_step { get; set; } // Length of a row in bytes
+        [DataMember] public byte[] data { get; set; } // Actual point data, size is (row_step*height)
         
-        public bool is_dense { get; set; } // True if there are no invalid points
+        [DataMember] public bool is_dense { get; set; } // True if there are no invalid points
     
         /// <summary> Constructor for empty message. </summary>
         public PointCloud2()
@@ -60,24 +61,27 @@ namespace Iviz.Msgs.sensor_msgs
             this.header = new std_msgs.Header(b);
             this.height = b.Deserialize<uint>();
             this.width = b.Deserialize<uint>();
-            this.fields = b.DeserializeArray<PointField>(0);
+            this.fields = b.DeserializeArray<PointField>();
+            for (int i = 0; i < this.fields.Length; i++)
+            {
+                this.fields[i] = new PointField(b);
+            }
             this.is_bigendian = b.Deserialize<bool>();
             this.point_step = b.Deserialize<uint>();
             this.row_step = b.Deserialize<uint>();
-            this.data = b.DeserializeStructArray<byte>(0);
+            this.data = b.DeserializeStructArray<byte>();
             this.is_dense = b.Deserialize<bool>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new PointCloud2(b);
+            return new PointCloud2(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.Serialize(this.height);
             b.Serialize(this.width);
             b.SerializeArray(this.fields, 0);
@@ -91,11 +95,11 @@ namespace Iviz.Msgs.sensor_msgs
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (fields is null) throw new System.NullReferenceException();
             if (data is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -110,20 +114,16 @@ namespace Iviz.Msgs.sensor_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "sensor_msgs/PointCloud2";
+        [Preserve] public const string RosMessageType = "sensor_msgs/PointCloud2";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "1158d486dd51d683ce2f1be655c3c181";
+        [Preserve] public const string RosMd5Sum = "1158d486dd51d683ce2f1be655c3c181";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE7VV32/bNhB+119xqB9qF7GHpF0WBDCGYkHWAF1aoNnTMASUeLaJUaRLUsm0v37fkaLt" +
                 "bHvYwybYkHS6++73xxk97EyknmNUW6adtzqSos5by10y3pHf0P1Sm55dxKuytPfGpXhGzzvT7ahXYzOD" +
                 "vkvKOFJam1TUjNv40KuMEQdoqkhOJBa2QBC8NJ4Rp26FIBgoGZm0SooQU0w+sBYzRa1xKozUWt/COEWy" +

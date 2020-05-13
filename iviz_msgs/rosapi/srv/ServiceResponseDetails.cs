@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.rosapi
 {
+    [DataContract]
     public sealed class ServiceResponseDetails : IService
     {
         /// <summary> Request message. </summary>
-        public ServiceResponseDetailsRequest Request { get; set; }
+        [DataMember] public ServiceResponseDetailsRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public ServiceResponseDetailsResponse Response { get; set; }
+        [DataMember] public ServiceResponseDetailsResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public ServiceResponseDetails()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.rosapi
             Response = new ServiceResponseDetailsResponse();
         }
         
-        public IService Create() => new ServiceResponseDetails();
+        IService IService.Create() => new ServiceResponseDetails();
         
         IRequest IService.Request
         {
@@ -40,21 +41,18 @@ namespace Iviz.Msgs.rosapi
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "rosapi/ServiceResponseDetails";
+        [Preserve] public const string RosServiceType = "rosapi/ServiceResponseDetails";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "f9c88144f6f6bd888dd99d4e0411905d";
+        [Preserve] public const string RosMd5Sum = "f9c88144f6f6bd888dd99d4e0411905d";
     }
 
     public sealed class ServiceResponseDetailsRequest : IRequest
     {
-        public string type { get; set; }
+        [DataMember] public string type { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ServiceResponseDetailsRequest()
@@ -74,13 +72,12 @@ namespace Iviz.Msgs.rosapi
             this.type = b.DeserializeString();
         }
         
-        public IRequest Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new ServiceResponseDetailsRequest(b);
+            return new ServiceResponseDetailsRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.type);
@@ -91,7 +88,6 @@ namespace Iviz.Msgs.rosapi
             if (type is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -104,7 +100,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class ServiceResponseDetailsResponse : IResponse
     {
-        public TypeDef[] typedefs { get; set; }
+        [DataMember] public TypeDef[] typedefs { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ServiceResponseDetailsResponse()
@@ -121,16 +117,19 @@ namespace Iviz.Msgs.rosapi
         /// <summary> Constructor with buffer. </summary>
         internal ServiceResponseDetailsResponse(Buffer b)
         {
-            this.typedefs = b.DeserializeArray<TypeDef>(0);
+            this.typedefs = b.DeserializeArray<TypeDef>();
+            for (int i = 0; i < this.typedefs.Length; i++)
+            {
+                this.typedefs[i] = new TypeDef(b);
+            }
         }
         
-        public IResponse Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new ServiceResponseDetailsResponse(b);
+            return new ServiceResponseDetailsResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeArray(this.typedefs, 0);
@@ -141,7 +140,6 @@ namespace Iviz.Msgs.rosapi
             if (typedefs is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {

@@ -253,11 +253,11 @@ namespace Iviz.MsgsGen
             */
 
             lines.Add("/// <summary> Request message. </summary>");
-            lines.Add("public " + name + "Request Request { get; set; }");
+            lines.Add("[DataMember] public " + name + "Request Request { get; set; }");
 
             lines.Add("");
             lines.Add("/// <summary> Response message. </summary>");
-            lines.Add("public " + name + "Response Response { get; set; }");
+            lines.Add("[DataMember] public " + name + "Response Response { get; set; }");
 
             lines.Add("");
             lines.Add("/// <summary> Empty constructor. </summary>");
@@ -276,7 +276,7 @@ namespace Iviz.MsgsGen
             lines.Add("}");
 
             lines.Add("");
-            lines.Add("public IService Create() => new " + name + "();");
+            lines.Add("IService IService.Create() => new " + name + "();");
 
             lines.Add("");
             lines.Add("IRequest IService.Request");
@@ -296,19 +296,16 @@ namespace Iviz.MsgsGen
             lines.Add("public string ErrorMessage { get; set; }");
 
             lines.Add("");
-            lines.Add("[IgnoreDataMember]");
-            lines.Add("public string RosType => RosServiceType;");
+            lines.Add("string IService.RosType => RosServiceType;");
 
             lines.Add("");
             lines.Add("/// <summary> Full ROS name of this service. </summary>");
-            lines.Add("[Preserve]");
-            lines.Add("public const string RosServiceType = \"" + package + "/" + name + "\";");
+            lines.Add("[Preserve] public const string RosServiceType = \"" + package + "/" + name + "\";");
 
             lines.Add("");
             string md5 = GetMd5();
             lines.Add("/// <summary> MD5 hash of a compact representation of the service. </summary>");
-            lines.Add("[Preserve]");
-            lines.Add("public const string RosMd5Sum = \"" + md5 + "\";");
+            lines.Add("[Preserve] public const string RosMd5Sum = \"" + md5 + "\";");
 
 
             return lines;
@@ -326,6 +323,7 @@ namespace Iviz.MsgsGen
             str.AppendLine("");
             str.AppendLine("namespace Iviz.Msgs." + package);
             str.AppendLine("{");
+            str.AppendLine("    [DataContract]");
             str.AppendLine("    public sealed class " + name + " : IService");
             str.AppendLine("    {");
 

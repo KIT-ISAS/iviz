@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.nav_msgs
 {
+    [DataContract]
     public sealed class GetPlan : IService
     {
         /// <summary> Request message. </summary>
-        public GetPlanRequest Request { get; set; }
+        [DataMember] public GetPlanRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public GetPlanResponse Response { get; set; }
+        [DataMember] public GetPlanResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public GetPlan()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.nav_msgs
             Response = new GetPlanResponse();
         }
         
-        public IService Create() => new GetPlan();
+        IService IService.Create() => new GetPlan();
         
         IRequest IService.Request
         {
@@ -40,16 +41,13 @@ namespace Iviz.Msgs.nav_msgs
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "nav_msgs/GetPlan";
+        [Preserve] public const string RosServiceType = "nav_msgs/GetPlan";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "421c8ea4d21c6c9db7054b4bbdf1e024";
+        [Preserve] public const string RosMd5Sum = "421c8ea4d21c6c9db7054b4bbdf1e024";
     }
 
     public sealed class GetPlanRequest : IRequest
@@ -57,14 +55,14 @@ namespace Iviz.Msgs.nav_msgs
         // Get a plan from the current position to the goal Pose 
         
         // The start pose for the plan
-        public geometry_msgs.PoseStamped start { get; set; }
+        [DataMember] public geometry_msgs.PoseStamped start { get; set; }
         
         // The final pose of the goal position
-        public geometry_msgs.PoseStamped goal { get; set; }
+        [DataMember] public geometry_msgs.PoseStamped goal { get; set; }
         
         // If the goal is obstructed, how many meters the planner can 
         // relax the constraint in x and y before failing. 
-        public float tolerance { get; set; }
+        [DataMember] public float tolerance { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetPlanRequest()
@@ -89,27 +87,27 @@ namespace Iviz.Msgs.nav_msgs
             this.tolerance = b.Deserialize<float>();
         }
         
-        public IRequest Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new GetPlanRequest(b);
+            return new GetPlanRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.start.Serialize(b);
-            this.goal.Serialize(b);
+            b.Serialize(this.start);
+            b.Serialize(this.goal);
             b.Serialize(this.tolerance);
         }
         
         public void Validate()
         {
             if (start is null) throw new System.NullReferenceException();
+            start.Validate();
             if (goal is null) throw new System.NullReferenceException();
+            goal.Validate();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -123,7 +121,7 @@ namespace Iviz.Msgs.nav_msgs
 
     public sealed class GetPlanResponse : IResponse
     {
-        public nav_msgs.Path plan { get; set; }
+        [DataMember] public nav_msgs.Path plan { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetPlanResponse()
@@ -143,24 +141,23 @@ namespace Iviz.Msgs.nav_msgs
             this.plan = new nav_msgs.Path(b);
         }
         
-        public IResponse Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new GetPlanResponse(b);
+            return new GetPlanResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.plan.Serialize(b);
+            b.Serialize(this.plan);
         }
         
         public void Validate()
         {
             if (plan is null) throw new System.NullReferenceException();
+            plan.Validate();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {

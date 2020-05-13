@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.sensor_msgs
 {
+    [DataContract]
     public sealed class CameraInfo : IMessage
     {
         // This message defines meta information for a camera. It should be in a
@@ -33,7 +34,7 @@ namespace Iviz.Msgs.sensor_msgs
         //######################################################################
         
         // Time of image acquisition, camera coordinate frame ID
-        public std_msgs.Header header { get; set; } // Header timestamp should be acquisition time of image
+        [DataMember] public std_msgs.Header header { get; set; } // Header timestamp should be acquisition time of image
         // Header frame_id should be optical frame of camera
         // origin of frame should be optical center of camera
         // +x should point to the right in the image
@@ -57,17 +58,17 @@ namespace Iviz.Msgs.sensor_msgs
         
         // The image dimensions with which the camera was calibrated. Normally
         // this will be the full camera resolution in pixels.
-        public uint height { get; set; }
-        public uint width { get; set; }
+        [DataMember] public uint height { get; set; }
+        [DataMember] public uint width { get; set; }
         
         // The distortion model used. Supported models are listed in
         // sensor_msgs/distortion_models.h. For most cameras, "plumb_bob" - a
         // simple model of radial and tangential distortion - is sufficient.
-        public string distortion_model { get; set; }
+        [DataMember] public string distortion_model { get; set; }
         
         // The distortion parameters, size depending on the distortion model.
         // For "plumb_bob", the 5 parameters are: (k1, k2, t1, t2, k3).
-        public double[] D { get; set; }
+        [DataMember] public double[] D { get; set; }
         
         // Intrinsic camera matrix for the raw (distorted) images.
         //     [fx  0 cx]
@@ -76,13 +77,13 @@ namespace Iviz.Msgs.sensor_msgs
         // Projects 3D points in the camera coordinate frame to 2D pixel
         // coordinates using the focal lengths (fx, fy) and principal point
         // (cx, cy).
-        public double[/*9*/] K { get; set; } // 3x3 row-major matrix
+        [DataMember] public double[/*9*/] K { get; set; } // 3x3 row-major matrix
         
         // Rectification matrix (stereo cameras only)
         // A rotation matrix aligning the camera coordinate system to the ideal
         // stereo image plane so that epipolar lines in both stereo images are
         // parallel.
-        public double[/*9*/] R { get; set; } // 3x3 row-major matrix
+        [DataMember] public double[/*9*/] R { get; set; } // 3x3 row-major matrix
         
         // Projection/camera matrix
         //     [fx'  0  cx' Tx]
@@ -108,7 +109,7 @@ namespace Iviz.Msgs.sensor_msgs
         //         x = u / w
         //         y = v / w
         //  This holds for both images of a stereo pair.
-        public double[/*12*/] P { get; set; } // 3x4 row-major matrix
+        [DataMember] public double[/*12*/] P { get; set; } // 3x4 row-major matrix
         
         
         //######################################################################
@@ -125,8 +126,8 @@ namespace Iviz.Msgs.sensor_msgs
         //  (width / binning_x) x (height / binning_y).
         // The default values binning_x = binning_y = 0 is considered the same
         //  as binning_x = binning_y = 1 (no subsampling).
-        public uint binning_x { get; set; }
-        public uint binning_y { get; set; }
+        [DataMember] public uint binning_x { get; set; }
+        [DataMember] public uint binning_y { get; set; }
         
         // Region of interest (subwindow of full camera resolution), given in
         //  full resolution (unbinned) image coordinates. A particular ROI
@@ -134,7 +135,7 @@ namespace Iviz.Msgs.sensor_msgs
         //  regardless of binning settings.
         // The default setting of roi (all values 0) is considered the same as
         //  full resolution (roi.width = width, roi.height = height).
-        public RegionOfInterest roi { get; set; }
+        [DataMember] public RegionOfInterest roi { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public CameraInfo()
@@ -174,7 +175,7 @@ namespace Iviz.Msgs.sensor_msgs
             this.height = b.Deserialize<uint>();
             this.width = b.Deserialize<uint>();
             this.distortion_model = b.DeserializeString();
-            this.D = b.DeserializeStructArray<double>(0);
+            this.D = b.DeserializeStructArray<double>();
             this.K = b.DeserializeStructArray<double>(9);
             this.R = b.DeserializeStructArray<double>(9);
             this.P = b.DeserializeStructArray<double>(12);
@@ -183,16 +184,15 @@ namespace Iviz.Msgs.sensor_msgs
             this.roi = new RegionOfInterest(b);
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new CameraInfo(b);
+            return new CameraInfo(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.Serialize(this.height);
             b.Serialize(this.width);
             b.Serialize(this.distortion_model);
@@ -202,12 +202,13 @@ namespace Iviz.Msgs.sensor_msgs
             b.SerializeStructArray(this.P, 12);
             b.Serialize(this.binning_x);
             b.Serialize(this.binning_y);
-            this.roi.Serialize(b);
+            b.Serialize(this.roi);
         }
         
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (distortion_model is null) throw new System.NullReferenceException();
             if (D is null) throw new System.NullReferenceException();
             if (K is null) throw new System.NullReferenceException();
@@ -217,9 +218,9 @@ namespace Iviz.Msgs.sensor_msgs
             if (P is null) throw new System.NullReferenceException();
             if (P.Length != 12) throw new System.IndexOutOfRangeException();
             if (roi is null) throw new System.NullReferenceException();
+            roi.Validate();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -231,20 +232,16 @@ namespace Iviz.Msgs.sensor_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "sensor_msgs/CameraInfo";
+        [Preserve] public const string RosMessageType = "sensor_msgs/CameraInfo";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "c9a58c1b0b154e0e6da7578cb991d214";
+        [Preserve] public const string RosMd5Sum = "c9a58c1b0b154e0e6da7578cb991d214";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE8VZbW8buRH+rl8xsD9YyslyHF8L1IU/NBfkauTaM3IG0tYwDGqXK/GyWu4tuZY3v77P" +
                 "DMndleSkd0CCCnEkccmZ4bw+Mzqm27VxtNHOqZWmXBem0vzdKzJVYZuN8sZWhE+kKFMb3agFXXtya9uW" +
                 "OS01tpGaHMdnVOHN1SrThFPe1iajo/DogekdkapyUllmN7WqjAaFjtoaO6kwjxp0zIYFkZNOqOWXk2Os" +

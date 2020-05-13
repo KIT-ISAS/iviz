@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.sensor_msgs
 {
+    [DataContract]
     public sealed class JointState : IMessage
     {
         // This is a message that holds data to describe the state of a set of torque controlled joints. 
@@ -24,12 +25,12 @@ namespace Iviz.Msgs.sensor_msgs
         // states.
         
         
-        public std_msgs.Header header { get; set; }
+        [DataMember] public std_msgs.Header header { get; set; }
         
-        public string[] name { get; set; }
-        public double[] position { get; set; }
-        public double[] velocity { get; set; }
-        public double[] effort { get; set; }
+        [DataMember] public string[] name { get; set; }
+        [DataMember] public double[] position { get; set; }
+        [DataMember] public double[] velocity { get; set; }
+        [DataMember] public double[] effort { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public JointState()
@@ -55,22 +56,21 @@ namespace Iviz.Msgs.sensor_msgs
         internal JointState(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.name = b.DeserializeStringArray(0);
-            this.position = b.DeserializeStructArray<double>(0);
-            this.velocity = b.DeserializeStructArray<double>(0);
-            this.effort = b.DeserializeStructArray<double>(0);
+            this.name = b.DeserializeStringArray();
+            this.position = b.DeserializeStructArray<double>();
+            this.velocity = b.DeserializeStructArray<double>();
+            this.effort = b.DeserializeStructArray<double>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new JointState(b);
+            return new JointState(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.SerializeArray(this.name, 0);
             b.SerializeStructArray(this.position, 0);
             b.SerializeStructArray(this.velocity, 0);
@@ -80,13 +80,13 @@ namespace Iviz.Msgs.sensor_msgs
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (name is null) throw new System.NullReferenceException();
             if (position is null) throw new System.NullReferenceException();
             if (velocity is null) throw new System.NullReferenceException();
             if (effort is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -104,20 +104,16 @@ namespace Iviz.Msgs.sensor_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "sensor_msgs/JointState";
+        [Preserve] public const string RosMessageType = "sensor_msgs/JointState";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "3066dcd76a6cfaef579bd0f34173e9fd";
+        [Preserve] public const string RosMd5Sum = "3066dcd76a6cfaef579bd0f34173e9fd";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61UTW/UMBC951eMtId20TaVAHGoxAGJzwMVUitxQKiajWcTg2MH29kl/Hqe7exmq144" +
                 "UO2hdmbezLz3PCu673Qg/Jh6CYFbodhxpM4ZFUhxZIqOlITG6236JhQiRyG3Q0qQmP6Jzv8ahRpno3fG" +
                 "iKIfTtsYaqpW1QolzpKEm658pksve2fGdO9p8Dr0HHWzTt0o2WkLnO10AwB6lgsPLuionc0lcT6isEoA" +

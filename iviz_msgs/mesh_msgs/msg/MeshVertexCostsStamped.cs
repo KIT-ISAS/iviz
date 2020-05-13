@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.mesh_msgs
 {
+    [DataContract]
     public sealed class MeshVertexCostsStamped : IMessage
     {
         // Mesh Attribute Message
-        public std_msgs.Header header { get; set; }
-        public string uuid { get; set; }
-        public string type { get; set; }
-        public mesh_msgs.MeshVertexCosts mesh_vertex_costs { get; set; }
+        [DataMember] public std_msgs.Header header { get; set; }
+        [DataMember] public string uuid { get; set; }
+        [DataMember] public string type { get; set; }
+        [DataMember] public mesh_msgs.MeshVertexCosts mesh_vertex_costs { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshVertexCostsStamped()
@@ -37,30 +38,30 @@ namespace Iviz.Msgs.mesh_msgs
             this.mesh_vertex_costs = new mesh_msgs.MeshVertexCosts(b);
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new MeshVertexCostsStamped(b);
+            return new MeshVertexCostsStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.Serialize(this.uuid);
             b.Serialize(this.type);
-            this.mesh_vertex_costs.Serialize(b);
+            b.Serialize(this.mesh_vertex_costs);
         }
         
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (uuid is null) throw new System.NullReferenceException();
             if (type is null) throw new System.NullReferenceException();
             if (mesh_vertex_costs is null) throw new System.NullReferenceException();
+            mesh_vertex_costs.Validate();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -73,20 +74,16 @@ namespace Iviz.Msgs.mesh_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "mesh_msgs/MeshVertexCostsStamped";
+        [Preserve] public const string RosMessageType = "mesh_msgs/MeshVertexCostsStamped";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "f65d52b48920bc9c2a071d643ab7b6b3";
+        [Preserve] public const string RosMd5Sum = "f65d52b48920bc9c2a071d643ab7b6b3";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE7VTTWsbMRC961cM+JCk4ATam6GH0tAmh0AhoZdSzFgarwRaaSuNnOy/79O6TkMh0EO7" +
                 "CLQavffmUyu6k+rpg2oJu6bSj5UHMVXddqxDvboRdlLILxvMJaSBWgvu9K/zJGaEyhHf9b5KUXn6mKtW" +
                 "Wm4Oi2Fru8WY9//4M3f3nzf0R8RmRffKyXFxiEHZsTLtMzIJg5eyjnKQCBKPkzhabnsm9RLEBx8qYQ2S" +

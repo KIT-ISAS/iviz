@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.sensor_msgs
 {
+    [DataContract]
     public sealed class NavSatFix : IMessage
     {
         // Navigation Satellite fix for any Global Navigation Satellite System
@@ -16,20 +17,20 @@ namespace Iviz.Msgs.sensor_msgs
         //        receiver, usually the location of the antenna.  This is a
         //        Euclidean frame relative to the vehicle, not a reference
         //        ellipsoid.
-        public std_msgs.Header header { get; set; }
+        [DataMember] public std_msgs.Header header { get; set; }
         
         // satellite fix status information
-        public NavSatStatus status { get; set; }
+        [DataMember] public NavSatStatus status { get; set; }
         
         // Latitude [degrees]. Positive is north of equator; negative is south.
-        public double latitude { get; set; }
+        [DataMember] public double latitude { get; set; }
         
         // Longitude [degrees]. Positive is east of prime meridian; negative is west.
-        public double longitude { get; set; }
+        [DataMember] public double longitude { get; set; }
         
         // Altitude [m]. Positive is above the WGS 84 ellipsoid
         // (quiet NaN if no altitude is available).
-        public double altitude { get; set; }
+        [DataMember] public double altitude { get; set; }
         
         // Position covariance [m^2] defined relative to a tangential plane
         // through the reported position. The components are East, North, and
@@ -37,7 +38,7 @@ namespace Iviz.Msgs.sensor_msgs
         //
         // Beware: this coordinate system exhibits singularities at the poles.
         
-        public double[/*9*/] position_covariance { get; set; }
+        [DataMember] public double[/*9*/] position_covariance { get; set; }
         
         // If the covariance of the fix is known, fill it in completely. If the
         // GPS receiver provides the variance of each measurement, put them
@@ -49,7 +50,7 @@ namespace Iviz.Msgs.sensor_msgs
         public const byte COVARIANCE_TYPE_DIAGONAL_KNOWN = 2;
         public const byte COVARIANCE_TYPE_KNOWN = 3;
         
-        public byte position_covariance_type { get; set; }
+        [DataMember] public byte position_covariance_type { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public NavSatFix()
@@ -84,17 +85,16 @@ namespace Iviz.Msgs.sensor_msgs
             this.position_covariance_type = b.Deserialize<byte>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new NavSatFix(b);
+            return new NavSatFix(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
-            this.status.Serialize(b);
+            b.Serialize(this.header);
+            b.Serialize(this.status);
             b.Serialize(this.latitude);
             b.Serialize(this.longitude);
             b.Serialize(this.altitude);
@@ -105,12 +105,13 @@ namespace Iviz.Msgs.sensor_msgs
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (status is null) throw new System.NullReferenceException();
+            status.Validate();
             if (position_covariance is null) throw new System.NullReferenceException();
             if (position_covariance.Length != 9) throw new System.IndexOutOfRangeException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -120,20 +121,16 @@ namespace Iviz.Msgs.sensor_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "sensor_msgs/NavSatFix";
+        [Preserve] public const string RosMessageType = "sensor_msgs/NavSatFix";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "2d3a8cd499b9b4a0249fb98fd05cfa48";
+        [Preserve] public const string RosMd5Sum = "2d3a8cd499b9b4a0249fb98fd05cfa48";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE7VWXW/bNhR9968g4Icmg+M1aVF0GTrAadzMWGobUdJ2KDqDlq4lbhKpkpQd//udS31Y" +
                 "aZuhA7YgLzJ5z/0691wOxVxuVSq9MlpE0lOeK09io+7Fxlgh9V5c5WYt82/fi/bOUzEYDoYiKilWG0WJ" +
                 "qJzSqfAZifdXkXj5XFjakCUdk2Cz0hmVDGCRkUzIjp2XRSlcY+6C4c0iEl4VFILwmXKiIOkqSwVpL45w" +

@@ -69,6 +69,7 @@ namespace Iviz.MsgsGen
         {
             "geometry_msgs/Vector3",
             "geometry_msgs/Point",
+            "geometry_msgs/Point32",
             "geometry_msgs/Quaternion",
             "geometry_msgs/Pose",
             "geometry_msgs/Transform",
@@ -180,14 +181,12 @@ namespace Iviz.MsgsGen
             if (fixedSize != -1)
             {
                 return new List<string> {
-                            "[IgnoreDataMember]",
                             "public int RosMessageLength => " + fixedSize + ";"
                 };
             }
             else if (variables.Count == 0)
             {
                 return new List<string> {
-                            "[IgnoreDataMember]",
                             "public int RosMessageLength => 0;"
                 };
             }
@@ -267,7 +266,6 @@ namespace Iviz.MsgsGen
             }
 
             List<string> lines = new List<string>();
-            lines.Add("[IgnoreDataMember]");
             lines.Add("public int RosMessageLength");
             lines.Add("{");
             lines.Add("    get {");
@@ -390,30 +388,34 @@ namespace Iviz.MsgsGen
                         {
                             if (variable.className == "string")
                             {
-                                //lines.Add("    BuiltIns.Deserialize(out this." + variable.fieldName + ", b);");
-                                //lines.Add("    this." + variable.fieldName + " = BuiltIns.DeserializeString(b);");
                                 lines.Add("    this." + variable.fieldName + " = b.DeserializeString();");
                             }
                             else
                             {
-                                //lines.Add("    this." + variable.fieldName + " = BuiltIns.DeserializeStruct<" + variable.className + ">(b);");
                                 lines.Add("    this." + variable.fieldName + " = b.Deserialize<" + variable.className + ">();");
+                            }
+                        }
+                        else if (variable.arraySize == 0)
+                        {
+                            if (variable.className == "string")
+                            {
+                                lines.Add("    this." + variable.fieldName + " = b.DeserializeStringArray();");
+                            }
+                            else
+                            {
+                                lines.Add("    this." + variable.fieldName + " = b.DeserializeStructArray<" + variable.className + ">();");
                             }
                         }
                         else
                         {
                             if (variable.className == "string")
                             {
-                                //lines.Add("    BuiltIns.Deserialize(out this." + variable.fieldName + ", b);");
-                                //lines.Add("    this." + variable.fieldName + " = BuiltIns.DeserializeStringArray(b, " + variable.arraySize + ");");
                                 lines.Add("    this." + variable.fieldName + " = b.DeserializeStringArray(" + variable.arraySize + ");");
                             }
                             else
                             {
-                                //lines.Add("    this." + variable.fieldName + " = BuiltIns.DeserializeStructArray<" + variable.className + ">(b, " + variable.arraySize + ");");
                                 lines.Add("    this." + variable.fieldName + " = b.DeserializeStructArray<" + variable.className + ">(" + variable.arraySize + ");");
                             }
-                            //lines.Add("    BuiltIns.Deserialize(out this." + variable.fieldName + ", b, " + variable.arraySize + ");");
                         }
                     }
                     else
@@ -422,19 +424,34 @@ namespace Iviz.MsgsGen
                         {
                             lines.Add("    this." + variable.fieldName + " = new " + variable.className + "(b);");
                         }
+                        else if(variable.arraySize == 0)
+                        {
+                            if (variable.classInfo.forceStruct)
+                            {
+                                lines.Add("    this." + variable.fieldName + " = b.DeserializeStructArray<" + variable.className + ">();");
+                            }
+                            else
+                            {
+                                lines.Add("    this." + variable.fieldName + " = b.DeserializeArray<" + variable.className + ">();");
+                                lines.Add("    for (int i = 0; i < this." + variable.fieldName + ".Length; i++)");
+                                lines.Add("    {");
+                                lines.Add("        this." + variable.fieldName + "[i] = new " + variable.className + "(b);");
+                                lines.Add("    }");
+                            }
+                        }
                         else
                         {
                             if (variable.classInfo.forceStruct)
                             {
-                                //lines.Add("    this." + variable.fieldName + " = BuiltIns.DeserializeStructArray<" + variable.className + ">(b, " + variable.arraySize + ");");
-                                //lines.Add("    BuiltIns.DeserializeStructArray(out this." + variable.fieldName + ", b, " + variable.arraySize + ");");
                                 lines.Add("    this." + variable.fieldName + " = b.DeserializeStructArray<" + variable.className + ">(" + variable.arraySize + ");");
                             }
                             else
                             {
-                                //lines.Add("    this." + variable.fieldName + " = BuiltIns.DeserializeArray<" + variable.className + ">(b, " + variable.arraySize + ");");
-                                //lines.Add("    BuiltIns.DeserializeArray(out this." + variable.fieldName + ", b, " + variable.arraySize + ");");
                                 lines.Add("    this." + variable.fieldName + " = b.DeserializeArray<" + variable.className + ">(" + variable.arraySize + ");");
+                                lines.Add("    for (int i = 0; i < " + variable.arraySize + "; i++)");
+                                lines.Add("    {");
+                                lines.Add("        this." + variable.fieldName + "[i] = new " + variable.className + "(b);");
+                                lines.Add("    }");
                             }
                         }
                     }
@@ -443,10 +460,9 @@ namespace Iviz.MsgsGen
             lines.Add("}");
             lines.Add("");
 
-            lines.Add("public " + type + " Deserialize(Buffer b)");
+            lines.Add("ISerializable ISerializable.Deserialize(Buffer b)");
             lines.Add("{");
-            lines.Add("    if (b is null) throw new System.ArgumentNullException(nameof(b));");
-            lines.Add("    return new " + name + "(b);");
+            lines.Add("    return new " + name + "(b ?? throw new System.ArgumentNullException(nameof(b)));");
             lines.Add("}");
 
             return lines;
@@ -456,7 +472,7 @@ namespace Iviz.MsgsGen
         {
             List<string> lines = new List<string>();
 
-            lines.Add("public void Serialize(Buffer b)");
+            lines.Add("void ISerializable.Serialize(Buffer b)");
             lines.Add("{");
             lines.Add("    if (b is null) throw new System.ArgumentNullException(nameof(b));");
             if (forceStruct)
@@ -492,7 +508,7 @@ namespace Iviz.MsgsGen
                     {
                         if (variable.arraySize == -1)
                         {
-                            lines.Add("    this." + variable.fieldName + ".Serialize(b);");
+                            lines.Add("    b.Serialize(this." + variable.fieldName + ");");
                         }
                         else
                         {
@@ -531,6 +547,10 @@ namespace Iviz.MsgsGen
                 else
                 {
                     lines.Add("    if (" + variable.fieldName + " is null) throw new System.NullReferenceException();");
+                    if (variable.arraySize == -1 && variable.rosClassName != "string")
+                    {
+                        lines.Add("    " + variable.fieldName + ".Validate();");
+                    }
                 }
             }
             lines.Add("}");
@@ -613,6 +633,7 @@ namespace Iviz.MsgsGen
         List<string> CreateClassContent()
         {
             List<string> lines = new List<string>();
+            lines.Add("[DataContract]");
             if (forceStruct)
             {
                 lines.Add("[StructLayout(LayoutKind.Sequential)]");
@@ -655,26 +676,22 @@ namespace Iviz.MsgsGen
             //lines.Add("    IMessage IMessage.Create() => new " + name + "();");
 
             lines.Add("");
-            lines.Add("    [IgnoreDataMember]");
-            lines.Add("    public string RosType => RosMessageType;");
+            lines.Add("    string IMessage.RosType => RosMessageType;");
 
             lines.Add("");
             lines.Add("    /// <summary> Full ROS name of this message. </summary>");
-            lines.Add("    [Preserve]");
-            lines.Add("    public const string RosMessageType = \"" + package + "/" + name + "\";");
+            lines.Add("    [Preserve] public const string RosMessageType = \"" + package + "/" + name + "\";");
 
 
             lines.Add("");
             string md5 = GetMd5Property();
             lines.Add("    /// <summary> MD5 hash of a compact representation of the message. </summary>");
-            lines.Add("    [Preserve]");
-            lines.Add("    public const string RosMd5Sum = \"" + md5 + "\";");
+            lines.Add("    [Preserve] public const string RosMd5Sum = \"" + md5 + "\";");
 
             lines.Add("");
 
             lines.Add("    /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>");
-            lines.Add("    [Preserve]");
-            lines.Add("    public const string RosDependenciesBase64 =");
+            lines.Add("    [Preserve] public const string RosDependenciesBase64 =");
 
             /*
             byte[] inputBytes = Encoding.UTF8.GetBytes(catDependencies);

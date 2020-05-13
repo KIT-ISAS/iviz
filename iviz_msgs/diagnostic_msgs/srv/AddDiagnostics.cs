@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.diagnostic_msgs
 {
+    [DataContract]
     public sealed class AddDiagnostics : IService
     {
         /// <summary> Request message. </summary>
-        public AddDiagnosticsRequest Request { get; set; }
+        [DataMember] public AddDiagnosticsRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public AddDiagnosticsResponse Response { get; set; }
+        [DataMember] public AddDiagnosticsResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public AddDiagnostics()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.diagnostic_msgs
             Response = new AddDiagnosticsResponse();
         }
         
-        public IService Create() => new AddDiagnostics();
+        IService IService.Create() => new AddDiagnostics();
         
         IRequest IService.Request
         {
@@ -40,16 +41,13 @@ namespace Iviz.Msgs.diagnostic_msgs
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "diagnostic_msgs/AddDiagnostics";
+        [Preserve] public const string RosServiceType = "diagnostic_msgs/AddDiagnostics";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "e6ac9bbde83d0d3186523c3687aecaee";
+        [Preserve] public const string RosMd5Sum = "e6ac9bbde83d0d3186523c3687aecaee";
     }
 
     public sealed class AddDiagnosticsRequest : IRequest
@@ -70,7 +68,7 @@ namespace Iviz.Msgs.diagnostic_msgs
         // and http://wiki.ros.org/diagnostics/Tutorials/Using%20the%20GenericAnalyzer
         // for examples of the structure of yaml files which are expected to have been
         // loaded into the namespace.
-        public string load_namespace { get; set; }
+        [DataMember] public string load_namespace { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public AddDiagnosticsRequest()
@@ -90,13 +88,12 @@ namespace Iviz.Msgs.diagnostic_msgs
             this.load_namespace = b.DeserializeString();
         }
         
-        public IRequest Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new AddDiagnosticsRequest(b);
+            return new AddDiagnosticsRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.load_namespace);
@@ -107,7 +104,6 @@ namespace Iviz.Msgs.diagnostic_msgs
             if (load_namespace is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -125,10 +121,10 @@ namespace Iviz.Msgs.diagnostic_msgs
         // otherwise. A false return value means that either there is a bond in the
         // aggregator which already used the requested namespace, or the initialization
         // of analyzers failed.
-        public bool success { get; set; }
+        [DataMember] public bool success { get; set; }
         
         // Message with additional information about the success or failure
-        public string message { get; set; }
+        [DataMember] public string message { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public AddDiagnosticsResponse()
@@ -150,13 +146,12 @@ namespace Iviz.Msgs.diagnostic_msgs
             this.message = b.DeserializeString();
         }
         
-        public IResponse Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new AddDiagnosticsResponse(b);
+            return new AddDiagnosticsResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.success);
@@ -168,7 +163,6 @@ namespace Iviz.Msgs.diagnostic_msgs
             if (message is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {

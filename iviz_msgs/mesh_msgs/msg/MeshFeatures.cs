@@ -2,10 +2,11 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.mesh_msgs
 {
+    [DataContract]
     public sealed class MeshFeatures : IMessage
     {
-        public string map_uuid { get; set; }
-        public mesh_msgs.Feature[] features { get; set; }
+        [DataMember] public string map_uuid { get; set; }
+        [DataMember] public mesh_msgs.Feature[] features { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshFeatures()
@@ -25,16 +26,19 @@ namespace Iviz.Msgs.mesh_msgs
         internal MeshFeatures(Buffer b)
         {
             this.map_uuid = b.DeserializeString();
-            this.features = b.DeserializeArray<mesh_msgs.Feature>(0);
+            this.features = b.DeserializeArray<mesh_msgs.Feature>();
+            for (int i = 0; i < this.features.Length; i++)
+            {
+                this.features[i] = new mesh_msgs.Feature(b);
+            }
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new MeshFeatures(b);
+            return new MeshFeatures(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.map_uuid);
@@ -47,7 +51,6 @@ namespace Iviz.Msgs.mesh_msgs
             if (features is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -61,20 +64,16 @@ namespace Iviz.Msgs.mesh_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "mesh_msgs/MeshFeatures";
+        [Preserve] public const string RosMessageType = "mesh_msgs/MeshFeatures";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "ea0bfd1049bc24f2cd76d68461f1f987";
+        [Preserve] public const string RosMd5Sum = "ea0bfd1049bc24f2cd76d68461f1f987";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE7XQwQqCYAwH8PueYtADBBYdgq51CoK6RcjQqYP8Jt8mZE+fYniojrnTf2OwHzOPEkqs" +
                 "qUnbVnKo2aq0ttKWeyZvI19vWIzJAHZ/LjieD1v8ugkla80eu3F6UgmOd83IRQOY5+/tu5Kvkl6Ys2VR" +
                 "Gtc4l/GHCBZ4qcQw0+AkwdArxkZNBiVqgdR3g1wCFpEZraGMoRjUmzU+ptRN6TkX//Nn48VVgjk5wQu3" +

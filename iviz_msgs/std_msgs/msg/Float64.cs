@@ -2,9 +2,10 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.std_msgs
 {
+    [DataContract]
     public sealed class Float64 : IMessage
     {
-        public double data { get; set; }
+        [DataMember] public double data { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Float64()
@@ -23,13 +24,12 @@ namespace Iviz.Msgs.std_msgs
             this.data = b.Deserialize<double>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new Float64(b);
+            return new Float64(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.data);
@@ -39,23 +39,18 @@ namespace Iviz.Msgs.std_msgs
         {
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength => 8;
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "std_msgs/Float64";
+        [Preserve] public const string RosMessageType = "std_msgs/Float64";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "fdb28210bfa9d7c91146260178d9a584";
+        [Preserve] public const string RosMd5Sum = "fdb28210bfa9d7c91146260178d9a584";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE0vLyU8sMTNRSEksSeQCAPMRveQNAAAA";
                 
     }

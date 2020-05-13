@@ -2,17 +2,18 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.geometry_msgs
 {
+    [DataContract]
     public sealed class AccelWithCovariance : IMessage
     {
         // This expresses acceleration in free space with uncertainty.
         
-        public Accel accel { get; set; }
+        [DataMember] public Accel accel { get; set; }
         
         // Row-major representation of the 6x6 covariance matrix
         // The orientation parameters use a fixed-axis representation.
         // In order, the parameters are:
         // (x, y, z, rotation about X axis, rotation about Y axis, rotation about Z axis)
-        public double[/*36*/] covariance { get; set; }
+        [DataMember] public double[/*36*/] covariance { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public AccelWithCovariance()
@@ -36,43 +37,38 @@ namespace Iviz.Msgs.geometry_msgs
             this.covariance = b.DeserializeStructArray<double>(36);
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new AccelWithCovariance(b);
+            return new AccelWithCovariance(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.accel.Serialize(b);
+            b.Serialize(this.accel);
             b.SerializeStructArray(this.covariance, 36);
         }
         
         public void Validate()
         {
             if (accel is null) throw new System.NullReferenceException();
+            accel.Validate();
             if (covariance is null) throw new System.NullReferenceException();
             if (covariance.Length != 36) throw new System.IndexOutOfRangeException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength => 336;
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "geometry_msgs/AccelWithCovariance";
+        [Preserve] public const string RosMessageType = "geometry_msgs/AccelWithCovariance";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "ad5a718d699c6be72a02b8d6a139f334";
+        [Preserve] public const string RosMd5Sum = "ad5a718d699c6be72a02b8d6a139f334";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71TTWvcQAy9+1c8yCUBx4Wm7CHQQ08lh0JpQ+kHpWht2TuNPTKacdbOr6/Gdpws7aGH" +
                 "0oUFWaP3pPdGc4bbgwvgsVcOgQOoLLllpejEw3nUyozQU8k4unjA4EvWSM7HqciyN6l6wWTZGT7I8bKj" +
                 "n6JQToTs40IkNeKBsRt3KOWe1JHRoKOobjTcrZ2Juq28J6WOI2vAEBiE2o1cXdJoo54yF4a+MX6tWPO5" +

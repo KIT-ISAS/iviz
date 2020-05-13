@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.std_srvs
 {
+    [DataContract]
     public sealed class Trigger : IService
     {
         /// <summary> Request message. </summary>
-        public TriggerRequest Request { get; set; }
+        [DataMember] public TriggerRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public TriggerResponse Response { get; set; }
+        [DataMember] public TriggerResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public Trigger()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.std_srvs
             Response = new TriggerResponse();
         }
         
-        public IService Create() => new Trigger();
+        IService IService.Create() => new Trigger();
         
         IRequest IService.Request
         {
@@ -40,16 +41,13 @@ namespace Iviz.Msgs.std_srvs
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "std_srvs/Trigger";
+        [Preserve] public const string RosServiceType = "std_srvs/Trigger";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "937c9679a518e3a18d831e57125ea522";
+        [Preserve] public const string RosMd5Sum = "937c9679a518e3a18d831e57125ea522";
     }
 
     public sealed class TriggerRequest : Internal.EmptyRequest
@@ -58,8 +56,8 @@ namespace Iviz.Msgs.std_srvs
 
     public sealed class TriggerResponse : IResponse
     {
-        public bool success { get; set; } // indicate successful run of triggered service
-        public string message { get; set; } // informational, e.g. for error messages
+        [DataMember] public bool success { get; set; } // indicate successful run of triggered service
+        [DataMember] public string message { get; set; } // informational, e.g. for error messages
     
         /// <summary> Constructor for empty message. </summary>
         public TriggerResponse()
@@ -81,13 +79,12 @@ namespace Iviz.Msgs.std_srvs
             this.message = b.DeserializeString();
         }
         
-        public IResponse Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new TriggerResponse(b);
+            return new TriggerResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.success);
@@ -99,7 +96,6 @@ namespace Iviz.Msgs.std_srvs
             if (message is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {

@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.sensor_msgs
 {
+    [DataContract]
     public sealed class Imu : IMessage
     {
         // This is a message to hold data from an IMU (Inertial Measurement Unit)
@@ -18,16 +19,16 @@ namespace Iviz.Msgs.sensor_msgs
         // If you are interpreting this message, please check for a value of -1 in the first element of each 
         // covariance matrix, and disregard the associated estimate.
         
-        public std_msgs.Header header { get; set; }
+        [DataMember] public std_msgs.Header header { get; set; }
         
-        public geometry_msgs.Quaternion orientation { get; set; }
-        public double[/*9*/] orientation_covariance { get; set; } // Row major about x, y, z axes
+        [DataMember] public geometry_msgs.Quaternion orientation { get; set; }
+        [DataMember] public double[/*9*/] orientation_covariance { get; set; } // Row major about x, y, z axes
         
-        public geometry_msgs.Vector3 angular_velocity { get; set; }
-        public double[/*9*/] angular_velocity_covariance { get; set; } // Row major about x, y, z axes
+        [DataMember] public geometry_msgs.Vector3 angular_velocity { get; set; }
+        [DataMember] public double[/*9*/] angular_velocity_covariance { get; set; } // Row major about x, y, z axes
         
-        public geometry_msgs.Vector3 linear_acceleration { get; set; }
-        public double[/*9*/] linear_acceleration_covariance { get; set; } // Row major x, y z 
+        [DataMember] public geometry_msgs.Vector3 linear_acceleration { get; set; }
+        [DataMember] public double[/*9*/] linear_acceleration_covariance { get; set; } // Row major x, y z 
     
         /// <summary> Constructor for empty message. </summary>
         public Imu()
@@ -65,27 +66,27 @@ namespace Iviz.Msgs.sensor_msgs
             this.linear_acceleration_covariance = b.DeserializeStructArray<double>(9);
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new Imu(b);
+            return new Imu(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
-            this.orientation.Serialize(b);
+            b.Serialize(this.header);
+            b.Serialize(this.orientation);
             b.SerializeStructArray(this.orientation_covariance, 9);
-            this.angular_velocity.Serialize(b);
+            b.Serialize(this.angular_velocity);
             b.SerializeStructArray(this.angular_velocity_covariance, 9);
-            this.linear_acceleration.Serialize(b);
+            b.Serialize(this.linear_acceleration);
             b.SerializeStructArray(this.linear_acceleration_covariance, 9);
         }
         
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (orientation_covariance is null) throw new System.NullReferenceException();
             if (orientation_covariance.Length != 9) throw new System.IndexOutOfRangeException();
             if (angular_velocity_covariance is null) throw new System.NullReferenceException();
@@ -94,7 +95,6 @@ namespace Iviz.Msgs.sensor_msgs
             if (linear_acceleration_covariance.Length != 9) throw new System.IndexOutOfRangeException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -104,20 +104,16 @@ namespace Iviz.Msgs.sensor_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "sensor_msgs/Imu";
+        [Preserve] public const string RosMessageType = "sensor_msgs/Imu";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "6a62c6daae103f4ff57a132d6f95cec2";
+        [Preserve] public const string RosMd5Sum = "6a62c6daae103f4ff57a132d6f95cec2";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71WTW/bRhC981cMooOlQpIbpwhQAz0UCNrqYCBtkl6KVBiRI3JjclfZXVqWf33e7IoS" +
                 "7SRogX4IAkSRO+/NvPnihN42JhC+TJ2EwLVQdNS4tqKKI9PWu47Y0urmHU1XVnw03NKNcOi9dGIjvbMm" +
                 "zopJMaEfy1Ja8RyNs4FC43qgbISMpe4y/HlFU+ui/qsvwmwO1Iq8i+k4MO+kdaWJh8eGnqvLIGXCX20p" +

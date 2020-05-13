@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.sensor_msgs
 {
+    [DataContract]
     public sealed class ChannelFloat32 : IMessage
     {
         // This message is used by the PointCloud message to hold optional data
@@ -23,11 +24,11 @@ namespace Iviz.Msgs.sensor_msgs
         
         // The channel name should give semantics of the channel (e.g.
         // "intensity" instead of "value").
-        public string name { get; set; }
+        [DataMember] public string name { get; set; }
         
         // The values array should be 1-1 with the elements of the associated
         // PointCloud.
-        public float[] values { get; set; }
+        [DataMember] public float[] values { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ChannelFloat32()
@@ -47,16 +48,15 @@ namespace Iviz.Msgs.sensor_msgs
         internal ChannelFloat32(Buffer b)
         {
             this.name = b.DeserializeString();
-            this.values = b.DeserializeStructArray<float>(0);
+            this.values = b.DeserializeStructArray<float>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new ChannelFloat32(b);
+            return new ChannelFloat32(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.name);
@@ -69,7 +69,6 @@ namespace Iviz.Msgs.sensor_msgs
             if (values is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -80,20 +79,16 @@ namespace Iviz.Msgs.sensor_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "sensor_msgs/ChannelFloat32";
+        [Preserve] public const string RosMessageType = "sensor_msgs/ChannelFloat32";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "3d40139cdd33dfedcb71ffeeeb42ae7f";
+        [Preserve] public const string RosMd5Sum = "3d40139cdd33dfedcb71ffeeeb42ae7f";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE11Ty47bMAy8+ysI7yUBsgY27aHosQu016LoreiBlhhbqCwaopRs/r6UYudl+CBA5Mxw" +
                 "hnqB36MTmEgEBwI9ZiEL/RnSSPCTXUjvnrO9ViSGkb0FnpPjgB4sJmxeAEXYOEzafHJpBEIzwlz6wYUK" +
                 "ZgpOp3wEnsKgNXyoF0f0maRgxIhnkJGzEvRULwUnUvB6fmyr4LI0XTgU4yZ5BxjsRUdluAN+FlvlcYwk" +

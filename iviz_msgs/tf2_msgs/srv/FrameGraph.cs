@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.tf2_msgs
 {
+    [DataContract]
     public sealed class FrameGraph : IService
     {
         /// <summary> Request message. </summary>
-        public FrameGraphRequest Request { get; set; }
+        [DataMember] public FrameGraphRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public FrameGraphResponse Response { get; set; }
+        [DataMember] public FrameGraphResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public FrameGraph()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.tf2_msgs
             Response = new FrameGraphResponse();
         }
         
-        public IService Create() => new FrameGraph();
+        IService IService.Create() => new FrameGraph();
         
         IRequest IService.Request
         {
@@ -40,16 +41,13 @@ namespace Iviz.Msgs.tf2_msgs
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "tf2_msgs/FrameGraph";
+        [Preserve] public const string RosServiceType = "tf2_msgs/FrameGraph";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "437ea58e9463815a0d511c7326b686b0";
+        [Preserve] public const string RosMd5Sum = "437ea58e9463815a0d511c7326b686b0";
     }
 
     public sealed class FrameGraphRequest : Internal.EmptyRequest
@@ -58,7 +56,7 @@ namespace Iviz.Msgs.tf2_msgs
 
     public sealed class FrameGraphResponse : IResponse
     {
-        public string frame_yaml { get; set; }
+        [DataMember] public string frame_yaml { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public FrameGraphResponse()
@@ -78,13 +76,12 @@ namespace Iviz.Msgs.tf2_msgs
             this.frame_yaml = b.DeserializeString();
         }
         
-        public IResponse Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new FrameGraphResponse(b);
+            return new FrameGraphResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.frame_yaml);
@@ -95,7 +92,6 @@ namespace Iviz.Msgs.tf2_msgs
             if (frame_yaml is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {

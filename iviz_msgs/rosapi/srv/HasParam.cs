@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.rosapi
 {
+    [DataContract]
     public sealed class HasParam : IService
     {
         /// <summary> Request message. </summary>
-        public HasParamRequest Request { get; set; }
+        [DataMember] public HasParamRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public HasParamResponse Response { get; set; }
+        [DataMember] public HasParamResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public HasParam()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.rosapi
             Response = new HasParamResponse();
         }
         
-        public IService Create() => new HasParam();
+        IService IService.Create() => new HasParam();
         
         IRequest IService.Request
         {
@@ -40,21 +41,18 @@ namespace Iviz.Msgs.rosapi
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "rosapi/HasParam";
+        [Preserve] public const string RosServiceType = "rosapi/HasParam";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "ed3df286bd6dff9b961770f577454ea9";
+        [Preserve] public const string RosMd5Sum = "ed3df286bd6dff9b961770f577454ea9";
     }
 
     public sealed class HasParamRequest : IRequest
     {
-        public string name { get; set; }
+        [DataMember] public string name { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public HasParamRequest()
@@ -74,13 +72,12 @@ namespace Iviz.Msgs.rosapi
             this.name = b.DeserializeString();
         }
         
-        public IRequest Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new HasParamRequest(b);
+            return new HasParamRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.name);
@@ -91,7 +88,6 @@ namespace Iviz.Msgs.rosapi
             if (name is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -104,7 +100,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class HasParamResponse : IResponse
     {
-        public bool exists { get; set; }
+        [DataMember] public bool exists { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public HasParamResponse()
@@ -123,13 +119,12 @@ namespace Iviz.Msgs.rosapi
             this.exists = b.Deserialize<bool>();
         }
         
-        public IResponse Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new HasParamResponse(b);
+            return new HasParamResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.exists);
@@ -139,7 +134,6 @@ namespace Iviz.Msgs.rosapi
         {
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength => 1;
     }
 }

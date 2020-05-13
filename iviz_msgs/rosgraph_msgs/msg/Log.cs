@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.rosgraph_msgs
 {
+    [DataContract]
     public sealed class Log : IMessage
     {
         //#
@@ -15,14 +16,14 @@ namespace Iviz.Msgs.rosgraph_msgs
         //#
         //# Fields
         //#
-        public std_msgs.Header header { get; set; }
-        public byte level { get; set; }
-        public string name { get; set; } // name of the node
-        public string msg { get; set; } // message 
-        public string file { get; set; } // file the message came from
-        public string function { get; set; } // function the message came from
-        public uint line { get; set; } // line the message came from
-        public string[] topics { get; set; } // topic names that the node publishes
+        [DataMember] public std_msgs.Header header { get; set; }
+        [DataMember] public byte level { get; set; }
+        [DataMember] public string name { get; set; } // name of the node
+        [DataMember] public string msg { get; set; } // message 
+        [DataMember] public string file { get; set; } // file the message came from
+        [DataMember] public string function { get; set; } // function the message came from
+        [DataMember] public uint line { get; set; } // line the message came from
+        [DataMember] public string[] topics { get; set; } // topic names that the node publishes
     
         /// <summary> Constructor for empty message. </summary>
         public Log()
@@ -58,19 +59,18 @@ namespace Iviz.Msgs.rosgraph_msgs
             this.file = b.DeserializeString();
             this.function = b.DeserializeString();
             this.line = b.Deserialize<uint>();
-            this.topics = b.DeserializeStringArray(0);
+            this.topics = b.DeserializeStringArray();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new Log(b);
+            return new Log(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.Serialize(this.level);
             b.Serialize(this.name);
             b.Serialize(this.msg);
@@ -83,6 +83,7 @@ namespace Iviz.Msgs.rosgraph_msgs
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (name is null) throw new System.NullReferenceException();
             if (msg is null) throw new System.NullReferenceException();
             if (file is null) throw new System.NullReferenceException();
@@ -90,7 +91,6 @@ namespace Iviz.Msgs.rosgraph_msgs
             if (topics is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -109,20 +109,16 @@ namespace Iviz.Msgs.rosgraph_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "rosgraph_msgs/Log";
+        [Preserve] public const string RosMessageType = "rosgraph_msgs/Log";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "acffd30cd6b6de30f120938c17c593fb";
+        [Preserve] public const string RosMd5Sum = "acffd30cd6b6de30f120938c17c593fb";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61TXWvbMBR996+44Ie2g7S0G6ME/JCRpits7Ugz9jBGkK1rWyBLniQn87/fkdxkGYyx" +
                 "hwWDZN9zzv06yfMsz+mZd+xUGEnjoqmyxgdhgkcsK8fAtLx79/m+uKZccjk0E2yKPDyunooborxhw07o" +
                 "09iXxfqxeIPYXjijzG+8u/X6aV3cUs7OWXcaWS02iw/F9VvKaxGEvqpQmaqOynmqeKVYy1TfexaSHbXp" +

@@ -2,9 +2,10 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.rosbridge_msgs
 {
+    [DataContract]
     public sealed class ConnectedClients : IMessage
     {
-        public ConnectedClient[] clients { get; set; }
+        [DataMember] public ConnectedClient[] clients { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ConnectedClients()
@@ -21,16 +22,19 @@ namespace Iviz.Msgs.rosbridge_msgs
         /// <summary> Constructor with buffer. </summary>
         internal ConnectedClients(Buffer b)
         {
-            this.clients = b.DeserializeArray<ConnectedClient>(0);
+            this.clients = b.DeserializeArray<ConnectedClient>();
+            for (int i = 0; i < this.clients.Length; i++)
+            {
+                this.clients[i] = new ConnectedClient(b);
+            }
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new ConnectedClients(b);
+            return new ConnectedClients(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeArray(this.clients, 0);
@@ -41,7 +45,6 @@ namespace Iviz.Msgs.rosbridge_msgs
             if (clients is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -54,20 +57,16 @@ namespace Iviz.Msgs.rosbridge_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "rosbridge_msgs/ConnectedClients";
+        [Preserve] public const string RosMessageType = "rosbridge_msgs/ConnectedClients";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "d0d53b0c0aa23aa7e4cf52f49bca4b69";
+        [Preserve] public const string RosMd5Sum = "d0d53b0c0aa23aa7e4cf52f49bca4b69";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE3POz8tLTS5JTXHOyUzNK4mOVUgGM4q5uGypDLh8g92tFIryi5OKMlPSU+Nzi9OL9Z1R" +
                 "7ecqLinKzEtXyCyIT0xJKUotLuYqycxNVUiGKMvMz4sH8bm4AIb8WuK4AAAA";
                 

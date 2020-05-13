@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.nav_msgs
 {
+    [DataContract]
     public sealed class SetMap : IService
     {
         /// <summary> Request message. </summary>
-        public SetMapRequest Request { get; set; }
+        [DataMember] public SetMapRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public SetMapResponse Response { get; set; }
+        [DataMember] public SetMapResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public SetMap()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.nav_msgs
             Response = new SetMapResponse();
         }
         
-        public IService Create() => new SetMap();
+        IService IService.Create() => new SetMap();
         
         IRequest IService.Request
         {
@@ -40,23 +41,20 @@ namespace Iviz.Msgs.nav_msgs
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "nav_msgs/SetMap";
+        [Preserve] public const string RosServiceType = "nav_msgs/SetMap";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "c36922319011e63ed7784112ad4fdd32";
+        [Preserve] public const string RosMd5Sum = "c36922319011e63ed7784112ad4fdd32";
     }
 
     public sealed class SetMapRequest : IRequest
     {
         // Set a new map together with an initial pose
-        public nav_msgs.OccupancyGrid map { get; set; }
-        public geometry_msgs.PoseWithCovarianceStamped initial_pose { get; set; }
+        [DataMember] public nav_msgs.OccupancyGrid map { get; set; }
+        [DataMember] public geometry_msgs.PoseWithCovarianceStamped initial_pose { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public SetMapRequest()
@@ -79,26 +77,26 @@ namespace Iviz.Msgs.nav_msgs
             this.initial_pose = new geometry_msgs.PoseWithCovarianceStamped(b);
         }
         
-        public IRequest Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new SetMapRequest(b);
+            return new SetMapRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.map.Serialize(b);
-            this.initial_pose.Serialize(b);
+            b.Serialize(this.map);
+            b.Serialize(this.initial_pose);
         }
         
         public void Validate()
         {
             if (map is null) throw new System.NullReferenceException();
+            map.Validate();
             if (initial_pose is null) throw new System.NullReferenceException();
+            initial_pose.Validate();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -112,7 +110,7 @@ namespace Iviz.Msgs.nav_msgs
 
     public sealed class SetMapResponse : IResponse
     {
-        public bool success { get; set; }
+        [DataMember] public bool success { get; set; }
         
     
         /// <summary> Constructor for empty message. </summary>
@@ -132,13 +130,12 @@ namespace Iviz.Msgs.nav_msgs
             this.success = b.Deserialize<bool>();
         }
         
-        public IResponse Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new SetMapResponse(b);
+            return new SetMapResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.success);
@@ -148,7 +145,6 @@ namespace Iviz.Msgs.nav_msgs
         {
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength => 1;
     }
 }

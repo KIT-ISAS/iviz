@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.grid_map_msgs
 {
+    [DataContract]
     public sealed class ProcessFile : IService
     {
         /// <summary> Request message. </summary>
-        public ProcessFileRequest Request { get; set; }
+        [DataMember] public ProcessFileRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public ProcessFileResponse Response { get; set; }
+        [DataMember] public ProcessFileResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public ProcessFile()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.grid_map_msgs
             Response = new ProcessFileResponse();
         }
         
-        public IService Create() => new ProcessFile();
+        IService IService.Create() => new ProcessFile();
         
         IRequest IService.Request
         {
@@ -40,25 +41,22 @@ namespace Iviz.Msgs.grid_map_msgs
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "grid_map_msgs/ProcessFile";
+        [Preserve] public const string RosServiceType = "grid_map_msgs/ProcessFile";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "03f389710f49a6dd2a8b447bb2850cd6";
+        [Preserve] public const string RosMd5Sum = "03f389710f49a6dd2a8b447bb2850cd6";
     }
 
     public sealed class ProcessFileRequest : IRequest
     {
         // Absolute file path.
-        public string file_path { get; set; }
+        [DataMember] public string file_path { get; set; }
         
         // For ROS bags: topic name that should be processed (optional).
-        public string topic_name { get; set; }
+        [DataMember] public string topic_name { get; set; }
         
     
         /// <summary> Constructor for empty message. </summary>
@@ -82,13 +80,12 @@ namespace Iviz.Msgs.grid_map_msgs
             this.topic_name = b.DeserializeString();
         }
         
-        public IRequest Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new ProcessFileRequest(b);
+            return new ProcessFileRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.file_path);
@@ -101,7 +98,6 @@ namespace Iviz.Msgs.grid_map_msgs
             if (topic_name is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -117,7 +113,7 @@ namespace Iviz.Msgs.grid_map_msgs
     {
         
         // True if file processing was successful.
-        public bool success { get; set; }
+        [DataMember] public bool success { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ProcessFileResponse()
@@ -136,13 +132,12 @@ namespace Iviz.Msgs.grid_map_msgs
             this.success = b.Deserialize<bool>();
         }
         
-        public IResponse Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new ProcessFileResponse(b);
+            return new ProcessFileResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.success);
@@ -152,7 +147,6 @@ namespace Iviz.Msgs.grid_map_msgs
         {
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength => 1;
     }
 }

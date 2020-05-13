@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.rosapi
 {
+    [DataContract]
     public sealed class ServiceType : IService
     {
         /// <summary> Request message. </summary>
-        public ServiceTypeRequest Request { get; set; }
+        [DataMember] public ServiceTypeRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public ServiceTypeResponse Response { get; set; }
+        [DataMember] public ServiceTypeResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public ServiceType()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.rosapi
             Response = new ServiceTypeResponse();
         }
         
-        public IService Create() => new ServiceType();
+        IService IService.Create() => new ServiceType();
         
         IRequest IService.Request
         {
@@ -40,21 +41,18 @@ namespace Iviz.Msgs.rosapi
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "rosapi/ServiceType";
+        [Preserve] public const string RosServiceType = "rosapi/ServiceType";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "0e24a2dcdf70e483afc092a35a1f15f7";
+        [Preserve] public const string RosMd5Sum = "0e24a2dcdf70e483afc092a35a1f15f7";
     }
 
     public sealed class ServiceTypeRequest : IRequest
     {
-        public string service { get; set; }
+        [DataMember] public string service { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ServiceTypeRequest()
@@ -74,13 +72,12 @@ namespace Iviz.Msgs.rosapi
             this.service = b.DeserializeString();
         }
         
-        public IRequest Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new ServiceTypeRequest(b);
+            return new ServiceTypeRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.service);
@@ -91,7 +88,6 @@ namespace Iviz.Msgs.rosapi
             if (service is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -104,7 +100,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class ServiceTypeResponse : IResponse
     {
-        public string type { get; set; }
+        [DataMember] public string type { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ServiceTypeResponse()
@@ -124,13 +120,12 @@ namespace Iviz.Msgs.rosapi
             this.type = b.DeserializeString();
         }
         
-        public IResponse Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new ServiceTypeResponse(b);
+            return new ServiceTypeResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.type);
@@ -141,7 +136,6 @@ namespace Iviz.Msgs.rosapi
             if (type is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {

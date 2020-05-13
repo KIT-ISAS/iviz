@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.sensor_msgs
 {
+    [DataContract]
     public sealed class Illuminance : IMessage
     {
         // Single photometric illuminance measurement.  Light should be assumed to be
@@ -19,12 +20,12 @@ namespace Iviz.Msgs.sensor_msgs
         // Luminance (nits/light output per area)
         // Irradiance (watt/area), etc.
         
-        public std_msgs.Header header { get; set; } // timestamp is the time the illuminance was measured
+        [DataMember] public std_msgs.Header header { get; set; } // timestamp is the time the illuminance was measured
         // frame_id is the location and direction of the reading
         
-        public double illuminance { get; set; } // Measurement of the Photometric Illuminance in Lux.
+        [DataMember] public double illuminance { get; set; } // Measurement of the Photometric Illuminance in Lux.
         
-        public double variance { get; set; } // 0 is interpreted as variance unknown
+        [DataMember] public double variance { get; set; } // 0 is interpreted as variance unknown
     
         /// <summary> Constructor for empty message. </summary>
         public Illuminance()
@@ -48,16 +49,15 @@ namespace Iviz.Msgs.sensor_msgs
             this.variance = b.Deserialize<double>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new Illuminance(b);
+            return new Illuminance(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.Serialize(this.illuminance);
             b.Serialize(this.variance);
         }
@@ -65,9 +65,9 @@ namespace Iviz.Msgs.sensor_msgs
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -77,20 +77,16 @@ namespace Iviz.Msgs.sensor_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "sensor_msgs/Illuminance";
+        [Preserve] public const string RosMessageType = "sensor_msgs/Illuminance";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "8cf5febb0952fca9d650c3d11a81a188";
+        [Preserve] public const string RosMd5Sum = "8cf5febb0952fca9d650c3d11a81a188";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61UwW7bMAy9+ysI5NBmW9JiG3YosMOAYluAFijWHnYrWJmxhcmSJ1FJs68fKduJeyiw" +
                 "wwwDtijq8ZGPIizg3vrGEfRt4NARR2vAOpc769Ebgo4w5UgdeV4D3NimZUhtyK6GJwJMKXdUAwdZVbCY" +
                 "3GtAF3wD3BIk8inEswTPK3y2Cc7ViJEQwhZqYjJsgwfZ0Y3D6g/0Dj0t14r3IKY5nTF0izvBgEsIEfqQ" +

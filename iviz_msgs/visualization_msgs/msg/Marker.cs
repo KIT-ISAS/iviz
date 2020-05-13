@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.visualization_msgs
 {
+    [DataContract]
     public sealed class Marker : IMessage
     {
         // See http://www.ros.org/wiki/rviz/DisplayTypes/Marker and http://www.ros.org/wiki/rviz/Tutorials/Markers%3A%20Basic%20Shapes for more information on using this message with rviz
@@ -24,30 +25,30 @@ namespace Iviz.Msgs.visualization_msgs
         public const byte DELETE = 2;
         public const byte DELETEALL = 3;
         
-        public std_msgs.Header header { get; set; } // header for time/frame information
-        public string ns { get; set; } // Namespace to place this object in... used in conjunction with id to create a unique name for the object
-        public int id { get; set; } // object ID useful in conjunction with the namespace for manipulating and deleting the object later
-        public int type { get; set; } // Type of object
-        public int action { get; set; } // 0 add/modify an object, 1 (deprecated), 2 deletes an object, 3 deletes all objects
-        public geometry_msgs.Pose pose { get; set; } // Pose of the object
-        public geometry_msgs.Vector3 scale { get; set; } // Scale of the object 1,1,1 means default (usually 1 meter square)
-        public std_msgs.ColorRGBA color { get; set; } // Color [0.0-1.0]
-        public duration lifetime { get; set; } // How long the object should last before being automatically deleted.  0 means forever
-        public bool frame_locked { get; set; } // If this marker should be frame-locked, i.e. retransformed into its frame every timestep
+        [DataMember] public std_msgs.Header header { get; set; } // header for time/frame information
+        [DataMember] public string ns { get; set; } // Namespace to place this object in... used in conjunction with id to create a unique name for the object
+        [DataMember] public int id { get; set; } // object ID useful in conjunction with the namespace for manipulating and deleting the object later
+        [DataMember] public int type { get; set; } // Type of object
+        [DataMember] public int action { get; set; } // 0 add/modify an object, 1 (deprecated), 2 deletes an object, 3 deletes all objects
+        [DataMember] public geometry_msgs.Pose pose { get; set; } // Pose of the object
+        [DataMember] public geometry_msgs.Vector3 scale { get; set; } // Scale of the object 1,1,1 means default (usually 1 meter square)
+        [DataMember] public std_msgs.ColorRGBA color { get; set; } // Color [0.0-1.0]
+        [DataMember] public duration lifetime { get; set; } // How long the object should last before being automatically deleted.  0 means forever
+        [DataMember] public bool frame_locked { get; set; } // If this marker should be frame-locked, i.e. retransformed into its frame every timestep
         
         //Only used if the type specified has some use for them (eg. POINTS, LINE_STRIP, ...)
-        public geometry_msgs.Point[] points { get; set; }
+        [DataMember] public geometry_msgs.Point[] points { get; set; }
         //Only used if the type specified has some use for them (eg. POINTS, LINE_STRIP, ...)
         //number of colors must either be 0 or equal to the number of points
         //NOTE: alpha is not yet used
-        public std_msgs.ColorRGBA[] colors { get; set; }
+        [DataMember] public std_msgs.ColorRGBA[] colors { get; set; }
         
         // NOTE: only used for text markers
-        public string text { get; set; }
+        [DataMember] public string text { get; set; }
         
         // NOTE: only used for MESH_RESOURCE markers
-        public string mesh_resource { get; set; }
-        public bool mesh_use_embedded_materials { get; set; }
+        [DataMember] public string mesh_resource { get; set; }
+        [DataMember] public bool mesh_use_embedded_materials { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Marker()
@@ -93,30 +94,29 @@ namespace Iviz.Msgs.visualization_msgs
             this.color = new std_msgs.ColorRGBA(b);
             this.lifetime = b.Deserialize<duration>();
             this.frame_locked = b.Deserialize<bool>();
-            this.points = b.DeserializeStructArray<geometry_msgs.Point>(0);
-            this.colors = b.DeserializeStructArray<std_msgs.ColorRGBA>(0);
+            this.points = b.DeserializeStructArray<geometry_msgs.Point>();
+            this.colors = b.DeserializeStructArray<std_msgs.ColorRGBA>();
             this.text = b.DeserializeString();
             this.mesh_resource = b.DeserializeString();
             this.mesh_use_embedded_materials = b.Deserialize<bool>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new Marker(b);
+            return new Marker(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.Serialize(this.ns);
             b.Serialize(this.id);
             b.Serialize(this.type);
             b.Serialize(this.action);
-            this.pose.Serialize(b);
-            this.scale.Serialize(b);
-            this.color.Serialize(b);
+            b.Serialize(this.pose);
+            b.Serialize(this.scale);
+            b.Serialize(this.color);
             b.Serialize(this.lifetime);
             b.Serialize(this.frame_locked);
             b.SerializeStructArray(this.points, 0);
@@ -129,6 +129,7 @@ namespace Iviz.Msgs.visualization_msgs
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (ns is null) throw new System.NullReferenceException();
             if (points is null) throw new System.NullReferenceException();
             if (colors is null) throw new System.NullReferenceException();
@@ -136,7 +137,6 @@ namespace Iviz.Msgs.visualization_msgs
             if (mesh_resource is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -151,20 +151,16 @@ namespace Iviz.Msgs.visualization_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "visualization_msgs/Marker";
+        [Preserve] public const string RosMessageType = "visualization_msgs/Marker";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "4048c9de2a16f4ae8e0538085ebf1b97";
+        [Preserve] public const string RosMd5Sum = "4048c9de2a16f4ae8e0538085ebf1b97";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71X227bOBB9rr5igKBosnDkXLrdbgA/pLGbGMhtbbfdoigMWqJtNrKoklRc9+t7hpTk" +
                 "uEnafdg2MWKK4sycuZ1htmgoJc2dK47a7eVyGRttY21m7aW6UW1zq762u8oWmViNVoW07QthbqQhkac/" +
                 "FhqVThslslrCPj08fnqw90pYleB7OBfQRlNtaKGNJJVjuRBO6ZzwKa3KZ+TmytJCWitmkpbKzYlVR1Gp" +

@@ -2,18 +2,19 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.trajectory_msgs
 {
+    [DataContract]
     public sealed class MultiDOFJointTrajectory : IMessage
     {
         // The header is used to specify the coordinate frame and the reference time for the trajectory durations
-        public std_msgs.Header header { get; set; }
+        [DataMember] public std_msgs.Header header { get; set; }
         
         // A representation of a multi-dof joint trajectory (each point is a transformation)
         // Each point along the trajectory will include an array of positions/velocities/accelerations
         // that has the same length as the array of joint names, and has the same order of joints as 
         // the joint names array.
         
-        public string[] joint_names { get; set; }
-        public MultiDOFJointTrajectoryPoint[] points { get; set; }
+        [DataMember] public string[] joint_names { get; set; }
+        [DataMember] public MultiDOFJointTrajectoryPoint[] points { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MultiDOFJointTrajectory()
@@ -35,20 +36,23 @@ namespace Iviz.Msgs.trajectory_msgs
         internal MultiDOFJointTrajectory(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.joint_names = b.DeserializeStringArray(0);
-            this.points = b.DeserializeArray<MultiDOFJointTrajectoryPoint>(0);
+            this.joint_names = b.DeserializeStringArray();
+            this.points = b.DeserializeArray<MultiDOFJointTrajectoryPoint>();
+            for (int i = 0; i < this.points.Length; i++)
+            {
+                this.points[i] = new MultiDOFJointTrajectoryPoint(b);
+            }
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new MultiDOFJointTrajectory(b);
+            return new MultiDOFJointTrajectory(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.SerializeArray(this.joint_names, 0);
             b.SerializeArray(this.points, 0);
         }
@@ -56,11 +60,11 @@ namespace Iviz.Msgs.trajectory_msgs
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (joint_names is null) throw new System.NullReferenceException();
             if (points is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -79,20 +83,16 @@ namespace Iviz.Msgs.trajectory_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "trajectory_msgs/MultiDOFJointTrajectory";
+        [Preserve] public const string RosMessageType = "trajectory_msgs/MultiDOFJointTrajectory";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "ef145a45a5f47b77b7f5cdde4b16c942";
+        [Preserve] public const string RosMd5Sum = "ef145a45a5f47b77b7f5cdde4b16c942";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71WS4/bNhC+81cM4EPswusFkiKHBXookKbdAkFTxMilKAxaGklMJFIhqXXUX99vqJft" +
                 "TR9AmzV84Gve33yjFe0rpop1zp5MoC5wTtFRaDkzRU8Rt5lzPjdWR6bC64ZJ2zxdeC7Ys82YosFx4Xw6" +
                 "jl5/4Cw631PeeR2Ns0H9NJgYLCm1ou8h3noObGN6Qq4gTU1XR3OTY/3BGRvPda1ZZxW16RiearmzAUab" +

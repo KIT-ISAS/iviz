@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.rosbridge_library
 {
+    [DataContract]
     public sealed class TestResponseOnly : IService
     {
         /// <summary> Request message. </summary>
-        public TestResponseOnlyRequest Request { get; set; }
+        [DataMember] public TestResponseOnlyRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public TestResponseOnlyResponse Response { get; set; }
+        [DataMember] public TestResponseOnlyResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public TestResponseOnly()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.rosbridge_library
             Response = new TestResponseOnlyResponse();
         }
         
-        public IService Create() => new TestResponseOnly();
+        IService IService.Create() => new TestResponseOnly();
         
         IRequest IService.Request
         {
@@ -40,16 +41,13 @@ namespace Iviz.Msgs.rosbridge_library
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "rosbridge_library/TestResponseOnly";
+        [Preserve] public const string RosServiceType = "rosbridge_library/TestResponseOnly";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "da5909fbe378aeaf85e547e830cc1bb7";
+        [Preserve] public const string RosMd5Sum = "da5909fbe378aeaf85e547e830cc1bb7";
     }
 
     public sealed class TestResponseOnlyRequest : Internal.EmptyRequest
@@ -58,7 +56,7 @@ namespace Iviz.Msgs.rosbridge_library
 
     public sealed class TestResponseOnlyResponse : IResponse
     {
-        public int data { get; set; }
+        [DataMember] public int data { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestResponseOnlyResponse()
@@ -77,13 +75,12 @@ namespace Iviz.Msgs.rosbridge_library
             this.data = b.Deserialize<int>();
         }
         
-        public IResponse Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new TestResponseOnlyResponse(b);
+            return new TestResponseOnlyResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.data);
@@ -93,7 +90,6 @@ namespace Iviz.Msgs.rosbridge_library
         {
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength => 4;
     }
 }

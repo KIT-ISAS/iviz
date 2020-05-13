@@ -2,15 +2,16 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.rosapi
 {
+    [DataContract]
     public sealed class TypeDef : IMessage
     {
-        public string type { get; set; }
-        public string[] fieldnames { get; set; }
-        public string[] fieldtypes { get; set; }
-        public int[] fieldarraylen { get; set; }
-        public string[] examples { get; set; }
-        public string[] constnames { get; set; }
-        public string[] constvalues { get; set; }
+        [DataMember] public string type { get; set; }
+        [DataMember] public string[] fieldnames { get; set; }
+        [DataMember] public string[] fieldtypes { get; set; }
+        [DataMember] public int[] fieldarraylen { get; set; }
+        [DataMember] public string[] examples { get; set; }
+        [DataMember] public string[] constnames { get; set; }
+        [DataMember] public string[] constvalues { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TypeDef()
@@ -40,21 +41,20 @@ namespace Iviz.Msgs.rosapi
         internal TypeDef(Buffer b)
         {
             this.type = b.DeserializeString();
-            this.fieldnames = b.DeserializeStringArray(0);
-            this.fieldtypes = b.DeserializeStringArray(0);
-            this.fieldarraylen = b.DeserializeStructArray<int>(0);
-            this.examples = b.DeserializeStringArray(0);
-            this.constnames = b.DeserializeStringArray(0);
-            this.constvalues = b.DeserializeStringArray(0);
+            this.fieldnames = b.DeserializeStringArray();
+            this.fieldtypes = b.DeserializeStringArray();
+            this.fieldarraylen = b.DeserializeStructArray<int>();
+            this.examples = b.DeserializeStringArray();
+            this.constnames = b.DeserializeStringArray();
+            this.constvalues = b.DeserializeStringArray();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new TypeDef(b);
+            return new TypeDef(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.type);
@@ -77,7 +77,6 @@ namespace Iviz.Msgs.rosapi
             if (constvalues is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -113,20 +112,16 @@ namespace Iviz.Msgs.rosapi
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "rosapi/TypeDef";
+        [Preserve] public const string RosMessageType = "rosapi/TypeDef";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "80597571d79bbeef6c9c4d98f30116a0";
+        [Preserve] public const string RosMd5Sum = "80597571d79bbeef6c9c4d98f30116a0";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAEysuKcrMS1coqSxI5SoGs6NjFdIyU3NS8hJzU4vRxEDKirky80qMjWBCiUVFiZU5qXkI" +
                 "lakVibkFOch6k/PzikvQzAOLlSXmlAIFuQB/w6D2hgAAAA==";
                 

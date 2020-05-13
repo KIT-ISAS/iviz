@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.visualization_msgs
 {
+    [DataContract]
     public sealed class InteractiveMarkerControl : IMessage
     {
         // Represents a control that is to be displayed together with an interactive marker
@@ -9,13 +10,13 @@ namespace Iviz.Msgs.visualization_msgs
         // Identifying string for this control.
         // You need to assign a unique value to this to receive feedback from the GUI
         // on what actions the user performs on this control (e.g. a button click).
-        public string name { get; set; }
+        [DataMember] public string name { get; set; }
         
         
         // Defines the local coordinate frame (relative to the pose of the parent
         // interactive marker) in which is being rotated and translated.
         // Default: Identity
-        public geometry_msgs.Quaternion orientation { get; set; }
+        [DataMember] public geometry_msgs.Quaternion orientation { get; set; }
         
         
         // Orientation mode: controls how orientation changes.
@@ -26,7 +27,7 @@ namespace Iviz.Msgs.visualization_msgs
         public const byte FIXED = 1;
         public const byte VIEW_FACING = 2;
         
-        public byte orientation_mode { get; set; }
+        [DataMember] public byte orientation_mode { get; set; }
         
         // Interaction mode for this control
         // 
@@ -52,12 +53,12 @@ namespace Iviz.Msgs.visualization_msgs
         public const byte ROTATE_3D = 8;
         public const byte MOVE_ROTATE_3D = 9;
         
-        public byte interaction_mode { get; set; }
+        [DataMember] public byte interaction_mode { get; set; }
         
         
         // If true, the contained markers will also be visible
         // when the gui is not in interactive mode.
-        public bool always_visible { get; set; }
+        [DataMember] public bool always_visible { get; set; }
         
         
         // Markers to be displayed as custom visual representation.
@@ -68,19 +69,19 @@ namespace Iviz.Msgs.visualization_msgs
         //   but will be transformed into the local frame of the interactive marker.
         // - If the header of a marker is empty, its pose will be interpreted as 
         //   relative to the pose of the parent interactive marker.
-        public Marker[] markers { get; set; }
+        [DataMember] public Marker[] markers { get; set; }
         
         
         // In VIEW_FACING mode, set this to true if you don't want the markers
         // to be aligned with the camera view point. The markers will show up
         // as in INHERIT mode.
-        public bool independent_marker_orientation { get; set; }
+        [DataMember] public bool independent_marker_orientation { get; set; }
         
         
         // Short description (< 40 characters) of what this control does,
         // e.g. "Move the robot". 
         // Default: A generic description based on the interaction mode
-        public string description { get; set; }
+        [DataMember] public string description { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarkerControl()
@@ -111,22 +112,25 @@ namespace Iviz.Msgs.visualization_msgs
             this.orientation_mode = b.Deserialize<byte>();
             this.interaction_mode = b.Deserialize<byte>();
             this.always_visible = b.Deserialize<bool>();
-            this.markers = b.DeserializeArray<Marker>(0);
+            this.markers = b.DeserializeArray<Marker>();
+            for (int i = 0; i < this.markers.Length; i++)
+            {
+                this.markers[i] = new Marker(b);
+            }
             this.independent_marker_orientation = b.Deserialize<bool>();
             this.description = b.DeserializeString();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new InteractiveMarkerControl(b);
+            return new InteractiveMarkerControl(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.name);
-            this.orientation.Serialize(b);
+            b.Serialize(this.orientation);
             b.Serialize(this.orientation_mode);
             b.Serialize(this.interaction_mode);
             b.Serialize(this.always_visible);
@@ -142,7 +146,6 @@ namespace Iviz.Msgs.visualization_msgs
             if (description is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -157,20 +160,16 @@ namespace Iviz.Msgs.visualization_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "visualization_msgs/InteractiveMarkerControl";
+        [Preserve] public const string RosMessageType = "visualization_msgs/InteractiveMarkerControl";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "b3c81e785788195d1840b86c28da1aac";
+        [Preserve] public const string RosMd5Sum = "b3c81e785788195d1840b86c28da1aac";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71YbXPbNhL+XP0KTDyd2FeZfktzre78QbHkRFPb8klKmkyno4FISEJNEQpAWlZ+/T27" +
                 "ACnKspv7cInjiUkQ2Pd9dhd7YqCWVjmV5U5IEZsstyYV+VzmQjuRGzFRItFumcq1SvA+U/lcWbHS+VzI" +
                 "TOgsV1bGub5XYiHtnbKNxp7oJaCnp2udzYTLLf2ZGguqIBlYRNj2yRQiU0xWSOf0LIMIRaY/F0rcyxT/" +

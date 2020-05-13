@@ -2,16 +2,17 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.sensor_msgs
 {
+    [DataContract]
     public sealed class Temperature : IMessage
     {
         // Single temperature reading.
         
-        public std_msgs.Header header { get; set; } // timestamp is the time the temperature was measured
+        [DataMember] public std_msgs.Header header { get; set; } // timestamp is the time the temperature was measured
         // frame_id is the location of the temperature reading
         
-        public double temperature { get; set; } // Measurement of the Temperature in Degrees Celsius
+        [DataMember] public double temperature { get; set; } // Measurement of the Temperature in Degrees Celsius
         
-        public double variance { get; set; } // 0 is interpreted as variance unknown
+        [DataMember] public double variance { get; set; } // 0 is interpreted as variance unknown
     
         /// <summary> Constructor for empty message. </summary>
         public Temperature()
@@ -35,16 +36,15 @@ namespace Iviz.Msgs.sensor_msgs
             this.variance = b.Deserialize<double>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new Temperature(b);
+            return new Temperature(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.Serialize(this.temperature);
             b.Serialize(this.variance);
         }
@@ -52,9 +52,9 @@ namespace Iviz.Msgs.sensor_msgs
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -64,20 +64,16 @@ namespace Iviz.Msgs.sensor_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "sensor_msgs/Temperature";
+        [Preserve] public const string RosMessageType = "sensor_msgs/Temperature";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "ff71b307acdbe7c871a5a6d7ed359100";
+        [Preserve] public const string RosMd5Sum = "ff71b307acdbe7c871a5a6d7ed359100";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61TTYvbMBC961cM5LC7haSlLT0s9NSlH4eFwuYeJvbEFpUlVzNO6n/fJ7nZpJRCDxUG" +
                 "y9KbNzPvjWlFTz52QchkGCWzTVkoC7c43ThHn7GVTP3yuqwVmR9EjYeRvJL1Ug+WzRXViZUGYcW+dfS3" +
                 "taJD5kF2vj2ThdSw+RQpHf7g/FUeqjuExPbu7W+3C9/jknOQaGeK7RXIR3qQLosofZCgftIrtiNnz7GR" +

@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.rosbridge_library
 {
+    [DataContract]
     public sealed class TestRequestAndResponse : IService
     {
         /// <summary> Request message. </summary>
-        public TestRequestAndResponseRequest Request { get; set; }
+        [DataMember] public TestRequestAndResponseRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public TestRequestAndResponseResponse Response { get; set; }
+        [DataMember] public TestRequestAndResponseResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public TestRequestAndResponse()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.rosbridge_library
             Response = new TestRequestAndResponseResponse();
         }
         
-        public IService Create() => new TestRequestAndResponse();
+        IService IService.Create() => new TestRequestAndResponse();
         
         IRequest IService.Request
         {
@@ -40,21 +41,18 @@ namespace Iviz.Msgs.rosbridge_library
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "rosbridge_library/TestRequestAndResponse";
+        [Preserve] public const string RosServiceType = "rosbridge_library/TestRequestAndResponse";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "491d316f183df11876531749005b31d1";
+        [Preserve] public const string RosMd5Sum = "491d316f183df11876531749005b31d1";
     }
 
     public sealed class TestRequestAndResponseRequest : IRequest
     {
-        public int data { get; set; }
+        [DataMember] public int data { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestRequestAndResponseRequest()
@@ -73,13 +71,12 @@ namespace Iviz.Msgs.rosbridge_library
             this.data = b.Deserialize<int>();
         }
         
-        public IRequest Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new TestRequestAndResponseRequest(b);
+            return new TestRequestAndResponseRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.data);
@@ -89,13 +86,12 @@ namespace Iviz.Msgs.rosbridge_library
         {
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength => 4;
     }
 
     public sealed class TestRequestAndResponseResponse : IResponse
     {
-        public int data { get; set; }
+        [DataMember] public int data { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestRequestAndResponseResponse()
@@ -114,13 +110,12 @@ namespace Iviz.Msgs.rosbridge_library
             this.data = b.Deserialize<int>();
         }
         
-        public IResponse Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new TestRequestAndResponseResponse(b);
+            return new TestRequestAndResponseResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.data);
@@ -130,7 +125,6 @@ namespace Iviz.Msgs.rosbridge_library
         {
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength => 4;
     }
 }

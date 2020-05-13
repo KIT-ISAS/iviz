@@ -2,19 +2,20 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.nav_msgs
 {
+    [DataContract]
     public sealed class OccupancyGrid : IMessage
     {
         // This represents a 2-D grid map, in which each cell represents the probability of
         // occupancy.
         
-        public std_msgs.Header header { get; set; }
+        [DataMember] public std_msgs.Header header { get; set; }
         
         //MetaData for the map
-        public MapMetaData info { get; set; }
+        [DataMember] public MapMetaData info { get; set; }
         
         // The map data, in row-major order, starting with (0,0).  Occupancy
         // probabilities are in the range [0,100].  Unknown is -1.
-        public sbyte[] data { get; set; }
+        [DataMember] public sbyte[] data { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public OccupancyGrid()
@@ -37,31 +38,31 @@ namespace Iviz.Msgs.nav_msgs
         {
             this.header = new std_msgs.Header(b);
             this.info = new MapMetaData(b);
-            this.data = b.DeserializeStructArray<sbyte>(0);
+            this.data = b.DeserializeStructArray<sbyte>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new OccupancyGrid(b);
+            return new OccupancyGrid(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
-            this.info.Serialize(b);
+            b.Serialize(this.header);
+            b.Serialize(this.info);
             b.SerializeStructArray(this.data, 0);
         }
         
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (info is null) throw new System.NullReferenceException();
+            info.Validate();
             if (data is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -72,20 +73,16 @@ namespace Iviz.Msgs.nav_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "nav_msgs/OccupancyGrid";
+        [Preserve] public const string RosMessageType = "nav_msgs/OccupancyGrid";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "3381f2d731d4076ec5c71b0759edbe4e";
+        [Preserve] public const string RosMd5Sum = "3381f2d731d4076ec5c71b0759edbe4e";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71VTW/TQBC9768YKQdalIS0IIQqcUCqgB4qioBTVEWT9cResHfN7rqp+fW8XcdJChLi" +
                 "QKmsxl7PvHnz5sMT+lyZQF5aL0FsDMR0Pruk0puCGm6nZCxtK6MrEsY/LXV9bB0roda7Na9NbWJPbqMm" +
                 "5LTuWra6nyv1XrgQT9Xwo9TkWiJfcmTaOJ/dEUVdc7s/N3bjYAdi+R0VOMw0vNvOGv4KN+cBNqUQ2Udj" +

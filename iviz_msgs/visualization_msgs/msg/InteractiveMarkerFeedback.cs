@@ -2,20 +2,21 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.visualization_msgs
 {
+    [DataContract]
     public sealed class InteractiveMarkerFeedback : IMessage
     {
         // Time/frame info.
-        public std_msgs.Header header { get; set; }
+        [DataMember] public std_msgs.Header header { get; set; }
         
         // Identifying string. Must be unique in the topic namespace.
-        public string client_id { get; set; }
+        [DataMember] public string client_id { get; set; }
         
         // Feedback message sent back from the GUI, e.g.
         // when the status of an interactive marker was modified by the user.
         
         // Specifies which interactive marker and control this message refers to
-        public string marker_name { get; set; }
-        public string control_name { get; set; }
+        [DataMember] public string marker_name { get; set; }
+        [DataMember] public string control_name { get; set; }
         
         // Type of the event
         // KEEP_ALIVE: sent while dragging to keep up control of the marker
@@ -30,22 +31,22 @@ namespace Iviz.Msgs.visualization_msgs
         public const byte MOUSE_DOWN = 4;
         public const byte MOUSE_UP = 5;
         
-        public byte event_type { get; set; }
+        [DataMember] public byte event_type { get; set; }
         
         // Current pose of the marker
         // Note: Has to be valid for all feedback types.
-        public geometry_msgs.Pose pose { get; set; }
+        [DataMember] public geometry_msgs.Pose pose { get; set; }
         
         // Contains the ID of the selected menu entry
         // Only valid for MENU_SELECT events.
-        public uint menu_entry_id { get; set; }
+        [DataMember] public uint menu_entry_id { get; set; }
         
         // If event_type is BUTTON_CLICK, MOUSE_DOWN, or MOUSE_UP, mouse_point
         // may contain the 3 dimensional position of the event on the
         // control.  If it does, mouse_point_valid will be true.  mouse_point
         // will be relative to the frame listed in the header.
-        public geometry_msgs.Point mouse_point { get; set; }
-        public bool mouse_point_valid { get; set; }
+        [DataMember] public geometry_msgs.Point mouse_point { get; set; }
+        [DataMember] public bool mouse_point_valid { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarkerFeedback()
@@ -84,35 +85,34 @@ namespace Iviz.Msgs.visualization_msgs
             this.mouse_point_valid = b.Deserialize<bool>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new InteractiveMarkerFeedback(b);
+            return new InteractiveMarkerFeedback(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.Serialize(this.client_id);
             b.Serialize(this.marker_name);
             b.Serialize(this.control_name);
             b.Serialize(this.event_type);
-            this.pose.Serialize(b);
+            b.Serialize(this.pose);
             b.Serialize(this.menu_entry_id);
-            this.mouse_point.Serialize(b);
+            b.Serialize(this.mouse_point);
             b.Serialize(this.mouse_point_valid);
         }
         
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (client_id is null) throw new System.NullReferenceException();
             if (marker_name is null) throw new System.NullReferenceException();
             if (control_name is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -125,20 +125,16 @@ namespace Iviz.Msgs.visualization_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "visualization_msgs/InteractiveMarkerFeedback";
+        [Preserve] public const string RosMessageType = "visualization_msgs/InteractiveMarkerFeedback";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "ab0f1eee058667e28c19ff3ffc3f4b78";
+        [Preserve] public const string RosMd5Sum = "ab0f1eee058667e28c19ff3ffc3f4b78";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71W227bRhB951cM4Ickhay0cRoEBvLg2koixBcVltpHYkUOqYXJXWZ3aUX9+p5ZXkzV" +
                 "RdGHNoYBUcuZM3POXFYntNY1vy6cqpm0Kew8+cwqZ0e7+JEkJ7TM2QRdHLQpyQeHjzndtD7Qlqk1+msr" +
                 "nhR2TME2OiMDLN+ojOdJZ05ZpQGR6lzgPjLnW5U9EKy8Kpk83lE8KZytI9CnzXJGPC/nsN/vuEP3QYXW" +

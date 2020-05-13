@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.rosapi
 {
+    [DataContract]
     public sealed class GetParam : IService
     {
         /// <summary> Request message. </summary>
-        public GetParamRequest Request { get; set; }
+        [DataMember] public GetParamRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public GetParamResponse Response { get; set; }
+        [DataMember] public GetParamResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public GetParam()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.rosapi
             Response = new GetParamResponse();
         }
         
-        public IService Create() => new GetParam();
+        IService IService.Create() => new GetParam();
         
         IRequest IService.Request
         {
@@ -40,22 +41,19 @@ namespace Iviz.Msgs.rosapi
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "rosapi/GetParam";
+        [Preserve] public const string RosServiceType = "rosapi/GetParam";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "e36fd90759dbac1c5159140a7fa8c644";
+        [Preserve] public const string RosMd5Sum = "e36fd90759dbac1c5159140a7fa8c644";
     }
 
     public sealed class GetParamRequest : IRequest
     {
-        public string name { get; set; }
-        public string @default { get; set; }
+        [DataMember] public string name { get; set; }
+        [DataMember] public string @default { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetParamRequest()
@@ -78,13 +76,12 @@ namespace Iviz.Msgs.rosapi
             this.@default = b.DeserializeString();
         }
         
-        public IRequest Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new GetParamRequest(b);
+            return new GetParamRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.name);
@@ -97,7 +94,6 @@ namespace Iviz.Msgs.rosapi
             if (@default is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -111,7 +107,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class GetParamResponse : IResponse
     {
-        public string value { get; set; }
+        [DataMember] public string value { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetParamResponse()
@@ -131,13 +127,12 @@ namespace Iviz.Msgs.rosapi
             this.value = b.DeserializeString();
         }
         
-        public IResponse Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new GetParamResponse(b);
+            return new GetParamResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.value);
@@ -148,7 +143,6 @@ namespace Iviz.Msgs.rosapi
             if (value is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {

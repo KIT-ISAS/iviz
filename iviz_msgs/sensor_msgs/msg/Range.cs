@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.sensor_msgs
 {
+    [DataContract]
     public sealed class Range : IMessage
     {
         // Single range reading from an active ranger that emits energy and reports
@@ -14,7 +15,7 @@ namespace Iviz.Msgs.sensor_msgs
         // These sensors follow REP 117 and will output -Inf if the object is detected
         // and +Inf if the object is outside of the detection range.
         
-        public std_msgs.Header header { get; set; } // timestamp in the header is the time the ranger
+        [DataMember] public std_msgs.Header header { get; set; } // timestamp in the header is the time the ranger
         // returned the distance reading
         
         // Radiation type enums
@@ -22,21 +23,21 @@ namespace Iviz.Msgs.sensor_msgs
         public const byte ULTRASOUND = 0;
         public const byte INFRARED = 1;
         
-        public byte radiation_type { get; set; } // the type of radiation used by the sensor
+        [DataMember] public byte radiation_type { get; set; } // the type of radiation used by the sensor
         // (sound, IR, etc) [enum]
         
-        public float field_of_view { get; set; } // the size of the arc that the distance reading is
+        [DataMember] public float field_of_view { get; set; } // the size of the arc that the distance reading is
         // valid for [rad]
         // the object causing the range reading may have
         // been anywhere within -field_of_view/2 and
         // field_of_view/2 at the measured range. 
         // 0 angle corresponds to the x-axis of the sensor.
         
-        public float min_range { get; set; } // minimum range value [m]
-        public float max_range { get; set; } // maximum range value [m]
+        [DataMember] public float min_range { get; set; } // minimum range value [m]
+        [DataMember] public float max_range { get; set; } // maximum range value [m]
         // Fixed distance rangers require min_range==max_range
         
-        public float range { get; set; } // range data [m]
+        [DataMember] public float range { get; set; } // range data [m]
         // (Note: values < range_min or > range_max
         // should be discarded)
         // Fixed distance rangers only output -Inf or +Inf.
@@ -73,16 +74,15 @@ namespace Iviz.Msgs.sensor_msgs
             this.range = b.Deserialize<float>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new Range(b);
+            return new Range(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.Serialize(this.radiation_type);
             b.Serialize(this.field_of_view);
             b.Serialize(this.min_range);
@@ -93,9 +93,9 @@ namespace Iviz.Msgs.sensor_msgs
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -105,20 +105,16 @@ namespace Iviz.Msgs.sensor_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "sensor_msgs/Range";
+        [Preserve] public const string RosMessageType = "sensor_msgs/Range";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "c005c34273dc426c67a020a87bc24148";
+        [Preserve] public const string RosMd5Sum = "c005c34273dc426c67a020a87bc24148";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61W224bNxB9368YQA+RGkuJ04cGRlQggONWQOoEkvNkBAK1pLRsuaRMcnXp1/cMuVpZ" +
                 "jqM2QBeGtUtyzsycuXB6NNN2ZRR5YVf4r4TENy29q0lYEmXUm3bTU6xEJFXrGEhZ5Vd7HJGQWTsfQ9Ej" +
                 "Z5/iJAkdaCOMliSMwxrD+pKwEStFUocobKmoViI0XskRAemuglCtQhAAwytZF0ms196tvRZR0dJ5MiLA" +

@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.nav_msgs
 {
+    [DataContract]
     public sealed class GridCells : IMessage
     {
         //an array of cells in a 2D grid
-        public std_msgs.Header header { get; set; }
-        public float cell_width { get; set; }
-        public float cell_height { get; set; }
-        public geometry_msgs.Point[] cells { get; set; }
+        [DataMember] public std_msgs.Header header { get; set; }
+        [DataMember] public float cell_width { get; set; }
+        [DataMember] public float cell_height { get; set; }
+        [DataMember] public geometry_msgs.Point[] cells { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GridCells()
@@ -32,19 +33,18 @@ namespace Iviz.Msgs.nav_msgs
             this.header = new std_msgs.Header(b);
             this.cell_width = b.Deserialize<float>();
             this.cell_height = b.Deserialize<float>();
-            this.cells = b.DeserializeStructArray<geometry_msgs.Point>(0);
+            this.cells = b.DeserializeStructArray<geometry_msgs.Point>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new GridCells(b);
+            return new GridCells(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.Serialize(this.cell_width);
             b.Serialize(this.cell_height);
             b.SerializeStructArray(this.cells, 0);
@@ -53,10 +53,10 @@ namespace Iviz.Msgs.nav_msgs
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (cells is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -67,20 +67,16 @@ namespace Iviz.Msgs.nav_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "nav_msgs/GridCells";
+        [Preserve] public const string RosMessageType = "nav_msgs/GridCells";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "b9e4f5df6d28e272ebde00a3994830f5";
+        [Preserve] public const string RosMd5Sum = "b9e4f5df6d28e272ebde00a3994830f5";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE7VTTWvcMBC961cM7CFJYVNISw+B3kI/DoVAcitlmZVm7QFZcqXxbtxf3yebbBvooYfW" +
                 "GGRL772ZeTPacCIuhWfKB/ISYyXFDt3cUVc0uE/CQQr1y+IOMbO9uVmAu5MG619u9aJdb66TPIiVeTfU" +
                 "rr6+z5rs67dV3bn3//hxXx4+3lK1sEZbE3YbejBOgUsgpMKBjemQUQgSlLKNcpQIEg+jBFpObR6lXoP4" +
