@@ -2,12 +2,13 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.mesh_msgs
 {
+    [DataContract]
     public sealed class MeshFaceCluster : IMessage
     {
         //Cluster
-        public uint[] face_indices { get; set; }
+        [DataMember] public uint[] face_indices { get; set; }
         //optional
-        public string label { get; set; }
+        [DataMember] public string label { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshFaceCluster()
@@ -26,17 +27,16 @@ namespace Iviz.Msgs.mesh_msgs
         /// <summary> Constructor with buffer. </summary>
         internal MeshFaceCluster(Buffer b)
         {
-            this.face_indices = b.DeserializeStructArray<uint>(0);
+            this.face_indices = b.DeserializeStructArray<uint>();
             this.label = b.DeserializeString();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new MeshFaceCluster(b);
+            return new MeshFaceCluster(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeStructArray(this.face_indices, 0);
@@ -49,7 +49,6 @@ namespace Iviz.Msgs.mesh_msgs
             if (label is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -60,20 +59,16 @@ namespace Iviz.Msgs.mesh_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "mesh_msgs/MeshFaceCluster";
+        [Preserve] public const string RosMessageType = "mesh_msgs/MeshFaceCluster";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "9e0f40b9dcf1de10d00e57182c9d138f";
+        [Preserve] public const string RosMd5Sum = "9e0f40b9dcf1de10d00e57182c9d138f";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE1N2ziktLkkt4irNzCsxNoqOVUhLTE6Nz8xLyUxOLeZSzi8oyczPS8zhKi4pysxLV8hJ" +
                 "TErN4eICAKZztFU3AAAA";
                 

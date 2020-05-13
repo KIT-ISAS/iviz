@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.nav_msgs
 {
+    [DataContract]
     public sealed class GetMap : IService
     {
         /// <summary> Request message. </summary>
-        public GetMapRequest Request { get; set; }
+        [DataMember] public GetMapRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public GetMapResponse Response { get; set; }
+        [DataMember] public GetMapResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public GetMap()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.nav_msgs
             Response = new GetMapResponse();
         }
         
-        public IService Create() => new GetMap();
+        IService IService.Create() => new GetMap();
         
         IRequest IService.Request
         {
@@ -40,16 +41,13 @@ namespace Iviz.Msgs.nav_msgs
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "nav_msgs/GetMap";
+        [Preserve] public const string RosServiceType = "nav_msgs/GetMap";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "6cdd0a18e0aff5b0a3ca2326a89b54ff";
+        [Preserve] public const string RosMd5Sum = "6cdd0a18e0aff5b0a3ca2326a89b54ff";
     }
 
     public sealed class GetMapRequest : IRequest
@@ -66,13 +64,12 @@ namespace Iviz.Msgs.nav_msgs
         {
         }
         
-        public IRequest Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new GetMapRequest(b);
+            return new GetMapRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
         }
@@ -81,13 +78,12 @@ namespace Iviz.Msgs.nav_msgs
         {
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength => 0;
     }
 
     public sealed class GetMapResponse : IResponse
     {
-        public nav_msgs.OccupancyGrid map { get; set; }
+        [DataMember] public nav_msgs.OccupancyGrid map { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetMapResponse()
@@ -107,24 +103,23 @@ namespace Iviz.Msgs.nav_msgs
             this.map = new nav_msgs.OccupancyGrid(b);
         }
         
-        public IResponse Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new GetMapResponse(b);
+            return new GetMapResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.map.Serialize(b);
+            b.Serialize(this.map);
         }
         
         public void Validate()
         {
             if (map is null) throw new System.NullReferenceException();
+            map.Validate();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {

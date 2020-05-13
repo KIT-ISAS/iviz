@@ -2,12 +2,13 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.mesh_msgs
 {
+    [DataContract]
     public sealed class MeshVertexColorsStamped : IMessage
     {
         // Mesh Attribute Message
-        public std_msgs.Header header { get; set; }
-        public string uuid { get; set; }
-        public mesh_msgs.MeshVertexColors mesh_vertex_colors { get; set; }
+        [DataMember] public std_msgs.Header header { get; set; }
+        [DataMember] public string uuid { get; set; }
+        [DataMember] public mesh_msgs.MeshVertexColors mesh_vertex_colors { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshVertexColorsStamped()
@@ -33,28 +34,28 @@ namespace Iviz.Msgs.mesh_msgs
             this.mesh_vertex_colors = new mesh_msgs.MeshVertexColors(b);
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new MeshVertexColorsStamped(b);
+            return new MeshVertexColorsStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.Serialize(this.uuid);
-            this.mesh_vertex_colors.Serialize(b);
+            b.Serialize(this.mesh_vertex_colors);
         }
         
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (uuid is null) throw new System.NullReferenceException();
             if (mesh_vertex_colors is null) throw new System.NullReferenceException();
+            mesh_vertex_colors.Validate();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -66,20 +67,16 @@ namespace Iviz.Msgs.mesh_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "mesh_msgs/MeshVertexColorsStamped";
+        [Preserve] public const string RosMessageType = "mesh_msgs/MeshVertexColorsStamped";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "9e3527729bbf26fabb162c58762b6739";
+        [Preserve] public const string RosMd5Sum = "9e3527729bbf26fabb162c58762b6739";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71Ty2ocMRC86ysa9mA7sA4kt4UcnBg/DgZjm1xMWHqk3hmBRprosfb8fUpaPDGBkByc" +
                 "DIKRWlXVT63oRtJAZzlH25Us9Zi4F5Wy2Y6pT++vhI1EGtoP5mh9T6VYo0YwD5iq8VVilucvwYWYqF3t" +
                 "m2Wrm0mpT2/8qZv7yw39Eqda0X1mbzgaBJHZcGbaBcRv+0Hi2sleHEg8TmKo3eZ5knQK4sNgE2H14iWy" +

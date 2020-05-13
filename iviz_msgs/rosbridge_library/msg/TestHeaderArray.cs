@@ -2,9 +2,10 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.rosbridge_library
 {
+    [DataContract]
     public sealed class TestHeaderArray : IMessage
     {
-        public std_msgs.Header[] header { get; set; }
+        [DataMember] public std_msgs.Header[] header { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestHeaderArray()
@@ -21,16 +22,19 @@ namespace Iviz.Msgs.rosbridge_library
         /// <summary> Constructor with buffer. </summary>
         internal TestHeaderArray(Buffer b)
         {
-            this.header = b.DeserializeArray<std_msgs.Header>(0);
+            this.header = b.DeserializeArray<std_msgs.Header>();
+            for (int i = 0; i < this.header.Length; i++)
+            {
+                this.header[i] = new std_msgs.Header(b);
+            }
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new TestHeaderArray(b);
+            return new TestHeaderArray(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeArray(this.header, 0);
@@ -39,9 +43,13 @@ namespace Iviz.Msgs.rosbridge_library
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            for (int i = 0; i < header.Length; i++)
+            {
+                if (header[i] is null) throw new System.NullReferenceException();
+                header[i].Validate();
+            }
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -54,20 +62,16 @@ namespace Iviz.Msgs.rosbridge_library
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "rosbridge_library/TestHeaderArray";
+        [Preserve] public const string RosMessageType = "rosbridge_library/TestHeaderArray";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "d7be0bb39af8fb9129d5a76e6b63a290";
+        [Preserve] public const string RosMd5Sum = "d7be0bb39af8fb9129d5a76e6b63a290";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE62RTWvkMAyG7/4Vgjn0A6YL29tAb2U/DoWF9raUQWOrscCxU0mZbv79yhl22956aDAk" +
                 "jt/3eWVJLe1HHfTLD8JE8vsR8voRbj75CXf333eg7+PCBu4Na0JJMJJhQkN4agKZh0yyLXSk4iYcJ0qw" +
                 "ntoykV658SGzgq+BKgmWssCsLrIGsY3jXDmiERiP9M7vTq6AMKEYx7mguL5J4trlT4IjdbovpeeZaiT4" +

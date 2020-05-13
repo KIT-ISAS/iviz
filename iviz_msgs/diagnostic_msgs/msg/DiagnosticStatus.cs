@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.diagnostic_msgs
 {
+    [DataContract]
     public sealed class DiagnosticStatus : IMessage
     {
         // This message holds the status of an individual component of the robot.
@@ -13,11 +14,11 @@ namespace Iviz.Msgs.diagnostic_msgs
         public const byte ERROR = 2;
         public const byte STALE = 3;
         
-        public byte level { get; set; } // level of operation enumerated above 
-        public string name { get; set; } // a description of the test/component reporting
-        public string message { get; set; } // a description of the status
-        public string hardware_id { get; set; } // a hardware unique string
-        public KeyValue[] values { get; set; } // an array of values associated with the status
+        [DataMember] public byte level { get; set; } // level of operation enumerated above 
+        [DataMember] public string name { get; set; } // a description of the test/component reporting
+        [DataMember] public string message { get; set; } // a description of the status
+        [DataMember] public string hardware_id { get; set; } // a hardware unique string
+        [DataMember] public KeyValue[] values { get; set; } // an array of values associated with the status
         
     
         /// <summary> Constructor for empty message. </summary>
@@ -46,16 +47,19 @@ namespace Iviz.Msgs.diagnostic_msgs
             this.name = b.DeserializeString();
             this.message = b.DeserializeString();
             this.hardware_id = b.DeserializeString();
-            this.values = b.DeserializeArray<KeyValue>(0);
+            this.values = b.DeserializeArray<KeyValue>();
+            for (int i = 0; i < this.values.Length; i++)
+            {
+                this.values[i] = new KeyValue(b);
+            }
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new DiagnosticStatus(b);
+            return new DiagnosticStatus(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.level);
@@ -71,9 +75,13 @@ namespace Iviz.Msgs.diagnostic_msgs
             if (message is null) throw new System.NullReferenceException();
             if (hardware_id is null) throw new System.NullReferenceException();
             if (values is null) throw new System.NullReferenceException();
+            for (int i = 0; i < values.Length; i++)
+            {
+                if (values[i] is null) throw new System.NullReferenceException();
+                values[i].Validate();
+            }
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -89,20 +97,16 @@ namespace Iviz.Msgs.diagnostic_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "diagnostic_msgs/DiagnosticStatus";
+        [Preserve] public const string RosMessageType = "diagnostic_msgs/DiagnosticStatus";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "d0ce08bc6e5ba34c7754f563a9cabaf1";
+        [Preserve] public const string RosMd5Sum = "d0ce08bc6e5ba34c7754f563a9cabaf1";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61STW+DMAy951dY6n3dx20Shx6qHfbRiVbbYZoqQzywCgmLDYh/PwJF62W3RYr8HL/n" +
                 "2E5WcChZoCYRLAhKX1kBLQlEUVsB/wXogJ3ljm2LFeS+brwjpzEUicFnXq/MCsy4X70IZxVBRR1Vk9w3" +
                 "FFDZOzHZoAS7x+R6Ru+b9CW5mfE2TXdpcjs7+8PmaZvcmdmbUsHqbC8zArm2jpgsYOY7AiMa2BXgsKZR" +

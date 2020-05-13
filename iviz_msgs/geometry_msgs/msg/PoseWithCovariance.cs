@@ -2,17 +2,18 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.geometry_msgs
 {
+    [DataContract]
     public sealed class PoseWithCovariance : IMessage
     {
         // This represents a pose in free space with uncertainty.
         
-        public Pose pose { get; set; }
+        [DataMember] public Pose pose { get; set; }
         
         // Row-major representation of the 6x6 covariance matrix
         // The orientation parameters use a fixed-axis representation.
         // In order, the parameters are:
         // (x, y, z, rotation about X axis, rotation about Y axis, rotation about Z axis)
-        public double[/*36*/] covariance { get; set; }
+        [DataMember] public double[/*36*/] covariance { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public PoseWithCovariance()
@@ -35,16 +36,15 @@ namespace Iviz.Msgs.geometry_msgs
             this.covariance = b.DeserializeStructArray<double>(36);
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new PoseWithCovariance(b);
+            return new PoseWithCovariance(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.pose.Serialize(b);
+            b.Serialize(this.pose);
             b.SerializeStructArray(this.covariance, 36);
         }
         
@@ -54,23 +54,18 @@ namespace Iviz.Msgs.geometry_msgs
             if (covariance.Length != 36) throw new System.IndexOutOfRangeException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength => 344;
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "geometry_msgs/PoseWithCovariance";
+        [Preserve] public const string RosMessageType = "geometry_msgs/PoseWithCovariance";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "c23e848cf1b7533a8d7c259073a97e6f";
+        [Preserve] public const string RosMd5Sum = "c23e848cf1b7533a8d7c259073a97e6f";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71TyU7DQAy9z1dY6gWktBxAOVTiwAlxQGLpgUUImcRpB5GZ4JnQpF+PJ22WLuKEmpPj" +
                 "5Y3fsz2C2UI7YCqYHBnvAKGwjkAbyJgIXIEJwVL7BZQmIfaoja8nSt2FrJCq1Age7HKc46flHgm9tgZs" +
                 "Bn5BEFcxJPYHWaOAQI6edSV1M4lZ1l16gYw5eWIHpcAjZLqidIzVsMcmdSLVN4LPKXHUvDGoRaapxE+q" +

@@ -198,19 +198,17 @@ namespace Iviz.RoslibSharp
                         }
                         catch (Exception e) when (e is ArgumentException || e is IndexOutOfRangeException)
                         {
-                            Logger.Log($"{this}: {e.StackTrace}");
+                            Logger.Log($"{this}: {e}");
                         }
                     }
                 }
                 catch (IOException e)
                 {
-                    Logger.LogDebug($"{this}: " + e.Message);
-                    Logger.LogDebug(e.StackTrace);
+                    Logger.LogDebug($"{this}: " + e);
                 }
                 catch (Exception e)
                 {
-                    Logger.LogError($"{this}: " + e.Message);
-                    Logger.LogError(e.StackTrace);
+                    Logger.LogError($"{this}: " + e);
                 }
             }
             tcpClient = null;

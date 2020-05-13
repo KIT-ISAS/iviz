@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.sensor_msgs
 {
+    [DataContract]
     public sealed class MultiDOFJointState : IMessage
     {
         // Representation of state for joints with multiple degrees of freedom, 
@@ -24,12 +25,12 @@ namespace Iviz.Msgs.sensor_msgs
         // This is the only way to uniquely associate the joint name with the correct
         // states.
         
-        public std_msgs.Header header { get; set; }
+        [DataMember] public std_msgs.Header header { get; set; }
         
-        public string[] joint_names { get; set; }
-        public geometry_msgs.Transform[] transforms { get; set; }
-        public geometry_msgs.Twist[] twist { get; set; }
-        public geometry_msgs.Wrench[] wrench { get; set; }
+        [DataMember] public string[] joint_names { get; set; }
+        [DataMember] public geometry_msgs.Transform[] transforms { get; set; }
+        [DataMember] public geometry_msgs.Twist[] twist { get; set; }
+        [DataMember] public geometry_msgs.Wrench[] wrench { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MultiDOFJointState()
@@ -55,22 +56,29 @@ namespace Iviz.Msgs.sensor_msgs
         internal MultiDOFJointState(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.joint_names = b.DeserializeStringArray(0);
-            this.transforms = b.DeserializeStructArray<geometry_msgs.Transform>(0);
-            this.twist = b.DeserializeArray<geometry_msgs.Twist>(0);
-            this.wrench = b.DeserializeArray<geometry_msgs.Wrench>(0);
+            this.joint_names = b.DeserializeStringArray();
+            this.transforms = b.DeserializeStructArray<geometry_msgs.Transform>();
+            this.twist = b.DeserializeArray<geometry_msgs.Twist>();
+            for (int i = 0; i < this.twist.Length; i++)
+            {
+                this.twist[i] = new geometry_msgs.Twist(b);
+            }
+            this.wrench = b.DeserializeArray<geometry_msgs.Wrench>();
+            for (int i = 0; i < this.wrench.Length; i++)
+            {
+                this.wrench[i] = new geometry_msgs.Wrench(b);
+            }
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new MultiDOFJointState(b);
+            return new MultiDOFJointState(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.SerializeArray(this.joint_names, 0);
             b.SerializeStructArray(this.transforms, 0);
             b.SerializeArray(this.twist, 0);
@@ -80,13 +88,27 @@ namespace Iviz.Msgs.sensor_msgs
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (joint_names is null) throw new System.NullReferenceException();
+            for (int i = 0; i < joint_names.Length; i++)
+            {
+                if (joint_names[i] is null) throw new System.NullReferenceException();
+            }
             if (transforms is null) throw new System.NullReferenceException();
             if (twist is null) throw new System.NullReferenceException();
+            for (int i = 0; i < twist.Length; i++)
+            {
+                if (twist[i] is null) throw new System.NullReferenceException();
+                twist[i].Validate();
+            }
             if (wrench is null) throw new System.NullReferenceException();
+            for (int i = 0; i < wrench.Length; i++)
+            {
+                if (wrench[i] is null) throw new System.NullReferenceException();
+                wrench[i].Validate();
+            }
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -104,20 +126,16 @@ namespace Iviz.Msgs.sensor_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "sensor_msgs/MultiDOFJointState";
+        [Preserve] public const string RosMessageType = "sensor_msgs/MultiDOFJointState";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "690f272f0640d2631c305eeb8301e59d";
+        [Preserve] public const string RosMd5Sum = "690f272f0640d2631c305eeb8301e59d";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71WTW/cNhC961cQ8CF2sVaBuOjBQA8FXLcuUDRN3OZQFAZXmpVYU6RCUqsovz5vhpJ2" +
                 "/VE0h9aGYetj5nHmzZsZnai31AeK5JJOxjvldyriktTOB/W3Ny5FNZrUqm6wyfSWVE1NIIpsucNF7buN" +
                 "Kk5gb60fjWtUagkYYajSEIjNfmaYd4xaFicwvUnKRKVjHDqqYa6T0vksZRwu4xQTdaryAZH13tVRJY/n" +

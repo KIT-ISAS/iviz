@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.sensor_msgs
 {
+    [DataContract]
     public sealed class SetCameraInfo : IService
     {
         /// <summary> Request message. </summary>
-        public SetCameraInfoRequest Request { get; set; }
+        [DataMember] public SetCameraInfoRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public SetCameraInfoResponse Response { get; set; }
+        [DataMember] public SetCameraInfoResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public SetCameraInfo()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.sensor_msgs
             Response = new SetCameraInfoResponse();
         }
         
-        public IService Create() => new SetCameraInfo();
+        IService IService.Create() => new SetCameraInfo();
         
         IRequest IService.Request
         {
@@ -40,16 +41,13 @@ namespace Iviz.Msgs.sensor_msgs
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "sensor_msgs/SetCameraInfo";
+        [Preserve] public const string RosServiceType = "sensor_msgs/SetCameraInfo";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "bef1df590ed75ed1f393692395e15482";
+        [Preserve] public const string RosMd5Sum = "bef1df590ed75ed1f393692395e15482";
     }
 
     public sealed class SetCameraInfoRequest : IRequest
@@ -62,7 +60,7 @@ namespace Iviz.Msgs.sensor_msgs
         // will assume that the region of the imager that is being referred to is
         // the region that the camera is currently capturing.
         
-        public sensor_msgs.CameraInfo camera_info { get; set; } // The camera_info to store
+        [DataMember] public sensor_msgs.CameraInfo camera_info { get; set; } // The camera_info to store
     
         /// <summary> Constructor for empty message. </summary>
         public SetCameraInfoRequest()
@@ -82,24 +80,23 @@ namespace Iviz.Msgs.sensor_msgs
             this.camera_info = new sensor_msgs.CameraInfo(b);
         }
         
-        public IRequest Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new SetCameraInfoRequest(b);
+            return new SetCameraInfoRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.camera_info.Serialize(b);
+            b.Serialize(this.camera_info);
         }
         
         public void Validate()
         {
             if (camera_info is null) throw new System.NullReferenceException();
+            camera_info.Validate();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -112,8 +109,8 @@ namespace Iviz.Msgs.sensor_msgs
 
     public sealed class SetCameraInfoResponse : IResponse
     {
-        public bool success { get; set; } // True if the call succeeded
-        public string status_message { get; set; } // Used to give details about success
+        [DataMember] public bool success { get; set; } // True if the call succeeded
+        [DataMember] public string status_message { get; set; } // Used to give details about success
     
         /// <summary> Constructor for empty message. </summary>
         public SetCameraInfoResponse()
@@ -135,13 +132,12 @@ namespace Iviz.Msgs.sensor_msgs
             this.status_message = b.DeserializeString();
         }
         
-        public IResponse Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new SetCameraInfoResponse(b);
+            return new SetCameraInfoResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.success);
@@ -153,7 +149,6 @@ namespace Iviz.Msgs.sensor_msgs
             if (status_message is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {

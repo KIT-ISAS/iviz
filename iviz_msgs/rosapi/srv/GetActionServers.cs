@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.rosapi
 {
+    [DataContract]
     public sealed class GetActionServers : IService
     {
         /// <summary> Request message. </summary>
-        public GetActionServersRequest Request { get; set; }
+        [DataMember] public GetActionServersRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public GetActionServersResponse Response { get; set; }
+        [DataMember] public GetActionServersResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public GetActionServers()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.rosapi
             Response = new GetActionServersResponse();
         }
         
-        public IService Create() => new GetActionServers();
+        IService IService.Create() => new GetActionServers();
         
         IRequest IService.Request
         {
@@ -40,16 +41,13 @@ namespace Iviz.Msgs.rosapi
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "rosapi/GetActionServers";
+        [Preserve] public const string RosServiceType = "rosapi/GetActionServers";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "46807ba271844ac5ba4730a47556b236";
+        [Preserve] public const string RosMd5Sum = "46807ba271844ac5ba4730a47556b236";
     }
 
     public sealed class GetActionServersRequest : IRequest
@@ -66,13 +64,12 @@ namespace Iviz.Msgs.rosapi
         {
         }
         
-        public IRequest Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new GetActionServersRequest(b);
+            return new GetActionServersRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
         }
@@ -81,13 +78,12 @@ namespace Iviz.Msgs.rosapi
         {
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength => 0;
     }
 
     public sealed class GetActionServersResponse : IResponse
     {
-        public string[] action_servers { get; set; }
+        [DataMember] public string[] action_servers { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetActionServersResponse()
@@ -104,16 +100,15 @@ namespace Iviz.Msgs.rosapi
         /// <summary> Constructor with buffer. </summary>
         internal GetActionServersResponse(Buffer b)
         {
-            this.action_servers = b.DeserializeStringArray(0);
+            this.action_servers = b.DeserializeStringArray();
         }
         
-        public IResponse Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new GetActionServersResponse(b);
+            return new GetActionServersResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeArray(this.action_servers, 0);
@@ -122,9 +117,12 @@ namespace Iviz.Msgs.rosapi
         public void Validate()
         {
             if (action_servers is null) throw new System.NullReferenceException();
+            for (int i = 0; i < action_servers.Length; i++)
+            {
+                if (action_servers[i] is null) throw new System.NullReferenceException();
+            }
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {

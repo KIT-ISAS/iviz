@@ -2,10 +2,11 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.mesh_msgs
 {
+    [DataContract]
     public sealed class VectorFieldStamped : IMessage
     {
-        public std_msgs.Header header { get; set; }
-        public mesh_msgs.VectorField vector_field { get; set; }
+        [DataMember] public std_msgs.Header header { get; set; }
+        [DataMember] public mesh_msgs.VectorField vector_field { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public VectorFieldStamped()
@@ -28,26 +29,26 @@ namespace Iviz.Msgs.mesh_msgs
             this.vector_field = new mesh_msgs.VectorField(b);
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new VectorFieldStamped(b);
+            return new VectorFieldStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
-            this.vector_field.Serialize(b);
+            b.Serialize(this.header);
+            b.Serialize(this.vector_field);
         }
         
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (vector_field is null) throw new System.NullReferenceException();
+            vector_field.Validate();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -58,20 +59,16 @@ namespace Iviz.Msgs.mesh_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "mesh_msgs/VectorFieldStamped";
+        [Preserve] public const string RosMessageType = "mesh_msgs/VectorFieldStamped";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "3d9fc2de2c0939ad4bbe0890ccb68ce5";
+        [Preserve] public const string RosMd5Sum = "3d9fc2de2c0939ad4bbe0890ccb68ce5";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71UTWvcMBC9+1cM5JCkbFxISg8LvZW0ORQCCb2UssxKY1tUllxJ3o376/sk77pJCbSH" +
                 "pothZWvemzefMelNH9v4+qOwlkBd+at6id38/bOo5MO1EatpV86bJr9U1bt//Ks+3X1YU3wqqDqhu8RO" +
                 "c9DUS2LNianxEGraTsKFlZ1YgLgfRFO5TdMgsQbwvjOR8LTiJLC1E40RRsmT8n0/OqM4CSWDYB/jgTSO" +

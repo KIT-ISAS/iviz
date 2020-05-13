@@ -2,12 +2,13 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.mesh_msgs
 {
+    [DataContract]
     public sealed class MeshMaterialsStamped : IMessage
     {
         // Mesh Attribute Message
-        public std_msgs.Header header { get; set; }
-        public string uuid { get; set; }
-        public mesh_msgs.MeshMaterials mesh_materials { get; set; }
+        [DataMember] public std_msgs.Header header { get; set; }
+        [DataMember] public string uuid { get; set; }
+        [DataMember] public mesh_msgs.MeshMaterials mesh_materials { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshMaterialsStamped()
@@ -33,28 +34,28 @@ namespace Iviz.Msgs.mesh_msgs
             this.mesh_materials = new mesh_msgs.MeshMaterials(b);
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new MeshMaterialsStamped(b);
+            return new MeshMaterialsStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.Serialize(this.uuid);
-            this.mesh_materials.Serialize(b);
+            b.Serialize(this.mesh_materials);
         }
         
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (uuid is null) throw new System.NullReferenceException();
             if (mesh_materials is null) throw new System.NullReferenceException();
+            mesh_materials.Validate();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -66,20 +67,16 @@ namespace Iviz.Msgs.mesh_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "mesh_msgs/MeshMaterialsStamped";
+        [Preserve] public const string RosMessageType = "mesh_msgs/MeshMaterialsStamped";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "80683ad6336327fea277cb1ed5f58927";
+        [Preserve] public const string RosMd5Sum = "80683ad6336327fea277cb1ed5f58927";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71UTWvbQBC9768Y8CFJwSm0N0MPqUPSHAylMb2UIkbSWFpY7ar74dj/vm/lSnZSDD00" +
                 "MTKaXc17++ZrZ7SS0NJNjF6XKUpeBm5EhVgXXWjC+y/CtXhqhxe2vbYNpaRr1QF58MkcK47iNZtAh/1x" +
                 "qdSn//xTq8f7Bb0QqGb0GNnW7GsIiFxzZNo4CNdNK35uZCsGIO56qWn4Gve9hGsA160OhKcRK56N2VMK" +

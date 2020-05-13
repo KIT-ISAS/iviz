@@ -2,10 +2,11 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.mesh_msgs
 {
+    [DataContract]
     public sealed class TriangleMeshStamped : IMessage
     {
-        public std_msgs.Header header { get; set; }
-        public mesh_msgs.TriangleMesh mesh { get; set; }
+        [DataMember] public std_msgs.Header header { get; set; }
+        [DataMember] public mesh_msgs.TriangleMesh mesh { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TriangleMeshStamped()
@@ -28,26 +29,26 @@ namespace Iviz.Msgs.mesh_msgs
             this.mesh = new mesh_msgs.TriangleMesh(b);
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new TriangleMeshStamped(b);
+            return new TriangleMeshStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
-            this.mesh.Serialize(b);
+            b.Serialize(this.header);
+            b.Serialize(this.mesh);
         }
         
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (mesh is null) throw new System.NullReferenceException();
+            mesh.Validate();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -58,20 +59,16 @@ namespace Iviz.Msgs.mesh_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "mesh_msgs/TriangleMeshStamped";
+        [Preserve] public const string RosMessageType = "mesh_msgs/TriangleMeshStamped";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "3e766dd12107291d682eb5e6c7442b9d";
+        [Preserve] public const string RosMd5Sum = "3e766dd12107291d682eb5e6c7442b9d";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71XXW/bNhR9168g4IckbewU6zAUGYZ9pGuXhwDFmrdiMGjpSuJGkSpJxXZ+/c4lRdlO" +
                 "nawPSw0Hlsh7Dy/v54kP1bLzjb/4g2RFTrTxp+jIt2n91ilpGk03WBG8XBQ//c+f4ubj+0vhDy0pZuJj" +
                 "kKaSrsKxQVYySFFbWKialtxc0x1pKMmup0rE3bDtyS+geNsqL/BtyJCTWm/F4CEUrCht1w1GlTKQCArX" +

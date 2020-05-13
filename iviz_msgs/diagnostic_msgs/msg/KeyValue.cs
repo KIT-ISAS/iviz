@@ -2,10 +2,11 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.diagnostic_msgs
 {
+    [DataContract]
     public sealed class KeyValue : IMessage
     {
-        public string key { get; set; } // what to label this value when viewing
-        public string value { get; set; } // a value to track over time
+        [DataMember] public string key { get; set; } // what to label this value when viewing
+        [DataMember] public string value { get; set; } // a value to track over time
     
         /// <summary> Constructor for empty message. </summary>
         public KeyValue()
@@ -28,13 +29,12 @@ namespace Iviz.Msgs.diagnostic_msgs
             this.value = b.DeserializeString();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new KeyValue(b);
+            return new KeyValue(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.key);
@@ -47,7 +47,6 @@ namespace Iviz.Msgs.diagnostic_msgs
             if (value is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -58,20 +57,16 @@ namespace Iviz.Msgs.diagnostic_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "diagnostic_msgs/KeyValue";
+        [Preserve] public const string RosMessageType = "diagnostic_msgs/KeyValue";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "cf57fdc6617a881a88c16e768132149c";
+        [Preserve] public const string RosMd5Sum = "cf57fdc6617a881a88c16e768132149c";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAEy2LQQrAIBDE7r5iwJdty1AXrYJulf6+C/YWSDKsa72Q+SJiJTFYQ5GDBZZ0YEp56IIV" +
                 "U7m8DWMv20TIT/5ZlzOjTXaY3gzhA0OUpa5eAAAA";
                 

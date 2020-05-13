@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.rosbridge_library
 {
+    [DataContract]
     public sealed class TestNestedService : IService
     {
         /// <summary> Request message. </summary>
-        public TestNestedServiceRequest Request { get; set; }
+        [DataMember] public TestNestedServiceRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public TestNestedServiceResponse Response { get; set; }
+        [DataMember] public TestNestedServiceResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public TestNestedService()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.rosbridge_library
             Response = new TestNestedServiceResponse();
         }
         
-        public IService Create() => new TestNestedService();
+        IService IService.Create() => new TestNestedService();
         
         IRequest IService.Request
         {
@@ -40,22 +41,19 @@ namespace Iviz.Msgs.rosbridge_library
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "rosbridge_library/TestNestedService";
+        [Preserve] public const string RosServiceType = "rosbridge_library/TestNestedService";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "063d2b71e58b5225a457d4ee09dab6f6";
+        [Preserve] public const string RosMd5Sum = "063d2b71e58b5225a457d4ee09dab6f6";
     }
 
     public sealed class TestNestedServiceRequest : IRequest
     {
         //request definition
-        public geometry_msgs.Pose pose { get; set; }
+        [DataMember] public geometry_msgs.Pose pose { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestNestedServiceRequest()
@@ -74,30 +72,28 @@ namespace Iviz.Msgs.rosbridge_library
             this.pose = new geometry_msgs.Pose(b);
         }
         
-        public IRequest Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new TestNestedServiceRequest(b);
+            return new TestNestedServiceRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.pose.Serialize(b);
+            b.Serialize(this.pose);
         }
         
         public void Validate()
         {
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength => 56;
     }
 
     public sealed class TestNestedServiceResponse : IResponse
     {
         //response definition
-        public std_msgs.Float64 data { get; set; }
+        [DataMember] public std_msgs.Float64 data { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestNestedServiceResponse()
@@ -117,24 +113,23 @@ namespace Iviz.Msgs.rosbridge_library
             this.data = new std_msgs.Float64(b);
         }
         
-        public IResponse Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new TestNestedServiceResponse(b);
+            return new TestNestedServiceResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.data.Serialize(b);
+            b.Serialize(this.data);
         }
         
         public void Validate()
         {
             if (data is null) throw new System.NullReferenceException();
+            data.Validate();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength => 8;
     }
 }

@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.sensor_msgs
 {
+    [DataContract]
     public sealed class MagneticField : IMessage
     {
         // Measurement of the Magnetic Field vector at a specific location.
@@ -14,17 +15,17 @@ namespace Iviz.Msgs.sensor_msgs
         // other source
         
         
-        public std_msgs.Header header { get; set; } // timestamp is the time the
+        [DataMember] public std_msgs.Header header { get; set; } // timestamp is the time the
         // field was measured
         // frame_id is the location and orientation
         // of the field measurement
         
-        public geometry_msgs.Vector3 magnetic_field { get; set; } // x, y, and z components of the
+        [DataMember] public geometry_msgs.Vector3 magnetic_field { get; set; } // x, y, and z components of the
         // field vector in Tesla
         // If your sensor does not output 3 axes,
         // put NaNs in the components not reported.
         
-        public double[/*9*/] magnetic_field_covariance { get; set; } // Row major about x, y, z axes
+        [DataMember] public double[/*9*/] magnetic_field_covariance { get; set; } // Row major about x, y, z axes
         // 0 is interpreted as variance unknown
     
         /// <summary> Constructor for empty message. </summary>
@@ -51,28 +52,27 @@ namespace Iviz.Msgs.sensor_msgs
             this.magnetic_field_covariance = b.DeserializeStructArray<double>(9);
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new MagneticField(b);
+            return new MagneticField(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
-            this.magnetic_field.Serialize(b);
+            b.Serialize(this.header);
+            b.Serialize(this.magnetic_field);
             b.SerializeStructArray(this.magnetic_field_covariance, 9);
         }
         
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (magnetic_field_covariance is null) throw new System.NullReferenceException();
             if (magnetic_field_covariance.Length != 9) throw new System.IndexOutOfRangeException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -82,20 +82,16 @@ namespace Iviz.Msgs.sensor_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "sensor_msgs/MagneticField";
+        [Preserve] public const string RosMessageType = "sensor_msgs/MagneticField";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "2f3b0b43eed0c9501de0fa3ff89a45aa";
+        [Preserve] public const string RosMd5Sum = "2f3b0b43eed0c9501de0fa3ff89a45aa";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE7VVXYvbRhR916+4RA/ZDVq3ZEugC30ohLT7sCE0S19KMdfSlTSJNKPOjGxrf33PHVle" +
                 "sTTgQmsMtuV7z/2Yc85QTg/CYfTSi43kaoqt0AM3VqIp6YORrqK9lNF54khMYZDS1PircyVH4+wmyyin" +
                 "+zmxdHv2hm0pC1S/QjeBvlp3sAWZSKF1I7B3QrXpOqnIWAW6MjVx19HkxhSsSYqzxhUu2zVwQbJpNlR7" +

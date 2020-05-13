@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.rosbridge_library
 {
+    [DataContract]
     public sealed class TestMultipleRequestFields : IService
     {
         /// <summary> Request message. </summary>
-        public TestMultipleRequestFieldsRequest Request { get; set; }
+        [DataMember] public TestMultipleRequestFieldsRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public TestMultipleRequestFieldsResponse Response { get; set; }
+        [DataMember] public TestMultipleRequestFieldsResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public TestMultipleRequestFields()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.rosbridge_library
             Response = new TestMultipleRequestFieldsResponse();
         }
         
-        public IService Create() => new TestMultipleRequestFields();
+        IService IService.Create() => new TestMultipleRequestFields();
         
         IRequest IService.Request
         {
@@ -40,24 +41,21 @@ namespace Iviz.Msgs.rosbridge_library
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "rosbridge_library/TestMultipleRequestFields";
+        [Preserve] public const string RosServiceType = "rosbridge_library/TestMultipleRequestFields";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "6cce9fb727dd0f31d504d7d198a1f4ef";
+        [Preserve] public const string RosMd5Sum = "6cce9fb727dd0f31d504d7d198a1f4ef";
     }
 
     public sealed class TestMultipleRequestFieldsRequest : IRequest
     {
-        public int @int { get; set; }
-        public float @float { get; set; }
-        public string @string { get; set; }
-        public bool @bool { get; set; }
+        [DataMember] public int @int { get; set; }
+        [DataMember] public float @float { get; set; }
+        [DataMember] public string @string { get; set; }
+        [DataMember] public bool @bool { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestMultipleRequestFieldsRequest()
@@ -83,13 +81,12 @@ namespace Iviz.Msgs.rosbridge_library
             this.@bool = b.Deserialize<bool>();
         }
         
-        public IRequest Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new TestMultipleRequestFieldsRequest(b);
+            return new TestMultipleRequestFieldsRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.@int);
@@ -103,7 +100,6 @@ namespace Iviz.Msgs.rosbridge_library
             if (@string is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {

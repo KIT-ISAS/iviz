@@ -2,21 +2,22 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.nav_msgs
 {
+    [DataContract]
     public sealed class MapMetaData : IMessage
     {
         // This hold basic information about the characterists of the OccupancyGrid
         
         // The time at which the map was loaded
-        public time map_load_time { get; set; }
+        [DataMember] public time map_load_time { get; set; }
         // The map resolution [m/cell]
-        public float resolution { get; set; }
+        [DataMember] public float resolution { get; set; }
         // Map width [cells]
-        public uint width { get; set; }
+        [DataMember] public uint width { get; set; }
         // Map height [cells]
-        public uint height { get; set; }
+        [DataMember] public uint height { get; set; }
         // The origin of the map [m, m, rad].  This is the real-world pose of the
         // cell (0,0) in the map.
-        public geometry_msgs.Pose origin { get; set; }
+        [DataMember] public geometry_msgs.Pose origin { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MapMetaData()
@@ -43,43 +44,37 @@ namespace Iviz.Msgs.nav_msgs
             this.origin = new geometry_msgs.Pose(b);
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new MapMetaData(b);
+            return new MapMetaData(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.map_load_time);
             b.Serialize(this.resolution);
             b.Serialize(this.width);
             b.Serialize(this.height);
-            this.origin.Serialize(b);
+            b.Serialize(this.origin);
         }
         
         public void Validate()
         {
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength => 76;
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "nav_msgs/MapMetaData";
+        [Preserve] public const string RosMessageType = "nav_msgs/MapMetaData";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "10cfc8a2818024d3248802c00c95f11b";
+        [Preserve] public const string RosMd5Sum = "10cfc8a2818024d3248802c00c95f11b";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71TPU8DMQzd8yssdQGpXCtADEgMTJ0qimCrqipN3EukS3IkOR3l1+PkPtrCwIJ6yhDb" +
                 "z/bzc24C70oHUK6SsONBC9B277zhUTsLfOeaCFEhCMU9FxG9DjGA22fnixBNza04LLyWjE2oFkLUBoFH" +
                 "aJUWKsMMr6HlASrHJUqWAeTbJnubrD4z4TwGVzW5+drMBFbVhu0JGO9uT2KUsExFtYwK1gkVNqzRNqGy" +

@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.rosapi
 {
+    [DataContract]
     public sealed class Subscribers : IService
     {
         /// <summary> Request message. </summary>
-        public SubscribersRequest Request { get; set; }
+        [DataMember] public SubscribersRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public SubscribersResponse Response { get; set; }
+        [DataMember] public SubscribersResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public Subscribers()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.rosapi
             Response = new SubscribersResponse();
         }
         
-        public IService Create() => new Subscribers();
+        IService IService.Create() => new Subscribers();
         
         IRequest IService.Request
         {
@@ -40,21 +41,18 @@ namespace Iviz.Msgs.rosapi
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "rosapi/Subscribers";
+        [Preserve] public const string RosServiceType = "rosapi/Subscribers";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "cb387b68f5b29bc1456398ee8476b973";
+        [Preserve] public const string RosMd5Sum = "cb387b68f5b29bc1456398ee8476b973";
     }
 
     public sealed class SubscribersRequest : IRequest
     {
-        public string topic { get; set; }
+        [DataMember] public string topic { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public SubscribersRequest()
@@ -74,13 +72,12 @@ namespace Iviz.Msgs.rosapi
             this.topic = b.DeserializeString();
         }
         
-        public IRequest Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new SubscribersRequest(b);
+            return new SubscribersRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.topic);
@@ -91,7 +88,6 @@ namespace Iviz.Msgs.rosapi
             if (topic is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -104,7 +100,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class SubscribersResponse : IResponse
     {
-        public string[] subscribers { get; set; }
+        [DataMember] public string[] subscribers { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public SubscribersResponse()
@@ -121,16 +117,15 @@ namespace Iviz.Msgs.rosapi
         /// <summary> Constructor with buffer. </summary>
         internal SubscribersResponse(Buffer b)
         {
-            this.subscribers = b.DeserializeStringArray(0);
+            this.subscribers = b.DeserializeStringArray();
         }
         
-        public IResponse Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new SubscribersResponse(b);
+            return new SubscribersResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeArray(this.subscribers, 0);
@@ -139,9 +134,12 @@ namespace Iviz.Msgs.rosapi
         public void Validate()
         {
             if (subscribers is null) throw new System.NullReferenceException();
+            for (int i = 0; i < subscribers.Length; i++)
+            {
+                if (subscribers[i] is null) throw new System.NullReferenceException();
+            }
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {

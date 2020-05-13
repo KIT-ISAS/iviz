@@ -2,15 +2,16 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.nav_msgs
 {
+    [DataContract]
     public sealed class Odometry : IMessage
     {
         // This represents an estimate of a position and velocity in free space.  
         // The pose in this message should be specified in the coordinate frame given by header.frame_id.
         // The twist in this message should be specified in the coordinate frame given by the child_frame_id
-        public std_msgs.Header header { get; set; }
-        public string child_frame_id { get; set; }
-        public geometry_msgs.PoseWithCovariance pose { get; set; }
-        public geometry_msgs.TwistWithCovariance twist { get; set; }
+        [DataMember] public std_msgs.Header header { get; set; }
+        [DataMember] public string child_frame_id { get; set; }
+        [DataMember] public geometry_msgs.PoseWithCovariance pose { get; set; }
+        [DataMember] public geometry_msgs.TwistWithCovariance twist { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Odometry()
@@ -39,30 +40,31 @@ namespace Iviz.Msgs.nav_msgs
             this.twist = new geometry_msgs.TwistWithCovariance(b);
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new Odometry(b);
+            return new Odometry(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.Serialize(this.child_frame_id);
-            this.pose.Serialize(b);
-            this.twist.Serialize(b);
+            b.Serialize(this.pose);
+            b.Serialize(this.twist);
         }
         
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (child_frame_id is null) throw new System.NullReferenceException();
             if (pose is null) throw new System.NullReferenceException();
+            pose.Validate();
             if (twist is null) throw new System.NullReferenceException();
+            twist.Validate();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -73,20 +75,16 @@ namespace Iviz.Msgs.nav_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "nav_msgs/Odometry";
+        [Preserve] public const string RosMessageType = "nav_msgs/Odometry";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "cd5e73d190d741a2f92e81eda573aca7";
+        [Preserve] public const string RosMd5Sum = "cd5e73d190d741a2f92e81eda573aca7";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE+1WTW/bRhC981cM4EPsQmKBuPDBQA9FgrY+FEgbo0lbFMaKOyS3IXeV3aUk5tfnzfJD" +
                 "sqw0OaQ61RBgcjmfb97MzgXd1yaQ57XnwDYGUpY4RNOqyORKUrR2wUTjLL5o2nDjChN7MpZKz0xhrQrO" +
                 "ibILWGIRZvkWxWrLIagKMrXrGk0rkebClIb1IMNUOOe1seKs9KplqsyGLa16qllp9nk6fTA6Hx3ErQnx" +

@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.geometry_msgs
 {
+    [DataContract]
     public sealed class TransformStamped : IMessage
     {
         // This expresses a transform from coordinate frame header.frame_id
@@ -11,9 +12,9 @@ namespace Iviz.Msgs.geometry_msgs
         // <a href="http://wiki.ros.org/tf">tf</a> package. 
         // See its documentation for more information.
         
-        public std_msgs.Header header { get; set; }
-        public string child_frame_id { get; set; } // the frame id of the child frame
-        public Transform transform { get; set; }
+        [DataMember] public std_msgs.Header header { get; set; }
+        [DataMember] public string child_frame_id { get; set; } // the frame id of the child frame
+        [DataMember] public Transform transform { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TransformStamped()
@@ -38,27 +39,26 @@ namespace Iviz.Msgs.geometry_msgs
             this.transform = new Transform(b);
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new TransformStamped(b);
+            return new TransformStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.Serialize(this.child_frame_id);
-            this.transform.Serialize(b);
+            b.Serialize(this.transform);
         }
         
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (child_frame_id is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -69,20 +69,16 @@ namespace Iviz.Msgs.geometry_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "geometry_msgs/TransformStamped";
+        [Preserve] public const string RosMessageType = "geometry_msgs/TransformStamped";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "b5764a33bfeb3588febc2682852579b0";
+        [Preserve] public const string RosMd5Sum = "b5764a33bfeb3588febc2682852579b0";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71VTU/cMBC951eMugeggqwEVQ8IOKG2HCpRgXpFQzJJLBI72BOW9Nf32dnN8iW1h5ZV" +
                 "pLUdz5uP92ayoOvGBJLH3ksIEohJPdtQOd9R5V1HhXO+NJZVsOdOqBEuxedpc2PKbEHqSBt5fbNoTFve" +
                 "bC/iavLWwRXXQnHpgrYjDUFKuh0TDG6dMDVeqtMPjWp/vFyuzJ3JvQu58/VSqw9nWp0s+Yx6Lu4AlEeb" +

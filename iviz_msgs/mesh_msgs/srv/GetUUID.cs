@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.mesh_msgs
 {
+    [DataContract]
     public sealed class GetUUID : IService
     {
         /// <summary> Request message. </summary>
-        public GetUUIDRequest Request { get; set; }
+        [DataMember] public GetUUIDRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public GetUUIDResponse Response { get; set; }
+        [DataMember] public GetUUIDResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public GetUUID()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.mesh_msgs
             Response = new GetUUIDResponse();
         }
         
-        public IService Create() => new GetUUID();
+        IService IService.Create() => new GetUUID();
         
         IRequest IService.Request
         {
@@ -40,16 +41,13 @@ namespace Iviz.Msgs.mesh_msgs
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "mesh_msgs/GetUUID";
+        [Preserve] public const string RosServiceType = "mesh_msgs/GetUUID";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "18ad0215778d252d8f14959901273e8d";
+        [Preserve] public const string RosMd5Sum = "18ad0215778d252d8f14959901273e8d";
     }
 
     public sealed class GetUUIDRequest : Internal.EmptyRequest
@@ -58,7 +56,7 @@ namespace Iviz.Msgs.mesh_msgs
 
     public sealed class GetUUIDResponse : IResponse
     {
-        public string uuid { get; set; }
+        [DataMember] public string uuid { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetUUIDResponse()
@@ -78,13 +76,12 @@ namespace Iviz.Msgs.mesh_msgs
             this.uuid = b.DeserializeString();
         }
         
-        public IResponse Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new GetUUIDResponse(b);
+            return new GetUUIDResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.uuid);
@@ -95,7 +92,6 @@ namespace Iviz.Msgs.mesh_msgs
             if (uuid is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {

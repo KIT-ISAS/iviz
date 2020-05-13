@@ -9,7 +9,7 @@ namespace Iviz.Msgs
     [AttributeUsage(AttributeTargets.Field)]
     public class PreserveAttribute : System.Attribute { }
 
-    public interface ISerializable<T> 
+    public interface ISerializable
     {
         /// <summary>
         /// Fills this message with the information from the buffer.
@@ -19,7 +19,7 @@ namespace Iviz.Msgs
         /// The position of the message end will be written to this pointer.
         /// </param>
         /// <param name="end">The maximum position that the function is allowed to read from.</param>
-        T Deserialize(Buffer b);
+        ISerializable Deserialize(Buffer b);
 
         /// <summary>
         /// Fills the buffer with the information from this message.

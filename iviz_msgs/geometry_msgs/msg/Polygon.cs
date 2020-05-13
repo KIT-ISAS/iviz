@@ -2,10 +2,11 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.geometry_msgs
 {
+    [DataContract]
     public sealed class Polygon : IMessage
     {
         //A specification of a polygon where the first and last points are assumed to be connected
-        public Point32[] points { get; set; }
+        [DataMember] public Point32[] points { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Polygon()
@@ -22,19 +23,18 @@ namespace Iviz.Msgs.geometry_msgs
         /// <summary> Constructor with buffer. </summary>
         internal Polygon(Buffer b)
         {
-            this.points = b.DeserializeArray<Point32>(0);
+            this.points = b.DeserializeStructArray<Point32>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new Polygon(b);
+            return new Polygon(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeArray(this.points, 0);
+            b.SerializeStructArray(this.points, 0);
         }
         
         public void Validate()
@@ -42,7 +42,6 @@ namespace Iviz.Msgs.geometry_msgs
             if (points is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -52,20 +51,16 @@ namespace Iviz.Msgs.geometry_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "geometry_msgs/Polygon";
+        [Preserve] public const string RosMessageType = "geometry_msgs/Polygon";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "cd60a26494a087f577976f0329fa120e";
+        [Preserve] public const string RosMd5Sum = "cd60a26494a087f577976f0329fa120e";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61RzUrEMBC+5ykG9qIgK+zeBA/iQTwIgt5EJG2m7WCaCZlZ1/r0Ttru4gPY0zSZ7zeb" +
                 "O5CMLXXUeiVOwB14yByn3n6OAxYEHRA6KqLgU4DobchMSQW83XqRw4gBlKFBaDklbBWDe64r+93b+7rs" +
                 "3O0/f+7p5eEGeuQRtUwfo/Ryvaq6DbwOJNWOekoyZ8gs9DejbQIl6AqileBbvDiSDrDfQUMWzrZysWrE" +

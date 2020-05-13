@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.std_msgs
 {
+    [DataContract]
     public sealed class Int8MultiArray : IMessage
     {
         // Please look at the MultiArrayLayout message definition for
         // documentation on all multiarrays.
         
-        public MultiArrayLayout layout { get; set; } // specification of data layout
-        public sbyte[] data { get; set; } // array of data
+        [DataMember] public MultiArrayLayout layout { get; set; } // specification of data layout
+        [DataMember] public sbyte[] data { get; set; } // array of data
         
     
         /// <summary> Constructor for empty message. </summary>
@@ -29,29 +30,28 @@ namespace Iviz.Msgs.std_msgs
         internal Int8MultiArray(Buffer b)
         {
             this.layout = new MultiArrayLayout(b);
-            this.data = b.DeserializeStructArray<sbyte>(0);
+            this.data = b.DeserializeStructArray<sbyte>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new Int8MultiArray(b);
+            return new Int8MultiArray(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.layout.Serialize(b);
+            b.Serialize(this.layout);
             b.SerializeStructArray(this.data, 0);
         }
         
         public void Validate()
         {
             if (layout is null) throw new System.NullReferenceException();
+            layout.Validate();
             if (data is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -62,20 +62,16 @@ namespace Iviz.Msgs.std_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "std_msgs/Int8MultiArray";
+        [Preserve] public const string RosMessageType = "std_msgs/Int8MultiArray";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "d7c1af35a1b4781bbe79e03dd94b7c13";
+        [Preserve] public const string RosMd5Sum = "d7c1af35a1b4781bbe79e03dd94b7c13";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71U32vbMBB+919xJC9tlmb5UUpb6ENgsJcWBh2MEUJQrXOsRLaCJDfr/vp9kh3bafc4" +
                 "ZgyW73R33/fpTkP6plk4Jm3MnoQnnzM9VdqrpbXi7VG8mcpTwc6JLZPkTJXKK1NSZmwyJGnSquDSi2jD" +
                 "K7SmIoSLEO4mSfIhGenmWz9DcgdOVabSJklGUnjR7EpU6W9Xa+o90UtdeKx0CkuS5OEfP8nT89d7cl5u" +

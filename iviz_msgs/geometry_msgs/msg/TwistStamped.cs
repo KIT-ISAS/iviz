@@ -2,11 +2,12 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.geometry_msgs
 {
+    [DataContract]
     public sealed class TwistStamped : IMessage
     {
         // A twist with reference coordinate frame and timestamp
-        public std_msgs.Header header { get; set; }
-        public Twist twist { get; set; }
+        [DataMember] public std_msgs.Header header { get; set; }
+        [DataMember] public Twist twist { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TwistStamped()
@@ -29,26 +30,26 @@ namespace Iviz.Msgs.geometry_msgs
             this.twist = new Twist(b);
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new TwistStamped(b);
+            return new TwistStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
-            this.twist.Serialize(b);
+            b.Serialize(this.header);
+            b.Serialize(this.twist);
         }
         
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (twist is null) throw new System.NullReferenceException();
+            twist.Validate();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -58,20 +59,16 @@ namespace Iviz.Msgs.geometry_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "geometry_msgs/TwistStamped";
+        [Preserve] public const string RosMessageType = "geometry_msgs/TwistStamped";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "98d34b0043a2093cf9d9345ab6eef12e";
+        [Preserve] public const string RosMd5Sum = "98d34b0043a2093cf9d9345ab6eef12e";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71UTWvbQBC9768Y8CFOcVRISg+BHgqlrQ+FQEKvYawdS0ukXXV3FEf99X27spWEXnpo" +
                 "awTWx8ybeW/e7Io+kh5cUjo4bSnKXqL4WqgOIVrnWYX2kXsh9pbU9ZKU+8F8FbYSqS1/5q4gFBxjPvzl" +
                 "n/l2++Waktr7PjXp7VzZrOhW0RJHS70oW1amfUBHrmklXnTyKB2VXsVS+arTIKlC4l3rEuFqxEvkrpto" +

@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.std_srvs
 {
+    [DataContract]
     public sealed class SetBool : IService
     {
         /// <summary> Request message. </summary>
-        public SetBoolRequest Request { get; set; }
+        [DataMember] public SetBoolRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public SetBoolResponse Response { get; set; }
+        [DataMember] public SetBoolResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public SetBool()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.std_srvs
             Response = new SetBoolResponse();
         }
         
-        public IService Create() => new SetBool();
+        IService IService.Create() => new SetBool();
         
         IRequest IService.Request
         {
@@ -40,21 +41,18 @@ namespace Iviz.Msgs.std_srvs
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "std_srvs/SetBool";
+        [Preserve] public const string RosServiceType = "std_srvs/SetBool";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "09fb03525b03e7ea1fd3992bafd87e16";
+        [Preserve] public const string RosMd5Sum = "09fb03525b03e7ea1fd3992bafd87e16";
     }
 
     public sealed class SetBoolRequest : IRequest
     {
-        public bool data { get; set; } // e.g. for hardware enabling / disabling
+        [DataMember] public bool data { get; set; } // e.g. for hardware enabling / disabling
     
         /// <summary> Constructor for empty message. </summary>
         public SetBoolRequest()
@@ -73,13 +71,12 @@ namespace Iviz.Msgs.std_srvs
             this.data = b.Deserialize<bool>();
         }
         
-        public IRequest Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new SetBoolRequest(b);
+            return new SetBoolRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.data);
@@ -89,14 +86,13 @@ namespace Iviz.Msgs.std_srvs
         {
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength => 1;
     }
 
     public sealed class SetBoolResponse : IResponse
     {
-        public bool success { get; set; } // indicate successful run of triggered service
-        public string message { get; set; } // informational, e.g. for error messages
+        [DataMember] public bool success { get; set; } // indicate successful run of triggered service
+        [DataMember] public string message { get; set; } // informational, e.g. for error messages
     
         /// <summary> Constructor for empty message. </summary>
         public SetBoolResponse()
@@ -118,13 +114,12 @@ namespace Iviz.Msgs.std_srvs
             this.message = b.DeserializeString();
         }
         
-        public IResponse Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new SetBoolResponse(b);
+            return new SetBoolResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.success);
@@ -136,7 +131,6 @@ namespace Iviz.Msgs.std_srvs
             if (message is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {

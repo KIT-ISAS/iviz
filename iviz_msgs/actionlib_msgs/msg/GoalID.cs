@@ -2,17 +2,18 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.actionlib_msgs
 {
+    [DataContract]
     public sealed class GoalID : IMessage
     {
         // The stamp should store the time at which this goal was requested.
         // It is used by an action server when it tries to preempt all
         // goals that were requested before a certain time
-        public time stamp { get; set; }
+        [DataMember] public time stamp { get; set; }
         
         // The id provides a way to associate feedback and
         // result message with specific goal requests. The id
         // specified must be unique.
-        public string id { get; set; }
+        [DataMember] public string id { get; set; }
         
     
         /// <summary> Constructor for empty message. </summary>
@@ -35,13 +36,12 @@ namespace Iviz.Msgs.actionlib_msgs
             this.id = b.DeserializeString();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new GoalID(b);
+            return new GoalID(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.stamp);
@@ -53,7 +53,6 @@ namespace Iviz.Msgs.actionlib_msgs
             if (id is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -63,20 +62,16 @@ namespace Iviz.Msgs.actionlib_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "actionlib_msgs/GoalID";
+        [Preserve] public const string RosMessageType = "actionlib_msgs/GoalID";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "302881f31927c1df708a2dbab0e80ee8";
+        [Preserve] public const string RosMd5Sum = "302881f31927c1df708a2dbab0e80ee8";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAEz2PS5LDIAxE95yiq7L3PbKfC8ggG1VscJCIK7cf4XHNkqY/Tw/8ZIYa7Qc0174lf9TG" +
                 "MJdNdgYZziwxuyKKtdKGkxSN353VOE3hgafB/7pywvwFFVA0qQXK7cPN81wgBmvCCqs4GvN+GGjbPD06" +
                 "Xc5jiX36vxozL4OFELkZSbmIwoV1IQdPD35JXlk/kryeHO87Rki1RiFjLMxppvhysuSJxto3w86qtDJO" +

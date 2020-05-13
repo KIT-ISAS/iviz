@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.sensor_msgs
 {
+    [DataContract]
     public sealed class BatteryState : IMessage
     {
         
@@ -37,25 +38,25 @@ namespace Iviz.Msgs.sensor_msgs
         public const byte POWER_SUPPLY_TECHNOLOGY_NICD = 5;
         public const byte POWER_SUPPLY_TECHNOLOGY_LIMN = 6;
         
-        public std_msgs.Header header { get; set; }
-        public float voltage { get; set; } // Voltage in Volts (Mandatory)
-        public float temperature { get; set; } // Temperature in Degrees Celsius (If unmeasured NaN)
-        public float current { get; set; } // Negative when discharging (A)  (If unmeasured NaN)
-        public float charge { get; set; } // Current charge in Ah  (If unmeasured NaN)
-        public float capacity { get; set; } // Capacity in Ah (last full capacity)  (If unmeasured NaN)
-        public float design_capacity { get; set; } // Capacity in Ah (design capacity)  (If unmeasured NaN)
-        public float percentage { get; set; } // Charge percentage on 0 to 1 range  (If unmeasured NaN)
-        public byte power_supply_status { get; set; } // The charging status as reported. Values defined above
-        public byte power_supply_health { get; set; } // The battery health metric. Values defined above
-        public byte power_supply_technology { get; set; } // The battery chemistry. Values defined above
-        public bool present { get; set; } // True if the battery is present
+        [DataMember] public std_msgs.Header header { get; set; }
+        [DataMember] public float voltage { get; set; } // Voltage in Volts (Mandatory)
+        [DataMember] public float temperature { get; set; } // Temperature in Degrees Celsius (If unmeasured NaN)
+        [DataMember] public float current { get; set; } // Negative when discharging (A)  (If unmeasured NaN)
+        [DataMember] public float charge { get; set; } // Current charge in Ah  (If unmeasured NaN)
+        [DataMember] public float capacity { get; set; } // Capacity in Ah (last full capacity)  (If unmeasured NaN)
+        [DataMember] public float design_capacity { get; set; } // Capacity in Ah (design capacity)  (If unmeasured NaN)
+        [DataMember] public float percentage { get; set; } // Charge percentage on 0 to 1 range  (If unmeasured NaN)
+        [DataMember] public byte power_supply_status { get; set; } // The charging status as reported. Values defined above
+        [DataMember] public byte power_supply_health { get; set; } // The battery health metric. Values defined above
+        [DataMember] public byte power_supply_technology { get; set; } // The battery chemistry. Values defined above
+        [DataMember] public bool present { get; set; } // True if the battery is present
         
-        public float[] cell_voltage { get; set; } // An array of individual cell voltages for each cell in the pack
+        [DataMember] public float[] cell_voltage { get; set; } // An array of individual cell voltages for each cell in the pack
         // If individual voltages unknown but number of cells known set each to NaN
-        public float[] cell_temperature { get; set; } // An array of individual cell temperatures for each cell in the pack
+        [DataMember] public float[] cell_temperature { get; set; } // An array of individual cell temperatures for each cell in the pack
         // If individual temperatures unknown but number of cells known set each to NaN
-        public string location { get; set; } // The location into which the battery is inserted. (slot number or plug)
-        public string serial_number { get; set; } // The best approximation of the battery serial number
+        [DataMember] public string location { get; set; } // The location into which the battery is inserted. (slot number or plug)
+        [DataMember] public string serial_number { get; set; } // The best approximation of the battery serial number
     
         /// <summary> Constructor for empty message. </summary>
         public BatteryState()
@@ -103,22 +104,21 @@ namespace Iviz.Msgs.sensor_msgs
             this.power_supply_health = b.Deserialize<byte>();
             this.power_supply_technology = b.Deserialize<byte>();
             this.present = b.Deserialize<bool>();
-            this.cell_voltage = b.DeserializeStructArray<float>(0);
-            this.cell_temperature = b.DeserializeStructArray<float>(0);
+            this.cell_voltage = b.DeserializeStructArray<float>();
+            this.cell_temperature = b.DeserializeStructArray<float>();
             this.location = b.DeserializeString();
             this.serial_number = b.DeserializeString();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new BatteryState(b);
+            return new BatteryState(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.Serialize(this.voltage);
             b.Serialize(this.temperature);
             b.Serialize(this.current);
@@ -139,13 +139,13 @@ namespace Iviz.Msgs.sensor_msgs
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (cell_voltage is null) throw new System.NullReferenceException();
             if (cell_temperature is null) throw new System.NullReferenceException();
             if (location is null) throw new System.NullReferenceException();
             if (serial_number is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -159,20 +159,16 @@ namespace Iviz.Msgs.sensor_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "sensor_msgs/BatteryState";
+        [Preserve] public const string RosMessageType = "sensor_msgs/BatteryState";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "4ddae7f048e32fda22cac764685e3974";
+        [Preserve] public const string RosMd5Sum = "4ddae7f048e32fda22cac764685e3974";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61WbW/iOBD+nl8xEh+WnlS6L3e3q0r7AQEFdDRBJW2vOp0ikwyJVcfmbIeWf3/jvEBo" +
                 "C909XVSpJH7mmRnP+Bl7HRgoaSyT1gDTCHGmDEqwCnJm4wxshoCyyA1wWb4ILotneEQtUXgdSHDFJSZu" +
                 "lctYFAlelIiLtXpCHZlivRbbXgbMgFrBBrXhSsKX3leyDYlOSYSEr1aoUcYI3MBKaTB2KxA0MkPBlW7j" +

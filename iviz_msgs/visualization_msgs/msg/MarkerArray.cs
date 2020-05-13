@@ -2,9 +2,10 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.visualization_msgs
 {
+    [DataContract]
     public sealed class MarkerArray : IMessage
     {
-        public Marker[] markers { get; set; }
+        [DataMember] public Marker[] markers { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MarkerArray()
@@ -21,16 +22,19 @@ namespace Iviz.Msgs.visualization_msgs
         /// <summary> Constructor with buffer. </summary>
         internal MarkerArray(Buffer b)
         {
-            this.markers = b.DeserializeArray<Marker>(0);
+            this.markers = b.DeserializeArray<Marker>();
+            for (int i = 0; i < this.markers.Length; i++)
+            {
+                this.markers[i] = new Marker(b);
+            }
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new MarkerArray(b);
+            return new MarkerArray(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeArray(this.markers, 0);
@@ -39,9 +43,13 @@ namespace Iviz.Msgs.visualization_msgs
         public void Validate()
         {
             if (markers is null) throw new System.NullReferenceException();
+            for (int i = 0; i < markers.Length; i++)
+            {
+                if (markers[i] is null) throw new System.NullReferenceException();
+                markers[i].Validate();
+            }
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -54,20 +62,16 @@ namespace Iviz.Msgs.visualization_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "visualization_msgs/MarkerArray";
+        [Preserve] public const string RosMessageType = "visualization_msgs/MarkerArray";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "d155b9ce5188fbaf89745847fd5882d7";
+        [Preserve] public const string RosMd5Sum = "d155b9ce5188fbaf89745847fd5882d7";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71X227bOBB9Xn3FAEHRZOHIuXS73QB+SGM3MZDb2m67RVEYtETbbGRRJam47tfvGVKS" +
                 "4yZp92HTxIgpijNz5naGuRDmRpqPn2jhFzaKOv/zT3QxPD2iW2VLkalvwimdjxd2ZtsX3mK0RUMpae5c" +
                 "cdRuL5fL2GgbazNrL9WNaptb9a3dVbbIxGq0KmQtRiJPfyw0Kp02SmS1hH12ePzsYO+1sCrB93AuoI2m" +

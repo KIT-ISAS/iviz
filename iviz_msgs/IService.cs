@@ -39,7 +39,7 @@ namespace Iviz.Msgs
     /// Interface for all ROS service requests.
     /// All classes representing ROS requests derive from this.
     /// </summary>
-    public interface IRequest : ISerializable<IRequest>
+    public interface IRequest : ISerializable
     {
     }
 
@@ -47,7 +47,7 @@ namespace Iviz.Msgs
     /// Interface for all ROS service responses.
     /// All classes representing ROS responses derive from this.
     /// </summary>
-    public interface IResponse : ISerializable<IResponse>
+    public interface IResponse : ISerializable
     {
     }
 
@@ -56,19 +56,19 @@ namespace Iviz.Msgs
         /// <summary>
         /// Class that represents an empty service request.
         /// </summary>
+        [DataContract]
         public class EmptyRequest : IRequest
         {
-            public IRequest Deserialize(Buffer b)
+            ISerializable ISerializable.Deserialize(Buffer b)
             {
                 return new EmptyRequest();
             }
 
-            public void Serialize(Buffer b)
+            void ISerializable.Serialize(Buffer b)
             {
             }
 
-            [IgnoreDataMember]
-            public int RosMessageLength => 0;
+            int ISerializable.RosMessageLength => 0;
 
             public void Validate()
             {
@@ -78,19 +78,19 @@ namespace Iviz.Msgs
         /// <summary>
         /// Class that represents an empty service response.
         /// </summary>
+        [DataContract]
         public class EmptyResponse : IResponse
         {
-            public IResponse Deserialize(Buffer b)
+            ISerializable ISerializable.Deserialize(Buffer b)
             {
                 return new EmptyResponse();
             }
 
-            public void Serialize(Buffer b)
+            void ISerializable.Serialize(Buffer b)
             {
             }
 
-            [IgnoreDataMember]
-            public int RosMessageLength => 0;
+            int ISerializable.RosMessageLength => 0;
 
             public void Validate()
             {

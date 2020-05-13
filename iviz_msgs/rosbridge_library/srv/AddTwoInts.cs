@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.rosbridge_library
 {
+    [DataContract]
     public sealed class AddTwoInts : IService
     {
         /// <summary> Request message. </summary>
-        public AddTwoIntsRequest Request { get; set; }
+        [DataMember] public AddTwoIntsRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public AddTwoIntsResponse Response { get; set; }
+        [DataMember] public AddTwoIntsResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public AddTwoInts()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.rosbridge_library
             Response = new AddTwoIntsResponse();
         }
         
-        public IService Create() => new AddTwoInts();
+        IService IService.Create() => new AddTwoInts();
         
         IRequest IService.Request
         {
@@ -40,22 +41,19 @@ namespace Iviz.Msgs.rosbridge_library
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "rosbridge_library/AddTwoInts";
+        [Preserve] public const string RosServiceType = "rosbridge_library/AddTwoInts";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "6a2e34150c00229791cc89ff309fff21";
+        [Preserve] public const string RosMd5Sum = "6a2e34150c00229791cc89ff309fff21";
     }
 
     public sealed class AddTwoIntsRequest : IRequest
     {
-        public long a { get; set; }
-        public long b { get; set; }
+        [DataMember] public long a { get; set; }
+        [DataMember] public long b { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public AddTwoIntsRequest()
@@ -76,13 +74,12 @@ namespace Iviz.Msgs.rosbridge_library
             this.b = b.Deserialize<long>();
         }
         
-        public IRequest Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new AddTwoIntsRequest(b);
+            return new AddTwoIntsRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.a);
@@ -93,13 +90,12 @@ namespace Iviz.Msgs.rosbridge_library
         {
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength => 16;
     }
 
     public sealed class AddTwoIntsResponse : IResponse
     {
-        public long sum { get; set; }
+        [DataMember] public long sum { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public AddTwoIntsResponse()
@@ -118,13 +114,12 @@ namespace Iviz.Msgs.rosbridge_library
             this.sum = b.Deserialize<long>();
         }
         
-        public IResponse Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new AddTwoIntsResponse(b);
+            return new AddTwoIntsResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.sum);
@@ -134,7 +129,6 @@ namespace Iviz.Msgs.rosbridge_library
         {
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength => 8;
     }
 }

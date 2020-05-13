@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.sensor_msgs
 {
+    [DataContract]
     public sealed class LaserScan : IMessage
     {
         // Single scan from a planar laser range-finder
@@ -10,27 +11,27 @@ namespace Iviz.Msgs.sensor_msgs
         // array), please find or create a different message, since applications
         // will make fairly laser-specific assumptions about this data
         
-        public std_msgs.Header header { get; set; } // timestamp in the header is the acquisition time of 
+        [DataMember] public std_msgs.Header header { get; set; } // timestamp in the header is the acquisition time of 
         // the first ray in the scan.
         //
         // in frame frame_id, angles are measured around 
         // the positive Z axis (counterclockwise, if Z is up)
         // with zero angle being forward along the x axis
         
-        public float angle_min { get; set; } // start angle of the scan [rad]
-        public float angle_max { get; set; } // end angle of the scan [rad]
-        public float angle_increment { get; set; } // angular distance between measurements [rad]
+        [DataMember] public float angle_min { get; set; } // start angle of the scan [rad]
+        [DataMember] public float angle_max { get; set; } // end angle of the scan [rad]
+        [DataMember] public float angle_increment { get; set; } // angular distance between measurements [rad]
         
-        public float time_increment { get; set; } // time between measurements [seconds] - if your scanner
+        [DataMember] public float time_increment { get; set; } // time between measurements [seconds] - if your scanner
         // is moving, this will be used in interpolating position
         // of 3d points
-        public float scan_time { get; set; } // time between scans [seconds]
+        [DataMember] public float scan_time { get; set; } // time between scans [seconds]
         
-        public float range_min { get; set; } // minimum range value [m]
-        public float range_max { get; set; } // maximum range value [m]
+        [DataMember] public float range_min { get; set; } // minimum range value [m]
+        [DataMember] public float range_max { get; set; } // maximum range value [m]
         
-        public float[] ranges { get; set; } // range data [m] (Note: values < range_min or > range_max should be discarded)
-        public float[] intensities { get; set; } // intensity data [device-specific units].  If your
+        [DataMember] public float[] ranges { get; set; } // range data [m] (Note: values < range_min or > range_max should be discarded)
+        [DataMember] public float[] intensities { get; set; } // intensity data [device-specific units].  If your
         // device does not provide intensities, please leave
         // the array empty.
     
@@ -68,20 +69,19 @@ namespace Iviz.Msgs.sensor_msgs
             this.scan_time = b.Deserialize<float>();
             this.range_min = b.Deserialize<float>();
             this.range_max = b.Deserialize<float>();
-            this.ranges = b.DeserializeStructArray<float>(0);
-            this.intensities = b.DeserializeStructArray<float>(0);
+            this.ranges = b.DeserializeStructArray<float>();
+            this.intensities = b.DeserializeStructArray<float>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new LaserScan(b);
+            return new LaserScan(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.Serialize(this.angle_min);
             b.Serialize(this.angle_max);
             b.Serialize(this.angle_increment);
@@ -96,11 +96,11 @@ namespace Iviz.Msgs.sensor_msgs
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (ranges is null) throw new System.NullReferenceException();
             if (intensities is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -112,20 +112,16 @@ namespace Iviz.Msgs.sensor_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "sensor_msgs/LaserScan";
+        [Preserve] public const string RosMessageType = "sensor_msgs/LaserScan";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "90c7ef2dc6895d81024acba2ac42f369";
+        [Preserve] public const string RosMd5Sum = "90c7ef2dc6895d81024acba2ac42f369";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61VTY/jNgy9+1cQyGGTYpIC3dug7Wmx7RxaFJg9dRAMGJmOhZUljyQn4/76Psr5cBed" +
                 "7B7WCBIoJh/FR/JxQY/W751QMuypiaEjpt6x50iOk0SK7PeybqyvJVaLakEPDY1hoJYPQuxDbk9GwKFa" +
                 "DtYIHW1uqbZNI1F8pp3A2IZIS9nsNwiQAvABxTHyuLpDQEEs0iAEMxOFM8BnEJ2kxHu5o2Q9AnDfO2s4" +

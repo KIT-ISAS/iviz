@@ -2,20 +2,21 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.sensor_msgs
 {
+    [DataContract]
     public sealed class RelativeHumidity : IMessage
     {
         // Single reading from a relative humidity sensor.  Defines the ratio of partial
         // pressure of water vapor to the saturated vapor pressure at a temperature.
         
-        public std_msgs.Header header { get; set; } // timestamp of the measurement
+        [DataMember] public std_msgs.Header header { get; set; } // timestamp of the measurement
         // frame_id is the location of the humidity sensor
         
-        public double relative_humidity { get; set; } // Expression of the relative humidity
+        [DataMember] public double relative_humidity { get; set; } // Expression of the relative humidity
         // from 0.0 to 1.0.
         // 0.0 is no partial pressure of water vapor
         // 1.0 represents partial pressure of saturation
         
-        public double variance { get; set; } // 0 is interpreted as variance unknown
+        [DataMember] public double variance { get; set; } // 0 is interpreted as variance unknown
     
         /// <summary> Constructor for empty message. </summary>
         public RelativeHumidity()
@@ -39,16 +40,15 @@ namespace Iviz.Msgs.sensor_msgs
             this.variance = b.Deserialize<double>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new RelativeHumidity(b);
+            return new RelativeHumidity(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.Serialize(this.relative_humidity);
             b.Serialize(this.variance);
         }
@@ -56,9 +56,9 @@ namespace Iviz.Msgs.sensor_msgs
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -68,20 +68,16 @@ namespace Iviz.Msgs.sensor_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "sensor_msgs/RelativeHumidity";
+        [Preserve] public const string RosMessageType = "sensor_msgs/RelativeHumidity";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "8730015b05955b7e992ce29a2678d90f";
+        [Preserve] public const string RosMd5Sum = "8730015b05955b7e992ce29a2678d90f";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61Uy27bMBC88ysW0CFJAavuAz0Y6M195FCgQHI31tLaIkqRKknZ9d93loofTZu0hwoG" +
                 "bMkzs7uzQ1FFd9ZvnVAUbvGLNjH0xLh1nO1OqBt729p8oCQ+hVgTLWVjvSTKHVgABQobGjhmy85QRUOU" +
                 "lMYo+njPWSLteAiRciiUxHkETdqHxyc4Z9TN0g8SFSK1MfQZXUGgm74ur4qy7SVl7gctpMq9sAr14rOh" +

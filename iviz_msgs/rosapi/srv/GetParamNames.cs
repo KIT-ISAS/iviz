@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.rosapi
 {
+    [DataContract]
     public sealed class GetParamNames : IService
     {
         /// <summary> Request message. </summary>
-        public GetParamNamesRequest Request { get; set; }
+        [DataMember] public GetParamNamesRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public GetParamNamesResponse Response { get; set; }
+        [DataMember] public GetParamNamesResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public GetParamNames()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.rosapi
             Response = new GetParamNamesResponse();
         }
         
-        public IService Create() => new GetParamNames();
+        IService IService.Create() => new GetParamNames();
         
         IRequest IService.Request
         {
@@ -40,16 +41,13 @@ namespace Iviz.Msgs.rosapi
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "rosapi/GetParamNames";
+        [Preserve] public const string RosServiceType = "rosapi/GetParamNames";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "dc7ae3609524b18034e49294a4ce670e";
+        [Preserve] public const string RosMd5Sum = "dc7ae3609524b18034e49294a4ce670e";
     }
 
     public sealed class GetParamNamesRequest : Internal.EmptyRequest
@@ -58,7 +56,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class GetParamNamesResponse : IResponse
     {
-        public string[] names { get; set; }
+        [DataMember] public string[] names { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetParamNamesResponse()
@@ -75,16 +73,15 @@ namespace Iviz.Msgs.rosapi
         /// <summary> Constructor with buffer. </summary>
         internal GetParamNamesResponse(Buffer b)
         {
-            this.names = b.DeserializeStringArray(0);
+            this.names = b.DeserializeStringArray();
         }
         
-        public IResponse Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new GetParamNamesResponse(b);
+            return new GetParamNamesResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeArray(this.names, 0);
@@ -93,9 +90,12 @@ namespace Iviz.Msgs.rosapi
         public void Validate()
         {
             if (names is null) throw new System.NullReferenceException();
+            for (int i = 0; i < names.Length; i++)
+            {
+                if (names[i] is null) throw new System.NullReferenceException();
+            }
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {

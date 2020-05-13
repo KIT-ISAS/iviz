@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.mesh_msgs
 {
+    [DataContract]
     public sealed class MeshMaterials : IMessage
     {
         // Mesh Attribute Message
-        public mesh_msgs.MeshFaceCluster[] clusters { get; set; }
-        public mesh_msgs.MeshMaterial[] materials { get; set; }
-        public uint[] cluster_materials { get; set; }
-        public mesh_msgs.MeshVertexTexCoords[] vertex_tex_coords { get; set; }
+        [DataMember] public mesh_msgs.MeshFaceCluster[] clusters { get; set; }
+        [DataMember] public mesh_msgs.MeshMaterial[] materials { get; set; }
+        [DataMember] public uint[] cluster_materials { get; set; }
+        [DataMember] public mesh_msgs.MeshVertexTexCoords[] vertex_tex_coords { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshMaterials()
@@ -31,19 +32,30 @@ namespace Iviz.Msgs.mesh_msgs
         /// <summary> Constructor with buffer. </summary>
         internal MeshMaterials(Buffer b)
         {
-            this.clusters = b.DeserializeArray<mesh_msgs.MeshFaceCluster>(0);
-            this.materials = b.DeserializeArray<mesh_msgs.MeshMaterial>(0);
-            this.cluster_materials = b.DeserializeStructArray<uint>(0);
-            this.vertex_tex_coords = b.DeserializeArray<mesh_msgs.MeshVertexTexCoords>(0);
+            this.clusters = b.DeserializeArray<mesh_msgs.MeshFaceCluster>();
+            for (int i = 0; i < this.clusters.Length; i++)
+            {
+                this.clusters[i] = new mesh_msgs.MeshFaceCluster(b);
+            }
+            this.materials = b.DeserializeArray<mesh_msgs.MeshMaterial>();
+            for (int i = 0; i < this.materials.Length; i++)
+            {
+                this.materials[i] = new mesh_msgs.MeshMaterial(b);
+            }
+            this.cluster_materials = b.DeserializeStructArray<uint>();
+            this.vertex_tex_coords = b.DeserializeArray<mesh_msgs.MeshVertexTexCoords>();
+            for (int i = 0; i < this.vertex_tex_coords.Length; i++)
+            {
+                this.vertex_tex_coords[i] = new mesh_msgs.MeshVertexTexCoords(b);
+            }
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new MeshMaterials(b);
+            return new MeshMaterials(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeArray(this.clusters, 0);
@@ -55,12 +67,26 @@ namespace Iviz.Msgs.mesh_msgs
         public void Validate()
         {
             if (clusters is null) throw new System.NullReferenceException();
+            for (int i = 0; i < clusters.Length; i++)
+            {
+                if (clusters[i] is null) throw new System.NullReferenceException();
+                clusters[i].Validate();
+            }
             if (materials is null) throw new System.NullReferenceException();
+            for (int i = 0; i < materials.Length; i++)
+            {
+                if (materials[i] is null) throw new System.NullReferenceException();
+                materials[i].Validate();
+            }
             if (cluster_materials is null) throw new System.NullReferenceException();
             if (vertex_tex_coords is null) throw new System.NullReferenceException();
+            for (int i = 0; i < vertex_tex_coords.Length; i++)
+            {
+                if (vertex_tex_coords[i] is null) throw new System.NullReferenceException();
+                vertex_tex_coords[i].Validate();
+            }
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -76,20 +102,16 @@ namespace Iviz.Msgs.mesh_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "mesh_msgs/MeshMaterials";
+        [Preserve] public const string RosMessageType = "mesh_msgs/MeshMaterials";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "e151c9a065aae90d545559129a79a70a";
+        [Preserve] public const string RosMd5Sum = "e151c9a065aae90d545559129a79a70a";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE72TQWrDMBBF93MKgQ8QaHeFLBJDs/KmCdmEIsbyxBHIVtBIwb19JMdRqEt3bQSCr9Ef" +
                 "ePORClERn8TKe6fr4CkdGVuCLpZlxy0vkuEdFZUmsCd3+BTqpnhmqjAWNZro6CbJEHTvX18eTfJx9b17" +
                 "T87TsKOhtNY1HDsuY0WmrcYawPKPF1TbzZv4dVYo7iKPcYy3UveNVsRQ2LPXtkcDHPPrW2GwJvMczHva" +

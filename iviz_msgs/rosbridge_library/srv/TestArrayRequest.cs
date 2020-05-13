@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.rosbridge_library
 {
+    [DataContract]
     public sealed class TestArrayRequest : IService
     {
         /// <summary> Request message. </summary>
-        public TestArrayRequestRequest Request { get; set; }
+        [DataMember] public TestArrayRequestRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public TestArrayRequestResponse Response { get; set; }
+        [DataMember] public TestArrayRequestResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public TestArrayRequest()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.rosbridge_library
             Response = new TestArrayRequestResponse();
         }
         
-        public IService Create() => new TestArrayRequest();
+        IService IService.Create() => new TestArrayRequest();
         
         IRequest IService.Request
         {
@@ -40,21 +41,18 @@ namespace Iviz.Msgs.rosbridge_library
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "rosbridge_library/TestArrayRequest";
+        [Preserve] public const string RosServiceType = "rosbridge_library/TestArrayRequest";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "3d7cfb7e4aa0844868966efa8a264398";
+        [Preserve] public const string RosMd5Sum = "3d7cfb7e4aa0844868966efa8a264398";
     }
 
     public sealed class TestArrayRequestRequest : IRequest
     {
-        public int[] @int { get; set; }
+        [DataMember] public int[] @int { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestArrayRequestRequest()
@@ -71,16 +69,15 @@ namespace Iviz.Msgs.rosbridge_library
         /// <summary> Constructor with buffer. </summary>
         internal TestArrayRequestRequest(Buffer b)
         {
-            this.@int = b.DeserializeStructArray<int>(0);
+            this.@int = b.DeserializeStructArray<int>();
         }
         
-        public IRequest Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new TestArrayRequestRequest(b);
+            return new TestArrayRequestRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeStructArray(this.@int, 0);
@@ -91,7 +88,6 @@ namespace Iviz.Msgs.rosbridge_library
             if (@int is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {

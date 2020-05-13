@@ -49,13 +49,16 @@ namespace Iviz.Msgs
             return val;
         }
 
-        internal string[] DeserializeStringArray(uint count)
+        internal string[] DeserializeStringArray(uint count = 0)
         {
             if (count == 0)
             {
                 AssertInRange(4);
                 count = *(uint*)ptr; ptr += 4;
-                if (count == 0) { return Array.Empty<string>(); }
+                if (count == 0)
+                {
+                    return Array.Empty<string>();
+                }
             }
             string[] val = new string[count];
             for (int i = 0; i < val.Length; i++)
@@ -73,13 +76,16 @@ namespace Iviz.Msgs
             return val;
         }
 
-        internal T[] DeserializeStructArray<T>(uint count) where T : unmanaged
+        internal T[] DeserializeStructArray<T>(uint count = 0) where T : unmanaged
         {
             if (count == 0)
             {
                 AssertInRange(4);
                 count = *(uint*)ptr; ptr += 4;
-                if (count == 0) { return Array.Empty<T>(); }
+                if (count == 0)
+                {
+                    return Array.Empty<T>();
+                }
             }
             AssertInRange(count * (uint)sizeof(T));
             T[] val = new T[count];
@@ -92,21 +98,18 @@ namespace Iviz.Msgs
             return val;
         }
 
-        internal T[] DeserializeArray<T>(uint count) where T : IMessage, new()
+        internal T[] DeserializeArray<T>(uint count = 0) where T : IMessage, new()
         {
             if (count == 0)
             {
                 AssertInRange(4);
                 count = *(uint*)ptr; ptr += 4;
-                if (count == 0) { return Array.Empty<T>(); }
+                if (count == 0)
+                {
+                    return Array.Empty<T>();
+                }
             }
-            T[] val = new T[count];
-            for (int i = 0; i < val.Length; i++)
-            {
-                val[i] = new T();
-                val[i].Deserialize(this);
-            }
-            return val;
+            return new T[count];
         }
 
         internal void Serialize<T>(in T val) where T : unmanaged
@@ -132,6 +135,11 @@ namespace Iviz.Msgs
                 BuiltIns.UTF8.GetBytes(b_ptr, val.Length, ptr, (int)count);
                 ptr += count;
             }
+        }
+
+        internal void Serialize(ISerializable val)
+        {
+            val.Serialize(this);
         }
 
         internal void SerializeArray(string[] val, uint count)
@@ -204,13 +212,8 @@ namespace Iviz.Msgs
             }
         }
 
-        public static T Deserialize<T>(ISerializable<T> generator, byte[] buffer, int size)
+        public static T Deserialize<T>(T generator, byte[] buffer, int size) where T : ISerializable
         {
-            if (generator is null)
-            {
-                throw new ArgumentNullException(nameof(generator));
-            }
-
             if (buffer is null)
             {
                 throw new ArgumentNullException(nameof(buffer));
@@ -223,12 +226,12 @@ namespace Iviz.Msgs
             fixed (byte* b_ptr = buffer)
             {
                 Buffer b = new Buffer(b_ptr, b_ptr + size);
-                return generator.Deserialize(b);
+                return (T)generator.Deserialize(b);
                 //return (uint)(b.ptr - b_ptr);
             }
         }
 
-        public static uint Serialize<T>(ISerializable<T> message, byte[] buffer)
+        public static uint Serialize(ISerializable message, byte[] buffer)
         {
             if (message is null)
             {

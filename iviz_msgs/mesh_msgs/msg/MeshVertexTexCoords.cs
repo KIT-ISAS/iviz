@@ -2,11 +2,12 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.mesh_msgs
 {
+    [DataContract]
     public sealed class MeshVertexTexCoords : IMessage
     {
         // Mesh Attribute Type
-        public float u { get; set; }
-        public float v { get; set; }
+        [DataMember] public float u { get; set; }
+        [DataMember] public float v { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshVertexTexCoords()
@@ -27,13 +28,12 @@ namespace Iviz.Msgs.mesh_msgs
             this.v = b.Deserialize<float>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new MeshVertexTexCoords(b);
+            return new MeshVertexTexCoords(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.u);
@@ -44,23 +44,18 @@ namespace Iviz.Msgs.mesh_msgs
         {
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength => 8;
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "mesh_msgs/MeshVertexTexCoords";
+        [Preserve] public const string RosMessageType = "mesh_msgs/MeshVertexTexCoords";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "4f5254e0e12914c461d4b17a0cd07f7f";
+        [Preserve] public const string RosMd5Sum = "4f5254e0e12914c461d4b17a0cd07f7f";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE1NW8E0tzlBwLCkpykwqLUlVCKksSOVKy8lPLDE2UiiFs8q4uADIua4VKwAAAA==";
                 
     }

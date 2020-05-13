@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.visualization_msgs
 {
+    [DataContract]
     public sealed class ImageMarker : IMessage
     {
         public const byte CIRCLE = 0;
@@ -13,21 +14,21 @@ namespace Iviz.Msgs.visualization_msgs
         public const byte ADD = 0;
         public const byte REMOVE = 1;
         
-        public std_msgs.Header header { get; set; }
-        public string ns { get; set; } // namespace, used with id to form a unique id
-        public int id { get; set; } // unique id within the namespace
-        public int type { get; set; } // CIRCLE/LINE_STRIP/etc.
-        public int action { get; set; } // ADD/REMOVE
-        public geometry_msgs.Point position { get; set; } // 2D, in pixel-coords
-        public float scale { get; set; } // the diameter for a circle, etc.
-        public std_msgs.ColorRGBA outline_color { get; set; }
-        public byte filled { get; set; } // whether to fill in the shape with color
-        public std_msgs.ColorRGBA fill_color { get; set; } // color [0.0-1.0]
-        public duration lifetime { get; set; } // How long the object should last before being automatically deleted.  0 means forever
+        [DataMember] public std_msgs.Header header { get; set; }
+        [DataMember] public string ns { get; set; } // namespace, used with id to form a unique id
+        [DataMember] public int id { get; set; } // unique id within the namespace
+        [DataMember] public int type { get; set; } // CIRCLE/LINE_STRIP/etc.
+        [DataMember] public int action { get; set; } // ADD/REMOVE
+        [DataMember] public geometry_msgs.Point position { get; set; } // 2D, in pixel-coords
+        [DataMember] public float scale { get; set; } // the diameter for a circle, etc.
+        [DataMember] public std_msgs.ColorRGBA outline_color { get; set; }
+        [DataMember] public byte filled { get; set; } // whether to fill in the shape with color
+        [DataMember] public std_msgs.ColorRGBA fill_color { get; set; } // color [0.0-1.0]
+        [DataMember] public duration lifetime { get; set; } // How long the object should last before being automatically deleted.  0 means forever
         
         
-        public geometry_msgs.Point[] points { get; set; } // used for LINE_STRIP/LINE_LIST/POINTS/etc., 2D in pixel coords
-        public std_msgs.ColorRGBA[] outline_colors { get; set; } // a color for each line, point, etc.
+        [DataMember] public geometry_msgs.Point[] points { get; set; } // used for LINE_STRIP/LINE_LIST/POINTS/etc., 2D in pixel coords
+        [DataMember] public std_msgs.ColorRGBA[] outline_colors { get; set; } // a color for each line, point, etc.
     
         /// <summary> Constructor for empty message. </summary>
         public ImageMarker()
@@ -70,29 +71,28 @@ namespace Iviz.Msgs.visualization_msgs
             this.filled = b.Deserialize<byte>();
             this.fill_color = new std_msgs.ColorRGBA(b);
             this.lifetime = b.Deserialize<duration>();
-            this.points = b.DeserializeStructArray<geometry_msgs.Point>(0);
-            this.outline_colors = b.DeserializeStructArray<std_msgs.ColorRGBA>(0);
+            this.points = b.DeserializeStructArray<geometry_msgs.Point>();
+            this.outline_colors = b.DeserializeStructArray<std_msgs.ColorRGBA>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new ImageMarker(b);
+            return new ImageMarker(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.Serialize(this.ns);
             b.Serialize(this.id);
             b.Serialize(this.type);
             b.Serialize(this.action);
-            this.position.Serialize(b);
+            b.Serialize(this.position);
             b.Serialize(this.scale);
-            this.outline_color.Serialize(b);
+            b.Serialize(this.outline_color);
             b.Serialize(this.filled);
-            this.fill_color.Serialize(b);
+            b.Serialize(this.fill_color);
             b.Serialize(this.lifetime);
             b.SerializeStructArray(this.points, 0);
             b.SerializeStructArray(this.outline_colors, 0);
@@ -101,12 +101,12 @@ namespace Iviz.Msgs.visualization_msgs
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (ns is null) throw new System.NullReferenceException();
             if (points is null) throw new System.NullReferenceException();
             if (outline_colors is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -119,20 +119,16 @@ namespace Iviz.Msgs.visualization_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "visualization_msgs/ImageMarker";
+        [Preserve] public const string RosMessageType = "visualization_msgs/ImageMarker";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "1de93c67ec8858b831025a08fbf1b35c";
+        [Preserve] public const string RosMd5Sum = "1de93c67ec8858b831025a08fbf1b35c";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE7VU227TQBB9rr9ipDxwUXOhIIQq5QGaUiL1piZCQghFE3sSL1rvmt112/D1nF07bhF9" +
                 "4AGiSHvxzJmZc2anUSa8o5P5zcn56XSSNel4Pr88XS2WN/Pr6avHV+fzxXJ61N1cX51/Obu6nL7uz/PL" +
                 "5WL6JuvO72ezHvDm9OLq8ynAsk/ChTgq05L54JTZkvEHBwMyXImvOZdDarwUdKdCSaqgYGljXUVMjVE/" +

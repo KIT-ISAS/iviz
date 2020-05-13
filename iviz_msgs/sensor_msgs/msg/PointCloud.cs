@@ -2,22 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.sensor_msgs
 {
+    [DataContract]
     public sealed class PointCloud : IMessage
     {
         // This message holds a collection of 3d points, plus optional additional
         // information about each point.
         
         // Time of sensor data acquisition, coordinate frame ID.
-        public std_msgs.Header header { get; set; }
+        [DataMember] public std_msgs.Header header { get; set; }
         
         // Array of 3d points. Each Point32 should be interpreted as a 3d point
         // in the frame given in the header.
-        public geometry_msgs.Point32[] points { get; set; }
+        [DataMember] public geometry_msgs.Point32[] points { get; set; }
         
         // Each channel should have the same number of elements as points array,
         // and the data in each channel should correspond 1:1 with each point.
         // Channel names in common practice are listed in ChannelFloat32.msg.
-        public ChannelFloat32[] channels { get; set; }
+        [DataMember] public ChannelFloat32[] channels { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public PointCloud()
@@ -39,32 +40,40 @@ namespace Iviz.Msgs.sensor_msgs
         internal PointCloud(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.points = b.DeserializeArray<geometry_msgs.Point32>(0);
-            this.channels = b.DeserializeArray<ChannelFloat32>(0);
+            this.points = b.DeserializeStructArray<geometry_msgs.Point32>();
+            this.channels = b.DeserializeArray<ChannelFloat32>();
+            for (int i = 0; i < this.channels.Length; i++)
+            {
+                this.channels[i] = new ChannelFloat32(b);
+            }
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new PointCloud(b);
+            return new PointCloud(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
-            b.SerializeArray(this.points, 0);
+            b.Serialize(this.header);
+            b.SerializeStructArray(this.points, 0);
             b.SerializeArray(this.channels, 0);
         }
         
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (points is null) throw new System.NullReferenceException();
             if (channels is null) throw new System.NullReferenceException();
+            for (int i = 0; i < channels.Length; i++)
+            {
+                if (channels[i] is null) throw new System.NullReferenceException();
+                channels[i].Validate();
+            }
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -79,20 +88,16 @@ namespace Iviz.Msgs.sensor_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "sensor_msgs/PointCloud";
+        [Preserve] public const string RosMessageType = "sensor_msgs/PointCloud";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "d8e9c3f5afbdd8a130fd1d2763945fca";
+        [Preserve] public const string RosMd5Sum = "d8e9c3f5afbdd8a130fd1d2763945fca";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE7VWTW8bNxC9768YyIfIgazCTg+FgR7atE5zKBA0vhWFMdod7RLhkmuSK1v99X1D7urD" +
                 "8SGHRhCg1ZJ8M/PmzQwv6L4zkXqJkVuhztsmElPtrZU6Ge/Ib+ldQ4M3LsUVDXaM5AddYUvcNKY8Vhdk" +
                 "3NaHnvMh3vgxkXDdlZPrChvuTS8KF8VFH6jhxMT142hiBlnBqg+NcZyEtoGx+eNv6+oP4UYCdflHYX4J" +

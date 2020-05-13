@@ -2,27 +2,28 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.grid_map_msgs
 {
+    [DataContract]
     public sealed class GridMap : IMessage
     {
         // Grid map header
-        public GridMapInfo info { get; set; }
+        [DataMember] public GridMapInfo info { get; set; }
         
         // Grid map layer names.
-        public string[] layers { get; set; }
+        [DataMember] public string[] layers { get; set; }
         
         // Grid map basic layer names (optional). The basic layers
         // determine which layers from `layers` need to be valid
         // in order for a cell of the grid map to be valid.
-        public string[] basic_layers { get; set; }
+        [DataMember] public string[] basic_layers { get; set; }
         
         // Grid map data.
-        public std_msgs.Float32MultiArray[] data { get; set; }
+        [DataMember] public std_msgs.Float32MultiArray[] data { get; set; }
         
         // Row start index (default 0).
-        public ushort outer_start_index { get; set; }
+        [DataMember] public ushort outer_start_index { get; set; }
         
         // Column start index (default 0).
-        public ushort inner_start_index { get; set; }
+        [DataMember] public ushort inner_start_index { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GridMap()
@@ -48,23 +49,26 @@ namespace Iviz.Msgs.grid_map_msgs
         internal GridMap(Buffer b)
         {
             this.info = new GridMapInfo(b);
-            this.layers = b.DeserializeStringArray(0);
-            this.basic_layers = b.DeserializeStringArray(0);
-            this.data = b.DeserializeArray<std_msgs.Float32MultiArray>(0);
+            this.layers = b.DeserializeStringArray();
+            this.basic_layers = b.DeserializeStringArray();
+            this.data = b.DeserializeArray<std_msgs.Float32MultiArray>();
+            for (int i = 0; i < this.data.Length; i++)
+            {
+                this.data[i] = new std_msgs.Float32MultiArray(b);
+            }
             this.outer_start_index = b.Deserialize<ushort>();
             this.inner_start_index = b.Deserialize<ushort>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new GridMap(b);
+            return new GridMap(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.info.Serialize(b);
+            b.Serialize(this.info);
             b.SerializeArray(this.layers, 0);
             b.SerializeArray(this.basic_layers, 0);
             b.SerializeArray(this.data, 0);
@@ -75,12 +79,25 @@ namespace Iviz.Msgs.grid_map_msgs
         public void Validate()
         {
             if (info is null) throw new System.NullReferenceException();
+            info.Validate();
             if (layers is null) throw new System.NullReferenceException();
+            for (int i = 0; i < layers.Length; i++)
+            {
+                if (layers[i] is null) throw new System.NullReferenceException();
+            }
             if (basic_layers is null) throw new System.NullReferenceException();
+            for (int i = 0; i < basic_layers.Length; i++)
+            {
+                if (basic_layers[i] is null) throw new System.NullReferenceException();
+            }
             if (data is null) throw new System.NullReferenceException();
+            for (int i = 0; i < data.Length; i++)
+            {
+                if (data[i] is null) throw new System.NullReferenceException();
+                data[i].Validate();
+            }
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -104,20 +121,16 @@ namespace Iviz.Msgs.grid_map_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "grid_map_msgs/GridMap";
+        [Preserve] public const string RosMessageType = "grid_map_msgs/GridMap";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "95681e052b1f73bf87b7eb984382b401";
+        [Preserve] public const string RosMd5Sum = "95681e052b1f73bf87b7eb984382b401";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71X224bNxB9368Y2A+xXFux5cBoAuTBaJA0QAykTYCiMAyZ2h1pae+SG5KyrHx9z5B7" +
                 "U5wifagjCNYuOTM8c+bC8T69c7qgWjVUsirYZfJ+qZr3ZmlJ40+W7Q8yldqyI6Nq9tPMB6fN6uo6rfod" +
                 "wYXyOh+L04FtgrZGVZMpfS55LOGhWXBgV2vDtCl1XrYbtHS2ppv0ckOGuaBgacF0rypdQE8bsg64aWkd" +

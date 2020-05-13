@@ -3,13 +3,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.std_msgs
 {
+    [DataContract]
     [StructLayout(LayoutKind.Sequential)]
     public readonly struct ColorRGBA : IMessage
     {
-        public float r { get; }
-        public float g { get; }
-        public float b { get; }
-        public float a { get; }
+        [DataMember] public float r { get; }
+        [DataMember] public float g { get; }
+        [DataMember] public float b { get; }
+        [DataMember] public float a { get; }
     
         /// <summary> Explicit constructor. </summary>
         public ColorRGBA(float r, float g, float b, float a)
@@ -26,13 +27,12 @@ namespace Iviz.Msgs.std_msgs
             this = b.Deserialize<ColorRGBA>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new ColorRGBA(b);
+            return new ColorRGBA(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this);
@@ -42,23 +42,18 @@ namespace Iviz.Msgs.std_msgs
         {
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength => 16;
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "std_msgs/ColorRGBA";
+        [Preserve] public const string RosMessageType = "std_msgs/ColorRGBA";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "a29a96539573343b1310c73607334b00";
+        [Preserve] public const string RosMd5Sum = "a29a96539573343b1310c73607334b00";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE0vLyU8sMTZSKOJKg7LS4awkOCuRiwsAZHVNWikAAAA=";
                 
     }

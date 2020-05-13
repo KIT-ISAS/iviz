@@ -2,11 +2,12 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.geometry_msgs
 {
+    [DataContract]
     public sealed class AccelWithCovarianceStamped : IMessage
     {
         // This represents an estimated accel with reference coordinate frame and timestamp.
-        public std_msgs.Header header { get; set; }
-        public AccelWithCovariance accel { get; set; }
+        [DataMember] public std_msgs.Header header { get; set; }
+        [DataMember] public AccelWithCovariance accel { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public AccelWithCovarianceStamped()
@@ -29,26 +30,26 @@ namespace Iviz.Msgs.geometry_msgs
             this.accel = new AccelWithCovariance(b);
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new AccelWithCovarianceStamped(b);
+            return new AccelWithCovarianceStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
-            this.accel.Serialize(b);
+            b.Serialize(this.header);
+            b.Serialize(this.accel);
         }
         
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (accel is null) throw new System.NullReferenceException();
+            accel.Validate();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -58,20 +59,16 @@ namespace Iviz.Msgs.geometry_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "geometry_msgs/AccelWithCovarianceStamped";
+        [Preserve] public const string RosMessageType = "geometry_msgs/AccelWithCovarianceStamped";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "96adb295225031ec8d57fb4251b0a886";
+        [Preserve] public const string RosMd5Sum = "96adb295225031ec8d57fb4251b0a886";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71VTY/TQAy951dY6mFb1BaJRXtYiQMCAT0gIUB8Cq3cxEkGkpngmWyb/fW8mbShaDmA" +
                 "BFtFajKxn+3nZ2dGb2vjSaVT8WKDJ7YkPpiWgxTEeS4N7UyoYVKKis2Fcue0MBYGVCq3ApeC4AE3brt1" +
                 "9kK4EKU6/WWPI8R7IDxx16yGI0KCzbJH//iXvXzz/JJ8KK5aX/n7Yx7ZjN4EZMhaUCuBCw5MpUN+pqpF" +

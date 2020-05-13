@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.rosbridge_library
 {
+    [DataContract]
     public sealed class TestEmpty : IService
     {
         /// <summary> Request message. </summary>
-        public TestEmptyRequest Request { get; set; }
+        [DataMember] public TestEmptyRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public TestEmptyResponse Response { get; set; }
+        [DataMember] public TestEmptyResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public TestEmpty()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.rosbridge_library
             Response = new TestEmptyResponse();
         }
         
-        public IService Create() => new TestEmpty();
+        IService IService.Create() => new TestEmpty();
         
         IRequest IService.Request
         {
@@ -40,16 +41,13 @@ namespace Iviz.Msgs.rosbridge_library
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "rosbridge_library/TestEmpty";
+        [Preserve] public const string RosServiceType = "rosbridge_library/TestEmpty";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "d41d8cd98f00b204e9800998ecf8427e";
+        [Preserve] public const string RosMd5Sum = "d41d8cd98f00b204e9800998ecf8427e";
     }
 
     public sealed class TestEmptyRequest : Internal.EmptyRequest

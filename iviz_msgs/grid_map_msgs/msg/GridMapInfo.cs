@@ -2,22 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.grid_map_msgs
 {
+    [DataContract]
     public sealed class GridMapInfo : IMessage
     {
         // Header (time and frame)
-        public std_msgs.Header header { get; set; }
+        [DataMember] public std_msgs.Header header { get; set; }
         
         // Resolution of the grid [m/cell].
-        public double resolution { get; set; }
+        [DataMember] public double resolution { get; set; }
         
         // Length in x-direction [m].
-        public double length_x { get; set; }
+        [DataMember] public double length_x { get; set; }
         
         // Length in y-direction [m].
-        public double length_y { get; set; }
+        [DataMember] public double length_y { get; set; }
         
         // Pose of the grid map center in the frame defined in `header` [m].
-        public geometry_msgs.Pose pose { get; set; }
+        [DataMember] public geometry_msgs.Pose pose { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GridMapInfo()
@@ -45,28 +46,27 @@ namespace Iviz.Msgs.grid_map_msgs
             this.pose = new geometry_msgs.Pose(b);
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new GridMapInfo(b);
+            return new GridMapInfo(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.Serialize(this.resolution);
             b.Serialize(this.length_x);
             b.Serialize(this.length_y);
-            this.pose.Serialize(b);
+            b.Serialize(this.pose);
         }
         
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -76,20 +76,16 @@ namespace Iviz.Msgs.grid_map_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "grid_map_msgs/GridMapInfo";
+        [Preserve] public const string RosMessageType = "grid_map_msgs/GridMapInfo";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "43ee5430e1c253682111cb6bedac0ef9";
+        [Preserve] public const string RosMd5Sum = "43ee5430e1c253682111cb6bedac0ef9";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71UTWvcMBC961cM7CFJ6W6gLT0EeiiUfkALaZNbKJuJNGsLZMmR5GTdX98nOevN0kN6" +
                 "aLOYtS29efPezMgL+ixsJNJxtp0Qe0ObyJ2cqIf1tt6UWtAPScEN2QZPYUO5FWqiNXTVnWpx7udKbVzg" +
                 "/PYNxRlYwr6Kb3JL1tN2aWwUXRmuukcBrkLW20P4+AR8LPDzkORATsc9afEZ0sFRlqsfMrKxXkxZvJ48" +

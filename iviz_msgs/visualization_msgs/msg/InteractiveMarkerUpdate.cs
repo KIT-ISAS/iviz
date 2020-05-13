@@ -2,15 +2,16 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.visualization_msgs
 {
+    [DataContract]
     public sealed class InteractiveMarkerUpdate : IMessage
     {
         // Identifying string. Must be unique in the topic namespace
         // that this server works on.
-        public string server_id { get; set; }
+        [DataMember] public string server_id { get; set; }
         
         // Sequence number.
         // The client will use this to detect if it has missed an update.
-        public ulong seq_num { get; set; }
+        [DataMember] public ulong seq_num { get; set; }
         
         // Type holds the purpose of this message.  It must be one of UPDATE or KEEP_ALIVE.
         // UPDATE: Incremental update to previous state. 
@@ -22,19 +23,19 @@ namespace Iviz.Msgs.visualization_msgs
         public const byte KEEP_ALIVE = 0;
         public const byte UPDATE = 1;
         
-        public byte type { get; set; }
+        [DataMember] public byte type { get; set; }
         
         //Note: No guarantees on the order of processing.
         //      Contents must be kept consistent by sender.
         
         //Markers to be added or updated
-        public InteractiveMarker[] markers { get; set; }
+        [DataMember] public InteractiveMarker[] markers { get; set; }
         
         //Poses of markers that should be moved
-        public InteractiveMarkerPose[] poses { get; set; }
+        [DataMember] public InteractiveMarkerPose[] poses { get; set; }
         
         //Names of markers to be erased
-        public string[] erases { get; set; }
+        [DataMember] public string[] erases { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarkerUpdate()
@@ -62,18 +63,25 @@ namespace Iviz.Msgs.visualization_msgs
             this.server_id = b.DeserializeString();
             this.seq_num = b.Deserialize<ulong>();
             this.type = b.Deserialize<byte>();
-            this.markers = b.DeserializeArray<InteractiveMarker>(0);
-            this.poses = b.DeserializeArray<InteractiveMarkerPose>(0);
-            this.erases = b.DeserializeStringArray(0);
+            this.markers = b.DeserializeArray<InteractiveMarker>();
+            for (int i = 0; i < this.markers.Length; i++)
+            {
+                this.markers[i] = new InteractiveMarker(b);
+            }
+            this.poses = b.DeserializeArray<InteractiveMarkerPose>();
+            for (int i = 0; i < this.poses.Length; i++)
+            {
+                this.poses[i] = new InteractiveMarkerPose(b);
+            }
+            this.erases = b.DeserializeStringArray();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new InteractiveMarkerUpdate(b);
+            return new InteractiveMarkerUpdate(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.server_id);
@@ -88,11 +96,24 @@ namespace Iviz.Msgs.visualization_msgs
         {
             if (server_id is null) throw new System.NullReferenceException();
             if (markers is null) throw new System.NullReferenceException();
+            for (int i = 0; i < markers.Length; i++)
+            {
+                if (markers[i] is null) throw new System.NullReferenceException();
+                markers[i].Validate();
+            }
             if (poses is null) throw new System.NullReferenceException();
+            for (int i = 0; i < poses.Length; i++)
+            {
+                if (poses[i] is null) throw new System.NullReferenceException();
+                poses[i].Validate();
+            }
             if (erases is null) throw new System.NullReferenceException();
+            for (int i = 0; i < erases.Length; i++)
+            {
+                if (erases[i] is null) throw new System.NullReferenceException();
+            }
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -115,20 +136,16 @@ namespace Iviz.Msgs.visualization_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "visualization_msgs/InteractiveMarkerUpdate";
+        [Preserve] public const string RosMessageType = "visualization_msgs/InteractiveMarkerUpdate";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "710d308d0a9276d65945e92dd30b3946";
+        [Preserve] public const string RosMd5Sum = "710d308d0a9276d65945e92dd30b3946";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE91aW3PbNhZ+rn4FJp5O7K0s39Jsq10/KJacaOrb2nLaTqejgUhIQk0RDEhaVn59v3MA" +
                 "UKRlJ52dTTqz2c6aAnEOzv0GbolhrNJCT1c6nYm8sPjTEedlXoiJEmWqP5RK6FQUcyUKk+lIpHKh8kxG" +
                 "qrWFVVng/3QucmXvlRVLY+9yYdJOy6Hy62Mdt7D9RgFbGimRlouJsh0sjYA3SjRIEEudJKLMlUNYGBGr" +

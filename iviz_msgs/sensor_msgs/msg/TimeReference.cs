@@ -2,15 +2,16 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.sensor_msgs
 {
+    [DataContract]
     public sealed class TimeReference : IMessage
     {
         // Measurement from an external time source not actively synchronized with the system clock.
         
-        public std_msgs.Header header { get; set; } // stamp is system time for which measurement was valid
+        [DataMember] public std_msgs.Header header { get; set; } // stamp is system time for which measurement was valid
         // frame_id is not used 
         
-        public time time_ref { get; set; } // corresponding time from this external source
-        public string source { get; set; } // (optional) name of time source
+        [DataMember] public time time_ref { get; set; } // corresponding time from this external source
+        [DataMember] public string source { get; set; } // (optional) name of time source
     
         /// <summary> Constructor for empty message. </summary>
         public TimeReference()
@@ -35,16 +36,15 @@ namespace Iviz.Msgs.sensor_msgs
             this.source = b.DeserializeString();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new TimeReference(b);
+            return new TimeReference(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.Serialize(this.time_ref);
             b.Serialize(this.source);
         }
@@ -52,10 +52,10 @@ namespace Iviz.Msgs.sensor_msgs
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (source is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -66,20 +66,16 @@ namespace Iviz.Msgs.sensor_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "sensor_msgs/TimeReference";
+        [Preserve] public const string RosMessageType = "sensor_msgs/TimeReference";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "fded64a0265108ba86c3d38fb11c0c16";
+        [Preserve] public const string RosMd5Sum = "fded64a0265108ba86c3d38fb11c0c16";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61TwYrbMBC96ysGfNikkBTaW6C3Zds9LBR272EiTSxReeRK46Tu13ckJ2naUw8VBmP7" +
                 "zXsz7407eCEsU6aBWOCY0wDIQD+EMmMECQNBSVO2BJwE0Eo4UZyhzGx9Thx+koNzEA/iFTkXoQFsTPbb" +
                 "1pgvhI4y+OWmp4MiOIwQyhXaBI4pw9kH62G4a+aMBU4YgzPw9+m0UxxoH1ylqo1NRfswptFBY91nOlak" +

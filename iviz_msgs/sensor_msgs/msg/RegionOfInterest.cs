@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.sensor_msgs
 {
+    [DataContract]
     public sealed class RegionOfInterest : IMessage
     {
         // This message is used to specify a region of interest within an image.
@@ -11,18 +12,18 @@ namespace Iviz.Msgs.sensor_msgs
         // width fields for the associated image; or height = width = 0
         // indicates that the full resolution image was captured.
         
-        public uint x_offset { get; set; } // Leftmost pixel of the ROI
+        [DataMember] public uint x_offset { get; set; } // Leftmost pixel of the ROI
         // (0 if the ROI includes the left edge of the image)
-        public uint y_offset { get; set; } // Topmost pixel of the ROI
+        [DataMember] public uint y_offset { get; set; } // Topmost pixel of the ROI
         // (0 if the ROI includes the top edge of the image)
-        public uint height { get; set; } // Height of ROI
-        public uint width { get; set; } // Width of ROI
+        [DataMember] public uint height { get; set; } // Height of ROI
+        [DataMember] public uint width { get; set; } // Width of ROI
         
         // True if a distinct rectified ROI should be calculated from the "raw"
         // ROI in this message. Typically this should be False if the full image
         // is captured (ROI not used), and True if a subwindow is captured (ROI
         // used).
-        public bool do_rectify { get; set; }
+        [DataMember] public bool do_rectify { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public RegionOfInterest()
@@ -49,13 +50,12 @@ namespace Iviz.Msgs.sensor_msgs
             this.do_rectify = b.Deserialize<bool>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new RegionOfInterest(b);
+            return new RegionOfInterest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.x_offset);
@@ -69,23 +69,18 @@ namespace Iviz.Msgs.sensor_msgs
         {
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength => 17;
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "sensor_msgs/RegionOfInterest";
+        [Preserve] public const string RosMessageType = "sensor_msgs/RegionOfInterest";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "bdb633039d588fcccb441a4d43ccfe09";
+        [Preserve] public const string RosMd5Sum = "bdb633039d588fcccb441a4d43ccfe09";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61STWvcMBC9+1c84ksCYQntseRaWigUykKOQSuNViKyZKQRjv99R7I32ybQU32SpXkf" +
                 "82ZGHJ0vmKgUdSbIsRYy4IQyk/Z2hUKms08RycJHpkyFsXh2PkJF+Elwh2EcRjw5ih/g7Ai/fn5HIWYf" +
                 "z42lXWk1UVZYGqT9dxosqggPqxeK9/3akT87Fh0jkoYdrKdgCopLNRiQ2KCMSbF27+qF5y+ETblXqFKS" +

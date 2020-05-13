@@ -2,17 +2,18 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.visualization_msgs
 {
+    [DataContract]
     public sealed class InteractiveMarkerPose : IMessage
     {
         // Time/frame info.
-        public std_msgs.Header header { get; set; }
+        [DataMember] public std_msgs.Header header { get; set; }
         
         // Initial pose. Also, defines the pivot point for rotations.
-        public geometry_msgs.Pose pose { get; set; }
+        [DataMember] public geometry_msgs.Pose pose { get; set; }
         
         // Identifying string. Must be globally unique in
         // the topic that this message is sent through.
-        public string name { get; set; }
+        [DataMember] public string name { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarkerPose()
@@ -37,27 +38,26 @@ namespace Iviz.Msgs.visualization_msgs
             this.name = b.DeserializeString();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new InteractiveMarkerPose(b);
+            return new InteractiveMarkerPose(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
-            this.pose.Serialize(b);
+            b.Serialize(this.header);
+            b.Serialize(this.pose);
             b.Serialize(this.name);
         }
         
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (name is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -68,20 +68,16 @@ namespace Iviz.Msgs.visualization_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "visualization_msgs/InteractiveMarkerPose";
+        [Preserve] public const string RosMessageType = "visualization_msgs/InteractiveMarkerPose";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "a6e6833209a196a38d798dadb02c81f8";
+        [Preserve] public const string RosMd5Sum = "a6e6833209a196a38d798dadb02c81f8";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71UwU7cMBC9+ytG2gNQQZDaqgekHpBQWw5IVHBHs/EkGSmxg+0spF/fZ4csXfXQHlpW" +
                 "0caJZ96892acDd3rIOdN4EFIXeMr803YSqCu3IzZ0LXTpNzT6KNUdNlHf0pWGnUSKXVCo+58wq66RI0P" +
                 "FHzipN7FyrTiB0lhfhhiG89vAVBQCqoVl7SZ1bUUU8CtopspJtoKtb3fct/PNDl9nDIxJORSyY9aY8UJ" +

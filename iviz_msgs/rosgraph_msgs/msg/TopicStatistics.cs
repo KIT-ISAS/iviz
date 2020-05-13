@@ -2,40 +2,41 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.rosgraph_msgs
 {
+    [DataContract]
     public sealed class TopicStatistics : IMessage
     {
         // name of the topic
-        public string topic { get; set; }
+        [DataMember] public string topic { get; set; }
         
         // node id of the publisher
-        public string node_pub { get; set; }
+        [DataMember] public string node_pub { get; set; }
         
         // node id of the subscriber
-        public string node_sub { get; set; }
+        [DataMember] public string node_sub { get; set; }
         
         // the statistics apply to this time window
-        public time window_start { get; set; }
-        public time window_stop { get; set; }
+        [DataMember] public time window_start { get; set; }
+        [DataMember] public time window_stop { get; set; }
         
         // number of messages delivered during the window
-        public int delivered_msgs { get; set; }
+        [DataMember] public int delivered_msgs { get; set; }
         // numbers of messages dropped during the window
-        public int dropped_msgs { get; set; }
+        [DataMember] public int dropped_msgs { get; set; }
         
         // traffic during the window, in bytes
-        public int traffic { get; set; }
+        [DataMember] public int traffic { get; set; }
         
         // mean/stddev/max period between two messages
-        public duration period_mean { get; set; }
-        public duration period_stddev { get; set; }
-        public duration period_max { get; set; }
+        [DataMember] public duration period_mean { get; set; }
+        [DataMember] public duration period_stddev { get; set; }
+        [DataMember] public duration period_max { get; set; }
         
         // mean/stddev/max age of the message based on the
         // timestamp in the message header. In case the
         // message does not have a header, it will be 0.
-        public duration stamp_age_mean { get; set; }
-        public duration stamp_age_stddev { get; set; }
-        public duration stamp_age_max { get; set; }
+        [DataMember] public duration stamp_age_mean { get; set; }
+        [DataMember] public duration stamp_age_stddev { get; set; }
+        [DataMember] public duration stamp_age_max { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TopicStatistics()
@@ -83,13 +84,12 @@ namespace Iviz.Msgs.rosgraph_msgs
             this.stamp_age_max = b.Deserialize<duration>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new TopicStatistics(b);
+            return new TopicStatistics(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.topic);
@@ -115,7 +115,6 @@ namespace Iviz.Msgs.rosgraph_msgs
             if (node_sub is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -127,20 +126,16 @@ namespace Iviz.Msgs.rosgraph_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "rosgraph_msgs/TopicStatistics";
+        [Preserve] public const string RosMessageType = "rosgraph_msgs/TopicStatistics";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "10152ed868c5097a5e2e4a89d7daa710";
+        [Preserve] public const string RosMd5Sum = "10152ed868c5097a5e2e4a89d7daa710";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE32RXW6DMBCE3znFSnmtkqo9RU+BDF7CSvhH3gWS23cdTEIh6htefzPjWU7gjUMIHUiP" +
                 "ICFSW7Ek8tdyqE7gg0Ugu0JxbAbiHtMK5vtap29YHhtuEzU7mBf4QYgRYqGWwcQ43DVW58QgpO+aydsw" +
                 "V5vvWgVJdpMQH9mj06Ac7ZDZXJHB4kATJrRgx6VU/zQlL99fL6J2fOWnC/+1SSHG/0yW+8UiF0um66g9" +

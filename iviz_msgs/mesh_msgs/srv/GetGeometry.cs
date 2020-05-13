@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.mesh_msgs
 {
+    [DataContract]
     public sealed class GetGeometry : IService
     {
         /// <summary> Request message. </summary>
-        public GetGeometryRequest Request { get; set; }
+        [DataMember] public GetGeometryRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public GetGeometryResponse Response { get; set; }
+        [DataMember] public GetGeometryResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public GetGeometry()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.mesh_msgs
             Response = new GetGeometryResponse();
         }
         
-        public IService Create() => new GetGeometry();
+        IService IService.Create() => new GetGeometry();
         
         IRequest IService.Request
         {
@@ -40,21 +41,18 @@ namespace Iviz.Msgs.mesh_msgs
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "mesh_msgs/GetGeometry";
+        [Preserve] public const string RosServiceType = "mesh_msgs/GetGeometry";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "e21c42f8a3978429fcbcd1c03ddeb4e3";
+        [Preserve] public const string RosMd5Sum = "e21c42f8a3978429fcbcd1c03ddeb4e3";
     }
 
     public sealed class GetGeometryRequest : IRequest
     {
-        public string uuid { get; set; }
+        [DataMember] public string uuid { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetGeometryRequest()
@@ -74,13 +72,12 @@ namespace Iviz.Msgs.mesh_msgs
             this.uuid = b.DeserializeString();
         }
         
-        public IRequest Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new GetGeometryRequest(b);
+            return new GetGeometryRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.uuid);
@@ -91,7 +88,6 @@ namespace Iviz.Msgs.mesh_msgs
             if (uuid is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -104,7 +100,7 @@ namespace Iviz.Msgs.mesh_msgs
 
     public sealed class GetGeometryResponse : IResponse
     {
-        public mesh_msgs.MeshGeometryStamped mesh_geometry_stamped { get; set; }
+        [DataMember] public mesh_msgs.MeshGeometryStamped mesh_geometry_stamped { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetGeometryResponse()
@@ -124,24 +120,23 @@ namespace Iviz.Msgs.mesh_msgs
             this.mesh_geometry_stamped = new mesh_msgs.MeshGeometryStamped(b);
         }
         
-        public IResponse Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new GetGeometryResponse(b);
+            return new GetGeometryResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.mesh_geometry_stamped.Serialize(b);
+            b.Serialize(this.mesh_geometry_stamped);
         }
         
         public void Validate()
         {
             if (mesh_geometry_stamped is null) throw new System.NullReferenceException();
+            mesh_geometry_stamped.Validate();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {

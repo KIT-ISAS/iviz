@@ -2,12 +2,13 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.geometry_msgs
 {
+    [DataContract]
     public sealed class PoseWithCovarianceStamped : IMessage
     {
         // This expresses an estimated pose with a reference coordinate frame and timestamp
         
-        public std_msgs.Header header { get; set; }
-        public PoseWithCovariance pose { get; set; }
+        [DataMember] public std_msgs.Header header { get; set; }
+        [DataMember] public PoseWithCovariance pose { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public PoseWithCovarianceStamped()
@@ -30,26 +31,26 @@ namespace Iviz.Msgs.geometry_msgs
             this.pose = new PoseWithCovariance(b);
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new PoseWithCovarianceStamped(b);
+            return new PoseWithCovarianceStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
-            this.pose.Serialize(b);
+            b.Serialize(this.header);
+            b.Serialize(this.pose);
         }
         
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (pose is null) throw new System.NullReferenceException();
+            pose.Validate();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -59,20 +60,16 @@ namespace Iviz.Msgs.geometry_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "geometry_msgs/PoseWithCovarianceStamped";
+        [Preserve] public const string RosMessageType = "geometry_msgs/PoseWithCovarianceStamped";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "953b798c0f514ff060a53a3498ce6246";
+        [Preserve] public const string RosMd5Sum = "953b798c0f514ff060a53a3498ce6246";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71VwW7TQBC971eMlENblASJohwqcUAgoAekQitRQKia2GN7kb3r7q6buF/P203spKRC" +
                 "HKBRpNjrmTcz771xJnRVaU+ybp14L57YkPigGw6SU2u90EqHipicFOLEZEKZtS7XBhFUOG4EOTkhBXnc" +
                 "tEp9EM7FUZV+1AUwvgDijb1jpzkCRFilXv3jj/p4+f6MfMhvGl/655su1IQuA/pjl1MjgXMOTIVFd7qs" +

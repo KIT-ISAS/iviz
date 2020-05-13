@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.sensor_msgs
 {
+    [DataContract]
     public sealed class NavSatStatus : IMessage
     {
         // Navigation Satellite fix status for any Global Navigation Satellite System
@@ -15,7 +16,7 @@ namespace Iviz.Msgs.sensor_msgs
         public const sbyte STATUS_SBAS_FIX = 1; // with satellite-based augmentation
         public const sbyte STATUS_GBAS_FIX = 2; // with ground-based augmentation
         
-        public sbyte status { get; set; }
+        [DataMember] public sbyte status { get; set; }
         
         // Bits defining which Global Navigation Satellite System signals were
         // used by the receiver.
@@ -25,7 +26,7 @@ namespace Iviz.Msgs.sensor_msgs
         public const ushort SERVICE_COMPASS = 4; // includes BeiDou.
         public const ushort SERVICE_GALILEO = 8;
         
-        public ushort service { get; set; }
+        [DataMember] public ushort service { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public NavSatStatus()
@@ -46,13 +47,12 @@ namespace Iviz.Msgs.sensor_msgs
             this.service = b.Deserialize<ushort>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new NavSatStatus(b);
+            return new NavSatStatus(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.status);
@@ -63,23 +63,18 @@ namespace Iviz.Msgs.sensor_msgs
         {
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength => 3;
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "sensor_msgs/NavSatStatus";
+        [Preserve] public const string RosMessageType = "sensor_msgs/NavSatStatus";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "331cdbddfa4bc96ffc3b9ad98900a54c";
+        [Preserve] public const string RosMd5Sum = "331cdbddfa4bc96ffc3b9ad98900a54c";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE42RT0/DMAzF7/0UlnZmYgghLiB1MKZJY0OUfzeUtm5rKUumxNnYt8ehLWyMA7nV7vvZ" +
                 "fm8AC7WhWjFZA5li1JoYoaIP8Kw4eKisA2V2MNU2V/rv37OdZ1wlyQBeG+QGHbAFG3gdWLSgQr1Cw1h+" +
                 "cclDiYxuRUYq+Q5yyw2IKnYFwbs1iqr8KmnlGZhWCCVVFTrBkGxRWOewiFt42EoV5Atpg+UQIBVGN2ej" +

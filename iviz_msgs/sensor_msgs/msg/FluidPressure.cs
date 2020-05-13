@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.sensor_msgs
 {
+    [DataContract]
     public sealed class FluidPressure : IMessage
     {
         // Single pressure reading.  This message is appropriate for measuring the
@@ -10,12 +11,12 @@ namespace Iviz.Msgs.sensor_msgs
         
         // This message is not appropriate for force/pressure contact sensors.
         
-        public std_msgs.Header header { get; set; } // timestamp of the measurement
+        [DataMember] public std_msgs.Header header { get; set; } // timestamp of the measurement
         // frame_id is the location of the pressure sensor
         
-        public double fluid_pressure { get; set; } // Absolute pressure reading in Pascals.
+        [DataMember] public double fluid_pressure { get; set; } // Absolute pressure reading in Pascals.
         
-        public double variance { get; set; } // 0 is interpreted as variance unknown
+        [DataMember] public double variance { get; set; } // 0 is interpreted as variance unknown
     
         /// <summary> Constructor for empty message. </summary>
         public FluidPressure()
@@ -39,16 +40,15 @@ namespace Iviz.Msgs.sensor_msgs
             this.variance = b.Deserialize<double>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new FluidPressure(b);
+            return new FluidPressure(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.Serialize(this.fluid_pressure);
             b.Serialize(this.variance);
         }
@@ -56,9 +56,9 @@ namespace Iviz.Msgs.sensor_msgs
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -68,20 +68,16 @@ namespace Iviz.Msgs.sensor_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "sensor_msgs/FluidPressure";
+        [Preserve] public const string RosMessageType = "sensor_msgs/FluidPressure";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "804dc5cea1c5306d6a2eb80b9833befe";
+        [Preserve] public const string RosMd5Sum = "804dc5cea1c5306d6a2eb80b9833befe";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61UwYrbMBC96ysGcthN6WZLW3oI9FBY2u6hUNi9h4k8sUVlyZXGSfP3fWNvkqVLoYcK" +
                 "B8fWzNOb92ZMC3oIqY1CQ5FaxyJUhBu8WhE9dqFSj9fcCuEvD0PJQwmsQrtcsMXIQCxpJ44WF4yQamiE" +
                 "8o6YdnEMDV1zKK/pgFTcRP3yhM+xZsT7ODZSDYS1z3XopARPOGTLJfei9nSCXzmL+5NdyvqCIX5ebs+0" +

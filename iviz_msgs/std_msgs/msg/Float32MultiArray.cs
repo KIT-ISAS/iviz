@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.std_msgs
 {
+    [DataContract]
     public sealed class Float32MultiArray : IMessage
     {
         // Please look at the MultiArrayLayout message definition for
         // documentation on all multiarrays.
         
-        public MultiArrayLayout layout { get; set; } // specification of data layout
-        public float[] data { get; set; } // array of data
+        [DataMember] public MultiArrayLayout layout { get; set; } // specification of data layout
+        [DataMember] public float[] data { get; set; } // array of data
         
     
         /// <summary> Constructor for empty message. </summary>
@@ -29,29 +30,28 @@ namespace Iviz.Msgs.std_msgs
         internal Float32MultiArray(Buffer b)
         {
             this.layout = new MultiArrayLayout(b);
-            this.data = b.DeserializeStructArray<float>(0);
+            this.data = b.DeserializeStructArray<float>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new Float32MultiArray(b);
+            return new Float32MultiArray(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.layout.Serialize(b);
+            b.Serialize(this.layout);
             b.SerializeStructArray(this.data, 0);
         }
         
         public void Validate()
         {
             if (layout is null) throw new System.NullReferenceException();
+            layout.Validate();
             if (data is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -62,20 +62,16 @@ namespace Iviz.Msgs.std_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "std_msgs/Float32MultiArray";
+        [Preserve] public const string RosMessageType = "std_msgs/Float32MultiArray";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "6a40e0ffa6a17a503ac3f8616991b1f6";
+        [Preserve] public const string RosMd5Sum = "6a40e0ffa6a17a503ac3f8616991b1f6";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71UXWvbMBR996+4JC9tlmb5KGUt9CEw2EsLgw3GCKGo1nWsRJaCJDfrfv2O/J12j2PG" +
                 "YFn365yjezWmr5qFZ9LWHkgECjnTY6mDWjsnXh/Eqy0DFey92DFJzpRRQVlDmXXJmKRNy4JNENUeXqE1" +
                 "FTFcxHA/S5J3yUg33/oZkz9yqjKVNkkykiKIxivJtBVhtdxsW//aSn14VakNS5Lk/h8/yeO3L3fkg3wq" +

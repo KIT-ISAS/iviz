@@ -2,11 +2,12 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.visualization_msgs
 {
+    [DataContract]
     public sealed class InteractiveMarkerInit : IMessage
     {
         // Identifying string. Must be unique in the topic namespace
         // that this server works on.
-        public string server_id { get; set; }
+        [DataMember] public string server_id { get; set; }
         
         // Sequence number.
         // The client will use this to detect if it has missed a subsequent
@@ -14,10 +15,10 @@ namespace Iviz.Msgs.visualization_msgs
         // an init message.  Clients will likely want to unsubscribe from the
         // init topic after a successful initialization to avoid receiving
         // duplicate data.
-        public ulong seq_num { get; set; }
+        [DataMember] public ulong seq_num { get; set; }
         
         // All markers.
-        public InteractiveMarker[] markers { get; set; }
+        [DataMember] public InteractiveMarker[] markers { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarkerInit()
@@ -39,16 +40,19 @@ namespace Iviz.Msgs.visualization_msgs
         {
             this.server_id = b.DeserializeString();
             this.seq_num = b.Deserialize<ulong>();
-            this.markers = b.DeserializeArray<InteractiveMarker>(0);
+            this.markers = b.DeserializeArray<InteractiveMarker>();
+            for (int i = 0; i < this.markers.Length; i++)
+            {
+                this.markers[i] = new InteractiveMarker(b);
+            }
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new InteractiveMarkerInit(b);
+            return new InteractiveMarkerInit(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.server_id);
@@ -60,9 +64,13 @@ namespace Iviz.Msgs.visualization_msgs
         {
             if (server_id is null) throw new System.NullReferenceException();
             if (markers is null) throw new System.NullReferenceException();
+            for (int i = 0; i < markers.Length; i++)
+            {
+                if (markers[i] is null) throw new System.NullReferenceException();
+                markers[i].Validate();
+            }
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -76,20 +84,16 @@ namespace Iviz.Msgs.visualization_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "visualization_msgs/InteractiveMarkerInit";
+        [Preserve] public const string RosMessageType = "visualization_msgs/InteractiveMarkerInit";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "d5f2c5045a72456d228676ab91048734";
+        [Preserve] public const string RosMd5Sum = "d5f2c5045a72456d228676ab91048734";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE8VabXPbNhL+fPoVmGQ6sa+y7NhprvWdPziWnGjqt7OVvkyno4FISEJDEQxAWlF+/T27" +
                 "APhiOU3n5pJLMjEJAovFvj678FMxTlVe6vlG5wvhSosfA3FZuVLMlKhy/b5SQueiXCpRmkInIpcr5QqZ" +
                 "qN5TjMoS/2knnLL3yoq1se+cMPmg50mF8alOe5h+p0AtT5TIq9VM2QGGJqCbZBosiLXOMlE55QmWRqSq" +

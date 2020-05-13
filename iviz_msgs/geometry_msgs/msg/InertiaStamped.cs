@@ -2,10 +2,11 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.geometry_msgs
 {
+    [DataContract]
     public sealed class InertiaStamped : IMessage
     {
-        public std_msgs.Header header { get; set; }
-        public Inertia inertia { get; set; }
+        [DataMember] public std_msgs.Header header { get; set; }
+        [DataMember] public Inertia inertia { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public InertiaStamped()
@@ -28,26 +29,26 @@ namespace Iviz.Msgs.geometry_msgs
             this.inertia = new Inertia(b);
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new InertiaStamped(b);
+            return new InertiaStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
-            this.inertia.Serialize(b);
+            b.Serialize(this.header);
+            b.Serialize(this.inertia);
         }
         
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (inertia is null) throw new System.NullReferenceException();
+            inertia.Validate();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -57,20 +58,16 @@ namespace Iviz.Msgs.geometry_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "geometry_msgs/InertiaStamped";
+        [Preserve] public const string RosMessageType = "geometry_msgs/InertiaStamped";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "ddee48caeab5a966c5e8d166654a9ac7";
+        [Preserve] public const string RosMd5Sum = "ddee48caeab5a966c5e8d166654a9ac7";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71UTWvcMBC961cM5JCk7LqQlB4CObW02UMgkNBLScOsPbZFLMmV5N310h/fJ3m/cuuh" +
                 "rbGxPZr35nvuhCvx1OaXWljxUTPp6a3U7V++1P3j1xsKsXoxoQnv7yazZ/QY2VbsKzISueLIVDt4pZtW" +
                 "/LyTlXQAsemlonwax15CAeBTqwPhbgQuc9eNNAQoRUelM2awuuQoFLWRN3ggtSWmnhFnOXTsoe98pW1S" +

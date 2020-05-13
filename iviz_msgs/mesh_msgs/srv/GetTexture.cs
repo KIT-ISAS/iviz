@@ -2,13 +2,14 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.mesh_msgs
 {
+    [DataContract]
     public sealed class GetTexture : IService
     {
         /// <summary> Request message. </summary>
-        public GetTextureRequest Request { get; set; }
+        [DataMember] public GetTextureRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        public GetTextureResponse Response { get; set; }
+        [DataMember] public GetTextureResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
         public GetTexture()
@@ -24,7 +25,7 @@ namespace Iviz.Msgs.mesh_msgs
             Response = new GetTextureResponse();
         }
         
-        public IService Create() => new GetTexture();
+        IService IService.Create() => new GetTexture();
         
         IRequest IService.Request
         {
@@ -40,22 +41,19 @@ namespace Iviz.Msgs.mesh_msgs
         
         public string ErrorMessage { get; set; }
         
-        [IgnoreDataMember]
-        public string RosType => RosServiceType;
+        string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve]
-        public const string RosServiceType = "mesh_msgs/GetTexture";
+        [Preserve] public const string RosServiceType = "mesh_msgs/GetTexture";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "48823554c65f6c317f12f79207ce78ac";
+        [Preserve] public const string RosMd5Sum = "48823554c65f6c317f12f79207ce78ac";
     }
 
     public sealed class GetTextureRequest : IRequest
     {
-        public string uuid { get; set; }
-        public uint texture_index { get; set; }
+        [DataMember] public string uuid { get; set; }
+        [DataMember] public uint texture_index { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetTextureRequest()
@@ -77,13 +75,12 @@ namespace Iviz.Msgs.mesh_msgs
             this.texture_index = b.Deserialize<uint>();
         }
         
-        public IRequest Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new GetTextureRequest(b);
+            return new GetTextureRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.uuid);
@@ -95,7 +92,6 @@ namespace Iviz.Msgs.mesh_msgs
             if (uuid is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -108,7 +104,7 @@ namespace Iviz.Msgs.mesh_msgs
 
     public sealed class GetTextureResponse : IResponse
     {
-        public mesh_msgs.MeshTexture texture { get; set; }
+        [DataMember] public mesh_msgs.MeshTexture texture { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetTextureResponse()
@@ -128,24 +124,23 @@ namespace Iviz.Msgs.mesh_msgs
             this.texture = new mesh_msgs.MeshTexture(b);
         }
         
-        public IResponse Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new GetTextureResponse(b);
+            return new GetTextureResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.texture.Serialize(b);
+            b.Serialize(this.texture);
         }
         
         public void Validate()
         {
             if (texture is null) throw new System.NullReferenceException();
+            texture.Validate();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {

@@ -2,12 +2,13 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.sensor_msgs
 {
+    [DataContract]
     public sealed class Joy : IMessage
     {
         // Reports the state of a joysticks axes and buttons.
-        public std_msgs.Header header { get; set; } // timestamp in the header is the time the data is received from the joystick
-        public float[] axes { get; set; } // the axes measurements from a joystick
-        public int[] buttons { get; set; } // the buttons measurements from a joystick 
+        [DataMember] public std_msgs.Header header { get; set; } // timestamp in the header is the time the data is received from the joystick
+        [DataMember] public float[] axes { get; set; } // the axes measurements from a joystick
+        [DataMember] public int[] buttons { get; set; } // the buttons measurements from a joystick 
     
         /// <summary> Constructor for empty message. </summary>
         public Joy()
@@ -29,20 +30,19 @@ namespace Iviz.Msgs.sensor_msgs
         internal Joy(Buffer b)
         {
             this.header = new std_msgs.Header(b);
-            this.axes = b.DeserializeStructArray<float>(0);
-            this.buttons = b.DeserializeStructArray<int>(0);
+            this.axes = b.DeserializeStructArray<float>();
+            this.buttons = b.DeserializeStructArray<int>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new Joy(b);
+            return new Joy(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            this.header.Serialize(b);
+            b.Serialize(this.header);
             b.SerializeStructArray(this.axes, 0);
             b.SerializeStructArray(this.buttons, 0);
         }
@@ -50,11 +50,11 @@ namespace Iviz.Msgs.sensor_msgs
         public void Validate()
         {
             if (header is null) throw new System.NullReferenceException();
+            header.Validate();
             if (axes is null) throw new System.NullReferenceException();
             if (buttons is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -66,20 +66,16 @@ namespace Iviz.Msgs.sensor_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "sensor_msgs/Joy";
+        [Preserve] public const string RosMessageType = "sensor_msgs/Joy";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "5a9ea5f83505693b71e785041e67a8bb";
+        [Preserve] public const string RosMd5Sum = "5a9ea5f83505693b71e785041e67a8bb";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61TwW7UMBC9+ytGyqEt0hYJbitxQ1AOSIj2htBq1p4kpokd7Mm2+XuenaZbcUA9YFlJ" +
                 "bM+8eX5v0tB3mWLSTNoLZWUVii0x/YpLVm/vM/Gj4BEcHWfVGPK1uRF2kqhfX+fRkPpRADJO5ENFfIrx" +
                 "K345rh+OlctmEiv+JI7aFMd6stU17RBZ37/78XMl8LIIwureKJznJKME8K8IZ97GhzX7ifVf+dvuvyDI" +

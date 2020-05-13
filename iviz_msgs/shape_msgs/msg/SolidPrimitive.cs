@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.shape_msgs
 {
+    [DataContract]
     public sealed class SolidPrimitive : IMessage
     {
         // Define box, sphere, cylinder, cone 
@@ -13,11 +14,11 @@ namespace Iviz.Msgs.shape_msgs
         public const byte CONE = 4;
         
         // The type of the shape
-        public byte type { get; set; }
+        [DataMember] public byte type { get; set; }
         
         
         // The dimensions of the shape
-        public double[] dimensions { get; set; }
+        [DataMember] public double[] dimensions { get; set; }
         
         // The meaning of the shape dimensions: each constant defines the index in the 'dimensions' array
         
@@ -64,16 +65,15 @@ namespace Iviz.Msgs.shape_msgs
         internal SolidPrimitive(Buffer b)
         {
             this.type = b.Deserialize<byte>();
-            this.dimensions = b.DeserializeStructArray<double>(0);
+            this.dimensions = b.DeserializeStructArray<double>();
         }
         
-        public IMessage Deserialize(Buffer b)
+        ISerializable ISerializable.Deserialize(Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            return new SolidPrimitive(b);
+            return new SolidPrimitive(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void Serialize(Buffer b)
+        void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this.type);
@@ -85,7 +85,6 @@ namespace Iviz.Msgs.shape_msgs
             if (dimensions is null) throw new System.NullReferenceException();
         }
     
-        [IgnoreDataMember]
         public int RosMessageLength
         {
             get {
@@ -95,20 +94,16 @@ namespace Iviz.Msgs.shape_msgs
             }
         }
     
-        [IgnoreDataMember]
-        public string RosType => RosMessageType;
+        string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve]
-        public const string RosMessageType = "shape_msgs/SolidPrimitive";
+        [Preserve] public const string RosMessageType = "shape_msgs/SolidPrimitive";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve]
-        public const string RosMd5Sum = "d8f8cbc74c5ff283fca29569ccefb45d";
+        [Preserve] public const string RosMd5Sum = "d8f8cbc74c5ff283fca29569ccefb45d";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve]
-        public const string RosDependenciesBase64 =
+        [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE3WTbWsbMQzH39+nEPRFW3Yc3VZGGeRF29yWwGhH2kGSUYJ7p+QMF/uwfSX59pNs30Mz" +
                 "SiCcbEl/6Sf5DKa4lQrhVR9SsE2FBlMojrVUJRr60nSXnMFtXYOtRIMWhEEofVAJTkMl3hBchdJQjlaV" +
                 "Uu04GTkWqBylKymCL+AqpV+WJK1U7gbuHpeTz/H76fcsX+STL9G8X/2aP0zzxeRrd/D4kE+uE6rjuSKx" +
