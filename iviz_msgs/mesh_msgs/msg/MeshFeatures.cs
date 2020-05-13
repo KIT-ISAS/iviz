@@ -51,6 +51,7 @@ namespace Iviz.Msgs.mesh_msgs
             if (features is null) throw new System.NullReferenceException();
             for (int i = 0; i < features.Length; i++)
             {
+                if (features[i] is null) throw new System.NullReferenceException();
                 features[i].Validate();
             }
         }

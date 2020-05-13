@@ -62,9 +62,14 @@ namespace Iviz.Msgs.trajectory_msgs
             if (header is null) throw new System.NullReferenceException();
             header.Validate();
             if (joint_names is null) throw new System.NullReferenceException();
+            for (int i = 0; i < joint_names.Length; i++)
+            {
+                if (joint_names[i] is null) throw new System.NullReferenceException();
+            }
             if (points is null) throw new System.NullReferenceException();
             for (int i = 0; i < points.Length; i++)
             {
+                if (points[i] is null) throw new System.NullReferenceException();
                 points[i].Validate();
             }
         }

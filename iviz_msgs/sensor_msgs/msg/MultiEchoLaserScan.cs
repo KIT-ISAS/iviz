@@ -110,11 +110,13 @@ namespace Iviz.Msgs.sensor_msgs
             if (ranges is null) throw new System.NullReferenceException();
             for (int i = 0; i < ranges.Length; i++)
             {
+                if (ranges[i] is null) throw new System.NullReferenceException();
                 ranges[i].Validate();
             }
             if (intensities is null) throw new System.NullReferenceException();
             for (int i = 0; i < intensities.Length; i++)
             {
+                if (intensities[i] is null) throw new System.NullReferenceException();
                 intensities[i].Validate();
             }
         }

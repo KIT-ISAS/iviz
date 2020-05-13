@@ -98,14 +98,20 @@ namespace Iviz.Msgs.visualization_msgs
             if (markers is null) throw new System.NullReferenceException();
             for (int i = 0; i < markers.Length; i++)
             {
+                if (markers[i] is null) throw new System.NullReferenceException();
                 markers[i].Validate();
             }
             if (poses is null) throw new System.NullReferenceException();
             for (int i = 0; i < poses.Length; i++)
             {
+                if (poses[i] is null) throw new System.NullReferenceException();
                 poses[i].Validate();
             }
             if (erases is null) throw new System.NullReferenceException();
+            for (int i = 0; i < erases.Length; i++)
+            {
+                if (erases[i] is null) throw new System.NullReferenceException();
+            }
         }
     
         public int RosMessageLength

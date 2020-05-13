@@ -70,11 +70,13 @@ namespace Iviz.Msgs.trajectory_msgs
             if (velocities is null) throw new System.NullReferenceException();
             for (int i = 0; i < velocities.Length; i++)
             {
+                if (velocities[i] is null) throw new System.NullReferenceException();
                 velocities[i].Validate();
             }
             if (accelerations is null) throw new System.NullReferenceException();
             for (int i = 0; i < accelerations.Length; i++)
             {
+                if (accelerations[i] is null) throw new System.NullReferenceException();
                 accelerations[i].Validate();
             }
         }

@@ -552,14 +552,25 @@ namespace Iviz.MsgsGen
                         lines.Add("    " + variable.fieldName + ".Validate();");
                     }
                 }
-                if (variable.arraySize != -1 &&
-                    !BuiltInTypes.Contains(variable.rosClassName) && !(variable.classInfo?.forceStruct ?? false))
+                if (variable.arraySize != -1)
                 {
-                    lines.Add("    for (int i = 0; i < " + variable.fieldName + ".Length; i++)");
-                    lines.Add("    {");
-                    lines.Add("        " + variable.fieldName + "[i].Validate();");
-                    lines.Add("    }");
+                    if (variable.rosClassName == "string")
+                    {
+                        lines.Add("    for (int i = 0; i < " + variable.fieldName + ".Length; i++)");
+                        lines.Add("    {");
+                        lines.Add("        if (" + variable.fieldName + "[i] is null) throw new System.NullReferenceException();");
+                        lines.Add("    }");
+                    }
+                    else if (!BuiltInTypes.Contains(variable.rosClassName) && !(variable.classInfo?.forceStruct ?? false))
+                    {
+                        lines.Add("    for (int i = 0; i < " + variable.fieldName + ".Length; i++)");
+                        lines.Add("    {");
+                        lines.Add("        if (" + variable.fieldName + "[i] is null) throw new System.NullReferenceException();");
+                        lines.Add("        " + variable.fieldName + "[i].Validate();");
+                        lines.Add("    }");
+                    }
                 }
+
 
             }
             lines.Add("}");

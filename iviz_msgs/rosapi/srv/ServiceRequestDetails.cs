@@ -140,6 +140,7 @@ namespace Iviz.Msgs.rosapi
             if (typedefs is null) throw new System.NullReferenceException();
             for (int i = 0; i < typedefs.Length; i++)
             {
+                if (typedefs[i] is null) throw new System.NullReferenceException();
                 typedefs[i].Validate();
             }
         }

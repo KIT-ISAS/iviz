@@ -144,8 +144,20 @@ namespace Iviz.Msgs.rosapi
         public void Validate()
         {
             if (subscribing is null) throw new System.NullReferenceException();
+            for (int i = 0; i < subscribing.Length; i++)
+            {
+                if (subscribing[i] is null) throw new System.NullReferenceException();
+            }
             if (publishing is null) throw new System.NullReferenceException();
+            for (int i = 0; i < publishing.Length; i++)
+            {
+                if (publishing[i] is null) throw new System.NullReferenceException();
+            }
             if (services is null) throw new System.NullReferenceException();
+            for (int i = 0; i < services.Length; i++)
+            {
+                if (services[i] is null) throw new System.NullReferenceException();
+            }
         }
     
         public int RosMessageLength

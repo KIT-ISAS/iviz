@@ -106,6 +106,7 @@ namespace Iviz.Msgs.diagnostic_msgs
             if (status is null) throw new System.NullReferenceException();
             for (int i = 0; i < status.Length; i++)
             {
+                if (status[i] is null) throw new System.NullReferenceException();
                 status[i].Validate();
             }
         }

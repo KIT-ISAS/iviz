@@ -90,15 +90,21 @@ namespace Iviz.Msgs.sensor_msgs
             if (header is null) throw new System.NullReferenceException();
             header.Validate();
             if (joint_names is null) throw new System.NullReferenceException();
+            for (int i = 0; i < joint_names.Length; i++)
+            {
+                if (joint_names[i] is null) throw new System.NullReferenceException();
+            }
             if (transforms is null) throw new System.NullReferenceException();
             if (twist is null) throw new System.NullReferenceException();
             for (int i = 0; i < twist.Length; i++)
             {
+                if (twist[i] is null) throw new System.NullReferenceException();
                 twist[i].Validate();
             }
             if (wrench is null) throw new System.NullReferenceException();
             for (int i = 0; i < wrench.Length; i++)
             {
+                if (wrench[i] is null) throw new System.NullReferenceException();
                 wrench[i].Validate();
             }
         }

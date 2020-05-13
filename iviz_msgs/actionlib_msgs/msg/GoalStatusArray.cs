@@ -55,6 +55,7 @@ namespace Iviz.Msgs.actionlib_msgs
             if (status_list is null) throw new System.NullReferenceException();
             for (int i = 0; i < status_list.Length; i++)
             {
+                if (status_list[i] is null) throw new System.NullReferenceException();
                 status_list[i].Validate();
             }
         }

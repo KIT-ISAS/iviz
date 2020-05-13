@@ -69,6 +69,7 @@ namespace Iviz.Msgs.sensor_msgs
             if (channels is null) throw new System.NullReferenceException();
             for (int i = 0; i < channels.Length; i++)
             {
+                if (channels[i] is null) throw new System.NullReferenceException();
                 channels[i].Validate();
             }
         }

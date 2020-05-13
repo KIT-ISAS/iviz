@@ -145,6 +145,7 @@ namespace Iviz.Msgs.visualization_msgs
             if (markers is null) throw new System.NullReferenceException();
             for (int i = 0; i < markers.Length; i++)
             {
+                if (markers[i] is null) throw new System.NullReferenceException();
                 markers[i].Validate();
             }
             if (description is null) throw new System.NullReferenceException();

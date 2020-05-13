@@ -120,6 +120,10 @@ namespace Iviz.Msgs.grid_map_msgs
         {
             if (frame_id is null) throw new System.NullReferenceException();
             if (layers is null) throw new System.NullReferenceException();
+            for (int i = 0; i < layers.Length; i++)
+            {
+                if (layers[i] is null) throw new System.NullReferenceException();
+            }
         }
     
         public int RosMessageLength

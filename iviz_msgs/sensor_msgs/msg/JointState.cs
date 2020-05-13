@@ -82,6 +82,10 @@ namespace Iviz.Msgs.sensor_msgs
             if (header is null) throw new System.NullReferenceException();
             header.Validate();
             if (name is null) throw new System.NullReferenceException();
+            for (int i = 0; i < name.Length; i++)
+            {
+                if (name[i] is null) throw new System.NullReferenceException();
+            }
             if (position is null) throw new System.NullReferenceException();
             if (velocity is null) throw new System.NullReferenceException();
             if (effort is null) throw new System.NullReferenceException();

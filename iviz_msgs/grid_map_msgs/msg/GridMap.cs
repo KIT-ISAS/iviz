@@ -81,10 +81,19 @@ namespace Iviz.Msgs.grid_map_msgs
             if (info is null) throw new System.NullReferenceException();
             info.Validate();
             if (layers is null) throw new System.NullReferenceException();
+            for (int i = 0; i < layers.Length; i++)
+            {
+                if (layers[i] is null) throw new System.NullReferenceException();
+            }
             if (basic_layers is null) throw new System.NullReferenceException();
+            for (int i = 0; i < basic_layers.Length; i++)
+            {
+                if (basic_layers[i] is null) throw new System.NullReferenceException();
+            }
             if (data is null) throw new System.NullReferenceException();
             for (int i = 0; i < data.Length; i++)
             {
+                if (data[i] is null) throw new System.NullReferenceException();
                 data[i].Validate();
             }
         }

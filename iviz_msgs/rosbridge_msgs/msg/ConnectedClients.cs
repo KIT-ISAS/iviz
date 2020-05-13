@@ -45,6 +45,7 @@ namespace Iviz.Msgs.rosbridge_msgs
             if (clients is null) throw new System.NullReferenceException();
             for (int i = 0; i < clients.Length; i++)
             {
+                if (clients[i] is null) throw new System.NullReferenceException();
                 clients[i].Validate();
             }
         }

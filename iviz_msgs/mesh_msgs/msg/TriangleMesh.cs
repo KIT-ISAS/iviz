@@ -100,6 +100,7 @@ namespace Iviz.Msgs.mesh_msgs
             if (triangles is null) throw new System.NullReferenceException();
             for (int i = 0; i < triangles.Length; i++)
             {
+                if (triangles[i] is null) throw new System.NullReferenceException();
                 triangles[i].Validate();
             }
             if (vertices is null) throw new System.NullReferenceException();
@@ -110,16 +111,19 @@ namespace Iviz.Msgs.mesh_msgs
             if (face_materials is null) throw new System.NullReferenceException();
             for (int i = 0; i < face_materials.Length; i++)
             {
+                if (face_materials[i] is null) throw new System.NullReferenceException();
                 face_materials[i].Validate();
             }
             if (textures is null) throw new System.NullReferenceException();
             for (int i = 0; i < textures.Length; i++)
             {
+                if (textures[i] is null) throw new System.NullReferenceException();
                 textures[i].Validate();
             }
             if (clusters is null) throw new System.NullReferenceException();
             for (int i = 0; i < clusters.Length; i++)
             {
+                if (clusters[i] is null) throw new System.NullReferenceException();
                 clusters[i].Validate();
             }
         }

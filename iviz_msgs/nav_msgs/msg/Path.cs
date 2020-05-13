@@ -53,6 +53,7 @@ namespace Iviz.Msgs.nav_msgs
             if (poses is null) throw new System.NullReferenceException();
             for (int i = 0; i < poses.Length; i++)
             {
+                if (poses[i] is null) throw new System.NullReferenceException();
                 poses[i].Validate();
             }
         }

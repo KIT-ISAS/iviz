@@ -46,6 +46,7 @@ namespace Iviz.Msgs.sensor_msgs
             if (array is null) throw new System.NullReferenceException();
             for (int i = 0; i < array.Length; i++)
             {
+                if (array[i] is null) throw new System.NullReferenceException();
                 array[i].Validate();
             }
         }

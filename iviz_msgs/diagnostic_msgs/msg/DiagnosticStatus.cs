@@ -77,6 +77,7 @@ namespace Iviz.Msgs.diagnostic_msgs
             if (values is null) throw new System.NullReferenceException();
             for (int i = 0; i < values.Length; i++)
             {
+                if (values[i] is null) throw new System.NullReferenceException();
                 values[i].Validate();
             }
         }

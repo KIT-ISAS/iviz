@@ -55,6 +55,7 @@ namespace Iviz.Msgs.shape_msgs
             if (triangles is null) throw new System.NullReferenceException();
             for (int i = 0; i < triangles.Length; i++)
             {
+                if (triangles[i] is null) throw new System.NullReferenceException();
                 triangles[i].Validate();
             }
             if (vertices is null) throw new System.NullReferenceException();

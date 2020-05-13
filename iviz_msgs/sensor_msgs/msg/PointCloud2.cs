@@ -99,6 +99,7 @@ namespace Iviz.Msgs.sensor_msgs
             if (fields is null) throw new System.NullReferenceException();
             for (int i = 0; i < fields.Length; i++)
             {
+                if (fields[i] is null) throw new System.NullReferenceException();
                 fields[i].Validate();
             }
             if (data is null) throw new System.NullReferenceException();

@@ -70,11 +70,31 @@ namespace Iviz.Msgs.rosapi
         {
             if (type is null) throw new System.NullReferenceException();
             if (fieldnames is null) throw new System.NullReferenceException();
+            for (int i = 0; i < fieldnames.Length; i++)
+            {
+                if (fieldnames[i] is null) throw new System.NullReferenceException();
+            }
             if (fieldtypes is null) throw new System.NullReferenceException();
+            for (int i = 0; i < fieldtypes.Length; i++)
+            {
+                if (fieldtypes[i] is null) throw new System.NullReferenceException();
+            }
             if (fieldarraylen is null) throw new System.NullReferenceException();
             if (examples is null) throw new System.NullReferenceException();
+            for (int i = 0; i < examples.Length; i++)
+            {
+                if (examples[i] is null) throw new System.NullReferenceException();
+            }
             if (constnames is null) throw new System.NullReferenceException();
+            for (int i = 0; i < constnames.Length; i++)
+            {
+                if (constnames[i] is null) throw new System.NullReferenceException();
+            }
             if (constvalues is null) throw new System.NullReferenceException();
+            for (int i = 0; i < constvalues.Length; i++)
+            {
+                if (constvalues[i] is null) throw new System.NullReferenceException();
+            }
         }
     
         public int RosMessageLength

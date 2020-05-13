@@ -122,7 +122,15 @@ namespace Iviz.Msgs.rosapi
         public void Validate()
         {
             if (topics is null) throw new System.NullReferenceException();
+            for (int i = 0; i < topics.Length; i++)
+            {
+                if (topics[i] is null) throw new System.NullReferenceException();
+            }
             if (types is null) throw new System.NullReferenceException();
+            for (int i = 0; i < types.Length; i++)
+            {
+                if (types[i] is null) throw new System.NullReferenceException();
+            }
         }
     
         public int RosMessageLength

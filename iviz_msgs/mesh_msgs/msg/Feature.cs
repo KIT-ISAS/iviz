@@ -49,6 +49,7 @@ namespace Iviz.Msgs.mesh_msgs
             if (descriptor is null) throw new System.NullReferenceException();
             for (int i = 0; i < descriptor.Length; i++)
             {
+                if (descriptor[i] is null) throw new System.NullReferenceException();
                 descriptor[i].Validate();
             }
         }

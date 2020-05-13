@@ -100,11 +100,13 @@ namespace Iviz.Msgs.visualization_msgs
             if (menu_entries is null) throw new System.NullReferenceException();
             for (int i = 0; i < menu_entries.Length; i++)
             {
+                if (menu_entries[i] is null) throw new System.NullReferenceException();
                 menu_entries[i].Validate();
             }
             if (controls is null) throw new System.NullReferenceException();
             for (int i = 0; i < controls.Length; i++)
             {
+                if (controls[i] is null) throw new System.NullReferenceException();
                 controls[i].Validate();
             }
         }

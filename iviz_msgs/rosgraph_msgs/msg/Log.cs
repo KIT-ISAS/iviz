@@ -89,6 +89,10 @@ namespace Iviz.Msgs.rosgraph_msgs
             if (file is null) throw new System.NullReferenceException();
             if (function is null) throw new System.NullReferenceException();
             if (topics is null) throw new System.NullReferenceException();
+            for (int i = 0; i < topics.Length; i++)
+            {
+                if (topics[i] is null) throw new System.NullReferenceException();
+            }
         }
     
         public int RosMessageLength

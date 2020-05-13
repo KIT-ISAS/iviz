@@ -117,6 +117,10 @@ namespace Iviz.Msgs.rosapi
         public void Validate()
         {
             if (action_servers is null) throw new System.NullReferenceException();
+            for (int i = 0; i < action_servers.Length; i++)
+            {
+                if (action_servers[i] is null) throw new System.NullReferenceException();
+            }
         }
     
         public int RosMessageLength

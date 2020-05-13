@@ -140,6 +140,7 @@ namespace Iviz.Msgs.mesh_msgs
             if (clusters is null) throw new System.NullReferenceException();
             for (int i = 0; i < clusters.Length; i++)
             {
+                if (clusters[i] is null) throw new System.NullReferenceException();
                 clusters[i].Validate();
             }
         }

@@ -69,17 +69,20 @@ namespace Iviz.Msgs.mesh_msgs
             if (clusters is null) throw new System.NullReferenceException();
             for (int i = 0; i < clusters.Length; i++)
             {
+                if (clusters[i] is null) throw new System.NullReferenceException();
                 clusters[i].Validate();
             }
             if (materials is null) throw new System.NullReferenceException();
             for (int i = 0; i < materials.Length; i++)
             {
+                if (materials[i] is null) throw new System.NullReferenceException();
                 materials[i].Validate();
             }
             if (cluster_materials is null) throw new System.NullReferenceException();
             if (vertex_tex_coords is null) throw new System.NullReferenceException();
             for (int i = 0; i < vertex_tex_coords.Length; i++)
             {
+                if (vertex_tex_coords[i] is null) throw new System.NullReferenceException();
                 vertex_tex_coords[i].Validate();
             }
         }

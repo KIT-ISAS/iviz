@@ -45,6 +45,7 @@ namespace Iviz.Msgs.rosbridge_library
             if (header is null) throw new System.NullReferenceException();
             for (int i = 0; i < header.Length; i++)
             {
+                if (header[i] is null) throw new System.NullReferenceException();
                 header[i].Validate();
             }
         }

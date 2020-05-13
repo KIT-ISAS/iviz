@@ -73,6 +73,7 @@ namespace Iviz.Msgs.std_msgs
             if (dim is null) throw new System.NullReferenceException();
             for (int i = 0; i < dim.Length; i++)
             {
+                if (dim[i] is null) throw new System.NullReferenceException();
                 dim[i].Validate();
             }
         }
