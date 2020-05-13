@@ -63,6 +63,10 @@ namespace Iviz.Msgs.trajectory_msgs
             header.Validate();
             if (joint_names is null) throw new System.NullReferenceException();
             if (points is null) throw new System.NullReferenceException();
+            for (int i = 0; i < points.Length; i++)
+            {
+                points[i].Validate();
+            }
         }
     
         public int RosMessageLength

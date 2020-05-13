@@ -56,6 +56,10 @@ namespace Iviz.Msgs.mesh_msgs
             if (vertices is null) throw new System.NullReferenceException();
             if (vertex_normals is null) throw new System.NullReferenceException();
             if (faces is null) throw new System.NullReferenceException();
+            for (int i = 0; i < faces.Length; i++)
+            {
+                faces[i].Validate();
+            }
         }
     
         public int RosMessageLength

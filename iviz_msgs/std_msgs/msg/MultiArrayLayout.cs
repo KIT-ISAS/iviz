@@ -71,6 +71,10 @@ namespace Iviz.Msgs.std_msgs
         public void Validate()
         {
             if (dim is null) throw new System.NullReferenceException();
+            for (int i = 0; i < dim.Length; i++)
+            {
+                dim[i].Validate();
+            }
         }
     
         public int RosMessageLength

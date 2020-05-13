@@ -43,6 +43,10 @@ namespace Iviz.Msgs.tf2_msgs
         public void Validate()
         {
             if (transforms is null) throw new System.NullReferenceException();
+            for (int i = 0; i < transforms.Length; i++)
+            {
+                transforms[i].Validate();
+            }
         }
     
         public int RosMessageLength

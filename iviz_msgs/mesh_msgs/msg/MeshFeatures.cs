@@ -49,6 +49,10 @@ namespace Iviz.Msgs.mesh_msgs
         {
             if (map_uuid is null) throw new System.NullReferenceException();
             if (features is null) throw new System.NullReferenceException();
+            for (int i = 0; i < features.Length; i++)
+            {
+                features[i].Validate();
+            }
         }
     
         public int RosMessageLength

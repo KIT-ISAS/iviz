@@ -43,6 +43,10 @@ namespace Iviz.Msgs.rosbridge_msgs
         public void Validate()
         {
             if (clients is null) throw new System.NullReferenceException();
+            for (int i = 0; i < clients.Length; i++)
+            {
+                clients[i].Validate();
+            }
         }
     
         public int RosMessageLength

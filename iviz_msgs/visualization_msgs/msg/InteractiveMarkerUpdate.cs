@@ -96,7 +96,15 @@ namespace Iviz.Msgs.visualization_msgs
         {
             if (server_id is null) throw new System.NullReferenceException();
             if (markers is null) throw new System.NullReferenceException();
+            for (int i = 0; i < markers.Length; i++)
+            {
+                markers[i].Validate();
+            }
             if (poses is null) throw new System.NullReferenceException();
+            for (int i = 0; i < poses.Length; i++)
+            {
+                poses[i].Validate();
+            }
             if (erases is null) throw new System.NullReferenceException();
         }
     

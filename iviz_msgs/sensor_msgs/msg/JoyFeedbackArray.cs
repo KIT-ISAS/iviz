@@ -44,6 +44,10 @@ namespace Iviz.Msgs.sensor_msgs
         public void Validate()
         {
             if (array is null) throw new System.NullReferenceException();
+            for (int i = 0; i < array.Length; i++)
+            {
+                array[i].Validate();
+            }
         }
     
         public int RosMessageLength

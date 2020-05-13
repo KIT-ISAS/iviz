@@ -43,6 +43,10 @@ namespace Iviz.Msgs.visualization_msgs
         public void Validate()
         {
             if (markers is null) throw new System.NullReferenceException();
+            for (int i = 0; i < markers.Length; i++)
+            {
+                markers[i].Validate();
+            }
         }
     
         public int RosMessageLength

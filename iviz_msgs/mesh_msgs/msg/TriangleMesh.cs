@@ -98,14 +98,30 @@ namespace Iviz.Msgs.mesh_msgs
         public void Validate()
         {
             if (triangles is null) throw new System.NullReferenceException();
+            for (int i = 0; i < triangles.Length; i++)
+            {
+                triangles[i].Validate();
+            }
             if (vertices is null) throw new System.NullReferenceException();
             if (vertex_normals is null) throw new System.NullReferenceException();
             if (vertex_colors is null) throw new System.NullReferenceException();
             if (triangle_colors is null) throw new System.NullReferenceException();
             if (vertex_texture_coords is null) throw new System.NullReferenceException();
             if (face_materials is null) throw new System.NullReferenceException();
+            for (int i = 0; i < face_materials.Length; i++)
+            {
+                face_materials[i].Validate();
+            }
             if (textures is null) throw new System.NullReferenceException();
+            for (int i = 0; i < textures.Length; i++)
+            {
+                textures[i].Validate();
+            }
             if (clusters is null) throw new System.NullReferenceException();
+            for (int i = 0; i < clusters.Length; i++)
+            {
+                clusters[i].Validate();
+            }
         }
     
         public int RosMessageLength

@@ -53,6 +53,10 @@ namespace Iviz.Msgs.actionlib_msgs
             if (header is null) throw new System.NullReferenceException();
             header.Validate();
             if (status_list is null) throw new System.NullReferenceException();
+            for (int i = 0; i < status_list.Length; i++)
+            {
+                status_list[i].Validate();
+            }
         }
     
         public int RosMessageLength

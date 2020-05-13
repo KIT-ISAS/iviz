@@ -47,6 +47,10 @@ namespace Iviz.Msgs.mesh_msgs
         public void Validate()
         {
             if (descriptor is null) throw new System.NullReferenceException();
+            for (int i = 0; i < descriptor.Length; i++)
+            {
+                descriptor[i].Validate();
+            }
         }
     
         public int RosMessageLength

@@ -67,9 +67,21 @@ namespace Iviz.Msgs.mesh_msgs
         public void Validate()
         {
             if (clusters is null) throw new System.NullReferenceException();
+            for (int i = 0; i < clusters.Length; i++)
+            {
+                clusters[i].Validate();
+            }
             if (materials is null) throw new System.NullReferenceException();
+            for (int i = 0; i < materials.Length; i++)
+            {
+                materials[i].Validate();
+            }
             if (cluster_materials is null) throw new System.NullReferenceException();
             if (vertex_tex_coords is null) throw new System.NullReferenceException();
+            for (int i = 0; i < vertex_tex_coords.Length; i++)
+            {
+                vertex_tex_coords[i].Validate();
+            }
         }
     
         public int RosMessageLength

@@ -83,6 +83,10 @@ namespace Iviz.Msgs.grid_map_msgs
             if (layers is null) throw new System.NullReferenceException();
             if (basic_layers is null) throw new System.NullReferenceException();
             if (data is null) throw new System.NullReferenceException();
+            for (int i = 0; i < data.Length; i++)
+            {
+                data[i].Validate();
+            }
         }
     
         public int RosMessageLength

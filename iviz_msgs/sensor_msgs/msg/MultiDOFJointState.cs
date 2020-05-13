@@ -92,7 +92,15 @@ namespace Iviz.Msgs.sensor_msgs
             if (joint_names is null) throw new System.NullReferenceException();
             if (transforms is null) throw new System.NullReferenceException();
             if (twist is null) throw new System.NullReferenceException();
+            for (int i = 0; i < twist.Length; i++)
+            {
+                twist[i].Validate();
+            }
             if (wrench is null) throw new System.NullReferenceException();
+            for (int i = 0; i < wrench.Length; i++)
+            {
+                wrench[i].Validate();
+            }
         }
     
         public int RosMessageLength

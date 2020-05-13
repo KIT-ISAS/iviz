@@ -68,7 +68,15 @@ namespace Iviz.Msgs.trajectory_msgs
         {
             if (transforms is null) throw new System.NullReferenceException();
             if (velocities is null) throw new System.NullReferenceException();
+            for (int i = 0; i < velocities.Length; i++)
+            {
+                velocities[i].Validate();
+            }
             if (accelerations is null) throw new System.NullReferenceException();
+            for (int i = 0; i < accelerations.Length; i++)
+            {
+                accelerations[i].Validate();
+            }
         }
     
         public int RosMessageLength

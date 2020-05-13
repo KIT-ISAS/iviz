@@ -75,6 +75,10 @@ namespace Iviz.Msgs.diagnostic_msgs
             if (message is null) throw new System.NullReferenceException();
             if (hardware_id is null) throw new System.NullReferenceException();
             if (values is null) throw new System.NullReferenceException();
+            for (int i = 0; i < values.Length; i++)
+            {
+                values[i].Validate();
+            }
         }
     
         public int RosMessageLength

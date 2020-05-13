@@ -138,6 +138,10 @@ namespace Iviz.Msgs.rosapi
         public void Validate()
         {
             if (typedefs is null) throw new System.NullReferenceException();
+            for (int i = 0; i < typedefs.Length; i++)
+            {
+                typedefs[i].Validate();
+            }
         }
     
         public int RosMessageLength

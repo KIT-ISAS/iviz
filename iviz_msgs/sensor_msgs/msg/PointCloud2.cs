@@ -97,6 +97,10 @@ namespace Iviz.Msgs.sensor_msgs
             if (header is null) throw new System.NullReferenceException();
             header.Validate();
             if (fields is null) throw new System.NullReferenceException();
+            for (int i = 0; i < fields.Length; i++)
+            {
+                fields[i].Validate();
+            }
             if (data is null) throw new System.NullReferenceException();
         }
     

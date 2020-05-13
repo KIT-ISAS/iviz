@@ -138,6 +138,10 @@ namespace Iviz.Msgs.mesh_msgs
         public void Validate()
         {
             if (clusters is null) throw new System.NullReferenceException();
+            for (int i = 0; i < clusters.Length; i++)
+            {
+                clusters[i].Validate();
+            }
         }
     
         public int RosMessageLength

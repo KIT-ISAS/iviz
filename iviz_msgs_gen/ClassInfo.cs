@@ -424,7 +424,7 @@ namespace Iviz.MsgsGen
                         {
                             lines.Add("    this." + variable.fieldName + " = new " + variable.className + "(b);");
                         }
-                        else if(variable.arraySize == 0)
+                        else if (variable.arraySize == 0)
                         {
                             if (variable.classInfo.forceStruct)
                             {
@@ -552,6 +552,15 @@ namespace Iviz.MsgsGen
                         lines.Add("    " + variable.fieldName + ".Validate();");
                     }
                 }
+                if (variable.arraySize != -1 &&
+                    !BuiltInTypes.Contains(variable.rosClassName) && !(variable.classInfo?.forceStruct ?? false))
+                {
+                    lines.Add("    for (int i = 0; i < " + variable.fieldName + ".Length; i++)");
+                    lines.Add("    {");
+                    lines.Add("        " + variable.fieldName + "[i].Validate();");
+                    lines.Add("    }");
+                }
+
             }
             lines.Add("}");
 

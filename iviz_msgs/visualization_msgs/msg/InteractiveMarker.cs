@@ -98,7 +98,15 @@ namespace Iviz.Msgs.visualization_msgs
             if (name is null) throw new System.NullReferenceException();
             if (description is null) throw new System.NullReferenceException();
             if (menu_entries is null) throw new System.NullReferenceException();
+            for (int i = 0; i < menu_entries.Length; i++)
+            {
+                menu_entries[i].Validate();
+            }
             if (controls is null) throw new System.NullReferenceException();
+            for (int i = 0; i < controls.Length; i++)
+            {
+                controls[i].Validate();
+            }
         }
     
         public int RosMessageLength

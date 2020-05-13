@@ -104,6 +104,10 @@ namespace Iviz.Msgs.diagnostic_msgs
         {
             if (id is null) throw new System.NullReferenceException();
             if (status is null) throw new System.NullReferenceException();
+            for (int i = 0; i < status.Length; i++)
+            {
+                status[i].Validate();
+            }
         }
     
         public int RosMessageLength

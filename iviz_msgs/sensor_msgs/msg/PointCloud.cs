@@ -67,6 +67,10 @@ namespace Iviz.Msgs.sensor_msgs
             header.Validate();
             if (points is null) throw new System.NullReferenceException();
             if (channels is null) throw new System.NullReferenceException();
+            for (int i = 0; i < channels.Length; i++)
+            {
+                channels[i].Validate();
+            }
         }
     
         public int RosMessageLength

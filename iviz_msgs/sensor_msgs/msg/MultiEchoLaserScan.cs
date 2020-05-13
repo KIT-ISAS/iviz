@@ -108,7 +108,15 @@ namespace Iviz.Msgs.sensor_msgs
             if (header is null) throw new System.NullReferenceException();
             header.Validate();
             if (ranges is null) throw new System.NullReferenceException();
+            for (int i = 0; i < ranges.Length; i++)
+            {
+                ranges[i].Validate();
+            }
             if (intensities is null) throw new System.NullReferenceException();
+            for (int i = 0; i < intensities.Length; i++)
+            {
+                intensities[i].Validate();
+            }
         }
     
         public int RosMessageLength
