@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Iviz.App.Displays;
 using Iviz.Msgs.sensor_msgs;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Iviz.App
@@ -128,6 +129,8 @@ namespace Iviz.App
 
             fieldNames.Clear();
             fieldNames.AddRange(msg.fields.Select(x => x.name));
+            Debug.Log(JsonConvert.SerializeObject(msg, Formatting.Indented));
+
 
             int newSize = (int)(msg.width * msg.height);
             if (newSize > pointBuffer.Length)

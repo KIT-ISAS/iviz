@@ -20,7 +20,7 @@ namespace Iviz.RoslibSharp
         public string CallerId => TopicInfo.CallerId;
         public string TopicType => TopicInfo.Type;
         public int NumConnections => connectionsByUri.Count;
-        public readonly bool RequestNoDelay;
+        public bool RequestNoDelay { get; }
 
         public TcpReceiverManager(TopicInfo topicInfo, bool requestNoDelay)
         {

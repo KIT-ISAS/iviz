@@ -24,7 +24,8 @@ Shader "iviz/Line"
 			struct Line {
 				float3 A;
 				float3 B;
-                int color;
+                int colorA;
+				int colorB;
 			};
 
 			StructuredBuffer<float3> _Quad;
@@ -52,7 +53,10 @@ Shader "iviz/Line"
 
 				v2f o;
 				o.position = UnityObjectToClipPos(float4(p, 1));
-				int c = _Lines[inst].color;
+
+				int cA = _Lines[inst].colorA;
+				int cB = _Lines[inst].colorB;
+				int c = (cB - cA) * V.z + cA;
 				half3 rgb = half3(
 					(c >>  0) & 0xff,
 					(c >>  8) & 0xff,

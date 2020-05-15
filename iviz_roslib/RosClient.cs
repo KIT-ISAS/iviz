@@ -48,6 +48,11 @@ namespace Iviz.RoslibSharp
         public XmlRpc.Master Master { get; }
 
         /// <summary>
+        /// Wrapper for XML-RPC calls to the master.
+        /// </summary>
+        public XmlRpc.ParameterClient Parameters { get; }
+
+        /// <summary>
         /// URI of the master node.
         /// </summary>
         public Uri MasterUri => Master.MasterUri;
@@ -77,20 +82,13 @@ namespace Iviz.RoslibSharp
 
             if (callerUri == null)
             {
-                callerUri = new Uri($"http://localhost:7613/");
+                callerUri = new Uri($"http://{TryGetHostname()}:7613/");
             }
 
             if (callerUri.Scheme != "http")
             {
                 throw new ArgumentException("URI scheme must be http", nameof(callerUri));
             }
-
-            /*
-            if (callerUri.Host == "localhost")
-            {
-                    callerUri = new Uri($"http://{Dns.GetHostName()}:{callerUri.Port}{callerUri.AbsolutePath}");
-            }
-            */
 
             CallerId = callerId ?? "/RosClient";
             CallerUri = callerUri;
@@ -108,6 +106,7 @@ namespace Iviz.RoslibSharp
 
             Master = new XmlRpc.Master(masterUri, CallerId, CallerUri);
             Talker = new XmlRpc.NodeClient(CallerId, CallerUri);
+            Parameters = new XmlRpc.ParameterClient(masterUri, CallerId, CallerUri);
 
             Logger.Log($"RosClient: Starting: My id is {CallerId}, my uri is {CallerUri}, and I'm talking to {MasterUri}");
 
@@ -123,6 +122,24 @@ namespace Iviz.RoslibSharp
                 throw new ArgumentException($"RosClient: Failed to contact the master URI '{masterUri}'", nameof(masterUri), e);
             }
             Logger.Log("RosClient: Initialized.");
+        }
+
+        public static string TryGetHostname()
+        {
+            string hostname;
+            if ((hostname = Environment.GetEnvironmentVariable("ROS_HOSTNAME")) != null)
+            {
+                return hostname;
+            }
+            if ((hostname = Environment.GetEnvironmentVariable("ROS_IP")) != null)
+            {
+                return hostname;
+            }
+            if ((hostname = Dns.GetHostName()) != null)
+            {
+                return hostname;
+            }
+            return "localhost";
         }
 
         /// <summary>
@@ -684,6 +701,58 @@ namespace Iviz.RoslibSharp
             advertisedService.Stop();
 
             Master.UnregisterService(name, advertisedService.Uri);
+        }
+
+        public XmlRpc.StatusCode SetParameter(string key, string value)
+        {
+            return Parameters.SetParam(key, new XmlRpc.Arg(value)).Code;
+        }
+
+        public XmlRpc.StatusCode SetParameter(string key, int value)
+        {
+            return Parameters.SetParam(key, new XmlRpc.Arg(value)).Code;
+        }
+
+        public XmlRpc.StatusCode SetParameter(string key, bool value)
+        {
+            return Parameters.SetParam(key, new XmlRpc.Arg(value)).Code;
+        }
+
+        public XmlRpc.StatusCode SetParameter(string key, double value)
+        {
+            return Parameters.SetParam(key, new XmlRpc.Arg(value)).Code;
+        }
+
+        public XmlRpc.StatusCode SetParameter(string key, string[] value)
+        {
+            return Parameters.SetParam(key, new XmlRpc.Arg(value)).Code;
+        }
+
+        public XmlRpc.StatusCode GetParameter(string key, out object value)
+        {
+            var response = Parameters.GetParam(key);
+            value = response.ParameterValue;
+            return response.Code;
+        }
+
+        public XmlRpc.StatusCode DeleteParameter(string key)
+        {
+            return Parameters.DeleteParam(key).Code;
+        }
+
+        public bool HasParameter(string key)
+        {
+            return Parameters.HasParam(key).HasParam;
+        }
+
+        public XmlRpc.StatusCode SubscribeParameter(string key)
+        {
+            return Parameters.SubscribeParam(key).Code;
+        }
+
+        public XmlRpc.StatusCode UnsubscribeParameter(string key)
+        {
+            return Parameters.UnsubscribeParam(key).Code;
         }
 
         public void Dispose()

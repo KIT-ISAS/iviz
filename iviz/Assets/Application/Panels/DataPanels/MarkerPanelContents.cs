@@ -16,6 +16,7 @@
             gameObject.SetActive(false);
 
             Topic.label.alignment = UnityEngine.TextAnchor.UpperLeft;
+            Topic.label.fontStyle = UnityEngine.FontStyle.Italic;
 
             Widgets = new Widget[] { CloseButton };
         }

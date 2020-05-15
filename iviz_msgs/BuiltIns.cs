@@ -679,7 +679,7 @@ namespace Iviz.Msgs
 
         public static string GetDependenciesBase64(Type type)
         {
-            return GetClassStringConstant(type, "RosDepb.endenciesBase64");
+            return GetClassStringConstant(type, "RosDependenciesBase64");
         }
 
         public static IMessage CreateGenerator(Type type)

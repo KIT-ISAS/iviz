@@ -10,13 +10,13 @@ namespace Iviz.App {
         // Use this for initialization
         void Start()
         {
-            List<LineResource.LineWithColor> ls = new List<LineResource.LineWithColor>();
-            ls.Add(new LineResource.LineWithColor(
+            List<LineWithColor> ls = new List<LineWithColor>();
+            ls.Add(new LineWithColor(
                 new Vector3(0, 0, 0),
                 new Vector3(1, 1, 1),
                 Color.red
                 ));
-            ls.Add(new LineResource.LineWithColor(
+            ls.Add(new LineWithColor(
                 new Vector3(1, 1, 1),
                 new Vector3(2, 0, 2),
                 Color.blue

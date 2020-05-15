@@ -2,33 +2,45 @@
 using System.Collections;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
+using System;
 
 namespace Iviz.App.Displays
 {
+    [StructLayout(LayoutKind.Sequential)]
+    public struct LineWithColor
+    {
+        public Vector3 A;
+        public Vector3 B;
+        public Color32 colorA;
+        public Color32 colorB;
+
+        public LineWithColor(Vector3 a, Vector3 b, Color32 color)
+        {
+            A = a;
+            B = b;
+            colorA = color;
+            colorB = color;
+        }
+
+        public LineWithColor(Vector3 a, Vector3 b, Color32 colorA, Color32 colorB)
+        {
+            A = a;
+            B = b;
+            this.colorA = colorA;
+            this.colorB = colorB;
+        }
+    };
+
     public class LineResource : MarkerResource
     {
-        [StructLayout(LayoutKind.Sequential)]
-        public struct LineWithColor
-        {
-            public Vector3 A;
-            public Vector3 B;
-            public Color32 color;
-
-            public LineWithColor(Vector3 a, Vector3 b, Color32 color)
-            {
-                A = a;
-                B = b;
-                this.color = color;
-            }
-        };
 
         Material material;
-        Camera mainCamera = null;
 
-        LineWithColor[] lineBuffer = new LineWithColor[0];
+        LineWithColor[] lineBuffer = Array.Empty<LineWithColor>();
         ComputeBuffer lineComputeBuffer;
         ComputeBuffer quadComputeBuffer;
 
+        public Camera MainCamera { get; set; }
         public Color Color { get; set; } = Color.white;
 
         static readonly int PropLines = Shader.PropertyToID("_Lines");
@@ -58,6 +70,11 @@ namespace Iviz.App.Displays
                 }
                 Size = size;
             }
+        }
+
+        public IList<LineWithColor> LinesWithColor
+        {
+            get => lineBuffer;
         }
 
         public void Set(IList<LineWithColor> points, int size = -1)
@@ -123,7 +140,7 @@ namespace Iviz.App.Displays
             material.SetMatrix(PropLocalToWorld, transform.localToWorldMatrix);
             material.SetMatrix(PropWorldToLocal, transform.worldToLocalMatrix);
 
-            Camera camera = mainCamera ?? TFListener.MainCamera;
+            Camera camera = MainCamera ?? TFListener.MainCamera;
             material.SetVector("_Front", camera.transform.forward);
 
             Bounds worldBounds = Collider.bounds;

@@ -120,7 +120,7 @@ namespace Iviz.RoslibSharp.XmlRpc
             return new LookupServiceResponse((object[])response);
         }
 
-        public RegisterServiceResponse RegisterService(string service, Uri rosRpcUri)
+        public DefaultResponse RegisterService(string service, Uri rosRpcUri)
         {
             Arg[] args = {
                 new Arg(CallerId),
@@ -129,7 +129,7 @@ namespace Iviz.RoslibSharp.XmlRpc
                 new Arg(CallerUri),
             };
             object response = Service.MethodCall(MasterUri, CallerUri, "registerService", args);
-            return new RegisterServiceResponse((object[])response);
+            return new DefaultResponse((object[])response);
         }
 
         public UnregisterServiceResponse UnregisterService(string service, Uri rosRpcUri)
@@ -180,44 +180,49 @@ namespace Iviz.RoslibSharp.XmlRpc
         }
     }
 
-    public sealed class GetUriResponse
+    public abstract class BaseResponse
     {
         public StatusCode Code { get; }
         public string StatusMessage { get; }
-        public Uri Uri { get; }
 
-        internal GetUriResponse(object[] a)
+        protected BaseResponse(object[] a)
         {
             Code = (StatusCode)a[0];
             StatusMessage = (string)a[1];
+        }
+    }
+
+    public sealed class DefaultResponse : BaseResponse
+    {
+        internal DefaultResponse(object[] a) : base(a) { }
+    }
+
+    public sealed class GetUriResponse : BaseResponse
+    {
+        public Uri Uri { get; }
+
+        internal GetUriResponse(object[] a) : base(a)
+        {
             Uri = new Uri((string)a[2]);
         }
     }
 
-    public sealed class LookupNodeResponse
+    public sealed class LookupNodeResponse : BaseResponse
     {
-        public StatusCode Code { get; }
-        public string StatusMessage { get; }
         public Uri Uri { get; }
 
-        internal LookupNodeResponse(object[] a)
+        internal LookupNodeResponse(object[] a) : base(a)
         {
-            Code = (StatusCode)a[0];
-            StatusMessage = (string)a[1];
             Uri = new Uri((string)a[2]);
         }
     }
 
-    public sealed class GetPublishedTopicsResponse
+    public sealed class GetPublishedTopicsResponse : BaseResponse
     {
-        public StatusCode Code { get; }
-        public string StatusMessage { get; }
         public ReadOnlyCollection<TopicTuple> Topics { get; }
 
-        internal GetPublishedTopicsResponse(object[] a)
+        internal GetPublishedTopicsResponse(object[] a) : base(a)
         {
-            Code = (StatusCode)a[0];
-            StatusMessage = (string)a[1];
             object[] tmp = (object[])a[2];
 
             TopicTuple[] topics = new TopicTuple[tmp.Length];
@@ -230,16 +235,12 @@ namespace Iviz.RoslibSharp.XmlRpc
         }
     }
 
-    public sealed class RegisterSubscriberResponse
+    public sealed class RegisterSubscriberResponse : BaseResponse
     {
-        public StatusCode Code { get; }
-        public string StatusMessage { get; }
         public ReadOnlyCollection<Uri> Publishers { get; }
 
-        internal RegisterSubscriberResponse(object[] a)
+        internal RegisterSubscriberResponse(object[] a) : base(a)
         {
-            Code = (StatusCode)a[0];
-            StatusMessage = (string)a[1];
             object[] tmp = (object[])a[2];
             Uri[] publishers = new Uri[tmp.Length];
             for (int i = 0; i < publishers.Length; i++)
@@ -253,30 +254,22 @@ namespace Iviz.RoslibSharp.XmlRpc
         }
     }
 
-    public sealed class UnregisterSubscriberResponse
+    public sealed class UnregisterSubscriberResponse : BaseResponse
     {
-        public StatusCode Code { get; }
-        public string StatusMessage { get; }
         public int NumUnsubscribed { get; }
 
-        internal UnregisterSubscriberResponse(object[] a)
+        internal UnregisterSubscriberResponse(object[] a) : base(a)
         {
-            Code = (StatusCode)a[0];
-            StatusMessage = (string)a[1];
             NumUnsubscribed = (int)a[2];
         }
     }
 
-    public sealed class RegisterPublisherResponse
+    public sealed class RegisterPublisherResponse : BaseResponse
     {
-        public StatusCode Code { get; }
-        public string StatusMessage { get; }
         public ReadOnlyCollection<string> Subscribers { get; }
 
-        internal RegisterPublisherResponse(object[] a)
+        internal RegisterPublisherResponse(object[] a) : base(a)
         {
-            Code = (StatusCode)a[0];
-            StatusMessage = (string)a[1];
             object[] tmp = (object[])a[2];
             string[] subscribers = new string[tmp.Length];
             for (int i = 0; i < subscribers.Length; i++)
@@ -287,56 +280,32 @@ namespace Iviz.RoslibSharp.XmlRpc
         }
     }
 
-    public sealed class UnregisterPublisherResponse
+    public sealed class UnregisterPublisherResponse : BaseResponse
     {
-        public StatusCode Code { get; }
-        public string StatusMessage { get; }
         public int NumUnregistered { get; }
 
-        internal UnregisterPublisherResponse(object[] a)
+        internal UnregisterPublisherResponse(object[] a) : base(a)
         {
-            Code = (StatusCode)a[0];
-            StatusMessage = (string)a[1];
             NumUnregistered = (int)a[2];
         }
     }
 
-    public sealed class LookupServiceResponse
+    public sealed class LookupServiceResponse : BaseResponse
     {
-        public StatusCode Code { get; }
-        public string StatusMessage { get; }
         public Uri ServiceUrl { get; }
 
-        internal LookupServiceResponse(object[] a)
+        internal LookupServiceResponse(object[] a) : base(a)
         {
-            Code = (StatusCode)a[0];
-            StatusMessage = (string)a[1];
             ServiceUrl = new Uri((string)a[2]);
         }
     }
 
-    public sealed class RegisterServiceResponse
+    public sealed class UnregisterServiceResponse : BaseResponse
     {
-        public StatusCode Code { get; }
-        public string StatusMessage { get; }
-
-        internal RegisterServiceResponse(object[] a)
-        {
-            Code = (StatusCode)a[0];
-            StatusMessage = (string)a[1];
-        }
-    }
-
-    public sealed class UnregisterServiceResponse
-    {
-        public StatusCode Code { get; }
-        public string StatusMessage { get; }
         public int NumUnregistered { get; }
 
-        internal UnregisterServiceResponse(object[] a)
+        internal UnregisterServiceResponse(object[] a) : base(a)
         {
-            Code = (StatusCode)a[0];
-            StatusMessage = (string)a[1];
             NumUnregistered = (int)a[2];
         }
     }

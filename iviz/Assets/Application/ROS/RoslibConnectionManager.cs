@@ -134,7 +134,7 @@ namespace Iviz.App
                 
 
                 string hostname = Dns.GetHostName();
-                Uri callerUri = new Uri($"http://{hostname}:7613");
+                Uri callerUri = new Uri($"http://{hostname}:7614");
                 client = new RosClient(Uri, Id, callerUri);
 
                 foreach (var entry in publishersByTopic)

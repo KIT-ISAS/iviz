@@ -29,8 +29,8 @@ namespace Iviz.App
             p.UpdateSize();
             gameObject.SetActive(false);
 
-            //Stats.label.alignment = UnityEngine.TextAnchor.MiddleCenter;
             Topic.label.alignment = UnityEngine.TextAnchor.UpperLeft;
+            Topic.label.fontStyle = UnityEngine.FontStyle.Italic;
 
             Widgets = new Widget[] { PointSize, Colormap, IntensityChannel, CloseButton };
         }

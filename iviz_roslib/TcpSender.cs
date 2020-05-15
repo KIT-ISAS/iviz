@@ -383,7 +383,7 @@ namespace Iviz.RoslibSharp
 
         public override string ToString()
         {
-            return $"[TcpSender {Hostname}:{Port} '{Topic}' >>'{RemoteCallerId}']";
+            return $"[TcpSender :{Port} '{Topic}' >>'{RemoteCallerId}']";
         }
     }
 }

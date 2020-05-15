@@ -161,7 +161,6 @@ namespace Iviz.App
             public Info Cylinder { get; }
             public Info Sphere { get; }
             public Info Text { get; }
-            public Info LineStrip { get; }
             public Info LineConnector { get; }
             public Info NamedBoundary { get; }
             public Info Arrow { get; }
@@ -172,6 +171,7 @@ namespace Iviz.App
             public Info TFFrame { get; }
             public Info Image { get; }
             public Info Square { get; }
+            public Info Line { get; }
 
             public ReadOnlyDictionary<string, Info> Generic { get; }
 
@@ -181,7 +181,6 @@ namespace Iviz.App
                 Cylinder = new Info("Displays/Cylinder");
                 Sphere = new Info("Displays/Sphere");
                 Text = new Info("Displays/Text");
-                LineStrip = new Info("Displays/LineStrip");
                 LineConnector = new Info("Displays/LineConnector");
                 NamedBoundary = new Info("Displays/NamedBoundary");
                 Arrow = new Info("Displays/Arrow");
@@ -192,6 +191,7 @@ namespace Iviz.App
                 TFFrame = new Info("Displays/TFFrame");
                 Image = new Info("Displays/ImageResource");
                 Square = new Info("Displays/Square");
+                Line = new Info("Displays/Line");
 
                 Generic = new ReadOnlyDictionary<string, Info>(
                     new Dictionary<string, Info>()

@@ -1,4 +1,6 @@
-﻿//#define USING_VR
+﻿#define USING_VR
+
+using UnityEngine;
 
 #if USING_VR
 using Iviz.App.Displays;
@@ -7,22 +9,22 @@ using Iviz.Msgs.std_msgs;
 using Iviz.Msgs.tf2_msgs;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using UnityEngine.EventSystems;
 using Valve.VR;
 using Valve.VR.InteractionSystem;
+#endif
 
 namespace Iviz.App
 {
     public class ControllerManager : MonoBehaviour
     {
-        const float SendPeriod = 0.033f;
+#if USING_VR
         public GameObject LeftController;
         public GameObject RightController;
+        public GameObject Head;
         //public GameObject LeftCollider;
         //public GameObject RightCollider;
         public GameObject RightShoulderMarker;
-        public GameObject CameraRig;
         bool prevLeftDown;
         bool prevRightDown;
 
@@ -33,13 +35,16 @@ namespace Iviz.App
         public string LeftControllerTopic { get; } = "/holodeck/vive_left";
         public string RightControllerTopic { get; } = "/holodeck/vive_right";
         public string RightShoulderMarkerTopic { get; } = "/holodeck/marker_rs";
+        public string SmhiHeadTopic { get; } = "/smhi_interface/headpose";
         public string TfTopic { get; } = "/tf";
-        public string LeftFrameName { get; } = "/holodeck/left_controller";
-        public string RightFrameName { get; } = "/holodeck/right_controller";
-        public string RightShoulderMarkerName { get; } = "/holodeck/marker_rs";
+        public string LeftFrameName { get; } = "holodeck/left_controller";
+        public string RightFrameName { get; } = "holodeck/right_controller";
+        public string RightShoulderMarkerName { get; } = "holodeck/marker_rs";
+        public string HeadFrameName { get; } = "holodeck/head";
 
         RosSender<Joy> rosSenderLeft, rosSenderRight;
         RosSender<TFMessage> rosSenderTF;
+        RosSender<Msgs.geometry_msgs.PoseStamped> rosSenderHead;
 
         public InteractiveMarkerListener interactiveMarkerListener;
 
@@ -50,11 +55,25 @@ namespace Iviz.App
             //LeftCollider.GetComponent<MeshRenderer>().enabled = false;
             //RightCollider.GetComponent<MeshRenderer>().enabled = false;
 
+            if (LeftController == null)
+            {
+                LeftController = GameObject.Find("LeftHand");
+            }
+            if (RightController == null)
+            {
+                RightController = GameObject.Find("RightHand");
+            }
+            if (Head == null)
+            {
+                Head = GameObject.Find("VRCamera");
+            }
+
 
             rosSenderLeft = new RosSender<Joy>(LeftControllerTopic);
             rosSenderRight = new RosSender<Joy>(RightControllerTopic);
             rosSenderTF = new RosSender<TFMessage>(TfTopic);
-            
+            rosSenderHead = new RosSender<Msgs.geometry_msgs.PoseStamped>(SmhiHeadTopic);
+
             //ConnectionManager.Instance.Advertise<Joy>(LeftControllerTopic);
             //ConnectionManager.Instance.Advertise<Joy>(RightControllerTopic);
             //ConnectionManager.Instance.Advertise<TFMessage>(TfTopic);
@@ -95,9 +114,9 @@ namespace Iviz.App
 
             return new Joy()
             {
-                header = new Header {
-                    seq = joySeq++,
-                    stamp = Utils.GetRosTime(), 
+                header = new Header
+                {
+                    stamp = Utils.GetRosTime(),
                     frame_id = frameName
                 },
                 buttons = buttons.ToArray(),
@@ -126,6 +145,12 @@ namespace Iviz.App
                         header = Utils.CreateHeader(tfSeq++, TFListener.BaseFrame.Id),
                         child_frame_id = RightFrameName,
                         transform = RightController.transform.AsPose().Unity2RosTransform()
+                    },
+                    new Msgs.geometry_msgs.TransformStamped
+                    {
+                        header = Utils.CreateHeader(tfSeq++, TFListener.BaseFrame.Id),
+                        child_frame_id = HeadFrameName,
+                        transform = Head.transform.AsPose().Unity2RosTransform()
                     },
                     /*
                     new RosSharp.RosBridgeClient.MessageTypes.Geometry.TransformStamped
@@ -243,28 +268,38 @@ namespace Iviz.App
             }
         }
 
-        int frame = 0;
+        uint headSeq = 0;
         public void Update()
         {
             //frame++;
             //if ((frame % 10) == 0)
             //{
 
-                Joy leftMsg = CreateJoyMessage(LeftInputSource, LeftFrameName);
-                //ConnectionManager.Instance.Publish(LeftControllerTopic, leftMsg);
-                rosSenderLeft.Publish(leftMsg);
+            Joy leftMsg = CreateJoyMessage(LeftInputSource, LeftFrameName);
+            leftMsg.header.seq = joySeq;
+            //ConnectionManager.Instance.Publish(LeftControllerTopic, leftMsg);
+            rosSenderLeft.Publish(leftMsg);
 
-                Joy rightMsg = CreateJoyMessage(RightInputSource, RightFrameName);
-                //ConnectionManager.Instance.Publish(RightControllerTopic, rightMsg);
-                rosSenderRight.Publish(rightMsg);
+            Joy rightMsg = CreateJoyMessage(RightInputSource, RightFrameName);
+            rightMsg.header.seq = joySeq;
+            //ConnectionManager.Instance.Publish(RightControllerTopic, rightMsg);
+            rosSenderRight.Publish(rightMsg);
 
-                TFMessage tFMsg = CreateTfMessage();
-                rosSenderTF.Publish(tFMsg);
+            joySeq++;
+
+            TFMessage tFMsg = CreateTfMessage();
+            rosSenderTF.Publish(tFMsg);
             //}
+
+            Msgs.geometry_msgs.PoseStamped pose = new Msgs.geometry_msgs.PoseStamped
+            {
+                header = Utils.CreateHeader(headSeq++, TFListener.BaseFrame.Id),
+                pose = Head.transform.AsPose().Unity2RosPose()
+            };
+            rosSenderHead.Publish(pose);
 
             CheckForSelectClick();
         }
-
+#endif
     }
 }
-#endif

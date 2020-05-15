@@ -16,11 +16,11 @@ namespace Iviz.RoslibSharp
 
     public static class Logger
     {
-        public static Action<object> Log = Console.Out.WriteLine;
+        public static Action<object> Log { get; set; } = Console.Out.WriteLine;
 
-        public static Action<object> LogError = Console.Error.WriteLine;
+        public static Action<object> LogError { get; set; } = Console.Error.WriteLine;
 
-        public static Action<object> LogDebug = o => { };
+        public static Action<object> LogDebug { get; set; } = _ => { };
         
         //{
             //Console.Out.WriteLine(o);

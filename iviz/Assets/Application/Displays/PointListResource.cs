@@ -71,8 +71,6 @@ namespace Iviz.App.Displays
             }
         }
 
-        public Color Color { get; set; } = Color.white;
-
         static readonly int PropIntensityCoeff = Shader.PropertyToID("_IntensityCoeff");
         static readonly int PropIntensityAdd = Shader.PropertyToID("_IntensityAdd");
 
@@ -126,58 +124,29 @@ namespace Iviz.App.Displays
                 Size = size;
             }
         }
-
-        public IEnumerable<Color32> Colors
-        {
-            get => pointBuffer.Select(x => x.color);
-            private set
-            {
-                int index = 0;
-                if (value == null || value.Count() == 0)
-                {
-                    for (int i = 0; i < Size; i++)
-                    {
-                        pointBuffer[index++].color = Color;
-                    }
-                }
-                else if (value.Count() == pointBuffer.Length)
-                {
-                    foreach (Color32 color in value)
-                    {
-                        pointBuffer[index++].color = Color * color;
-                    }
-                }
-                else
-                {
-                    throw new ArgumentException(
-                        "Input color has size " + value.Count() + ", but buffer size is " + pointBuffer.Length,
-                        nameof(value));
-                }
-            }
-        }
-
-        public IEnumerable<Vector3> Points
-        {
-            get => pointBuffer.Select(x => x.position);
-            private set
-            {
-                Size = value.Count();
-
-                int index = 0;
-                foreach (Vector3 pos in value)
-                {
-                    pointBuffer[index++].position = pos;
-                }
-                pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
-                Bounds bounds = CalculateBounds();
-                Collider.center = bounds.center;
-                Collider.size = bounds.size;
-            }
-        }
-
         public IList<PointWithColor> PointsWithColor
         {
             get => pointBuffer;
+            set
+            {
+                Size = value.Count;
+                for (int i = 0; i < Size; i++)
+                {
+                    pointBuffer[i] = value[i];
+                }
+                UpdateBuffer();
+            }
+        }
+
+        public void Set(IList<Vector3> points, int size)
+        {
+            Size = size;
+            for (int i = 0; i < size; i++)
+            {
+                pointBuffer[i].position = points[i];
+                pointBuffer[i].color = Color.white;
+            }
+            UpdateBuffer();
         }
 
         public void Set(IList<PointWithColor> points, int size)
@@ -187,10 +156,7 @@ namespace Iviz.App.Displays
             {
                 pointBuffer[i] = points[i];
             }
-            pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
-            Bounds bounds = CalculateBounds();
-            Collider.center = bounds.center;
-            Collider.size = bounds.size;
+            UpdateBuffer();
         }
 
         public void Set(IList<Vector3> points, IList<Color> colors)
@@ -201,7 +167,7 @@ namespace Iviz.App.Displays
                 for (int i = 0; i < size; i++)
                 {
                     pointBuffer[i].position = points[i];
-                    pointBuffer[i].color = Color;
+                    pointBuffer[i].color = Color.white;
                 }
             }
             else
@@ -209,9 +175,14 @@ namespace Iviz.App.Displays
                 for (int i = 0; i < size; i++)
                 {
                     pointBuffer[i].position = points[i];
-                    pointBuffer[i].color = Color * colors[i];
+                    pointBuffer[i].color = colors[i];
                 }
             }
+            UpdateBuffer();
+        }
+
+        void UpdateBuffer()
+        {
             pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
             Bounds bounds = CalculateBounds();
             Collider.center = bounds.center;
