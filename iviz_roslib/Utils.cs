@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using Iviz.Msgs;
-using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace Iviz.RoslibSharp
 {
@@ -10,7 +9,7 @@ namespace Iviz.RoslibSharp
     {
         public override string ToString()
         {
-            return JToken.FromObject(this).ToString();
+            return Utils.ToJsonString(this);
         }
     }
 
@@ -21,10 +20,6 @@ namespace Iviz.RoslibSharp
         public static Action<object> LogError { get; set; } = Console.Error.WriteLine;
 
         public static Action<object> LogDebug { get; set; } = _ => { };
-        
-        //{
-            //Console.Out.WriteLine(o);
-        //}
     }
 
     public static class Utils
@@ -114,12 +109,17 @@ namespace Iviz.RoslibSharp
 
         public static string ToJsonString(this ISerializable o)
         {
-            return JToken.FromObject(o).ToString();
+            return ToJsonString((object)o);
         }
 
         public static string ToJsonString(this IService o)
         {
-            return JToken.FromObject(o).ToString();
+            return ToJsonString((object)o);
+        }
+
+        public static string ToJsonString(object o)
+        {
+            return JsonConvert.SerializeObject(o);
         }
     }
 }

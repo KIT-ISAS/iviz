@@ -16,7 +16,7 @@ namespace Iviz.RoslibSharp.XmlRpc
         volatile bool keepRunning;
         Task task;
         
-        CancellationTokenSource tokenSource = new CancellationTokenSource();
+        readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
 
         public Uri Uri => client.CallerUri;
 
@@ -47,7 +47,7 @@ namespace Iviz.RoslibSharp.XmlRpc
             Logger.Log("RcpNodeServer: Starting RPC server on " + maskUri);
             listener.Prefixes.Add(maskUri);
             listener.Start();
-            Logger.Log("RcpNodeServer: Started!");
+            //Logger.Log("RcpNodeServer: Started!");
 
             task = Task.Run(() =>
             {
@@ -57,7 +57,12 @@ namespace Iviz.RoslibSharp.XmlRpc
                     {
                         Task<HttpListenerContext> task = listener.GetContextAsync();
                         task.Wait(tokenSource.Token);
-                        
+
+                        if (task.IsCanceled || task.IsFaulted)
+                        {
+                            break;
+                        }
+
                         HttpListenerContext context = task.Result;
                         Task.Run(() =>
                         {
@@ -72,7 +77,7 @@ namespace Iviz.RoslibSharp.XmlRpc
                         });
                     }
                 }
-                catch (ThreadAbortException)
+                catch (Exception e) when(e is ThreadAbortException || e is OperationCanceledException)
                 {
                     //Logger.LogDebug(e);
                 }
@@ -80,16 +85,16 @@ namespace Iviz.RoslibSharp.XmlRpc
                 {
                     Logger.Log(e);
                 }
-                Logger.LogDebug("RcpNodeServer: Leaving thread.");
+                //Logger.LogDebug("RcpNodeServer: Leaving thread.");
             });
         }
 
         public void Stop()
         {
             keepRunning = false;
-            listener.Close();
             tokenSource.Cancel();
             task?.Wait();
+            listener.Close();
         }
 
         public void Dispose()
