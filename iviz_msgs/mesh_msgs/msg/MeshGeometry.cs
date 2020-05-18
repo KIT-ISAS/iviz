@@ -1,40 +1,40 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.mesh_msgs
+namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract]
+    [DataContract (Name = "mesh_msgs/MeshGeometry")]
     public sealed class MeshGeometry : IMessage
     {
         // Mesh Geometry Message
-        [DataMember] public geometry_msgs.Point[] vertices { get; set; }
-        [DataMember] public geometry_msgs.Point[] vertex_normals { get; set; }
-        [DataMember] public mesh_msgs.TriangleIndices[] faces { get; set; }
+        [DataMember (Name = "vertices")] public GeometryMsgs.Point[] Vertices { get; set; }
+        [DataMember (Name = "vertex_normals")] public GeometryMsgs.Point[] VertexNormals { get; set; }
+        [DataMember (Name = "faces")] public MeshMsgs.TriangleIndices[] Faces { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshGeometry()
         {
-            vertices = System.Array.Empty<geometry_msgs.Point>();
-            vertex_normals = System.Array.Empty<geometry_msgs.Point>();
-            faces = System.Array.Empty<mesh_msgs.TriangleIndices>();
+            Vertices = System.Array.Empty<GeometryMsgs.Point>();
+            VertexNormals = System.Array.Empty<GeometryMsgs.Point>();
+            Faces = System.Array.Empty<MeshMsgs.TriangleIndices>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MeshGeometry(geometry_msgs.Point[] vertices, geometry_msgs.Point[] vertex_normals, mesh_msgs.TriangleIndices[] faces)
+        public MeshGeometry(GeometryMsgs.Point[] Vertices, GeometryMsgs.Point[] VertexNormals, MeshMsgs.TriangleIndices[] Faces)
         {
-            this.vertices = vertices ?? throw new System.ArgumentNullException(nameof(vertices));
-            this.vertex_normals = vertex_normals ?? throw new System.ArgumentNullException(nameof(vertex_normals));
-            this.faces = faces ?? throw new System.ArgumentNullException(nameof(faces));
+            this.Vertices = Vertices;
+            this.VertexNormals = VertexNormals;
+            this.Faces = Faces;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal MeshGeometry(Buffer b)
         {
-            this.vertices = b.DeserializeStructArray<geometry_msgs.Point>();
-            this.vertex_normals = b.DeserializeStructArray<geometry_msgs.Point>();
-            this.faces = b.DeserializeArray<mesh_msgs.TriangleIndices>();
-            for (int i = 0; i < this.faces.Length; i++)
+            Vertices = b.DeserializeStructArray<GeometryMsgs.Point>();
+            VertexNormals = b.DeserializeStructArray<GeometryMsgs.Point>();
+            Faces = b.DeserializeArray<MeshMsgs.TriangleIndices>();
+            for (int i = 0; i < this.Faces.Length; i++)
             {
-                this.faces[i] = new mesh_msgs.TriangleIndices(b);
+                Faces[i] = new MeshMsgs.TriangleIndices(b);
             }
         }
         
@@ -46,20 +46,20 @@ namespace Iviz.Msgs.mesh_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeStructArray(this.vertices, 0);
-            b.SerializeStructArray(this.vertex_normals, 0);
-            b.SerializeArray(this.faces, 0);
+            b.SerializeStructArray(Vertices, 0);
+            b.SerializeStructArray(VertexNormals, 0);
+            b.SerializeArray(Faces, 0);
         }
         
         public void Validate()
         {
-            if (vertices is null) throw new System.NullReferenceException();
-            if (vertex_normals is null) throw new System.NullReferenceException();
-            if (faces is null) throw new System.NullReferenceException();
-            for (int i = 0; i < faces.Length; i++)
+            if (Vertices is null) throw new System.NullReferenceException();
+            if (VertexNormals is null) throw new System.NullReferenceException();
+            if (Faces is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Faces.Length; i++)
             {
-                if (faces[i] is null) throw new System.NullReferenceException();
-                faces[i].Validate();
+                if (Faces[i] is null) throw new System.NullReferenceException();
+                Faces[i].Validate();
             }
         }
     
@@ -67,9 +67,9 @@ namespace Iviz.Msgs.mesh_msgs
         {
             get {
                 int size = 12;
-                size += 24 * vertices.Length;
-                size += 24 * vertex_normals.Length;
-                size += 12 * faces.Length;
+                size += 24 * Vertices.Length;
+                size += 24 * VertexNormals.Length;
+                size += 12 * Faces.Length;
                 return size;
             }
         }

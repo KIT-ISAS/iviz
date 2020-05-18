@@ -1,26 +1,25 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.geometry_msgs
+namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract]
+    [DataContract (Name = "geometry_msgs/Quaternion")]
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct Quaternion : IMessage
+    public struct Quaternion : IMessage
     {
         // This represents an orientation in free space in quaternion form.
-        
-        [DataMember] public double x { get; }
-        [DataMember] public double y { get; }
-        [DataMember] public double z { get; }
-        [DataMember] public double w { get; }
+        [DataMember (Name = "x")] public double X { get; set; }
+        [DataMember (Name = "y")] public double Y { get; set; }
+        [DataMember (Name = "z")] public double Z { get; set; }
+        [DataMember (Name = "w")] public double W { get; set; }
     
         /// <summary> Explicit constructor. </summary>
-        public Quaternion(double x, double y, double z, double w)
+        public Quaternion(double X, double Y, double Z, double W)
         {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-            this.w = w;
+            this.X = X;
+            this.Y = Y;
+            this.Z = Z;
+            this.W = W;
         }
         
         /// <summary> Constructor with buffer. </summary>

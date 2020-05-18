@@ -1,14 +1,13 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.sensor_msgs
+namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract]
+    [DataContract (Name = "sensor_msgs/NavSatFix")]
     public sealed class NavSatFix : IMessage
     {
         // Navigation Satellite fix for any Global Navigation Satellite System
         //
         // Specified using the WGS 84 reference ellipsoid
-        
         // header.stamp specifies the ROS time for this measurement (the
         //        corresponding satellite time may be reported using the
         //        sensor_msgs/TimeReference message).
@@ -17,72 +16,62 @@ namespace Iviz.Msgs.sensor_msgs
         //        receiver, usually the location of the antenna.  This is a
         //        Euclidean frame relative to the vehicle, not a reference
         //        ellipsoid.
-        [DataMember] public std_msgs.Header header { get; set; }
-        
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         // satellite fix status information
-        [DataMember] public NavSatStatus status { get; set; }
-        
+        [DataMember (Name = "status")] public NavSatStatus Status { get; set; }
         // Latitude [degrees]. Positive is north of equator; negative is south.
-        [DataMember] public double latitude { get; set; }
-        
+        [DataMember (Name = "latitude")] public double Latitude { get; set; }
         // Longitude [degrees]. Positive is east of prime meridian; negative is west.
-        [DataMember] public double longitude { get; set; }
-        
+        [DataMember (Name = "longitude")] public double Longitude { get; set; }
         // Altitude [m]. Positive is above the WGS 84 ellipsoid
         // (quiet NaN if no altitude is available).
-        [DataMember] public double altitude { get; set; }
-        
+        [DataMember (Name = "altitude")] public double Altitude { get; set; }
         // Position covariance [m^2] defined relative to a tangential plane
         // through the reported position. The components are East, North, and
         // Up (ENU), in row-major order.
         //
         // Beware: this coordinate system exhibits singularities at the poles.
-        
-        [DataMember] public double[/*9*/] position_covariance { get; set; }
-        
+        [DataMember (Name = "position_covariance")] public double[/*9*/] PositionCovariance { get; set; }
         // If the covariance of the fix is known, fill it in completely. If the
         // GPS receiver provides the variance of each measurement, put them
         // along the diagonal. If only Dilution of Precision is available,
         // estimate an approximate covariance from that.
-        
         public const byte COVARIANCE_TYPE_UNKNOWN = 0;
         public const byte COVARIANCE_TYPE_APPROXIMATED = 1;
         public const byte COVARIANCE_TYPE_DIAGONAL_KNOWN = 2;
         public const byte COVARIANCE_TYPE_KNOWN = 3;
-        
-        [DataMember] public byte position_covariance_type { get; set; }
+        [DataMember (Name = "position_covariance_type")] public byte PositionCovarianceType { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public NavSatFix()
         {
-            header = new std_msgs.Header();
-            status = new NavSatStatus();
-            position_covariance = new double[9];
+            Header = new StdMsgs.Header();
+            Status = new NavSatStatus();
+            PositionCovariance = new double[9];
         }
         
         /// <summary> Explicit constructor. </summary>
-        public NavSatFix(std_msgs.Header header, NavSatStatus status, double latitude, double longitude, double altitude, double[] position_covariance, byte position_covariance_type)
+        public NavSatFix(StdMsgs.Header Header, NavSatStatus Status, double Latitude, double Longitude, double Altitude, double[] PositionCovariance, byte PositionCovarianceType)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.status = status ?? throw new System.ArgumentNullException(nameof(status));
-            this.latitude = latitude;
-            this.longitude = longitude;
-            this.altitude = altitude;
-            this.position_covariance = position_covariance ?? throw new System.ArgumentNullException(nameof(position_covariance));
-            if (this.position_covariance.Length != 9) throw new System.ArgumentException("Invalid size", nameof(position_covariance));
-            this.position_covariance_type = position_covariance_type;
+            this.Header = Header;
+            this.Status = Status;
+            this.Latitude = Latitude;
+            this.Longitude = Longitude;
+            this.Altitude = Altitude;
+            this.PositionCovariance = PositionCovariance;
+            this.PositionCovarianceType = PositionCovarianceType;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal NavSatFix(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.status = new NavSatStatus(b);
-            this.latitude = b.Deserialize<double>();
-            this.longitude = b.Deserialize<double>();
-            this.altitude = b.Deserialize<double>();
-            this.position_covariance = b.DeserializeStructArray<double>(9);
-            this.position_covariance_type = b.Deserialize<byte>();
+            Header = new StdMsgs.Header(b);
+            Status = new NavSatStatus(b);
+            Latitude = b.Deserialize<double>();
+            Longitude = b.Deserialize<double>();
+            Altitude = b.Deserialize<double>();
+            PositionCovariance = b.DeserializeStructArray<double>(9);
+            PositionCovarianceType = b.Deserialize<byte>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -93,30 +82,30 @@ namespace Iviz.Msgs.sensor_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.status);
-            b.Serialize(this.latitude);
-            b.Serialize(this.longitude);
-            b.Serialize(this.altitude);
-            b.SerializeStructArray(this.position_covariance, 9);
-            b.Serialize(this.position_covariance_type);
+            b.Serialize(Header);
+            b.Serialize(Status);
+            b.Serialize(this.Latitude);
+            b.Serialize(this.Longitude);
+            b.Serialize(this.Altitude);
+            b.SerializeStructArray(PositionCovariance, 9);
+            b.Serialize(this.PositionCovarianceType);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (status is null) throw new System.NullReferenceException();
-            status.Validate();
-            if (position_covariance is null) throw new System.NullReferenceException();
-            if (position_covariance.Length != 9) throw new System.IndexOutOfRangeException();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (Status is null) throw new System.NullReferenceException();
+            Status.Validate();
+            if (PositionCovariance is null) throw new System.NullReferenceException();
+            if (PositionCovariance.Length != 9) throw new System.IndexOutOfRangeException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 100;
-                size += header.RosMessageLength;
+                size += Header.RosMessageLength;
                 return size;
             }
         }

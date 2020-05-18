@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosapi
+namespace Iviz.Msgs.Rosapi
 {
-    [DataContract]
+    [DataContract (Name = "rosapi/ServiceProviders")]
     public sealed class ServiceProviders : IService
     {
         /// <summary> Request message. </summary>
@@ -52,24 +52,24 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class ServiceProvidersRequest : IRequest
     {
-        [DataMember] public string service { get; set; }
+        [DataMember (Name = "service")] public string Service { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ServiceProvidersRequest()
         {
-            service = "";
+            Service = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public ServiceProvidersRequest(string service)
+        public ServiceProvidersRequest(string Service)
         {
-            this.service = service ?? throw new System.ArgumentNullException(nameof(service));
+            this.Service = Service;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal ServiceProvidersRequest(Buffer b)
         {
-            this.service = b.DeserializeString();
+            Service = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -80,19 +80,19 @@ namespace Iviz.Msgs.rosapi
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.service);
+            b.Serialize(this.Service);
         }
         
         public void Validate()
         {
-            if (service is null) throw new System.NullReferenceException();
+            if (Service is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(service);
+                size += BuiltIns.UTF8.GetByteCount(Service);
                 return size;
             }
         }
@@ -100,24 +100,24 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class ServiceProvidersResponse : IResponse
     {
-        [DataMember] public string[] providers { get; set; }
+        [DataMember (Name = "providers")] public string[] Providers { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ServiceProvidersResponse()
         {
-            providers = System.Array.Empty<string>();
+            Providers = System.Array.Empty<string>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public ServiceProvidersResponse(string[] providers)
+        public ServiceProvidersResponse(string[] Providers)
         {
-            this.providers = providers ?? throw new System.ArgumentNullException(nameof(providers));
+            this.Providers = Providers;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal ServiceProvidersResponse(Buffer b)
         {
-            this.providers = b.DeserializeStringArray();
+            Providers = b.DeserializeStringArray();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -128,15 +128,15 @@ namespace Iviz.Msgs.rosapi
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeArray(this.providers, 0);
+            b.SerializeArray(Providers, 0);
         }
         
         public void Validate()
         {
-            if (providers is null) throw new System.NullReferenceException();
-            for (int i = 0; i < providers.Length; i++)
+            if (Providers is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Providers.Length; i++)
             {
-                if (providers[i] is null) throw new System.NullReferenceException();
+                if (Providers[i] is null) throw new System.NullReferenceException();
             }
         }
     
@@ -144,10 +144,10 @@ namespace Iviz.Msgs.rosapi
         {
             get {
                 int size = 4;
-                size += 4 * providers.Length;
-                for (int i = 0; i < providers.Length; i++)
+                size += 4 * Providers.Length;
+                for (int i = 0; i < Providers.Length; i++)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(providers[i]);
+                    size += BuiltIns.UTF8.GetByteCount(Providers[i]);
                 }
                 return size;
             }

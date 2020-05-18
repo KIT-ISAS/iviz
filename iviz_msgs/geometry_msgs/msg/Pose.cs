@@ -1,21 +1,21 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.geometry_msgs
+namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract]
+    [DataContract (Name = "geometry_msgs/Pose")]
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct Pose : IMessage
+    public struct Pose : IMessage
     {
         // A representation of pose in free space, composed of position and orientation. 
-        [DataMember] public Point position { get; }
-        [DataMember] public Quaternion orientation { get; }
+        [DataMember (Name = "position")] public Point Position { get; set; }
+        [DataMember (Name = "orientation")] public Quaternion Orientation { get; set; }
     
         /// <summary> Explicit constructor. </summary>
-        public Pose(Point position, Quaternion orientation)
+        public Pose(Point Position, Quaternion Orientation)
         {
-            this.position = position;
-            this.orientation = orientation;
+            this.Position = Position;
+            this.Orientation = Orientation;
         }
         
         /// <summary> Constructor with buffer. </summary>

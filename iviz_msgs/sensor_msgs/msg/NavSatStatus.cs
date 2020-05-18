@@ -1,32 +1,26 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.sensor_msgs
+namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract]
+    [DataContract (Name = "sensor_msgs/NavSatStatus")]
     public sealed class NavSatStatus : IMessage
     {
         // Navigation Satellite fix status for any Global Navigation Satellite System
-        
         // Whether to output an augmented fix is determined by both the fix
         // type and the last time differential corrections were received.  A
         // fix is valid when status >= STATUS_FIX.
-        
         public const sbyte STATUS_NO_FIX = -1; // unable to fix position
         public const sbyte STATUS_FIX = 0; // unaugmented fix
         public const sbyte STATUS_SBAS_FIX = 1; // with satellite-based augmentation
         public const sbyte STATUS_GBAS_FIX = 2; // with ground-based augmentation
-        
-        [DataMember] public sbyte status { get; set; }
-        
+        [DataMember (Name = "status")] public sbyte Status { get; set; }
         // Bits defining which Global Navigation Satellite System signals were
         // used by the receiver.
-        
         public const ushort SERVICE_GPS = 1;
         public const ushort SERVICE_GLONASS = 2;
         public const ushort SERVICE_COMPASS = 4; // includes BeiDou.
         public const ushort SERVICE_GALILEO = 8;
-        
-        [DataMember] public ushort service { get; set; }
+        [DataMember (Name = "service")] public ushort Service { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public NavSatStatus()
@@ -34,17 +28,17 @@ namespace Iviz.Msgs.sensor_msgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public NavSatStatus(sbyte status, ushort service)
+        public NavSatStatus(sbyte Status, ushort Service)
         {
-            this.status = status;
-            this.service = service;
+            this.Status = Status;
+            this.Service = Service;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal NavSatStatus(Buffer b)
         {
-            this.status = b.Deserialize<sbyte>();
-            this.service = b.Deserialize<ushort>();
+            Status = b.Deserialize<sbyte>();
+            Service = b.Deserialize<ushort>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -55,8 +49,8 @@ namespace Iviz.Msgs.sensor_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.status);
-            b.Serialize(this.service);
+            b.Serialize(this.Status);
+            b.Serialize(this.Service);
         }
         
         public void Validate()

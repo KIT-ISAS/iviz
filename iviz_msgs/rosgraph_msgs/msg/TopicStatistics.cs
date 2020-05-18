@@ -1,87 +1,80 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosgraph_msgs
+namespace Iviz.Msgs.RosgraphMsgs
 {
-    [DataContract]
+    [DataContract (Name = "rosgraph_msgs/TopicStatistics")]
     public sealed class TopicStatistics : IMessage
     {
         // name of the topic
-        [DataMember] public string topic { get; set; }
-        
+        [DataMember (Name = "topic")] public string Topic { get; set; }
         // node id of the publisher
-        [DataMember] public string node_pub { get; set; }
-        
+        [DataMember (Name = "node_pub")] public string NodePub { get; set; }
         // node id of the subscriber
-        [DataMember] public string node_sub { get; set; }
-        
+        [DataMember (Name = "node_sub")] public string NodeSub { get; set; }
         // the statistics apply to this time window
-        [DataMember] public time window_start { get; set; }
-        [DataMember] public time window_stop { get; set; }
-        
+        [DataMember (Name = "window_start")] public time WindowStart { get; set; }
+        [DataMember (Name = "window_stop")] public time WindowStop { get; set; }
         // number of messages delivered during the window
-        [DataMember] public int delivered_msgs { get; set; }
+        [DataMember (Name = "delivered_msgs")] public int DeliveredMsgs { get; set; }
         // numbers of messages dropped during the window
-        [DataMember] public int dropped_msgs { get; set; }
-        
+        [DataMember (Name = "dropped_msgs")] public int DroppedMsgs { get; set; }
         // traffic during the window, in bytes
-        [DataMember] public int traffic { get; set; }
-        
+        [DataMember (Name = "traffic")] public int Traffic { get; set; }
         // mean/stddev/max period between two messages
-        [DataMember] public duration period_mean { get; set; }
-        [DataMember] public duration period_stddev { get; set; }
-        [DataMember] public duration period_max { get; set; }
-        
+        [DataMember (Name = "period_mean")] public duration PeriodMean { get; set; }
+        [DataMember (Name = "period_stddev")] public duration PeriodStddev { get; set; }
+        [DataMember (Name = "period_max")] public duration PeriodMax { get; set; }
         // mean/stddev/max age of the message based on the
         // timestamp in the message header. In case the
         // message does not have a header, it will be 0.
-        [DataMember] public duration stamp_age_mean { get; set; }
-        [DataMember] public duration stamp_age_stddev { get; set; }
-        [DataMember] public duration stamp_age_max { get; set; }
+        [DataMember (Name = "stamp_age_mean")] public duration StampAgeMean { get; set; }
+        [DataMember (Name = "stamp_age_stddev")] public duration StampAgeStddev { get; set; }
+        [DataMember (Name = "stamp_age_max")] public duration StampAgeMax { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TopicStatistics()
         {
-            topic = "";
-            node_pub = "";
-            node_sub = "";
+            Topic = "";
+            NodePub = "";
+            NodeSub = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TopicStatistics(string topic, string node_pub, string node_sub, time window_start, time window_stop, int delivered_msgs, int dropped_msgs, int traffic, duration period_mean, duration period_stddev, duration period_max, duration stamp_age_mean, duration stamp_age_stddev, duration stamp_age_max)
+        public TopicStatistics(string Topic, string NodePub, string NodeSub, time WindowStart, time WindowStop, int DeliveredMsgs, int DroppedMsgs, int Traffic, duration PeriodMean, duration PeriodStddev, duration PeriodMax, duration StampAgeMean, duration StampAgeStddev, duration StampAgeMax)
         {
-            this.topic = topic ?? throw new System.ArgumentNullException(nameof(topic));
-            this.node_pub = node_pub ?? throw new System.ArgumentNullException(nameof(node_pub));
-            this.node_sub = node_sub ?? throw new System.ArgumentNullException(nameof(node_sub));
-            this.window_start = window_start;
-            this.window_stop = window_stop;
-            this.delivered_msgs = delivered_msgs;
-            this.dropped_msgs = dropped_msgs;
-            this.traffic = traffic;
-            this.period_mean = period_mean;
-            this.period_stddev = period_stddev;
-            this.period_max = period_max;
-            this.stamp_age_mean = stamp_age_mean;
-            this.stamp_age_stddev = stamp_age_stddev;
-            this.stamp_age_max = stamp_age_max;
+            this.Topic = Topic;
+            this.NodePub = NodePub;
+            this.NodeSub = NodeSub;
+            this.WindowStart = WindowStart;
+            this.WindowStop = WindowStop;
+            this.DeliveredMsgs = DeliveredMsgs;
+            this.DroppedMsgs = DroppedMsgs;
+            this.Traffic = Traffic;
+            this.PeriodMean = PeriodMean;
+            this.PeriodStddev = PeriodStddev;
+            this.PeriodMax = PeriodMax;
+            this.StampAgeMean = StampAgeMean;
+            this.StampAgeStddev = StampAgeStddev;
+            this.StampAgeMax = StampAgeMax;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal TopicStatistics(Buffer b)
         {
-            this.topic = b.DeserializeString();
-            this.node_pub = b.DeserializeString();
-            this.node_sub = b.DeserializeString();
-            this.window_start = b.Deserialize<time>();
-            this.window_stop = b.Deserialize<time>();
-            this.delivered_msgs = b.Deserialize<int>();
-            this.dropped_msgs = b.Deserialize<int>();
-            this.traffic = b.Deserialize<int>();
-            this.period_mean = b.Deserialize<duration>();
-            this.period_stddev = b.Deserialize<duration>();
-            this.period_max = b.Deserialize<duration>();
-            this.stamp_age_mean = b.Deserialize<duration>();
-            this.stamp_age_stddev = b.Deserialize<duration>();
-            this.stamp_age_max = b.Deserialize<duration>();
+            Topic = b.DeserializeString();
+            NodePub = b.DeserializeString();
+            NodeSub = b.DeserializeString();
+            WindowStart = b.Deserialize<time>();
+            WindowStop = b.Deserialize<time>();
+            DeliveredMsgs = b.Deserialize<int>();
+            DroppedMsgs = b.Deserialize<int>();
+            Traffic = b.Deserialize<int>();
+            PeriodMean = b.Deserialize<duration>();
+            PeriodStddev = b.Deserialize<duration>();
+            PeriodMax = b.Deserialize<duration>();
+            StampAgeMean = b.Deserialize<duration>();
+            StampAgeStddev = b.Deserialize<duration>();
+            StampAgeMax = b.Deserialize<duration>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -92,36 +85,36 @@ namespace Iviz.Msgs.rosgraph_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.topic);
-            b.Serialize(this.node_pub);
-            b.Serialize(this.node_sub);
-            b.Serialize(this.window_start);
-            b.Serialize(this.window_stop);
-            b.Serialize(this.delivered_msgs);
-            b.Serialize(this.dropped_msgs);
-            b.Serialize(this.traffic);
-            b.Serialize(this.period_mean);
-            b.Serialize(this.period_stddev);
-            b.Serialize(this.period_max);
-            b.Serialize(this.stamp_age_mean);
-            b.Serialize(this.stamp_age_stddev);
-            b.Serialize(this.stamp_age_max);
+            b.Serialize(this.Topic);
+            b.Serialize(this.NodePub);
+            b.Serialize(this.NodeSub);
+            b.Serialize(this.WindowStart);
+            b.Serialize(this.WindowStop);
+            b.Serialize(this.DeliveredMsgs);
+            b.Serialize(this.DroppedMsgs);
+            b.Serialize(this.Traffic);
+            b.Serialize(this.PeriodMean);
+            b.Serialize(this.PeriodStddev);
+            b.Serialize(this.PeriodMax);
+            b.Serialize(this.StampAgeMean);
+            b.Serialize(this.StampAgeStddev);
+            b.Serialize(this.StampAgeMax);
         }
         
         public void Validate()
         {
-            if (topic is null) throw new System.NullReferenceException();
-            if (node_pub is null) throw new System.NullReferenceException();
-            if (node_sub is null) throw new System.NullReferenceException();
+            if (Topic is null) throw new System.NullReferenceException();
+            if (NodePub is null) throw new System.NullReferenceException();
+            if (NodeSub is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 88;
-                size += BuiltIns.UTF8.GetByteCount(topic);
-                size += BuiltIns.UTF8.GetByteCount(node_pub);
-                size += BuiltIns.UTF8.GetByteCount(node_sub);
+                size += BuiltIns.UTF8.GetByteCount(Topic);
+                size += BuiltIns.UTF8.GetByteCount(NodePub);
+                size += BuiltIns.UTF8.GetByteCount(NodeSub);
                 return size;
             }
         }

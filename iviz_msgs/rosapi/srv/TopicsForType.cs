@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosapi
+namespace Iviz.Msgs.Rosapi
 {
-    [DataContract]
+    [DataContract (Name = "rosapi/TopicsForType")]
     public sealed class TopicsForType : IService
     {
         /// <summary> Request message. </summary>
@@ -52,24 +52,24 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class TopicsForTypeRequest : IRequest
     {
-        [DataMember] public string type { get; set; }
+        [DataMember (Name = "type")] public string Type { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TopicsForTypeRequest()
         {
-            type = "";
+            Type = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TopicsForTypeRequest(string type)
+        public TopicsForTypeRequest(string Type)
         {
-            this.type = type ?? throw new System.ArgumentNullException(nameof(type));
+            this.Type = Type;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal TopicsForTypeRequest(Buffer b)
         {
-            this.type = b.DeserializeString();
+            Type = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -80,19 +80,19 @@ namespace Iviz.Msgs.rosapi
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.type);
+            b.Serialize(this.Type);
         }
         
         public void Validate()
         {
-            if (type is null) throw new System.NullReferenceException();
+            if (Type is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(type);
+                size += BuiltIns.UTF8.GetByteCount(Type);
                 return size;
             }
         }
@@ -100,24 +100,24 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class TopicsForTypeResponse : IResponse
     {
-        [DataMember] public string[] topics { get; set; }
+        [DataMember (Name = "topics")] public string[] Topics { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TopicsForTypeResponse()
         {
-            topics = System.Array.Empty<string>();
+            Topics = System.Array.Empty<string>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TopicsForTypeResponse(string[] topics)
+        public TopicsForTypeResponse(string[] Topics)
         {
-            this.topics = topics ?? throw new System.ArgumentNullException(nameof(topics));
+            this.Topics = Topics;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal TopicsForTypeResponse(Buffer b)
         {
-            this.topics = b.DeserializeStringArray();
+            Topics = b.DeserializeStringArray();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -128,15 +128,15 @@ namespace Iviz.Msgs.rosapi
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeArray(this.topics, 0);
+            b.SerializeArray(Topics, 0);
         }
         
         public void Validate()
         {
-            if (topics is null) throw new System.NullReferenceException();
-            for (int i = 0; i < topics.Length; i++)
+            if (Topics is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Topics.Length; i++)
             {
-                if (topics[i] is null) throw new System.NullReferenceException();
+                if (Topics[i] is null) throw new System.NullReferenceException();
             }
         }
     
@@ -144,10 +144,10 @@ namespace Iviz.Msgs.rosapi
         {
             get {
                 int size = 4;
-                size += 4 * topics.Length;
-                for (int i = 0; i < topics.Length; i++)
+                size += 4 * Topics.Length;
+                for (int i = 0; i < Topics.Length; i++)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(topics[i]);
+                    size += BuiltIns.UTF8.GetByteCount(Topics[i]);
                 }
                 return size;
             }

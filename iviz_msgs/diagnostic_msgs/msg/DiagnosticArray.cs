@@ -1,36 +1,36 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.diagnostic_msgs
+namespace Iviz.Msgs.DiagnosticMsgs
 {
-    [DataContract]
+    [DataContract (Name = "diagnostic_msgs/DiagnosticArray")]
     public sealed class DiagnosticArray : IMessage
     {
         // This message is used to send diagnostic information about the state of the robot
-        [DataMember] public std_msgs.Header header { get; set; } //for timestamp
-        [DataMember] public DiagnosticStatus[] status { get; set; } // an array of components being reported on
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; } //for timestamp
+        [DataMember (Name = "status")] public DiagnosticStatus[] Status { get; set; } // an array of components being reported on
     
         /// <summary> Constructor for empty message. </summary>
         public DiagnosticArray()
         {
-            header = new std_msgs.Header();
-            status = System.Array.Empty<DiagnosticStatus>();
+            Header = new StdMsgs.Header();
+            Status = System.Array.Empty<DiagnosticStatus>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public DiagnosticArray(std_msgs.Header header, DiagnosticStatus[] status)
+        public DiagnosticArray(StdMsgs.Header Header, DiagnosticStatus[] Status)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.status = status ?? throw new System.ArgumentNullException(nameof(status));
+            this.Header = Header;
+            this.Status = Status;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal DiagnosticArray(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.status = b.DeserializeArray<DiagnosticStatus>();
-            for (int i = 0; i < this.status.Length; i++)
+            Header = new StdMsgs.Header(b);
+            Status = b.DeserializeArray<DiagnosticStatus>();
+            for (int i = 0; i < this.Status.Length; i++)
             {
-                this.status[i] = new DiagnosticStatus(b);
+                Status[i] = new DiagnosticStatus(b);
             }
         }
         
@@ -42,19 +42,19 @@ namespace Iviz.Msgs.diagnostic_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.SerializeArray(this.status, 0);
+            b.Serialize(Header);
+            b.SerializeArray(Status, 0);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (status is null) throw new System.NullReferenceException();
-            for (int i = 0; i < status.Length; i++)
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (Status is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Status.Length; i++)
             {
-                if (status[i] is null) throw new System.NullReferenceException();
-                status[i].Validate();
+                if (Status[i] is null) throw new System.NullReferenceException();
+                Status[i].Validate();
             }
         }
     
@@ -62,10 +62,10 @@ namespace Iviz.Msgs.diagnostic_msgs
         {
             get {
                 int size = 4;
-                size += header.RosMessageLength;
-                for (int i = 0; i < status.Length; i++)
+                size += Header.RosMessageLength;
+                for (int i = 0; i < Status.Length; i++)
                 {
-                    size += status[i].RosMessageLength;
+                    size += Status[i].RosMessageLength;
                 }
                 return size;
             }

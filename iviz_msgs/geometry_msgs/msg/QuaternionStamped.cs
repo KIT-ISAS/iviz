@@ -1,33 +1,32 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.geometry_msgs
+namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract]
+    [DataContract (Name = "geometry_msgs/QuaternionStamped")]
     public sealed class QuaternionStamped : IMessage
     {
         // This represents an orientation with reference coordinate frame and timestamp.
-        
-        [DataMember] public std_msgs.Header header { get; set; }
-        [DataMember] public Quaternion quaternion { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "quaternion")] public Quaternion Quaternion { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public QuaternionStamped()
         {
-            header = new std_msgs.Header();
+            Header = new StdMsgs.Header();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public QuaternionStamped(std_msgs.Header header, Quaternion quaternion)
+        public QuaternionStamped(StdMsgs.Header Header, Quaternion Quaternion)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.quaternion = quaternion;
+            this.Header = Header;
+            this.Quaternion = Quaternion;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal QuaternionStamped(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.quaternion = new Quaternion(b);
+            Header = new StdMsgs.Header(b);
+            Quaternion = new Quaternion(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -38,21 +37,21 @@ namespace Iviz.Msgs.geometry_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.quaternion);
+            b.Serialize(Header);
+            b.Serialize(Quaternion);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 32;
-                size += header.RosMessageLength;
+                size += Header.RosMessageLength;
                 return size;
             }
         }

@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.mesh_msgs
+namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract]
+    [DataContract (Name = "mesh_msgs/GetVertexColors")]
     public sealed class GetVertexColors : IService
     {
         /// <summary> Request message. </summary>
@@ -52,24 +52,24 @@ namespace Iviz.Msgs.mesh_msgs
 
     public sealed class GetVertexColorsRequest : IRequest
     {
-        [DataMember] public string uuid { get; set; }
+        [DataMember (Name = "uuid")] public string Uuid { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetVertexColorsRequest()
         {
-            uuid = "";
+            Uuid = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GetVertexColorsRequest(string uuid)
+        public GetVertexColorsRequest(string Uuid)
         {
-            this.uuid = uuid ?? throw new System.ArgumentNullException(nameof(uuid));
+            this.Uuid = Uuid;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal GetVertexColorsRequest(Buffer b)
         {
-            this.uuid = b.DeserializeString();
+            Uuid = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -80,19 +80,19 @@ namespace Iviz.Msgs.mesh_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.uuid);
+            b.Serialize(this.Uuid);
         }
         
         public void Validate()
         {
-            if (uuid is null) throw new System.NullReferenceException();
+            if (Uuid is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(uuid);
+                size += BuiltIns.UTF8.GetByteCount(Uuid);
                 return size;
             }
         }
@@ -100,24 +100,24 @@ namespace Iviz.Msgs.mesh_msgs
 
     public sealed class GetVertexColorsResponse : IResponse
     {
-        [DataMember] public mesh_msgs.MeshVertexColorsStamped mesh_vertex_colors_stamped { get; set; }
+        [DataMember (Name = "mesh_vertex_colors_stamped")] public MeshMsgs.MeshVertexColorsStamped MeshVertexColorsStamped { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetVertexColorsResponse()
         {
-            mesh_vertex_colors_stamped = new mesh_msgs.MeshVertexColorsStamped();
+            MeshVertexColorsStamped = new MeshMsgs.MeshVertexColorsStamped();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GetVertexColorsResponse(mesh_msgs.MeshVertexColorsStamped mesh_vertex_colors_stamped)
+        public GetVertexColorsResponse(MeshMsgs.MeshVertexColorsStamped MeshVertexColorsStamped)
         {
-            this.mesh_vertex_colors_stamped = mesh_vertex_colors_stamped ?? throw new System.ArgumentNullException(nameof(mesh_vertex_colors_stamped));
+            this.MeshVertexColorsStamped = MeshVertexColorsStamped;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal GetVertexColorsResponse(Buffer b)
         {
-            this.mesh_vertex_colors_stamped = new mesh_msgs.MeshVertexColorsStamped(b);
+            MeshVertexColorsStamped = new MeshMsgs.MeshVertexColorsStamped(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -128,20 +128,20 @@ namespace Iviz.Msgs.mesh_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.mesh_vertex_colors_stamped);
+            b.Serialize(MeshVertexColorsStamped);
         }
         
         public void Validate()
         {
-            if (mesh_vertex_colors_stamped is null) throw new System.NullReferenceException();
-            mesh_vertex_colors_stamped.Validate();
+            if (MeshVertexColorsStamped is null) throw new System.NullReferenceException();
+            MeshVertexColorsStamped.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 0;
-                size += mesh_vertex_colors_stamped.RosMessageLength;
+                size += MeshVertexColorsStamped.RosMessageLength;
                 return size;
             }
         }

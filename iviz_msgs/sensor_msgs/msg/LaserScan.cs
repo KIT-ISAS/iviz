@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.sensor_msgs
+namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract]
+    [DataContract (Name = "sensor_msgs/LaserScan")]
     public sealed class LaserScan : IMessage
     {
         // Single scan from a planar laser range-finder
@@ -10,67 +10,62 @@ namespace Iviz.Msgs.sensor_msgs
         // If you have another ranging device with different behavior (e.g. a sonar
         // array), please find or create a different message, since applications
         // will make fairly laser-specific assumptions about this data
-        
-        [DataMember] public std_msgs.Header header { get; set; } // timestamp in the header is the acquisition time of 
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; } // timestamp in the header is the acquisition time of 
         // the first ray in the scan.
         //
         // in frame frame_id, angles are measured around 
         // the positive Z axis (counterclockwise, if Z is up)
         // with zero angle being forward along the x axis
-        
-        [DataMember] public float angle_min { get; set; } // start angle of the scan [rad]
-        [DataMember] public float angle_max { get; set; } // end angle of the scan [rad]
-        [DataMember] public float angle_increment { get; set; } // angular distance between measurements [rad]
-        
-        [DataMember] public float time_increment { get; set; } // time between measurements [seconds] - if your scanner
+        [DataMember (Name = "angle_min")] public float AngleMin { get; set; } // start angle of the scan [rad]
+        [DataMember (Name = "angle_max")] public float AngleMax { get; set; } // end angle of the scan [rad]
+        [DataMember (Name = "angle_increment")] public float AngleIncrement { get; set; } // angular distance between measurements [rad]
+        [DataMember (Name = "time_increment")] public float TimeIncrement { get; set; } // time between measurements [seconds] - if your scanner
         // is moving, this will be used in interpolating position
         // of 3d points
-        [DataMember] public float scan_time { get; set; } // time between scans [seconds]
-        
-        [DataMember] public float range_min { get; set; } // minimum range value [m]
-        [DataMember] public float range_max { get; set; } // maximum range value [m]
-        
-        [DataMember] public float[] ranges { get; set; } // range data [m] (Note: values < range_min or > range_max should be discarded)
-        [DataMember] public float[] intensities { get; set; } // intensity data [device-specific units].  If your
+        [DataMember (Name = "scan_time")] public float ScanTime { get; set; } // time between scans [seconds]
+        [DataMember (Name = "range_min")] public float RangeMin { get; set; } // minimum range value [m]
+        [DataMember (Name = "range_max")] public float RangeMax { get; set; } // maximum range value [m]
+        [DataMember (Name = "ranges")] public float[] Ranges { get; set; } // range data [m] (Note: values < range_min or > range_max should be discarded)
+        [DataMember (Name = "intensities")] public float[] Intensities { get; set; } // intensity data [device-specific units].  If your
         // device does not provide intensities, please leave
         // the array empty.
     
         /// <summary> Constructor for empty message. </summary>
         public LaserScan()
         {
-            header = new std_msgs.Header();
-            ranges = System.Array.Empty<float>();
-            intensities = System.Array.Empty<float>();
+            Header = new StdMsgs.Header();
+            Ranges = System.Array.Empty<float>();
+            Intensities = System.Array.Empty<float>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public LaserScan(std_msgs.Header header, float angle_min, float angle_max, float angle_increment, float time_increment, float scan_time, float range_min, float range_max, float[] ranges, float[] intensities)
+        public LaserScan(StdMsgs.Header Header, float AngleMin, float AngleMax, float AngleIncrement, float TimeIncrement, float ScanTime, float RangeMin, float RangeMax, float[] Ranges, float[] Intensities)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.angle_min = angle_min;
-            this.angle_max = angle_max;
-            this.angle_increment = angle_increment;
-            this.time_increment = time_increment;
-            this.scan_time = scan_time;
-            this.range_min = range_min;
-            this.range_max = range_max;
-            this.ranges = ranges ?? throw new System.ArgumentNullException(nameof(ranges));
-            this.intensities = intensities ?? throw new System.ArgumentNullException(nameof(intensities));
+            this.Header = Header;
+            this.AngleMin = AngleMin;
+            this.AngleMax = AngleMax;
+            this.AngleIncrement = AngleIncrement;
+            this.TimeIncrement = TimeIncrement;
+            this.ScanTime = ScanTime;
+            this.RangeMin = RangeMin;
+            this.RangeMax = RangeMax;
+            this.Ranges = Ranges;
+            this.Intensities = Intensities;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal LaserScan(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.angle_min = b.Deserialize<float>();
-            this.angle_max = b.Deserialize<float>();
-            this.angle_increment = b.Deserialize<float>();
-            this.time_increment = b.Deserialize<float>();
-            this.scan_time = b.Deserialize<float>();
-            this.range_min = b.Deserialize<float>();
-            this.range_max = b.Deserialize<float>();
-            this.ranges = b.DeserializeStructArray<float>();
-            this.intensities = b.DeserializeStructArray<float>();
+            Header = new StdMsgs.Header(b);
+            AngleMin = b.Deserialize<float>();
+            AngleMax = b.Deserialize<float>();
+            AngleIncrement = b.Deserialize<float>();
+            TimeIncrement = b.Deserialize<float>();
+            ScanTime = b.Deserialize<float>();
+            RangeMin = b.Deserialize<float>();
+            RangeMax = b.Deserialize<float>();
+            Ranges = b.DeserializeStructArray<float>();
+            Intensities = b.DeserializeStructArray<float>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -81,33 +76,33 @@ namespace Iviz.Msgs.sensor_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.angle_min);
-            b.Serialize(this.angle_max);
-            b.Serialize(this.angle_increment);
-            b.Serialize(this.time_increment);
-            b.Serialize(this.scan_time);
-            b.Serialize(this.range_min);
-            b.Serialize(this.range_max);
-            b.SerializeStructArray(this.ranges, 0);
-            b.SerializeStructArray(this.intensities, 0);
+            b.Serialize(Header);
+            b.Serialize(this.AngleMin);
+            b.Serialize(this.AngleMax);
+            b.Serialize(this.AngleIncrement);
+            b.Serialize(this.TimeIncrement);
+            b.Serialize(this.ScanTime);
+            b.Serialize(this.RangeMin);
+            b.Serialize(this.RangeMax);
+            b.SerializeStructArray(Ranges, 0);
+            b.SerializeStructArray(Intensities, 0);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (ranges is null) throw new System.NullReferenceException();
-            if (intensities is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (Ranges is null) throw new System.NullReferenceException();
+            if (Intensities is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 36;
-                size += header.RosMessageLength;
-                size += 4 * ranges.Length;
-                size += 4 * intensities.Length;
+                size += Header.RosMessageLength;
+                size += 4 * Ranges.Length;
+                size += 4 * Intensities.Length;
                 return size;
             }
         }

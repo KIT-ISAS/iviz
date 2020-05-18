@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.sensor_msgs
+namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract]
+    [DataContract (Name = "sensor_msgs/RegionOfInterest")]
     public sealed class RegionOfInterest : IMessage
     {
         // This message is used to specify a region of interest within an image.
@@ -11,19 +11,17 @@ namespace Iviz.Msgs.sensor_msgs
         // taken, the height and width fields should either match the height and
         // width fields for the associated image; or height = width = 0
         // indicates that the full resolution image was captured.
-        
-        [DataMember] public uint x_offset { get; set; } // Leftmost pixel of the ROI
+        [DataMember (Name = "x_offset")] public uint XOffset { get; set; } // Leftmost pixel of the ROI
         // (0 if the ROI includes the left edge of the image)
-        [DataMember] public uint y_offset { get; set; } // Topmost pixel of the ROI
+        [DataMember (Name = "y_offset")] public uint YOffset { get; set; } // Topmost pixel of the ROI
         // (0 if the ROI includes the top edge of the image)
-        [DataMember] public uint height { get; set; } // Height of ROI
-        [DataMember] public uint width { get; set; } // Width of ROI
-        
+        [DataMember (Name = "height")] public uint Height { get; set; } // Height of ROI
+        [DataMember (Name = "width")] public uint Width { get; set; } // Width of ROI
         // True if a distinct rectified ROI should be calculated from the "raw"
         // ROI in this message. Typically this should be False if the full image
         // is captured (ROI not used), and True if a subwindow is captured (ROI
         // used).
-        [DataMember] public bool do_rectify { get; set; }
+        [DataMember (Name = "do_rectify")] public bool DoRectify { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public RegionOfInterest()
@@ -31,23 +29,23 @@ namespace Iviz.Msgs.sensor_msgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public RegionOfInterest(uint x_offset, uint y_offset, uint height, uint width, bool do_rectify)
+        public RegionOfInterest(uint XOffset, uint YOffset, uint Height, uint Width, bool DoRectify)
         {
-            this.x_offset = x_offset;
-            this.y_offset = y_offset;
-            this.height = height;
-            this.width = width;
-            this.do_rectify = do_rectify;
+            this.XOffset = XOffset;
+            this.YOffset = YOffset;
+            this.Height = Height;
+            this.Width = Width;
+            this.DoRectify = DoRectify;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal RegionOfInterest(Buffer b)
         {
-            this.x_offset = b.Deserialize<uint>();
-            this.y_offset = b.Deserialize<uint>();
-            this.height = b.Deserialize<uint>();
-            this.width = b.Deserialize<uint>();
-            this.do_rectify = b.Deserialize<bool>();
+            XOffset = b.Deserialize<uint>();
+            YOffset = b.Deserialize<uint>();
+            Height = b.Deserialize<uint>();
+            Width = b.Deserialize<uint>();
+            DoRectify = b.Deserialize<bool>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -58,11 +56,11 @@ namespace Iviz.Msgs.sensor_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.x_offset);
-            b.Serialize(this.y_offset);
-            b.Serialize(this.height);
-            b.Serialize(this.width);
-            b.Serialize(this.do_rectify);
+            b.Serialize(this.XOffset);
+            b.Serialize(this.YOffset);
+            b.Serialize(this.Height);
+            b.Serialize(this.Width);
+            b.Serialize(this.DoRectify);
         }
         
         public void Validate()

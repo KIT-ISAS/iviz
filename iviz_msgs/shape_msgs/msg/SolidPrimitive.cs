@@ -1,39 +1,29 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.shape_msgs
+namespace Iviz.Msgs.ShapeMsgs
 {
-    [DataContract]
+    [DataContract (Name = "shape_msgs/SolidPrimitive")]
     public sealed class SolidPrimitive : IMessage
     {
         // Define box, sphere, cylinder, cone 
         // All shapes are defined to have their bounding boxes centered around 0,0,0.
-        
         public const byte BOX = 1;
         public const byte SPHERE = 2;
         public const byte CYLINDER = 3;
         public const byte CONE = 4;
-        
         // The type of the shape
-        [DataMember] public byte type { get; set; }
-        
-        
+        [DataMember (Name = "type")] public byte Type { get; set; }
         // The dimensions of the shape
-        [DataMember] public double[] dimensions { get; set; }
-        
+        [DataMember (Name = "dimensions")] public double[] Dimensions { get; set; }
         // The meaning of the shape dimensions: each constant defines the index in the 'dimensions' array
-        
         // For the BOX type, the X, Y, and Z dimensions are the length of the corresponding
         // sides of the box.
         public const byte BOX_X = 0;
         public const byte BOX_Y = 1;
         public const byte BOX_Z = 2;
-        
-        
         // For the SPHERE type, only one component is used, and it gives the radius of
         // the sphere.
         public const byte SPHERE_RADIUS = 0;
-        
-        
         // For the CYLINDER and CONE types, the center line is oriented along
         // the Z axis.  Therefore the CYLINDER_HEIGHT (CONE_HEIGHT) component
         // of dimensions gives the height of the cylinder (cone).  The
@@ -41,31 +31,29 @@ namespace Iviz.Msgs.shape_msgs
         // radius of the base of the cylinder (cone).  Cone and cylinder
         // primitives are defined to be circular. The tip of the cone is
         // pointing up, along +Z axis.
-        
         public const byte CYLINDER_HEIGHT = 0;
         public const byte CYLINDER_RADIUS = 1;
-        
         public const byte CONE_HEIGHT = 0;
         public const byte CONE_RADIUS = 1;
     
         /// <summary> Constructor for empty message. </summary>
         public SolidPrimitive()
         {
-            dimensions = System.Array.Empty<double>();
+            Dimensions = System.Array.Empty<double>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public SolidPrimitive(byte type, double[] dimensions)
+        public SolidPrimitive(byte Type, double[] Dimensions)
         {
-            this.type = type;
-            this.dimensions = dimensions ?? throw new System.ArgumentNullException(nameof(dimensions));
+            this.Type = Type;
+            this.Dimensions = Dimensions;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal SolidPrimitive(Buffer b)
         {
-            this.type = b.Deserialize<byte>();
-            this.dimensions = b.DeserializeStructArray<double>();
+            Type = b.Deserialize<byte>();
+            Dimensions = b.DeserializeStructArray<double>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -76,20 +64,20 @@ namespace Iviz.Msgs.shape_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.type);
-            b.SerializeStructArray(this.dimensions, 0);
+            b.Serialize(this.Type);
+            b.SerializeStructArray(Dimensions, 0);
         }
         
         public void Validate()
         {
-            if (dimensions is null) throw new System.NullReferenceException();
+            if (Dimensions is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 5;
-                size += 8 * dimensions.Length;
+                size += 8 * Dimensions.Length;
                 return size;
             }
         }

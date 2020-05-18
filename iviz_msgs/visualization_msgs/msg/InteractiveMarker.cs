@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.visualization_msgs
+namespace Iviz.Msgs.VisualizationMsgs
 {
-    [DataContract]
+    [DataContract (Name = "visualization_msgs/InteractiveMarker")]
     public sealed class InteractiveMarker : IMessage
     {
         // Time/frame info.
@@ -11,66 +11,60 @@ namespace Iviz.Msgs.visualization_msgs
         // in the same frame.
         // Otherwise, you might receive feedback in a different frame.
         // For rviz, this will be the current 'fixed frame' set by the user.
-        [DataMember] public std_msgs.Header header { get; set; }
-        
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         // Initial pose. Also, defines the pivot point for rotations.
-        [DataMember] public geometry_msgs.Pose pose { get; set; }
-        
+        [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose { get; set; }
         // Identifying string. Must be globally unique in
         // the topic that this message is sent through.
-        [DataMember] public string name { get; set; }
-        
+        [DataMember (Name = "name")] public string Name { get; set; }
         // Short description (< 40 characters).
-        [DataMember] public string description { get; set; }
-        
+        [DataMember (Name = "description")] public string Description { get; set; }
         // Scale to be used for default controls (default=1).
-        [DataMember] public float scale { get; set; }
-        
+        [DataMember (Name = "scale")] public float Scale { get; set; }
         // All menu and submenu entries associated with this marker.
-        [DataMember] public MenuEntry[] menu_entries { get; set; }
-        
+        [DataMember (Name = "menu_entries")] public MenuEntry[] MenuEntries { get; set; }
         // List of controls displayed for this marker.
-        [DataMember] public InteractiveMarkerControl[] controls { get; set; }
+        [DataMember (Name = "controls")] public InteractiveMarkerControl[] Controls { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarker()
         {
-            header = new std_msgs.Header();
-            name = "";
-            description = "";
-            menu_entries = System.Array.Empty<MenuEntry>();
-            controls = System.Array.Empty<InteractiveMarkerControl>();
+            Header = new StdMsgs.Header();
+            Name = "";
+            Description = "";
+            MenuEntries = System.Array.Empty<MenuEntry>();
+            Controls = System.Array.Empty<InteractiveMarkerControl>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public InteractiveMarker(std_msgs.Header header, geometry_msgs.Pose pose, string name, string description, float scale, MenuEntry[] menu_entries, InteractiveMarkerControl[] controls)
+        public InteractiveMarker(StdMsgs.Header Header, GeometryMsgs.Pose Pose, string Name, string Description, float Scale, MenuEntry[] MenuEntries, InteractiveMarkerControl[] Controls)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.pose = pose;
-            this.name = name ?? throw new System.ArgumentNullException(nameof(name));
-            this.description = description ?? throw new System.ArgumentNullException(nameof(description));
-            this.scale = scale;
-            this.menu_entries = menu_entries ?? throw new System.ArgumentNullException(nameof(menu_entries));
-            this.controls = controls ?? throw new System.ArgumentNullException(nameof(controls));
+            this.Header = Header;
+            this.Pose = Pose;
+            this.Name = Name;
+            this.Description = Description;
+            this.Scale = Scale;
+            this.MenuEntries = MenuEntries;
+            this.Controls = Controls;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal InteractiveMarker(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.pose = new geometry_msgs.Pose(b);
-            this.name = b.DeserializeString();
-            this.description = b.DeserializeString();
-            this.scale = b.Deserialize<float>();
-            this.menu_entries = b.DeserializeArray<MenuEntry>();
-            for (int i = 0; i < this.menu_entries.Length; i++)
+            Header = new StdMsgs.Header(b);
+            Pose = new GeometryMsgs.Pose(b);
+            Name = b.DeserializeString();
+            Description = b.DeserializeString();
+            Scale = b.Deserialize<float>();
+            MenuEntries = b.DeserializeArray<MenuEntry>();
+            for (int i = 0; i < this.MenuEntries.Length; i++)
             {
-                this.menu_entries[i] = new MenuEntry(b);
+                MenuEntries[i] = new MenuEntry(b);
             }
-            this.controls = b.DeserializeArray<InteractiveMarkerControl>();
-            for (int i = 0; i < this.controls.Length; i++)
+            Controls = b.DeserializeArray<InteractiveMarkerControl>();
+            for (int i = 0; i < this.Controls.Length; i++)
             {
-                this.controls[i] = new InteractiveMarkerControl(b);
+                Controls[i] = new InteractiveMarkerControl(b);
             }
         }
         
@@ -82,32 +76,32 @@ namespace Iviz.Msgs.visualization_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.pose);
-            b.Serialize(this.name);
-            b.Serialize(this.description);
-            b.Serialize(this.scale);
-            b.SerializeArray(this.menu_entries, 0);
-            b.SerializeArray(this.controls, 0);
+            b.Serialize(Header);
+            b.Serialize(Pose);
+            b.Serialize(this.Name);
+            b.Serialize(this.Description);
+            b.Serialize(this.Scale);
+            b.SerializeArray(MenuEntries, 0);
+            b.SerializeArray(Controls, 0);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (name is null) throw new System.NullReferenceException();
-            if (description is null) throw new System.NullReferenceException();
-            if (menu_entries is null) throw new System.NullReferenceException();
-            for (int i = 0; i < menu_entries.Length; i++)
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (Name is null) throw new System.NullReferenceException();
+            if (Description is null) throw new System.NullReferenceException();
+            if (MenuEntries is null) throw new System.NullReferenceException();
+            for (int i = 0; i < MenuEntries.Length; i++)
             {
-                if (menu_entries[i] is null) throw new System.NullReferenceException();
-                menu_entries[i].Validate();
+                if (MenuEntries[i] is null) throw new System.NullReferenceException();
+                MenuEntries[i].Validate();
             }
-            if (controls is null) throw new System.NullReferenceException();
-            for (int i = 0; i < controls.Length; i++)
+            if (Controls is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Controls.Length; i++)
             {
-                if (controls[i] is null) throw new System.NullReferenceException();
-                controls[i].Validate();
+                if (Controls[i] is null) throw new System.NullReferenceException();
+                Controls[i].Validate();
             }
         }
     
@@ -115,16 +109,16 @@ namespace Iviz.Msgs.visualization_msgs
         {
             get {
                 int size = 76;
-                size += header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(name);
-                size += BuiltIns.UTF8.GetByteCount(description);
-                for (int i = 0; i < menu_entries.Length; i++)
+                size += Header.RosMessageLength;
+                size += BuiltIns.UTF8.GetByteCount(Name);
+                size += BuiltIns.UTF8.GetByteCount(Description);
+                for (int i = 0; i < MenuEntries.Length; i++)
                 {
-                    size += menu_entries[i].RosMessageLength;
+                    size += MenuEntries[i].RosMessageLength;
                 }
-                for (int i = 0; i < controls.Length; i++)
+                for (int i = 0; i < Controls.Length; i++)
                 {
-                    size += controls[i].RosMessageLength;
+                    size += Controls[i].RosMessageLength;
                 }
                 return size;
             }

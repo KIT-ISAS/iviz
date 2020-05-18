@@ -1,43 +1,40 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.sensor_msgs
+namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract]
+    [DataContract (Name = "sensor_msgs/RelativeHumidity")]
     public sealed class RelativeHumidity : IMessage
     {
         // Single reading from a relative humidity sensor.  Defines the ratio of partial
         // pressure of water vapor to the saturated vapor pressure at a temperature.
-        
-        [DataMember] public std_msgs.Header header { get; set; } // timestamp of the measurement
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; } // timestamp of the measurement
         // frame_id is the location of the humidity sensor
-        
-        [DataMember] public double relative_humidity { get; set; } // Expression of the relative humidity
+        [DataMember (Name = "relative_humidity")] public double RelativeHumidity_ { get; set; } // Expression of the relative humidity
         // from 0.0 to 1.0.
         // 0.0 is no partial pressure of water vapor
         // 1.0 represents partial pressure of saturation
-        
-        [DataMember] public double variance { get; set; } // 0 is interpreted as variance unknown
+        [DataMember (Name = "variance")] public double Variance { get; set; } // 0 is interpreted as variance unknown
     
         /// <summary> Constructor for empty message. </summary>
         public RelativeHumidity()
         {
-            header = new std_msgs.Header();
+            Header = new StdMsgs.Header();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public RelativeHumidity(std_msgs.Header header, double relative_humidity, double variance)
+        public RelativeHumidity(StdMsgs.Header Header, double RelativeHumidity_, double Variance)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.relative_humidity = relative_humidity;
-            this.variance = variance;
+            this.Header = Header;
+            this.RelativeHumidity_ = RelativeHumidity_;
+            this.Variance = Variance;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal RelativeHumidity(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.relative_humidity = b.Deserialize<double>();
-            this.variance = b.Deserialize<double>();
+            Header = new StdMsgs.Header(b);
+            RelativeHumidity_ = b.Deserialize<double>();
+            Variance = b.Deserialize<double>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -48,22 +45,22 @@ namespace Iviz.Msgs.sensor_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.relative_humidity);
-            b.Serialize(this.variance);
+            b.Serialize(Header);
+            b.Serialize(this.RelativeHumidity_);
+            b.Serialize(this.Variance);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 16;
-                size += header.RosMessageLength;
+                size += Header.RosMessageLength;
                 return size;
             }
         }

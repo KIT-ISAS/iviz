@@ -1,53 +1,54 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.trajectory_msgs
+namespace Iviz.Msgs.TrajectoryMsgs
 {
-    [DataContract]
+    [DataContract (Name = "trajectory_msgs/MultiDOFJointTrajectoryPoint")]
     public sealed class MultiDOFJointTrajectoryPoint : IMessage
     {
         // Each multi-dof joint can specify a transform (up to 6 DOF)
-        [DataMember] public geometry_msgs.Transform[] transforms { get; set; }
-        
+        [DataMember (Name = "transforms")] public GeometryMsgs.Transform[] Transforms { get; set; }
         // There can be a velocity specified for the origin of the joint 
-        [DataMember] public geometry_msgs.Twist[] velocities { get; set; }
-        
+        [DataMember (Name = "velocities")] public GeometryMsgs.Twist[] Velocities { get; set; }
         // There can be an acceleration specified for the origin of the joint 
-        [DataMember] public geometry_msgs.Twist[] accelerations { get; set; }
-        
-        [DataMember] public duration time_from_start { get; set; }
+        [DataMember (Name = "accelerations")] public GeometryMsgs.Twist[] Accelerations { get; set; }
+        [DataMember (Name = "time_from_start")] public duration TimeFromStart { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MultiDOFJointTrajectoryPoint()
         {
-            transforms = System.Array.Empty<geometry_msgs.Transform>();
-            velocities = System.Array.Empty<geometry_msgs.Twist>();
-            accelerations = System.Array.Empty<geometry_msgs.Twist>();
+            Transforms = System.Array.Empty<GeometryMsgs.Transform>();
+            Velocities = System.Array.Empty<GeometryMsgs.Twist>();
+            Accelerations = System.Array.Empty<GeometryMsgs.Twist>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MultiDOFJointTrajectoryPoint(geometry_msgs.Transform[] transforms, geometry_msgs.Twist[] velocities, geometry_msgs.Twist[] accelerations, duration time_from_start)
+        public MultiDOFJointTrajectoryPoint(GeometryMsgs.Transform[] Transforms, GeometryMsgs.Twist[] Velocities, GeometryMsgs.Twist[] Accelerations, duration TimeFromStart)
         {
-            this.transforms = transforms ?? throw new System.ArgumentNullException(nameof(transforms));
-            this.velocities = velocities ?? throw new System.ArgumentNullException(nameof(velocities));
-            this.accelerations = accelerations ?? throw new System.ArgumentNullException(nameof(accelerations));
-            this.time_from_start = time_from_start;
+            this.Transforms = Transforms;
+            this.Velocities = Velocities;
+            this.Accelerations = Accelerations;
+            this.TimeFromStart = TimeFromStart;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal MultiDOFJointTrajectoryPoint(Buffer b)
         {
-            this.transforms = b.DeserializeStructArray<geometry_msgs.Transform>();
-            this.velocities = b.DeserializeArray<geometry_msgs.Twist>();
-            for (int i = 0; i < this.velocities.Length; i++)
+            Transforms = b.DeserializeArray<GeometryMsgs.Transform>();
+            for (int i = 0; i < this.Transforms.Length; i++)
             {
-                this.velocities[i] = new geometry_msgs.Twist(b);
+                Transforms[i] = new GeometryMsgs.Transform(b);
             }
-            this.accelerations = b.DeserializeArray<geometry_msgs.Twist>();
-            for (int i = 0; i < this.accelerations.Length; i++)
+            Velocities = b.DeserializeArray<GeometryMsgs.Twist>();
+            for (int i = 0; i < this.Velocities.Length; i++)
             {
-                this.accelerations[i] = new geometry_msgs.Twist(b);
+                Velocities[i] = new GeometryMsgs.Twist(b);
             }
-            this.time_from_start = b.Deserialize<duration>();
+            Accelerations = b.DeserializeArray<GeometryMsgs.Twist>();
+            for (int i = 0; i < this.Accelerations.Length; i++)
+            {
+                Accelerations[i] = new GeometryMsgs.Twist(b);
+            }
+            TimeFromStart = b.Deserialize<duration>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -58,26 +59,31 @@ namespace Iviz.Msgs.trajectory_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeStructArray(this.transforms, 0);
-            b.SerializeArray(this.velocities, 0);
-            b.SerializeArray(this.accelerations, 0);
-            b.Serialize(this.time_from_start);
+            b.SerializeArray(Transforms, 0);
+            b.SerializeArray(Velocities, 0);
+            b.SerializeArray(Accelerations, 0);
+            b.Serialize(this.TimeFromStart);
         }
         
         public void Validate()
         {
-            if (transforms is null) throw new System.NullReferenceException();
-            if (velocities is null) throw new System.NullReferenceException();
-            for (int i = 0; i < velocities.Length; i++)
+            if (Transforms is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Transforms.Length; i++)
             {
-                if (velocities[i] is null) throw new System.NullReferenceException();
-                velocities[i].Validate();
+                if (Transforms[i] is null) throw new System.NullReferenceException();
+                Transforms[i].Validate();
             }
-            if (accelerations is null) throw new System.NullReferenceException();
-            for (int i = 0; i < accelerations.Length; i++)
+            if (Velocities is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Velocities.Length; i++)
             {
-                if (accelerations[i] is null) throw new System.NullReferenceException();
-                accelerations[i].Validate();
+                if (Velocities[i] is null) throw new System.NullReferenceException();
+                Velocities[i].Validate();
+            }
+            if (Accelerations is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Accelerations.Length; i++)
+            {
+                if (Accelerations[i] is null) throw new System.NullReferenceException();
+                Accelerations[i].Validate();
             }
         }
     
@@ -85,9 +91,9 @@ namespace Iviz.Msgs.trajectory_msgs
         {
             get {
                 int size = 20;
-                size += 56 * transforms.Length;
-                size += 48 * velocities.Length;
-                size += 48 * accelerations.Length;
+                size += 56 * Transforms.Length;
+                size += 48 * Velocities.Length;
+                size += 48 * Accelerations.Length;
                 return size;
             }
         }

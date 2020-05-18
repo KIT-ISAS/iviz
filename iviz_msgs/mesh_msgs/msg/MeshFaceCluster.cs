@@ -1,34 +1,34 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.mesh_msgs
+namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract]
+    [DataContract (Name = "mesh_msgs/MeshFaceCluster")]
     public sealed class MeshFaceCluster : IMessage
     {
         //Cluster
-        [DataMember] public uint[] face_indices { get; set; }
+        [DataMember (Name = "face_indices")] public uint[] FaceIndices { get; set; }
         //optional
-        [DataMember] public string label { get; set; }
+        [DataMember (Name = "label")] public string Label { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshFaceCluster()
         {
-            face_indices = System.Array.Empty<uint>();
-            label = "";
+            FaceIndices = System.Array.Empty<uint>();
+            Label = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MeshFaceCluster(uint[] face_indices, string label)
+        public MeshFaceCluster(uint[] FaceIndices, string Label)
         {
-            this.face_indices = face_indices ?? throw new System.ArgumentNullException(nameof(face_indices));
-            this.label = label ?? throw new System.ArgumentNullException(nameof(label));
+            this.FaceIndices = FaceIndices;
+            this.Label = Label;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal MeshFaceCluster(Buffer b)
         {
-            this.face_indices = b.DeserializeStructArray<uint>();
-            this.label = b.DeserializeString();
+            FaceIndices = b.DeserializeStructArray<uint>();
+            Label = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -39,22 +39,22 @@ namespace Iviz.Msgs.mesh_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeStructArray(this.face_indices, 0);
-            b.Serialize(this.label);
+            b.SerializeStructArray(FaceIndices, 0);
+            b.Serialize(this.Label);
         }
         
         public void Validate()
         {
-            if (face_indices is null) throw new System.NullReferenceException();
-            if (label is null) throw new System.NullReferenceException();
+            if (FaceIndices is null) throw new System.NullReferenceException();
+            if (Label is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 8;
-                size += 4 * face_indices.Length;
-                size += BuiltIns.UTF8.GetByteCount(label);
+                size += 4 * FaceIndices.Length;
+                size += BuiltIns.UTF8.GetByteCount(Label);
                 return size;
             }
         }

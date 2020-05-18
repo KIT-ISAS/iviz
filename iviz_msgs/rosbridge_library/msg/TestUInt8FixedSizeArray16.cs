@@ -1,29 +1,28 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosbridge_library
+namespace Iviz.Msgs.RosbridgeLibrary
 {
-    [DataContract]
+    [DataContract (Name = "rosbridge_library/TestUInt8FixedSizeArray16")]
     public sealed class TestUInt8FixedSizeArray16 : IMessage
     {
-        [DataMember] public byte[/*16*/] data { get; set; }
+        [DataMember (Name = "data")] public byte[/*16*/] Data { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestUInt8FixedSizeArray16()
         {
-            data = new byte[16];
+            Data = new byte[16];
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TestUInt8FixedSizeArray16(byte[] data)
+        public TestUInt8FixedSizeArray16(byte[] Data)
         {
-            this.data = data ?? throw new System.ArgumentNullException(nameof(data));
-            if (this.data.Length != 16) throw new System.ArgumentException("Invalid size", nameof(data));
+            this.Data = Data;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal TestUInt8FixedSizeArray16(Buffer b)
         {
-            this.data = b.DeserializeStructArray<byte>(16);
+            Data = b.DeserializeStructArray<byte>(16);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -34,13 +33,13 @@ namespace Iviz.Msgs.rosbridge_library
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeStructArray(this.data, 16);
+            b.SerializeStructArray(Data, 16);
         }
         
         public void Validate()
         {
-            if (data is null) throw new System.NullReferenceException();
-            if (data.Length != 16) throw new System.IndexOutOfRangeException();
+            if (Data is null) throw new System.NullReferenceException();
+            if (Data.Length != 16) throw new System.IndexOutOfRangeException();
         }
     
         public int RosMessageLength => 16;

@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.grid_map_msgs
+namespace Iviz.Msgs.GridMapMsgs
 {
-    [DataContract]
+    [DataContract (Name = "grid_map_msgs/GetGridMapInfo")]
     public sealed class GetGridMapInfo : IService
     {
         /// <summary> Request message. </summary>
@@ -56,26 +56,25 @@ namespace Iviz.Msgs.grid_map_msgs
 
     public sealed class GetGridMapInfoResponse : IResponse
     {
-        
         // Grid map info
-        [DataMember] public grid_map_msgs.GridMapInfo info { get; set; }
+        [DataMember (Name = "info")] public GridMapMsgs.GridMapInfo Info { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetGridMapInfoResponse()
         {
-            info = new grid_map_msgs.GridMapInfo();
+            Info = new GridMapMsgs.GridMapInfo();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GetGridMapInfoResponse(grid_map_msgs.GridMapInfo info)
+        public GetGridMapInfoResponse(GridMapMsgs.GridMapInfo Info)
         {
-            this.info = info ?? throw new System.ArgumentNullException(nameof(info));
+            this.Info = Info;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal GetGridMapInfoResponse(Buffer b)
         {
-            this.info = new grid_map_msgs.GridMapInfo(b);
+            Info = new GridMapMsgs.GridMapInfo(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -86,20 +85,20 @@ namespace Iviz.Msgs.grid_map_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.info);
+            b.Serialize(Info);
         }
         
         public void Validate()
         {
-            if (info is null) throw new System.NullReferenceException();
-            info.Validate();
+            if (Info is null) throw new System.NullReferenceException();
+            Info.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 0;
-                size += info.RosMessageLength;
+                size += Info.RosMessageLength;
                 return size;
             }
         }

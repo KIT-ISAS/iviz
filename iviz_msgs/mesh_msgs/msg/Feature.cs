@@ -1,34 +1,34 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.mesh_msgs
+namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract]
+    [DataContract (Name = "mesh_msgs/Feature")]
     public sealed class Feature : IMessage
     {
-        [DataMember] public geometry_msgs.Point location { get; set; }
-        [DataMember] public std_msgs.Float32[] descriptor { get; set; }
+        [DataMember (Name = "location")] public GeometryMsgs.Point Location { get; set; }
+        [DataMember (Name = "descriptor")] public StdMsgs.Float32[] Descriptor { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Feature()
         {
-            descriptor = System.Array.Empty<std_msgs.Float32>();
+            Descriptor = System.Array.Empty<StdMsgs.Float32>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Feature(geometry_msgs.Point location, std_msgs.Float32[] descriptor)
+        public Feature(GeometryMsgs.Point Location, StdMsgs.Float32[] Descriptor)
         {
-            this.location = location;
-            this.descriptor = descriptor ?? throw new System.ArgumentNullException(nameof(descriptor));
+            this.Location = Location;
+            this.Descriptor = Descriptor;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal Feature(Buffer b)
         {
-            this.location = new geometry_msgs.Point(b);
-            this.descriptor = b.DeserializeArray<std_msgs.Float32>();
-            for (int i = 0; i < this.descriptor.Length; i++)
+            Location = new GeometryMsgs.Point(b);
+            Descriptor = b.DeserializeArray<StdMsgs.Float32>();
+            for (int i = 0; i < this.Descriptor.Length; i++)
             {
-                this.descriptor[i] = new std_msgs.Float32(b);
+                Descriptor[i] = new StdMsgs.Float32(b);
             }
         }
         
@@ -40,17 +40,17 @@ namespace Iviz.Msgs.mesh_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.location);
-            b.SerializeArray(this.descriptor, 0);
+            b.Serialize(Location);
+            b.SerializeArray(Descriptor, 0);
         }
         
         public void Validate()
         {
-            if (descriptor is null) throw new System.NullReferenceException();
-            for (int i = 0; i < descriptor.Length; i++)
+            if (Descriptor is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Descriptor.Length; i++)
             {
-                if (descriptor[i] is null) throw new System.NullReferenceException();
-                descriptor[i].Validate();
+                if (Descriptor[i] is null) throw new System.NullReferenceException();
+                Descriptor[i].Validate();
             }
         }
     
@@ -58,7 +58,7 @@ namespace Iviz.Msgs.mesh_msgs
         {
             get {
                 int size = 28;
-                size += 4 * descriptor.Length;
+                size += 4 * Descriptor.Length;
                 return size;
             }
         }

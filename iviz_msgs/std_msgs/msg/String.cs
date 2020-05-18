@@ -1,28 +1,28 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.std_msgs
+namespace Iviz.Msgs.StdMsgs
 {
-    [DataContract]
+    [DataContract (Name = "std_msgs/String")]
     public sealed class String : IMessage
     {
-        [DataMember] public string data { get; set; }
+        [DataMember (Name = "data")] public string Data { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public String()
         {
-            data = "";
+            Data = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public String(string data)
+        public String(string Data)
         {
-            this.data = data ?? throw new System.ArgumentNullException(nameof(data));
+            this.Data = Data;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal String(Buffer b)
         {
-            this.data = b.DeserializeString();
+            Data = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -33,19 +33,19 @@ namespace Iviz.Msgs.std_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.data);
+            b.Serialize(this.Data);
         }
         
         public void Validate()
         {
-            if (data is null) throw new System.NullReferenceException();
+            if (Data is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(data);
+                size += BuiltIns.UTF8.GetByteCount(Data);
                 return size;
             }
         }

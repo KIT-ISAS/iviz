@@ -1,76 +1,70 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.sensor_msgs
+namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract]
+    [DataContract (Name = "sensor_msgs/PointCloud2")]
     public sealed class PointCloud2 : IMessage
     {
         // This message holds a collection of N-dimensional points, which may
         // contain additional information such as normals, intensity, etc. The
         // point data is stored as a binary blob, its layout described by the
         // contents of the "fields" array.
-        
         // The point cloud data may be organized 2d (image-like) or 1d
         // (unordered). Point clouds organized as 2d images may be produced by
         // camera depth sensors such as stereo or time-of-flight.
-        
         // Time of sensor data acquisition, and the coordinate frame ID (for 3d
         // points).
-        [DataMember] public std_msgs.Header header { get; set; }
-        
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         // 2D structure of the point cloud. If the cloud is unordered, height is
         // 1 and width is the length of the point cloud.
-        [DataMember] public uint height { get; set; }
-        [DataMember] public uint width { get; set; }
-        
+        [DataMember (Name = "height")] public uint Height { get; set; }
+        [DataMember (Name = "width")] public uint Width { get; set; }
         // Describes the channels and their layout in the binary data blob.
-        [DataMember] public PointField[] fields { get; set; }
-        
-        [DataMember] public bool is_bigendian { get; set; } // Is this data bigendian?
-        [DataMember] public uint point_step { get; set; } // Length of a point in bytes
-        [DataMember] public uint row_step { get; set; } // Length of a row in bytes
-        [DataMember] public byte[] data { get; set; } // Actual point data, size is (row_step*height)
-        
-        [DataMember] public bool is_dense { get; set; } // True if there are no invalid points
+        [DataMember (Name = "fields")] public PointField[] Fields { get; set; }
+        [DataMember (Name = "is_bigendian")] public bool IsBigendian { get; set; } // Is this data bigendian?
+        [DataMember (Name = "point_step")] public uint PointStep { get; set; } // Length of a point in bytes
+        [DataMember (Name = "row_step")] public uint RowStep { get; set; } // Length of a row in bytes
+        [DataMember (Name = "data")] public byte[] Data { get; set; } // Actual point data, size is (row_step*height)
+        [DataMember (Name = "is_dense")] public bool IsDense { get; set; } // True if there are no invalid points
     
         /// <summary> Constructor for empty message. </summary>
         public PointCloud2()
         {
-            header = new std_msgs.Header();
-            fields = System.Array.Empty<PointField>();
-            data = System.Array.Empty<byte>();
+            Header = new StdMsgs.Header();
+            Fields = System.Array.Empty<PointField>();
+            Data = System.Array.Empty<byte>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public PointCloud2(std_msgs.Header header, uint height, uint width, PointField[] fields, bool is_bigendian, uint point_step, uint row_step, byte[] data, bool is_dense)
+        public PointCloud2(StdMsgs.Header Header, uint Height, uint Width, PointField[] Fields, bool IsBigendian, uint PointStep, uint RowStep, byte[] Data, bool IsDense)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.height = height;
-            this.width = width;
-            this.fields = fields ?? throw new System.ArgumentNullException(nameof(fields));
-            this.is_bigendian = is_bigendian;
-            this.point_step = point_step;
-            this.row_step = row_step;
-            this.data = data ?? throw new System.ArgumentNullException(nameof(data));
-            this.is_dense = is_dense;
+            this.Header = Header;
+            this.Height = Height;
+            this.Width = Width;
+            this.Fields = Fields;
+            this.IsBigendian = IsBigendian;
+            this.PointStep = PointStep;
+            this.RowStep = RowStep;
+            this.Data = Data;
+            this.IsDense = IsDense;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal PointCloud2(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.height = b.Deserialize<uint>();
-            this.width = b.Deserialize<uint>();
-            this.fields = b.DeserializeArray<PointField>();
-            for (int i = 0; i < this.fields.Length; i++)
+            Header = new StdMsgs.Header(b);
+            Height = b.Deserialize<uint>();
+            Width = b.Deserialize<uint>();
+            Fields = b.DeserializeArray<PointField>();
+            for (int i = 0; i < this.Fields.Length; i++)
             {
-                this.fields[i] = new PointField(b);
+                Fields[i] = new PointField(b);
             }
-            this.is_bigendian = b.Deserialize<bool>();
-            this.point_step = b.Deserialize<uint>();
-            this.row_step = b.Deserialize<uint>();
-            this.data = b.DeserializeStructArray<byte>();
-            this.is_dense = b.Deserialize<bool>();
+            IsBigendian = b.Deserialize<bool>();
+            PointStep = b.Deserialize<uint>();
+            RowStep = b.Deserialize<uint>();
+            Data = b.DeserializeStructArray<byte>();
+            IsDense = b.Deserialize<bool>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -81,40 +75,40 @@ namespace Iviz.Msgs.sensor_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.height);
-            b.Serialize(this.width);
-            b.SerializeArray(this.fields, 0);
-            b.Serialize(this.is_bigendian);
-            b.Serialize(this.point_step);
-            b.Serialize(this.row_step);
-            b.SerializeStructArray(this.data, 0);
-            b.Serialize(this.is_dense);
+            b.Serialize(Header);
+            b.Serialize(this.Height);
+            b.Serialize(this.Width);
+            b.SerializeArray(Fields, 0);
+            b.Serialize(this.IsBigendian);
+            b.Serialize(this.PointStep);
+            b.Serialize(this.RowStep);
+            b.SerializeStructArray(Data, 0);
+            b.Serialize(this.IsDense);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (fields is null) throw new System.NullReferenceException();
-            for (int i = 0; i < fields.Length; i++)
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (Fields is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Fields.Length; i++)
             {
-                if (fields[i] is null) throw new System.NullReferenceException();
-                fields[i].Validate();
+                if (Fields[i] is null) throw new System.NullReferenceException();
+                Fields[i].Validate();
             }
-            if (data is null) throw new System.NullReferenceException();
+            if (Data is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 26;
-                size += header.RosMessageLength;
-                for (int i = 0; i < fields.Length; i++)
+                size += Header.RosMessageLength;
+                for (int i = 0; i < Fields.Length; i++)
                 {
-                    size += fields[i].RosMessageLength;
+                    size += Fields[i].RosMessageLength;
                 }
-                size += 1 * data.Length;
+                size += 1 * Data.Length;
                 return size;
             }
         }

@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosapi
+namespace Iviz.Msgs.Rosapi
 {
-    [DataContract]
+    [DataContract (Name = "rosapi/HasParam")]
     public sealed class HasParam : IService
     {
         /// <summary> Request message. </summary>
@@ -52,24 +52,24 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class HasParamRequest : IRequest
     {
-        [DataMember] public string name { get; set; }
+        [DataMember (Name = "name")] public string Name { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public HasParamRequest()
         {
-            name = "";
+            Name = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public HasParamRequest(string name)
+        public HasParamRequest(string Name)
         {
-            this.name = name ?? throw new System.ArgumentNullException(nameof(name));
+            this.Name = Name;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal HasParamRequest(Buffer b)
         {
-            this.name = b.DeserializeString();
+            Name = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -80,19 +80,19 @@ namespace Iviz.Msgs.rosapi
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.name);
+            b.Serialize(this.Name);
         }
         
         public void Validate()
         {
-            if (name is null) throw new System.NullReferenceException();
+            if (Name is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(name);
+                size += BuiltIns.UTF8.GetByteCount(Name);
                 return size;
             }
         }
@@ -100,7 +100,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class HasParamResponse : IResponse
     {
-        [DataMember] public bool exists { get; set; }
+        [DataMember (Name = "exists")] public bool Exists { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public HasParamResponse()
@@ -108,15 +108,15 @@ namespace Iviz.Msgs.rosapi
         }
         
         /// <summary> Explicit constructor. </summary>
-        public HasParamResponse(bool exists)
+        public HasParamResponse(bool Exists)
         {
-            this.exists = exists;
+            this.Exists = Exists;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal HasParamResponse(Buffer b)
         {
-            this.exists = b.Deserialize<bool>();
+            Exists = b.Deserialize<bool>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -127,7 +127,7 @@ namespace Iviz.Msgs.rosapi
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.exists);
+            b.Serialize(this.Exists);
         }
         
         public void Validate()

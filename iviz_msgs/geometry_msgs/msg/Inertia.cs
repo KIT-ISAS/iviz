@@ -1,26 +1,24 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.geometry_msgs
+namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract]
+    [DataContract (Name = "geometry_msgs/Inertia")]
     public sealed class Inertia : IMessage
     {
         // Mass [kg]
-        [DataMember] public double m { get; set; }
-        
+        [DataMember (Name = "m")] public double M { get; set; }
         // Center of mass [m]
-        [DataMember] public geometry_msgs.Vector3 com { get; set; }
-        
+        [DataMember (Name = "com")] public GeometryMsgs.Vector3 Com { get; set; }
         // Inertia Tensor [kg-m^2]
         //     | ixx ixy ixz |
         // I = | ixy iyy iyz |
         //     | ixz iyz izz |
-        [DataMember] public double ixx { get; set; }
-        [DataMember] public double ixy { get; set; }
-        [DataMember] public double ixz { get; set; }
-        [DataMember] public double iyy { get; set; }
-        [DataMember] public double iyz { get; set; }
-        [DataMember] public double izz { get; set; }
+        [DataMember (Name = "ixx")] public double Ixx { get; set; }
+        [DataMember (Name = "ixy")] public double Ixy { get; set; }
+        [DataMember (Name = "ixz")] public double Ixz { get; set; }
+        [DataMember (Name = "iyy")] public double Iyy { get; set; }
+        [DataMember (Name = "iyz")] public double Iyz { get; set; }
+        [DataMember (Name = "izz")] public double Izz { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Inertia()
@@ -28,29 +26,29 @@ namespace Iviz.Msgs.geometry_msgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Inertia(double m, geometry_msgs.Vector3 com, double ixx, double ixy, double ixz, double iyy, double iyz, double izz)
+        public Inertia(double M, GeometryMsgs.Vector3 Com, double Ixx, double Ixy, double Ixz, double Iyy, double Iyz, double Izz)
         {
-            this.m = m;
-            this.com = com;
-            this.ixx = ixx;
-            this.ixy = ixy;
-            this.ixz = ixz;
-            this.iyy = iyy;
-            this.iyz = iyz;
-            this.izz = izz;
+            this.M = M;
+            this.Com = Com;
+            this.Ixx = Ixx;
+            this.Ixy = Ixy;
+            this.Ixz = Ixz;
+            this.Iyy = Iyy;
+            this.Iyz = Iyz;
+            this.Izz = Izz;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal Inertia(Buffer b)
         {
-            this.m = b.Deserialize<double>();
-            this.com = new geometry_msgs.Vector3(b);
-            this.ixx = b.Deserialize<double>();
-            this.ixy = b.Deserialize<double>();
-            this.ixz = b.Deserialize<double>();
-            this.iyy = b.Deserialize<double>();
-            this.iyz = b.Deserialize<double>();
-            this.izz = b.Deserialize<double>();
+            M = b.Deserialize<double>();
+            Com = new GeometryMsgs.Vector3(b);
+            Ixx = b.Deserialize<double>();
+            Ixy = b.Deserialize<double>();
+            Ixz = b.Deserialize<double>();
+            Iyy = b.Deserialize<double>();
+            Iyz = b.Deserialize<double>();
+            Izz = b.Deserialize<double>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -61,14 +59,14 @@ namespace Iviz.Msgs.geometry_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.m);
-            b.Serialize(this.com);
-            b.Serialize(this.ixx);
-            b.Serialize(this.ixy);
-            b.Serialize(this.ixz);
-            b.Serialize(this.iyy);
-            b.Serialize(this.iyz);
-            b.Serialize(this.izz);
+            b.Serialize(this.M);
+            b.Serialize(Com);
+            b.Serialize(this.Ixx);
+            b.Serialize(this.Ixy);
+            b.Serialize(this.Ixz);
+            b.Serialize(this.Iyy);
+            b.Serialize(this.Iyz);
+            b.Serialize(this.Izz);
         }
         
         public void Validate()

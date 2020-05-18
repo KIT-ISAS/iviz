@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.nav_msgs
+namespace Iviz.Msgs.NavMsgs
 {
-    [DataContract]
+    [DataContract (Name = "nav_msgs/SetMap")]
     public sealed class SetMap : IService
     {
         /// <summary> Request message. </summary>
@@ -53,28 +53,28 @@ namespace Iviz.Msgs.nav_msgs
     public sealed class SetMapRequest : IRequest
     {
         // Set a new map together with an initial pose
-        [DataMember] public nav_msgs.OccupancyGrid map { get; set; }
-        [DataMember] public geometry_msgs.PoseWithCovarianceStamped initial_pose { get; set; }
+        [DataMember (Name = "map")] public NavMsgs.OccupancyGrid Map { get; set; }
+        [DataMember (Name = "initial_pose")] public GeometryMsgs.PoseWithCovarianceStamped InitialPose { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public SetMapRequest()
         {
-            map = new nav_msgs.OccupancyGrid();
-            initial_pose = new geometry_msgs.PoseWithCovarianceStamped();
+            Map = new NavMsgs.OccupancyGrid();
+            InitialPose = new GeometryMsgs.PoseWithCovarianceStamped();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public SetMapRequest(nav_msgs.OccupancyGrid map, geometry_msgs.PoseWithCovarianceStamped initial_pose)
+        public SetMapRequest(NavMsgs.OccupancyGrid Map, GeometryMsgs.PoseWithCovarianceStamped InitialPose)
         {
-            this.map = map ?? throw new System.ArgumentNullException(nameof(map));
-            this.initial_pose = initial_pose ?? throw new System.ArgumentNullException(nameof(initial_pose));
+            this.Map = Map;
+            this.InitialPose = InitialPose;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal SetMapRequest(Buffer b)
         {
-            this.map = new nav_msgs.OccupancyGrid(b);
-            this.initial_pose = new geometry_msgs.PoseWithCovarianceStamped(b);
+            Map = new NavMsgs.OccupancyGrid(b);
+            InitialPose = new GeometryMsgs.PoseWithCovarianceStamped(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -85,24 +85,24 @@ namespace Iviz.Msgs.nav_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.map);
-            b.Serialize(this.initial_pose);
+            b.Serialize(Map);
+            b.Serialize(InitialPose);
         }
         
         public void Validate()
         {
-            if (map is null) throw new System.NullReferenceException();
-            map.Validate();
-            if (initial_pose is null) throw new System.NullReferenceException();
-            initial_pose.Validate();
+            if (Map is null) throw new System.NullReferenceException();
+            Map.Validate();
+            if (InitialPose is null) throw new System.NullReferenceException();
+            InitialPose.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 0;
-                size += map.RosMessageLength;
-                size += initial_pose.RosMessageLength;
+                size += Map.RosMessageLength;
+                size += InitialPose.RosMessageLength;
                 return size;
             }
         }
@@ -110,8 +110,7 @@ namespace Iviz.Msgs.nav_msgs
 
     public sealed class SetMapResponse : IResponse
     {
-        [DataMember] public bool success { get; set; }
-        
+        [DataMember (Name = "success")] public bool Success { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public SetMapResponse()
@@ -119,15 +118,15 @@ namespace Iviz.Msgs.nav_msgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public SetMapResponse(bool success)
+        public SetMapResponse(bool Success)
         {
-            this.success = success;
+            this.Success = Success;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal SetMapResponse(Buffer b)
         {
-            this.success = b.Deserialize<bool>();
+            Success = b.Deserialize<bool>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -138,7 +137,7 @@ namespace Iviz.Msgs.nav_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.success);
+            b.Serialize(this.Success);
         }
         
         public void Validate()

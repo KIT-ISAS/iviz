@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.grid_map_msgs
+namespace Iviz.Msgs.GridMapMsgs
 {
-    [DataContract]
+    [DataContract (Name = "grid_map_msgs/SetGridMap")]
     public sealed class SetGridMap : IService
     {
         /// <summary> Request message. </summary>
@@ -53,25 +53,24 @@ namespace Iviz.Msgs.grid_map_msgs
     public sealed class SetGridMapRequest : IRequest
     {
         // map
-        [DataMember] public grid_map_msgs.GridMap map { get; set; }
-        
+        [DataMember (Name = "map")] public GridMapMsgs.GridMap Map { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public SetGridMapRequest()
         {
-            map = new grid_map_msgs.GridMap();
+            Map = new GridMapMsgs.GridMap();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public SetGridMapRequest(grid_map_msgs.GridMap map)
+        public SetGridMapRequest(GridMapMsgs.GridMap Map)
         {
-            this.map = map ?? throw new System.ArgumentNullException(nameof(map));
+            this.Map = Map;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal SetGridMapRequest(Buffer b)
         {
-            this.map = new grid_map_msgs.GridMap(b);
+            Map = new GridMapMsgs.GridMap(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -82,20 +81,20 @@ namespace Iviz.Msgs.grid_map_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.map);
+            b.Serialize(Map);
         }
         
         public void Validate()
         {
-            if (map is null) throw new System.NullReferenceException();
-            map.Validate();
+            if (Map is null) throw new System.NullReferenceException();
+            Map.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 0;
-                size += map.RosMessageLength;
+                size += Map.RosMessageLength;
                 return size;
             }
         }

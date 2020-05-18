@@ -1,40 +1,37 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.geometry_msgs
+namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract]
+    [DataContract (Name = "geometry_msgs/AccelWithCovariance")]
     public sealed class AccelWithCovariance : IMessage
     {
         // This expresses acceleration in free space with uncertainty.
-        
-        [DataMember] public Accel accel { get; set; }
-        
+        [DataMember (Name = "accel")] public Accel Accel { get; set; }
         // Row-major representation of the 6x6 covariance matrix
         // The orientation parameters use a fixed-axis representation.
         // In order, the parameters are:
         // (x, y, z, rotation about X axis, rotation about Y axis, rotation about Z axis)
-        [DataMember] public double[/*36*/] covariance { get; set; }
+        [DataMember (Name = "covariance")] public double[/*36*/] Covariance { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public AccelWithCovariance()
         {
-            accel = new Accel();
-            covariance = new double[36];
+            Accel = new Accel();
+            Covariance = new double[36];
         }
         
         /// <summary> Explicit constructor. </summary>
-        public AccelWithCovariance(Accel accel, double[] covariance)
+        public AccelWithCovariance(Accel Accel, double[] Covariance)
         {
-            this.accel = accel ?? throw new System.ArgumentNullException(nameof(accel));
-            this.covariance = covariance ?? throw new System.ArgumentNullException(nameof(covariance));
-            if (this.covariance.Length != 36) throw new System.ArgumentException("Invalid size", nameof(covariance));
+            this.Accel = Accel;
+            this.Covariance = Covariance;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal AccelWithCovariance(Buffer b)
         {
-            this.accel = new Accel(b);
-            this.covariance = b.DeserializeStructArray<double>(36);
+            Accel = new Accel(b);
+            Covariance = b.DeserializeStructArray<double>(36);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -45,16 +42,16 @@ namespace Iviz.Msgs.geometry_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.accel);
-            b.SerializeStructArray(this.covariance, 36);
+            b.Serialize(Accel);
+            b.SerializeStructArray(Covariance, 36);
         }
         
         public void Validate()
         {
-            if (accel is null) throw new System.NullReferenceException();
-            accel.Validate();
-            if (covariance is null) throw new System.NullReferenceException();
-            if (covariance.Length != 36) throw new System.IndexOutOfRangeException();
+            if (Accel is null) throw new System.NullReferenceException();
+            Accel.Validate();
+            if (Covariance is null) throw new System.NullReferenceException();
+            if (Covariance.Length != 36) throw new System.IndexOutOfRangeException();
         }
     
         public int RosMessageLength => 336;

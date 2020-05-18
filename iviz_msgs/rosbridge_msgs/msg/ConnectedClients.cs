@@ -1,31 +1,31 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosbridge_msgs
+namespace Iviz.Msgs.RosbridgeMsgs
 {
-    [DataContract]
+    [DataContract (Name = "rosbridge_msgs/ConnectedClients")]
     public sealed class ConnectedClients : IMessage
     {
-        [DataMember] public ConnectedClient[] clients { get; set; }
+        [DataMember (Name = "clients")] public ConnectedClient[] Clients { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ConnectedClients()
         {
-            clients = System.Array.Empty<ConnectedClient>();
+            Clients = System.Array.Empty<ConnectedClient>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public ConnectedClients(ConnectedClient[] clients)
+        public ConnectedClients(ConnectedClient[] Clients)
         {
-            this.clients = clients ?? throw new System.ArgumentNullException(nameof(clients));
+            this.Clients = Clients;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal ConnectedClients(Buffer b)
         {
-            this.clients = b.DeserializeArray<ConnectedClient>();
-            for (int i = 0; i < this.clients.Length; i++)
+            Clients = b.DeserializeArray<ConnectedClient>();
+            for (int i = 0; i < this.Clients.Length; i++)
             {
-                this.clients[i] = new ConnectedClient(b);
+                Clients[i] = new ConnectedClient(b);
             }
         }
         
@@ -37,16 +37,16 @@ namespace Iviz.Msgs.rosbridge_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeArray(this.clients, 0);
+            b.SerializeArray(Clients, 0);
         }
         
         public void Validate()
         {
-            if (clients is null) throw new System.NullReferenceException();
-            for (int i = 0; i < clients.Length; i++)
+            if (Clients is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Clients.Length; i++)
             {
-                if (clients[i] is null) throw new System.NullReferenceException();
-                clients[i].Validate();
+                if (Clients[i] is null) throw new System.NullReferenceException();
+                Clients[i].Validate();
             }
         }
     
@@ -54,9 +54,9 @@ namespace Iviz.Msgs.rosbridge_msgs
         {
             get {
                 int size = 4;
-                for (int i = 0; i < clients.Length; i++)
+                for (int i = 0; i < Clients.Length; i++)
                 {
-                    size += clients[i].RosMessageLength;
+                    size += Clients[i].RosMessageLength;
                 }
                 return size;
             }

@@ -1,11 +1,11 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.std_msgs
+namespace Iviz.Msgs.StdMsgs
 {
-    [DataContract]
+    [DataContract (Name = "std_msgs/UInt16")]
     public sealed class UInt16 : IMessage
     {
-        [DataMember] public ushort data { get; set; }
+        [DataMember (Name = "data")] public ushort Data { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public UInt16()
@@ -13,15 +13,15 @@ namespace Iviz.Msgs.std_msgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public UInt16(ushort data)
+        public UInt16(ushort Data)
         {
-            this.data = data;
+            this.Data = Data;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal UInt16(Buffer b)
         {
-            this.data = b.Deserialize<ushort>();
+            Data = b.Deserialize<ushort>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -32,7 +32,7 @@ namespace Iviz.Msgs.std_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.data);
+            b.Serialize(this.Data);
         }
         
         public void Validate()

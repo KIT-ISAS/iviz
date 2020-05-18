@@ -1,11 +1,11 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.std_msgs
+namespace Iviz.Msgs.StdMsgs
 {
-    [DataContract]
+    [DataContract (Name = "std_msgs/Duration")]
     public sealed class Duration : IMessage
     {
-        [DataMember] public duration data { get; set; }
+        [DataMember (Name = "data")] public duration Data { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Duration()
@@ -13,15 +13,15 @@ namespace Iviz.Msgs.std_msgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Duration(duration data)
+        public Duration(duration Data)
         {
-            this.data = data;
+            this.Data = Data;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal Duration(Buffer b)
         {
-            this.data = b.Deserialize<duration>();
+            Data = b.Deserialize<duration>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -32,7 +32,7 @@ namespace Iviz.Msgs.std_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.data);
+            b.Serialize(this.Data);
         }
         
         public void Validate()

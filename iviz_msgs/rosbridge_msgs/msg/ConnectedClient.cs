@@ -1,31 +1,31 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosbridge_msgs
+namespace Iviz.Msgs.RosbridgeMsgs
 {
-    [DataContract]
+    [DataContract (Name = "rosbridge_msgs/ConnectedClient")]
     public sealed class ConnectedClient : IMessage
     {
-        [DataMember] public string ip_address { get; set; }
-        [DataMember] public time connection_time { get; set; }
+        [DataMember (Name = "ip_address")] public string IpAddress { get; set; }
+        [DataMember (Name = "connection_time")] public time ConnectionTime { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ConnectedClient()
         {
-            ip_address = "";
+            IpAddress = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public ConnectedClient(string ip_address, time connection_time)
+        public ConnectedClient(string IpAddress, time ConnectionTime)
         {
-            this.ip_address = ip_address ?? throw new System.ArgumentNullException(nameof(ip_address));
-            this.connection_time = connection_time;
+            this.IpAddress = IpAddress;
+            this.ConnectionTime = ConnectionTime;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal ConnectedClient(Buffer b)
         {
-            this.ip_address = b.DeserializeString();
-            this.connection_time = b.Deserialize<time>();
+            IpAddress = b.DeserializeString();
+            ConnectionTime = b.Deserialize<time>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -36,20 +36,20 @@ namespace Iviz.Msgs.rosbridge_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.ip_address);
-            b.Serialize(this.connection_time);
+            b.Serialize(this.IpAddress);
+            b.Serialize(this.ConnectionTime);
         }
         
         public void Validate()
         {
-            if (ip_address is null) throw new System.NullReferenceException();
+            if (IpAddress is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 12;
-                size += BuiltIns.UTF8.GetByteCount(ip_address);
+                size += BuiltIns.UTF8.GetByteCount(IpAddress);
                 return size;
             }
         }

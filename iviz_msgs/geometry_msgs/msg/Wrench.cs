@@ -1,14 +1,14 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.geometry_msgs
+namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract]
+    [DataContract (Name = "geometry_msgs/Wrench")]
     public sealed class Wrench : IMessage
     {
         // This represents force in free space, separated into
         // its linear and angular parts.
-        [DataMember] public Vector3 force { get; set; }
-        [DataMember] public Vector3 torque { get; set; }
+        [DataMember (Name = "force")] public Vector3 Force { get; set; }
+        [DataMember (Name = "torque")] public Vector3 Torque { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Wrench()
@@ -16,17 +16,17 @@ namespace Iviz.Msgs.geometry_msgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Wrench(Vector3 force, Vector3 torque)
+        public Wrench(Vector3 Force, Vector3 Torque)
         {
-            this.force = force;
-            this.torque = torque;
+            this.Force = Force;
+            this.Torque = Torque;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal Wrench(Buffer b)
         {
-            this.force = new Vector3(b);
-            this.torque = new Vector3(b);
+            Force = new Vector3(b);
+            Torque = new Vector3(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -37,8 +37,8 @@ namespace Iviz.Msgs.geometry_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.force);
-            b.Serialize(this.torque);
+            b.Serialize(Force);
+            b.Serialize(Torque);
         }
         
         public void Validate()

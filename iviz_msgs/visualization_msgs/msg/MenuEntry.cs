@@ -1,12 +1,11 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.visualization_msgs
+namespace Iviz.Msgs.VisualizationMsgs
 {
-    [DataContract]
+    [DataContract (Name = "visualization_msgs/MenuEntry")]
     public sealed class MenuEntry : IMessage
     {
         // MenuEntry message.
-        
         // Each InteractiveMarker message has an array of MenuEntry messages.
         // A collection of MenuEntries together describe a
         // menu/submenu/subsubmenu/etc tree, though they are stored in a flat
@@ -15,7 +14,6 @@ namespace Iviz.Msgs.visualization_msgs
         // ones with parent_id = 0.  Menu entries are ordered within their
         // level the same way they are ordered in the containing array.  Parent
         // entries must appear before their children.
-        
         // Example:
         // - id = 3
         //   parent_id = 0
@@ -35,21 +33,16 @@ namespace Iviz.Msgs.visualization_msgs
         //  - robot
         //    - pr2
         //    - turtle
-        
         // ID is a number for each menu entry.  Must be unique within the
         // control, and should never be 0.
-        [DataMember] public uint id { get; set; }
-        
+        [DataMember (Name = "id")] public uint Id { get; set; }
         // ID of the parent of this menu entry, if it is a submenu.  If this
         // menu entry is a top-level entry, set parent_id to 0.
-        [DataMember] public uint parent_id { get; set; }
-        
+        [DataMember (Name = "parent_id")] public uint ParentId { get; set; }
         // menu / entry title
-        [DataMember] public string title { get; set; }
-        
+        [DataMember (Name = "title")] public string Title { get; set; }
         // Arguments to command indicated by command_type (below)
-        [DataMember] public string command { get; set; }
-        
+        [DataMember (Name = "command")] public string Command { get; set; }
         // Command_type stores the type of response desired when this menu
         // entry is clicked.
         // FEEDBACK: send an InteractiveMarkerFeedback message with menu_entry_id set to this entry's id.
@@ -58,33 +51,33 @@ namespace Iviz.Msgs.visualization_msgs
         public const byte FEEDBACK = 0;
         public const byte ROSRUN = 1;
         public const byte ROSLAUNCH = 2;
-        [DataMember] public byte command_type { get; set; }
+        [DataMember (Name = "command_type")] public byte CommandType { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MenuEntry()
         {
-            title = "";
-            command = "";
+            Title = "";
+            Command = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MenuEntry(uint id, uint parent_id, string title, string command, byte command_type)
+        public MenuEntry(uint Id, uint ParentId, string Title, string Command, byte CommandType)
         {
-            this.id = id;
-            this.parent_id = parent_id;
-            this.title = title ?? throw new System.ArgumentNullException(nameof(title));
-            this.command = command ?? throw new System.ArgumentNullException(nameof(command));
-            this.command_type = command_type;
+            this.Id = Id;
+            this.ParentId = ParentId;
+            this.Title = Title;
+            this.Command = Command;
+            this.CommandType = CommandType;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal MenuEntry(Buffer b)
         {
-            this.id = b.Deserialize<uint>();
-            this.parent_id = b.Deserialize<uint>();
-            this.title = b.DeserializeString();
-            this.command = b.DeserializeString();
-            this.command_type = b.Deserialize<byte>();
+            Id = b.Deserialize<uint>();
+            ParentId = b.Deserialize<uint>();
+            Title = b.DeserializeString();
+            Command = b.DeserializeString();
+            CommandType = b.Deserialize<byte>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -95,25 +88,25 @@ namespace Iviz.Msgs.visualization_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.id);
-            b.Serialize(this.parent_id);
-            b.Serialize(this.title);
-            b.Serialize(this.command);
-            b.Serialize(this.command_type);
+            b.Serialize(this.Id);
+            b.Serialize(this.ParentId);
+            b.Serialize(this.Title);
+            b.Serialize(this.Command);
+            b.Serialize(this.CommandType);
         }
         
         public void Validate()
         {
-            if (title is null) throw new System.NullReferenceException();
-            if (command is null) throw new System.NullReferenceException();
+            if (Title is null) throw new System.NullReferenceException();
+            if (Command is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 17;
-                size += BuiltIns.UTF8.GetByteCount(title);
-                size += BuiltIns.UTF8.GetByteCount(command);
+                size += BuiltIns.UTF8.GetByteCount(Title);
+                size += BuiltIns.UTF8.GetByteCount(Command);
                 return size;
             }
         }

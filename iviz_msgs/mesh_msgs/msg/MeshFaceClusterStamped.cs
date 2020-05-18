@@ -1,46 +1,43 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.mesh_msgs
+namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract]
+    [DataContract (Name = "mesh_msgs/MeshFaceClusterStamped")]
     public sealed class MeshFaceClusterStamped : IMessage
     {
         // header
-        [DataMember] public std_msgs.Header header { get; set; }
-        
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         // mesh uuid
-        [DataMember] public string uuid { get; set; }
-        
+        [DataMember (Name = "uuid")] public string Uuid { get; set; }
         // Cluster
-        [DataMember] public MeshFaceCluster cluster { get; set; }
-        
+        [DataMember (Name = "cluster")] public MeshFaceCluster Cluster { get; set; }
         // overwrite existing labeled faces
-        [DataMember] public bool @override { get; set; }
+        [DataMember (Name = "override")] public bool @override { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshFaceClusterStamped()
         {
-            header = new std_msgs.Header();
-            uuid = "";
-            cluster = new MeshFaceCluster();
+            Header = new StdMsgs.Header();
+            Uuid = "";
+            Cluster = new MeshFaceCluster();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MeshFaceClusterStamped(std_msgs.Header header, string uuid, MeshFaceCluster cluster, bool @override)
+        public MeshFaceClusterStamped(StdMsgs.Header Header, string Uuid, MeshFaceCluster Cluster, bool @override)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.uuid = uuid ?? throw new System.ArgumentNullException(nameof(uuid));
-            this.cluster = cluster ?? throw new System.ArgumentNullException(nameof(cluster));
+            this.Header = Header;
+            this.Uuid = Uuid;
+            this.Cluster = Cluster;
             this.@override = @override;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal MeshFaceClusterStamped(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.uuid = b.DeserializeString();
-            this.cluster = new MeshFaceCluster(b);
-            this.@override = b.Deserialize<bool>();
+            Header = new StdMsgs.Header(b);
+            Uuid = b.DeserializeString();
+            Cluster = new MeshFaceCluster(b);
+            @override = b.Deserialize<bool>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -51,28 +48,28 @@ namespace Iviz.Msgs.mesh_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.uuid);
-            b.Serialize(this.cluster);
+            b.Serialize(Header);
+            b.Serialize(this.Uuid);
+            b.Serialize(Cluster);
             b.Serialize(this.@override);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (uuid is null) throw new System.NullReferenceException();
-            if (cluster is null) throw new System.NullReferenceException();
-            cluster.Validate();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (Uuid is null) throw new System.NullReferenceException();
+            if (Cluster is null) throw new System.NullReferenceException();
+            Cluster.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 5;
-                size += header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(uuid);
-                size += cluster.RosMessageLength;
+                size += Header.RosMessageLength;
+                size += BuiltIns.UTF8.GetByteCount(Uuid);
+                size += Cluster.RosMessageLength;
                 return size;
             }
         }

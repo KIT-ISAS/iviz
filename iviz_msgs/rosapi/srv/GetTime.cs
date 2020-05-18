@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosapi
+namespace Iviz.Msgs.Rosapi
 {
-    [DataContract]
+    [DataContract (Name = "rosapi/GetTime")]
     public sealed class GetTime : IService
     {
         /// <summary> Request message. </summary>
@@ -56,7 +56,7 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class GetTimeResponse : IResponse
     {
-        [DataMember] public time time { get; set; }
+        [DataMember (Name = "time")] public time Time { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetTimeResponse()
@@ -64,15 +64,15 @@ namespace Iviz.Msgs.rosapi
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GetTimeResponse(time time)
+        public GetTimeResponse(time Time)
         {
-            this.time = time;
+            this.Time = Time;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal GetTimeResponse(Buffer b)
         {
-            this.time = b.Deserialize<time>();
+            Time = b.Deserialize<time>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -83,7 +83,7 @@ namespace Iviz.Msgs.rosapi
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.time);
+            b.Serialize(this.Time);
         }
         
         public void Validate()

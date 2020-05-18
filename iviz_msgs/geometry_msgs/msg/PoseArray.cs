@@ -1,35 +1,33 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.geometry_msgs
+namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract]
+    [DataContract (Name = "geometry_msgs/PoseArray")]
     public sealed class PoseArray : IMessage
     {
         // An array of poses with a header for global reference.
-        
-        [DataMember] public std_msgs.Header header { get; set; }
-        
-        [DataMember] public Pose[] poses { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "poses")] public Pose[] Poses { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public PoseArray()
         {
-            header = new std_msgs.Header();
-            poses = System.Array.Empty<Pose>();
+            Header = new StdMsgs.Header();
+            Poses = System.Array.Empty<Pose>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public PoseArray(std_msgs.Header header, Pose[] poses)
+        public PoseArray(StdMsgs.Header Header, Pose[] Poses)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.poses = poses ?? throw new System.ArgumentNullException(nameof(poses));
+            this.Header = Header;
+            this.Poses = Poses;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal PoseArray(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.poses = b.DeserializeStructArray<Pose>();
+            Header = new StdMsgs.Header(b);
+            Poses = b.DeserializeStructArray<Pose>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -40,23 +38,23 @@ namespace Iviz.Msgs.geometry_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.SerializeStructArray(this.poses, 0);
+            b.Serialize(Header);
+            b.SerializeStructArray(Poses, 0);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (poses is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (Poses is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += header.RosMessageLength;
-                size += 56 * poses.Length;
+                size += Header.RosMessageLength;
+                size += 56 * Poses.Length;
                 return size;
             }
         }

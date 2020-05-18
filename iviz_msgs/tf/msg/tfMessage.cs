@@ -1,31 +1,31 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.tf
+namespace Iviz.Msgs.Tf
 {
-    [DataContract]
+    [DataContract (Name = "tf/tfMessage")]
     public sealed class tfMessage : IMessage
     {
-        [DataMember] public geometry_msgs.TransformStamped[] transforms { get; set; }
+        [DataMember (Name = "transforms")] public GeometryMsgs.TransformStamped[] Transforms { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public tfMessage()
         {
-            transforms = System.Array.Empty<geometry_msgs.TransformStamped>();
+            Transforms = System.Array.Empty<GeometryMsgs.TransformStamped>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public tfMessage(geometry_msgs.TransformStamped[] transforms)
+        public tfMessage(GeometryMsgs.TransformStamped[] Transforms)
         {
-            this.transforms = transforms ?? throw new System.ArgumentNullException(nameof(transforms));
+            this.Transforms = Transforms;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal tfMessage(Buffer b)
         {
-            this.transforms = b.DeserializeArray<geometry_msgs.TransformStamped>();
-            for (int i = 0; i < this.transforms.Length; i++)
+            Transforms = b.DeserializeArray<GeometryMsgs.TransformStamped>();
+            for (int i = 0; i < this.Transforms.Length; i++)
             {
-                this.transforms[i] = new geometry_msgs.TransformStamped(b);
+                Transforms[i] = new GeometryMsgs.TransformStamped(b);
             }
         }
         
@@ -37,16 +37,16 @@ namespace Iviz.Msgs.tf
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeArray(this.transforms, 0);
+            b.SerializeArray(Transforms, 0);
         }
         
         public void Validate()
         {
-            if (transforms is null) throw new System.NullReferenceException();
-            for (int i = 0; i < transforms.Length; i++)
+            if (Transforms is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Transforms.Length; i++)
             {
-                if (transforms[i] is null) throw new System.NullReferenceException();
-                transforms[i].Validate();
+                if (Transforms[i] is null) throw new System.NullReferenceException();
+                Transforms[i].Validate();
             }
         }
     
@@ -54,9 +54,9 @@ namespace Iviz.Msgs.tf
         {
             get {
                 int size = 4;
-                for (int i = 0; i < transforms.Length; i++)
+                for (int i = 0; i < Transforms.Length; i++)
                 {
-                    size += transforms[i].RosMessageLength;
+                    size += Transforms[i].RosMessageLength;
                 }
                 return size;
             }

@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.sensor_msgs
+namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract]
+    [DataContract (Name = "sensor_msgs/MultiDOFJointState")]
     public sealed class MultiDOFJointState : IMessage
     {
         // Representation of state for joints with multiple degrees of freedom, 
@@ -24,49 +24,51 @@ namespace Iviz.Msgs.sensor_msgs
         // All arrays in this message should have the same size, or be empty.
         // This is the only way to uniquely associate the joint name with the correct
         // states.
-        
-        [DataMember] public std_msgs.Header header { get; set; }
-        
-        [DataMember] public string[] joint_names { get; set; }
-        [DataMember] public geometry_msgs.Transform[] transforms { get; set; }
-        [DataMember] public geometry_msgs.Twist[] twist { get; set; }
-        [DataMember] public geometry_msgs.Wrench[] wrench { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "joint_names")] public string[] JointNames { get; set; }
+        [DataMember (Name = "transforms")] public GeometryMsgs.Transform[] Transforms { get; set; }
+        [DataMember (Name = "twist")] public GeometryMsgs.Twist[] Twist { get; set; }
+        [DataMember (Name = "wrench")] public GeometryMsgs.Wrench[] Wrench { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MultiDOFJointState()
         {
-            header = new std_msgs.Header();
-            joint_names = System.Array.Empty<string>();
-            transforms = System.Array.Empty<geometry_msgs.Transform>();
-            twist = System.Array.Empty<geometry_msgs.Twist>();
-            wrench = System.Array.Empty<geometry_msgs.Wrench>();
+            Header = new StdMsgs.Header();
+            JointNames = System.Array.Empty<string>();
+            Transforms = System.Array.Empty<GeometryMsgs.Transform>();
+            Twist = System.Array.Empty<GeometryMsgs.Twist>();
+            Wrench = System.Array.Empty<GeometryMsgs.Wrench>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MultiDOFJointState(std_msgs.Header header, string[] joint_names, geometry_msgs.Transform[] transforms, geometry_msgs.Twist[] twist, geometry_msgs.Wrench[] wrench)
+        public MultiDOFJointState(StdMsgs.Header Header, string[] JointNames, GeometryMsgs.Transform[] Transforms, GeometryMsgs.Twist[] Twist, GeometryMsgs.Wrench[] Wrench)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.joint_names = joint_names ?? throw new System.ArgumentNullException(nameof(joint_names));
-            this.transforms = transforms ?? throw new System.ArgumentNullException(nameof(transforms));
-            this.twist = twist ?? throw new System.ArgumentNullException(nameof(twist));
-            this.wrench = wrench ?? throw new System.ArgumentNullException(nameof(wrench));
+            this.Header = Header;
+            this.JointNames = JointNames;
+            this.Transforms = Transforms;
+            this.Twist = Twist;
+            this.Wrench = Wrench;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal MultiDOFJointState(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.joint_names = b.DeserializeStringArray();
-            this.transforms = b.DeserializeStructArray<geometry_msgs.Transform>();
-            this.twist = b.DeserializeArray<geometry_msgs.Twist>();
-            for (int i = 0; i < this.twist.Length; i++)
+            Header = new StdMsgs.Header(b);
+            JointNames = b.DeserializeStringArray();
+            Transforms = b.DeserializeArray<GeometryMsgs.Transform>();
+            for (int i = 0; i < this.Transforms.Length; i++)
             {
-                this.twist[i] = new geometry_msgs.Twist(b);
+                Transforms[i] = new GeometryMsgs.Transform(b);
             }
-            this.wrench = b.DeserializeArray<geometry_msgs.Wrench>();
-            for (int i = 0; i < this.wrench.Length; i++)
+            Twist = b.DeserializeArray<GeometryMsgs.Twist>();
+            for (int i = 0; i < this.Twist.Length; i++)
             {
-                this.wrench[i] = new geometry_msgs.Wrench(b);
+                Twist[i] = new GeometryMsgs.Twist(b);
+            }
+            Wrench = b.DeserializeArray<GeometryMsgs.Wrench>();
+            for (int i = 0; i < this.Wrench.Length; i++)
+            {
+                Wrench[i] = new GeometryMsgs.Wrench(b);
             }
         }
         
@@ -78,34 +80,39 @@ namespace Iviz.Msgs.sensor_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.SerializeArray(this.joint_names, 0);
-            b.SerializeStructArray(this.transforms, 0);
-            b.SerializeArray(this.twist, 0);
-            b.SerializeArray(this.wrench, 0);
+            b.Serialize(Header);
+            b.SerializeArray(JointNames, 0);
+            b.SerializeArray(Transforms, 0);
+            b.SerializeArray(Twist, 0);
+            b.SerializeArray(Wrench, 0);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (joint_names is null) throw new System.NullReferenceException();
-            for (int i = 0; i < joint_names.Length; i++)
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (JointNames is null) throw new System.NullReferenceException();
+            for (int i = 0; i < JointNames.Length; i++)
             {
-                if (joint_names[i] is null) throw new System.NullReferenceException();
+                if (JointNames[i] is null) throw new System.NullReferenceException();
             }
-            if (transforms is null) throw new System.NullReferenceException();
-            if (twist is null) throw new System.NullReferenceException();
-            for (int i = 0; i < twist.Length; i++)
+            if (Transforms is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Transforms.Length; i++)
             {
-                if (twist[i] is null) throw new System.NullReferenceException();
-                twist[i].Validate();
+                if (Transforms[i] is null) throw new System.NullReferenceException();
+                Transforms[i].Validate();
             }
-            if (wrench is null) throw new System.NullReferenceException();
-            for (int i = 0; i < wrench.Length; i++)
+            if (Twist is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Twist.Length; i++)
             {
-                if (wrench[i] is null) throw new System.NullReferenceException();
-                wrench[i].Validate();
+                if (Twist[i] is null) throw new System.NullReferenceException();
+                Twist[i].Validate();
+            }
+            if (Wrench is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Wrench.Length; i++)
+            {
+                if (Wrench[i] is null) throw new System.NullReferenceException();
+                Wrench[i].Validate();
             }
         }
     
@@ -113,15 +120,15 @@ namespace Iviz.Msgs.sensor_msgs
         {
             get {
                 int size = 16;
-                size += header.RosMessageLength;
-                size += 4 * joint_names.Length;
-                for (int i = 0; i < joint_names.Length; i++)
+                size += Header.RosMessageLength;
+                size += 4 * JointNames.Length;
+                for (int i = 0; i < JointNames.Length; i++)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(joint_names[i]);
+                    size += BuiltIns.UTF8.GetByteCount(JointNames[i]);
                 }
-                size += 56 * transforms.Length;
-                size += 48 * twist.Length;
-                size += 48 * wrench.Length;
+                size += 56 * Transforms.Length;
+                size += 48 * Twist.Length;
+                size += 48 * Wrench.Length;
                 return size;
             }
         }

@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosapi
+namespace Iviz.Msgs.Rosapi
 {
-    [DataContract]
+    [DataContract (Name = "rosapi/GetActionServers")]
     public sealed class GetActionServers : IService
     {
         /// <summary> Request message. </summary>
@@ -52,7 +52,6 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class GetActionServersRequest : IRequest
     {
-        
     
         /// <summary> Constructor for empty message. </summary>
         public GetActionServersRequest()
@@ -83,24 +82,24 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class GetActionServersResponse : IResponse
     {
-        [DataMember] public string[] action_servers { get; set; }
+        [DataMember (Name = "action_servers")] public string[] ActionServers { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetActionServersResponse()
         {
-            action_servers = System.Array.Empty<string>();
+            ActionServers = System.Array.Empty<string>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GetActionServersResponse(string[] action_servers)
+        public GetActionServersResponse(string[] ActionServers)
         {
-            this.action_servers = action_servers ?? throw new System.ArgumentNullException(nameof(action_servers));
+            this.ActionServers = ActionServers;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal GetActionServersResponse(Buffer b)
         {
-            this.action_servers = b.DeserializeStringArray();
+            ActionServers = b.DeserializeStringArray();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -111,15 +110,15 @@ namespace Iviz.Msgs.rosapi
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeArray(this.action_servers, 0);
+            b.SerializeArray(ActionServers, 0);
         }
         
         public void Validate()
         {
-            if (action_servers is null) throw new System.NullReferenceException();
-            for (int i = 0; i < action_servers.Length; i++)
+            if (ActionServers is null) throw new System.NullReferenceException();
+            for (int i = 0; i < ActionServers.Length; i++)
             {
-                if (action_servers[i] is null) throw new System.NullReferenceException();
+                if (ActionServers[i] is null) throw new System.NullReferenceException();
             }
         }
     
@@ -127,10 +126,10 @@ namespace Iviz.Msgs.rosapi
         {
             get {
                 int size = 4;
-                size += 4 * action_servers.Length;
-                for (int i = 0; i < action_servers.Length; i++)
+                size += 4 * ActionServers.Length;
+                for (int i = 0; i < ActionServers.Length; i++)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(action_servers[i]);
+                    size += BuiltIns.UTF8.GetByteCount(ActionServers[i]);
                 }
                 return size;
             }

@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosapi
+namespace Iviz.Msgs.Rosapi
 {
-    [DataContract]
+    [DataContract (Name = "rosapi/SearchParam")]
     public sealed class SearchParam : IService
     {
         /// <summary> Request message. </summary>
@@ -52,24 +52,24 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class SearchParamRequest : IRequest
     {
-        [DataMember] public string name { get; set; }
+        [DataMember (Name = "name")] public string Name { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public SearchParamRequest()
         {
-            name = "";
+            Name = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public SearchParamRequest(string name)
+        public SearchParamRequest(string Name)
         {
-            this.name = name ?? throw new System.ArgumentNullException(nameof(name));
+            this.Name = Name;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal SearchParamRequest(Buffer b)
         {
-            this.name = b.DeserializeString();
+            Name = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -80,19 +80,19 @@ namespace Iviz.Msgs.rosapi
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.name);
+            b.Serialize(this.Name);
         }
         
         public void Validate()
         {
-            if (name is null) throw new System.NullReferenceException();
+            if (Name is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(name);
+                size += BuiltIns.UTF8.GetByteCount(Name);
                 return size;
             }
         }
@@ -100,24 +100,24 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class SearchParamResponse : IResponse
     {
-        [DataMember] public string global_name { get; set; }
+        [DataMember (Name = "global_name")] public string GlobalName { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public SearchParamResponse()
         {
-            global_name = "";
+            GlobalName = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public SearchParamResponse(string global_name)
+        public SearchParamResponse(string GlobalName)
         {
-            this.global_name = global_name ?? throw new System.ArgumentNullException(nameof(global_name));
+            this.GlobalName = GlobalName;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal SearchParamResponse(Buffer b)
         {
-            this.global_name = b.DeserializeString();
+            GlobalName = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -128,19 +128,19 @@ namespace Iviz.Msgs.rosapi
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.global_name);
+            b.Serialize(this.GlobalName);
         }
         
         public void Validate()
         {
-            if (global_name is null) throw new System.NullReferenceException();
+            if (GlobalName is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(global_name);
+                size += BuiltIns.UTF8.GetByteCount(GlobalName);
                 return size;
             }
         }

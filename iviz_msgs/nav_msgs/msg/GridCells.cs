@@ -1,39 +1,39 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.nav_msgs
+namespace Iviz.Msgs.NavMsgs
 {
-    [DataContract]
+    [DataContract (Name = "nav_msgs/GridCells")]
     public sealed class GridCells : IMessage
     {
         //an array of cells in a 2D grid
-        [DataMember] public std_msgs.Header header { get; set; }
-        [DataMember] public float cell_width { get; set; }
-        [DataMember] public float cell_height { get; set; }
-        [DataMember] public geometry_msgs.Point[] cells { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "cell_width")] public float CellWidth { get; set; }
+        [DataMember (Name = "cell_height")] public float CellHeight { get; set; }
+        [DataMember (Name = "cells")] public GeometryMsgs.Point[] Cells { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GridCells()
         {
-            header = new std_msgs.Header();
-            cells = System.Array.Empty<geometry_msgs.Point>();
+            Header = new StdMsgs.Header();
+            Cells = System.Array.Empty<GeometryMsgs.Point>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GridCells(std_msgs.Header header, float cell_width, float cell_height, geometry_msgs.Point[] cells)
+        public GridCells(StdMsgs.Header Header, float CellWidth, float CellHeight, GeometryMsgs.Point[] Cells)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.cell_width = cell_width;
-            this.cell_height = cell_height;
-            this.cells = cells ?? throw new System.ArgumentNullException(nameof(cells));
+            this.Header = Header;
+            this.CellWidth = CellWidth;
+            this.CellHeight = CellHeight;
+            this.Cells = Cells;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal GridCells(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.cell_width = b.Deserialize<float>();
-            this.cell_height = b.Deserialize<float>();
-            this.cells = b.DeserializeStructArray<geometry_msgs.Point>();
+            Header = new StdMsgs.Header(b);
+            CellWidth = b.Deserialize<float>();
+            CellHeight = b.Deserialize<float>();
+            Cells = b.DeserializeStructArray<GeometryMsgs.Point>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -44,25 +44,25 @@ namespace Iviz.Msgs.nav_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.cell_width);
-            b.Serialize(this.cell_height);
-            b.SerializeStructArray(this.cells, 0);
+            b.Serialize(Header);
+            b.Serialize(this.CellWidth);
+            b.Serialize(this.CellHeight);
+            b.SerializeStructArray(Cells, 0);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (cells is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (Cells is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 12;
-                size += header.RosMessageLength;
-                size += 24 * cells.Length;
+                size += Header.RosMessageLength;
+                size += 24 * Cells.Length;
                 return size;
             }
         }

@@ -1,46 +1,44 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.trajectory_msgs
+namespace Iviz.Msgs.TrajectoryMsgs
 {
-    [DataContract]
+    [DataContract (Name = "trajectory_msgs/MultiDOFJointTrajectory")]
     public sealed class MultiDOFJointTrajectory : IMessage
     {
         // The header is used to specify the coordinate frame and the reference time for the trajectory durations
-        [DataMember] public std_msgs.Header header { get; set; }
-        
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         // A representation of a multi-dof joint trajectory (each point is a transformation)
         // Each point along the trajectory will include an array of positions/velocities/accelerations
         // that has the same length as the array of joint names, and has the same order of joints as 
         // the joint names array.
-        
-        [DataMember] public string[] joint_names { get; set; }
-        [DataMember] public MultiDOFJointTrajectoryPoint[] points { get; set; }
+        [DataMember (Name = "joint_names")] public string[] JointNames { get; set; }
+        [DataMember (Name = "points")] public MultiDOFJointTrajectoryPoint[] Points { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MultiDOFJointTrajectory()
         {
-            header = new std_msgs.Header();
-            joint_names = System.Array.Empty<string>();
-            points = System.Array.Empty<MultiDOFJointTrajectoryPoint>();
+            Header = new StdMsgs.Header();
+            JointNames = System.Array.Empty<string>();
+            Points = System.Array.Empty<MultiDOFJointTrajectoryPoint>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MultiDOFJointTrajectory(std_msgs.Header header, string[] joint_names, MultiDOFJointTrajectoryPoint[] points)
+        public MultiDOFJointTrajectory(StdMsgs.Header Header, string[] JointNames, MultiDOFJointTrajectoryPoint[] Points)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.joint_names = joint_names ?? throw new System.ArgumentNullException(nameof(joint_names));
-            this.points = points ?? throw new System.ArgumentNullException(nameof(points));
+            this.Header = Header;
+            this.JointNames = JointNames;
+            this.Points = Points;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal MultiDOFJointTrajectory(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.joint_names = b.DeserializeStringArray();
-            this.points = b.DeserializeArray<MultiDOFJointTrajectoryPoint>();
-            for (int i = 0; i < this.points.Length; i++)
+            Header = new StdMsgs.Header(b);
+            JointNames = b.DeserializeStringArray();
+            Points = b.DeserializeArray<MultiDOFJointTrajectoryPoint>();
+            for (int i = 0; i < this.Points.Length; i++)
             {
-                this.points[i] = new MultiDOFJointTrajectoryPoint(b);
+                Points[i] = new MultiDOFJointTrajectoryPoint(b);
             }
         }
         
@@ -52,25 +50,25 @@ namespace Iviz.Msgs.trajectory_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.SerializeArray(this.joint_names, 0);
-            b.SerializeArray(this.points, 0);
+            b.Serialize(Header);
+            b.SerializeArray(JointNames, 0);
+            b.SerializeArray(Points, 0);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (joint_names is null) throw new System.NullReferenceException();
-            for (int i = 0; i < joint_names.Length; i++)
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (JointNames is null) throw new System.NullReferenceException();
+            for (int i = 0; i < JointNames.Length; i++)
             {
-                if (joint_names[i] is null) throw new System.NullReferenceException();
+                if (JointNames[i] is null) throw new System.NullReferenceException();
             }
-            if (points is null) throw new System.NullReferenceException();
-            for (int i = 0; i < points.Length; i++)
+            if (Points is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Points.Length; i++)
             {
-                if (points[i] is null) throw new System.NullReferenceException();
-                points[i].Validate();
+                if (Points[i] is null) throw new System.NullReferenceException();
+                Points[i].Validate();
             }
         }
     
@@ -78,15 +76,15 @@ namespace Iviz.Msgs.trajectory_msgs
         {
             get {
                 int size = 8;
-                size += header.RosMessageLength;
-                size += 4 * joint_names.Length;
-                for (int i = 0; i < joint_names.Length; i++)
+                size += Header.RosMessageLength;
+                size += 4 * JointNames.Length;
+                for (int i = 0; i < JointNames.Length; i++)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(joint_names[i]);
+                    size += BuiltIns.UTF8.GetByteCount(JointNames[i]);
                 }
-                for (int i = 0; i < points.Length; i++)
+                for (int i = 0; i < Points.Length; i++)
                 {
-                    size += points[i].RosMessageLength;
+                    size += Points[i].RosMessageLength;
                 }
                 return size;
             }

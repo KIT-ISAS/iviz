@@ -1,13 +1,13 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.mesh_msgs
+namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract]
+    [DataContract (Name = "mesh_msgs/MeshMaterial")]
     public sealed class MeshMaterial : IMessage
     {
-        [DataMember] public uint texture_index { get; set; }
-        [DataMember] public std_msgs.ColorRGBA color { get; set; }
-        [DataMember] public bool has_texture { get; set; }
+        [DataMember (Name = "texture_index")] public uint TextureIndex { get; set; }
+        [DataMember (Name = "color")] public StdMsgs.ColorRGBA Color { get; set; }
+        [DataMember (Name = "has_texture")] public bool HasTexture { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshMaterial()
@@ -15,19 +15,19 @@ namespace Iviz.Msgs.mesh_msgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MeshMaterial(uint texture_index, std_msgs.ColorRGBA color, bool has_texture)
+        public MeshMaterial(uint TextureIndex, StdMsgs.ColorRGBA Color, bool HasTexture)
         {
-            this.texture_index = texture_index;
-            this.color = color;
-            this.has_texture = has_texture;
+            this.TextureIndex = TextureIndex;
+            this.Color = Color;
+            this.HasTexture = HasTexture;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal MeshMaterial(Buffer b)
         {
-            this.texture_index = b.Deserialize<uint>();
-            this.color = new std_msgs.ColorRGBA(b);
-            this.has_texture = b.Deserialize<bool>();
+            TextureIndex = b.Deserialize<uint>();
+            Color = new StdMsgs.ColorRGBA(b);
+            HasTexture = b.Deserialize<bool>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -38,9 +38,9 @@ namespace Iviz.Msgs.mesh_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.texture_index);
-            b.Serialize(this.color);
-            b.Serialize(this.has_texture);
+            b.Serialize(this.TextureIndex);
+            b.Serialize(Color);
+            b.Serialize(this.HasTexture);
         }
         
         public void Validate()

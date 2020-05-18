@@ -1,49 +1,45 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.grid_map_msgs
+namespace Iviz.Msgs.GridMapMsgs
 {
-    [DataContract]
+    [DataContract (Name = "grid_map_msgs/GridMapInfo")]
     public sealed class GridMapInfo : IMessage
     {
         // Header (time and frame)
-        [DataMember] public std_msgs.Header header { get; set; }
-        
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         // Resolution of the grid [m/cell].
-        [DataMember] public double resolution { get; set; }
-        
+        [DataMember (Name = "resolution")] public double Resolution { get; set; }
         // Length in x-direction [m].
-        [DataMember] public double length_x { get; set; }
-        
+        [DataMember (Name = "length_x")] public double LengthX { get; set; }
         // Length in y-direction [m].
-        [DataMember] public double length_y { get; set; }
-        
+        [DataMember (Name = "length_y")] public double LengthY { get; set; }
         // Pose of the grid map center in the frame defined in `header` [m].
-        [DataMember] public geometry_msgs.Pose pose { get; set; }
+        [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GridMapInfo()
         {
-            header = new std_msgs.Header();
+            Header = new StdMsgs.Header();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GridMapInfo(std_msgs.Header header, double resolution, double length_x, double length_y, geometry_msgs.Pose pose)
+        public GridMapInfo(StdMsgs.Header Header, double Resolution, double LengthX, double LengthY, GeometryMsgs.Pose Pose)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.resolution = resolution;
-            this.length_x = length_x;
-            this.length_y = length_y;
-            this.pose = pose;
+            this.Header = Header;
+            this.Resolution = Resolution;
+            this.LengthX = LengthX;
+            this.LengthY = LengthY;
+            this.Pose = Pose;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal GridMapInfo(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.resolution = b.Deserialize<double>();
-            this.length_x = b.Deserialize<double>();
-            this.length_y = b.Deserialize<double>();
-            this.pose = new geometry_msgs.Pose(b);
+            Header = new StdMsgs.Header(b);
+            Resolution = b.Deserialize<double>();
+            LengthX = b.Deserialize<double>();
+            LengthY = b.Deserialize<double>();
+            Pose = new GeometryMsgs.Pose(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -54,24 +50,24 @@ namespace Iviz.Msgs.grid_map_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.resolution);
-            b.Serialize(this.length_x);
-            b.Serialize(this.length_y);
-            b.Serialize(this.pose);
+            b.Serialize(Header);
+            b.Serialize(this.Resolution);
+            b.Serialize(this.LengthX);
+            b.Serialize(this.LengthY);
+            b.Serialize(Pose);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 80;
-                size += header.RosMessageLength;
+                size += Header.RosMessageLength;
                 return size;
             }
         }

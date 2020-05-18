@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.std_srvs
+namespace Iviz.Msgs.StdSrvs
 {
-    [DataContract]
+    [DataContract (Name = "std_srvs/SetBool")]
     public sealed class SetBool : IService
     {
         /// <summary> Request message. </summary>
@@ -52,7 +52,7 @@ namespace Iviz.Msgs.std_srvs
 
     public sealed class SetBoolRequest : IRequest
     {
-        [DataMember] public bool data { get; set; } // e.g. for hardware enabling / disabling
+        [DataMember (Name = "data")] public bool Data { get; set; } // e.g. for hardware enabling / disabling
     
         /// <summary> Constructor for empty message. </summary>
         public SetBoolRequest()
@@ -60,15 +60,15 @@ namespace Iviz.Msgs.std_srvs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public SetBoolRequest(bool data)
+        public SetBoolRequest(bool Data)
         {
-            this.data = data;
+            this.Data = Data;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal SetBoolRequest(Buffer b)
         {
-            this.data = b.Deserialize<bool>();
+            Data = b.Deserialize<bool>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -79,7 +79,7 @@ namespace Iviz.Msgs.std_srvs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.data);
+            b.Serialize(this.Data);
         }
         
         public void Validate()
@@ -91,27 +91,27 @@ namespace Iviz.Msgs.std_srvs
 
     public sealed class SetBoolResponse : IResponse
     {
-        [DataMember] public bool success { get; set; } // indicate successful run of triggered service
-        [DataMember] public string message { get; set; } // informational, e.g. for error messages
+        [DataMember (Name = "success")] public bool Success { get; set; } // indicate successful run of triggered service
+        [DataMember (Name = "message")] public string Message { get; set; } // informational, e.g. for error messages
     
         /// <summary> Constructor for empty message. </summary>
         public SetBoolResponse()
         {
-            message = "";
+            Message = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public SetBoolResponse(bool success, string message)
+        public SetBoolResponse(bool Success, string Message)
         {
-            this.success = success;
-            this.message = message ?? throw new System.ArgumentNullException(nameof(message));
+            this.Success = Success;
+            this.Message = Message;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal SetBoolResponse(Buffer b)
         {
-            this.success = b.Deserialize<bool>();
-            this.message = b.DeserializeString();
+            Success = b.Deserialize<bool>();
+            Message = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -122,20 +122,20 @@ namespace Iviz.Msgs.std_srvs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.success);
-            b.Serialize(this.message);
+            b.Serialize(this.Success);
+            b.Serialize(this.Message);
         }
         
         public void Validate()
         {
-            if (message is null) throw new System.NullReferenceException();
+            if (Message is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 5;
-                size += BuiltIns.UTF8.GetByteCount(message);
+                size += BuiltIns.UTF8.GetByteCount(Message);
                 return size;
             }
         }

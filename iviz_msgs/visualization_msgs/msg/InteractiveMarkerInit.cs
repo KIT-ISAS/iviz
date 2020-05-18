@@ -1,49 +1,47 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.visualization_msgs
+namespace Iviz.Msgs.VisualizationMsgs
 {
-    [DataContract]
+    [DataContract (Name = "visualization_msgs/InteractiveMarkerInit")]
     public sealed class InteractiveMarkerInit : IMessage
     {
         // Identifying string. Must be unique in the topic namespace
         // that this server works on.
-        [DataMember] public string server_id { get; set; }
-        
+        [DataMember (Name = "server_id")] public string ServerId { get; set; }
         // Sequence number.
         // The client will use this to detect if it has missed a subsequent
         // update.  Every update message will have the same sequence number as
         // an init message.  Clients will likely want to unsubscribe from the
         // init topic after a successful initialization to avoid receiving
         // duplicate data.
-        [DataMember] public ulong seq_num { get; set; }
-        
+        [DataMember (Name = "seq_num")] public ulong SeqNum { get; set; }
         // All markers.
-        [DataMember] public InteractiveMarker[] markers { get; set; }
+        [DataMember (Name = "markers")] public InteractiveMarker[] Markers { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarkerInit()
         {
-            server_id = "";
-            markers = System.Array.Empty<InteractiveMarker>();
+            ServerId = "";
+            Markers = System.Array.Empty<InteractiveMarker>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public InteractiveMarkerInit(string server_id, ulong seq_num, InteractiveMarker[] markers)
+        public InteractiveMarkerInit(string ServerId, ulong SeqNum, InteractiveMarker[] Markers)
         {
-            this.server_id = server_id ?? throw new System.ArgumentNullException(nameof(server_id));
-            this.seq_num = seq_num;
-            this.markers = markers ?? throw new System.ArgumentNullException(nameof(markers));
+            this.ServerId = ServerId;
+            this.SeqNum = SeqNum;
+            this.Markers = Markers;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal InteractiveMarkerInit(Buffer b)
         {
-            this.server_id = b.DeserializeString();
-            this.seq_num = b.Deserialize<ulong>();
-            this.markers = b.DeserializeArray<InteractiveMarker>();
-            for (int i = 0; i < this.markers.Length; i++)
+            ServerId = b.DeserializeString();
+            SeqNum = b.Deserialize<ulong>();
+            Markers = b.DeserializeArray<InteractiveMarker>();
+            for (int i = 0; i < this.Markers.Length; i++)
             {
-                this.markers[i] = new InteractiveMarker(b);
+                Markers[i] = new InteractiveMarker(b);
             }
         }
         
@@ -55,19 +53,19 @@ namespace Iviz.Msgs.visualization_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.server_id);
-            b.Serialize(this.seq_num);
-            b.SerializeArray(this.markers, 0);
+            b.Serialize(this.ServerId);
+            b.Serialize(this.SeqNum);
+            b.SerializeArray(Markers, 0);
         }
         
         public void Validate()
         {
-            if (server_id is null) throw new System.NullReferenceException();
-            if (markers is null) throw new System.NullReferenceException();
-            for (int i = 0; i < markers.Length; i++)
+            if (ServerId is null) throw new System.NullReferenceException();
+            if (Markers is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Markers.Length; i++)
             {
-                if (markers[i] is null) throw new System.NullReferenceException();
-                markers[i].Validate();
+                if (Markers[i] is null) throw new System.NullReferenceException();
+                Markers[i].Validate();
             }
         }
     
@@ -75,10 +73,10 @@ namespace Iviz.Msgs.visualization_msgs
         {
             get {
                 int size = 16;
-                size += BuiltIns.UTF8.GetByteCount(server_id);
-                for (int i = 0; i < markers.Length; i++)
+                size += BuiltIns.UTF8.GetByteCount(ServerId);
+                for (int i = 0; i < Markers.Length; i++)
                 {
-                    size += markers[i].RosMessageLength;
+                    size += Markers[i].RosMessageLength;
                 }
                 return size;
             }

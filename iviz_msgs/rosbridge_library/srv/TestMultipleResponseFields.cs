@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosbridge_library
+namespace Iviz.Msgs.RosbridgeLibrary
 {
-    [DataContract]
+    [DataContract (Name = "rosbridge_library/TestMultipleResponseFields")]
     public sealed class TestMultipleResponseFields : IService
     {
         /// <summary> Request message. </summary>
@@ -56,10 +56,10 @@ namespace Iviz.Msgs.rosbridge_library
 
     public sealed class TestMultipleResponseFieldsResponse : IResponse
     {
-        [DataMember] public int @int { get; set; }
-        [DataMember] public float @float { get; set; }
-        [DataMember] public string @string { get; set; }
-        [DataMember] public bool @bool { get; set; }
+        [DataMember (Name = "int")] public int @int { get; set; }
+        [DataMember (Name = "float")] public float @float { get; set; }
+        [DataMember (Name = "string")] public string @string { get; set; }
+        [DataMember (Name = "bool")] public bool @bool { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestMultipleResponseFieldsResponse()
@@ -72,17 +72,17 @@ namespace Iviz.Msgs.rosbridge_library
         {
             this.@int = @int;
             this.@float = @float;
-            this.@string = @string ?? throw new System.ArgumentNullException(nameof(@string));
+            this.@string = @string;
             this.@bool = @bool;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal TestMultipleResponseFieldsResponse(Buffer b)
         {
-            this.@int = b.Deserialize<int>();
-            this.@float = b.Deserialize<float>();
-            this.@string = b.DeserializeString();
-            this.@bool = b.Deserialize<bool>();
+            @int = b.Deserialize<int>();
+            @float = b.Deserialize<float>();
+            @string = b.DeserializeString();
+            @bool = b.Deserialize<bool>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)

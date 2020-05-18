@@ -1,13 +1,13 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.mesh_msgs
+namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract]
+    [DataContract (Name = "mesh_msgs/MeshVertexTexCoords")]
     public sealed class MeshVertexTexCoords : IMessage
     {
         // Mesh Attribute Type
-        [DataMember] public float u { get; set; }
-        [DataMember] public float v { get; set; }
+        [DataMember (Name = "u")] public float U { get; set; }
+        [DataMember (Name = "v")] public float V { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshVertexTexCoords()
@@ -15,17 +15,17 @@ namespace Iviz.Msgs.mesh_msgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MeshVertexTexCoords(float u, float v)
+        public MeshVertexTexCoords(float U, float V)
         {
-            this.u = u;
-            this.v = v;
+            this.U = U;
+            this.V = V;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal MeshVertexTexCoords(Buffer b)
         {
-            this.u = b.Deserialize<float>();
-            this.v = b.Deserialize<float>();
+            U = b.Deserialize<float>();
+            V = b.Deserialize<float>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -36,8 +36,8 @@ namespace Iviz.Msgs.mesh_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.u);
-            b.Serialize(this.v);
+            b.Serialize(this.U);
+            b.Serialize(this.V);
         }
         
         public void Validate()

@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosapi
+namespace Iviz.Msgs.Rosapi
 {
-    [DataContract]
+    [DataContract (Name = "rosapi/TopicType")]
     public sealed class TopicType : IService
     {
         /// <summary> Request message. </summary>
@@ -52,24 +52,24 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class TopicTypeRequest : IRequest
     {
-        [DataMember] public string topic { get; set; }
+        [DataMember (Name = "topic")] public string Topic { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TopicTypeRequest()
         {
-            topic = "";
+            Topic = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TopicTypeRequest(string topic)
+        public TopicTypeRequest(string Topic)
         {
-            this.topic = topic ?? throw new System.ArgumentNullException(nameof(topic));
+            this.Topic = Topic;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal TopicTypeRequest(Buffer b)
         {
-            this.topic = b.DeserializeString();
+            Topic = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -80,19 +80,19 @@ namespace Iviz.Msgs.rosapi
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.topic);
+            b.Serialize(this.Topic);
         }
         
         public void Validate()
         {
-            if (topic is null) throw new System.NullReferenceException();
+            if (Topic is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(topic);
+                size += BuiltIns.UTF8.GetByteCount(Topic);
                 return size;
             }
         }
@@ -100,24 +100,24 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class TopicTypeResponse : IResponse
     {
-        [DataMember] public string type { get; set; }
+        [DataMember (Name = "type")] public string Type { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TopicTypeResponse()
         {
-            type = "";
+            Type = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TopicTypeResponse(string type)
+        public TopicTypeResponse(string Type)
         {
-            this.type = type ?? throw new System.ArgumentNullException(nameof(type));
+            this.Type = Type;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal TopicTypeResponse(Buffer b)
         {
-            this.type = b.DeserializeString();
+            Type = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -128,19 +128,19 @@ namespace Iviz.Msgs.rosapi
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.type);
+            b.Serialize(this.Type);
         }
         
         public void Validate()
         {
-            if (type is null) throw new System.NullReferenceException();
+            if (Type is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(type);
+                size += BuiltIns.UTF8.GetByteCount(Type);
                 return size;
             }
         }

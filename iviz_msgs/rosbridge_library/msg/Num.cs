@@ -1,11 +1,11 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosbridge_library
+namespace Iviz.Msgs.RosbridgeLibrary
 {
-    [DataContract]
+    [DataContract (Name = "rosbridge_library/Num")]
     public sealed class Num : IMessage
     {
-        [DataMember] public long num { get; set; }
+        [DataMember (Name = "num")] public long Num_ { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Num()
@@ -13,15 +13,15 @@ namespace Iviz.Msgs.rosbridge_library
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Num(long num)
+        public Num(long Num_)
         {
-            this.num = num;
+            this.Num_ = Num_;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal Num(Buffer b)
         {
-            this.num = b.Deserialize<long>();
+            Num_ = b.Deserialize<long>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -32,7 +32,7 @@ namespace Iviz.Msgs.rosbridge_library
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.num);
+            b.Serialize(this.Num_);
         }
         
         public void Validate()

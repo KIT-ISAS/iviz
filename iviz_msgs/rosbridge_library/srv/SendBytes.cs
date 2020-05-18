@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosbridge_library
+namespace Iviz.Msgs.RosbridgeLibrary
 {
-    [DataContract]
+    [DataContract (Name = "rosbridge_library/SendBytes")]
     public sealed class SendBytes : IService
     {
         /// <summary> Request message. </summary>
@@ -52,7 +52,7 @@ namespace Iviz.Msgs.rosbridge_library
 
     public sealed class SendBytesRequest : IRequest
     {
-        [DataMember] public long count { get; set; }
+        [DataMember (Name = "count")] public long Count { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public SendBytesRequest()
@@ -60,15 +60,15 @@ namespace Iviz.Msgs.rosbridge_library
         }
         
         /// <summary> Explicit constructor. </summary>
-        public SendBytesRequest(long count)
+        public SendBytesRequest(long Count)
         {
-            this.count = count;
+            this.Count = Count;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal SendBytesRequest(Buffer b)
         {
-            this.count = b.Deserialize<long>();
+            Count = b.Deserialize<long>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -79,7 +79,7 @@ namespace Iviz.Msgs.rosbridge_library
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.count);
+            b.Serialize(this.Count);
         }
         
         public void Validate()
@@ -91,24 +91,24 @@ namespace Iviz.Msgs.rosbridge_library
 
     public sealed class SendBytesResponse : IResponse
     {
-        [DataMember] public string data { get; set; }
+        [DataMember (Name = "data")] public string Data { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public SendBytesResponse()
         {
-            data = "";
+            Data = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public SendBytesResponse(string data)
+        public SendBytesResponse(string Data)
         {
-            this.data = data ?? throw new System.ArgumentNullException(nameof(data));
+            this.Data = Data;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal SendBytesResponse(Buffer b)
         {
-            this.data = b.DeserializeString();
+            Data = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -119,19 +119,19 @@ namespace Iviz.Msgs.rosbridge_library
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.data);
+            b.Serialize(this.Data);
         }
         
         public void Validate()
         {
-            if (data is null) throw new System.NullReferenceException();
+            if (Data is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(data);
+                size += BuiltIns.UTF8.GetByteCount(Data);
                 return size;
             }
         }

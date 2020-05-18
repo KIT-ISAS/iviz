@@ -1,47 +1,46 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.trajectory_msgs
+namespace Iviz.Msgs.TrajectoryMsgs
 {
-    [DataContract]
+    [DataContract (Name = "trajectory_msgs/JointTrajectoryPoint")]
     public sealed class JointTrajectoryPoint : IMessage
     {
         // Each trajectory point specifies either positions[, velocities[, accelerations]]
         // or positions[, effort] for the trajectory to be executed.
         // All specified values are in the same order as the joint names in JointTrajectory.msg
-        
-        [DataMember] public double[] positions { get; set; }
-        [DataMember] public double[] velocities { get; set; }
-        [DataMember] public double[] accelerations { get; set; }
-        [DataMember] public double[] effort { get; set; }
-        [DataMember] public duration time_from_start { get; set; }
+        [DataMember (Name = "positions")] public double[] Positions { get; set; }
+        [DataMember (Name = "velocities")] public double[] Velocities { get; set; }
+        [DataMember (Name = "accelerations")] public double[] Accelerations { get; set; }
+        [DataMember (Name = "effort")] public double[] Effort { get; set; }
+        [DataMember (Name = "time_from_start")] public duration TimeFromStart { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public JointTrajectoryPoint()
         {
-            positions = System.Array.Empty<double>();
-            velocities = System.Array.Empty<double>();
-            accelerations = System.Array.Empty<double>();
-            effort = System.Array.Empty<double>();
+            Positions = System.Array.Empty<double>();
+            Velocities = System.Array.Empty<double>();
+            Accelerations = System.Array.Empty<double>();
+            Effort = System.Array.Empty<double>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public JointTrajectoryPoint(double[] positions, double[] velocities, double[] accelerations, double[] effort, duration time_from_start)
+        public JointTrajectoryPoint(double[] Positions, double[] Velocities, double[] Accelerations, double[] Effort, duration TimeFromStart)
         {
-            this.positions = positions ?? throw new System.ArgumentNullException(nameof(positions));
-            this.velocities = velocities ?? throw new System.ArgumentNullException(nameof(velocities));
-            this.accelerations = accelerations ?? throw new System.ArgumentNullException(nameof(accelerations));
-            this.effort = effort ?? throw new System.ArgumentNullException(nameof(effort));
-            this.time_from_start = time_from_start;
+            this.Positions = Positions;
+            this.Velocities = Velocities;
+            this.Accelerations = Accelerations;
+            this.Effort = Effort;
+            this.TimeFromStart = TimeFromStart;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal JointTrajectoryPoint(Buffer b)
         {
-            this.positions = b.DeserializeStructArray<double>();
-            this.velocities = b.DeserializeStructArray<double>();
-            this.accelerations = b.DeserializeStructArray<double>();
-            this.effort = b.DeserializeStructArray<double>();
-            this.time_from_start = b.Deserialize<duration>();
+            Positions = b.DeserializeStructArray<double>();
+            Velocities = b.DeserializeStructArray<double>();
+            Accelerations = b.DeserializeStructArray<double>();
+            Effort = b.DeserializeStructArray<double>();
+            TimeFromStart = b.Deserialize<duration>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -52,29 +51,29 @@ namespace Iviz.Msgs.trajectory_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeStructArray(this.positions, 0);
-            b.SerializeStructArray(this.velocities, 0);
-            b.SerializeStructArray(this.accelerations, 0);
-            b.SerializeStructArray(this.effort, 0);
-            b.Serialize(this.time_from_start);
+            b.SerializeStructArray(Positions, 0);
+            b.SerializeStructArray(Velocities, 0);
+            b.SerializeStructArray(Accelerations, 0);
+            b.SerializeStructArray(Effort, 0);
+            b.Serialize(this.TimeFromStart);
         }
         
         public void Validate()
         {
-            if (positions is null) throw new System.NullReferenceException();
-            if (velocities is null) throw new System.NullReferenceException();
-            if (accelerations is null) throw new System.NullReferenceException();
-            if (effort is null) throw new System.NullReferenceException();
+            if (Positions is null) throw new System.NullReferenceException();
+            if (Velocities is null) throw new System.NullReferenceException();
+            if (Accelerations is null) throw new System.NullReferenceException();
+            if (Effort is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 24;
-                size += 8 * positions.Length;
-                size += 8 * velocities.Length;
-                size += 8 * accelerations.Length;
-                size += 8 * effort.Length;
+                size += 8 * Positions.Length;
+                size += 8 * Velocities.Length;
+                size += 8 * Accelerations.Length;
+                size += 8 * Effort.Length;
                 return size;
             }
         }

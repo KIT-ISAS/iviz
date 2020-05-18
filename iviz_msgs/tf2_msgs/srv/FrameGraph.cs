@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.tf2_msgs
+namespace Iviz.Msgs.Tf2Msgs
 {
-    [DataContract]
+    [DataContract (Name = "tf2_msgs/FrameGraph")]
     public sealed class FrameGraph : IService
     {
         /// <summary> Request message. </summary>
@@ -56,24 +56,24 @@ namespace Iviz.Msgs.tf2_msgs
 
     public sealed class FrameGraphResponse : IResponse
     {
-        [DataMember] public string frame_yaml { get; set; }
+        [DataMember (Name = "frame_yaml")] public string FrameYaml { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public FrameGraphResponse()
         {
-            frame_yaml = "";
+            FrameYaml = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public FrameGraphResponse(string frame_yaml)
+        public FrameGraphResponse(string FrameYaml)
         {
-            this.frame_yaml = frame_yaml ?? throw new System.ArgumentNullException(nameof(frame_yaml));
+            this.FrameYaml = FrameYaml;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal FrameGraphResponse(Buffer b)
         {
-            this.frame_yaml = b.DeserializeString();
+            FrameYaml = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -84,19 +84,19 @@ namespace Iviz.Msgs.tf2_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.frame_yaml);
+            b.Serialize(this.FrameYaml);
         }
         
         public void Validate()
         {
-            if (frame_yaml is null) throw new System.NullReferenceException();
+            if (FrameYaml is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(frame_yaml);
+                size += BuiltIns.UTF8.GetByteCount(FrameYaml);
                 return size;
             }
         }

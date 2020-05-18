@@ -45,7 +45,7 @@ namespace Iviz.MsgsGen
             foreach (string msg in msgs)
             {
                 ClassInfo classInfo = new ClassInfo(package, msg);
-                messages.Add(classInfo.package + "/" + classInfo.name, classInfo);
+                messages.Add(classInfo.rosPackage + "/" + classInfo.name, classInfo);
             }
 
             List<string> srvs = new List<string>();
@@ -54,7 +54,7 @@ namespace Iviz.MsgsGen
             foreach (string srv in srvs)
             {
                 ServiceInfo classInfo = new ServiceInfo(package, srv);
-                services.Add(classInfo.package + "/" + classInfo.name, classInfo);
+                services.Add(classInfo.rosPackage + "/" + classInfo.name, classInfo);
             }
         }
 

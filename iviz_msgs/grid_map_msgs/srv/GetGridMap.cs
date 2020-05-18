@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.grid_map_msgs
+namespace Iviz.Msgs.GridMapMsgs
 {
-    [DataContract]
+    [DataContract (Name = "grid_map_msgs/GetGridMap")]
     public sealed class GetGridMap : IService
     {
         /// <summary> Request message. </summary>
@@ -53,51 +53,45 @@ namespace Iviz.Msgs.grid_map_msgs
     public sealed class GetGridMapRequest : IRequest
     {
         // Frame id of the submap position request.
-        [DataMember] public string frame_id { get; set; }
-        
+        [DataMember (Name = "frame_id")] public string FrameId { get; set; }
         // Requested submap position in x-direction [m].
-        [DataMember] public double position_x { get; set; }
-        
+        [DataMember (Name = "position_x")] public double PositionX { get; set; }
         // Requested submap position in y-direction [m].
-        [DataMember] public double position_y { get; set; }
-        
+        [DataMember (Name = "position_y")] public double PositionY { get; set; }
         // Requested submap length in x-direction [m].
-        [DataMember] public double length_x { get; set; }
-        
+        [DataMember (Name = "length_x")] public double LengthX { get; set; }
         // Requested submap width in y-direction [m].
-        [DataMember] public double length_y { get; set; }
-        
+        [DataMember (Name = "length_y")] public double LengthY { get; set; }
         // Requested layers. If empty, get all layers.
-        [DataMember] public string[] layers { get; set; }
-        
+        [DataMember (Name = "layers")] public string[] Layers { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetGridMapRequest()
         {
-            frame_id = "";
-            layers = System.Array.Empty<string>();
+            FrameId = "";
+            Layers = System.Array.Empty<string>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GetGridMapRequest(string frame_id, double position_x, double position_y, double length_x, double length_y, string[] layers)
+        public GetGridMapRequest(string FrameId, double PositionX, double PositionY, double LengthX, double LengthY, string[] Layers)
         {
-            this.frame_id = frame_id ?? throw new System.ArgumentNullException(nameof(frame_id));
-            this.position_x = position_x;
-            this.position_y = position_y;
-            this.length_x = length_x;
-            this.length_y = length_y;
-            this.layers = layers ?? throw new System.ArgumentNullException(nameof(layers));
+            this.FrameId = FrameId;
+            this.PositionX = PositionX;
+            this.PositionY = PositionY;
+            this.LengthX = LengthX;
+            this.LengthY = LengthY;
+            this.Layers = Layers;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal GetGridMapRequest(Buffer b)
         {
-            this.frame_id = b.DeserializeString();
-            this.position_x = b.Deserialize<double>();
-            this.position_y = b.Deserialize<double>();
-            this.length_x = b.Deserialize<double>();
-            this.length_y = b.Deserialize<double>();
-            this.layers = b.DeserializeStringArray();
+            FrameId = b.DeserializeString();
+            PositionX = b.Deserialize<double>();
+            PositionY = b.Deserialize<double>();
+            LengthX = b.Deserialize<double>();
+            LengthY = b.Deserialize<double>();
+            Layers = b.DeserializeStringArray();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -108,21 +102,21 @@ namespace Iviz.Msgs.grid_map_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.frame_id);
-            b.Serialize(this.position_x);
-            b.Serialize(this.position_y);
-            b.Serialize(this.length_x);
-            b.Serialize(this.length_y);
-            b.SerializeArray(this.layers, 0);
+            b.Serialize(this.FrameId);
+            b.Serialize(this.PositionX);
+            b.Serialize(this.PositionY);
+            b.Serialize(this.LengthX);
+            b.Serialize(this.LengthY);
+            b.SerializeArray(Layers, 0);
         }
         
         public void Validate()
         {
-            if (frame_id is null) throw new System.NullReferenceException();
-            if (layers is null) throw new System.NullReferenceException();
-            for (int i = 0; i < layers.Length; i++)
+            if (FrameId is null) throw new System.NullReferenceException();
+            if (Layers is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Layers.Length; i++)
             {
-                if (layers[i] is null) throw new System.NullReferenceException();
+                if (Layers[i] is null) throw new System.NullReferenceException();
             }
         }
     
@@ -130,11 +124,11 @@ namespace Iviz.Msgs.grid_map_msgs
         {
             get {
                 int size = 40;
-                size += BuiltIns.UTF8.GetByteCount(frame_id);
-                size += 4 * layers.Length;
-                for (int i = 0; i < layers.Length; i++)
+                size += BuiltIns.UTF8.GetByteCount(FrameId);
+                size += 4 * Layers.Length;
+                for (int i = 0; i < Layers.Length; i++)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(layers[i]);
+                    size += BuiltIns.UTF8.GetByteCount(Layers[i]);
                 }
                 return size;
             }
@@ -143,26 +137,25 @@ namespace Iviz.Msgs.grid_map_msgs
 
     public sealed class GetGridMapResponse : IResponse
     {
-        
         // Submap
-        [DataMember] public grid_map_msgs.GridMap map { get; set; }
+        [DataMember (Name = "map")] public GridMapMsgs.GridMap Map { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetGridMapResponse()
         {
-            map = new grid_map_msgs.GridMap();
+            Map = new GridMapMsgs.GridMap();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GetGridMapResponse(grid_map_msgs.GridMap map)
+        public GetGridMapResponse(GridMapMsgs.GridMap Map)
         {
-            this.map = map ?? throw new System.ArgumentNullException(nameof(map));
+            this.Map = Map;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal GetGridMapResponse(Buffer b)
         {
-            this.map = new grid_map_msgs.GridMap(b);
+            Map = new GridMapMsgs.GridMap(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -173,20 +166,20 @@ namespace Iviz.Msgs.grid_map_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.map);
+            b.Serialize(Map);
         }
         
         public void Validate()
         {
-            if (map is null) throw new System.NullReferenceException();
-            map.Validate();
+            if (Map is null) throw new System.NullReferenceException();
+            Map.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 0;
-                size += map.RosMessageLength;
+                size += Map.RosMessageLength;
                 return size;
             }
         }

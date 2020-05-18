@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.std_srvs
+namespace Iviz.Msgs.StdSrvs
 {
-    [DataContract]
+    [DataContract (Name = "std_srvs/Empty")]
     public sealed class Empty : IService
     {
         /// <summary> Request message. </summary>

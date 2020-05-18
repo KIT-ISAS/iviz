@@ -1,30 +1,29 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.mesh_msgs
+namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract]
+    [DataContract (Name = "mesh_msgs/TriangleIndices")]
     public sealed class TriangleIndices : IMessage
     {
         // Definition of a triangle's vertices
-        [DataMember] public uint[/*3*/] vertex_indices { get; set; }
+        [DataMember (Name = "vertex_indices")] public uint[/*3*/] VertexIndices { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TriangleIndices()
         {
-            vertex_indices = new uint[3];
+            VertexIndices = new uint[3];
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TriangleIndices(uint[] vertex_indices)
+        public TriangleIndices(uint[] VertexIndices)
         {
-            this.vertex_indices = vertex_indices ?? throw new System.ArgumentNullException(nameof(vertex_indices));
-            if (this.vertex_indices.Length != 3) throw new System.ArgumentException("Invalid size", nameof(vertex_indices));
+            this.VertexIndices = VertexIndices;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal TriangleIndices(Buffer b)
         {
-            this.vertex_indices = b.DeserializeStructArray<uint>(3);
+            VertexIndices = b.DeserializeStructArray<uint>(3);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -35,13 +34,13 @@ namespace Iviz.Msgs.mesh_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeStructArray(this.vertex_indices, 3);
+            b.SerializeStructArray(VertexIndices, 3);
         }
         
         public void Validate()
         {
-            if (vertex_indices is null) throw new System.NullReferenceException();
-            if (vertex_indices.Length != 3) throw new System.IndexOutOfRangeException();
+            if (VertexIndices is null) throw new System.NullReferenceException();
+            if (VertexIndices.Length != 3) throw new System.IndexOutOfRangeException();
         }
     
         public int RosMessageLength => 12;

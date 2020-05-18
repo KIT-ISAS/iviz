@@ -1,32 +1,32 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.geometry_msgs
+namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract]
+    [DataContract (Name = "geometry_msgs/InertiaStamped")]
     public sealed class InertiaStamped : IMessage
     {
-        [DataMember] public std_msgs.Header header { get; set; }
-        [DataMember] public Inertia inertia { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "inertia")] public Inertia Inertia { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public InertiaStamped()
         {
-            header = new std_msgs.Header();
-            inertia = new Inertia();
+            Header = new StdMsgs.Header();
+            Inertia = new Inertia();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public InertiaStamped(std_msgs.Header header, Inertia inertia)
+        public InertiaStamped(StdMsgs.Header Header, Inertia Inertia)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.inertia = inertia ?? throw new System.ArgumentNullException(nameof(inertia));
+            this.Header = Header;
+            this.Inertia = Inertia;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal InertiaStamped(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.inertia = new Inertia(b);
+            Header = new StdMsgs.Header(b);
+            Inertia = new Inertia(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -37,23 +37,23 @@ namespace Iviz.Msgs.geometry_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.inertia);
+            b.Serialize(Header);
+            b.Serialize(Inertia);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (inertia is null) throw new System.NullReferenceException();
-            inertia.Validate();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (Inertia is null) throw new System.NullReferenceException();
+            Inertia.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 80;
-                size += header.RosMessageLength;
+                size += Header.RosMessageLength;
                 return size;
             }
         }

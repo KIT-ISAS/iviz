@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.tf2_msgs
+namespace Iviz.Msgs.Tf2Msgs
 {
-    [DataContract]
+    [DataContract (Name = "tf2_msgs/TF2Error")]
     public sealed class TF2Error : IMessage
     {
         public const byte NO_ERROR = 0;
@@ -12,28 +12,27 @@ namespace Iviz.Msgs.tf2_msgs
         public const byte INVALID_ARGUMENT_ERROR = 4;
         public const byte TIMEOUT_ERROR = 5;
         public const byte TRANSFORM_ERROR = 6;
-        
-        [DataMember] public byte error { get; set; }
-        [DataMember] public string error_string { get; set; }
+        [DataMember (Name = "error")] public byte Error { get; set; }
+        [DataMember (Name = "error_string")] public string ErrorString { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TF2Error()
         {
-            error_string = "";
+            ErrorString = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TF2Error(byte error, string error_string)
+        public TF2Error(byte Error, string ErrorString)
         {
-            this.error = error;
-            this.error_string = error_string ?? throw new System.ArgumentNullException(nameof(error_string));
+            this.Error = Error;
+            this.ErrorString = ErrorString;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal TF2Error(Buffer b)
         {
-            this.error = b.Deserialize<byte>();
-            this.error_string = b.DeserializeString();
+            Error = b.Deserialize<byte>();
+            ErrorString = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -44,20 +43,20 @@ namespace Iviz.Msgs.tf2_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.error);
-            b.Serialize(this.error_string);
+            b.Serialize(this.Error);
+            b.Serialize(this.ErrorString);
         }
         
         public void Validate()
         {
-            if (error_string is null) throw new System.NullReferenceException();
+            if (ErrorString is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 5;
-                size += BuiltIns.UTF8.GetByteCount(error_string);
+                size += BuiltIns.UTF8.GetByteCount(ErrorString);
                 return size;
             }
         }

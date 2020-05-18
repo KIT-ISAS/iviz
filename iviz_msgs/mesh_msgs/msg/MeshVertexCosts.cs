@@ -1,29 +1,29 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.mesh_msgs
+namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract]
+    [DataContract (Name = "mesh_msgs/MeshVertexCosts")]
     public sealed class MeshVertexCosts : IMessage
     {
         // Mesh Attribute Message
-        [DataMember] public float[] costs { get; set; }
+        [DataMember (Name = "costs")] public float[] Costs { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshVertexCosts()
         {
-            costs = System.Array.Empty<float>();
+            Costs = System.Array.Empty<float>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MeshVertexCosts(float[] costs)
+        public MeshVertexCosts(float[] Costs)
         {
-            this.costs = costs ?? throw new System.ArgumentNullException(nameof(costs));
+            this.Costs = Costs;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal MeshVertexCosts(Buffer b)
         {
-            this.costs = b.DeserializeStructArray<float>();
+            Costs = b.DeserializeStructArray<float>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -34,19 +34,19 @@ namespace Iviz.Msgs.mesh_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeStructArray(this.costs, 0);
+            b.SerializeStructArray(Costs, 0);
         }
         
         public void Validate()
         {
-            if (costs is null) throw new System.NullReferenceException();
+            if (Costs is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += 4 * costs.Length;
+                size += 4 * Costs.Length;
                 return size;
             }
         }

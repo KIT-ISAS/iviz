@@ -1,11 +1,11 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.std_msgs
+namespace Iviz.Msgs.StdMsgs
 {
-    [DataContract]
+    [DataContract (Name = "std_msgs/Char")]
     public sealed class Char : IMessage
     {
-        [DataMember] public sbyte data { get; set; }
+        [DataMember (Name = "data")] public sbyte Data { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Char()
@@ -13,15 +13,15 @@ namespace Iviz.Msgs.std_msgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Char(sbyte data)
+        public Char(sbyte Data)
         {
-            this.data = data;
+            this.Data = Data;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal Char(Buffer b)
         {
-            this.data = b.Deserialize<sbyte>();
+            Data = b.Deserialize<sbyte>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -32,7 +32,7 @@ namespace Iviz.Msgs.std_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.data);
+            b.Serialize(this.Data);
         }
         
         public void Validate()

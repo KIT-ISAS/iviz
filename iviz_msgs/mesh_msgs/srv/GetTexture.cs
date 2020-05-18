@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.mesh_msgs
+namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract]
+    [DataContract (Name = "mesh_msgs/GetTexture")]
     public sealed class GetTexture : IService
     {
         /// <summary> Request message. </summary>
@@ -52,27 +52,27 @@ namespace Iviz.Msgs.mesh_msgs
 
     public sealed class GetTextureRequest : IRequest
     {
-        [DataMember] public string uuid { get; set; }
-        [DataMember] public uint texture_index { get; set; }
+        [DataMember (Name = "uuid")] public string Uuid { get; set; }
+        [DataMember (Name = "texture_index")] public uint TextureIndex { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetTextureRequest()
         {
-            uuid = "";
+            Uuid = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GetTextureRequest(string uuid, uint texture_index)
+        public GetTextureRequest(string Uuid, uint TextureIndex)
         {
-            this.uuid = uuid ?? throw new System.ArgumentNullException(nameof(uuid));
-            this.texture_index = texture_index;
+            this.Uuid = Uuid;
+            this.TextureIndex = TextureIndex;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal GetTextureRequest(Buffer b)
         {
-            this.uuid = b.DeserializeString();
-            this.texture_index = b.Deserialize<uint>();
+            Uuid = b.DeserializeString();
+            TextureIndex = b.Deserialize<uint>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -83,20 +83,20 @@ namespace Iviz.Msgs.mesh_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.uuid);
-            b.Serialize(this.texture_index);
+            b.Serialize(this.Uuid);
+            b.Serialize(this.TextureIndex);
         }
         
         public void Validate()
         {
-            if (uuid is null) throw new System.NullReferenceException();
+            if (Uuid is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 8;
-                size += BuiltIns.UTF8.GetByteCount(uuid);
+                size += BuiltIns.UTF8.GetByteCount(Uuid);
                 return size;
             }
         }
@@ -104,24 +104,24 @@ namespace Iviz.Msgs.mesh_msgs
 
     public sealed class GetTextureResponse : IResponse
     {
-        [DataMember] public mesh_msgs.MeshTexture texture { get; set; }
+        [DataMember (Name = "texture")] public MeshMsgs.MeshTexture Texture { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetTextureResponse()
         {
-            texture = new mesh_msgs.MeshTexture();
+            Texture = new MeshMsgs.MeshTexture();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GetTextureResponse(mesh_msgs.MeshTexture texture)
+        public GetTextureResponse(MeshMsgs.MeshTexture Texture)
         {
-            this.texture = texture ?? throw new System.ArgumentNullException(nameof(texture));
+            this.Texture = Texture;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal GetTextureResponse(Buffer b)
         {
-            this.texture = new mesh_msgs.MeshTexture(b);
+            Texture = new MeshMsgs.MeshTexture(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -132,20 +132,20 @@ namespace Iviz.Msgs.mesh_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.texture);
+            b.Serialize(Texture);
         }
         
         public void Validate()
         {
-            if (texture is null) throw new System.NullReferenceException();
-            texture.Validate();
+            if (Texture is null) throw new System.NullReferenceException();
+            Texture.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 0;
-                size += texture.RosMessageLength;
+                size += Texture.RosMessageLength;
                 return size;
             }
         }

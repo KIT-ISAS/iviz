@@ -1,32 +1,32 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.mesh_msgs
+namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract]
+    [DataContract (Name = "mesh_msgs/VectorFieldStamped")]
     public sealed class VectorFieldStamped : IMessage
     {
-        [DataMember] public std_msgs.Header header { get; set; }
-        [DataMember] public mesh_msgs.VectorField vector_field { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "vector_field")] public MeshMsgs.VectorField VectorField { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public VectorFieldStamped()
         {
-            header = new std_msgs.Header();
-            vector_field = new mesh_msgs.VectorField();
+            Header = new StdMsgs.Header();
+            VectorField = new MeshMsgs.VectorField();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public VectorFieldStamped(std_msgs.Header header, mesh_msgs.VectorField vector_field)
+        public VectorFieldStamped(StdMsgs.Header Header, MeshMsgs.VectorField VectorField)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.vector_field = vector_field ?? throw new System.ArgumentNullException(nameof(vector_field));
+            this.Header = Header;
+            this.VectorField = VectorField;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal VectorFieldStamped(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.vector_field = new mesh_msgs.VectorField(b);
+            Header = new StdMsgs.Header(b);
+            VectorField = new MeshMsgs.VectorField(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -37,24 +37,24 @@ namespace Iviz.Msgs.mesh_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.vector_field);
+            b.Serialize(Header);
+            b.Serialize(VectorField);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (vector_field is null) throw new System.NullReferenceException();
-            vector_field.Validate();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (VectorField is null) throw new System.NullReferenceException();
+            VectorField.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 0;
-                size += header.RosMessageLength;
-                size += vector_field.RosMessageLength;
+                size += Header.RosMessageLength;
+                size += VectorField.RosMessageLength;
                 return size;
             }
         }

@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.nav_msgs
+namespace Iviz.Msgs.NavMsgs
 {
-    [DataContract]
+    [DataContract (Name = "nav_msgs/GetMap")]
     public sealed class GetMap : IService
     {
         /// <summary> Request message. </summary>
@@ -83,24 +83,24 @@ namespace Iviz.Msgs.nav_msgs
 
     public sealed class GetMapResponse : IResponse
     {
-        [DataMember] public nav_msgs.OccupancyGrid map { get; set; }
+        [DataMember (Name = "map")] public NavMsgs.OccupancyGrid Map { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetMapResponse()
         {
-            map = new nav_msgs.OccupancyGrid();
+            Map = new NavMsgs.OccupancyGrid();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GetMapResponse(nav_msgs.OccupancyGrid map)
+        public GetMapResponse(NavMsgs.OccupancyGrid Map)
         {
-            this.map = map ?? throw new System.ArgumentNullException(nameof(map));
+            this.Map = Map;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal GetMapResponse(Buffer b)
         {
-            this.map = new nav_msgs.OccupancyGrid(b);
+            Map = new NavMsgs.OccupancyGrid(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -111,20 +111,20 @@ namespace Iviz.Msgs.nav_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.map);
+            b.Serialize(Map);
         }
         
         public void Validate()
         {
-            if (map is null) throw new System.NullReferenceException();
-            map.Validate();
+            if (Map is null) throw new System.NullReferenceException();
+            Map.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 0;
-                size += map.RosMessageLength;
+                size += Map.RosMessageLength;
                 return size;
             }
         }

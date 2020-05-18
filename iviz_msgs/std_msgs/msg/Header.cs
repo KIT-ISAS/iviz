@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.std_msgs
+namespace Iviz.Msgs.StdMsgs
 {
-    [DataContract]
+    [DataContract (Name = "std_msgs/Header")]
     public sealed class Header : IMessage
     {
         // Standard metadata for higher-level stamped data types.
@@ -10,35 +10,35 @@ namespace Iviz.Msgs.std_msgs
         // in a particular coordinate frame.
         // 
         // sequence ID: consecutively increasing ID 
-        [DataMember] public uint seq { get; set; }
+        [DataMember (Name = "seq")] public uint Seq { get; set; }
         //Two-integer timestamp that is expressed as:
         // * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')
         // * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')
         // time-handling sugar is provided by the client library
-        [DataMember] public time stamp { get; set; }
+        [DataMember (Name = "stamp")] public time Stamp { get; set; }
         //Frame this data is associated with
-        [DataMember] public string frame_id { get; set; }
+        [DataMember (Name = "frame_id")] public string FrameId { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Header()
         {
-            frame_id = "";
+            FrameId = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Header(uint seq, time stamp, string frame_id)
+        public Header(uint Seq, time Stamp, string FrameId)
         {
-            this.seq = seq;
-            this.stamp = stamp;
-            this.frame_id = frame_id ?? throw new System.ArgumentNullException(nameof(frame_id));
+            this.Seq = Seq;
+            this.Stamp = Stamp;
+            this.FrameId = FrameId;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal Header(Buffer b)
         {
-            this.seq = b.Deserialize<uint>();
-            this.stamp = b.Deserialize<time>();
-            this.frame_id = b.DeserializeString();
+            Seq = b.Deserialize<uint>();
+            Stamp = b.Deserialize<time>();
+            FrameId = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -49,21 +49,21 @@ namespace Iviz.Msgs.std_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.seq);
-            b.Serialize(this.stamp);
-            b.Serialize(this.frame_id);
+            b.Serialize(this.Seq);
+            b.Serialize(this.Stamp);
+            b.Serialize(this.FrameId);
         }
         
         public void Validate()
         {
-            if (frame_id is null) throw new System.NullReferenceException();
+            if (FrameId is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 16;
-                size += BuiltIns.UTF8.GetByteCount(frame_id);
+                size += BuiltIns.UTF8.GetByteCount(FrameId);
                 return size;
             }
         }

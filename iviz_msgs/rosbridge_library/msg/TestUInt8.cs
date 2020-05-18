@@ -1,28 +1,28 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosbridge_library
+namespace Iviz.Msgs.RosbridgeLibrary
 {
-    [DataContract]
+    [DataContract (Name = "rosbridge_library/TestUInt8")]
     public sealed class TestUInt8 : IMessage
     {
-        [DataMember] public byte[] data { get; set; }
+        [DataMember (Name = "data")] public byte[] Data { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestUInt8()
         {
-            data = System.Array.Empty<byte>();
+            Data = System.Array.Empty<byte>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TestUInt8(byte[] data)
+        public TestUInt8(byte[] Data)
         {
-            this.data = data ?? throw new System.ArgumentNullException(nameof(data));
+            this.Data = Data;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal TestUInt8(Buffer b)
         {
-            this.data = b.DeserializeStructArray<byte>();
+            Data = b.DeserializeStructArray<byte>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -33,19 +33,19 @@ namespace Iviz.Msgs.rosbridge_library
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeStructArray(this.data, 0);
+            b.SerializeStructArray(Data, 0);
         }
         
         public void Validate()
         {
-            if (data is null) throw new System.NullReferenceException();
+            if (Data is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += 1 * data.Length;
+                size += 1 * Data.Length;
                 return size;
             }
         }

@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.sensor_msgs
+namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract]
+    [DataContract (Name = "sensor_msgs/PointField")]
     public sealed class PointField : IMessage
     {
         // This message holds the description of one point entry in the
@@ -15,34 +15,33 @@ namespace Iviz.Msgs.sensor_msgs
         public const byte UINT32 = 6;
         public const byte FLOAT32 = 7;
         public const byte FLOAT64 = 8;
-        
-        [DataMember] public string name { get; set; } // Name of field
-        [DataMember] public uint offset { get; set; } // Offset from start of point struct
-        [DataMember] public byte datatype { get; set; } // Datatype enumeration, see above
-        [DataMember] public uint count { get; set; } // How many elements in the field
+        [DataMember (Name = "name")] public string Name { get; set; } // Name of field
+        [DataMember (Name = "offset")] public uint Offset { get; set; } // Offset from start of point struct
+        [DataMember (Name = "datatype")] public byte Datatype { get; set; } // Datatype enumeration, see above
+        [DataMember (Name = "count")] public uint Count { get; set; } // How many elements in the field
     
         /// <summary> Constructor for empty message. </summary>
         public PointField()
         {
-            name = "";
+            Name = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public PointField(string name, uint offset, byte datatype, uint count)
+        public PointField(string Name, uint Offset, byte Datatype, uint Count)
         {
-            this.name = name ?? throw new System.ArgumentNullException(nameof(name));
-            this.offset = offset;
-            this.datatype = datatype;
-            this.count = count;
+            this.Name = Name;
+            this.Offset = Offset;
+            this.Datatype = Datatype;
+            this.Count = Count;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal PointField(Buffer b)
         {
-            this.name = b.DeserializeString();
-            this.offset = b.Deserialize<uint>();
-            this.datatype = b.Deserialize<byte>();
-            this.count = b.Deserialize<uint>();
+            Name = b.DeserializeString();
+            Offset = b.Deserialize<uint>();
+            Datatype = b.Deserialize<byte>();
+            Count = b.Deserialize<uint>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -53,22 +52,22 @@ namespace Iviz.Msgs.sensor_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.name);
-            b.Serialize(this.offset);
-            b.Serialize(this.datatype);
-            b.Serialize(this.count);
+            b.Serialize(this.Name);
+            b.Serialize(this.Offset);
+            b.Serialize(this.Datatype);
+            b.Serialize(this.Count);
         }
         
         public void Validate()
         {
-            if (name is null) throw new System.NullReferenceException();
+            if (Name is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 13;
-                size += BuiltIns.UTF8.GetByteCount(name);
+                size += BuiltIns.UTF8.GetByteCount(Name);
                 return size;
             }
         }

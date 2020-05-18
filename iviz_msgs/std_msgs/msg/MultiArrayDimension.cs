@@ -1,34 +1,34 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.std_msgs
+namespace Iviz.Msgs.StdMsgs
 {
-    [DataContract]
+    [DataContract (Name = "std_msgs/MultiArrayDimension")]
     public sealed class MultiArrayDimension : IMessage
     {
-        [DataMember] public string label { get; set; } // label of given dimension
-        [DataMember] public uint size { get; set; } // size of given dimension (in type units)
-        [DataMember] public uint stride { get; set; } // stride of given dimension
+        [DataMember (Name = "label")] public string Label { get; set; } // label of given dimension
+        [DataMember (Name = "size")] public uint Size { get; set; } // size of given dimension (in type units)
+        [DataMember (Name = "stride")] public uint Stride { get; set; } // stride of given dimension
     
         /// <summary> Constructor for empty message. </summary>
         public MultiArrayDimension()
         {
-            label = "";
+            Label = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MultiArrayDimension(string label, uint size, uint stride)
+        public MultiArrayDimension(string Label, uint Size, uint Stride)
         {
-            this.label = label ?? throw new System.ArgumentNullException(nameof(label));
-            this.size = size;
-            this.stride = stride;
+            this.Label = Label;
+            this.Size = Size;
+            this.Stride = Stride;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal MultiArrayDimension(Buffer b)
         {
-            this.label = b.DeserializeString();
-            this.size = b.Deserialize<uint>();
-            this.stride = b.Deserialize<uint>();
+            Label = b.DeserializeString();
+            Size = b.Deserialize<uint>();
+            Stride = b.Deserialize<uint>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -39,21 +39,21 @@ namespace Iviz.Msgs.std_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.label);
-            b.Serialize(this.size);
-            b.Serialize(this.stride);
+            b.Serialize(this.Label);
+            b.Serialize(this.Size);
+            b.Serialize(this.Stride);
         }
         
         public void Validate()
         {
-            if (label is null) throw new System.NullReferenceException();
+            if (Label is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 12;
-                size += BuiltIns.UTF8.GetByteCount(label);
+                size += BuiltIns.UTF8.GetByteCount(Label);
                 return size;
             }
         }

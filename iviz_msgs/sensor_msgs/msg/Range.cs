@@ -1,43 +1,36 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.sensor_msgs
+namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract]
+    [DataContract (Name = "sensor_msgs/Range")]
     public sealed class Range : IMessage
     {
         // Single range reading from an active ranger that emits energy and reports
         // one range reading that is valid along an arc at the distance measured. 
         // This message is  not appropriate for laser scanners. See the LaserScan
         // message if you are working with a laser scanner.
-        
         // This message also can represent a fixed-distance (binary) ranger.  This
         // sensor will have min_range===max_range===distance of detection.
         // These sensors follow REP 117 and will output -Inf if the object is detected
         // and +Inf if the object is outside of the detection range.
-        
-        [DataMember] public std_msgs.Header header { get; set; } // timestamp in the header is the time the ranger
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; } // timestamp in the header is the time the ranger
         // returned the distance reading
-        
         // Radiation type enums
         // If you want a value added to this list, send an email to the ros-users list
         public const byte ULTRASOUND = 0;
         public const byte INFRARED = 1;
-        
-        [DataMember] public byte radiation_type { get; set; } // the type of radiation used by the sensor
+        [DataMember (Name = "radiation_type")] public byte RadiationType { get; set; } // the type of radiation used by the sensor
         // (sound, IR, etc) [enum]
-        
-        [DataMember] public float field_of_view { get; set; } // the size of the arc that the distance reading is
+        [DataMember (Name = "field_of_view")] public float FieldOfView { get; set; } // the size of the arc that the distance reading is
         // valid for [rad]
         // the object causing the range reading may have
         // been anywhere within -field_of_view/2 and
         // field_of_view/2 at the measured range. 
         // 0 angle corresponds to the x-axis of the sensor.
-        
-        [DataMember] public float min_range { get; set; } // minimum range value [m]
-        [DataMember] public float max_range { get; set; } // maximum range value [m]
+        [DataMember (Name = "min_range")] public float MinRange { get; set; } // minimum range value [m]
+        [DataMember (Name = "max_range")] public float MaxRange { get; set; } // maximum range value [m]
         // Fixed distance rangers require min_range==max_range
-        
-        [DataMember] public float range { get; set; } // range data [m]
+        [DataMember (Name = "range")] public float Range_ { get; set; } // range data [m]
         // (Note: values < range_min or > range_max
         // should be discarded)
         // Fixed distance rangers only output -Inf or +Inf.
@@ -49,29 +42,29 @@ namespace Iviz.Msgs.sensor_msgs
         /// <summary> Constructor for empty message. </summary>
         public Range()
         {
-            header = new std_msgs.Header();
+            Header = new StdMsgs.Header();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Range(std_msgs.Header header, byte radiation_type, float field_of_view, float min_range, float max_range, float range)
+        public Range(StdMsgs.Header Header, byte RadiationType, float FieldOfView, float MinRange, float MaxRange, float Range_)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.radiation_type = radiation_type;
-            this.field_of_view = field_of_view;
-            this.min_range = min_range;
-            this.max_range = max_range;
-            this.range = range;
+            this.Header = Header;
+            this.RadiationType = RadiationType;
+            this.FieldOfView = FieldOfView;
+            this.MinRange = MinRange;
+            this.MaxRange = MaxRange;
+            this.Range_ = Range_;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal Range(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.radiation_type = b.Deserialize<byte>();
-            this.field_of_view = b.Deserialize<float>();
-            this.min_range = b.Deserialize<float>();
-            this.max_range = b.Deserialize<float>();
-            this.range = b.Deserialize<float>();
+            Header = new StdMsgs.Header(b);
+            RadiationType = b.Deserialize<byte>();
+            FieldOfView = b.Deserialize<float>();
+            MinRange = b.Deserialize<float>();
+            MaxRange = b.Deserialize<float>();
+            Range_ = b.Deserialize<float>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -82,25 +75,25 @@ namespace Iviz.Msgs.sensor_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.radiation_type);
-            b.Serialize(this.field_of_view);
-            b.Serialize(this.min_range);
-            b.Serialize(this.max_range);
-            b.Serialize(this.range);
+            b.Serialize(Header);
+            b.Serialize(this.RadiationType);
+            b.Serialize(this.FieldOfView);
+            b.Serialize(this.MinRange);
+            b.Serialize(this.MaxRange);
+            b.Serialize(this.Range_);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 17;
-                size += header.RosMessageLength;
+                size += Header.RosMessageLength;
                 return size;
             }
         }

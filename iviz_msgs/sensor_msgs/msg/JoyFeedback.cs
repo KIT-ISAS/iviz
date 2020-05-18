@@ -1,25 +1,21 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.sensor_msgs
+namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract]
+    [DataContract (Name = "sensor_msgs/JoyFeedback")]
     public sealed class JoyFeedback : IMessage
     {
         // Declare of the type of feedback
         public const byte TYPE_LED = 0;
         public const byte TYPE_RUMBLE = 1;
         public const byte TYPE_BUZZER = 2;
-        
-        [DataMember] public byte type { get; set; }
-        
+        [DataMember (Name = "type")] public byte Type { get; set; }
         // This will hold an id number for each type of each feedback.
         // Example, the first led would be id=0, the second would be id=1
-        [DataMember] public byte id { get; set; }
-        
+        [DataMember (Name = "id")] public byte Id { get; set; }
         // Intensity of the feedback, from 0.0 to 1.0, inclusive.  If device is
         // actually binary, driver should treat 0<=x<0.5 as off, 0.5<=x<=1 as on.
-        [DataMember] public float intensity { get; set; }
-        
+        [DataMember (Name = "intensity")] public float Intensity { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public JoyFeedback()
@@ -27,19 +23,19 @@ namespace Iviz.Msgs.sensor_msgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public JoyFeedback(byte type, byte id, float intensity)
+        public JoyFeedback(byte Type, byte Id, float Intensity)
         {
-            this.type = type;
-            this.id = id;
-            this.intensity = intensity;
+            this.Type = Type;
+            this.Id = Id;
+            this.Intensity = Intensity;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal JoyFeedback(Buffer b)
         {
-            this.type = b.Deserialize<byte>();
-            this.id = b.Deserialize<byte>();
-            this.intensity = b.Deserialize<float>();
+            Type = b.Deserialize<byte>();
+            Id = b.Deserialize<byte>();
+            Intensity = b.Deserialize<float>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -50,9 +46,9 @@ namespace Iviz.Msgs.sensor_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.type);
-            b.Serialize(this.id);
-            b.Serialize(this.intensity);
+            b.Serialize(this.Type);
+            b.Serialize(this.Id);
+            b.Serialize(this.Intensity);
         }
         
         public void Validate()

@@ -1,36 +1,36 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.nav_msgs
+namespace Iviz.Msgs.NavMsgs
 {
-    [DataContract]
+    [DataContract (Name = "nav_msgs/Path")]
     public sealed class Path : IMessage
     {
         //An array of poses that represents a Path for a robot to follow
-        [DataMember] public std_msgs.Header header { get; set; }
-        [DataMember] public geometry_msgs.PoseStamped[] poses { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "poses")] public GeometryMsgs.PoseStamped[] Poses { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Path()
         {
-            header = new std_msgs.Header();
-            poses = System.Array.Empty<geometry_msgs.PoseStamped>();
+            Header = new StdMsgs.Header();
+            Poses = System.Array.Empty<GeometryMsgs.PoseStamped>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Path(std_msgs.Header header, geometry_msgs.PoseStamped[] poses)
+        public Path(StdMsgs.Header Header, GeometryMsgs.PoseStamped[] Poses)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.poses = poses ?? throw new System.ArgumentNullException(nameof(poses));
+            this.Header = Header;
+            this.Poses = Poses;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal Path(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.poses = b.DeserializeArray<geometry_msgs.PoseStamped>();
-            for (int i = 0; i < this.poses.Length; i++)
+            Header = new StdMsgs.Header(b);
+            Poses = b.DeserializeArray<GeometryMsgs.PoseStamped>();
+            for (int i = 0; i < this.Poses.Length; i++)
             {
-                this.poses[i] = new geometry_msgs.PoseStamped(b);
+                Poses[i] = new GeometryMsgs.PoseStamped(b);
             }
         }
         
@@ -42,19 +42,19 @@ namespace Iviz.Msgs.nav_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.SerializeArray(this.poses, 0);
+            b.Serialize(Header);
+            b.SerializeArray(Poses, 0);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (poses is null) throw new System.NullReferenceException();
-            for (int i = 0; i < poses.Length; i++)
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (Poses is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Poses.Length; i++)
             {
-                if (poses[i] is null) throw new System.NullReferenceException();
-                poses[i].Validate();
+                if (Poses[i] is null) throw new System.NullReferenceException();
+                Poses[i].Validate();
             }
         }
     
@@ -62,10 +62,10 @@ namespace Iviz.Msgs.nav_msgs
         {
             get {
                 int size = 4;
-                size += header.RosMessageLength;
-                for (int i = 0; i < poses.Length; i++)
+                size += Header.RosMessageLength;
+                for (int i = 0; i < Poses.Length; i++)
                 {
-                    size += poses[i].RosMessageLength;
+                    size += Poses[i].RosMessageLength;
                 }
                 return size;
             }

@@ -1,31 +1,31 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosbridge_library
+namespace Iviz.Msgs.RosbridgeLibrary
 {
-    [DataContract]
+    [DataContract (Name = "rosbridge_library/TestHeaderArray")]
     public sealed class TestHeaderArray : IMessage
     {
-        [DataMember] public std_msgs.Header[] header { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header[] Header { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestHeaderArray()
         {
-            header = System.Array.Empty<std_msgs.Header>();
+            Header = System.Array.Empty<StdMsgs.Header>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TestHeaderArray(std_msgs.Header[] header)
+        public TestHeaderArray(StdMsgs.Header[] Header)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.Header = Header;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal TestHeaderArray(Buffer b)
         {
-            this.header = b.DeserializeArray<std_msgs.Header>();
-            for (int i = 0; i < this.header.Length; i++)
+            Header = b.DeserializeArray<StdMsgs.Header>();
+            for (int i = 0; i < this.Header.Length; i++)
             {
-                this.header[i] = new std_msgs.Header(b);
+                Header[i] = new StdMsgs.Header(b);
             }
         }
         
@@ -37,16 +37,16 @@ namespace Iviz.Msgs.rosbridge_library
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeArray(this.header, 0);
+            b.SerializeArray(Header, 0);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            for (int i = 0; i < header.Length; i++)
+            if (Header is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Header.Length; i++)
             {
-                if (header[i] is null) throw new System.NullReferenceException();
-                header[i].Validate();
+                if (Header[i] is null) throw new System.NullReferenceException();
+                Header[i].Validate();
             }
         }
     
@@ -54,9 +54,9 @@ namespace Iviz.Msgs.rosbridge_library
         {
             get {
                 int size = 4;
-                for (int i = 0; i < header.Length; i++)
+                for (int i = 0; i < Header.Length; i++)
                 {
-                    size += header[i].RosMessageLength;
+                    size += Header[i].RosMessageLength;
                 }
                 return size;
             }

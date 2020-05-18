@@ -1,32 +1,32 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.sensor_msgs
+namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract]
+    [DataContract (Name = "sensor_msgs/JoyFeedbackArray")]
     public sealed class JoyFeedbackArray : IMessage
     {
         // This message publishes values for multiple feedback at once. 
-        [DataMember] public JoyFeedback[] array { get; set; }
+        [DataMember (Name = "array")] public JoyFeedback[] Array { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public JoyFeedbackArray()
         {
-            array = System.Array.Empty<JoyFeedback>();
+            Array = System.Array.Empty<JoyFeedback>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public JoyFeedbackArray(JoyFeedback[] array)
+        public JoyFeedbackArray(JoyFeedback[] Array)
         {
-            this.array = array ?? throw new System.ArgumentNullException(nameof(array));
+            this.Array = Array;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal JoyFeedbackArray(Buffer b)
         {
-            this.array = b.DeserializeArray<JoyFeedback>();
-            for (int i = 0; i < this.array.Length; i++)
+            Array = b.DeserializeArray<JoyFeedback>();
+            for (int i = 0; i < this.Array.Length; i++)
             {
-                this.array[i] = new JoyFeedback(b);
+                Array[i] = new JoyFeedback(b);
             }
         }
         
@@ -38,16 +38,16 @@ namespace Iviz.Msgs.sensor_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeArray(this.array, 0);
+            b.SerializeArray(Array, 0);
         }
         
         public void Validate()
         {
-            if (array is null) throw new System.NullReferenceException();
-            for (int i = 0; i < array.Length; i++)
+            if (Array is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Array.Length; i++)
             {
-                if (array[i] is null) throw new System.NullReferenceException();
-                array[i].Validate();
+                if (Array[i] is null) throw new System.NullReferenceException();
+                Array[i].Validate();
             }
         }
     
@@ -55,7 +55,7 @@ namespace Iviz.Msgs.sensor_msgs
         {
             get {
                 int size = 4;
-                size += 6 * array.Length;
+                size += 6 * Array.Length;
                 return size;
             }
         }

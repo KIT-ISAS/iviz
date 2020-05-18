@@ -1,63 +1,58 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.grid_map_msgs
+namespace Iviz.Msgs.GridMapMsgs
 {
-    [DataContract]
+    [DataContract (Name = "grid_map_msgs/GridMap")]
     public sealed class GridMap : IMessage
     {
         // Grid map header
-        [DataMember] public GridMapInfo info { get; set; }
-        
+        [DataMember (Name = "info")] public GridMapInfo Info { get; set; }
         // Grid map layer names.
-        [DataMember] public string[] layers { get; set; }
-        
+        [DataMember (Name = "layers")] public string[] Layers { get; set; }
         // Grid map basic layer names (optional). The basic layers
         // determine which layers from `layers` need to be valid
         // in order for a cell of the grid map to be valid.
-        [DataMember] public string[] basic_layers { get; set; }
-        
+        [DataMember (Name = "basic_layers")] public string[] BasicLayers { get; set; }
         // Grid map data.
-        [DataMember] public std_msgs.Float32MultiArray[] data { get; set; }
-        
+        [DataMember (Name = "data")] public StdMsgs.Float32MultiArray[] Data { get; set; }
         // Row start index (default 0).
-        [DataMember] public ushort outer_start_index { get; set; }
-        
+        [DataMember (Name = "outer_start_index")] public ushort OuterStartIndex { get; set; }
         // Column start index (default 0).
-        [DataMember] public ushort inner_start_index { get; set; }
+        [DataMember (Name = "inner_start_index")] public ushort InnerStartIndex { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GridMap()
         {
-            info = new GridMapInfo();
-            layers = System.Array.Empty<string>();
-            basic_layers = System.Array.Empty<string>();
-            data = System.Array.Empty<std_msgs.Float32MultiArray>();
+            Info = new GridMapInfo();
+            Layers = System.Array.Empty<string>();
+            BasicLayers = System.Array.Empty<string>();
+            Data = System.Array.Empty<StdMsgs.Float32MultiArray>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GridMap(GridMapInfo info, string[] layers, string[] basic_layers, std_msgs.Float32MultiArray[] data, ushort outer_start_index, ushort inner_start_index)
+        public GridMap(GridMapInfo Info, string[] Layers, string[] BasicLayers, StdMsgs.Float32MultiArray[] Data, ushort OuterStartIndex, ushort InnerStartIndex)
         {
-            this.info = info ?? throw new System.ArgumentNullException(nameof(info));
-            this.layers = layers ?? throw new System.ArgumentNullException(nameof(layers));
-            this.basic_layers = basic_layers ?? throw new System.ArgumentNullException(nameof(basic_layers));
-            this.data = data ?? throw new System.ArgumentNullException(nameof(data));
-            this.outer_start_index = outer_start_index;
-            this.inner_start_index = inner_start_index;
+            this.Info = Info;
+            this.Layers = Layers;
+            this.BasicLayers = BasicLayers;
+            this.Data = Data;
+            this.OuterStartIndex = OuterStartIndex;
+            this.InnerStartIndex = InnerStartIndex;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal GridMap(Buffer b)
         {
-            this.info = new GridMapInfo(b);
-            this.layers = b.DeserializeStringArray();
-            this.basic_layers = b.DeserializeStringArray();
-            this.data = b.DeserializeArray<std_msgs.Float32MultiArray>();
-            for (int i = 0; i < this.data.Length; i++)
+            Info = new GridMapInfo(b);
+            Layers = b.DeserializeStringArray();
+            BasicLayers = b.DeserializeStringArray();
+            Data = b.DeserializeArray<StdMsgs.Float32MultiArray>();
+            for (int i = 0; i < this.Data.Length; i++)
             {
-                this.data[i] = new std_msgs.Float32MultiArray(b);
+                Data[i] = new StdMsgs.Float32MultiArray(b);
             }
-            this.outer_start_index = b.Deserialize<ushort>();
-            this.inner_start_index = b.Deserialize<ushort>();
+            OuterStartIndex = b.Deserialize<ushort>();
+            InnerStartIndex = b.Deserialize<ushort>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -68,33 +63,33 @@ namespace Iviz.Msgs.grid_map_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.info);
-            b.SerializeArray(this.layers, 0);
-            b.SerializeArray(this.basic_layers, 0);
-            b.SerializeArray(this.data, 0);
-            b.Serialize(this.outer_start_index);
-            b.Serialize(this.inner_start_index);
+            b.Serialize(Info);
+            b.SerializeArray(Layers, 0);
+            b.SerializeArray(BasicLayers, 0);
+            b.SerializeArray(Data, 0);
+            b.Serialize(this.OuterStartIndex);
+            b.Serialize(this.InnerStartIndex);
         }
         
         public void Validate()
         {
-            if (info is null) throw new System.NullReferenceException();
-            info.Validate();
-            if (layers is null) throw new System.NullReferenceException();
-            for (int i = 0; i < layers.Length; i++)
+            if (Info is null) throw new System.NullReferenceException();
+            Info.Validate();
+            if (Layers is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Layers.Length; i++)
             {
-                if (layers[i] is null) throw new System.NullReferenceException();
+                if (Layers[i] is null) throw new System.NullReferenceException();
             }
-            if (basic_layers is null) throw new System.NullReferenceException();
-            for (int i = 0; i < basic_layers.Length; i++)
+            if (BasicLayers is null) throw new System.NullReferenceException();
+            for (int i = 0; i < BasicLayers.Length; i++)
             {
-                if (basic_layers[i] is null) throw new System.NullReferenceException();
+                if (BasicLayers[i] is null) throw new System.NullReferenceException();
             }
-            if (data is null) throw new System.NullReferenceException();
-            for (int i = 0; i < data.Length; i++)
+            if (Data is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Data.Length; i++)
             {
-                if (data[i] is null) throw new System.NullReferenceException();
-                data[i].Validate();
+                if (Data[i] is null) throw new System.NullReferenceException();
+                Data[i].Validate();
             }
         }
     
@@ -102,20 +97,20 @@ namespace Iviz.Msgs.grid_map_msgs
         {
             get {
                 int size = 16;
-                size += info.RosMessageLength;
-                size += 4 * layers.Length;
-                for (int i = 0; i < layers.Length; i++)
+                size += Info.RosMessageLength;
+                size += 4 * Layers.Length;
+                for (int i = 0; i < Layers.Length; i++)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(layers[i]);
+                    size += BuiltIns.UTF8.GetByteCount(Layers[i]);
                 }
-                size += 4 * basic_layers.Length;
-                for (int i = 0; i < basic_layers.Length; i++)
+                size += 4 * BasicLayers.Length;
+                for (int i = 0; i < BasicLayers.Length; i++)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(basic_layers[i]);
+                    size += BuiltIns.UTF8.GetByteCount(BasicLayers[i]);
                 }
-                for (int i = 0; i < data.Length; i++)
+                for (int i = 0; i < Data.Length; i++)
                 {
-                    size += data[i].RosMessageLength;
+                    size += Data[i].RosMessageLength;
                 }
                 return size;
             }

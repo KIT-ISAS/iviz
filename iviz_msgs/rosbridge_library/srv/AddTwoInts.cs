@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosbridge_library
+namespace Iviz.Msgs.RosbridgeLibrary
 {
-    [DataContract]
+    [DataContract (Name = "rosbridge_library/AddTwoInts")]
     public sealed class AddTwoInts : IService
     {
         /// <summary> Request message. </summary>
@@ -52,8 +52,8 @@ namespace Iviz.Msgs.rosbridge_library
 
     public sealed class AddTwoIntsRequest : IRequest
     {
-        [DataMember] public long a { get; set; }
-        [DataMember] public long b { get; set; }
+        [DataMember (Name = "a")] public long A { get; set; }
+        [DataMember (Name = "b")] public long B { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public AddTwoIntsRequest()
@@ -61,17 +61,17 @@ namespace Iviz.Msgs.rosbridge_library
         }
         
         /// <summary> Explicit constructor. </summary>
-        public AddTwoIntsRequest(long a, long b)
+        public AddTwoIntsRequest(long A, long B)
         {
-            this.a = a;
-            this.b = b;
+            this.A = A;
+            this.B = B;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal AddTwoIntsRequest(Buffer b)
         {
-            this.a = b.Deserialize<long>();
-            this.b = b.Deserialize<long>();
+            A = b.Deserialize<long>();
+            B = b.Deserialize<long>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -82,8 +82,8 @@ namespace Iviz.Msgs.rosbridge_library
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.a);
-            b.Serialize(this.b);
+            b.Serialize(this.A);
+            b.Serialize(this.B);
         }
         
         public void Validate()
@@ -95,7 +95,7 @@ namespace Iviz.Msgs.rosbridge_library
 
     public sealed class AddTwoIntsResponse : IResponse
     {
-        [DataMember] public long sum { get; set; }
+        [DataMember (Name = "sum")] public long Sum { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public AddTwoIntsResponse()
@@ -103,15 +103,15 @@ namespace Iviz.Msgs.rosbridge_library
         }
         
         /// <summary> Explicit constructor. </summary>
-        public AddTwoIntsResponse(long sum)
+        public AddTwoIntsResponse(long Sum)
         {
-            this.sum = sum;
+            this.Sum = Sum;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal AddTwoIntsResponse(Buffer b)
         {
-            this.sum = b.Deserialize<long>();
+            Sum = b.Deserialize<long>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -122,7 +122,7 @@ namespace Iviz.Msgs.rosbridge_library
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.sum);
+            b.Serialize(this.Sum);
         }
         
         public void Validate()

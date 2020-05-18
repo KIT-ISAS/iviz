@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosapi
+namespace Iviz.Msgs.Rosapi
 {
-    [DataContract]
+    [DataContract (Name = "rosapi/ServiceRequestDetails")]
     public sealed class ServiceRequestDetails : IService
     {
         /// <summary> Request message. </summary>
@@ -52,24 +52,24 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class ServiceRequestDetailsRequest : IRequest
     {
-        [DataMember] public string type { get; set; }
+        [DataMember (Name = "type")] public string Type { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ServiceRequestDetailsRequest()
         {
-            type = "";
+            Type = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public ServiceRequestDetailsRequest(string type)
+        public ServiceRequestDetailsRequest(string Type)
         {
-            this.type = type ?? throw new System.ArgumentNullException(nameof(type));
+            this.Type = Type;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal ServiceRequestDetailsRequest(Buffer b)
         {
-            this.type = b.DeserializeString();
+            Type = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -80,19 +80,19 @@ namespace Iviz.Msgs.rosapi
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.type);
+            b.Serialize(this.Type);
         }
         
         public void Validate()
         {
-            if (type is null) throw new System.NullReferenceException();
+            if (Type is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(type);
+                size += BuiltIns.UTF8.GetByteCount(Type);
                 return size;
             }
         }
@@ -100,27 +100,27 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class ServiceRequestDetailsResponse : IResponse
     {
-        [DataMember] public TypeDef[] typedefs { get; set; }
+        [DataMember (Name = "typedefs")] public TypeDef[] Typedefs { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ServiceRequestDetailsResponse()
         {
-            typedefs = System.Array.Empty<TypeDef>();
+            Typedefs = System.Array.Empty<TypeDef>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public ServiceRequestDetailsResponse(TypeDef[] typedefs)
+        public ServiceRequestDetailsResponse(TypeDef[] Typedefs)
         {
-            this.typedefs = typedefs ?? throw new System.ArgumentNullException(nameof(typedefs));
+            this.Typedefs = Typedefs;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal ServiceRequestDetailsResponse(Buffer b)
         {
-            this.typedefs = b.DeserializeArray<TypeDef>();
-            for (int i = 0; i < this.typedefs.Length; i++)
+            Typedefs = b.DeserializeArray<TypeDef>();
+            for (int i = 0; i < this.Typedefs.Length; i++)
             {
-                this.typedefs[i] = new TypeDef(b);
+                Typedefs[i] = new TypeDef(b);
             }
         }
         
@@ -132,16 +132,16 @@ namespace Iviz.Msgs.rosapi
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeArray(this.typedefs, 0);
+            b.SerializeArray(Typedefs, 0);
         }
         
         public void Validate()
         {
-            if (typedefs is null) throw new System.NullReferenceException();
-            for (int i = 0; i < typedefs.Length; i++)
+            if (Typedefs is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Typedefs.Length; i++)
             {
-                if (typedefs[i] is null) throw new System.NullReferenceException();
-                typedefs[i].Validate();
+                if (Typedefs[i] is null) throw new System.NullReferenceException();
+                Typedefs[i].Validate();
             }
         }
     
@@ -149,9 +149,9 @@ namespace Iviz.Msgs.rosapi
         {
             get {
                 int size = 4;
-                for (int i = 0; i < typedefs.Length; i++)
+                for (int i = 0; i < Typedefs.Length; i++)
                 {
-                    size += typedefs[i].RosMessageLength;
+                    size += Typedefs[i].RosMessageLength;
                 }
                 return size;
             }

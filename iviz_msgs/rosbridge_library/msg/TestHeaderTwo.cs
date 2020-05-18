@@ -1,28 +1,28 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosbridge_library
+namespace Iviz.Msgs.RosbridgeLibrary
 {
-    [DataContract]
+    [DataContract (Name = "rosbridge_library/TestHeaderTwo")]
     public sealed class TestHeaderTwo : IMessage
     {
-        [DataMember] public std_msgs.Header header { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestHeaderTwo()
         {
-            header = new std_msgs.Header();
+            Header = new StdMsgs.Header();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TestHeaderTwo(std_msgs.Header header)
+        public TestHeaderTwo(StdMsgs.Header Header)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
+            this.Header = Header;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal TestHeaderTwo(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
+            Header = new StdMsgs.Header(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -33,20 +33,20 @@ namespace Iviz.Msgs.rosbridge_library
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
+            b.Serialize(Header);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 0;
-                size += header.RosMessageLength;
+                size += Header.RosMessageLength;
                 return size;
             }
         }

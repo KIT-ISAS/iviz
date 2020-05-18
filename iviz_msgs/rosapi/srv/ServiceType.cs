@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosapi
+namespace Iviz.Msgs.Rosapi
 {
-    [DataContract]
+    [DataContract (Name = "rosapi/ServiceType")]
     public sealed class ServiceType : IService
     {
         /// <summary> Request message. </summary>
@@ -52,24 +52,24 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class ServiceTypeRequest : IRequest
     {
-        [DataMember] public string service { get; set; }
+        [DataMember (Name = "service")] public string Service { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ServiceTypeRequest()
         {
-            service = "";
+            Service = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public ServiceTypeRequest(string service)
+        public ServiceTypeRequest(string Service)
         {
-            this.service = service ?? throw new System.ArgumentNullException(nameof(service));
+            this.Service = Service;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal ServiceTypeRequest(Buffer b)
         {
-            this.service = b.DeserializeString();
+            Service = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -80,19 +80,19 @@ namespace Iviz.Msgs.rosapi
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.service);
+            b.Serialize(this.Service);
         }
         
         public void Validate()
         {
-            if (service is null) throw new System.NullReferenceException();
+            if (Service is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(service);
+                size += BuiltIns.UTF8.GetByteCount(Service);
                 return size;
             }
         }
@@ -100,24 +100,24 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class ServiceTypeResponse : IResponse
     {
-        [DataMember] public string type { get; set; }
+        [DataMember (Name = "type")] public string Type { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ServiceTypeResponse()
         {
-            type = "";
+            Type = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public ServiceTypeResponse(string type)
+        public ServiceTypeResponse(string Type)
         {
-            this.type = type ?? throw new System.ArgumentNullException(nameof(type));
+            this.Type = Type;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal ServiceTypeResponse(Buffer b)
         {
-            this.type = b.DeserializeString();
+            Type = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -128,19 +128,19 @@ namespace Iviz.Msgs.rosapi
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.type);
+            b.Serialize(this.Type);
         }
         
         public void Validate()
         {
-            if (type is null) throw new System.NullReferenceException();
+            if (Type is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(type);
+                size += BuiltIns.UTF8.GetByteCount(Type);
                 return size;
             }
         }

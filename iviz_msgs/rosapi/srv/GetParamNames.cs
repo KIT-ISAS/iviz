@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosapi
+namespace Iviz.Msgs.Rosapi
 {
-    [DataContract]
+    [DataContract (Name = "rosapi/GetParamNames")]
     public sealed class GetParamNames : IService
     {
         /// <summary> Request message. </summary>
@@ -56,24 +56,24 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class GetParamNamesResponse : IResponse
     {
-        [DataMember] public string[] names { get; set; }
+        [DataMember (Name = "names")] public string[] Names { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetParamNamesResponse()
         {
-            names = System.Array.Empty<string>();
+            Names = System.Array.Empty<string>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GetParamNamesResponse(string[] names)
+        public GetParamNamesResponse(string[] Names)
         {
-            this.names = names ?? throw new System.ArgumentNullException(nameof(names));
+            this.Names = Names;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal GetParamNamesResponse(Buffer b)
         {
-            this.names = b.DeserializeStringArray();
+            Names = b.DeserializeStringArray();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -84,15 +84,15 @@ namespace Iviz.Msgs.rosapi
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeArray(this.names, 0);
+            b.SerializeArray(Names, 0);
         }
         
         public void Validate()
         {
-            if (names is null) throw new System.NullReferenceException();
-            for (int i = 0; i < names.Length; i++)
+            if (Names is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Names.Length; i++)
             {
-                if (names[i] is null) throw new System.NullReferenceException();
+                if (Names[i] is null) throw new System.NullReferenceException();
             }
         }
     
@@ -100,10 +100,10 @@ namespace Iviz.Msgs.rosapi
         {
             get {
                 int size = 4;
-                size += 4 * names.Length;
-                for (int i = 0; i < names.Length; i++)
+                size += 4 * Names.Length;
+                for (int i = 0; i < Names.Length; i++)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(names[i]);
+                    size += BuiltIns.UTF8.GetByteCount(Names[i]);
                 }
                 return size;
             }

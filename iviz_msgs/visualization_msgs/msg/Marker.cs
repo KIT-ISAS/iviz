@@ -1,12 +1,11 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.visualization_msgs
+namespace Iviz.Msgs.VisualizationMsgs
 {
-    [DataContract]
+    [DataContract (Name = "visualization_msgs/Marker")]
     public sealed class Marker : IMessage
     {
         // See http://www.ros.org/wiki/rviz/DisplayTypes/Marker and http://www.ros.org/wiki/rviz/Tutorials/Markers%3A%20Basic%20Shapes for more information on using this message with rviz
-        
         public const byte ARROW = 0;
         public const byte CUBE = 1;
         public const byte SPHERE = 2;
@@ -19,86 +18,81 @@ namespace Iviz.Msgs.visualization_msgs
         public const byte TEXT_VIEW_FACING = 9;
         public const byte MESH_RESOURCE = 10;
         public const byte TRIANGLE_LIST = 11;
-        
         public const byte ADD = 0;
         public const byte MODIFY = 0;
         public const byte DELETE = 2;
         public const byte DELETEALL = 3;
-        
-        [DataMember] public std_msgs.Header header { get; set; } // header for time/frame information
-        [DataMember] public string ns { get; set; } // Namespace to place this object in... used in conjunction with id to create a unique name for the object
-        [DataMember] public int id { get; set; } // object ID useful in conjunction with the namespace for manipulating and deleting the object later
-        [DataMember] public int type { get; set; } // Type of object
-        [DataMember] public int action { get; set; } // 0 add/modify an object, 1 (deprecated), 2 deletes an object, 3 deletes all objects
-        [DataMember] public geometry_msgs.Pose pose { get; set; } // Pose of the object
-        [DataMember] public geometry_msgs.Vector3 scale { get; set; } // Scale of the object 1,1,1 means default (usually 1 meter square)
-        [DataMember] public std_msgs.ColorRGBA color { get; set; } // Color [0.0-1.0]
-        [DataMember] public duration lifetime { get; set; } // How long the object should last before being automatically deleted.  0 means forever
-        [DataMember] public bool frame_locked { get; set; } // If this marker should be frame-locked, i.e. retransformed into its frame every timestep
-        
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; } // header for time/frame information
+        [DataMember (Name = "ns")] public string Ns { get; set; } // Namespace to place this object in... used in conjunction with id to create a unique name for the object
+        [DataMember (Name = "id")] public int Id { get; set; } // object ID useful in conjunction with the namespace for manipulating and deleting the object later
+        [DataMember (Name = "type")] public int Type { get; set; } // Type of object
+        [DataMember (Name = "action")] public int Action { get; set; } // 0 add/modify an object, 1 (deprecated), 2 deletes an object, 3 deletes all objects
+        [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose { get; set; } // Pose of the object
+        [DataMember (Name = "scale")] public GeometryMsgs.Vector3 Scale { get; set; } // Scale of the object 1,1,1 means default (usually 1 meter square)
+        [DataMember (Name = "color")] public StdMsgs.ColorRGBA Color { get; set; } // Color [0.0-1.0]
+        [DataMember (Name = "lifetime")] public duration Lifetime { get; set; } // How long the object should last before being automatically deleted.  0 means forever
+        [DataMember (Name = "frame_locked")] public bool FrameLocked { get; set; } // If this marker should be frame-locked, i.e. retransformed into its frame every timestep
         //Only used if the type specified has some use for them (eg. POINTS, LINE_STRIP, ...)
-        [DataMember] public geometry_msgs.Point[] points { get; set; }
+        [DataMember (Name = "points")] public GeometryMsgs.Point[] Points { get; set; }
         //Only used if the type specified has some use for them (eg. POINTS, LINE_STRIP, ...)
         //number of colors must either be 0 or equal to the number of points
         //NOTE: alpha is not yet used
-        [DataMember] public std_msgs.ColorRGBA[] colors { get; set; }
-        
+        [DataMember (Name = "colors")] public StdMsgs.ColorRGBA[] Colors { get; set; }
         // NOTE: only used for text markers
-        [DataMember] public string text { get; set; }
-        
+        [DataMember (Name = "text")] public string Text { get; set; }
         // NOTE: only used for MESH_RESOURCE markers
-        [DataMember] public string mesh_resource { get; set; }
-        [DataMember] public bool mesh_use_embedded_materials { get; set; }
+        [DataMember (Name = "mesh_resource")] public string MeshResource { get; set; }
+        [DataMember (Name = "mesh_use_embedded_materials")] public bool MeshUseEmbeddedMaterials { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Marker()
         {
-            header = new std_msgs.Header();
-            ns = "";
-            points = System.Array.Empty<geometry_msgs.Point>();
-            colors = System.Array.Empty<std_msgs.ColorRGBA>();
-            text = "";
-            mesh_resource = "";
+            Header = new StdMsgs.Header();
+            Ns = "";
+            Points = System.Array.Empty<GeometryMsgs.Point>();
+            Colors = System.Array.Empty<StdMsgs.ColorRGBA>();
+            Text = "";
+            MeshResource = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Marker(std_msgs.Header header, string ns, int id, int type, int action, geometry_msgs.Pose pose, geometry_msgs.Vector3 scale, std_msgs.ColorRGBA color, duration lifetime, bool frame_locked, geometry_msgs.Point[] points, std_msgs.ColorRGBA[] colors, string text, string mesh_resource, bool mesh_use_embedded_materials)
+        public Marker(StdMsgs.Header Header, string Ns, int Id, int Type, int Action, GeometryMsgs.Pose Pose, GeometryMsgs.Vector3 Scale, StdMsgs.ColorRGBA Color, duration Lifetime, bool FrameLocked, GeometryMsgs.Point[] Points, StdMsgs.ColorRGBA[] Colors, string Text, string MeshResource, bool MeshUseEmbeddedMaterials)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.ns = ns ?? throw new System.ArgumentNullException(nameof(ns));
-            this.id = id;
-            this.type = type;
-            this.action = action;
-            this.pose = pose;
-            this.scale = scale;
-            this.color = color;
-            this.lifetime = lifetime;
-            this.frame_locked = frame_locked;
-            this.points = points ?? throw new System.ArgumentNullException(nameof(points));
-            this.colors = colors ?? throw new System.ArgumentNullException(nameof(colors));
-            this.text = text ?? throw new System.ArgumentNullException(nameof(text));
-            this.mesh_resource = mesh_resource ?? throw new System.ArgumentNullException(nameof(mesh_resource));
-            this.mesh_use_embedded_materials = mesh_use_embedded_materials;
+            this.Header = Header;
+            this.Ns = Ns;
+            this.Id = Id;
+            this.Type = Type;
+            this.Action = Action;
+            this.Pose = Pose;
+            this.Scale = Scale;
+            this.Color = Color;
+            this.Lifetime = Lifetime;
+            this.FrameLocked = FrameLocked;
+            this.Points = Points;
+            this.Colors = Colors;
+            this.Text = Text;
+            this.MeshResource = MeshResource;
+            this.MeshUseEmbeddedMaterials = MeshUseEmbeddedMaterials;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal Marker(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.ns = b.DeserializeString();
-            this.id = b.Deserialize<int>();
-            this.type = b.Deserialize<int>();
-            this.action = b.Deserialize<int>();
-            this.pose = new geometry_msgs.Pose(b);
-            this.scale = new geometry_msgs.Vector3(b);
-            this.color = new std_msgs.ColorRGBA(b);
-            this.lifetime = b.Deserialize<duration>();
-            this.frame_locked = b.Deserialize<bool>();
-            this.points = b.DeserializeStructArray<geometry_msgs.Point>();
-            this.colors = b.DeserializeStructArray<std_msgs.ColorRGBA>();
-            this.text = b.DeserializeString();
-            this.mesh_resource = b.DeserializeString();
-            this.mesh_use_embedded_materials = b.Deserialize<bool>();
+            Header = new StdMsgs.Header(b);
+            Ns = b.DeserializeString();
+            Id = b.Deserialize<int>();
+            Type = b.Deserialize<int>();
+            Action = b.Deserialize<int>();
+            Pose = new GeometryMsgs.Pose(b);
+            Scale = new GeometryMsgs.Vector3(b);
+            Color = new StdMsgs.ColorRGBA(b);
+            Lifetime = b.Deserialize<duration>();
+            FrameLocked = b.Deserialize<bool>();
+            Points = b.DeserializeStructArray<GeometryMsgs.Point>();
+            Colors = b.DeserializeStructArray<StdMsgs.ColorRGBA>();
+            Text = b.DeserializeString();
+            MeshResource = b.DeserializeString();
+            MeshUseEmbeddedMaterials = b.Deserialize<bool>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -109,44 +103,44 @@ namespace Iviz.Msgs.visualization_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.ns);
-            b.Serialize(this.id);
-            b.Serialize(this.type);
-            b.Serialize(this.action);
-            b.Serialize(this.pose);
-            b.Serialize(this.scale);
-            b.Serialize(this.color);
-            b.Serialize(this.lifetime);
-            b.Serialize(this.frame_locked);
-            b.SerializeStructArray(this.points, 0);
-            b.SerializeStructArray(this.colors, 0);
-            b.Serialize(this.text);
-            b.Serialize(this.mesh_resource);
-            b.Serialize(this.mesh_use_embedded_materials);
+            b.Serialize(Header);
+            b.Serialize(this.Ns);
+            b.Serialize(this.Id);
+            b.Serialize(this.Type);
+            b.Serialize(this.Action);
+            b.Serialize(Pose);
+            b.Serialize(Scale);
+            b.Serialize(Color);
+            b.Serialize(this.Lifetime);
+            b.Serialize(this.FrameLocked);
+            b.SerializeStructArray(Points, 0);
+            b.SerializeStructArray(Colors, 0);
+            b.Serialize(this.Text);
+            b.Serialize(this.MeshResource);
+            b.Serialize(this.MeshUseEmbeddedMaterials);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (ns is null) throw new System.NullReferenceException();
-            if (points is null) throw new System.NullReferenceException();
-            if (colors is null) throw new System.NullReferenceException();
-            if (text is null) throw new System.NullReferenceException();
-            if (mesh_resource is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (Ns is null) throw new System.NullReferenceException();
+            if (Points is null) throw new System.NullReferenceException();
+            if (Colors is null) throw new System.NullReferenceException();
+            if (Text is null) throw new System.NullReferenceException();
+            if (MeshResource is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 138;
-                size += header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(ns);
-                size += 24 * points.Length;
-                size += 16 * colors.Length;
-                size += BuiltIns.UTF8.GetByteCount(text);
-                size += BuiltIns.UTF8.GetByteCount(mesh_resource);
+                size += Header.RosMessageLength;
+                size += BuiltIns.UTF8.GetByteCount(Ns);
+                size += 24 * Points.Length;
+                size += 16 * Colors.Length;
+                size += BuiltIns.UTF8.GetByteCount(Text);
+                size += BuiltIns.UTF8.GetByteCount(MeshResource);
                 return size;
             }
         }

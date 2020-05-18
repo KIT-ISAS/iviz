@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Iviz.MsgsGen
 {
@@ -38,10 +39,29 @@ namespace Iviz.MsgsGen
             ServiceSeparator
         }
 
+        public static string Sanitize(string name)
+        {
+            StringBuilder str = new StringBuilder();
+            str.Append(char.ToUpper(name[0]));
+            for (int i = 1; i < name.Length; i++)
+            {
+                if (name[i] == '_' && i != name.Length - 1)
+                {
+                    str.Append(char.ToUpper(name[i + 1]));
+                    i++;
+                }
+                else
+                {
+                    str.Append(name[i]);
+                }
+            }
+            return str.ToString();
+        }
+
         public interface IElement
         {
             ElementType Type { get; }
-            string ToCString(bool forceUnroll = false);
+            List<string> ToCString(bool forceUnroll = false);
         }
 
         public class Empty : IElement
@@ -53,9 +73,9 @@ namespace Iviz.MsgsGen
                 return "[]";
             }
 
-            public string ToCString(bool forceUnroll)
+            public List<string> ToCString(bool forceUnroll)
             {
-                return "";
+                return new List<string>();
             }
         }
 
@@ -75,9 +95,9 @@ namespace Iviz.MsgsGen
                 return "[# '" + text + "']";
             }
 
-            public string ToCString(bool forceUnroll)
+            public List<string> ToCString(bool forceUnroll)
             {
-                return "//" + text;
+                return new List<string> { "//" + text };
             }
         }
 
@@ -117,13 +137,18 @@ namespace Iviz.MsgsGen
                 "override",
             };
 
-            public Variable(string comment, string classToken, string fieldName)
+            public Variable(string comment, string classToken, string fieldName, string parentClassName)
             {
                 this.comment = comment;
                 this.classToken = classToken;
 
                 rosFieldName = fieldName;
-                this.fieldName = fieldName;
+
+                this.fieldName = Sanitize(fieldName);
+                if (this.fieldName == parentClassName)
+                {
+                    this.fieldName += "_";
+                }
 
                 if (Keywords.Contains(fieldName))
                 {
@@ -150,18 +175,24 @@ namespace Iviz.MsgsGen
                     arraySize = -1;
                 }
 
+                int slashIndex;
                 if (rosClassName == "Header")
                 {
                     rosClassName = "std_msgs/Header";
-                    className = "std_msgs.Header";
+                    className = "StdMsgs.Header";
                 }
                 else if (BuiltInsMaps.TryGetValue(rosClassName, out className))
                 {
                     //
                 }
-                else
+                else if ((slashIndex = rosClassName.IndexOf('/')) != -1)
                 {
-                    className = rosClassName.Replace('/', '.');
+                    string packageName = rosClassName.Substring(0, slashIndex);
+                    string classProper = rosClassName.Substring(slashIndex + 1);
+                    className = Sanitize(packageName) + "." + classProper;
+                } else
+                {
+                    className = rosClassName;
                 }
 
             }
@@ -171,40 +202,46 @@ namespace Iviz.MsgsGen
                 return "['" + classToken + "' '" + rosFieldName + "' # '" + comment + "']";
             }
 
-            public string ToCString(bool forceUnroll)
+            public List<string> ToCString(bool isInStruct)
             {
+
+                List<string> list = new List<string>();
+
+                string attrStr = (fieldName != rosFieldName) ? $"[DataMember (Name = \"{rosFieldName}\")]" : "[DataMember]";
+                //list.Add(attrStr);
+
                 string result;
                 if (arraySize == -1)
                 {
-                    if (forceUnroll)
+                    /*
+                    if (isInStruct)
                     {
-                        result = "[DataMember] public " + className + " " + fieldName + " { get; }";
-                    } else
-                    {
-                        result = "[DataMember] public " + className + " " + fieldName + " { get; set; }";
+                        result = "public " + className + " " + fieldName + " { get; }";
                     }
+                    else
+                    {
+                        result = "public " + className + " " + fieldName + " { get; set; }";
+                    }
+                    */
+                    result = "public " + className + " " + fieldName + " { get; set; }";
                 }
                 else if (arraySize == 0)
                 {
-                    result = "[DataMember] public " + className + "[] " + fieldName + " { get; set; }";
+                    result = "public " + className + "[] " + fieldName + " { get; set; }";
                 }
                 else
                 {
-                    
-                    //if (forceUnroll)
-                    //{
-                    //    result = "public " + className + " " + string.Join(", ", Enumerable.Range(0, arraySize).Select(x => fieldName + "_" + x)) + ";";
-                    //}
-                    //else
-                    //{
-                        result = "[DataMember] public " + className + "[/*" + arraySize + "*/] " + fieldName + " { get; set; }";
-                    //}
+                    result = "public " + className + "[/*" + arraySize + "*/] " + fieldName + " { get; set; }";
                 }
                 if (comment != "")
                 {
                     result += " //" + comment;
                 }
-                return result;
+                //list.Add(result);
+
+                list.Add(attrStr + " " + result);
+
+                return list;
             }
 
             public string GetMd5Entry()
@@ -254,7 +291,7 @@ namespace Iviz.MsgsGen
                 return "['" + className + "' '" + fieldName + "' = '" + value + "' # '" + comment + "']";
             }
 
-            public string ToCString(bool forceUnroll)
+            public List<string> ToCString(bool forceUnroll)
             {
                 string result = "";
                 if (BuiltInsMaps.TryGetValue(className, out string alias))
@@ -268,7 +305,7 @@ namespace Iviz.MsgsGen
                 {
                     result += " //" + comment;
                 }
-                return result;
+                return new List<string> { result };
             }
 
             public string ToMd5String()
@@ -294,9 +331,9 @@ namespace Iviz.MsgsGen
                 return "[XXX '" + text + "']";
             }
 
-            public string ToCString(bool forceUnroll)
+            public List<string> ToCString(bool forceUnroll)
             {
-                return "";
+                return new List<string> ();
             }
         }
 
@@ -309,9 +346,9 @@ namespace Iviz.MsgsGen
                 return "[---]";
             }
 
-            public string ToCString(bool forceUnroll)
+            public List<string> ToCString(bool forceUnroll)
             {
-                return "";
+                return new List<string>();
             }
         }
 
@@ -326,7 +363,7 @@ namespace Iviz.MsgsGen
             return char.IsWhiteSpace(c);
         }
 
-        public static List<IElement> ParseFile(string[] lines)
+        public static List<IElement> ParseFile(string[] lines, string className)
         {
             List<IElement> elements = new List<IElement>();
 
@@ -406,7 +443,7 @@ namespace Iviz.MsgsGen
                         // class identifier
                         if (terms[0] != "=" && terms[1] != "=" && terms[1][0] != '#')
                         {
-                            elements.Add(new Variable("", terms[0], terms[1]));
+                            elements.Add(new Variable("", terms[0], terms[1], className));
                             continue;
                         }
                         break;
@@ -414,7 +451,7 @@ namespace Iviz.MsgsGen
                         // class identifier # comment
                         if (terms[0] != "=" && terms[1] != "=" && terms[2][0] == '#')
                         {
-                            elements.Add(new Variable(terms[2].Substring(1), terms[0], terms[1]));
+                            elements.Add(new Variable(terms[2].Substring(1), terms[0], terms[1], className));
                             continue;
                         }
                         break;

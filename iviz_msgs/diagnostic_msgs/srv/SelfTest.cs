@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.diagnostic_msgs
+namespace Iviz.Msgs.DiagnosticMsgs
 {
-    [DataContract]
+    [DataContract (Name = "diagnostic_msgs/SelfTest")]
     public sealed class SelfTest : IService
     {
         /// <summary> Request message. </summary>
@@ -56,34 +56,34 @@ namespace Iviz.Msgs.diagnostic_msgs
 
     public sealed class SelfTestResponse : IResponse
     {
-        [DataMember] public string id { get; set; }
-        [DataMember] public byte passed { get; set; }
-        [DataMember] public DiagnosticStatus[] status { get; set; }
+        [DataMember (Name = "id")] public string Id { get; set; }
+        [DataMember (Name = "passed")] public byte Passed { get; set; }
+        [DataMember (Name = "status")] public DiagnosticStatus[] Status { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public SelfTestResponse()
         {
-            id = "";
-            status = System.Array.Empty<DiagnosticStatus>();
+            Id = "";
+            Status = System.Array.Empty<DiagnosticStatus>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public SelfTestResponse(string id, byte passed, DiagnosticStatus[] status)
+        public SelfTestResponse(string Id, byte Passed, DiagnosticStatus[] Status)
         {
-            this.id = id ?? throw new System.ArgumentNullException(nameof(id));
-            this.passed = passed;
-            this.status = status ?? throw new System.ArgumentNullException(nameof(status));
+            this.Id = Id;
+            this.Passed = Passed;
+            this.Status = Status;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal SelfTestResponse(Buffer b)
         {
-            this.id = b.DeserializeString();
-            this.passed = b.Deserialize<byte>();
-            this.status = b.DeserializeArray<DiagnosticStatus>();
-            for (int i = 0; i < this.status.Length; i++)
+            Id = b.DeserializeString();
+            Passed = b.Deserialize<byte>();
+            Status = b.DeserializeArray<DiagnosticStatus>();
+            for (int i = 0; i < this.Status.Length; i++)
             {
-                this.status[i] = new DiagnosticStatus(b);
+                Status[i] = new DiagnosticStatus(b);
             }
         }
         
@@ -95,19 +95,19 @@ namespace Iviz.Msgs.diagnostic_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.id);
-            b.Serialize(this.passed);
-            b.SerializeArray(this.status, 0);
+            b.Serialize(this.Id);
+            b.Serialize(this.Passed);
+            b.SerializeArray(Status, 0);
         }
         
         public void Validate()
         {
-            if (id is null) throw new System.NullReferenceException();
-            if (status is null) throw new System.NullReferenceException();
-            for (int i = 0; i < status.Length; i++)
+            if (Id is null) throw new System.NullReferenceException();
+            if (Status is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Status.Length; i++)
             {
-                if (status[i] is null) throw new System.NullReferenceException();
-                status[i].Validate();
+                if (Status[i] is null) throw new System.NullReferenceException();
+                Status[i].Validate();
             }
         }
     
@@ -115,10 +115,10 @@ namespace Iviz.Msgs.diagnostic_msgs
         {
             get {
                 int size = 9;
-                size += BuiltIns.UTF8.GetByteCount(id);
-                for (int i = 0; i < status.Length; i++)
+                size += BuiltIns.UTF8.GetByteCount(Id);
+                for (int i = 0; i < Status.Length; i++)
                 {
-                    size += status[i].RosMessageLength;
+                    size += Status[i].RosMessageLength;
                 }
                 return size;
             }

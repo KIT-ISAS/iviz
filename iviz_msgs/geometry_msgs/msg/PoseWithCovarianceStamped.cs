@@ -1,34 +1,33 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.geometry_msgs
+namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract]
+    [DataContract (Name = "geometry_msgs/PoseWithCovarianceStamped")]
     public sealed class PoseWithCovarianceStamped : IMessage
     {
         // This expresses an estimated pose with a reference coordinate frame and timestamp
-        
-        [DataMember] public std_msgs.Header header { get; set; }
-        [DataMember] public PoseWithCovariance pose { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "pose")] public PoseWithCovariance Pose { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public PoseWithCovarianceStamped()
         {
-            header = new std_msgs.Header();
-            pose = new PoseWithCovariance();
+            Header = new StdMsgs.Header();
+            Pose = new PoseWithCovariance();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public PoseWithCovarianceStamped(std_msgs.Header header, PoseWithCovariance pose)
+        public PoseWithCovarianceStamped(StdMsgs.Header Header, PoseWithCovariance Pose)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.pose = pose ?? throw new System.ArgumentNullException(nameof(pose));
+            this.Header = Header;
+            this.Pose = Pose;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal PoseWithCovarianceStamped(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.pose = new PoseWithCovariance(b);
+            Header = new StdMsgs.Header(b);
+            Pose = new PoseWithCovariance(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -39,23 +38,23 @@ namespace Iviz.Msgs.geometry_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.pose);
+            b.Serialize(Header);
+            b.Serialize(Pose);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (pose is null) throw new System.NullReferenceException();
-            pose.Validate();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (Pose is null) throw new System.NullReferenceException();
+            Pose.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 344;
-                size += header.RosMessageLength;
+                size += Header.RosMessageLength;
                 return size;
             }
         }

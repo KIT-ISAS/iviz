@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.diagnostic_msgs
+namespace Iviz.Msgs.DiagnosticMsgs
 {
-    [DataContract]
+    [DataContract (Name = "diagnostic_msgs/AddDiagnostics")]
     public sealed class AddDiagnostics : IService
     {
         /// <summary> Request message. </summary>
@@ -56,7 +56,6 @@ namespace Iviz.Msgs.diagnostic_msgs
         // and should be used by a loader script or program, not as a standalone service.
         // Information about dynamic addition of analyzers can be found at
         // http://wiki.ros.org/diagnostics/Tutorials/Adding%20Analyzers%20at%20Runtime
-        
         // The load_namespace parameter defines the namespace where parameters for the
         // initialization of analyzers in the diagnostic aggregator have been loaded. The
         // value should be a global name (i.e. /my/name/space), not a relative
@@ -68,24 +67,24 @@ namespace Iviz.Msgs.diagnostic_msgs
         // and http://wiki.ros.org/diagnostics/Tutorials/Using%20the%20GenericAnalyzer
         // for examples of the structure of yaml files which are expected to have been
         // loaded into the namespace.
-        [DataMember] public string load_namespace { get; set; }
+        [DataMember (Name = "load_namespace")] public string LoadNamespace { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public AddDiagnosticsRequest()
         {
-            load_namespace = "";
+            LoadNamespace = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public AddDiagnosticsRequest(string load_namespace)
+        public AddDiagnosticsRequest(string LoadNamespace)
         {
-            this.load_namespace = load_namespace ?? throw new System.ArgumentNullException(nameof(load_namespace));
+            this.LoadNamespace = LoadNamespace;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal AddDiagnosticsRequest(Buffer b)
         {
-            this.load_namespace = b.DeserializeString();
+            LoadNamespace = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -96,19 +95,19 @@ namespace Iviz.Msgs.diagnostic_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.load_namespace);
+            b.Serialize(this.LoadNamespace);
         }
         
         public void Validate()
         {
-            if (load_namespace is null) throw new System.NullReferenceException();
+            if (LoadNamespace is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(load_namespace);
+                size += BuiltIns.UTF8.GetByteCount(LoadNamespace);
                 return size;
             }
         }
@@ -116,34 +115,32 @@ namespace Iviz.Msgs.diagnostic_msgs
 
     public sealed class AddDiagnosticsResponse : IResponse
     {
-        
         // True if diagnostic aggregator was updated with new diagnostics, False
         // otherwise. A false return value means that either there is a bond in the
         // aggregator which already used the requested namespace, or the initialization
         // of analyzers failed.
-        [DataMember] public bool success { get; set; }
-        
+        [DataMember (Name = "success")] public bool Success { get; set; }
         // Message with additional information about the success or failure
-        [DataMember] public string message { get; set; }
+        [DataMember (Name = "message")] public string Message { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public AddDiagnosticsResponse()
         {
-            message = "";
+            Message = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public AddDiagnosticsResponse(bool success, string message)
+        public AddDiagnosticsResponse(bool Success, string Message)
         {
-            this.success = success;
-            this.message = message ?? throw new System.ArgumentNullException(nameof(message));
+            this.Success = Success;
+            this.Message = Message;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal AddDiagnosticsResponse(Buffer b)
         {
-            this.success = b.Deserialize<bool>();
-            this.message = b.DeserializeString();
+            Success = b.Deserialize<bool>();
+            Message = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -154,20 +151,20 @@ namespace Iviz.Msgs.diagnostic_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.success);
-            b.Serialize(this.message);
+            b.Serialize(this.Success);
+            b.Serialize(this.Message);
         }
         
         public void Validate()
         {
-            if (message is null) throw new System.NullReferenceException();
+            if (Message is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 5;
-                size += BuiltIns.UTF8.GetByteCount(message);
+                size += BuiltIns.UTF8.GetByteCount(Message);
                 return size;
             }
         }

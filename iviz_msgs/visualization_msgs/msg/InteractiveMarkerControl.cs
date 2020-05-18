@@ -1,24 +1,19 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.visualization_msgs
+namespace Iviz.Msgs.VisualizationMsgs
 {
-    [DataContract]
+    [DataContract (Name = "visualization_msgs/InteractiveMarkerControl")]
     public sealed class InteractiveMarkerControl : IMessage
     {
         // Represents a control that is to be displayed together with an interactive marker
-        
         // Identifying string for this control.
         // You need to assign a unique value to this to receive feedback from the GUI
         // on what actions the user performs on this control (e.g. a button click).
-        [DataMember] public string name { get; set; }
-        
-        
+        [DataMember (Name = "name")] public string Name { get; set; }
         // Defines the local coordinate frame (relative to the pose of the parent
         // interactive marker) in which is being rotated and translated.
         // Default: Identity
-        [DataMember] public geometry_msgs.Quaternion orientation { get; set; }
-        
-        
+        [DataMember (Name = "orientation")] public GeometryMsgs.Quaternion Orientation { get; set; }
         // Orientation mode: controls how orientation changes.
         // INHERIT: Follow orientation of interactive marker
         // FIXED: Keep orientation fixed at initial state
@@ -26,9 +21,7 @@ namespace Iviz.Msgs.visualization_msgs
         public const byte INHERIT = 0;
         public const byte FIXED = 1;
         public const byte VIEW_FACING = 2;
-        
-        [DataMember] public byte orientation_mode { get; set; }
-        
+        [DataMember (Name = "orientation_mode")] public byte OrientationMode { get; set; }
         // Interaction mode for this control
         // 
         // NONE: This control is only meant for visualization; no context menu.
@@ -52,15 +45,10 @@ namespace Iviz.Msgs.visualization_msgs
         public const byte MOVE_3D = 7;
         public const byte ROTATE_3D = 8;
         public const byte MOVE_ROTATE_3D = 9;
-        
-        [DataMember] public byte interaction_mode { get; set; }
-        
-        
+        [DataMember (Name = "interaction_mode")] public byte InteractionMode { get; set; }
         // If true, the contained markers will also be visible
         // when the gui is not in interactive mode.
-        [DataMember] public bool always_visible { get; set; }
-        
-        
+        [DataMember (Name = "always_visible")] public bool AlwaysVisible { get; set; }
         // Markers to be displayed as custom visual representation.
         // Leave this empty to use the default control handles.
         //
@@ -69,56 +57,52 @@ namespace Iviz.Msgs.visualization_msgs
         //   but will be transformed into the local frame of the interactive marker.
         // - If the header of a marker is empty, its pose will be interpreted as 
         //   relative to the pose of the parent interactive marker.
-        [DataMember] public Marker[] markers { get; set; }
-        
-        
+        [DataMember (Name = "markers")] public Marker[] Markers { get; set; }
         // In VIEW_FACING mode, set this to true if you don't want the markers
         // to be aligned with the camera view point. The markers will show up
         // as in INHERIT mode.
-        [DataMember] public bool independent_marker_orientation { get; set; }
-        
-        
+        [DataMember (Name = "independent_marker_orientation")] public bool IndependentMarkerOrientation { get; set; }
         // Short description (< 40 characters) of what this control does,
         // e.g. "Move the robot". 
         // Default: A generic description based on the interaction mode
-        [DataMember] public string description { get; set; }
+        [DataMember (Name = "description")] public string Description { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarkerControl()
         {
-            name = "";
-            markers = System.Array.Empty<Marker>();
-            description = "";
+            Name = "";
+            Markers = System.Array.Empty<Marker>();
+            Description = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public InteractiveMarkerControl(string name, geometry_msgs.Quaternion orientation, byte orientation_mode, byte interaction_mode, bool always_visible, Marker[] markers, bool independent_marker_orientation, string description)
+        public InteractiveMarkerControl(string Name, GeometryMsgs.Quaternion Orientation, byte OrientationMode, byte InteractionMode, bool AlwaysVisible, Marker[] Markers, bool IndependentMarkerOrientation, string Description)
         {
-            this.name = name ?? throw new System.ArgumentNullException(nameof(name));
-            this.orientation = orientation;
-            this.orientation_mode = orientation_mode;
-            this.interaction_mode = interaction_mode;
-            this.always_visible = always_visible;
-            this.markers = markers ?? throw new System.ArgumentNullException(nameof(markers));
-            this.independent_marker_orientation = independent_marker_orientation;
-            this.description = description ?? throw new System.ArgumentNullException(nameof(description));
+            this.Name = Name;
+            this.Orientation = Orientation;
+            this.OrientationMode = OrientationMode;
+            this.InteractionMode = InteractionMode;
+            this.AlwaysVisible = AlwaysVisible;
+            this.Markers = Markers;
+            this.IndependentMarkerOrientation = IndependentMarkerOrientation;
+            this.Description = Description;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal InteractiveMarkerControl(Buffer b)
         {
-            this.name = b.DeserializeString();
-            this.orientation = new geometry_msgs.Quaternion(b);
-            this.orientation_mode = b.Deserialize<byte>();
-            this.interaction_mode = b.Deserialize<byte>();
-            this.always_visible = b.Deserialize<bool>();
-            this.markers = b.DeserializeArray<Marker>();
-            for (int i = 0; i < this.markers.Length; i++)
+            Name = b.DeserializeString();
+            Orientation = new GeometryMsgs.Quaternion(b);
+            OrientationMode = b.Deserialize<byte>();
+            InteractionMode = b.Deserialize<byte>();
+            AlwaysVisible = b.Deserialize<bool>();
+            Markers = b.DeserializeArray<Marker>();
+            for (int i = 0; i < this.Markers.Length; i++)
             {
-                this.markers[i] = new Marker(b);
+                Markers[i] = new Marker(b);
             }
-            this.independent_marker_orientation = b.Deserialize<bool>();
-            this.description = b.DeserializeString();
+            IndependentMarkerOrientation = b.Deserialize<bool>();
+            Description = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -129,38 +113,38 @@ namespace Iviz.Msgs.visualization_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.name);
-            b.Serialize(this.orientation);
-            b.Serialize(this.orientation_mode);
-            b.Serialize(this.interaction_mode);
-            b.Serialize(this.always_visible);
-            b.SerializeArray(this.markers, 0);
-            b.Serialize(this.independent_marker_orientation);
-            b.Serialize(this.description);
+            b.Serialize(this.Name);
+            b.Serialize(Orientation);
+            b.Serialize(this.OrientationMode);
+            b.Serialize(this.InteractionMode);
+            b.Serialize(this.AlwaysVisible);
+            b.SerializeArray(Markers, 0);
+            b.Serialize(this.IndependentMarkerOrientation);
+            b.Serialize(this.Description);
         }
         
         public void Validate()
         {
-            if (name is null) throw new System.NullReferenceException();
-            if (markers is null) throw new System.NullReferenceException();
-            for (int i = 0; i < markers.Length; i++)
+            if (Name is null) throw new System.NullReferenceException();
+            if (Markers is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Markers.Length; i++)
             {
-                if (markers[i] is null) throw new System.NullReferenceException();
-                markers[i].Validate();
+                if (Markers[i] is null) throw new System.NullReferenceException();
+                Markers[i].Validate();
             }
-            if (description is null) throw new System.NullReferenceException();
+            if (Description is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 48;
-                size += BuiltIns.UTF8.GetByteCount(name);
-                for (int i = 0; i < markers.Length; i++)
+                size += BuiltIns.UTF8.GetByteCount(Name);
+                for (int i = 0; i < Markers.Length; i++)
                 {
-                    size += markers[i].RosMessageLength;
+                    size += Markers[i].RosMessageLength;
                 }
-                size += BuiltIns.UTF8.GetByteCount(description);
+                size += BuiltIns.UTF8.GetByteCount(Description);
                 return size;
             }
         }

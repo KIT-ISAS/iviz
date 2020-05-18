@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.grid_map_msgs
+namespace Iviz.Msgs.GridMapMsgs
 {
-    [DataContract]
+    [DataContract (Name = "grid_map_msgs/ProcessFile")]
     public sealed class ProcessFile : IService
     {
         /// <summary> Request message. </summary>
@@ -53,31 +53,29 @@ namespace Iviz.Msgs.grid_map_msgs
     public sealed class ProcessFileRequest : IRequest
     {
         // Absolute file path.
-        [DataMember] public string file_path { get; set; }
-        
+        [DataMember (Name = "file_path")] public string FilePath { get; set; }
         // For ROS bags: topic name that should be processed (optional).
-        [DataMember] public string topic_name { get; set; }
-        
+        [DataMember (Name = "topic_name")] public string TopicName { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ProcessFileRequest()
         {
-            file_path = "";
-            topic_name = "";
+            FilePath = "";
+            TopicName = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public ProcessFileRequest(string file_path, string topic_name)
+        public ProcessFileRequest(string FilePath, string TopicName)
         {
-            this.file_path = file_path ?? throw new System.ArgumentNullException(nameof(file_path));
-            this.topic_name = topic_name ?? throw new System.ArgumentNullException(nameof(topic_name));
+            this.FilePath = FilePath;
+            this.TopicName = TopicName;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal ProcessFileRequest(Buffer b)
         {
-            this.file_path = b.DeserializeString();
-            this.topic_name = b.DeserializeString();
+            FilePath = b.DeserializeString();
+            TopicName = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -88,22 +86,22 @@ namespace Iviz.Msgs.grid_map_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.file_path);
-            b.Serialize(this.topic_name);
+            b.Serialize(this.FilePath);
+            b.Serialize(this.TopicName);
         }
         
         public void Validate()
         {
-            if (file_path is null) throw new System.NullReferenceException();
-            if (topic_name is null) throw new System.NullReferenceException();
+            if (FilePath is null) throw new System.NullReferenceException();
+            if (TopicName is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 8;
-                size += BuiltIns.UTF8.GetByteCount(file_path);
-                size += BuiltIns.UTF8.GetByteCount(topic_name);
+                size += BuiltIns.UTF8.GetByteCount(FilePath);
+                size += BuiltIns.UTF8.GetByteCount(TopicName);
                 return size;
             }
         }
@@ -111,9 +109,8 @@ namespace Iviz.Msgs.grid_map_msgs
 
     public sealed class ProcessFileResponse : IResponse
     {
-        
         // True if file processing was successful.
-        [DataMember] public bool success { get; set; }
+        [DataMember (Name = "success")] public bool Success { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ProcessFileResponse()
@@ -121,15 +118,15 @@ namespace Iviz.Msgs.grid_map_msgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public ProcessFileResponse(bool success)
+        public ProcessFileResponse(bool Success)
         {
-            this.success = success;
+            this.Success = Success;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal ProcessFileResponse(Buffer b)
         {
-            this.success = b.Deserialize<bool>();
+            Success = b.Deserialize<bool>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -140,7 +137,7 @@ namespace Iviz.Msgs.grid_map_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.success);
+            b.Serialize(this.Success);
         }
         
         public void Validate()

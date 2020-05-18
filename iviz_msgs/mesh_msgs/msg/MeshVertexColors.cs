@@ -1,29 +1,29 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.mesh_msgs
+namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract]
+    [DataContract (Name = "mesh_msgs/MeshVertexColors")]
     public sealed class MeshVertexColors : IMessage
     {
         // Mesh Attribute Message
-        [DataMember] public std_msgs.ColorRGBA[] vertex_colors { get; set; }
+        [DataMember (Name = "vertex_colors")] public StdMsgs.ColorRGBA[] VertexColors { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshVertexColors()
         {
-            vertex_colors = System.Array.Empty<std_msgs.ColorRGBA>();
+            VertexColors = System.Array.Empty<StdMsgs.ColorRGBA>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MeshVertexColors(std_msgs.ColorRGBA[] vertex_colors)
+        public MeshVertexColors(StdMsgs.ColorRGBA[] VertexColors)
         {
-            this.vertex_colors = vertex_colors ?? throw new System.ArgumentNullException(nameof(vertex_colors));
+            this.VertexColors = VertexColors;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal MeshVertexColors(Buffer b)
         {
-            this.vertex_colors = b.DeserializeStructArray<std_msgs.ColorRGBA>();
+            VertexColors = b.DeserializeStructArray<StdMsgs.ColorRGBA>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -34,19 +34,19 @@ namespace Iviz.Msgs.mesh_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeStructArray(this.vertex_colors, 0);
+            b.SerializeStructArray(VertexColors, 0);
         }
         
         public void Validate()
         {
-            if (vertex_colors is null) throw new System.NullReferenceException();
+            if (VertexColors is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += 16 * vertex_colors.Length;
+                size += 16 * VertexColors.Length;
                 return size;
             }
         }

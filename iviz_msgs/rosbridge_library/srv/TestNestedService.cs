@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosbridge_library
+namespace Iviz.Msgs.RosbridgeLibrary
 {
-    [DataContract]
+    [DataContract (Name = "rosbridge_library/TestNestedService")]
     public sealed class TestNestedService : IService
     {
         /// <summary> Request message. </summary>
@@ -53,7 +53,7 @@ namespace Iviz.Msgs.rosbridge_library
     public sealed class TestNestedServiceRequest : IRequest
     {
         //request definition
-        [DataMember] public geometry_msgs.Pose pose { get; set; }
+        [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestNestedServiceRequest()
@@ -61,15 +61,15 @@ namespace Iviz.Msgs.rosbridge_library
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TestNestedServiceRequest(geometry_msgs.Pose pose)
+        public TestNestedServiceRequest(GeometryMsgs.Pose Pose)
         {
-            this.pose = pose;
+            this.Pose = Pose;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal TestNestedServiceRequest(Buffer b)
         {
-            this.pose = new geometry_msgs.Pose(b);
+            Pose = new GeometryMsgs.Pose(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -80,7 +80,7 @@ namespace Iviz.Msgs.rosbridge_library
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.pose);
+            b.Serialize(Pose);
         }
         
         public void Validate()
@@ -93,24 +93,24 @@ namespace Iviz.Msgs.rosbridge_library
     public sealed class TestNestedServiceResponse : IResponse
     {
         //response definition
-        [DataMember] public std_msgs.Float64 data { get; set; }
+        [DataMember (Name = "data")] public StdMsgs.Float64 Data { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestNestedServiceResponse()
         {
-            data = new std_msgs.Float64();
+            Data = new StdMsgs.Float64();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TestNestedServiceResponse(std_msgs.Float64 data)
+        public TestNestedServiceResponse(StdMsgs.Float64 Data)
         {
-            this.data = data ?? throw new System.ArgumentNullException(nameof(data));
+            this.Data = Data;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal TestNestedServiceResponse(Buffer b)
         {
-            this.data = new std_msgs.Float64(b);
+            Data = new StdMsgs.Float64(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -121,13 +121,13 @@ namespace Iviz.Msgs.rosbridge_library
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.data);
+            b.Serialize(Data);
         }
         
         public void Validate()
         {
-            if (data is null) throw new System.NullReferenceException();
-            data.Validate();
+            if (Data is null) throw new System.NullReferenceException();
+            Data.Validate();
         }
     
         public int RosMessageLength => 8;

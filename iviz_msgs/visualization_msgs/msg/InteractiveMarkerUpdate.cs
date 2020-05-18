@@ -1,18 +1,16 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.visualization_msgs
+namespace Iviz.Msgs.VisualizationMsgs
 {
-    [DataContract]
+    [DataContract (Name = "visualization_msgs/InteractiveMarkerUpdate")]
     public sealed class InteractiveMarkerUpdate : IMessage
     {
         // Identifying string. Must be unique in the topic namespace
         // that this server works on.
-        [DataMember] public string server_id { get; set; }
-        
+        [DataMember (Name = "server_id")] public string ServerId { get; set; }
         // Sequence number.
         // The client will use this to detect if it has missed an update.
-        [DataMember] public ulong seq_num { get; set; }
-        
+        [DataMember (Name = "seq_num")] public ulong SeqNum { get; set; }
         // Type holds the purpose of this message.  It must be one of UPDATE or KEEP_ALIVE.
         // UPDATE: Incremental update to previous state. 
         //         The sequence number must be 1 higher than for
@@ -22,58 +20,53 @@ namespace Iviz.Msgs.visualization_msgs
         //             No payload data should be filled out (markers, poses, or erases).
         public const byte KEEP_ALIVE = 0;
         public const byte UPDATE = 1;
-        
-        [DataMember] public byte type { get; set; }
-        
+        [DataMember (Name = "type")] public byte Type { get; set; }
         //Note: No guarantees on the order of processing.
         //      Contents must be kept consistent by sender.
-        
         //Markers to be added or updated
-        [DataMember] public InteractiveMarker[] markers { get; set; }
-        
+        [DataMember (Name = "markers")] public InteractiveMarker[] Markers { get; set; }
         //Poses of markers that should be moved
-        [DataMember] public InteractiveMarkerPose[] poses { get; set; }
-        
+        [DataMember (Name = "poses")] public InteractiveMarkerPose[] Poses { get; set; }
         //Names of markers to be erased
-        [DataMember] public string[] erases { get; set; }
+        [DataMember (Name = "erases")] public string[] Erases { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarkerUpdate()
         {
-            server_id = "";
-            markers = System.Array.Empty<InteractiveMarker>();
-            poses = System.Array.Empty<InteractiveMarkerPose>();
-            erases = System.Array.Empty<string>();
+            ServerId = "";
+            Markers = System.Array.Empty<InteractiveMarker>();
+            Poses = System.Array.Empty<InteractiveMarkerPose>();
+            Erases = System.Array.Empty<string>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public InteractiveMarkerUpdate(string server_id, ulong seq_num, byte type, InteractiveMarker[] markers, InteractiveMarkerPose[] poses, string[] erases)
+        public InteractiveMarkerUpdate(string ServerId, ulong SeqNum, byte Type, InteractiveMarker[] Markers, InteractiveMarkerPose[] Poses, string[] Erases)
         {
-            this.server_id = server_id ?? throw new System.ArgumentNullException(nameof(server_id));
-            this.seq_num = seq_num;
-            this.type = type;
-            this.markers = markers ?? throw new System.ArgumentNullException(nameof(markers));
-            this.poses = poses ?? throw new System.ArgumentNullException(nameof(poses));
-            this.erases = erases ?? throw new System.ArgumentNullException(nameof(erases));
+            this.ServerId = ServerId;
+            this.SeqNum = SeqNum;
+            this.Type = Type;
+            this.Markers = Markers;
+            this.Poses = Poses;
+            this.Erases = Erases;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal InteractiveMarkerUpdate(Buffer b)
         {
-            this.server_id = b.DeserializeString();
-            this.seq_num = b.Deserialize<ulong>();
-            this.type = b.Deserialize<byte>();
-            this.markers = b.DeserializeArray<InteractiveMarker>();
-            for (int i = 0; i < this.markers.Length; i++)
+            ServerId = b.DeserializeString();
+            SeqNum = b.Deserialize<ulong>();
+            Type = b.Deserialize<byte>();
+            Markers = b.DeserializeArray<InteractiveMarker>();
+            for (int i = 0; i < this.Markers.Length; i++)
             {
-                this.markers[i] = new InteractiveMarker(b);
+                Markers[i] = new InteractiveMarker(b);
             }
-            this.poses = b.DeserializeArray<InteractiveMarkerPose>();
-            for (int i = 0; i < this.poses.Length; i++)
+            Poses = b.DeserializeArray<InteractiveMarkerPose>();
+            for (int i = 0; i < this.Poses.Length; i++)
             {
-                this.poses[i] = new InteractiveMarkerPose(b);
+                Poses[i] = new InteractiveMarkerPose(b);
             }
-            this.erases = b.DeserializeStringArray();
+            Erases = b.DeserializeStringArray();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -84,33 +77,33 @@ namespace Iviz.Msgs.visualization_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.server_id);
-            b.Serialize(this.seq_num);
-            b.Serialize(this.type);
-            b.SerializeArray(this.markers, 0);
-            b.SerializeArray(this.poses, 0);
-            b.SerializeArray(this.erases, 0);
+            b.Serialize(this.ServerId);
+            b.Serialize(this.SeqNum);
+            b.Serialize(this.Type);
+            b.SerializeArray(Markers, 0);
+            b.SerializeArray(Poses, 0);
+            b.SerializeArray(Erases, 0);
         }
         
         public void Validate()
         {
-            if (server_id is null) throw new System.NullReferenceException();
-            if (markers is null) throw new System.NullReferenceException();
-            for (int i = 0; i < markers.Length; i++)
+            if (ServerId is null) throw new System.NullReferenceException();
+            if (Markers is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Markers.Length; i++)
             {
-                if (markers[i] is null) throw new System.NullReferenceException();
-                markers[i].Validate();
+                if (Markers[i] is null) throw new System.NullReferenceException();
+                Markers[i].Validate();
             }
-            if (poses is null) throw new System.NullReferenceException();
-            for (int i = 0; i < poses.Length; i++)
+            if (Poses is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Poses.Length; i++)
             {
-                if (poses[i] is null) throw new System.NullReferenceException();
-                poses[i].Validate();
+                if (Poses[i] is null) throw new System.NullReferenceException();
+                Poses[i].Validate();
             }
-            if (erases is null) throw new System.NullReferenceException();
-            for (int i = 0; i < erases.Length; i++)
+            if (Erases is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Erases.Length; i++)
             {
-                if (erases[i] is null) throw new System.NullReferenceException();
+                if (Erases[i] is null) throw new System.NullReferenceException();
             }
         }
     
@@ -118,19 +111,19 @@ namespace Iviz.Msgs.visualization_msgs
         {
             get {
                 int size = 25;
-                size += BuiltIns.UTF8.GetByteCount(server_id);
-                for (int i = 0; i < markers.Length; i++)
+                size += BuiltIns.UTF8.GetByteCount(ServerId);
+                for (int i = 0; i < Markers.Length; i++)
                 {
-                    size += markers[i].RosMessageLength;
+                    size += Markers[i].RosMessageLength;
                 }
-                for (int i = 0; i < poses.Length; i++)
+                for (int i = 0; i < Poses.Length; i++)
                 {
-                    size += poses[i].RosMessageLength;
+                    size += Poses[i].RosMessageLength;
                 }
-                size += 4 * erases.Length;
-                for (int i = 0; i < erases.Length; i++)
+                size += 4 * Erases.Length;
+                for (int i = 0; i < Erases.Length; i++)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(erases[i]);
+                    size += BuiltIns.UTF8.GetByteCount(Erases[i]);
                 }
                 return size;
             }

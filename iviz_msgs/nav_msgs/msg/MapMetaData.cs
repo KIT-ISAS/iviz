@@ -1,23 +1,22 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.nav_msgs
+namespace Iviz.Msgs.NavMsgs
 {
-    [DataContract]
+    [DataContract (Name = "nav_msgs/MapMetaData")]
     public sealed class MapMetaData : IMessage
     {
         // This hold basic information about the characterists of the OccupancyGrid
-        
         // The time at which the map was loaded
-        [DataMember] public time map_load_time { get; set; }
+        [DataMember (Name = "map_load_time")] public time MapLoadTime { get; set; }
         // The map resolution [m/cell]
-        [DataMember] public float resolution { get; set; }
+        [DataMember (Name = "resolution")] public float Resolution { get; set; }
         // Map width [cells]
-        [DataMember] public uint width { get; set; }
+        [DataMember (Name = "width")] public uint Width { get; set; }
         // Map height [cells]
-        [DataMember] public uint height { get; set; }
+        [DataMember (Name = "height")] public uint Height { get; set; }
         // The origin of the map [m, m, rad].  This is the real-world pose of the
         // cell (0,0) in the map.
-        [DataMember] public geometry_msgs.Pose origin { get; set; }
+        [DataMember (Name = "origin")] public GeometryMsgs.Pose Origin { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MapMetaData()
@@ -25,23 +24,23 @@ namespace Iviz.Msgs.nav_msgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MapMetaData(time map_load_time, float resolution, uint width, uint height, geometry_msgs.Pose origin)
+        public MapMetaData(time MapLoadTime, float Resolution, uint Width, uint Height, GeometryMsgs.Pose Origin)
         {
-            this.map_load_time = map_load_time;
-            this.resolution = resolution;
-            this.width = width;
-            this.height = height;
-            this.origin = origin;
+            this.MapLoadTime = MapLoadTime;
+            this.Resolution = Resolution;
+            this.Width = Width;
+            this.Height = Height;
+            this.Origin = Origin;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal MapMetaData(Buffer b)
         {
-            this.map_load_time = b.Deserialize<time>();
-            this.resolution = b.Deserialize<float>();
-            this.width = b.Deserialize<uint>();
-            this.height = b.Deserialize<uint>();
-            this.origin = new geometry_msgs.Pose(b);
+            MapLoadTime = b.Deserialize<time>();
+            Resolution = b.Deserialize<float>();
+            Width = b.Deserialize<uint>();
+            Height = b.Deserialize<uint>();
+            Origin = new GeometryMsgs.Pose(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -52,11 +51,11 @@ namespace Iviz.Msgs.nav_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.map_load_time);
-            b.Serialize(this.resolution);
-            b.Serialize(this.width);
-            b.Serialize(this.height);
-            b.Serialize(this.origin);
+            b.Serialize(this.MapLoadTime);
+            b.Serialize(this.Resolution);
+            b.Serialize(this.Width);
+            b.Serialize(this.Height);
+            b.Serialize(Origin);
         }
         
         public void Validate()

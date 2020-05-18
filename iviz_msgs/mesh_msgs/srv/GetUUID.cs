@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.mesh_msgs
+namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract]
+    [DataContract (Name = "mesh_msgs/GetUUID")]
     public sealed class GetUUID : IService
     {
         /// <summary> Request message. </summary>
@@ -56,24 +56,24 @@ namespace Iviz.Msgs.mesh_msgs
 
     public sealed class GetUUIDResponse : IResponse
     {
-        [DataMember] public string uuid { get; set; }
+        [DataMember (Name = "uuid")] public string Uuid { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetUUIDResponse()
         {
-            uuid = "";
+            Uuid = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GetUUIDResponse(string uuid)
+        public GetUUIDResponse(string Uuid)
         {
-            this.uuid = uuid ?? throw new System.ArgumentNullException(nameof(uuid));
+            this.Uuid = Uuid;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal GetUUIDResponse(Buffer b)
         {
-            this.uuid = b.DeserializeString();
+            Uuid = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -84,19 +84,19 @@ namespace Iviz.Msgs.mesh_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.uuid);
+            b.Serialize(this.Uuid);
         }
         
         public void Validate()
         {
-            if (uuid is null) throw new System.NullReferenceException();
+            if (Uuid is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(uuid);
+                size += BuiltIns.UTF8.GetByteCount(Uuid);
                 return size;
             }
         }

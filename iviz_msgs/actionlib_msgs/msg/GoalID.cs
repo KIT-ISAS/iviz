@@ -1,39 +1,37 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.actionlib_msgs
+namespace Iviz.Msgs.ActionlibMsgs
 {
-    [DataContract]
+    [DataContract (Name = "actionlib_msgs/GoalID")]
     public sealed class GoalID : IMessage
     {
         // The stamp should store the time at which this goal was requested.
         // It is used by an action server when it tries to preempt all
         // goals that were requested before a certain time
-        [DataMember] public time stamp { get; set; }
-        
+        [DataMember (Name = "stamp")] public time Stamp { get; set; }
         // The id provides a way to associate feedback and
         // result message with specific goal requests. The id
         // specified must be unique.
-        [DataMember] public string id { get; set; }
-        
+        [DataMember (Name = "id")] public string Id { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GoalID()
         {
-            id = "";
+            Id = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GoalID(time stamp, string id)
+        public GoalID(time Stamp, string Id)
         {
-            this.stamp = stamp;
-            this.id = id ?? throw new System.ArgumentNullException(nameof(id));
+            this.Stamp = Stamp;
+            this.Id = Id;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal GoalID(Buffer b)
         {
-            this.stamp = b.Deserialize<time>();
-            this.id = b.DeserializeString();
+            Stamp = b.Deserialize<time>();
+            Id = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -44,20 +42,20 @@ namespace Iviz.Msgs.actionlib_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.stamp);
-            b.Serialize(this.id);
+            b.Serialize(this.Stamp);
+            b.Serialize(this.Id);
         }
         
         public void Validate()
         {
-            if (id is null) throw new System.NullReferenceException();
+            if (Id is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 12;
-                size += BuiltIns.UTF8.GetByteCount(id);
+                size += BuiltIns.UTF8.GetByteCount(Id);
                 return size;
             }
         }

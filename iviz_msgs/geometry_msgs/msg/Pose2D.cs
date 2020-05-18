@@ -1,23 +1,18 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.geometry_msgs
+namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract]
+    [DataContract (Name = "geometry_msgs/Pose2D")]
     public sealed class Pose2D : IMessage
     {
         // Deprecated
         // Please use the full 3D pose.
-        
         // In general our recommendation is to use a full 3D representation of everything and for 2D specific applications make the appropriate projections into the plane for their calculations but optimally will preserve the 3D information during processing.
-        
         // If we have parallel copies of 2D datatypes every UI and other pipeline will end up needing to have dual interfaces to plot everything. And you will end up with not being able to use 3D tools for 2D use cases even if they're completely valid, as you'd have to reimplement it with different inputs and outputs. It's not particularly hard to plot the 2D pose or compute the yaw error for the Pose message and there are already tools and libraries that can do this for you.
-        
-        
         // This expresses a position and orientation on a 2D manifold.
-        
-        [DataMember] public double x { get; set; }
-        [DataMember] public double y { get; set; }
-        [DataMember] public double theta { get; set; }
+        [DataMember (Name = "x")] public double X { get; set; }
+        [DataMember (Name = "y")] public double Y { get; set; }
+        [DataMember (Name = "theta")] public double Theta { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Pose2D()
@@ -25,19 +20,19 @@ namespace Iviz.Msgs.geometry_msgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Pose2D(double x, double y, double theta)
+        public Pose2D(double X, double Y, double Theta)
         {
-            this.x = x;
-            this.y = y;
-            this.theta = theta;
+            this.X = X;
+            this.Y = Y;
+            this.Theta = Theta;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal Pose2D(Buffer b)
         {
-            this.x = b.Deserialize<double>();
-            this.y = b.Deserialize<double>();
-            this.theta = b.Deserialize<double>();
+            X = b.Deserialize<double>();
+            Y = b.Deserialize<double>();
+            Theta = b.Deserialize<double>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -48,9 +43,9 @@ namespace Iviz.Msgs.geometry_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.x);
-            b.Serialize(this.y);
-            b.Serialize(this.theta);
+            b.Serialize(this.X);
+            b.Serialize(this.Y);
+            b.Serialize(this.Theta);
         }
         
         public void Validate()

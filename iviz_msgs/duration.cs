@@ -1,29 +1,31 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 
 namespace Iviz.Msgs
 {
+    [DataContract]
     [StructLayout(LayoutKind.Sequential)]
     public readonly struct duration : IEquatable<duration>
     {
-        public int secs { get; }
-        public int nsecs { get; }
+        [DataMember] public int Secs { get; }
+        [DataMember] public int Nsecs { get; }
 
         public duration(int secs, int nsecs)
         {
-            this.secs = secs;
-            this.nsecs = nsecs;
+            Secs = secs;
+            Nsecs = nsecs;
         }
 
         public duration(in TimeSpan span)
         {
-            secs = span.Seconds;
-            nsecs = (int)(span.Ticks % 10000000) * 100;
+            Secs = span.Seconds;
+            Nsecs = (int)(span.Ticks % 10000000) * 100;
         }
 
         public TimeSpan ToTimeSpan()
         {
-            return TimeSpan.FromSeconds(secs) + TimeSpan.FromTicks(nsecs / 100);
+            return TimeSpan.FromSeconds(Secs) + TimeSpan.FromTicks(Nsecs / 100);
         }
 
         public override bool Equals(object obj)
@@ -33,12 +35,12 @@ namespace Iviz.Msgs
 
         public override int GetHashCode()
         {
-            return (secs, nsecs).GetHashCode();
+            return (Secs, Nsecs).GetHashCode();
         }
 
         public static bool operator ==(duration left, duration right)
         {
-            return left.nsecs == right.nsecs && left.secs == right.secs;
+            return left.Nsecs == right.Nsecs && left.Secs == right.Secs;
         }
 
         public static bool operator !=(duration left, duration right)
@@ -50,6 +52,8 @@ namespace Iviz.Msgs
         {
             return this == other;
         }
+
+        public bool IsZero => Secs == 0 && Nsecs == 0;
     }
 
 }

@@ -1,32 +1,31 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.sensor_msgs
+namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract]
+    [DataContract (Name = "sensor_msgs/LaserEcho")]
     public sealed class LaserEcho : IMessage
     {
         // This message is a submessage of MultiEchoLaserScan and is not intended
         // to be used separately.
-        
-        [DataMember] public float[] echoes { get; set; } // Multiple values of ranges or intensities.
+        [DataMember (Name = "echoes")] public float[] Echoes { get; set; } // Multiple values of ranges or intensities.
         // Each array represents data from the same angle increment.
     
         /// <summary> Constructor for empty message. </summary>
         public LaserEcho()
         {
-            echoes = System.Array.Empty<float>();
+            Echoes = System.Array.Empty<float>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public LaserEcho(float[] echoes)
+        public LaserEcho(float[] Echoes)
         {
-            this.echoes = echoes ?? throw new System.ArgumentNullException(nameof(echoes));
+            this.Echoes = Echoes;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal LaserEcho(Buffer b)
         {
-            this.echoes = b.DeserializeStructArray<float>();
+            Echoes = b.DeserializeStructArray<float>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -37,19 +36,19 @@ namespace Iviz.Msgs.sensor_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeStructArray(this.echoes, 0);
+            b.SerializeStructArray(Echoes, 0);
         }
         
         public void Validate()
         {
-            if (echoes is null) throw new System.NullReferenceException();
+            if (Echoes is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += 4 * echoes.Length;
+                size += 4 * Echoes.Length;
                 return size;
             }
         }

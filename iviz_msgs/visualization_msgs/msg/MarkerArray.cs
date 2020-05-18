@@ -1,31 +1,31 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.visualization_msgs
+namespace Iviz.Msgs.VisualizationMsgs
 {
-    [DataContract]
+    [DataContract (Name = "visualization_msgs/MarkerArray")]
     public sealed class MarkerArray : IMessage
     {
-        [DataMember] public Marker[] markers { get; set; }
+        [DataMember (Name = "markers")] public Marker[] Markers { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MarkerArray()
         {
-            markers = System.Array.Empty<Marker>();
+            Markers = System.Array.Empty<Marker>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MarkerArray(Marker[] markers)
+        public MarkerArray(Marker[] Markers)
         {
-            this.markers = markers ?? throw new System.ArgumentNullException(nameof(markers));
+            this.Markers = Markers;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal MarkerArray(Buffer b)
         {
-            this.markers = b.DeserializeArray<Marker>();
-            for (int i = 0; i < this.markers.Length; i++)
+            Markers = b.DeserializeArray<Marker>();
+            for (int i = 0; i < this.Markers.Length; i++)
             {
-                this.markers[i] = new Marker(b);
+                Markers[i] = new Marker(b);
             }
         }
         
@@ -37,16 +37,16 @@ namespace Iviz.Msgs.visualization_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeArray(this.markers, 0);
+            b.SerializeArray(Markers, 0);
         }
         
         public void Validate()
         {
-            if (markers is null) throw new System.NullReferenceException();
-            for (int i = 0; i < markers.Length; i++)
+            if (Markers is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Markers.Length; i++)
             {
-                if (markers[i] is null) throw new System.NullReferenceException();
-                markers[i].Validate();
+                if (Markers[i] is null) throw new System.NullReferenceException();
+                Markers[i].Validate();
             }
         }
     
@@ -54,9 +54,9 @@ namespace Iviz.Msgs.visualization_msgs
         {
             get {
                 int size = 4;
-                for (int i = 0; i < markers.Length; i++)
+                for (int i = 0; i < Markers.Length; i++)
                 {
-                    size += markers[i].RosMessageLength;
+                    size += Markers[i].RosMessageLength;
                 }
                 return size;
             }

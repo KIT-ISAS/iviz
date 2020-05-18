@@ -1,11 +1,11 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.geometry_msgs
+namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract]
+    [DataContract (Name = "geometry_msgs/Point32")]
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct Point32 : IMessage
+    public struct Point32 : IMessage
     {
         // This contains the position of a point in free space(with 32 bits of precision).
         // It is recommeded to use Point wherever possible instead of Point32.  
@@ -14,17 +14,16 @@ namespace Iviz.Msgs.geometry_msgs
         //
         // This message is designed to take up less space when sending
         // lots of points at once, as in the case of a PointCloud.  
-        
-        [DataMember] public float x { get; }
-        [DataMember] public float y { get; }
-        [DataMember] public float z { get; }
+        [DataMember (Name = "x")] public float X { get; set; }
+        [DataMember (Name = "y")] public float Y { get; set; }
+        [DataMember (Name = "z")] public float Z { get; set; }
     
         /// <summary> Explicit constructor. </summary>
-        public Point32(float x, float y, float z)
+        public Point32(float X, float Y, float Z)
         {
-            this.x = x;
-            this.y = y;
-            this.z = z;
+            this.X = X;
+            this.Y = Y;
+            this.Z = Z;
         }
         
         /// <summary> Constructor with buffer. </summary>

@@ -1,33 +1,33 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.geometry_msgs
+namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract]
+    [DataContract (Name = "geometry_msgs/PolygonStamped")]
     public sealed class PolygonStamped : IMessage
     {
         // This represents a Polygon with reference coordinate frame and timestamp
-        [DataMember] public std_msgs.Header header { get; set; }
-        [DataMember] public Polygon polygon { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "polygon")] public Polygon Polygon { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public PolygonStamped()
         {
-            header = new std_msgs.Header();
-            polygon = new Polygon();
+            Header = new StdMsgs.Header();
+            Polygon = new Polygon();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public PolygonStamped(std_msgs.Header header, Polygon polygon)
+        public PolygonStamped(StdMsgs.Header Header, Polygon Polygon)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.polygon = polygon ?? throw new System.ArgumentNullException(nameof(polygon));
+            this.Header = Header;
+            this.Polygon = Polygon;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal PolygonStamped(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.polygon = new Polygon(b);
+            Header = new StdMsgs.Header(b);
+            Polygon = new Polygon(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -38,24 +38,24 @@ namespace Iviz.Msgs.geometry_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.polygon);
+            b.Serialize(Header);
+            b.Serialize(Polygon);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (polygon is null) throw new System.NullReferenceException();
-            polygon.Validate();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (Polygon is null) throw new System.NullReferenceException();
+            Polygon.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 0;
-                size += header.RosMessageLength;
-                size += polygon.RosMessageLength;
+                size += Header.RosMessageLength;
+                size += Polygon.RosMessageLength;
                 return size;
             }
         }

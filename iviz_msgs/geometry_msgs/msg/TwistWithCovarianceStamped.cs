@@ -1,33 +1,33 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.geometry_msgs
+namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract]
+    [DataContract (Name = "geometry_msgs/TwistWithCovarianceStamped")]
     public sealed class TwistWithCovarianceStamped : IMessage
     {
         // This represents an estimated twist with reference coordinate frame and timestamp.
-        [DataMember] public std_msgs.Header header { get; set; }
-        [DataMember] public TwistWithCovariance twist { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "twist")] public TwistWithCovariance Twist { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TwistWithCovarianceStamped()
         {
-            header = new std_msgs.Header();
-            twist = new TwistWithCovariance();
+            Header = new StdMsgs.Header();
+            Twist = new TwistWithCovariance();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TwistWithCovarianceStamped(std_msgs.Header header, TwistWithCovariance twist)
+        public TwistWithCovarianceStamped(StdMsgs.Header Header, TwistWithCovariance Twist)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.twist = twist ?? throw new System.ArgumentNullException(nameof(twist));
+            this.Header = Header;
+            this.Twist = Twist;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal TwistWithCovarianceStamped(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.twist = new TwistWithCovariance(b);
+            Header = new StdMsgs.Header(b);
+            Twist = new TwistWithCovariance(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -38,23 +38,23 @@ namespace Iviz.Msgs.geometry_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.twist);
+            b.Serialize(Header);
+            b.Serialize(Twist);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (twist is null) throw new System.NullReferenceException();
-            twist.Validate();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (Twist is null) throw new System.NullReferenceException();
+            Twist.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 336;
-                size += header.RosMessageLength;
+                size += Header.RosMessageLength;
                 return size;
             }
         }

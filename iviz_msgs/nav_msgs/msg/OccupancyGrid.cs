@@ -1,44 +1,41 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.nav_msgs
+namespace Iviz.Msgs.NavMsgs
 {
-    [DataContract]
+    [DataContract (Name = "nav_msgs/OccupancyGrid")]
     public sealed class OccupancyGrid : IMessage
     {
         // This represents a 2-D grid map, in which each cell represents the probability of
         // occupancy.
-        
-        [DataMember] public std_msgs.Header header { get; set; }
-        
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         //MetaData for the map
-        [DataMember] public MapMetaData info { get; set; }
-        
+        [DataMember (Name = "info")] public MapMetaData Info { get; set; }
         // The map data, in row-major order, starting with (0,0).  Occupancy
         // probabilities are in the range [0,100].  Unknown is -1.
-        [DataMember] public sbyte[] data { get; set; }
+        [DataMember (Name = "data")] public sbyte[] Data { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public OccupancyGrid()
         {
-            header = new std_msgs.Header();
-            info = new MapMetaData();
-            data = System.Array.Empty<sbyte>();
+            Header = new StdMsgs.Header();
+            Info = new MapMetaData();
+            Data = System.Array.Empty<sbyte>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public OccupancyGrid(std_msgs.Header header, MapMetaData info, sbyte[] data)
+        public OccupancyGrid(StdMsgs.Header Header, MapMetaData Info, sbyte[] Data)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.info = info ?? throw new System.ArgumentNullException(nameof(info));
-            this.data = data ?? throw new System.ArgumentNullException(nameof(data));
+            this.Header = Header;
+            this.Info = Info;
+            this.Data = Data;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal OccupancyGrid(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.info = new MapMetaData(b);
-            this.data = b.DeserializeStructArray<sbyte>();
+            Header = new StdMsgs.Header(b);
+            Info = new MapMetaData(b);
+            Data = b.DeserializeStructArray<sbyte>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -49,26 +46,26 @@ namespace Iviz.Msgs.nav_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.info);
-            b.SerializeStructArray(this.data, 0);
+            b.Serialize(Header);
+            b.Serialize(Info);
+            b.SerializeStructArray(Data, 0);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (info is null) throw new System.NullReferenceException();
-            info.Validate();
-            if (data is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (Info is null) throw new System.NullReferenceException();
+            Info.Validate();
+            if (Data is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 80;
-                size += header.RosMessageLength;
-                size += 1 * data.Length;
+                size += Header.RosMessageLength;
+                size += 1 * Data.Length;
                 return size;
             }
         }

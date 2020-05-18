@@ -1,32 +1,32 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.diagnostic_msgs
+namespace Iviz.Msgs.DiagnosticMsgs
 {
-    [DataContract]
+    [DataContract (Name = "diagnostic_msgs/KeyValue")]
     public sealed class KeyValue : IMessage
     {
-        [DataMember] public string key { get; set; } // what to label this value when viewing
-        [DataMember] public string value { get; set; } // a value to track over time
+        [DataMember (Name = "key")] public string Key { get; set; } // what to label this value when viewing
+        [DataMember (Name = "value")] public string Value { get; set; } // a value to track over time
     
         /// <summary> Constructor for empty message. </summary>
         public KeyValue()
         {
-            key = "";
-            value = "";
+            Key = "";
+            Value = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public KeyValue(string key, string value)
+        public KeyValue(string Key, string Value)
         {
-            this.key = key ?? throw new System.ArgumentNullException(nameof(key));
-            this.value = value ?? throw new System.ArgumentNullException(nameof(value));
+            this.Key = Key;
+            this.Value = Value;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal KeyValue(Buffer b)
         {
-            this.key = b.DeserializeString();
-            this.value = b.DeserializeString();
+            Key = b.DeserializeString();
+            Value = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -37,22 +37,22 @@ namespace Iviz.Msgs.diagnostic_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.key);
-            b.Serialize(this.value);
+            b.Serialize(this.Key);
+            b.Serialize(this.Value);
         }
         
         public void Validate()
         {
-            if (key is null) throw new System.NullReferenceException();
-            if (value is null) throw new System.NullReferenceException();
+            if (Key is null) throw new System.NullReferenceException();
+            if (Value is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 8;
-                size += BuiltIns.UTF8.GetByteCount(key);
-                size += BuiltIns.UTF8.GetByteCount(value);
+                size += BuiltIns.UTF8.GetByteCount(Key);
+                size += BuiltIns.UTF8.GetByteCount(Value);
                 return size;
             }
         }

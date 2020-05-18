@@ -1,41 +1,39 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.shape_msgs
+namespace Iviz.Msgs.ShapeMsgs
 {
-    [DataContract]
+    [DataContract (Name = "shape_msgs/Mesh")]
     public sealed class Mesh : IMessage
     {
         // Definition of a mesh
-        
         // list of triangles; the index values refer to positions in vertices[]
-        [DataMember] public MeshTriangle[] triangles { get; set; }
-        
+        [DataMember (Name = "triangles")] public MeshTriangle[] Triangles { get; set; }
         // the actual vertices that make up the mesh
-        [DataMember] public geometry_msgs.Point[] vertices { get; set; }
+        [DataMember (Name = "vertices")] public GeometryMsgs.Point[] Vertices { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Mesh()
         {
-            triangles = System.Array.Empty<MeshTriangle>();
-            vertices = System.Array.Empty<geometry_msgs.Point>();
+            Triangles = System.Array.Empty<MeshTriangle>();
+            Vertices = System.Array.Empty<GeometryMsgs.Point>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Mesh(MeshTriangle[] triangles, geometry_msgs.Point[] vertices)
+        public Mesh(MeshTriangle[] Triangles, GeometryMsgs.Point[] Vertices)
         {
-            this.triangles = triangles ?? throw new System.ArgumentNullException(nameof(triangles));
-            this.vertices = vertices ?? throw new System.ArgumentNullException(nameof(vertices));
+            this.Triangles = Triangles;
+            this.Vertices = Vertices;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal Mesh(Buffer b)
         {
-            this.triangles = b.DeserializeArray<MeshTriangle>();
-            for (int i = 0; i < this.triangles.Length; i++)
+            Triangles = b.DeserializeArray<MeshTriangle>();
+            for (int i = 0; i < this.Triangles.Length; i++)
             {
-                this.triangles[i] = new MeshTriangle(b);
+                Triangles[i] = new MeshTriangle(b);
             }
-            this.vertices = b.DeserializeStructArray<geometry_msgs.Point>();
+            Vertices = b.DeserializeStructArray<GeometryMsgs.Point>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -46,27 +44,27 @@ namespace Iviz.Msgs.shape_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeArray(this.triangles, 0);
-            b.SerializeStructArray(this.vertices, 0);
+            b.SerializeArray(Triangles, 0);
+            b.SerializeStructArray(Vertices, 0);
         }
         
         public void Validate()
         {
-            if (triangles is null) throw new System.NullReferenceException();
-            for (int i = 0; i < triangles.Length; i++)
+            if (Triangles is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Triangles.Length; i++)
             {
-                if (triangles[i] is null) throw new System.NullReferenceException();
-                triangles[i].Validate();
+                if (Triangles[i] is null) throw new System.NullReferenceException();
+                Triangles[i].Validate();
             }
-            if (vertices is null) throw new System.NullReferenceException();
+            if (Vertices is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 8;
-                size += 12 * triangles.Length;
-                size += 24 * vertices.Length;
+                size += 12 * Triangles.Length;
+                size += 24 * Vertices.Length;
                 return size;
             }
         }

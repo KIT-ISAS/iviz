@@ -1,55 +1,49 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.sensor_msgs
+namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract]
+    [DataContract (Name = "sensor_msgs/MagneticField")]
     public sealed class MagneticField : IMessage
     {
         // Measurement of the Magnetic Field vector at a specific location.
-        
         // If the covariance of the measurement is known, it should be filled in
         // (if all you know is the variance of each measurement, e.g. from the datasheet,
         //just put those along the diagonal)
         // A covariance matrix of all zeros will be interpreted as "covariance unknown",
         // and to use the data a covariance will have to be assumed or gotten from some
         // other source
-        
-        
-        [DataMember] public std_msgs.Header header { get; set; } // timestamp is the time the
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; } // timestamp is the time the
         // field was measured
         // frame_id is the location and orientation
         // of the field measurement
-        
-        [DataMember] public geometry_msgs.Vector3 magnetic_field { get; set; } // x, y, and z components of the
+        [DataMember (Name = "magnetic_field")] public GeometryMsgs.Vector3 MagneticField_ { get; set; } // x, y, and z components of the
         // field vector in Tesla
         // If your sensor does not output 3 axes,
         // put NaNs in the components not reported.
-        
-        [DataMember] public double[/*9*/] magnetic_field_covariance { get; set; } // Row major about x, y, z axes
+        [DataMember (Name = "magnetic_field_covariance")] public double[/*9*/] MagneticFieldCovariance { get; set; } // Row major about x, y, z axes
         // 0 is interpreted as variance unknown
     
         /// <summary> Constructor for empty message. </summary>
         public MagneticField()
         {
-            header = new std_msgs.Header();
-            magnetic_field_covariance = new double[9];
+            Header = new StdMsgs.Header();
+            MagneticFieldCovariance = new double[9];
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MagneticField(std_msgs.Header header, geometry_msgs.Vector3 magnetic_field, double[] magnetic_field_covariance)
+        public MagneticField(StdMsgs.Header Header, GeometryMsgs.Vector3 MagneticField_, double[] MagneticFieldCovariance)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.magnetic_field = magnetic_field;
-            this.magnetic_field_covariance = magnetic_field_covariance ?? throw new System.ArgumentNullException(nameof(magnetic_field_covariance));
-            if (this.magnetic_field_covariance.Length != 9) throw new System.ArgumentException("Invalid size", nameof(magnetic_field_covariance));
+            this.Header = Header;
+            this.MagneticField_ = MagneticField_;
+            this.MagneticFieldCovariance = MagneticFieldCovariance;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal MagneticField(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.magnetic_field = new geometry_msgs.Vector3(b);
-            this.magnetic_field_covariance = b.DeserializeStructArray<double>(9);
+            Header = new StdMsgs.Header(b);
+            MagneticField_ = new GeometryMsgs.Vector3(b);
+            MagneticFieldCovariance = b.DeserializeStructArray<double>(9);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -60,24 +54,24 @@ namespace Iviz.Msgs.sensor_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.magnetic_field);
-            b.SerializeStructArray(this.magnetic_field_covariance, 9);
+            b.Serialize(Header);
+            b.Serialize(MagneticField_);
+            b.SerializeStructArray(MagneticFieldCovariance, 9);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (magnetic_field_covariance is null) throw new System.NullReferenceException();
-            if (magnetic_field_covariance.Length != 9) throw new System.IndexOutOfRangeException();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (MagneticFieldCovariance is null) throw new System.NullReferenceException();
+            if (MagneticFieldCovariance.Length != 9) throw new System.IndexOutOfRangeException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 96;
-                size += header.RosMessageLength;
+                size += Header.RosMessageLength;
                 return size;
             }
         }

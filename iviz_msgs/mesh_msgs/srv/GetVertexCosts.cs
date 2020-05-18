@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.mesh_msgs
+namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract]
+    [DataContract (Name = "mesh_msgs/GetVertexCosts")]
     public sealed class GetVertexCosts : IService
     {
         /// <summary> Request message. </summary>
@@ -52,24 +52,24 @@ namespace Iviz.Msgs.mesh_msgs
 
     public sealed class GetVertexCostsRequest : IRequest
     {
-        [DataMember] public string uuid { get; set; }
+        [DataMember (Name = "uuid")] public string Uuid { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetVertexCostsRequest()
         {
-            uuid = "";
+            Uuid = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GetVertexCostsRequest(string uuid)
+        public GetVertexCostsRequest(string Uuid)
         {
-            this.uuid = uuid ?? throw new System.ArgumentNullException(nameof(uuid));
+            this.Uuid = Uuid;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal GetVertexCostsRequest(Buffer b)
         {
-            this.uuid = b.DeserializeString();
+            Uuid = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -80,19 +80,19 @@ namespace Iviz.Msgs.mesh_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.uuid);
+            b.Serialize(this.Uuid);
         }
         
         public void Validate()
         {
-            if (uuid is null) throw new System.NullReferenceException();
+            if (Uuid is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(uuid);
+                size += BuiltIns.UTF8.GetByteCount(Uuid);
                 return size;
             }
         }
@@ -100,24 +100,24 @@ namespace Iviz.Msgs.mesh_msgs
 
     public sealed class GetVertexCostsResponse : IResponse
     {
-        [DataMember] public mesh_msgs.MeshVertexCostsStamped mesh_vertex_costs_stamped { get; set; }
+        [DataMember (Name = "mesh_vertex_costs_stamped")] public MeshMsgs.MeshVertexCostsStamped MeshVertexCostsStamped { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetVertexCostsResponse()
         {
-            mesh_vertex_costs_stamped = new mesh_msgs.MeshVertexCostsStamped();
+            MeshVertexCostsStamped = new MeshMsgs.MeshVertexCostsStamped();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GetVertexCostsResponse(mesh_msgs.MeshVertexCostsStamped mesh_vertex_costs_stamped)
+        public GetVertexCostsResponse(MeshMsgs.MeshVertexCostsStamped MeshVertexCostsStamped)
         {
-            this.mesh_vertex_costs_stamped = mesh_vertex_costs_stamped ?? throw new System.ArgumentNullException(nameof(mesh_vertex_costs_stamped));
+            this.MeshVertexCostsStamped = MeshVertexCostsStamped;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal GetVertexCostsResponse(Buffer b)
         {
-            this.mesh_vertex_costs_stamped = new mesh_msgs.MeshVertexCostsStamped(b);
+            MeshVertexCostsStamped = new MeshMsgs.MeshVertexCostsStamped(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -128,20 +128,20 @@ namespace Iviz.Msgs.mesh_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.mesh_vertex_costs_stamped);
+            b.Serialize(MeshVertexCostsStamped);
         }
         
         public void Validate()
         {
-            if (mesh_vertex_costs_stamped is null) throw new System.NullReferenceException();
-            mesh_vertex_costs_stamped.Validate();
+            if (MeshVertexCostsStamped is null) throw new System.NullReferenceException();
+            MeshVertexCostsStamped.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 0;
-                size += mesh_vertex_costs_stamped.RosMessageLength;
+                size += MeshVertexCostsStamped.RosMessageLength;
                 return size;
             }
         }

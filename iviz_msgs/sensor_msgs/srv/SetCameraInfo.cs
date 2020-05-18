@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.sensor_msgs
+namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract]
+    [DataContract (Name = "sensor_msgs/SetCameraInfo")]
     public sealed class SetCameraInfo : IService
     {
         /// <summary> Request message. </summary>
@@ -59,25 +59,24 @@ namespace Iviz.Msgs.sensor_msgs
         // camera is currently outputting on its camera_info topic, and the camera
         // will assume that the region of the imager that is being referred to is
         // the region that the camera is currently capturing.
-        
-        [DataMember] public sensor_msgs.CameraInfo camera_info { get; set; } // The camera_info to store
+        [DataMember (Name = "camera_info")] public SensorMsgs.CameraInfo CameraInfo { get; set; } // The camera_info to store
     
         /// <summary> Constructor for empty message. </summary>
         public SetCameraInfoRequest()
         {
-            camera_info = new sensor_msgs.CameraInfo();
+            CameraInfo = new SensorMsgs.CameraInfo();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public SetCameraInfoRequest(sensor_msgs.CameraInfo camera_info)
+        public SetCameraInfoRequest(SensorMsgs.CameraInfo CameraInfo)
         {
-            this.camera_info = camera_info ?? throw new System.ArgumentNullException(nameof(camera_info));
+            this.CameraInfo = CameraInfo;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal SetCameraInfoRequest(Buffer b)
         {
-            this.camera_info = new sensor_msgs.CameraInfo(b);
+            CameraInfo = new SensorMsgs.CameraInfo(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -88,20 +87,20 @@ namespace Iviz.Msgs.sensor_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.camera_info);
+            b.Serialize(CameraInfo);
         }
         
         public void Validate()
         {
-            if (camera_info is null) throw new System.NullReferenceException();
-            camera_info.Validate();
+            if (CameraInfo is null) throw new System.NullReferenceException();
+            CameraInfo.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 0;
-                size += camera_info.RosMessageLength;
+                size += CameraInfo.RosMessageLength;
                 return size;
             }
         }
@@ -109,27 +108,27 @@ namespace Iviz.Msgs.sensor_msgs
 
     public sealed class SetCameraInfoResponse : IResponse
     {
-        [DataMember] public bool success { get; set; } // True if the call succeeded
-        [DataMember] public string status_message { get; set; } // Used to give details about success
+        [DataMember (Name = "success")] public bool Success { get; set; } // True if the call succeeded
+        [DataMember (Name = "status_message")] public string StatusMessage { get; set; } // Used to give details about success
     
         /// <summary> Constructor for empty message. </summary>
         public SetCameraInfoResponse()
         {
-            status_message = "";
+            StatusMessage = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public SetCameraInfoResponse(bool success, string status_message)
+        public SetCameraInfoResponse(bool Success, string StatusMessage)
         {
-            this.success = success;
-            this.status_message = status_message ?? throw new System.ArgumentNullException(nameof(status_message));
+            this.Success = Success;
+            this.StatusMessage = StatusMessage;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal SetCameraInfoResponse(Buffer b)
         {
-            this.success = b.Deserialize<bool>();
-            this.status_message = b.DeserializeString();
+            Success = b.Deserialize<bool>();
+            StatusMessage = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -140,20 +139,20 @@ namespace Iviz.Msgs.sensor_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.success);
-            b.Serialize(this.status_message);
+            b.Serialize(this.Success);
+            b.Serialize(this.StatusMessage);
         }
         
         public void Validate()
         {
-            if (status_message is null) throw new System.NullReferenceException();
+            if (StatusMessage is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 5;
-                size += BuiltIns.UTF8.GetByteCount(status_message);
+                size += BuiltIns.UTF8.GetByteCount(StatusMessage);
                 return size;
             }
         }

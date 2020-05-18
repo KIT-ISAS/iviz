@@ -1,13 +1,13 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.geometry_msgs
+namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract]
+    [DataContract (Name = "geometry_msgs/Twist")]
     public sealed class Twist : IMessage
     {
         // This expresses velocity in free space broken into its linear and angular parts.
-        [DataMember] public Vector3 linear { get; set; }
-        [DataMember] public Vector3 angular { get; set; }
+        [DataMember (Name = "linear")] public Vector3 Linear { get; set; }
+        [DataMember (Name = "angular")] public Vector3 Angular { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Twist()
@@ -15,17 +15,17 @@ namespace Iviz.Msgs.geometry_msgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Twist(Vector3 linear, Vector3 angular)
+        public Twist(Vector3 Linear, Vector3 Angular)
         {
-            this.linear = linear;
-            this.angular = angular;
+            this.Linear = Linear;
+            this.Angular = Angular;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal Twist(Buffer b)
         {
-            this.linear = new Vector3(b);
-            this.angular = new Vector3(b);
+            Linear = new Vector3(b);
+            Angular = new Vector3(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -36,8 +36,8 @@ namespace Iviz.Msgs.geometry_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.linear);
-            b.Serialize(this.angular);
+            b.Serialize(Linear);
+            b.Serialize(Angular);
         }
         
         public void Validate()

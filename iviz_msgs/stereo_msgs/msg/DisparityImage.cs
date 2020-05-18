@@ -1,26 +1,22 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.stereo_msgs
+namespace Iviz.Msgs.StereoMsgs
 {
-    [DataContract]
+    [DataContract (Name = "stereo_msgs/DisparityImage")]
     public sealed class DisparityImage : IMessage
     {
         // Separate header for compatibility with current TimeSynchronizer.
         // Likely to be removed in a later release, use image.header instead.
-        [DataMember] public std_msgs.Header header { get; set; }
-        
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         // Floating point disparity image. The disparities are pre-adjusted for any
         // x-offset between the principal points of the two cameras (in the case
         // that they are verged). That is: d = x_l - x_r - (cx_l - cx_r)
-        [DataMember] public sensor_msgs.Image image { get; set; }
-        
+        [DataMember (Name = "image")] public SensorMsgs.Image Image { get; set; }
         // Stereo geometry. For disparity d, the depth from the camera is Z = fT/d.
-        [DataMember] public float f { get; set; } // Focal length, pixels
+        [DataMember (Name = "f")] public float F { get; set; } // Focal length, pixels
         [DataMember] public float T { get; set; } // Baseline, world units
-        
         // Subwindow of (potentially) valid disparity values.
-        [DataMember] public sensor_msgs.RegionOfInterest valid_window { get; set; }
-        
+        [DataMember (Name = "valid_window")] public SensorMsgs.RegionOfInterest ValidWindow { get; set; }
         // The range of disparities searched.
         // In the disparity image, any disparity less than min_disparity is invalid.
         // The disparity search range defines the horopter, or 3D volume that the
@@ -28,45 +24,44 @@ namespace Iviz.Msgs.stereo_msgs
         //     Z_min = fT / max_disparity
         //     Z_max = fT / min_disparity
         // could not be found.
-        [DataMember] public float min_disparity { get; set; }
-        [DataMember] public float max_disparity { get; set; }
-        
+        [DataMember (Name = "min_disparity")] public float MinDisparity { get; set; }
+        [DataMember (Name = "max_disparity")] public float MaxDisparity { get; set; }
         // Smallest allowed disparity increment. The smallest achievable depth range
         // resolution is delta_Z = (Z^2/fT)*delta_d.
-        [DataMember] public float delta_d { get; set; }
+        [DataMember (Name = "delta_d")] public float DeltaD { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public DisparityImage()
         {
-            header = new std_msgs.Header();
-            image = new sensor_msgs.Image();
-            valid_window = new sensor_msgs.RegionOfInterest();
+            Header = new StdMsgs.Header();
+            Image = new SensorMsgs.Image();
+            ValidWindow = new SensorMsgs.RegionOfInterest();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public DisparityImage(std_msgs.Header header, sensor_msgs.Image image, float f, float T, sensor_msgs.RegionOfInterest valid_window, float min_disparity, float max_disparity, float delta_d)
+        public DisparityImage(StdMsgs.Header Header, SensorMsgs.Image Image, float F, float T, SensorMsgs.RegionOfInterest ValidWindow, float MinDisparity, float MaxDisparity, float DeltaD)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.image = image ?? throw new System.ArgumentNullException(nameof(image));
-            this.f = f;
+            this.Header = Header;
+            this.Image = Image;
+            this.F = F;
             this.T = T;
-            this.valid_window = valid_window ?? throw new System.ArgumentNullException(nameof(valid_window));
-            this.min_disparity = min_disparity;
-            this.max_disparity = max_disparity;
-            this.delta_d = delta_d;
+            this.ValidWindow = ValidWindow;
+            this.MinDisparity = MinDisparity;
+            this.MaxDisparity = MaxDisparity;
+            this.DeltaD = DeltaD;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal DisparityImage(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.image = new sensor_msgs.Image(b);
-            this.f = b.Deserialize<float>();
-            this.T = b.Deserialize<float>();
-            this.valid_window = new sensor_msgs.RegionOfInterest(b);
-            this.min_disparity = b.Deserialize<float>();
-            this.max_disparity = b.Deserialize<float>();
-            this.delta_d = b.Deserialize<float>();
+            Header = new StdMsgs.Header(b);
+            Image = new SensorMsgs.Image(b);
+            F = b.Deserialize<float>();
+            T = b.Deserialize<float>();
+            ValidWindow = new SensorMsgs.RegionOfInterest(b);
+            MinDisparity = b.Deserialize<float>();
+            MaxDisparity = b.Deserialize<float>();
+            DeltaD = b.Deserialize<float>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -77,32 +72,32 @@ namespace Iviz.Msgs.stereo_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.image);
-            b.Serialize(this.f);
+            b.Serialize(Header);
+            b.Serialize(Image);
+            b.Serialize(this.F);
             b.Serialize(this.T);
-            b.Serialize(this.valid_window);
-            b.Serialize(this.min_disparity);
-            b.Serialize(this.max_disparity);
-            b.Serialize(this.delta_d);
+            b.Serialize(ValidWindow);
+            b.Serialize(this.MinDisparity);
+            b.Serialize(this.MaxDisparity);
+            b.Serialize(this.DeltaD);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (image is null) throw new System.NullReferenceException();
-            image.Validate();
-            if (valid_window is null) throw new System.NullReferenceException();
-            valid_window.Validate();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (Image is null) throw new System.NullReferenceException();
+            Image.Validate();
+            if (ValidWindow is null) throw new System.NullReferenceException();
+            ValidWindow.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 37;
-                size += header.RosMessageLength;
-                size += image.RosMessageLength;
+                size += Header.RosMessageLength;
+                size += Image.RosMessageLength;
                 return size;
             }
         }

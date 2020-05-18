@@ -1,38 +1,37 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.actionlib_msgs
+namespace Iviz.Msgs.ActionlibMsgs
 {
-    [DataContract]
+    [DataContract (Name = "actionlib_msgs/GoalStatusArray")]
     public sealed class GoalStatusArray : IMessage
     {
         // Stores the statuses for goals that are currently being tracked
         // by an action server
-        [DataMember] public std_msgs.Header header { get; set; }
-        [DataMember] public GoalStatus[] status_list { get; set; }
-        
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "status_list")] public GoalStatus[] StatusList { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GoalStatusArray()
         {
-            header = new std_msgs.Header();
-            status_list = System.Array.Empty<GoalStatus>();
+            Header = new StdMsgs.Header();
+            StatusList = System.Array.Empty<GoalStatus>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GoalStatusArray(std_msgs.Header header, GoalStatus[] status_list)
+        public GoalStatusArray(StdMsgs.Header Header, GoalStatus[] StatusList)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.status_list = status_list ?? throw new System.ArgumentNullException(nameof(status_list));
+            this.Header = Header;
+            this.StatusList = StatusList;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal GoalStatusArray(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.status_list = b.DeserializeArray<GoalStatus>();
-            for (int i = 0; i < this.status_list.Length; i++)
+            Header = new StdMsgs.Header(b);
+            StatusList = b.DeserializeArray<GoalStatus>();
+            for (int i = 0; i < this.StatusList.Length; i++)
             {
-                this.status_list[i] = new GoalStatus(b);
+                StatusList[i] = new GoalStatus(b);
             }
         }
         
@@ -44,19 +43,19 @@ namespace Iviz.Msgs.actionlib_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.SerializeArray(this.status_list, 0);
+            b.Serialize(Header);
+            b.SerializeArray(StatusList, 0);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (status_list is null) throw new System.NullReferenceException();
-            for (int i = 0; i < status_list.Length; i++)
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (StatusList is null) throw new System.NullReferenceException();
+            for (int i = 0; i < StatusList.Length; i++)
             {
-                if (status_list[i] is null) throw new System.NullReferenceException();
-                status_list[i].Validate();
+                if (StatusList[i] is null) throw new System.NullReferenceException();
+                StatusList[i].Validate();
             }
         }
     
@@ -64,10 +63,10 @@ namespace Iviz.Msgs.actionlib_msgs
         {
             get {
                 int size = 4;
-                size += header.RosMessageLength;
-                for (int i = 0; i < status_list.Length; i++)
+                size += Header.RosMessageLength;
+                for (int i = 0; i < StatusList.Length; i++)
                 {
-                    size += status_list[i].RosMessageLength;
+                    size += StatusList[i].RosMessageLength;
                 }
                 return size;
             }

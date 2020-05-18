@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosgraph_msgs
+namespace Iviz.Msgs.RosgraphMsgs
 {
-    [DataContract]
+    [DataContract (Name = "rosgraph_msgs/Log")]
     public sealed class Log : IMessage
     {
         //#
@@ -16,50 +16,50 @@ namespace Iviz.Msgs.rosgraph_msgs
         //#
         //# Fields
         //#
-        [DataMember] public std_msgs.Header header { get; set; }
-        [DataMember] public byte level { get; set; }
-        [DataMember] public string name { get; set; } // name of the node
-        [DataMember] public string msg { get; set; } // message 
-        [DataMember] public string file { get; set; } // file the message came from
-        [DataMember] public string function { get; set; } // function the message came from
-        [DataMember] public uint line { get; set; } // line the message came from
-        [DataMember] public string[] topics { get; set; } // topic names that the node publishes
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "level")] public byte Level { get; set; }
+        [DataMember (Name = "name")] public string Name { get; set; } // name of the node
+        [DataMember (Name = "msg")] public string Msg { get; set; } // message 
+        [DataMember (Name = "file")] public string File { get; set; } // file the message came from
+        [DataMember (Name = "function")] public string Function { get; set; } // function the message came from
+        [DataMember (Name = "line")] public uint Line { get; set; } // line the message came from
+        [DataMember (Name = "topics")] public string[] Topics { get; set; } // topic names that the node publishes
     
         /// <summary> Constructor for empty message. </summary>
         public Log()
         {
-            header = new std_msgs.Header();
-            name = "";
-            msg = "";
-            file = "";
-            function = "";
-            topics = System.Array.Empty<string>();
+            Header = new StdMsgs.Header();
+            Name = "";
+            Msg = "";
+            File = "";
+            Function = "";
+            Topics = System.Array.Empty<string>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Log(std_msgs.Header header, byte level, string name, string msg, string file, string function, uint line, string[] topics)
+        public Log(StdMsgs.Header Header, byte Level, string Name, string Msg, string File, string Function, uint Line, string[] Topics)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.level = level;
-            this.name = name ?? throw new System.ArgumentNullException(nameof(name));
-            this.msg = msg ?? throw new System.ArgumentNullException(nameof(msg));
-            this.file = file ?? throw new System.ArgumentNullException(nameof(file));
-            this.function = function ?? throw new System.ArgumentNullException(nameof(function));
-            this.line = line;
-            this.topics = topics ?? throw new System.ArgumentNullException(nameof(topics));
+            this.Header = Header;
+            this.Level = Level;
+            this.Name = Name;
+            this.Msg = Msg;
+            this.File = File;
+            this.Function = Function;
+            this.Line = Line;
+            this.Topics = Topics;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal Log(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.level = b.Deserialize<byte>();
-            this.name = b.DeserializeString();
-            this.msg = b.DeserializeString();
-            this.file = b.DeserializeString();
-            this.function = b.DeserializeString();
-            this.line = b.Deserialize<uint>();
-            this.topics = b.DeserializeStringArray();
+            Header = new StdMsgs.Header(b);
+            Level = b.Deserialize<byte>();
+            Name = b.DeserializeString();
+            Msg = b.DeserializeString();
+            File = b.DeserializeString();
+            Function = b.DeserializeString();
+            Line = b.Deserialize<uint>();
+            Topics = b.DeserializeStringArray();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -70,28 +70,28 @@ namespace Iviz.Msgs.rosgraph_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.level);
-            b.Serialize(this.name);
-            b.Serialize(this.msg);
-            b.Serialize(this.file);
-            b.Serialize(this.function);
-            b.Serialize(this.line);
-            b.SerializeArray(this.topics, 0);
+            b.Serialize(Header);
+            b.Serialize(this.Level);
+            b.Serialize(this.Name);
+            b.Serialize(this.Msg);
+            b.Serialize(this.File);
+            b.Serialize(this.Function);
+            b.Serialize(this.Line);
+            b.SerializeArray(Topics, 0);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (name is null) throw new System.NullReferenceException();
-            if (msg is null) throw new System.NullReferenceException();
-            if (file is null) throw new System.NullReferenceException();
-            if (function is null) throw new System.NullReferenceException();
-            if (topics is null) throw new System.NullReferenceException();
-            for (int i = 0; i < topics.Length; i++)
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (Name is null) throw new System.NullReferenceException();
+            if (Msg is null) throw new System.NullReferenceException();
+            if (File is null) throw new System.NullReferenceException();
+            if (Function is null) throw new System.NullReferenceException();
+            if (Topics is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Topics.Length; i++)
             {
-                if (topics[i] is null) throw new System.NullReferenceException();
+                if (Topics[i] is null) throw new System.NullReferenceException();
             }
         }
     
@@ -99,15 +99,15 @@ namespace Iviz.Msgs.rosgraph_msgs
         {
             get {
                 int size = 25;
-                size += header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(name);
-                size += BuiltIns.UTF8.GetByteCount(msg);
-                size += BuiltIns.UTF8.GetByteCount(file);
-                size += BuiltIns.UTF8.GetByteCount(function);
-                size += 4 * topics.Length;
-                for (int i = 0; i < topics.Length; i++)
+                size += Header.RosMessageLength;
+                size += BuiltIns.UTF8.GetByteCount(Name);
+                size += BuiltIns.UTF8.GetByteCount(Msg);
+                size += BuiltIns.UTF8.GetByteCount(File);
+                size += BuiltIns.UTF8.GetByteCount(Function);
+                size += 4 * Topics.Length;
+                for (int i = 0; i < Topics.Length; i++)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(topics[i]);
+                    size += BuiltIns.UTF8.GetByteCount(Topics[i]);
                 }
                 return size;
             }

@@ -1,23 +1,19 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.visualization_msgs
+namespace Iviz.Msgs.VisualizationMsgs
 {
-    [DataContract]
+    [DataContract (Name = "visualization_msgs/InteractiveMarkerFeedback")]
     public sealed class InteractiveMarkerFeedback : IMessage
     {
         // Time/frame info.
-        [DataMember] public std_msgs.Header header { get; set; }
-        
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         // Identifying string. Must be unique in the topic namespace.
-        [DataMember] public string client_id { get; set; }
-        
+        [DataMember (Name = "client_id")] public string ClientId { get; set; }
         // Feedback message sent back from the GUI, e.g.
         // when the status of an interactive marker was modified by the user.
-        
         // Specifies which interactive marker and control this message refers to
-        [DataMember] public string marker_name { get; set; }
-        [DataMember] public string control_name { get; set; }
-        
+        [DataMember (Name = "marker_name")] public string MarkerName { get; set; }
+        [DataMember (Name = "control_name")] public string ControlName { get; set; }
         // Type of the event
         // KEEP_ALIVE: sent while dragging to keep up control of the marker
         // MENU_SELECT: a menu entry has been selected
@@ -27,62 +23,57 @@ namespace Iviz.Msgs.visualization_msgs
         public const byte POSE_UPDATE = 1;
         public const byte MENU_SELECT = 2;
         public const byte BUTTON_CLICK = 3;
-        
         public const byte MOUSE_DOWN = 4;
         public const byte MOUSE_UP = 5;
-        
-        [DataMember] public byte event_type { get; set; }
-        
+        [DataMember (Name = "event_type")] public byte EventType { get; set; }
         // Current pose of the marker
         // Note: Has to be valid for all feedback types.
-        [DataMember] public geometry_msgs.Pose pose { get; set; }
-        
+        [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose { get; set; }
         // Contains the ID of the selected menu entry
         // Only valid for MENU_SELECT events.
-        [DataMember] public uint menu_entry_id { get; set; }
-        
+        [DataMember (Name = "menu_entry_id")] public uint MenuEntryId { get; set; }
         // If event_type is BUTTON_CLICK, MOUSE_DOWN, or MOUSE_UP, mouse_point
         // may contain the 3 dimensional position of the event on the
         // control.  If it does, mouse_point_valid will be true.  mouse_point
         // will be relative to the frame listed in the header.
-        [DataMember] public geometry_msgs.Point mouse_point { get; set; }
-        [DataMember] public bool mouse_point_valid { get; set; }
+        [DataMember (Name = "mouse_point")] public GeometryMsgs.Point MousePoint { get; set; }
+        [DataMember (Name = "mouse_point_valid")] public bool MousePointValid { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarkerFeedback()
         {
-            header = new std_msgs.Header();
-            client_id = "";
-            marker_name = "";
-            control_name = "";
+            Header = new StdMsgs.Header();
+            ClientId = "";
+            MarkerName = "";
+            ControlName = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public InteractiveMarkerFeedback(std_msgs.Header header, string client_id, string marker_name, string control_name, byte event_type, geometry_msgs.Pose pose, uint menu_entry_id, geometry_msgs.Point mouse_point, bool mouse_point_valid)
+        public InteractiveMarkerFeedback(StdMsgs.Header Header, string ClientId, string MarkerName, string ControlName, byte EventType, GeometryMsgs.Pose Pose, uint MenuEntryId, GeometryMsgs.Point MousePoint, bool MousePointValid)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.client_id = client_id ?? throw new System.ArgumentNullException(nameof(client_id));
-            this.marker_name = marker_name ?? throw new System.ArgumentNullException(nameof(marker_name));
-            this.control_name = control_name ?? throw new System.ArgumentNullException(nameof(control_name));
-            this.event_type = event_type;
-            this.pose = pose;
-            this.menu_entry_id = menu_entry_id;
-            this.mouse_point = mouse_point;
-            this.mouse_point_valid = mouse_point_valid;
+            this.Header = Header;
+            this.ClientId = ClientId;
+            this.MarkerName = MarkerName;
+            this.ControlName = ControlName;
+            this.EventType = EventType;
+            this.Pose = Pose;
+            this.MenuEntryId = MenuEntryId;
+            this.MousePoint = MousePoint;
+            this.MousePointValid = MousePointValid;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal InteractiveMarkerFeedback(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.client_id = b.DeserializeString();
-            this.marker_name = b.DeserializeString();
-            this.control_name = b.DeserializeString();
-            this.event_type = b.Deserialize<byte>();
-            this.pose = new geometry_msgs.Pose(b);
-            this.menu_entry_id = b.Deserialize<uint>();
-            this.mouse_point = new geometry_msgs.Point(b);
-            this.mouse_point_valid = b.Deserialize<bool>();
+            Header = new StdMsgs.Header(b);
+            ClientId = b.DeserializeString();
+            MarkerName = b.DeserializeString();
+            ControlName = b.DeserializeString();
+            EventType = b.Deserialize<byte>();
+            Pose = new GeometryMsgs.Pose(b);
+            MenuEntryId = b.Deserialize<uint>();
+            MousePoint = new GeometryMsgs.Point(b);
+            MousePointValid = b.Deserialize<bool>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -93,34 +84,34 @@ namespace Iviz.Msgs.visualization_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.client_id);
-            b.Serialize(this.marker_name);
-            b.Serialize(this.control_name);
-            b.Serialize(this.event_type);
-            b.Serialize(this.pose);
-            b.Serialize(this.menu_entry_id);
-            b.Serialize(this.mouse_point);
-            b.Serialize(this.mouse_point_valid);
+            b.Serialize(Header);
+            b.Serialize(this.ClientId);
+            b.Serialize(this.MarkerName);
+            b.Serialize(this.ControlName);
+            b.Serialize(this.EventType);
+            b.Serialize(Pose);
+            b.Serialize(this.MenuEntryId);
+            b.Serialize(MousePoint);
+            b.Serialize(this.MousePointValid);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (client_id is null) throw new System.NullReferenceException();
-            if (marker_name is null) throw new System.NullReferenceException();
-            if (control_name is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (ClientId is null) throw new System.NullReferenceException();
+            if (MarkerName is null) throw new System.NullReferenceException();
+            if (ControlName is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 98;
-                size += header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(client_id);
-                size += BuiltIns.UTF8.GetByteCount(marker_name);
-                size += BuiltIns.UTF8.GetByteCount(control_name);
+                size += Header.RosMessageLength;
+                size += BuiltIns.UTF8.GetByteCount(ClientId);
+                size += BuiltIns.UTF8.GetByteCount(MarkerName);
+                size += BuiltIns.UTF8.GetByteCount(ControlName);
                 return size;
             }
         }

@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosbridge_library
+namespace Iviz.Msgs.RosbridgeLibrary
 {
-    [DataContract]
+    [DataContract (Name = "rosbridge_library/TestRequestAndResponse")]
     public sealed class TestRequestAndResponse : IService
     {
         /// <summary> Request message. </summary>
@@ -52,7 +52,7 @@ namespace Iviz.Msgs.rosbridge_library
 
     public sealed class TestRequestAndResponseRequest : IRequest
     {
-        [DataMember] public int data { get; set; }
+        [DataMember (Name = "data")] public int Data { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestRequestAndResponseRequest()
@@ -60,15 +60,15 @@ namespace Iviz.Msgs.rosbridge_library
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TestRequestAndResponseRequest(int data)
+        public TestRequestAndResponseRequest(int Data)
         {
-            this.data = data;
+            this.Data = Data;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal TestRequestAndResponseRequest(Buffer b)
         {
-            this.data = b.Deserialize<int>();
+            Data = b.Deserialize<int>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -79,7 +79,7 @@ namespace Iviz.Msgs.rosbridge_library
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.data);
+            b.Serialize(this.Data);
         }
         
         public void Validate()
@@ -91,7 +91,7 @@ namespace Iviz.Msgs.rosbridge_library
 
     public sealed class TestRequestAndResponseResponse : IResponse
     {
-        [DataMember] public int data { get; set; }
+        [DataMember (Name = "data")] public int Data { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestRequestAndResponseResponse()
@@ -99,15 +99,15 @@ namespace Iviz.Msgs.rosbridge_library
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TestRequestAndResponseResponse(int data)
+        public TestRequestAndResponseResponse(int Data)
         {
-            this.data = data;
+            this.Data = Data;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal TestRequestAndResponseResponse(Buffer b)
         {
-            this.data = b.Deserialize<int>();
+            Data = b.Deserialize<int>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -118,7 +118,7 @@ namespace Iviz.Msgs.rosbridge_library
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.data);
+            b.Serialize(this.Data);
         }
         
         public void Validate()

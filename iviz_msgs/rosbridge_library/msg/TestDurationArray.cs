@@ -1,28 +1,28 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosbridge_library
+namespace Iviz.Msgs.RosbridgeLibrary
 {
-    [DataContract]
+    [DataContract (Name = "rosbridge_library/TestDurationArray")]
     public sealed class TestDurationArray : IMessage
     {
-        [DataMember] public duration[] durations { get; set; }
+        [DataMember (Name = "durations")] public duration[] Durations { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestDurationArray()
         {
-            durations = System.Array.Empty<duration>();
+            Durations = System.Array.Empty<duration>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TestDurationArray(duration[] durations)
+        public TestDurationArray(duration[] Durations)
         {
-            this.durations = durations ?? throw new System.ArgumentNullException(nameof(durations));
+            this.Durations = Durations;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal TestDurationArray(Buffer b)
         {
-            this.durations = b.DeserializeStructArray<duration>();
+            Durations = b.DeserializeStructArray<duration>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -33,19 +33,19 @@ namespace Iviz.Msgs.rosbridge_library
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeStructArray(this.durations, 0);
+            b.SerializeStructArray(Durations, 0);
         }
         
         public void Validate()
         {
-            if (durations is null) throw new System.NullReferenceException();
+            if (Durations is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += 8 * durations.Length;
+                size += 8 * Durations.Length;
                 return size;
             }
         }

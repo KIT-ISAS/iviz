@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.mesh_msgs
+namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract]
+    [DataContract (Name = "mesh_msgs/GetGeometry")]
     public sealed class GetGeometry : IService
     {
         /// <summary> Request message. </summary>
@@ -52,24 +52,24 @@ namespace Iviz.Msgs.mesh_msgs
 
     public sealed class GetGeometryRequest : IRequest
     {
-        [DataMember] public string uuid { get; set; }
+        [DataMember (Name = "uuid")] public string Uuid { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetGeometryRequest()
         {
-            uuid = "";
+            Uuid = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GetGeometryRequest(string uuid)
+        public GetGeometryRequest(string Uuid)
         {
-            this.uuid = uuid ?? throw new System.ArgumentNullException(nameof(uuid));
+            this.Uuid = Uuid;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal GetGeometryRequest(Buffer b)
         {
-            this.uuid = b.DeserializeString();
+            Uuid = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -80,19 +80,19 @@ namespace Iviz.Msgs.mesh_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.uuid);
+            b.Serialize(this.Uuid);
         }
         
         public void Validate()
         {
-            if (uuid is null) throw new System.NullReferenceException();
+            if (Uuid is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(uuid);
+                size += BuiltIns.UTF8.GetByteCount(Uuid);
                 return size;
             }
         }
@@ -100,24 +100,24 @@ namespace Iviz.Msgs.mesh_msgs
 
     public sealed class GetGeometryResponse : IResponse
     {
-        [DataMember] public mesh_msgs.MeshGeometryStamped mesh_geometry_stamped { get; set; }
+        [DataMember (Name = "mesh_geometry_stamped")] public MeshMsgs.MeshGeometryStamped MeshGeometryStamped { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetGeometryResponse()
         {
-            mesh_geometry_stamped = new mesh_msgs.MeshGeometryStamped();
+            MeshGeometryStamped = new MeshMsgs.MeshGeometryStamped();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GetGeometryResponse(mesh_msgs.MeshGeometryStamped mesh_geometry_stamped)
+        public GetGeometryResponse(MeshMsgs.MeshGeometryStamped MeshGeometryStamped)
         {
-            this.mesh_geometry_stamped = mesh_geometry_stamped ?? throw new System.ArgumentNullException(nameof(mesh_geometry_stamped));
+            this.MeshGeometryStamped = MeshGeometryStamped;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal GetGeometryResponse(Buffer b)
         {
-            this.mesh_geometry_stamped = new mesh_msgs.MeshGeometryStamped(b);
+            MeshGeometryStamped = new MeshMsgs.MeshGeometryStamped(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -128,20 +128,20 @@ namespace Iviz.Msgs.mesh_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.mesh_geometry_stamped);
+            b.Serialize(MeshGeometryStamped);
         }
         
         public void Validate()
         {
-            if (mesh_geometry_stamped is null) throw new System.NullReferenceException();
-            mesh_geometry_stamped.Validate();
+            if (MeshGeometryStamped is null) throw new System.NullReferenceException();
+            MeshGeometryStamped.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 0;
-                size += mesh_geometry_stamped.RosMessageLength;
+                size += MeshGeometryStamped.RosMessageLength;
                 return size;
             }
         }

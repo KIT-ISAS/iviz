@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.sensor_msgs
+namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract]
+    [DataContract (Name = "sensor_msgs/JointState")]
     public sealed class JointState : IMessage
     {
         // This is a message that holds data to describe the state of a set of torque controlled joints. 
@@ -23,43 +23,40 @@ namespace Iviz.Msgs.sensor_msgs
         // All arrays in this message should have the same size, or be empty.
         // This is the only way to uniquely associate the joint name with the correct
         // states.
-        
-        
-        [DataMember] public std_msgs.Header header { get; set; }
-        
-        [DataMember] public string[] name { get; set; }
-        [DataMember] public double[] position { get; set; }
-        [DataMember] public double[] velocity { get; set; }
-        [DataMember] public double[] effort { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "name")] public string[] Name { get; set; }
+        [DataMember (Name = "position")] public double[] Position { get; set; }
+        [DataMember (Name = "velocity")] public double[] Velocity { get; set; }
+        [DataMember (Name = "effort")] public double[] Effort { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public JointState()
         {
-            header = new std_msgs.Header();
-            name = System.Array.Empty<string>();
-            position = System.Array.Empty<double>();
-            velocity = System.Array.Empty<double>();
-            effort = System.Array.Empty<double>();
+            Header = new StdMsgs.Header();
+            Name = System.Array.Empty<string>();
+            Position = System.Array.Empty<double>();
+            Velocity = System.Array.Empty<double>();
+            Effort = System.Array.Empty<double>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public JointState(std_msgs.Header header, string[] name, double[] position, double[] velocity, double[] effort)
+        public JointState(StdMsgs.Header Header, string[] Name, double[] Position, double[] Velocity, double[] Effort)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.name = name ?? throw new System.ArgumentNullException(nameof(name));
-            this.position = position ?? throw new System.ArgumentNullException(nameof(position));
-            this.velocity = velocity ?? throw new System.ArgumentNullException(nameof(velocity));
-            this.effort = effort ?? throw new System.ArgumentNullException(nameof(effort));
+            this.Header = Header;
+            this.Name = Name;
+            this.Position = Position;
+            this.Velocity = Velocity;
+            this.Effort = Effort;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal JointState(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.name = b.DeserializeStringArray();
-            this.position = b.DeserializeStructArray<double>();
-            this.velocity = b.DeserializeStructArray<double>();
-            this.effort = b.DeserializeStructArray<double>();
+            Header = new StdMsgs.Header(b);
+            Name = b.DeserializeStringArray();
+            Position = b.DeserializeStructArray<double>();
+            Velocity = b.DeserializeStructArray<double>();
+            Effort = b.DeserializeStructArray<double>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -70,40 +67,40 @@ namespace Iviz.Msgs.sensor_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.SerializeArray(this.name, 0);
-            b.SerializeStructArray(this.position, 0);
-            b.SerializeStructArray(this.velocity, 0);
-            b.SerializeStructArray(this.effort, 0);
+            b.Serialize(Header);
+            b.SerializeArray(Name, 0);
+            b.SerializeStructArray(Position, 0);
+            b.SerializeStructArray(Velocity, 0);
+            b.SerializeStructArray(Effort, 0);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (name is null) throw new System.NullReferenceException();
-            for (int i = 0; i < name.Length; i++)
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (Name is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Name.Length; i++)
             {
-                if (name[i] is null) throw new System.NullReferenceException();
+                if (Name[i] is null) throw new System.NullReferenceException();
             }
-            if (position is null) throw new System.NullReferenceException();
-            if (velocity is null) throw new System.NullReferenceException();
-            if (effort is null) throw new System.NullReferenceException();
+            if (Position is null) throw new System.NullReferenceException();
+            if (Velocity is null) throw new System.NullReferenceException();
+            if (Effort is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 16;
-                size += header.RosMessageLength;
-                size += 4 * name.Length;
-                for (int i = 0; i < name.Length; i++)
+                size += Header.RosMessageLength;
+                size += 4 * Name.Length;
+                for (int i = 0; i < Name.Length; i++)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(name[i]);
+                    size += BuiltIns.UTF8.GetByteCount(Name[i]);
                 }
-                size += 8 * position.Length;
-                size += 8 * velocity.Length;
-                size += 8 * effort.Length;
+                size += 8 * Position.Length;
+                size += 8 * Velocity.Length;
+                size += 8 * Effort.Length;
                 return size;
             }
         }

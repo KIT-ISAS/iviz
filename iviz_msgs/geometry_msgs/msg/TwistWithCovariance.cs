@@ -1,40 +1,37 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.geometry_msgs
+namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract]
+    [DataContract (Name = "geometry_msgs/TwistWithCovariance")]
     public sealed class TwistWithCovariance : IMessage
     {
         // This expresses velocity in free space with uncertainty.
-        
-        [DataMember] public Twist twist { get; set; }
-        
+        [DataMember (Name = "twist")] public Twist Twist { get; set; }
         // Row-major representation of the 6x6 covariance matrix
         // The orientation parameters use a fixed-axis representation.
         // In order, the parameters are:
         // (x, y, z, rotation about X axis, rotation about Y axis, rotation about Z axis)
-        [DataMember] public double[/*36*/] covariance { get; set; }
+        [DataMember (Name = "covariance")] public double[/*36*/] Covariance { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TwistWithCovariance()
         {
-            twist = new Twist();
-            covariance = new double[36];
+            Twist = new Twist();
+            Covariance = new double[36];
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TwistWithCovariance(Twist twist, double[] covariance)
+        public TwistWithCovariance(Twist Twist, double[] Covariance)
         {
-            this.twist = twist ?? throw new System.ArgumentNullException(nameof(twist));
-            this.covariance = covariance ?? throw new System.ArgumentNullException(nameof(covariance));
-            if (this.covariance.Length != 36) throw new System.ArgumentException("Invalid size", nameof(covariance));
+            this.Twist = Twist;
+            this.Covariance = Covariance;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal TwistWithCovariance(Buffer b)
         {
-            this.twist = new Twist(b);
-            this.covariance = b.DeserializeStructArray<double>(36);
+            Twist = new Twist(b);
+            Covariance = b.DeserializeStructArray<double>(36);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -45,16 +42,16 @@ namespace Iviz.Msgs.geometry_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.twist);
-            b.SerializeStructArray(this.covariance, 36);
+            b.Serialize(Twist);
+            b.SerializeStructArray(Covariance, 36);
         }
         
         public void Validate()
         {
-            if (twist is null) throw new System.NullReferenceException();
-            twist.Validate();
-            if (covariance is null) throw new System.NullReferenceException();
-            if (covariance.Length != 36) throw new System.IndexOutOfRangeException();
+            if (Twist is null) throw new System.NullReferenceException();
+            Twist.Validate();
+            if (Covariance is null) throw new System.NullReferenceException();
+            if (Covariance.Length != 36) throw new System.IndexOutOfRangeException();
         }
     
         public int RosMessageLength => 336;

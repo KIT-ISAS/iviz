@@ -1,11 +1,11 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.geometry_msgs
+namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract]
+    [DataContract (Name = "geometry_msgs/Vector3")]
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct Vector3 : IMessage
+    public struct Vector3 : IMessage
     {
         // This represents a vector in free space. 
         // It is only meant to represent a direction. Therefore, it does not
@@ -13,17 +13,16 @@ namespace Iviz.Msgs.geometry_msgs
         // generic rigid transformation to a Vector3, tf2 will only apply the
         // rotation). If you want your data to be translatable too, use the
         // geometry_msgs/Point message instead.
-        
-        [DataMember] public double x { get; }
-        [DataMember] public double y { get; }
-        [DataMember] public double z { get; }
+        [DataMember (Name = "x")] public double X { get; set; }
+        [DataMember (Name = "y")] public double Y { get; set; }
+        [DataMember (Name = "z")] public double Z { get; set; }
     
         /// <summary> Explicit constructor. </summary>
-        public Vector3(double x, double y, double z)
+        public Vector3(double X, double Y, double Z)
         {
-            this.x = x;
-            this.y = y;
-            this.z = z;
+            this.X = X;
+            this.Y = Y;
+            this.Z = Z;
         }
         
         /// <summary> Constructor with buffer. </summary>

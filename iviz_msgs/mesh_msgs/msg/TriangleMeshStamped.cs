@@ -1,32 +1,32 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.mesh_msgs
+namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract]
+    [DataContract (Name = "mesh_msgs/TriangleMeshStamped")]
     public sealed class TriangleMeshStamped : IMessage
     {
-        [DataMember] public std_msgs.Header header { get; set; }
-        [DataMember] public mesh_msgs.TriangleMesh mesh { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "mesh")] public MeshMsgs.TriangleMesh Mesh { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TriangleMeshStamped()
         {
-            header = new std_msgs.Header();
-            mesh = new mesh_msgs.TriangleMesh();
+            Header = new StdMsgs.Header();
+            Mesh = new MeshMsgs.TriangleMesh();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TriangleMeshStamped(std_msgs.Header header, mesh_msgs.TriangleMesh mesh)
+        public TriangleMeshStamped(StdMsgs.Header Header, MeshMsgs.TriangleMesh Mesh)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.mesh = mesh ?? throw new System.ArgumentNullException(nameof(mesh));
+            this.Header = Header;
+            this.Mesh = Mesh;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal TriangleMeshStamped(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.mesh = new mesh_msgs.TriangleMesh(b);
+            Header = new StdMsgs.Header(b);
+            Mesh = new MeshMsgs.TriangleMesh(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -37,24 +37,24 @@ namespace Iviz.Msgs.mesh_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.mesh);
+            b.Serialize(Header);
+            b.Serialize(Mesh);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (mesh is null) throw new System.NullReferenceException();
-            mesh.Validate();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (Mesh is null) throw new System.NullReferenceException();
+            Mesh.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 0;
-                size += header.RosMessageLength;
-                size += mesh.RosMessageLength;
+                size += Header.RosMessageLength;
+                size += Mesh.RosMessageLength;
                 return size;
             }
         }

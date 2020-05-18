@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosbridge_library
+namespace Iviz.Msgs.RosbridgeLibrary
 {
-    [DataContract]
+    [DataContract (Name = "rosbridge_library/TestArrayRequest")]
     public sealed class TestArrayRequest : IService
     {
         /// <summary> Request message. </summary>
@@ -52,7 +52,7 @@ namespace Iviz.Msgs.rosbridge_library
 
     public sealed class TestArrayRequestRequest : IRequest
     {
-        [DataMember] public int[] @int { get; set; }
+        [DataMember (Name = "int")] public int[] @int { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TestArrayRequestRequest()
@@ -63,13 +63,13 @@ namespace Iviz.Msgs.rosbridge_library
         /// <summary> Explicit constructor. </summary>
         public TestArrayRequestRequest(int[] @int)
         {
-            this.@int = @int ?? throw new System.ArgumentNullException(nameof(@int));
+            this.@int = @int;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal TestArrayRequestRequest(Buffer b)
         {
-            this.@int = b.DeserializeStructArray<int>();
+            @int = b.DeserializeStructArray<int>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -80,7 +80,7 @@ namespace Iviz.Msgs.rosbridge_library
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeStructArray(this.@int, 0);
+            b.SerializeStructArray(@int, 0);
         }
         
         public void Validate()

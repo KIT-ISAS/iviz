@@ -1,43 +1,39 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.sensor_msgs
+namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract]
+    [DataContract (Name = "sensor_msgs/FluidPressure")]
     public sealed class FluidPressure : IMessage
     {
         // Single pressure reading.  This message is appropriate for measuring the
         // pressure inside of a fluid (air, water, etc).  This also includes
         // atmospheric or barometric pressure.
-        
         // This message is not appropriate for force/pressure contact sensors.
-        
-        [DataMember] public std_msgs.Header header { get; set; } // timestamp of the measurement
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; } // timestamp of the measurement
         // frame_id is the location of the pressure sensor
-        
-        [DataMember] public double fluid_pressure { get; set; } // Absolute pressure reading in Pascals.
-        
-        [DataMember] public double variance { get; set; } // 0 is interpreted as variance unknown
+        [DataMember (Name = "fluid_pressure")] public double FluidPressure_ { get; set; } // Absolute pressure reading in Pascals.
+        [DataMember (Name = "variance")] public double Variance { get; set; } // 0 is interpreted as variance unknown
     
         /// <summary> Constructor for empty message. </summary>
         public FluidPressure()
         {
-            header = new std_msgs.Header();
+            Header = new StdMsgs.Header();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public FluidPressure(std_msgs.Header header, double fluid_pressure, double variance)
+        public FluidPressure(StdMsgs.Header Header, double FluidPressure_, double Variance)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.fluid_pressure = fluid_pressure;
-            this.variance = variance;
+            this.Header = Header;
+            this.FluidPressure_ = FluidPressure_;
+            this.Variance = Variance;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal FluidPressure(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.fluid_pressure = b.Deserialize<double>();
-            this.variance = b.Deserialize<double>();
+            Header = new StdMsgs.Header(b);
+            FluidPressure_ = b.Deserialize<double>();
+            Variance = b.Deserialize<double>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -48,22 +44,22 @@ namespace Iviz.Msgs.sensor_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.fluid_pressure);
-            b.Serialize(this.variance);
+            b.Serialize(Header);
+            b.Serialize(this.FluidPressure_);
+            b.Serialize(this.Variance);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 16;
-                size += header.RosMessageLength;
+                size += Header.RosMessageLength;
                 return size;
             }
         }

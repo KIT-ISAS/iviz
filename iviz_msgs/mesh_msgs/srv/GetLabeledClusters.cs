@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.mesh_msgs
+namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract]
+    [DataContract (Name = "mesh_msgs/GetLabeledClusters")]
     public sealed class GetLabeledClusters : IService
     {
         /// <summary> Request message. </summary>
@@ -52,24 +52,24 @@ namespace Iviz.Msgs.mesh_msgs
 
     public sealed class GetLabeledClustersRequest : IRequest
     {
-        [DataMember] public string uuid { get; set; }
+        [DataMember (Name = "uuid")] public string Uuid { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetLabeledClustersRequest()
         {
-            uuid = "";
+            Uuid = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GetLabeledClustersRequest(string uuid)
+        public GetLabeledClustersRequest(string Uuid)
         {
-            this.uuid = uuid ?? throw new System.ArgumentNullException(nameof(uuid));
+            this.Uuid = Uuid;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal GetLabeledClustersRequest(Buffer b)
         {
-            this.uuid = b.DeserializeString();
+            Uuid = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -80,19 +80,19 @@ namespace Iviz.Msgs.mesh_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.uuid);
+            b.Serialize(this.Uuid);
         }
         
         public void Validate()
         {
-            if (uuid is null) throw new System.NullReferenceException();
+            if (Uuid is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(uuid);
+                size += BuiltIns.UTF8.GetByteCount(Uuid);
                 return size;
             }
         }
@@ -100,27 +100,27 @@ namespace Iviz.Msgs.mesh_msgs
 
     public sealed class GetLabeledClustersResponse : IResponse
     {
-        [DataMember] public MeshFaceCluster[] clusters { get; set; }
+        [DataMember (Name = "clusters")] public MeshFaceCluster[] Clusters { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetLabeledClustersResponse()
         {
-            clusters = System.Array.Empty<MeshFaceCluster>();
+            Clusters = System.Array.Empty<MeshFaceCluster>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GetLabeledClustersResponse(MeshFaceCluster[] clusters)
+        public GetLabeledClustersResponse(MeshFaceCluster[] Clusters)
         {
-            this.clusters = clusters ?? throw new System.ArgumentNullException(nameof(clusters));
+            this.Clusters = Clusters;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal GetLabeledClustersResponse(Buffer b)
         {
-            this.clusters = b.DeserializeArray<MeshFaceCluster>();
-            for (int i = 0; i < this.clusters.Length; i++)
+            Clusters = b.DeserializeArray<MeshFaceCluster>();
+            for (int i = 0; i < this.Clusters.Length; i++)
             {
-                this.clusters[i] = new MeshFaceCluster(b);
+                Clusters[i] = new MeshFaceCluster(b);
             }
         }
         
@@ -132,16 +132,16 @@ namespace Iviz.Msgs.mesh_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeArray(this.clusters, 0);
+            b.SerializeArray(Clusters, 0);
         }
         
         public void Validate()
         {
-            if (clusters is null) throw new System.NullReferenceException();
-            for (int i = 0; i < clusters.Length; i++)
+            if (Clusters is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Clusters.Length; i++)
             {
-                if (clusters[i] is null) throw new System.NullReferenceException();
-                clusters[i].Validate();
+                if (Clusters[i] is null) throw new System.NullReferenceException();
+                Clusters[i].Validate();
             }
         }
     
@@ -149,9 +149,9 @@ namespace Iviz.Msgs.mesh_msgs
         {
             get {
                 int size = 4;
-                for (int i = 0; i < clusters.Length; i++)
+                for (int i = 0; i < Clusters.Length; i++)
                 {
-                    size += clusters[i].RosMessageLength;
+                    size += Clusters[i].RosMessageLength;
                 }
                 return size;
             }

@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.mesh_msgs
+namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract]
+    [DataContract (Name = "mesh_msgs/GetMaterials")]
     public sealed class GetMaterials : IService
     {
         /// <summary> Request message. </summary>
@@ -52,24 +52,24 @@ namespace Iviz.Msgs.mesh_msgs
 
     public sealed class GetMaterialsRequest : IRequest
     {
-        [DataMember] public string uuid { get; set; }
+        [DataMember (Name = "uuid")] public string Uuid { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetMaterialsRequest()
         {
-            uuid = "";
+            Uuid = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GetMaterialsRequest(string uuid)
+        public GetMaterialsRequest(string Uuid)
         {
-            this.uuid = uuid ?? throw new System.ArgumentNullException(nameof(uuid));
+            this.Uuid = Uuid;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal GetMaterialsRequest(Buffer b)
         {
-            this.uuid = b.DeserializeString();
+            Uuid = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -80,19 +80,19 @@ namespace Iviz.Msgs.mesh_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.uuid);
+            b.Serialize(this.Uuid);
         }
         
         public void Validate()
         {
-            if (uuid is null) throw new System.NullReferenceException();
+            if (Uuid is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(uuid);
+                size += BuiltIns.UTF8.GetByteCount(Uuid);
                 return size;
             }
         }
@@ -100,24 +100,24 @@ namespace Iviz.Msgs.mesh_msgs
 
     public sealed class GetMaterialsResponse : IResponse
     {
-        [DataMember] public mesh_msgs.MeshMaterialsStamped mesh_materials_stamped { get; set; }
+        [DataMember (Name = "mesh_materials_stamped")] public MeshMsgs.MeshMaterialsStamped MeshMaterialsStamped { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetMaterialsResponse()
         {
-            mesh_materials_stamped = new mesh_msgs.MeshMaterialsStamped();
+            MeshMaterialsStamped = new MeshMsgs.MeshMaterialsStamped();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GetMaterialsResponse(mesh_msgs.MeshMaterialsStamped mesh_materials_stamped)
+        public GetMaterialsResponse(MeshMsgs.MeshMaterialsStamped MeshMaterialsStamped)
         {
-            this.mesh_materials_stamped = mesh_materials_stamped ?? throw new System.ArgumentNullException(nameof(mesh_materials_stamped));
+            this.MeshMaterialsStamped = MeshMaterialsStamped;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal GetMaterialsResponse(Buffer b)
         {
-            this.mesh_materials_stamped = new mesh_msgs.MeshMaterialsStamped(b);
+            MeshMaterialsStamped = new MeshMsgs.MeshMaterialsStamped(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -128,20 +128,20 @@ namespace Iviz.Msgs.mesh_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.mesh_materials_stamped);
+            b.Serialize(MeshMaterialsStamped);
         }
         
         public void Validate()
         {
-            if (mesh_materials_stamped is null) throw new System.NullReferenceException();
-            mesh_materials_stamped.Validate();
+            if (MeshMaterialsStamped is null) throw new System.NullReferenceException();
+            MeshMaterialsStamped.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 0;
-                size += mesh_materials_stamped.RosMessageLength;
+                size += MeshMaterialsStamped.RosMessageLength;
                 return size;
             }
         }

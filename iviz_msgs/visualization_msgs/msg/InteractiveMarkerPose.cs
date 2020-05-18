@@ -1,41 +1,39 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.visualization_msgs
+namespace Iviz.Msgs.VisualizationMsgs
 {
-    [DataContract]
+    [DataContract (Name = "visualization_msgs/InteractiveMarkerPose")]
     public sealed class InteractiveMarkerPose : IMessage
     {
         // Time/frame info.
-        [DataMember] public std_msgs.Header header { get; set; }
-        
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         // Initial pose. Also, defines the pivot point for rotations.
-        [DataMember] public geometry_msgs.Pose pose { get; set; }
-        
+        [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose { get; set; }
         // Identifying string. Must be globally unique in
         // the topic that this message is sent through.
-        [DataMember] public string name { get; set; }
+        [DataMember (Name = "name")] public string Name { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarkerPose()
         {
-            header = new std_msgs.Header();
-            name = "";
+            Header = new StdMsgs.Header();
+            Name = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public InteractiveMarkerPose(std_msgs.Header header, geometry_msgs.Pose pose, string name)
+        public InteractiveMarkerPose(StdMsgs.Header Header, GeometryMsgs.Pose Pose, string Name)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.pose = pose;
-            this.name = name ?? throw new System.ArgumentNullException(nameof(name));
+            this.Header = Header;
+            this.Pose = Pose;
+            this.Name = Name;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal InteractiveMarkerPose(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.pose = new geometry_msgs.Pose(b);
-            this.name = b.DeserializeString();
+            Header = new StdMsgs.Header(b);
+            Pose = new GeometryMsgs.Pose(b);
+            Name = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -46,24 +44,24 @@ namespace Iviz.Msgs.visualization_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.pose);
-            b.Serialize(this.name);
+            b.Serialize(Header);
+            b.Serialize(Pose);
+            b.Serialize(this.Name);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (name is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (Name is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 60;
-                size += header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(name);
+                size += Header.RosMessageLength;
+                size += BuiltIns.UTF8.GetByteCount(Name);
                 return size;
             }
         }

@@ -1,32 +1,32 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.mesh_msgs
+namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract]
+    [DataContract (Name = "mesh_msgs/VectorField")]
     public sealed class VectorField : IMessage
     {
-        [DataMember] public geometry_msgs.Point[] positions { get; set; }
-        [DataMember] public geometry_msgs.Vector3[] vectors { get; set; }
+        [DataMember (Name = "positions")] public GeometryMsgs.Point[] Positions { get; set; }
+        [DataMember (Name = "vectors")] public GeometryMsgs.Vector3[] Vectors { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public VectorField()
         {
-            positions = System.Array.Empty<geometry_msgs.Point>();
-            vectors = System.Array.Empty<geometry_msgs.Vector3>();
+            Positions = System.Array.Empty<GeometryMsgs.Point>();
+            Vectors = System.Array.Empty<GeometryMsgs.Vector3>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public VectorField(geometry_msgs.Point[] positions, geometry_msgs.Vector3[] vectors)
+        public VectorField(GeometryMsgs.Point[] Positions, GeometryMsgs.Vector3[] Vectors)
         {
-            this.positions = positions ?? throw new System.ArgumentNullException(nameof(positions));
-            this.vectors = vectors ?? throw new System.ArgumentNullException(nameof(vectors));
+            this.Positions = Positions;
+            this.Vectors = Vectors;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal VectorField(Buffer b)
         {
-            this.positions = b.DeserializeStructArray<geometry_msgs.Point>();
-            this.vectors = b.DeserializeStructArray<geometry_msgs.Vector3>();
+            Positions = b.DeserializeStructArray<GeometryMsgs.Point>();
+            Vectors = b.DeserializeStructArray<GeometryMsgs.Vector3>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -37,22 +37,22 @@ namespace Iviz.Msgs.mesh_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeStructArray(this.positions, 0);
-            b.SerializeStructArray(this.vectors, 0);
+            b.SerializeStructArray(Positions, 0);
+            b.SerializeStructArray(Vectors, 0);
         }
         
         public void Validate()
         {
-            if (positions is null) throw new System.NullReferenceException();
-            if (vectors is null) throw new System.NullReferenceException();
+            if (Positions is null) throw new System.NullReferenceException();
+            if (Vectors is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 8;
-                size += 24 * positions.Length;
-                size += 24 * vectors.Length;
+                size += 24 * Positions.Length;
+                size += 24 * Vectors.Length;
                 return size;
             }
         }

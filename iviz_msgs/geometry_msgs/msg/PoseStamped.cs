@@ -1,32 +1,32 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.geometry_msgs
+namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract]
+    [DataContract (Name = "geometry_msgs/PoseStamped")]
     public sealed class PoseStamped : IMessage
     {
         // A Pose with reference coordinate frame and timestamp
-        [DataMember] public std_msgs.Header header { get; set; }
-        [DataMember] public Pose pose { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "pose")] public Pose Pose { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public PoseStamped()
         {
-            header = new std_msgs.Header();
+            Header = new StdMsgs.Header();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public PoseStamped(std_msgs.Header header, Pose pose)
+        public PoseStamped(StdMsgs.Header Header, Pose Pose)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.pose = pose;
+            this.Header = Header;
+            this.Pose = Pose;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal PoseStamped(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.pose = new Pose(b);
+            Header = new StdMsgs.Header(b);
+            Pose = new Pose(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -37,21 +37,21 @@ namespace Iviz.Msgs.geometry_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.pose);
+            b.Serialize(Header);
+            b.Serialize(Pose);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 56;
-                size += header.RosMessageLength;
+                size += Header.RosMessageLength;
                 return size;
             }
         }

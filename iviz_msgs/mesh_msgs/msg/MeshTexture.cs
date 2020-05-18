@@ -1,36 +1,36 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.mesh_msgs
+namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract]
+    [DataContract (Name = "mesh_msgs/MeshTexture")]
     public sealed class MeshTexture : IMessage
     {
         // Mesh Attribute Message
-        [DataMember] public string uuid { get; set; }
-        [DataMember] public uint texture_index { get; set; }
-        [DataMember] public sensor_msgs.Image image { get; set; }
+        [DataMember (Name = "uuid")] public string Uuid { get; set; }
+        [DataMember (Name = "texture_index")] public uint TextureIndex { get; set; }
+        [DataMember (Name = "image")] public SensorMsgs.Image Image { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshTexture()
         {
-            uuid = "";
-            image = new sensor_msgs.Image();
+            Uuid = "";
+            Image = new SensorMsgs.Image();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MeshTexture(string uuid, uint texture_index, sensor_msgs.Image image)
+        public MeshTexture(string Uuid, uint TextureIndex, SensorMsgs.Image Image)
         {
-            this.uuid = uuid ?? throw new System.ArgumentNullException(nameof(uuid));
-            this.texture_index = texture_index;
-            this.image = image ?? throw new System.ArgumentNullException(nameof(image));
+            this.Uuid = Uuid;
+            this.TextureIndex = TextureIndex;
+            this.Image = Image;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal MeshTexture(Buffer b)
         {
-            this.uuid = b.DeserializeString();
-            this.texture_index = b.Deserialize<uint>();
-            this.image = new sensor_msgs.Image(b);
+            Uuid = b.DeserializeString();
+            TextureIndex = b.Deserialize<uint>();
+            Image = new SensorMsgs.Image(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -41,24 +41,24 @@ namespace Iviz.Msgs.mesh_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.uuid);
-            b.Serialize(this.texture_index);
-            b.Serialize(this.image);
+            b.Serialize(this.Uuid);
+            b.Serialize(this.TextureIndex);
+            b.Serialize(Image);
         }
         
         public void Validate()
         {
-            if (uuid is null) throw new System.NullReferenceException();
-            if (image is null) throw new System.NullReferenceException();
-            image.Validate();
+            if (Uuid is null) throw new System.NullReferenceException();
+            if (Image is null) throw new System.NullReferenceException();
+            Image.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 8;
-                size += BuiltIns.UTF8.GetByteCount(uuid);
-                size += image.RosMessageLength;
+                size += BuiltIns.UTF8.GetByteCount(Uuid);
+                size += Image.RosMessageLength;
                 return size;
             }
         }

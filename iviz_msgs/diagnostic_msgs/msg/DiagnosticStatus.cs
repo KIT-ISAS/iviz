@@ -1,56 +1,53 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.diagnostic_msgs
+namespace Iviz.Msgs.DiagnosticMsgs
 {
-    [DataContract]
+    [DataContract (Name = "diagnostic_msgs/DiagnosticStatus")]
     public sealed class DiagnosticStatus : IMessage
     {
         // This message holds the status of an individual component of the robot.
         // 
-        
         // Possible levels of operations
         public const byte OK = 0;
         public const byte WARN = 1;
         public const byte ERROR = 2;
         public const byte STALE = 3;
-        
-        [DataMember] public byte level { get; set; } // level of operation enumerated above 
-        [DataMember] public string name { get; set; } // a description of the test/component reporting
-        [DataMember] public string message { get; set; } // a description of the status
-        [DataMember] public string hardware_id { get; set; } // a hardware unique string
-        [DataMember] public KeyValue[] values { get; set; } // an array of values associated with the status
-        
+        [DataMember (Name = "level")] public byte Level { get; set; } // level of operation enumerated above 
+        [DataMember (Name = "name")] public string Name { get; set; } // a description of the test/component reporting
+        [DataMember (Name = "message")] public string Message { get; set; } // a description of the status
+        [DataMember (Name = "hardware_id")] public string HardwareId { get; set; } // a hardware unique string
+        [DataMember (Name = "values")] public KeyValue[] Values { get; set; } // an array of values associated with the status
     
         /// <summary> Constructor for empty message. </summary>
         public DiagnosticStatus()
         {
-            name = "";
-            message = "";
-            hardware_id = "";
-            values = System.Array.Empty<KeyValue>();
+            Name = "";
+            Message = "";
+            HardwareId = "";
+            Values = System.Array.Empty<KeyValue>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public DiagnosticStatus(byte level, string name, string message, string hardware_id, KeyValue[] values)
+        public DiagnosticStatus(byte Level, string Name, string Message, string HardwareId, KeyValue[] Values)
         {
-            this.level = level;
-            this.name = name ?? throw new System.ArgumentNullException(nameof(name));
-            this.message = message ?? throw new System.ArgumentNullException(nameof(message));
-            this.hardware_id = hardware_id ?? throw new System.ArgumentNullException(nameof(hardware_id));
-            this.values = values ?? throw new System.ArgumentNullException(nameof(values));
+            this.Level = Level;
+            this.Name = Name;
+            this.Message = Message;
+            this.HardwareId = HardwareId;
+            this.Values = Values;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal DiagnosticStatus(Buffer b)
         {
-            this.level = b.Deserialize<byte>();
-            this.name = b.DeserializeString();
-            this.message = b.DeserializeString();
-            this.hardware_id = b.DeserializeString();
-            this.values = b.DeserializeArray<KeyValue>();
-            for (int i = 0; i < this.values.Length; i++)
+            Level = b.Deserialize<byte>();
+            Name = b.DeserializeString();
+            Message = b.DeserializeString();
+            HardwareId = b.DeserializeString();
+            Values = b.DeserializeArray<KeyValue>();
+            for (int i = 0; i < this.Values.Length; i++)
             {
-                this.values[i] = new KeyValue(b);
+                Values[i] = new KeyValue(b);
             }
         }
         
@@ -62,23 +59,23 @@ namespace Iviz.Msgs.diagnostic_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.level);
-            b.Serialize(this.name);
-            b.Serialize(this.message);
-            b.Serialize(this.hardware_id);
-            b.SerializeArray(this.values, 0);
+            b.Serialize(this.Level);
+            b.Serialize(this.Name);
+            b.Serialize(this.Message);
+            b.Serialize(this.HardwareId);
+            b.SerializeArray(Values, 0);
         }
         
         public void Validate()
         {
-            if (name is null) throw new System.NullReferenceException();
-            if (message is null) throw new System.NullReferenceException();
-            if (hardware_id is null) throw new System.NullReferenceException();
-            if (values is null) throw new System.NullReferenceException();
-            for (int i = 0; i < values.Length; i++)
+            if (Name is null) throw new System.NullReferenceException();
+            if (Message is null) throw new System.NullReferenceException();
+            if (HardwareId is null) throw new System.NullReferenceException();
+            if (Values is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Values.Length; i++)
             {
-                if (values[i] is null) throw new System.NullReferenceException();
-                values[i].Validate();
+                if (Values[i] is null) throw new System.NullReferenceException();
+                Values[i].Validate();
             }
         }
     
@@ -86,12 +83,12 @@ namespace Iviz.Msgs.diagnostic_msgs
         {
             get {
                 int size = 17;
-                size += BuiltIns.UTF8.GetByteCount(name);
-                size += BuiltIns.UTF8.GetByteCount(message);
-                size += BuiltIns.UTF8.GetByteCount(hardware_id);
-                for (int i = 0; i < values.Length; i++)
+                size += BuiltIns.UTF8.GetByteCount(Name);
+                size += BuiltIns.UTF8.GetByteCount(Message);
+                size += BuiltIns.UTF8.GetByteCount(HardwareId);
+                for (int i = 0; i < Values.Length; i++)
                 {
-                    size += values[i].RosMessageLength;
+                    size += Values[i].RosMessageLength;
                 }
                 return size;
             }

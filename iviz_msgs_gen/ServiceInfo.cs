@@ -9,6 +9,7 @@ namespace Iviz.MsgsGen
 {
     public class ServiceInfo
     {
+        public readonly string rosPackage;
         public readonly string package;
         public readonly string name;
         //public readonly string[] lines;
@@ -29,12 +30,13 @@ namespace Iviz.MsgsGen
         {
             Console.WriteLine("-- Parsing '" + path + "'");
 
-            this.package = package;
+            this.rosPackage = package;
+            this.package = MsgParser.Sanitize(package);
             name = Path.GetFileNameWithoutExtension(path);
             string[] lines = File.ReadAllLines(path);
             fullMessage = File.ReadAllText(path);
 
-            List<MsgParser.IElement> elements = MsgParser.ParseFile(lines);
+            List<MsgParser.IElement> elements = MsgParser.ParseFile(lines, name);
             int serviceSeparator = elements.FindIndex(x => x.Type == MsgParser.ElementType.ServiceSeparator);
             if (serviceSeparator == -1)
             {
@@ -60,8 +62,8 @@ namespace Iviz.MsgsGen
 
         public void ResolveClasses(PackageInfo packageInfo)
         {
-            ClassInfo.DoResolveClasses(packageInfo, package, variablesReq);
-            ClassInfo.DoResolveClasses(packageInfo, package, variablesResp);
+            ClassInfo.DoResolveClasses(packageInfo, rosPackage, variablesReq);
+            ClassInfo.DoResolveClasses(packageInfo, rosPackage, variablesResp);
         }
 
         public void CheckFixedSize()
@@ -97,7 +99,11 @@ namespace Iviz.MsgsGen
 
             foreach (var element in elements)
             {
-                lines.Add("    " + element.ToCString());
+                var sublines = element.ToCString(forceStruct);
+                foreach (var entry in sublines)
+                {
+                    lines.Add("    " + entry);
+                }
             }
 
             lines.Add("");
@@ -300,7 +306,7 @@ namespace Iviz.MsgsGen
 
             lines.Add("");
             lines.Add("/// <summary> Full ROS name of this service. </summary>");
-            lines.Add("[Preserve] public const string RosServiceType = \"" + package + "/" + name + "\";");
+            lines.Add("[Preserve] public const string RosServiceType = \"" + rosPackage + "/" + name + "\";");
 
             lines.Add("");
             string md5 = GetMd5();
@@ -323,7 +329,7 @@ namespace Iviz.MsgsGen
             str.AppendLine("");
             str.AppendLine("namespace Iviz.Msgs." + package);
             str.AppendLine("{");
-            str.AppendLine("    [DataContract]");
+            str.AppendLine("    [DataContract (Name = \"" + rosPackage + "/" + name + "\")]");
             str.AppendLine("    public sealed class " + name + " : IService");
             str.AppendLine("    {");
 

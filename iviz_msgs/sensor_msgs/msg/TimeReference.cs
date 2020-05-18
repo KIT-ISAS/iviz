@@ -1,39 +1,37 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.sensor_msgs
+namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract]
+    [DataContract (Name = "sensor_msgs/TimeReference")]
     public sealed class TimeReference : IMessage
     {
         // Measurement from an external time source not actively synchronized with the system clock.
-        
-        [DataMember] public std_msgs.Header header { get; set; } // stamp is system time for which measurement was valid
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; } // stamp is system time for which measurement was valid
         // frame_id is not used 
-        
-        [DataMember] public time time_ref { get; set; } // corresponding time from this external source
-        [DataMember] public string source { get; set; } // (optional) name of time source
+        [DataMember (Name = "time_ref")] public time TimeRef { get; set; } // corresponding time from this external source
+        [DataMember (Name = "source")] public string Source { get; set; } // (optional) name of time source
     
         /// <summary> Constructor for empty message. </summary>
         public TimeReference()
         {
-            header = new std_msgs.Header();
-            source = "";
+            Header = new StdMsgs.Header();
+            Source = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TimeReference(std_msgs.Header header, time time_ref, string source)
+        public TimeReference(StdMsgs.Header Header, time TimeRef, string Source)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.time_ref = time_ref;
-            this.source = source ?? throw new System.ArgumentNullException(nameof(source));
+            this.Header = Header;
+            this.TimeRef = TimeRef;
+            this.Source = Source;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal TimeReference(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.time_ref = b.Deserialize<time>();
-            this.source = b.DeserializeString();
+            Header = new StdMsgs.Header(b);
+            TimeRef = b.Deserialize<time>();
+            Source = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -44,24 +42,24 @@ namespace Iviz.Msgs.sensor_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.time_ref);
-            b.Serialize(this.source);
+            b.Serialize(Header);
+            b.Serialize(this.TimeRef);
+            b.Serialize(this.Source);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (source is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (Source is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 12;
-                size += header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(source);
+                size += Header.RosMessageLength;
+                size += BuiltIns.UTF8.GetByteCount(Source);
                 return size;
             }
         }

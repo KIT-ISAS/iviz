@@ -1,14 +1,14 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosgraph_msgs
+namespace Iviz.Msgs.RosgraphMsgs
 {
-    [DataContract]
+    [DataContract (Name = "rosgraph_msgs/Clock")]
     public sealed class Clock : IMessage
     {
         // roslib/Clock is used for publishing simulated time in ROS. 
         // This message simply communicates the current time.
         // For more information, see http://www.ros.org/wiki/Clock
-        [DataMember] public time clock { get; set; }
+        [DataMember (Name = "clock")] public time Clock_ { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Clock()
@@ -16,15 +16,15 @@ namespace Iviz.Msgs.rosgraph_msgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Clock(time clock)
+        public Clock(time Clock_)
         {
-            this.clock = clock;
+            this.Clock_ = Clock_;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal Clock(Buffer b)
         {
-            this.clock = b.Deserialize<time>();
+            Clock_ = b.Deserialize<time>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -35,7 +35,7 @@ namespace Iviz.Msgs.rosgraph_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.clock);
+            b.Serialize(this.Clock_);
         }
         
         public void Validate()

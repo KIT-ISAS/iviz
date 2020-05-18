@@ -29,7 +29,7 @@ namespace Iviz.MsgsGen
                 {
                     continue;
                 }
-                string packageDir = IvizMsgPaths + "/" + classInfo.package + "/msg/";
+                string packageDir = IvizMsgPaths + "/" + classInfo.rosPackage + "/msg/";
                 Directory.CreateDirectory(packageDir);
                 string text = classInfo.ToCString();
                 File.WriteAllText(packageDir + classInfo.name + ".cs", text);
@@ -37,7 +37,7 @@ namespace Iviz.MsgsGen
 
             foreach (ServiceInfo classInfo in p.services.Values)
             {
-                string packageDir = IvizMsgPaths + "/" + classInfo.package + "/srv/";
+                string packageDir = IvizMsgPaths + "/" + classInfo.rosPackage + "/srv/";
                 Directory.CreateDirectory(packageDir);
                 string text = classInfo.ToCString();
                 File.WriteAllText(packageDir + classInfo.name + ".cs", text);

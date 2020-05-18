@@ -1,15 +1,14 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.sensor_msgs
+namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract]
+    [DataContract (Name = "sensor_msgs/Image")]
     public sealed class Image : IMessage
     {
         // This message contains an uncompressed image
         // (0, 0) is at top-left corner of image
         //
-        
-        [DataMember] public std_msgs.Header header { get; set; } // Header timestamp should be acquisition time of image
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; } // Header timestamp should be acquisition time of image
         // Header frame_id should be optical frame of camera
         // origin of frame should be optical center of camera
         // +x should point to the right in the image
@@ -18,51 +17,47 @@ namespace Iviz.Msgs.sensor_msgs
         // If the frame_id here and the frame_id of the CameraInfo
         // message associated with the image conflict
         // the behavior is undefined
-        
-        [DataMember] public uint height { get; set; } // image height, that is, number of rows
-        [DataMember] public uint width { get; set; } // image width, that is, number of columns
-        
+        [DataMember (Name = "height")] public uint Height { get; set; } // image height, that is, number of rows
+        [DataMember (Name = "width")] public uint Width { get; set; } // image width, that is, number of columns
         // The legal values for encoding are in file src/image_encodings.cpp
         // If you want to standardize a new string format, join
         // ros-users@lists.sourceforge.net and send an email proposing a new encoding.
-        
-        [DataMember] public string encoding { get; set; } // Encoding of pixels -- channel meaning, ordering, size
+        [DataMember (Name = "encoding")] public string Encoding { get; set; } // Encoding of pixels -- channel meaning, ordering, size
         // taken from the list of strings in include/sensor_msgs/image_encodings.h
-        
-        [DataMember] public byte is_bigendian { get; set; } // is this data bigendian?
-        [DataMember] public uint step { get; set; } // Full row length in bytes
-        [DataMember] public byte[] data { get; set; } // actual matrix data, size is (step * rows)
+        [DataMember (Name = "is_bigendian")] public byte IsBigendian { get; set; } // is this data bigendian?
+        [DataMember (Name = "step")] public uint Step { get; set; } // Full row length in bytes
+        [DataMember (Name = "data")] public byte[] Data { get; set; } // actual matrix data, size is (step * rows)
     
         /// <summary> Constructor for empty message. </summary>
         public Image()
         {
-            header = new std_msgs.Header();
-            encoding = "";
-            data = System.Array.Empty<byte>();
+            Header = new StdMsgs.Header();
+            Encoding = "";
+            Data = System.Array.Empty<byte>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Image(std_msgs.Header header, uint height, uint width, string encoding, byte is_bigendian, uint step, byte[] data)
+        public Image(StdMsgs.Header Header, uint Height, uint Width, string Encoding, byte IsBigendian, uint Step, byte[] Data)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.height = height;
-            this.width = width;
-            this.encoding = encoding ?? throw new System.ArgumentNullException(nameof(encoding));
-            this.is_bigendian = is_bigendian;
-            this.step = step;
-            this.data = data ?? throw new System.ArgumentNullException(nameof(data));
+            this.Header = Header;
+            this.Height = Height;
+            this.Width = Width;
+            this.Encoding = Encoding;
+            this.IsBigendian = IsBigendian;
+            this.Step = Step;
+            this.Data = Data;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal Image(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.height = b.Deserialize<uint>();
-            this.width = b.Deserialize<uint>();
-            this.encoding = b.DeserializeString();
-            this.is_bigendian = b.Deserialize<byte>();
-            this.step = b.Deserialize<uint>();
-            this.data = b.DeserializeStructArray<byte>();
+            Header = new StdMsgs.Header(b);
+            Height = b.Deserialize<uint>();
+            Width = b.Deserialize<uint>();
+            Encoding = b.DeserializeString();
+            IsBigendian = b.Deserialize<byte>();
+            Step = b.Deserialize<uint>();
+            Data = b.DeserializeStructArray<byte>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -73,30 +68,30 @@ namespace Iviz.Msgs.sensor_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.height);
-            b.Serialize(this.width);
-            b.Serialize(this.encoding);
-            b.Serialize(this.is_bigendian);
-            b.Serialize(this.step);
-            b.SerializeStructArray(this.data, 0);
+            b.Serialize(Header);
+            b.Serialize(this.Height);
+            b.Serialize(this.Width);
+            b.Serialize(this.Encoding);
+            b.Serialize(this.IsBigendian);
+            b.Serialize(this.Step);
+            b.SerializeStructArray(Data, 0);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (encoding is null) throw new System.NullReferenceException();
-            if (data is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (Encoding is null) throw new System.NullReferenceException();
+            if (Data is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 21;
-                size += header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(encoding);
-                size += 1 * data.Length;
+                size += Header.RosMessageLength;
+                size += BuiltIns.UTF8.GetByteCount(Encoding);
+                size += 1 * Data.Length;
                 return size;
             }
         }

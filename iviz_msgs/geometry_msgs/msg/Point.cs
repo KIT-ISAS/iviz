@@ -1,23 +1,23 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.geometry_msgs
+namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract]
+    [DataContract (Name = "geometry_msgs/Point")]
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct Point : IMessage
+    public struct Point : IMessage
     {
         // This contains the position of a point in free space
-        [DataMember] public double x { get; }
-        [DataMember] public double y { get; }
-        [DataMember] public double z { get; }
+        [DataMember (Name = "x")] public double X { get; set; }
+        [DataMember (Name = "y")] public double Y { get; set; }
+        [DataMember (Name = "z")] public double Z { get; set; }
     
         /// <summary> Explicit constructor. </summary>
-        public Point(double x, double y, double z)
+        public Point(double X, double Y, double Z)
         {
-            this.x = x;
-            this.y = y;
-            this.z = z;
+            this.X = X;
+            this.Y = Y;
+            this.Z = Z;
         }
         
         /// <summary> Constructor with buffer. </summary>

@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.sensor_msgs
+namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract]
+    [DataContract (Name = "sensor_msgs/ChannelFloat32")]
     public sealed class ChannelFloat32 : IMessage
     {
         // This message is used by the PointCloud message to hold optional data
@@ -10,7 +10,6 @@ namespace Iviz.Msgs.sensor_msgs
         // array should be the same as the length of the points array in the
         // PointCloud, and each value should be associated with the corresponding
         // point.
-        
         // Channel names in existing practice include:
         //   "u", "v" - row and column (respectively) in the left stereo image.
         //              This is opposite to usual conventions but remains for
@@ -21,34 +20,32 @@ namespace Iviz.Msgs.sensor_msgs
         //           in order.
         //   "intensity" - laser or pixel intensity.
         //   "distance"
-        
         // The channel name should give semantics of the channel (e.g.
         // "intensity" instead of "value").
-        [DataMember] public string name { get; set; }
-        
+        [DataMember (Name = "name")] public string Name { get; set; }
         // The values array should be 1-1 with the elements of the associated
         // PointCloud.
-        [DataMember] public float[] values { get; set; }
+        [DataMember (Name = "values")] public float[] Values { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ChannelFloat32()
         {
-            name = "";
-            values = System.Array.Empty<float>();
+            Name = "";
+            Values = System.Array.Empty<float>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public ChannelFloat32(string name, float[] values)
+        public ChannelFloat32(string Name, float[] Values)
         {
-            this.name = name ?? throw new System.ArgumentNullException(nameof(name));
-            this.values = values ?? throw new System.ArgumentNullException(nameof(values));
+            this.Name = Name;
+            this.Values = Values;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal ChannelFloat32(Buffer b)
         {
-            this.name = b.DeserializeString();
-            this.values = b.DeserializeStructArray<float>();
+            Name = b.DeserializeString();
+            Values = b.DeserializeStructArray<float>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -59,22 +56,22 @@ namespace Iviz.Msgs.sensor_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.name);
-            b.SerializeStructArray(this.values, 0);
+            b.Serialize(this.Name);
+            b.SerializeStructArray(Values, 0);
         }
         
         public void Validate()
         {
-            if (name is null) throw new System.NullReferenceException();
-            if (values is null) throw new System.NullReferenceException();
+            if (Name is null) throw new System.NullReferenceException();
+            if (Values is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 8;
-                size += BuiltIns.UTF8.GetByteCount(name);
-                size += 4 * values.Length;
+                size += BuiltIns.UTF8.GetByteCount(Name);
+                size += 4 * Values.Length;
                 return size;
             }
         }

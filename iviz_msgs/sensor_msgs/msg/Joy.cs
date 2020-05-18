@@ -1,37 +1,37 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.sensor_msgs
+namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract]
+    [DataContract (Name = "sensor_msgs/Joy")]
     public sealed class Joy : IMessage
     {
         // Reports the state of a joysticks axes and buttons.
-        [DataMember] public std_msgs.Header header { get; set; } // timestamp in the header is the time the data is received from the joystick
-        [DataMember] public float[] axes { get; set; } // the axes measurements from a joystick
-        [DataMember] public int[] buttons { get; set; } // the buttons measurements from a joystick 
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; } // timestamp in the header is the time the data is received from the joystick
+        [DataMember (Name = "axes")] public float[] Axes { get; set; } // the axes measurements from a joystick
+        [DataMember (Name = "buttons")] public int[] Buttons { get; set; } // the buttons measurements from a joystick 
     
         /// <summary> Constructor for empty message. </summary>
         public Joy()
         {
-            header = new std_msgs.Header();
-            axes = System.Array.Empty<float>();
-            buttons = System.Array.Empty<int>();
+            Header = new StdMsgs.Header();
+            Axes = System.Array.Empty<float>();
+            Buttons = System.Array.Empty<int>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Joy(std_msgs.Header header, float[] axes, int[] buttons)
+        public Joy(StdMsgs.Header Header, float[] Axes, int[] Buttons)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.axes = axes ?? throw new System.ArgumentNullException(nameof(axes));
-            this.buttons = buttons ?? throw new System.ArgumentNullException(nameof(buttons));
+            this.Header = Header;
+            this.Axes = Axes;
+            this.Buttons = Buttons;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal Joy(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.axes = b.DeserializeStructArray<float>();
-            this.buttons = b.DeserializeStructArray<int>();
+            Header = new StdMsgs.Header(b);
+            Axes = b.DeserializeStructArray<float>();
+            Buttons = b.DeserializeStructArray<int>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -42,26 +42,26 @@ namespace Iviz.Msgs.sensor_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.SerializeStructArray(this.axes, 0);
-            b.SerializeStructArray(this.buttons, 0);
+            b.Serialize(Header);
+            b.SerializeStructArray(Axes, 0);
+            b.SerializeStructArray(Buttons, 0);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (axes is null) throw new System.NullReferenceException();
-            if (buttons is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (Axes is null) throw new System.NullReferenceException();
+            if (Buttons is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 8;
-                size += header.RosMessageLength;
-                size += 4 * axes.Length;
-                size += 4 * buttons.Length;
+                size += Header.RosMessageLength;
+                size += 4 * Axes.Length;
+                size += 4 * Buttons.Length;
                 return size;
             }
         }

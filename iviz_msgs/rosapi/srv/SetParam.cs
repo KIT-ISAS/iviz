@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosapi
+namespace Iviz.Msgs.Rosapi
 {
-    [DataContract]
+    [DataContract (Name = "rosapi/SetParam")]
     public sealed class SetParam : IService
     {
         /// <summary> Request message. </summary>
@@ -52,28 +52,28 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class SetParamRequest : IRequest
     {
-        [DataMember] public string name { get; set; }
-        [DataMember] public string value { get; set; }
+        [DataMember (Name = "name")] public string Name { get; set; }
+        [DataMember (Name = "value")] public string Value { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public SetParamRequest()
         {
-            name = "";
-            value = "";
+            Name = "";
+            Value = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public SetParamRequest(string name, string value)
+        public SetParamRequest(string Name, string Value)
         {
-            this.name = name ?? throw new System.ArgumentNullException(nameof(name));
-            this.value = value ?? throw new System.ArgumentNullException(nameof(value));
+            this.Name = Name;
+            this.Value = Value;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal SetParamRequest(Buffer b)
         {
-            this.name = b.DeserializeString();
-            this.value = b.DeserializeString();
+            Name = b.DeserializeString();
+            Value = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -84,22 +84,22 @@ namespace Iviz.Msgs.rosapi
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.name);
-            b.Serialize(this.value);
+            b.Serialize(this.Name);
+            b.Serialize(this.Value);
         }
         
         public void Validate()
         {
-            if (name is null) throw new System.NullReferenceException();
-            if (value is null) throw new System.NullReferenceException();
+            if (Name is null) throw new System.NullReferenceException();
+            if (Value is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 8;
-                size += BuiltIns.UTF8.GetByteCount(name);
-                size += BuiltIns.UTF8.GetByteCount(value);
+                size += BuiltIns.UTF8.GetByteCount(Name);
+                size += BuiltIns.UTF8.GetByteCount(Value);
                 return size;
             }
         }

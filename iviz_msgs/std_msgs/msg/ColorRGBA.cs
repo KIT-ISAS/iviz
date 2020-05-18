@@ -1,24 +1,24 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.std_msgs
+namespace Iviz.Msgs.StdMsgs
 {
-    [DataContract]
+    [DataContract (Name = "std_msgs/ColorRGBA")]
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct ColorRGBA : IMessage
+    public struct ColorRGBA : IMessage
     {
-        [DataMember] public float r { get; }
-        [DataMember] public float g { get; }
-        [DataMember] public float b { get; }
-        [DataMember] public float a { get; }
+        [DataMember (Name = "r")] public float R { get; set; }
+        [DataMember (Name = "g")] public float G { get; set; }
+        [DataMember (Name = "b")] public float B { get; set; }
+        [DataMember (Name = "a")] public float A { get; set; }
     
         /// <summary> Explicit constructor. </summary>
-        public ColorRGBA(float r, float g, float b, float a)
+        public ColorRGBA(float R, float G, float B, float A)
         {
-            this.r = r;
-            this.g = g;
-            this.b = b;
-            this.a = a;
+            this.R = R;
+            this.G = G;
+            this.B = B;
+            this.A = A;
         }
         
         /// <summary> Constructor with buffer. </summary>

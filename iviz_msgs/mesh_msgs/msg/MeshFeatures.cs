@@ -1,35 +1,35 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.mesh_msgs
+namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract]
+    [DataContract (Name = "mesh_msgs/MeshFeatures")]
     public sealed class MeshFeatures : IMessage
     {
-        [DataMember] public string map_uuid { get; set; }
-        [DataMember] public mesh_msgs.Feature[] features { get; set; }
+        [DataMember (Name = "map_uuid")] public string MapUuid { get; set; }
+        [DataMember (Name = "features")] public MeshMsgs.Feature[] Features { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshFeatures()
         {
-            map_uuid = "";
-            features = System.Array.Empty<mesh_msgs.Feature>();
+            MapUuid = "";
+            Features = System.Array.Empty<MeshMsgs.Feature>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MeshFeatures(string map_uuid, mesh_msgs.Feature[] features)
+        public MeshFeatures(string MapUuid, MeshMsgs.Feature[] Features)
         {
-            this.map_uuid = map_uuid ?? throw new System.ArgumentNullException(nameof(map_uuid));
-            this.features = features ?? throw new System.ArgumentNullException(nameof(features));
+            this.MapUuid = MapUuid;
+            this.Features = Features;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal MeshFeatures(Buffer b)
         {
-            this.map_uuid = b.DeserializeString();
-            this.features = b.DeserializeArray<mesh_msgs.Feature>();
-            for (int i = 0; i < this.features.Length; i++)
+            MapUuid = b.DeserializeString();
+            Features = b.DeserializeArray<MeshMsgs.Feature>();
+            for (int i = 0; i < this.Features.Length; i++)
             {
-                this.features[i] = new mesh_msgs.Feature(b);
+                Features[i] = new MeshMsgs.Feature(b);
             }
         }
         
@@ -41,18 +41,18 @@ namespace Iviz.Msgs.mesh_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.map_uuid);
-            b.SerializeArray(this.features, 0);
+            b.Serialize(this.MapUuid);
+            b.SerializeArray(Features, 0);
         }
         
         public void Validate()
         {
-            if (map_uuid is null) throw new System.NullReferenceException();
-            if (features is null) throw new System.NullReferenceException();
-            for (int i = 0; i < features.Length; i++)
+            if (MapUuid is null) throw new System.NullReferenceException();
+            if (Features is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Features.Length; i++)
             {
-                if (features[i] is null) throw new System.NullReferenceException();
-                features[i].Validate();
+                if (Features[i] is null) throw new System.NullReferenceException();
+                Features[i].Validate();
             }
         }
     
@@ -60,10 +60,10 @@ namespace Iviz.Msgs.mesh_msgs
         {
             get {
                 int size = 8;
-                size += BuiltIns.UTF8.GetByteCount(map_uuid);
-                for (int i = 0; i < features.Length; i++)
+                size += BuiltIns.UTF8.GetByteCount(MapUuid);
+                for (int i = 0; i < Features.Length; i++)
                 {
-                    size += features[i].RosMessageLength;
+                    size += Features[i].RosMessageLength;
                 }
                 return size;
             }

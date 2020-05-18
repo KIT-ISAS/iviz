@@ -1,36 +1,34 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.std_msgs
+namespace Iviz.Msgs.StdMsgs
 {
-    [DataContract]
+    [DataContract (Name = "std_msgs/Int16MultiArray")]
     public sealed class Int16MultiArray : IMessage
     {
         // Please look at the MultiArrayLayout message definition for
         // documentation on all multiarrays.
-        
-        [DataMember] public MultiArrayLayout layout { get; set; } // specification of data layout
-        [DataMember] public short[] data { get; set; } // array of data
-        
+        [DataMember (Name = "layout")] public MultiArrayLayout Layout { get; set; } // specification of data layout
+        [DataMember (Name = "data")] public short[] Data { get; set; } // array of data
     
         /// <summary> Constructor for empty message. </summary>
         public Int16MultiArray()
         {
-            layout = new MultiArrayLayout();
-            data = System.Array.Empty<short>();
+            Layout = new MultiArrayLayout();
+            Data = System.Array.Empty<short>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Int16MultiArray(MultiArrayLayout layout, short[] data)
+        public Int16MultiArray(MultiArrayLayout Layout, short[] Data)
         {
-            this.layout = layout ?? throw new System.ArgumentNullException(nameof(layout));
-            this.data = data ?? throw new System.ArgumentNullException(nameof(data));
+            this.Layout = Layout;
+            this.Data = Data;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal Int16MultiArray(Buffer b)
         {
-            this.layout = new MultiArrayLayout(b);
-            this.data = b.DeserializeStructArray<short>();
+            Layout = new MultiArrayLayout(b);
+            Data = b.DeserializeStructArray<short>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -41,23 +39,23 @@ namespace Iviz.Msgs.std_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.layout);
-            b.SerializeStructArray(this.data, 0);
+            b.Serialize(Layout);
+            b.SerializeStructArray(Data, 0);
         }
         
         public void Validate()
         {
-            if (layout is null) throw new System.NullReferenceException();
-            layout.Validate();
-            if (data is null) throw new System.NullReferenceException();
+            if (Layout is null) throw new System.NullReferenceException();
+            Layout.Validate();
+            if (Data is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += layout.RosMessageLength;
-                size += 2 * data.Length;
+                size += Layout.RosMessageLength;
+                size += 2 * Data.Length;
                 return size;
             }
         }

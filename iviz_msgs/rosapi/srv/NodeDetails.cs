@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosapi
+namespace Iviz.Msgs.Rosapi
 {
-    [DataContract]
+    [DataContract (Name = "rosapi/NodeDetails")]
     public sealed class NodeDetails : IService
     {
         /// <summary> Request message. </summary>
@@ -52,24 +52,24 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class NodeDetailsRequest : IRequest
     {
-        [DataMember] public string node { get; set; }
+        [DataMember (Name = "node")] public string Node { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public NodeDetailsRequest()
         {
-            node = "";
+            Node = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public NodeDetailsRequest(string node)
+        public NodeDetailsRequest(string Node)
         {
-            this.node = node ?? throw new System.ArgumentNullException(nameof(node));
+            this.Node = Node;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal NodeDetailsRequest(Buffer b)
         {
-            this.node = b.DeserializeString();
+            Node = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -80,19 +80,19 @@ namespace Iviz.Msgs.rosapi
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.node);
+            b.Serialize(this.Node);
         }
         
         public void Validate()
         {
-            if (node is null) throw new System.NullReferenceException();
+            if (Node is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(node);
+                size += BuiltIns.UTF8.GetByteCount(Node);
                 return size;
             }
         }
@@ -100,32 +100,32 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class NodeDetailsResponse : IResponse
     {
-        [DataMember] public string[] subscribing { get; set; }
-        [DataMember] public string[] publishing { get; set; }
-        [DataMember] public string[] services { get; set; }
+        [DataMember (Name = "subscribing")] public string[] Subscribing { get; set; }
+        [DataMember (Name = "publishing")] public string[] Publishing { get; set; }
+        [DataMember (Name = "services")] public string[] Services { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public NodeDetailsResponse()
         {
-            subscribing = System.Array.Empty<string>();
-            publishing = System.Array.Empty<string>();
-            services = System.Array.Empty<string>();
+            Subscribing = System.Array.Empty<string>();
+            Publishing = System.Array.Empty<string>();
+            Services = System.Array.Empty<string>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public NodeDetailsResponse(string[] subscribing, string[] publishing, string[] services)
+        public NodeDetailsResponse(string[] Subscribing, string[] Publishing, string[] Services)
         {
-            this.subscribing = subscribing ?? throw new System.ArgumentNullException(nameof(subscribing));
-            this.publishing = publishing ?? throw new System.ArgumentNullException(nameof(publishing));
-            this.services = services ?? throw new System.ArgumentNullException(nameof(services));
+            this.Subscribing = Subscribing;
+            this.Publishing = Publishing;
+            this.Services = Services;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal NodeDetailsResponse(Buffer b)
         {
-            this.subscribing = b.DeserializeStringArray();
-            this.publishing = b.DeserializeStringArray();
-            this.services = b.DeserializeStringArray();
+            Subscribing = b.DeserializeStringArray();
+            Publishing = b.DeserializeStringArray();
+            Services = b.DeserializeStringArray();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -136,27 +136,27 @@ namespace Iviz.Msgs.rosapi
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeArray(this.subscribing, 0);
-            b.SerializeArray(this.publishing, 0);
-            b.SerializeArray(this.services, 0);
+            b.SerializeArray(Subscribing, 0);
+            b.SerializeArray(Publishing, 0);
+            b.SerializeArray(Services, 0);
         }
         
         public void Validate()
         {
-            if (subscribing is null) throw new System.NullReferenceException();
-            for (int i = 0; i < subscribing.Length; i++)
+            if (Subscribing is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Subscribing.Length; i++)
             {
-                if (subscribing[i] is null) throw new System.NullReferenceException();
+                if (Subscribing[i] is null) throw new System.NullReferenceException();
             }
-            if (publishing is null) throw new System.NullReferenceException();
-            for (int i = 0; i < publishing.Length; i++)
+            if (Publishing is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Publishing.Length; i++)
             {
-                if (publishing[i] is null) throw new System.NullReferenceException();
+                if (Publishing[i] is null) throw new System.NullReferenceException();
             }
-            if (services is null) throw new System.NullReferenceException();
-            for (int i = 0; i < services.Length; i++)
+            if (Services is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Services.Length; i++)
             {
-                if (services[i] is null) throw new System.NullReferenceException();
+                if (Services[i] is null) throw new System.NullReferenceException();
             }
         }
     
@@ -164,20 +164,20 @@ namespace Iviz.Msgs.rosapi
         {
             get {
                 int size = 12;
-                size += 4 * subscribing.Length;
-                for (int i = 0; i < subscribing.Length; i++)
+                size += 4 * Subscribing.Length;
+                for (int i = 0; i < Subscribing.Length; i++)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(subscribing[i]);
+                    size += BuiltIns.UTF8.GetByteCount(Subscribing[i]);
                 }
-                size += 4 * publishing.Length;
-                for (int i = 0; i < publishing.Length; i++)
+                size += 4 * Publishing.Length;
+                for (int i = 0; i < Publishing.Length; i++)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(publishing[i]);
+                    size += BuiltIns.UTF8.GetByteCount(Publishing[i]);
                 }
-                size += 4 * services.Length;
-                for (int i = 0; i < services.Length; i++)
+                size += 4 * Services.Length;
+                for (int i = 0; i < Services.Length; i++)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(services[i]);
+                    size += BuiltIns.UTF8.GetByteCount(Services[i]);
                 }
                 return size;
             }

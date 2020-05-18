@@ -6,13 +6,13 @@ namespace Iviz.Msgs
     [StructLayout(LayoutKind.Sequential)]
     public readonly struct time : IEquatable<time>
     {
-        public uint secs { get; }
-        public uint nsecs { get; }
+        public uint Secs { get; }
+        public uint Nsecs { get; }
 
         public time(uint secs, uint nsecs)
         {
-            this.secs = secs;
-            this.nsecs = nsecs;
+            this.Secs = secs;
+            this.Nsecs = nsecs;
         }
 
         static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
@@ -20,13 +20,13 @@ namespace Iviz.Msgs
         public time(in DateTime time)
         {
             TimeSpan diff = time - UnixEpoch;
-            secs = (uint)diff.TotalSeconds;
-            nsecs = (uint)(diff.Ticks % 10000000) * 100;
+            Secs = (uint)diff.TotalSeconds;
+            Nsecs = (uint)(diff.Ticks % 10000000) * 100;
         }
 
         public DateTime ToDateTime()
         {
-            return UnixEpoch.AddSeconds(secs).AddTicks(nsecs / 100);
+            return UnixEpoch.AddSeconds(Secs).AddTicks(Nsecs / 100);
         }
 
         public override bool Equals(object obj)
@@ -36,12 +36,12 @@ namespace Iviz.Msgs
 
         public override int GetHashCode()
         {
-            return (secs, nsecs).GetHashCode();
+            return (Secs, Nsecs).GetHashCode();
         }
 
         public static bool operator ==(time left, time right)
         {
-            return left.nsecs == right.nsecs && left.secs == right.secs;
+            return left.Nsecs == right.Nsecs && left.Secs == right.Secs;
         }
 
         public static bool operator !=(time left, time right)

@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosapi
+namespace Iviz.Msgs.Rosapi
 {
-    [DataContract]
+    [DataContract (Name = "rosapi/Publishers")]
     public sealed class Publishers : IService
     {
         /// <summary> Request message. </summary>
@@ -52,24 +52,24 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class PublishersRequest : IRequest
     {
-        [DataMember] public string topic { get; set; }
+        [DataMember (Name = "topic")] public string Topic { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public PublishersRequest()
         {
-            topic = "";
+            Topic = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public PublishersRequest(string topic)
+        public PublishersRequest(string Topic)
         {
-            this.topic = topic ?? throw new System.ArgumentNullException(nameof(topic));
+            this.Topic = Topic;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal PublishersRequest(Buffer b)
         {
-            this.topic = b.DeserializeString();
+            Topic = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -80,19 +80,19 @@ namespace Iviz.Msgs.rosapi
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.topic);
+            b.Serialize(this.Topic);
         }
         
         public void Validate()
         {
-            if (topic is null) throw new System.NullReferenceException();
+            if (Topic is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(topic);
+                size += BuiltIns.UTF8.GetByteCount(Topic);
                 return size;
             }
         }
@@ -100,24 +100,24 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class PublishersResponse : IResponse
     {
-        [DataMember] public string[] publishers { get; set; }
+        [DataMember (Name = "publishers")] public string[] Publishers_ { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public PublishersResponse()
         {
-            publishers = System.Array.Empty<string>();
+            Publishers_ = System.Array.Empty<string>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public PublishersResponse(string[] publishers)
+        public PublishersResponse(string[] Publishers_)
         {
-            this.publishers = publishers ?? throw new System.ArgumentNullException(nameof(publishers));
+            this.Publishers_ = Publishers_;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal PublishersResponse(Buffer b)
         {
-            this.publishers = b.DeserializeStringArray();
+            Publishers_ = b.DeserializeStringArray();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -128,15 +128,15 @@ namespace Iviz.Msgs.rosapi
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeArray(this.publishers, 0);
+            b.SerializeArray(Publishers_, 0);
         }
         
         public void Validate()
         {
-            if (publishers is null) throw new System.NullReferenceException();
-            for (int i = 0; i < publishers.Length; i++)
+            if (Publishers_ is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Publishers_.Length; i++)
             {
-                if (publishers[i] is null) throw new System.NullReferenceException();
+                if (Publishers_[i] is null) throw new System.NullReferenceException();
             }
         }
     
@@ -144,10 +144,10 @@ namespace Iviz.Msgs.rosapi
         {
             get {
                 int size = 4;
-                size += 4 * publishers.Length;
-                for (int i = 0; i < publishers.Length; i++)
+                size += 4 * Publishers_.Length;
+                for (int i = 0; i < Publishers_.Length; i++)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(publishers[i]);
+                    size += BuiltIns.UTF8.GetByteCount(Publishers_[i]);
                 }
                 return size;
             }

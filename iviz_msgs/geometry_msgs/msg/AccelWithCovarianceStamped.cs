@@ -1,33 +1,33 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.geometry_msgs
+namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract]
+    [DataContract (Name = "geometry_msgs/AccelWithCovarianceStamped")]
     public sealed class AccelWithCovarianceStamped : IMessage
     {
         // This represents an estimated accel with reference coordinate frame and timestamp.
-        [DataMember] public std_msgs.Header header { get; set; }
-        [DataMember] public AccelWithCovariance accel { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "accel")] public AccelWithCovariance Accel { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public AccelWithCovarianceStamped()
         {
-            header = new std_msgs.Header();
-            accel = new AccelWithCovariance();
+            Header = new StdMsgs.Header();
+            Accel = new AccelWithCovariance();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public AccelWithCovarianceStamped(std_msgs.Header header, AccelWithCovariance accel)
+        public AccelWithCovarianceStamped(StdMsgs.Header Header, AccelWithCovariance Accel)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.accel = accel ?? throw new System.ArgumentNullException(nameof(accel));
+            this.Header = Header;
+            this.Accel = Accel;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal AccelWithCovarianceStamped(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.accel = new AccelWithCovariance(b);
+            Header = new StdMsgs.Header(b);
+            Accel = new AccelWithCovariance(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -38,23 +38,23 @@ namespace Iviz.Msgs.geometry_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.accel);
+            b.Serialize(Header);
+            b.Serialize(Accel);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (accel is null) throw new System.NullReferenceException();
-            accel.Validate();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (Accel is null) throw new System.NullReferenceException();
+            Accel.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 336;
-                size += header.RosMessageLength;
+                size += Header.RosMessageLength;
                 return size;
             }
         }

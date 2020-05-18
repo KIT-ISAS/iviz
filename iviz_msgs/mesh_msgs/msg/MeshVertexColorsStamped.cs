@@ -1,37 +1,37 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.mesh_msgs
+namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract]
+    [DataContract (Name = "mesh_msgs/MeshVertexColorsStamped")]
     public sealed class MeshVertexColorsStamped : IMessage
     {
         // Mesh Attribute Message
-        [DataMember] public std_msgs.Header header { get; set; }
-        [DataMember] public string uuid { get; set; }
-        [DataMember] public mesh_msgs.MeshVertexColors mesh_vertex_colors { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "uuid")] public string Uuid { get; set; }
+        [DataMember (Name = "mesh_vertex_colors")] public MeshMsgs.MeshVertexColors MeshVertexColors { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshVertexColorsStamped()
         {
-            header = new std_msgs.Header();
-            uuid = "";
-            mesh_vertex_colors = new mesh_msgs.MeshVertexColors();
+            Header = new StdMsgs.Header();
+            Uuid = "";
+            MeshVertexColors = new MeshMsgs.MeshVertexColors();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MeshVertexColorsStamped(std_msgs.Header header, string uuid, mesh_msgs.MeshVertexColors mesh_vertex_colors)
+        public MeshVertexColorsStamped(StdMsgs.Header Header, string Uuid, MeshMsgs.MeshVertexColors MeshVertexColors)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.uuid = uuid ?? throw new System.ArgumentNullException(nameof(uuid));
-            this.mesh_vertex_colors = mesh_vertex_colors ?? throw new System.ArgumentNullException(nameof(mesh_vertex_colors));
+            this.Header = Header;
+            this.Uuid = Uuid;
+            this.MeshVertexColors = MeshVertexColors;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal MeshVertexColorsStamped(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.uuid = b.DeserializeString();
-            this.mesh_vertex_colors = new mesh_msgs.MeshVertexColors(b);
+            Header = new StdMsgs.Header(b);
+            Uuid = b.DeserializeString();
+            MeshVertexColors = new MeshMsgs.MeshVertexColors(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -42,27 +42,27 @@ namespace Iviz.Msgs.mesh_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.uuid);
-            b.Serialize(this.mesh_vertex_colors);
+            b.Serialize(Header);
+            b.Serialize(this.Uuid);
+            b.Serialize(MeshVertexColors);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (uuid is null) throw new System.NullReferenceException();
-            if (mesh_vertex_colors is null) throw new System.NullReferenceException();
-            mesh_vertex_colors.Validate();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (Uuid is null) throw new System.NullReferenceException();
+            if (MeshVertexColors is null) throw new System.NullReferenceException();
+            MeshVertexColors.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(uuid);
-                size += mesh_vertex_colors.RosMessageLength;
+                size += Header.RosMessageLength;
+                size += BuiltIns.UTF8.GetByteCount(Uuid);
+                size += MeshVertexColors.RosMessageLength;
                 return size;
             }
         }

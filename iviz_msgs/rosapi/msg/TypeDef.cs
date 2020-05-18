@@ -1,52 +1,52 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosapi
+namespace Iviz.Msgs.Rosapi
 {
-    [DataContract]
+    [DataContract (Name = "rosapi/TypeDef")]
     public sealed class TypeDef : IMessage
     {
-        [DataMember] public string type { get; set; }
-        [DataMember] public string[] fieldnames { get; set; }
-        [DataMember] public string[] fieldtypes { get; set; }
-        [DataMember] public int[] fieldarraylen { get; set; }
-        [DataMember] public string[] examples { get; set; }
-        [DataMember] public string[] constnames { get; set; }
-        [DataMember] public string[] constvalues { get; set; }
+        [DataMember (Name = "type")] public string Type { get; set; }
+        [DataMember (Name = "fieldnames")] public string[] Fieldnames { get; set; }
+        [DataMember (Name = "fieldtypes")] public string[] Fieldtypes { get; set; }
+        [DataMember (Name = "fieldarraylen")] public int[] Fieldarraylen { get; set; }
+        [DataMember (Name = "examples")] public string[] Examples { get; set; }
+        [DataMember (Name = "constnames")] public string[] Constnames { get; set; }
+        [DataMember (Name = "constvalues")] public string[] Constvalues { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TypeDef()
         {
-            type = "";
-            fieldnames = System.Array.Empty<string>();
-            fieldtypes = System.Array.Empty<string>();
-            fieldarraylen = System.Array.Empty<int>();
-            examples = System.Array.Empty<string>();
-            constnames = System.Array.Empty<string>();
-            constvalues = System.Array.Empty<string>();
+            Type = "";
+            Fieldnames = System.Array.Empty<string>();
+            Fieldtypes = System.Array.Empty<string>();
+            Fieldarraylen = System.Array.Empty<int>();
+            Examples = System.Array.Empty<string>();
+            Constnames = System.Array.Empty<string>();
+            Constvalues = System.Array.Empty<string>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TypeDef(string type, string[] fieldnames, string[] fieldtypes, int[] fieldarraylen, string[] examples, string[] constnames, string[] constvalues)
+        public TypeDef(string Type, string[] Fieldnames, string[] Fieldtypes, int[] Fieldarraylen, string[] Examples, string[] Constnames, string[] Constvalues)
         {
-            this.type = type ?? throw new System.ArgumentNullException(nameof(type));
-            this.fieldnames = fieldnames ?? throw new System.ArgumentNullException(nameof(fieldnames));
-            this.fieldtypes = fieldtypes ?? throw new System.ArgumentNullException(nameof(fieldtypes));
-            this.fieldarraylen = fieldarraylen ?? throw new System.ArgumentNullException(nameof(fieldarraylen));
-            this.examples = examples ?? throw new System.ArgumentNullException(nameof(examples));
-            this.constnames = constnames ?? throw new System.ArgumentNullException(nameof(constnames));
-            this.constvalues = constvalues ?? throw new System.ArgumentNullException(nameof(constvalues));
+            this.Type = Type;
+            this.Fieldnames = Fieldnames;
+            this.Fieldtypes = Fieldtypes;
+            this.Fieldarraylen = Fieldarraylen;
+            this.Examples = Examples;
+            this.Constnames = Constnames;
+            this.Constvalues = Constvalues;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal TypeDef(Buffer b)
         {
-            this.type = b.DeserializeString();
-            this.fieldnames = b.DeserializeStringArray();
-            this.fieldtypes = b.DeserializeStringArray();
-            this.fieldarraylen = b.DeserializeStructArray<int>();
-            this.examples = b.DeserializeStringArray();
-            this.constnames = b.DeserializeStringArray();
-            this.constvalues = b.DeserializeStringArray();
+            Type = b.DeserializeString();
+            Fieldnames = b.DeserializeStringArray();
+            Fieldtypes = b.DeserializeStringArray();
+            Fieldarraylen = b.DeserializeStructArray<int>();
+            Examples = b.DeserializeStringArray();
+            Constnames = b.DeserializeStringArray();
+            Constvalues = b.DeserializeStringArray();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -57,43 +57,43 @@ namespace Iviz.Msgs.rosapi
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.type);
-            b.SerializeArray(this.fieldnames, 0);
-            b.SerializeArray(this.fieldtypes, 0);
-            b.SerializeStructArray(this.fieldarraylen, 0);
-            b.SerializeArray(this.examples, 0);
-            b.SerializeArray(this.constnames, 0);
-            b.SerializeArray(this.constvalues, 0);
+            b.Serialize(this.Type);
+            b.SerializeArray(Fieldnames, 0);
+            b.SerializeArray(Fieldtypes, 0);
+            b.SerializeStructArray(Fieldarraylen, 0);
+            b.SerializeArray(Examples, 0);
+            b.SerializeArray(Constnames, 0);
+            b.SerializeArray(Constvalues, 0);
         }
         
         public void Validate()
         {
-            if (type is null) throw new System.NullReferenceException();
-            if (fieldnames is null) throw new System.NullReferenceException();
-            for (int i = 0; i < fieldnames.Length; i++)
+            if (Type is null) throw new System.NullReferenceException();
+            if (Fieldnames is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Fieldnames.Length; i++)
             {
-                if (fieldnames[i] is null) throw new System.NullReferenceException();
+                if (Fieldnames[i] is null) throw new System.NullReferenceException();
             }
-            if (fieldtypes is null) throw new System.NullReferenceException();
-            for (int i = 0; i < fieldtypes.Length; i++)
+            if (Fieldtypes is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Fieldtypes.Length; i++)
             {
-                if (fieldtypes[i] is null) throw new System.NullReferenceException();
+                if (Fieldtypes[i] is null) throw new System.NullReferenceException();
             }
-            if (fieldarraylen is null) throw new System.NullReferenceException();
-            if (examples is null) throw new System.NullReferenceException();
-            for (int i = 0; i < examples.Length; i++)
+            if (Fieldarraylen is null) throw new System.NullReferenceException();
+            if (Examples is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Examples.Length; i++)
             {
-                if (examples[i] is null) throw new System.NullReferenceException();
+                if (Examples[i] is null) throw new System.NullReferenceException();
             }
-            if (constnames is null) throw new System.NullReferenceException();
-            for (int i = 0; i < constnames.Length; i++)
+            if (Constnames is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Constnames.Length; i++)
             {
-                if (constnames[i] is null) throw new System.NullReferenceException();
+                if (Constnames[i] is null) throw new System.NullReferenceException();
             }
-            if (constvalues is null) throw new System.NullReferenceException();
-            for (int i = 0; i < constvalues.Length; i++)
+            if (Constvalues is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Constvalues.Length; i++)
             {
-                if (constvalues[i] is null) throw new System.NullReferenceException();
+                if (Constvalues[i] is null) throw new System.NullReferenceException();
             }
         }
     
@@ -101,32 +101,32 @@ namespace Iviz.Msgs.rosapi
         {
             get {
                 int size = 28;
-                size += BuiltIns.UTF8.GetByteCount(type);
-                size += 4 * fieldnames.Length;
-                for (int i = 0; i < fieldnames.Length; i++)
+                size += BuiltIns.UTF8.GetByteCount(Type);
+                size += 4 * Fieldnames.Length;
+                for (int i = 0; i < Fieldnames.Length; i++)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(fieldnames[i]);
+                    size += BuiltIns.UTF8.GetByteCount(Fieldnames[i]);
                 }
-                size += 4 * fieldtypes.Length;
-                for (int i = 0; i < fieldtypes.Length; i++)
+                size += 4 * Fieldtypes.Length;
+                for (int i = 0; i < Fieldtypes.Length; i++)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(fieldtypes[i]);
+                    size += BuiltIns.UTF8.GetByteCount(Fieldtypes[i]);
                 }
-                size += 4 * fieldarraylen.Length;
-                size += 4 * examples.Length;
-                for (int i = 0; i < examples.Length; i++)
+                size += 4 * Fieldarraylen.Length;
+                size += 4 * Examples.Length;
+                for (int i = 0; i < Examples.Length; i++)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(examples[i]);
+                    size += BuiltIns.UTF8.GetByteCount(Examples[i]);
                 }
-                size += 4 * constnames.Length;
-                for (int i = 0; i < constnames.Length; i++)
+                size += 4 * Constnames.Length;
+                for (int i = 0; i < Constnames.Length; i++)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(constnames[i]);
+                    size += BuiltIns.UTF8.GetByteCount(Constnames[i]);
                 }
-                size += 4 * constvalues.Length;
-                for (int i = 0; i < constvalues.Length; i++)
+                size += 4 * Constvalues.Length;
+                for (int i = 0; i < Constvalues.Length; i++)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(constvalues[i]);
+                    size += BuiltIns.UTF8.GetByteCount(Constvalues[i]);
                 }
                 return size;
             }

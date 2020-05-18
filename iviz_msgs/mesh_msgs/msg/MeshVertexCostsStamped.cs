@@ -1,41 +1,41 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.mesh_msgs
+namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract]
+    [DataContract (Name = "mesh_msgs/MeshVertexCostsStamped")]
     public sealed class MeshVertexCostsStamped : IMessage
     {
         // Mesh Attribute Message
-        [DataMember] public std_msgs.Header header { get; set; }
-        [DataMember] public string uuid { get; set; }
-        [DataMember] public string type { get; set; }
-        [DataMember] public mesh_msgs.MeshVertexCosts mesh_vertex_costs { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "uuid")] public string Uuid { get; set; }
+        [DataMember (Name = "type")] public string Type { get; set; }
+        [DataMember (Name = "mesh_vertex_costs")] public MeshMsgs.MeshVertexCosts MeshVertexCosts { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public MeshVertexCostsStamped()
         {
-            header = new std_msgs.Header();
-            uuid = "";
-            type = "";
-            mesh_vertex_costs = new mesh_msgs.MeshVertexCosts();
+            Header = new StdMsgs.Header();
+            Uuid = "";
+            Type = "";
+            MeshVertexCosts = new MeshMsgs.MeshVertexCosts();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MeshVertexCostsStamped(std_msgs.Header header, string uuid, string type, mesh_msgs.MeshVertexCosts mesh_vertex_costs)
+        public MeshVertexCostsStamped(StdMsgs.Header Header, string Uuid, string Type, MeshMsgs.MeshVertexCosts MeshVertexCosts)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.uuid = uuid ?? throw new System.ArgumentNullException(nameof(uuid));
-            this.type = type ?? throw new System.ArgumentNullException(nameof(type));
-            this.mesh_vertex_costs = mesh_vertex_costs ?? throw new System.ArgumentNullException(nameof(mesh_vertex_costs));
+            this.Header = Header;
+            this.Uuid = Uuid;
+            this.Type = Type;
+            this.MeshVertexCosts = MeshVertexCosts;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal MeshVertexCostsStamped(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.uuid = b.DeserializeString();
-            this.type = b.DeserializeString();
-            this.mesh_vertex_costs = new mesh_msgs.MeshVertexCosts(b);
+            Header = new StdMsgs.Header(b);
+            Uuid = b.DeserializeString();
+            Type = b.DeserializeString();
+            MeshVertexCosts = new MeshMsgs.MeshVertexCosts(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -46,30 +46,30 @@ namespace Iviz.Msgs.mesh_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.uuid);
-            b.Serialize(this.type);
-            b.Serialize(this.mesh_vertex_costs);
+            b.Serialize(Header);
+            b.Serialize(this.Uuid);
+            b.Serialize(this.Type);
+            b.Serialize(MeshVertexCosts);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (uuid is null) throw new System.NullReferenceException();
-            if (type is null) throw new System.NullReferenceException();
-            if (mesh_vertex_costs is null) throw new System.NullReferenceException();
-            mesh_vertex_costs.Validate();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (Uuid is null) throw new System.NullReferenceException();
+            if (Type is null) throw new System.NullReferenceException();
+            if (MeshVertexCosts is null) throw new System.NullReferenceException();
+            MeshVertexCosts.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 8;
-                size += header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(uuid);
-                size += BuiltIns.UTF8.GetByteCount(type);
-                size += mesh_vertex_costs.RosMessageLength;
+                size += Header.RosMessageLength;
+                size += BuiltIns.UTF8.GetByteCount(Uuid);
+                size += BuiltIns.UTF8.GetByteCount(Type);
+                size += MeshVertexCosts.RosMessageLength;
                 return size;
             }
         }

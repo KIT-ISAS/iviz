@@ -1,36 +1,33 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.shape_msgs
+namespace Iviz.Msgs.ShapeMsgs
 {
-    [DataContract]
+    [DataContract (Name = "shape_msgs/Plane")]
     public sealed class Plane : IMessage
     {
         // Representation of a plane, using the plane equation ax + by + cz + d = 0
-        
         // a := coef[0]
         // b := coef[1]
         // c := coef[2]
         // d := coef[3]
-        
-        [DataMember] public double[/*4*/] coef { get; set; }
+        [DataMember (Name = "coef")] public double[/*4*/] Coef { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Plane()
         {
-            coef = new double[4];
+            Coef = new double[4];
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Plane(double[] coef)
+        public Plane(double[] Coef)
         {
-            this.coef = coef ?? throw new System.ArgumentNullException(nameof(coef));
-            if (this.coef.Length != 4) throw new System.ArgumentException("Invalid size", nameof(coef));
+            this.Coef = Coef;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal Plane(Buffer b)
         {
-            this.coef = b.DeserializeStructArray<double>(4);
+            Coef = b.DeserializeStructArray<double>(4);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -41,13 +38,13 @@ namespace Iviz.Msgs.shape_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeStructArray(this.coef, 4);
+            b.SerializeStructArray(Coef, 4);
         }
         
         public void Validate()
         {
-            if (coef is null) throw new System.NullReferenceException();
-            if (coef.Length != 4) throw new System.IndexOutOfRangeException();
+            if (Coef is null) throw new System.NullReferenceException();
+            if (Coef.Length != 4) throw new System.IndexOutOfRangeException();
         }
     
         public int RosMessageLength => 32;

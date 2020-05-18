@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.rosapi
+namespace Iviz.Msgs.Rosapi
 {
-    [DataContract]
+    [DataContract (Name = "rosapi/TopicsAndRawTypes")]
     public sealed class TopicsAndRawTypes : IService
     {
         /// <summary> Request message. </summary>
@@ -52,7 +52,6 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class TopicsAndRawTypesRequest : IRequest
     {
-        
     
         /// <summary> Constructor for empty message. </summary>
         public TopicsAndRawTypesRequest()
@@ -83,32 +82,32 @@ namespace Iviz.Msgs.rosapi
 
     public sealed class TopicsAndRawTypesResponse : IResponse
     {
-        [DataMember] public string[] topics { get; set; }
-        [DataMember] public string[] types { get; set; }
-        [DataMember] public string[] typedefs_full_text { get; set; }
+        [DataMember (Name = "topics")] public string[] Topics { get; set; }
+        [DataMember (Name = "types")] public string[] Types { get; set; }
+        [DataMember (Name = "typedefs_full_text")] public string[] TypedefsFullText { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TopicsAndRawTypesResponse()
         {
-            topics = System.Array.Empty<string>();
-            types = System.Array.Empty<string>();
-            typedefs_full_text = System.Array.Empty<string>();
+            Topics = System.Array.Empty<string>();
+            Types = System.Array.Empty<string>();
+            TypedefsFullText = System.Array.Empty<string>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TopicsAndRawTypesResponse(string[] topics, string[] types, string[] typedefs_full_text)
+        public TopicsAndRawTypesResponse(string[] Topics, string[] Types, string[] TypedefsFullText)
         {
-            this.topics = topics ?? throw new System.ArgumentNullException(nameof(topics));
-            this.types = types ?? throw new System.ArgumentNullException(nameof(types));
-            this.typedefs_full_text = typedefs_full_text ?? throw new System.ArgumentNullException(nameof(typedefs_full_text));
+            this.Topics = Topics;
+            this.Types = Types;
+            this.TypedefsFullText = TypedefsFullText;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal TopicsAndRawTypesResponse(Buffer b)
         {
-            this.topics = b.DeserializeStringArray();
-            this.types = b.DeserializeStringArray();
-            this.typedefs_full_text = b.DeserializeStringArray();
+            Topics = b.DeserializeStringArray();
+            Types = b.DeserializeStringArray();
+            TypedefsFullText = b.DeserializeStringArray();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -119,27 +118,27 @@ namespace Iviz.Msgs.rosapi
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeArray(this.topics, 0);
-            b.SerializeArray(this.types, 0);
-            b.SerializeArray(this.typedefs_full_text, 0);
+            b.SerializeArray(Topics, 0);
+            b.SerializeArray(Types, 0);
+            b.SerializeArray(TypedefsFullText, 0);
         }
         
         public void Validate()
         {
-            if (topics is null) throw new System.NullReferenceException();
-            for (int i = 0; i < topics.Length; i++)
+            if (Topics is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Topics.Length; i++)
             {
-                if (topics[i] is null) throw new System.NullReferenceException();
+                if (Topics[i] is null) throw new System.NullReferenceException();
             }
-            if (types is null) throw new System.NullReferenceException();
-            for (int i = 0; i < types.Length; i++)
+            if (Types is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Types.Length; i++)
             {
-                if (types[i] is null) throw new System.NullReferenceException();
+                if (Types[i] is null) throw new System.NullReferenceException();
             }
-            if (typedefs_full_text is null) throw new System.NullReferenceException();
-            for (int i = 0; i < typedefs_full_text.Length; i++)
+            if (TypedefsFullText is null) throw new System.NullReferenceException();
+            for (int i = 0; i < TypedefsFullText.Length; i++)
             {
-                if (typedefs_full_text[i] is null) throw new System.NullReferenceException();
+                if (TypedefsFullText[i] is null) throw new System.NullReferenceException();
             }
         }
     
@@ -147,20 +146,20 @@ namespace Iviz.Msgs.rosapi
         {
             get {
                 int size = 12;
-                size += 4 * topics.Length;
-                for (int i = 0; i < topics.Length; i++)
+                size += 4 * Topics.Length;
+                for (int i = 0; i < Topics.Length; i++)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(topics[i]);
+                    size += BuiltIns.UTF8.GetByteCount(Topics[i]);
                 }
-                size += 4 * types.Length;
-                for (int i = 0; i < types.Length; i++)
+                size += 4 * Types.Length;
+                for (int i = 0; i < Types.Length; i++)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(types[i]);
+                    size += BuiltIns.UTF8.GetByteCount(Types[i]);
                 }
-                size += 4 * typedefs_full_text.Length;
-                for (int i = 0; i < typedefs_full_text.Length; i++)
+                size += 4 * TypedefsFullText.Length;
+                for (int i = 0; i < TypedefsFullText.Length; i++)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(typedefs_full_text[i]);
+                    size += BuiltIns.UTF8.GetByteCount(TypedefsFullText[i]);
                 }
                 return size;
             }

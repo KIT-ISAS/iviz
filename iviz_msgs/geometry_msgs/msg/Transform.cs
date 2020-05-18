@@ -1,28 +1,31 @@
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.geometry_msgs
+namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract]
-    [StructLayout(LayoutKind.Sequential)]
-    public readonly struct Transform : IMessage
+    [DataContract (Name = "geometry_msgs/Transform")]
+    public sealed class Transform : IMessage
     {
         // This represents the transform between two coordinate frames in free space.
-        
-        [DataMember] public Vector3 translation { get; }
-        [DataMember] public Quaternion rotation { get; }
+        [DataMember (Name = "translation")] public Vector3 Translation { get; set; }
+        [DataMember (Name = "rotation")] public Quaternion Rotation { get; set; }
     
-        /// <summary> Explicit constructor. </summary>
-        public Transform(Vector3 translation, Quaternion rotation)
+        /// <summary> Constructor for empty message. </summary>
+        public Transform()
         {
-            this.translation = translation;
-            this.rotation = rotation;
+        }
+        
+        /// <summary> Explicit constructor. </summary>
+        public Transform(Vector3 Translation, Quaternion Rotation)
+        {
+            this.Translation = Translation;
+            this.Rotation = Rotation;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal Transform(Buffer b)
         {
-            this = b.Deserialize<Transform>();
+            Translation = new Vector3(b);
+            Rotation = new Quaternion(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -33,7 +36,8 @@ namespace Iviz.Msgs.geometry_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this);
+            b.Serialize(Translation);
+            b.Serialize(Rotation);
         }
         
         public void Validate()

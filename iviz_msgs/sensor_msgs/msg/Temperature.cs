@@ -1,39 +1,36 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.sensor_msgs
+namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract]
+    [DataContract (Name = "sensor_msgs/Temperature")]
     public sealed class Temperature : IMessage
     {
         // Single temperature reading.
-        
-        [DataMember] public std_msgs.Header header { get; set; } // timestamp is the time the temperature was measured
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; } // timestamp is the time the temperature was measured
         // frame_id is the location of the temperature reading
-        
-        [DataMember] public double temperature { get; set; } // Measurement of the Temperature in Degrees Celsius
-        
-        [DataMember] public double variance { get; set; } // 0 is interpreted as variance unknown
+        [DataMember (Name = "temperature")] public double Temperature_ { get; set; } // Measurement of the Temperature in Degrees Celsius
+        [DataMember (Name = "variance")] public double Variance { get; set; } // 0 is interpreted as variance unknown
     
         /// <summary> Constructor for empty message. </summary>
         public Temperature()
         {
-            header = new std_msgs.Header();
+            Header = new StdMsgs.Header();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Temperature(std_msgs.Header header, double temperature, double variance)
+        public Temperature(StdMsgs.Header Header, double Temperature_, double Variance)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.temperature = temperature;
-            this.variance = variance;
+            this.Header = Header;
+            this.Temperature_ = Temperature_;
+            this.Variance = Variance;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal Temperature(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.temperature = b.Deserialize<double>();
-            this.variance = b.Deserialize<double>();
+            Header = new StdMsgs.Header(b);
+            Temperature_ = b.Deserialize<double>();
+            Variance = b.Deserialize<double>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -44,22 +41,22 @@ namespace Iviz.Msgs.sensor_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.temperature);
-            b.Serialize(this.variance);
+            b.Serialize(Header);
+            b.Serialize(this.Temperature_);
+            b.Serialize(this.Variance);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 16;
-                size += header.RosMessageLength;
+                size += Header.RosMessageLength;
                 return size;
             }
         }

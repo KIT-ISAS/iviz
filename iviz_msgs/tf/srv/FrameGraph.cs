@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.tf
+namespace Iviz.Msgs.Tf
 {
-    [DataContract]
+    [DataContract (Name = "tf/FrameGraph")]
     public sealed class FrameGraph : IService
     {
         /// <summary> Request message. </summary>
@@ -56,24 +56,24 @@ namespace Iviz.Msgs.tf
 
     public sealed class FrameGraphResponse : IResponse
     {
-        [DataMember] public string dot_graph { get; set; }
+        [DataMember (Name = "dot_graph")] public string DotGraph { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public FrameGraphResponse()
         {
-            dot_graph = "";
+            DotGraph = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public FrameGraphResponse(string dot_graph)
+        public FrameGraphResponse(string DotGraph)
         {
-            this.dot_graph = dot_graph ?? throw new System.ArgumentNullException(nameof(dot_graph));
+            this.DotGraph = DotGraph;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal FrameGraphResponse(Buffer b)
         {
-            this.dot_graph = b.DeserializeString();
+            DotGraph = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -84,19 +84,19 @@ namespace Iviz.Msgs.tf
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.dot_graph);
+            b.Serialize(this.DotGraph);
         }
         
         public void Validate()
         {
-            if (dot_graph is null) throw new System.NullReferenceException();
+            if (DotGraph is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(dot_graph);
+                size += BuiltIns.UTF8.GetByteCount(DotGraph);
                 return size;
             }
         }

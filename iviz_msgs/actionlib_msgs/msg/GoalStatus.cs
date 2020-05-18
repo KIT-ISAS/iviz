@@ -1,12 +1,12 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.actionlib_msgs
+namespace Iviz.Msgs.ActionlibMsgs
 {
-    [DataContract]
+    [DataContract (Name = "actionlib_msgs/GoalStatus")]
     public sealed class GoalStatus : IMessage
     {
-        [DataMember] public GoalID goal_id { get; set; }
-        [DataMember] public byte status { get; set; }
+        [DataMember (Name = "goal_id")] public GoalID GoalId { get; set; }
+        [DataMember (Name = "status")] public byte Status { get; set; }
         public const byte PENDING = 0; // The goal has yet to be processed by the action server
         public const byte ACTIVE = 1; // The goal is currently being processed by the action server
         public const byte PREEMPTED = 2; // The goal received a cancel request after it started executing
@@ -24,32 +24,30 @@ namespace Iviz.Msgs.actionlib_msgs
         //    and was successfully cancelled (Terminal State)
         public const byte LOST = 9; // An action client can determine that a goal is LOST. This should not be
         //    sent over the wire by an action server
-        
         //Allow for the user to associate a string with GoalStatus for debugging
-        [DataMember] public string text { get; set; }
-        
+        [DataMember (Name = "text")] public string Text { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GoalStatus()
         {
-            goal_id = new GoalID();
-            text = "";
+            GoalId = new GoalID();
+            Text = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GoalStatus(GoalID goal_id, byte status, string text)
+        public GoalStatus(GoalID GoalId, byte Status, string Text)
         {
-            this.goal_id = goal_id ?? throw new System.ArgumentNullException(nameof(goal_id));
-            this.status = status;
-            this.text = text ?? throw new System.ArgumentNullException(nameof(text));
+            this.GoalId = GoalId;
+            this.Status = Status;
+            this.Text = Text;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal GoalStatus(Buffer b)
         {
-            this.goal_id = new GoalID(b);
-            this.status = b.Deserialize<byte>();
-            this.text = b.DeserializeString();
+            GoalId = new GoalID(b);
+            Status = b.Deserialize<byte>();
+            Text = b.DeserializeString();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -60,24 +58,24 @@ namespace Iviz.Msgs.actionlib_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.goal_id);
-            b.Serialize(this.status);
-            b.Serialize(this.text);
+            b.Serialize(GoalId);
+            b.Serialize(this.Status);
+            b.Serialize(this.Text);
         }
         
         public void Validate()
         {
-            if (goal_id is null) throw new System.NullReferenceException();
-            goal_id.Validate();
-            if (text is null) throw new System.NullReferenceException();
+            if (GoalId is null) throw new System.NullReferenceException();
+            GoalId.Validate();
+            if (Text is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 5;
-                size += goal_id.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(text);
+                size += GoalId.RosMessageLength;
+                size += BuiltIns.UTF8.GetByteCount(Text);
                 return size;
             }
         }

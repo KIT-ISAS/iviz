@@ -1,33 +1,33 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.geometry_msgs
+namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract]
+    [DataContract (Name = "geometry_msgs/WrenchStamped")]
     public sealed class WrenchStamped : IMessage
     {
         // A wrench with reference coordinate frame and timestamp
-        [DataMember] public std_msgs.Header header { get; set; }
-        [DataMember] public Wrench wrench { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "wrench")] public Wrench Wrench { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public WrenchStamped()
         {
-            header = new std_msgs.Header();
-            wrench = new Wrench();
+            Header = new StdMsgs.Header();
+            Wrench = new Wrench();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public WrenchStamped(std_msgs.Header header, Wrench wrench)
+        public WrenchStamped(StdMsgs.Header Header, Wrench Wrench)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.wrench = wrench ?? throw new System.ArgumentNullException(nameof(wrench));
+            this.Header = Header;
+            this.Wrench = Wrench;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal WrenchStamped(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.wrench = new Wrench(b);
+            Header = new StdMsgs.Header(b);
+            Wrench = new Wrench(b);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -38,23 +38,23 @@ namespace Iviz.Msgs.geometry_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.wrench);
+            b.Serialize(Header);
+            b.Serialize(Wrench);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (wrench is null) throw new System.NullReferenceException();
-            wrench.Validate();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (Wrench is null) throw new System.NullReferenceException();
+            Wrench.Validate();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 48;
-                size += header.RosMessageLength;
+                size += Header.RosMessageLength;
                 return size;
             }
         }

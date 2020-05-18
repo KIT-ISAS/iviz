@@ -1,29 +1,29 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.geometry_msgs
+namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract]
+    [DataContract (Name = "geometry_msgs/Polygon")]
     public sealed class Polygon : IMessage
     {
         //A specification of a polygon where the first and last points are assumed to be connected
-        [DataMember] public Point32[] points { get; set; }
+        [DataMember (Name = "points")] public Point32[] Points { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Polygon()
         {
-            points = System.Array.Empty<Point32>();
+            Points = System.Array.Empty<Point32>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Polygon(Point32[] points)
+        public Polygon(Point32[] Points)
         {
-            this.points = points ?? throw new System.ArgumentNullException(nameof(points));
+            this.Points = Points;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal Polygon(Buffer b)
         {
-            this.points = b.DeserializeStructArray<Point32>();
+            Points = b.DeserializeStructArray<Point32>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -34,19 +34,19 @@ namespace Iviz.Msgs.geometry_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeStructArray(this.points, 0);
+            b.SerializeStructArray(Points, 0);
         }
         
         public void Validate()
         {
-            if (points is null) throw new System.NullReferenceException();
+            if (Points is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += 12 * points.Length;
+                size += 12 * Points.Length;
                 return size;
             }
         }

@@ -1,46 +1,44 @@
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.sensor_msgs
+namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract]
+    [DataContract (Name = "sensor_msgs/CompressedImage")]
     public sealed class CompressedImage : IMessage
     {
         // This message contains a compressed image
-        
-        [DataMember] public std_msgs.Header header { get; set; } // Header timestamp should be acquisition time of image
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; } // Header timestamp should be acquisition time of image
         // Header frame_id should be optical frame of camera
         // origin of frame should be optical center of camera
         // +x should point to the right in the image
         // +y should point down in the image
         // +z should point into to plane of the image
-        
-        [DataMember] public string format { get; set; } // Specifies the format of the data
+        [DataMember (Name = "format")] public string Format { get; set; } // Specifies the format of the data
         //   Acceptable values:
         //     jpeg, png
-        [DataMember] public byte[] data { get; set; } // Compressed image buffer
+        [DataMember (Name = "data")] public byte[] Data { get; set; } // Compressed image buffer
     
         /// <summary> Constructor for empty message. </summary>
         public CompressedImage()
         {
-            header = new std_msgs.Header();
-            format = "";
-            data = System.Array.Empty<byte>();
+            Header = new StdMsgs.Header();
+            Format = "";
+            Data = System.Array.Empty<byte>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public CompressedImage(std_msgs.Header header, string format, byte[] data)
+        public CompressedImage(StdMsgs.Header Header, string Format, byte[] Data)
         {
-            this.header = header ?? throw new System.ArgumentNullException(nameof(header));
-            this.format = format ?? throw new System.ArgumentNullException(nameof(format));
-            this.data = data ?? throw new System.ArgumentNullException(nameof(data));
+            this.Header = Header;
+            this.Format = Format;
+            this.Data = Data;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal CompressedImage(Buffer b)
         {
-            this.header = new std_msgs.Header(b);
-            this.format = b.DeserializeString();
-            this.data = b.DeserializeStructArray<byte>();
+            Header = new StdMsgs.Header(b);
+            Format = b.DeserializeString();
+            Data = b.DeserializeStructArray<byte>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -51,26 +49,26 @@ namespace Iviz.Msgs.sensor_msgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.header);
-            b.Serialize(this.format);
-            b.SerializeStructArray(this.data, 0);
+            b.Serialize(Header);
+            b.Serialize(this.Format);
+            b.SerializeStructArray(Data, 0);
         }
         
         public void Validate()
         {
-            if (header is null) throw new System.NullReferenceException();
-            header.Validate();
-            if (format is null) throw new System.NullReferenceException();
-            if (data is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException();
+            Header.Validate();
+            if (Format is null) throw new System.NullReferenceException();
+            if (Data is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 8;
-                size += header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(format);
-                size += 1 * data.Length;
+                size += Header.RosMessageLength;
+                size += BuiltIns.UTF8.GetByteCount(Format);
+                size += 1 * Data.Length;
                 return size;
             }
         }
