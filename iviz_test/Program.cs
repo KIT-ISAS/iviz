@@ -3,11 +3,9 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using Iviz.Bridge.Client;
-using Iviz.Msgs.geometry_msgs;
-using Iviz.Msgs.rosapi;
-using Iviz.Msgs.rosbridge_library;
-using Iviz.Msgs.tf2_msgs;
-using Iviz.Msgs.visualization_msgs;
+using Iviz.Msgs.GeometryMsgs;
+using Iviz.Msgs.Tf2Msgs;
+using Iviz.Msgs.VisualizationMsgs;
 using Iviz.RoslibSharp;
 
 namespace iviz_test
@@ -21,28 +19,28 @@ namespace iviz_test
             TransformStamped[] tfs = new TransformStamped[1];
             tfs[0] = new TransformStamped
             (
-                header: new Iviz.Msgs.std_msgs.Header(),
-                child_frame_id: "",
-                transform: new Transform
+                Header: new Iviz.Msgs.StdMsgs.Header(),
+                ChildFrameId: "",
+                Transform: new Transform
                 (
-                    translation: new Vector3
+                    Translation: new Vector3
                     (
-                        x: 0,
-                        y: 0,
-                        z: 1
+                        X: 0,
+                        Y: 0,
+                        Z: 1
                     ),
-                    rotation: new Quaternion
+                    Rotation: new Quaternion
                     (
-                        x: 0,
-                        y: 0,
-                        z: 0,
-                        w: 1
+                        X: 0,
+                        Y: 0,
+                        Z: 0,
+                        W: 1
                     )
                 )
             );
             TFMessage tf = new TFMessage
             {
-                transforms = tfs
+                Transforms = tfs
             };
 
             BridgePublisher<TFMessage> publisher = client.Advertise<TFMessage>("/tf");
@@ -149,28 +147,28 @@ namespace iviz_test
             TransformStamped[] tfs = new TransformStamped[1];
             tfs[0] = new TransformStamped
             (
-                header: new Iviz.Msgs.std_msgs.Header(),
-                child_frame_id: "",
-                transform: new Transform
+                Header: new Iviz.Msgs.StdMsgs.Header(),
+                ChildFrameId: "",
+                Transform: new Transform
                 (
-                    translation: new Vector3
+                    Translation: new Vector3
                     (
-                        x: 0,
-                        y: 0,
-                        z: 1
+                        X: 0,
+                        Y: 0,
+                        Z: 1
                     ),
-                    rotation: new Quaternion
+                    Rotation: new Quaternion
                     (
-                        x: 0,
-                        y: 0,
-                        z: 0,
-                        w: 1
+                        X: 0,
+                        Y: 0,
+                        Z: 0,
+                        W: 1
                     )
                 )
             );
             TFMessage tf = new TFMessage
             {
-                transforms = tfs
+                Transforms = tfs
             };
             /*
             client.Subscribe<TFMessage>("/tf", Callback);
@@ -203,7 +201,7 @@ namespace iviz_test
 
         }
 
-        static void Callback(Iviz.Msgs.std_msgs.Int32 value)
+        static void Callback(Iviz.Msgs.StdMsgs.Int32 value)
         {
             Console.WriteLine("<< " + value.ToJsonString());
         }
