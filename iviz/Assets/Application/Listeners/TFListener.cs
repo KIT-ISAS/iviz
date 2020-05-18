@@ -1,15 +1,31 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using tfMessage_v2 = Iviz.Msgs.tf2_msgs.TFMessage;
-using System;
+using tfMessage_v2 = Iviz.Msgs.Tf2Msgs.TFMessage;
 using System.Linq;
-using Iviz.Msgs.tf;
-using Iviz.Msgs.geometry_msgs;
 using Iviz.RoslibSharp;
 using Iviz.App.Displays;
+using Iviz.Msgs.GeometryMsgs;
+using Iviz.Msgs.Tf;
+using System.Runtime.Serialization;
+using System;
+using Iviz.Resources;
 
-namespace Iviz.App
+namespace Iviz.App.Listeners
 {
+    [DataContract]
+    public class TFConfiguration : JsonToString, IConfiguration
+    {
+        [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
+        [DataMember] public Resource.Module Module => Resource.Module.TF;
+        [DataMember] public string Topic { get; set; } = "";
+        [DataMember] public bool AxisVisible { get; set; } = true;
+        [DataMember] public float AxisSize { get; set; } = 0.25f;
+        [DataMember] public bool AxisLabelVisible { get; set; } = false;
+        [DataMember] public float AxisLabelSize { get; set; } = 0.1f;
+        [DataMember] public bool ParentConnectorVisible { get; set; } = false;
+        [DataMember] public bool ShowAllFrames { get; set; } = false;
+    }
+
     public class TFListener : TopicListener
     {
         public static TFListener Instance { get; private set; }
@@ -26,61 +42,49 @@ namespace Iviz.App
 
         readonly Dictionary<string, TFFrame> frames = new Dictionary<string, TFFrame>();
 
-        [Serializable]
-        public class Configuration : JsonToString
-        {
-            public Resource.Module module => Resource.Module.TF;
-            public string topic = "";
-            public bool axisVisible = true;
-            public float axisSize = 0.25f;
-            public bool axisLabelVisible = false;
-            public float axisLabelSize = 0.1f;
-            public bool parentConnectorVisible = false;
-            public bool showAllFrames = false;
-        }
 
-        readonly Configuration config = new Configuration();
-        public Configuration Config
+        readonly TFConfiguration config = new TFConfiguration();
+        public TFConfiguration Config
         {
             get => config;
             set
             {
-                config.topic = value.topic;
-                AxisVisible = value.axisVisible;
-                AxisSize = value.axisSize;
-                AxisLabelSize = value.axisLabelSize;
-                AxisLabelVisible = value.axisLabelVisible;
-                ParentConnectorVisible = value.parentConnectorVisible;
-                ShowAllFrames = value.showAllFrames;
+                config.Topic = value.Topic;
+                AxisVisible = value.AxisVisible;
+                AxisSize = value.AxisSize;
+                AxisLabelSize = value.AxisLabelSize;
+                AxisLabelVisible = value.AxisLabelVisible;
+                ParentConnectorVisible = value.ParentConnectorVisible;
+                ShowAllFrames = value.ShowAllFrames;
             }
         }
 
         public bool AxisVisible
         {
-            get => config.axisVisible;
+            get => config.AxisVisible;
             set
             {
-                config.axisVisible = value;
+                config.AxisVisible = value;
                 frames.Values.ForEach(x => x.AxisVisible = value);
             }
         }
 
         public bool AxisLabelVisible
         {
-            get => config.axisLabelVisible;
+            get => config.AxisLabelVisible;
             set
             {
-                config.axisLabelVisible = value;
+                config.AxisLabelVisible = value;
                 frames.Values.ForEach(x => x.LabelVisible = value);
             }
         }
 
         public float AxisLabelSize
         {
-            get => config.axisLabelSize;
+            get => config.AxisLabelSize;
             set
             {
-                config.axisLabelSize = value;
+                config.AxisLabelSize = value;
                 frames.Values.ForEach(x =>
                 {
                     x.LabelSize = value;
@@ -90,30 +94,30 @@ namespace Iviz.App
 
         public float AxisSize
         {
-            get => config.axisSize;
+            get => config.AxisSize;
             set
             {
-                config.axisSize = value;
+                config.AxisSize = value;
                 frames.Values.ForEach(x => x.AxisLength = value);
             }
         }
 
         public bool ParentConnectorVisible
         {
-            get => config.parentConnectorVisible;
+            get => config.ParentConnectorVisible;
             set
             {
-                config.parentConnectorVisible = value;
+                config.ParentConnectorVisible = value;
                 frames.Values.ForEach(x => x.ConnectorVisible = value);
             }
         }
 
         public bool ShowAllFrames
         {
-            get => config.showAllFrames;
+            get => config.ShowAllFrames;
             set
             {
-                config.showAllFrames = value;
+                config.ShowAllFrames = value;
                 if (value)
                 {
                     frames.Values.ForEach(x => x.AddListener(dummy));
@@ -135,7 +139,7 @@ namespace Iviz.App
             mainCamera = GameObject.Find("MainCamera").GetComponent<Camera>();
             guiManager = mainCamera.GetComponent<FlyCamera>();
 
-            Config = new Configuration();
+            Config = new TFConfiguration();
 
             BaseFrame = Add(CreateFrameObject("map", gameObject));
             BaseFrame.AddListener(null);
@@ -153,7 +157,7 @@ namespace Iviz.App
         public override void StartListening()
         {
             base.StartListening();
-            Listener = new RosListener<tfMessage_v2>(Config.topic, SubscriptionHandler_v2);
+            Listener = new RosListener<tfMessage_v2>(Config.Topic, SubscriptionHandler_v2);
         }
 
         void TopicsUpdated()
@@ -179,13 +183,13 @@ namespace Iviz.App
         {
             foreach (TransformStamped t in transforms)
             {
-                string childId = t.child_frame_id;
+                string childId = t.ChildFrameId;
                 if (childId.Length != 0 && childId[0] == '/')
                 {
                     childId = childId.Substring(1);
                 }
                 TFFrame child;
-                if (config.showAllFrames)
+                if (config.ShowAllFrames)
                 {
                     child = GetOrCreateFrame(childId, dummy); ;
                 }
@@ -193,7 +197,7 @@ namespace Iviz.App
                 {
                     continue;
                 }
-                string parentId = t.header.frame_id;
+                string parentId = t.Header.FrameId;
                 if (parentId.Length != 0 && parentId[0] == '/')
                 {
                     parentId = parentId.Substring(1);
@@ -205,7 +209,7 @@ namespace Iviz.App
                 {
                     continue;
                 }
-                child.Pose = t.transform.Ros2Unity();
+                child.Pose = t.Transform.Ros2Unity();
             }
         }
 
@@ -256,11 +260,11 @@ namespace Iviz.App
             TFFrame frame = o.GetComponent<TFFrame>();
             frame.Id = id;
             frame.IgnoreUpdates = false;
-            frame.AxisVisible = config.axisVisible;
-            frame.AxisLength = config.axisSize;
-            frame.LabelSize = config.axisLabelSize;
-            frame.LabelVisible = config.axisLabelVisible;
-            frame.ConnectorVisible = config.parentConnectorVisible;
+            frame.AxisVisible = config.AxisVisible;
+            frame.AxisLength = config.AxisSize;
+            frame.LabelSize = config.AxisLabelSize;
+            frame.LabelVisible = config.AxisLabelVisible;
+            frame.ConnectorVisible = config.ParentConnectorVisible;
             return frame;
         }
 
@@ -271,12 +275,12 @@ namespace Iviz.App
 
         void SubscriptionHandler_v1(tfMessage msg)
         {
-            ProcessMessages(msg.transforms);
+            ProcessMessages(msg.Transforms);
         }
 
         void SubscriptionHandler_v2(tfMessage_v2 msg)
         {
-            ProcessMessages(msg.transforms);
+            ProcessMessages(msg.Transforms);
         }
 
         public void MarkAsDead(TFFrame frame)

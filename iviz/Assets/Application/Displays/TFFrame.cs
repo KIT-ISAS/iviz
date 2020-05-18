@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.EventSystems;
+using Iviz.Displays;
+using Iviz.App.Listeners;
+using Iviz.Resources;
 
 namespace Iviz.App.Displays
 {

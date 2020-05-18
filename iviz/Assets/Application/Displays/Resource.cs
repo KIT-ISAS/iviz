@@ -3,17 +3,18 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.Collections.ObjectModel;
-using Iviz.Msgs.sensor_msgs;
-using Iviz.Msgs.visualization_msgs;
 using System;
+using Iviz.Msgs.SensorMsgs;
+using Iviz.Msgs.VisualizationMsgs;
 
-namespace Iviz.App
+namespace Iviz.Resources
 {
     public class Resource
     {
         [JsonConverter(typeof(StringEnumConverter))]
         public enum Module
         {
+            Invalid = 0,
             Grid,
             TF,
             PointCloud,
@@ -65,8 +66,8 @@ namespace Iviz.App
                     throw new ArgumentNullException(nameof(resourceName));
                 }
 
-                GameObject = Resources.Load<GameObject>(resourceName);
-                if (GameObject == null)
+                GameObject = UnityEngine.Resources.Load<GameObject>(resourceName);
+                if (GameObject is null)
                 {
                     throw new ArgumentException("Cannot find resource '" + resourceName + "'", nameof(resourceName));
                 }
@@ -75,7 +76,7 @@ namespace Iviz.App
 
             public Info(GameObject resource)
             {
-                GameObject = resource ?? throw new System.ArgumentNullException(nameof(resource));
+                GameObject = resource ?? throw new ArgumentNullException(nameof(resource));
                 Id = resource.GetInstanceID();
             }
 
@@ -84,6 +85,15 @@ namespace Iviz.App
             public override string ToString()
             {
                 return GameObject.ToString();
+            }
+
+            public GameObject Instantiate(Transform parent = null)
+            {
+                if (GameObject is null)
+                {
+                    throw new NullReferenceException();
+                }
+                return UnityEngine.Object.Instantiate(GameObject, parent);
             }
         }
 
@@ -101,14 +111,20 @@ namespace Iviz.App
 
             public MaterialsType()
             {
-                SimpleLit = Resources.Load<Material>("Materials/SimpleWhite");
-                Lit = Resources.Load<Material>("Materials/White");
-                TexturedLit = Resources.Load<Material>("Materials/Textured Lit");
-                ImagePreview = Resources.Load<Material>("Materials/ImagePreview");
-                PointCloud = Resources.Load<Material>("Materials/PointCloud Material");
-                MeshList = Resources.Load<Material>("Materials/MeshList Material");
-                Grid = Resources.Load<Material>("Materials/Grid");
-                Line = Resources.Load<Material>("Materials/Line Material");
+                SimpleLit = Load("Materials/SimpleWhite");
+                Lit = Load("Materials/White");
+                TexturedLit = Load("Materials/Textured Lit");
+                ImagePreview = Load("Materials/ImagePreview");
+                PointCloud = Load("Materials/PointCloud Material");
+                MeshList = Load("Materials/MeshList Material");
+                Grid = Load("Materials/Grid");
+                Line = Load("Materials/Line Material");
+                DepthImageProjector = Load("Materials/DepthImage Material");
+            }
+
+            static Material Load(string path)
+            {
+                return UnityEngine.Resources.Load<Material>(path);
             }
         }
 
@@ -149,7 +165,7 @@ namespace Iviz.App
                 Dictionary<ColormapId, Texture2D> textures = new Dictionary<ColormapId, Texture2D>();
                 for (int i = 0; i < Names.Count; i++)
                 {
-                    textures[(ColormapId)i] = Resources.Load<Texture2D>("Colormaps/" + Names[i]);
+                    textures[(ColormapId)i] = UnityEngine.Resources.Load<Texture2D>("Colormaps/" + Names[i]);
                 }
                 Textures = new ReadOnlyDictionary<ColormapId, Texture2D>(textures);
             }
@@ -242,11 +258,39 @@ namespace Iviz.App
         {
             public Info DisplayButton { get; }
             public Info TopicsButton { get; }
+            public Info ItemListPanel { get; }
+            public Info ConnectionPanel { get; }
+
+            public Info HeadTitle { get; }
+            public Info SectionTitle { get; }
+            public Info ToggleWidget { get; }
+            public Info SliderWidget { get; }
+            public Info InputWidget { get; }
+            public Info Dropdown { get; }
+            public Info ColorPicker { get; }
+            public Info ImagePreview { get; }
+            public Info CloseButton { get; }
+            public Info TrashButton { get; }
+            public Info DataLabel { get; }
 
             public WidgetsType()
             {
                 DisplayButton = new Info("Widgets/Display Button");
                 TopicsButton = new Info("Widgets/Topics Button");
+                ItemListPanel = new Info("Widgets/Item List Panel");
+                ConnectionPanel = new Info("Widgets/Connection Panel");
+
+                HeadTitle = new Info("Widgets/Head Title");
+                SectionTitle = new Info("Widgets/Section Title");
+                ToggleWidget = new Info("Widgets/Toggle");
+                SliderWidget = new Info("Widgets/Slider");
+                InputWidget = new Info("Widgets/Input Field");
+                ColorPicker = new Info("Widgets/ColorPicker");
+                ImagePreview = new Info("Widgets/Image Preview");
+                Dropdown = new Info("Widgets/Dropdown");
+                CloseButton = new Info("Widgets/Close Button");
+                TrashButton = new Info("Widgets/Trash Button");
+                DataLabel = new Info("Widgets/Data Label");
             }
         }
 

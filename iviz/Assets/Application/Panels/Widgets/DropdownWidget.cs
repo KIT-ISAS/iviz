@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Iviz.Resources;
 using UnityEngine.UI;
 
 namespace Iviz.App

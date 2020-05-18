@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Iviz.App.Listeners;
+using Iviz.Resources;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,16 +8,43 @@ namespace Iviz.App
 {
     public class ImageDisplayData : DisplayableListenerData
     {
-        ImageListener listener;
-        ImagePanelContents panel;
+        readonly ImageListener listener;
+        readonly ImagePanelContents panel;
         RawImage anchor;
 
-        public override TopicListener Listener => listener;
+        protected override TopicListener Listener => listener;
+
         public override DataPanelContents Panel => panel;
         public override Resource.Module Module => Resource.Module.Image;
+        public override IConfiguration Configuration => listener.Config;
 
         public ImageListener Image => listener;
 
+
+        public ImageDisplayData(DisplayDataConstructor constructor) :
+            base(constructor.DisplayList,
+                ((ImageConfiguration)constructor.Configuration)?.Topic ?? constructor.Topic,
+                ((ImageConfiguration)constructor.Configuration)?.Type ?? constructor.Type)
+        {
+            GameObject displayObject = Resource.Listeners.Image.Instantiate();
+            displayObject.name = "Image";
+
+            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Image) as ImagePanelContents;
+            listener = displayObject.GetComponent<ImageListener>();
+            if (constructor.Configuration != null)
+            {
+                listener.Config = (ImageConfiguration)constructor.Configuration;
+            }
+            else
+            {
+                listener.Config.Topic = Topic;
+                listener.Config.Type = Type;
+            }
+            listener.StartListening();
+            UpdateButtonText();
+        }
+
+        /*
         public override DisplayData Initialize(DisplayListPanel displayList, string topic, string type)
         {
             base.Initialize(displayList, topic, type);
@@ -23,17 +52,16 @@ namespace Iviz.App
             displayObject.name = "Image";
 
             listener = displayObject.GetComponent<ImageListener>();
-            //display.Parent = TFListener.DisplaysFrame;
-            listener.Config.topic = Topic;
-            listener.Config.type = Type;
+            listener.Config.Topic = Topic;
+            listener.Config.Type = Type;
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Image) as ImagePanelContents;
             return this;
         }
 
         public override DisplayData Deserialize(JToken j)
         {
-            listener.Config = j.ToObject<ImageListener.Configuration>();
-            Topic = listener.Config.topic;
+            listener.Config = j.ToObject<ImageConfiguration>();
+            Topic = listener.Config.Topic;
             return this;
         }
 
@@ -42,15 +70,7 @@ namespace Iviz.App
             base.Start();
             listener.StartListening();
         }
-
-        public override void Cleanup()
-        {
-            base.Cleanup();
-
-            listener.Stop();
-            ResourcePool.Dispose(Resource.Listeners.Image, listener.gameObject);
-            listener = null;
-        }
+        */
 
         public override void SetupPanel()
         {
@@ -117,9 +137,16 @@ namespace Iviz.App
             panel.PreviewWidget.image.enabled = true;
         }
 
+        /*
         public override JToken Serialize()
         {
             return JToken.FromObject(listener.Config);
+        }
+        */
+
+        public override void AddToState(StateConfiguration config)
+        {
+            config.Images.Add(listener.Config);
         }
     }
 }

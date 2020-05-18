@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using Iviz.App.Displays;
-using Iviz.Msgs.visualization_msgs;
+using Iviz.Msgs.VisualizationMsgs;
 using UnityEngine;
 
-namespace Iviz.App
+namespace Iviz.App.Listeners
 {
     public class MenuObject : MonoBehaviour
     {
@@ -22,7 +22,7 @@ namespace Iviz.App
             float y0 = 0;
             foreach (MenuEntry entry in entries)
             {
-                GameObject gameObject = Instantiate(Resources.Load<GameObject>("MenuEntry"));
+                GameObject gameObject = Instantiate(UnityEngine.Resources.Load<GameObject>("MenuEntry"));
 
                 MenuEntryObject menuEntry = gameObject.GetComponent<MenuEntryObject>();
                 menuEntry.transform.SetParentLocal(transform);

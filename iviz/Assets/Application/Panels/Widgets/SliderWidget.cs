@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using Iviz.Resources;
 using UnityEngine.UI;
 
 namespace Iviz.App

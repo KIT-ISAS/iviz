@@ -1,13 +1,28 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Iviz.App.Displays;
-using Iviz.Msgs.sensor_msgs;
+using Iviz.Displays;
+using Iviz.Msgs.SensorMsgs;
+using Iviz.Resources;
+using Iviz.RoslibSharp;
 using RosSharp;
 using UnityEngine;
 
-namespace Iviz.App
+namespace Iviz.App.Listeners
 {
-    public class LaserScanListener : TopicListener, IRecyclable
+    [DataContract]
+    public class LaserScanConfiguration : JsonToString, IConfiguration
+    {
+        [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
+        [DataMember] public Resource.Module Module => Resource.Module.LaserScan;
+        [DataMember] public string Topic { get; set; } = "";
+        [DataMember] public float PointSize { get; set; } = 0.03f;
+        [DataMember] public Resource.ColormapId Colormap { get; set; } = Resource.ColormapId.hsv;
+        [DataMember] public bool IgnoreIntensity { get; set; }
+    }
+
+    public class LaserScanListener : TopicListener
     {
         PointListResource pointCloud;
         DisplayNode node;
@@ -15,58 +30,47 @@ namespace Iviz.App
         public float MinIntensity { get; private set; }
         public float MaxIntensity { get; private set; }
         public int Size { get; private set; }
-
         public bool CalculateMinMax { get; private set; } = true;
 
-        [Serializable]
-        public class Configuration
-        {
-            public Resource.Module module => Resource.Module.LaserScan;
-            public string topic = "";
-            public float pointSize = 0.03f;
-            public Resource.ColormapId colormap = Resource.ColormapId.hsv;
-            public bool ignoreIntensity;
-        }
-
-        readonly Configuration config = new Configuration();
-        public Configuration Config
+        readonly LaserScanConfiguration config = new LaserScanConfiguration();
+        public LaserScanConfiguration Config
         {
             get => config;
             set
             {
-                config.topic = value.topic;
-                PointSize = value.pointSize;
-                Colormap = value.colormap;
-                IgnoreIntensity = value.ignoreIntensity;
+                config.Topic = value.Topic;
+                PointSize = value.PointSize;
+                Colormap = value.Colormap;
+                IgnoreIntensity = value.IgnoreIntensity;
             }
         }
 
         public float PointSize
         {
-            get => config.pointSize;
+            get => config.PointSize;
             set
             {
-                config.pointSize = value;
+                config.PointSize = value;
                 pointCloud.Scale = value * Vector2.one;
             }
         }
 
         public Resource.ColormapId Colormap
         {
-            get => config.colormap;
+            get => config.Colormap;
             set
             {
-                config.colormap = value;
+                config.Colormap = value;
                 pointCloud.Colormap = value;
             }
         }
 
         public bool IgnoreIntensity
         {
-            get => config.ignoreIntensity;
+            get => config.IgnoreIntensity;
             set
             {
-                config.ignoreIntensity = value;
+                config.IgnoreIntensity = value;
             }
         }
 
@@ -89,26 +93,26 @@ namespace Iviz.App
 
             node = SimpleDisplayNode.Instantiate("LaserScanNode", transform);
             pointCloud = ResourcePool.GetOrCreate(Resource.Markers.PointList, node.transform).GetComponent<PointListResource>();
-            Config = new Configuration();
+            Config = new LaserScanConfiguration();
         }
 
         public override void StartListening()
         {
             base.StartListening();
-            Listener = new RosListener<LaserScan>(config.topic, Handler);
-            name = "LaserScan:" + config.topic;
-            node.name = "LaserScanNode:" + config.topic;
+            Listener = new RosListener<LaserScan>(config.Topic, Handler);
+            name = "LaserScan:" + config.Topic;
+            node.name = "LaserScanNode:" + config.Topic;
         }
 
         void Handler(LaserScan msg)
         {
-            int newSize = msg.ranges.Length;
+            int newSize = msg.Ranges.Length;
             if (newSize > pointBuffer.Length)
             {
                 pointBuffer = new PointWithColor[newSize * 11 / 10];
             }
 
-            if (msg.angle_min >= msg.angle_max || msg.range_min >= msg.range_max)
+            if (msg.AngleMin >= msg.AngleMax || msg.RangeMin >= msg.RangeMax)
             {
                 Logger.Info("LaserScanListener: Invalid angle or range dimensions!");
                 return;
@@ -117,21 +121,21 @@ namespace Iviz.App
 
             Task.Run(() =>
             {
-                bool useIntensity = (!IgnoreIntensity && msg.ranges.Length == msg.intensities.Length && msg.range_min < msg.range_max);
+                bool useIntensity = (!IgnoreIntensity && msg.Ranges.Length == msg.Intensities.Length && msg.RangeMin < msg.RangeMax);
 
-                float x = Mathf.Cos(msg.angle_min);
-                float y = Mathf.Sin(msg.angle_min);
+                float x = Mathf.Cos(msg.AngleMin);
+                float y = Mathf.Sin(msg.AngleMin);
 
-                float dx = Mathf.Cos(msg.angle_increment);
-                float dy = Mathf.Sin(msg.angle_increment);
+                float dx = Mathf.Cos(msg.AngleIncrement);
+                float dy = Mathf.Sin(msg.AngleIncrement);
 
                 Vector2 intensityBounds;
                 if (!useIntensity)
                 {
-                    for (int i = 0; i < msg.ranges.Length; i++)
+                    for (int i = 0; i < msg.Ranges.Length; i++)
                     {
-                        float range = msg.ranges[i];
-                        if (range > msg.range_max || range < msg.range_min)
+                        float range = msg.Ranges[i];
+                        if (range > msg.RangeMax || range < msg.RangeMin)
                         {
                             range = float.NaN;
                         }
@@ -140,19 +144,19 @@ namespace Iviz.App
                         x = dx * x - dy * y;
                         y = dy * x + dx * y;
                     }
-                    intensityBounds = new Vector2(msg.range_min, msg.range_max);
+                    intensityBounds = new Vector2(msg.RangeMin, msg.RangeMax);
                 }
                 else
                 {
-                    for (int i = 0; i < msg.ranges.Length; i++)
+                    for (int i = 0; i < msg.Ranges.Length; i++)
                     {
-                        float range = msg.ranges[i];
-                        if (range > msg.range_max || range < msg.range_min)
+                        float range = msg.Ranges[i];
+                        if (range > msg.RangeMax || range < msg.RangeMin)
                         {
                             range = float.NaN;
                         }
                         pointBuffer[i].position = new Vector3(x * range, y * range, 0).Ros2Unity();
-                        pointBuffer[i].intensity = msg.intensities[i];
+                        pointBuffer[i].intensity = msg.Intensities[i];
                         x = dx * x - dy * y;
                         y = dy * x + dx * y;
                     }
@@ -164,7 +168,7 @@ namespace Iviz.App
                     Size = newSize;
                     pointCloud.IntensityBounds = intensityBounds;
                     pointCloud.UseIntensityTexture = true;
-                    pointCloud.Set(pointBuffer, newSize);
+                    pointCloud.PointsWithColor = new ArraySegment<PointWithColor>(pointBuffer, 0, newSize);
                 });
             });
         }
@@ -195,10 +199,7 @@ namespace Iviz.App
         {
             base.Stop();
             pointCloud.Parent = node.transform;
-        }
 
-        public void Recycle()
-        {
             ResourcePool.Dispose(Resource.Markers.PointList, pointCloud.gameObject);
             pointCloud = null;
         }

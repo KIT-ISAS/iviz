@@ -1,42 +1,46 @@
 ﻿using System.Collections.Generic;
 using System;
-using Iviz.Msgs.visualization_msgs;
+using Iviz.Msgs.VisualizationMsgs;
+using System.Runtime.Serialization;
+using Iviz.RoslibSharp;
+using Iviz.Resources;
 
-namespace Iviz.App
+namespace Iviz.App.Listeners
 {
+    [DataContract]
+    public class MarkerConfiguration : JsonToString, IConfiguration
+    {
+        [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
+        [DataMember] public Resource.Module Module => Resource.Module.Marker;
+        [DataMember] public string Topic { get; set; } = "";
+        [DataMember] public string Type { get; set; } = "";
+    }
+
     public class MarkerListener : TopicListener
     {
         readonly Dictionary<string, MarkerObject> markers = new Dictionary<string, MarkerObject>();
 
-        [Serializable]
-        public class Configuration
-        {
-            public Resource.Module module => Resource.Module.Marker;
-            public string topic = "";
-            public string type = "";
-        }
-
-        readonly Configuration config = new Configuration();
-        public Configuration Config
+        readonly MarkerConfiguration config = new MarkerConfiguration();
+        public MarkerConfiguration Config
         {
             get => config;
             set
             {
-                config.topic = value.topic;
-                config.type = value.type;
+                config.Topic = value.Topic;
+                config.Type = value.Type;
             }
         }
 
         public override void StartListening()
         {
             base.StartListening();
-            if (config.type == Marker.RosMessageType)
+            if (config.Type == Marker.RosMessageType)
             {
-                Listener = new RosListener<Marker>(config.topic, Handler);
+                Listener = new RosListener<Marker>(config.Topic, Handler);
             }
-            else if (config.type == MarkerArray.RosMessageType)
+            else if (config.Type == MarkerArray.RosMessageType)
             {
-                Listener = new RosListener<MarkerArray>(config.topic, ArrayHandler);
+                Listener = new RosListener<MarkerArray>(config.Topic, ArrayHandler);
             }
         }
 
@@ -93,19 +97,19 @@ namespace Iviz.App
 
         public static string IdFromMessage(Marker marker)
         {
-            return $"{marker.ns}/{marker.id}";
+            return $"{marker.Ns}/{marker.Id}";
         }
 
 
         void ArrayHandler(MarkerArray msg)
         {
-            msg.markers.ForEach(Handler);
+            msg.Markers.ForEach(Handler);
         }
 
         void Handler(Marker msg)
         {
             string id = IdFromMessage(msg);
-            switch (msg.action)
+            switch (msg.Action)
             {
                 case Marker.ADD:
                     if (!markers.TryGetValue(id, out MarkerObject markerToAdd))

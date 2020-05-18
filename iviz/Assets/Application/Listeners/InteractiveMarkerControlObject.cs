@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System;
-using Iviz.Msgs.visualization_msgs;
 using Iviz.App.Displays;
+using Iviz.Msgs.VisualizationMsgs;
+using Iviz.Resources;
 
-namespace Iviz.App
+namespace Iviz.App.Listeners
 {
     public class InteractiveMarkerControlObject : DisplayNode
     {
@@ -20,15 +21,15 @@ namespace Iviz.App
 
         public void Set(InteractiveMarkerControl msg)
         {
-            Description = msg.description;
-            name = msg.name;
-            Id = msg.name;
+            Description = msg.Description;
+            name = msg.Name;
+            Id = msg.Name;
 
-            transform.localRotation = msg.orientation.Ros2Unity();
+            transform.localRotation = msg.Orientation.Ros2Unity();
 
-            UpdateMarkers(msg.markers);
+            UpdateMarkers(msg.Markers);
 
-            InteractionMode = msg.interaction_mode;
+            InteractionMode = msg.InteractionMode;
             UpdateInteractionMode();
         }
 
@@ -61,7 +62,7 @@ namespace Iviz.App
             foreach (Marker marker in msg)
             {
                 string id = MarkerListener.IdFromMessage(marker);
-                switch (marker.action)
+                switch (marker.Action)
                 {
                     case Marker.ADD:
                         if (!markers.TryGetValue(id, out MarkerObject markerToAdd))
@@ -72,7 +73,7 @@ namespace Iviz.App
                             markers[id] = markerToAdd;
                         }
                         markerToAdd.Set(marker);
-                        if (marker.header.frame_id == "")
+                        if (marker.Header.FrameId == "")
                         {
                             markerToAdd.transform.SetParentLocal(transform);
                         }

@@ -1,6 +1,4 @@
-﻿using Iviz.Msgs.grid_map_msgs;
-using UnityEngine;
-
+﻿
 namespace Iviz.App
 {
     /*

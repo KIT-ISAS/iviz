@@ -1,43 +1,47 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System;
-using Iviz.Msgs.sensor_msgs;
+using Iviz.Msgs.SensorMsgs;
+using System.Runtime.Serialization;
+using Iviz.RoslibSharp;
+using Iviz.Resources;
 
-namespace Iviz.App
+namespace Iviz.App.Listeners
 {
+    [DataContract]
+    public class JointStateConfiguration : JsonToString, IConfiguration
+    {
+        [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
+        [DataMember] public Resource.Module Module => Resource.Module.JointState;
+        [DataMember] public string Topic { get; set; } = "";
+        [DataMember] public string RobotName { get; set; } = "";
+        [DataMember] public string MsgJointPrefix { get; set; } = "";
+        [DataMember] public string MsgJointSuffix { get; set; } = "";
+        [DataMember] public int MsgTrimFromEnd { get; set; } = 0;
+    }
+
     public class JointStateListener : TopicListener
     {
-        [Serializable]
-        public class Configuration
-        {
-            public Resource.Module module => Resource.Module.JointState;
-            public string topic = "";
-            public string robotName = "";
-            public string msgJointPrefix = "";
-            public string msgJointSuffix = "";
-            public int msgTrimFromEnd = 0;
-        }
-
-        readonly Configuration config = new Configuration();
-        public Configuration Config
+        readonly JointStateConfiguration config = new JointStateConfiguration();
+        public JointStateConfiguration Config
         {
             get => config;
             set
             {
-                config.topic = value.topic;
-                config.robotName = value.robotName;
-                MsgJointPrefix = value.msgJointPrefix;
-                MsgJointSuffix = value.msgJointSuffix;
-                MsgTrimFromEnd = value.msgTrimFromEnd;
+                config.Topic = value.Topic;
+                config.RobotName = value.RobotName;
+                MsgJointPrefix = value.MsgJointPrefix;
+                MsgJointSuffix = value.MsgJointSuffix;
+                MsgTrimFromEnd = value.MsgTrimFromEnd;
             }
         }
 
         public string RobotName
         {
-            get => config.robotName;
+            get => config.RobotName;
             set
             {
-                config.robotName = value;
+                config.RobotName = value;
             }
         }
 
@@ -62,28 +66,28 @@ namespace Iviz.App
 
         public string MsgJointPrefix
         {
-            get => config.msgJointPrefix;
+            get => config.MsgJointPrefix;
             set
             {
-                config.msgJointPrefix = value;
+                config.MsgJointPrefix = value;
             }
         }
 
         public string MsgJointSuffix
         {
-            get => config.msgJointSuffix;
+            get => config.MsgJointSuffix;
             set
             {
-                config.msgJointSuffix = value;
+                config.MsgJointSuffix = value;
             }
         }
 
         public int MsgTrimFromEnd
         {
-            get => config.msgTrimFromEnd;
+            get => config.MsgTrimFromEnd;
             set
             {
-                config.msgTrimFromEnd = value;
+                config.MsgTrimFromEnd = value;
             }
         }
 
@@ -98,7 +102,7 @@ namespace Iviz.App
         public override void StartListening()
         {
             base.StartListening();
-            Listener = new RosListener<JointState>(config.topic, Handler);
+            Listener = new RosListener<JointState>(config.Topic, Handler);
         }
 
         public override void Stop()
@@ -115,9 +119,9 @@ namespace Iviz.App
                 return;
             }
 
-            for (int i = 0; i < msg.name.Length; i++)
+            for (int i = 0; i < msg.Name.Length; i++)
             {
-                string msgJoint = msg.name[i];
+                string msgJoint = msg.Name[i];
                 if (MsgTrimFromEnd != 0 && msgJoint.Length >= MsgTrimFromEnd) 
                 {
                     msgJoint = msgJoint.Substring(0, msgJoint.Length - MsgTrimFromEnd);
@@ -125,13 +129,13 @@ namespace Iviz.App
                 msgJoint = $"{MsgJointPrefix}{msgJoint}{MsgJointSuffix}";
                 if (Robot.JointWriters.TryGetValue(msgJoint, out JointInfo writer))
                 {
-                    writer.Write((float)msg.position[i]);
+                    writer.Write((float)msg.Position[i]);
                 }
                 else
                 {
                     if (!warnNotFound.Contains(msgJoint))
                     {
-                        Debug.Log("JointStateListener for " + name + ": Cannot find joint '" + msgJoint + "' (original: '" + msg.name[i] + "')");
+                        Debug.Log("JointStateListener for " + name + ": Cannot find joint '" + msgJoint + "' (original: '" + msg.Name[i] + "')");
                         warnNotFound.Add(msgJoint);
                     }
                 }

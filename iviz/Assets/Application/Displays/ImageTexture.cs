@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Iviz.App;
+using Iviz.Resources;
 using Unity.Collections;
 using UnityEngine;
+using Logger = Iviz.App.Logger;
 
-namespace Iviz.App
+namespace Iviz.Displays
 {
     public class ImageTexture
     {

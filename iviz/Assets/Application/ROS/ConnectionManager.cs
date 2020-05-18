@@ -1,5 +1,5 @@
 ﻿using Iviz.Msgs;
-using Iviz.Msgs.rosgraph_msgs;
+using Iviz.Msgs.RosgraphMsgs;
 using Iviz.RoslibSharp;
 using System;
 using System.Collections.Generic;
@@ -17,16 +17,18 @@ namespace Iviz.App
         Connected,
     }
 
+    /*
     public interface IRosConnection
     {
         event Action<ConnectionState> ConnectionStateChanged;
 
         ConnectionState ConnectionState { get; }
-        Uri Uri { get; }
-        string Id { get; }
-        ReadOnlyCollection<BriefTopicInfo> PublishedTopics { get; }
 
-        bool TrySetUri(string uri);
+        Uri MasterUri { get; set; }
+        Uri MyUri { get; set; }
+        string MyId { get; set; }
+
+        ReadOnlyCollection<BriefTopicInfo> PublishedTopics { get; }
 
         void Subscribe<T>(RosListener<T> listener) where T : IMessage, new();
         void Unsubscribe(RosListener subscriber);
@@ -36,30 +38,23 @@ namespace Iviz.App
         void Publish(RosSender advertiser, IMessage msg);
         void Stop();
 
+        bool HasPublishers(string topic);
+
         ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics();
     }
-
+    */
 
     public class ConnectionManager : MonoBehaviour
     {
         public static ConnectionManager Instance { get; private set; }
-        public static IRosConnection Connection { get; private set; }
+        public static RosConnection Connection { get; private set; }
         RosSender<Log> sender;
-
-        [Flags]
-        public enum LogLevel
-        {
-            Debug = Log.DEBUG,
-            Info = Log.INFO,
-            Warn = Log.WARN,
-            Error = Log.ERROR,
-            Fatal = Log.FATAL,
-        }
 
         void Awake()
         {
             Instance = this;
             Connection = new RoslibConnection();
+            Logger.Log += LogMessage;
 
             sender = new RosSender<Log>("/rosout");
         }
@@ -70,16 +65,17 @@ namespace Iviz.App
             Connection = null;
         }
 
-        public void LogMessage(LogLevel logLevel, string message, string file, int line)
+        uint logSeq = 0;
+        void LogMessage(in LogMessage msg)
         {
             sender.Publish(new Log()
             {
-                header = Utils.CreateHeader(),
-                level = (byte)logLevel,
-                name = Connection.Id,
-                msg = message,
-                file = file,
-                line = (uint)line
+                Header = RosUtils.CreateHeader(logSeq++),
+                Level = (byte)msg.Level,
+                Name = Connection.MyId,
+                Msg = (msg.Message is Exception ex) ? ex.Message : msg.Message.ToString(),
+                File = msg.File,
+                Line = (uint)msg.Line
             });
         }
 
@@ -99,7 +95,7 @@ namespace Iviz.App
         public static ReadOnlyCollection<BriefTopicInfo>  GetSystemPublishedTopics() => Connection.GetSystemPublishedTopics();
     }
 
-    public abstract class RosConnection : IRosConnection
+    public abstract class RosConnection
     {
         static readonly TimeSpan TaskWaitTime = TimeSpan.FromMilliseconds(2000);
 
@@ -114,8 +110,12 @@ namespace Iviz.App
         public event Action<ConnectionState> ConnectionStateChanged;
 
         public ConnectionState ConnectionState { get; private set; } = ConnectionState.Disconnected;
-        public virtual Uri Uri { get; protected set; }
-        public abstract string Id { get; }
+
+        public virtual Uri MasterUri { get; set; }
+        public virtual Uri MyUri { get; set; }
+        public virtual string MyId { get; set; }
+
+        public bool KeepReconnecting { get; set; }
 
         protected static readonly ReadOnlyCollection<BriefTopicInfo> EmptyTopics =
             new ReadOnlyCollection<BriefTopicInfo>(new List<BriefTopicInfo>());
@@ -149,17 +149,19 @@ namespace Iviz.App
             }
         }
 
+        /*
         public bool TrySetUri(string uristr)
         {
             if (!Uri.TryCreate(uristr, UriKind.Absolute, out Uri uri) ||
                 uri.Scheme != "http" || (uri.AbsolutePath != "/"))
             {
-                Uri = null;
+                MasterUri = null;
                 return false;
             }
-            Uri = uri;
+            MasterUri = uri;
             return true;
         }
+        */
 
         protected void AddTask(Action a)
         {
@@ -174,7 +176,7 @@ namespace Iviz.App
         {
             while (keepRunning)
             {
-                if (ConnectionState != ConnectionState.Connected)
+                if (KeepReconnecting && ConnectionState != ConnectionState.Connected)
                 {
                     SetConnectionState(ConnectionState.Connecting);
 
@@ -224,7 +226,7 @@ namespace Iviz.App
 
         protected abstract bool Connect();
 
-        protected virtual void Disconnect()
+        public virtual void Disconnect()
         {
             SetConnectionState(ConnectionState.Disconnected);
         }
@@ -235,6 +237,7 @@ namespace Iviz.App
         public abstract void Unadvertise(RosSender advertiser);
         public abstract void Publish(RosSender advertiser, IMessage msg);
         public abstract ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics();
+        public abstract bool HasPublishers(string topic);
 
         protected virtual void Update()
         {

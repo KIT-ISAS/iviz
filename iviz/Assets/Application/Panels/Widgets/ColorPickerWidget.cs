@@ -1,4 +1,5 @@
 ﻿using System;
+using Iviz.Resources;
 using UnityEngine;
 using UnityEngine.UI;
 

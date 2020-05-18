@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Iviz.App.Displays
+namespace Iviz.Displays
 {
     public abstract class MarkerResource : MonoBehaviour, IDisplay
     {

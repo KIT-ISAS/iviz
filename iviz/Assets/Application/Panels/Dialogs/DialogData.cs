@@ -3,7 +3,7 @@
     public abstract class DialogData
     {
         protected DisplayListPanel DisplayListPanel { get; private set; }
-        protected DialogPanelManager DialogPanelManager => DisplayListPanel.dialogPanelManager;
+        protected DialogPanelManager DialogPanelManager => DisplayListPanel.DialogPanelManager;
         public abstract IDialogPanelContents Panel { get; }
 
         public virtual void Initialize(DisplayListPanel panel)
@@ -14,11 +14,6 @@
         public abstract void SetupPanel();
         public virtual void CleanupPanel() { }
         public virtual void UpdatePanel() { }
-
-        public virtual void Start()
-        {
-
-        }
 
         public virtual void Cleanup()
         {

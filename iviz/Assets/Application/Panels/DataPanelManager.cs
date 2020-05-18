@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Iviz.Resources;
 using UnityEngine;
 
 namespace Iviz.App
@@ -110,7 +111,7 @@ namespace Iviz.App
 
         GameObject CreatePanelObject(string name)
         {
-            GameObject o = Instantiate(Resources.Load<GameObject>("Widgets/Data Panel"), transform);
+            GameObject o = Instantiate(UnityEngine.Resources.Load<GameObject>("Widgets/Data Panel"), transform);
             o.name = name;
             return o;
         }

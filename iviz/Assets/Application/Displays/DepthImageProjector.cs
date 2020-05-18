@@ -1,9 +1,25 @@
 ﻿using UnityEngine;
 using System;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
+using Iviz.RoslibSharp;
+using Iviz.Displays;
+using Iviz.App.Listeners;
+using Iviz.Resources;
 
 namespace Iviz.App.Displays
 {
+    [DataContract]
+    public class DepthImageProjectorConfiguration : JsonToString, IConfiguration
+    {
+        [DataMember] public Guid Id { get; set; }
+        [DataMember] public Resource.Module Module => Resource.Module.DepthImageProjector;
+        [DataMember] public string ColorName { get; set; } = "";
+        [DataMember] public string DepthName { get; set; } = "";
+        [DataMember] public float PointSize { get; set; } = 1f;
+        [DataMember] public float FovAngle { get; set; } = 1.0f * Mathf.Rad2Deg;
+    }
+
     public class DepthImageProjector : MonoBehaviour, IDisplay
     {
         //const string MaterialResourcePath = "Displays/DepthImage Material";
@@ -19,63 +35,53 @@ namespace Iviz.App.Displays
         float K_cy = 240;
         */
 
-        [Serializable]
-        public class Configuration
-        {
-            public Resource.Module module => Resource.Module.DepthImageProjector;
-            public string colorName = "";
-            public string depthName = "";
-            public float pointSize = 1f;
-            public float fovAngle = 1.0f * Mathf.Rad2Deg;
-        }
-
-        readonly Configuration config = new Configuration();
-        public Configuration Config
+        readonly DepthImageProjectorConfiguration config = new DepthImageProjectorConfiguration();
+        public DepthImageProjectorConfiguration Config
         {
             get => config;
             set
             {
-                ColorName = value.colorName;
-                DepthName = value.depthName;
-                PointSize = value.pointSize;
-                FovAngle = value.fovAngle;
+                ColorName = value.ColorName;
+                DepthName = value.DepthName;
+                PointSize = value.PointSize;
+                FovAngle = value.FovAngle;
             }
         }
 
         public string ColorName
         {
-            get => config.colorName;
+            get => config.ColorName;
             set
             {
-                config.colorName = value;
+                config.ColorName = value;
             }
         }
 
         public string DepthName
         {
-            get => config.depthName;
+            get => config.DepthName;
             set
             {
-                config.depthName = value;
+                config.DepthName = value;
             }
         }
 
         public float PointSize
         {
-            get => config.pointSize;
+            get => config.PointSize;
             set
             {
-                config.pointSize = value;
+                config.PointSize = value;
                 UpdateQuadComputeBuffer();
             }
         }
 
         public float FovAngle
         {
-            get => config.fovAngle;
+            get => config.FovAngle;
             set
             {
-                config.fovAngle = value;
+                config.FovAngle = value;
                 if (DepthImage != null)
                 {
                     UpdatePosValues(DepthImage.Texture);
@@ -155,7 +161,7 @@ namespace Iviz.App.Displays
         {
             material = Instantiate(Resource.Materials.DepthImageProjector);
 
-            Config = new Configuration();
+            Config = new DepthImageProjectorConfiguration();
 
             Debug.Log("Supports Compute Shaders: " + SystemInfo.supportsComputeShaders);
             Bounds = new Bounds(Vector3.zero, Vector3.one * 20);
@@ -259,12 +265,12 @@ namespace Iviz.App.Displays
                 return;
             }
             float ratio = (float)texture.height / texture.width;
-            float posCoeff_X = 2 * Mathf.Tan(config.fovAngle * Mathf.Deg2Rad / 2);
+            float posCoeff_X = 2 * Mathf.Tan(config.FovAngle * Mathf.Deg2Rad / 2);
             float posCoeff_Y = posCoeff_X * ratio;
             float posAdd_X = -0.5f * posCoeff_X;
             float posAdd_Y = -0.5f * posCoeff_Y;
 
-            material.SetFloat(PropPointSize, posCoeff_X / texture.width * config.pointSize);
+            material.SetFloat(PropPointSize, posCoeff_X / texture.width * config.PointSize);
             material.SetVector(PropPosST, new Vector4(posCoeff_X, posCoeff_Y, posAdd_X, posAdd_Y));
         }
 
@@ -281,7 +287,7 @@ namespace Iviz.App.Displays
             material.SetMatrix(PropLocalToWorld, transform.localToWorldMatrix);
             material.SetMatrix(PropWorldToLocal, transform.worldToLocalMatrix);
 
-            WorldBounds = Utils.TransformBound(Bounds, transform);
+            WorldBounds = UnityUtils.TransformBound(Bounds, transform);
             Graphics.DrawProcedural(material, WorldBounds, MeshTopology.Quads, 4, uvs.Length);
         }
 
@@ -312,7 +318,7 @@ namespace Iviz.App.Displays
             width = 0;
             height = 0;
             uvs = new Vector2[0];
-            Config = new Configuration();
+            Config = new DepthImageProjectorConfiguration();
         }
 
         void OnDestroy()

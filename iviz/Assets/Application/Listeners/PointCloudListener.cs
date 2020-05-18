@@ -1,15 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Iviz.App.Displays;
-using Iviz.Msgs.sensor_msgs;
-using Newtonsoft.Json;
+using Iviz.Displays;
+using Iviz.Msgs.SensorMsgs;
+using Iviz.Resources;
+using Iviz.RoslibSharp;
 using UnityEngine;
 
-namespace Iviz.App
+namespace Iviz.App.Listeners
 {
-    public class PointCloudListener : TopicListener, IRecyclable
+    [DataContract]
+    public class PointCloudConfiguration : JsonToString, IConfiguration
+    {
+        [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
+        [DataMember] public Resource.Module Module => Resource.Module.PointCloud;
+        [DataMember] public string Topic { get; set; } = "";
+        [DataMember] public string IntensityChannel { get; set; } = "x";
+        [DataMember] public float PointSize { get; set; } = 0.03f;
+        [DataMember] public Resource.ColormapId Colormap { get; set; } = Resource.ColormapId.hsv;
+    }
+
+    public class PointCloudListener : TopicListener
     {
         DisplayNode node;
         PointListResource pointCloud;
@@ -20,54 +34,44 @@ namespace Iviz.App
         
         public bool CalculateMinMax { get; private set; } = true;
 
-        [Serializable]
-        public class Configuration
-        {
-            public Resource.Module module => Resource.Module.PointCloud;
-            public string topic = "";
-            public string intensityChannel = "x";
-            public float pointSize = 0.03f;
-            public Resource.ColormapId colormap = Resource.ColormapId.hsv;
-        }
-
-        readonly Configuration config = new Configuration();
-        public Configuration Config
+        readonly PointCloudConfiguration config = new PointCloudConfiguration();
+        public PointCloudConfiguration Config
         {
             get => config;
             set
             {
-                config.topic = value.topic;
-                IntensityChannel = value.intensityChannel;
-                PointSize = value.pointSize;
-                Colormap = value.colormap;
+                config.Topic = value.Topic;
+                IntensityChannel = value.IntensityChannel;
+                PointSize = value.PointSize;
+                Colormap = value.Colormap;
             }
         }
 
         public string IntensityChannel
         {
-            get => config.intensityChannel;
+            get => config.IntensityChannel;
             set
             {
-                config.intensityChannel = value;
+                config.IntensityChannel = value;
             }
         }
 
         public float PointSize
         {
-            get => config.pointSize;
+            get => config.PointSize;
             set
             {
-                config.pointSize = value;
+                config.PointSize = value;
                 pointCloud.Scale = value * Vector2.one;
             }
         }
 
         public Resource.ColormapId Colormap
         {
-            get => config.colormap;
+            get => config.Colormap;
             set
             {
-                config.colormap = value;
+                config.Colormap = value;
                 pointCloud.Colormap = value;
             }
         }
@@ -82,16 +86,16 @@ namespace Iviz.App
             node = SimpleDisplayNode.Instantiate("PointCloudNode", transform);
             pointCloud = ResourcePool.GetOrCreate(Resource.Markers.PointList, node.transform).GetComponent<PointListResource>();
 
-            Config = new Configuration();
-            transform.localRotation = Quaternion.identity.ToRos().Ros2Unity();
+            Config = new PointCloudConfiguration();
+            transform.localRotation = new Msgs.GeometryMsgs.Quaternion(0, 0, 0, 1).Ros2Unity();
         }
 
         public override void StartListening()
         {
             base.StartListening();
-            Listener = new RosListener<PointCloud2>(config.topic, Handler);
-            name = "PointCloud:" + config.topic;
-            node.name = "PointCloudNode:" + config.topic;
+            Listener = new RosListener<PointCloud2>(config.Topic, Handler);
+            name = "PointCloud:" + config.Topic;
+            node.name = "PointCloudNode:" + config.Topic;
         }
 
         static int FieldSizeFromType(int datatype)
@@ -117,22 +121,22 @@ namespace Iviz.App
 
         void Handler(PointCloud2 msg)
         {
-            node.SetParent(msg.header.frame_id);
+            node.SetParent(msg.Header.FrameId);
 
-            if (msg.point_step < 3 * 4 ||
-                msg.row_step < msg.point_step * msg.width ||
-                msg.data.Length < msg.row_step * msg.height)
+            if (msg.PointStep < 3 * 4 ||
+                msg.RowStep < msg.PointStep * msg.Width ||
+                msg.Data.Length < msg.RowStep * msg.Height)
             {
                 Logger.Info("PointCloudListener: Invalid point cloud dimensions!");
                 return;
             }
 
             fieldNames.Clear();
-            fieldNames.AddRange(msg.fields.Select(x => x.name));
-            Debug.Log(JsonConvert.SerializeObject(msg, Formatting.Indented));
+            fieldNames.AddRange(msg.Fields.Select(x => x.Name));
+            //Debug.Log(msg.ToJsonString());
 
 
-            int newSize = (int)(msg.width * msg.height);
+            int newSize = (int)(msg.Width * msg.Height);
             if (newSize > pointBuffer.Length)
             {
                 pointBuffer = new PointWithColor[newSize * 11 / 10];
@@ -142,34 +146,34 @@ namespace Iviz.App
             Task.Run(() =>
             {
                 Dictionary<string, PointField> fieldOffsets = new Dictionary<string, PointField>();
-                msg.fields.ForEach(x => fieldOffsets.Add(x.name, x));
+                msg.Fields.ForEach(x => fieldOffsets.Add(x.Name, x));
 
-                if (!fieldOffsets.TryGetValue("x", out PointField xField) || xField.datatype != PointField.FLOAT32 ||
-                    !fieldOffsets.TryGetValue("y", out PointField yField) || yField.datatype != PointField.FLOAT32 ||
-                    !fieldOffsets.TryGetValue("z", out PointField zField) || zField.datatype != PointField.FLOAT32)
+                if (!fieldOffsets.TryGetValue("x", out PointField xField) || xField.Datatype != PointField.FLOAT32 ||
+                    !fieldOffsets.TryGetValue("y", out PointField yField) || yField.Datatype != PointField.FLOAT32 ||
+                    !fieldOffsets.TryGetValue("z", out PointField zField) || zField.Datatype != PointField.FLOAT32)
                 {
                     Logger.Info("PointCloudListener: Unsupported point cloud! Expected XYZ as floats.");
                     return;
                 }
-                int xOffset = (int)xField.offset;
-                int yOffset = (int)yField.offset;
-                int zOffset = (int)zField.offset;
+                int xOffset = (int)xField.Offset;
+                int yOffset = (int)yField.Offset;
+                int zOffset = (int)zField.Offset;
 
-                if (!fieldOffsets.TryGetValue(config.intensityChannel, out PointField iField))
+                if (!fieldOffsets.TryGetValue(config.IntensityChannel, out PointField iField))
                 {
                     iField = new PointField();
                 }
-                int iOffset = (int)iField.offset;
-                int iSize = FieldSizeFromType(iField.datatype);
-                if (iSize == -1 || msg.point_step < iOffset + iSize)
+                int iOffset = (int)iField.Offset;
+                int iSize = FieldSizeFromType(iField.Datatype);
+                if (iSize == -1 || msg.PointStep < iOffset + iSize)
                 {
                     Logger.Info("PointCloudListener: Invalid or unsupported intensity field type!");
                     return;
                 }
 
-                bool rgbaHint = iSize == 4 && (iField.name == "rgb" || iField.name == "rgba");
+                bool rgbaHint = iSize == 4 && (iField.Name == "rgb" || iField.Name == "rgba");
 
-                GeneratePointBuffer(msg, xOffset, yOffset, zOffset, iOffset, iField.datatype, rgbaHint);
+                GeneratePointBuffer(msg, xOffset, yOffset, zOffset, iOffset, iField.Datatype, rgbaHint);
 
                 Vector2 intensityBounds =  rgbaHint ? Vector2.zero : CalculateBounds(newSize);
 
@@ -178,7 +182,7 @@ namespace Iviz.App
                     Size = newSize;
                     pointCloud.IntensityBounds = intensityBounds;
                     pointCloud.UseIntensityTexture = !rgbaHint;
-                    pointCloud.Set(pointBuffer, Size);
+                    pointCloud.PointsWithColor = new ArraySegment<PointWithColor>(pointBuffer, 0, Size);
                 });
             });
         }
@@ -230,8 +234,8 @@ namespace Iviz.App
         {
             int heightOffset = 0;
             int pointOffset = 0;
-            int rowStep = (int)msg.row_step;
-            int pointStep = (int)msg.point_step;
+            int rowStep = (int)msg.RowStep;
+            int pointStep = (int)msg.PointStep;
 
             Func<byte[], int, float> intensityFn;
             if (rgbaHint)
@@ -274,19 +278,19 @@ namespace Iviz.App
 
             if (intensityFn != null)
             {
-                for (int v = (int)msg.height; v > 0; v--, heightOffset += rowStep)
+                for (int v = (int)msg.Height; v > 0; v--, heightOffset += rowStep)
                 {
                     int rowOffset = heightOffset;
-                    for (int u = (int)msg.width; u > 0; u--, rowOffset += pointStep, pointOffset++)
+                    for (int u = (int)msg.Width; u > 0; u--, rowOffset += pointStep, pointOffset++)
                     {
                         Vector3 xyz = new Vector3(
-                            BitConverter.ToSingle(msg.data, rowOffset + xOffset),
-                            BitConverter.ToSingle(msg.data, rowOffset + yOffset),
-                            BitConverter.ToSingle(msg.data, rowOffset + zOffset)
+                            BitConverter.ToSingle(msg.Data, rowOffset + xOffset),
+                            BitConverter.ToSingle(msg.Data, rowOffset + yOffset),
+                            BitConverter.ToSingle(msg.Data, rowOffset + zOffset)
                         );
                         pointBuffer[pointOffset] = new PointWithColor(
                             new Vector3(-xyz.y, xyz.z, xyz.x),
-                            intensityFn(msg.data, rowOffset + iOffset)
+                            intensityFn(msg.Data, rowOffset + iOffset)
                         );
                     }
                 }
@@ -359,14 +363,14 @@ namespace Iviz.App
 
         void GeneratePointBufferXYZ(PointCloud2 msg, int iOffset, int iType)
         {
-            int rowStep = (int)msg.row_step;
-            int pointStep = (int)msg.point_step;
-            int height = (int)msg.height;
-            int width = (int)msg.width;
+            int rowStep = (int)msg.RowStep;
+            int pointStep = (int)msg.PointStep;
+            int height = (int)msg.Height;
+            int width = (int)msg.Width;
 
             unsafe
             {
-                fixed (byte* dataPtr = msg.data)
+                fixed (byte* dataPtr = msg.Data)
                 fixed (PointWithColor* pointBufferPtr = pointBuffer)
                 {
                     PointWithColor* pointBufferOff = pointBufferPtr;
@@ -469,10 +473,7 @@ namespace Iviz.App
         {
             base.Stop();
             pointCloud.Parent = node.transform;
-        }
 
-        public void Recycle()
-        {
             ResourcePool.Dispose(Resource.Markers.PointList, pointCloud.gameObject);
             pointCloud = null;
         }

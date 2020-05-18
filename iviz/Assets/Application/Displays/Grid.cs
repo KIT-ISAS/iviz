@@ -5,10 +5,32 @@ using System;
 using UnityEngine.EventSystems;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json;
-using Iviz.App.Displays;
+using System.Runtime.Serialization;
+using Iviz.App.Listeners;
+using Iviz.Resources;
 
-namespace Iviz.App
+namespace Iviz.App.Displays
 {
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum GridOrientation
+    {
+        XY, YZ, XZ
+    }
+
+    [DataContract]
+    public class GridConfiguration :  IConfiguration
+    {
+        [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
+        [DataMember] public Resource.Module Module => Resource.Module.Grid;
+        [DataMember] public GridOrientation Orientation { get; set; } = GridOrientation.XY;
+        [DataMember] public SerializableColor GridColor { get; set; } = Color.white * 0.25f;
+        [DataMember] public SerializableColor InteriorColor { get; set; } = Color.white * 0.5f;
+        [DataMember] public float GridLineWidth { get; set; } = 0.02f;
+        [DataMember] public float GridCellSize { get; set; } = 1;
+        [DataMember] public int NumberOfGridCells { get; set; } = 20;
+        [DataMember] public bool ShowInterior { get; set; } = true;
+    }
+
     public class Grid : ClickableDisplayNode, IRecyclable
     {
         Mesh mesh;
@@ -21,117 +43,99 @@ namespace Iviz.App
         public override Bounds Bounds => new Bounds(boxCollider.center, boxCollider.size);
         public override Bounds WorldBounds => boxCollider.bounds;
 
-        [JsonConverter(typeof(StringEnumConverter))]
-        public enum OrientationType
-        {
-            XY, YZ, XZ
-        }
 
         public static readonly List<string> OrientationNames = new List<string> { "XY", "YZ", "XZ" };
 
-        static readonly Dictionary<OrientationType, Quaternion> RotationByOrientation = new Dictionary<OrientationType, Quaternion>
+        static readonly Dictionary<GridOrientation, Quaternion> RotationByOrientation = new Dictionary<GridOrientation, Quaternion>
         {
-            { OrientationType.XZ, Quaternion.identity },
-            { OrientationType.XY, Quaternion.Euler(90, 0, 0) },
-            { OrientationType.YZ, Quaternion.Euler(0, 90, 0) }
+            { GridOrientation.XZ, Quaternion.identity },
+            { GridOrientation.XY, Quaternion.Euler(90, 0, 0) },
+            { GridOrientation.YZ, Quaternion.Euler(0, 90, 0) }
         };
 
-        [Serializable]
-        public class Configuration
-        {
-            public Resource.Module module => Resource.Module.Grid;
-            public OrientationType orientation = OrientationType.XY;
-            public SerializableColor gridColor = Color.white * 0.25f;
-            public SerializableColor interiorColor = Color.white * 0.5f;
-            public float gridLineWidth = 0.02f;
-            public float gridCellSize = 1;
-            public int numberOfGridCells = 20;
-            public bool showInterior = true;
-        }
-
-        readonly Configuration config = new Configuration();
-        public Configuration Config
+        readonly GridConfiguration config = new GridConfiguration();
+        public GridConfiguration Config
         {
             get => config;
             set
             {
-                Orientation = value.orientation;
-                GridColor = value.gridColor;
-                InteriorColor = value.interiorColor;
-                GridLineWidth = value.gridLineWidth;
-                GridCellSize = value.gridCellSize;
-                NumberOfGridCells = value.numberOfGridCells;
-                ShowInterior = value.showInterior;
+                Orientation = value.Orientation;
+                GridColor = value.GridColor;
+                InteriorColor = value.InteriorColor;
+                GridLineWidth = value.GridLineWidth;
+                GridCellSize = value.GridCellSize;
+                NumberOfGridCells = value.NumberOfGridCells;
+                ShowInterior = value.ShowInterior;
             }
         }
 
-        public OrientationType Orientation
+        public GridOrientation Orientation
         {
-            get => config.orientation;
+            get => config.Orientation;
             set
             {
-                config.orientation = value;
-                transform.rotation = RotationByOrientation[value];
+                config.Orientation = value;
+                transform.localRotation = RotationByOrientation[value];
                 reflectionProbe.transform.position = new Vector3(0, 2.0f, 0);
             }
         }
 
         public Color GridColor
         {
-            get => config.gridColor;
+            get => config.GridColor;
             set
             {
-                config.gridColor = value;
+                config.GridColor = value;
                 meshRenderer.SetPropertyColor(value);
             }
         }
 
         public Color InteriorColor
         {
-            get => config.interiorColor;
+            get => config.InteriorColor;
             set
             {
-                config.interiorColor = value;
+                config.InteriorColor = value;
                 interiorRenderer.SetPropertyColor(value);
             }
         }
 
         public float GridLineWidth
         {
-            get => config.gridLineWidth;
+            get => config.GridLineWidth;
             set
             {
-                config.gridLineWidth = value;
+                config.GridLineWidth = value;
                 UpdateMesh();
             }
         }
 
         public float GridCellSize
         {
-            get => config.gridCellSize;
+            get => config.GridCellSize;
             set
             {
-                config.gridCellSize = value;
+                config.GridCellSize = value;
                 UpdateMesh();
             }
         }
 
         public int NumberOfGridCells
         {
-            get => config.numberOfGridCells;
+            get => config.NumberOfGridCells;
             set
             {
-                config.numberOfGridCells = value;
+                config.NumberOfGridCells = value;
                 UpdateMesh();
             }
         }
 
         public bool ShowInterior
         {
-            get => config.showInterior;
+            get => config.ShowInterior;
             set
             {
-                config.showInterior = value;
+                config.ShowInterior = value;
                 interiorObject.SetActive(value);
             }
         }
@@ -163,7 +167,7 @@ namespace Iviz.App
             reflectionProbe.refreshMode = UnityEngine.Rendering.ReflectionProbeRefreshMode.ViaScripting;
             reflectionProbe.clearFlags = UnityEngine.Rendering.ReflectionProbeClearFlags.SolidColor;
 
-            Config = new Configuration();
+            Config = new GridConfiguration();
             gameObject.layer = Resource.ClickableLayer;
 
             Parent = TFListener.BaseFrame;
@@ -237,7 +241,7 @@ namespace Iviz.App
         public override void Stop()
         {
             base.Stop();
-            Config = new Configuration();
+            Config = new GridConfiguration();
         }
 
         public void Recycle()

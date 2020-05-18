@@ -1,4 +1,5 @@
-﻿using UnityEngine.UI;
+﻿using Iviz.Resources;
+using UnityEngine.UI;
 
 namespace Iviz.App
 {

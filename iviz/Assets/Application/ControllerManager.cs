@@ -1,12 +1,9 @@
-﻿#define USING_VR
+﻿//#define USING_VR
 
 using UnityEngine;
 
 #if USING_VR
 using Iviz.App.Displays;
-using Iviz.Msgs.sensor_msgs;
-using Iviz.Msgs.std_msgs;
-using Iviz.Msgs.tf2_msgs;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.EventSystems;

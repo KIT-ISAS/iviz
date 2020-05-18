@@ -5,10 +5,21 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using System;
-using Iviz.Msgs.visualization_msgs;
+using Iviz.Msgs.VisualizationMsgs;
+using Iviz.RoslibSharp;
+using System.Runtime.Serialization;
+using Iviz.Resources;
 
-namespace Iviz.App
+namespace Iviz.App.Listeners
 {
+    [DataContract]
+    public class InteractiveMarkerConfiguration : JsonToString, IConfiguration
+    {
+        [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
+        [DataMember] public Resource.Module Module => Resource.Module.InteractiveMarker;
+        [DataMember] public string Topic { get; set; } = "";
+        [DataMember] public bool DisableExpiration { get; set; } = false;
+    }
 
     public class InteractiveMarkerListener : TopicListener
     {
@@ -17,38 +28,30 @@ namespace Iviz.App
         readonly Dictionary<string, InteractiveMarkerObject> imarkers =
             new Dictionary<string, InteractiveMarkerObject>();
 
-        [Serializable]
-        public class Configuration
-        {
-            public Resource.Module module => Resource.Module.InteractiveMarker;
-            public string topic = "";
-            public bool disableExpiration;
-        }
-
         public bool DisableExpiration
         {
-            get => config.disableExpiration;
+            get => config.DisableExpiration;
             set
             {
-                config.disableExpiration = value;
+                config.DisableExpiration = value;
             }
         }
 
-        readonly Configuration config = new Configuration();
-        public Configuration Config
+        readonly InteractiveMarkerConfiguration config = new InteractiveMarkerConfiguration();
+        public InteractiveMarkerConfiguration Config
         {
             get => config;
             set
             {
-                config.topic = value.topic;
-                DisableExpiration = value.disableExpiration;
+                config.Topic = value.Topic;
+                DisableExpiration = value.DisableExpiration;
             }
         }
 
         public override void StartListening()
         {
             base.StartListening();
-            Listener = new RosListener<InteractiveMarkerUpdate>(config.topic, Handler);
+            Listener = new RosListener<InteractiveMarkerUpdate>(config.Topic, Handler);
             GameThread.EverySecond += CheckForExpiredMarkers;
             rosSender = new RosSender<InteractiveMarkerFeedback>("/interactive_markers/feedback");
         }
@@ -79,19 +82,19 @@ namespace Iviz.App
 
         void Handler(InteractiveMarkerUpdate msg)
         {
-            if (msg.type == InteractiveMarkerUpdate.KEEP_ALIVE)
+            if (msg.Type == InteractiveMarkerUpdate.KEEP_ALIVE)
             {
                 return;
             }
 
-            msg.markers.ForEach(CreateInteractiveMarker);
-            msg.poses.ForEach(UpdateInteractiveMarkerPose);
-            msg.erases.ForEach(DestroyInteractiveMarker);
+            msg.Markers.ForEach(CreateInteractiveMarker);
+            msg.Poses.ForEach(UpdateInteractiveMarkerPose);
+            msg.Erases.ForEach(DestroyInteractiveMarker);
         }
 
         void CreateInteractiveMarker(InteractiveMarker msg)
         {
-            string id = msg.name;
+            string id = msg.Name;
             if (!imarkers.TryGetValue(id, out InteractiveMarkerObject imarker))
             {
                 imarker = ResourcePool.
@@ -107,12 +110,12 @@ namespace Iviz.App
 
         void UpdateInteractiveMarkerPose(InteractiveMarkerPose msg)
         {
-            string id = msg.name;
+            string id = msg.Name;
             if (!imarkers.TryGetValue(id, out InteractiveMarkerObject im))
             {
                 return;
             }
-            im.transform.SetLocalPose(msg.pose.Ros2Unity());
+            im.transform.SetLocalPose(msg.Pose.Ros2Unity());
             im.UpdateExpirationTime();
         }
 
@@ -128,21 +131,22 @@ namespace Iviz.App
             imarkers.Remove(id);
         }
 
+        uint feedSeq = 0;
         void OnInteractiveControlObjectClicked(string imarkerId, Pose controlPose, string controlId, Vector3 position, int button)
         {
             InteractiveMarkerFeedback msg = new InteractiveMarkerFeedback
             {
-                header = Utils.CreateHeader(),
-                client_id = "iviz",
-                marker_name = imarkerId,
-                control_name = controlId,
-                event_type = InteractiveMarkerFeedback.BUTTON_CLICK,
-                pose = controlPose.Unity2RosPose(),
-                mouse_point = position.Unity2RosPoint(),
-                mouse_point_valid = true
+                Header = RosUtils.CreateHeader(feedSeq++),
+                ClientId = "iviz",
+                MarkerName = imarkerId,
+                ControlName = controlId,
+                EventType = InteractiveMarkerFeedback.BUTTON_CLICK,
+                Pose = controlPose.Unity2RosPose(),
+                MousePoint = position.Unity2RosPoint(),
+                MousePointValid = true
             };
             rosSender.Publish(msg);
-            Debug.Log("Publishing feedback! " + msg.pose);
+            Debug.Log("Publishing feedback! " + msg.Pose);
         }
 
         void CheckForExpiredMarkers()

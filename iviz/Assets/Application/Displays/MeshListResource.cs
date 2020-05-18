@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Iviz.Resources;
 using UnityEngine;
 
-namespace Iviz.App.Displays
+namespace Iviz.Displays
 {
     public sealed class MeshListResource : MarkerResource
     {

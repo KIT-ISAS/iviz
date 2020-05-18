@@ -1,11 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using Iviz.Resources;
 
 namespace Iviz.App
 {
     public enum DialogPanelType
     {
-        ItemList
+        ItemList,
+        Connection
     }
 
     public class DialogPanelManager : MonoBehaviour
@@ -30,7 +32,10 @@ namespace Iviz.App
             parentCanvas = GetComponentInParent<Canvas>();
 
             gameObject.SetActive(false);
-            PanelByType[DialogPanelType.ItemList] = CreateItemPanelObject("Dialog Item Panel").GetComponent<DialogItemList>();
+            PanelByType[DialogPanelType.ItemList] = Resource.Widgets.ItemListPanel.Instantiate(transform).GetComponent<DialogItemList>();
+            PanelByType[DialogPanelType.Connection] = Resource.Widgets.ConnectionPanel.Instantiate(transform).GetComponent<ConnectionDialogContents>();
+
+            PanelByType.Values.ForEach(x => x.Active = false);
             Active = false;
             gameObject.SetActive(true);
             started = true;
@@ -116,7 +121,7 @@ namespace Iviz.App
 
         GameObject CreateItemPanelObject(string name)
         {
-            GameObject o = Instantiate(Resources.Load<GameObject>("Widgets/Item List Panel"), transform);
+            GameObject o = Resource.Widgets.ItemListPanel.Instantiate(transform);
             o.name = name;
             return o;
         }

@@ -1,4 +1,6 @@
 ﻿using Iviz.App.Displays;
+using Iviz.App.Listeners;
+using Iviz.Resources;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,16 +10,35 @@ namespace Iviz.App
 {
     public class DepthImageProjectorDisplayData : DisplayData
     {
-        DepthImageProjector display;
-        DepthImageProjectorPanelContents panel;
+        readonly DepthImageProjector display;
+        readonly DepthImageProjectorPanelContents panel;
 
         public override DataPanelContents Panel => panel;
         public override Resource.Module Module => Resource.Module.DepthImageProjector;
 
+        public override IConfiguration Configuration  => display.Config;
+
         readonly List<string> depthImageCandidates = new List<string>();
         readonly List<string> colorImageCandidates = new List<string>();
 
+        public DepthImageProjectorDisplayData(DisplayDataConstructor constructor) :
+        base(constructor.DisplayList, constructor.Topic, constructor.Type)
+        {
+            GameObject displayObject = ResourcePool.GetOrCreate(Resource.Listeners.DepthImageProjector);
+            display = displayObject.GetComponent<DepthImageProjector>();
 
+            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.DepthImageProjector) as DepthImageProjectorPanelContents;
+
+            if (constructor.Configuration != null)
+            {
+                display.Config = (DepthImageProjectorConfiguration)constructor.Configuration;
+                display.ColorImage = GetImageWithName(display.ColorName);
+                display.DepthImage = GetImageWithName(display.DepthName);
+            }
+            UpdateButtonText();
+        }
+
+        /*
         public override DisplayData Initialize(DisplayListPanel displayList, string topic, string type)
         {
             base.Initialize(displayList, topic, type);
@@ -30,20 +51,19 @@ namespace Iviz.App
 
         public override DisplayData Deserialize(JToken j)
         {
-            display.Config = j.ToObject<DepthImageProjector.Configuration>();
+            display.Config = j.ToObject<DepthImageProjectorConfiguration>();
             display.ColorImage = GetImageWithName(display.ColorName);
             display.DepthImage = GetImageWithName(display.DepthName);
             return this;
         }
+        */
 
-
-        public override void Cleanup()
+        public override void Stop()
         {
-            base.Cleanup();
+            base.Stop();
 
             display.Stop();
             ResourcePool.Dispose(Resource.Listeners.DepthImageProjector, display.gameObject);
-            display = null;
         }
 
         public override void SetupPanel()
@@ -141,9 +161,16 @@ namespace Iviz.App
             panel.Color.Options = colorImageCandidates;
         }
 
+        /*
         public override JToken Serialize()
         {
             return JToken.FromObject(display.Config);
+        }
+        */
+
+        public override void AddToState(StateConfiguration config)
+        {
+            config.DepthImageProjectors.Add(display.Config);
         }
     }
 }

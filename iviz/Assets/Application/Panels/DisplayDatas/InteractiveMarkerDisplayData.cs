@@ -1,17 +1,43 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Iviz.App.Listeners;
+using Iviz.Resources;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 namespace Iviz.App
 {
     public class InteractiveMarkerDisplayData : DisplayableListenerData
     {
-        InteractiveMarkerListener listener;
-        InteractiveMarkerPanelContents panel;
+        readonly InteractiveMarkerListener listener;
+        readonly InteractiveMarkerPanelContents panel;
+
+        protected override TopicListener Listener => listener;
 
         public override DataPanelContents Panel => panel;
-        public override TopicListener Listener => listener;
         public override Resource.Module Module => Resource.Module.InteractiveMarker;
 
+        public override IConfiguration Configuration => listener.Config;
+
+        public InteractiveMarkerDisplayData(DisplayDataConstructor constructor) :
+        base(constructor.DisplayList, ((InteractiveMarkerConfiguration)constructor.Configuration)?.Topic ?? constructor.Topic, constructor.Type)
+        {
+            GameObject listenerObject = Resource.Listeners.InteractiveMarker.Instantiate();
+            listenerObject.name = "InteractiveMarkers";
+
+            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.InteractiveMarker) as InteractiveMarkerPanelContents;
+            listener = listenerObject.GetComponent<InteractiveMarkerListener>();
+            if (constructor.Configuration != null)
+            {
+                listener.Config = (InteractiveMarkerConfiguration)constructor.Configuration;
+            }
+            else
+            {
+                listener.Config.Topic = Topic;
+            }
+            listener.StartListening();
+            UpdateButtonText();
+        }
+
+        /*
         public override DisplayData Initialize(DisplayListPanel displayList, string topic, string type)
         {
             base.Initialize(displayList, topic, type);
@@ -20,15 +46,15 @@ namespace Iviz.App
             listenerObject.name = "InteractiveMarkers";
 
             listener = listenerObject.GetComponent<InteractiveMarkerListener>();
-            listener.Config.topic = topic;
+            listener.Config.Topic = topic;
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.InteractiveMarker) as InteractiveMarkerPanelContents;
             return this;
         }
 
         public override DisplayData Deserialize(JToken j)
         {
-            listener.Config = j.ToObject<InteractiveMarkerListener.Configuration>();
-            Topic = listener.Config.topic;
+            listener.Config = j.ToObject<InteractiveMarkerConfiguration>();
+            Topic = listener.Config.Topic;
             return this;
         }
 
@@ -37,16 +63,7 @@ namespace Iviz.App
             base.Start();
             listener.StartListening();
         }
-
-
-        public override void Cleanup()
-        {
-            base.Cleanup();
-
-            listener.Stop();
-            ResourcePool.Dispose(Resource.Listeners.InteractiveMarker, listener.gameObject);
-            listener = null;
-        }
+        */
 
         public override void SetupPanel()
         {
@@ -64,9 +81,16 @@ namespace Iviz.App
             };
         }
 
+        /*
         public override JToken Serialize()
         {
             return JToken.FromObject(listener.Config);
+        }
+        */
+
+        public override void AddToState(StateConfiguration config)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

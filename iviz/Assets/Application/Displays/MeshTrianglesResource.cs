@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace Iviz.App.Displays
+namespace Iviz.Displays
 {
     public class MeshTrianglesResource : MarkerResource
     {

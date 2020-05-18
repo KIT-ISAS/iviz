@@ -1,18 +1,38 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Iviz.App.Listeners;
+using Iviz.Resources;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 namespace Iviz.App
 {
     public class RobotDisplayData : DisplayData
     {
-        Robot display;
-        RobotPanelContents panel;
+        readonly RobotPanelContents panel;
 
-        public string RobotName => display.LongName;
-        public Robot Robot => display;
+        public Robot Robot { get; }
+        public string RobotName => Robot.LongName;
+
         public override DataPanelContents Panel => panel;
         public override Resource.Module Module => Resource.Module.Robot;
 
+        public override IConfiguration Configuration => Robot.Config;
+
+        public RobotDisplayData(DisplayDataConstructor constructor) :
+        base(constructor.DisplayList, constructor.Topic, constructor.Type)
+        {
+            GameObject displayObject = ResourcePool.GetOrCreate(Resource.Listeners.Robot);
+            Robot = displayObject.GetComponent<Robot>();
+            Robot.Parent = TFListener.ListenersFrame;
+            Robot.DisplayData = this;
+            if (constructor.Configuration != null)
+            {
+                Robot.Config = (RobotConfiguration)constructor.Configuration;
+            }
+            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Robot) as RobotPanelContents;
+            UpdateButtonText();
+        }
+
+        /*
         public override DisplayData Initialize(DisplayListPanel displayList, string topic, string type)
         {
             base.Initialize(displayList, topic, type);
@@ -27,7 +47,7 @@ namespace Iviz.App
 
         public override DisplayData Deserialize(JToken j)
         {
-            display.Config = j.ToObject<Robot.Configuration>();
+            display.Config = j.ToObject<RobotConfiguration>();
             return this;
         }
 
@@ -36,31 +56,32 @@ namespace Iviz.App
             base.Start();
             UpdateButtonText();
         }
+        */
 
-        public override void Cleanup()
+        public override void Stop()
         {
-            base.Cleanup();
+            base.Stop();
 
-            display.Stop();
-            ResourcePool.Dispose(Resource.Listeners.Robot, display.gameObject);
-            display = null;
+            Robot.Stop();
+            ResourcePool.Dispose(Resource.Listeners.Robot, Robot.gameObject);
+            //display = null;
         }
 
         public override void SetupPanel()
         {
-            panel.ResourceType.Value = display.RobotResource;
-            panel.FramePrefix.Value = display.FramePrefix;
-            panel.FrameSuffix.Value = display.FrameSuffix;
-            panel.AttachToTF.Value = display.AttachToTF;
+            panel.ResourceType.Value = Robot.RobotResource;
+            panel.FramePrefix.Value = Robot.FramePrefix;
+            panel.FrameSuffix.Value = Robot.FrameSuffix;
+            panel.AttachToTF.Value = Robot.AttachToTF;
 
             panel.ResourceType.ValueChanged += (_, f) =>
             {
-                display.RobotResource = f;
+                Robot.RobotResource = f;
                 UpdateButtonText();
             };
             panel.AttachToTF.ValueChanged += f =>
             {
-                display.AttachToTF = f;
+                Robot.AttachToTF = f;
             }; 
             panel.CloseButton.Clicked += () =>
             {
@@ -69,31 +90,38 @@ namespace Iviz.App
             };
             panel.FramePrefix.EndEdit += f =>
             {
-                display.FramePrefix = f;
+                Robot.FramePrefix = f;
             };
             panel.FrameSuffix.EndEdit += f =>
             {
-                display.FrameSuffix = f;
+                Robot.FrameSuffix = f;
             };
         }
 
-        void UpdateButtonText()
+        protected override void UpdateButtonText()
         {
             const int maxLength = 20;
-            if (display.LongName.Length > maxLength)
+            if (Robot.LongName.Length > maxLength)
             {
-                string nameShort = display.LongName.Substring(0, maxLength);
+                string nameShort = Robot.LongName.Substring(0, maxLength);
                 ButtonText = $"{nameShort}...\n<b>{Module}</b>";
             }
             else
             {
-                ButtonText = $"{display.LongName}\n<b>{Module}</b>";
+                ButtonText = $"{Robot.LongName}\n<b>{Module}</b>";
             }
         }
 
+        /*
         public override JToken Serialize()
         {
             return JToken.FromObject(display.Config);
+        }
+        */
+
+        public override void AddToState(StateConfiguration config)
+        {
+            config.Robots.Add(Robot.Config);
         }
     }
 }

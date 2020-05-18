@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Iviz.App;
+using Iviz.Resources;
 using UnityEngine;
 
-namespace Iviz.App.Displays
+namespace Iviz.Displays
 {
     [StructLayout(LayoutKind.Explicit)]
     public struct PointWithColor
@@ -98,18 +98,18 @@ namespace Iviz.App.Displays
 
         static readonly int PropPoints = Shader.PropertyToID("_Points");
 
-        int size;
+        int size_;
         public int Size
         {
-            get => size;
+            get => size_;
             private set
             {
-                if (value == size)
+                if (value == size_)
                 {
                     return;
                 }
-                size = value;
-                int reqDataSize = (int)(size * 1.1f);
+                size_ = value;
+                int reqDataSize = (int)(size_ * 1.1f);
                 if (pointBuffer == null || pointBuffer.Length < reqDataSize)
                 {
                     pointBuffer = new PointWithColor[reqDataSize];
@@ -121,7 +121,6 @@ namespace Iviz.App.Displays
                     pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithColor>());
                     material.SetBuffer(PropPoints, pointComputeBuffer);
                 }
-                Size = size;
             }
         }
         public IList<PointWithColor> PointsWithColor
@@ -138,10 +137,10 @@ namespace Iviz.App.Displays
             }
         }
 
-        public void Set(IList<Vector3> points, int size)
+        public void Set(IList<Vector3> points)
         {
-            Size = size;
-            for (int i = 0; i < size; i++)
+            Size = points.Count;
+            for (int i = 0; i < Size; i++)
             {
                 pointBuffer[i].position = points[i];
                 pointBuffer[i].color = Color.white;
@@ -149,22 +148,24 @@ namespace Iviz.App.Displays
             UpdateBuffer();
         }
 
-        public void Set(IList<PointWithColor> points, int size)
+        /*
+        public void Set(IList<PointWithColor> points)
         {
-            Size = size;
-            for (int i = 0; i < size; i++)
+            Size = points.Count;
+            for (int i = 0; i < Size; i++)
             {
                 pointBuffer[i] = points[i];
             }
             UpdateBuffer();
         }
+        */
 
         public void Set(IList<Vector3> points, IList<Color> colors)
         {
             Size = points.Count;
             if (colors == null)
             {
-                for (int i = 0; i < size; i++)
+                for (int i = 0; i < Size; i++)
                 {
                     pointBuffer[i].position = points[i];
                     pointBuffer[i].color = Color.white;
@@ -172,7 +173,7 @@ namespace Iviz.App.Displays
             }
             else
             {
-                for (int i = 0; i < size; i++)
+                for (int i = 0; i < Size; i++)
                 {
                     pointBuffer[i].position = points[i];
                     pointBuffer[i].color = colors[i];
@@ -324,7 +325,7 @@ namespace Iviz.App.Displays
             }
             UpdateQuadComputeBuffer();
 
-            Debug.Log("PointCloudListener: Rebuilding compute buffers");
+            //Debug.Log("PointCloudListener: Rebuilding compute buffers");
         }
     }
 }

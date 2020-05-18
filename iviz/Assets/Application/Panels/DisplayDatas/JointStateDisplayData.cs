@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Iviz.App.Listeners;
+using Iviz.Resources;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -7,14 +9,38 @@ namespace Iviz.App
 {
     public class JointStateDisplayData : DisplayableListenerData
     {
-        JointStateListener listener;
-        JointStatePanelContents panel;
+        readonly JointStateListener listener;
+        readonly JointStatePanelContents panel;
         readonly List<string> robotNames = new List<string>();
 
+        protected override TopicListener Listener => listener;
+
         public override DataPanelContents Panel => panel;
-        public override TopicListener Listener => listener;
         public override Resource.Module Module => Resource.Module.JointState;
 
+        public override IConfiguration Configuration => listener.Config;
+
+        public JointStateDisplayData(DisplayDataConstructor constructor) :
+            base(constructor.DisplayList, ((JointStateConfiguration)constructor.Configuration)?.Topic ?? constructor.Topic, constructor.Type)
+        {
+            GameObject displayObject = Resource.Listeners.JointState.Instantiate();
+            displayObject.name = "JointState:" + Topic;
+
+            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.JointState) as JointStatePanelContents;
+            listener = displayObject.GetComponent<JointStateListener>();
+            if (constructor.Configuration != null)
+            {
+                listener.Config = (JointStateConfiguration)constructor.Configuration;
+                listener.Robot = GetRobotWithName(listener.RobotName);
+            }
+            else
+            {
+                listener.Config.Topic = Topic;
+            }
+            listener.StartListening();
+            UpdateButtonText();
+        }
+        /*
         public override DisplayData Initialize(DisplayListPanel displayList, string topic, string type)
         {
             base.Initialize(displayList, topic, type);
@@ -22,7 +48,7 @@ namespace Iviz.App
             displayObject.name = "JointState:" + Topic;
 
             listener = displayObject.GetComponent<JointStateListener>();
-            listener.Config.topic = Topic;
+            listener.Config.Topic = Topic;
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.JointState) as JointStatePanelContents;
 
             return this;
@@ -30,8 +56,8 @@ namespace Iviz.App
 
         public override DisplayData Deserialize(JToken j)
         {
-            listener.Config = j.ToObject<JointStateListener.Configuration>();
-            Topic = listener.Config.topic;
+            listener.Config = j.ToObject<JointStateConfiguration>();
+            Topic = listener.Config.Topic;
             listener.Robot = GetRobotWithName(listener.RobotName);
             return this;
         }
@@ -41,15 +67,7 @@ namespace Iviz.App
             base.Start();
             listener.StartListening();
         }
-
-        public override void Cleanup()
-        {
-            base.Cleanup();
-
-            listener.Stop();
-            ResourcePool.Dispose(Resource.Listeners.PointCloud, listener.gameObject);
-            listener = null;
-        }
+        */
 
         public override void SetupPanel()
         {
@@ -108,9 +126,16 @@ namespace Iviz.App
                 FirstOrDefault(x => x.RobotName == name)?.Robot;
         }
 
+        /*
         public override JToken Serialize()
         {
             return JToken.FromObject(listener.Config);
+        }
+        */
+
+        public override void AddToState(StateConfiguration config)
+        {
+            config.JointStates.Add(listener.Config);
         }
     }
 }

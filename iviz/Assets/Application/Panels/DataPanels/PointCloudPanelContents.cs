@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Iviz.Resources;
 
 namespace Iviz.App
 {

@@ -1,32 +1,78 @@
 ﻿
+using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
+using Iviz.Msgs.RosgraphMsgs;
 
 namespace Iviz.App
 {
+    [Flags]
+    public enum LogLevel
+    {
+        Debug = Log.DEBUG,
+        Info = Log.INFO,
+        Warn = Log.WARN,
+        Error = Log.ERROR,
+        Fatal = Log.FATAL,
+    }
+
+    [DataContract]
+    public readonly struct LogMessage
+    {
+        [DataMember] public LogLevel Level { get; }
+        [DataMember] public object Message { get; }
+        [DataMember] public string File { get; }
+        [DataMember] public int Line { get; }
+
+        public LogMessage(LogLevel level, object message, string file, int line)
+        {
+            Level = level;
+            Message = message;
+            File = file;
+            Line = line;
+        }
+
+        /*
+        public override string ToString()
+        {
+            return RoslibSharp.Utils.ToJsonString(this);
+        }
+        */
+
+    }
+
     public static class Logger
     {
-        public static void Info<T>(T t, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
+        public delegate void Delegate(in LogMessage msg);
+
+        public static event Delegate Log;
+
+        public static void Info<T>(in T t, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
         {
             UnityEngine.Debug.Log(t);
-            ConnectionManager.Instance.LogMessage(ConnectionManager.LogLevel.Debug, t.ToString(), file, line);
+            Log?.Invoke(new LogMessage(LogLevel.Info, t, file, line));
+            //ConnectionManager.Instance.LogMessage(ConnectionManager.LogLevel.Debug, t.ToString(), file, line);
         }
 
         public static void Error<T>(T t, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
         {
             UnityEngine.Debug.LogError(t);
-            ConnectionManager.Instance.LogMessage(ConnectionManager.LogLevel.Error, t.ToString(), file, line);
+            Log?.Invoke(new LogMessage(LogLevel.Error, t, file, line));
+            //ConnectionManager.Instance.LogMessage(ConnectionManager.LogLevel.Error, t.ToString(), file, line);
         }
 
         public static void Warn<T>(T t, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
         {
             UnityEngine.Debug.LogWarning(t);
-            ConnectionManager.Instance.LogMessage(ConnectionManager.LogLevel.Warn, t.ToString(), file, line);
+            Log?.Invoke(new LogMessage(LogLevel.Warn, t, file, line));
+            //ConnectionManager.Instance.LogMessage(ConnectionManager.LogLevel.Warn, t.ToString(), file, line);
         }
 
         public static void Debug<T>(T t, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
         {
             UnityEngine.Debug.Log(t);
-            ConnectionManager.Instance.LogMessage(ConnectionManager.LogLevel.Debug, t.ToString(), file, line);
+            Log?.Invoke(new LogMessage(LogLevel.Debug, t, file, line));
+            //ConnectionManager.Instance.LogMessage(ConnectionManager.LogLevel.Debug, t.ToString(), file, line);
         }
     }
 }

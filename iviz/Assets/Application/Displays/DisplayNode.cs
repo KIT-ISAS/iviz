@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System;
+using Iviz.App.Listeners;
 
 namespace Iviz.App
 {
@@ -9,7 +10,7 @@ namespace Iviz.App
     }
 }
 
-namespace Iviz.App.Displays
+namespace Iviz.Displays
 {
     public interface IDisplay
     {
@@ -20,8 +21,10 @@ namespace Iviz.App.Displays
         void Stop();
         Transform Parent { get; set; }
     }
+}
 
-
+namespace Iviz.App.Displays
+{
     public abstract class DisplayNode : MonoBehaviour
     {
         TFFrame parent;

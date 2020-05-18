@@ -3,14 +3,15 @@ using Iviz.RoslibSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Net;
+using System.Net.Sockets;
 using UnityEngine;
 
 namespace Iviz.App
 {
-    public class RoslibConnection : RosConnection
+    public sealed class RoslibConnection : RosConnection
     {
-        public const string MyId = "iviz";
         RosClient client;
 
         abstract class AdvertisedTopic
@@ -104,22 +105,45 @@ namespace Iviz.App
         readonly Dictionary<string, SubscribedTopic> subscribersByTopic = new Dictionary<string, SubscribedTopic>();
         readonly List<RosPublisher> publishers = new List<RosPublisher>();
 
-        public override Uri Uri
+        public override Uri MasterUri
         {
-            get => base.Uri;
-            protected set
+            get => base.MasterUri;
+            set
             {
-                base.Uri = value;
+                base.MasterUri = value;
                 Disconnect();
             }
         }
 
-        public override string Id => "/Iviz";
+        //public override string Id => "/Iviz";
+        public override string MyId
+        {
+            get => base.MyId;
+            set
+            {
+                base.MyId = value;
+                Disconnect();
+            }
+        }
+
+        public override Uri MyUri
+        {
+            get => base.MyUri;
+            set
+            {
+                base.MyUri = value;
+                Disconnect();
+            }
+        }
 
         protected override bool Connect()
         {
             //Debug.Log("Connecting! '" + Uri + "'");
-            if (Uri == null || Uri.Scheme != "http")
+            if (MasterUri == null ||
+                MasterUri.Scheme != "http" ||
+                MyId == null ||
+                MyUri == null ||
+                MyUri.Scheme != "http")
             {
                 return false;
             }
@@ -128,14 +152,14 @@ namespace Iviz.App
             try
             {
                 
-                RoslibSharp.Logger.LogDebug = x => Debug.Log(x.ToString());
-                RoslibSharp.Logger.LogError = x => Debug.LogError(x.ToString());
-                RoslibSharp.Logger.Log = x => Debug.Log(x.ToString());
+                RoslibSharp.Logger.LogDebug = x => Logger.Debug(x);
+                RoslibSharp.Logger.LogError = x => Logger.Error(x);
+                RoslibSharp.Logger.Log = x => Logger.Info(x);
                 
 
-                string hostname = Dns.GetHostName();
-                Uri callerUri = new Uri($"http://{hostname}:7614");
-                client = new RosClient(Uri, Id, callerUri);
+                //string hostname = Dns.GetHostName();
+                //Uri callerUri = new Uri($"http://{hostname}:7614");
+                client = new RosClient(MasterUri, MyId, MyUri);
 
                 foreach (var entry in publishersByTopic)
                 {
@@ -152,6 +176,12 @@ namespace Iviz.App
 
                 return true;
             }
+            catch (Exception e) when (e is ArgumentException)
+            {
+                Logger.Debug(e);
+                client = null;
+                return false;
+            }
             catch (Exception e)
             {
                 Logger.Error(e);
@@ -160,7 +190,7 @@ namespace Iviz.App
             }
         }
 
-        protected override void Disconnect()
+        public override void Disconnect()
         {
             base.Disconnect();
 
@@ -365,6 +395,19 @@ namespace Iviz.App
 
         protected override void Update()
         {
+        }
+
+        public override bool HasPublishers(string topic)
+        {
+            if (!subscribersByTopic.TryGetValue(topic, out SubscribedTopic subscribedTopic))
+            {
+                return false;
+            }
+            if (subscribedTopic.subscriber == null)
+            {
+                return false;
+            }
+            return subscribedTopic.subscriber.NumPublishers != 0;
         }
 
         public override void Stop()

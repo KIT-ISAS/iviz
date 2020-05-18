@@ -1,4 +1,6 @@
-﻿namespace Iviz.App
+﻿using Iviz.Resources;
+
+namespace Iviz.App
 {
     public class RobotPanelContents : DataPanelContents
     {

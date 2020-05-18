@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Iviz.Resources;
 
 namespace Iviz.App
 {
@@ -80,7 +81,7 @@ namespace Iviz.App
 
         void OnItemClicked(int index, string _)
         {
-            DisplayListPanel.CreateDisplayForTopic(topics[index].topic, topics[index].type).Start();
+            DisplayListPanel.CreateDisplayForTopic(topics[index].topic, topics[index].type);
             Close();
         }
 

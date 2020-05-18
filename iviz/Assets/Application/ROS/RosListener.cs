@@ -35,6 +35,8 @@ namespace Iviz.App
         public string Type { get; }
         public RosListenerStats Stats { get; protected set; } = new RosListenerStats();
 
+        public bool HasPublishers => ConnectionManager.Connection.HasPublishers(Topic);
+
         protected RosListener(string topic, string type)
         {
             Topic = topic ?? throw new ArgumentNullException(nameof(topic));

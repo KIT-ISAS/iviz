@@ -2,6 +2,7 @@
 using System.Collections;
 using Iviz.App.Displays;
 using System.Collections.Generic;
+using Iviz.Displays;
 
 namespace Iviz.App {
 
@@ -23,7 +24,7 @@ namespace Iviz.App {
                 ));
             LineResource resource = GetComponent<LineResource>();
             resource.Scale = 0.01f;
-            resource.Set(ls);
+            resource.LinesWithColor = ls;
         }
 
         // Update is called once per frame

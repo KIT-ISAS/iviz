@@ -3,14 +3,30 @@ using RosSharp;
 using System.Linq;
 using System.Collections.Generic;
 using RosSharp.Urdf;
-using System;
 using Iviz.App.Displays;
+using System.Runtime.Serialization;
+using Iviz.RoslibSharp;
+using System;
+using Iviz.App.Listeners;
+using Iviz.Resources;
 
 namespace Iviz.App
 {
     class RobotInfo : MonoBehaviour
     {
         public Robot owner;
+    }
+
+    [DataContract]
+    public class RobotConfiguration : JsonToString, IConfiguration
+    {
+        [DataMember] public Guid Id { get; set; }
+        [DataMember] public Resource.Module Module => Resource.Module.Robot;
+        [DataMember] public string RobotName { get; set; } = "";
+        [DataMember] public string RobotResource { get; set; } = Resource.Robots.Names[0];
+        [DataMember] public string FramePrefix { get; set; } = "";
+        [DataMember] public string FrameSuffix { get; set; } = "";
+        [DataMember] public bool AttachToTF { get; set; } = false;
     }
 
     public class Robot : ClickableDisplayNode
@@ -31,52 +47,41 @@ namespace Iviz.App
 
         public IReadOnlyDictionary<string, JointInfo> JointWriters => jointWriters;
 
-        [Serializable]
-        public class Configuration
-        {
-            public Resource.Module module => Resource.Module.Robot;
-            public string robotName = "";
-            public string robotResource = Resource.Robots.Names[0];
-            public string framePrefix = "";
-            public string frameSuffix = "";
-            public bool attachToTF = false;
-        }
-
-        readonly Configuration config = new Configuration();
-        public Configuration Config
+        readonly RobotConfiguration config = new RobotConfiguration();
+        public RobotConfiguration Config
         {
             get => config;
             set
             {
-                RobotResource = value.robotResource;
-                AttachToTF = value.attachToTF;
-                FramePrefix = value.framePrefix;
-                FrameSuffix = value.frameSuffix;
+                RobotResource = value.RobotResource;
+                AttachToTF = value.AttachToTF;
+                FramePrefix = value.FramePrefix;
+                FrameSuffix = value.FrameSuffix;
             }
         }
 
         public string Name
         {
-            get => config.robotName;
+            get => config.RobotName;
             set
             {
                 if (value == "")
                 {
-                    name = "Robot: " + config.robotResource;
+                    name = "Robot: " + config.RobotResource;
                 }
                 else
                 {
                     name = "Robot: " + value;
                 }
-                config.robotName = value;
+                config.RobotName = value;
             }
         }
 
-        public string LongName => (Name == "") ? config.robotResource : Name;
+        public string LongName => (Name == "") ? config.RobotResource : Name;
 
         public string RobotResource
         {
-            get => config.robotResource;
+            get => config.RobotResource;
             set
             {
                 LoadRobotFromResource(value);
@@ -85,18 +90,18 @@ namespace Iviz.App
 
         public string FramePrefix
         {
-            get => config.framePrefix;
+            get => config.FramePrefix;
             set
             {
                 if (AttachToTF)
                 {
                     AttachToTF = false;
-                    config.framePrefix = value;
+                    config.FramePrefix = value;
                     AttachToTF = true;
                 }
                 else
                 {
-                    config.framePrefix = value;
+                    config.FramePrefix = value;
                 }
                 if (BaseLink != null)
                 {
@@ -107,18 +112,18 @@ namespace Iviz.App
 
         public string FrameSuffix
         {
-            get => config.frameSuffix;
+            get => config.FrameSuffix;
             set
             {
                 if (AttachToTF)
                 {
                     AttachToTF = false;
-                    config.frameSuffix = value;
+                    config.FrameSuffix = value;
                     AttachToTF = true;
                 }
                 else
                 {
-                    config.frameSuffix = value;
+                    config.FrameSuffix = value;
                 }
                 if (BaseLink != null)
                 {
@@ -129,12 +134,12 @@ namespace Iviz.App
 
         public string Decorate(string jointName)
         {
-            return $"{config.framePrefix}{jointName}{config.frameSuffix}";
+            return $"{config.FramePrefix}{jointName}{config.FrameSuffix}";
         }
 
         public bool AttachToTF
         {
-            get => config.attachToTF;
+            get => config.AttachToTF;
             set
             {
                 if (value)
@@ -186,7 +191,7 @@ namespace Iviz.App
                 {
                     SetParent(Decorate(BaseLink.name));
                 }
-                config.attachToTF = value;
+                config.AttachToTF = value;
             }
         }
 
@@ -196,12 +201,12 @@ namespace Iviz.App
             gameObject.layer = Resource.ClickableLayer;
             boxCollider = GetComponent<BoxCollider>();
 
-            Config = new Configuration();
+            Config = new RobotConfiguration();
         }
 
         void LoadRobotFromResource(string newResource)
         {
-            if (newResource == config.robotResource && RobotObject != null)
+            if (newResource == config.RobotResource && RobotObject != null)
             {
                 return;
             }
@@ -210,7 +215,7 @@ namespace Iviz.App
 
             DisposeRobot();
 
-            config.robotResource = newResource;
+            config.RobotResource = newResource;
 
             RobotObject = ResourcePool.GetOrCreate(Resource.Robots.GetObject(newResource), TFListener.BaseFrame.transform);
             RobotObject.name = newResource;
@@ -326,7 +331,7 @@ namespace Iviz.App
         {
             base.Stop();
             DisposeRobot();
-            Config = new Configuration();
+            Config = new RobotConfiguration();
         }
 
         void DisposeRobot()
@@ -338,9 +343,9 @@ namespace Iviz.App
 
             if (RobotObject != null)
             {
-                ResourcePool.Dispose(Resource.Robots.GetObject(config.robotResource), RobotObject);
+                ResourcePool.Dispose(Resource.Robots.GetObject(config.RobotResource), RobotObject);
             }
-            config.robotResource = null;
+            config.RobotResource = null;
             RobotObject = null;
             robotCollider = null;
             if (robotInfo != null)

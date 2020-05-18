@@ -1,7 +1,7 @@
-﻿using Iviz.Msgs.visualization_msgs;
+﻿using Iviz.Msgs.VisualizationMsgs;
 using UnityEngine;
 
-namespace Iviz.App
+namespace Iviz.App.Listeners
 {
     public abstract class InteractableObject : MonoBehaviour
     {

@@ -1,48 +1,68 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using System;
+using Iviz.Resources;
+using Newtonsoft.Json.Linq;
 
 namespace Iviz.App
 {
+    public class DisplayDataConstructor
+    {
+        public Resource.Module Module { get; set; }
+        public DisplayListPanel DisplayList { get; set; }
+        public string Topic { get; set; }
+        public string Type { get; set; }
+        public IConfiguration Configuration { get; set; }
+    }
+
     public abstract class DisplayData
     {
-        public static DisplayData CreateFromResource(Resource.Module resource)
-        {
-            switch (resource)
-            {
-                case Resource.Module.TF: return new TFDisplayData();
-                case Resource.Module.PointCloud: return new PointCloudDisplayData();
-                case Resource.Module.Grid: return new GridDisplayData();
-                case Resource.Module.Image: return new ImageDisplayData();
-                case Resource.Module.Robot: return new RobotDisplayData();
-                case Resource.Module.Marker: return new MarkerDisplayData();
-                case Resource.Module.InteractiveMarker: return new InteractiveMarkerDisplayData();
-                case Resource.Module.JointState: return new JointStateDisplayData();
-                case Resource.Module.DepthImageProjector: return new DepthImageProjectorDisplayData();
-                case Resource.Module.LaserScan: return new LaserScanDisplayData();
-                default: return null;
-            }
-        }
-
-        public string Topic { get; protected set; }
-        public string Type { get; protected set; }
-        protected DisplayListPanel DisplayListPanel { get; private set; }
-        protected DataPanelManager DataPanelManager => DisplayListPanel.dataPanelManager;
-        public abstract Resource.Module Module { get; }
-        public abstract DataPanelContents Panel { get; }
-
-        public abstract void SetupPanel();
-        public virtual void CleanupPanel() { }
-        public virtual void UpdatePanel() { }
+        protected DisplayListPanel DisplayListPanel { get; }
+        protected DataPanelManager DataPanelManager => DisplayListPanel.DataPanelManager;
 
         string buttonText;
-        protected string ButtonText
+        public string ButtonText
         {
             get => buttonText;
-            set
+            protected set
             {
                 buttonText = value;
                 DisplayListPanel.SetButtonText(this, buttonText);
             }
         }
+
+        public string Topic { get; }
+        public string Type { get; }
+        public abstract Resource.Module Module { get; }
+        public abstract DataPanelContents Panel { get; }
+
+        protected DisplayData(DisplayListPanel displayList, string topic, string type)
+        {
+            DisplayListPanel = displayList;
+            Topic = topic;
+            Type = type;
+        }
+
+
+        protected virtual void UpdateButtonText()
+        {
+            const int maxLength = 20;
+            if (Topic.Length > maxLength)
+            {
+                string topicShort = Topic.Substring(0, maxLength);
+                ButtonText = $"{topicShort}...\n<b>{Module}</b>";
+            }
+            else if (Topic != "")
+            {
+                ButtonText = $"{Topic}\n<b>{Module}</b>";
+            }
+            else
+            {
+                ButtonText = $"<b>{Module}</b>";
+            }
+        }
+
+        public abstract void SetupPanel();
+        public virtual void CleanupPanel() { }
+        public virtual void UpdatePanel() { }
 
         public void Select()
         {
@@ -50,43 +70,32 @@ namespace Iviz.App
             DisplayListPanel.AllGuiVisible = true;
         }
 
-        public virtual DisplayData Initialize(DisplayListPanel displayList, string topic, string type)
-        {
-            DisplayListPanel = displayList;
-            Topic = topic;
-            Type = type;
-            return this;
-        }
+        public abstract IConfiguration Configuration { get; }
 
-        public abstract DisplayData Deserialize(JToken j);
+        public abstract void AddToState(StateConfiguration config);
 
-        public virtual void Start()
-        {
-            if (string.IsNullOrEmpty(ButtonText))
-            {
-                const int maxLength = 20;
-                if (Topic.Length > maxLength)
-                {
-                    string topicShort = Topic.Substring(0, maxLength);
-                    ButtonText = $"{topicShort}...\n<b>{Module}</b>";
-                }
-                else if (Topic != "")
-                {
-                    ButtonText = $"{Topic}\n<b>{Module}</b>";
-                }
-                else
-                {
-                    ButtonText = $"<b>{Module}</b>";
-                }
-            }
-        }
-
-        public abstract JToken Serialize();
-        
-        public virtual void Cleanup()
+        public virtual void Stop()
         {
             DataPanelManager.HidePanelFor(this);
-            DisplayListPanel = null;
+        }
+
+        
+        public static DisplayData CreateFromResource(DisplayDataConstructor c)
+        {
+            switch (c.Module)
+            {
+                case Resource.Module.TF: return new TFDisplayData(c);
+                case Resource.Module.PointCloud: return new PointCloudDisplayData(c);
+                case Resource.Module.Grid: return new GridDisplayData(c);
+                case Resource.Module.Image: return new ImageDisplayData(c);
+                case Resource.Module.Robot: return new RobotDisplayData(c);
+                case Resource.Module.Marker: return new MarkerDisplayData(c);
+                case Resource.Module.InteractiveMarker: return new InteractiveMarkerDisplayData(c);
+                case Resource.Module.JointState: return new JointStateDisplayData(c);
+                case Resource.Module.DepthImageProjector: return new DepthImageProjectorDisplayData(c);
+                case Resource.Module.LaserScan: return new LaserScanDisplayData(c);
+                default: throw new ArgumentException(nameof(c));
+            }
         }
     }
 }

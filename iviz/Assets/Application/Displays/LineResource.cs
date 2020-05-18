@@ -3,8 +3,10 @@ using System.Collections;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System;
+using Iviz.Resources;
+using Iviz.App.Listeners;
 
-namespace Iviz.App.Displays
+namespace Iviz.Displays
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct LineWithColor
@@ -33,7 +35,6 @@ namespace Iviz.App.Displays
 
     public class LineResource : MarkerResource
     {
-
         Material material;
 
         LineWithColor[] lineBuffer = Array.Empty<LineWithColor>();
@@ -45,18 +46,18 @@ namespace Iviz.App.Displays
 
         static readonly int PropLines = Shader.PropertyToID("_Lines");
 
-        int size;
+        int size_;
         public int Size
         {
-            get => size;
+            get => size_;
             private set
             {
-                if (value == size)
+                if (value == size_)
                 {
                     return;
                 }
-                size = value;
-                int reqDataSize = (int)(size * 1.1f);
+                size_ = value;
+                int reqDataSize = (int)(size_ * 1.1f);
                 if (lineBuffer == null || lineBuffer.Length < reqDataSize)
                 {
                     lineBuffer = new LineWithColor[reqDataSize];
@@ -68,18 +69,30 @@ namespace Iviz.App.Displays
                     lineComputeBuffer = new ComputeBuffer(lineBuffer.Length, Marshal.SizeOf<LineWithColor>());
                     material.SetBuffer(PropLines, lineComputeBuffer);
                 }
-                Size = size;
             }
         }
 
         public IList<LineWithColor> LinesWithColor
         {
             get => lineBuffer;
+            set
+            {
+                Size = value.Count;
+                for (int i = 0; i < Size; i++)
+                {
+                    lineBuffer[i] = value[i];
+                }
+                lineComputeBuffer.SetData(lineBuffer, 0, 0, Size);
+                Bounds bounds = CalculateBounds();
+                Collider.center = bounds.center;
+                Collider.size = bounds.size;
+            }
         }
 
-        public void Set(IList<LineWithColor> points, int size = -1)
+        /*
+        public void Set(IList<LineWithColor> points)
         {
-            Size = size == -1 ? points.Count : size;
+            Size = points.Count;
             for (int i = 0; i < Size; i++)
             {
                 lineBuffer[i] = points[i];
@@ -89,6 +102,7 @@ namespace Iviz.App.Displays
             Collider.center = bounds.center;
             Collider.size = bounds.size;
         }
+        */
 
         float scale;
         public float Scale
@@ -221,7 +235,7 @@ namespace Iviz.App.Displays
             }
             UpdateQuadComputeBuffer();
 
-            Debug.Log("LineResource: Rebuilding compute buffers");
+            //Debug.Log("LineResource: Rebuilding compute buffers");
         }
     }
 }

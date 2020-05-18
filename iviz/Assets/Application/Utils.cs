@@ -1,46 +1,79 @@
 ﻿using UnityEngine;
 using System.Runtime.InteropServices;
 using System;
-using RosSharp;
 
 using System.Collections.Generic;
-using Iviz.Msgs.std_msgs;
 using Iviz.Msgs;
+using Iviz.Msgs.StdMsgs;
+using System.Runtime.Serialization;
 
-namespace Iviz.App
+namespace Iviz
 {
-    [Serializable]
+    [DataContract]
     public struct SerializableColor
     {
-        public float r, g, b, a;
+        [DataMember] public float R { get; set; }
+        [DataMember] public float G { get; set; }
+        [DataMember] public float B { get; set; }
+        [DataMember] public float A { get; set; }
+
+        public SerializableColor(float r, float g, float b, float a)
+        {
+            R = r;
+            G = g;
+            B = b;
+            A = a;
+        }
 
         public static implicit operator Color(SerializableColor i)
         {
-            return new Color(i.r, i.g, i.b, i.a);
+            return new Color(i.R, i.G, i.B, i.A);
         }
 
         public static implicit operator SerializableColor(Color color)
         {
-            return new SerializableColor { 
-                r = color.r,
-                g = color.g,
-                b = color.g,
-                a = color.a,
-            };
+            return new SerializableColor(
+                r: color.r,
+                g: color.g,
+                b: color.b,
+                a: color.a
+            );
         }
     }
 
-    public static class Utils
+    public static class RosUtils
     {
-
-        public static Vector3 ToUnity(this Iviz.Msgs.geometry_msgs.Vector3 p)
+        //----
+        static Vector3 Unity2Ros(this Vector3 vector3)
         {
-            return new Vector3((float)p.x, (float)p.y, (float)p.z);
+            return new Vector3(vector3.z, -vector3.x, vector3.y);
         }
 
-        public static Vector3 Ros2Unity(this Iviz.Msgs.geometry_msgs.Vector3 p)
+        static Vector3 Ros2Unity(this Vector3 vector3)
         {
-            return ToUnity(p).Ros2Unity();
+            return new Vector3(-vector3.y, vector3.z, vector3.x);
+        }
+
+        static Quaternion Ros2Unity(this Quaternion quaternion)
+        {
+            return new Quaternion(quaternion.y, -quaternion.z, -quaternion.x, quaternion.w);
+        }
+
+        static Quaternion Unity2Ros(this Quaternion quaternion)
+        {
+            return new Quaternion(-quaternion.z, quaternion.x, -quaternion.y, quaternion.w);
+        }
+        //----
+
+
+        static Vector3 ToUnity(this Msgs.GeometryMsgs.Vector3 p)
+        {
+            return new Vector3((float)p.X, (float)p.Y, (float)p.Z);
+        }
+
+        public static Vector3 Ros2Unity(this Msgs.GeometryMsgs.Vector3 p)
+        {
+            return p.ToUnity().Ros2Unity();
         }
 
         public static Vector3 Abs(this Vector3 p)
@@ -53,60 +86,60 @@ namespace Iviz.App
             return Vector3.Scale(p, o);
         }
 
-        public static Iviz.Msgs.geometry_msgs.Vector3 ToRosVector3(this Vector3 p)
+        static Msgs.GeometryMsgs.Vector3 ToRosVector3(this Vector3 p)
         {
-            return new Iviz.Msgs.geometry_msgs.Vector3
+            return new Msgs.GeometryMsgs.Vector3
             (
-                x: p.x,
-                y: p.y,
-                z: p.z
+                X: p.x,
+                Y: p.y,
+                Z: p.z
             );
         }
 
-        public static Iviz.Msgs.geometry_msgs.Vector3 Unity2RosVector3(this Vector3 p)
+        public static Msgs.GeometryMsgs.Vector3 Unity2RosVector3(this Vector3 p)
         {
             return ToRosVector3(p.Unity2Ros());
         }
 
-        public static Vector3 ToUnity(this Msgs.geometry_msgs.Point p)
+        static Vector3 ToUnity(this Msgs.GeometryMsgs.Point p)
         {
-            return new Vector3((float)p.x, (float)p.y, (float)p.z);
+            return new Vector3((float)p.X, (float)p.Y, (float)p.Z);
         }
 
-        public static Vector3 Ros2Unity(this Msgs.geometry_msgs.Point p)
+        public static Vector3 Ros2Unity(this Msgs.GeometryMsgs.Point p)
         {
-            return ToUnity(p).Ros2Unity();
+            return p.ToUnity().Ros2Unity();
         }
 
         public static Color ToUnityColor(this ColorRGBA p)
         {
-            return new Color(p.r, p.g, p.b, p.a);
+            return new Color(p.R, p.G, p.B, p.A);
         }
 
         public static ColorRGBA Sanitize(this ColorRGBA p)
         {
             return new ColorRGBA
             (
-                r: Mathf.Max(Mathf.Min(p.r, 1), 0),
-                g: Mathf.Max(Mathf.Min(p.g, 1), 0),
-                b: Mathf.Max(Mathf.Min(p.b, 1), 0),
-                a: Mathf.Max(Mathf.Min(p.a, 1), 0)
+                R: Mathf.Max(Mathf.Min(p.R, 1), 0),
+                G: Mathf.Max(Mathf.Min(p.G, 1), 0),
+                B: Mathf.Max(Mathf.Min(p.B, 1), 0),
+                A: Mathf.Max(Mathf.Min(p.A, 1), 0)
             );
         }
 
         public static Color32 ToUnityColor32(this ColorRGBA p)
         {
-            return new Color32((byte)(p.r * 255), (byte)(p.g * 255), (byte)(p.b * 255), (byte)(p.a * 255));
+            return new Color32((byte)(p.R * 255), (byte)(p.G * 255), (byte)(p.B * 255), (byte)(p.A * 255));
         }
 
         public static ColorRGBA ToRos(this Color p)
         {
             return new ColorRGBA
             (
-                r: p.r,
-                g: p.g,
-                b: p.b,
-                a: p.a
+                R: p.r,
+                G: p.g,
+                B: p.b,
+                A: p.a
             );
         }
 
@@ -114,110 +147,141 @@ namespace Iviz.App
         {
             return new ColorRGBA
             (
-                r: p.r / 255f,
-                g: p.g / 255f,
-                b: p.b / 255f,
-                a: p.a / 255f
+                R: p.r / 255f,
+                G: p.g / 255f,
+                B: p.b / 255f,
+                A: p.a / 255f
             );
         }
 
-        public static Iviz.Msgs.geometry_msgs.Point ToRosPoint(this Vector3 p)
+        static Msgs.GeometryMsgs.Point ToRosPoint(this Vector3 p)
         {
-            return new Iviz.Msgs.geometry_msgs.Point
+            return new Msgs.GeometryMsgs.Point
             (
-                x: p.x,
-                y: p.y,
-                z: p.z
+                X: p.x,
+                Y: p.y,
+                Z: p.z
             );
         }
 
-        public static Iviz.Msgs.geometry_msgs.Point Unity2RosPoint(this Vector3 p)
+        public static Msgs.GeometryMsgs.Point Unity2RosPoint(this Vector3 p)
         {
             return ToRosPoint(p.Unity2Ros());
         }
 
-        public static Quaternion ToUnity(this Msgs.geometry_msgs.Quaternion p)
+        static Quaternion ToUnity(this Msgs.GeometryMsgs.Quaternion p)
         {
-            return new Quaternion((float)p.x, (float)p.y, (float)p.z, (float)p.w);
+            return new Quaternion((float)p.X, (float)p.Y, (float)p.Z, (float)p.W);
         }
 
-        public static Quaternion Ros2Unity(this Iviz.Msgs.geometry_msgs.Quaternion p)
+        public static Quaternion Ros2Unity(this Msgs.GeometryMsgs.Quaternion p)
         {
-            return ToUnity(p).Ros2Unity();
+            return p.ToUnity().Ros2Unity();
         }
 
-        public static Iviz.Msgs.geometry_msgs.Quaternion ToRos(this Quaternion p)
+        static Msgs.GeometryMsgs.Quaternion ToRos(this Quaternion p)
         {
-            return new Iviz.Msgs.geometry_msgs.Quaternion
+            return new Msgs.GeometryMsgs.Quaternion
             (
-                x: p.x,
-                y: p.y,
-                z: p.z,
-                w: p.w
+                X: p.x,
+                Y: p.y,
+                Z: p.z,
+                W: p.w
             );
         }
 
-        public static Iviz.Msgs.geometry_msgs.Quaternion Unity2RosQuaternion(this Quaternion p)
+        public static Msgs.GeometryMsgs.Quaternion Unity2RosQuaternion(this Quaternion p)
         {
             return ToRos(p.Unity2Ros());
         }
 
-        public static Pose ToUnity(this Iviz.Msgs.geometry_msgs.Transform pose)
+        static Pose ToUnity(this Msgs.GeometryMsgs.Transform pose)
         {
-            return new Pose(pose.translation.ToUnity(), pose.rotation.ToUnity());
+            return new Pose(pose.Translation.ToUnity(), pose.Rotation.ToUnity());
         }
 
-        public static Pose Ros2Unity(this Iviz.Msgs.geometry_msgs.Transform pose)
+        public static Pose Ros2Unity(this Msgs.GeometryMsgs.Transform pose)
         {
-            return new Pose(pose.translation.Ros2Unity(), pose.rotation.Ros2Unity());
+            return new Pose(pose.Translation.Ros2Unity(), pose.Rotation.Ros2Unity());
         }
 
-        public static Pose ToUnity(this Iviz.Msgs.geometry_msgs.Pose pose)
+        static Pose ToUnity(this Msgs.GeometryMsgs.Pose pose)
         {
-            return new Pose(pose.position.ToUnity(), pose.orientation.ToUnity());
+            return new Pose(pose.Position.ToUnity(), pose.Orientation.ToUnity());
         }
 
-        public static Pose Ros2Unity(this Iviz.Msgs.geometry_msgs.Pose pose)
+        public static Pose Ros2Unity(this Msgs.GeometryMsgs.Pose pose)
         {
-            return new Pose(pose.position.Ros2Unity(), pose.orientation.Ros2Unity());
+            return new Pose(pose.Position.Ros2Unity(), pose.Orientation.Ros2Unity());
         }
 
-        public static Iviz.Msgs.geometry_msgs.Transform ToRosTransform(this Pose p)
+        static Msgs.GeometryMsgs.Transform ToRosTransform(this Pose p)
         {
-            return new Iviz.Msgs.geometry_msgs.Transform
+            return new Msgs.GeometryMsgs.Transform
             (
-                translation: p.position.ToRosVector3(),
-                rotation: p.rotation.ToRos()
+                Translation: p.position.ToRosVector3(),
+                Rotation: p.rotation.ToRos()
             );
         }
 
-        public static Iviz.Msgs.geometry_msgs.Transform Unity2RosTransform(this Pose p)
+        public static Msgs.GeometryMsgs.Transform Unity2RosTransform(this Pose p)
         {
-            return new Iviz.Msgs.geometry_msgs.Transform
+            return new Msgs.GeometryMsgs.Transform
             (
-                translation: p.position.Unity2RosVector3(),
-                rotation: p.rotation.Unity2RosQuaternion()
+                Translation: p.position.Unity2RosVector3(),
+                Rotation: p.rotation.Unity2RosQuaternion()
             );
         }
 
-        public static Iviz.Msgs.geometry_msgs.Pose ToRosPose(this Pose p)
+        static Msgs.GeometryMsgs.Pose ToRosPose(this Pose p)
         {
-            return new Iviz.Msgs.geometry_msgs.Pose
+            return new Msgs.GeometryMsgs.Pose
             (
-                position: p.position.ToRosPoint(),
-                orientation: p.rotation.ToRos()
+                Position: p.position.ToRosPoint(),
+                Orientation: p.rotation.ToRos()
             );
         }
 
-        public static Iviz.Msgs.geometry_msgs.Pose Unity2RosPose(this Pose p)
+        public static Msgs.GeometryMsgs.Pose Unity2RosPose(this Pose p)
         {
-            return new Iviz.Msgs.geometry_msgs.Pose
+            return new Msgs.GeometryMsgs.Pose
             (
-                position: p.position.Unity2RosPoint(),
-                orientation: p.rotation.Unity2RosQuaternion()
+                Position: p.position.Unity2RosPoint(),
+                Orientation: p.rotation.Unity2RosQuaternion()
             );
         }
 
+        public static time GetRosTime()
+        {
+            /*
+            long timeMs = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            return new time
+            {
+                secs = (uint)(timeMs / 1000),
+                nsecs = (uint)(timeMs % 1000) * 1000000
+            };
+            */
+            return new time(DateTime.Now);
+        }
+
+        public static TimeSpan ToTimeSpan(this duration duration)
+        {
+            return TimeSpan.FromSeconds(duration.Secs) + TimeSpan.FromTicks(duration.Nsecs / 100);
+        }
+
+        public static Header CreateHeader(uint seq = 0, string frame_id = "")
+        {
+            return new Header
+            (
+                Seq: seq,
+                FrameId: frame_id,
+                Stamp: GetRosTime()
+            );
+        }
+    }
+
+    public static class UnityUtils
+    {
         public static Pose AsPose(this Transform t)
         {
             return new Pose(t.position, t.rotation);
@@ -283,6 +347,7 @@ namespace Iviz.App
                 );
         }
 
+        /*
         public static void FromByteArray<T>(byte[] source, ref T[] destination) where T : struct
         {
             int size = source.Length / Marshal.SizeOf(typeof(T));
@@ -324,39 +389,9 @@ namespace Iviz.App
                     handle.Free();
             }
         }
+        */
 
-        public static time GetRosTime()
-        {
-            /*
-            long timeMs = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            return new time
-            {
-                secs = (uint)(timeMs / 1000),
-                nsecs = (uint)(timeMs % 1000) * 1000000
-            };
-            */
-            return new time(DateTime.Now);
-        }
 
-        public static TimeSpan ToTimeSpan(this duration duration)
-        {
-            return TimeSpan.FromSeconds(duration.secs) + TimeSpan.FromTicks(duration.nsecs / 100);
-        }
-
-        public static bool IsZero(this duration duration)
-        {
-            return duration.secs == 0 && duration.nsecs == 0;
-        }
-
-        public static Header CreateHeader(uint seq = 0, string frame_id = "")
-        {
-            return new Header
-            {
-                seq = seq,
-                frame_id = frame_id,
-                stamp = GetRosTime()
-            };
-        }
 
         public static void ForEach<T>(this IEnumerable<T> col, Action<T> action)
         {
@@ -382,11 +417,11 @@ namespace Iviz.App
         public static Bounds TransformBound(Bounds b, Quaternion q, Vector3 t)
         {
             Vector3[] R = {
-                b.extents.x * Vector3.right,
+                 b.extents.x * Vector3.right,
                 -b.extents.x * Vector3.right,
-                b.extents.y * Vector3.up,
+                 b.extents.y * Vector3.up,
                 -b.extents.y * Vector3.up,
-                b.extents.z * Vector3.forward,
+                 b.extents.z * Vector3.forward,
                 -b.extents.z * Vector3.forward
             };
             Vector3 positionMin = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);

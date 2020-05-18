@@ -1,8 +1,8 @@
-﻿using Iviz.Msgs.visualization_msgs;
+﻿using Iviz.Msgs.VisualizationMsgs;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Iviz.App
+namespace Iviz.App.Listeners
 {
     public class MenuEntryObject : InteractableObject
     {
@@ -21,9 +21,9 @@ namespace Iviz.App
             Height = rectTransform.rect.height * transform.localScale.y;
 
             canvas.worldCamera = camera;
-            Id = msg.id;
+            Id = msg.Id;
             Text = GetComponentInChildren<Text>();
-            Text.text = msg.title;
+            Text.text = msg.Title;
             Parent = parent;
         }
 

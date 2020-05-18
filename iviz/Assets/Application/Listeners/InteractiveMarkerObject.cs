@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System;
-using Iviz.Msgs.visualization_msgs;
 using Iviz.App.Displays;
+using Iviz.Msgs.VisualizationMsgs;
+using Iviz.Resources;
 
-namespace Iviz.App
+namespace Iviz.App.Listeners
 {
     public class InteractiveMarkerObject : DisplayNode
     {
@@ -16,7 +17,7 @@ namespace Iviz.App
         readonly Dictionary<string, InteractiveMarkerControlObject> controls = new Dictionary<string, InteractiveMarkerControlObject>();
         readonly HashSet<string> controlsToDelete = new HashSet<string>();
 
-        MenuObject menuObject;
+        MenuObject menuObject = null;
         public bool HasMenu => menuObject != null;
 
         const int LifetimeInSec = 15;
@@ -24,21 +25,21 @@ namespace Iviz.App
 
         public void Set(InteractiveMarker msg)
         {
-            name = msg.name;
-            Id = msg.name;
-            Description = msg.description;
+            name = msg.Name;
+            Id = msg.Name;
+            Description = msg.Description;
 
-            transform.SetLocalPose(msg.pose.Ros2Unity());
-            transform.localScale = msg.scale * Vector3.one;
+            transform.SetLocalPose(msg.Pose.Ros2Unity());
+            transform.localScale = msg.Scale * Vector3.one;
 
-            SetParent(msg.header.frame_id);
+            SetParent(msg.Header.FrameId);
 
             controlsToDelete.Clear();
             controls.Keys.ForEach(x => controlsToDelete.Add(x));
 
-            foreach (InteractiveMarkerControl controlMsg in msg.controls)
+            foreach (InteractiveMarkerControl controlMsg in msg.Controls)
             {
-                string id = controlMsg.name;
+                string id = controlMsg.Name;
                 if (!controls.TryGetValue(id, out InteractiveMarkerControlObject control))
                 {
                     control = ResourcePool.
