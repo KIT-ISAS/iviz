@@ -14,6 +14,7 @@ namespace Iviz.App.Displays
     {
         [DataMember] public Guid Id { get; set; }
         [DataMember] public Resource.Module Module => Resource.Module.DepthImageProjector;
+        [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string ColorName { get; set; } = "";
         [DataMember] public string DepthName { get; set; } = "";
         [DataMember] public float PointSize { get; set; } = 1f;
@@ -46,6 +47,12 @@ namespace Iviz.App.Displays
                 PointSize = value.PointSize;
                 FovAngle = value.FovAngle;
             }
+        }
+
+        public virtual bool Visible
+        {
+            get => gameObject.activeSelf;
+            set => gameObject.SetActive(this);
         }
 
         public string ColorName

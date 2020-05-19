@@ -53,6 +53,11 @@ namespace Iviz.Displays
             set => transform.parent = value;
         }
 
+        public bool Visible
+        {
+            get => gameObject.activeSelf;
+            set => gameObject.SetActive(value);
+        }
 
         public void Stop()
         {

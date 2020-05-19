@@ -1,5 +1,6 @@
 ﻿using Iviz.App.Displays;
 using Iviz.App.Listeners;
+using Iviz.Displays;
 using Iviz.Resources;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
@@ -24,8 +25,7 @@ namespace Iviz.App
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Grid) as GridPanelContents;
 
             display = displayObject.GetComponent<Displays.Grid>();
-            display.DisplayData = this;
-            display.Parent = TFListener.ListenersFrame;
+            //display.DisplayData = this;
             if (constructor.Configuration != null)
             {
                 display.Config = (GridConfiguration)constructor.Configuration;

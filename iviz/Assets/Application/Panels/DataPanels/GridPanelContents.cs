@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Iviz.Displays;
+using UnityEngine;
 
 namespace Iviz.App
 {
@@ -20,7 +21,7 @@ namespace Iviz.App
             LineWidth = p.AddSlider("Grid Line Width").SetMinValue(0.01f).SetMaxValue(0.1f).UpdateValue();
             CellSize = p.AddSlider("Grid Cell Size").SetMinValue(0.01f).SetMaxValue(0.1f).SetValue(1.0f).UpdateValue();
             NumberOfCells = p.AddSlider("Number of Cells").SetMinValue(1).SetMaxValue(50).SetIntegerOnly(true).SetValue(10).UpdateValue();
-            Orientation = p.AddDropdown("Orientation").SetOptions(Displays.Grid.OrientationNames).SetIndex(0);
+            Orientation = p.AddDropdown("Orientation").SetOptions(GridResource.OrientationNames).SetIndex(0);
             ColorPicker = p.AddColorPicker("Grid Color").SetValue(Color.gray);
             ShowInterior = p.AddToggle("Show Interior").SetValue(true);
             p.UpdateSize();

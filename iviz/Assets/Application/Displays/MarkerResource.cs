@@ -6,7 +6,6 @@ namespace Iviz.Displays
     {
         protected BoxCollider Collider;
 
-        //public Bounds Bounds { get; protected set; }
         public Bounds Bounds => new Bounds(Collider.center, Collider.size);
         public Bounds WorldBounds => Collider.bounds;
 
@@ -22,13 +21,15 @@ namespace Iviz.Displays
             get => transform.parent;
             set => transform.parent = value;
         }
-
+        public virtual bool Visible
+        {
+            get => gameObject.activeSelf;
+            set => gameObject.SetActive(this);
+        }
         protected virtual void Awake()
         {
             Collider = GetComponent<BoxCollider>();
-            //Bounds = Collider.bounds;
         }
-
         public virtual void Stop()
         {
         }

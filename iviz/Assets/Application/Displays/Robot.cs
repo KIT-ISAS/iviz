@@ -22,6 +22,7 @@ namespace Iviz.App
     {
         [DataMember] public Guid Id { get; set; }
         [DataMember] public Resource.Module Module => Resource.Module.Robot;
+        [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string RobotName { get; set; } = "";
         [DataMember] public string RobotResource { get; set; } = Resource.Robots.Names[0];
         [DataMember] public string FramePrefix { get; set; } = "";

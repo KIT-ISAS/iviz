@@ -14,6 +14,7 @@ namespace Iviz.App.Listeners
     {
         [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
         [DataMember] public Resource.Module Module => Resource.Module.Image;
+        [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public string Type { get; set; } = "";
         [DataMember] public Resource.ColormapId Colormap { get; set; } = Resource.ColormapId.gray;
@@ -45,9 +46,20 @@ namespace Iviz.App.Listeners
                 config.Topic = value.Topic;
                 config.Type = value.Type;
                 Colormap = value.Colormap;
+                Visible = value.Visible;
                 //Anchor = value.anchor;
                 MinIntensity = value.MinIntensity;
                 MaxIntensity = value.MaxIntensity;
+            }
+        }
+
+        public bool Visible
+        {
+            get => config.Visible;
+            set
+            {
+                config.Visible = value;
+                marker.Visible = value;
             }
         }
 
@@ -100,7 +112,7 @@ namespace Iviz.App.Listeners
             set
             {
                 config.EnableMarker = value;
-                marker.Active = value;
+                marker.Visible = value;
             }
         }
 
@@ -166,12 +178,15 @@ namespace Iviz.App.Listeners
 
         public override void Stop()
         {
-            texture.Stop();
-        }
+            marker.Texture = null;
+            ResourcePool.Dispose(Resource.Markers.Image, marker.gameObject);
+            marker = null;
 
-        void OnDestroy()
-        {
+            texture.Stop();
             texture.Destroy();
+
+            node.Stop();
+            Destroy(node);
         }
 
     }

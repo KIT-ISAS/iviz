@@ -17,6 +17,7 @@ namespace Iviz.App.Listeners
     {
         [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
         [DataMember] public Resource.Module Module => Resource.Module.InteractiveMarker;
+        [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public bool DisableExpiration { get; set; } = false;
     }
