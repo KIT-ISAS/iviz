@@ -1,16 +1,11 @@
 ﻿using UnityEngine;
-using System.Linq;
-using System.Collections.Generic;
 using System;
-using UnityEngine.EventSystems;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json;
 using System.Runtime.Serialization;
-using Iviz.App.Listeners;
 using Iviz.Resources;
 using Iviz.Displays;
+using Iviz.App.Displays;
 
-namespace Iviz.App.Displays
+namespace Iviz.App.Listeners
 {
     [DataContract]
     public class GridConfiguration :  IConfiguration
@@ -134,7 +129,7 @@ namespace Iviz.App.Displays
 
         void Awake()
         {
-            //grid = ResourcePool.GetOrCreate(Resource.)
+            grid = ResourcePool.GetOrCreate(Resource.Markers.Grid, transform).GetComponent<GridResource>();
             node = SimpleClickableDisplayNode.Instantiate("node", transform);
             node.Target = grid;
 
@@ -158,10 +153,10 @@ namespace Iviz.App.Displays
 
         public void Stop()
         {
-            //ResourcePool.Dispose(grid);
+            ResourcePool.Dispose(Resource.Markers.Grid, grid.gameObject);
             node.Stop();
-            Destroy(node);
-            Destroy(reflectionProbe);
+            Destroy(node.gameObject);
+            Destroy(reflectionProbe.gameObject);
         }
 
         /*

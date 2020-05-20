@@ -45,19 +45,25 @@ namespace Iviz.App
         protected virtual void UpdateButtonText()
         {
             const int maxLength = 20;
+            string text;
             if (Topic.Length > maxLength)
             {
                 string topicShort = Topic.Substring(0, maxLength);
-                ButtonText = $"{topicShort}...\n<b>{Module}</b>";
+                text = $"{topicShort}...\n<b>{Module}</b>";
             }
             else if (Topic != "")
             {
-                ButtonText = $"{Topic}\n<b>{Module}</b>";
+                text = $"{Topic}\n<b>{Module}</b>";
             }
             else
             {
-                ButtonText = $"<b>{Module}</b>";
+                text = $"<b>{Module}</b>";
             }
+            if (!Visible)
+            {
+                text = $"<color=grey>{text}</color>";
+            }
+            ButtonText = text;
         }
 
         public abstract void SetupPanel();
@@ -71,6 +77,8 @@ namespace Iviz.App
         }
 
         public abstract IConfiguration Configuration { get; }
+
+        protected virtual bool Visible => Configuration?.Visible ?? true;
 
         public abstract void AddToState(StateConfiguration config);
 

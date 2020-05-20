@@ -11,6 +11,7 @@ namespace Iviz.App
         public DropdownWidget Colormap { get; private set; }
         public DropdownWidget IntensityChannel { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
+        public ToggleButtonWidget HideButton { get; private set; }
 
         void Start()
         {
@@ -26,6 +27,7 @@ namespace Iviz.App
             IntensityChannel = p.AddDropdown("Intensity Channel")
                         .SetOptions(DefaultChannels);
             CloseButton = p.AddTrashButton();
+            HideButton = p.AddHideButton();
             //p.AddToggle("Override Color");
             p.UpdateSize();
             gameObject.SetActive(false);
@@ -33,7 +35,7 @@ namespace Iviz.App
             Topic.label.alignment = UnityEngine.TextAnchor.UpperLeft;
             Topic.label.fontStyle = UnityEngine.FontStyle.Italic;
 
-            Widgets = new Widget[] { PointSize, Colormap, IntensityChannel, CloseButton };
+            Widgets = new Widget[] { PointSize, Colormap, IntensityChannel, CloseButton, HideButton };
         }
     }
 }

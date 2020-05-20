@@ -188,6 +188,7 @@ namespace Iviz.Resources
             public Info Image { get; }
             public Info Square { get; }
             public Info Line { get; }
+            public Info Grid { get; }
 
             public ReadOnlyDictionary<string, Info> Generic { get; }
 
@@ -208,6 +209,7 @@ namespace Iviz.Resources
                 Image = new Info("Displays/ImageResource");
                 Square = new Info("Displays/Square");
                 Line = new Info("Displays/Line");
+                Grid = new Info("Displays/Grid");
 
                 Generic = new ReadOnlyDictionary<string, Info>(
                     new Dictionary<string, Info>()
@@ -272,6 +274,7 @@ namespace Iviz.Resources
             public Info CloseButton { get; }
             public Info TrashButton { get; }
             public Info DataLabel { get; }
+            public Info HideButton { get; }
 
             public WidgetsType()
             {
@@ -291,6 +294,7 @@ namespace Iviz.Resources
                 CloseButton = new Info("Widgets/Close Button");
                 TrashButton = new Info("Widgets/Trash Button");
                 DataLabel = new Info("Widgets/Data Label");
+                HideButton = new Info("Widgets/Hide Button");
             }
         }
 

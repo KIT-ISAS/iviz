@@ -6,6 +6,7 @@ namespace Iviz.App
     public class GridPanelContents : DataPanelContents
     {
         public TrashButtonWidget CloseButton { get; private set; }
+        public ToggleButtonWidget HideButton { get; private set; }
         public SliderWidget LineWidth { get; private set; }
         public SliderWidget CellSize { get; private set; }
         public SliderWidget NumberOfCells { get; private set; }
@@ -18,6 +19,7 @@ namespace Iviz.App
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("Grid");
             CloseButton = p.AddTrashButton();
+            HideButton = p.AddHideButton();
             LineWidth = p.AddSlider("Grid Line Width").SetMinValue(0.01f).SetMaxValue(0.1f).UpdateValue();
             CellSize = p.AddSlider("Grid Cell Size").SetMinValue(0.01f).SetMaxValue(0.1f).SetValue(1.0f).UpdateValue();
             NumberOfCells = p.AddSlider("Number of Cells").SetMinValue(1).SetMaxValue(50).SetIntegerOnly(true).SetValue(10).UpdateValue();
@@ -27,7 +29,7 @@ namespace Iviz.App
             p.UpdateSize();
             gameObject.SetActive(false);
 
-            Widgets = new Widget[] { CloseButton, LineWidth, CellSize, NumberOfCells, Orientation, ColorPicker, ShowInterior };
+            Widgets = new Widget[] { CloseButton, HideButton, LineWidth, CellSize, NumberOfCells, Orientation, ColorPicker, ShowInterior };
         }
     }
 }

@@ -71,6 +71,7 @@ namespace Iviz.App
             panel.Colormap.Index = (int)listener.Colormap;
             panel.PointSize.Value = listener.PointSize;
             panel.IgnoreIntensity.Value = listener.IgnoreIntensity;
+            panel.HideButton.State = listener.Visible;
 
             panel.IgnoreIntensity.ValueChanged += f =>
             {
@@ -88,6 +89,12 @@ namespace Iviz.App
             {
                 DataPanelManager.HideSelectedPanel();
                 DisplayListPanel.RemoveDisplay(this);
+            };
+            panel.HideButton.Clicked += () =>
+            {
+                listener.Visible = !listener.Visible;
+                panel.HideButton.State = listener.Visible;
+                UpdateButtonText();
             };
         }
 

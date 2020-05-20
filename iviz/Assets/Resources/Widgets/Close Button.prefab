@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6524995043497632416}
   - component: {fileID: 7474953677808031820}
   m_Layer: 5
-  m_Name: Tash Button
+  m_Name: Close Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -143,6 +143,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   button: {fileID: 6524995043497632416}
+  image: {fileID: 6524995043761585362}
 --- !u!1 &6524995043761585360
 GameObject:
   m_ObjectHideFlags: 0

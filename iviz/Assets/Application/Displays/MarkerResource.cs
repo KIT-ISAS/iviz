@@ -24,7 +24,7 @@ namespace Iviz.Displays
         public virtual bool Visible
         {
             get => gameObject.activeSelf;
-            set => gameObject.SetActive(this);
+            set => gameObject.SetActive(value);
         }
         protected virtual void Awake()
         {

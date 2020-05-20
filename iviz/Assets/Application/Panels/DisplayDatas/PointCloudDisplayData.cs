@@ -85,6 +85,7 @@ namespace Iviz.App
             panel.PointSize.Value = listener.PointSize;
             panel.IntensityChannel.Options = listener.FieldNames;
             panel.IntensityChannel.Value = listener.IntensityChannel;
+            panel.HideButton.State = listener.Visible;
 
             panel.PointSize.ValueChanged += f =>
             {
@@ -102,6 +103,12 @@ namespace Iviz.App
             {
                 DataPanelManager.HideSelectedPanel();
                 DisplayListPanel.RemoveDisplay(this);
+            };
+            panel.HideButton.Clicked += () =>
+            {
+                listener.Visible = !listener.Visible;
+                panel.HideButton.State = listener.Visible;
+                UpdateButtonText();
             };
         }
 

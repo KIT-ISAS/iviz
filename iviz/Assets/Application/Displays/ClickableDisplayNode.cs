@@ -107,6 +107,7 @@ namespace Iviz.App.Displays
                 if (target != null)
                 {
                     ((MonoBehaviour)target).gameObject.layer = Resource.ClickableLayer;
+                    ((MonoBehaviour)target).transform.parent = transform;
                 }
             }
         }
@@ -119,6 +120,15 @@ namespace Iviz.App.Displays
             GameObject obj = new GameObject(name);
             obj.transform.parent = transform;
             return obj.AddComponent<SimpleClickableDisplayNode>();
+        }
+
+        public override void Stop()
+        {
+            base.Stop();
+            if (Target != null)
+            {
+                Target.Parent = null;
+            }
         }
     }
 

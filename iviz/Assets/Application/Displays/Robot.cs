@@ -133,6 +133,19 @@ namespace Iviz.App
             }
         }
 
+        public bool Visible
+        {
+            get => config.Visible;
+            set
+            {
+                config.Visible = value;
+                if (RobotObject != null)
+                {
+                    RobotObject.SetActive(value);
+                }
+            }
+        }
+
         public string Decorate(string jointName)
         {
             return $"{config.FramePrefix}{jointName}{config.FrameSuffix}";
@@ -256,6 +269,8 @@ namespace Iviz.App
                     jointWriters[x.JointName] = x.gameObject.AddComponent<JointInfo>();
                 }
             });
+
+            RobotObject.SetActive(Visible);
 
             BaseLink = RobotObject.
                 GetComponentsInChildren<UrdfLink>().
