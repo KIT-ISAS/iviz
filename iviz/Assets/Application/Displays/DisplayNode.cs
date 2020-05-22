@@ -20,6 +20,7 @@ namespace Iviz.Displays
         bool ColliderEnabled { get; set; }
         void Stop();
         Transform Parent { get; set; }
+        bool Visible { get; set; }
     }
 }
 

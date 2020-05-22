@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace Iviz.App
@@ -6,6 +7,7 @@ namespace Iviz.App
     public class TrashButtonWidget : Widget
     {
         public Button button;
+        public Image image;
 
         public bool Interactable
         {
@@ -13,6 +15,15 @@ namespace Iviz.App
             set
             {
                 button.interactable = value;
+            }
+        }
+
+        public Sprite Sprite
+        {
+            get => image.sprite;
+            set
+            {
+                image.sprite = value;
             }
         }
 

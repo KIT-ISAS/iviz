@@ -2,17 +2,10 @@
 
 namespace Iviz.Displays
 {
-    public class ImageResource : MonoBehaviour, IDisplay
+    public class ImageResource : MarkerResource
     {
         public GameObject front;
         public GameObject back;
-        BoxCollider Collider;
-
-        public bool Active
-        {
-            get => gameObject.activeSelf;
-            set => gameObject.SetActive(value);
-        }
 
         ImageTexture texture;
         public ImageTexture Texture
@@ -46,32 +39,22 @@ namespace Iviz.Displays
         public float Width => Scale;
         float AspectRatio => (Texture == null || Texture.Width == 0) ? 1 : (float)Texture.Height / Texture.Width;
         public float Height => Width * AspectRatio;
-        public string Name => "ImageResource";
-        public Bounds Bounds => new Bounds(Collider.center, Collider.size);
-        public Bounds WorldBounds => Collider.bounds;
 
-        public bool ColliderEnabled
-        {
-            get => Collider.enabled;
-            set => Collider.enabled = value;
-        }
+        public override string Name => "ImageResource";
 
-        public Transform Parent
+        protected override void Awake()
         {
-            get => transform.parent;
-            set => transform.parent = value;
-        }
-
-        void Awake()
-        {
+            base.Awake();
             Collider = GetComponent<BoxCollider>();
         }
 
-        public void Stop()
+        public override void Stop()
         {
+            base.Stop();
             if (texture != null)
             {
                 texture.TextureChanged -= OnTextureChanged;
+                texture = null;
             }
         }
 

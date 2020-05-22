@@ -13,6 +13,7 @@ namespace Iviz.App.Listeners
     {
         [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
         [DataMember] public Resource.Module Module => Resource.Module.JointState;
+        [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public string RobotName { get; set; } = "";
         [DataMember] public string MsgJointPrefix { get; set; } = "";
@@ -42,6 +43,15 @@ namespace Iviz.App.Listeners
             set
             {
                 config.RobotName = value;
+            }
+        }
+
+        public bool Visible
+        {
+            get => config.Visible;
+            set
+            {
+                config.Visible = value;
             }
         }
 

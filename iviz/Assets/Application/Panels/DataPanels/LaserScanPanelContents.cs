@@ -9,6 +9,7 @@ namespace Iviz.App
         public SliderWidget PointSize { get; private set; }
         public DropdownWidget Colormap { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
+        public ToggleButtonWidget HideButton { get; private set; }
 
         void Start()
         {
@@ -22,13 +23,14 @@ namespace Iviz.App
                         .SetIndex((int)Resource.ColormapId.hsv);
             IgnoreIntensity = p.AddToggle("Ignore Intensity");
             CloseButton = p.AddTrashButton();
+            HideButton = p.AddHideButton();
             p.UpdateSize();
             gameObject.SetActive(false);
 
             Topic.label.alignment = UnityEngine.TextAnchor.UpperLeft;
             Topic.label.fontStyle = UnityEngine.FontStyle.Italic;
 
-            Widgets = new Widget[] { IgnoreIntensity, PointSize, Colormap, CloseButton };
+            Widgets = new Widget[] { IgnoreIntensity, PointSize, Colormap, CloseButton, HideButton };
         }
     }
 }

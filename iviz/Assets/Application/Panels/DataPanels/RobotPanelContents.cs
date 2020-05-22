@@ -9,6 +9,7 @@ namespace Iviz.App
         public InputFieldWidget FramePrefix { get; private set; }
         public InputFieldWidget FrameSuffix { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
+        public ToggleButtonWidget HideButton { get; private set; }
 
         void Awake()
         {
@@ -19,10 +20,11 @@ namespace Iviz.App
             FramePrefix = p.AddInputField("TF Frame Prefix").SetPlaceholder("<none>");
             FrameSuffix = p.AddInputField("TF Frame Suffix").SetPlaceholder("<none>");
             CloseButton = p.AddTrashButton();
+            HideButton = p.AddHideButton();
             p.UpdateSize();
             gameObject.SetActive(false);
 
-            Widgets = new Widget[] { ResourceType, CloseButton, FramePrefix, FrameSuffix, AttachToTF };
+            Widgets = new Widget[] { ResourceType, CloseButton, FramePrefix, FrameSuffix, AttachToTF, HideButton };
         }
     }
 }

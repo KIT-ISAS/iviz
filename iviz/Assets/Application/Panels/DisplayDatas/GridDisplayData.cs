@@ -1,5 +1,6 @@
 ﻿using Iviz.App.Displays;
 using Iviz.App.Listeners;
+using Iviz.Displays;
 using Iviz.Resources;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
@@ -8,7 +9,7 @@ namespace Iviz.App
 {
     public class GridDisplayData : DisplayData
     {
-        readonly Displays.Grid display;
+        readonly Listeners.Grid display;
         readonly GridPanelContents panel;
 
         public override Resource.Module Module => Resource.Module.Grid;
@@ -18,14 +19,13 @@ namespace Iviz.App
         public GridDisplayData(DisplayDataConstructor constructor) :
             base(constructor.DisplayList, constructor.Topic, constructor.Type)
         {
-            GameObject displayObject = ResourcePool.GetOrCreate(Resource.Listeners.Grid);
+            GameObject displayObject = Resource.Listeners.Grid.Instantiate();    
             displayObject.name = "Grid";
 
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Grid) as GridPanelContents;
 
-            display = displayObject.GetComponent<Displays.Grid>();
-            display.DisplayData = this;
-            display.Parent = TFListener.ListenersFrame;
+            display = displayObject.GetComponent<Listeners.Grid>();
+            //display.DisplayData = this;
             if (constructor.Configuration != null)
             {
                 display.Config = (GridConfiguration)constructor.Configuration;
@@ -62,8 +62,9 @@ namespace Iviz.App
         {
             base.Stop();
 
+            Debug.Log("was here");
             display.Stop();
-            ResourcePool.Dispose(Resource.Listeners.Grid, display.gameObject);
+            Object.Destroy(display.gameObject);
         }
 
         const float InteriorColorFactor = 0.5f;
@@ -76,6 +77,7 @@ namespace Iviz.App
             panel.Orientation.Index = (int)display.Orientation;
             panel.ColorPicker.Value = display.InteriorColor;
             panel.ShowInterior.Value = display.ShowInterior;
+            panel.HideButton.State = display.Visible;
 
             panel.LineWidth.ValueChanged += f =>
             {
@@ -106,6 +108,12 @@ namespace Iviz.App
             {
                 DataPanelManager.HideSelectedPanel();
                 DisplayListPanel.RemoveDisplay(this);
+            };
+            panel.HideButton.Clicked += () =>
+            {
+                display.Visible = !display.Visible;
+                panel.HideButton.State = display.Visible;
+                UpdateButtonText();
             };
         }
 

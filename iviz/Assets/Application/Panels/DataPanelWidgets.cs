@@ -32,6 +32,15 @@ namespace Iviz.App
             return o.GetComponent<TrashButtonWidget>();
         }
 
+        public ToggleButtonWidget AddHideButton()
+        {
+            GameObject o = Resource.Widgets.HideButton.Instantiate(nonstatics.transform);
+            RectTransform transform = o.transform as RectTransform;
+            transform.anchoredPosition = new Vector2(transform.anchoredPosition.x, yCloseButton);
+            o.SetActive(true);
+            return o.GetComponent<ToggleButtonWidget>();
+        }
+
         GameObject AddToBottom(GameObject o)
         {
             RectTransform transform = o.GetComponent<RectTransform>();

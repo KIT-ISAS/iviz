@@ -45,15 +45,26 @@ namespace Iviz.App
 
         protected virtual void UpdateButtonText()
         {
-            if (Topic != "")
+            const int maxLength = 20;
+            string text;
+            if (Topic.Length > maxLength)
             {
                 string topicShort = RosUtils.SanitizedText(Topic, MaxTextRowLength);
                 ButtonText = $"{topicShort}\n<b>{Module}</b>";
             }
+            else if (Topic != "")
+            {
+                text = $"{Topic}\n<b>{Module}</b>";
+            }
             else
             {
-                ButtonText = $"<b>{Module}</b>";
+                text = $"<b>{Module}</b>";
             }
+            if (!Visible)
+            {
+                text = $"<color=grey>{text}</color>";
+            }
+            ButtonText = text;
         }
 
         public abstract void SetupPanel();
@@ -67,6 +78,8 @@ namespace Iviz.App
         }
 
         public abstract IConfiguration Configuration { get; }
+
+        protected virtual bool Visible => Configuration?.Visible ?? true;
 
         public abstract void AddToState(StateConfiguration config);
 

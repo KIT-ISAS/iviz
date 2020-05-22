@@ -73,6 +73,7 @@ namespace Iviz.App
             panel.FramePrefix.Value = Robot.FramePrefix;
             panel.FrameSuffix.Value = Robot.FrameSuffix;
             panel.AttachToTF.Value = Robot.AttachToTF;
+            panel.HideButton.State = Robot.Visible;
 
             panel.ResourceType.ValueChanged += (_, f) =>
             {
@@ -95,6 +96,12 @@ namespace Iviz.App
             panel.FrameSuffix.EndEdit += f =>
             {
                 Robot.FrameSuffix = f;
+            };
+            panel.HideButton.Clicked += () =>
+            {
+                Robot.Visible = !Robot.Visible;
+                panel.HideButton.State = Robot.Visible;
+                UpdateButtonText();
             };
         }
 

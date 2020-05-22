@@ -19,6 +19,7 @@ namespace Iviz.App
     {
         Guid Id { get; }
         Resource.Module Module { get; }
+        bool Visible { get; set; }
     }
 
     [DataContract]

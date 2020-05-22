@@ -5,11 +5,11 @@ using System;
 using UnityEngine.EventSystems;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json;
-using System.Runtime.Serialization;
 using Iviz.App.Listeners;
 using Iviz.Resources;
+using Iviz.App;
 
-namespace Iviz.App.Displays
+namespace Iviz.Displays
 {
     [JsonConverter(typeof(StringEnumConverter))]
     public enum GridOrientation
@@ -17,32 +17,12 @@ namespace Iviz.App.Displays
         XY, YZ, XZ
     }
 
-    [DataContract]
-    public class GridConfiguration :  IConfiguration
-    {
-        [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
-        [DataMember] public Resource.Module Module => Resource.Module.Grid;
-        [DataMember] public GridOrientation Orientation { get; set; } = GridOrientation.XY;
-        [DataMember] public SerializableColor GridColor { get; set; } = Color.white * 0.25f;
-        [DataMember] public SerializableColor InteriorColor { get; set; } = Color.white * 0.5f;
-        [DataMember] public float GridLineWidth { get; set; } = 0.02f;
-        [DataMember] public float GridCellSize { get; set; } = 1;
-        [DataMember] public int NumberOfGridCells { get; set; } = 20;
-        [DataMember] public bool ShowInterior { get; set; } = true;
-    }
-
-    public class Grid : ClickableDisplayNode, IRecyclable
+    public class GridResource : MarkerResource
     {
         Mesh mesh;
         MeshRenderer meshRenderer;
-        ReflectionProbe reflectionProbe;
         GameObject interiorObject;
         MeshRenderer interiorRenderer;
-
-        BoxCollider boxCollider;
-        public override Bounds Bounds => new Bounds(boxCollider.center, boxCollider.size);
-        public override Bounds WorldBounds => boxCollider.bounds;
-
 
         public static readonly List<string> OrientationNames = new List<string> { "XY", "YZ", "XZ" };
 
@@ -53,96 +33,89 @@ namespace Iviz.App.Displays
             { GridOrientation.YZ, Quaternion.Euler(0, 90, 0) }
         };
 
-        readonly GridConfiguration config = new GridConfiguration();
-        public GridConfiguration Config
-        {
-            get => config;
-            set
-            {
-                Orientation = value.Orientation;
-                GridColor = value.GridColor;
-                InteriorColor = value.InteriorColor;
-                GridLineWidth = value.GridLineWidth;
-                GridCellSize = value.GridCellSize;
-                NumberOfGridCells = value.NumberOfGridCells;
-                ShowInterior = value.ShowInterior;
-            }
-        }
-
+        GridOrientation orientation;
         public GridOrientation Orientation
         {
-            get => config.Orientation;
+            get => orientation;
             set
             {
-                config.Orientation = value;
+                orientation = value;
                 transform.localRotation = RotationByOrientation[value];
-                reflectionProbe.transform.position = new Vector3(0, 2.0f, 0);
             }
         }
 
+        Color gridColor;
         public Color GridColor
         {
-            get => config.GridColor;
+            get => gridColor;
             set
             {
-                config.GridColor = value;
+                gridColor = value;
                 meshRenderer.SetPropertyColor(value);
             }
         }
 
+        Color interiorColor;
         public Color InteriorColor
         {
-            get => config.InteriorColor;
+            get => interiorColor;
             set
             {
-                config.InteriorColor = value;
+                interiorColor = value;
                 interiorRenderer.SetPropertyColor(value);
             }
         }
 
+        float gridLineWidth;
         public float GridLineWidth
         {
-            get => config.GridLineWidth;
+            get => gridLineWidth;
             set
             {
-                config.GridLineWidth = value;
+                gridLineWidth = value;
                 UpdateMesh();
             }
         }
 
+        float gridCellSize;
         public float GridCellSize
         {
-            get => config.GridCellSize;
+            get => gridCellSize;
             set
             {
-                config.GridCellSize = value;
+                gridCellSize = value;
                 UpdateMesh();
             }
         }
 
+        int numberOfGridCells;
         public int NumberOfGridCells
         {
-            get => config.NumberOfGridCells;
+            get => numberOfGridCells;
             set
             {
-                config.NumberOfGridCells = value;
+                numberOfGridCells = value;
                 UpdateMesh();
             }
         }
 
+        bool showInterior;
         public bool ShowInterior
         {
-            get => config.ShowInterior;
+            get => showInterior;
             set
             {
-                config.ShowInterior = value;
+                showInterior = value;
                 interiorObject.SetActive(value);
             }
         }
 
+        public override string Name => "Grid";
 
-        void Awake()
+        protected override void Awake()
         {
+            base.Awake();
+
             mesh = new Mesh();
             GetComponent<MeshFilter>().sharedMesh = mesh;
             meshRenderer = GetComponent<MeshRenderer>();
@@ -150,7 +123,7 @@ namespace Iviz.App.Displays
             meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             //meshRenderer.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
 
-            interiorObject = ResourcePool.GetOrCreate(Resource.Markers.Cube, transform);
+            interiorObject = Resource.Markers.Cube.Instantiate(transform);
             interiorObject.name = "Grid Interior";
             interiorObject.transform.localPosition = new Vector3(0, 0, 0.01f);
             interiorRenderer = interiorObject.GetComponent<MeshRenderer>();
@@ -159,19 +132,15 @@ namespace Iviz.App.Displays
             interiorRenderer.receiveShadows = true;
             //interiorRenderer.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
 
-            reflectionProbe = new GameObject().AddComponent<ReflectionProbe>();
-            reflectionProbe.gameObject.name = "Grid Reflection Probe";
-            reflectionProbe.transform.parent = transform;
-            reflectionProbe.transform.position = new Vector3(0, 2.0f, 0);
-            reflectionProbe.mode = UnityEngine.Rendering.ReflectionProbeMode.Realtime;
-            reflectionProbe.refreshMode = UnityEngine.Rendering.ReflectionProbeRefreshMode.ViaScripting;
-            reflectionProbe.clearFlags = UnityEngine.Rendering.ReflectionProbeClearFlags.SolidColor;
+            Orientation = GridOrientation.XY;
+            GridColor = Color.white * 0.25f;
+            InteriorColor = Color.white * 0.5f;
+            GridLineWidth = 0.02f;
+            GridCellSize = 1;
+            NumberOfGridCells = 20;
+            ShowInterior = true;
 
-            Config = new GridConfiguration();
             gameObject.layer = Resource.ClickableLayer;
-
-            Parent = TFListener.BaseFrame;
-            boxCollider = GetComponent<BoxCollider>();
         }
 
         void UpdateMesh()
@@ -233,45 +202,12 @@ namespace Iviz.App.Displays
             interiorObject.transform.localScale = new Vector3(totalSize, totalSize, GridLineWidth / 8.1f);
 
             GetComponent<BoxCollider>().size = new Vector3(totalSize, totalSize, GridLineWidth / 8);
-
-            reflectionProbe.size = new Vector3(totalSize * 2, 4.05f, totalSize * 2);
-            reflectionProbe.RenderProbe();
         }
 
         public override void Stop()
         {
-            base.Stop();
-            Config = new GridConfiguration();
-        }
-
-        public void Recycle()
-        {
-            //interiorRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
-            interiorRenderer.receiveShadows = false;
-            ResourcePool.Dispose(Resource.Markers.Cube, interiorObject);
-            interiorRenderer = null;
+            Destroy(interiorObject);
             interiorObject = null;
-
-            Destroy(reflectionProbe);
-            reflectionProbe = null;
         }
-
-        public override void OnPointerClick(PointerEventData eventData)
-        {
-            if (GetClickCount(eventData) == 2 &&
-                eventData.button == PointerEventData.InputButton.Left &&
-                TFListener.GuiManager.OrbitFrame != null)
-            {
-                TFListener.GuiManager.OrbitFrame = null;
-                return;
-            }
-            if (GetClickCount(eventData) == 1 && IsRealClick(eventData))
-            {
-                TFListener.GuiManager.Select(null);
-            }
-            
-            //base.OnPointerClick(eventData);
-        }
-
     }
 }

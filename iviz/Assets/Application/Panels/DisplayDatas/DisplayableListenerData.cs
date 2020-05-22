@@ -57,7 +57,7 @@ namespace Iviz.App
         {
             base.Stop();
             Listener.Stop();
-            UnityEngine.Object.Destroy(Listener);
+            UnityEngine.Object.Destroy(Listener.gameObject);
         }
     }
 }

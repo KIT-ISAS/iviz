@@ -16,6 +16,7 @@ namespace Iviz.App.Listeners
     {
         [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
         [DataMember] public Resource.Module Module => Resource.Module.LaserScan;
+        [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public float PointSize { get; set; } = 0.03f;
         [DataMember] public Resource.ColormapId Colormap { get; set; } = Resource.ColormapId.hsv;
@@ -39,9 +40,20 @@ namespace Iviz.App.Listeners
             set
             {
                 config.Topic = value.Topic;
+                Visible = value.Visible;
                 PointSize = value.PointSize;
                 Colormap = value.Colormap;
                 IgnoreIntensity = value.IgnoreIntensity;
+            }
+        }
+
+        public bool Visible
+        {
+            get => config.Visible;
+            set
+            {
+                config.Visible = value;
+                pointCloud.Visible = value;
             }
         }
 
@@ -198,10 +210,12 @@ namespace Iviz.App.Listeners
         public override void Stop()
         {
             base.Stop();
-            pointCloud.Parent = node.transform;
 
             ResourcePool.Dispose(Resource.Markers.PointList, pointCloud.gameObject);
             pointCloud = null;
+
+            node.Stop();
+            Destroy(node);
         }
     }
 }

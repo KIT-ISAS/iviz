@@ -22,6 +22,7 @@ namespace Iviz.App
     {
         [DataMember] public Guid Id { get; set; }
         [DataMember] public Resource.Module Module => Resource.Module.Robot;
+        [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string RobotName { get; set; } = "";
         [DataMember] public string RobotResource { get; set; } = Resource.Robots.Names[0];
         [DataMember] public string FramePrefix { get; set; } = "";
@@ -128,6 +129,19 @@ namespace Iviz.App
                 if (BaseLink != null)
                 {
                     SetParent(Decorate(BaseLink.name));
+                }
+            }
+        }
+
+        public bool Visible
+        {
+            get => config.Visible;
+            set
+            {
+                config.Visible = value;
+                if (RobotObject != null)
+                {
+                    RobotObject.SetActive(value);
                 }
             }
         }
@@ -255,6 +269,8 @@ namespace Iviz.App
                     jointWriters[x.JointName] = x.gameObject.AddComponent<JointInfo>();
                 }
             });
+
+            RobotObject.SetActive(Visible);
 
             BaseLink = RobotObject.
                 GetComponentsInChildren<UrdfLink>().
