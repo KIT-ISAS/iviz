@@ -56,7 +56,7 @@ namespace Iviz.App
         {
             GetTopics();
             itemList.Title = "Available Topics";
-            itemList.Items = topics.Select(x => $"{x.topic}\n<b>{x.resource}</b>");
+            itemList.Items = topics.Select(x => $"{RosUtils.SanitizedText(x.topic, 30)}\n<b>{x.resource}</b>");
             itemList.ItemClicked += OnItemClicked;
             itemList.CloseClicked += OnCloseClicked;
             lastTime = DateTime.Now;

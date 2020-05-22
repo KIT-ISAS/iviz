@@ -74,7 +74,7 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
-            panel.Topic.Label = Topic;
+            panel.Topic.Label = SanitizedTopicText();
             panel.Description.Label = listener.Description;
 
             panel.PreviewWidget.Material = listener.Material;

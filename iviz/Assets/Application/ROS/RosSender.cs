@@ -15,7 +15,7 @@ namespace Iviz.App
             Topic = topic;
             Type = type;
 
-            Debug.Log("RosListener: Requesting advertisement for topic " + Topic);
+            //Debug.Log("RosListener: Requesting advertisement for topic " + Topic);
         }
 
         public abstract void Stop();

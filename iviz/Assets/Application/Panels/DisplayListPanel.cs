@@ -123,6 +123,16 @@ namespace Iviz.App
         readonly HashSet<string> displayedTopics = new HashSet<string>();
         public IReadOnlyCollection<string> DisplayedTopics => displayedTopics;
 
+        bool KeepReconnecting
+        {
+            get => ConnectionManager.Connection.KeepReconnecting;
+            set
+            {
+                ConnectionManager.Connection.KeepReconnecting = value;
+                status.enabled = value;
+            }
+        }
+
         void Start()
         {
             parentCanvas = transform.parent.parent.GetComponentInParent<Canvas>();
@@ -134,10 +144,12 @@ namespace Iviz.App
 
             availableDisplays = CreateDialog<AddDisplayDialogData>();
             availableTopics = CreateDialog<AddTopicDialogData>();
-            connectionData = CreateDialog<ConnectionDialogData>();
 
-            save.onClick.AddListener(OnSaveClick);
-            load.onClick.AddListener(OnLoadClick);
+            connectionData = CreateDialog<ConnectionDialogData>();
+            LoadSimpleConfiguration();
+
+            save.onClick.AddListener(SaveStateConfiguration);
+            load.onClick.AddListener(LoadStateConfiguration);
             hide.onClick.AddListener(OnHideClick);
 
             addDisplayByTopic.onClick.AddListener(OnAddDisplayByTopicClick);
@@ -152,43 +164,42 @@ namespace Iviz.App
             ConnectionManager.Connection.MasterUri = connectionData.MasterUri;
             ConnectionManager.Connection.MyUri = connectionData.MyUri;
             ConnectionManager.Connection.MyId = connectionData.MyId;
-            ConnectionManager.Connection.KeepReconnecting = false;
+            KeepReconnecting = false;
 
             //ConnectionManager.Instance.KeepReconnecting = keepReconnecting.isOn;
             //keepReconnecting.onValueChanged.AddListener(x => ConnectionManager.Instance.KeepReconnecting = x);
             connectionData.MasterUriChanged += uri =>
             {
                 ConnectionManager.Connection.MasterUri = uri;
-                ConnectionManager.Connection.KeepReconnecting = false;
+                KeepReconnecting = false;
                 MasterUriStr.Label = (uri == null) ? "(?) →" : uri + " →";
             };
             connectionData.MyIdChanged += id =>
             {
                 ConnectionManager.Connection.MyId = id;
-                ConnectionManager.Connection.KeepReconnecting = false;
+                KeepReconnecting = false;
             };
             connectionData.MyUriChanged += uri =>
             {
                 ConnectionManager.Connection.MyUri = uri;
-                ConnectionManager.Connection.KeepReconnecting = false;
+                KeepReconnecting = false;
             };
             connectionData.ConnectClicked += () =>
             {
-                ConnectionManager.Connection.KeepReconnecting = true;
+                KeepReconnecting = true;
             };
             connectionData.StopClicked += () =>
             {
-                ConnectionManager.Connection.KeepReconnecting = false;
+                KeepReconnecting = false;
                 ConnectionManager.Connection.Disconnect();
             };
             ConnectButton.Clicked += () =>
             {
-                ConnectionManager.Connection.KeepReconnecting = true;
+                KeepReconnecting = true;
             };
 
 
             //address.onEndEdit.AddListener(OnAddressChanged);
-            status.enabled = false;
 
             ConnectionManager.Connection.ConnectionStateChanged += OnConnectionStateChanged;
 
@@ -231,6 +242,7 @@ namespace Iviz.App
                 case ConnectionState.Connected:
                     GameThread.EverySecond -= RotateSprite;
                     status.sprite = ConnectedSprite;
+                    SaveSimpleConfiguration();
                     break;
                 case ConnectionState.Disconnected:
                     GameThread.EverySecond -= RotateSprite;
@@ -255,21 +267,8 @@ namespace Iviz.App
             EventSystem.current.SetSelectedGameObject(null);
         }
 
-        void OnSaveClick()
+        void SaveStateConfiguration()
         {
-            /*
-            JObject root = new JObject
-            {
-                ["address"] = JToken.FromObject(address.text),
-                ["keepReconnecting"] = JToken.FromObject(keepReconnecting.isOn),
-                ["displays"] = new JArray(displayDatas.Select(x => x.Serialize()))
-            };
-
-            string text = root.ToString();
-            File.WriteAllText(Application.persistentDataPath + "/config.json", text);
-            Debug.Log("DisplayListPanel: Writing config to " + Application.persistentDataPath + "/config.json");
-            */
-
             StateConfiguration config = new StateConfiguration
             {
                 MasterUri = connectionData.MasterUri,
@@ -279,13 +278,22 @@ namespace Iviz.App
             };
             displayDatas.ForEach(x => x.AddToState(config));
 
-            string text = JsonConvert.SerializeObject(config, Formatting.Indented);
-            File.WriteAllText(Application.persistentDataPath + "/config.json", text);
+            try
+            {
+                string text = JsonConvert.SerializeObject(config, Formatting.Indented);
+                File.WriteAllText(Application.persistentDataPath + "/config.json", text);
+            }
+            catch (Exception e) when
+            (e is IOException || e is System.Security.SecurityException || e is JsonException)
+            {
+                Logger.Error(e);
+                return;
+            }
             Logger.Debug("DisplayListPanel: Writing config to " + Application.persistentDataPath + "/config.json");
 
         }
 
-        void OnLoadClick()
+        void LoadStateConfiguration()
         {
             while (displayDatas.Count > 1)
             {
@@ -298,62 +306,71 @@ namespace Iviz.App
             {
                 text = File.ReadAllText(Application.persistentDataPath + "/config.json");
             }
-            catch (Exception e) when (e is IOException || e is System.Security.SecurityException)
+            catch (Exception e) when 
+            (e is IOException || e is System.Security.SecurityException ||  e is JsonException)
             {
-                Debug.Log(e);
+                Logger.Error(e);
                 return;
             }
 
-            StateConfiguration config = JsonConvert.DeserializeObject<StateConfiguration>(text);
+            StateConfiguration stateConfig = JsonConvert.DeserializeObject<StateConfiguration>(text);
 
-            connectionData.MasterUri = config.MasterUri;
-            connectionData.MyUri = config.MyUri;
-            connectionData.MyId = config.MyId;
+            connectionData.MasterUri = stateConfig.MasterUri;
+            connectionData.MyUri = stateConfig.MyUri;
+            connectionData.MyId = stateConfig.MyId;
 
-            TFData.UpdateConfiguration(config.Tf);
 
-            void createEntry(IConfiguration x)
+            TFData.UpdateConfiguration(stateConfig.Tf);
+            stateConfig.CreateListOfEntries().ForEach(
+                displayConfigList => displayConfigList.ForEach(
+                    displayConfig => CreateDisplay(displayConfig.Module, configuration: displayConfig)));
+
+            if (connectionData.MasterUri != null && 
+                connectionData.MyUri != null && 
+                connectionData.MyId != null)
             {
-                CreateDisplay(x.Module, configuration: x);
+                KeepReconnecting = true;
             }
-
-            config.CreateListOfEntries().ForEach(x => x.ForEach(createEntry));
-
-            /*
-            JObject root = JObject.Parse(text);
-            JToken value;
-
-            if (root.TryGetValue("address", out value))
-            {
-                address.text = value.ToObject<string>();
-            }
-            OnAddressChanged(address.text);
-
-            //keepReconnecting.isOn = root["keepReconnecting"].ToObject<bool>();
-
-            if (root.TryGetValue("displays", out value))
-            {
-                foreach (JObject entry in value)
-                {
-                    if (!entry.TryGetValue("module", out JToken m))
-                    {
-                        Debug.Log("DisplayListPanel: Display entry missing 'module' property!");
-                        continue;
-                    }
-                    Resource.Module module = m.ToObject<Resource.Module>();
-                    switch (module)
-                    {
-                        case Resource.Module.TF:
-                            TFData.Deserialize(entry);
-                            break;
-                        default:
-                            CreateDisplay(module).Deserialize(entry).Start();
-                            break;
-                    }
-                }
-            }
-            */
         }
+
+        void LoadSimpleConfiguration()
+        {
+            try
+            {
+                string text = File.ReadAllText(Application.persistentDataPath + "/connection.json");
+                ConnectionConfiguration config = JsonConvert.DeserializeObject<ConnectionConfiguration>(text);
+                connectionData.MasterUri = config.MasterUri;
+                connectionData.MyUri = config.MyUri;
+                connectionData.MyId = config.MyId;
+            }
+            catch (Exception e) when 
+            (e is IOException || e is System.Security.SecurityException || e is JsonException)
+            {
+                //Debug.Log(e);
+            }
+        }
+
+        void SaveSimpleConfiguration()
+        {
+            try
+            {
+                ConnectionConfiguration config = new ConnectionConfiguration
+                {
+                    MasterUri = connectionData.MasterUri,
+                    MyUri = connectionData.MyUri,
+                    MyId = connectionData.MyId,
+                };
+
+                string text = JsonConvert.SerializeObject(config, Formatting.Indented);
+                File.WriteAllText(Application.persistentDataPath + "/connection.json", text);
+            }
+            catch (Exception e) when 
+            (e is IOException || e is System.Security.SecurityException || e is JsonException)
+            {
+                //Debug.Log(e);
+            }
+        }
+
 
         void OnAddDisplayByTopicClick()
         {

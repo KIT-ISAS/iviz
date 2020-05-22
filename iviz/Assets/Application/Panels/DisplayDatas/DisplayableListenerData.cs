@@ -48,6 +48,11 @@ namespace Iviz.App
             ListenerPanel.Stats.Label = $"{subscribedStatus} | {messagesPerSecond} Hz | {minJitter} - {maxJitter} sec";
         }
 
+        protected string SanitizedTopicText()
+        {
+            return RosUtils.SanitizedText(Topic, MaxTextRowLength);
+        }
+
         public override void Stop()
         {
             base.Stop();

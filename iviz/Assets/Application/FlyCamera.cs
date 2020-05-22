@@ -451,6 +451,7 @@ namespace Iviz.App
             Vector3 p_Velocity = new Vector3();
             if (Input.GetKey(KeyCode.W))
             {
+                //Debug.Log("was here");
                 p_Velocity += new Vector3(0, 0, 1);
             }
             if (Input.GetKey(KeyCode.S))
