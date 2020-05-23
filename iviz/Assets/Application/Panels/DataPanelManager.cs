@@ -109,6 +109,18 @@ namespace Iviz.App
             Active = false;
         }
 
+        public void TogglePanel(DisplayData selected)
+        {
+            if (SelectedDisplayData == selected)
+            {
+                HideSelectedPanel();
+            }
+            else
+            {
+                SelectPanelFor(selected);
+            }
+        }
+
         GameObject CreatePanelObject(string name)
         {
             GameObject o = Instantiate(UnityEngine.Resources.Load<GameObject>("Widgets/Data Panel"), transform);

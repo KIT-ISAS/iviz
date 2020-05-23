@@ -67,7 +67,7 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
-            panel.Topic.Label = Topic;
+            panel.Topic.Label = SanitizedTopicText();
             panel.DisableExpiration.Value = listener.DisableExpiration;
 
             panel.DisableExpiration.ValueChanged += f =>

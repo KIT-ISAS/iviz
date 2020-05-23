@@ -38,7 +38,7 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
-            panel.Topic.Label = Topic;
+            panel.Topic.Label = SanitizedTopicText();
 
             panel.Colormap.Index = (int)listener.Colormap;
             panel.PointSize.Value = listener.PointSize;

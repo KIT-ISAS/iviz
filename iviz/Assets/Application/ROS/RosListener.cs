@@ -61,7 +61,7 @@ namespace Iviz.App
         {
             subscriptionHandler = handler;
 
-            Debug.Log("RosListener: Requesting subscription to topic " + Topic);
+            //Debug.Log("RosListener: Requesting subscription to topic " + Topic);
             ConnectionManager.Subscribe(this);
         }
 

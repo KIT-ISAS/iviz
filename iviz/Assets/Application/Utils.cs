@@ -279,6 +279,18 @@ namespace Iviz
                 Stamp: GetRosTime()
             );
         }
+
+        public static string SanitizedText(string text, int size)
+        {
+            if (text.Length <= size + 5)
+            {
+                return text;
+            }
+            else
+            {
+                return text.Substring(0, size) + "...\n→ " + text.Substring(size);
+            }
+        }
     }
 
     public static class UnityUtils

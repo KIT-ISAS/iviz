@@ -15,6 +15,7 @@ namespace Iviz.App
 
     public abstract class DisplayData
     {
+        protected const int MaxTextRowLength = 35;
         protected DisplayListPanel DisplayListPanel { get; }
         protected DataPanelManager DataPanelManager => DisplayListPanel.DataPanelManager;
 
@@ -48,8 +49,8 @@ namespace Iviz.App
             string text;
             if (Topic.Length > maxLength)
             {
-                string topicShort = Topic.Substring(0, maxLength);
-                text = $"{topicShort}...\n<b>{Module}</b>";
+                string topicShort = RosUtils.SanitizedText(Topic, MaxTextRowLength);
+                ButtonText = $"{topicShort}\n<b>{Module}</b>";
             }
             else if (Topic != "")
             {
@@ -72,7 +73,7 @@ namespace Iviz.App
 
         public void Select()
         {
-            DataPanelManager.SelectPanelFor(this);
+            DataPanelManager.TogglePanel(this);
             DisplayListPanel.AllGuiVisible = true;
         }
 

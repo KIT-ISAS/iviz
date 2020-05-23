@@ -152,25 +152,22 @@ namespace Iviz.App
             try
             {
                 
-                RoslibSharp.Logger.LogDebug = x => Logger.Debug(x);
+                //RoslibSharp.Logger.LogDebug = x => Logger.Debug(x);
                 RoslibSharp.Logger.LogError = x => Logger.Error(x);
                 RoslibSharp.Logger.Log = x => Logger.Info(x);
                 
-
-                //string hostname = Dns.GetHostName();
-                //Uri callerUri = new Uri($"http://{hostname}:7614");
                 client = new RosClient(MasterUri, MyId, MyUri);
 
                 foreach (var entry in publishersByTopic)
                 {
-                    Logger.Debug("Late advertisement for " + entry.Key);
+                    //Logger.Debug("Late advertisement for " + entry.Key);
                     entry.Value.Advertise(client, entry.Key);
                     entry.Value.Id = publishers.Count;
                     publishers.Add(entry.Value.publisher);
                 }
                 foreach (var entry in subscribersByTopic)
                 {
-                    Logger.Debug("Late subscription for " + entry.Key);
+                    //Logger.Debug("Late subscription for " + entry.Key);
                     entry.Value.Subscribe(client, entry.Key);
                 }
 

@@ -1,6 +1,11 @@
-﻿//#define USING_VR
+﻿#define USING_VR
 
 using UnityEngine;
+using Iviz.Msgs.SensorMsgs;
+using Iviz.Msgs.Tf2Msgs;
+using Iviz.App.Listeners;
+using Iviz.Msgs.StdMsgs;
+using Iviz.Resources;
 
 #if USING_VR
 using Iviz.App.Displays;
@@ -41,7 +46,7 @@ namespace Iviz.App
 
         RosSender<Joy> rosSenderLeft, rosSenderRight;
         RosSender<TFMessage> rosSenderTF;
-        RosSender<Msgs.geometry_msgs.PoseStamped> rosSenderHead;
+        RosSender<Msgs.GeometryMsgs.PoseStamped> rosSenderHead;
 
         public InteractiveMarkerListener interactiveMarkerListener;
 
@@ -69,7 +74,7 @@ namespace Iviz.App
             rosSenderLeft = new RosSender<Joy>(LeftControllerTopic);
             rosSenderRight = new RosSender<Joy>(RightControllerTopic);
             rosSenderTF = new RosSender<TFMessage>(TfTopic);
-            rosSenderHead = new RosSender<Msgs.geometry_msgs.PoseStamped>(SmhiHeadTopic);
+            rosSenderHead = new RosSender<Msgs.GeometryMsgs.PoseStamped>(SmhiHeadTopic);
 
             //ConnectionManager.Instance.Advertise<Joy>(LeftControllerTopic);
             //ConnectionManager.Instance.Advertise<Joy>(RightControllerTopic);
@@ -111,13 +116,13 @@ namespace Iviz.App
 
             return new Joy()
             {
-                header = new Header
+                Header = new Header
                 {
-                    stamp = Utils.GetRosTime(),
-                    frame_id = frameName
+                    Stamp = RosUtils.GetRosTime(),
+                    FrameId = frameName
                 },
-                buttons = buttons.ToArray(),
-                axes = new[]
+                Buttons = buttons.ToArray(),
+                Axes = new[]
                 {
                     squeeze, trackpadPos.x, trackpadPos.y
                 }
@@ -129,25 +134,25 @@ namespace Iviz.App
         {
             return new TFMessage
             {
-                transforms = new[]
+                Transforms = new[]
                 {
-                    new Msgs.geometry_msgs.TransformStamped
+                    new Msgs.GeometryMsgs.TransformStamped
                     {
-                        header = Utils.CreateHeader(tfSeq++, TFListener.BaseFrame.Id),
-                        child_frame_id = LeftFrameName,
-                        transform = LeftController.transform.AsPose().Unity2RosTransform(),
+                        Header = RosUtils.CreateHeader(tfSeq++, TFListener.BaseFrame.Id),
+                        ChildFrameId = LeftFrameName,
+                        Transform = LeftController.transform.AsPose().Unity2RosTransform(),
                     },
-                    new Msgs.geometry_msgs.TransformStamped
+                    new Msgs.GeometryMsgs.TransformStamped
                     {
-                        header = Utils.CreateHeader(tfSeq++, TFListener.BaseFrame.Id),
-                        child_frame_id = RightFrameName,
-                        transform = RightController.transform.AsPose().Unity2RosTransform()
+                        Header = RosUtils.CreateHeader(tfSeq++, TFListener.BaseFrame.Id),
+                        ChildFrameId = RightFrameName,
+                        Transform = RightController.transform.AsPose().Unity2RosTransform()
                     },
-                    new Msgs.geometry_msgs.TransformStamped
+                    new Msgs.GeometryMsgs.TransformStamped
                     {
-                        header = Utils.CreateHeader(tfSeq++, TFListener.BaseFrame.Id),
-                        child_frame_id = HeadFrameName,
-                        transform = Head.transform.AsPose().Unity2RosTransform()
+                        Header = RosUtils.CreateHeader(tfSeq++, TFListener.BaseFrame.Id),
+                        ChildFrameId = HeadFrameName,
+                        Transform = Head.transform.AsPose().Unity2RosTransform()
                     },
                     /*
                     new RosSharp.RosBridgeClient.MessageTypes.Geometry.TransformStamped
@@ -273,12 +278,12 @@ namespace Iviz.App
             //{
 
             Joy leftMsg = CreateJoyMessage(LeftInputSource, LeftFrameName);
-            leftMsg.header.seq = joySeq;
+            leftMsg.Header.Seq = joySeq;
             //ConnectionManager.Instance.Publish(LeftControllerTopic, leftMsg);
             rosSenderLeft.Publish(leftMsg);
 
             Joy rightMsg = CreateJoyMessage(RightInputSource, RightFrameName);
-            rightMsg.header.seq = joySeq;
+            rightMsg.Header.Seq = joySeq;
             //ConnectionManager.Instance.Publish(RightControllerTopic, rightMsg);
             rosSenderRight.Publish(rightMsg);
 
@@ -288,10 +293,10 @@ namespace Iviz.App
             rosSenderTF.Publish(tFMsg);
             //}
 
-            Msgs.geometry_msgs.PoseStamped pose = new Msgs.geometry_msgs.PoseStamped
+            Msgs.GeometryMsgs.PoseStamped pose = new Msgs.GeometryMsgs.PoseStamped
             {
-                header = Utils.CreateHeader(headSeq++, TFListener.BaseFrame.Id),
-                pose = Head.transform.AsPose().Unity2RosPose()
+                Header = RosUtils.CreateHeader(headSeq++, TFListener.BaseFrame.Id),
+                Pose = Head.transform.AsPose().Unity2RosPose()
             };
             rosSenderHead.Publish(pose);
 

@@ -71,7 +71,7 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
-            panel.Topic.Label = Topic;
+            panel.Topic.Label = SanitizedTopicText();
 
             robotNames.Clear();
             robotNames.Add("<none>");

@@ -107,16 +107,19 @@ namespace Iviz.App
 
         protected override void UpdateButtonText()
         {
+            /*
             const int maxLength = 20;
             if (Robot.LongName.Length > maxLength)
             {
                 string nameShort = Robot.LongName.Substring(0, maxLength);
-                ButtonText = $"{nameShort}...\n<b>{Module}</b>";
+                ButtonText = $"{nameShort}\n<b>{Module}</b>";
             }
             else
             {
                 ButtonText = $"{Robot.LongName}\n<b>{Module}</b>";
             }
+            */
+            ButtonText = $"{RosUtils.SanitizedText(Robot.LongName, MaxTextRowLength)}\n<b>{Module}</b>";
         }
 
         /*
