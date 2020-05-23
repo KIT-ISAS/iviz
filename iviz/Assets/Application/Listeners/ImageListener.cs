@@ -129,11 +129,9 @@ namespace Iviz.App.Listeners
 
         void Awake()
         {
-            transform.parent = TFListener.ListenersFrame.transform;
-
             texture = new ImageTexture();
-            node = SimpleClickableDisplayNode.Instantiate("ImageNode", transform);
-            marker = ResourcePool.GetOrCreate(Resource.Markers.Image, node.transform).GetComponent<ImageResource>();
+            node = SimpleClickableDisplayNode.Instantiate("ImageNode");
+            marker = ResourcePool.GetOrCreate(Resource.Markers.Image).GetComponent<ImageResource>();
             marker.Texture = texture;
             node.Target = marker;
 

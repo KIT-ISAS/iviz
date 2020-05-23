@@ -12,6 +12,7 @@ namespace Iviz.App
             Tuple.Create("<b>Robot</b>\nA robot object", Resource.Module.Robot),
             Tuple.Create("<b>Grid</b>\nA reference plane", Resource.Module.Grid),
             Tuple.Create("<b>DepthProjector</b>\nPoint cloud generator for depth images", Resource.Module.DepthImageProjector),
+            Tuple.Create("<b>AR</b>\nManager for augmented reality", Resource.Module.AR),
         };
 
         DialogItemList itemList;

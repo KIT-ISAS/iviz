@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Iviz.App
 {
-    public class GridPanelContents : DataPanelContents
+    public class ARPanelContents : DataPanelContents
     {
         public TrashButtonWidget CloseButton { get; private set; }
         public ToggleButtonWidget HideButton { get; private set; }

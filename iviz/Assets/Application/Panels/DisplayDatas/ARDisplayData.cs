@@ -7,28 +7,27 @@ using UnityEngine;
 
 namespace Iviz.App
 {
-    public class GridDisplayData : DisplayData
+    public class ARDisplayData : DisplayData
     {
-        readonly Listeners.Grid display;
+        readonly AugmentedReality display;
         readonly GridPanelContents panel;
 
-        public override Resource.Module Module => Resource.Module.Grid;
+        public override Resource.Module Module => Resource.Module.AR;
         public override DataPanelContents Panel => panel;
         public override IConfiguration Configuration => display.Config;
 
-        public GridDisplayData(DisplayDataConstructor constructor) :
+        public ARDisplayData(DisplayDataConstructor constructor) :
             base(constructor.DisplayList, constructor.Topic, constructor.Type)
         {
-            GameObject displayObject = Resource.Listeners.Grid.Instantiate();    
-            displayObject.name = "Grid";
+            GameObject displayObject = Resource.Listeners.AR.Instantiate();    
+            displayObject.name = "AR";
 
-            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Grid) as GridPanelContents;
+            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.AR) as GridPanelContents;
 
-            display = displayObject.GetComponent<Listeners.Grid>();
-            //display.DisplayData = this;
+            display = displayObject.GetComponent<AugmentedReality>();
             if (constructor.Configuration != null)
             {
-                display.Config = (GridConfiguration)constructor.Configuration;
+                display.Config = (ARConfiguration)constructor.Configuration;
             }
 
             UpdateButtonText();

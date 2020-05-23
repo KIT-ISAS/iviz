@@ -129,8 +129,8 @@ namespace Iviz.App.Listeners
 
         void Awake()
         {
-            grid = ResourcePool.GetOrCreate(Resource.Markers.Grid, transform).GetComponent<GridResource>();
-            node = SimpleClickableDisplayNode.Instantiate("node", transform);
+            grid = ResourcePool.GetOrCreate(Resource.Markers.Grid).GetComponent<GridResource>();
+            node = SimpleClickableDisplayNode.Instantiate("node");
             node.Target = grid;
 
             reflectionProbe = new GameObject().AddComponent<ReflectionProbe>();

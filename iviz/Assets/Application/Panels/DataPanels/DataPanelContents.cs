@@ -19,6 +19,7 @@ namespace Iviz.App
                 case Resource.Module.JointState: return o.AddComponent<JointStatePanelContents>();
                 case Resource.Module.DepthImageProjector: return o.AddComponent<DepthImageProjectorPanelContents>();
                 case Resource.Module.LaserScan: return o.AddComponent<LaserScanPanelContents>();
+                case Resource.Module.AR: return o.AddComponent<ARPanelContents>();
                 default: return o.AddComponent<DefaultPanelContents>();
             }
         }

@@ -102,6 +102,7 @@ namespace Iviz.App
                 case Resource.Module.JointState: return new JointStateDisplayData(c);
                 case Resource.Module.DepthImageProjector: return new DepthImageProjectorDisplayData(c);
                 case Resource.Module.LaserScan: return new LaserScanDisplayData(c);
+                case Resource.Module.AR: return new ARDisplayData(c);
                 default: throw new ArgumentException(nameof(c));
             }
         }

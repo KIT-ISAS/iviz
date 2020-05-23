@@ -5,7 +5,7 @@ namespace Iviz.App
     public class LaserScanPanelContents : ListenerPanelContents
     {
         public DataLabelWidget Topic { get; private set; }
-        public ToggleWidget IgnoreIntensity { get; private set; }
+        public ToggleWidget UseIntensity { get; private set; }
         public SliderWidget PointSize { get; private set; }
         public DropdownWidget Colormap { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
@@ -21,7 +21,7 @@ namespace Iviz.App
             Colormap = p.AddDropdown("Colormap")
                         .SetOptions(Resource.Colormaps.Names)
                         .SetIndex((int)Resource.ColormapId.hsv);
-            IgnoreIntensity = p.AddToggle("Ignore Intensity");
+            UseIntensity = p.AddToggle("Use Intensity If Available");
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();
             p.UpdateSize();
@@ -30,7 +30,7 @@ namespace Iviz.App
             Topic.label.alignment = UnityEngine.TextAnchor.UpperLeft;
             Topic.label.fontStyle = UnityEngine.FontStyle.Italic;
 
-            Widgets = new Widget[] { IgnoreIntensity, PointSize, Colormap, CloseButton, HideButton };
+            Widgets = new Widget[] { UseIntensity, PointSize, Colormap, CloseButton, HideButton };
         }
     }
 }

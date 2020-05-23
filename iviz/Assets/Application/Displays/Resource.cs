@@ -24,7 +24,8 @@ namespace Iviz.Resources
             InteractiveMarker,
             JointState,
             DepthImageProjector,
-            LaserScan
+            LaserScan,
+            AR
         }
 
         static readonly Dictionary<string, Module> resourceByRosMessageType = new Dictionary<string, Module>
@@ -237,6 +238,7 @@ namespace Iviz.Resources
             public Info JointState { get; }
             public Info DepthImageProjector { get; }
             public Info LaserScan { get; }
+            public Info AR { get; }
 
             public ListenersType()
             {
@@ -253,6 +255,7 @@ namespace Iviz.Resources
                 JointState = new Info("Listeners/JointState");
                 DepthImageProjector = new Info("Listeners/DepthImageProjector");
                 LaserScan = new Info("Listeners/LaserScan");
+                AR = new Info("Listeners/AR");
             }
         }
 
@@ -268,6 +271,7 @@ namespace Iviz.Resources
             public Info ToggleWidget { get; }
             public Info SliderWidget { get; }
             public Info InputWidget { get; }
+            public Info ShortInputWidget { get; }
             public Info Dropdown { get; }
             public Info ColorPicker { get; }
             public Info ImagePreview { get; }
@@ -275,6 +279,7 @@ namespace Iviz.Resources
             public Info TrashButton { get; }
             public Info DataLabel { get; }
             public Info HideButton { get; }
+            public Info Vector3 { get; }
 
             public WidgetsType()
             {
@@ -288,6 +293,7 @@ namespace Iviz.Resources
                 ToggleWidget = new Info("Widgets/Toggle");
                 SliderWidget = new Info("Widgets/Slider");
                 InputWidget = new Info("Widgets/Input Field");
+                ShortInputWidget = new Info("Widgets/Short Input Field");
                 ColorPicker = new Info("Widgets/ColorPicker");
                 ImagePreview = new Info("Widgets/Image Preview");
                 Dropdown = new Info("Widgets/Dropdown");
@@ -295,6 +301,7 @@ namespace Iviz.Resources
                 TrashButton = new Info("Widgets/Trash Button");
                 DataLabel = new Info("Widgets/Data Label");
                 HideButton = new Info("Widgets/Hide Button");
+                Vector3 = new Info("Widgets/Vector3");
             }
         }
 

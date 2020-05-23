@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Iviz.Resources;
+using UnityEngine.UI;
 
 namespace Iviz.App
 {
@@ -12,6 +13,11 @@ namespace Iviz.App
         public DropdownWidget IntensityChannel { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
         public ToggleButtonWidget HideButton { get; private set; }
+
+        public ToggleWidget ForceMinMax { get; private set; }
+        public InputFieldWidget MinIntensity { get; private set; }
+        public InputFieldWidget MaxIntensity { get; private set; }
+
 
         void Start()
         {
@@ -26,6 +32,11 @@ namespace Iviz.App
                         .SetIndex((int)Resource.ColormapId.hsv);
             IntensityChannel = p.AddDropdown("Intensity Channel")
                         .SetOptions(DefaultChannels);
+
+            ForceMinMax = p.AddToggle("Force Min/Max");
+            MinIntensity = p.AddShortInputField("Min").SetContentType(InputField.ContentType.DecimalNumber);
+            MaxIntensity = p.AddShortInputField("Max").SetContentType(InputField.ContentType.DecimalNumber);
+
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();
             //p.AddToggle("Override Color");
@@ -35,7 +46,9 @@ namespace Iviz.App
             Topic.label.alignment = UnityEngine.TextAnchor.UpperLeft;
             Topic.label.fontStyle = UnityEngine.FontStyle.Italic;
 
-            Widgets = new Widget[] { PointSize, Colormap, IntensityChannel, CloseButton, HideButton };
+            Widgets = new Widget[] {
+                PointSize, Colormap, IntensityChannel, CloseButton,
+                HideButton, ForceMinMax, MinIntensity, MaxIntensity };
         }
     }
 }

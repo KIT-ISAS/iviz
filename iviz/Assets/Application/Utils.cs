@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Iviz.Msgs;
 using Iviz.Msgs.StdMsgs;
 using System.Runtime.Serialization;
+using System.Globalization;
 
 namespace Iviz
 {
@@ -282,6 +283,8 @@ namespace Iviz
 
     public static class UnityUtils
     {
+        public static CultureInfo Culture { get; } = BuiltIns.Culture;
+
         public static Pose AsPose(this Transform t)
         {
             return new Pose(t.position, t.rotation);

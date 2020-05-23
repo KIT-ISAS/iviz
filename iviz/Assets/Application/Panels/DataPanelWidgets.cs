@@ -80,6 +80,18 @@ namespace Iviz.App
             return AddToBottom(o).GetComponent<InputFieldWidget>().SetLabel(label);
         }
 
+        public InputFieldWidget AddShortInputField(string label)
+        {
+            GameObject o = Resource.Widgets.ShortInputWidget.Instantiate(nonstatics.transform);
+            return AddToBottom(o).GetComponent<InputFieldWidget>().SetLabel(label);
+        }
+
+        public Vector3Widget AddVector3(string label)
+        {
+            GameObject o = Resource.Widgets.Vector3.Instantiate(nonstatics.transform);
+            return AddToBottom(o).GetComponent<Vector3Widget>().SetLabel(label);
+        }
+
         public DropdownWidget AddDropdown(string label)
         {
             GameObject o = Resource.Widgets.Dropdown.Instantiate(nonstatics.transform);

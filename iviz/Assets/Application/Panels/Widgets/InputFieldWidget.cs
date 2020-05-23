@@ -37,6 +37,15 @@ namespace Iviz.App
             }
         }
 
+        public InputField.ContentType ContentType
+        {
+            get => text.contentType;
+            set
+            {
+                text.contentType = value;
+            }
+        }
+
         public bool Interactable
         {
             get => text.interactable;
@@ -82,6 +91,12 @@ namespace Iviz.App
         public InputFieldWidget SetPlaceholder(string f)
         {
             Placeholder = f;
+            return this;
+        }
+
+        public InputFieldWidget SetContentType(InputField.ContentType contentType)
+        {
+            ContentType = contentType;
             return this;
         }
 

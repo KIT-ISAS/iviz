@@ -22,6 +22,9 @@ namespace Iviz.App.Listeners
         [DataMember] public string IntensityChannel { get; set; } = "x";
         [DataMember] public float PointSize { get; set; } = 0.03f;
         [DataMember] public Resource.ColormapId Colormap { get; set; } = Resource.ColormapId.hsv;
+        [DataMember] public bool ForceMinMax { get; set; } = false;
+        [DataMember] public float MinIntensity { get; set; } = 0;
+        [DataMember] public float MaxIntensity { get; set; } = 1;
     }
 
     public class PointCloudListener : TopicListener
@@ -29,8 +32,8 @@ namespace Iviz.App.Listeners
         DisplayNode node;
         PointListResource pointCloud;
 
-        public float MinIntensity { get; private set; }
-        public float MaxIntensity { get; private set; }
+        public float LastMinIntensity { get; private set; }
+        public float LastMaxIntensity { get; private set; }
         public int Size { get; private set; } 
         
         public bool CalculateMinMax { get; private set; } = true;
@@ -85,6 +88,45 @@ namespace Iviz.App.Listeners
             {
                 config.Colormap = value;
                 pointCloud.Colormap = value;
+            }
+        }
+
+        public bool ForceMinMax
+        {
+            get => config.ForceMinMax;
+            set
+            {
+                config.ForceMinMax = value;
+                if (config.ForceMinMax)
+                {
+                    pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
+                }
+            }
+        }
+
+        public float MinIntensity
+        {
+            get => config.MinIntensity;
+            set
+            {
+                config.MinIntensity = value;
+                if (config.ForceMinMax)
+                {
+                    pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
+                }
+            }
+        }
+
+        public float MaxIntensity
+        {
+            get => config.MaxIntensity;
+            set
+            {
+                config.MaxIntensity = value;
+                if (config.ForceMinMax)
+                {
+                    pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
+                }
             }
         }
 
@@ -187,7 +229,9 @@ namespace Iviz.App.Listeners
 
                 GeneratePointBuffer(msg, xOffset, yOffset, zOffset, iOffset, iField.Datatype, rgbaHint);
 
-                Vector2 intensityBounds =  rgbaHint ? Vector2.zero : CalculateBounds(newSize);
+                Vector2 intensityBounds = (!rgbaHint && ForceMinMax) ?
+                    CalculateBounds(newSize) :
+                    new Vector2(MinIntensity, MaxIntensity);
 
                 GameThread.RunOnce(() =>
                 {

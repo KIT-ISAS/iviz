@@ -41,9 +41,9 @@ namespace Iviz.App
                     subscribedStatus = "?";
                     break;
             }
-            string messagesPerSecond = Listener.MessagesPerSecond.ToString("0.##", CultureInfo.InvariantCulture);
-            string minJitter = Listener.MessagesJitterMin.ToString("0.##", CultureInfo.InvariantCulture);
-            string maxJitter = Listener.MessagesJitterMax.ToString("0.##", CultureInfo.InvariantCulture);
+            string messagesPerSecond = Listener.MessagesPerSecond.ToString("0.##", UnityUtils.Culture);
+            string minJitter = Listener.MessagesJitterMin.ToString("0.##", UnityUtils.Culture);
+            string maxJitter = Listener.MessagesJitterMax.ToString("0.##", UnityUtils.Culture);
 
             ListenerPanel.Stats.Label = $"{subscribedStatus} | {messagesPerSecond} Hz | {minJitter} - {maxJitter} sec";
         }

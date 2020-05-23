@@ -12,6 +12,7 @@ namespace Iviz.App
         public SliderWidget Max { get; private set; }
         public DropdownWidget Anchor { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
+        public ToggleButtonWidget HideButton { get; private set; }
 
         void Start()
         {
@@ -30,12 +31,13 @@ namespace Iviz.App
             PreviewWidget = p.AddImagePreviewWidget("Preview");
             Description = p.AddDataLabel("");
             CloseButton = p.AddTrashButton();
+            HideButton = p.AddHideButton();
             p.UpdateSize();
             gameObject.SetActive(false);
 
             Topic.label.alignment = UnityEngine.TextAnchor.UpperLeft;
 
-            Widgets = new Widget[] { PreviewWidget, Colormap, Anchor, Min, Max, CloseButton };
+            Widgets = new Widget[] { PreviewWidget, Colormap, Anchor, Min, Max, CloseButton, HideButton };
 
         }
     }

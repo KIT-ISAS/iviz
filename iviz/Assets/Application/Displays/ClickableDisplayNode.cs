@@ -115,11 +115,16 @@ namespace Iviz.App.Displays
         public override Bounds Bounds => Target?.Bounds ?? new Bounds();
         public override Bounds WorldBounds => Target?.WorldBounds ?? new Bounds();
 
-        public static SimpleClickableDisplayNode Instantiate(string name, Transform transform)
+        public static SimpleClickableDisplayNode Instantiate(string name, TFFrame frame = null)
         {
+            if (frame == null)
+            {
+                frame = TFListener.ListenersFrame;
+            }
             GameObject obj = new GameObject(name);
-            obj.transform.parent = transform;
-            return obj.AddComponent<SimpleClickableDisplayNode>();
+            SimpleClickableDisplayNode node = obj.AddComponent<SimpleClickableDisplayNode>();
+            node.Parent = frame;
+            return node;
         }
 
         public override void Stop()

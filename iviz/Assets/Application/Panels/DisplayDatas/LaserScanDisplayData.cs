@@ -70,12 +70,12 @@ namespace Iviz.App
 
             panel.Colormap.Index = (int)listener.Colormap;
             panel.PointSize.Value = listener.PointSize;
-            panel.IgnoreIntensity.Value = listener.IgnoreIntensity;
+            panel.UseIntensity.Value = listener.UseIntensity;
             panel.HideButton.State = listener.Visible;
 
-            panel.IgnoreIntensity.ValueChanged += f =>
+            panel.UseIntensity.ValueChanged += f =>
             {
-                listener.IgnoreIntensity = f;
+                listener.UseIntensity = f;
             };
             panel.PointSize.ValueChanged += f =>
             {

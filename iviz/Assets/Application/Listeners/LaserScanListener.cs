@@ -20,7 +20,9 @@ namespace Iviz.App.Listeners
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public float PointSize { get; set; } = 0.03f;
         [DataMember] public Resource.ColormapId Colormap { get; set; } = Resource.ColormapId.hsv;
-        [DataMember] public bool IgnoreIntensity { get; set; }
+        [DataMember] public bool UseIntensity { get; set; } = false;
+        [DataMember] public bool UseLines { get; set; } = false;
+        [DataMember] public float MaxDistance { get; set; } = 1.0f;
     }
 
     public class LaserScanListener : TopicListener
@@ -43,7 +45,7 @@ namespace Iviz.App.Listeners
                 Visible = value.Visible;
                 PointSize = value.PointSize;
                 Colormap = value.Colormap;
-                IgnoreIntensity = value.IgnoreIntensity;
+                UseIntensity = value.UseIntensity;
             }
         }
 
@@ -77,12 +79,12 @@ namespace Iviz.App.Listeners
             }
         }
 
-        public bool IgnoreIntensity
+        public bool UseIntensity
         {
-            get => config.IgnoreIntensity;
+            get => config.UseIntensity;
             set
             {
-                config.IgnoreIntensity = value;
+                config.UseIntensity = value;
             }
         }
 
@@ -98,6 +100,7 @@ namespace Iviz.App.Listeners
         */
 
         PointWithColor[] pointBuffer = new PointWithColor[0];
+        LineWithColor[] lineBuffer = new LineWithColor[0];
 
         void Awake()
         {
@@ -118,22 +121,24 @@ namespace Iviz.App.Listeners
 
         void Handler(LaserScan msg)
         {
-            int newSize = msg.Ranges.Length;
-            if (newSize > pointBuffer.Length)
-            {
-                pointBuffer = new PointWithColor[newSize * 11 / 10];
-            }
-
             if (msg.AngleMin >= msg.AngleMax || msg.RangeMin >= msg.RangeMax)
             {
                 Logger.Info("LaserScanListener: Invalid angle or range dimensions!");
                 return;
             }
-
+            int newSize = msg.Ranges.Length;
+            if (newSize > pointBuffer.Length)
+            {
+                pointBuffer = new PointWithColor[newSize * 11 / 10];
+            }
+            if (newSize > lineBuffer.Length)
+            {
+                lineBuffer = new LineWithColor[newSize * 11 / 10];
+            }
 
             Task.Run(() =>
             {
-                bool useIntensity = (!IgnoreIntensity && msg.Ranges.Length == msg.Intensities.Length && msg.RangeMin < msg.RangeMax);
+                bool useIntensity = (UseIntensity && msg.Ranges.Length == msg.Intensities.Length && msg.RangeMin < msg.RangeMax);
 
                 float x = Mathf.Cos(msg.AngleMin);
                 float y = Mathf.Sin(msg.AngleMin);
