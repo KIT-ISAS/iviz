@@ -15,6 +15,7 @@ namespace Iviz.App
         public override Resource.Module Module => Resource.Module.Grid;
         public override DataPanelContents Panel => panel;
         public override IConfiguration Configuration => display.Config;
+        public override IController Controller => display;
 
         public GridDisplayData(DisplayDataConstructor constructor) :
             base(constructor.DisplayList, constructor.Topic, constructor.Type)
@@ -53,6 +54,7 @@ namespace Iviz.App
             panel.ColorPicker.Value = display.InteriorColor;
             panel.ShowInterior.Value = display.ShowInterior;
             panel.HideButton.State = display.Visible;
+            panel.Offset.Value = display.Offset;
 
             panel.LineWidth.ValueChanged += f =>
             {
@@ -84,6 +86,10 @@ namespace Iviz.App
                 DataPanelManager.HideSelectedPanel();
                 DisplayListPanel.RemoveDisplay(this);
             };
+            panel.Offset.ValueChanged += f =>
+            {
+                display.Offset = f;
+            };
             panel.HideButton.Clicked += () =>
             {
                 display.Visible = !display.Visible;
@@ -91,13 +97,6 @@ namespace Iviz.App
                 UpdateButtonText();
             };
         }
-
-        /*
-        public override JToken Serialize()
-        {
-            return JToken.FromObject(display.Config);
-        }
-        */
 
         public override void AddToState(StateConfiguration config)
         {

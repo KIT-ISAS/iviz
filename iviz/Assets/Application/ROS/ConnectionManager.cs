@@ -79,6 +79,9 @@ namespace Iviz.App
             });
         }
 
+        public static string MyId => Connection?.MyId;
+        public static Uri MyUri => Connection?.MyUri;
+        public static Uri MasterUri => Connection?.MasterUri;
 
         public static ConnectionState ConnectionState => Connection?.ConnectionState ?? ConnectionState.Disconnected;
         public static bool Connected => ConnectionState == ConnectionState.Connected;

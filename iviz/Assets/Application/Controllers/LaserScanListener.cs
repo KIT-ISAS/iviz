@@ -107,7 +107,7 @@ namespace Iviz.App.Listeners
             transform.parent = TFListener.ListenersFrame.transform;
 
             node = SimpleDisplayNode.Instantiate("LaserScanNode", transform);
-            pointCloud = ResourcePool.GetOrCreate(Resource.Markers.PointList, node.transform).GetComponent<PointListResource>();
+            pointCloud = ResourcePool.GetOrCreate<PointListResource>(Resource.Markers.PointList, node.transform);
             Config = new LaserScanConfiguration();
         }
 

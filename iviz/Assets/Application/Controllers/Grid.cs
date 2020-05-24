@@ -8,7 +8,7 @@ using Iviz.App.Displays;
 namespace Iviz.App.Listeners
 {
     [DataContract]
-    public class GridConfiguration :  IConfiguration
+    public class GridConfiguration : IConfiguration
     {
         [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
         [DataMember] public Resource.Module Module => Resource.Module.Grid;
@@ -20,11 +20,12 @@ namespace Iviz.App.Listeners
         [DataMember] public float GridCellSize { get; set; } = 1;
         [DataMember] public int NumberOfGridCells { get; set; } = 20;
         [DataMember] public bool ShowInterior { get; set; } = true;
+        [DataMember] public SerializableVector3 Offset { get; set; } = Vector3.zero;
     }
 
-    public class Grid : MonoBehaviour
+    public class Grid : MonoBehaviour, IController
     {
-        SimpleClickableDisplayNode node;
+        DisplayClickableNode node;
         ReflectionProbe reflectionProbe;
         GridResource grid;
 
@@ -73,6 +74,7 @@ namespace Iviz.App.Listeners
             {
                 config.GridColor = value;
                 grid.GridColor = value;
+                UpdateMesh();
             }
         }
 
@@ -83,6 +85,7 @@ namespace Iviz.App.Listeners
             {
                 config.InteriorColor = value;
                 grid.InteriorColor = value;
+                UpdateMesh();
             }
         }
 
@@ -93,6 +96,7 @@ namespace Iviz.App.Listeners
             {
                 config.GridLineWidth = value;
                 grid.GridLineWidth = value;
+                UpdateMesh();
             }
         }
 
@@ -103,6 +107,7 @@ namespace Iviz.App.Listeners
             {
                 config.GridCellSize = value;
                 grid.GridCellSize = value;
+                UpdateMesh();
             }
         }
 
@@ -113,6 +118,7 @@ namespace Iviz.App.Listeners
             {
                 config.NumberOfGridCells = value;
                 grid.NumberOfGridCells = value;
+                UpdateMesh();
             }
         }
 
@@ -123,23 +129,35 @@ namespace Iviz.App.Listeners
             {
                 config.ShowInterior = value;
                 grid.ShowInterior = value;
+                UpdateMesh();
             }
         }
 
+        public SerializableVector3 Offset
+        {
+            get => config.Offset;
+            set
+            {
+                config.Offset = value;
+                node.transform.position = ((Vector3)value).Ros2Unity();
+                UpdateMesh();
+            }
+        }
 
         void Awake()
         {
-            grid = ResourcePool.GetOrCreate(Resource.Markers.Grid).GetComponent<GridResource>();
-            node = SimpleClickableDisplayNode.Instantiate("node");
+            grid = ResourcePool.GetOrCreate<GridResource>(Resource.Markers.Grid);
+            node = DisplayClickableNode.Instantiate("node");
             node.Target = grid;
 
             reflectionProbe = new GameObject().AddComponent<ReflectionProbe>();
             reflectionProbe.gameObject.name = "Grid Reflection Probe";
-            reflectionProbe.transform.parent = transform;
+            reflectionProbe.transform.parent = grid.transform;
             reflectionProbe.transform.position = new Vector3(0, 2.0f, 0);
             reflectionProbe.mode = UnityEngine.Rendering.ReflectionProbeMode.Realtime;
             reflectionProbe.refreshMode = UnityEngine.Rendering.ReflectionProbeRefreshMode.ViaScripting;
             reflectionProbe.clearFlags = UnityEngine.Rendering.ReflectionProbeClearFlags.SolidColor;
+            UpdateMesh();
 
             Config = new GridConfiguration();
             gameObject.layer = Resource.ClickableLayer;
@@ -147,8 +165,9 @@ namespace Iviz.App.Listeners
 
         void UpdateMesh()
         {
-            //reflectionProbe.size = new Vector3(totalSize * 2, 4.05f, totalSize * 2);
-            //reflectionProbe.RenderProbe();
+            float totalSize = NumberOfGridCells * GridCellSize;
+            reflectionProbe.size = new Vector3(totalSize * 2, 4.05f, totalSize * 2);
+            reflectionProbe.RenderProbe();
         }
 
         public void Stop()

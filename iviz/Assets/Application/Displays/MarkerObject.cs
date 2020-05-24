@@ -26,7 +26,7 @@ namespace Iviz.App
         TRIANGLE_LIST = Marker.TRIANGLE_LIST,
     }
 
-    public class MarkerObject : ClickableDisplayNode
+    public class MarkerObject : ClickableNode
     {
         const string packagePrefix = "package://ibis/";
 
@@ -79,7 +79,7 @@ namespace Iviz.App
                     }
                     return;
                 }
-                resource = ResourcePool.GetOrCreate(resourceType, transform).GetComponent<MarkerResource>();
+                resource = ResourcePool.GetOrCreate<MarkerResource>(resourceType, transform);
                 if (resource == null)
                 {
                     Debug.LogError("Resource " + resourceType + " has no MarkerResource!");

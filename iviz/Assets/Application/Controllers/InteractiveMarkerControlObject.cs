@@ -67,7 +67,7 @@ namespace Iviz.App.Listeners
                     case Marker.ADD:
                         if (!markers.TryGetValue(id, out MarkerObject markerToAdd))
                         {
-                            markerToAdd = ResourcePool.GetOrCreate(Resource.Listeners.MarkerObject, transform).GetComponent<MarkerObject>();
+                            markerToAdd = ResourcePool.GetOrCreate<MarkerObject>(Resource.Listeners.MarkerObject, transform);
                             markerToAdd.Parent = TFListener.ListenersFrame;
                             markerToAdd.Clicked += (point, button) => Clicked?.Invoke(transform.AsPose(), point, button);
                             markers[id] = markerToAdd;

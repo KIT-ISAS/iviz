@@ -11,6 +11,8 @@ namespace Iviz.App
         public string Topic { get; set; }
         public string Type { get; set; }
         public IConfiguration Configuration { get; set; }
+
+        public T GetConfiguration<T>() where T : class, IConfiguration => Configuration as T;
     }
 
     public abstract class DisplayData
@@ -34,6 +36,9 @@ namespace Iviz.App
         public string Type { get; }
         public abstract Resource.Module Module { get; }
         public abstract DataPanelContents Panel { get; }
+        public abstract IController Controller { get; }
+        public abstract IConfiguration Configuration { get; }
+        protected virtual bool Visible => Configuration?.Visible ?? true;
 
         protected DisplayData(DisplayListPanel displayList, string topic, string type)
         {
@@ -45,16 +50,11 @@ namespace Iviz.App
 
         protected virtual void UpdateButtonText()
         {
-            const int maxLength = 20;
             string text;
-            if (Topic.Length > maxLength)
+            if (!string.IsNullOrEmpty(Topic))
             {
                 string topicShort = RosUtils.SanitizedText(Topic, MaxTextRowLength);
-                ButtonText = $"{topicShort}\n<b>{Module}</b>";
-            }
-            else if (Topic != "")
-            {
-                text = $"{Topic}\n<b>{Module}</b>";
+                text = $"{topicShort}\n<b>{Module}</b>";
             }
             else
             {
@@ -77,17 +77,12 @@ namespace Iviz.App
             DisplayListPanel.AllGuiVisible = true;
         }
 
-        public abstract IConfiguration Configuration { get; }
-
-        protected virtual bool Visible => Configuration?.Visible ?? true;
-
         public abstract void AddToState(StateConfiguration config);
 
         public virtual void Stop()
         {
             DataPanelManager.HidePanelFor(this);
         }
-
         
         public static DisplayData CreateFromResource(DisplayDataConstructor c)
         {

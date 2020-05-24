@@ -117,13 +117,5 @@ namespace Iviz.App
                 SelectPanelFor(selected);
             }
         }
-
-
-        GameObject CreateItemPanelObject(string name)
-        {
-            GameObject o = Resource.Widgets.ItemListPanel.Instantiate(transform);
-            o.name = name;
-            return o;
-        }
     }
 }

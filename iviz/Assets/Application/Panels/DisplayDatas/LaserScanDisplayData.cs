@@ -18,7 +18,7 @@ namespace Iviz.App
 
 
         public LaserScanDisplayData(DisplayDataConstructor constructor) :
-        base(constructor.DisplayList, ((LaserScanConfiguration)constructor.Configuration)?.Topic ?? constructor.Topic, constructor.Type)
+        base(constructor.DisplayList, constructor.GetConfiguration<LaserScanConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
         {
             GameObject listenerObject = Resource.Listeners.LaserScan.Instantiate();
             listenerObject.name = "LaserScan:" + Topic;
@@ -36,33 +36,6 @@ namespace Iviz.App
             listener.StartListening();
             UpdateButtonText();
         }
-        /*
-        public override DisplayData Initialize(DisplayListPanel displayList, string topic, string type)
-        {
-            base.Initialize(displayList, topic, type);
-            GameObject listenerObject = ResourcePool.GetOrCreate(Resource.Listeners.LaserScan);
-            listenerObject.name = "LaserScan:" + Topic;
-
-            listener = listenerObject.GetComponent<LaserScanListener>();
-            listener.Config.Topic = Topic;
-            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.LaserScan) as LaserScanPanelContents;
-
-            return this;
-        }
-
-        public override DisplayData Deserialize(JToken j)
-        {
-            listener.Config = j.ToObject<LaserScanConfiguration>();
-            Topic = listener.Config.Topic;
-            return this;
-        }
-
-        public override void Start()
-        {
-            base.Start();
-            listener.StartListening();
-        }
-        */
 
         public override void SetupPanel()
         {
@@ -97,13 +70,6 @@ namespace Iviz.App
                 UpdateButtonText();
             };
         }
-
-        /*
-        public override JToken Serialize()
-        {
-            return JToken.FromObject(listener.Config);
-        }
-        */
 
         public override void AddToState(StateConfiguration config)
         {

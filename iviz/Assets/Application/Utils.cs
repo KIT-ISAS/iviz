@@ -7,6 +7,7 @@ using Iviz.Msgs;
 using Iviz.Msgs.StdMsgs;
 using System.Runtime.Serialization;
 using System.Globalization;
+using Iviz.App.Listeners;
 
 namespace Iviz
 {
@@ -26,12 +27,12 @@ namespace Iviz
             A = a;
         }
 
-        public static implicit operator Color(SerializableColor i)
+        public static implicit operator Color(in SerializableColor i)
         {
             return new Color(i.R, i.G, i.B, i.A);
         }
 
-        public static implicit operator SerializableColor(Color color)
+        public static implicit operator SerializableColor(in Color color)
         {
             return new SerializableColor(
                 r: color.r,
@@ -42,30 +43,46 @@ namespace Iviz
         }
     }
 
+    [DataContract]
+    public struct SerializableVector3
+    {
+        [DataMember] public float X { get; set; }
+        [DataMember] public float Y { get; set; }
+        [DataMember] public float Z { get; set; }
+
+        public SerializableVector3(float x, float y, float z)
+        {
+            X = x;
+            Y = y;
+            Z = z;
+        }
+
+        public static implicit operator Vector3(in SerializableVector3 i)
+        {
+            return new Vector3(i.X, i.Y, i.Z);
+        }
+
+        public static implicit operator SerializableVector3(in Vector3 v)
+        {
+            return new SerializableVector3(
+                x: v.x,
+                y: v.y,
+                z: v.z
+            );
+        }
+    }
+
     public static class RosUtils
     {
         //----
-        static Vector3 Unity2Ros(this Vector3 vector3)
-        {
-            return new Vector3(vector3.z, -vector3.x, vector3.y);
-        }
+        public static Vector3 Unity2Ros(this Vector3 vector3)=> new Vector3(vector3.z, -vector3.x, vector3.y);
 
-        static Vector3 Ros2Unity(this Vector3 vector3)
-        {
-            return new Vector3(-vector3.y, vector3.z, vector3.x);
-        }
+        public static Vector3 Ros2Unity(this Vector3 vector3)=> new Vector3(-vector3.y, vector3.z, vector3.x);
 
-        static Quaternion Ros2Unity(this Quaternion quaternion)
-        {
-            return new Quaternion(quaternion.y, -quaternion.z, -quaternion.x, quaternion.w);
-        }
+        static Quaternion Ros2Unity(this Quaternion quaternion) => new Quaternion(quaternion.y, -quaternion.z, -quaternion.x, quaternion.w);
 
-        static Quaternion Unity2Ros(this Quaternion quaternion)
-        {
-            return new Quaternion(-quaternion.z, quaternion.x, -quaternion.y, quaternion.w);
-        }
+        static Quaternion Unity2Ros(this Quaternion quaternion)=> new Quaternion(-quaternion.z, quaternion.x, -quaternion.y, quaternion.w);
         //----
-
 
         static Vector3 ToUnity(this Msgs.GeometryMsgs.Vector3 p)
         {
@@ -216,6 +233,7 @@ namespace Iviz
             return new Pose(pose.Position.Ros2Unity(), pose.Orientation.Ros2Unity());
         }
 
+        /*
         static Msgs.GeometryMsgs.Transform ToRosTransform(this Pose p)
         {
             return new Msgs.GeometryMsgs.Transform
@@ -224,6 +242,7 @@ namespace Iviz
                 Rotation: p.rotation.ToRos()
             );
         }
+        */
 
         public static Msgs.GeometryMsgs.Transform Unity2RosTransform(this Pose p)
         {
@@ -234,6 +253,7 @@ namespace Iviz
             );
         }
 
+        /*
         static Msgs.GeometryMsgs.Pose ToRosPose(this Pose p)
         {
             return new Msgs.GeometryMsgs.Pose
@@ -242,6 +262,7 @@ namespace Iviz
                 Orientation: p.rotation.ToRos()
             );
         }
+        */
 
         public static Msgs.GeometryMsgs.Pose Unity2RosPose(this Pose p)
         {
@@ -254,14 +275,6 @@ namespace Iviz
 
         public static time GetRosTime()
         {
-            /*
-            long timeMs = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            return new time
-            {
-                secs = (uint)(timeMs / 1000),
-                nsecs = (uint)(timeMs % 1000) * 1000000
-            };
-            */
             return new time(DateTime.Now);
         }
 
@@ -270,12 +283,12 @@ namespace Iviz
             return TimeSpan.FromSeconds(duration.Secs) + TimeSpan.FromTicks(duration.Nsecs / 100);
         }
 
-        public static Header CreateHeader(uint seq = 0, string frame_id = "")
+        public static Header CreateHeader(uint seq = 0, string frame_id = null)
         {
             return new Header
             (
                 Seq: seq,
-                FrameId: frame_id,
+                FrameId: frame_id ?? TFListener.BaseFrameId,
                 Stamp: GetRosTime()
             );
         }
@@ -362,52 +375,6 @@ namespace Iviz
                 );
         }
 
-        /*
-        public static void FromByteArray<T>(byte[] source, ref T[] destination) where T : struct
-        {
-            int size = source.Length / Marshal.SizeOf(typeof(T));
-            if (destination == null || destination.Length != size)
-            {
-                //Debug.Log("Utils.FromByteArray: Forcing array resize! Expected " + size + ", got " +
-                //    (destination == null ? 0 : destination.Length));
-                destination = new T[size];
-            }
-            GCHandle handle = GCHandle.Alloc(destination, GCHandleType.Pinned);
-            try
-            {
-                IntPtr pointer = handle.AddrOfPinnedObject();
-                Marshal.Copy(source, 0, pointer, source.Length);
-            }
-            finally
-            {
-                if (handle.IsAllocated)
-                    handle.Free();
-            }
-        }
-
-        public static void ToByteArray<T>(T[] source, ref byte[] destination) where T : struct
-        {
-            GCHandle handle = GCHandle.Alloc(source, GCHandleType.Pinned);
-            try
-            {
-                IntPtr pointer = handle.AddrOfPinnedObject();
-                int size = source.Length * Marshal.SizeOf(typeof(T));
-                if (destination == null || destination.Length != size)
-                {
-                    destination = new byte[size];
-                }
-                Marshal.Copy(pointer, destination, 0, destination.Length);
-            }
-            finally
-            {
-                if (handle.IsAllocated)
-                    handle.Free();
-            }
-        }
-        */
-
-
-
         public static void ForEach<T>(this IEnumerable<T> col, Action<T> action)
         {
             foreach (var item in col)
@@ -477,7 +444,7 @@ namespace Iviz
         }
 
         static readonly int MainTexSTPropId = Shader.PropertyToID("_MainTex_ST_");
-        public static void SetPropertyMainTexST(this MeshRenderer meshRenderer, Vector2 xy, Vector2 wh, int id = 0)
+        public static void SetPropertyMainTexST(this MeshRenderer meshRenderer, in Vector2 xy, in Vector2 wh, int id = 0)
         {
             if (propBlock == null)
             {

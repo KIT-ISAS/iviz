@@ -42,9 +42,7 @@ namespace Iviz.App.Listeners
                 string id = controlMsg.Name;
                 if (!controls.TryGetValue(id, out InteractiveMarkerControlObject control))
                 {
-                    control = ResourcePool.
-                        GetOrCreate(Resource.Listeners.InteractiveMarkerControlObject, transform).
-                        GetComponent<InteractiveMarkerControlObject>();
+                    control = ResourcePool.GetOrCreate<InteractiveMarkerControlObject>(Resource.Listeners.InteractiveMarkerControlObject, transform);
                     control.Parent = TFListener.ListenersFrame;
                     control.Clicked += (pose, point, button) => Clicked?.Invoke(id, pose, point, button);
                     control.transform.SetParentLocal(transform);

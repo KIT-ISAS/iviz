@@ -120,10 +120,12 @@ namespace Iviz.App
 
         Robot GetRobotWithName(string name)
         {
-            return DisplayListPanel.DisplayDatas.
+            return (Robot)
+                DisplayListPanel.DisplayDatas.
                 Where(x => x.Module == Resource.Module.Robot).
-                Select(x => x as RobotDisplayData).
-                FirstOrDefault(x => x.RobotName == name)?.Robot;
+                Cast<RobotDisplayData>().
+                FirstOrDefault(x => x.RobotName == name)?.
+                Controller;
         }
 
         /*

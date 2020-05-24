@@ -54,11 +54,20 @@ namespace Iviz.App
             {
                 return;
             }
-            value = new Vector3(
-                float.Parse(inputX.Value, UnityUtils.Culture),
-                float.Parse(inputY.Value, UnityUtils.Culture),
-                float.Parse(inputZ.Value, UnityUtils.Culture)
-                );
+            Vector3 v;
+            if (!float.TryParse(inputX.Value, out v.x))
+            {
+                v.x = 0;
+            }
+            if (!float.TryParse(inputY.Value, out v.y))
+            {
+                v.y = 0;
+            }
+            if (!float.TryParse(inputZ.Value, out v.z))
+            {
+                v.z = 0;
+            }
+            value = v;
             ValueChanged?.Invoke(value);
         }
 

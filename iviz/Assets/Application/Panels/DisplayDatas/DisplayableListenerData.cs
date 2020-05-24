@@ -8,20 +8,13 @@ namespace Iviz.App
         ListenerPanelContents ListenerPanel => (ListenerPanelContents)Panel;
 
         protected abstract TopicListener Listener { get; }
+        public override IController Controller => Listener;
 
         protected DisplayableListenerData(DisplayListPanel displayList, string topic, string type) :
             base(displayList, topic, type)
         {
             DisplayListPanel.RegisterDisplayedTopic(Topic);
         }
-
-        /*
-        public override void Start()
-        {
-            base.Start();
-            DisplayListPanel.RegisterDisplayedTopic(Topic);
-        }
-        */
 
         public override void UpdatePanel()
         {

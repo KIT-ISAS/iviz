@@ -9,6 +9,7 @@ using Iviz.RoslibSharp;
 using System;
 using Iviz.App.Listeners;
 using Iviz.Resources;
+using System.Collections.ObjectModel;
 
 namespace Iviz.App
 {
@@ -30,23 +31,26 @@ namespace Iviz.App
         [DataMember] public bool AttachToTF { get; set; } = false;
     }
 
-    public class Robot : ClickableDisplayNode
+    public class Robot : MonoBehaviour, IController
     {
-        BoxCollider robotCollider;
-        public override Bounds Bounds => robotCollider != null ? new Bounds(robotCollider.center, robotCollider.size) : new Bounds();
-        public override Bounds WorldBounds => robotCollider?.bounds ?? new Bounds();
+        ObjectClickableNode node;
+
+        //BoxCollider robotCollider;
+        //public override Bounds Bounds => robotCollider != null ? new Bounds(robotCollider.center, robotCollider.size) : new Bounds();
+        //public override Bounds WorldBounds => robotCollider?.bounds ?? new Bounds();
 
         public GameObject RobotObject { get; private set; }
         public GameObject BaseLink { get; private set; }
 
         RobotInfo robotInfo;
-        BoxCollider boxCollider;
+        public event Action Stopped;
+        //BoxCollider boxCollider;
 
         readonly Dictionary<GameObject, GameObject> originalLinkParents = new Dictionary<GameObject, GameObject>();
         readonly Dictionary<GameObject, Pose> originalLinkPoses = new Dictionary<GameObject, Pose>();
         readonly Dictionary<string, JointInfo> jointWriters = new Dictionary<string, JointInfo>();
 
-        public IReadOnlyDictionary<string, JointInfo> JointWriters => jointWriters;
+        public IReadOnlyDictionary<string, JointInfo> JointWriters => new ReadOnlyDictionary<string, JointInfo>(jointWriters);
 
         readonly RobotConfiguration config = new RobotConfiguration();
         public RobotConfiguration Config
@@ -106,7 +110,7 @@ namespace Iviz.App
                 }
                 if (BaseLink != null)
                 {
-                    SetParent(Decorate(BaseLink.name));
+                    node.SetParent(Decorate(BaseLink.name));
                 }
             }
         }
@@ -128,7 +132,7 @@ namespace Iviz.App
                 }
                 if (BaseLink != null)
                 {
-                    SetParent(Decorate(BaseLink.name));
+                    node.SetParent(Decorate(BaseLink.name));
                 }
             }
         }
@@ -161,8 +165,8 @@ namespace Iviz.App
                     RobotObject.transform.SetParentLocal(TFListener.BaseFrame.transform);
                     originalLinkParents.ForEach(x =>
                     {
-                        TFFrame frame = TFListener.GetOrCreateFrame(Decorate(x.Key.name), this);
-                        TFFrame parentFrame = TFListener.GetOrCreateFrame(Decorate(x.Value.name), this);
+                        TFFrame frame = TFListener.GetOrCreateFrame(Decorate(x.Key.name), node);
+                        TFFrame parentFrame = TFListener.GetOrCreateFrame(Decorate(x.Value.name), node);
 
                         frame.Parent = null;
                         parentFrame.Parent = null;
@@ -172,8 +176,8 @@ namespace Iviz.App
                     });
                     originalLinkParents.ForEach(x =>
                     {
-                        TFFrame frame = TFListener.GetOrCreateFrame(Decorate(x.Key.name), this);
-                        TFFrame parentFrame = TFListener.GetOrCreateFrame(Decorate(x.Value.name), this);
+                        TFFrame frame = TFListener.GetOrCreateFrame(Decorate(x.Key.name), node);
+                        TFFrame parentFrame = TFListener.GetOrCreateFrame(Decorate(x.Value.name), node);
                         frame.Parent = parentFrame;
                     });
                 }
@@ -183,37 +187,38 @@ namespace Iviz.App
                     {
                         if (TFListener.TryGetFrame(Decorate(x.Key.name), out TFFrame frame))
                         {
-                            frame.RemoveListener(this);
+                            frame.RemoveListener(node);
                         }
                         if (TFListener.TryGetFrame(Decorate(x.Value.name), out TFFrame parentFrame))
                         {
-                            parentFrame.RemoveListener(this);
+                            parentFrame.RemoveListener(node);
                         }
 
-                        x.Key.transform.SetParentLocal(x.Value == null ? transform : x.Value.transform);
+                        x.Key.transform.SetParentLocal(x.Value == null ? node.transform : x.Value.transform);
                         x.Key.transform.SetLocalPose(originalLinkPoses[x.Key]);
                     });
-                    Parent = null;
-                    RobotObject.transform.SetParentLocal(transform);
+                    node.Parent = null;
+                    RobotObject.transform.SetParentLocal(node.transform);
                     jointWriters.Values.ForEach(x => x.Reset());
                 }
                 if (BaseLink == null)
                 {
-                    Parent = TFListener.BaseFrame;
+                    node.Parent = TFListener.BaseFrame;
                 }
                 else
                 {
-                    SetParent(Decorate(BaseLink.name));
+                    node.SetParent(Decorate(BaseLink.name));
                 }
                 config.AttachToTF = value;
             }
         }
 
-        
+
         void Awake()
         {
+            node = ObjectClickableNode.Instantiate("node");
             gameObject.layer = Resource.ClickableLayer;
-            boxCollider = GetComponent<BoxCollider>();
+            //boxCollider = GetComponent<BoxCollider>();
 
             Config = new RobotConfiguration();
         }
@@ -236,13 +241,14 @@ namespace Iviz.App
 
             Name = Name; // update name;
 
-            robotCollider = RobotObject.GetComponent<BoxCollider>();
-            boxCollider.size = robotCollider.size;
-            boxCollider.center = robotCollider.center;
+            node.Target = RobotObject;
+            //robotCollider = RobotObject.GetComponent<BoxCollider>();
+            //boxCollider.size = robotCollider.size;
+            //boxCollider.center = robotCollider.center;
 
-            if (Selected)
+            if (node.Selected)
             {
-                Selected = true; // update bounds
+                node.Selected = true; // update bounds
             }
 
             robotInfo = RobotObject.GetComponent<RobotInfo>(); // check if recycled
@@ -343,11 +349,12 @@ namespace Iviz.App
             });
         }
 
-        public override void Stop()
+        public void Stop()
         {
-            base.Stop();
+            node.Stop();
             DisposeRobot();
             Config = new RobotConfiguration();
+            Stopped?.Invoke();
         }
 
         void DisposeRobot()
@@ -363,7 +370,8 @@ namespace Iviz.App
             }
             config.RobotResource = null;
             RobotObject = null;
-            robotCollider = null;
+            node.Target = null;
+            //robotCollider = null;
             if (robotInfo != null)
             {
                 robotInfo.owner = null;

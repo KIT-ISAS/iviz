@@ -15,12 +15,6 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public interface IConfiguration
-    {
-        Guid Id { get; }
-        Resource.Module Module { get; }
-        bool Visible { get; set; }
-    }
 
     [DataContract]
     public class ConnectionConfiguration
@@ -49,6 +43,7 @@ namespace Iviz.App
         [DataMember] public List<MarkerConfiguration> Markers { get; set; } = new List<MarkerConfiguration>();
         [DataMember] public List<InteractiveMarkerConfiguration> InteractiveMarkers { get; set; } = new List<InteractiveMarkerConfiguration>();
         [DataMember] public List<DepthImageProjectorConfiguration> DepthImageProjectors { get; set; } = new List<DepthImageProjectorConfiguration>();
+        [DataMember] public ARConfiguration AR { get; set; } = null;
 
         public List<IReadOnlyList<IConfiguration>> CreateListOfEntries() => new List<IReadOnlyList<IConfiguration>>
         {
@@ -111,7 +106,7 @@ namespace Iviz.App
         public string Address { get; private set; }
 
         readonly List<DisplayData> displayDatas = new List<DisplayData>();
-        public IReadOnlyList<DisplayData> DisplayDatas => displayDatas;
+        public ReadOnlyCollection<DisplayData> DisplayDatas => new ReadOnlyCollection<DisplayData>(displayDatas);
 
         DialogData availableDisplays;
         DialogData availableTopics;
@@ -140,7 +135,7 @@ namespace Iviz.App
 
             buttonHeight = Resource.Widgets.DisplayButton.GameObject.GetComponent<RectTransform>().rect.height;
 
-            CreateDisplay(Resource.Module.TF, "/tf");
+            CreateDisplay(Resource.Module.TF, TFListener.DefaultTopic);
             CreateDisplay(Resource.Module.Grid);
 
             availableDisplays = CreateDialog<AddDisplayDialogData>();

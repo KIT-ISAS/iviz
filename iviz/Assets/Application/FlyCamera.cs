@@ -55,7 +55,7 @@ namespace Iviz.App
                 false;
 #endif
 
-        public ClickableDisplayNode SelectedDisplay { get; private set; }
+        public ClickableNode SelectedDisplay { get; private set; }
 
         public bool PointerDown { get; private set; }
 
@@ -72,11 +72,11 @@ namespace Iviz.App
         void Start()
         {
             mainCamera = GetComponent<Camera>();
-            namedBoundary = ResourcePool.GetOrCreate(Resource.Markers.NamedBoundary).GetComponent<NamedBoundary>();
+            namedBoundary = ResourcePool.GetOrCreate<NamedBoundary>(Resource.Markers.NamedBoundary);
             StartOrbiting();
         }
 
-        public void Unselect(ClickableDisplayNode display)
+        public void Unselect(ClickableNode display)
         {
             if (SelectedDisplay != display)
             {
@@ -89,7 +89,7 @@ namespace Iviz.App
             //namedBoundary.transform.SetParentLocal(transform);
         }
 
-        public void Select(ClickableDisplayNode display)
+        public void Select(ClickableNode display)
         {
             if (SelectedDisplay == display)
             {
@@ -108,7 +108,7 @@ namespace Iviz.App
             }
         }
 
-        public void ShowBoundary(ClickableDisplayNode display, Bounds bounds, string name, Transform parent)
+        public void ShowBoundary(ClickableNode display, Bounds bounds, string name, Transform parent)
         {
             if (display != SelectedDisplay)
             {

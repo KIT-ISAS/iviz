@@ -29,12 +29,14 @@ namespace Iviz.App.Listeners
 
     public class TFListener : TopicListener
     {
+        public const string DefaultTopic = "/tf";
+        public const string BaseFrameId = "map";
+
         public static TFListener Instance { get; private set; }
         public static Camera MainCamera => Instance.mainCamera;
         public static FlyCamera GuiManager => Instance.guiManager;
 
         public static TFFrame BaseFrame { get; private set; }
-
         public static TFFrame ListenersFrame { get; private set; }
 
         Camera mainCamera;
@@ -43,6 +45,9 @@ namespace Iviz.App.Listeners
 
         readonly Dictionary<string, TFFrame> frames = new Dictionary<string, TFFrame>();
 
+        RosSender<tfMessage_v2> publisher;
+        public static RosSender<tfMessage_v2> Publisher =>
+            Instance.publisher ?? (Instance.publisher = new RosSender<tfMessage_v2>(DefaultTopic));
 
         readonly TFConfiguration config = new TFConfiguration();
         public TFConfiguration Config
@@ -142,7 +147,7 @@ namespace Iviz.App.Listeners
 
             Config = new TFConfiguration();
 
-            BaseFrame = Add(CreateFrameObject("map", gameObject));
+            BaseFrame = Add(CreateFrameObject(BaseFrameId, gameObject));
             BaseFrame.AddListener(null);
 
             ListenersFrame = Add(CreateFrameObject("_displays_", gameObject));
@@ -290,6 +295,29 @@ namespace Iviz.App.Listeners
             GuiManager.Unselect(frame);
             frame.Parent = null;
             ResourcePool.Dispose(Resource.Markers.TFFrame, frame.gameObject);
+        }
+
+        public static void Publish(tfMessage_v2 msg)
+        {
+            Publisher.Publish(msg);
+        }
+
+        static uint tfSeq = 0;
+        public static void Publish(string parentFrame, string childFrame, in UnityEngine.Pose unityPose)
+        {
+            tfMessage_v2 msg = new tfMessage_v2
+            (
+                Transforms: new[]
+                {
+                    new TransformStamped
+                    (
+                        Header: RosUtils.CreateHeader(tfSeq++, parentFrame ?? BaseFrameId),
+                        ChildFrameId: childFrame ?? "",
+                        Transform: unityPose.Unity2RosTransform()
+                    )
+                }
+            );
+            Publish(msg);
         }
     }
 }

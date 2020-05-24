@@ -41,28 +41,6 @@ namespace Iviz.App
             listener.Config = configuration;
         }
 
-        /*
-        public override DisplayData Initialize(DisplayListPanel displayList, string topic, string type)
-        {
-            base.Initialize(displayList, topic, type);
-            GameObject listenerObject = ResourcePool.GetOrCreate(Resource.Listeners.TF);
-            listenerObject.name = "TF";
-
-            listener = listenerObject.GetComponent<TFListener>();
-            listener.Config.Topic = Topic;
-
-            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.TF) as TFPanelContents;
-
-            return this;
-        }
-
-        public override void Start()
-        {
-            base.Start();
-            listener.StartListening();
-        }
-        */
-
         public override void SetupPanel()
         {
             panel.ShowAxes.Value = listener.AxisVisible;
@@ -99,20 +77,6 @@ namespace Iviz.App
                 listener.ShowAllFrames = f;
             };
         }
-
-        /*
-        public override DisplayData Deserialize(JToken j)
-        {
-            listener.Config = j.ToObject<TFConfiguration>();
-            Topic = listener.Config.Topic;
-            return this;
-        }
-
-        public override JToken Serialize()
-        {
-            return JToken.FromObject(listener.Config);
-        }
-        */
 
         public override void AddToState(StateConfiguration config)
         {

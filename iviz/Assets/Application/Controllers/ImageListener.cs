@@ -28,7 +28,7 @@ namespace Iviz.App.Listeners
     public class ImageListener : TopicListener
     {
         ImageTexture texture;
-        SimpleClickableDisplayNode node;
+        DisplayClickableNode node;
         ImageResource marker;
 
         public ImageTexture ImageTexture => texture;
@@ -130,8 +130,8 @@ namespace Iviz.App.Listeners
         void Awake()
         {
             texture = new ImageTexture();
-            node = SimpleClickableDisplayNode.Instantiate("ImageNode");
-            marker = ResourcePool.GetOrCreate(Resource.Markers.Image).GetComponent<ImageResource>();
+            node = DisplayClickableNode.Instantiate("ImageNode");
+            marker = ResourcePool.GetOrCreate<ImageResource>(Resource.Markers.Image);
             marker.Texture = texture;
             node.Target = marker;
 

@@ -38,12 +38,12 @@ namespace Iviz.App
             readonly GameObject buttonObject;
             readonly Text text;
             readonly Button button;
-            public readonly float buttonHeight;
+            public float ButtonHeight { get; }
 
             public ItemEntry(int index, GameObject parent, Action<int, string> callback)
             {
                 buttonObject = ResourcePool.GetOrCreate(Resource.Widgets.TopicsButton, parent.transform, false);
-                buttonHeight = ((RectTransform)buttonObject.transform).rect.height;
+                ButtonHeight = ((RectTransform)buttonObject.transform).rect.height;
 
                 text = buttonObject.GetComponentInChildren<Text>();
                 button = buttonObject.GetComponentInChildren<Button>();
@@ -65,7 +65,7 @@ namespace Iviz.App
                         throw new ArgumentOutOfRangeException(nameof(value));
                     }
                     index = value;
-                    float y = yOffset + index * (yOffset + buttonHeight);
+                    float y = yOffset + index * (yOffset + ButtonHeight);
                     ((RectTransform)buttonObject.transform).anchoredPosition = new Vector2(0, -y);
                 }
             }
@@ -74,6 +74,12 @@ namespace Iviz.App
             {
                 get => text.text;
                 set => text.text = value;
+            }
+
+            public bool Interactable
+            {
+                get => button.interactable;
+                set => button.interactable = value;
             }
 
             public void Invalidate()
@@ -126,10 +132,9 @@ namespace Iviz.App
             }
         }
 
-        public string this[int i]
+        public ItemEntry this[int i]
         {
-            get => items[i].Text;
-            set => items[i].Text = value;
+            get => items[i];
         }
 
         public bool Empty => items.Count == 0;
@@ -193,7 +198,7 @@ namespace Iviz.App
             rectTransform.sizeDelta =
                 (items.Count == 0) ?
                 new Vector2(0, 2 * yOffset) :
-                new Vector2(0, 3 * yOffset + (items.Count  + 1) * items[0].buttonHeight);
+                new Vector2(0, 3 * yOffset + (items.Count  + 1) * items[0].ButtonHeight);
 
             emptyText.gameObject.SetActive(items.Count == 0);
         }

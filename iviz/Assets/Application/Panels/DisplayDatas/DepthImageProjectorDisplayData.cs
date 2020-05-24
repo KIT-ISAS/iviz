@@ -15,8 +15,8 @@ namespace Iviz.App
 
         public override DataPanelContents Panel => panel;
         public override Resource.Module Module => Resource.Module.DepthImageProjector;
-
         public override IConfiguration Configuration  => display.Config;
+        public override IController Controller => display;
 
         readonly List<string> depthImageCandidates = new List<string>();
         readonly List<string> colorImageCandidates = new List<string>();
@@ -24,8 +24,7 @@ namespace Iviz.App
         public DepthImageProjectorDisplayData(DisplayDataConstructor constructor) :
         base(constructor.DisplayList, constructor.Topic, constructor.Type)
         {
-            GameObject displayObject = ResourcePool.GetOrCreate(Resource.Listeners.DepthImageProjector);
-            display = displayObject.GetComponent<DepthImageProjector>();
+            display = ResourcePool.GetOrCreate<DepthImageProjector>(Resource.Listeners.DepthImageProjector);
 
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.DepthImageProjector) as DepthImageProjectorPanelContents;
 

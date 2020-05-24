@@ -56,8 +56,8 @@ namespace Iviz.App.Displays
         }
         */
 
-        ClickableDisplayNode target;
-        public ClickableDisplayNode Target
+        ClickableNode target;
+        public ClickableNode Target
         {
             get => target;
             set

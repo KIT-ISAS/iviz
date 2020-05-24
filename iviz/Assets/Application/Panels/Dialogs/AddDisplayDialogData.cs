@@ -30,6 +30,9 @@ namespace Iviz.App
             itemList.Items = Displays.Select(x => x.Item1);
             itemList.ItemClicked += OnItemClicked;
             itemList.CloseClicked += OnCloseClicked;
+
+            bool hasAR = DisplayListPanel.DisplayDatas.Any(x => x.Module == Resource.Module.AR);
+            itemList[3].Interactable = !hasAR;
         }
 
         void OnCloseClicked()

@@ -21,7 +21,7 @@ namespace Iviz.App.Displays
         [DataMember] public float FovAngle { get; set; } = 1.0f * Mathf.Rad2Deg;
     }
 
-    public class DepthImageProjector : MonoBehaviour, IDisplay
+    public class DepthImageProjector : MonoBehaviour, IDisplay, IController
     {
         //const string MaterialResourcePath = "Displays/DepthImage Material";
 

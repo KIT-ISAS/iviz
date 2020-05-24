@@ -1,20 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using Iviz.Msgs;
 using Iviz.RoslibSharp;
 using UnityEngine;
 
 namespace Iviz.App
 {
+    [DataContract]
     public class RosListenerStats : JsonToString
     {
-        public int TotalMessages { get; }
-        public float JitterMin { get; }
-        public float JitterMax { get; }
-        public float JitterMean { get; }
-        public float MessagesPerSecond { get; }
-        public int MessagesInQueue { get; }
+        [DataMember] public int TotalMessages { get; }
+        [DataMember] public float JitterMin { get; }
+        [DataMember] public float JitterMax { get; }
+        [DataMember] public float JitterMean { get; }
+        [DataMember] public float MessagesPerSecond { get; }
+        [DataMember] public int MessagesInQueue { get; }
 
         public RosListenerStats() { }
 
@@ -51,9 +53,9 @@ namespace Iviz.App
     {
         readonly Action<T> subscriptionHandler;
         readonly List<float> timesOfArrival = new List<float>();
-        int totalMsgCounter;
-        int msgInQueue;
 
+        public int TotalMsgCounter { get; private set; }
+        public int MsgsInQueue { get; private set; }
         public int MaxQueueSize { get; set; } = 5;
 
         public RosListener(string topic, Action<T> handler) :
@@ -67,15 +69,15 @@ namespace Iviz.App
 
         public void EnqueueMessage(T t)
         {
-            if (msgInQueue >= MaxQueueSize)
+            if (MsgsInQueue >= MaxQueueSize)
             {
                 return;
             }
-            msgInQueue++;
+            MsgsInQueue++;
             GameThread.RunOnce(() =>
             {
-                totalMsgCounter++;
-                msgInQueue--;
+                TotalMsgCounter++;
+                MsgsInQueue--;
                 timesOfArrival.Add(Time.time);
                 try
                 {
@@ -83,7 +85,7 @@ namespace Iviz.App
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError(e);
+                    Logger.Error(e);
                 }
             });
         }
@@ -98,6 +100,7 @@ namespace Iviz.App
         {
             if (!timesOfArrival.Any())
             {
+                Stats = new RosListenerStats();
                 return;
             }
             else
@@ -113,12 +116,12 @@ namespace Iviz.App
                 }
 
                 Stats = new RosListenerStats(
-                    totalMsgCounter,
+                    TotalMsgCounter,
                     jitterMin,
                     jitterMax,
                     timesOfArrival.Count == 0 ? 0 : (timesOfArrival.Last() - timesOfArrival.First()) / timesOfArrival.Count(),
                     timesOfArrival.Count,
-                    msgInQueue
+                    MsgsInQueue
                 );
                 timesOfArrival.Clear();
             }

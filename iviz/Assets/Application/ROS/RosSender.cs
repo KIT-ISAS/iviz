@@ -1,6 +1,4 @@
 ﻿using Iviz.Msgs;
-using UnityEngine;
-
 
 namespace Iviz.App
 {
@@ -12,9 +10,8 @@ namespace Iviz.App
 
         protected RosSender(string topic, string type)
         {
-            Topic = topic;
-            Type = type;
-
+            Topic = topic ?? throw new System.ArgumentNullException(nameof(topic));
+            Type = type ?? throw new System.ArgumentNullException(nameof(type));
             //Debug.Log("RosListener: Requesting advertisement for topic " + Topic);
         }
 

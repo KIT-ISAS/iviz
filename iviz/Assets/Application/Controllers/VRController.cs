@@ -1,4 +1,4 @@
-﻿#define USING_VR
+﻿//#define USING_VR
 
 using UnityEngine;
 using Iviz.Msgs.SensorMsgs;
@@ -18,7 +18,7 @@ using Valve.VR.InteractionSystem;
 
 namespace Iviz.App
 {
-    public class ControllerManager : MonoBehaviour
+    public class VRController : MonoBehaviour
     {
 #if USING_VR
         public GameObject LeftController;
@@ -38,14 +38,13 @@ namespace Iviz.App
         public string RightControllerTopic { get; } = "/holodeck/vive_right";
         public string RightShoulderMarkerTopic { get; } = "/holodeck/marker_rs";
         public string SmhiHeadTopic { get; } = "/smhi_interface/headpose";
-        public string TfTopic { get; } = "/tf";
+        public string TfTopic { get; } = TFListener.DefaultTopic;
         public string LeftFrameName { get; } = "holodeck/left_controller";
         public string RightFrameName { get; } = "holodeck/right_controller";
         public string RightShoulderMarkerName { get; } = "holodeck/marker_rs";
         public string HeadFrameName { get; } = "holodeck/head";
 
         RosSender<Joy> rosSenderLeft, rosSenderRight;
-        RosSender<TFMessage> rosSenderTF;
         RosSender<Msgs.GeometryMsgs.PoseStamped> rosSenderHead;
 
         public InteractiveMarkerListener interactiveMarkerListener;
@@ -73,7 +72,6 @@ namespace Iviz.App
 
             rosSenderLeft = new RosSender<Joy>(LeftControllerTopic);
             rosSenderRight = new RosSender<Joy>(RightControllerTopic);
-            rosSenderTF = new RosSender<TFMessage>(TfTopic);
             rosSenderHead = new RosSender<Msgs.GeometryMsgs.PoseStamped>(SmhiHeadTopic);
 
             //ConnectionManager.Instance.Advertise<Joy>(LeftControllerTopic);
@@ -290,7 +288,7 @@ namespace Iviz.App
             joySeq++;
 
             TFMessage tFMsg = CreateTfMessage();
-            rosSenderTF.Publish(tFMsg);
+            TFListener.Publisher.Publish(tFMsg);
             //}
 
             Msgs.GeometryMsgs.PoseStamped pose = new Msgs.GeometryMsgs.PoseStamped

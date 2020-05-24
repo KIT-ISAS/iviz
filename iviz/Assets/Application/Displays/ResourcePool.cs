@@ -17,6 +17,11 @@ namespace Iviz.App
             return Instance.GetImpl(resource, parent, enable);
         }
 
+        public static T GetOrCreate<T>(Resource.Info resource, Transform parent = null, bool enable = true) where T : MonoBehaviour
+        {
+            return GetOrCreate(resource, parent, enable).GetComponent<T>();
+        }
+
         public static void Dispose(Resource.Info resource, GameObject instance)
         {
             if (Instance != null)

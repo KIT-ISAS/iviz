@@ -8,7 +8,7 @@ using Iviz.Resources;
 
 namespace Iviz.App.Displays
 {
-    public sealed class TFFrame : ClickableDisplayNode, IRecyclable
+    public sealed class TFFrame : ClickableNode, IRecyclable
     {
         public const int Layer = 9;
         static readonly string[] names = { "Axis-X", "Axis-Y", "Axis-Z" };
@@ -90,7 +90,7 @@ namespace Iviz.App.Displays
 
         public override Bounds Bounds => new Bounds(boxCollider.center, boxCollider.size);
         public override Bounds WorldBounds => boxCollider.bounds;
-        
+
 
         public void AddListener(DisplayNode display)
         {
