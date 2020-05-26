@@ -182,6 +182,7 @@ namespace Iviz.App
             };
             connectionData.ConnectClicked += () =>
             {
+                ConnectionManager.Connection.Disconnect();
                 KeepReconnecting = true;
             };
             connectionData.StopClicked += () =>

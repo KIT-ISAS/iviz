@@ -41,6 +41,17 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
+            panel.WorldScale.Value = display.WorldScale;
+            panel.Origin.Value = display.Origin;
+
+            panel.WorldScale.ValueChanged += f =>
+            {
+                display.WorldScale = f;
+            };
+            panel.Origin.ValueChanged += f =>
+            {
+                display.Origin = f;
+            };
             panel.CloseButton.Clicked += () =>
             {
                 DataPanelManager.HideSelectedPanel();

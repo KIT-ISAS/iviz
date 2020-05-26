@@ -25,7 +25,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 906031459955196090}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10.877455, y: 7.5678825, z: 6.5306797}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 6019251946498178308}
@@ -75,7 +75,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6019251946498178307}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -10.877455, y: -7.5678825, z: -6.5306797}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2586147710159433609}
@@ -116,6 +116,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6019251946659006208}
   - component: {fileID: 6019251946659006209}
+  - component: {fileID: 2073293449537332265}
   m_Layer: 0
   m_Name: AR Session Origin
   m_TagString: Untagged
@@ -131,7 +132,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6019251946659006334}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -10.877455, y: -7.5678825, z: -6.5306797}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 6019251948242916437}
@@ -151,6 +152,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Camera: {fileID: 6019251948242916433}
+--- !u!114 &2073293449537332265
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6019251946659006334}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1760703bbd54c04488a8d10600262ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_PlanePrefab: {fileID: 666795433288981299, guid: 75a5cdd81f9844f6b9d69890de63b125,
+    type: 3}
+  m_DetectionMode: -1
 --- !u!1 &6019251948242916430
 GameObject:
   m_ObjectHideFlags: 0
@@ -164,6 +180,7 @@ GameObject:
   - component: {fileID: 6019251948242916434}
   - component: {fileID: 6019251948242916435}
   - component: {fileID: 6019251948242916432}
+  - component: {fileID: 851342195858701130}
   m_Layer: 0
   m_Name: AR Camera
   m_TagString: Untagged
@@ -208,7 +225,7 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.1
+  near clip plane: 0.05
   far clip plane: 20
   field of view: 60
   orthographic: 0
@@ -276,3 +293,19 @@ MonoBehaviour:
   m_CustomMaterial: {fileID: 0}
   m_UseCustomRendererAsset: 0
   m_CustomRendererAsset: {fileID: 0}
+--- !u!114 &851342195858701130
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6019251948242916430}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c49b4cc203aa6414fae5c798d1d0e7d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EventMask:
+    serializedVersion: 2
+    m_Bits: 768
+  m_MaxRayIntersections: 0

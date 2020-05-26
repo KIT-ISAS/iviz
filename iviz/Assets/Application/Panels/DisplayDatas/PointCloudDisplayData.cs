@@ -47,8 +47,8 @@ namespace Iviz.App
             panel.HideButton.State = listener.Visible;
 
             panel.ForceMinMax.Value = listener.ForceMinMax;
-            panel.MinIntensity.Value = listener.MinIntensity.ToString(UnityUtils.Culture);
-            panel.MaxIntensity.Value = listener.MaxIntensity.ToString(UnityUtils.Culture);
+            panel.MinIntensity.Value = listener.MinIntensity;
+            panel.MaxIntensity.Value = listener.MaxIntensity;
             panel.MinIntensity.Interactable = listener.ForceMinMax;
             panel.MaxIntensity.Interactable = listener.ForceMinMax;
 
@@ -83,11 +83,11 @@ namespace Iviz.App
             };
             panel.MinIntensity.ValueChanged += f =>
             {
-                listener.MinIntensity = float.Parse(f);
+                listener.MinIntensity = f;
             };
             panel.MaxIntensity.ValueChanged += f =>
             {
-                listener.MaxIntensity = float.Parse(f);
+                listener.MaxIntensity = f;
             };
         }
 

@@ -103,6 +103,7 @@ namespace Iviz.Resources
             public Material Lit { get; }
             public Material SimpleLit { get; }
             public Material TexturedLit { get; }
+            public Material TransparentLit { get; }
             public Material ImagePreview { get; }
             public Material PointCloud { get; }
             public Material MeshList { get; }
@@ -115,6 +116,7 @@ namespace Iviz.Resources
                 SimpleLit = Load("Materials/SimpleWhite");
                 Lit = Load("Materials/White");
                 TexturedLit = Load("Materials/Textured Lit");
+                TransparentLit = Load("Materials/Transparent Lit");
                 ImagePreview = Load("Materials/ImagePreview");
                 PointCloud = Load("Materials/PointCloud Material");
                 MeshList = Load("Materials/MeshList Material");
@@ -272,6 +274,7 @@ namespace Iviz.Resources
             public Info SliderWidget { get; }
             public Info InputWidget { get; }
             public Info ShortInputWidget { get; }
+            public Info NumberInputWidget { get; }
             public Info Dropdown { get; }
             public Info ColorPicker { get; }
             public Info ImagePreview { get; }
@@ -294,6 +297,7 @@ namespace Iviz.Resources
                 SliderWidget = new Info("Widgets/Slider");
                 InputWidget = new Info("Widgets/Input Field");
                 ShortInputWidget = new Info("Widgets/Short Input Field");
+                NumberInputWidget = new Info("Widgets/Number Input Field");
                 ColorPicker = new Info("Widgets/ColorPicker");
                 ImagePreview = new Info("Widgets/Image Preview");
                 Dropdown = new Info("Widgets/Dropdown");

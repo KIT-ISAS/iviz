@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Iviz.Resources;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -17,6 +18,7 @@ namespace Iviz.Displays
             {
                 color = value;
                 mainRenderer.SetPropertyColor(color);
+                mainRenderer.material = (color.a > 0.99f) ? Resource.Materials.Lit : Resource.Materials.TransparentLit;
             }
         }
 
