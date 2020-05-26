@@ -73,9 +73,10 @@ namespace Iviz.MsgsGen
             "geometry_msgs/Point32",
             "geometry_msgs/Quaternion",
             "geometry_msgs/Pose",
-            //"geometry_msgs/Transform",
+            "geometry_msgs/Transform",
             "std_msgs/ColorRGBA",
-            //"mesh_msgs/TriangleIndices",
+            "mesh_msgs/TriangleIndices",
+            "mesh_msgs/MeshMaterial",
         };
 
         static readonly HashSet<string> forceSkip = new HashSet<string>
@@ -346,7 +347,18 @@ namespace Iviz.MsgsGen
                 lines.Add("{");
                 foreach (var variable in variables)
                 {
-                    lines.Add("    this." + variable.fieldName + " = " + variable.fieldName + ";");
+                    if (variable.arraySize > 0 && forceStruct)
+                    {
+                        lines.Add("    if (" + variable.fieldName + " is null) throw new System.ArgumentNullException(nameof(" + variable.fieldName + "));");
+                        lines.Add("    for (int i = 0; i < " + variable.arraySize + "; i++)");
+                        lines.Add("    {");
+                        lines.Add("        this." + variable.fieldName + "[i] = " + variable.fieldName + "[i];");
+                        lines.Add("    }");
+                    }
+                    else
+                    {
+                        lines.Add("    this." + variable.fieldName + " = " + variable.fieldName + ";");
+                    }
                 }
                 lines.Add("}");
                 lines.Add("");
@@ -357,7 +369,8 @@ namespace Iviz.MsgsGen
             lines.Add("{");
             if (forceStruct)
             {
-                lines.Add("    this = b.Deserialize<" + name + ">();");
+                //lines.Add("    this = b.Deserialize<" + name + ">();");
+                lines.Add("    b.Deserialize(out this);");
             }
             else
             {
@@ -511,8 +524,11 @@ namespace Iviz.MsgsGen
             {
                 if (variable.arraySize > 0)
                 {
-                    lines.Add("    if (" + variable.fieldName + " is null) throw new System.NullReferenceException();");
-                    lines.Add("    if (" + variable.fieldName + ".Length != " + variable.arraySize + ") throw new System.IndexOutOfRangeException();");
+                    if (!forceStruct)
+                    {
+                        lines.Add("    if (" + variable.fieldName + " is null) throw new System.NullReferenceException();");
+                        lines.Add("    if (" + variable.fieldName + ".Length != " + variable.arraySize + ") throw new System.IndexOutOfRangeException();");
+                    }
                 }
                 else if (variable.arraySize == -1 &&
                   ((BuiltInTypes.Contains(variable.rosClassName) && variable.rosClassName != "string") ||
@@ -632,7 +648,14 @@ namespace Iviz.MsgsGen
             if (forceStruct)
             {
                 lines.Add("[StructLayout(LayoutKind.Sequential)]");
-                lines.Add("public struct " + name + " : IMessage");
+                if (variables.Any(x => x.arraySize > 0))
+                {
+                    lines.Add("public unsafe struct " + name + " : IMessage");
+                }
+                else
+                {
+                    lines.Add("public struct " + name + " : IMessage");
+                }
             }
             else
             {

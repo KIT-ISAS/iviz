@@ -23,7 +23,7 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor with buffer. </summary>
         internal Point(Buffer b)
         {
-            this = b.Deserialize<Point>();
+            b.Deserialize(out this);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)

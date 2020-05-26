@@ -1,19 +1,16 @@
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract (Name = "mesh_msgs/MeshMaterial")]
-    public sealed class MeshMaterial : IMessage
+    [StructLayout(LayoutKind.Sequential)]
+    public struct MeshMaterial : IMessage
     {
         [DataMember (Name = "texture_index")] public uint TextureIndex { get; set; }
         [DataMember (Name = "color")] public StdMsgs.ColorRGBA Color { get; set; }
         [DataMember (Name = "has_texture")] public bool HasTexture { get; set; }
     
-        /// <summary> Constructor for empty message. </summary>
-        public MeshMaterial()
-        {
-        }
-        
         /// <summary> Explicit constructor. </summary>
         public MeshMaterial(uint TextureIndex, StdMsgs.ColorRGBA Color, bool HasTexture)
         {
@@ -25,9 +22,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// <summary> Constructor with buffer. </summary>
         internal MeshMaterial(Buffer b)
         {
-            TextureIndex = b.Deserialize<uint>();
-            Color = new StdMsgs.ColorRGBA(b);
-            HasTexture = b.Deserialize<bool>();
+            b.Deserialize(out this);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -38,9 +33,7 @@ namespace Iviz.Msgs.MeshMsgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.TextureIndex);
-            b.Serialize(Color);
-            b.Serialize(this.HasTexture);
+            b.Serialize(this);
         }
         
         public void Validate()

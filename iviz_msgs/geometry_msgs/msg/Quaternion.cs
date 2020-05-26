@@ -25,7 +25,7 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor with buffer. </summary>
         internal Quaternion(Buffer b)
         {
-            this = b.Deserialize<Quaternion>();
+            b.Deserialize(out this);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)

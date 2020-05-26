@@ -31,11 +31,7 @@ namespace Iviz.Msgs.MeshMsgs
         {
             Vertices = b.DeserializeStructArray<GeometryMsgs.Point>();
             VertexNormals = b.DeserializeStructArray<GeometryMsgs.Point>();
-            Faces = b.DeserializeArray<MeshMsgs.TriangleIndices>();
-            for (int i = 0; i < this.Faces.Length; i++)
-            {
-                Faces[i] = new MeshMsgs.TriangleIndices(b);
-            }
+            Faces = b.DeserializeStructArray<MeshMsgs.TriangleIndices>();
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -48,7 +44,7 @@ namespace Iviz.Msgs.MeshMsgs
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeStructArray(Vertices, 0);
             b.SerializeStructArray(VertexNormals, 0);
-            b.SerializeArray(Faces, 0);
+            b.SerializeStructArray(Faces, 0);
         }
         
         public void Validate()
@@ -56,11 +52,6 @@ namespace Iviz.Msgs.MeshMsgs
             if (Vertices is null) throw new System.NullReferenceException();
             if (VertexNormals is null) throw new System.NullReferenceException();
             if (Faces is null) throw new System.NullReferenceException();
-            for (int i = 0; i < Faces.Length; i++)
-            {
-                if (Faces[i] is null) throw new System.NullReferenceException();
-                Faces[i].Validate();
-            }
         }
     
         public int RosMessageLength

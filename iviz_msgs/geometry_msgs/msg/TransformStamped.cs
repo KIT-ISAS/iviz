@@ -20,7 +20,6 @@ namespace Iviz.Msgs.GeometryMsgs
         {
             Header = new StdMsgs.Header();
             ChildFrameId = "";
-            Transform = new Transform();
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -57,8 +56,6 @@ namespace Iviz.Msgs.GeometryMsgs
             if (Header is null) throw new System.NullReferenceException();
             Header.Validate();
             if (ChildFrameId is null) throw new System.NullReferenceException();
-            if (Transform is null) throw new System.NullReferenceException();
-            Transform.Validate();
         }
     
         public int RosMessageLength

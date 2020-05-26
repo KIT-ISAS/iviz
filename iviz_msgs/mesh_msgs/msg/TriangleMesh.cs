@@ -48,21 +48,13 @@ namespace Iviz.Msgs.MeshMsgs
         /// <summary> Constructor with buffer. </summary>
         internal TriangleMesh(Buffer b)
         {
-            Triangles = b.DeserializeArray<TriangleIndices>();
-            for (int i = 0; i < this.Triangles.Length; i++)
-            {
-                Triangles[i] = new TriangleIndices(b);
-            }
+            Triangles = b.DeserializeStructArray<TriangleIndices>();
             Vertices = b.DeserializeStructArray<GeometryMsgs.Point>();
             VertexNormals = b.DeserializeStructArray<GeometryMsgs.Point>();
             VertexColors = b.DeserializeStructArray<StdMsgs.ColorRGBA>();
             TriangleColors = b.DeserializeStructArray<StdMsgs.ColorRGBA>();
             VertexTextureCoords = b.DeserializeStructArray<GeometryMsgs.Point>();
-            FaceMaterials = b.DeserializeArray<MeshMsgs.MeshMaterial>();
-            for (int i = 0; i < this.FaceMaterials.Length; i++)
-            {
-                FaceMaterials[i] = new MeshMsgs.MeshMaterial(b);
-            }
+            FaceMaterials = b.DeserializeStructArray<MeshMsgs.MeshMaterial>();
             Textures = b.DeserializeArray<SensorMsgs.Image>();
             for (int i = 0; i < this.Textures.Length; i++)
             {
@@ -83,13 +75,13 @@ namespace Iviz.Msgs.MeshMsgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeArray(Triangles, 0);
+            b.SerializeStructArray(Triangles, 0);
             b.SerializeStructArray(Vertices, 0);
             b.SerializeStructArray(VertexNormals, 0);
             b.SerializeStructArray(VertexColors, 0);
             b.SerializeStructArray(TriangleColors, 0);
             b.SerializeStructArray(VertexTextureCoords, 0);
-            b.SerializeArray(FaceMaterials, 0);
+            b.SerializeStructArray(FaceMaterials, 0);
             b.SerializeArray(Textures, 0);
             b.SerializeArray(Clusters, 0);
         }
@@ -97,22 +89,12 @@ namespace Iviz.Msgs.MeshMsgs
         public void Validate()
         {
             if (Triangles is null) throw new System.NullReferenceException();
-            for (int i = 0; i < Triangles.Length; i++)
-            {
-                if (Triangles[i] is null) throw new System.NullReferenceException();
-                Triangles[i].Validate();
-            }
             if (Vertices is null) throw new System.NullReferenceException();
             if (VertexNormals is null) throw new System.NullReferenceException();
             if (VertexColors is null) throw new System.NullReferenceException();
             if (TriangleColors is null) throw new System.NullReferenceException();
             if (VertexTextureCoords is null) throw new System.NullReferenceException();
             if (FaceMaterials is null) throw new System.NullReferenceException();
-            for (int i = 0; i < FaceMaterials.Length; i++)
-            {
-                if (FaceMaterials[i] is null) throw new System.NullReferenceException();
-                FaceMaterials[i].Validate();
-            }
             if (Textures is null) throw new System.NullReferenceException();
             for (int i = 0; i < Textures.Length; i++)
             {

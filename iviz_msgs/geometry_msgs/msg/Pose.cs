@@ -21,7 +21,7 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor with buffer. </summary>
         internal Pose(Buffer b)
         {
-            this = b.Deserialize<Pose>();
+            b.Deserialize(out this);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)

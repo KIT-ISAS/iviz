@@ -24,7 +24,7 @@ namespace Iviz.Msgs.StdMsgs
         /// <summary> Constructor with buffer. </summary>
         internal ColorRGBA(Buffer b)
         {
-            this = b.Deserialize<ColorRGBA>();
+            b.Deserialize(out this);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)

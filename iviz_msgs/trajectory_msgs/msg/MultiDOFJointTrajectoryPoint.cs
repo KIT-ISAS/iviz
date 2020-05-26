@@ -33,11 +33,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
         /// <summary> Constructor with buffer. </summary>
         internal MultiDOFJointTrajectoryPoint(Buffer b)
         {
-            Transforms = b.DeserializeArray<GeometryMsgs.Transform>();
-            for (int i = 0; i < this.Transforms.Length; i++)
-            {
-                Transforms[i] = new GeometryMsgs.Transform(b);
-            }
+            Transforms = b.DeserializeStructArray<GeometryMsgs.Transform>();
             Velocities = b.DeserializeArray<GeometryMsgs.Twist>();
             for (int i = 0; i < this.Velocities.Length; i++)
             {
@@ -59,7 +55,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeArray(Transforms, 0);
+            b.SerializeStructArray(Transforms, 0);
             b.SerializeArray(Velocities, 0);
             b.SerializeArray(Accelerations, 0);
             b.Serialize(this.TimeFromStart);
@@ -68,11 +64,6 @@ namespace Iviz.Msgs.TrajectoryMsgs
         public void Validate()
         {
             if (Transforms is null) throw new System.NullReferenceException();
-            for (int i = 0; i < Transforms.Length; i++)
-            {
-                if (Transforms[i] is null) throw new System.NullReferenceException();
-                Transforms[i].Validate();
-            }
             if (Velocities is null) throw new System.NullReferenceException();
             for (int i = 0; i < Velocities.Length; i++)
             {

@@ -24,10 +24,12 @@ namespace Iviz.Msgs
         void AssertInRange(uint off)
         {
             if (ptr + off > end)
+            {
                 throw new ArgumentOutOfRangeException(nameof(off));
+            }
         }
 
-        static void AssertSize<T>(T[] array, uint size)
+        static void AssertSize(Array array, uint size)
         {
             if (array is null)
             {
@@ -35,7 +37,9 @@ namespace Iviz.Msgs
             }
 
             if (array.Length != size)
+            {
                 throw new ArgumentException("Invalid array size. Expected " + size + ", but got " + array.Length + ".", nameof(array));
+            }
         }
 
         internal string DeserializeString()
@@ -74,6 +78,13 @@ namespace Iviz.Msgs
             T val = *(T*)ptr;
             ptr += sizeof(T);
             return val;
+        }
+
+        internal void Deserialize<T>(out T t) where T : unmanaged
+        {
+            AssertInRange((uint)sizeof(T));
+            t = *(T*)ptr;
+            ptr += sizeof(T);
         }
 
         internal T[] DeserializeStructArray<T>(uint count = 0) where T : unmanaged

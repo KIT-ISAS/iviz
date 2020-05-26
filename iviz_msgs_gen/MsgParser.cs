@@ -213,16 +213,6 @@ namespace Iviz.MsgsGen
                 string result;
                 if (arraySize == -1)
                 {
-                    /*
-                    if (isInStruct)
-                    {
-                        result = "public " + className + " " + fieldName + " { get; }";
-                    }
-                    else
-                    {
-                        result = "public " + className + " " + fieldName + " { get; set; }";
-                    }
-                    */
                     result = "public " + className + " " + fieldName + " { get; set; }";
                 }
                 else if (arraySize == 0)
@@ -231,7 +221,14 @@ namespace Iviz.MsgsGen
                 }
                 else
                 {
-                    result = "public " + className + "[/*" + arraySize + "*/] " + fieldName + " { get; set; }";
+                    if (isInStruct)
+                    {
+                        result = "fixed " + className + " " + fieldName + "[" + arraySize + "];";
+                    }
+                    else
+                    {
+                        result = "public " + className + "[/*" + arraySize + "*/] " + fieldName + " { get; set; }";
+                    }
                 }
                 if (comment != "")
                 {
@@ -240,6 +237,17 @@ namespace Iviz.MsgsGen
                 //list.Add(result);
 
                 list.Add(attrStr + " " + result);
+
+                if (arraySize > 0 && isInStruct)
+                {
+                    for (int i = 0; i < arraySize; i++) {
+                        list.Add("public " + className + " " + fieldName + i);
+                        list.Add("{");
+                        list.Add("    get => " + fieldName + "[" + i + "];");
+                        list.Add("    set => " + fieldName + "[" + i + "] = value;");
+                        list.Add("}");
+                    }
+                }
 
                 return list;
             }

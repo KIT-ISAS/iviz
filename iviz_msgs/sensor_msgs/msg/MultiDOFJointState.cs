@@ -55,11 +55,7 @@ namespace Iviz.Msgs.SensorMsgs
         {
             Header = new StdMsgs.Header(b);
             JointNames = b.DeserializeStringArray();
-            Transforms = b.DeserializeArray<GeometryMsgs.Transform>();
-            for (int i = 0; i < this.Transforms.Length; i++)
-            {
-                Transforms[i] = new GeometryMsgs.Transform(b);
-            }
+            Transforms = b.DeserializeStructArray<GeometryMsgs.Transform>();
             Twist = b.DeserializeArray<GeometryMsgs.Twist>();
             for (int i = 0; i < this.Twist.Length; i++)
             {
@@ -82,7 +78,7 @@ namespace Iviz.Msgs.SensorMsgs
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Header);
             b.SerializeArray(JointNames, 0);
-            b.SerializeArray(Transforms, 0);
+            b.SerializeStructArray(Transforms, 0);
             b.SerializeArray(Twist, 0);
             b.SerializeArray(Wrench, 0);
         }
@@ -97,11 +93,6 @@ namespace Iviz.Msgs.SensorMsgs
                 if (JointNames[i] is null) throw new System.NullReferenceException();
             }
             if (Transforms is null) throw new System.NullReferenceException();
-            for (int i = 0; i < Transforms.Length; i++)
-            {
-                if (Transforms[i] is null) throw new System.NullReferenceException();
-                Transforms[i].Validate();
-            }
             if (Twist is null) throw new System.NullReferenceException();
             for (int i = 0; i < Twist.Length; i++)
             {

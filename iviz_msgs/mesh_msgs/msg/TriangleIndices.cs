@@ -1,29 +1,44 @@
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract (Name = "mesh_msgs/TriangleIndices")]
-    public sealed class TriangleIndices : IMessage
+    [StructLayout(LayoutKind.Sequential)]
+    public unsafe struct TriangleIndices : IMessage
     {
         // Definition of a triangle's vertices
-        [DataMember (Name = "vertex_indices")] public uint[/*3*/] VertexIndices { get; set; }
-    
-        /// <summary> Constructor for empty message. </summary>
-        public TriangleIndices()
+        [DataMember (Name = "vertex_indices")] fixed uint VertexIndices[3];
+        public uint VertexIndices0
         {
-            VertexIndices = new uint[3];
+            get => VertexIndices[0];
+            set => VertexIndices[0] = value;
         }
-        
+        public uint VertexIndices1
+        {
+            get => VertexIndices[1];
+            set => VertexIndices[1] = value;
+        }
+        public uint VertexIndices2
+        {
+            get => VertexIndices[2];
+            set => VertexIndices[2] = value;
+        }
+    
         /// <summary> Explicit constructor. </summary>
         public TriangleIndices(uint[] VertexIndices)
         {
-            this.VertexIndices = VertexIndices;
+            if (VertexIndices is null) throw new System.ArgumentNullException(nameof(VertexIndices));
+            for (int i = 0; i < 3; i++)
+            {
+                this.VertexIndices[i] = VertexIndices[i];
+            }
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal TriangleIndices(Buffer b)
         {
-            VertexIndices = b.DeserializeStructArray<uint>(3);
+            b.Deserialize(out this);
         }
         
         ISerializable ISerializable.Deserialize(Buffer b)
@@ -34,13 +49,11 @@ namespace Iviz.Msgs.MeshMsgs
         void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.SerializeStructArray(VertexIndices, 3);
+            b.Serialize(this);
         }
         
         public void Validate()
         {
-            if (VertexIndices is null) throw new System.NullReferenceException();
-            if (VertexIndices.Length != 3) throw new System.IndexOutOfRangeException();
         }
     
         public int RosMessageLength => 12;
