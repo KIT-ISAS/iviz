@@ -154,7 +154,7 @@ namespace Iviz.App.Displays
                     gameObject.name = names[i];
                     gameObject.layer = Layer;
                     MeshRenderer renderer = gameObject.GetComponent<MeshRenderer>();
-                    renderer.sharedMaterial = Resource.Materials.SimpleLit;
+                    renderer.sharedMaterial = Resource.Materials.SimpleLit.Object;
                     renderer.receiveShadows = false;
                     renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                     axisObjects[i] = gameObject;

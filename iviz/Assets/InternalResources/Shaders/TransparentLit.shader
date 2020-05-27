@@ -8,11 +8,11 @@
 	}
 		SubShader
 	{
-		Tags { "RenderType"="Transparent"}
+		Tags { "Queue" = "Transparent" "RenderType"="Transparent"}
 		LOD 200
 
 		CGPROGRAM
-		#pragma surface surf Standard addshadow fullforwardshadows
+		#pragma surface surf Standard addshadow fullforwardshadows alpha
 		#pragma target 3.0
 
 		struct Input {

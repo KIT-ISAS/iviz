@@ -9,7 +9,6 @@ namespace Iviz.Displays
     public sealed class MeshListResource : MarkerResource
     {
         Material material;
-        BoxCollider boxCollider;
         Bounds baseBounds;
 
         struct PointWithColor
@@ -116,20 +115,18 @@ namespace Iviz.Displays
         {
             baseBounds = CalculateBounds();
 
-            boxCollider.center = Bounds.center;
-            boxCollider.size = Bounds.size;
+            Collider.center = Bounds.center;
+            Collider.size = Bounds.size;
         }
 
         protected override void Awake()
         {
             base.Awake();
 
-            material = Instantiate(Resource.Materials.MeshList);
+            material = Resource.Materials.MeshList.Instantiate();
             material.enableInstancing = true;
 
-            Mesh = Resource.Markers.SphereSimple.GameObject.GetComponent<MeshFilter>().sharedMesh;
-
-            boxCollider = Collider as BoxCollider;
+            Mesh = Resource.Markers.SphereSimple.Object.GetComponent<MeshFilter>().sharedMesh;
 
             SetCapacity(10);
         }
@@ -177,7 +174,7 @@ namespace Iviz.Displays
             {
                 return;
             }
-            Bounds worldBounds = boxCollider.bounds;
+            Bounds worldBounds = Collider.bounds;
             material.SetVector("_BoundaryCenter", worldBounds.center);
             Graphics.DrawMeshInstancedIndirect(mesh, 0, material, worldBounds, argsComputeBuffer);
         }

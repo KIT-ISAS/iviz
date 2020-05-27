@@ -17,8 +17,10 @@ namespace Iviz.Displays
             set
             {
                 color = value;
+                mainRenderer.material = (color.a > 0.99f) ?
+                    Resource.Materials.Lit.Object :
+                    Resource.Materials.TransparentLit.Object;
                 mainRenderer.SetPropertyColor(color);
-                mainRenderer.material = (color.a > 0.99f) ? Resource.Materials.Lit : Resource.Materials.TransparentLit;
             }
         }
 

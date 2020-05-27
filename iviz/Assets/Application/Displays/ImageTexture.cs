@@ -78,7 +78,7 @@ namespace Iviz.Displays
 
         public ImageTexture()
         {
-            Material = UnityEngine.Object.Instantiate(Resource.Materials.ImagePreview);
+            Material = Resource.Materials.ImagePreview.Instantiate();
         }
 
         static int FieldSizeFromEncoding(string encoding)

@@ -185,7 +185,7 @@ namespace Iviz.RoslibSharp.XmlRpc
         public StatusCode Code { get; }
         public string StatusMessage { get; }
 
-        protected BaseResponse(object[] a)
+        protected private BaseResponse(object[] a)
         {
             Code = (StatusCode)a[0];
             StatusMessage = (string)a[1];
@@ -203,7 +203,9 @@ namespace Iviz.RoslibSharp.XmlRpc
 
         internal GetUriResponse(object[] a) : base(a)
         {
-            Uri = new Uri((string)a[2]);
+            Uri = (Code == StatusCode.Success &&
+                Uri.TryCreate((string)a[2], UriKind.Absolute, out Uri uri))
+                ? uri : null;
         }
     }
 
@@ -213,7 +215,9 @@ namespace Iviz.RoslibSharp.XmlRpc
 
         internal LookupNodeResponse(object[] a) : base(a)
         {
-            Uri = new Uri((string)a[2]);
+            Uri = (Code == StatusCode.Success &&
+                Uri.TryCreate((string)a[2], UriKind.Absolute, out Uri uri))
+                ? uri : null;
         }
     }
 

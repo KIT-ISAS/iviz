@@ -12,7 +12,7 @@ namespace iviz_test
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main_Old(string[] args)
         {
             BridgeClient client = new BridgeClient("ws://192.168.0.157:8080");
 
@@ -53,14 +53,14 @@ namespace iviz_test
             }
         }
 
-        static void Main_Old(string[] args)
+        static void Main(string[] args)
         {
             RosClient client = new RosClient(
                 //"http://192.168.0.73:11311",
                 "http://141.3.59.5:11311",
                 null,
                 //"http://192.168.0.157:7614"
-                "http://i59-r142-pc01:7614"
+                "http://141.3.59.35:7614"
                 );
 
             /*
@@ -184,14 +184,14 @@ namespace iviz_test
             client.Close();
             */
             //client.Subscribe<TFMessage>("/tf", Callback);
-            //client.Advertise<TFMessage>("/tf", out RosPublisher publisher);
+            client.Advertise<TFMessage>("/tf", out RosPublisher publisher);
 
-            client.Subscribe<Marker>("/hololens/environment", Callback);
+            //client.Subscribe<Marker>("/hololens/environment", Callback);
 
 
             while (true)
             {
-                //publisher.Publish(tf);
+                publisher.Publish(tf);
                 //Console.WriteLine(">> " + tf.ToJsonString());
                 Thread.Sleep(1000);
             }

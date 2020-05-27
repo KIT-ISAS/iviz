@@ -166,7 +166,7 @@ namespace Iviz.App.Displays
 
         void Awake()
         {
-            material = Instantiate(Resource.Materials.DepthImageProjector);
+            material = Resource.Materials.DepthImageProjector.Instantiate();
 
             Config = new DepthImageProjectorConfiguration();
 

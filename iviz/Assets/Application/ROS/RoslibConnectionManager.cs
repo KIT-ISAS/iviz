@@ -238,16 +238,20 @@ namespace Iviz.App
                 if (client != null)
                 {
                     newAdvertisedTopic.Advertise(client, advertiser.Topic);
-                    //client?.Advertise<T>(advertiser.Topic, out publisher);
+                    //Logger.Debug("Direct advertisement for " + advertiser.Topic);
+
+                    client?.Advertise<T>(advertiser.Topic, out publisher);
                     id = publishers.FindIndex(x => x is null);
                     if (id == -1)
                     {
                         id = publishers.Count;
                         publishers.Add(publisher);
+                        //Logger.Debug("Id is " + id);
                     }
                     else
                     {
                         publishers[id] = publisher;
+                        //Logger.Debug("Id is " + id);
                     }
                     PublishedTopics = client.PublishedTopics;
                 }
@@ -287,7 +291,8 @@ namespace Iviz.App
             {
                 return;
             }
-            publishers[advertiser.Id].Publish(msg);
+            //Debug.Log("Trying to publish: " + advertiser.Id + " -> " + publishers[advertiser.Id]);
+            publishers[advertiser.Id]?.Publish(msg);
         }
 
         public override void Subscribe<T>(RosListener<T> listener)
@@ -400,7 +405,7 @@ namespace Iviz.App
             {
                 return false;
             }
-            if (subscribedTopic.subscriber == null)
+            if (subscribedTopic?.subscriber == null)
             {
                 return false;
             }

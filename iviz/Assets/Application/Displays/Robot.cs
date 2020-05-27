@@ -236,7 +236,7 @@ namespace Iviz.App
 
             config.RobotResource = newResource;
 
-            RobotObject = ResourcePool.GetOrCreate(Resource.Robots.GetObject(newResource), TFListener.BaseFrame.transform);
+            RobotObject = ResourcePool.GetOrCreate(Resource.Robots.Objects[newResource], TFListener.BaseFrame.transform);
             RobotObject.name = newResource;
 
             Name = Name; // update name;
@@ -306,12 +306,12 @@ namespace Iviz.App
                 {
                     if (materials[i] == null)
                     {
-                        materials[i] = Resource.Materials.Lit;
+                        materials[i] = Resource.Materials.Lit.Object;
                     }
                     else if (materials[i].mainTexture == null)
                     {
                         Color c = materials[i].color;
-                        materials[i] = Resource.Materials.Lit;
+                        materials[i] = Resource.Materials.Lit.Object;
                         meshRenderer.SetPropertyColor(c, i);
                     }
                     else
@@ -319,9 +319,9 @@ namespace Iviz.App
                         Texture tex = materials[i].mainTexture;
                         if (!materialsByTexture.TryGetValue(tex, out Material material))
                         {
-                            material = Instantiate(Resource.Materials.TexturedLit);
+                            material = Resource.Materials.TexturedLit.Instantiate();
                             material.mainTexture = tex;
-                            material.name = Resource.Materials.TexturedLit.name + " - " + materialsByTexture.Count;
+                            material.name = Resource.Materials.TexturedLit.Name + " - " + materialsByTexture.Count;
                             materialsByTexture[tex] = material;
                         }
                         meshRenderer.SetPropertyColor(Color.white, i);
@@ -366,7 +366,7 @@ namespace Iviz.App
 
             if (RobotObject != null)
             {
-                ResourcePool.Dispose(Resource.Robots.GetObject(config.RobotResource), RobotObject);
+                ResourcePool.Dispose(Resource.Robots.Objects[config.RobotResource], RobotObject);
             }
             config.RobotResource = null;
             RobotObject = null;

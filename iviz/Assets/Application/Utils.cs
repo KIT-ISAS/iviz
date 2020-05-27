@@ -401,6 +401,14 @@ namespace Iviz
             }
         }
 
+        public static void ForEach<T>(this IList<T> col, Action<T> action)
+        {
+            for (int i = 0; i < col.Count; i++)
+            {
+                action(col[i]);
+            }
+        }
+
         public static Bounds TransformBound(Bounds b, Transform T)
         {
             return TransformBound(b, T.rotation, T.position);

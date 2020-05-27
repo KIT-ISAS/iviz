@@ -44,7 +44,7 @@ namespace Iviz.RoslibSharp.XmlRpc
         {
             value = $"<value><i4>{f}</i4></value>\n";
         }
-        public Arg(Uri f) : this(f?.ToString() ?? throw new ArgumentNullException(nameof(f)))
+        public Arg(Uri f) : this(f?.ToString() ?? "(unknown)")
         {
         }
         public Arg(string f)
