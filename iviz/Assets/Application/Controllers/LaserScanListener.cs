@@ -146,7 +146,7 @@ namespace Iviz.App.Listeners
                 float dx = Mathf.Cos(msg.AngleIncrement);
                 float dy = Mathf.Sin(msg.AngleIncrement);
 
-                Vector2 intensityBounds;
+                Vector2 intensityBounds = Vector2.zero;
                 if (!useIntensity)
                 {
                     for (int i = 0; i < msg.Ranges.Length; i++)
@@ -156,8 +156,12 @@ namespace Iviz.App.Listeners
                         {
                             range = float.NaN;
                         }
-                        pointBuffer[i].position = new Vector3(x * range, y * range, 0).Ros2Unity();
-                        pointBuffer[i].intensity = range;
+                        //new Unity.Mathematics.float4(-y, 0, x, 1) * range;
+                        //pointBuffer[i] = new PointWithColor(
+                        //    new Vector3(x * range, y * range, 0).Ros2Unity(),
+                        //    range
+                        //);
+                        pointBuffer[i] = new PointWithColor(new Unity.Mathematics.float4(-y, 0, x, 1) * range);
                         x = dx * x - dy * y;
                         y = dy * x + dx * y;
                     }
@@ -172,21 +176,26 @@ namespace Iviz.App.Listeners
                         {
                             range = float.NaN;
                         }
-                        pointBuffer[i].position = new Vector3(x * range, y * range, 0).Ros2Unity();
-                        pointBuffer[i].intensity = msg.Intensities[i];
+                        pointBuffer[i] = new PointWithColor(
+                            new Vector3(x * range, y * range, 0).Ros2Unity(),
+                            msg.Intensities[i]
+                        );
                         x = dx * x - dy * y;
                         y = dy * x + dx * y;
                     }
-                    intensityBounds = CalculateBounds(newSize);
+                    //intensityBounds = CalculateBounds(newSize);
                 }
 
                 GameThread.RunOnce(() =>
-                {
-                    Size = newSize;
-                    pointCloud.IntensityBounds = intensityBounds;
-                    pointCloud.UseIntensityTexture = true;
-                    pointCloud.PointsWithColor = new ArraySegment<PointWithColor>(pointBuffer, 0, newSize);
-                });
+                            {
+                                Size = newSize;
+                                pointCloud.UseIntensityTexture = true;
+                                pointCloud.PointsWithColor = new ArraySegment<PointWithColor>(pointBuffer, 0, newSize);
+                                if (!useIntensity)
+                                {
+                                    pointCloud.IntensityBounds = intensityBounds;
+                                }
+                            });
             });
         }
 
@@ -195,16 +204,12 @@ namespace Iviz.App.Listeners
             float intensityMin = float.MaxValue, intensityMax = float.MinValue;
             for (int i = 0; i < size; i++)
             {
-                Vector3 position = pointBuffer[i].position;
-                float intensity = pointBuffer[i].intensity;
-                if (float.IsNaN(position.x) ||
-                    float.IsNaN(position.y) ||
-                    float.IsNaN(position.z) ||
-                    float.IsNaN(intensity))
+                if (pointBuffer[i].HasNaN)
                 {
                     continue;
                 }
 
+                float intensity = pointBuffer[i].Intensity;
                 intensityMin = Mathf.Min(intensityMin, intensity);
                 intensityMax = Mathf.Max(intensityMax, intensity);
             }

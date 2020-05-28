@@ -10,27 +10,63 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    [StructLayout(LayoutKind.Explicit)]
-    public struct PointWithColor
+    public readonly struct PointWithColor
     {
-        [FieldOffset(0)] public Vector3 position;
-        [FieldOffset(12)] public Color32 color;
-        [FieldOffset(12)] public float intensity;
+        readonly float4 f;
 
-        public PointWithColor(Vector3 position, Color32 color) : this()
+        public float X => f.x;
+        public float Y => f.y;
+        public float Z => f.z;
+        public Vector3 Position => new Vector3(f.x, f.y, f.z);
+        public Color32 Color
         {
-            this.position = position;
-            this.color = color;
+            get
+            {
+                unsafe
+                {
+                    float w = f.w;
+                    return *(Color32*)&w;
+                }
+            }
+
+        }
+        public float Intensity => f.w;
+
+        public PointWithColor(Vector3 position, Color32 color)
+        {
+            f.x = position.x;
+            f.y = position.y;
+            f.z = position.z;
+            unsafe
+            {
+                f.w = *(float*)&color;
+            }
         }
 
-        public PointWithColor(Vector3 position, float intensity) : this()
+        public PointWithColor(Vector3 position, float intensity)
         {
-            this.position = position;
-            this.intensity = intensity;
+            f.x = position.x;
+            f.y = position.y;
+            f.z = position.z;
+            f.w = intensity;
         }
 
-        public static implicit operator float4(PointWithColor c) =>
-            new float4(c.position.x, c.position.y, c.position.z, c.intensity);
+        public PointWithColor(float x, float y, float z, float w)
+        {
+            f.x = x;
+            f.y = y;
+            f.z = z;
+            f.w = w;
+        }
+
+        public PointWithColor(float4 f)
+        {
+            this.f = f;
+        }
+
+        public bool HasNaN => math.any(math.isnan(f));
+
+        public static implicit operator float4(PointWithColor c) => c.f;
     };
 
     public class PointListResource : MarkerResource
@@ -117,7 +153,7 @@ namespace Iviz.Displays
                     return;
                 }
                 size_ = value;
-                int reqDataSize = (int)(size_ * 1.1f);
+                int reqDataSize = size_ * 11 / 10;
                 if (pointBuffer == null || pointBuffer.Length < reqDataSize)
                 {
                     //pointBuffer = new PointWithColor[reqDataSize];
@@ -142,9 +178,7 @@ namespace Iviz.Displays
                 int realSize = 0;
                 for (int i = 0; i < value.Count; i++)
                 {
-                    if (float.IsNaN(value[i].position.x) ||
-                        float.IsNaN(value[i].position.y) ||
-                        float.IsNaN(value[i].position.z))
+                    if (value[i].HasNaN)
                     {
                         continue;
                     }
@@ -155,40 +189,13 @@ namespace Iviz.Displays
             }
         }
 
-        /*
-        public void Set(IList<Vector3> points)
-        {
-            Size = points.Count;
-            for (int i = 0; i < Size; i++)
-            {
-                pointBuffer[i] = new PointWithColor(points[i], Color.white);
-                //pointBuffer[i].position = points[i];
-                //pointBuffer[i].color = Color.white;
-            }
-            UpdateBuffer();
-        }
-        */
-
-        /*
-        public void Set(IList<PointWithColor> points)
-        {
-            Size = points.Count;
-            for (int i = 0; i < Size; i++)
-            {
-                pointBuffer[i] = points[i];
-            }
-            UpdateBuffer();
-        }
-        */
-
-        public void Set(IList<Vector3> points, IList<Color> colors = null)
+        public void Set(IList<Vector3> points, IList<Color> colors = null, Color? color = null)
         {
             Size = points.Count;
             int realSize = 0;
             if (colors == null || points.Count != colors.Count)
             {
-                PointWithColor pc = new PointWithColor();
-                pc.color = Color.white;
+                float intensity = new PointWithColor(Vector3.zero, color ?? Color.white).Intensity;
                 for (int i = 0; i < points.Count; i++)
                 {
                     if (float.IsNaN(points[i].x) ||
@@ -197,8 +204,7 @@ namespace Iviz.Displays
                     {
                         continue;
                     }
-                    pc.position = points[i];
-                    pointBuffer[realSize++] = pc;
+                    pointBuffer[realSize++] = new PointWithColor(points[i], intensity);
                 }
             }
             else
@@ -221,9 +227,10 @@ namespace Iviz.Displays
         void UpdateBuffer()
         {
             pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
-            Bounds bounds = CalculateBounds();
+            MinMaxJob.CalculateBounds(pointBuffer, out Bounds bounds, out Vector2 span);
             Collider.center = bounds.center;
             Collider.size = bounds.size;
+            IntensityBounds = span;
         }
 
         Vector2 scale;
@@ -269,23 +276,6 @@ namespace Iviz.Displays
         }
 
 
-        /*
-        void Start()
-        {
-            List<Vector3> points = new List<Vector3>();
-            for (int i = 0; i < 20; i++)
-            {
-                points.Add(new Vector3(i, 0, i));
-            }
-            SetSize(points.Count);
-
-            Scale = 1.0f * Vector3.one;
-            Color = Color.red;
-            Colors = null;
-            Points = points;
-        }
-        */
-
         static readonly int PropLocalToWorld = Shader.PropertyToID("_LocalToWorld");
         static readonly int PropWorldToLocal = Shader.PropertyToID("_WorldToLocal");
 
@@ -299,15 +289,15 @@ namespace Iviz.Displays
         }
 
         [BurstCompile(CompileSynchronously = true)]
-        private struct MinMaxJob : IJob
+        struct MinMaxJob : IJob
         {
             [ReadOnly]
-            public NativeArray<float4> Input;
+            NativeArray<float4> Input;
 
             [WriteOnly]
-            public float4 Min;
+            float4 Min;
             [WriteOnly]
-            public float4 Max;
+            float4 Max;
 
             public void Execute()
             {
@@ -319,38 +309,26 @@ namespace Iviz.Displays
                     Max = math.max(Max, Input[i]);
                 }
             }
-        }
 
-        Bounds CalculateBounds()
-        {
-            /*
-            Vector3 positionMin = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
-            Vector3 positionMax = new Vector3(float.MinValue, float.MinValue, float.MinValue);
-            for (int i = 0; i < Size; i++)
+            public static void CalculateBounds(
+                NativeArray<float4> pointBuffer,
+                out Bounds bounds,
+                out Vector2 intensitySpan)
             {
-                //Vector3 position = pointBuffer[i].position;
-                Vector3 position = new Vector3();
-                if (float.IsNaN(position.x) ||
-                    float.IsNaN(position.y) ||
-                    float.IsNaN(position.z))
+                var job = new MinMaxJob
                 {
-                    continue;
-                }
-                positionMin = Vector3.Min(positionMin, position);
-                positionMax = Vector3.Max(positionMax, position);
+                    Input = pointBuffer
+                };
+                job.Schedule().Complete();
+
+                Vector3 positionMin = new Vector3(job.Min.x, job.Min.y, job.Min.z);
+                Vector3 positionMax = new Vector3(job.Max.x, job.Max.y, job.Max.z);
+
+                bounds = new Bounds((positionMax + positionMin) / 2, positionMax - positionMin);
+                intensitySpan = new Vector2(job.Min.w, job.Max.w);
             }
-            */
-            var job = new MinMaxJob
-            {
-                Input = pointBuffer
-            };
-            job.Schedule().Complete();
-
-            Vector3 positionMin = new Vector3(job.Min.x, job.Min.y, job.Min.z);
-            Vector3 positionMax = new Vector3(job.Max.x, job.Max.y, job.Max.z);
-
-            return new Bounds((positionMax + positionMin) / 2, positionMax - positionMin);
         }
+
 
         /*
         [BurstCompile(CompileSynchronously = true)]

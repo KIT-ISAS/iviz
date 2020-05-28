@@ -23,8 +23,8 @@ Shader "iviz/Line"
 
 			struct Line {
 				float3 A;
-				float3 B;
                 int colorA;
+				float3 B;
 				int colorB;
 			};
 

@@ -129,10 +129,10 @@ namespace Iviz.App
                             Color32 color = msg.Color.Sanitize().ToUnityColor32();
                             for (int i = 0; i < lines.Length; i++)
                             {
-                                lines[i].A = msg.Points[2 * i + 0].Ros2Unity();
-                                lines[i].B = msg.Points[2 * i + 1].Ros2Unity();
-                                lines[i].colorA = color;
-                                lines[i].colorB = color;
+                                lines[i] = new LineWithColor(
+                                    msg.Points[2 * i + 0].Ros2Unity(), color,
+                                    msg.Points[2 * i + 1].Ros2Unity(), color
+                                    );
                             }
                         }
                         else
@@ -140,10 +140,10 @@ namespace Iviz.App
                             Color color = msg.Color.Sanitize().ToUnityColor();
                             for (int i = 0; i < lines.Length; i++)
                             {
-                                lines[i].A = msg.Points[2 * i + 0].Ros2Unity();
-                                lines[i].B = msg.Points[2 * i + 1].Ros2Unity();
-                                lines[i].colorA = color * msg.Colors[2 * i + 0].ToUnityColor();
-                                lines[i].colorB = color * msg.Colors[2 * i + 1].ToUnityColor();
+                                lines[i] = new LineWithColor(
+                                    msg.Points[2 * i + 0].Ros2Unity(), color * msg.Colors[2 * i + 0].ToUnityColor(),
+                                    msg.Points[2 * i + 1].Ros2Unity(), color * msg.Colors[2 * i + 1].ToUnityColor()
+                                    );
                             }
                         }
                         lineResource.LinesWithColor = lines;
@@ -159,10 +159,10 @@ namespace Iviz.App
                             Color32 color = msg.Color.Sanitize().ToUnityColor32();
                             for (int i = 0; i < lines.Length; i++)
                             {
-                                lines[i].A = msg.Points[i + 0].Ros2Unity();
-                                lines[i].B = msg.Points[i + 1].Ros2Unity();
-                                lines[i].colorA = color;
-                                lines[i].colorB = color;
+                                lines[i] = new LineWithColor(
+                                    msg.Points[i + 0].Ros2Unity(), color,
+                                    msg.Points[i + 1].Ros2Unity(), color
+                                    );
                             }
                         }
                         else
@@ -170,10 +170,10 @@ namespace Iviz.App
                             Color color = msg.Color.Sanitize().ToUnityColor();
                             for (int i = 0; i < lines.Length; i++)
                             {
-                                lines[i].A = msg.Points[i + 0].Ros2Unity();
-                                lines[i].B = msg.Points[i + 1].Ros2Unity();
-                                lines[i].colorA = color * msg.Colors[i + 0].ToUnityColor();
-                                lines[i].colorB = color * msg.Colors[i + 1].ToUnityColor();
+                                lines[i] = new LineWithColor(
+                                    msg.Points[i + 0].Ros2Unity(), color * msg.Colors[i + 0].ToUnityColor(),
+                                    msg.Points[i + 1].Ros2Unity(), color * msg.Colors[i + 1].ToUnityColor()
+                                    );
                             }
                         }
                         lineResource.LinesWithColor = lines;
@@ -188,8 +188,7 @@ namespace Iviz.App
                         Color32 color = msg.Color.Sanitize().ToUnityColor32();
                         for (int i = 0; i < points.Length; i++)
                         {
-                            points[i].position = msg.Points[i].Ros2Unity();
-                            points[i].color = color;
+                            points[i] = new PointWithColor(msg.Points[i].Ros2Unity(), color);
                         }
                     }
                     else
@@ -197,8 +196,9 @@ namespace Iviz.App
                         Color color = msg.Color.Sanitize().ToUnityColor();
                         for (int i = 0; i < points.Length; i++)
                         {
-                            points[i].position = msg.Points[i].Ros2Unity();
-                            points[i].color = color * msg.Colors[i].ToUnityColor();
+                            points[i] = new PointWithColor(
+                                msg.Points[i].Ros2Unity(),
+                                color * msg.Colors[i].ToUnityColor());
                         }
                     }
                     pointList.PointsWithColor = points;

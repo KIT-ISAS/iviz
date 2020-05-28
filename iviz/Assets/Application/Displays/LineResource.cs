@@ -5,32 +5,58 @@ using System.Collections.Generic;
 using System;
 using Iviz.Resources;
 using Iviz.App.Listeners;
+using Unity.Mathematics;
 
 namespace Iviz.Displays
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct LineWithColor
+    public readonly struct LineWithColor
     {
-        public Vector3 A;
-        public Vector3 B;
-        public Color32 colorA;
-        public Color32 colorB;
+        readonly float4x2 f;
 
-        public LineWithColor(Vector3 a, Vector3 b, Color32 color)
+        public Vector3 A => new Vector3(f.c0.x, f.c0.y, f.c0.z);
+        public Color32 ColorA
         {
-            A = a;
-            B = b;
-            colorA = color;
-            colorB = color;
+            get
+            {
+                unsafe
+                {
+                    float w = f.c0.w;
+                    return *(Color32*)&w;
+                }
+            }
+        }
+        public Vector3 B => new Vector3(f.c1.x, f.c1.y, f.c1.z);
+        public Color32 ColorB
+        {
+            get
+            {
+                unsafe
+                {
+                    float w = f.c1.w;
+                    return *(Color32*)&w;
+                }
+            }
         }
 
-        public LineWithColor(Vector3 a, Vector3 b, Color32 colorA, Color32 colorB)
+        public LineWithColor(Vector3 a, Color32 colorA, Vector3 b, Color32 colorB)
         {
-            A = a;
-            B = b;
-            this.colorA = colorA;
-            this.colorB = colorB;
+            f.c0.x = a.x;
+            f.c0.y = a.y;
+            f.c0.z = a.z;
+
+            f.c1.x = b.x;
+            f.c1.y = b.y;
+            f.c1.z = b.z;
+
+            unsafe
+            {
+                f.c0.w = *(float*)&colorA;
+                f.c1.w = *(float*)&colorB;
+            }
         }
+
+        public static implicit operator float4x2(LineWithColor c) => c.f;
     };
 
     public class LineResource : MarkerResource

@@ -34,8 +34,8 @@ namespace Iviz.App.Listeners
 
         public float LastMinIntensity { get; private set; }
         public float LastMaxIntensity { get; private set; }
-        public int Size { get; private set; } 
-        
+        public int Size { get; private set; }
+
         public bool CalculateMinMax { get; private set; } = true;
 
         readonly PointCloudConfiguration config = new PointCloudConfiguration();
@@ -229,16 +229,22 @@ namespace Iviz.App.Listeners
 
                 GeneratePointBuffer(msg, xOffset, yOffset, zOffset, iOffset, iField.Datatype, rgbaHint);
 
+                /*
                 Vector2 intensityBounds = (!rgbaHint && ForceMinMax) ?
                     CalculateBounds(newSize) :
                     new Vector2(MinIntensity, MaxIntensity);
+                */
 
                 GameThread.RunOnce(() =>
                 {
                     Size = newSize;
-                    pointCloud.IntensityBounds = intensityBounds;
+                    //pointCloud.IntensityBounds = intensityBounds;
                     pointCloud.UseIntensityTexture = !rgbaHint;
                     pointCloud.PointsWithColor = new ArraySegment<PointWithColor>(pointBuffer, 0, Size);
+                    if (ForceMinMax)
+                    {
+                        pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
+                    }
                 });
             });
         }
@@ -249,16 +255,12 @@ namespace Iviz.App.Listeners
             float intensityMin = float.MaxValue, intensityMax = float.MinValue;
             for (int i = 0; i < size; i++)
             {
-                Vector3 position = pointBuffer[i].position;
-                float intensity = pointBuffer[i].intensity;
-                if (float.IsNaN(position.x) ||
-                    float.IsNaN(position.y) ||
-                    float.IsNaN(position.z) ||
-                    float.IsNaN(intensity))
+                if (pointBuffer[i].HasNaN)
                 {
                     continue;
                 }
 
+                float intensity = pointBuffer[i].Intensity;
                 intensityMin = Mathf.Min(intensityMin, intensity);
                 intensityMax = Mathf.Max(intensityMax, intensity);
             }
@@ -275,7 +277,8 @@ namespace Iviz.App.Listeners
                 if (rgbaHint)
                 {
                     GeneratePointBufferXYZ(msg, iOffset, PointField.FLOAT32);
-                } else
+                }
+                else
                 {
                     GeneratePointBufferXYZ(msg, iOffset, iType);
                 }
@@ -440,80 +443,56 @@ namespace Iviz.App.Listeners
                                 for (int u = width; u > 0; u--, dataOff += pointStep, pointBufferOff++)
                                 {
                                     float* datap = (float*)dataOff;
-                                    pointBufferOff->position.x = -datap[1];
-                                    pointBufferOff->position.y = datap[2];
-                                    pointBufferOff->position.z = datap[0];
-                                    pointBufferOff->intensity = *(float*)(dataOff + iOffset);
+                                    *pointBufferOff = new PointWithColor(-datap[1], datap[2], datap[0], *(float*)(dataOff + iOffset));
                                 }
                                 break;
                             case PointField.FLOAT64:
                                 for (int u = width; u > 0; u--, dataOff += pointStep, pointBufferOff++)
                                 {
                                     float* datap = (float*)dataOff;
-                                    pointBufferOff->position.x = -datap[1];
-                                    pointBufferOff->position.y = datap[2];
-                                    pointBufferOff->position.z = datap[0];
-                                    pointBufferOff->intensity = (float)*(double*)(dataOff + iOffset);
+                                    *pointBufferOff = new PointWithColor(-datap[1], datap[2], datap[0], (float)*(double*)(dataOff + iOffset));
                                 }
                                 break;
                             case PointField.INT8:
                                 for (int u = width; u > 0; u--, dataOff += pointStep, pointBufferOff++)
                                 {
                                     float* datap = (float*)dataOff;
-                                    pointBufferOff->position.x = -datap[1];
-                                    pointBufferOff->position.y = datap[2];
-                                    pointBufferOff->position.z = datap[0];
-                                    pointBufferOff->intensity = (sbyte)*(dataOff + iOffset);
+                                    *pointBufferOff = new PointWithColor(-datap[1], datap[2], datap[0], (sbyte)*(dataOff + iOffset));
                                 }
                                 break;
                             case PointField.UINT8:
                                 for (int u = width; u > 0; u--, dataOff += pointStep, pointBufferOff++)
                                 {
                                     float* datap = (float*)dataOff;
-                                    pointBufferOff->position.x = -datap[1];
-                                    pointBufferOff->position.y = datap[2];
-                                    pointBufferOff->position.z = datap[0];
-                                    pointBufferOff->intensity = *(dataOff + iOffset);
+                                    *pointBufferOff = new PointWithColor(-datap[1], datap[2], datap[0], *(dataOff + iOffset));
                                 }
                                 break;
                             case PointField.INT16:
                                 for (int u = width; u > 0; u--, dataOff += pointStep, pointBufferOff++)
                                 {
                                     float* datap = (float*)dataOff;
-                                    pointBufferOff->position.x = -datap[1];
-                                    pointBufferOff->position.y = datap[2];
-                                    pointBufferOff->position.z = datap[0];
-                                    pointBufferOff->intensity = *(short*)(dataOff + iOffset);
+                                    *pointBufferOff = new PointWithColor(-datap[1], datap[2], datap[0], *(short*)(dataOff + iOffset));
                                 }
                                 break;
                             case PointField.UINT16:
                                 for (int u = width; u > 0; u--, dataOff += pointStep, pointBufferOff++)
                                 {
                                     float* datap = (float*)dataOff;
-                                    pointBufferOff->position.x = -datap[1];
-                                    pointBufferOff->position.y = datap[2];
-                                    pointBufferOff->position.z = datap[0];
-                                    pointBufferOff->intensity = *(ushort*)(dataOff + iOffset);
+                                    *pointBufferOff = new PointWithColor(-datap[1], datap[2], datap[0], *(ushort*)(dataOff + iOffset));
                                 }
                                 break;
                             case PointField.INT32:
                                 for (int u = width; u > 0; u--, dataOff += pointStep, pointBufferOff++)
                                 {
                                     float* datap = (float*)dataOff;
-                                    pointBufferOff->position.x = -datap[1];
-                                    pointBufferOff->position.y = datap[2];
-                                    pointBufferOff->position.z = datap[0];
-                                    pointBufferOff->intensity = *(int*)(dataOff + iOffset);
+                                    *pointBufferOff = new PointWithColor(-datap[1], datap[2], datap[0], *(int*)(dataOff + iOffset));
                                 }
                                 break;
                             case PointField.UINT32:
                                 for (int u = width; u > 0; u--, dataOff += pointStep, pointBufferOff++)
                                 {
                                     float* datap = (float*)dataOff;
-                                    pointBufferOff->position.x = -datap[1];
-                                    pointBufferOff->position.y = datap[2];
-                                    pointBufferOff->position.z = datap[0];
-                                    pointBufferOff->intensity = *(uint*)(dataOff + iOffset);
+                                    *pointBufferOff = new PointWithColor(-datap[1], datap[2], datap[0], *(uint*)(dataOff + iOffset));
                                 }
                                 break;
                             default:

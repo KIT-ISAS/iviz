@@ -11,6 +11,7 @@ namespace Iviz.App {
         // Use this for initialization
         void Start()
         {
+            /*
             List<LineWithColor> ls = new List<LineWithColor>();
             ls.Add(new LineWithColor(
                 new Vector3(0, 0, 0),
@@ -25,6 +26,7 @@ namespace Iviz.App {
             LineResource resource = GetComponent<LineResource>();
             resource.Scale = 0.01f;
             resource.LinesWithColor = ls;
+            */
         }
 
         // Update is called once per frame
