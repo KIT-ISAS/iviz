@@ -179,6 +179,15 @@ namespace Iviz.RoslibSharp
             }
 
             XmlRpc.RegisterSubscriberResponse masterResponse = Master.RegisterSubscriber(topic, topicInfo.Type);
+            if (masterResponse.Code != XmlRpc.StatusCode.Success)
+            {
+                lock (subscribersByTopic)
+                {
+                    subscribersByTopic.Remove(topic);
+                }
+                throw new ArgumentException("Error registering publisher: " + masterResponse.StatusMessage, nameof(topic));
+            }
+
             manager.PublisherUpdateRpc(Talker, masterResponse.Publishers);
 
             return subscription;
@@ -346,7 +355,15 @@ namespace Iviz.RoslibSharp
                 publishersByTopic[topic] = publisher;
             }
 
-            Master.RegisterPublisher(topic, topicInfo.Type);
+            var response = Master.RegisterPublisher(topic, topicInfo.Type);
+            if (response.Code != XmlRpc.StatusCode.Success)
+            {
+                lock (publishersByTopic)
+                {
+                    publishersByTopic.Remove(topic);
+                }
+                throw new ArgumentException("Error registering publisher: " + response.StatusMessage, nameof(topic));
+            }
 
             return publisher;
         }

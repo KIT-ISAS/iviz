@@ -269,7 +269,7 @@ namespace Iviz.RoslibSharp
                 //Logger.Log($"{this}: initialized! " + tcpListener.LocalEndpoint);
                 Status = SenderStatus.Waiting;
                 Task<TcpClient> task = tcpListener.AcceptTcpClientAsync();
-                if (!task.Wait(5000))
+                if (!task.Wait(5000) || task.IsCanceled)
                 {
                     throw new TimeoutException();
                 }
@@ -332,7 +332,7 @@ namespace Iviz.RoslibSharp
                     }
                 }
             }
-            catch (IOException e)
+            catch (Exception e) when (e is IOException || e is TimeoutException)
             {
                 Logger.LogDebug($"{this}: {e}");
             }

@@ -46,9 +46,14 @@ namespace Iviz.RoslibSharp
                 Logger.LogError($"{this}: Failed to add publisher {remoteUri}: {e}");
                 return false;
             }
+            if (response.code != XmlRpc.StatusCode.Success)
+            {
+                Logger.LogDebug($"{this}: Topic request to {response.protocol.hostname}:{response.protocol.port} failed");
+                return false;
+            }
             if (response.protocol.type == null)
             {
-                Logger.Log($"{this}: {response.protocol.hostname}:{response.protocol.port} has no suitable protocols");
+                Logger.LogDebug($"{this}: {response.protocol.hostname}:{response.protocol.port} has no suitable protocols");
                 return false;
             }
 
