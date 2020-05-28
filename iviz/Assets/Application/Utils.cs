@@ -147,7 +147,7 @@ namespace Iviz
 
         public static Color32 ToUnityColor32(this ColorRGBA p)
         {
-            return new Color32((byte)(p.R * 255), (byte)(p.G * 255), (byte)(p.B * 255), (byte)(p.A * 255));
+            return p.ToUnityColor();
         }
 
         public static ColorRGBA ToRos(this Color p)

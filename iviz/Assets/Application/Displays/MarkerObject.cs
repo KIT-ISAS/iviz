@@ -180,34 +180,54 @@ namespace Iviz.App
                         break;
                     }
                 case MarkerType.POINTS:
-                    PointListResource pointList = resource as PointListResource;
-                    pointList.Scale = msg.Scale.Ros2Unity().Abs();
-                    PointWithColor[] points = new PointWithColor[msg.Points.Length];
-                    if (msg.Colors.Length == 0)
                     {
-                        Color32 color = msg.Color.Sanitize().ToUnityColor32();
-                        for (int i = 0; i < points.Length; i++)
-                        {
-                            points[i] = new PointWithColor(msg.Points[i].Ros2Unity(), color);
-                        }
-                    }
-                    else
-                    {
+                        PointListResource pointList = resource as PointListResource;
+                        pointList.Scale = msg.Scale.Ros2Unity().Abs();
+                        PointWithColor[] points = new PointWithColor[msg.Points.Length];
                         Color color = msg.Color.Sanitize().ToUnityColor();
-                        for (int i = 0; i < points.Length; i++)
+                        if (msg.Colors.Length == 0 || color == Color.black)
                         {
-                            points[i] = new PointWithColor(
-                                msg.Points[i].Ros2Unity(),
-                                color * msg.Colors[i].ToUnityColor());
+                            for (int i = 0; i < points.Length; i++)
+                            {
+                                points[i] = new PointWithColor(msg.Points[i].Ros2Unity(), color);
+                            }
                         }
+                        else if (color == Color.white)
+                        {
+                            for (int i = 0; i < points.Length; i++)
+                            {
+                                points[i] = new PointWithColor(
+                                    msg.Points[i].Ros2Unity(),
+                                    msg.Colors[i].ToUnityColor32());
+                            }
+                        }
+                        else
+                        {
+                            for (int i = 0; i < points.Length; i++)
+                            {
+                                points[i] = new PointWithColor(
+                                    msg.Points[i].Ros2Unity(),
+                                    color * msg.Colors[i].ToUnityColor());
+                            }
+                        }
+                        pointList.PointsWithColor = points;
+                        pointList.UseIntensityTexture = false;
+                        break;
                     }
-                    pointList.PointsWithColor = points;
-                    pointList.UseIntensityTexture = false;
-                    break;
                 case MarkerType.TRIANGLE_LIST:
                     MeshTrianglesResource meshTriangles = resource as MeshTrianglesResource;
                     meshTriangles.Color = msg.Color.Sanitize().ToUnityColor();
-                    meshTriangles.Set(msg.Points.Select(x => x.Ros2Unity()).ToArray());
+                    if (msg.Colors.Length != 0)
+                    {
+                        meshTriangles.Set(
+                            msg.Points.Select(x => x.Ros2Unity()).ToArray(),
+                            msg.Colors.Select(x => x.ToUnityColor()).ToArray()
+                            );
+                    }
+                    else
+                    {
+                        meshTriangles.Set(msg.Points.Select(x => x.Ros2Unity()).ToArray());
+                    }
                     break;
             }
         }

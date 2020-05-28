@@ -52,6 +52,22 @@ namespace Iviz.Displays
             }
         }
 
+        void SetColors(IList<Color> colors)
+        {
+            if (colors is List<Color> colors_v)
+            {
+                Mesh.SetColors(colors_v);
+            }
+            else if (colors is Color[] colors_a)
+            {
+                Mesh.colors = colors_a;
+            }
+            else
+            {
+                Mesh.colors = colors.ToArray();
+            }
+        }
+
         void SetTriangles(IList<int> indices)
         {
             if (indices is List<int> indices_v)
@@ -68,11 +84,15 @@ namespace Iviz.Displays
             }
         }
 
-        public void Set(IList<Vector3> points)
+        public void Set(IList<Vector3> points, IList<Color> colors = null)
         {
             if (points.Count % 3 != 0)
             {
                 throw new ArgumentException("Invalid triangle list " + points.Count, nameof(points));
+            }
+            if (colors != null && colors.Count != points.Count)
+            {
+                throw new ArgumentException("Inconsistent color size!");
             }
             int[] triangles = new int[points.Count];
             for (int i = 0; i < triangles.Length; i++)
@@ -82,14 +102,18 @@ namespace Iviz.Displays
 
             Mesh.Clear();
             SetVertices(points);
+            if (colors != null)
+            {
+                SetColors(colors);
+            }
             Mesh.SetTriangles(triangles, 0);
             Mesh.RecalculateNormals();
 
             Collider.center = Mesh.bounds.center;
             Collider.size = Mesh.bounds.size;
-            //Bounds = Mesh.bounds;
         }
 
+        /*
         public void Set(IList<Vector3> points, IList<int> triangles)
         {
             if (triangles.Count % 3 != 0)
@@ -103,5 +127,6 @@ namespace Iviz.Displays
             Mesh.RecalculateBounds();
             Mesh.RecalculateNormals();
         }
+        */
     }
 }
