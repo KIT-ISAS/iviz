@@ -16,7 +16,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public PoseStamped(StdMsgs.Header Header, Pose Pose)
+        public PoseStamped(StdMsgs.Header Header, in Pose Pose)
         {
             this.Header = Header;
             this.Pose = Pose;

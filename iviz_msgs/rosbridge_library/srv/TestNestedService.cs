@@ -61,7 +61,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TestNestedServiceRequest(GeometryMsgs.Pose Pose)
+        public TestNestedServiceRequest(in GeometryMsgs.Pose Pose)
         {
             this.Pose = Pose;
         }

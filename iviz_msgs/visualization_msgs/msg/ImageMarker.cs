@@ -36,7 +36,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public ImageMarker(StdMsgs.Header Header, string Ns, int Id, int Type, int Action, GeometryMsgs.Point Position, float Scale, StdMsgs.ColorRGBA OutlineColor, byte Filled, StdMsgs.ColorRGBA FillColor, duration Lifetime, GeometryMsgs.Point[] Points, StdMsgs.ColorRGBA[] OutlineColors)
+        public ImageMarker(StdMsgs.Header Header, string Ns, int Id, int Type, int Action, in GeometryMsgs.Point Position, float Scale, in StdMsgs.ColorRGBA OutlineColor, byte Filled, in StdMsgs.ColorRGBA FillColor, duration Lifetime, GeometryMsgs.Point[] Points, StdMsgs.ColorRGBA[] OutlineColors)
         {
             this.Header = Header;
             this.Ns = Ns;

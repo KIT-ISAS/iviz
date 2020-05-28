@@ -15,7 +15,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Feature(GeometryMsgs.Point Location, StdMsgs.Float32[] Descriptor)
+        public Feature(in GeometryMsgs.Point Location, StdMsgs.Float32[] Descriptor)
         {
             this.Location = Location;
             this.Descriptor = Descriptor;

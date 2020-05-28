@@ -16,7 +16,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public PointStamped(StdMsgs.Header Header, Point Point)
+        public PointStamped(StdMsgs.Header Header, in Point Point)
         {
             this.Header = Header;
             this.Point = Point;

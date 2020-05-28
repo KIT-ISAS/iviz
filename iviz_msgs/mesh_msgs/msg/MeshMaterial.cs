@@ -12,7 +12,7 @@ namespace Iviz.Msgs.MeshMsgs
         [DataMember (Name = "has_texture")] public bool HasTexture { get; set; }
     
         /// <summary> Explicit constructor. </summary>
-        public MeshMaterial(uint TextureIndex, StdMsgs.ColorRGBA Color, bool HasTexture)
+        public MeshMaterial(uint TextureIndex, in StdMsgs.ColorRGBA Color, bool HasTexture)
         {
             this.TextureIndex = TextureIndex;
             this.Color = Color;
@@ -25,24 +25,24 @@ namespace Iviz.Msgs.MeshMsgs
             b.Deserialize(out this);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        readonly ISerializable ISerializable.Deserialize(Buffer b)
         {
             return new MeshMaterial(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        readonly void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this);
         }
         
-        public void Validate()
+        public readonly void Validate()
         {
         }
     
-        public int RosMessageLength => 21;
+        public readonly int RosMessageLength => 21;
     
-        string IMessage.RosType => RosMessageType;
+        readonly string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "mesh_msgs/MeshMaterial";

@@ -49,7 +49,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public InteractiveMarkerFeedback(StdMsgs.Header Header, string ClientId, string MarkerName, string ControlName, byte EventType, GeometryMsgs.Pose Pose, uint MenuEntryId, GeometryMsgs.Point MousePoint, bool MousePointValid)
+        public InteractiveMarkerFeedback(StdMsgs.Header Header, string ClientId, string MarkerName, string ControlName, byte EventType, in GeometryMsgs.Pose Pose, uint MenuEntryId, in GeometryMsgs.Point MousePoint, bool MousePointValid)
         {
             this.Header = Header;
             this.ClientId = ClientId;

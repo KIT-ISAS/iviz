@@ -15,7 +15,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Twist(Vector3 Linear, Vector3 Angular)
+        public Twist(in Vector3 Linear, in Vector3 Angular)
         {
             this.Linear = Linear;
             this.Angular = Angular;

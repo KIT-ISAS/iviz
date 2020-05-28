@@ -243,7 +243,7 @@ namespace Iviz.MsgsGen
                     for (int i = 0; i < arraySize; i++) {
                         list.Add("public " + className + " " + fieldName + i);
                         list.Add("{");
-                        list.Add("    get => " + fieldName + "[" + i + "];");
+                        list.Add("    readonly get => " + fieldName + "[" + i + "];");
                         list.Add("    set => " + fieldName + "[" + i + "] = value;");
                         list.Add("}");
                     }

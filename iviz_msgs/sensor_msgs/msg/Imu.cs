@@ -36,7 +36,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Imu(StdMsgs.Header Header, GeometryMsgs.Quaternion Orientation, double[] OrientationCovariance, GeometryMsgs.Vector3 AngularVelocity, double[] AngularVelocityCovariance, GeometryMsgs.Vector3 LinearAcceleration, double[] LinearAccelerationCovariance)
+        public Imu(StdMsgs.Header Header, in GeometryMsgs.Quaternion Orientation, double[] OrientationCovariance, in GeometryMsgs.Vector3 AngularVelocity, double[] AngularVelocityCovariance, in GeometryMsgs.Vector3 LinearAcceleration, double[] LinearAccelerationCovariance)
         {
             this.Header = Header;
             this.Orientation = Orientation;

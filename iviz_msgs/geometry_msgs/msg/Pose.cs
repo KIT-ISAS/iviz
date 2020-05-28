@@ -12,7 +12,7 @@ namespace Iviz.Msgs.GeometryMsgs
         [DataMember (Name = "orientation")] public Quaternion Orientation { get; set; }
     
         /// <summary> Explicit constructor. </summary>
-        public Pose(Point Position, Quaternion Orientation)
+        public Pose(in Point Position, in Quaternion Orientation)
         {
             this.Position = Position;
             this.Orientation = Orientation;
@@ -24,24 +24,24 @@ namespace Iviz.Msgs.GeometryMsgs
             b.Deserialize(out this);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        readonly ISerializable ISerializable.Deserialize(Buffer b)
         {
             return new Pose(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        readonly void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this);
         }
         
-        public void Validate()
+        public readonly void Validate()
         {
         }
     
-        public int RosMessageLength => 56;
+        public readonly int RosMessageLength => 56;
     
-        string IMessage.RosType => RosMessageType;
+        readonly string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "geometry_msgs/Pose";

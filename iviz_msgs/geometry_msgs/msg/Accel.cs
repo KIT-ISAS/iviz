@@ -15,7 +15,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Accel(Vector3 Linear, Vector3 Angular)
+        public Accel(in Vector3 Linear, in Vector3 Angular)
         {
             this.Linear = Linear;
             this.Angular = Angular;

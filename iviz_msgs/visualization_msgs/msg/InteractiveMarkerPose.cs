@@ -21,7 +21,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public InteractiveMarkerPose(StdMsgs.Header Header, GeometryMsgs.Pose Pose, string Name)
+        public InteractiveMarkerPose(StdMsgs.Header Header, in GeometryMsgs.Pose Pose, string Name)
         {
             this.Header = Header;
             this.Pose = Pose;

@@ -16,7 +16,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public QuaternionStamped(StdMsgs.Header Header, Quaternion Quaternion)
+        public QuaternionStamped(StdMsgs.Header Header, in Quaternion Quaternion)
         {
             this.Header = Header;
             this.Quaternion = Quaternion;

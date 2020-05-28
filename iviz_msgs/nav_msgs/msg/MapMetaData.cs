@@ -24,7 +24,7 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MapMetaData(time MapLoadTime, float Resolution, uint Width, uint Height, GeometryMsgs.Pose Origin)
+        public MapMetaData(time MapLoadTime, float Resolution, uint Width, uint Height, in GeometryMsgs.Pose Origin)
         {
             this.MapLoadTime = MapLoadTime;
             this.Resolution = Resolution;

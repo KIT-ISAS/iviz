@@ -27,24 +27,24 @@ namespace Iviz.Msgs.StdMsgs
             b.Deserialize(out this);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        readonly ISerializable ISerializable.Deserialize(Buffer b)
         {
             return new ColorRGBA(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        readonly void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this);
         }
         
-        public void Validate()
+        public readonly void Validate()
         {
         }
     
-        public int RosMessageLength => 16;
+        public readonly int RosMessageLength => 16;
     
-        string IMessage.RosType => RosMessageType;
+        readonly string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "std_msgs/ColorRGBA";

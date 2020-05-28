@@ -16,7 +16,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Wrench(Vector3 Force, Vector3 Torque)
+        public Wrench(in Vector3 Force, in Vector3 Torque)
         {
             this.Force = Force;
             this.Torque = Torque;

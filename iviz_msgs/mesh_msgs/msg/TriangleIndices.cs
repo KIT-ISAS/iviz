@@ -11,17 +11,17 @@ namespace Iviz.Msgs.MeshMsgs
         [DataMember (Name = "vertex_indices")] fixed uint VertexIndices[3];
         public uint VertexIndices0
         {
-            get => VertexIndices[0];
+            readonly get => VertexIndices[0];
             set => VertexIndices[0] = value;
         }
         public uint VertexIndices1
         {
-            get => VertexIndices[1];
+            readonly get => VertexIndices[1];
             set => VertexIndices[1] = value;
         }
         public uint VertexIndices2
         {
-            get => VertexIndices[2];
+            readonly get => VertexIndices[2];
             set => VertexIndices[2] = value;
         }
     
@@ -41,24 +41,24 @@ namespace Iviz.Msgs.MeshMsgs
             b.Deserialize(out this);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        readonly ISerializable ISerializable.Deserialize(Buffer b)
         {
             return new TriangleIndices(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        readonly void ISerializable.Serialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this);
         }
         
-        public void Validate()
+        public readonly void Validate()
         {
         }
     
-        public int RosMessageLength => 12;
+        public readonly int RosMessageLength => 12;
     
-        string IMessage.RosType => RosMessageType;
+        readonly string IMessage.RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "mesh_msgs/TriangleIndices";

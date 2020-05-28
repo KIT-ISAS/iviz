@@ -179,18 +179,19 @@ namespace Iviz.MsgsGen
         }
 
 
-        internal static List<string> CreateLengthProperty(List<MsgParser.Variable> variables, int fixedSize)
+        internal static List<string> CreateLengthProperty(List<MsgParser.Variable> variables, int fixedSize, bool forceStruct)
         {
+            string readOnlyId = forceStruct ? "readonly " : "";
             if (fixedSize != -1)
             {
                 return new List<string> {
-                            "public int RosMessageLength => " + fixedSize + ";"
+                            "public " + readOnlyId + "int RosMessageLength => " + fixedSize + ";"
                 };
             }
             else if (variables.Count == 0)
             {
                 return new List<string> {
-                            "public int RosMessageLength => 0;"
+                            "public " + readOnlyId + "int RosMessageLength => 0;"
                 };
             }
 
@@ -269,7 +270,7 @@ namespace Iviz.MsgsGen
             }
 
             List<string> lines = new List<string>();
-            lines.Add("public int RosMessageLength");
+            lines.Add("public " + readOnlyId + "int RosMessageLength");
             lines.Add("{");
             lines.Add("    get {");
             lines.Add("        int size = " + fieldSize + ";");
@@ -342,7 +343,24 @@ namespace Iviz.MsgsGen
             if (variables.Any())
             {
                 lines.Add("/// <summary> Explicit constructor. </summary>");
-                string args = string.Join(", ", variables.Select(x => x.className + (x.arraySize == -1 ? " " : "[] ") + x.fieldName));
+                //
+                static string ParamToArg(MsgParser.Variable v)
+                {
+                    if (v.arraySize != -1)
+                    {
+                        return v.className + "[] " + v.fieldName;
+                    }
+                    else if (v.classInfo != null && v.classInfo.forceStruct)
+                    {
+                        return "in " + v.className + " " + v.fieldName;
+                    }
+                    else
+                    {
+                        return v.className + " " + v.fieldName;
+                    }
+                }
+                //
+                string args = string.Join(", ", variables.Select(ParamToArg));
                 lines.Add("public " + name + "(" + args + ")");
                 lines.Add("{");
                 foreach (var variable in variables)
@@ -454,7 +472,8 @@ namespace Iviz.MsgsGen
             lines.Add("}");
             lines.Add("");
 
-            lines.Add("ISerializable ISerializable.Deserialize(Buffer b)");
+            string readOnlyId = forceStruct ? "readonly " : "";
+            lines.Add(readOnlyId + "ISerializable ISerializable.Deserialize(Buffer b)");
             lines.Add("{");
             lines.Add("    return new " + name + "(b ?? throw new System.ArgumentNullException(nameof(b)));");
             lines.Add("}");
@@ -466,7 +485,9 @@ namespace Iviz.MsgsGen
         {
             List<string> lines = new List<string>();
 
-            lines.Add("void ISerializable.Serialize(Buffer b)");
+            string readOnlyId = forceStruct ? "readonly " : "";
+
+            lines.Add(readOnlyId + "void ISerializable.Serialize(Buffer b)");
             lines.Add("{");
             lines.Add("    if (b is null) throw new System.ArgumentNullException(nameof(b));");
             if (forceStruct)
@@ -518,7 +539,7 @@ namespace Iviz.MsgsGen
             lines.Add("}");
 
             lines.Add("");
-            lines.Add("public void Validate()");
+            lines.Add("public " + readOnlyId + "void Validate()");
             lines.Add("{");
             foreach (var variable in variables)
             {
@@ -688,7 +709,7 @@ namespace Iviz.MsgsGen
             }
 
             lines.Add("");
-            List<string> lengthProperty = CreateLengthProperty(variables, fixedSize);
+            List<string> lengthProperty = CreateLengthProperty(variables, fixedSize, forceStruct);
             foreach (var entry in lengthProperty)
             {
                 lines.Add("    " + entry);
@@ -698,7 +719,8 @@ namespace Iviz.MsgsGen
             //lines.Add("    IMessage IMessage.Create() => new " + name + "();");
 
             lines.Add("");
-            lines.Add("    string IMessage.RosType => RosMessageType;");
+            string readOnlyId = forceStruct ? "readonly " : "";
+            lines.Add("    " + readOnlyId + "string IMessage.RosType => RosMessageType;");
 
             lines.Add("");
             lines.Add("    /// <summary> Full ROS name of this message. </summary>");

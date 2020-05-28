@@ -124,7 +124,7 @@ namespace Iviz.MsgsGen
             }
 
             lines.Add("");
-            List<string> lengthProperty = ClassInfo.CreateLengthProperty(variables, fixedSize);
+            List<string> lengthProperty = ClassInfo.CreateLengthProperty(variables, fixedSize, false);
             foreach (var entry in lengthProperty)
             {
                 lines.Add("    " + entry);

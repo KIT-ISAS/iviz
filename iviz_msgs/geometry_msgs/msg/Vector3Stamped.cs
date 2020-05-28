@@ -16,7 +16,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Vector3Stamped(StdMsgs.Header Header, Vector3 Vector)
+        public Vector3Stamped(StdMsgs.Header Header, in Vector3 Vector)
         {
             this.Header = Header;
             this.Vector = Vector;

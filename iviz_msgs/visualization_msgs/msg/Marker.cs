@@ -56,7 +56,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Marker(StdMsgs.Header Header, string Ns, int Id, int Type, int Action, GeometryMsgs.Pose Pose, GeometryMsgs.Vector3 Scale, StdMsgs.ColorRGBA Color, duration Lifetime, bool FrameLocked, GeometryMsgs.Point[] Points, StdMsgs.ColorRGBA[] Colors, string Text, string MeshResource, bool MeshUseEmbeddedMaterials)
+        public Marker(StdMsgs.Header Header, string Ns, int Id, int Type, int Action, in GeometryMsgs.Pose Pose, in GeometryMsgs.Vector3 Scale, in StdMsgs.ColorRGBA Color, duration Lifetime, bool FrameLocked, GeometryMsgs.Point[] Points, StdMsgs.ColorRGBA[] Colors, string Text, string MeshResource, bool MeshUseEmbeddedMaterials)
         {
             this.Header = Header;
             this.Ns = Ns;

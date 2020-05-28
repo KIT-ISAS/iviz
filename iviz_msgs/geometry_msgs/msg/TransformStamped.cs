@@ -23,7 +23,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TransformStamped(StdMsgs.Header Header, string ChildFrameId, Transform Transform)
+        public TransformStamped(StdMsgs.Header Header, string ChildFrameId, in Transform Transform)
         {
             this.Header = Header;
             this.ChildFrameId = ChildFrameId;

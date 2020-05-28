@@ -20,7 +20,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public PoseWithCovariance(Pose Pose, double[] Covariance)
+        public PoseWithCovariance(in Pose Pose, double[] Covariance)
         {
             this.Pose = Pose;
             this.Covariance = Covariance;

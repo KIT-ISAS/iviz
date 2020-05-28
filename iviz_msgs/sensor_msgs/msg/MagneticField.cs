@@ -31,7 +31,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MagneticField(StdMsgs.Header Header, GeometryMsgs.Vector3 MagneticField_, double[] MagneticFieldCovariance)
+        public MagneticField(StdMsgs.Header Header, in GeometryMsgs.Vector3 MagneticField_, double[] MagneticFieldCovariance)
         {
             this.Header = Header;
             this.MagneticField_ = MagneticField_;
