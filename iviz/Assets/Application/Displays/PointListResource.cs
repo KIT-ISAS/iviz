@@ -253,7 +253,7 @@ namespace Iviz.Displays
         {
             base.Awake();
 
-            material = Instantiate(Resource.Materials.PointCloud);
+            material = Resource.Materials.PointCloud.Instantiate();
             material.DisableKeyword("USE_TEXTURE");
         }
 

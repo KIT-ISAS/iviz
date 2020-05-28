@@ -1,5 +1,6 @@
 ﻿using Iviz.Displays;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Iviz.App
 {
@@ -8,17 +9,17 @@ namespace Iviz.App
         public TrashButtonWidget CloseButton { get; private set; }
         public ToggleButtonWidget HideButton { get; private set; }
         public Vector3Widget Origin { get; private set; }
-        public InputFieldWidget WorldScale { get; private set; }
+        public NumberInputFieldWidget WorldScale { get; private set; }
         public ToggleWidget SearchMarker { get; private set; }
 
         void Awake()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
-            p.AddHeadTitleWidget("Grid");
+            p.AddHeadTitleWidget("AR");
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();
             Origin = p.AddVector3("Offset");
-            WorldScale = p.AddShortInputField("World Scale");
+            WorldScale = p.AddNumberInputField("World Scale");
             SearchMarker = p.AddToggle("Search Origin Marker");
             p.UpdateSize();
             gameObject.SetActive(false);

@@ -31,10 +31,6 @@ namespace Iviz.App
 
             gameObject.SetActive(false);
             DefaultPanel = CreatePanelObject("Default Panel").AddComponent<DefaultPanelContents>();
-            foreach (Resource.Module resource in Enum.GetValues(typeof(Resource.Module)))
-            {
-                PanelByResourceType[resource] = DataPanelContents.AddTo(CreatePanelObject(resource + " Panel"), resource);
-            }
             Active = false;
             gameObject.SetActive(true);
             started = true;
@@ -49,7 +45,17 @@ namespace Iviz.App
 
         public DataPanelContents GetPanelByResourceType(Resource.Module resource)
         {
-            return PanelByResourceType.TryGetValue(resource, out DataPanelContents cm) ? cm : DefaultPanel;
+            if (PanelByResourceType.TryGetValue(resource, out DataPanelContents cm))
+            {
+                return cm;
+            }
+            cm = DataPanelContents.AddTo(CreatePanelObject(resource + " Panel"), resource);
+            if (cm != null)
+            {
+                PanelByResourceType[resource] = cm;
+                return cm;
+            }
+            return DefaultPanel;
         }
 
         public void SelectPanelFor(DisplayData newSelected)

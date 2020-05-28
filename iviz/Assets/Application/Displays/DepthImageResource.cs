@@ -115,7 +115,7 @@ namespace Iviz.App.Displays
 
         void Awake()
         {
-            material = Instantiate(Resource.Materials.DepthImageProjector);
+            material = Resource.Materials.DepthImageProjector.Instantiate();
 
             Debug.Log("Supports Compute Shaders: " + SystemInfo.supportsComputeShaders);
             Bounds = new Bounds(Vector3.zero, Vector3.one * 20);

@@ -7,6 +7,10 @@ using System;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Msgs.VisualizationMsgs;
 
+using GameObjectInfo = Iviz.Resources.Resource.Info<UnityEngine.GameObject>;
+using MaterialInfo = Iviz.Resources.Resource.Info<UnityEngine.Material>;
+
+
 namespace Iviz.Resources
 {
     public class Resource
@@ -55,10 +59,30 @@ namespace Iviz.Resources
             }
         }
 
-        public class Info
+        public class Info<T> where T : UnityEngine.Object
         {
-            public int Id { get; }
-            public GameObject GameObject { get; }
+            readonly string resourceName;
+
+            T baseObject;
+            public T Object
+            {
+                get
+                {
+                    if (baseObject != null)
+                    {
+                        return baseObject;
+                    }
+                    baseObject = UnityEngine.Resources.Load<T>(resourceName);
+                    if (baseObject is null)
+                    {
+                        throw new ArgumentException("Cannot find resource '" + resourceName + "'", nameof(resourceName));
+                    }
+                    return baseObject;
+                }
+            }
+
+            int id = 0;
+            public int Id => (id != 0) ? id : (id = Object.GetInstanceID());
 
             public Info(string resourceName)
             {
@@ -67,65 +91,51 @@ namespace Iviz.Resources
                     throw new ArgumentNullException(nameof(resourceName));
                 }
 
-                GameObject = UnityEngine.Resources.Load<GameObject>(resourceName);
-                if (GameObject is null)
-                {
-                    throw new ArgumentException("Cannot find resource '" + resourceName + "'", nameof(resourceName));
-                }
-                Id = GameObject.GetInstanceID();
+                this.resourceName = resourceName;
             }
 
-            public Info(GameObject resource)
-            {
-                GameObject = resource ?? throw new ArgumentNullException(nameof(resource));
-                Id = resource.GetInstanceID();
-            }
-
-            public string Name => GameObject.name;
+            public string Name => Object.name;
 
             public override string ToString()
             {
-                return GameObject.ToString();
+                return Object.ToString();
             }
 
-            public GameObject Instantiate(Transform parent = null)
+            public T Instantiate(Transform parent = null)
             {
-                if (GameObject is null)
+                if (Object is null)
                 {
                     throw new NullReferenceException();
                 }
-                return UnityEngine.Object.Instantiate(GameObject, parent);
+                return UnityEngine.Object.Instantiate(Object, parent);
             }
         }
 
         public class MaterialsType
         {
-            public Material Lit { get; }
-            public Material SimpleLit { get; }
-            public Material TexturedLit { get; }
-            public Material ImagePreview { get; }
-            public Material PointCloud { get; }
-            public Material MeshList { get; }
-            public Material DepthImageProjector { get; }
-            public Material Grid { get; }
-            public Material Line { get; }
+            public MaterialInfo Lit { get; }
+            public MaterialInfo SimpleLit { get; }
+            public MaterialInfo TexturedLit { get; }
+            public MaterialInfo TransparentLit { get; }
+            public MaterialInfo ImagePreview { get; }
+            public MaterialInfo PointCloud { get; }
+            public MaterialInfo MeshList { get; }
+            public MaterialInfo DepthImageProjector { get; }
+            public MaterialInfo Grid { get; }
+            public MaterialInfo Line { get; }
 
             public MaterialsType()
             {
-                SimpleLit = Load("Materials/SimpleWhite");
-                Lit = Load("Materials/White");
-                TexturedLit = Load("Materials/Textured Lit");
-                ImagePreview = Load("Materials/ImagePreview");
-                PointCloud = Load("Materials/PointCloud Material");
-                MeshList = Load("Materials/MeshList Material");
-                Grid = Load("Materials/Grid");
-                Line = Load("Materials/Line Material");
-                DepthImageProjector = Load("Materials/DepthImage Material");
-            }
-
-            static Material Load(string path)
-            {
-                return UnityEngine.Resources.Load<Material>(path);
+                SimpleLit = new MaterialInfo("Materials/SimpleWhite");
+                Lit = new MaterialInfo("Materials/White");
+                TexturedLit = new MaterialInfo("Materials/Textured Lit");
+                TransparentLit = new MaterialInfo("Materials/Transparent Lit");
+                ImagePreview = new MaterialInfo("Materials/ImagePreview");
+                PointCloud = new MaterialInfo("Materials/PointCloud Material");
+                MeshList = new MaterialInfo("Materials/MeshList Material");
+                Grid = new MaterialInfo("Materials/Grid");
+                Line = new MaterialInfo("Materials/Line Material");
+                DepthImageProjector = new MaterialInfo("Materials/DepthImage Material");
             }
         }
 
@@ -144,21 +154,21 @@ namespace Iviz.Resources
 
             public ColormapsType()
             {
-                string[] names = 
+                string[] names =
                 {
-                    "lines", 
-                    "pink", 
-                    "copper", 
-                    "bone", 
-                    "gray", 
-                    "winter", 
-                    "autumn", 
-                    "summer", 
-                    "spring", 
-                    "cool", 
-                    "hot", 
-                    "hsv", 
-                    "jet", 
+                    "lines",
+                    "pink",
+                    "copper",
+                    "bone",
+                    "gray",
+                    "winter",
+                    "autumn",
+                    "summer",
+                    "spring",
+                    "cool",
+                    "hot",
+                    "hsv",
+                    "jet",
                     "parula"
                 };
                 Names = new ReadOnlyCollection<string>(names);
@@ -174,146 +184,142 @@ namespace Iviz.Resources
 
         public class MarkersType
         {
-            public Info Cube { get; }
-            public Info Cylinder { get; }
-            public Info Sphere { get; }
-            public Info Text { get; }
-            public Info LineConnector { get; }
-            public Info NamedBoundary { get; }
-            public Info Arrow { get; }
-            public Info SphereSimple { get; }
-            public Info MeshList { get; }
-            public Info PointList { get; }
-            public Info MeshTriangles { get; }
-            public Info TFFrame { get; }
-            public Info Image { get; }
-            public Info Square { get; }
-            public Info Line { get; }
-            public Info Grid { get; }
+            public GameObjectInfo Cube { get; }
+            public GameObjectInfo Cylinder { get; }
+            public GameObjectInfo Sphere { get; }
+            public GameObjectInfo Text { get; }
+            public GameObjectInfo LineConnector { get; }
+            public GameObjectInfo NamedBoundary { get; }
+            public GameObjectInfo Arrow { get; }
+            public GameObjectInfo SphereSimple { get; }
+            public GameObjectInfo MeshList { get; }
+            public GameObjectInfo PointList { get; }
+            public GameObjectInfo MeshTriangles { get; }
+            public GameObjectInfo TFFrame { get; }
+            public GameObjectInfo Image { get; }
+            public GameObjectInfo Square { get; }
+            public GameObjectInfo Line { get; }
+            public GameObjectInfo Grid { get; }
 
-            public ReadOnlyDictionary<string, Info> Generic { get; }
+            public ReadOnlyDictionary<string, GameObjectInfo> Generic { get; }
 
             public MarkersType()
             {
-                Cube = new Info("Displays/Cube");
-                Cylinder = new Info("Displays/Cylinder");
-                Sphere = new Info("Displays/Sphere");
-                Text = new Info("Displays/Text");
-                LineConnector = new Info("Displays/LineConnector");
-                NamedBoundary = new Info("Displays/NamedBoundary");
-                Arrow = new Info("Displays/Arrow");
-                SphereSimple = new Info("Spheres/sphere-LOD1");
-                MeshList = new Info("Displays/MeshList");
-                PointList = new Info("Displays/PointList");
-                MeshTriangles = new Info("Displays/MeshTriangles");
-                TFFrame = new Info("Displays/TFFrame");
-                Image = new Info("Displays/ImageResource");
-                Square = new Info("Displays/Square");
-                Line = new Info("Displays/Line");
-                Grid = new Info("Displays/Grid");
+                Cube = new GameObjectInfo("Displays/Cube");
+                Cylinder = new GameObjectInfo("Displays/Cylinder");
+                Sphere = new GameObjectInfo("Displays/Sphere");
+                Text = new GameObjectInfo("Displays/Text");
+                LineConnector = new GameObjectInfo("Displays/LineConnector");
+                NamedBoundary = new GameObjectInfo("Displays/NamedBoundary");
+                Arrow = new GameObjectInfo("Displays/Arrow");
+                SphereSimple = new GameObjectInfo("Spheres/sphere-LOD1");
+                MeshList = new GameObjectInfo("Displays/MeshList");
+                PointList = new GameObjectInfo("Displays/PointList");
+                MeshTriangles = new GameObjectInfo("Displays/MeshTriangles");
+                TFFrame = new GameObjectInfo("Displays/TFFrame");
+                Image = new GameObjectInfo("Displays/ImageResource");
+                Square = new GameObjectInfo("Displays/Square");
+                Line = new GameObjectInfo("Displays/Line");
+                Grid = new GameObjectInfo("Displays/Grid");
 
-                Generic = new ReadOnlyDictionary<string, Info>(
-                    new Dictionary<string, Info>()
+                Generic = new ReadOnlyDictionary<string, GameObjectInfo>(
+                    new Dictionary<string, GameObjectInfo>()
                     {
                         ["Cube"] = Cube,
                         ["Cylinder"] = Cylinder,
                         ["Sphere"] = Sphere,
-                        ["RightHand"] = new Info("Displays/RightHand"),
+                        ["RightHand"] = new GameObjectInfo("Displays/RightHand"),
                     });
             }
         }
 
         public class ListenersType
         {
-            public Info PointCloud { get; }
-            public Info Grid { get; }
-            public Info TF { get; }
-            public Info Image { get; }
-            public Info Robot { get; }
-            public Info MarkerObject { get; }
-            public Info Marker { get; }
-            public Info InteractiveMarkerControlObject { get; }
-            public Info InteractiveMarkerObject { get; }
-            public Info InteractiveMarker { get; }
-            public Info JointState { get; }
-            public Info DepthImageProjector { get; }
-            public Info LaserScan { get; }
-            public Info AR { get; }
+            public GameObjectInfo PointCloud { get; }
+            public GameObjectInfo Grid { get; }
+            public GameObjectInfo TF { get; }
+            public GameObjectInfo Image { get; }
+            public GameObjectInfo Robot { get; }
+            public GameObjectInfo MarkerObject { get; }
+            public GameObjectInfo Marker { get; }
+            public GameObjectInfo InteractiveMarkerControlObject { get; }
+            public GameObjectInfo InteractiveMarkerObject { get; }
+            public GameObjectInfo InteractiveMarker { get; }
+            public GameObjectInfo JointState { get; }
+            public GameObjectInfo DepthImageProjector { get; }
+            public GameObjectInfo LaserScan { get; }
+            public GameObjectInfo AR { get; }
 
             public ListenersType()
             {
-                PointCloud = new Info("Listeners/PointCloud");
-                Grid = new Info("Listeners/Grid");
-                TF = new Info("Listeners/TF");
-                Image = new Info("Listeners/Image");
-                Robot = new Info("Listeners/Robot");
-                MarkerObject = new Info("Listeners/MarkerObject");
-                Marker = new Info("Listeners/Marker");
-                InteractiveMarkerControlObject = new Info("Listeners/InteractiveMarkerControlObject");
-                InteractiveMarkerObject = new Info("Listeners/InteractiveMarkerObject");
-                InteractiveMarker = new Info("Listeners/InteractiveMarker");
-                JointState = new Info("Listeners/JointState");
-                DepthImageProjector = new Info("Listeners/DepthImageProjector");
-                LaserScan = new Info("Listeners/LaserScan");
-                AR = new Info("Listeners/AR");
+                PointCloud = new GameObjectInfo("Listeners/PointCloud");
+                Grid = new GameObjectInfo("Listeners/Grid");
+                TF = new GameObjectInfo("Listeners/TF");
+                Image = new GameObjectInfo("Listeners/Image");
+                Robot = new GameObjectInfo("Listeners/Robot");
+                MarkerObject = new GameObjectInfo("Listeners/MarkerObject");
+                Marker = new GameObjectInfo("Listeners/Marker");
+                InteractiveMarkerControlObject = new GameObjectInfo("Listeners/InteractiveMarkerControlObject");
+                InteractiveMarkerObject = new GameObjectInfo("Listeners/InteractiveMarkerObject");
+                InteractiveMarker = new GameObjectInfo("Listeners/InteractiveMarker");
+                JointState = new GameObjectInfo("Listeners/JointState");
+                DepthImageProjector = new GameObjectInfo("Listeners/DepthImageProjector");
+                LaserScan = new GameObjectInfo("Listeners/LaserScan");
+                AR = new GameObjectInfo("Listeners/AR");
             }
         }
 
         public class WidgetsType
         {
-            public Info DisplayButton { get; }
-            public Info TopicsButton { get; }
-            public Info ItemListPanel { get; }
-            public Info ConnectionPanel { get; }
+            public GameObjectInfo DisplayButton { get; }
+            public GameObjectInfo TopicsButton { get; }
+            public GameObjectInfo ItemListPanel { get; }
+            public GameObjectInfo ConnectionPanel { get; }
 
-            public Info HeadTitle { get; }
-            public Info SectionTitle { get; }
-            public Info ToggleWidget { get; }
-            public Info SliderWidget { get; }
-            public Info InputWidget { get; }
-            public Info ShortInputWidget { get; }
-            public Info Dropdown { get; }
-            public Info ColorPicker { get; }
-            public Info ImagePreview { get; }
-            public Info CloseButton { get; }
-            public Info TrashButton { get; }
-            public Info DataLabel { get; }
-            public Info HideButton { get; }
-            public Info Vector3 { get; }
+            public GameObjectInfo HeadTitle { get; }
+            public GameObjectInfo SectionTitle { get; }
+            public GameObjectInfo ToggleWidget { get; }
+            public GameObjectInfo SliderWidget { get; }
+            public GameObjectInfo InputWidget { get; }
+            public GameObjectInfo ShortInputWidget { get; }
+            public GameObjectInfo NumberInputWidget { get; }
+            public GameObjectInfo Dropdown { get; }
+            public GameObjectInfo ColorPicker { get; }
+            public GameObjectInfo ImagePreview { get; }
+            public GameObjectInfo CloseButton { get; }
+            public GameObjectInfo TrashButton { get; }
+            public GameObjectInfo DataLabel { get; }
+            public GameObjectInfo HideButton { get; }
+            public GameObjectInfo Vector3 { get; }
 
             public WidgetsType()
             {
-                DisplayButton = new Info("Widgets/Display Button");
-                TopicsButton = new Info("Widgets/Topics Button");
-                ItemListPanel = new Info("Widgets/Item List Panel");
-                ConnectionPanel = new Info("Widgets/Connection Panel");
+                DisplayButton = new GameObjectInfo("Widgets/Display Button");
+                TopicsButton = new GameObjectInfo("Widgets/Topics Button");
+                ItemListPanel = new GameObjectInfo("Widgets/Item List Panel");
+                ConnectionPanel = new GameObjectInfo("Widgets/Connection Panel");
 
-                HeadTitle = new Info("Widgets/Head Title");
-                SectionTitle = new Info("Widgets/Section Title");
-                ToggleWidget = new Info("Widgets/Toggle");
-                SliderWidget = new Info("Widgets/Slider");
-                InputWidget = new Info("Widgets/Input Field");
-                ShortInputWidget = new Info("Widgets/Short Input Field");
-                ColorPicker = new Info("Widgets/ColorPicker");
-                ImagePreview = new Info("Widgets/Image Preview");
-                Dropdown = new Info("Widgets/Dropdown");
-                CloseButton = new Info("Widgets/Close Button");
-                TrashButton = new Info("Widgets/Trash Button");
-                DataLabel = new Info("Widgets/Data Label");
-                HideButton = new Info("Widgets/Hide Button");
-                Vector3 = new Info("Widgets/Vector3");
+                HeadTitle = new GameObjectInfo("Widgets/Head Title");
+                SectionTitle = new GameObjectInfo("Widgets/Section Title");
+                ToggleWidget = new GameObjectInfo("Widgets/Toggle");
+                SliderWidget = new GameObjectInfo("Widgets/Slider");
+                InputWidget = new GameObjectInfo("Widgets/Input Field");
+                ShortInputWidget = new GameObjectInfo("Widgets/Short Input Field");
+                NumberInputWidget = new GameObjectInfo("Widgets/Number Input Field");
+                ColorPicker = new GameObjectInfo("Widgets/ColorPicker");
+                ImagePreview = new GameObjectInfo("Widgets/Image Preview");
+                Dropdown = new GameObjectInfo("Widgets/Dropdown");
+                CloseButton = new GameObjectInfo("Widgets/Close Button");
+                TrashButton = new GameObjectInfo("Widgets/Trash Button");
+                DataLabel = new GameObjectInfo("Widgets/Data Label");
+                HideButton = new GameObjectInfo("Widgets/Hide Button");
+                Vector3 = new GameObjectInfo("Widgets/Vector3");
             }
         }
 
         public class RobotsType
         {
-            public ReadOnlyCollection<string> Names { get; }
-
-            readonly Dictionary<string, Info> Objects = new Dictionary<string, Info>();
-
-            public RobotsType()
-            {
-                string[] names =
+            static readonly string[] names =
                 {
                 "edu.iviz.dummybot",
                 "com.clearpath.husky",
@@ -324,18 +330,19 @@ namespace Iviz.Resources
                 "edu.kit.h2t.armar6"
                 };
 
-                Names = new ReadOnlyCollection<string>(names);
-            }
+            public ReadOnlyCollection<string> Names { get; }
+            public ReadOnlyDictionary<string, GameObjectInfo> Objects { get; }
 
-            public Info GetObject(string name)
+            public RobotsType()
             {
-                // robots are huge so they are only loaded on demand
-                if (!Objects.TryGetValue(name, out Info info))
+                Names = new ReadOnlyCollection<string>(names);
+
+                Dictionary<string, GameObjectInfo> objects = new Dictionary<string, GameObjectInfo>();
+                foreach (string name in names)
                 {
-                    info = new Info("Robots/" + name);
-                    Objects.Add(name, info);
+                    objects.Add(name, new GameObjectInfo("Robots/" + name));
                 }
-                return info;
+                Objects = new ReadOnlyDictionary<string, GameObjectInfo>(objects);
             }
         }
 

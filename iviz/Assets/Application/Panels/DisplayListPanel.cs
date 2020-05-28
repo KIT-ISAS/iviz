@@ -133,7 +133,7 @@ namespace Iviz.App
         {
             parentCanvas = transform.parent.parent.GetComponentInParent<Canvas>();
 
-            buttonHeight = Resource.Widgets.DisplayButton.GameObject.GetComponent<RectTransform>().rect.height;
+            buttonHeight = Resource.Widgets.DisplayButton.Object.GetComponent<RectTransform>().rect.height;
 
             CreateDisplay(Resource.Module.TF, TFListener.DefaultTopic);
             CreateDisplay(Resource.Module.Grid);
@@ -182,6 +182,7 @@ namespace Iviz.App
             };
             connectionData.ConnectClicked += () =>
             {
+                ConnectionManager.Connection.Disconnect();
                 KeepReconnecting = true;
             };
             connectionData.StopClicked += () =>

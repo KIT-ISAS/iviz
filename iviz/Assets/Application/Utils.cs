@@ -310,6 +310,16 @@ namespace Iviz
     {
         public static CultureInfo Culture { get; } = BuiltIns.Culture;
 
+        public static bool TryParse(string s, out float f)
+        {
+            if (float.TryParse(s, NumberStyles.AllowDecimalPoint, Culture, out f))
+            {
+                return true;
+            }
+            f = 0;
+            return false;
+        }
+
         public static Pose AsPose(this Transform t)
         {
             return new Pose(t.position, t.rotation);
@@ -386,6 +396,14 @@ namespace Iviz
         public static void ForEach<T>(this T[] col, Action<T> action)
         {
             for (int i = 0; i < col.Length; i++)
+            {
+                action(col[i]);
+            }
+        }
+
+        public static void ForEach<T>(this IList<T> col, Action<T> action)
+        {
+            for (int i = 0; i < col.Count; i++)
             {
                 action(col[i]);
             }

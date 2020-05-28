@@ -12,17 +12,17 @@ namespace Iviz.App
 
         public static ResourcePool Instance { get; private set; }
 
-        public static GameObject GetOrCreate(Resource.Info resource, Transform parent = null, bool enable = true)
+        public static GameObject GetOrCreate(Resource.Info<GameObject> resource, Transform parent = null, bool enable = true)
         {
             return Instance.GetImpl(resource, parent, enable);
         }
 
-        public static T GetOrCreate<T>(Resource.Info resource, Transform parent = null, bool enable = true) where T : MonoBehaviour
+        public static T GetOrCreate<T>(Resource.Info<GameObject> resource, Transform parent = null, bool enable = true) where T : MonoBehaviour
         {
             return GetOrCreate(resource, parent, enable).GetComponent<T>();
         }
 
-        public static void Dispose(Resource.Info resource, GameObject instance)
+        public static void Dispose(Resource.Info<GameObject> resource, GameObject instance)
         {
             if (Instance != null)
             {
@@ -80,7 +80,7 @@ namespace Iviz.App
 
         readonly HashSet<int> destroyedObjects = new HashSet<int>();
 
-        GameObject GetImpl(Resource.Info resource, Transform parent, bool enable)
+        GameObject GetImpl(Resource.Info<GameObject> resource, Transform parent, bool enable)
         {
             GameObject gameObject;
             if (pool.TryGetValue(resource.Id, out Queue<ObjectWithDeadline> instances) && instances.Any())
@@ -95,11 +95,11 @@ namespace Iviz.App
                 //Debug.Log("State: " + string.Join(",", destroyedObjects));
                 return gameObject;
             }
-            return Instantiate(resource.GameObject, parent);
+            return Instantiate(resource.Object, parent);
                 //gameObject.transform.SetParentLocal(parent);
         }
 
-        void AddImpl(Resource.Info resource, GameObject gameObject)
+        void AddImpl(Resource.Info<GameObject> resource, GameObject gameObject)
         {
             //Debug.Log("Adding " + resource.GameObject.name + " " + gameObject.GetInstanceID());
             if (gameObject == null)
@@ -111,7 +111,7 @@ namespace Iviz.App
             if (destroyedObjects.Contains(gameObject.GetInstanceID()))
             {
                 Debug.LogWarning($"ResourcePool: Attempting to dispose of object {gameObject} " +
-                    $"[ type={resource.GameObject.name} id {gameObject.GetInstanceID()} ] multiple times!");
+                    $"[ type={resource.Object.name} id {gameObject.GetInstanceID()} ] multiple times!");
                 //Debug.Log("** State: " + string.Join(",", destroyedObjects));
                 return;
             }
@@ -130,9 +130,9 @@ namespace Iviz.App
             gameObject.name = resource.Name;
             gameObject.transform.SetParentLocal(transform);
             //Debug.Log("Parent of " + gameObject + " is " + gameObject.transform.parent.gameObject);
-            gameObject.transform.localPosition = resource.GameObject.transform.localPosition;
-            gameObject.transform.localRotation = resource.GameObject.transform.localRotation;
-            gameObject.transform.localScale = resource.GameObject.transform.localScale;
+            gameObject.transform.localPosition = resource.Object.transform.localPosition;
+            gameObject.transform.localRotation = resource.Object.transform.localRotation;
+            gameObject.transform.localScale = resource.Object.transform.localScale;
             //gameObject.layer = resource.GameObject.layer;
             destroyedObjects.Add(gameObject.GetInstanceID());
             //Debug.Log("State: " + string.Join(",", destroyedObjects));

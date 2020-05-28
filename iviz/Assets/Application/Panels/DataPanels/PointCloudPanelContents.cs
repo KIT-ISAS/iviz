@@ -15,8 +15,8 @@ namespace Iviz.App
         public ToggleButtonWidget HideButton { get; private set; }
 
         public ToggleWidget ForceMinMax { get; private set; }
-        public InputFieldWidget MinIntensity { get; private set; }
-        public InputFieldWidget MaxIntensity { get; private set; }
+        public NumberInputFieldWidget MinIntensity { get; private set; }
+        public NumberInputFieldWidget MaxIntensity { get; private set; }
 
 
         void Start()
@@ -34,8 +34,8 @@ namespace Iviz.App
                         .SetOptions(DefaultChannels);
 
             ForceMinMax = p.AddToggle("Force Min/Max");
-            MinIntensity = p.AddShortInputField("Min").SetContentType(InputField.ContentType.DecimalNumber);
-            MaxIntensity = p.AddShortInputField("Max").SetContentType(InputField.ContentType.DecimalNumber);
+            MinIntensity = p.AddNumberInputField("Min");
+            MaxIntensity = p.AddNumberInputField("Max");
 
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();

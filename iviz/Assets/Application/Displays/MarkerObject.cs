@@ -35,7 +35,7 @@ namespace Iviz.App
         public string Id { get; private set; }
 
         MarkerResource resource;
-        Resource.Info resourceType;
+        Resource.Info<GameObject> resourceType;
         Mesh cacheCube, cacheSphere;
 
         public override Bounds Bounds => resource?.Bounds ?? new Bounds();
@@ -45,8 +45,8 @@ namespace Iviz.App
 
         void Awake()
         {
-            cacheCube = Resource.Markers.Cube.GameObject.GetComponent<MeshFilter>().sharedMesh;
-            cacheSphere = Resource.Markers.SphereSimple.GameObject.GetComponent<MeshFilter>().sharedMesh;
+            cacheCube = Resource.Markers.Cube.Object.GetComponent<MeshFilter>().sharedMesh;
+            cacheSphere = Resource.Markers.SphereSimple.Object.GetComponent<MeshFilter>().sharedMesh;
         }
 
         public void Set(Marker msg)
@@ -58,7 +58,7 @@ namespace Iviz.App
                 DateTime.MaxValue :
                 DateTime.Now + msg.Lifetime.ToTimeSpan();
 
-            Resource.Info newResourceType = GetRequestedResource(msg);
+            Resource.Info<GameObject> newResourceType = GetRequestedResource(msg);
             if (newResourceType != resourceType)
             {
                 if (resource != null)
@@ -232,7 +232,7 @@ namespace Iviz.App
             transform.SetLocalPose(msg.Pose.Ros2Unity());
         }
 
-        Resource.Info GetRequestedResource(Marker msg)
+        Resource.Info<GameObject> GetRequestedResource(Marker msg)
         {
             switch (msg.Type())
             {
@@ -252,7 +252,7 @@ namespace Iviz.App
                     if (msg.MeshResource.StartsWith(packagePrefix))
                     {
                         string resourcePath = msg.MeshResource.Substring(packagePrefix.Length);
-                        return Resource.Markers.Generic.TryGetValue(resourcePath, out Resource.Info info) ? info : null;
+                        return Resource.Markers.Generic.TryGetValue(resourcePath, out Resource.Info<GameObject> info) ? info : null;
                     }
                     return null;
                 case MarkerType.CUBE_LIST:

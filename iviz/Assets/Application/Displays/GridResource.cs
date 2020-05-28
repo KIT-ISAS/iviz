@@ -119,7 +119,7 @@ namespace Iviz.Displays
             mesh = new Mesh();
             GetComponent<MeshFilter>().sharedMesh = mesh;
             meshRenderer = GetComponent<MeshRenderer>();
-            meshRenderer.sharedMaterial = Resource.Materials.Grid;
+            meshRenderer.sharedMaterial = Resource.Materials.Grid.Object;
             meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             //meshRenderer.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
 
@@ -145,7 +145,7 @@ namespace Iviz.Displays
 
         void UpdateMesh()
         {
-            Mesh squareMesh = Resource.Markers.Square.GameObject.GetComponent<MeshFilter>().sharedMesh;
+            Mesh squareMesh = Resource.Markers.Square.Object.GetComponent<MeshFilter>().sharedMesh;
             IEnumerable<int> squareIndices = squareMesh.GetIndices(0);
 
             float totalSize = GridCellSize * NumberOfGridCells + GridLineWidth;

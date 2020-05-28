@@ -150,7 +150,7 @@ namespace Iviz.Displays
         {
             base.Awake();
 
-            material = Instantiate(Resource.Materials.Line);
+            material = Resource.Materials.Line.Instantiate();
             Scale = 0.1f;
         }
 

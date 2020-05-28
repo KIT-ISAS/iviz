@@ -71,6 +71,11 @@ namespace Iviz.App
 
         void Start()
         {
+            if (IsMobile)
+            {
+                Application.targetFrameRate = 30;
+            }
+
             mainCamera = GetComponent<Camera>();
             namedBoundary = ResourcePool.GetOrCreate<NamedBoundary>(Resource.Markers.NamedBoundary);
             StartOrbiting();
@@ -135,7 +140,7 @@ namespace Iviz.App
                 {
                     PointerPosition = Input.GetTouch(0).position;
                     PointerOnGui = Canvases.Any(x => x.enabled && x.gameObject.activeInHierarchy &&
-                        RectTransformUtility.RectangleContainsScreenPoint(x.transform as RectTransform, PointerPosition));
+                        RectTransformUtility.RectangleContainsScreenPoint(x.transform as RectTransform, PointerPosition, mainCamera));
                 }
                 PointerAltDown = Input.touchCount == 2;
                 if (PointerAltDown)

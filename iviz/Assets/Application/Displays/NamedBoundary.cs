@@ -168,7 +168,7 @@ namespace Iviz.App.Displays
                 GameObject gameObject = ResourcePool.GetOrCreate(Resource.Markers.Cube, Holder.transform);
                 gameObject.name = "Cube";
                 MeshRenderer renderer = gameObject.GetComponent<MeshRenderer>();
-                renderer.sharedMaterial = Resource.Materials.SimpleLit;
+                renderer.sharedMaterial = Resource.Materials.SimpleLit.Object;
                 renderer.receiveShadows = false;
                 renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 renderer.SetPropertyEmissiveColor(Color.green / 2);
