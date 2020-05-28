@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,7 +16,7 @@ namespace Iviz.RoslibSharp.XmlRpc
         readonly RosClient client;
         volatile bool keepRunning;
         Task task;
-        
+
         readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
 
         public Uri Uri => client.CallerUri;
@@ -45,9 +46,16 @@ namespace Iviz.RoslibSharp.XmlRpc
 
             string maskUri = "http://+:" + Uri.Port + Uri.AbsolutePath;
             Logger.Log("RcpNodeServer: Starting RPC server on " + maskUri);
+
+            //TimeSpan timeout = TimeSpan.FromSeconds(10);
+            //listener.TimeoutManager.DrainEntityBody = timeout;
+            //listener.TimeoutManager.EntityBody = timeout;
+            //listener.TimeoutManager.HeaderWait = timeout;
+            //listener.TimeoutManager.IdleConnection = timeout;
+
             listener.Prefixes.Add(maskUri);
             listener.Start();
-            //Logger.Log("RcpNodeServer: Started!");
+            Logger.LogDebug("RcpNodeServer: Started!");
 
             task = Task.Run(() =>
             {
@@ -55,52 +63,66 @@ namespace Iviz.RoslibSharp.XmlRpc
                 {
                     while (keepRunning)
                     {
+                        Logger.Log("RcpNodeServer: Waiting...");
                         Task<HttpListenerContext> task = listener.GetContextAsync();
                         task.Wait(tokenSource.Token);
+                        Logger.LogDebug("RcpNodeServer: Received!");
 
-                        if (task.IsCanceled || task.IsFaulted)
+                        if (task.IsCanceled || !keepRunning)
                         {
-                            break;
+                            Logger.LogDebug("RcpNodeServer: Breaking!");
+                            continue;
+                        }
+                        if (task.IsFaulted)
+                        {
+                            Logger.LogDebug("RcpNodeServer: Faulted!!");
+                            continue;
                         }
 
                         HttpListenerContext context = task.Result;
                         Task.Run(() =>
                         {
-                           try
-                           {
-                               Service.MethodResponse(context, Methods);
-                           }
-                           catch (Exception e)
-                           {
-                               Logger.LogError(e);
-                           }
+                            try
+                            {
+                                Logger.LogDebug("RcpNodeServer: Starting service!");
+                                Service.MethodResponse(context, Methods);
+                                Logger.LogDebug("RcpNodeServer: Ending service!");
+                            }
+                            catch (Exception e)
+                            {
+                                Logger.LogError(e);
+                            }
                         });
                     }
                 }
-                catch (Exception e) when(e is ThreadAbortException || e is OperationCanceledException)
+                catch (Exception e) when (e is ThreadAbortException || e is OperationCanceledException)
                 {
-                    //Logger.LogDebug(e);
+                    Logger.LogDebug(e);
                 }
                 catch (Exception e)
                 {
                     Logger.Log(e);
                 }
-                //Logger.LogDebug("RcpNodeServer: Leaving thread.");
+                Logger.LogDebug("RcpNodeServer: Leaving thread.");
             });
         }
 
         public void Stop()
         {
             keepRunning = false;
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                listener.Abort();
+            }
             tokenSource.Cancel();
             task?.Wait();
             listener.Close();
+            task?.Dispose();
         }
 
         public void Dispose()
         {
             Stop();
-            task.Dispose();
         }
 
         public Arg[] GetBusStats(object[] _)
@@ -138,7 +160,7 @@ namespace Iviz.RoslibSharp.XmlRpc
             return new[] {
                     new Arg((int)StatusCode.Success),
                     new Arg("ok"),
-                    new Arg(client.MasterUri.ToString())
+                    new Arg(client.MasterUri)
                 };
         }
 
@@ -167,10 +189,19 @@ namespace Iviz.RoslibSharp.XmlRpc
 
         public Arg[] GetPid(object[] _)
         {
+            int id = -1;
+            try
+            {
+                id = Process.GetCurrentProcess().Id;
+            }
+            catch (Exception e)
+            {
+                Logger.Log($"RcpNodeServer: Failed to get process id");
+            }
             return new[] {
                     new Arg((int)StatusCode.Success),
                     new Arg("ok"),
-                    new Arg(Process.GetCurrentProcess().Id)
+                    new Arg(id)
                 };
         }
 

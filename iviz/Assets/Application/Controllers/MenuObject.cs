@@ -12,7 +12,6 @@ namespace Iviz.App.Listeners
         public void Set(MenuEntry[] entries, InteractiveMarkerObject parent, Camera camera)
         {
             Billboard billboard = GetComponent<Billboard>();
-            billboard.mainCamera = camera;
             billboard.parent = parent.transform;
             billboard.offset = new Vector3(0, 0.1f, 0);
 

@@ -87,6 +87,7 @@ namespace Iviz.App.Listeners
                 MainCamera.gameObject.SetActive(!value);
                 ARCamera.gameObject.SetActive(value);
                 Canvas.worldCamera = value ? ARCamera : MainCamera;
+                TFListener.MainCamera = value ? ARCamera : MainCamera;
             }
         }
 
@@ -149,6 +150,7 @@ namespace Iviz.App.Listeners
         }
 
         uint headSeq = 0;
+        int lastLength = 0;
         public void Update()
         {
             if (PublishPose)
@@ -173,14 +175,20 @@ namespace Iviz.App.Listeners
                     //Debug.Log("planeManager: " + planeManager);
                     var trackables = planeManager.trackables;
                     //Debug.Log("trackables: " + trackables);
-                    Marker[] markers = new Marker[2 * trackables.count];
+                    Marker[] markers = new Marker[2 * trackables.count + 1];
+                    markers[i++] = helper.CreateDeleteAll();
                     foreach (var trackable in trackables)
                     {
                         Mesh mesh = trackable?.gameObject.GetComponent<MeshFilter>()?.mesh;
                         //Debug.Log("mesh: " + mesh);
                         Marker[] meshMarkers = helper.MeshToMarker(mesh, trackable.transform.AsPose());
-                        markers[i++] = meshMarkers[0];
-                        markers[i++] = meshMarkers[1];
+                        markers[i] = meshMarkers[0];
+                        markers[i].Id = i;
+                        i++;
+
+                        markers[i] = meshMarkers[1];
+                        markers[i].Id = i;
+                        i++;
                     }
                     //Debug.Log("sender: " + rosSenderMarkers);
                     rosSenderMarkers.Publish(new MarkerArray(markers));

@@ -129,5 +129,14 @@ namespace Iviz.Displays
             return new Marker[] { content, grid };
         }
 
+        public Marker CreateDeleteAll()
+        {
+            return new Marker
+            {
+                Header = RosUtils.CreateHeader(seq++),
+                Action = Marker.DELETEALL
+            };
+        }
+
     }
 }

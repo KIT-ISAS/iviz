@@ -15,18 +15,20 @@ namespace Iviz.App
         [DataMember] public float JitterMin { get; }
         [DataMember] public float JitterMax { get; }
         [DataMember] public float JitterMean { get; }
-        [DataMember] public float MessagesPerSecond { get; }
+        [DataMember] public int MessagesPerSecond { get; }
+        [DataMember] public int BytesPerSecond { get; }
         [DataMember] public int MessagesInQueue { get; }
 
         public RosListenerStats() { }
 
-        public RosListenerStats(int totalMessages, float jitterMin, float jitterMax, float jitterMean, float messagesPerSecond, int messagesInQueue)
+        public RosListenerStats(int totalMessages, float jitterMin, float jitterMax, float jitterMean, int messagesPerSecond, int bytesPerSecond, int messagesInQueue)
         {
             TotalMessages = totalMessages;
             JitterMin = jitterMin;
             JitterMax = jitterMax;
             JitterMean = jitterMean;
             MessagesPerSecond = messagesPerSecond;
+            BytesPerSecond = bytesPerSecond;
             MessagesInQueue = messagesInQueue;
         }
     }
@@ -57,6 +59,7 @@ namespace Iviz.App
         public int TotalMsgCounter { get; private set; }
         public int MsgsInQueue { get; private set; }
         public int MaxQueueSize { get; set; } = 5;
+        public int TotalMsgBytes { get; private set; }
 
         public RosListener(string topic, Action<T> handler) :
             base(topic, BuiltIns.GetMessageType(typeof(T)))
@@ -78,6 +81,7 @@ namespace Iviz.App
             {
                 TotalMsgCounter++;
                 MsgsInQueue--;
+                TotalMsgBytes += t.RosMessageLength;
                 timesOfArrival.Add(Time.time);
                 try
                 {
@@ -121,8 +125,10 @@ namespace Iviz.App
                     jitterMax,
                     timesOfArrival.Count == 0 ? 0 : (timesOfArrival.Last() - timesOfArrival.First()) / timesOfArrival.Count(),
                     timesOfArrival.Count,
+                    TotalMsgBytes,
                     MsgsInQueue
                 );
+                TotalMsgBytes = 0;
                 timesOfArrival.Clear();
             }
         }

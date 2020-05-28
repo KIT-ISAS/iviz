@@ -67,7 +67,6 @@ namespace Iviz.Displays
         ComputeBuffer lineComputeBuffer;
         ComputeBuffer quadComputeBuffer;
 
-        public Camera MainCamera { get; set; }
         public Color Color { get; set; } = Color.white;
 
         static readonly int PropLines = Shader.PropertyToID("_Lines");
@@ -180,8 +179,8 @@ namespace Iviz.Displays
             material.SetMatrix(PropLocalToWorld, transform.localToWorldMatrix);
             material.SetMatrix(PropWorldToLocal, transform.worldToLocalMatrix);
 
-            Camera camera = MainCamera ?? TFListener.MainCamera;
-            material.SetVector("_Front", camera.transform.forward);
+            Camera camera = TFListener.MainCamera;
+            material.SetVector("_Front", transform.InverseTransformDirection(camera.transform.forward));
 
             Bounds worldBounds = Collider.bounds;
             Graphics.DrawProcedural(material, worldBounds, MeshTopology.Quads, 4, Size);

@@ -10,7 +10,6 @@ namespace Iviz.RoslibSharp
 {
     public sealed class RosClient : IDisposable
     {
-        internal readonly XmlRpc.NodeClient Talker;
         internal readonly XmlRpc.NodeServer Listener;
 
         readonly Dictionary<string, RosSubscriber> subscribersByTopic = new Dictionary<string, RosSubscriber>();
@@ -61,6 +60,8 @@ namespace Iviz.RoslibSharp
         /// URI of this node.
         /// </summary>
         public Uri CallerUri { get; }
+
+        XmlRpc.NodeClient Talker { get; }
 
         /// <summary>
         /// Constructs and connects a ROS client.
@@ -236,7 +237,7 @@ namespace Iviz.RoslibSharp
             {
                 throw new InvalidOperationException("Type does not match subscriber.");
             }
-                
+
             // local lambda wrapper for casting
             void wrapper(IMessage x) { callback((T)x); }
 
@@ -510,55 +511,88 @@ namespace Iviz.RoslibSharp
 
         internal string[][] GetSubscriptionsRcp()
         {
-            lock (subscribersByTopic)
+            try
             {
-                string[][] result = new string[subscribersByTopic.Count][];
-                int i = 0;
-                foreach (var entry in subscribersByTopic)
+                lock (subscribersByTopic)
                 {
-                    result[i++] = new[] { entry.Key, entry.Value.TopicType };
+                    string[][] result = new string[subscribersByTopic.Count][];
+                    int i = 0;
+                    foreach (var entry in subscribersByTopic)
+                    {
+                        result[i++] = new[] { entry.Key, entry.Value.TopicType };
+                    }
+                    return result;
                 }
-                return result;
+            }
+            catch (Exception e)
+            {
+                Logger.Log($"{this}: GetSubscriptionsRcp failed: " + e);
+                return Array.Empty<string[]>();
             }
         }
 
 
         internal string[][] GetPublicationsRcp()
         {
-            lock (publishersByTopic)
+            try
             {
-                string[][] result = new string[publishersByTopic.Count][];
-                int i = 0;
-                foreach (var entry in publishersByTopic)
+                lock (publishersByTopic)
                 {
-                    result[i++] = new[] { entry.Key, entry.Value.TopicType };
+                    string[][] result = new string[publishersByTopic.Count][];
+                    int i = 0;
+                    foreach (var entry in publishersByTopic)
+                    {
+                        result[i++] = new[] { entry.Key, entry.Value.TopicType };
+                    }
+                    return result;
                 }
-                return result;
+            }
+            catch (Exception e)
+            {
+                Logger.Log($"{this}: GetPublicationsRcp failed: " + e);
+                return Array.Empty<string[]>();
             }
         }
 
 
         internal void PublisherUpdateRcp(string topic, Uri[] publishers)
         {
-            if (!TryGetSubscriber(topic, out RosSubscriber subscriber))
+            try
             {
-                Logger.Log($"{this}: PublisherUpdate called for nonexisting topic '{topic}'");
-                return;
+                if (!TryGetSubscriber(topic, out RosSubscriber subscriber))
+                {
+                    Logger.Log($"{this}: PublisherUpdate called for nonexisting topic '{topic}'");
+                    return;
+                }
+                subscriber.PublisherUpdateRcp(Talker, publishers);
             }
-            subscriber.PublisherUpdateRcp(Talker, publishers);
+            catch (Exception e)
+            {
+                Logger.Log($"{this}: PublisherUpdateRcp failed: " + e);
+            }
         }
 
         internal bool RequestTopicRpc(string remoteCallerId, string topic, out string hostname, out int port)
         {
-            if (!TryGetPublisher(topic, out RosPublisher publisher))
+            try
             {
-                Logger.Log($"{this}: '{remoteCallerId} is requesting nonexisting topic '{topic}'");
-                hostname = null;
+                if (!TryGetPublisher(topic, out RosPublisher publisher))
+                {
+                    Logger.Log($"{this}: '{remoteCallerId} is requesting nonexisting topic '{topic}'");
+                    hostname = null;
+                    port = 0;
+                    return false;
+                }
+                publisher.RequestTopicRpc(remoteCallerId, out hostname, out port);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Logger.Log($"{this}: RequestTopicRpc failed: " + e);
+                hostname = "";
                 port = 0;
                 return false;
             }
-            publisher.RequestTopicRpc(remoteCallerId, out hostname, out port);
-            return true;
         }
 
         /// <summary>
@@ -566,8 +600,6 @@ namespace Iviz.RoslibSharp
         /// </summary>
         public void Close()
         {
-            Listener.Stop();
-
             RosPublisher[] publishers;
             lock (publishersByTopic)
             {
@@ -595,6 +627,8 @@ namespace Iviz.RoslibSharp
                 advertisedServicesByName.ForEach(x => x.Value.Stop());
                 advertisedServicesByName.Clear();
             }
+
+            Listener.Stop();
         }
 
         public SubscriberState GetSubscriberStatistics()
@@ -612,31 +646,48 @@ namespace Iviz.RoslibSharp
         internal List<BusInfo> GetBusInfoRcp()
         {
             List<BusInfo> busInfos = new List<BusInfo>();
-            SubscriberState sstate = GetSubscriberStatistics();
-            foreach (var topic in sstate.Topics)
+            try
             {
-                foreach (var receiver in topic.Receivers)
+                SubscriberState sstate = GetSubscriberStatistics();
+                foreach (var topic in sstate.Topics)
                 {
-                    busInfos.Add(new BusInfo(
-                        busInfos.Count,
-                        receiver.RemoteUri,
-                        "i", "TCPROS",
-                        topic.Topic,
-                        1));
+                    foreach (var receiver in topic.Receivers)
+                    {
+                        busInfos.Add(new BusInfo(
+                            busInfos.Count,
+                            receiver.RemoteUri,
+                            "i", "TCPROS",
+                            topic.Topic,
+                            1));
+                    }
+                }
+                PublisherState pstate = GetPublisherStatistics();
+                foreach (var topic in pstate.Topics)
+                {
+                    foreach (var sender in topic.Senders)
+                    {
+                        Uri remoteUri;
+                        try
+                        {
+                            remoteUri = Master.LookupNode(sender.RemoteId).Uri;
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.Log($"{this}: LookupNode for {sender.RemoteId} failed: " + e);
+                            remoteUri = null;
+                        }
+                        busInfos.Add(new BusInfo(
+                            busInfos.Count,
+                            remoteUri,
+                            "o", "TCPROS",
+                            topic.Topic,
+                            1));
+                    }
                 }
             }
-            PublisherState pstate = GetPublisherStatistics();
-            foreach (var topic in pstate.Topics)
+            catch (Exception e)
             {
-                foreach (var sender in topic.Senders)
-                {
-                    busInfos.Add(new BusInfo(
-                        busInfos.Count,
-                        Master.LookupNode(sender.RemoteId).Uri,
-                        "o", "TCPROS",
-                        topic.Topic,
-                        1));
-                }
+                Logger.Log($"{this}: GetBusInfoRcp failed: " + e);
             }
             return busInfos;
         }
@@ -776,6 +827,12 @@ namespace Iviz.RoslibSharp
         {
             Close();
             Listener.Dispose();
+        }
+
+        public Uri GetNodeMasterUri(Uri other)
+        {
+            Talker.Uri = other;
+            return Talker.GetMasterUri().uri;
         }
     }
 }

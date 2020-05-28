@@ -33,13 +33,12 @@ namespace Iviz.App.Listeners
         public const string BaseFrameId = "map";
 
         public static TFListener Instance { get; private set; }
-        public static Camera MainCamera => Instance.mainCamera;
+        public static Camera MainCamera { get; set; }
         public static FlyCamera GuiManager => Instance.guiManager;
 
         public static TFFrame BaseFrame { get; private set; }
         public static TFFrame ListenersFrame { get; private set; }
 
-        Camera mainCamera;
         FlyCamera guiManager;
         DisplayNode dummy;
 
@@ -142,8 +141,9 @@ namespace Iviz.App.Listeners
 
             dummy = SimpleDisplayNode.Instantiate("TFNode", transform);
 
-            mainCamera = GameObject.Find("MainCamera").GetComponent<Camera>();
-            guiManager = mainCamera.GetComponent<FlyCamera>();
+            GameObject mainCameraObj = GameObject.Find("MainCamera");
+            MainCamera = mainCameraObj.GetComponent<Camera>();
+            guiManager = mainCameraObj.GetComponent<FlyCamera>();
 
             Config = new TFConfiguration();
 

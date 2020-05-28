@@ -1,5 +1,6 @@
 ﻿
 using Iviz.App.Displays;
+using Iviz.App.Listeners;
 using Iviz.Resources;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,7 @@ namespace Iviz.App
         bool alreadyMoving;
         bool alreadyScaling;
 
-        Camera mainCamera;
+        Camera MainCamera => TFListener.MainCamera;
         NamedBoundary namedBoundary;
 
         public bool PointerOnGui { get; private set; }
@@ -76,7 +77,6 @@ namespace Iviz.App
                 Application.targetFrameRate = 30;
             }
 
-            mainCamera = GetComponent<Camera>();
             namedBoundary = ResourcePool.GetOrCreate<NamedBoundary>(Resource.Markers.NamedBoundary);
             StartOrbiting();
         }
@@ -140,7 +140,7 @@ namespace Iviz.App
                 {
                     PointerPosition = Input.GetTouch(0).position;
                     PointerOnGui = Canvases.Any(x => x.enabled && x.gameObject.activeInHierarchy &&
-                        RectTransformUtility.RectangleContainsScreenPoint(x.transform as RectTransform, PointerPosition, mainCamera));
+                        RectTransformUtility.RectangleContainsScreenPoint(x.transform as RectTransform, PointerPosition, MainCamera));
                 }
                 PointerAltDown = Input.touchCount == 2;
                 if (PointerAltDown)
@@ -158,7 +158,7 @@ namespace Iviz.App
                 {
                     PointerPosition = Input.mousePosition;
                     PointerOnGui = Canvases.Any(x => x.enabled && x.gameObject.activeInHierarchy &&
-                        RectTransformUtility.RectangleContainsScreenPoint(x.transform as RectTransform, PointerPosition, mainCamera));
+                        RectTransformUtility.RectangleContainsScreenPoint(x.transform as RectTransform, PointerPosition, MainCamera));
                 }
                 /*
                 PointerAltDown = Input.GetMouseButton(1) || (Input.mouseScrollDelta.y != 0);

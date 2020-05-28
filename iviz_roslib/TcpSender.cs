@@ -266,10 +266,10 @@ namespace Iviz.RoslibSharp
         {
             try
             {
-                //Logger.Log($"{this}: initialized! " + tcpListener.LocalEndpoint);
+                Logger.Log($"{this}: initialized! " + tcpListener.LocalEndpoint);
                 Status = SenderStatus.Waiting;
                 Task<TcpClient> task = tcpListener.AcceptTcpClientAsync();
-                if (!task.Wait(5000) || task.IsCanceled)
+                if (!task.Wait(1000) || task.IsCanceled)
                 {
                     throw new TimeoutException();
                 }

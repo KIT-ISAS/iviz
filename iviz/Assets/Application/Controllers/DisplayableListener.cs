@@ -18,9 +18,10 @@ namespace Iviz.App.Listeners
             Listener.HasPublishers ? SubscriberStatus.Active : SubscriberStatus.Inactive;
 
         public string Topic => Listener?.Topic;
-        public float MessagesPerSecond => Listener?.Stats.MessagesPerSecond ?? 0;
+        public int MessagesPerSecond => Listener?.Stats.MessagesPerSecond ?? 0;
         public float MessagesJitterMax => Listener?.Stats.JitterMax ?? 0;
         public float MessagesJitterMin => Listener?.Stats.JitterMin ?? 0;
+        public int BytesPerSecond => Listener?.Stats.BytesPerSecond ?? 0;
 
         public virtual void StartListening()
         {

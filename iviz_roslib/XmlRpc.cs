@@ -116,7 +116,7 @@ namespace Iviz.RoslibSharp.XmlRpc
             }
         }
 
-        public static object MethodCall(Uri remoteUri, Uri _, string method, Arg[] args, int timeoutInMs = 3000)
+        public static object MethodCall(Uri remoteUri, Uri _, string method, Arg[] args, int timeoutInMs = 2000)
         {
             if (args is null)
             {
@@ -295,7 +295,6 @@ namespace Iviz.RoslibSharp.XmlRpc
                 Logger.Log(">> " + buffer);
                 Logger.Log("--- End MethodResponse ---");
 #endif
-
 
                 string str = buffer.ToString();
                 httpContext.Response.ContentLength64 = str.Length;

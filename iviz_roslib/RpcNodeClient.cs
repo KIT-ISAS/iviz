@@ -2,7 +2,7 @@
 
 namespace Iviz.RoslibSharp.XmlRpc
 {
-    class NodeClient
+    public class NodeClient
     {
         public class ProtocolResponse
         {
@@ -46,6 +46,20 @@ namespace Iviz.RoslibSharp.XmlRpc
             }
         }
 
+        public class GetMasterUriResponse
+        {
+            public readonly StatusCode code;
+            public readonly string statusMessage;
+            public readonly Uri uri;
+
+            public GetMasterUriResponse(object[] a)
+            {
+                code = (StatusCode)a[0];
+                statusMessage = (string)a[1];
+                uri = new Uri((string)a[2]);
+            }
+        }
+
         readonly string CallerId;
         readonly Uri CallerUri;
         public Uri Uri { get; set; }
@@ -67,5 +81,13 @@ namespace Iviz.RoslibSharp.XmlRpc
             return new RequestTopicResponse((object[])response);
         }
 
+        public GetMasterUriResponse GetMasterUri()
+        {
+            Arg[] args = {
+                new Arg(CallerId)
+            };
+            object response = Service.MethodCall(Uri, CallerUri, "getMasterUri", args);
+            return new GetMasterUriResponse((object[])response);
+        }
     }
 }

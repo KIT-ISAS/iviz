@@ -83,10 +83,10 @@ namespace Iviz.RoslibSharp
             // while we're here
             Cleanup();
 
-            do
+            for (int i = 0; i < 10 && connection.Status == SenderStatus.Inactive; i++)
             {
                 Thread.Sleep(10);
-            } while (connection.Status != SenderStatus.Waiting);
+            }
 
             if (Latching && LatchedMessage != null)
             {

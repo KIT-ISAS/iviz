@@ -34,11 +34,12 @@ namespace Iviz.App
                     subscribedStatus = "?";
                     break;
             }
-            string messagesPerSecond = Listener.MessagesPerSecond.ToString("0.##", UnityUtils.Culture);
-            string minJitter = Listener.MessagesJitterMin.ToString("0.##", UnityUtils.Culture);
-            string maxJitter = Listener.MessagesJitterMax.ToString("0.##", UnityUtils.Culture);
+            string messagesPerSecond = Listener.MessagesPerSecond.ToString(UnityUtils.Culture);
+            string kbPerSecond = (Listener.BytesPerSecond * 0.001f).ToString("#,0.#", UnityUtils.Culture);
+            //string minJitter = Listener.MessagesJitterMin.ToString("0.##", UnityUtils.Culture);
+            //string maxJitter = Listener.MessagesJitterMax.ToString("0.##", UnityUtils.Culture);
 
-            ListenerPanel.Stats.Label = $"{subscribedStatus} | {messagesPerSecond} Hz | {minJitter} - {maxJitter} sec";
+            ListenerPanel.Stats.Label = $"{subscribedStatus} | {messagesPerSecond} Hz | {kbPerSecond} kbs";
         }
 
         protected string SanitizedTopicText()

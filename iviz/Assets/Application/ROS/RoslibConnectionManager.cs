@@ -151,11 +151,11 @@ namespace Iviz.App
 
             try
             {
-                
-                //RoslibSharp.Logger.LogDebug = x => Logger.Debug(x);
+
+                RoslibSharp.Logger.LogDebug = x => Logger.Debug(x);
                 RoslibSharp.Logger.LogError = x => Logger.Error(x);
                 RoslibSharp.Logger.Log = x => Logger.Info(x);
-                
+
                 client = new RosClient(MasterUri, MyId, MyUri);
 
                 foreach (var entry in publishersByTopic)
@@ -196,7 +196,7 @@ namespace Iviz.App
                 return;
             }
 
-
+            Debug.Log("RosLibConnection: Disconnecting...");
             client.Close();
             client = null;
             foreach (var entry in publishersByTopic)
@@ -209,6 +209,7 @@ namespace Iviz.App
                 entry.Value.subscriber = null;
             }
             publishers.Clear();
+            Debug.Log("RosLibConnection: Disconnection finished.");
         }
 
         public override void Advertise<T>(RosSender<T> advertiser)
@@ -311,7 +312,7 @@ namespace Iviz.App
             });
         }
 
-        void SubscribeImpl<T>(RosListener<T> listener) where T: IMessage, new()
+        void SubscribeImpl<T>(RosListener<T> listener) where T : IMessage, new()
         {
             if (!subscribersByTopic.TryGetValue(listener.Topic, out SubscribedTopic subscribedTopic))
             {
@@ -397,6 +398,15 @@ namespace Iviz.App
 
         protected override void Update()
         {
+            try
+            {
+                client?.GetNodeMasterUri(MyUri);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e);
+                Disconnect();
+            }
         }
 
         public override bool HasPublishers(string topic)
