@@ -1,21 +1,15 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace Iviz.App.Listeners
 {
     public abstract class TopicListener : MonoBehaviour, IController
     {
         public RosListener Listener { get; protected set; }
+        public IList<RosSender> Senders { get; protected set; }
 
-        public enum SubscriberStatus
-        {
-            Disconnected,
-            Inactive,
-            Active
-        }
-
-        public SubscriberStatus Subscribed =>
-            (!ConnectionManager.Connected || Listener == null) ? SubscriberStatus.Disconnected :
-            Listener.HasPublishers ? SubscriberStatus.Active : SubscriberStatus.Inactive;
+        public int NumPublishers =>
+            (!ConnectionManager.Connected || Listener == null) ? -1 : Listener.NumPublishers;
 
         public string Topic => Listener?.Topic;
         public int MessagesPerSecond => Listener?.Stats.MessagesPerSecond ?? 0;

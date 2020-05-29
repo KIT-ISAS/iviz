@@ -2,7 +2,7 @@
 
 namespace Iviz.RoslibSharp.XmlRpc
 {
-    public class NodeClient
+    class NodeClient
     {
         public class ProtocolResponse
         {
@@ -62,12 +62,13 @@ namespace Iviz.RoslibSharp.XmlRpc
 
         readonly string CallerId;
         readonly Uri CallerUri;
-        public Uri Uri { get; set; }
+        public Uri Uri { get; }
 
-        public NodeClient(string callerId, Uri callerUri)
+        public NodeClient(string callerId, Uri callerUri, Uri otherUri)
         {
             CallerId = callerId;
             CallerUri = callerUri;
+            Uri = otherUri;
         }
 
         public RequestTopicResponse RequestTopic(string topic, string[][] protocols)

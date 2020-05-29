@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -52,11 +53,12 @@ namespace Iviz.RoslibSharp
         public int Port { get; private set; }
         public string RemoteHostname { get; private set; }
         public int RemotePort { get; private set; }
-        public int MaxQueueSize { get; set; } = 3;
+        public int MaxQueueSizeBytes { get; set; } = 50000;
         public int CurrentQueueSize => messageQueue.Count;
         public int NumSent { get; private set; }
         public int BytesSent { get; private set; }
         public int NumDropped { get; private set; }
+        public int BytesDropped { get; private set; }
 
         public SenderStatus Status { get; private set; }
 
@@ -354,11 +356,24 @@ namespace Iviz.RoslibSharp
             }
             lock (condVar)
             {
+                const int minQueueSize = 2;
                 messageQueue.Add(message);
-                if (MaxQueueSize != 0 && messageQueue.Count > MaxQueueSize)
+
+                if (messageQueue.Count > minQueueSize)
                 {
-                    messageQueue.RemoveAt(0);
-                    NumDropped++;
+                    int totalQueueSize = messageQueue.Sum(x => x.RosMessageLength);
+                    if (totalQueueSize > MaxQueueSizeBytes)
+                    {
+                        int overflow = totalQueueSize - MaxQueueSizeBytes;
+                        int i;
+                        for (i = 0; i < messageQueue.Count - minQueueSize && overflow > 0; i++)
+                        {
+                            overflow -= messageQueue[i].RosMessageLength;
+                        }
+                        NumDropped += i;
+                        BytesDropped = totalQueueSize - MaxQueueSizeBytes - overflow;
+                        messageQueue.RemoveRange(0, i);
+                    }
                 }
                 Monitor.Pulse(condVar);
             }
@@ -378,7 +393,7 @@ namespace Iviz.RoslibSharp
             new PublisherSenderState(
                 IsAlive, Latching, Status,
                 Hostname, Port, RemoteCallerId, RemoteHostname, RemotePort,
-                CurrentQueueSize, MaxQueueSize, NumSent, BytesSent, NumDropped
+                CurrentQueueSize, MaxQueueSizeBytes, NumSent, BytesSent, NumDropped
             );
 
         public override string ToString()

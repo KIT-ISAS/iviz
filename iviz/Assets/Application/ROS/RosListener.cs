@@ -39,7 +39,7 @@ namespace Iviz.App
         public string Type { get; }
         public RosListenerStats Stats { get; protected set; } = new RosListenerStats();
 
-        public bool HasPublishers => ConnectionManager.Connection.HasPublishers(Topic);
+        public int NumPublishers => ConnectionManager.Connection.GetNumPublishers(Topic);
 
         protected RosListener(string topic, string type)
         {
@@ -58,7 +58,7 @@ namespace Iviz.App
 
         public int TotalMsgCounter { get; private set; }
         public int MsgsInQueue { get; private set; }
-        public int MaxQueueSize { get; set; } = 5;
+        public int MaxQueueSize { get; set; } = 50;
         public int TotalMsgBytes { get; private set; }
 
         public RosListener(string topic, Action<T> handler) :

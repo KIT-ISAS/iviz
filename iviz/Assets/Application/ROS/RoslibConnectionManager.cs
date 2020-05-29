@@ -6,6 +6,8 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Iviz.App
@@ -16,13 +18,19 @@ namespace Iviz.App
 
         abstract class AdvertisedTopic
         {
-            public RosPublisher publisher;
+            public RosPublisher Publisher { get; protected set; }
             public virtual int Id { get; set; }
 
             public abstract void Add(RosSender subscriber);
             public abstract void Remove(RosSender subscriber);
             public abstract int Count { get; }
             public abstract void Advertise(RosClient client, string topic);
+
+            public void Invalidate()
+            {
+                Id = -1;
+                Publisher = null;
+            }
         }
 
         class AdvertisedTopic<T> : AdvertisedTopic where T : IMessage
@@ -56,18 +64,25 @@ namespace Iviz.App
 
             public override void Advertise(RosClient client, string topic)
             {
+                RosPublisher publisher = null;
                 client?.Advertise<T>(topic, out publisher);
+                Publisher = publisher;
             }
         }
 
         abstract class SubscribedTopic
         {
-            public RosSubscriber subscriber;
+            public RosSubscriber Subscriber { get; protected set; }
 
             public abstract void Add(RosListener subscriber);
             public abstract void Remove(RosListener subscriber);
             public abstract int Count { get; }
             public abstract void Subscribe(RosClient client, string topic);
+
+            public void Invalidate()
+            {
+                Subscriber = null;
+            }
         }
 
         class SubscribedTopic<T> : SubscribedTopic where T : IMessage, new()
@@ -94,7 +109,9 @@ namespace Iviz.App
 
             public override void Subscribe(RosClient client, string topic)
             {
+                RosSubscriber subscriber = null;
                 client?.Subscribe<T>(topic, Callback, out subscriber);
+                Subscriber = subscriber;
             }
 
             public override int Count => listeners.Count;
@@ -147,6 +164,7 @@ namespace Iviz.App
             {
                 return false;
             }
+
             //Debug.Log("Valid");
 
             try
@@ -163,7 +181,7 @@ namespace Iviz.App
                     //Logger.Debug("Late advertisement for " + entry.Key);
                     entry.Value.Advertise(client, entry.Key);
                     entry.Value.Id = publishers.Count;
-                    publishers.Add(entry.Value.publisher);
+                    publishers.Add(entry.Value.Publisher);
                 }
                 foreach (var entry in subscribersByTopic)
                 {
@@ -201,12 +219,11 @@ namespace Iviz.App
             client = null;
             foreach (var entry in publishersByTopic)
             {
-                entry.Value.publisher = null;
-                entry.Value.Id = -1;
+                entry.Value.Invalidate();
             }
             foreach (var entry in subscribersByTopic)
             {
-                entry.Value.subscriber = null;
+                entry.Value.Invalidate();
             }
             publishers.Clear();
             Debug.Log("RosLibConnection: Disconnection finished.");
@@ -239,9 +256,10 @@ namespace Iviz.App
                 if (client != null)
                 {
                     newAdvertisedTopic.Advertise(client, advertiser.Topic);
+                    publisher = newAdvertisedTopic.Publisher;
                     //Logger.Debug("Direct advertisement for " + advertiser.Topic);
 
-                    client?.Advertise<T>(advertiser.Topic, out publisher);
+                    //client?.Advertise<T>(advertiser.Topic, out publisher);
                     id = publishers.FindIndex(x => x is null);
                     if (id == -1)
                     {
@@ -356,7 +374,7 @@ namespace Iviz.App
 
                     if (client != null)
                     {
-                        advertisedTopic.publisher.Unadvertise(advertiser.Topic);
+                        advertisedTopic.Publisher.Unadvertise(advertiser.Topic);
                         PublishedTopics = client.PublishedTopics;
                     }
                 }
@@ -388,7 +406,7 @@ namespace Iviz.App
                 if (subscribedTopic.Count == 0)
                 {
                     subscribersByTopic.Remove(subscriber.Topic);
-                    subscribedTopic.subscriber?.Unsubscribe(subscriber.Topic);
+                    subscribedTopic.Subscriber?.Unsubscribe(subscriber.Topic);
                 }
             }
         }
@@ -398,28 +416,22 @@ namespace Iviz.App
 
         protected override void Update()
         {
-            try
+            AddTask(() =>
             {
-                client?.GetNodeMasterUri(MyUri);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError(e);
-                Disconnect();
-            }
+                client?.CheckListenerHack();
+            });
         }
 
-        public override bool HasPublishers(string topic)
+        public override int GetNumPublishers(string topic)
         {
-            if (!subscribersByTopic.TryGetValue(topic, out SubscribedTopic subscribedTopic))
-            {
-                return false;
-            }
-            if (subscribedTopic?.subscriber == null)
-            {
-                return false;
-            }
-            return subscribedTopic.subscriber.NumPublishers != 0;
+            subscribersByTopic.TryGetValue(topic, out SubscribedTopic subscribedTopic);
+            return subscribedTopic?.Subscriber?.NumPublishers ?? 0;
+        }
+
+        public override int GetNumSubscribers(string topic)
+        {
+            publishersByTopic.TryGetValue(topic, out AdvertisedTopic advertisedTopic);
+            return advertisedTopic?.Publisher?.NumSubscribers ?? 0;
         }
 
         public override void Stop()

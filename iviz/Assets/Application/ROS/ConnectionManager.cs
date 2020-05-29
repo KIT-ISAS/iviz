@@ -240,7 +240,8 @@ namespace Iviz.App
         public abstract void Unadvertise(RosSender advertiser);
         public abstract void Publish(RosSender advertiser, IMessage msg);
         public abstract ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics();
-        public abstract bool HasPublishers(string topic);
+        public abstract int GetNumPublishers(string topic);
+        public abstract int GetNumSubscribers(string topic);
 
         protected virtual void Update()
         {

@@ -19,25 +19,17 @@ namespace Iviz.App
         public override void UpdatePanel()
         {
             string subscribedStatus;
-            switch(Listener.Subscribed)
+            int numPublishers = Listener.NumPublishers;
+            if (numPublishers == -1)
             {
-                case TopicListener.SubscriberStatus.Active:
-                    subscribedStatus = "On";
-                    break;
-                case TopicListener.SubscriberStatus.Inactive:
-                    subscribedStatus = "Inactive";
-                    break;
-                case TopicListener.SubscriberStatus.Disconnected:
-                    subscribedStatus = "Off";
-                    break;
-                default:
-                    subscribedStatus = "?";
-                    break;
+                subscribedStatus = "Off";
+            }
+            else
+            {
+                subscribedStatus = "On → " + numPublishers;
             }
             string messagesPerSecond = Listener.MessagesPerSecond.ToString(UnityUtils.Culture);
             string kbPerSecond = (Listener.BytesPerSecond * 0.001f).ToString("#,0.#", UnityUtils.Culture);
-            //string minJitter = Listener.MessagesJitterMin.ToString("0.##", UnityUtils.Culture);
-            //string maxJitter = Listener.MessagesJitterMax.ToString("0.##", UnityUtils.Culture);
 
             ListenerPanel.Stats.Label = $"{subscribedStatus} | {messagesPerSecond} Hz | {kbPerSecond} kbs";
         }

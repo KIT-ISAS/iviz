@@ -48,7 +48,7 @@ namespace Iviz.RoslibSharp
                 maxQueueSize = value;
                 lock (connectionsByCallerId)
                 {
-                    connectionsByCallerId.Values.ForEach(x => x.MaxQueueSize = value);
+                    connectionsByCallerId.Values.ForEach(x => x.MaxQueueSizeBytes = value);
                 }
             }
         }
@@ -92,7 +92,7 @@ namespace Iviz.RoslibSharp
             {
                 connection.Publish(LatchedMessage);
             }
-            connection.MaxQueueSize = MaxQueueSize;
+            connection.MaxQueueSizeBytes = MaxQueueSize;
             return endPoint;
         }
 

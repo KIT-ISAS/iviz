@@ -47,12 +47,6 @@ namespace Iviz.RoslibSharp.XmlRpc
             string maskUri = "http://+:" + Uri.Port + Uri.AbsolutePath;
             Logger.Log("RcpNodeServer: Starting RPC server on " + maskUri);
 
-            //TimeSpan timeout = TimeSpan.FromSeconds(10);
-            //listener.TimeoutManager.DrainEntityBody = timeout;
-            //listener.TimeoutManager.EntityBody = timeout;
-            //listener.TimeoutManager.HeaderWait = timeout;
-            //listener.TimeoutManager.IdleConnection = timeout;
-
             listener.Prefixes.Add(maskUri);
             listener.Start();
             Logger.LogDebug("RcpNodeServer: Started!");
@@ -63,20 +57,20 @@ namespace Iviz.RoslibSharp.XmlRpc
                 {
                     while (keepRunning)
                     {
-                        Logger.Log("RcpNodeServer: Waiting...");
+                        //Logger.LogDebug("RcpNodeServer: Waiting...");
                         Task<HttpListenerContext> task = listener.GetContextAsync();
                         task.Wait(tokenSource.Token);
-                        Logger.LogDebug("RcpNodeServer: Received!");
+                        //Logger.LogDebug("RcpNodeServer: Received!");
 
                         if (task.IsCanceled || !keepRunning)
                         {
-                            Logger.LogDebug("RcpNodeServer: Breaking!");
-                            continue;
+                            //Logger.LogDebug("RcpNodeServer: Breaking!");
+                            break;
                         }
                         if (task.IsFaulted)
                         {
                             Logger.LogDebug("RcpNodeServer: Faulted!!");
-                            continue;
+                            break;
                         }
 
                         HttpListenerContext context = task.Result;
@@ -84,9 +78,9 @@ namespace Iviz.RoslibSharp.XmlRpc
                         {
                             try
                             {
-                                Logger.LogDebug("RcpNodeServer: Starting service!");
+                                //Logger.LogDebug("RcpNodeServer: Starting service!");
                                 Service.MethodResponse(context, Methods);
-                                Logger.LogDebug("RcpNodeServer: Ending service!");
+                                //Logger.LogDebug("RcpNodeServer: Ending service!");
                             }
                             catch (Exception e)
                             {

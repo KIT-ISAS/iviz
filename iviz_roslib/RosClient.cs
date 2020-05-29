@@ -10,7 +10,7 @@ namespace Iviz.RoslibSharp
 {
     public sealed class RosClient : IDisposable
     {
-        internal readonly XmlRpc.NodeServer Listener;
+        XmlRpc.NodeServer Listener;
 
         readonly Dictionary<string, RosSubscriber> subscribersByTopic = new Dictionary<string, RosSubscriber>();
         readonly Dictionary<string, RosPublisher> publishersByTopic = new Dictionary<string, RosPublisher>();
@@ -61,7 +61,6 @@ namespace Iviz.RoslibSharp
         /// </summary>
         public Uri CallerUri { get; }
 
-        XmlRpc.NodeClient Talker { get; }
 
         /// <summary>
         /// Constructs and connects a ROS client.
@@ -106,7 +105,6 @@ namespace Iviz.RoslibSharp
             }
 
             Master = new XmlRpc.Master(masterUri, CallerId, CallerUri);
-            Talker = new XmlRpc.NodeClient(CallerId, CallerUri);
             Parameters = new XmlRpc.ParameterClient(masterUri, CallerId, CallerUri);
 
             Logger.Log($"RosClient: Starting: My id is {CallerId}, my uri is {CallerUri}, and I'm talking to {MasterUri}");
@@ -123,6 +121,16 @@ namespace Iviz.RoslibSharp
                 throw new ArgumentException($"RosClient: Failed to contact the master URI '{masterUri}'", nameof(masterUri), e);
             }
             Logger.Log("RosClient: Initialized.");
+
+            Logger.Log("RosClient: Doing reachability test...");
+            try
+            {
+                GetNodeMasterUri(CallerUri);
+            }
+            catch (TimeoutException)
+            {
+                Logger.LogError("RosClient: Node does not appear to be reachable!");
+            }
         }
 
         public static string TryGetHostname()
@@ -168,6 +176,11 @@ namespace Iviz.RoslibSharp
                 ForEach(x => Master.UnregisterPublisher(x.Name));
         }
 
+        internal XmlRpc.NodeClient CreateTalker(Uri otherUri)
+        {
+            return new XmlRpc.NodeClient(CallerId, CallerUri, otherUri);
+        }
+
         RosSubscriber CreateSubscriber(string topic, bool requestNoDelay, Type type, IMessage generator)
         {
             TopicInfo topicInfo = new TopicInfo(CallerId, topic, type, generator);
@@ -189,7 +202,7 @@ namespace Iviz.RoslibSharp
                 throw new ArgumentException("Error registering publisher: " + masterResponse.StatusMessage, nameof(topic));
             }
 
-            manager.PublisherUpdateRpc(Talker, masterResponse.Publishers);
+            manager.PublisherUpdateRpc(this, masterResponse.Publishers);
 
             return subscription;
         }
@@ -564,7 +577,7 @@ namespace Iviz.RoslibSharp
                     Logger.Log($"{this}: PublisherUpdate called for nonexisting topic '{topic}'");
                     return;
                 }
-                subscriber.PublisherUpdateRcp(Talker, publishers);
+                subscriber.PublisherUpdateRcp(publishers);
             }
             catch (Exception e)
             {
@@ -831,8 +844,28 @@ namespace Iviz.RoslibSharp
 
         public Uri GetNodeMasterUri(Uri other)
         {
-            Talker.Uri = other;
-            return Talker.GetMasterUri().uri;
+            return CreateTalker(other).GetMasterUri().uri;
+        }
+
+        public void CheckListenerHack()
+        {
+            try
+            {
+                GetNodeMasterUri(CallerUri);
+            }
+            catch (TimeoutException)
+            {
+                Logger.Log($"{this}: Resetting listener.");
+                Listener.Stop();
+                Listener = null;
+                Listener = new XmlRpc.NodeServer(this);
+                Listener.Start();
+            }
+        }
+
+        public override string ToString()
+        {
+            return $"[RosClient MyUri='{CallerUri}' MyId='{CallerId}' MasterUri='{MasterUri}']";
         }
     }
 }

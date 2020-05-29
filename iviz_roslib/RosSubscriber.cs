@@ -67,9 +67,9 @@ namespace Iviz.RoslibSharp
             return new SubscriberTopicState(Topic, TopicType, Ids, Manager.GetStates());
         }
 
-        internal void PublisherUpdateRcp(XmlRpc.NodeClient talker, Uri[] publisherUris)
+        internal void PublisherUpdateRcp(Uri[] publisherUris)
         {
-            Manager.PublisherUpdateRpc(talker, publisherUris);
+            Manager.PublisherUpdateRpc(Client, publisherUris);
         }
 
         internal void Stop()

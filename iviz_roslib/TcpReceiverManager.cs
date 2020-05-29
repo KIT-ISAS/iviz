@@ -24,13 +24,13 @@ namespace Iviz.RoslibSharp
 
         public TcpReceiverManager(TopicInfo topicInfo, bool requestNoDelay)
         {
-            this.TopicInfo = topicInfo;
+            TopicInfo = topicInfo;
             RequestNoDelay = requestNoDelay;
         }
 
-        bool AddPublisher(XmlRpc.NodeClient talker, Uri remoteUri)
+        bool AddPublisher(XmlRpc.NodeClient talker)
         {
-            talker.Uri = remoteUri;
+            Uri remoteUri = talker.Uri;
             XmlRpc.NodeClient.RequestTopicResponse response;
             try
             {
@@ -72,7 +72,7 @@ namespace Iviz.RoslibSharp
             return true;
         }
 
-        public void PublisherUpdateRpc(XmlRpc.NodeClient talker, IList<Uri> publisherUris)
+        public void PublisherUpdateRpc(RosClient caller, IList<Uri> publisherUris)
         {
             Uri[] toAdd;
             lock (connectionsByUri)
@@ -91,7 +91,7 @@ namespace Iviz.RoslibSharp
             }
             foreach (Uri uri in toAdd)
             {
-                AddPublisher(talker, uri);
+                AddPublisher(caller.CreateTalker(uri));
             }
         }
 
