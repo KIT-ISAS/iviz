@@ -1,0 +1,28 @@
+<launch>
+  <arg
+    name="model" />
+  <arg
+    name="gui"
+    default="False" />
+  <param
+    name="robot_description"
+    textfile="$(find crayler)/urdf/crayler.urdf" />
+  <param
+    name="use_gui"
+    value="$(arg gui)" />
+  <!--node
+    name="joint_state_publisher"
+    pkg="joint_state_publisher"
+    type="joint_state_publisher" /-->
+  <node
+    name="robot_state_publisher"
+    pkg="robot_state_publisher"
+    type="state_publisher" />
+  <node
+    name="rviz"
+    pkg="rviz"
+    type="rviz"
+    args="-d $(find crayler)/rviz/crayler_test_localization.rviz" />
+  <node pkg="tf" type="static_transform_publisher" name="scanner1_broadcaster" args="0 0 0 0 0 0 1 scan2d_back_left scanner1/scan_left 100" />
+  <node pkg="tf" type="static_transform_publisher" name="scanner2_broadcaster" args="0 0 0 0 0 0 1 scan2d_back_right scanner2/scan_right 100" />
+</launch>

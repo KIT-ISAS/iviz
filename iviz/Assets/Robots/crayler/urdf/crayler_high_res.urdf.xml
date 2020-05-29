@@ -1,0 +1,1280 @@
+<robot
+  name="crayler">
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="-0.066464 4.2251E-06 0.048976"
+        rpy="0 0 0" />
+      <mass
+        value="769.63" />
+      <inertia
+        ixx="29.452"
+        ixy="0.0020758"
+        ixz="-18.387"
+        iyy="42.774"
+        iyz="0.00020875"
+        izz="13.322" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.52941 0.54902 0.54902 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="wheel_rear_right">
+    <inertial>
+      <origin
+        xyz="-2.79354010573768E-18 2.32003590682677E-19 -0.000485744856249415"
+        rpy="0 0 0" />
+      <mass
+        value="82.3890394381167" />
+      <inertia
+        ixx="0"
+        ixy="0"
+        ixz="0"
+        iyy="0"
+        iyz="0"
+        izz="0" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/wheel_rear_right.STL" />
+      </geometry> 
+      <material
+        name="">
+        <color
+          rgba="0.298039215686275 0.298039215686275 0.298039215686275 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/wheel_rear_right.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_wheel_rear_right"
+    type="continuous">
+    <origin
+      xyz="0 0.81023 0"
+      rpy="1.5708 6.123E-17 -3.1416" />
+    <parent
+      link="base_link" />
+    <child
+      link="wheel_rear_right" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      effort="0"
+      velocity="1" />
+  </joint>
+  <link
+    name="wheel_rear_left">
+    <inertial>
+      <origin
+        xyz="-1.40768993380252E-18 -5.74000207871945E-19 0.000485744856249637"
+        rpy="0 0 0" />
+      <mass
+        value="82.3890394381167" />
+      <inertia
+        ixx="0"
+        ixy="0"
+        ixz="0"
+        iyy="0"
+        iyz="0"
+        izz="0" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/wheel_rear_left.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.298039215686275 0.298039215686275 0.298039215686275 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/wheel_rear_left.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_wheel_rear_left"
+    type="continuous">
+    <origin
+      xyz="0 -0.81023 0"
+      rpy="1.5708 6.123E-17 3.1416" />
+    <parent
+      link="base_link" />
+    <child
+      link="wheel_rear_left" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      effort="0"
+      velocity="1" />
+  </joint>
+  <link
+    name="scan2d_back_left">
+    <inertial>
+      <origin
+        xyz="-0.0716049858012626 -0.0171006947223147 -0.0808158679141284"
+        rpy="0 0 0" />
+      <mass
+        value="3.60628441596821" />
+      <inertia
+        ixx="0.00815594042373111"
+        ixy="-0.00403384555686372"
+        ixz="-0.00775907108314881"
+        iyy="0.0169773637050293"
+        iyz="-0.00343387477197156"
+        izz="0.0132856599497795" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/scan2d_back_left.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.0823529411764706 0.0862745098039216 0.0980392156862745 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/scan2d_back_left.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_scan2d_back_left"
+    type="fixed">
+    <origin
+      xyz="0.38062 -1.0046 0.20799"
+      rpy="-3.1416 -4.3296E-17 -0.7854" />
+    <parent
+      link="base_link" />
+    <child
+      link="scan2d_back_left" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="scan2d_back_right">
+    <inertial>
+      <origin
+        xyz="-0.0716045739816351 0.0173201866697006 -0.0808157346462496"
+        rpy="0 0 0" />
+      <mass
+        value="3.60626043370522" />
+      <inertia
+        ixx="0.00816589998181388"
+        ixy="0.00405416055132685"
+        ixz="-0.00775904369536902"
+        iyy="0.016977291559794"
+        iyz="0.0034461971319929"
+        izz="0.0132955080965055" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/scan2d_back_right.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.0823529411764706 0.0862745098039216 0.0980392156862745 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/scan2d_back_right.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_scan2d_back_right"
+    type="fixed">
+    <origin
+      xyz="-1.4211 -1.4208 0"
+      rpy="0 2.3705E-16 -1.5708" />
+    <parent
+      link="scan2d_back_left" />
+    <child
+      link="scan2d_back_right" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="scan3d_back_mid">
+    <inertial>
+      <origin
+        xyz="0.000169048395729884 -0.000255335253541322 -0.00161219654317846"
+        rpy="0 0 0" />
+      <mass
+        value="1.59760814665287" />
+      <inertia
+        ixx="0"
+        ixy="0"
+        ixz="0"
+        iyy="0"
+        iyz="0"
+        izz="0" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/scan3d_back_mid.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/scan3d_back_mid.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_scan3d_back_mid"
+    type="fixed">
+    <origin
+      xyz="0.2857 0 0.57372"
+      rpy="-1.0767E-13 0 -1.5708" />
+    <parent
+      link="base_link" />
+    <child
+      link="scan3d_back_mid" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="vehicle_front_wave">
+    <inertial>
+      <origin
+        xyz="0.00021967952296717 -1.17872722281594E-09 0.0987505076991591"
+        rpy="0 0 0" />
+      <mass
+        value="1.50125406109762" />
+      <inertia
+        ixx="0.00611057071212479"
+        ixy="-3.90622167601165E-13"
+        ixz="6.01562606138606E-06"
+        iyy="0.00210431391785642"
+        iyz="-1.06416497221082E-10"
+        izz="0.00400638676822132" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/vehicle_front_wave.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.215686274509804 0.215686274509804 0.215686274509804 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/vehicle_front_wave.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_vehicle_front_wave"
+    type="revolute">
+    <origin
+      xyz="-0.70459 0.001 0.00035232"
+      rpy="3.1416 -1.4661 3.1416" />
+    <parent
+      link="base_link" />
+    <child
+      link="vehicle_front_wave" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-0.02"
+      upper="0.02"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="vehicle_front_pitch">
+    <inertial>
+      <origin
+        xyz="1.27399779614734E-09 -4.66949673927353E-08 -5.66258823993075E-08"
+        rpy="0 0 0" />
+      <mass
+        value="0.414472723346101" />
+      <inertia
+        ixx="0.00050915006739063"
+        ixy="-4.12938814042948E-15"
+        ixz="2.4027477956191E-17"
+        iyy="1.06938857177098E-15"
+        iyz="9.03822027709336E-16"
+        izz="0.000509150067389562" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/vehicle_front_pitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.215686274509804 0.215686274509804 0.215686274509804 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/vehicle_front_pitch.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_vehicle_front_pitch"
+    type="fixed">
+    <origin
+      xyz="0 0 0.147"
+      rpy="-1.5708 -1.3614 -2.9669E-13" />
+    <parent
+      link="vehicle_front_wave" />
+    <child
+      link="vehicle_front_pitch" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="vehicle_front_steer">
+    <inertial>
+      <origin
+        xyz="0.470067891365014 0.00022846897035843 -0.0419188021221415"
+        rpy="0 0 0" />
+      <mass
+        value="181.113195921958" />
+      <inertia
+        ixx="9.13748753252638"
+        ixy="-0.00638952958632648"
+        ixz="1.04638696996548"
+        iyy="3.07187300264354"
+        iyz="0.0013729637212947"
+        izz="10.7605210281666" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/vehicle_front_steer.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/vehicle_front_steer.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_vehicle_front_steer"
+    type="revolute">
+    <origin
+      xyz="0 0 0"
+      rpy="-1.5708 0 0" />
+    <parent
+      link="vehicle_front_pitch" />
+    <child
+      link="vehicle_front_steer" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-0.48"
+      upper="0.48"
+      effort="100000"
+      velocity="100000" />
+  </joint>
+  <link
+    name="wheel_front_right">
+    <inertial>
+      <origin
+        xyz="0 -8.23993651088983E-18 -0.000485744856249637"
+        rpy="0 0 0" />
+      <mass
+        value="82.3890394381167" />
+      <inertia
+        ixx="0"
+        ixy="0"
+        ixz="0"
+        iyy="0"
+        iyz="0"
+        izz="0" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/wheel_front_right.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.298039215686275 0.298039215686275 0.298039215686275 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/wheel_front_right.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_wheel_front_right"
+    type="continuous">
+    <origin
+      xyz="0.8478 -0.81223 -0.072846"
+      rpy="1.5708 0.10472 -6.168E-14" />
+    <parent
+      link="vehicle_front_steer" />
+    <child
+      link="wheel_front_right" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      effort="0"
+      velocity="1" />
+  </joint>
+  <link
+    name="wheel_front_left">
+    <inertial>
+      <origin
+        xyz="0 0 0.000485744856249637"
+        rpy="0 0 0" />
+      <mass
+        value="82.3890394381167" />
+      <inertia
+        ixx="0"
+        ixy="0"
+        ixz="0"
+        iyy="0"
+        iyz="0"
+        izz="0" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/wheel_front_left.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.298039215686275 0.298039215686275 0.298039215686275 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/wheel_front_left.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_wheel_front_left"
+    type="continuous">
+    <origin
+      xyz="0.8478 0.81223 -0.072846"
+      rpy="1.5708 0.72168 -6.1858E-14" />
+    <parent
+      link="vehicle_front_steer" />
+    <child
+      link="wheel_front_left" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      effort="0"
+      velocity="1" />
+  </joint>
+  <link
+    name="forklifter_push">
+    <inertial>
+      <origin
+        xyz="0.0301107763214296 8.18847925272833E-05 0.0712816772811846"
+        rpy="0 0 0" />
+      <mass
+        value="57.2771795936717" />
+      <inertia
+        ixx="10.8141463051101"
+        ixy="-0.00408539403529364"
+        ixz="-0.00468978292983949"
+        iyy="0.0168247647312424"
+        iyz="1.36619672506922E-06"
+        izz="10.8232844483074" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/forklifter_push.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.529411764705882 0.549019607843137 0.549019607843137 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/forklifter_push.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_forklifter_push"
+    type="fixed">
+    <origin
+      xyz="0.86118 0.00010134 -0.21955"
+      rpy="-3.1416 -1.4661 -6.219E-14" />
+    <parent
+      link="vehicle_front_steer" />
+    <child
+      link="forklifter_push" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="forklifter_fold">
+    <inertial>
+      <origin
+        xyz="0.00794018404262631 0.592612569618188 -0.000846358049627149"
+        rpy="0 0 0" />
+      <mass
+        value="110.812246267385" />
+      <inertia
+        ixx="21.4829913063798"
+        ixy="0.83516759917911"
+        ixz="-0.00628751045896231"
+        iyy="7.46538242844528"
+        iyz="-0.0215040035571312"
+        izz="14.390600045056" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/forklifter_fold.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.2 0.2 0.2 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/forklifter_fold.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_forklifter_fold"
+    type="fixed">
+    <origin
+      xyz="0.237 0.00010134 0.1854"
+      rpy="-1.5708 -1.4661 -1.2976E-16" />
+    <parent
+      link="forklifter_push" />
+    <child
+      link="forklifter_fold" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="forklifter_lift_1">
+    <inertial>
+      <origin
+        xyz="0.0289916765117817 -9.83104323799572E-07 0.983073155848774"
+        rpy="0 0 0" />
+      <mass
+        value="105.667515890714" />
+      <inertia
+        ixx="17.2734622165847"
+        ixy="1.31354901676214E-07"
+        ixz="0.746777107423377"
+        iyy="13.0142082523618"
+        iyz="3.21070651432388E-06"
+        izz="4.42531458617504" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/forklifter_lift_1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.2 0.2 0.2 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/forklifter_lift_1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_forklifter_lift_1"
+    type="fixed">
+    <origin
+      xyz="-0.02 -0.19667 0.00047566"
+      rpy="-1.5708 4.6855E-17 -5.6066E-15" />
+    <parent
+      link="forklifter_fold" />
+    <child
+      link="forklifter_lift_1" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="imu_front">
+    <inertial>
+      <origin
+        xyz="-2.22044604925031E-16 -1.23604394720175E-17 0.00691247438351796"
+        rpy="0 0 0" />
+      <mass
+        value="0.0827337202571108" />
+      <inertia
+        ixx="0"
+        ixy="0"
+        ixz="0"
+        iyy="0"
+        iyz="0"
+        izz="0" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/imu_front.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/imu_front.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_imu_front"
+    type="fixed">
+    <origin
+      xyz="0.16142 0.001 0.097333"
+      rpy="5.3313E-17 0.10472 -6.168E-14" />
+    <parent
+      link="vehicle_front_steer" />
+    <child
+      link="imu_front" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="gps_right">
+    <inertial>
+      <origin
+        xyz="0.00072457164991277 -3.04837113873635E-06 -0.0422789013108091"
+        rpy="0 0 0" />
+      <mass
+        value="0.310023639023651" />
+      <inertia
+        ixx="0.000869449595208937"
+        ixy="-1.06021351353198E-08"
+        ixz="5.58393552134071E-06"
+        iyy="0.000874308172673687"
+        iyz="6.77747417965646E-08"
+        izz="4.85870135544432E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/gps_right.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/gps_right.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_gps_right"
+    type="fixed">
+    <origin
+      xyz="0.18021 0.74935 0.59897"
+      rpy="1.0206E-32 0.0091137 -3.1416" />
+    <parent
+      link="base_link" />
+    <child
+      link="gps_right" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="gps_left">
+    <inertial>
+      <origin
+        xyz="0.000339231551603758 -3.04840448150934E-06 -0.0422837489417636"
+        rpy="0 0 0" />
+      <mass
+        value="0.310023638593292" />
+      <inertia
+        ixx="0.000869479559711857"
+        ixy="-9.98401258637066E-09"
+        ixz="-2.29613716154894E-06"
+        iyy="0.000874308172419721"
+        iyz="6.78686958096794E-08"
+        izz="4.82873659805278E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/gps_left.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/gps_left.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_gps_left"
+    type="fixed">
+    <origin
+      xyz="0.18021 -0.74935 0.59897"
+      rpy="1.0206E-32 -9.5694E-14 -3.1416" />
+    <parent
+      link="base_link" />
+    <child
+      link="gps_left" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="imu_back">
+    <inertial>
+      <origin
+        xyz="1.11022302462516E-16 2.01961767483012E-18 0.00691247438351794"
+        rpy="0 0 0" />
+      <mass
+        value="0.0827337202571106" />
+      <inertia
+        ixx="0"
+        ixy="0"
+        ixz="0"
+        iyy="0"
+        iyz="0"
+        izz="0" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/imu_back.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://crayler/meshes/imu_back.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_imu_back"
+    type="fixed">
+    <origin
+      xyz="-0.591 0 0.14"
+      rpy="0 6.123E-17 3.1416" />
+    <parent
+      link="base_link" />
+    <child
+      link="imu_back" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+
+    <gazebo reference="scan2d_back_left">
+    <sensor type="ray" name="scan2d_back_left">
+      <pose>0 0 0 0 0 0 </pose>      
+      <visualize> 1 </visualize>
+      <update_rate> 10 </update_rate>
+      <ray>
+        <scan>
+          <horizontal> 
+            <samples> 270 </samples>
+            <min_angle> -2.355 </min_angle> 
+            <max_angle>  2.355 </max_angle>
+          </horizontal>
+          <vertical>
+            <samples> 1 </samples>
+            <min_angle> 0.0 </min_angle>
+            <max_angle> 0.0 </max_angle> 
+          </vertical>
+        </scan>  
+        <range>
+          <min> 0.1 </min> 
+          <max> 75.0 </max> 
+        </range>
+      </ray>
+      <plugin name='scan2d_back_left' filename='libgazebo_ros_laser.so'>
+        <topicName>/scan2d_back_left_laser</topicName>
+        <frameName>scan2d_back_left</frameName>
+        <alwaysOn> 1 </alwaysOn>
+        <gaussianNoise> 0.00 </gaussianNoise>
+        <updateRate> 10.0 </updateRate>
+        <hokuyoMinIntensity> 1 </hokuyoMinIntensity>
+      </plugin>
+    </sensor>
+  </gazebo>
+  <gazebo reference="scan2d_back_right">
+    <sensor type="ray" name="scan_2d_back_right">
+      <pose>0 0 0 0 0 0 </pose>
+      <visualize> 1 </visualize>
+      <update_rate> 10 </update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples> 270 </samples>
+            <min_angle> -2.355 </min_angle>
+            <max_angle>  2.355 </max_angle>
+          </horizontal>
+          <vertical>
+            <samples> 1 </samples>
+            <min_angle> 0.0 </min_angle>
+            <max_angle> 0.0 </max_angle>
+          </vertical>
+        </scan>
+        <range>
+          <min> 0.1 </min>
+          <max> 75.0 </max>
+        </range>
+      </ray>
+      <plugin name='scan2d_back_right' filename='libgazebo_ros_laser.so'>
+        <topicName>/scan2d_back_right_laser</topicName>
+        <frameName>scan2d_back_right</frameName>
+        <alwaysOn> 1 </alwaysOn>
+        <gaussianNoise> 0.00 </gaussianNoise>
+        <updateRate> 10.0 </updateRate>
+        <hokuyoMinIntensity> 1 </hokuyoMinIntensity>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+
+  <gazebo reference="scan3d_back_mid2">
+    <sensor type="gpu_ray" name="scan_3d_back_mid">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>false</visualize>
+      <update_rate>10</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>1875</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.14</min_angle>
+            <max_angle>3.14</max_angle>
+          </horizontal>
+          <vertical>
+            <samples>16</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.2616</min_angle>
+            <max_angle> 0.2616</max_angle>
+          </vertical>
+        </scan>
+        <range>
+          <min>0.3</min>
+          <max>130 + 1</max>
+          <resolution>0.001</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.0</stddev>
+        </noise>
+      </ray>
+
+      <plugin name="gazebo_ros_laser_controller" filename="libgazebo_ros_velodyne_gpu_laser.so">
+        <topicName>/scan3d_back_mid_laser</topicName>
+        <frameName>scan3d_back_mid</frameName>
+        <min_range>0.9</min_range>
+        <max_range>130</max_range>
+        <gaussianNoise>0.008</gaussianNoise>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+
+  <gazebo reference="scan3d_back_mid">
+    <sensor type="gpu_ray" name="scan_3d_back_mid">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>false</visualize>
+      <update_rate>10</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>1875</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.14</min_angle>
+            <max_angle>3.14</max_angle>
+          </horizontal>
+          <vertical>
+            <samples>16</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.2616</min_angle>
+            <max_angle> 0.2616</max_angle>
+          </vertical>
+        </scan>
+        <range>
+          <min>0.3</min>
+          <max>130 + 1</max>
+          <resolution>0.001</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.0</stddev>
+        </noise>
+      </ray>
+
+      <plugin name="gazebo_ros_laser_controller" filename="libgazebo_ros_velodyne_gpu_laser.so">
+        <topicName>/scan3d_back_mid_laser</topicName>
+        <frameName>scan3d_back_mid</frameName>
+        <min_range>0.9</min_range>
+        <max_range>130</max_range>
+        <gaussianNoise>0.008</gaussianNoise>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- GPS Sensor -->
+  <gazebo>
+    <plugin name="novatel_gps_sim" filename="libhector_gazebo_ros_gps.so">
+      <alwaysOn>1</alwaysOn>
+      <updateRate>10.0</updateRate>
+      <bodyName>gps_right</bodyName>
+      <topicName>/gps_fix_right</topicName>
+      <velocityTopicName>/gps_fix_velocity_right</velocityTopicName>
+      <drift>5.0 5.0 5.0</drift>
+      <!--Ilmenau Am Vogelherd 50 Forschungspark-->
+      <referenceLatitude>50.694394 </referenceLatitude>
+      <referenceLongitude>10.937722</referenceLongitude>
+      <referenceHeading>0.0</referenceHeading>
+      <referenceAltitude>508.0</referenceAltitude>
+      <gaussianNoise>0.1 0.1 0.1</gaussianNoise>
+      <velocityDrift>0 0 0</velocityDrift>
+      <velocityGaussianNoise>0.1 0.1 0.1</velocityGaussianNoise>
+    </plugin>
+ </gazebo>
+
+<gazebo>
+    <plugin name="novatel_gps_sim" filename="libhector_gazebo_ros_gps.so">
+      <alwaysOn>1</alwaysOn>
+      <updateRate>10.0</updateRate>
+      <bodyName>gps_left</bodyName>
+      <topicName>/gps_fix_left</topicName>
+      <velocityTopicName>/gps_fix_velocity_left</velocityTopicName>
+      <drift>5.0 5.0 5.0</drift>
+      <!--Ilmenau Am Vogelherd 50 Forschungspark-->
+      <referenceLatitude>50.694394 </referenceLatitude>
+      <referenceLongitude>10.937722</referenceLongitude>
+      <referenceHeading>0.0</referenceHeading>
+      <referenceAltitude>508.0</referenceAltitude>
+      <gaussianNoise>0.1 0.1 0.1</gaussianNoise>
+      <velocityDrift>0 0 0</velocityDrift>
+      <velocityGaussianNoise>0.1 0.1 0.1</velocityGaussianNoise>
+    </plugin>
+ </gazebo>
+
+ <gazebo>    
+    <plugin name="imu_plugin" filename="libgazebo_ros_imu.so">
+        <alwaysOn>true</alwaysOn>       
+        <bodyName>imu_front</bodyName>
+        <topicName>imu_data_front</topicName>
+        <serviceName>imu_service_front</serviceName>
+        <gaussianNoise>2.89e-08</gaussianNoise>
+        <updateRate>10.0</updateRate> 
+    </plugin>
+ </gazebo>
+ <gazebo>    
+    <plugin name="imu_plugin" filename="libgazebo_ros_imu.so">
+        <alwaysOn>true</alwaysOn>       
+        <bodyName>imu_back</bodyName>
+        <topicName>imu_data_back</topicName>
+        <serviceName>imu_service_back</serviceName>
+        <gaussianNoise>2.89e-08</gaussianNoise>
+        <updateRate>10.0</updateRate> 
+    </plugin>
+ </gazebo>
+
+
+ <!-- Manually added -->
+
+  <gazebo>
+    <plugin name="joint_state_publisher" filename="libgazebo_ros_joint_state_publisher.so">
+      <jointName>joint_wheel_front_left, joint_wheel_front_right, joint_wheel_rear_left, joint_wheel_rear_right, joint_vehicle_front_steer, joint_vehicle_front_wave</jointName>
+      <updateRate>100.0</updateRate>
+      <alwaysOn>true</alwaysOn>
+    </plugin>
+  </gazebo>
+
+ <gazebo>
+    <plugin name="gazebo_articulated_steering_plugin" filename="libgazebo_articulated_steering_plugin.so">
+      <front_left_wheel>joint_wheel_front_left</front_left_wheel>
+      <front_right_wheel>joint_wheel_front_right</front_right_wheel>
+      <back_left_wheel>joint_wheel_rear_left</back_left_wheel>
+      <back_right_wheel>joint_wheel_rear_right</back_right_wheel>
+      <articulated_steering>joint_vehicle_front_steer</articulated_steering>
+      <steering_rate>0.2</steering_rate>
+      <front_wheel_diameter>0.62</front_wheel_diameter>
+      <back_wheel_diameter>0.62</back_wheel_diameter>
+      <positive_acceleration>0.2</positive_acceleration>
+      <negative_acceleration>0.2</negative_acceleration>
+      <maximum_speed>0.5</maximum_speed>
+    </plugin>
+  </gazebo> 
+
+  <gazebo reference="wheel_rear_left">
+    <material>Gazebo/Grey</material>
+  </gazebo>
+
+  <gazebo reference="wheel_rear_right">
+    <material>Gazebo/Grey</material>
+  </gazebo>
+
+  <gazebo reference="wheel_front_left">
+    <material>Gazebo/Grey</material>
+  </gazebo>
+
+  <gazebo reference="wheel_front_right">
+    <material>Gazebo/Grey</material>
+  </gazebo>
+
+  <gazebo reference="base_link">
+    <material>Gazebo/Yellow</material>
+  </gazebo>
+
+  <gazebo reference="vehicle_front_wave">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <gazebo reference="vehicle_front_pitch">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <gazebo reference="forklifter_push">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <gazebo reference="forklifter_fold">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <gazebo reference="forklifter_lift_1">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <gazebo reference="vehicle_front_steer">
+    <material>Gazebo/Yellow</material>
+  </gazebo>
+
+  <gazebo reference="scan2d_back_left">
+    <material>Gazebo/Black</material>
+  </gazebo>
+  
+  <gazebo reference="scan2d_back_right">
+    <material>Gazebo/Black</material>
+  </gazebo>
+  
+  <gazebo reference="scan3d_back_mid">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <gazebo reference="imu_front">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <gazebo reference="imu_back">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <gazebo reference="gps_left">
+    <material>Gazebo/White</material>
+  </gazebo>
+
+  <gazebo reference="gps_right">
+    <material>Gazebo/White</material>
+  </gazebo>
+
+
+</robot>

@@ -216,8 +216,8 @@ namespace Iviz.App
 
         void Awake()
         {
-            node = ObjectClickableNode.Instantiate("node");
-            gameObject.layer = Resource.ClickableLayer;
+            node = ObjectClickableNode.Instantiate("RobotNode");
+            //gameObject.layer = Resource.ClickableLayer;
             //boxCollider = GetComponent<BoxCollider>();
 
             Config = new RobotConfiguration();
@@ -238,6 +238,7 @@ namespace Iviz.App
 
             RobotObject = ResourcePool.GetOrCreate(Resource.Robots.Objects[newResource], TFListener.BaseFrame.transform);
             RobotObject.name = newResource;
+            //RobotObject.layer = Resource.ClickableLayer;
 
             Name = Name; // update name;
 
@@ -286,6 +287,10 @@ namespace Iviz.App
             if (BaseLink == null)
             {
                 Debug.LogWarning("Robot " + newResource + " has no base link!");
+            }
+            else
+            {
+                node.SetParent(Decorate(BaseLink.name));
             }
 
             if (oldAttachToTf)

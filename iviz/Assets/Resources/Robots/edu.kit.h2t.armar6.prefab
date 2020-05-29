@@ -2975,8 +2975,6 @@ MonoBehaviour:
   PositionLimitMin: -10
   PositionLimitMax: 10
   Tolerance: 0.01
-  Position: 0
-  ReferencePosition: 0
 --- !u!1 &924516543632369005
 GameObject:
   m_ObjectHideFlags: 0
@@ -3276,8 +3274,6 @@ MonoBehaviour:
   PositionLimitMin: -10
   PositionLimitMax: 10
   Tolerance: 0.01
-  Position: 0
-  ReferencePosition: 0
 --- !u!1 &1006206441851416414
 GameObject:
   m_ObjectHideFlags: 0
@@ -8528,8 +8524,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1, y: 2, z: 1}
-  m_Center: {x: 0, y: 1, z: 0}
+  m_Size: {x: 1, y: 1.9040098, z: 1}
+  m_Center: {x: 1.2883358e-17, y: 0.9520049, z: -0.0029996634}
 --- !u!1 &2864798859386284907
 GameObject:
   m_ObjectHideFlags: 0
@@ -12003,8 +11999,6 @@ MonoBehaviour:
   PositionLimitMin: 0
   PositionLimitMax: 10
   Tolerance: 0.01
-  Position: 0
-  ReferencePosition: 0
 --- !u!1 &3881315078004105182
 GameObject:
   m_ObjectHideFlags: 0
@@ -25765,8 +25759,6 @@ MonoBehaviour:
   PositionLimitMin: -0.365
   PositionLimitMax: 0
   Tolerance: 0.01
-  Position: 0
-  ReferencePosition: 0
 --- !u!1 &7284005076694483099
 GameObject:
   m_ObjectHideFlags: 0
@@ -26784,8 +26776,6 @@ MonoBehaviour:
   PositionLimitMin: 0
   PositionLimitMax: 10
   Tolerance: 0.01
-  Position: 0
-  ReferencePosition: 0
 --- !u!1 &7504391563199988513
 GameObject:
   m_ObjectHideFlags: 0

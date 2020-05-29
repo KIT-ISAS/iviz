@@ -418,7 +418,9 @@ namespace Iviz.App
         {
             AddTask(() =>
             {
+                //Debug.Log("Pre");
                 client?.CheckListenerHack();
+                //Debug.Log("Post");
             });
         }
 

@@ -111,7 +111,6 @@ namespace Iviz.RoslibSharp.XmlRpc
             tokenSource.Cancel();
             task?.Wait();
             listener.Close();
-            task?.Dispose();
         }
 
         public void Dispose()
