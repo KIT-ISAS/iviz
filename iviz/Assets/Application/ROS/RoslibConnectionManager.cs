@@ -256,6 +256,7 @@ namespace Iviz.App
                 if (client != null)
                 {
                     newAdvertisedTopic.Advertise(client, advertiser.Topic);
+
                     publisher = newAdvertisedTopic.Publisher;
                     //Logger.Debug("Direct advertisement for " + advertiser.Topic);
 
@@ -406,6 +407,7 @@ namespace Iviz.App
                 if (subscribedTopic.Count == 0)
                 {
                     subscribersByTopic.Remove(subscriber.Topic);
+
                     subscribedTopic.Subscriber?.Unsubscribe(subscriber.Topic);
                 }
             }
@@ -418,7 +420,7 @@ namespace Iviz.App
         {
             AddTask(() =>
             {
-                client?.CheckListenerHack();
+                //client?.CheckListenerHack();
             });
         }
 

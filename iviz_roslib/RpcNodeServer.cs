@@ -12,9 +12,9 @@ namespace Iviz.RoslibSharp.XmlRpc
     sealed class NodeServer : IDisposable
     {
         readonly Dictionary<string, Func<object[], Arg[]>> Methods;
-        readonly HttpListener listener = new HttpListener();
+        readonly HttpListener listener;
         readonly RosClient client;
-        volatile bool keepRunning;
+        //volatile bool keepRunning;
         Task task;
 
         readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
@@ -24,6 +24,7 @@ namespace Iviz.RoslibSharp.XmlRpc
         public NodeServer(RosClient client)
         {
             this.client = client;
+            listener = new HttpListener(client.CallerUri);
 
             Methods = new Dictionary<string, Func<object[], Arg[]>>()
             {
@@ -42,17 +43,37 @@ namespace Iviz.RoslibSharp.XmlRpc
 
         public void Start()
         {
-            keepRunning = true;
+            //keepRunning = true;
 
-            string maskUri = "http://+:" + Uri.Port + Uri.AbsolutePath;
-            Logger.Log("RcpNodeServer: Starting RPC server on " + maskUri);
+            //string maskUri = "http://+:" + Uri.Port + Uri.AbsolutePath;
+            //Logger.Log("RcpNodeServer: Starting RPC server on " + maskUri);
 
-            listener.Prefixes.Add(maskUri);
-            listener.Start();
-            Logger.LogDebug("RcpNodeServer: Started!");
+            //listener.Prefixes.Add(maskUri);
+            //listener.Start();
 
             task = Task.Run(() =>
             {
+                Logger.LogDebug("RcpNodeServer: Starting!");
+                listener.Start(context =>
+                {
+                    Task.Run(() =>
+                    {
+                        using (context)
+                        {
+                            try
+                            {
+                                Service.MethodResponse(context, Methods);
+                            }
+                            catch (Exception e)
+                            {
+                                Logger.LogError(e);
+                            }
+                        }
+                    });
+                });
+
+
+                /*
                 try
                 {
                     while (keepRunning)
@@ -79,13 +100,10 @@ namespace Iviz.RoslibSharp.XmlRpc
                             try
                             {
                                 //Logger.LogDebug("RcpNodeServer: Starting service!");
-                                Service.MethodResponse(context, Methods);
+                                Service.MethodResponse(context, Methods); 
                                 //Logger.LogDebug("RcpNodeServer: Ending service!");
                             }
-                            catch (Exception e)
-                            {
-                                Logger.LogError(e);
-                            }
+
                         });
                     }
                 }
@@ -97,12 +115,14 @@ namespace Iviz.RoslibSharp.XmlRpc
                 {
                     Logger.Log(e);
                 }
+                */
                 Logger.LogDebug("RcpNodeServer: Leaving thread.");
             });
         }
 
         public void Stop()
         {
+            /*
             keepRunning = false;
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -112,6 +132,9 @@ namespace Iviz.RoslibSharp.XmlRpc
             task?.Wait();
             listener.Close();
             task?.Dispose();
+            */
+            listener.Stop();
+            task.Wait();
         }
 
         public void Dispose()
