@@ -13,7 +13,7 @@ namespace Iviz.App
 {
     public class RobotCreator : Editor
     {
-        const string packageRoot = "Assets/Resources_Internal/Robots/";
+        const string packageRoot = "Assets/Robots/";
         static readonly Link.Inertial DummyInertial = new Link.Inertial(
                 1.0f,
                 new Origin(new double[] { 0, 0, 0 },
@@ -40,8 +40,12 @@ namespace Iviz.App
             //string urdfFile = projectRoot + "/urdf/turtlebot3_waffle.urdf.xml";
             //string materialsRoot = projectRoot + "/unity_materials/";
 
-            string projectRoot = packageRoot + "pr2_description";
-            string urdfFile = projectRoot + "/robots/robot.urdf.xml";
+            //string projectRoot = packageRoot + "pr2_description";
+            //string urdfFile = projectRoot + "/robots/robot.urdf.xml";
+            //string materialsRoot = projectRoot + "/unity_materials/";
+
+            string projectRoot = packageRoot + "crayler";
+            string urdfFile = projectRoot + "/urdf/crayler_high_res.urdf.xml";
             string materialsRoot = projectRoot + "/unity_materials/";
 
             AssetDatabase.CreateFolder(projectRoot, "unity_materials");
@@ -100,8 +104,8 @@ namespace Iviz.App
             }
 
 
-            Material LitMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/Resources/BaseMaterials/Standard.mat");
-            Material TexturedMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/Resources/BaseMaterials/Standard.mat");
+            Material LitMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/Resources/Materials/Standard.mat");
+            Material TexturedMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/Resources/Materials/Standard.mat");
             Dictionary<Color, Material> colorMaterials = new Dictionary<Color, Material>
             {
                 [Color.white] = LitMaterial
@@ -368,11 +372,11 @@ namespace Iviz.App
 
         static Material CreateMaterial(Link.Visual.Material urdfMaterial)
         {
-            //Debug.Log("material name: " + urdfMaterial.name);
+            Debug.Log("material name: " + urdfMaterial.name);
             Material material = InitializeMaterial();
             if (urdfMaterial.color != null)
             {
-                //Debug.Log("color: " + CreateColor(urdfMaterial.color));
+                Debug.Log("color: " + CreateColor(urdfMaterial.color));
                 material.color = CreateColor(urdfMaterial.color);
             }
             else if (urdfMaterial.texture != null)
@@ -416,7 +420,7 @@ namespace Iviz.App
 
         static Material InitializeMaterial()
         {
-            Material LitMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/Resources/BaseMaterials/Standard.mat");
+            Material LitMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/Resources/Materials/Standard.mat");
             return Instantiate(LitMaterial);
         }
 
@@ -425,10 +429,10 @@ namespace Iviz.App
             var renderers = gameObject.GetComponentsInChildren<Renderer>();
             foreach (var renderer in renderers)
             {
-                if (renderer.sharedMaterial == null)
-                {
+                //if (renderer.sharedMaterial == null)
+                //{
                     renderer.sharedMaterial = material;
-                }
+                //}
             }
         }
 
@@ -524,7 +528,7 @@ namespace Iviz.App
 
         static GameObject CreateMeshVisual(Link.Geometry.Mesh mesh)
         {
-            string path = GetRelativeAssetPathFromUrdfPath(mesh.filename);
+            string path = GetRelativeAssetPathFromUrdfPath(mesh.filename + ".dae");
             GameObject meshObject = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             if (meshObject == null)
             {

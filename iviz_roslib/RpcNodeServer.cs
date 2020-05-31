@@ -122,17 +122,6 @@ namespace Iviz.RoslibSharp.XmlRpc
 
         public void Stop()
         {
-            /*
-            keepRunning = false;
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                listener.Abort();
-            }
-            tokenSource.Cancel();
-            task?.Wait();
-            listener.Close();
-            task?.Dispose();
-            */
             listener.Stop();
             task.Wait();
         }

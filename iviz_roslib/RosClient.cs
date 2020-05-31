@@ -8,6 +8,13 @@ using Iviz.Msgs;
 
 namespace Iviz.RoslibSharp
 {
+    public class InvalidMessageTypeException : Exception
+    {
+        public InvalidMessageTypeException(string message) : base(message) { }
+        public InvalidMessageTypeException(string message, Exception innerException) : base(message, innerException) { }
+        public InvalidMessageTypeException() { }
+    }
+
     public sealed class RosClient : IDisposable
     {
         XmlRpc.NodeServer Listener;
@@ -122,12 +129,11 @@ namespace Iviz.RoslibSharp
             }
             Logger.Log("RosClient: Initialized.");
 
-            Logger.Log("RosClient: Doing reachability test...");
             try
             {
                 GetNodeMasterUri(CallerUri);
             }
-            catch (TimeoutException)
+            catch (WebException)
             {
                 Logger.LogError("RosClient: Node does not appear to be reachable!");
             }
@@ -176,9 +182,9 @@ namespace Iviz.RoslibSharp
                 ForEach(x => Master.UnregisterPublisher(x.Name));
         }
 
-        internal XmlRpc.NodeClient CreateTalker(Uri otherUri)
+        internal XmlRpc.NodeClient CreateTalker(Uri otherUri, int timeoutInMs = 2000)
         {
-            return new XmlRpc.NodeClient(CallerId, CallerUri, otherUri);
+            return new XmlRpc.NodeClient(CallerId, CallerUri, otherUri, timeoutInMs);
         }
 
         RosSubscriber CreateSubscriber(string topic, bool requestNoDelay, Type type, IMessage generator)
@@ -271,7 +277,7 @@ namespace Iviz.RoslibSharp
 
             if (!typeof(IMessage).IsAssignableFrom(type))
             {
-                throw new ArgumentException("Type does not appear to be a message.", nameof(type));
+                throw new InvalidMessageTypeException("Expected IMessage object");
             }
 
             if (!TryGetSubscriber(topic, out subscriber))
@@ -281,7 +287,7 @@ namespace Iviz.RoslibSharp
 
             if (!subscriber.MessageTypeMatches(type))
             {
-                throw new ArgumentException("Message type does not match subscriber.", nameof(type));
+                throw new InvalidMessageTypeException("Expected " + subscriber.TopicType);
             }
 
             return subscriber.Subscribe(callback);
@@ -851,9 +857,9 @@ namespace Iviz.RoslibSharp
         {
             try
             {
-                GetNodeMasterUri(CallerUri);
+                CreateTalker(CallerUri, 500).GetMasterUri();
             }
-            catch (TimeoutException)
+            catch (WebException)
             {
                 Logger.Log($"{this}: Resetting listener.");
                 Listener.Stop();

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+    <asset>
+        <contributor>
+            <authoring_tool>ctmconv</authoring_tool>
+            <comments>COLOR= MATERIAL=                                                    </comments>
+        </contributor>
+        <created>2020-05-29T18:07:54</created>
+        <modified>2020-05-29T18:07:54</modified>
+    </asset>
+    <library_geometries>
+        <geometry id="Mesh-1" name="Mesh-1">
+            <mesh>
+                <source id="Mesh-1-positions" name="position">
+                    <float_array id="Mesh-1-positions-array" count="78">-0.0836646 0.0238186 -0.000991953 -0.0609875 -0.0207161 -0.026881 -0.0454637 -0.0567586 0.00209655 -0.03883 0.0330865 -0.0319154 -0.0318031 -0.0223607 -0.0477588 -0.026006 -0.0234014 -0.04495 -0.025405 0.0337334 -0.0477216 -0.0123433 0.00367161 0.0161169 -0.00706631 -0.00548433 -0.23591 -0.00645264 -0.00775595 -0.115984 -0.00523438 0.00935636 -0.15488 -0.00478632 -0.0141633 0.0114921 -0.00435006 0.0850989 0.00098983 0.000981477 -0.0511046 -0.0314289 0.00798436 0.00741824 -0.0997705 0.00871168 0.00320803 -0.0300159 0.0105121 -0.00802341 -0.155649 0.0106721 0.00623895 -0.235762 0.0120077 0.0475491 -0.0322065 0.0223179 -0.0368724 -0.0473196 0.0298843 0.0655055 0.00358664 0.030459 -0.000633174 -0.0464085 0.0368381 0.00530774 0.0126864 0.0371907 0.0138343 -0.0476116 0.04873 -0.068245 -0.000260943 0.0494134 0.00458107 -0.0311581 </float_array>
+                    <technique_common>
+                        <accessor count="26" offset="0" source="#Mesh-1-positions-array" stride="3">
+                            <param name="X" type="float" />
+                            <param name="Y" type="float" />
+                            <param name="Z" type="float" />
+                        </accessor>
+                    </technique_common>
+                </source>
+                <vertices id="Mesh-1-vertices">
+                    <input semantic="POSITION" source="#Mesh-1-positions" />
+                </vertices>
+                <triangles count="40">
+                    <input offset="0" semantic="VERTEX" source="#Mesh-1-vertices" />
+                    <p>15 21 18 25 21 13 18 21 25 5 13 21 13 5 1 3 5 18 21 15 5 15 18 5 5 3 1 23 19 6 6 4 1 4 6 19 13 4 19 23 25 19 23 18 25 18 23 6 18 6 3 6 1 3 4 13 1 19 25 13 0 11 2 0 12 20 0 20 11 2 11 24 7 12 0 22 20 12 22 11 20 0 2 7 11 22 24 22 7 24 12 7 22 24 7 2 9 16 14 14 10 9 16 17 14 14 17 10 10 8 9 9 8 16 8 17 16 8 10 17 </p>
+                </triangles>
+            </mesh>
+        </geometry>
+    </library_geometries>
+    <library_visual_scenes>
+        <visual_scene id="Scene-1" name="Scene-1">
+            <node id="Object-1" name="Object-1">
+                <instance_geometry url="#Mesh-1" />
+            </node>
+        </visual_scene>
+    </library_visual_scenes>
+    <scene>
+        <instance_visual_scene url="#Scene-1" />
+    </scene>
+</COLLADA>

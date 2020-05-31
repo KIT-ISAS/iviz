@@ -16,7 +16,7 @@ namespace Iviz.App.Listeners
         [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
         [DataMember] public Resource.Module Module => Resource.Module.AR;
         [DataMember] public bool Visible { get; set; } = true;
-        [DataMember] public SerializableVector3 Origin { get; set; } = Vector3.zero;
+        [DataMember] public SerializableVector3 Origin { get; set; } = new Vector3(0, 0, 1.5f);
         [DataMember] public bool SearchMarker { get; set; } = false;
         [DataMember] public float WorldScale { get; set; } = 1.0f;
         [DataMember] public bool PublishPose { get; set; } = true;

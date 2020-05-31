@@ -418,10 +418,6 @@ namespace Iviz.App
 
         protected override void Update()
         {
-            AddTask(() =>
-            {
-                //client?.CheckListenerHack();
-            });
         }
 
         public override int GetNumPublishers(string topic)

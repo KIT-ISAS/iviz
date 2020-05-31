@@ -1,6 +1,4 @@
 ﻿using Iviz.App.Listeners;
-using Iviz.Displays;
-using Iviz.Resources;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -45,6 +43,7 @@ namespace Iviz.App.Displays
 
         public virtual void OnPointerClick(PointerEventData eventData)
         {
+            Debug.Log("was here");
             if (!FlyCamera.IsMobile && eventData.button != PointerEventData.InputButton.Left)
             {
                 return;
@@ -89,97 +88,6 @@ namespace Iviz.App.Displays
             base.Stop();
             DisplayData = null;
             TFListener.GuiManager.Unselect(this);
-        }
-    }
-
-    public class DisplayClickableNode : ClickableNode
-    {
-        IDisplay target;
-        public IDisplay Target {
-            get => target;
-            set
-            {
-                if (target != null)
-                {
-                    ((MonoBehaviour)target).gameObject.layer = 0;
-                }
-                target = value;
-                if (target != null)
-                {
-                    ((MonoBehaviour)target).gameObject.layer = Resource.ClickableLayer;
-                    ((MonoBehaviour)target).transform.parent = transform;
-                }
-            }
-        }
-
-        public override Bounds Bounds => Target?.Bounds ?? new Bounds();
-        public override Bounds WorldBounds => Target?.WorldBounds ?? new Bounds();
-
-        public static DisplayClickableNode Instantiate(string name, TFFrame frame = null)
-        {
-            GameObject obj = new GameObject(name);
-            DisplayClickableNode node = obj.AddComponent<DisplayClickableNode>();
-            node.Parent = frame ?? TFListener.ListenersFrame;
-            return node;
-        }
-
-        public override void Stop()
-        {
-            base.Stop();
-            if (Target != null)
-            {
-                Target.Parent = null;
-            }
-        }
-    }
-
-    public class ObjectClickableNode : ClickableNode
-    {
-        BoxCollider boxCollider;
-
-        GameObject target;
-        public GameObject Target
-        {
-            get => target;
-            set
-            {
-                target = value;
-                if (target != null)
-                {
-                    target.transform.parent = transform;
-                    BoxCollider otherCollider = value.GetComponent<BoxCollider>();
-                    if (otherCollider != null)
-                    {
-                        boxCollider.center = otherCollider.center;
-                        boxCollider.size = otherCollider.size;
-                    }
-                }
-            }
-        }
-
-        public override Bounds Bounds => new Bounds(boxCollider.center, boxCollider.size);
-        public override Bounds WorldBounds => boxCollider.bounds;
-
-        void Awake()
-        {
-            boxCollider = gameObject.AddComponent<BoxCollider>();
-        }
-
-        public static ObjectClickableNode Instantiate(string name, TFFrame frame = null)
-        {
-            GameObject obj = new GameObject(name);
-            ObjectClickableNode node = obj.AddComponent<ObjectClickableNode>();
-            node.Parent = frame ?? TFListener.ListenersFrame;
-            return node;
-        }
-
-        public override void Stop()
-        {
-            base.Stop();
-            if (Target != null)
-            {
-                Target.transform.parent = null;
-            }
         }
     }
 

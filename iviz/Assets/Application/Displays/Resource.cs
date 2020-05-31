@@ -323,10 +323,9 @@ namespace Iviz.Resources
                 {
                 "edu.iviz.dummybot",
                 "com.clearpath.husky",
-                "com.robotis.turtlebot3.burger",
-                "com.robotis.turtlebot3.waffle",
                 "com.willowgarage.pr2",
                 "edu.fraunhofer.iosb.bob",
+                "edu.fraunhofer.iosb.crayler",
                 "edu.kit.h2t.armar6"
                 };
 
