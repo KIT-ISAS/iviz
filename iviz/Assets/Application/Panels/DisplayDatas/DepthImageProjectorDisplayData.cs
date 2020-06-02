@@ -27,7 +27,7 @@ namespace Iviz.App
 
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.DepthImageProjector) as DepthImageProjectorPanelContents;
 
-            display = ResourcePool.GetOrCreate<DepthImageProjector>(Resource.Listeners.DepthImageProjector);
+            display = Resource.Listeners.Instantiate<DepthImageProjector>();
             display.DisplayData = this;
             if (constructor.Configuration != null)
             {
@@ -61,9 +61,8 @@ namespace Iviz.App
         public override void Stop()
         {
             base.Stop();
-
             display.Stop();
-            ResourcePool.Dispose(Resource.Listeners.DepthImageProjector, display.gameObject);
+            Object.Destroy(display.gameObject);
         }
 
         public override void SetupPanel()

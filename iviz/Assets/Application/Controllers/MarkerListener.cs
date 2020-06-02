@@ -54,7 +54,7 @@ namespace Iviz.App.Listeners
             foreach (MarkerObject marker in markers.Values)
             {
                 marker.Stop();
-                ResourcePool.Dispose(Resource.Listeners.MarkerObject, marker.gameObject);
+                Destroy(marker.gameObject);
             }
             markers.Clear();
         }
@@ -117,7 +117,7 @@ namespace Iviz.App.Listeners
                 case Marker.ADD:
                     if (!markers.TryGetValue(id, out MarkerObject markerToAdd))
                     {
-                        markerToAdd = ResourcePool.GetOrCreate<MarkerObject>(Resource.Listeners.MarkerObject, transform);
+                        markerToAdd = Resource.Listeners.Instantiate<MarkerObject>(transform);
                         markerToAdd.Parent = TFListener.ListenersFrame;
                         markers[id] = markerToAdd;
                     }
@@ -127,7 +127,7 @@ namespace Iviz.App.Listeners
                     if (markers.TryGetValue(id, out MarkerObject markerToDelete))
                     {
                         markerToDelete.Stop();
-                        ResourcePool.Dispose(Resource.Listeners.MarkerObject, markerToDelete.gameObject);
+                        Destroy(markerToDelete.gameObject);
                         markers.Remove(id);
                     }
                     break;

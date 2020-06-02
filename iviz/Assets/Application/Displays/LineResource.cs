@@ -82,18 +82,7 @@ namespace Iviz.Displays
                     return;
                 }
                 size_ = value;
-                int reqDataSize = (int)(size_ * 1.1f);
-                if (lineBuffer == null || lineBuffer.Length < reqDataSize)
-                {
-                    lineBuffer = new LineWithColor[reqDataSize];
-
-                    if (lineComputeBuffer != null)
-                    {
-                        lineComputeBuffer.Release();
-                    }
-                    lineComputeBuffer = new ComputeBuffer(lineBuffer.Length, Marshal.SizeOf<LineWithColor>());
-                    material.SetBuffer(PropLines, lineComputeBuffer);
-                }
+                Reserve(size_);
             }
         }
 

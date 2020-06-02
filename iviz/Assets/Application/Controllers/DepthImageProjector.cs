@@ -6,8 +6,9 @@ using Iviz.RoslibSharp;
 using Iviz.Displays;
 using Iviz.App.Listeners;
 using Iviz.Resources;
+using Iviz.App.Displays;
 
-namespace Iviz.App.Displays
+namespace Iviz.App.Listeners
 {
     [DataContract]
     public class DepthImageProjectorConfiguration : JsonToString, IConfiguration
@@ -43,8 +44,12 @@ namespace Iviz.App.Displays
 
         public virtual bool Visible
         {
-            get => gameObject.activeSelf;
-            set => gameObject.SetActive(this);
+            get => config.Visible;
+            set
+            {
+                config.Visible = value;
+                resource.Visible = value;
+            }
         }
 
         public string ColorName
@@ -85,12 +90,6 @@ namespace Iviz.App.Displays
             }
         }
 
-        public Transform Parent
-        {
-            get => transform.parent;
-            set => transform.parent = value;
-        }
-
         ImageListener colorImage;
         public ImageListener ColorImage
         {
@@ -108,20 +107,32 @@ namespace Iviz.App.Displays
             get => depthImage;
             set
             {
+                if (depthImage != null)
+                {
+                    node.transform.parent = null;
+                }
                 depthImage = value;
+                if (depthImage != null)
+                {
+                    node.transform.parent = depthImage.Node.transform;
+                }
                 resource.DepthImage = value?.ImageTexture;
             }
         }
 
         void Awake()
         {
-            //resource = Resource.
+            resource = ResourcePool.GetOrCreate<DepthImageResource>(Resource.Markers.DepthImageResource, transform);
+            node = DisplayClickableNode.Instantiate("DepthImage");
+            node.Target = resource;
             Config = new DepthImageProjectorConfiguration();
         }
 
         public void Stop()
         {
             resource.Stop();
+            Destroy(node);
+            ResourcePool.Dispose(Resource.Markers.DepthImageResource, resource.gameObject);
         }
     }
 }

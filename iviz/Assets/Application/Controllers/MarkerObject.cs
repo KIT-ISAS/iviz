@@ -8,7 +8,7 @@ using Iviz.Displays;
 using Iviz.App.Listeners;
 using Iviz.Resources;
 
-namespace Iviz.App
+namespace Iviz.App.Listeners
 {
     enum MarkerType
     {

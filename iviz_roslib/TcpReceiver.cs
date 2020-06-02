@@ -155,7 +155,13 @@ namespace Iviz.RoslibSharp
             {
                 try
                 {
-                    tcpClient.Connect(RemoteHostname, RemotePort);
+                    const int timeoutInMs = 2000;
+
+                    Task task = tcpClient.ConnectAsync(RemoteHostname, RemotePort);
+                    if (!task.Wait(timeoutInMs) || task.IsCanceled)
+                    {
+                        throw new TimeoutException();
+                    }
 
                     IPEndPoint endPoint = ((IPEndPoint)tcpClient.Client.LocalEndPoint);
                     Hostname = endPoint.Address.ToString();
@@ -202,7 +208,7 @@ namespace Iviz.RoslibSharp
                         }
                     }
                 }
-                catch (IOException e)
+                catch (Exception e) when (e is IOException || e is AggregateException)
                 {
                     Logger.LogDebug($"{this}: " + e);
                 }

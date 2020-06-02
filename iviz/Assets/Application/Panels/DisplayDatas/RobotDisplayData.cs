@@ -20,8 +20,7 @@ namespace Iviz.App
         public RobotDisplayData(DisplayDataConstructor constructor) :
         base(constructor.DisplayList, constructor.Topic, constructor.Type)
         {
-            GameObject displayObject = ResourcePool.GetOrCreate(Resource.Listeners.Robot);
-            Robot = displayObject.GetComponent<Robot>();
+            Robot = Resource.Listeners.Instantiate<Robot>();
             Robot.DisplayData = this;
             if (constructor.Configuration != null)
             {
@@ -34,9 +33,8 @@ namespace Iviz.App
         public override void Stop()
         {
             base.Stop();
-
             Robot.Stop();
-            ResourcePool.Dispose(Resource.Listeners.Robot, Robot.gameObject);
+            Object.Destroy(Robot.gameObject);
         }
 
         public override void SetupPanel()

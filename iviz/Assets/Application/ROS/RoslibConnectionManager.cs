@@ -194,6 +194,7 @@ namespace Iviz.App
             catch (Exception e) when (e is ArgumentException)
             {
                 Logger.Debug(e);
+                Logger.Internal("Error:", e);
                 client = null;
                 return false;
             }

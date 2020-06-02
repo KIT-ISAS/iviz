@@ -23,14 +23,12 @@ namespace Iviz.App
 
         public ImageDisplayData(DisplayDataConstructor constructor) :
             base(constructor.DisplayList,
-                ((ImageConfiguration)constructor.Configuration)?.Topic ?? constructor.Topic,
-                ((ImageConfiguration)constructor.Configuration)?.Type ?? constructor.Type)
+                constructor.GetConfiguration<ImageConfiguration>()?.Topic ?? constructor.Topic,
+                constructor.GetConfiguration<ImageConfiguration>()?.Type ?? constructor.Type)
         {
-            GameObject displayObject = Resource.Listeners.Image.Instantiate();
-            displayObject.name = "Image";
-
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Image) as ImagePanelContents;
-            listener = displayObject.GetComponent<ImageListener>();
+            listener = Resource.Listeners.Instantiate<ImageListener>();
+            listener.name = "Image";
             if (constructor.Configuration != null)
             {
                 listener.Config = (ImageConfiguration)constructor.Configuration;
@@ -60,10 +58,16 @@ namespace Iviz.App
             panel.Min.Interactable = listener.IsMono;
             panel.Max.Interactable = listener.IsMono;
 
+            panel.ShowBillboard.Value = listener.EnableBillboard;
+            panel.BillboardSize.Value = listener.BillboardSize;
+
+            panel.BillboardSize.Interactable = listener.EnableBillboard;
+
             panel.Colormap.ValueChanged += (i, _) =>
             {
                 listener.Colormap = (Resource.ColormapId)i;
             };
+            /*
             panel.Anchor.ValueChanged += (i, _) =>
             {
                 RawImage newAnchor = DataPanelManager.AnchorCanvas.ImageFromAnchorType((AnchorCanvas.AnchorType)i);
@@ -83,6 +87,7 @@ namespace Iviz.App
                     anchor.gameObject.SetActive(true);
                 }
             };
+            */
             panel.Min.ValueChanged += f =>
             {
                 listener.MinIntensity = f;
@@ -96,6 +101,16 @@ namespace Iviz.App
                 DataPanelManager.HideSelectedPanel();
                 DisplayListPanel.RemoveDisplay(this);
             };
+            panel.ShowBillboard.ValueChanged += f =>
+            {
+                panel.BillboardSize.Interactable = f;
+                listener.EnableBillboard = f;
+            };
+            panel.BillboardSize.ValueChanged += f =>
+            {
+                listener.BillboardSize = f;
+            };
+
         }
 
         public override void UpdatePanel()

@@ -5,8 +5,9 @@ using UnityEngine.EventSystems;
 using Iviz.Displays;
 using Iviz.App.Listeners;
 using Iviz.Resources;
+using Iviz.App.Displays;
 
-namespace Iviz.App.Displays
+namespace Iviz.App.Listeners
 {
     public sealed class TFFrame : ClickableNode, IRecyclable
     {

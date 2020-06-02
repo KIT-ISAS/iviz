@@ -10,6 +10,7 @@ using Iviz.Msgs.VisualizationMsgs;
 using GameObjectInfo = Iviz.Resources.Resource.Info<UnityEngine.GameObject>;
 using MaterialInfo = Iviz.Resources.Resource.Info<UnityEngine.Material>;
 using Iviz.Msgs.GeometryMsgs;
+using Iviz.App;
 
 namespace Iviz.Resources
 {
@@ -203,6 +204,7 @@ namespace Iviz.Resources
             public GameObjectInfo Line { get; }
             public GameObjectInfo Grid { get; }
             public GameObjectInfo Axis { get; }
+            public GameObjectInfo DepthImageResource { get; }
 
             public ReadOnlyDictionary<string, GameObjectInfo> Generic { get; }
 
@@ -225,6 +227,7 @@ namespace Iviz.Resources
                 Line = new GameObjectInfo("Displays/Line");
                 Grid = new GameObjectInfo("Displays/Grid");
                 Axis = new GameObjectInfo("Displays/Axis");
+                DepthImageResource = new GameObjectInfo("Displays/DepthImageResource");
 
                 Generic = new ReadOnlyDictionary<string, GameObjectInfo>(
                     new Dictionary<string, GameObjectInfo>()
@@ -239,6 +242,7 @@ namespace Iviz.Resources
 
         public class ListenersType
         {
+            /*
             public GameObjectInfo PointCloud { get; }
             public GameObjectInfo Grid { get; }
             public GameObjectInfo TF { get; }
@@ -270,6 +274,18 @@ namespace Iviz.Resources
                 DepthImageProjector = new GameObjectInfo("Listeners/DepthImageProjector");
                 LaserScan = new GameObjectInfo("Listeners/LaserScan");
                 AR = new GameObjectInfo("Listeners/AR");
+            }
+            */
+            public T Instantiate<T>(UnityEngine.Transform parent = null) where T: MonoBehaviour
+            {
+                if (!typeof(IController).IsAssignableFrom(typeof(T)))
+                {
+                    throw new ArgumentException(nameof(T));
+                }
+                GameObject gameObject = new GameObject();
+                gameObject.transform.parent = parent;
+                gameObject.name = typeof(T).Name;
+                return gameObject.AddComponent<T>();
             }
         }
 

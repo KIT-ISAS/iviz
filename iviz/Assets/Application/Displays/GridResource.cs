@@ -110,7 +110,7 @@ namespace Iviz.Displays
             }
         }
 
-        public override string Name => ""; // intentionally empty
+        public override string Name => "Grid";
 
         protected override void Awake()
         {

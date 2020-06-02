@@ -147,12 +147,20 @@ namespace Iviz.App.Listeners
             {
                 MainCamera = GameObject.Find("MainCamera").GetComponent<Camera>();
             }
+            if (ARCamera == null)
+            {
+                ARCamera = GameObject.Find("AR Camera").GetComponent<Camera>();
+            }
+            if (ARSessionOrigin == null)
+            {
+                ARSessionOrigin = GameObject.Find("AR Session Origin").GetComponent<ARSessionOrigin>();
+            }
+
             planeManager = ARSessionOrigin.GetComponent<ARPlaneManager>();
             Config = new ARConfiguration();
         }
 
         uint headSeq = 0;
-        int lastLength = 0;
         public void Update()
         {
             if (PublishPose)

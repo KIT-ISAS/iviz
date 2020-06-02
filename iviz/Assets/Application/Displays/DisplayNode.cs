@@ -2,7 +2,7 @@
 using System;
 using Iviz.App.Listeners;
 
-namespace Iviz.App
+namespace Iviz.Displays
 {
     public interface IRecyclable
     {

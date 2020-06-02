@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using Iviz.Resources;
+using Iviz.Displays;
 
 namespace Iviz.App
 {

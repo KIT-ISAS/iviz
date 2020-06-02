@@ -219,7 +219,7 @@ namespace Iviz.App.Displays
             Pose pose = Target.BoundsPose;
             transform.position = pose.position;
             transform.rotation = pose.rotation;
-            LabelOffset = Bounds.center + new Vector3(0, Target.WorldBounds.size.y + 0.15f, 0);
+            LabelOffset = Bounds.center + new Vector3(0, Target.WorldBounds.size.y/2 + 0.15f, 0);
             Name = target?.Name;
         }
 

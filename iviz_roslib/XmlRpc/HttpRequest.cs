@@ -1,12 +1,14 @@
 ﻿using System;
 using System.IO;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using Iviz.Msgs;
 
 namespace Iviz.RoslibSharp.XmlRpc
 {
     public sealed class HttpRequest : IDisposable
     {
+        const int TimeoutInMs = 2000;
         readonly Uri callerUri;
         readonly Uri uri;
         readonly TcpClient client;
@@ -18,10 +20,19 @@ namespace Iviz.RoslibSharp.XmlRpc
             string hostname = uri.Host;
             int port = uri.Port;
 
-            client = new TcpClient(hostname, port);
+            client = new TcpClient();
+            Task task = client.ConnectAsync(hostname, port);
+            if (!task.Wait(TimeoutInMs) || task.IsCanceled)
+            {
+                throw new TimeoutException("Node failed to answer");
+            }
+            if (task.IsFaulted)
+            {
+                throw new TimeoutException("Node failed to answer", task.Exception);
+            }
         }
 
-        public string Request(string msgIn, int timeoutInMs = 2000)
+        public string Request(string msgIn, int timeoutInMs = TimeoutInMs)
         {
             if (msgIn is null)
             {

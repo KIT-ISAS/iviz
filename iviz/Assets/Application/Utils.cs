@@ -312,7 +312,7 @@ namespace Iviz
 
         public static bool TryParse(string s, out float f)
         {
-            if (float.TryParse(s, NumberStyles.AllowDecimalPoint, Culture, out f))
+            if (float.TryParse(s, NumberStyles.Any, Culture, out f))
             {
                 return true;
             }

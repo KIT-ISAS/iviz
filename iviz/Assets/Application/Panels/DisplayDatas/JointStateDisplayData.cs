@@ -21,13 +21,13 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
         public JointStateDisplayData(DisplayDataConstructor constructor) :
-            base(constructor.DisplayList, ((JointStateConfiguration)constructor.Configuration)?.Topic ?? constructor.Topic, constructor.Type)
+            base(constructor.DisplayList,
+                constructor.GetConfiguration<JointStateConfiguration>()?.Topic ?? constructor.Topic,
+                constructor.Type)
         {
-            GameObject displayObject = Resource.Listeners.JointState.Instantiate();
-            displayObject.name = "JointState:" + Topic;
-
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.JointState) as JointStatePanelContents;
-            listener = displayObject.GetComponent<JointStateListener>();
+            listener = Resource.Listeners.Instantiate<JointStateListener>();
+            listener.name = "JointState:" + Topic;
             listener.DisplayData = this;
             if (constructor.Configuration != null)
             {

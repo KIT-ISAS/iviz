@@ -159,6 +159,7 @@ namespace Iviz.App.Listeners
 
             node = DisplayClickableNode.Instantiate("GridNode");
             node.Target = grid;
+            node.SetName("");
 
             reflectionProbe = new GameObject().AddComponent<ReflectionProbe>();
             reflectionProbe.gameObject.name = "Grid Reflection Probe";

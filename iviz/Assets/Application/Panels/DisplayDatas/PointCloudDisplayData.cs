@@ -17,13 +17,12 @@ namespace Iviz.App
 
 
         public PointCloudDisplayData(DisplayDataConstructor constructor) :
-        base(constructor.DisplayList, ((PointCloudConfiguration)constructor.Configuration)?.Topic ?? constructor.Topic, constructor.Type)
+        base(constructor.DisplayList,
+            constructor.GetConfiguration<PointCloudConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
         {
-            GameObject listenerObject = Resource.Listeners.PointCloud.Instantiate();
-            listenerObject.name = "PointCloud:" + Topic;
-
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.PointCloud) as PointCloudPanelContents;
-            listener = listenerObject.GetComponent<PointCloudListener>();
+            listener = Resource.Listeners.Instantiate<PointCloudListener>();
+            listener.name = "PointCloud:" + Topic;
             listener.DisplayData = this;
             if (constructor.Configuration == null)
             {

@@ -154,10 +154,13 @@ namespace Iviz.Displays
                 }
                 size_ = value;
                 int reqDataSize = size_ * 11 / 10;
-                if (pointBuffer == null || pointBuffer.Length < reqDataSize)
+                if (pointBuffer.Length < reqDataSize)
                 {
                     //pointBuffer = new PointWithColor[reqDataSize];
-                    pointBuffer.Dispose();
+                    if (pointBuffer.Length != 0)
+                    {
+                        pointBuffer.Dispose();
+                    }
                     pointBuffer = new NativeArray<float4>(reqDataSize, Allocator.Persistent);
 
                     if (pointComputeBuffer != null)
@@ -295,68 +298,44 @@ namespace Iviz.Displays
             NativeArray<float4> Input;
 
             [WriteOnly]
-            float4 Min;
-            [WriteOnly]
-            float4 Max;
+            NativeArray<float4> Output;
 
             public void Execute()
             {
-                Min = new float4(float.MaxValue);
-                Max = new float4(float.MinValue);
+                float4 Min = new float4(float.MaxValue);
+                float4 Max = new float4(float.MinValue);
                 for (int i = 0; i < Input.Length; i++)
                 {
                     Min = math.min(Min, Input[i]);
                     Max = math.max(Max, Input[i]);
                 }
+                Output[0] = Min;
+                Output[1] = Max;
             }
 
             public static void CalculateBounds(
-                NativeArray<float4> pointBuffer,
+                in NativeArray<float4> pointBuffer,
                 out Bounds bounds,
                 out Vector2 intensitySpan)
             {
-                var job = new MinMaxJob
+                NativeArray<float4> output = new NativeArray<float4>(2, Allocator.Persistent);
+
+                MinMaxJob job = new MinMaxJob
                 {
-                    Input = pointBuffer
+                    Input = pointBuffer,
+                    Output = output
                 };
                 job.Schedule().Complete();
 
-                Vector3 positionMin = new Vector3(job.Min.x, job.Min.y, job.Min.z);
-                Vector3 positionMax = new Vector3(job.Max.x, job.Max.y, job.Max.z);
+                Vector3 positionMin = new Vector3(output[0].x, output[0].y, output[0].z);
+                Vector3 positionMax = new Vector3(output[1].x, output[1].y, output[1].z);
 
                 bounds = new Bounds((positionMax + positionMin) / 2, positionMax - positionMin);
-                intensitySpan = new Vector2(job.Min.w, job.Max.w);
+                intensitySpan = new Vector2(output[0].w, output[1].w);
+
+                output.Dispose();
             }
         }
-
-
-        /*
-        [BurstCompile(CompileSynchronously = true)]
-        private struct ClampJob : IJob
-        {
-            [ReadOnly]
-            public NativeArray<float4> Input;
-            [ReadOnly]
-            public float Min;
-            [ReadOnly]
-            public float Max;
-
-            [WriteOnly]
-            public NativeArray<float4> Output;
-
-            public void Execute()
-            {
-                float scale = 1 / (Max - Min);
-
-                for (int i = 0; i < Input.Length; i++)
-                {
-                    float4 inf = Input[i];
-                    float4 outf = inf * new float4(1, 1, 1, scale);
-                    Output[i] = outf;
-                }
-            }
-        }
-        */
 
         void OnDestroy()
         {
@@ -374,7 +353,7 @@ namespace Iviz.Displays
                 quadComputeBuffer.Release();
                 quadComputeBuffer = null;
             }
-            if (pointBuffer != null)
+            if (pointBuffer.Length > 0)
             {
                 pointBuffer.Dispose();
             }

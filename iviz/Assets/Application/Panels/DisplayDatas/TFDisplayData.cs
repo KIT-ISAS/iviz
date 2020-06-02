@@ -17,13 +17,13 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
         public TFDisplayData(DisplayDataConstructor constructor) :
-            base(constructor.DisplayList, ((TFConfiguration)constructor.Configuration)?.Topic ?? constructor.Topic, constructor.Type)
+            base(constructor.DisplayList,
+                constructor.GetConfiguration<TFConfiguration>()?.Topic ?? constructor.Topic,
+                constructor.Type)
         {
-            GameObject listenerObject = Resource.Listeners.TF.Instantiate();
-            listenerObject.name = "TF";
-
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.TF) as TFPanelContents;
-            listener = listenerObject.GetComponent<TFListener>();
+            listener = Resource.Listeners.Instantiate<TFListener>();
+            listener.name = "TF";
             listener.DisplayData = this;
             if (constructor.Configuration != null)
             {

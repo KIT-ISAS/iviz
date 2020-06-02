@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using Iviz.Msgs;
 
 namespace Iviz.RoslibSharp
@@ -100,9 +101,9 @@ namespace Iviz.RoslibSharp
             CallerId = callerId ?? "/RosClient";
             CallerUri = callerUri;
 
-            Listener = new XmlRpc.NodeServer(this);
             try
             {
+                Listener = new XmlRpc.NodeServer(this);
                 Listener.Start();
             }
             catch (HttpListenerException e)
@@ -122,13 +123,15 @@ namespace Iviz.RoslibSharp
                 // if so, remove them
                 EnsureCleanSlate();
             }
-            catch (WebException e)
+            catch (Exception e) when
+            (e is SocketException || e is TimeoutException || e is AggregateException)
             {
                 Listener.Stop();
                 throw new ArgumentException($"RosClient: Failed to contact the master URI '{masterUri}'", nameof(masterUri), e);
             }
             Logger.Log("RosClient: Initialized.");
 
+            /*
             try
             {
                 GetNodeMasterUri(CallerUri);
@@ -137,6 +140,7 @@ namespace Iviz.RoslibSharp
             {
                 Logger.LogError("RosClient: Node does not appear to be reachable!");
             }
+            */
         }
 
         public static string TryGetHostname()

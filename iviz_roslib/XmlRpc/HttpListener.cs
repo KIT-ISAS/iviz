@@ -17,11 +17,11 @@ namespace Iviz.RoslibSharp.XmlRpc
             }
 
             listener = new TcpListener(IPAddress.Any, uri.Port);
+            listener.Start();
         }
 
         public void Start(Action<HttpListenerContext> callback)
         {
-            listener.Start();
             while (keepGoing)
             {
                 TcpClient client;

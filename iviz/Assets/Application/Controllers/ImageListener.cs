@@ -18,17 +18,17 @@ namespace Iviz.App.Listeners
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public string Type { get; set; } = "";
         [DataMember] public Resource.ColormapId Colormap { get; set; } = Resource.ColormapId.gray;
-        [DataMember] public AnchorCanvas.AnchorType Anchor { get; set; } = AnchorCanvas.AnchorType.None;
+        //[DataMember] public AnchorCanvas.AnchorType Anchor { get; set; } = AnchorCanvas.AnchorType.None;
         [DataMember] public float MinIntensity { get; set; } = 0.0f;
         [DataMember] public float MaxIntensity { get; set; } = 1.0f;
-        [DataMember] public bool EnableMarker { get; set; } = false;
-        [DataMember] public float MarkerScale { get; set; } = 1.0f;
+        [DataMember] public bool EnableBillboard { get; set; } = false;
+        [DataMember] public float BillboardSize { get; set; } = 1.0f;
     }
 
     public class ImageListener : TopicListener
     {
         ImageTexture texture;
-        DisplayClickableNode node;
+        public DisplayClickableNode Node { get; private set; }
         ImageResource marker;
 
         public ImageTexture ImageTexture => texture;
@@ -39,8 +39,8 @@ namespace Iviz.App.Listeners
 
         public override DisplayData DisplayData
         {
-            get => node.DisplayData;
-            set => node.DisplayData = value;
+            get => Node.DisplayData;
+            set => Node.DisplayData = value;
         }
 
         readonly ImageConfiguration config = new ImageConfiguration();
@@ -65,7 +65,7 @@ namespace Iviz.App.Listeners
             set
             {
                 config.Visible = value;
-                marker.Visible = value;
+                marker.Visible = value && config.EnableBillboard;
             }
         }
 
@@ -112,22 +112,22 @@ namespace Iviz.App.Listeners
             }
         }
 
-        public bool EnableMarker
+        public bool EnableBillboard
         {
-            get => config.EnableMarker;
+            get => config.EnableBillboard;
             set
             {
-                config.EnableMarker = value;
-                marker.Visible = value;
+                config.EnableBillboard = value;
+                marker.Visible = value && config.Visible;
             }
         }
 
-        public float MarkerScale
+        public float BillboardSize
         {
-            get => config.MarkerScale;
+            get => config.BillboardSize;
             set
             {
-                config.MarkerScale = value;
+                config.BillboardSize = value;
                 marker.Scale = value;
             }
         }
@@ -136,10 +136,10 @@ namespace Iviz.App.Listeners
         void Awake()
         {
             texture = new ImageTexture();
-            node = DisplayClickableNode.Instantiate("ImageNode");
+            Node = DisplayClickableNode.Instantiate("ImageNode");
             marker = ResourcePool.GetOrCreate<ImageResource>(Resource.Markers.Image);
             marker.Texture = texture;
-            node.Target = marker;
+            Node.Target = marker;
 
             Config = new ImageConfiguration();
         }
@@ -155,13 +155,13 @@ namespace Iviz.App.Listeners
             {
                 Listener = new RosListener<CompressedImage>(config.Topic, HandlerCompressed);
             }
-            name = "Image:" + config.Topic;
-            node.name = "ImageNode:" + config.Topic;
+            name = "Node:" + config.Topic;
+            Node.SetName($"[{config.Topic}]");
         }
 
         void HandlerCompressed(CompressedImage msg)
         {
-            node.SetParent(msg.Header.FrameId);
+            Node.SetParent(msg.Header.FrameId);
 
             if (msg.Format != "png")
             {
@@ -173,7 +173,7 @@ namespace Iviz.App.Listeners
 
         void Handler(Image msg)
         {
-            node.SetParent(msg.Header.FrameId);
+            Node.SetParent(msg.Header.FrameId);
 
             int width = (int)msg.Width;
             int height = (int)msg.Height;
@@ -189,8 +189,8 @@ namespace Iviz.App.Listeners
             texture.Stop();
             texture.Destroy();
 
-            node.Stop();
-            Destroy(node);
+            Node.Stop();
+            Destroy(Node);
         }
 
     }

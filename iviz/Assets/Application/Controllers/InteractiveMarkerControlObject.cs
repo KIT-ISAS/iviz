@@ -67,7 +67,7 @@ namespace Iviz.App.Listeners
                     case Marker.ADD:
                         if (!markers.TryGetValue(id, out MarkerObject markerToAdd))
                         {
-                            markerToAdd = ResourcePool.GetOrCreate<MarkerObject>(Resource.Listeners.MarkerObject, transform);
+                            markerToAdd = Resource.Listeners.Instantiate<MarkerObject>(transform);
                             markerToAdd.Parent = TFListener.ListenersFrame;
                             markerToAdd.Clicked += (point, button) => Clicked?.Invoke(transform.AsPose(), point, button);
                             markers[id] = markerToAdd;
@@ -83,7 +83,7 @@ namespace Iviz.App.Listeners
                         if (markers.TryGetValue(id, out MarkerObject markerToDelete))
                         {
                             markerToDelete.Stop();
-                            ResourcePool.Dispose(Resource.Listeners.MarkerObject, markerToDelete.gameObject);
+                            Destroy(markerToDelete.gameObject);
                             markers.Remove(id);
                             markersToDelete.Remove(id);
                         }
@@ -94,7 +94,7 @@ namespace Iviz.App.Listeners
             {
                 MarkerObject markerToDelete = markers[x];
                 markerToDelete.Stop();
-                ResourcePool.Dispose(Resource.Listeners.MarkerObject, markerToDelete.gameObject);
+                Destroy(markerToDelete.gameObject);
                 markers.Remove(x);
             });
         }
@@ -104,7 +104,7 @@ namespace Iviz.App.Listeners
             markers.Values.ForEach(markerToDelete =>
             {
                 markerToDelete.Stop();
-                ResourcePool.Dispose(Resource.Listeners.MarkerObject, markerToDelete.gameObject);
+                Destroy(markerToDelete.gameObject);
             });
             markers.Clear();
             markersToDelete.Clear();

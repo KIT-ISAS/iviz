@@ -18,14 +18,12 @@ namespace Iviz.App
 
         public MarkerDisplayData(DisplayDataConstructor constructor) :
             base(constructor.DisplayList,
-                ((MarkerConfiguration)constructor.Configuration)?.Topic ?? constructor.Topic,
-                ((MarkerConfiguration)constructor.Configuration)?.Type ?? constructor.Type)
+                constructor.GetConfiguration<MarkerConfiguration>()?.Topic ?? constructor.Topic,
+                constructor.GetConfiguration<MarkerConfiguration>()?.Type ?? constructor.Type)
         {
-            GameObject listenerObject = Resource.Listeners.Marker.Instantiate();
-            listenerObject.name = "Marker:" + Topic;
-
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Marker) as MarkerPanelContents;
-            listener = listenerObject.GetComponent<MarkerListener>();
+            listener = Resource.Listeners.Instantiate<MarkerListener>();
+            listener.name = "Marker:" + Topic;
             listener.DisplayData = this;
             if (constructor.Configuration == null)
             {

@@ -67,7 +67,7 @@ namespace Iviz.App.Listeners
             foreach (InteractiveMarkerObject imarker in imarkers.Values)
             {
                 imarker.Stop();
-                ResourcePool.Dispose(Resource.Listeners.MarkerObject, imarker.gameObject);
+                Destroy(imarker.gameObject);
             }
             imarkers.Clear();
             rosSender.Stop();
@@ -78,7 +78,7 @@ namespace Iviz.App.Listeners
             foreach (InteractiveMarkerObject imarker in imarkers.Values)
             {
                 imarker.Stop();
-                ResourcePool.Dispose(Resource.Listeners.MarkerObject, imarker.gameObject);
+                Destroy(imarker.gameObject);
             }
             imarkers.Clear();
         }
@@ -100,7 +100,7 @@ namespace Iviz.App.Listeners
             string id = msg.Name;
             if (!imarkers.TryGetValue(id, out InteractiveMarkerObject imarker))
             {
-                imarker = ResourcePool.GetOrCreate<InteractiveMarkerObject>(Resource.Listeners.InteractiveMarkerObject, transform);
+                imarker = Resource.Listeners.Instantiate<InteractiveMarkerObject>(transform);
                 imarker.Parent = TFListener.ListenersFrame;
                 imarker.Clicked += (control, pose, point, button) => OnInteractiveControlObjectClicked(id, pose, control, point, button);
                 imarker.transform.SetParentLocal(transform);
@@ -128,7 +128,7 @@ namespace Iviz.App.Listeners
             }
 
             imarker.Stop();
-            ResourcePool.Dispose(Resource.Listeners.InteractiveMarkerObject, imarker.gameObject);
+            Destroy(imarker.gameObject);
             imarkers.Remove(id);
         }
 

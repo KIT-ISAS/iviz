@@ -18,13 +18,13 @@ namespace Iviz.App
 
 
         public LaserScanDisplayData(DisplayDataConstructor constructor) :
-        base(constructor.DisplayList, constructor.GetConfiguration<LaserScanConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
+        base(constructor.DisplayList,
+            constructor.GetConfiguration<LaserScanConfiguration>()?.Topic ?? constructor.Topic,
+            constructor.Type)
         {
-            GameObject listenerObject = Resource.Listeners.LaserScan.Instantiate();
-            listenerObject.name = "LaserScan:" + Topic;
-
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.LaserScan) as LaserScanPanelContents;
-            listener = listenerObject.GetComponent<LaserScanListener>();
+            listener = Resource.Listeners.Instantiate<LaserScanListener>();
+            listener.name = "LaserScan:" + Topic;
             listener.DisplayData = this;
             if (constructor.Configuration == null)
             {

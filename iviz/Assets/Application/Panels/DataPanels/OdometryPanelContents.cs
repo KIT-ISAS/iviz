@@ -18,6 +18,8 @@ namespace Iviz.App
             Listener = p.AddListener();
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();
+            AxisScale = p.AddSlider("Axis Scale").SetMinValue(0.1f).SetMaxValue(5.0f);
+            TrailEnabled = p.AddToggle("Enable Trail");
             p.UpdateSize();
             gameObject.SetActive(false);
         }

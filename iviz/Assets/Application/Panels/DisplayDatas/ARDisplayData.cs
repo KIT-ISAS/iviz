@@ -17,12 +17,10 @@ namespace Iviz.App
         public ARDisplayData(DisplayDataConstructor constructor) :
             base(constructor.DisplayList, constructor.Topic, constructor.Type)
         {
-            GameObject displayObject = Resource.Listeners.AR.Instantiate();    
-            displayObject.name = "AR";
-
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.AR) as ARPanelContents;
 
-            display = displayObject.GetComponent<ARController>();
+            display = Resource.Listeners.Instantiate<ARController>();
+            display.name = "AR";
             display.DisplayData = this;
             if (constructor.Configuration != null)
             {

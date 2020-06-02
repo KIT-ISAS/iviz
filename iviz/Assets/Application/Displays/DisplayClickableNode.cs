@@ -32,7 +32,14 @@ namespace Iviz.App.Displays
         public override Bounds Bounds => Target?.Bounds ?? new Bounds();
         public override Bounds WorldBounds => Target?.WorldBounds ?? new Bounds();
 
-        public override string Name => string.IsNullOrEmpty(Target?.Name) ? "" : Target.Name;
+        string displayName;
+        public override string Name => displayName ?? Target?.Name;
+
+        public void SetName(string name)
+        {
+            this.name = name;
+            displayName = name;
+        }
 
         public override Pose BoundsPose => targetObject.transform.AsPose();
 
@@ -40,6 +47,7 @@ namespace Iviz.App.Displays
         {
             GameObject obj = new GameObject(name);
             DisplayClickableNode node = obj.AddComponent<DisplayClickableNode>();
+            node.SetName(name);
             node.Parent = frame ?? TFListener.ListenersFrame;
             return node;
         }

@@ -36,7 +36,7 @@ namespace Iviz.RoslibSharp
             {
                 response = talker.RequestTopic(Topic, SupportedProtocols);
             }
-            catch (Exception e) when (e is TimeoutException || e is WebException)
+            catch (Exception e) when (e is TimeoutException || e is AggregateException)
             {
                 Logger.Log($"{this}: Failed to add publisher {remoteUri}: {e}");
                 return false;

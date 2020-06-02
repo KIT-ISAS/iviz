@@ -189,8 +189,6 @@ namespace Iviz.App.Listeners
 
             fieldNames.Clear();
             fieldNames.AddRange(msg.Fields.Select(x => x.Name));
-            //Debug.Log(msg.ToJsonString());
-
 
             int newSize = (int)(msg.Width * msg.Height);
             if (newSize > pointBuffer.Length)
@@ -357,70 +355,6 @@ namespace Iviz.App.Listeners
                 }
             }
         }
-
-        /*
-        void GeneratePointBufferXYZ_float(PointCloud2 msg, int iOffset)
-        {
-            int rowStep = (int)msg.row_step;
-            int pointStep = (int)msg.point_step;
-            int height = (int)msg.height;
-            int width = (int)msg.width;
-
-            unsafe
-            {
-                fixed (byte* dataPtr = msg.data)
-                fixed (PointWithColor* pointBufferPtr = pointBuffer)
-                {
-                    PointWithColor* pointBufferOff = pointBufferPtr;
-                    byte* dataRow = dataPtr;
-                    for (int v = height; v > 0; v--, dataRow += rowStep)
-                    {
-                        byte* dataOff = dataRow;
-                        for (int u = width; u > 0; u--, dataOff += pointStep, pointBufferOff++)
-                        {
-                            float* datap = (float*)dataOff;
-                            float* datai = (float*)(dataOff + iOffset);
-                            pointBufferOff->position.x = -datap[1];
-                            pointBufferOff->position.y = datap[2];
-                            pointBufferOff->position.z = datap[0];
-                            pointBufferOff->intensity = *datai;
-                        }
-                    }
-                }
-            }
-        }
-
-        void GeneratePointBufferXYZ_int(PointCloud2 msg, int iOffset)
-        {
-            int rowStep = (int)msg.row_step;
-            int pointStep = (int)msg.point_step;
-            int height = (int)msg.height;
-            int width = (int)msg.width;
-
-            unsafe
-            {
-                fixed (byte* dataPtr = msg.data)
-                fixed (PointWithColor* pointBufferPtr = pointBuffer)
-                {
-                    PointWithColor* pointBufferOff = pointBufferPtr;
-                    byte* dataRow = dataPtr;
-                    for (int v = height; v > 0; v--, dataRow += rowStep)
-                    {
-                        byte* dataOff = dataRow;
-                        for (int u = width; u > 0; u--, dataOff += pointStep, pointBufferOff++)
-                        {
-                            float* datap = (float*)dataOff;
-                            int* datai = (int*)(dataOff + iOffset);
-                            pointBufferOff->position.x = -datap[1];
-                            pointBufferOff->position.y = datap[2];
-                            pointBufferOff->position.z = datap[0];
-                            pointBufferOff->intensity = *datai;
-                        }
-                    }
-                }
-            }
-        }
-        */
 
         void GeneratePointBufferXYZ(PointCloud2 msg, int iOffset, int iType)
         {

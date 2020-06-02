@@ -42,7 +42,7 @@ namespace Iviz.App.Listeners
                 string id = controlMsg.Name;
                 if (!controls.TryGetValue(id, out InteractiveMarkerControlObject control))
                 {
-                    control = ResourcePool.GetOrCreate<InteractiveMarkerControlObject>(Resource.Listeners.InteractiveMarkerControlObject, transform);
+                    control = Resource.Listeners.Instantiate<InteractiveMarkerControlObject>(transform);
                     control.Parent = TFListener.ListenersFrame;
                     control.Clicked += (pose, point, button) => Clicked?.Invoke(id, pose, point, button);
                     control.transform.SetParentLocal(transform);
@@ -56,7 +56,7 @@ namespace Iviz.App.Listeners
             {
                 InteractiveMarkerControlObject control = controls[x];
                 control.Stop();
-                ResourcePool.Dispose(Resource.Listeners.InteractiveMarkerControlObject, control.gameObject);
+                Destroy(control.gameObject);
                 controls.Remove(x);
             });
 
@@ -79,7 +79,7 @@ namespace Iviz.App.Listeners
             controls.Values.ForEach(control =>
             {
                 control.Stop();
-                ResourcePool.Dispose(Resource.Listeners.InteractiveMarkerControlObject, control.gameObject);
+                Destroy(control.gameObject);
             });
             controls.Clear();
             controlsToDelete.Clear();

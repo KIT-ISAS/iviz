@@ -18,13 +18,14 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
         public InteractiveMarkerDisplayData(DisplayDataConstructor constructor) :
-        base(constructor.DisplayList, ((InteractiveMarkerConfiguration)constructor.Configuration)?.Topic ?? constructor.Topic, constructor.Type)
+        base(constructor.DisplayList,
+            constructor.GetConfiguration<InteractiveMarkerConfiguration>()?.Topic ?? constructor.Topic,
+            constructor.Type)
         {
-            GameObject listenerObject = Resource.Listeners.InteractiveMarker.Instantiate();
-            listenerObject.name = "InteractiveMarkers";
 
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.InteractiveMarker) as InteractiveMarkerPanelContents;
-            listener = listenerObject.GetComponent<InteractiveMarkerListener>();
+            listener = Resource.Listeners.Instantiate<InteractiveMarkerListener>();
+            listener.name = "InteractiveMarkers";
             listener.DisplayData = this;
             if (constructor.Configuration != null)
             {
