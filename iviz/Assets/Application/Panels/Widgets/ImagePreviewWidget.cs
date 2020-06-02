@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class ImagePreviewWidget : Widget
+    public class ImagePreviewWidget : MonoBehaviour, IWidget
     {
         public Text label;
         public RawImage image;
@@ -44,7 +44,7 @@ namespace Iviz.App
             return this;
         }
 
-        public override void ClearSubscribers()
+        public void ClearSubscribers()
         {
         }
     }

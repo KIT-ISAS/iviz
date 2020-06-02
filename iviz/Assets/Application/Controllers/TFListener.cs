@@ -44,9 +44,9 @@ namespace Iviz.App.Listeners
 
         readonly Dictionary<string, TFFrame> frames = new Dictionary<string, TFFrame>();
 
-        RosSender<tfMessage_v2> publisher;
-        public static RosSender<tfMessage_v2> Publisher =>
-            Instance.publisher ?? (Instance.publisher = new RosSender<tfMessage_v2>(DefaultTopic));
+        public RosSender<tfMessage_v2> Publisher { get; set; }
+
+        public override DisplayData DisplayData { get; set; }
 
         readonly TFConfiguration config = new TFConfiguration();
         public TFConfiguration Config
@@ -158,6 +158,8 @@ namespace Iviz.App.Listeners
             f = GetOrCreateFrame("navigation", dummy);
             f.AddListener(null);
             f.IgnoreUpdates = true;
+
+            Publisher = new RosSender<tfMessage_v2>(DefaultTopic);
         }
 
         public override void StartListening()
@@ -299,7 +301,7 @@ namespace Iviz.App.Listeners
 
         public static void Publish(tfMessage_v2 msg)
         {
-            Publisher.Publish(msg);
+            Instance.Publisher.Publish(msg);
         }
 
         static uint tfSeq = 0;

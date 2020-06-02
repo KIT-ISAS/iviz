@@ -42,7 +42,7 @@ namespace Iviz.App.Displays
             get => base.Selected;
             set
             {
-                base.selected = value;
+                selected = value;
                 labelObject.SetActive(value || LabelVisible);
             }
         }
@@ -313,6 +313,10 @@ namespace Iviz.App.Displays
 
         public bool IsChildless => !children.Any();
 
+        public override string Name => Id;
+
+        public override Pose BoundsPose => transform.AsPose();
+
         void Awake()
         {
             boxCollider = GetComponent<BoxCollider>();
@@ -351,14 +355,16 @@ namespace Iviz.App.Displays
             parentConnector = null;
         }
 
+        /*
         public override void OnPointerClick(PointerEventData eventData)
         {
             base.OnPointerClick(eventData);
-            if (GetClickCount(eventData) == 2)
+            if (GetClickCount(eventData) == 3)
             {
                 TFListener.GuiManager.StartOrbitingAround(OrbitColorEnabled ? null : this);
             }
         }
+        */
 
     }
 }

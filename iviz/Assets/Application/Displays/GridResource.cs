@@ -110,7 +110,7 @@ namespace Iviz.Displays
             }
         }
 
-        public override string Name => "Grid";
+        public override string Name => ""; // intentionally empty
 
         protected override void Awake()
         {
@@ -201,7 +201,7 @@ namespace Iviz.Displays
 
             interiorObject.transform.localScale = new Vector3(totalSize, totalSize, GridLineWidth / 8.1f);
 
-            GetComponent<BoxCollider>().size = new Vector3(totalSize, totalSize, GridLineWidth / 8);
+            Collider.size = new Vector3(totalSize, totalSize, GridLineWidth / 8);
         }
 
         public override void Stop()

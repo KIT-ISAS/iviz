@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Iviz.App
 {
-    public class InteractiveMarkerDisplayData : DisplayableListenerData
+    public class InteractiveMarkerDisplayData : ListenerDisplayData
     {
         readonly InteractiveMarkerListener listener;
         readonly InteractiveMarkerPanelContents panel;
@@ -25,6 +25,7 @@ namespace Iviz.App
 
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.InteractiveMarker) as InteractiveMarkerPanelContents;
             listener = listenerObject.GetComponent<InteractiveMarkerListener>();
+            listener.DisplayData = this;
             if (constructor.Configuration != null)
             {
                 listener.Config = (InteractiveMarkerConfiguration)constructor.Configuration;
@@ -37,37 +38,9 @@ namespace Iviz.App
             UpdateButtonText();
         }
 
-        /*
-        public override DisplayData Initialize(DisplayListPanel displayList, string topic, string type)
-        {
-            base.Initialize(displayList, topic, type);
-            
-            GameObject listenerObject = ResourcePool.GetOrCreate(Resource.Listeners.InteractiveMarker);
-            listenerObject.name = "InteractiveMarkers";
-
-            listener = listenerObject.GetComponent<InteractiveMarkerListener>();
-            listener.Config.Topic = topic;
-            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.InteractiveMarker) as InteractiveMarkerPanelContents;
-            return this;
-        }
-
-        public override DisplayData Deserialize(JToken j)
-        {
-            listener.Config = j.ToObject<InteractiveMarkerConfiguration>();
-            Topic = listener.Config.Topic;
-            return this;
-        }
-
-        public override void Start()
-        {
-            base.Start();
-            listener.StartListening();
-        }
-        */
-
         public override void SetupPanel()
         {
-            panel.Topic.Label = SanitizedTopicText();
+            panel.Listener.RosListener = listener.Listener;
             panel.DisableExpiration.Value = listener.DisableExpiration;
 
             panel.DisableExpiration.ValueChanged += f =>
@@ -80,13 +53,6 @@ namespace Iviz.App
                 DisplayListPanel.RemoveDisplay(this);
             };
         }
-
-        /*
-        public override JToken Serialize()
-        {
-            return JToken.FromObject(listener.Config);
-        }
-        */
 
         public override void AddToState(StateConfiguration config)
         {

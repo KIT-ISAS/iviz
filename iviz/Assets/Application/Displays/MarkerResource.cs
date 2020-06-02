@@ -26,6 +26,7 @@ namespace Iviz.Displays
             get => gameObject.activeSelf;
             set => gameObject.SetActive(value);
         }
+
         protected virtual void Awake()
         {
             Collider = GetComponent<BoxCollider>();

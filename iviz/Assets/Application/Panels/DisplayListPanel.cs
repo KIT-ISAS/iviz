@@ -43,6 +43,7 @@ namespace Iviz.App
         [DataMember] public List<MarkerConfiguration> Markers { get; set; } = new List<MarkerConfiguration>();
         [DataMember] public List<InteractiveMarkerConfiguration> InteractiveMarkers { get; set; } = new List<InteractiveMarkerConfiguration>();
         [DataMember] public List<DepthImageProjectorConfiguration> DepthImageProjectors { get; set; } = new List<DepthImageProjectorConfiguration>();
+        [DataMember] public List<OdometryConfiguration> Odometries { get; set; } = new List<OdometryConfiguration>();
         [DataMember] public ARConfiguration AR { get; set; } = null;
 
         public List<IReadOnlyList<IConfiguration>> CreateListOfEntries() => new List<IReadOnlyList<IConfiguration>>
@@ -135,14 +136,17 @@ namespace Iviz.App
 
             buttonHeight = Resource.Widgets.DisplayButton.Object.GetComponent<RectTransform>().rect.height;
 
-            CreateDisplay(Resource.Module.TF, TFListener.DefaultTopic);
-            CreateDisplay(Resource.Module.Grid);
-
             availableDisplays = CreateDialog<AddDisplayDialogData>();
             availableTopics = CreateDialog<AddTopicDialogData>();
 
             connectionData = CreateDialog<ConnectionDialogData>();
             LoadSimpleConfiguration();
+
+            Logger.Internal("<b>Welcome to iviz</b>");
+
+            CreateDisplay(Resource.Module.TF, TFListener.DefaultTopic);
+            CreateDisplay(Resource.Module.Grid);
+
 
             save.onClick.AddListener(SaveStateConfiguration);
             load.onClick.AddListener(LoadStateConfiguration);
@@ -168,30 +172,73 @@ namespace Iviz.App
             {
                 ConnectionManager.Connection.MasterUri = uri;
                 KeepReconnecting = false;
-                MasterUriStr.Label = (uri == null) ? "(?) →" : uri + " →";
+                if (uri == null)
+                {
+                    Logger.Internal($"Failed to set master uri.");
+                    MasterUriStr.Label = "(?) →";
+                }
+                else
+                {
+                    Logger.Internal($"Changing master uri to '{uri}'");
+                    MasterUriStr.Label = uri + " →";
+                }
             };
             connectionData.MyIdChanged += id =>
             {
                 ConnectionManager.Connection.MyId = id;
                 KeepReconnecting = false;
+                Logger.Internal($"Changing caller id to '{id}'");
             };
             connectionData.MyUriChanged += uri =>
             {
                 ConnectionManager.Connection.MyUri = uri;
                 KeepReconnecting = false;
+                if (uri == null)
+                {
+                    Logger.Internal($"Failed to set caller uri.");
+                }
+                else
+                {
+                    Logger.Internal($"Changing caller uri to '{uri}'");
+                }
             };
             connectionData.ConnectClicked += () =>
             {
+                if (ConnectionManager.Connected)
+                {
+                    Logger.Internal("Reconnection requested.");
+                }
+                else
+                {
+                    Logger.Internal("Connection requested.");
+                }
                 ConnectionManager.Connection.Disconnect();
                 KeepReconnecting = true;
             };
             connectionData.StopClicked += () =>
             {
+                if (ConnectionManager.Connected)
+                {
+                    Logger.Internal("Disconnection requested.");
+                }
+                else
+                {
+                    Logger.Internal("Disconnection requested (but already disconnected).");
+                }
                 KeepReconnecting = false;
                 ConnectionManager.Connection.Disconnect();
             };
             ConnectButton.Clicked += () =>
             {
+                if (ConnectionManager.Connected)
+                {
+                    Logger.Internal("Reconnection requested.");
+                }
+                else
+                {
+                    Logger.Internal("Connection requested.");
+                }
+                ConnectionManager.Connection.Disconnect();
                 KeepReconnecting = true;
             };
 
@@ -237,15 +284,18 @@ namespace Iviz.App
             switch (state)
             {
                 case ConnectionState.Connected:
+                    Logger.Internal("Connected!");
                     GameThread.EverySecond -= RotateSprite;
                     status.sprite = ConnectedSprite;
                     SaveSimpleConfiguration();
                     break;
                 case ConnectionState.Disconnected:
+                    Logger.Internal("Disconnected.");
                     GameThread.EverySecond -= RotateSprite;
                     status.sprite = DisconnectedSprite;
                     break;
                 case ConnectionState.Connecting:
+                    Logger.Internal("Connecting...");
                     status.sprite = ConnectingSprite;
                     GameThread.EverySecond += RotateSprite;
                     break;
@@ -277,13 +327,16 @@ namespace Iviz.App
 
             try
             {
+                Logger.Internal("Saving config file...");
                 string text = JsonConvert.SerializeObject(config, Formatting.Indented);
                 File.WriteAllText(Application.persistentDataPath + "/config.json", text);
+                Logger.Internal("Done.");
             }
             catch (Exception e) when
             (e is IOException || e is System.Security.SecurityException || e is JsonException)
             {
                 Logger.Error(e);
+                Logger.Internal("Error:", e);
                 return;
             }
             Logger.Debug("DisplayListPanel: Writing config to " + Application.persistentDataPath + "/config.json");
@@ -292,22 +345,30 @@ namespace Iviz.App
 
         void LoadStateConfiguration()
         {
-            while (displayDatas.Count > 1)
-            {
-                RemoveDisplay(1);
-            }
-
             Logger.Debug("DisplayListPanel: Reading config from " + Application.persistentDataPath + "/config.json");
             string text;
             try
             {
+                Logger.Internal("Loading config file...");
                 text = File.ReadAllText(Application.persistentDataPath + "/config.json");
+                Logger.Internal("Done.");
             }
-            catch (Exception e) when 
-            (e is IOException || e is System.Security.SecurityException ||  e is JsonException)
+            catch (FileNotFoundException)
+            {
+                Logger.Internal("Error: No config file found.");
+                return;
+            }
+            catch (Exception e) when
+            (e is IOException || e is System.Security.SecurityException || e is JsonException)
             {
                 Logger.Error(e);
+                Logger.Internal("Error:", e);
                 return;
+            }
+
+            while (displayDatas.Count > 1)
+            {
+                RemoveDisplay(1);
             }
 
             StateConfiguration stateConfig = JsonConvert.DeserializeObject<StateConfiguration>(text);
@@ -319,11 +380,17 @@ namespace Iviz.App
 
             TFData.UpdateConfiguration(stateConfig.Tf);
             stateConfig.CreateListOfEntries().ForEach(
-                displayConfigList => displayConfigList.ForEach(
-                    displayConfig => CreateDisplay(displayConfig.Module, configuration: displayConfig)));
+                displayConfigList => displayConfigList?.ForEach(
+                    displayConfig =>
+                    {
+                        if (displayConfig != null)
+                        {
+                            CreateDisplay(displayConfig.Module, configuration: displayConfig);
+                        }
+                    }));
 
-            if (connectionData.MasterUri != null && 
-                connectionData.MyUri != null && 
+            if (connectionData.MasterUri != null &&
+                connectionData.MyUri != null &&
                 connectionData.MyId != null)
             {
                 KeepReconnecting = true;
@@ -340,7 +407,7 @@ namespace Iviz.App
                 connectionData.MyUri = config.MyUri;
                 connectionData.MyId = config.MyId;
             }
-            catch (Exception e) when 
+            catch (Exception e) when
             (e is IOException || e is System.Security.SecurityException || e is JsonException)
             {
                 //Debug.Log(e);
@@ -361,7 +428,7 @@ namespace Iviz.App
                 string text = JsonConvert.SerializeObject(config, Formatting.Indented);
                 File.WriteAllText(Application.persistentDataPath + "/connection.json", text);
             }
-            catch (Exception e) when 
+            catch (Exception e) when
             (e is IOException || e is System.Security.SecurityException || e is JsonException)
             {
                 //Debug.Log(e);
@@ -389,7 +456,16 @@ namespace Iviz.App
                 Type = type,
                 Configuration = configuration
             };
-            DisplayData displayData = DisplayData.CreateFromResource(constructor);
+            DisplayData displayData;
+            try
+            {
+                displayData = DisplayData.CreateFromResource(constructor);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e);
+                return null;
+            }
             displayDatas.Add(displayData);
             CreateButtonObject(displayData);
             return displayData;

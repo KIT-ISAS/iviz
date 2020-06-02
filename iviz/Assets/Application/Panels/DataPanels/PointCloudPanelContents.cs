@@ -7,7 +7,6 @@ namespace Iviz.App
     public class PointCloudPanelContents : ListenerPanelContents
     {
         static readonly List<string> DefaultChannels = new List<string> { "x", "y", "z" };
-        public DataLabelWidget Topic { get; private set; }
         public SliderWidget PointSize { get; private set; }
         public DropdownWidget Colormap { get; private set; }
         public DropdownWidget IntensityChannel { get; private set; }
@@ -23,8 +22,7 @@ namespace Iviz.App
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("PointCloud");
-            Stats = p.AddSectionTitleWidget("Off | 0 Hz | 0 - 0 ms");
-            Topic = p.AddDataLabel("");
+            Listener = p.AddListener();
             PointSize = p.AddSlider("Point Size").SetMinValue(0.01f).SetMaxValue(0.1f);
             //p.AddToggle("Calculate Min/Max");
             Colormap = p.AddDropdown("Colormap")
@@ -42,13 +40,6 @@ namespace Iviz.App
             //p.AddToggle("Override Color");
             p.UpdateSize();
             gameObject.SetActive(false);
-
-            Topic.label.alignment = UnityEngine.TextAnchor.UpperLeft;
-            Topic.label.fontStyle = UnityEngine.FontStyle.Italic;
-
-            Widgets = new Widget[] {
-                PointSize, Colormap, IntensityChannel, CloseButton,
-                HideButton, ForceMinMax, MinIntensity, MaxIntensity };
         }
     }
 }

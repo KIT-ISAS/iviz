@@ -59,31 +59,24 @@ namespace Iviz.App
             base.Initialize(panel);
             this.panel = (ConnectionDialogContents)DialogPanelManager.GetPanelByType(DialogPanelType.Connection);
 
-            //Logger.Log += Logger_Log;
+            Logger.LogInternal += Logger_Log;
         }
 
-        /*
-        readonly StringBuilder str = new StringBuilder();
-        void Logger_Log(in LogMessage msg)
+        void Logger_Log(string msg)
         {
-            if (msg.Level == LogLevel.Info)
-            {
-                return;
-            }
-            str.AppendLine($"{Path.GetFileName(msg.File)}:{msg.Line} {((msg.Message is Exception ex) ? ex.Message : msg.Message.ToString())}");
-            string str_ = str.ToString();
             GameThread.RunOnce(() =>
             {
-                panel.Text.text = str_;
+                panel.LineLog.Add(msg);
+                panel.LineLog.Flush();
             });
         }
-        */
 
         public override void SetupPanel()
         {
             panel.MyUri.Value = MyUri.ToString();
             panel.MyId.Value = MyId;
             panel.MasterUri.Value = MasterUri.ToString();
+            panel.LineLog.Active = true;
 
             panel.Close.Clicked += Close;
             panel.MyUri.EndEdit += text =>

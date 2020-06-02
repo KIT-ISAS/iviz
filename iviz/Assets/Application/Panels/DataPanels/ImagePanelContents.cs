@@ -5,7 +5,6 @@ namespace Iviz.App
     public class ImagePanelContents : ListenerPanelContents
     {
         public ImagePreviewWidget PreviewWidget { get; private set; }
-        public DataLabelWidget Topic { get; private set; }
         public DataLabelWidget Description { get; private set; }
         public DropdownWidget Colormap { get; private set; }
         public SliderWidget Min { get; private set; }
@@ -18,8 +17,7 @@ namespace Iviz.App
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("Image");
-            Stats = p.AddSectionTitleWidget("Off | 0 Hz | 0 - 0 ms");
-            Topic = p.AddDataLabel("");
+            Listener = p.AddListener();
             Colormap = p.AddDropdown("Colormap")
                 .SetOptions(Resource.Colormaps.Names)
                 .SetIndex((int)Resource.ColormapId.gray);
@@ -34,11 +32,6 @@ namespace Iviz.App
             HideButton = p.AddHideButton();
             p.UpdateSize();
             gameObject.SetActive(false);
-
-            Topic.label.alignment = UnityEngine.TextAnchor.UpperLeft;
-
-            Widgets = new Widget[] { PreviewWidget, Colormap, Anchor, Min, Max, CloseButton, HideButton };
-
         }
     }
 }

@@ -41,8 +41,10 @@ namespace Iviz.App.Listeners
         public string HeadPoseTopic => $"{ConnectionManager.MyId}/ar_head";
         public string MarkersTopic => $"{ConnectionManager.MyId}/ar_markers";
 
-        RosSender<Msgs.GeometryMsgs.PoseStamped> rosSenderHead;
-        RosSender<MarkerArray> rosSenderMarkers;
+        public RosSender<Msgs.GeometryMsgs.PoseStamped> RosSenderHead { get; private set; }
+        public RosSender<MarkerArray> RosSenderMarkers { get; private set; }
+
+        public DisplayData DisplayData { get; set; }
 
         readonly ARConfiguration config = new ARConfiguration();
         public ARConfiguration Config
@@ -99,14 +101,14 @@ namespace Iviz.App.Listeners
                 config.PublishPose = value;
                 if (value)
                 {
-                    if (rosSenderHead != null && rosSenderHead.Topic != HeadPoseTopic)
+                    if (RosSenderHead != null && RosSenderHead.Topic != HeadPoseTopic)
                     {
-                        rosSenderHead.Stop();
-                        rosSenderHead = null;
+                        RosSenderHead.Stop();
+                        RosSenderHead = null;
                     }
-                    if (rosSenderHead == null)
+                    if (RosSenderHead == null)
                     {
-                        rosSenderHead = new RosSender<Msgs.GeometryMsgs.PoseStamped>(HeadPoseTopic);
+                        RosSenderHead = new RosSender<Msgs.GeometryMsgs.PoseStamped>(HeadPoseTopic);
                     }
                 }
             }
@@ -121,14 +123,14 @@ namespace Iviz.App.Listeners
                 planeManager.gameObject.SetActive(value);
                 if (value)
                 {
-                    if (rosSenderMarkers != null && rosSenderMarkers.Topic != MarkersTopic)
+                    if (RosSenderMarkers != null && RosSenderMarkers.Topic != MarkersTopic)
                     {
-                        rosSenderMarkers.Stop();
-                        rosSenderMarkers = null;
+                        RosSenderMarkers.Stop();
+                        RosSenderMarkers = null;
                     }
-                    if (rosSenderMarkers == null)
+                    if (RosSenderMarkers == null)
                     {
-                        rosSenderMarkers = new RosSender<MarkerArray>(MarkersTopic);
+                        RosSenderMarkers = new RosSender<MarkerArray>(MarkersTopic);
                     }
 
                 }
@@ -162,7 +164,7 @@ namespace Iviz.App.Listeners
                     Header: RosUtils.CreateHeader(headSeq++),
                     Pose: ARCamera.transform.AsPose().Unity2RosPose()
                 );
-                rosSenderHead.Publish(pose);
+                RosSenderHead.Publish(pose);
             }
             if (PublishMarkers)
             {
@@ -191,7 +193,7 @@ namespace Iviz.App.Listeners
                         i++;
                     }
                     //Debug.Log("sender: " + rosSenderMarkers);
-                    rosSenderMarkers.Publish(new MarkerArray(markers));
+                    RosSenderMarkers.Publish(new MarkerArray(markers));
                 }
             }
 

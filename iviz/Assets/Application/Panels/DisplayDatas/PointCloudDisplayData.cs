@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Iviz.App
 {
-    public class PointCloudDisplayData : DisplayableListenerData
+    public class PointCloudDisplayData : ListenerDisplayData
     {
         readonly PointCloudListener listener;
         readonly PointCloudPanelContents panel;
@@ -24,6 +24,7 @@ namespace Iviz.App
 
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.PointCloud) as PointCloudPanelContents;
             listener = listenerObject.GetComponent<PointCloudListener>();
+            listener.DisplayData = this;
             if (constructor.Configuration == null)
             {
                 listener.Config.Topic = Topic;
@@ -38,7 +39,7 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
-            panel.Topic.Label = SanitizedTopicText();
+            panel.Listener.RosListener = listener.Listener;
 
             panel.Colormap.Index = (int)listener.Colormap;
             panel.PointSize.Value = listener.PointSize;

@@ -38,7 +38,10 @@ namespace Iviz.App.Displays
         public bool Visible
         {
             get => gameObject.activeSelf;
-            set => gameObject.SetActive(value);
+            set
+            {
+                gameObject.SetActive(value);
+            }
         }
 
         /*
@@ -71,7 +74,6 @@ namespace Iviz.App.Displays
                 {
                     gameObject.SetActive(true);
                     labelObject.transform.localScale = TFListener.Instance.AxisLabelSize * Vector3.one;
-                    Name = target.name;
                 }
             }
         }
@@ -116,6 +118,7 @@ namespace Iviz.App.Displays
 
             //Active = false;
             Target = null;
+            Name = "";
         }
 
         GameObject CreateSelectionFrame()
@@ -211,9 +214,13 @@ namespace Iviz.App.Displays
                 return;
             }
 
-            float maxSize = Mathf.Max(Mathf.Max(bounds.size.x, bounds.size.y), bounds.size.z);
-            Bounds = Target.WorldBounds;
-            LabelOffset = Target.transform.TransformDirection(bounds.center) + new Vector3(0, maxSize / 2 + 0.15f, 0);
+            //float maxSize = Mathf.Max(Mathf.Max(bounds.size.x, bounds.size.y), bounds.size.z);
+            Bounds = Target.Bounds;
+            Pose pose = Target.BoundsPose;
+            transform.position = pose.position;
+            transform.rotation = pose.rotation;
+            LabelOffset = Bounds.center + new Vector3(0, Target.WorldBounds.size.y + 0.15f, 0);
+            Name = target?.Name;
         }
 
 

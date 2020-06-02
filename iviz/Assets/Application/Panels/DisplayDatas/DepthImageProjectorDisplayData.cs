@@ -24,10 +24,11 @@ namespace Iviz.App
         public DepthImageProjectorDisplayData(DisplayDataConstructor constructor) :
         base(constructor.DisplayList, constructor.Topic, constructor.Type)
         {
-            display = ResourcePool.GetOrCreate<DepthImageProjector>(Resource.Listeners.DepthImageProjector);
 
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.DepthImageProjector) as DepthImageProjectorPanelContents;
 
+            display = ResourcePool.GetOrCreate<DepthImageProjector>(Resource.Listeners.DepthImageProjector);
+            display.DisplayData = this;
             if (constructor.Configuration != null)
             {
                 display.Config = (DepthImageProjectorConfiguration)constructor.Configuration;

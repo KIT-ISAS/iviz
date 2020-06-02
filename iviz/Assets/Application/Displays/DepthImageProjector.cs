@@ -26,6 +26,8 @@ namespace Iviz.App.Displays
         DepthImageResource resource;
         DisplayClickableNode node;
 
+        public DisplayData DisplayData { get; set; }
+
         readonly DepthImageProjectorConfiguration config = new DepthImageProjectorConfiguration();
         public DepthImageProjectorConfiguration Config
         {

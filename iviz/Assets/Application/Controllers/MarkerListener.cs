@@ -21,6 +21,8 @@ namespace Iviz.App.Listeners
     {
         readonly Dictionary<string, MarkerObject> markers = new Dictionary<string, MarkerObject>();
 
+        public override DisplayData DisplayData { get; set; }
+
         readonly MarkerConfiguration config = new MarkerConfiguration();
         public MarkerConfiguration Config
         {

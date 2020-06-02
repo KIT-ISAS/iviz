@@ -4,7 +4,7 @@ using System.Net.Sockets;
 
 namespace Iviz.RoslibSharp.XmlRpc
 {
-    class HttpListener
+    class HttpListener : IDisposable
     {
         readonly TcpListener listener;
         bool keepGoing = true;
@@ -42,8 +42,22 @@ namespace Iviz.RoslibSharp.XmlRpc
         public void Stop()
         {
             keepGoing = false;
-            listener.Server.Shutdown(SocketShutdown.Both);
+
+            try
+            {
+                listener.Server.Shutdown(SocketShutdown.Both);
+            }
+            catch (SocketException) { }
+
             listener.Stop();
+        }
+
+        public void Dispose()
+        {
+            if (keepGoing)
+            {
+                Stop();
+            }
         }
     }
 }

@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class TrashButtonWidget : Widget
+    public class TrashButtonWidget : MonoBehaviour, IWidget
     {
         public Button button;
         public Image image;
@@ -34,7 +34,7 @@ namespace Iviz.App
             Clicked?.Invoke();
         }
 
-        public override void ClearSubscribers()
+        public void ClearSubscribers()
         {
             Clicked = null;
         }

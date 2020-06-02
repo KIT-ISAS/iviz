@@ -23,6 +23,8 @@ namespace Iviz.App.Listeners
 
     public class JointStateListener : TopicListener
     {
+        public override DisplayData DisplayData { get; set; }
+
         readonly JointStateConfiguration config = new JointStateConfiguration();
         public JointStateConfiguration Config
         {

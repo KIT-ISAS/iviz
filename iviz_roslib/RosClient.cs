@@ -182,6 +182,18 @@ namespace Iviz.RoslibSharp
                 ForEach(x => Master.UnregisterPublisher(x.Name));
         }
 
+        public void Cleanup()
+        {
+            lock (subscribersByTopic)
+            {
+                subscribersByTopic.Values.ForEach(x => x.Cleanup());
+            }
+            lock (publishersByTopic)
+            {
+                publishersByTopic.Values.ForEach(x => x.Cleanup());
+            }
+        }
+
         internal XmlRpc.NodeClient CreateTalker(Uri otherUri, int timeoutInMs = 2000)
         {
             return new XmlRpc.NodeClient(CallerId, CallerUri, otherUri, timeoutInMs);
@@ -853,6 +865,7 @@ namespace Iviz.RoslibSharp
             return CreateTalker(other).GetMasterUri().uri;
         }
 
+        /*
         public void CheckListenerHack()
         {
             try
@@ -868,6 +881,7 @@ namespace Iviz.RoslibSharp
                 Listener.Start();
             }
         }
+        */
 
         public override string ToString()
         {

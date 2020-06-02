@@ -301,13 +301,6 @@ namespace Iviz.App
             Clicked = null;
         }
 
-        /*
-        public void EnableColliders(bool b)
-        {
-            resource.ColliderEnabled = b;
-        }
-        */
-
         public bool ColliderEnabled
         {
             get => resource?.ColliderEnabled ?? false;
@@ -319,6 +312,10 @@ namespace Iviz.App
                 }
             }
         }
+
+        public override string Name => name;
+
+        public override Pose BoundsPose => resource?.transform.AsPose() ?? new Pose();
 
         public override void OnPointerClick(PointerEventData eventData)
         {

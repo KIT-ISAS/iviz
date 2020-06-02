@@ -1,8 +1,9 @@
-﻿using UnityEngine.UI;
+﻿using UnityEngine;
+using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class SectionTitleWidget : Widget
+    public class SectionTitleWidget : MonoBehaviour, IWidget
     {
         public Text label;
 
@@ -16,7 +17,7 @@ namespace Iviz.App
             }
         }
 
-        public override void ClearSubscribers() { }
+        public void ClearSubscribers() { }
 
         public SectionTitleWidget SetLabel(string f)
         {

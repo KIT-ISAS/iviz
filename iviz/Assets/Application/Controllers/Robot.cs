@@ -34,21 +34,17 @@ namespace Iviz.App
     public class Robot : MonoBehaviour, IController
     {
         ObjectClickableNode node;
-
-        //BoxCollider robotCollider;
-        //public override Bounds Bounds => robotCollider != null ? new Bounds(robotCollider.center, robotCollider.size) : new Bounds();
-        //public override Bounds WorldBounds => robotCollider?.bounds ?? new Bounds();
+        RobotInfo robotInfo;
 
         public GameObject RobotObject { get; private set; }
         public GameObject BaseLink { get; private set; }
 
-        RobotInfo robotInfo;
         public event Action Stopped;
-        //BoxCollider boxCollider;
 
         readonly Dictionary<GameObject, GameObject> originalLinkParents = new Dictionary<GameObject, GameObject>();
         readonly Dictionary<GameObject, Pose> originalLinkPoses = new Dictionary<GameObject, Pose>();
         readonly Dictionary<string, JointInfo> jointWriters = new Dictionary<string, JointInfo>();
+        readonly List<MeshRenderer> renderers = new List<MeshRenderer>();
 
         public IReadOnlyDictionary<string, JointInfo> JointWriters => new ReadOnlyDictionary<string, JointInfo>(jointWriters);
 
@@ -143,6 +139,7 @@ namespace Iviz.App
             set
             {
                 config.Visible = value;
+                renderers.ForEach(x => x.enabled = value);
                 if (RobotObject != null)
                 {
                     RobotObject.SetActive(value);
@@ -213,6 +210,11 @@ namespace Iviz.App
             }
         }
 
+        public DisplayData DisplayData
+        {
+            get => node.DisplayData;
+            set => node.DisplayData = value;
+        }
 
         void Awake()
         {
@@ -277,6 +279,7 @@ namespace Iviz.App
                 }
             });
 
+            renderers.AddRange(RobotObject.GetComponentsInChildren<MeshRenderer>());
             RobotObject.SetActive(Visible);
 
             BaseLink = RobotObject.
@@ -386,6 +389,7 @@ namespace Iviz.App
             jointWriters.Clear();
             originalLinkParents.Clear();
             originalLinkPoses.Clear();
+            renderers.Clear();
         }
 
         //public override void Recycle()

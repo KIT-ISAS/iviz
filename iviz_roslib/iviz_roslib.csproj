@@ -28,5 +28,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="POCOs\" />
+    <Folder Include="XmlRpc\" />
   </ItemGroup>
 </Project>

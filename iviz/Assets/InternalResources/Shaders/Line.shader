@@ -7,9 +7,12 @@ Shader "iviz/Line"
 	SubShader
 	{
 		Cull Off
+		Tags { "Queue" = "Transparent" "RenderType"="Transparent"}
+		Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass
 		{
+
 			CGPROGRAM
 			#include "UnityCG.cginc"
 
@@ -34,7 +37,7 @@ Shader "iviz/Line"
 			struct v2f
 			{
 				float4 position : SV_POSITION;
-				half3 color : COLOR;
+				half4 color : COLOR;
 			};
 
 			v2f vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
@@ -55,21 +58,26 @@ Shader "iviz/Line"
 				o.position = UnityObjectToClipPos(float4(p, 1));
 
 				int cA = _Lines[inst].colorA;
-				int cB = _Lines[inst].colorB;
-				int c = (cB - cA) * V.z + cA;
-				half3 rgb = half3(
-					(c >>  0) & 0xff,
-					(c >>  8) & 0xff,
-					(c >> 16) & 0xff
+				half4 rgbaA = half4(
+					(cA >>  0) & 0xff,
+					(cA >>  8) & 0xff,
+					(cA >> 16) & 0xff,
+					(cA >> 24) & 0xff
 					) / 255.0;
-				o.color = rgb;
-				//o.color = half3(1, 1, 1);
+				int cB = _Lines[inst].colorB;
+				half4 rgbaB = half4(
+					(cB >>  0) & 0xff,
+					(cB >>  8) & 0xff,
+					(cB >> 16) & 0xff,
+					(cB >> 24) & 0xff
+					) / 255.0;
+				o.color = (rgbaB - rgbaA) * V.z + rgbaA;
 				return o;
 			}
 
 			half4 frag(v2f i) : SV_Target
 			{
-				return half4(i.color, 1);
+				return i.color;
 			}
 
 			ENDCG

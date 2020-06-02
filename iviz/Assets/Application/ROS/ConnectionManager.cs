@@ -68,6 +68,11 @@ namespace Iviz.App
         uint logSeq = 0;
         void LogMessage(in LogMessage msg)
         {
+            if (msg.Level == LogLevel.Debug)
+            {
+                return;
+            }
+
             sender.Publish(new Log()
             {
                 Header = RosUtils.CreateHeader(logSeq++),

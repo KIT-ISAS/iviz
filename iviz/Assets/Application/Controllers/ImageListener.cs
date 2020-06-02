@@ -37,6 +37,12 @@ namespace Iviz.App.Listeners
         public string Description => texture.Description;
         public bool IsMono => texture.IsMono;
 
+        public override DisplayData DisplayData
+        {
+            get => node.DisplayData;
+            set => node.DisplayData = value;
+        }
+
         readonly ImageConfiguration config = new ImageConfiguration();
         public ImageConfiguration Config
         {

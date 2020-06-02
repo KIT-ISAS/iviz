@@ -100,7 +100,6 @@ namespace Iviz.App
             {
                 return;
             }
-            //namedBoundary.Active = false;
 
             if (SelectedDisplay != null)
             {
@@ -110,6 +109,18 @@ namespace Iviz.App
             if (SelectedDisplay != null)
             {
                 SelectedDisplay.Selected = true;
+            }
+        }
+
+        public void ToggleSelect(ClickableNode display)
+        {
+            if (SelectedDisplay != display)
+            {
+                Select(display);
+            }
+            else
+            {
+                Unselect(display);
             }
         }
 

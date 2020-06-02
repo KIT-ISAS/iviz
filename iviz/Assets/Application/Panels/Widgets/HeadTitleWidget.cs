@@ -1,8 +1,9 @@
-﻿using UnityEngine.UI;
+﻿using UnityEngine;
+using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class HeadTitleWidget : Widget
+    public class HeadTitleWidget : MonoBehaviour, IWidget
     {
         public Text label;
 
@@ -22,7 +23,7 @@ namespace Iviz.App
             return this;
         }
 
-        public override void ClearSubscribers() { }
+        public void ClearSubscribers() { }
 
     }
 }

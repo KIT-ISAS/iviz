@@ -97,6 +97,22 @@ namespace Iviz.Displays
             }
         }
 
+        public void Reserve(int size_)
+        {
+            int reqDataSize = (int)(size_ * 1.1f);
+            if (lineBuffer == null || lineBuffer.Length < reqDataSize)
+            {
+                lineBuffer = new LineWithColor[reqDataSize];
+
+                if (lineComputeBuffer != null)
+                {
+                    lineComputeBuffer.Release();
+                }
+                lineComputeBuffer = new ComputeBuffer(lineBuffer.Length, Marshal.SizeOf<LineWithColor>());
+                material.SetBuffer(PropLines, lineComputeBuffer);
+            }
+        }
+
         public IList<LineWithColor> LinesWithColor
         {
             get => lineBuffer;
@@ -114,20 +130,15 @@ namespace Iviz.Displays
             }
         }
 
-        /*
-        public void Set(IList<LineWithColor> points)
+        public void Set(int size, Action<LineWithColor[]> func)
         {
-            Size = points.Count;
-            for (int i = 0; i < Size; i++)
-            {
-                lineBuffer[i] = points[i];
-            }
+            Size = size;
+            func(lineBuffer);
             lineComputeBuffer.SetData(lineBuffer, 0, 0, Size);
             Bounds bounds = CalculateBounds();
             Collider.center = bounds.center;
             Collider.size = bounds.size;
         }
-        */
 
         float scale;
         public float Scale

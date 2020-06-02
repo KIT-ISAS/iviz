@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Iviz.App
 {
-    public class TFDisplayData : DisplayableListenerData
+    public class TFDisplayData : ListenerDisplayData
     {
         readonly TFListener listener;
         readonly TFPanelContents panel;
@@ -24,6 +24,7 @@ namespace Iviz.App
 
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.TF) as TFPanelContents;
             listener = listenerObject.GetComponent<TFListener>();
+            listener.DisplayData = this;
             if (constructor.Configuration != null)
             {
                 listener.Config = (TFConfiguration)constructor.Configuration;
@@ -43,13 +44,15 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
+            panel.Listener.RosListener = listener.Listener;
             panel.ShowAxes.Value = listener.AxisVisible;
             panel.FrameSize.Value = listener.AxisSize;
-            panel.ShowAxes.Value = listener.AxisVisible;
+            panel.ShowFrameLabels.Value = listener.AxisLabelVisible;
             panel.FrameLabelSize.Value = listener.AxisLabelSize;
             panel.FrameLabelSize.Interactable = listener.AxisLabelVisible;
             panel.ConnectToParent.Value = listener.ParentConnectorVisible;
             panel.ShowAllFrames.Value = listener.ShowAllFrames;
+            panel.Sender.RosSender = listener.Publisher;
 
             panel.ShowAxes.ValueChanged += f =>
             {

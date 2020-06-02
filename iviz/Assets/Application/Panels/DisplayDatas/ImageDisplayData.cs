@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class ImageDisplayData : DisplayableListenerData
+    public class ImageDisplayData : ListenerDisplayData
     {
         readonly ImageListener listener;
         readonly ImagePanelContents panel;
@@ -44,37 +44,9 @@ namespace Iviz.App
             UpdateButtonText();
         }
 
-        /*
-        public override DisplayData Initialize(DisplayListPanel displayList, string topic, string type)
-        {
-            base.Initialize(displayList, topic, type);
-            GameObject displayObject = ResourcePool.GetOrCreate(Resource.Listeners.Image);
-            displayObject.name = "Image";
-
-            listener = displayObject.GetComponent<ImageListener>();
-            listener.Config.Topic = Topic;
-            listener.Config.Type = Type;
-            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Image) as ImagePanelContents;
-            return this;
-        }
-
-        public override DisplayData Deserialize(JToken j)
-        {
-            listener.Config = j.ToObject<ImageConfiguration>();
-            Topic = listener.Config.Topic;
-            return this;
-        }
-
-        public override void Start()
-        {
-            base.Start();
-            listener.StartListening();
-        }
-        */
-
         public override void SetupPanel()
         {
-            panel.Topic.Label = SanitizedTopicText();
+            panel.Listener.RosListener = listener.Listener;
             panel.Description.Label = listener.Description;
 
             panel.PreviewWidget.Material = listener.Material;

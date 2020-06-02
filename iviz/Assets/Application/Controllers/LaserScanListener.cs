@@ -30,6 +30,8 @@ namespace Iviz.App.Listeners
         PointListResource pointCloud;
         DisplayNode node;
 
+        public override DisplayData DisplayData { get; set; }
+
         public float MinIntensity { get; private set; }
         public float MaxIntensity { get; private set; }
         public int Size { get; private set; }

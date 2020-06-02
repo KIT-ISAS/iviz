@@ -30,8 +30,6 @@ namespace Iviz.App
             Offset = p.AddVector3("Offset");
             p.UpdateSize();
             gameObject.SetActive(false);
-
-            Widgets = new Widget[] { CloseButton, HideButton, LineWidth, CellSize, NumberOfCells, Orientation, ColorPicker, ShowInterior, Offset };
         }
     }
 }

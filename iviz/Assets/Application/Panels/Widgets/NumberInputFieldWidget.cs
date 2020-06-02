@@ -2,11 +2,12 @@
 using System;
 using System.Globalization;
 using Iviz.Resources;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class NumberInputFieldWidget : Widget
+    public class NumberInputFieldWidget : MonoBehaviour, IWidget
     {
         public Text label;
         public InputField text;
@@ -75,7 +76,7 @@ namespace Iviz.App
             EndEdit?.Invoke(f);
         }
 
-        public override void ClearSubscribers()
+        public void ClearSubscribers()
         {
             ValueChanged = null;
             EndEdit = null;

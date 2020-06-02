@@ -12,6 +12,18 @@ namespace iviz_test
 {
     class Program
     {
+        static void Main()
+        {
+            RosClient client = new RosClient(
+                "http://192.168.0.73:11311",
+                null,
+                "http://192.168.0.157:7614"
+                );
+
+            Console.WriteLine(client.GetSystemState());
+            Console.In.Read();
+        }
+
         static void Main_Old(string[] args)
         {
             BridgeClient client = new BridgeClient("ws://192.168.0.157:8080");
@@ -53,7 +65,7 @@ namespace iviz_test
             }
         }
 
-        static void Main(string[] args)
+        static void Main_Old_2(string[] args)
         {
             RosClient client = new RosClient(
                 //"http://192.168.0.73:11311",

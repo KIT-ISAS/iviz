@@ -122,6 +122,18 @@ namespace Iviz.App
             return AddToBottom(o).GetComponent<DataLabelWidget>().SetLabel(label);
         }
 
+        public SenderWidget AddSender()
+        {
+            GameObject o = Resource.Widgets.Sender.Instantiate(nonstatics.transform);
+            return AddToBottom(o).GetComponent<SenderWidget>();
+        }
+
+        public ListenerWidget AddListener()
+        {
+            GameObject o = Resource.Widgets.Listener.Instantiate(nonstatics.transform);
+            return AddToBottom(o).GetComponent<ListenerWidget>();
+        }
+
         public void UpdateSize()
         {
             content.GetComponent<RectTransform>().sizeDelta = new Vector2(0, y);

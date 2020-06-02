@@ -19,8 +19,6 @@
             CloseButton = p.AddTrashButton();
             p.UpdateSize();
             gameObject.SetActive(false);
-
-            Widgets = new Widget[] { Depth, Color, FOV, PointSize, CloseButton };
         }
     }
 }

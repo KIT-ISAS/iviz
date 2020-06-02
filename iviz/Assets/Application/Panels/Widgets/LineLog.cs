@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Iviz.App
 {
-    public class LineLog : Widget
+    public class LineLog : MonoBehaviour, IWidget
     {
         public Text text;
         public GameObject content;
@@ -56,7 +56,7 @@ namespace Iviz.App
             ctransform.sizeDelta = new Vector2(0, y);
         }
 
-        public override void ClearSubscribers()
+        public void ClearSubscribers()
         {
             Active = false;
         }

@@ -6,8 +6,13 @@ namespace Iviz.App.Displays
 {
     public abstract class ClickableNode : DisplayNode, IPointerClickHandler
     {
+        const float MovingThreshold = 100;
+        const float MaxClickTime = 0.5f;
+
         public abstract Bounds Bounds { get; }
         public abstract Bounds WorldBounds { get; }
+        public abstract Pose BoundsPose { get; }
+        public abstract string Name { get; }
 
         public DisplayData DisplayData;
 
@@ -32,9 +37,6 @@ namespace Iviz.App.Displays
 
         protected bool IsRealClick(PointerEventData eventData)
         {
-            const float MovingThreshold = 50;
-            const float MaxClickTime = 0.5f;
-
             return
                 eventData.button == PointerEventData.InputButton.Left &&
                 Vector2.Distance(eventData.pressPosition, eventData.position) < MovingThreshold &&
@@ -43,7 +45,6 @@ namespace Iviz.App.Displays
 
         public virtual void OnPointerClick(PointerEventData eventData)
         {
-            Debug.Log("was here");
             if (!FlyCamera.IsMobile && eventData.button != PointerEventData.InputButton.Left)
             {
                 return;
@@ -58,6 +59,7 @@ namespace Iviz.App.Displays
                 return;
             }
             int clickCount = GetClickCount(eventData);
+            /*
             if (eventData.IsPointerMoving()) {
                 if (clickCount != 1)
                 {
@@ -68,18 +70,21 @@ namespace Iviz.App.Displays
                     return;
                 }
             }
+            */
 
             switch (clickCount)
             {
                 case 1:
-                    TFListener.GuiManager.Select(this);
+                    TFListener.GuiManager.ToggleSelect(this);
                     break;
                 case 2:
-                    TFListener.GuiManager.OrbitCenter = transform.TransformPoint(WorldBounds.center);
-                    break;
-                case 3:
                     DisplayData?.Select();
                     break;
+                    /*
+                case 3:
+                    TFListener.GuiManager.OrbitCenter = transform.TransformPoint(WorldBounds.center);
+                    break;
+                    */
             }
         }
 

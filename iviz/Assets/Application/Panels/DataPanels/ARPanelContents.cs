@@ -1,7 +1,4 @@
-﻿using Iviz.Displays;
-using UnityEngine;
-using UnityEngine.UI;
-
+﻿
 namespace Iviz.App
 {
     public class ARPanelContents : DataPanelContents
@@ -11,6 +8,8 @@ namespace Iviz.App
         public Vector3Widget Origin { get; private set; }
         public NumberInputFieldWidget WorldScale { get; private set; }
         public ToggleWidget SearchMarker { get; private set; }
+        public SenderWidget HeadSender { get; private set; }
+        public SenderWidget MarkersSender { get; private set; }
 
         void Awake()
         {
@@ -21,10 +20,10 @@ namespace Iviz.App
             Origin = p.AddVector3("Offset");
             WorldScale = p.AddNumberInputField("World Scale");
             SearchMarker = p.AddToggle("Search Origin Marker");
+            HeadSender = p.AddSender();
+            MarkersSender = p.AddSender();
             p.UpdateSize();
             gameObject.SetActive(false);
-
-            Widgets = new Widget[] { CloseButton, HideButton, Origin, WorldScale, SearchMarker };
         }
     }
 }

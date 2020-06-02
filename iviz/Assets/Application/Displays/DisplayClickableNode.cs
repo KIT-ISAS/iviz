@@ -7,6 +7,7 @@ namespace Iviz.App.Displays
 {
     public class DisplayClickableNode : ClickableNode
     {
+        GameObject targetObject;
         IDisplay target;
         public IDisplay Target
         {
@@ -15,15 +16,15 @@ namespace Iviz.App.Displays
             {
                 if (target != null)
                 {
-                    ((MonoBehaviour)target).gameObject.layer = 0;
+                    targetObject.gameObject.layer = 0;
                 }
                 target = value;
                 if (target != null)
                 {
-                    GameObject targetObject = ((MonoBehaviour)target).gameObject;
+                    targetObject = ((MonoBehaviour)target).gameObject;
                     targetObject.layer = Resource.ClickableLayer;
                     targetObject.transform.parent = transform;
-                    name = $"[{targetObject.name}]";
+                    name = Name;
                 }
             }
         }
@@ -31,10 +32,13 @@ namespace Iviz.App.Displays
         public override Bounds Bounds => Target?.Bounds ?? new Bounds();
         public override Bounds WorldBounds => Target?.WorldBounds ?? new Bounds();
 
+        public override string Name => string.IsNullOrEmpty(Target?.Name) ? "" : Target.Name;
+
+        public override Pose BoundsPose => targetObject.transform.AsPose();
+
         public static DisplayClickableNode Instantiate(string name, TFFrame frame = null)
         {
             GameObject obj = new GameObject(name);
-            //obj.layer = Resource.ClickableLayer;
             DisplayClickableNode node = obj.AddComponent<DisplayClickableNode>();
             node.Parent = frame ?? TFListener.ListenersFrame;
             return node;

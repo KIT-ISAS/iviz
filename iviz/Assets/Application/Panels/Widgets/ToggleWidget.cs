@@ -1,10 +1,11 @@
 ﻿using System;
 using Iviz.Resources;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class ToggleWidget : Widget
+    public class ToggleWidget : MonoBehaviour, IWidget
     {
         public Toggle toggle;
         public Text label;
@@ -44,7 +45,7 @@ namespace Iviz.App
             ValueChanged?.Invoke(f);
         }
 
-        public override void ClearSubscribers()
+        public void ClearSubscribers()
         {
             ValueChanged = null;
         }

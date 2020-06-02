@@ -21,12 +21,11 @@ namespace Iviz.App
             base(constructor.DisplayList, constructor.Topic, constructor.Type)
         {
             GameObject displayObject = Resource.Listeners.Grid.Instantiate();    
-            displayObject.name = "Grid";
 
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Grid) as GridPanelContents;
 
             display = displayObject.GetComponent<Listeners.Grid>();
-            //display.DisplayData = this;
+            display.DisplayData = this;
             if (constructor.Configuration != null)
             {
                 display.Config = (GridConfiguration)constructor.Configuration;

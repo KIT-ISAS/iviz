@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7979687756811785171}
   - component: {fileID: 7979687756811785170}
   m_Layer: 0
-  m_Name: Image Resource
+  m_Name: ImageResource
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -81,7 +81,7 @@ PrefabInstance:
     - target: {fileID: 8979140994947841299, guid: 9ba6887d9413647c49a9ad75f5c7a9a8,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.01
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8979140994947841299, guid: 9ba6887d9413647c49a9ad75f5c7a9a8,
         type: 3}
@@ -182,7 +182,7 @@ PrefabInstance:
     - target: {fileID: 8979140994947841299, guid: 9ba6887d9413647c49a9ad75f5c7a9a8,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.01
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8979140994947841299, guid: 9ba6887d9413647c49a9ad75f5c7a9a8,
         type: 3}

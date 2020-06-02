@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.Resources;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class DropdownWidget : Widget
+    public class DropdownWidget : MonoBehaviour, IWidget
     {
         public Text label;
         public Dropdown dropdown;
@@ -68,7 +69,7 @@ namespace Iviz.App
             ValueChanged?.Invoke(i, optionDatas[i].text);
         }
 
-        public override void ClearSubscribers()
+        public void ClearSubscribers()
         {
             ValueChanged = null;
         }

@@ -23,8 +23,6 @@ namespace Iviz.App
             HideButton = p.AddHideButton();
             p.UpdateSize();
             gameObject.SetActive(false);
-
-            Widgets = new Widget[] { ResourceType, CloseButton, FramePrefix, FrameSuffix, AttachToTF, HideButton };
         }
     }
 }

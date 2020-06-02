@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Net;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,10 +12,7 @@ namespace Iviz.RoslibSharp.XmlRpc
         readonly Dictionary<string, Func<object[], Arg[]>> Methods;
         readonly HttpListener listener;
         readonly RosClient client;
-        //volatile bool keepRunning;
         Task task;
-
-        readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
 
         public Uri Uri => client.CallerUri;
 
@@ -43,14 +38,6 @@ namespace Iviz.RoslibSharp.XmlRpc
 
         public void Start()
         {
-            //keepRunning = true;
-
-            //string maskUri = "http://+:" + Uri.Port + Uri.AbsolutePath;
-            //Logger.Log("RcpNodeServer: Starting RPC server on " + maskUri);
-
-            //listener.Prefixes.Add(maskUri);
-            //listener.Start();
-
             task = Task.Run(() =>
             {
                 Logger.LogDebug("RcpNodeServer: Starting!");
@@ -72,50 +59,6 @@ namespace Iviz.RoslibSharp.XmlRpc
                     });
                 });
 
-
-                /*
-                try
-                {
-                    while (keepRunning)
-                    {
-                        //Logger.LogDebug("RcpNodeServer: Waiting...");
-                        Task<HttpListenerContext> task = listener.GetContextAsync();
-                        task.Wait(tokenSource.Token);
-                        //Logger.LogDebug("RcpNodeServer: Received!");
-
-                        if (task.IsCanceled || !keepRunning)
-                        {
-                            //Logger.LogDebug("RcpNodeServer: Breaking!");
-                            break;
-                        }
-                        if (task.IsFaulted)
-                        {
-                            Logger.LogDebug("RcpNodeServer: Faulted!!");
-                            break;
-                        }
-
-                        HttpListenerContext context = task.Result;
-                        Task.Run(() =>
-                        {
-                            try
-                            {
-                                //Logger.LogDebug("RcpNodeServer: Starting service!");
-                                Service.MethodResponse(context, Methods); 
-                                //Logger.LogDebug("RcpNodeServer: Ending service!");
-                            }
-
-                        });
-                    }
-                }
-                catch (Exception e) when (e is ThreadAbortException || e is OperationCanceledException)
-                {
-                    Logger.LogDebug(e);
-                }
-                catch (Exception e)
-                {
-                    Logger.Log(e);
-                }
-                */
                 Logger.LogDebug("RcpNodeServer: Leaving thread.");
             });
         }
@@ -195,15 +138,9 @@ namespace Iviz.RoslibSharp.XmlRpc
 
         public Arg[] GetPid(object[] _)
         {
-            int id = -1;
-            try
-            {
-                id = Process.GetCurrentProcess().Id;
-            }
-            catch (Exception e)
-            {
-                Logger.Log($"RcpNodeServer: Failed to get process id");
-            }
+            int id = Process.GetCurrentProcess().Id;
+            Logger.Log($"RcpNodeServer: Failed to get process id");
+
             return new[] {
                     new Arg((int)StatusCode.Success),
                     new Arg("ok"),

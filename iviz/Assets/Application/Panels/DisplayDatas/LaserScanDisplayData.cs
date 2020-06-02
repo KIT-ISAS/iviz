@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Iviz.App
 {
-    public class LaserScanDisplayData : DisplayableListenerData
+    public class LaserScanDisplayData : ListenerDisplayData
     {
         readonly LaserScanListener listener;
         readonly LaserScanPanelContents panel;
@@ -25,6 +25,7 @@ namespace Iviz.App
 
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.LaserScan) as LaserScanPanelContents;
             listener = listenerObject.GetComponent<LaserScanListener>();
+            listener.DisplayData = this;
             if (constructor.Configuration == null)
             {
                 listener.Config.Topic = Topic;
@@ -39,7 +40,7 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
-            panel.Topic.Label = SanitizedTopicText();
+            panel.Listener.RosListener = listener.Listener;
 
             panel.Colormap.Index = (int)listener.Colormap;
             panel.PointSize.Value = listener.PointSize;

@@ -45,7 +45,7 @@ namespace Iviz.App
                     base.Id = value;
                     foreach (RosSender<T> sender in senders)
                     {
-                        sender.Id = value;
+                        sender.SetId(value);
                     }
                 }
             }
@@ -285,7 +285,7 @@ namespace Iviz.App
                 publishersByTopic.Add(advertiser.Topic, advertisedTopic);
             }
             advertisedTopic.Add(advertiser);
-            advertiser.Id = advertisedTopic.Id;
+            advertiser.SetId(advertisedTopic.Id);
         }
 
         public override void Publish(RosSender advertiser, IMessage msg)
@@ -418,6 +418,11 @@ namespace Iviz.App
 
         protected override void Update()
         {
+            AddTask(() =>
+            {
+                client?.Cleanup();
+            }
+            );
         }
 
         public override int GetNumPublishers(string topic)

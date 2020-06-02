@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Iviz.App
 {
-    public class JointStateDisplayData : DisplayableListenerData
+    public class JointStateDisplayData : ListenerDisplayData
     {
         readonly JointStateListener listener;
         readonly JointStatePanelContents panel;
@@ -28,6 +28,7 @@ namespace Iviz.App
 
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.JointState) as JointStatePanelContents;
             listener = displayObject.GetComponent<JointStateListener>();
+            listener.DisplayData = this;
             if (constructor.Configuration != null)
             {
                 listener.Config = (JointStateConfiguration)constructor.Configuration;
@@ -40,38 +41,10 @@ namespace Iviz.App
             listener.StartListening();
             UpdateButtonText();
         }
-        /*
-        public override DisplayData Initialize(DisplayListPanel displayList, string topic, string type)
-        {
-            base.Initialize(displayList, topic, type);
-            GameObject displayObject = ResourcePool.GetOrCreate(Resource.Listeners.JointState);
-            displayObject.name = "JointState:" + Topic;
-
-            listener = displayObject.GetComponent<JointStateListener>();
-            listener.Config.Topic = Topic;
-            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.JointState) as JointStatePanelContents;
-
-            return this;
-        }
-
-        public override DisplayData Deserialize(JToken j)
-        {
-            listener.Config = j.ToObject<JointStateConfiguration>();
-            Topic = listener.Config.Topic;
-            listener.Robot = GetRobotWithName(listener.RobotName);
-            return this;
-        }
-
-        public override void Start()
-        {
-            base.Start();
-            listener.StartListening();
-        }
-        */
 
         public override void SetupPanel()
         {
-            panel.Topic.Label = SanitizedTopicText();
+            panel.Listener.RosListener = listener.Listener;
 
             robotNames.Clear();
             robotNames.Add("<none>");

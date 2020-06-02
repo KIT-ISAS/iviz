@@ -29,6 +29,12 @@ namespace Iviz.App.Listeners
         ReflectionProbe reflectionProbe;
         GridResource grid;
 
+        public DisplayData DisplayData
+        {
+            get => node.DisplayData;
+            set => node.DisplayData = value;
+        }
+
         readonly GridConfiguration config = new GridConfiguration();
         public GridConfiguration Config
         {
@@ -146,8 +152,12 @@ namespace Iviz.App.Listeners
 
         void Awake()
         {
+            name = "Grid Controller";
+
             grid = ResourcePool.GetOrCreate<GridResource>(Resource.Markers.Grid);
-            node = DisplayClickableNode.Instantiate("node");
+            grid.name = "Grid";
+
+            node = DisplayClickableNode.Instantiate("GridNode");
             node.Target = grid;
 
             reflectionProbe = new GameObject().AddComponent<ReflectionProbe>();

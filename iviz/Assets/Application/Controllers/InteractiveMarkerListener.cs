@@ -29,6 +29,8 @@ namespace Iviz.App.Listeners
         readonly Dictionary<string, InteractiveMarkerObject> imarkers =
             new Dictionary<string, InteractiveMarkerObject>();
 
+        public override DisplayData DisplayData { get; set; }
+
         public bool DisableExpiration
         {
             get => config.DisableExpiration;

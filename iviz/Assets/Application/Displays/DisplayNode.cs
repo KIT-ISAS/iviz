@@ -10,20 +10,6 @@ namespace Iviz.App
     }
 }
 
-namespace Iviz.Displays
-{
-    public interface IDisplay
-    {
-        string Name { get; }
-        Bounds Bounds { get; }
-        Bounds WorldBounds { get; }
-        bool ColliderEnabled { get; set; }
-        void Stop();
-        Transform Parent { get; set; }
-        bool Visible { get; set; }
-    }
-}
-
 namespace Iviz.App.Displays
 {
     public abstract class DisplayNode : MonoBehaviour
@@ -71,14 +57,19 @@ namespace Iviz.App.Displays
 
     public sealed class SimpleDisplayNode : DisplayNode
     {
-        public static SimpleDisplayNode Instantiate(string name, Transform transform)
+        public static SimpleDisplayNode Instantiate(string name, Transform transform = null)
         {
             GameObject obj = new GameObject(name);
-            obj.transform.parent = transform;
-            return obj.AddComponent<SimpleDisplayNode>();
+            SimpleDisplayNode node = obj.AddComponent<SimpleDisplayNode>();
+            if (transform != null)
+            {
+                obj.transform.parent = transform;
+            }
+            else
+            {
+                node.Parent = TFListener.ListenersFrame;
+            }
+            return node;
         }
     }
-
-
-
 }

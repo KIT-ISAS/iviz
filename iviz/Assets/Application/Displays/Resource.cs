@@ -9,7 +9,7 @@ using Iviz.Msgs.VisualizationMsgs;
 
 using GameObjectInfo = Iviz.Resources.Resource.Info<UnityEngine.GameObject>;
 using MaterialInfo = Iviz.Resources.Resource.Info<UnityEngine.Material>;
-
+using Iviz.Msgs.GeometryMsgs;
 
 namespace Iviz.Resources
 {
@@ -29,7 +29,8 @@ namespace Iviz.Resources
             JointState,
             DepthImageProjector,
             LaserScan,
-            AR
+            AR,
+            Odometry,
         }
 
         static readonly Dictionary<string, Module> resourceByRosMessageType = new Dictionary<string, Module>
@@ -42,6 +43,7 @@ namespace Iviz.Resources
             { InteractiveMarkerUpdate.RosMessageType, Module.InteractiveMarker },
             { JointState.RosMessageType, Module.JointState },
             { LaserScan.RosMessageType, Module.LaserScan },
+            { PoseStamped.RosMessageType, Module.Odometry },
         };
 
         public static ReadOnlyDictionary<string, Module> ResourceByRosMessageType { get; }
@@ -101,7 +103,7 @@ namespace Iviz.Resources
                 return Object.ToString();
             }
 
-            public T Instantiate(Transform parent = null)
+            public T Instantiate(UnityEngine.Transform parent = null)
             {
                 if (Object is null)
                 {
@@ -200,6 +202,7 @@ namespace Iviz.Resources
             public GameObjectInfo Square { get; }
             public GameObjectInfo Line { get; }
             public GameObjectInfo Grid { get; }
+            public GameObjectInfo Axis { get; }
 
             public ReadOnlyDictionary<string, GameObjectInfo> Generic { get; }
 
@@ -221,6 +224,7 @@ namespace Iviz.Resources
                 Square = new GameObjectInfo("Displays/Square");
                 Line = new GameObjectInfo("Displays/Line");
                 Grid = new GameObjectInfo("Displays/Grid");
+                Axis = new GameObjectInfo("Displays/Axis");
 
                 Generic = new ReadOnlyDictionary<string, GameObjectInfo>(
                     new Dictionary<string, GameObjectInfo>()
@@ -291,6 +295,8 @@ namespace Iviz.Resources
             public GameObjectInfo DataLabel { get; }
             public GameObjectInfo HideButton { get; }
             public GameObjectInfo Vector3 { get; }
+            public GameObjectInfo Sender { get; }
+            public GameObjectInfo Listener { get; }
 
             public WidgetsType()
             {
@@ -314,6 +320,8 @@ namespace Iviz.Resources
                 DataLabel = new GameObjectInfo("Widgets/Data Label");
                 HideButton = new GameObjectInfo("Widgets/Hide Button");
                 Vector3 = new GameObjectInfo("Widgets/Vector3");
+                Sender = new GameObjectInfo("Widgets/Sender");
+                Listener = new GameObjectInfo("Widgets/Listener");
             }
         }
 

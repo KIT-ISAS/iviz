@@ -99,6 +99,7 @@ namespace Iviz.App
                 case Resource.Module.DepthImageProjector: return new DepthImageProjectorDisplayData(c);
                 case Resource.Module.LaserScan: return new LaserScanDisplayData(c);
                 case Resource.Module.AR: return new ARDisplayData(c);
+                case Resource.Module.Odometry: return new OdometryDisplayData(c);
                 default: throw new ArgumentException(nameof(c));
             }
         }

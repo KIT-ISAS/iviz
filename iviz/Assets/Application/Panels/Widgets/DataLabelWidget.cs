@@ -1,9 +1,10 @@
 ﻿using Iviz.Resources;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class DataLabelWidget : Widget
+    public class DataLabelWidget : MonoBehaviour, IWidget
     {
         public Text label;
         bool interactable = true;
@@ -33,7 +34,7 @@ namespace Iviz.App
             return this;
         }
 
-        public override void ClearSubscribers()
+        public void ClearSubscribers()
         {
         }
     }

@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class ColorPickerWidget : Widget
+    public class ColorPickerWidget : MonoBehaviour, IWidget
     {
         public SliderWidget sliderX;
         public SliderWidget sliderY;
@@ -127,7 +127,7 @@ namespace Iviz.App
             UpdateSliderLabels();
         }
 
-        public override void ClearSubscribers()
+        public void ClearSubscribers()
         {
             ValueChanged = null;
         }

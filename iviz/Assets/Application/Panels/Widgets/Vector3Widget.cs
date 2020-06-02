@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class Vector3Widget : Widget
+    public class Vector3Widget : MonoBehaviour, IWidget
     {
         public InputFieldWidget inputX;
         public InputFieldWidget inputY;
@@ -81,7 +81,7 @@ namespace Iviz.App
             disableUpdates = false;
         }
 
-        public override void ClearSubscribers()
+        public void ClearSubscribers()
         {
             ValueChanged = null;
         }

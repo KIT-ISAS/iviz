@@ -2,6 +2,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
+using System.Text;
 using Iviz.Msgs.RosgraphMsgs;
 
 namespace Iviz.App
@@ -44,35 +45,50 @@ namespace Iviz.App
     public static class Logger
     {
         public delegate void Delegate(in LogMessage msg);
-
         public static event Delegate Log;
+
+        public static event Action<string> LogInternal;
 
         public static void Info<T>(in T t, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
         {
             UnityEngine.Debug.Log(t);
             Log?.Invoke(new LogMessage(LogLevel.Info, t, file, line));
-            //ConnectionManager.Instance.LogMessage(ConnectionManager.LogLevel.Debug, t.ToString(), file, line);
         }
 
         public static void Error<T>(T t, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
         {
             UnityEngine.Debug.LogError(t);
             Log?.Invoke(new LogMessage(LogLevel.Error, t, file, line));
-            //ConnectionManager.Instance.LogMessage(ConnectionManager.LogLevel.Error, t.ToString(), file, line);
         }
 
         public static void Warn<T>(T t, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
         {
             UnityEngine.Debug.LogWarning(t);
             Log?.Invoke(new LogMessage(LogLevel.Warn, t, file, line));
-            //ConnectionManager.Instance.LogMessage(ConnectionManager.LogLevel.Warn, t.ToString(), file, line);
         }
 
         public static void Debug<T>(T t, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
         {
             UnityEngine.Debug.Log(t);
             Log?.Invoke(new LogMessage(LogLevel.Debug, t, file, line));
-            //ConnectionManager.Instance.LogMessage(ConnectionManager.LogLevel.Debug, t.ToString(), file, line);
+        }
+
+        public static void Internal(string msg)
+        {
+            string msgTxt = $"<b>[{DateTime.Now:HH:mm:ss}]</b> {msg}";
+            LogInternal?.Invoke(msgTxt);
+        }
+
+        public static void Internal(string msg, Exception e)
+        {
+            StringBuilder str = new StringBuilder();
+            str.Append($"<b>[{DateTime.Now:HH:mm:ss}]</b> {msg}");
+            while (e != null)
+            {
+                str.Append($"\n→ <color=red>{e.GetType()}</color> {e.Message}");
+                e = e.InnerException;
+            }
+            LogInternal?.Invoke(str.ToString());
         }
     }
 }

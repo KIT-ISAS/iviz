@@ -2,7 +2,6 @@
 {
     public class JointStatePanelContents : ListenerPanelContents
     {
-        public DataLabelWidget Topic { get; private set; }
         public DropdownWidget Robot { get; private set; }
         public InputFieldWidget JointPrefix { get; private set; }
         public InputFieldWidget JointSuffix { get; private set; }
@@ -13,8 +12,7 @@
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("JointState");
-            Stats = p.AddSectionTitleWidget("Off | 0 Hz | 0 - 0 ms");
-            Topic = p.AddDataLabel("");
+            Listener = p.AddListener();
             Robot = p.AddDropdown("Robot");
             JointPrefix = p.AddInputField("Joint Prefix").SetPlaceholder("<none>");
             JointSuffix = p.AddInputField("Joint Suffix").SetPlaceholder("<none>");
@@ -22,10 +20,6 @@
             CloseButton = p.AddTrashButton();
             p.UpdateSize();
             gameObject.SetActive(false);
-
-            Topic.label.alignment = UnityEngine.TextAnchor.UpperLeft;
-
-            Widgets = new Widget[] { JointPrefix, JointSuffix, TrimFromEnd, CloseButton, Robot };
         }
     }
 }

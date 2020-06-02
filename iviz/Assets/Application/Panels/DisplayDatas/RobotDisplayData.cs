@@ -22,8 +22,7 @@ namespace Iviz.App
         {
             GameObject displayObject = ResourcePool.GetOrCreate(Resource.Listeners.Robot);
             Robot = displayObject.GetComponent<Robot>();
-            //Robot.Parent = TFListener.ListenersFrame;
-            //Robot.DisplayData = this;
+            Robot.DisplayData = this;
             if (constructor.Configuration != null)
             {
                 Robot.Config = (RobotConfiguration)constructor.Configuration;

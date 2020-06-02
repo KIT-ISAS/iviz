@@ -32,6 +32,10 @@ namespace Iviz.App.Displays
         public override Bounds Bounds => new Bounds(boxCollider.center, boxCollider.size);
         public override Bounds WorldBounds => boxCollider.bounds;
 
+        public override string Name => target?.name ?? "";
+
+        public override Pose BoundsPose => target.transform.AsPose();
+
         void Awake()
         {
             //boxCollider = gameObject.AddComponent<BoxCollider>();

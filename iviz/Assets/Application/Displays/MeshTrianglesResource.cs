@@ -17,7 +17,7 @@ namespace Iviz.Displays
             set
             {
                 color = value;
-                mainRenderer.material = (color.a > 0.99f) ?
+                mainRenderer.material = (color.a > 254f / 255f) ?
                     Resource.Materials.Lit.Object :
                     Resource.Materials.TransparentLit.Object;
                 mainRenderer.SetPropertyColor(color);

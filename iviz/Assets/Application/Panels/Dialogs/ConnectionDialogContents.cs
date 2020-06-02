@@ -14,6 +14,7 @@ namespace Iviz.App
         public TrashButtonWidget Connect;
         public TrashButtonWidget Close;
         public TrashButtonWidget Stop;
+        public LineLog LineLog;
         //public Text Text;
 
         public bool Active

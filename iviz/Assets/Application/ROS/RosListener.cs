@@ -21,7 +21,8 @@ namespace Iviz.App
 
         public RosListenerStats() { }
 
-        public RosListenerStats(int totalMessages, float jitterMin, float jitterMax, float jitterMean, int messagesPerSecond, int bytesPerSecond, int messagesInQueue)
+        public RosListenerStats(int totalMessages, float jitterMin, float jitterMax,
+            float jitterMean, int messagesPerSecond, int bytesPerSecond, int messagesInQueue)
         {
             TotalMessages = totalMessages;
             JitterMin = jitterMin;
@@ -41,66 +42,28 @@ namespace Iviz.App
 
         public int NumPublishers => ConnectionManager.Connection.GetNumPublishers(Topic);
 
+        public int TotalMsgCounter { get; protected set; }
+        public int MsgsInQueue { get; protected set; }
+        public int MaxQueueSize { get; set; } = 50;
+        public int TotalMsgBytes { get; protected set; }
+        protected readonly List<float> timesOfArrival = new List<float>();
+
         protected RosListener(string topic, string type)
         {
+            Logger.Internal($"Subscribing to <b>{topic}</b> <i>[{type}]</i>.");
+
             Topic = topic ?? throw new ArgumentNullException(nameof(topic));
             Type = type ?? throw new ArgumentNullException(nameof(type));
+
+            GameThread.EverySecond += UpdateStats;
         }
 
-        public abstract void UpdateStats();
-        public abstract void Stop();
-    }
-
-    public class RosListener<T> : RosListener where T : IMessage, new()
-    {
-        readonly Action<T> subscriptionHandler;
-        readonly List<float> timesOfArrival = new List<float>();
-
-        public int TotalMsgCounter { get; private set; }
-        public int MsgsInQueue { get; private set; }
-        public int MaxQueueSize { get; set; } = 50;
-        public int TotalMsgBytes { get; private set; }
-
-        public RosListener(string topic, Action<T> handler) :
-            base(topic, BuiltIns.GetMessageType(typeof(T)))
+        public virtual void Stop()
         {
-            subscriptionHandler = handler;
-
-            //Debug.Log("RosListener: Requesting subscription to topic " + Topic);
-            ConnectionManager.Subscribe(this);
+            GameThread.EverySecond -= UpdateStats;
         }
 
-        public void EnqueueMessage(T t)
-        {
-            if (MsgsInQueue >= MaxQueueSize)
-            {
-                return;
-            }
-            MsgsInQueue++;
-            GameThread.RunOnce(() =>
-            {
-                TotalMsgCounter++;
-                MsgsInQueue--;
-                TotalMsgBytes += t.RosMessageLength;
-                timesOfArrival.Add(Time.time);
-                try
-                {
-                    subscriptionHandler(t);
-                }
-                catch (Exception e)
-                {
-                    Logger.Error(e);
-                }
-            });
-        }
-
-        public override void Stop()
-        {
-            ConnectionManager.Unsubscribe(this);
-        }
-
-
-        public override void UpdateStats()
+        void UpdateStats()
         {
             if (!timesOfArrival.Any())
             {
@@ -131,6 +94,50 @@ namespace Iviz.App
                 TotalMsgBytes = 0;
                 timesOfArrival.Clear();
             }
+        }
+    }
+
+    public sealed class RosListener<T> : RosListener where T : IMessage, new()
+    {
+        readonly Action<T> subscriptionHandler;
+
+        public RosListener(string topic, Action<T> handler) :
+            base(topic, BuiltIns.GetMessageType(typeof(T)))
+        {
+            subscriptionHandler = handler;
+
+            ConnectionManager.Subscribe(this);
+        }
+
+        public void EnqueueMessage(T t)
+        {
+            if (MsgsInQueue >= MaxQueueSize)
+            {
+                return;
+            }
+            MsgsInQueue++;
+            GameThread.RunOnce(() =>
+            {
+                TotalMsgCounter++;
+                MsgsInQueue--;
+                TotalMsgBytes += t.RosMessageLength;
+                timesOfArrival.Add(Time.time);
+                try
+                {
+                    subscriptionHandler(t);
+                }
+                catch (Exception e)
+                {
+                    Logger.Error(e);
+                }
+            });
+        }
+
+        public override void Stop()
+        {
+            base.Stop();
+            Logger.Internal($"Unsubscribing from {Topic}.");
+            ConnectionManager.Unsubscribe(this);
         }
     }
 }
