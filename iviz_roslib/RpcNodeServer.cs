@@ -65,7 +65,7 @@ namespace Iviz.RoslibSharp.XmlRpc
 
         public void Stop()
         {
-            listener.Stop();
+            listener.Dispose();
             task.Wait();
         }
 

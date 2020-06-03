@@ -27,7 +27,6 @@ namespace Iviz.RoslibSharp.XmlRpc
 
     public static class Service
     {
-
         static void Assert(string received, string expected)
         {
             if (received != expected)

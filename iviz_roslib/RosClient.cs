@@ -16,9 +16,16 @@ namespace Iviz.RoslibSharp
         public InvalidMessageTypeException() { }
     }
 
+    public class ConnectionException : Exception
+    {
+        public ConnectionException(string message) : base(message) { }
+        public ConnectionException(string message, Exception innerException) : base(message, innerException) { }
+        public ConnectionException() { }
+    }
+
     public sealed class RosClient : IDisposable
     {
-        XmlRpc.NodeServer Listener;
+        readonly XmlRpc.NodeServer Listener;
 
         readonly Dictionary<string, RosSubscriber> subscribersByTopic = new Dictionary<string, RosSubscriber>();
         readonly Dictionary<string, RosPublisher> publishersByTopic = new Dictionary<string, RosPublisher>();
@@ -53,6 +60,69 @@ namespace Iviz.RoslibSharp
         /// Wrapper for XML-RPC calls to the master.
         /// </summary>
         public XmlRpc.Master Master { get; }
+
+        /// <summary>
+        /// Timeout in milliseconds for XML-RPC communications with the master.
+        /// </summary>
+        public TimeSpan RpcMasterTimeout
+        {
+            get => TimeSpan.FromMilliseconds(Master.TimeoutInMs);
+            set
+            {
+                if (value.TotalMilliseconds <= 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value));
+                }
+                Master.TimeoutInMs = (int)value.TotalMilliseconds;
+            }
+        }
+
+        TimeSpan rpcNodeTimeout = TimeSpan.FromSeconds(2);
+
+        /// <summary>
+        /// Timeout in milliseconds for XML-RPC communications with another node.
+        /// </summary>
+        public TimeSpan RpcNodeTimeout
+        {
+            get => rpcNodeTimeout;
+            set
+            {
+                if (value.TotalMilliseconds <= 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value));
+                }
+                rpcNodeTimeout = value;
+            }
+        }
+
+        TimeSpan tcpRosTimeout = TimeSpan.FromSeconds(2);
+
+        /// <summary>
+        /// Timeout in milliseconds for TCP-ROS communications (topics, services).
+        /// </summary>
+        public TimeSpan TcpRosTimeout
+        {
+            get => tcpRosTimeout;
+            set
+            {
+                if (value.TotalMilliseconds <= 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value));
+                }
+                tcpRosTimeout = value;
+                lock (subscribersByTopic)
+                {
+                    subscribersByTopic.Values.ForEach(
+                        x => x.TimeoutInMs = (int)value.TotalMilliseconds);
+                }
+                lock (publishersByTopic)
+                {
+                    publishersByTopic.Values.ForEach(
+                        x => x.TimeoutInMs = (int)value.TotalMilliseconds);
+                }
+            }
+        }
+
 
         /// <summary>
         /// Wrapper for XML-RPC calls to the master.
@@ -109,7 +179,7 @@ namespace Iviz.RoslibSharp
             catch (HttpListenerException e)
             {
                 Listener.Stop();
-                throw new ArgumentException($"RosClient: Failed to bind to local URI '{callerUri}'", nameof(callerUri), e);
+                throw new ConnectionException($"RosClient: Failed to bind to local URI '{callerUri}'", e);
             }
 
             Master = new XmlRpc.Master(masterUri, CallerId, CallerUri);
@@ -127,7 +197,7 @@ namespace Iviz.RoslibSharp
             (e is SocketException || e is TimeoutException || e is AggregateException)
             {
                 Listener.Stop();
-                throw new ArgumentException($"RosClient: Failed to contact the master URI '{masterUri}'", nameof(masterUri), e);
+                throw new ConnectionException($"RosClient: Failed to contact the master URI '{masterUri}'", e);
             }
             Logger.Log("RosClient: Initialized.");
 
@@ -198,15 +268,18 @@ namespace Iviz.RoslibSharp
             }
         }
 
-        internal XmlRpc.NodeClient CreateTalker(Uri otherUri, int timeoutInMs = 2000)
+        internal XmlRpc.NodeClient CreateTalker(Uri otherUri)
         {
-            return new XmlRpc.NodeClient(CallerId, CallerUri, otherUri, timeoutInMs);
+            return new XmlRpc.NodeClient(CallerId, CallerUri, otherUri, (int)RpcNodeTimeout.TotalMilliseconds);
         }
 
         RosSubscriber CreateSubscriber(string topic, bool requestNoDelay, Type type, IMessage generator)
         {
             TopicInfo topicInfo = new TopicInfo(CallerId, topic, type, generator);
-            TcpReceiverManager manager = new TcpReceiverManager(topicInfo, requestNoDelay);
+            TcpReceiverManager manager = new TcpReceiverManager(topicInfo, requestNoDelay)
+            {
+                TimeoutInMs = (int)TcpRosTimeout.TotalMilliseconds
+            };
             RosSubscriber subscription = new RosSubscriber(this, manager);
 
             lock (subscribersByTopic)
@@ -383,7 +456,10 @@ namespace Iviz.RoslibSharp
         RosPublisher CreatePublisher(string topic, Type type)
         {
             TopicInfo topicInfo = new TopicInfo(CallerId, topic, type);
-            TcpSenderManager manager = new TcpSenderManager(topicInfo, CallerUri);
+            TcpSenderManager manager = new TcpSenderManager(topicInfo, CallerUri)
+            {
+                TimeoutInMs = (int)TcpRosTimeout.TotalMilliseconds
+            };
             RosPublisher publisher = new RosPublisher(this, manager);
 
             lock (publishersByTopic)

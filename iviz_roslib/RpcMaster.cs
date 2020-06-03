@@ -20,6 +20,7 @@ namespace Iviz.RoslibSharp.XmlRpc
         public Uri MasterUri { get; }
         public Uri CallerUri { get; }
         public string CallerId { get; }
+        public int TimeoutInMs { get; set; }
 
         internal Master(Uri masterUri, string callerId, Uri callerUri)
         {
@@ -31,8 +32,8 @@ namespace Iviz.RoslibSharp.XmlRpc
         public GetUriResponse GetUri()
         {
             Arg[] args = { new Arg(CallerId) };
-            object response = Service.MethodCall(MasterUri, CallerUri, "getUri", args);
-            return new GetUriResponse((object[])response);
+            object[] response = MethodCall("getUri", args);
+            return new GetUriResponse(response);
         }
 
         public LookupNodeResponse LookupNode(string nodeId)
@@ -41,8 +42,8 @@ namespace Iviz.RoslibSharp.XmlRpc
                 new Arg(CallerId),
                 new Arg(nodeId),
             };
-            object response = Service.MethodCall(MasterUri, CallerUri, "lookupNode", args);
-            return new LookupNodeResponse((object[])response);
+            object[] response = MethodCall("lookupNode", args);
+            return new LookupNodeResponse(response);
         }
 
         public GetPublishedTopicsResponse GetPublishedTopics(string subgraph = "")
@@ -51,8 +52,8 @@ namespace Iviz.RoslibSharp.XmlRpc
                 new Arg(CallerId),
                 new Arg(subgraph),
             };
-            object response = Service.MethodCall(MasterUri, CallerUri, "getPublishedTopics", args);
-            return new GetPublishedTopicsResponse((object[])response);
+            object[] response = MethodCall("getPublishedTopics", args);
+            return new GetPublishedTopicsResponse(response);
         }
 
         public RegisterSubscriberResponse RegisterSubscriber(string topic, string topicType)
@@ -63,8 +64,8 @@ namespace Iviz.RoslibSharp.XmlRpc
                 new Arg(topicType),
                 new Arg(CallerUri.ToString()),
             };
-            object response = Service.MethodCall(MasterUri, CallerUri, "registerSubscriber", args);
-            return new RegisterSubscriberResponse((object[])response);
+            object[] response = MethodCall("registerSubscriber", args);
+            return new RegisterSubscriberResponse(response);
         }
 
         public UnregisterSubscriberResponse UnregisterSubscriber(string topic)
@@ -74,8 +75,8 @@ namespace Iviz.RoslibSharp.XmlRpc
                 new Arg(topic),
                 new Arg(CallerUri.ToString()),
             };
-            object response = Service.MethodCall(MasterUri, CallerUri, "unregisterSubscriber", args);
-            return new UnregisterSubscriberResponse((object[])response);
+            object[] response = MethodCall("unregisterSubscriber", args);
+            return new UnregisterSubscriberResponse(response);
         }
 
         public RegisterPublisherResponse RegisterPublisher(string topic, string topicType)
@@ -86,8 +87,8 @@ namespace Iviz.RoslibSharp.XmlRpc
                 new Arg(topicType),
                 new Arg(CallerUri),
             };
-            object response = Service.MethodCall(MasterUri, CallerUri, "registerPublisher", args);
-            return new RegisterPublisherResponse((object[])response);
+            object[] response = MethodCall("registerPublisher", args);
+            return new RegisterPublisherResponse(response);
         }
 
         public UnregisterPublisherResponse UnregisterPublisher(string topic)
@@ -97,8 +98,8 @@ namespace Iviz.RoslibSharp.XmlRpc
                 new Arg(topic),
                 new Arg(CallerUri),
             };
-            object response = Service.MethodCall(MasterUri, CallerUri, "unregisterPublisher", args);
-            return new UnregisterPublisherResponse((object[])response);
+            object[] response = MethodCall("unregisterPublisher", args);
+            return new UnregisterPublisherResponse(response);
         }
 
         public GetSystemStateResponse GetSystemState()
@@ -106,8 +107,8 @@ namespace Iviz.RoslibSharp.XmlRpc
             Arg[] args = {
                 new Arg(CallerId),
             };
-            object response = Service.MethodCall(MasterUri, CallerUri, "getSystemState", args);
-            return new GetSystemStateResponse((object[])response);
+            object[] response = MethodCall("getSystemState", args);
+            return new GetSystemStateResponse(response);
         }
 
         public LookupServiceResponse LookupService(string service)
@@ -116,8 +117,8 @@ namespace Iviz.RoslibSharp.XmlRpc
                 new Arg(CallerId),
                 new Arg(service),
             };
-            object response = Service.MethodCall(MasterUri, CallerUri, "lookupService", args);
-            return new LookupServiceResponse((object[])response);
+            object[] response = MethodCall("lookupService", args);
+            return new LookupServiceResponse(response);
         }
 
         public DefaultResponse RegisterService(string service, Uri rosRpcUri)
@@ -128,8 +129,8 @@ namespace Iviz.RoslibSharp.XmlRpc
                 new Arg(rosRpcUri),
                 new Arg(CallerUri),
             };
-            object response = Service.MethodCall(MasterUri, CallerUri, "registerService", args);
-            return new DefaultResponse((object[])response);
+            object[] response = MethodCall("registerService", args);
+            return new DefaultResponse(response);
         }
 
         public UnregisterServiceResponse UnregisterService(string service, Uri rosRpcUri)
@@ -139,8 +140,14 @@ namespace Iviz.RoslibSharp.XmlRpc
                 new Arg(service),
                 new Arg(rosRpcUri),
             };
-            object response = Service.MethodCall(MasterUri, CallerUri, "unregisterService", args);
-            return new UnregisterServiceResponse((object[])response);
+            object[] response = MethodCall("unregisterService", args);
+            return new UnregisterServiceResponse(response);
+        }
+
+        object[] MethodCall(string function, Arg[] args)
+        {
+            return (object[])Service.MethodCall(MasterUri, CallerUri, function, args, TimeoutInMs);
+
         }
     }
 

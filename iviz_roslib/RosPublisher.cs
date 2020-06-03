@@ -27,6 +27,11 @@ namespace Iviz.RoslibSharp
             get => Manager.MaxQueueSize;
             set => Manager.MaxQueueSize = value;
         }
+        public int TimeoutInMs
+        {
+            get => Manager.TimeoutInMs;
+            set => Manager.TimeoutInMs = value;
+        }
 
         internal RosPublisher(RosClient client, TcpSenderManager manager)
         {

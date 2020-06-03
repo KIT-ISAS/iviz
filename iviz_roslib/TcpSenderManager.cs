@@ -19,6 +19,8 @@ namespace Iviz.RoslibSharp
         public string TopicType => topicInfo.Type;
         public int NumConnections => connectionsByCallerId.Count;
 
+        public int TimeoutInMs { get; set; }
+
         public IMessage LatchedMessage { get; private set; }
 
         bool latching;
@@ -76,7 +78,7 @@ namespace Iviz.RoslibSharp
                     }
                 }
 
-                endPoint = connection.Start();
+                endPoint = connection.Start(TimeoutInMs);
                 connectionsByCallerId[remoteCallerId] = connection;
             }
 

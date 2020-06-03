@@ -75,7 +75,7 @@ namespace Iviz.RoslibSharp
             Latching = latching;
         }
 
-        public IPEndPoint Start()
+        public IPEndPoint Start(int timeoutInMs)
         {
             string localHostname = CallerUri.Host;
             //IPAddress localAddress = Dns.GetHostAddresses(localHostname)[0];
@@ -85,7 +85,7 @@ namespace Iviz.RoslibSharp
             //Logger.Log("TcpSender: Listening at " + tcpListener.LocalEndpoint);
 
             keepRunning = true;
-            task = Task.Run(Run);
+            task = Task.Run(() => Run(timeoutInMs));
 
             IPEndPoint localEndpoint = (IPEndPoint)tcpListener.LocalEndpoint;
             Hostname = localEndpoint.Address.ToString();
@@ -264,14 +264,12 @@ namespace Iviz.RoslibSharp
             return errorMessage == null;
         }
 
-        void Run()
+        void Run(int timeoutInMs)
         {
             try
             {
                 Logger.LogDebug($"{this}: initialized! " + tcpListener.LocalEndpoint);
                 Status = SenderStatus.Waiting;
-
-                const int timeoutInMs = 2000;
 
                 Task<TcpClient> task = tcpListener.AcceptTcpClientAsync();
                 if (!task.Wait(timeoutInMs) || task.IsCanceled || task.IsFaulted)

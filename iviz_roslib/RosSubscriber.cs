@@ -22,6 +22,12 @@ namespace Iviz.RoslibSharp
         public int NumIds => Ids.Count;
         public bool RequestNoDelay => Manager.RequestNoDelay;
 
+        public int TimeoutInMs
+        {
+            get => Manager.TimeoutInMs;
+            set => Manager.TimeoutInMs = value;
+        }
+
         internal RosSubscriber(RosClient client, TcpReceiverManager manager)
         {
             Client = client;

@@ -53,10 +53,10 @@ namespace Iviz.RoslibSharp
             RequestNoDelay = requestNoDelay;
         }
 
-        public void Start()
+        public void Start(int timeoutInMs)
         {
             keepRunning = true;
-            task = Task.Run(Run);
+            task = Task.Run(() => Run(timeoutInMs));
         }
 
         public void Stop()
@@ -149,14 +149,12 @@ namespace Iviz.RoslibSharp
             return ParseHeader(totalLength);
         }
 
-        void Run()
+        void Run(int timeoutInMs)
         {
             using (tcpClient = new TcpClient())
             {
                 try
                 {
-                    const int timeoutInMs = 2000;
-
                     Task task = tcpClient.ConnectAsync(RemoteHostname, RemotePort);
                     if (!task.Wait(timeoutInMs) || task.IsCanceled)
                     {

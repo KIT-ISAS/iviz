@@ -60,9 +60,9 @@ namespace Iviz.RoslibSharp.XmlRpc
             }
         }
 
-        readonly string CallerId;
-        readonly Uri CallerUri;
-        readonly int timeoutInMs;
+        public string CallerId { get; }
+        public Uri CallerUri { get; }
+        public int TimeoutInMs { get; }
         public Uri Uri { get; }
 
         public NodeClient(string callerId, Uri callerUri, Uri otherUri, int timeoutInMs = 2000)
@@ -70,7 +70,7 @@ namespace Iviz.RoslibSharp.XmlRpc
             CallerId = callerId;
             CallerUri = callerUri;
             Uri = otherUri;
-            this.timeoutInMs = timeoutInMs;
+            TimeoutInMs = timeoutInMs;
         }
 
         public RequestTopicResponse RequestTopic(string topic, string[][] protocols)
@@ -80,7 +80,7 @@ namespace Iviz.RoslibSharp.XmlRpc
                 new Arg(topic),
                 new Arg(protocols),
             };
-            object response = Service.MethodCall(Uri, CallerUri, "requestTopic", args, timeoutInMs);
+            object response = Service.MethodCall(Uri, CallerUri, "requestTopic", args, TimeoutInMs);
             return new RequestTopicResponse((object[])response);
         }
 
@@ -89,7 +89,7 @@ namespace Iviz.RoslibSharp.XmlRpc
             Arg[] args = {
                 new Arg(CallerId)
             };
-            object response = Service.MethodCall(Uri, CallerUri, "getMasterUri", args, timeoutInMs);
+            object response = Service.MethodCall(Uri, CallerUri, "getMasterUri", args, TimeoutInMs);
             return new GetMasterUriResponse((object[])response);
         }
     }
