@@ -17,22 +17,24 @@ namespace Iviz.App.Listeners
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public string Type { get; set; } = "";
+        [DataMember] public float Scale { get; set; } = 1.0f;
         [DataMember] public bool ShowTrail { get; set; } = true;
-        [DataMember] public SerializableColor TrailColor { get; set; } = Color.red;
+        [DataMember] public SerializableColor Color { get; set; } = UnityEngine.Color.red;
         [DataMember] public float TrailTime { get; set; } = 2.0f;
     }
 
     public class OdometryListener : TopicListener
     {
-        DisplayClickableNode axisNode;
+        DisplayClickableNode displayNode;
         SimpleDisplayNode trailNode;
         AxisResource axis;
         TrailResource trail;
+        MeshMarkerResource sphere;
 
         public override DisplayData DisplayData
         {
-            get => axisNode.DisplayData;
-            set => axisNode.DisplayData = value;
+            get => displayNode.DisplayData;
+            set => displayNode.DisplayData = value;
         }
 
         readonly OdometryConfiguration config = new OdometryConfiguration();
@@ -68,13 +70,28 @@ namespace Iviz.App.Listeners
             }
         }
 
-        public Color TrailColor
+        public Color Color
         {
-            get => config.TrailColor;
+            get => config.Color;
             set
             {
-                config.TrailColor = value;
+                config.Color = value;
                 trail.Color = value;
+                if (sphere != null)
+                {
+                    sphere.Color = value;
+                }
+            }
+        }
+
+        public float Scale
+        {
+            get => config.Scale;
+            set
+            {
+                config.Scale = value;
+                displayNode.transform.localScale = value * UnityEngine.Vector3.one;
+                trail.Scale = 0.05f * value;
             }
         }
 
@@ -90,29 +107,52 @@ namespace Iviz.App.Listeners
 
         void Awake()
         {
-            axisNode = DisplayClickableNode.Instantiate("AxisNode");
-            axis = ResourcePool.GetOrCreate<AxisResource>(Resource.Markers.Axis);
-            axisNode.Target = axis;
+            displayNode = DisplayClickableNode.Instantiate("DisplayNode");
 
             trailNode = SimpleDisplayNode.Instantiate("TrailNode", transform);
             trailNode.Parent = TFListener.BaseFrame;
             trail = trailNode.gameObject.AddComponent<TrailResource>();
+            trail.DataSource = () => displayNode.transform.position;
 
-            trail.DataSource = () => axisNode.transform.position;
         }
 
         public override void StartListening()
         {
             base.StartListening();
-            Listener = new RosListener<PoseStamped>(config.Topic, Handler);
-            name = "Odometry:" + config.Topic;
-            axisNode.name = "Odometry:" + config.Topic;
+            switch(config.Type)
+            {
+                case PoseStamped.RosMessageType:
+                    Listener = new RosListener<PoseStamped>(config.Topic, Handler);
+                    name = "Odometry:" + config.Topic;
+                    displayNode.SetName($"[{config.Topic}]");
+
+                    axis = ResourcePool.GetOrCreate<AxisResource>(Resource.Markers.Axis);
+                    displayNode.Target = axis;
+                    break;
+
+                case PointStamped.RosMessageType:
+                    Listener = new RosListener<PointStamped>(config.Topic, Handler);
+                    name = "Odometry:" + config.Topic;
+                    displayNode.SetName($"[{config.Topic}]");
+
+                    sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Markers.Sphere);
+                    sphere.transform.localScale = 0.125f * UnityEngine.Vector3.one;
+                    sphere.Color = Color;
+                    displayNode.Target = sphere;
+                    break;
+            }
         }
 
         void Handler(PoseStamped msg)
         {
-            axisNode.SetParent(msg.Header.FrameId);
-            axisNode.transform.SetLocalPose(msg.Pose.Ros2Unity());
+            displayNode.SetParent(msg.Header.FrameId);
+            displayNode.transform.SetLocalPose(msg.Pose.Ros2Unity());
+        }
+
+        void Handler(PointStamped msg)
+        {
+            displayNode.SetParent(msg.Header.FrameId);
+            displayNode.transform.localPosition = msg.Point.Ros2Unity();
         }
     }
 }

@@ -35,6 +35,7 @@ namespace Iviz.App.Displays
         public override string Name => target?.name ?? "";
 
         public override Pose BoundsPose => target.transform.AsPose();
+        public override Vector3 BoundsScale => target?.transform.lossyScale ?? Vector3.one;
 
         void Awake()
         {

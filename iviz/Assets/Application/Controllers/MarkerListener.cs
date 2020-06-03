@@ -4,6 +4,7 @@ using Iviz.Msgs.VisualizationMsgs;
 using System.Runtime.Serialization;
 using Iviz.RoslibSharp;
 using Iviz.Resources;
+using UnityEngine;
 
 namespace Iviz.App.Listeners
 {
@@ -59,50 +60,10 @@ namespace Iviz.App.Listeners
             markers.Clear();
         }
 
-        /*
-        public List<MarkerObject> ManageMarkers(IEnumerable<Marker> markers)
-        {
-            return ProcessMessages(markers);
-        }
-
-        List<MarkerObject> ProcessMessages(IEnumerable<Marker> ms)
-        {
-            List<MarkerObject> created = new List<MarkerObject>();
-
-            foreach (Marker marker in ms)
-            {
-                string id = IdFromMessage(marker);
-                switch (marker.action)
-                {
-                    case Marker.ADD:
-                        if (!markers.TryGetValue(id, out MarkerObject markerToAdd))
-                        {
-                            markerToAdd = ResourcePool.GetOrCreate(Resource.Displays.MarkerObject, transform).GetComponent<MarkerObject>();
-                            markerToAdd.Parent = TFListener.DisplaysFrame;
-                            markers[id] = markerToAdd;
-                        }
-                        created.Add(markerToAdd);
-                        break;
-                    case Marker.DELETE:
-                        if (markers.TryGetValue(id, out MarkerObject markerToDelete))
-                        {
-                            markerToDelete.Stop();
-                            ResourcePool.Dispose(Resource.Displays.MarkerObject, markerToDelete.gameObject);
-                            markers.Remove(id);
-                        }
-                        break;
-                }
-            }
-
-            return created;
-        }
-        */
-
         public static string IdFromMessage(Marker marker)
         {
             return $"{marker.Ns}/{marker.Id}";
         }
-
 
         void ArrayHandler(MarkerArray msg)
         {
@@ -117,7 +78,7 @@ namespace Iviz.App.Listeners
                 case Marker.ADD:
                     if (!markers.TryGetValue(id, out MarkerObject markerToAdd))
                     {
-                        markerToAdd = Resource.Listeners.Instantiate<MarkerObject>(transform);
+                        markerToAdd = CreateMarkerObject();
                         markerToAdd.Parent = TFListener.ListenersFrame;
                         markers[id] = markerToAdd;
                     }
@@ -134,19 +95,12 @@ namespace Iviz.App.Listeners
             }
         }
 
-        void CheckForExpiredMarkers()
+        MarkerObject CreateMarkerObject()
         {
-            /*
-            float time = Time.realtimeSinceStartup;
-            if (time - lastExpirationCheck > 1)
-            {
-                IEnumerable<string> deadMarkers = expirationTimes.Where(x => x.Value < time).Select(x => x.Key);
-                deadMarkers.ForEach(DestroyMarker);
-                lastExpirationCheck = time;
-            }
-            */
+            GameObject gameObject = new GameObject();
+            gameObject.name = "MarkerObject";
+            return gameObject.AddComponent<MarkerObject>();
         }
-
     }
 
 }

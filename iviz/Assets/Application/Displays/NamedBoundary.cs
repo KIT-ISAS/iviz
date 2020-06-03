@@ -215,7 +215,8 @@ namespace Iviz.App.Displays
             }
 
             //float maxSize = Mathf.Max(Mathf.Max(bounds.size.x, bounds.size.y), bounds.size.z);
-            Bounds = Target.Bounds;
+            Bounds bounds = Target.Bounds;
+            Bounds = new Bounds(bounds.center, Vector3.Scale(bounds.size, Target.BoundsScale));
             Pose pose = Target.BoundsPose;
             transform.position = pose.position;
             transform.rotation = pose.rotation;

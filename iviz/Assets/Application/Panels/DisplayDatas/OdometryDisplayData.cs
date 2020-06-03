@@ -11,7 +11,7 @@ namespace Iviz.App
 
         public override DataPanelContents Panel => panel;
         protected override TopicListener Listener => listener;
-        public override Resource.Module Module => Resource.Module.AR;
+        public override Resource.Module Module => Resource.Module.Odometry;
         public override IConfiguration Configuration => listener.Config;
 
 
@@ -40,6 +40,28 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
+            panel.TrailEnabled.Value = listener.ShowTrail;
+            panel.Color.Value = listener.Color;
+            panel.TrailTime.Value = listener.TrailTime;
+            panel.Scale.Value = listener.Scale;
+
+            panel.TrailEnabled.ValueChanged += f =>
+            {
+                listener.ShowTrail = f;
+            };
+            panel.Color.ValueChanged += f =>
+            {
+                listener.Color = f;
+            };
+            panel.TrailTime.ValueChanged += f =>
+            {
+                listener.TrailTime = f;
+            };
+            panel.Scale.ValueChanged += f =>
+            {
+                listener.Scale = f;
+            };
+
             panel.Listener.RosListener = listener.Listener;
             panel.CloseButton.Clicked += () =>
             {

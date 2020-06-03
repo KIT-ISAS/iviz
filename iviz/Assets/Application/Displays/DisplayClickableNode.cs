@@ -31,6 +31,7 @@ namespace Iviz.App.Displays
 
         public override Bounds Bounds => Target?.Bounds ?? new Bounds();
         public override Bounds WorldBounds => Target?.WorldBounds ?? new Bounds();
+        public override Vector3 BoundsScale => targetObject?.transform.lossyScale ?? Vector3.one;
 
         string displayName;
         public override string Name => displayName ?? Target?.Name;

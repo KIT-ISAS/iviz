@@ -6,6 +6,8 @@ namespace Iviz.App
 {
     public class ListenerWidget : MonoBehaviour, IWidget
     {
+        const int Size = 30;
+
         public Text text;
 
         RosListener listener;
@@ -50,7 +52,7 @@ namespace Iviz.App
             string messagesPerSecond = MessagesPerSecond.ToString(UnityUtils.Culture);
             string kbPerSecond = (BytesPerSecond * 0.001f).ToString("#,0.#", UnityUtils.Culture);
 
-            text.text = $"{RosUtils.SanitizedText(Topic ?? "", 35)}\n" +
+            text.text = $"{RosUtils.SanitizedText(Topic ?? "", Size)}\n" +
                 $"<b>In: {subscriberStatus} | {messagesPerSecond} Hz | {kbPerSecond} kB/s</b>";
         }
 

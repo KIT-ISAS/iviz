@@ -12,6 +12,7 @@ namespace Iviz.App.Displays
         public abstract Bounds Bounds { get; }
         public abstract Bounds WorldBounds { get; }
         public abstract Pose BoundsPose { get; }
+        public abstract Vector3 BoundsScale { get; }
         public abstract string Name { get; }
 
         public DisplayData DisplayData;

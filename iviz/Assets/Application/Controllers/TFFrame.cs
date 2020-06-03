@@ -91,7 +91,7 @@ namespace Iviz.App.Listeners
 
         public override Bounds Bounds => new Bounds(boxCollider.center, boxCollider.size);
         public override Bounds WorldBounds => boxCollider.bounds;
-
+        public override Vector3 BoundsScale => Vector3.one;
 
         public void AddListener(DisplayNode display)
         {

@@ -317,6 +317,8 @@ namespace Iviz.App.Listeners
 
         public override Pose BoundsPose => resource?.transform.AsPose() ?? new Pose();
 
+        public override Vector3 BoundsScale => Vector3.one;
+
         public override void OnPointerClick(PointerEventData eventData)
         {
             if (!eventData.IsPointerMoving())

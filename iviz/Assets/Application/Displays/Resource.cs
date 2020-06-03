@@ -45,6 +45,7 @@ namespace Iviz.Resources
             { JointState.RosMessageType, Module.JointState },
             { LaserScan.RosMessageType, Module.LaserScan },
             { PoseStamped.RosMessageType, Module.Odometry },
+            { PointStamped.RosMessageType, Module.Odometry },
         };
 
         public static ReadOnlyDictionary<string, Module> ResourceByRosMessageType { get; }
