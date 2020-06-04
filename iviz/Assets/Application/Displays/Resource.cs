@@ -11,6 +11,7 @@ using GameObjectInfo = Iviz.Resources.Resource.Info<UnityEngine.GameObject>;
 using MaterialInfo = Iviz.Resources.Resource.Info<UnityEngine.Material>;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.App;
+using Iviz.Msgs.NavMsgs;
 
 namespace Iviz.Resources
 {
@@ -32,6 +33,7 @@ namespace Iviz.Resources
             LaserScan,
             AR,
             Odometry,
+            OccupancyGrid,
         }
 
         static readonly Dictionary<string, Module> resourceByRosMessageType = new Dictionary<string, Module>
@@ -46,6 +48,7 @@ namespace Iviz.Resources
             { LaserScan.RosMessageType, Module.LaserScan },
             { PoseStamped.RosMessageType, Module.Odometry },
             { PointStamped.RosMessageType, Module.Odometry },
+            { OccupancyGrid.RosMessageType, Module.OccupancyGrid },
         };
 
         public static ReadOnlyDictionary<string, Module> ResourceByRosMessageType { get; }
@@ -206,6 +209,7 @@ namespace Iviz.Resources
             public GameObjectInfo Grid { get; }
             public GameObjectInfo Axis { get; }
             public GameObjectInfo DepthImageResource { get; }
+            public GameObjectInfo OccupancyGridResource { get; }
 
             public ReadOnlyDictionary<string, GameObjectInfo> Generic { get; }
 
@@ -229,6 +233,7 @@ namespace Iviz.Resources
                 Grid = new GameObjectInfo("Displays/Grid");
                 Axis = new GameObjectInfo("Displays/Axis");
                 DepthImageResource = new GameObjectInfo("Displays/DepthImageResource");
+                OccupancyGridResource = new GameObjectInfo("Displays/OccupancyGridResource");
 
                 Generic = new ReadOnlyDictionary<string, GameObjectInfo>(
                     new Dictionary<string, GameObjectInfo>()
@@ -243,6 +248,8 @@ namespace Iviz.Resources
 
         public class ListenersType
         {
+            public GameObjectInfo AR { get; }
+
             /*
             public GameObjectInfo PointCloud { get; }
             public GameObjectInfo Grid { get; }
@@ -277,6 +284,12 @@ namespace Iviz.Resources
                 AR = new GameObjectInfo("Listeners/AR");
             }
             */
+
+            public ListenersType()
+            {
+                AR = new GameObjectInfo("Listeners/AR");
+            }
+
             public T Instantiate<T>(UnityEngine.Transform parent = null) where T: MonoBehaviour
             {
                 if (!typeof(IController).IsAssignableFrom(typeof(T)))

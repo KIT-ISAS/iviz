@@ -10,30 +10,22 @@ namespace Iviz.App
 
     public class NewMonoBehaviour : MonoBehaviour
     {
-        Mesh mesh;
-        RosSender<MarkerArray> sender;
-        // Use this for initialization
-        void Start()
+        OccupancyGridResource resource;
+
+        private void Start()
         {
-            mesh = GetComponent<MeshFilter>().mesh;
-            Debug.Log(mesh);
-            sender = new RosSender<MarkerArray>("/iviz/markers");
-        }
+            resource = gameObject.AddComponent<OccupancyGridResource>();
+            resource.NumCellsX = 1000;
+            resource.NumCellsY = 1000;
+            resource.CellSize = 0.01f;
 
-        /*
-        private void OnEnable()
-        {
-            if (mesh == null) return;
-            MarkerArray array = MeshToMarker(mesh, transform.AsPose());
-            sender?.Publish(array);
-        }
-        */
+            sbyte[] bytes = new sbyte[resource.NumCellsX * resource.NumCellsY];
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                bytes[i] = (sbyte)(Mathf.Sin(i) * 100);
+            }
 
-
-        // Update is called once per frame
-        void Update()
-        {
-
+            resource.SetOccupancy(bytes);
         }
     }
 }

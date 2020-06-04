@@ -99,29 +99,63 @@ namespace Iviz.App.Listeners
                 case MarkerType.CUBE:
                 case MarkerType.SPHERE:
                 case MarkerType.CYLINDER:
-                    MeshMarkerResource meshMarker = resource as MeshMarkerResource;
+                    MeshMarkerResource meshMarker = (MeshMarkerResource)resource;
                     meshMarker.Color = msg.Color.Sanitize().ToUnityColor();
                     transform.localScale = msg.Scale.Ros2Unity().Abs();
                     break;
                 case MarkerType.TEXT_VIEW_FACING:
-                    TextMarkerResource textResource = resource as TextMarkerResource;
+                    TextMarkerResource textResource = (TextMarkerResource)resource;
                     textResource.Text = msg.Text;
                     textResource.Color = msg.Color.Sanitize().ToUnityColor();
                     transform.localScale = (float)msg.Scale.Z * Vector3.one;
                     break;
                 case MarkerType.CUBE_LIST:
                 case MarkerType.SPHERE_LIST:
-                    MeshListResource meshList = resource as MeshListResource;
-                    meshList.Mesh = (msg.Type() == MarkerType.CUBE_LIST) ? cacheCube : cacheSphere;
-                    meshList.SetSize(msg.Points.Length);
-                    meshList.Scale = msg.Scale.Ros2Unity().Abs();
-                    meshList.Color = msg.Color.Sanitize().ToUnityColor();
-                    meshList.Colors = (msg.Colors.Length == 0) ? null : msg.Colors.Select(x => x.ToUnityColor32());
-                    meshList.Points = msg.Points.Select(x => x.Ros2Unity());
-                    break;
+                    {
+                        MeshListResource meshList = (MeshListResource)resource;
+                        meshList.UseIntensityTexture = false;
+                        meshList.UsePerVertexScale = false;
+                        meshList.Mesh = (msg.Type() == MarkerType.CUBE_LIST) ? cacheCube : cacheSphere;
+                        PointWithColor[] points = new PointWithColor[msg.Points.Length];
+                        Color color = msg.Color.Sanitize().ToUnityColor();
+                        if (msg.Colors.Length == 0 || color == Color.black)
+                        {
+                            for (int i = 0; i < points.Length; i++)
+                            {
+                                points[i] = new PointWithColor(msg.Points[i].Ros2Unity(), color);
+                            }
+                        }
+                        else if (color == Color.white)
+                        {
+                            for (int i = 0; i < points.Length; i++)
+                            {
+                                points[i] = new PointWithColor(
+                                    msg.Points[i].Ros2Unity(),
+                                    msg.Colors[i].ToUnityColor32());
+                            }
+                        }
+                        else
+                        {
+                            for (int i = 0; i < points.Length; i++)
+                            {
+                                points[i] = new PointWithColor(
+                                    msg.Points[i].Ros2Unity(),
+                                    color * msg.Colors[i].ToUnityColor());
+                            }
+                        }
+                        meshList.PointsWithColor = points;
+                        /*
+                        meshList.SetSize(msg.Points.Length);
+                        meshList.Scale = msg.Scale.Ros2Unity().Abs();
+                        meshList.Color = msg.Color.Sanitize().ToUnityColor();
+                        meshList.Colors = (msg.Colors.Length == 0) ? null : msg.Colors.Select(x => x.ToUnityColor32());
+                        meshList.Points = msg.Points.Select(x => x.Ros2Unity());
+                        */
+                        break;
+                    }
                 case MarkerType.LINE_LIST:
                     {
-                        LineResource lineResource = resource as LineResource;
+                        LineResource lineResource = (LineResource)resource;
                         lineResource.Scale = (float)msg.Scale.X;
                         LineWithColor[] lines = new LineWithColor[msg.Points.Length / 2];
                         if (msg.Colors.Length == 0)
@@ -151,7 +185,7 @@ namespace Iviz.App.Listeners
                     }
                 case MarkerType.LINE_STRIP:
                     {
-                        LineResource lineResource = resource as LineResource;
+                        LineResource lineResource = (LineResource)resource;
                         lineResource.Scale = (float)msg.Scale.X;
                         LineWithColor[] lines = new LineWithColor[msg.Points.Length - 1];
                         if (msg.Colors.Length == 0)
@@ -181,7 +215,7 @@ namespace Iviz.App.Listeners
                     }
                 case MarkerType.POINTS:
                     {
-                        PointListResource pointList = resource as PointListResource;
+                        PointListResource pointList = (PointListResource)resource;
                         pointList.Scale = msg.Scale.Ros2Unity().Abs();
                         PointWithColor[] points = new PointWithColor[msg.Points.Length];
                         Color color = msg.Color.Sanitize().ToUnityColor();
@@ -215,7 +249,7 @@ namespace Iviz.App.Listeners
                         break;
                     }
                 case MarkerType.TRIANGLE_LIST:
-                    MeshTrianglesResource meshTriangles = resource as MeshTrianglesResource;
+                    MeshTrianglesResource meshTriangles = (MeshTrianglesResource)resource;
                     meshTriangles.Color = msg.Color.Sanitize().ToUnityColor();
                     if (msg.Colors.Length != 0)
                     {

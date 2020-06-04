@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public class MeshTrianglesResource : MarkerResource
+    public sealed class MeshTrianglesResource : MarkerResource
     {
         public Mesh Mesh { get; private set; }
 

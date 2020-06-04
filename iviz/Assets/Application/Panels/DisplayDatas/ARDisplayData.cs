@@ -19,8 +19,7 @@ namespace Iviz.App
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.AR) as ARPanelContents;
 
-            display = Resource.Listeners.Instantiate<ARController>();
-            display.name = "AR";
+            display = Resource.Listeners.AR.Instantiate().GetComponent<ARController>();
             display.DisplayData = this;
             if (constructor.Configuration != null)
             {

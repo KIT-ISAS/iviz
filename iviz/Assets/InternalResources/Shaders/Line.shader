@@ -18,7 +18,12 @@ Shader "iviz/Line"
 
 			#pragma vertex vert
 			#pragma fragment frag
+			#pragma multi_compile _ USE_TEXTURE
 			#pragma multi_compile_instancing
+
+			sampler2D _IntensityTexture;
+			float _IntensityCoeff;
+			float _IntensityAdd;
 
 			float4x4 _LocalToWorld;
 			float4x4 _WorldToLocal;
@@ -26,13 +31,22 @@ Shader "iviz/Line"
 
 			struct Line {
 				float3 A;
-                int colorA;
+#if USE_TEXTURE
+				float intensityA;
+#else
+				int colorA;
+#endif
 				float3 B;
+#if USE_TEXTURE
+				float intensityB;
+#else
 				int colorB;
+#endif
 			};
 
 			StructuredBuffer<float3> _Quad;
 			StructuredBuffer<Line> _Lines;
+
 
 			struct v2f
 			{
@@ -57,6 +71,12 @@ Shader "iviz/Line"
 				v2f o;
 				o.position = UnityObjectToClipPos(float4(p, 1));
 
+	#if USE_TEXTURE
+				float intensityA = _Lines[inst].intensityA;
+				half4 rgbA = tex2Dlod(_IntensityTexture, float4(intensityA * _IntensityCoeff + _IntensityAdd, 0, 0, 0));
+				float intensityB = _Lines[inst].intensityB;
+				half4 rgbB = tex2Dlod(_IntensityTexture, float4(intensityB * _IntensityCoeff + _IntensityAdd, 0, 0, 0));
+    #else
 				int cA = _Lines[inst].colorA;
 				half4 rgbaA = half4(
 					(cA >>  0) & 0xff,
@@ -71,6 +91,7 @@ Shader "iviz/Line"
 					(cB >> 16) & 0xff,
 					(cB >> 24) & 0xff
 					) / 255.0;
+	#endif
 				o.color = (rgbaB - rgbaA) * V.z + rgbaA;
 				return o;
 			}

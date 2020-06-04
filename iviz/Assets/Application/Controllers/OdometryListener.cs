@@ -46,6 +46,10 @@ namespace Iviz.App.Listeners
                 config.Topic = value.Topic;
                 config.Type = value.Type;
                 Visible = value.Visible;
+                Scale = value.Scale;
+                ShowTrail = value.ShowTrail;
+                Color = value.Color;
+                TrailTime = value.TrailTime;
             }
         }
 

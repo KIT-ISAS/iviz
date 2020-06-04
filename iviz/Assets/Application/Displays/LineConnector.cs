@@ -21,10 +21,10 @@ namespace Iviz.Displays
         }
 
         public string Name => "LineConnector";
-
         public Bounds Bounds => new Bounds();
-
         public Bounds WorldBounds => new Bounds();
+        public Pose WorldPose => transform.AsPose();
+        public Vector3 WorldScale => transform.lossyScale;
 
         public bool ColliderEnabled { get => false; set { } }
 
@@ -57,6 +57,11 @@ namespace Iviz.Displays
         {
             get => gameObject.activeSelf;
             set => gameObject.SetActive(value);
+        }
+        public int Layer
+        {
+            get => gameObject.layer;
+            set => gameObject.layer = value;
         }
 
         public void Stop()

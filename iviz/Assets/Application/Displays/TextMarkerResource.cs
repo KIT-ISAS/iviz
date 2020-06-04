@@ -2,7 +2,7 @@
 
 namespace Iviz.Displays
 {
-    public class TextMarkerResource : MarkerResource
+    public sealed class TextMarkerResource : MarkerResource
     {
         TextMesh textMesh;
 

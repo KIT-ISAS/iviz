@@ -20,6 +20,11 @@ namespace Iviz.App
 
         public static T GetOrCreate<T>(Resource.Info<GameObject> resource, Transform parent = null, bool enable = true) where T : MonoBehaviour
         {
+            if (resource is null)
+            {
+                throw new ArgumentNullException(nameof(resource));
+            }
+
             return GetOrCreate(resource, parent, enable).GetComponent<T>();
         }
 

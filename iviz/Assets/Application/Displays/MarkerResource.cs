@@ -27,10 +27,20 @@ namespace Iviz.Displays
             set => gameObject.SetActive(value);
         }
 
+        public Vector3 WorldScale => transform.lossyScale;
+        public Pose WorldPose => transform.AsPose();
+
+        public int Layer
+        {
+            get => gameObject.layer;
+            set => gameObject.layer = value;
+        }
+
         protected virtual void Awake()
         {
             Collider = GetComponent<BoxCollider>();
         }
+
         public virtual void Stop()
         {
         }

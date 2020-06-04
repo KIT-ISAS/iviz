@@ -26,23 +26,20 @@ namespace Iviz.Displays
             }
         }
 
+        public Vector3 WorldScale => lines.WorldScale;
+        public Pose WorldPose => lines.WorldPose;
+
+        public int Layer
+        {
+            get => lines.Layer;
+            set => lines.Layer = value;
+        }
+
         readonly List<Vector3> measurements = new List<Vector3>();
         int startOffset = 0;
 
         int totalMeasurements = 10 * 2;
 
-        /*
-        int measurementsPerSecond = 10;
-        public int MeasurementsPerSecond
-        {
-            get => measurementsPerSecond;
-            set
-            {
-                measurementsPerSecond = value;
-                Reset();
-            }
-        }
-        */
         const int MeasurementsPerSecond = 16;
 
         int timeWindowInMs = 2000;

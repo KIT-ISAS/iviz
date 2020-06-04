@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using Iviz.Resources;
 using UnityEngine;
@@ -53,12 +54,9 @@ namespace Iviz.App
                 case Resource.Module.LaserScan: return o.AddComponent<LaserScanPanelContents>();
                 case Resource.Module.AR: return o.AddComponent<ARPanelContents>();
                 case Resource.Module.Odometry: return o.AddComponent<OdometryPanelContents>();
-                default: return o.AddComponent<DefaultPanelContents>();
+                case Resource.Module.OccupancyGrid: return o.AddComponent<OccupancyGridPanelContents>();
+                default: throw new ArgumentException();
             }
         }
-    }
-    public abstract class ListenerPanelContents : DataPanelContents
-    {
-        public ListenerWidget Listener { get; protected set; }
     }
 }

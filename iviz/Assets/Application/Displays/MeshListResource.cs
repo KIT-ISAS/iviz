@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Runtime.InteropServices;
 using Iviz.Resources;
+using Unity.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -9,18 +11,10 @@ namespace Iviz.Displays
     public sealed class MeshListResource : MarkerResource
     {
         Material material;
-        Bounds baseBounds;
 
-        struct PointWithColor
-        {
-            public Vector3 position;
-            public Color32 color;
-        };
-
-        PointWithColor[] pointBuffer;
-        int pointBufferSize;
+        NativeArray<float4> pointBuffer = new NativeArray<float4>();
         ComputeBuffer pointComputeBuffer;
-        
+
         readonly uint[] argsBuffer = new uint[5] { 0, 0, 0, 0, 0 };
         ComputeBuffer argsComputeBuffer;
 
@@ -39,7 +33,7 @@ namespace Iviz.Displays
 
         public Color Color { get; set; } = Color.white;
 
-        static readonly int PropPoints = Shader.PropertyToID("_Points");
+        /*
         void SetCapacity(int reqDataSize)
         {
             if (pointBuffer == null || pointBuffer.Length < reqDataSize)
@@ -54,10 +48,191 @@ namespace Iviz.Displays
                 material.SetBuffer(PropPoints, pointComputeBuffer);
             }
         }
+        */
 
+        bool useIntensityTexture;
+        public bool UseIntensityTexture
+        {
+            get => useIntensityTexture;
+            set
+            {
+                if (useIntensityTexture == value)
+                {
+                    return;
+                }
+                useIntensityTexture = value;
+                UpdateMaterialKeywords();
+            }
+        }
+
+        bool perVertexScale;
+        public bool UsePerVertexScale
+        {
+            get => perVertexScale;
+            set
+            {
+                if (perVertexScale == value)
+                {
+                    return;
+                }
+                perVertexScale = value;
+                UpdateMaterialKeywords();
+            }
+        }
+
+        void UpdateMaterialKeywords()
+        {
+            if (UsePerVertexScale && UseIntensityTexture)
+            {
+                material.DisableKeyword("USE_TEXTURE");
+                material.EnableKeyword("USE_TEXTURE_SCALE");
+            }
+            else if (UseIntensityTexture)
+            {
+                material.DisableKeyword("USE_TEXTURE_SCALE");
+                material.EnableKeyword("USE_TEXTURE");
+            }
+            else
+            {
+                material.DisableKeyword("USE_TEXTURE_SCALE");
+                material.DisableKeyword("USE_TEXTURE");
+            }
+        }
+
+        static readonly int PropIntensity = Shader.PropertyToID("_IntensityTexture");
+
+        Resource.ColormapId colormap;
+        public Resource.ColormapId Colormap
+        {
+            get => colormap;
+            set
+            {
+                colormap = value;
+
+                Texture2D texture = Resource.Colormaps.Textures[Colormap];
+                material.SetTexture(PropIntensity, texture);
+            }
+        }
+
+        static readonly int PropIntensityCoeff = Shader.PropertyToID("_IntensityCoeff");
+        static readonly int PropIntensityAdd = Shader.PropertyToID("_IntensityAdd");
+
+        Vector2 intensityBounds;
+        public Vector2 IntensityBounds
+        {
+            get => intensityBounds;
+            set
+            {
+                intensityBounds = value;
+                float intensitySpan = intensityBounds.y - intensityBounds.x;
+
+                if (intensitySpan == 0)
+                {
+                    material.SetFloat(PropIntensityCoeff, 1);
+                    material.SetFloat(PropIntensityAdd, 0);
+                }
+                else
+                {
+                    material.SetFloat(PropIntensityCoeff, 1 / intensitySpan);
+                    material.SetFloat(PropIntensityAdd, -intensityBounds.x / intensitySpan);
+                }
+            }
+        }
+
+        public void Set(IList<Vector3> points, IList<Color> colors = null, Color? color = null)
+        {
+            Size = points.Count;
+            int realSize = 0;
+            if (colors == null || points.Count != colors.Count)
+            {
+                float intensity = new PointWithColor(Vector3.zero, color ?? Color.white).Intensity;
+                for (int i = 0; i < points.Count; i++)
+                {
+                    if (float.IsNaN(points[i].x) ||
+                        float.IsNaN(points[i].y) ||
+                        float.IsNaN(points[i].z))
+                    {
+                        continue;
+                    }
+                    pointBuffer[realSize++] = new PointWithColor(points[i], intensity);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < points.Count; i++)
+                {
+                    if (float.IsNaN(points[i].x) ||
+                        float.IsNaN(points[i].y) ||
+                        float.IsNaN(points[i].z))
+                    {
+                        continue;
+                    }
+                    pointBuffer[realSize++] = new PointWithColor(points[i], colors[i]);
+                }
+            }
+            Size = realSize;
+            UpdateBuffer();
+        }
+
+        static readonly int PropPoints = Shader.PropertyToID("_Points");
+
+        int size_;
+        public int Size
+        {
+            get => size_;
+            private set
+            {
+                if (value == size_)
+                {
+                    return;
+                }
+                size_ = value;
+
+                argsBuffer[1] = (uint)size_;
+                argsComputeBuffer.SetData(argsBuffer);
+
+                int reqDataSize = size_ * 11 / 10;
+                if (pointBuffer.Length < reqDataSize)
+                {
+                    if (pointBuffer.Length != 0)
+                    {
+                        pointBuffer.Dispose();
+                    }
+                    pointBuffer = new NativeArray<float4>(reqDataSize, Allocator.Persistent);
+
+                    if (pointComputeBuffer != null)
+                    {
+                        pointComputeBuffer.Release();
+                    }
+                    pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithColor>());
+                    material.SetBuffer(PropPoints, pointComputeBuffer);
+                }
+            }
+        }
+
+        public IList<PointWithColor> PointsWithColor
+        {
+            set
+            {
+                Size = value.Count;
+
+                int realSize = 0;
+                for (int i = 0; i < value.Count; i++)
+                {
+                    if (value[i].HasNaN)
+                    {
+                        continue;
+                    }
+                    pointBuffer[realSize++] = value[i];
+                }
+                Size = realSize;
+                UpdateBuffer();
+            }
+        }
+        /*
         public IEnumerable<Color32> Colors
         {
-            get => pointBuffer.Select(x => x.color);
+            get => pointBuffer.Select(x => x.Color);
             set
             {
                 int index = 0;
@@ -65,7 +240,7 @@ namespace Iviz.Displays
                 {
                     for (int i = 0; i < pointBufferSize; i++)
                     {
-                        pointBuffer[index++].color = Color;
+                        pointBuffer[index++].Color = Color;
                     }
                 }
                 else
@@ -93,7 +268,15 @@ namespace Iviz.Displays
                 UpdateBounds();
             }
         }
+        */
 
+        void UpdateBuffer()
+        {
+            pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
+            MinMaxJob.CalculateBounds(pointBuffer, out Bounds bounds, out Vector2 _);
+            Collider.center = bounds.center;
+            Collider.size = bounds.size + Scale;
+        }
 
 
         static readonly int PropLocalScale = Shader.PropertyToID("_LocalScale");
@@ -109,8 +292,22 @@ namespace Iviz.Displays
             }
         }
 
+        static readonly int PropLocalOffset = Shader.PropertyToID("_LocalOffset");
+
+        Vector3 offset;
+        public Vector3 Offset
+        {
+            get => offset;
+            set
+            {
+                offset = value;
+                material.SetVector(PropLocalOffset, new Vector4(offset.x, offset.y, offset.z, 0));
+            }
+        }
+
         public override string Name => "MeshListResource";
 
+        /*
         void UpdateBounds()
         {
             baseBounds = CalculateBounds();
@@ -118,6 +315,7 @@ namespace Iviz.Displays
             Collider.center = Bounds.center;
             Collider.size = Bounds.size;
         }
+        */
 
         protected override void Awake()
         {
@@ -125,12 +323,19 @@ namespace Iviz.Displays
 
             material = Resource.Materials.MeshList.Instantiate();
             material.enableInstancing = true;
+            UpdateMaterialKeywords();
 
             Mesh = Resource.Markers.SphereSimple.Object.GetComponent<MeshFilter>().sharedMesh;
+            Scale = new Vector3(1, 1, 1);
+            Offset = new Vector3(0, 0, 0);
+            IntensityBounds = new Vector2(0, 1);
+            Colormap = Resource.ColormapId.gray;
 
-            SetCapacity(10);
+            argsComputeBuffer = new ComputeBuffer(1, argsBuffer.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
+            argsComputeBuffer.SetData(argsBuffer);
         }
 
+        /*
         public void SetSize(int size)
         {
             int reqDataSize = (int)(size * 1.1f);
@@ -146,6 +351,7 @@ namespace Iviz.Displays
 
             pointBufferSize = size;
         }
+        */
 
         /*
         void Start()
@@ -165,39 +371,19 @@ namespace Iviz.Displays
         */
 
         static readonly int PropLocalToWorld = Shader.PropertyToID("_LocalToWorld");
+        static readonly int PropBoundaryCenter = Shader.PropertyToID("_BoundaryCenter");
 
         void Update()
         {
-            material.SetMatrix(PropLocalToWorld, transform.localToWorldMatrix);
-
-            if (pointBufferSize == 0)
+            if (Size == 0)
             {
                 return;
             }
+            material.SetMatrix(PropLocalToWorld, transform.localToWorldMatrix);
             Bounds worldBounds = Collider.bounds;
-            material.SetVector("_BoundaryCenter", worldBounds.center);
+            material.SetVector(PropBoundaryCenter, worldBounds.center);
             Graphics.DrawMeshInstancedIndirect(mesh, 0, material, worldBounds, argsComputeBuffer);
         }
-
-        Bounds CalculateBounds()
-        {
-            Vector3 positionMin = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
-            Vector3 positionMax = new Vector3(float.MinValue, float.MinValue, float.MinValue);
-            for (int i = 0; i < pointBufferSize; i++)
-            {
-                Vector3 position = pointBuffer[i].position;
-                if (float.IsNaN(position.x) ||
-                    float.IsNaN(position.y) ||
-                    float.IsNaN(position.z))
-                {
-                    continue;
-                }
-                positionMin = Vector3.Min(positionMin, position);
-                positionMax = Vector3.Max(positionMax, position);
-            }
-            return new Bounds((positionMax + positionMin) / 2, positionMax - positionMin);
-        }
-
 
         void OnDestroy()
         {
@@ -213,6 +399,10 @@ namespace Iviz.Displays
             {
                 argsComputeBuffer.Release();
             }
+            if (pointBuffer.Length > 0)
+            {
+                pointBuffer.Dispose();
+            }
         }
 
 
@@ -223,9 +413,39 @@ namespace Iviz.Displays
             {
                 return;
             }
+            // unity bug causes all compute buffers to disappear when focus is lost
+            if (pointComputeBuffer != null)
+            {
+                pointComputeBuffer.Release();
+                pointComputeBuffer = null;
+            }
+            if (pointBuffer.Length != 0)
+            {
+                pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithColor>());
+                pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
+                material.SetBuffer(PropPoints, pointComputeBuffer);
+            }
+            if (argsComputeBuffer != null)
+            {
+                argsComputeBuffer.Release();
+                argsComputeBuffer = null;
 
-            material.SetBuffer(PropPoints, pointComputeBuffer);
-            Debug.Log("MeshList: Rebuilding compute buffers");
+                argsComputeBuffer = new ComputeBuffer(1, argsBuffer.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
+                argsComputeBuffer.SetData(argsBuffer);
+
+                //Debug.Log(string.Join(",", pointBuffer));
+            }
+            IntensityBounds = IntensityBounds;
+            Scale = Scale;
+            Offset = Offset;
+            Colormap = Colormap;
+            UpdateMaterialKeywords();
+        }
+
+        public override void Stop()
+        {
+            base.Stop();
+            Size = 0;
         }
     }
 }

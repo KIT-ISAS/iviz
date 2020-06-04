@@ -143,14 +143,81 @@ namespace Iviz.Displays
             }
         }
 
+        bool useIntensityTexture;
+        public bool UseIntensityTexture
+        {
+            get => useIntensityTexture;
+            set
+            {
+                if (useIntensityTexture == value)
+                {
+                    return;
+                }
+                useIntensityTexture = value;
+                if (useIntensityTexture)
+                {
+                    material.EnableKeyword("USE_TEXTURE");
+                }
+                else
+                {
+                    material.DisableKeyword("USE_TEXTURE");
+                }
+            }
+        }
+
+        static readonly int PropIntensity = Shader.PropertyToID("_IntensityTexture");
+
+        Resource.ColormapId colormap;
+        public Resource.ColormapId Colormap
+        {
+            get => colormap;
+            set
+            {
+                colormap = value;
+
+                Texture2D texture = Resource.Colormaps.Textures[Colormap];
+                material.SetTexture(PropIntensity, texture);
+            }
+        }
+
+        static readonly int PropIntensityCoeff = Shader.PropertyToID("_IntensityCoeff");
+        static readonly int PropIntensityAdd = Shader.PropertyToID("_IntensityAdd");
+
+        Vector2 intensityBounds;
+        public Vector2 IntensityBounds
+        {
+            get => intensityBounds;
+            set
+            {
+                intensityBounds = value;
+                float intensitySpan = intensityBounds.y - intensityBounds.x;
+
+                if (intensitySpan == 0)
+                {
+                    material.SetFloat(PropIntensityCoeff, 1);
+                    material.SetFloat(PropIntensityAdd, 0);
+                }
+                else
+                {
+                    material.SetFloat(PropIntensityCoeff, 1 / intensitySpan);
+                    material.SetFloat(PropIntensityAdd, -intensityBounds.x / intensitySpan);
+                }
+            }
+        }
+
         public override string Name => "LineResource";
 
         protected override void Awake()
         {
             base.Awake();
 
-            material = Resource.Materials.Line.Instantiate();
             Scale = 0.1f;
+
+            material = Resource.Materials.Line.Instantiate();
+            material.DisableKeyword("USE_TEXTURE");
+
+            UseIntensityTexture = false;
+            IntensityBounds = new Vector2(0, 1);
         }
 
         static readonly int PropQuad = Shader.PropertyToID("_Quad");
@@ -260,7 +327,16 @@ namespace Iviz.Displays
             }
             UpdateQuadComputeBuffer();
 
+            IntensityBounds = IntensityBounds;
+            Colormap = Colormap;
+
             //Debug.Log("LineResource: Rebuilding compute buffers");
+        }
+
+        public override void Stop()
+        {
+            base.Stop();
+            Size = 0;
         }
     }
 }

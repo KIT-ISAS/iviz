@@ -2,16 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.Resources;
+using UnityEngine;
 
 namespace Iviz.App
 {
     public class AddTopicDialogData : DialogData
     {
-        static readonly TimeSpan RefreshTime = TimeSpan.FromSeconds(2.5);
+        private const int Size = 30;
 
         DialogItemList itemList;
         public override IDialogPanelContents Panel => itemList;
-        DateTime lastTime;
+        DateTime lastTime = DateTime.MinValue;
 
         class TopicWithResource
         {
@@ -56,7 +57,7 @@ namespace Iviz.App
         {
             GetTopics();
             itemList.Title = "Available Topics";
-            itemList.Items = topics.Select(x => $"{RosUtils.SanitizedText(x.topic, 30)}\n<b>{x.resource}</b>");
+            itemList.Items = topics.Select(x => $"{RosUtils.SanitizedText(x.topic, Size)}\n<b>{x.resource}</b>");
             itemList.ItemClicked += OnItemClicked;
             itemList.CloseClicked += OnCloseClicked;
             lastTime = DateTime.Now;
@@ -65,12 +66,9 @@ namespace Iviz.App
         public override void UpdatePanel()
         {
             base.UpdatePanel();
-            DateTime now = DateTime.Now;
-            if (now - lastTime > RefreshTime)
-            {
-                GetTopics();
-                lastTime = now;
-            }
+
+            GetTopics();
+            itemList.Items = topics.Select(x => $"{RosUtils.SanitizedText(x.topic, Size)}\n<b>{x.resource}</b>");
         }
 
 

@@ -44,6 +44,7 @@ namespace Iviz.App
         [DataMember] public List<InteractiveMarkerConfiguration> InteractiveMarkers { get; set; } = new List<InteractiveMarkerConfiguration>();
         [DataMember] public List<DepthImageProjectorConfiguration> DepthImageProjectors { get; set; } = new List<DepthImageProjectorConfiguration>();
         [DataMember] public List<OdometryConfiguration> Odometries { get; set; } = new List<OdometryConfiguration>();
+        [DataMember] public List<OccupancyGridConfiguration> OccupancyGrids { get; set; } = new List<OccupancyGridConfiguration>();
         [DataMember] public ARConfiguration AR { get; set; } = null;
 
         public List<IReadOnlyList<IConfiguration>> CreateListOfEntries() => new List<IReadOnlyList<IConfiguration>>

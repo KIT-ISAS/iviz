@@ -107,6 +107,15 @@ namespace Iviz.App.Displays
             set => transform.parent = value;
         }
 
+        public Vector3 WorldScale => transform.lossyScale;
+        public Pose WorldPose => transform.AsPose();
+
+        public int Layer
+        {
+            get => gameObject.layer;
+            set => gameObject.layer = value;
+        }
+
         int width, height;
         Vector2[] uvs = new Vector2[0];
 

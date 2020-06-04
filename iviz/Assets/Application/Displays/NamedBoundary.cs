@@ -44,20 +44,14 @@ namespace Iviz.App.Displays
             }
         }
 
-        /*
-        public bool Active
+        public Vector3 WorldScale => transform.lossyScale;
+        public Pose WorldPose => transform.AsPose();
+
+        public int Layer
         {
-            get => gameObject.activeSelf;
-            set
-            {
-                gameObject.SetActive(value);
-                if (value)
-                {
-                    labelObject.transform.localScale = TFListener.Instance.AxisLabelSize * Vector3.one;
-                }
-            }
+            get => gameObject.layer;
+            set => gameObject.layer = value;
         }
-        */
 
         ClickableNode target;
         public ClickableNode Target
