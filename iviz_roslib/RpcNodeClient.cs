@@ -6,57 +6,88 @@ namespace Iviz.RoslibSharp.XmlRpc
     {
         public class ProtocolResponse
         {
-            public readonly string type;
-            public readonly string hostname;
-            public readonly int port;
+            public string Type { get; } = "";
+            public string Hostname { get; } = "";
+            public int Port { get; }
 
-            public ProtocolResponse(object[] a)
+            public ProtocolResponse()
             {
+            }
+
+            public ProtocolResponse(string type, string hostname, int port)
+            {
+                Type = type;
+                Hostname = hostname;
+                Port = port;
+            }
+        }
+
+        public class RequestTopicResponse : BaseResponse
+        {
+            public ProtocolResponse Protocol { get; }
+
+            public RequestTopicResponse(object[] a) : base(a)
+            {
+                if (hasParseError || Code != StatusCode.Success)
+                {
+                    Protocol = new ProtocolResponse();
+                    return;
+                }
+
                 if (a.Length == 0)
                 {
-                    type = null;
-                    hostname = null;
-                    port = -1;
+                    Protocol = new ProtocolResponse();
                 }
                 else
                 {
-                    if (a[0] is object[])
+                    if (a[0] is object[] tmp)
                     {
-                        a = (object[])a[0];
+                        a = tmp;
                     }
-                    type = (string)a[0];
-                    hostname = (string)a[1];
-                    port = (int)a[2];
+                    Protocol = new ProtocolResponse
+                    (
+                        type: Cast<string>(a[0]),
+                        hostname: Cast<string>(a[1]),
+                        port: Cast<int>(a[2])
+                    );
                 }
             }
         }
 
-
-        public class RequestTopicResponse
+        public class GetMasterUriResponse : BaseResponse
         {
-            public readonly StatusCode code;
-            public readonly string statusMessage;
-            public readonly ProtocolResponse protocol;
+            public Uri Uri { get; }
 
-            public RequestTopicResponse(object[] a)
+            public GetMasterUriResponse(object[] a) : base(a)
             {
-                code = (StatusCode)a[0];
-                statusMessage = (string)a[1];
-                protocol = new ProtocolResponse((object[])a[2]);
+                if (hasParseError || Code != StatusCode.Success)
+                {
+                    return;
+                }
+                if (Uri.TryCreate((string)a[2], UriKind.Absolute, out Uri uri))
+                {
+                    Uri = uri;
+                }
+                else
+                {
+                    Logger.Log($"RpcNodeClient: Failed to parse GetUriResponse uri: " + a[2]);
+                    hasParseError = true;
+                    Uri = null;
+                }
             }
         }
 
-        public class GetMasterUriResponse
+        public class GetPidResponse : BaseResponse
         {
-            public readonly StatusCode code;
-            public readonly string statusMessage;
-            public readonly Uri uri;
+            public int Pid { get; }
 
-            public GetMasterUriResponse(object[] a)
+            public GetPidResponse(object[] a) : base(a)
             {
-                code = (StatusCode)a[0];
-                statusMessage = (string)a[1];
-                uri = new Uri((string)a[2]);
+                if (hasParseError || Code != StatusCode.Success)
+                {
+                    return;
+                }
+                Pid = Cast<int>(a[2]);
             }
         }
 
@@ -80,8 +111,8 @@ namespace Iviz.RoslibSharp.XmlRpc
                 new Arg(topic),
                 new Arg(protocols),
             };
-            object response = Service.MethodCall(Uri, CallerUri, "requestTopic", args, TimeoutInMs);
-            return new RequestTopicResponse((object[])response);
+            object[] response = MethodCall("requestTopic", args);
+            return new RequestTopicResponse(response);
         }
 
         public GetMasterUriResponse GetMasterUri()
@@ -89,8 +120,28 @@ namespace Iviz.RoslibSharp.XmlRpc
             Arg[] args = {
                 new Arg(CallerId)
             };
-            object response = Service.MethodCall(Uri, CallerUri, "getMasterUri", args, TimeoutInMs);
-            return new GetMasterUriResponse((object[])response);
+            object[] response = MethodCall("getMasterUri", args);
+            return new GetMasterUriResponse(response);
+        }
+
+        public GetPidResponse GetPid()
+        {
+            Arg[] args = {
+                new Arg(CallerId)
+            };
+            object[] response = MethodCall("getPid", args);
+            return new GetPidResponse(response);
+        }
+
+        object[] MethodCall(string function, Arg[] args)
+        {
+            object tmp = Service.MethodCall(Uri, CallerUri, function, args, TimeoutInMs);
+            if (!(tmp is object[] result))
+            {
+                Logger.Log($"Rpc Response: Expected type object[], got {tmp?.GetType().Name}");
+                return null;
+            }
+            return result;
         }
     }
 }

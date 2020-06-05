@@ -12,7 +12,7 @@ namespace Iviz.RoslibSharp.XmlRpc
     {
         Error = -1,
         Failure = 0,
-        Success = 1
+        Success = 1,
     }
 
     public sealed class Master
@@ -146,8 +146,13 @@ namespace Iviz.RoslibSharp.XmlRpc
 
         object[] MethodCall(string function, Arg[] args)
         {
-            return (object[])Service.MethodCall(MasterUri, CallerUri, function, args, TimeoutInMs);
-
+            object tmp = Service.MethodCall(MasterUri, CallerUri, function, args, TimeoutInMs);
+            if (!(tmp is object[] result))
+            {
+                Logger.Log($"Rpc Response: Expected type object[], got {tmp.GetType().Name}");
+                return null;
+            }
+            return result;
         }
     }
 
@@ -155,50 +160,120 @@ namespace Iviz.RoslibSharp.XmlRpc
     {
         public StatusCode Code { get; }
         public string StatusMessage { get; }
+        private protected bool hasParseError;
 
-        protected private BaseResponse(object[] a)
+        public bool IsValid => Code != StatusCode.Success && !hasParseError;
+
+        private protected BaseResponse(object[] a)
         {
-            Code = (StatusCode)a[0];
-            StatusMessage = (string)a[1];
+            if (!EnsureSize(a, 2))
+            {
+                hasParseError = true;
+                Code = StatusCode.Error;
+                StatusMessage = "Parse error for input.";
+                return;
+            }
+            Code = (StatusCode)Cast<int>(a[0]);
+            StatusMessage = Cast<string>(a[1]);
+            if (!IsValid)
+            {
+                Logger.Log($"Rpc Response: {GetType().Name} failed! " + StatusMessage);
+            }
+        }
+
+        private protected T Cast<T>(object a)
+        {
+            if (!(a is T t))
+            {
+                Logger.Log($"Rpc Response: Expected type '{typeof(T).Name}, got {a.GetType().Name}");
+                hasParseError = true;
+                return default;
+            }
+            return t;
+        }
+
+        protected bool EnsureSize<T>(IList<T> a, int size = 1)
+        {
+            if (a == null)
+            {
+                Logger.Log($"Rpc Response: Null input");
+                hasParseError = true;
+                return false;
+            }
+            if (a.Count < size)
+            {
+                Logger.Log($"Rpc Response: Expected size '{size}, got {a.Count}");
+                hasParseError = true;
+                return false;
+            }
+            return true;
+        }
+
+    }
+
+    public class TopicTuple
+    {
+        public string Topic { get; }
+        public ReadOnlyCollection<string> Members { get; }
+
+        public TopicTuple(string topic, IList<string> members)
+        {
+            Topic = topic;
+            Members = new ReadOnlyCollection<string>(members);
         }
     }
 
     public sealed class GetSystemStateResponse : BaseResponse
     {
-        public ReadOnlyCollection<TopicTuples> Publishers { get; }
-        public ReadOnlyCollection<TopicTuples> Subscribers { get; }
-        public ReadOnlyCollection<TopicTuples> Services { get; }
+        static readonly ReadOnlyCollection<TopicTuple> Empty =
+            new ReadOnlyCollection<TopicTuple>(Array.Empty<TopicTuple>());
+
+        public ReadOnlyCollection<TopicTuple> Publishers { get; } = Empty;
+        public ReadOnlyCollection<TopicTuple> Subscribers { get; } = Empty;
+        public ReadOnlyCollection<TopicTuple> Services { get; } = Empty;
 
         internal GetSystemStateResponse(object[] a) : base(a)
         {
-            if (Code == StatusCode.Success)
+            if (!IsValid || !EnsureSize(a, 3))
             {
-                object[] root = (object[])a[2];
-                Publishers = CreateTuple(root[0]);
-                Subscribers = CreateTuple(root[1]);
-                Services = CreateTuple(root[2]);
+                return;
             }
-            else
+            object[] root = Cast<object[]>(a[2]);
+            if (!EnsureSize(root, 3))
             {
-                Logger.Log($"RcpMaster: GetSystemStateResponse failed: " + StatusMessage);
-                Publishers = new ReadOnlyCollection<TopicTuples>(Array.Empty<TopicTuples>());
-                Subscribers = new ReadOnlyCollection<TopicTuples>(Array.Empty<TopicTuples>());
-                Services = new ReadOnlyCollection<TopicTuples>(Array.Empty<TopicTuples>());
+                return;
             }
+            Publishers = CreateTuple(root[0]);
+            Subscribers = CreateTuple(root[1]);
+            Services = CreateTuple(root[2]);
         }
 
-        static ReadOnlyCollection<TopicTuples> CreateTuple(object root)
+        ReadOnlyCollection<TopicTuple> CreateTuple(object root)
         {
-            object[] list = (object[])root;
-            TopicTuples[] result = new TopicTuples[list.Length];
+            object[] list = Cast<object[]>(root);
+            if (list == null)
+            {
+                return Empty;
+            }
+
+            TopicTuple[] result = new TopicTuple[list.Length];
             for (int i = 0; i < list.Length; i++)
             {
-                object[] tuple = (object[])list[i];
-                string topic = (string)tuple[0];
-                string[] members = ((object[])tuple[1]).Cast<string>().ToArray();
-                result[i] = Tuple.Create(topic, members);
+                object[] tuple = Cast<object[]>(list[i]);
+                if (!EnsureSize(tuple, 2))
+                {
+                    return Empty;
+                }
+                string topic = Cast<string>(tuple[0]);
+                object[] tmp = Cast<object[]>(tuple[1]);
+                if (tmp == null)
+                {
+                    return Empty;
+                }
+                string[] members = tmp.Cast<string>().ToArray();
+                result[i] = new TopicTuple(topic, members);
             }
-            return new ReadOnlyCollection<TopicTuples>(result);
+            return new ReadOnlyCollection<TopicTuple>(result);
         }
     }
 
@@ -213,21 +288,18 @@ namespace Iviz.RoslibSharp.XmlRpc
 
         internal GetUriResponse(object[] a) : base(a)
         {
-            if (Code == StatusCode.Success)
+            if (!IsValid || !EnsureSize(a, 3))
             {
-                if (Uri.TryCreate((string)a[2], UriKind.Absolute, out Uri uri))
-                {
-                    Uri = uri;
-                }
-                else
-                {
-                    Logger.Log($"RcpMaster: Failed to parse GetUriResponse uri: " + a[2]);
-                    Uri = null;
-                }
+                return;
+            }
+            if (Uri.TryCreate(Cast<string>(a[2]) ?? "", UriKind.Absolute, out Uri uri))
+            {
+                Uri = uri;
             }
             else
             {
-                Logger.Log($"RcpMaster: GetUriResponse failed: " + StatusMessage);
+                Logger.Log($"Rpc Response: Failed to parse GetUriResponse uri: " + a[2]);
+                hasParseError = true;
                 Uri = null;
             }
         }
@@ -239,21 +311,18 @@ namespace Iviz.RoslibSharp.XmlRpc
 
         internal LookupNodeResponse(object[] a) : base(a)
         {
-            if (Code == StatusCode.Success)
+            if (!IsValid || !EnsureSize(a, 3))
             {
-                if (Uri.TryCreate((string)a[2], UriKind.Absolute, out Uri uri))
-                {
-                    Uri = uri;
-                }
-                else
-                {
-                    Logger.Log($"RcpMaster: Failed to parse LookupNodeResponse uri: " + a[2]);
-                    Uri = null;
-                }
+                return;
+            }
+            if (Uri.TryCreate(Cast<string>(a[2]) ?? "", UriKind.Absolute, out Uri uri))
+            {
+                Uri = uri;
             }
             else
             {
-                Logger.Log($"RcpMaster: LookupNodeResponse failed: " + StatusMessage);
+                Logger.Log($"RcpMaster: Failed to parse LookupNodeResponse uri: " + a[2]);
+                hasParseError = true;
                 Uri = null;
             }
         }
@@ -261,54 +330,65 @@ namespace Iviz.RoslibSharp.XmlRpc
 
     public sealed class GetPublishedTopicsResponse : BaseResponse
     {
-        public ReadOnlyCollection<TopicTuple> Topics { get; }
+        static readonly ReadOnlyCollection<(string, string)> Empty =
+            new ReadOnlyCollection<(string, string)>(Array.Empty<(string, string)>());
+
+        public ReadOnlyCollection<(string, string)> Topics { get; } = Empty;
 
         internal GetPublishedTopicsResponse(object[] a) : base(a)
         {
-            if (Code == StatusCode.Success)
+            if (!IsValid || !EnsureSize(a, 3))
             {
-                object[] tmp = (object[])a[2];
+                return;
+            }
+            object[] tmp = Cast<object[]>(a[2]);
+            if (tmp == null)
+            {
+                return;
+            }
 
-                TopicTuple[] topics = new TopicTuple[tmp.Length];
-                for (int i = 0; i < topics.Length; i++)
-                {
-                    object[] topic = (object[])tmp[i];
-                    topics[i] = Tuple.Create((string)topic[0], (string)topic[1]);
-                }
-                Topics = new ReadOnlyCollection<TopicTuple>(topics);
-            }
-            else
+            (string, string)[] topics = new (string, string)[tmp.Length];
+            for (int i = 0; i < topics.Length; i++)
             {
-                Logger.Log($"RcpMaster: GetPublishedTopicsResponse failed: " + StatusMessage);
-                Topics = new ReadOnlyCollection<TopicTuple>(Array.Empty<TopicTuple>());
+                object[] topic = Cast<object[]>(tmp[i]);
+                topics[i] = (Cast<string>(topic[0]), Cast<string>(topic[1]));
             }
+            Topics = new ReadOnlyCollection<(string, string)>(topics);
         }
     }
 
     public sealed class RegisterSubscriberResponse : BaseResponse
     {
-        public ReadOnlyCollection<Uri> Publishers { get; }
+        static readonly ReadOnlyCollection<Uri> Empty =
+            new ReadOnlyCollection<Uri>(Array.Empty<Uri>());
+
+        public ReadOnlyCollection<Uri> Publishers { get; } = Empty;
 
         internal RegisterSubscriberResponse(object[] a) : base(a)
         {
-            if (Code == StatusCode.Success)
+            if (!IsValid || !EnsureSize(a, 3))
             {
-                object[] tmp = (object[])a[2];
-                Uri[] publishers = new Uri[tmp.Length];
-                for (int i = 0; i < publishers.Length; i++)
+                return;
+            }
+            object[] tmp = Cast<object[]>(a[2]);
+            if (tmp == null)
+            {
+                hasParseError = true;
+                return;
+            }
+            List<Uri> publishers = new List<Uri>();
+            for (int i = 0; i < tmp.Length; i++)
+            {
+                if (!Uri.TryCreate(Cast<string>(tmp[i]) ?? "", UriKind.Absolute, out Uri publisher))
                 {
-                    if (!Uri.TryCreate((string)tmp[i], UriKind.Absolute, out publishers[i]))
-                    {
-                        Logger.Log($"RcpMaster: Invalid uri '{tmp[i]}'");
-                    }
+                    Logger.Log($"RcpMaster: Invalid uri '{tmp[i]}'");
                 }
-                Publishers = new ReadOnlyCollection<Uri>(publishers);
+                else
+                {
+                    publishers.Add(publisher);
+                }
             }
-            else
-            {
-                Logger.Log($"RcpMaster: RegisterSubscriberResponse failed: " + StatusMessage);
-                Publishers = new ReadOnlyCollection<Uri>(Array.Empty<Uri>());
-            }
+            Publishers = new ReadOnlyCollection<Uri>(publishers);
         }
     }
 
@@ -318,38 +398,38 @@ namespace Iviz.RoslibSharp.XmlRpc
 
         internal UnregisterSubscriberResponse(object[] a) : base(a)
         {
-            if (Code == StatusCode.Success)
+            if (!IsValid || !EnsureSize(a, 3))
             {
-                NumUnsubscribed = (int)a[2];
+                return;
             }
-            else
-            {
-                Logger.Log($"RcpMaster: UnregisterSubscriberResponse failed: " + StatusMessage);
-            }
+            NumUnsubscribed = Cast<int>(a[2]);
         }
     }
 
     public sealed class RegisterPublisherResponse : BaseResponse
     {
-        public ReadOnlyCollection<string> Subscribers { get; }
+        static readonly ReadOnlyCollection<string> Empty =
+            new ReadOnlyCollection<string>(Array.Empty<string>());
+
+        public ReadOnlyCollection<string> Subscribers { get; } = Empty;
 
         internal RegisterPublisherResponse(object[] a) : base(a)
         {
-            if (Code == StatusCode.Success)
+            if (!IsValid || !EnsureSize(a, 3))
             {
-                object[] tmp = (object[])a[2];
-                string[] subscribers = new string[tmp.Length];
-                for (int i = 0; i < subscribers.Length; i++)
-                {
-                    subscribers[i] = (string)tmp[i];
-                }
-                Subscribers = new ReadOnlyCollection<string>(subscribers);
+                return;
             }
-            else
+            object[] tmp = Cast<object[]>(a[2]);
+            if (tmp == null)
             {
-                Logger.Log($"RcpMaster: RegisterPublisherResponse failed: " + StatusMessage);
-                Subscribers = new ReadOnlyCollection<string>(Array.Empty<string>());
+                return;
             }
+            string[] subscribers = new string[tmp.Length];
+            for (int i = 0; i < subscribers.Length; i++)
+            {
+                subscribers[i] = Cast<string>(tmp[i]);
+            }
+            Subscribers = new ReadOnlyCollection<string>(subscribers);
         }
     }
 
@@ -359,14 +439,11 @@ namespace Iviz.RoslibSharp.XmlRpc
 
         internal UnregisterPublisherResponse(object[] a) : base(a)
         {
-            if (Code == StatusCode.Success)
+            if (!IsValid || !EnsureSize(a, 3))
             {
-                NumUnregistered = (int)a[2];
+                return;
             }
-            else
-            {
-                Logger.Log($"RcpMaster: UnregisterPublisherResponse failed: " + StatusMessage);
-            }
+            NumUnregistered = Cast<int>(a[2]);
         }
     }
 
@@ -376,7 +453,11 @@ namespace Iviz.RoslibSharp.XmlRpc
 
         internal LookupServiceResponse(object[] a) : base(a)
         {
-            ServiceUrl = new Uri((string)a[2]);
+            if (!IsValid || !EnsureSize(a, 3))
+            {
+                return;
+            }
+            ServiceUrl = new Uri(Cast<string>(a[2]));
         }
     }
 
@@ -386,7 +467,11 @@ namespace Iviz.RoslibSharp.XmlRpc
 
         internal UnregisterServiceResponse(object[] a) : base(a)
         {
-            NumUnregistered = (int)a[2];
+            if (!IsValid || !EnsureSize(a, 3))
+            {
+                return;
+            }
+            NumUnregistered = Cast<int>(a[2]);
         }
     }
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -21,6 +22,20 @@ namespace Iviz.RoslibSharp
         public ConnectionException(string message) : base(message) { }
         public ConnectionException(string message, Exception innerException) : base(message, innerException) { }
         public ConnectionException() { }
+    }
+
+    public class UnreachableUriException : Exception
+    {
+        public UnreachableUriException(string message) : base(message) { }
+        public UnreachableUriException(string message, Exception innerException) : base(message, innerException) { }
+        public UnreachableUriException() { }
+    }
+
+    public class XmlRpcException : Exception
+    {
+        public XmlRpcException(string message) : base(message) { }
+        public XmlRpcException(string message, Exception innerException) : base(message, innerException) { }
+        public XmlRpcException() { }
     }
 
     public sealed class RosClient : IDisposable
@@ -179,7 +194,7 @@ namespace Iviz.RoslibSharp
             catch (HttpListenerException e)
             {
                 Listener.Stop();
-                throw new ConnectionException($"RosClient: Failed to bind to local URI '{callerUri}'", e);
+                throw new ConnectionException($"Failed to bind to local URI '{callerUri}'", e);
             }
 
             Master = new XmlRpc.Master(masterUri, CallerId, CallerUri);
@@ -197,20 +212,31 @@ namespace Iviz.RoslibSharp
             (e is SocketException || e is TimeoutException || e is AggregateException)
             {
                 Listener.Stop();
-                throw new ConnectionException($"RosClient: Failed to contact the master URI '{masterUri}'", e);
+                throw new ConnectionException($"Failed to contact the master URI '{masterUri}'", e);
             }
             Logger.Log("RosClient: Initialized.");
 
-            /*
+
             try
             {
-                GetNodeMasterUri(CallerUri);
+                var response = CreateTalker(CallerUri).GetPid();
+                if (!response.IsValid)
+                {
+                    Logger.LogError("RosClient: Failed to validate reachability response.");
+                }
+                else
+                {
+                    if (response.Pid != Process.GetCurrentProcess().Id)
+                    {
+                        throw new UnreachableUriException($"My uri {CallerUri} appears to belong to someone else!");
+                    }
+                }
             }
             catch (WebException)
             {
-                Logger.LogError("RosClient: Node does not appear to be reachable!");
+                throw new UnreachableUriException($"My uri {CallerUri} does not appear to be reachable!");
             }
-            */
+
         }
 
         public static string TryGetHostname()
@@ -249,11 +275,11 @@ namespace Iviz.RoslibSharp
         {
             SystemState state = GetSystemState();
             state.Subscribers.
-                Where(x => x.Nodes.Contains(CallerId)).
-                ForEach(x => Master.UnregisterSubscriber(x.Name));
+                Where(x => x.Members.Contains(CallerId)).
+                ForEach(x => Master.UnregisterSubscriber(x.Topic));
             state.Publishers.
-                Where(x => x.Nodes.Contains(CallerId)).
-                ForEach(x => Master.UnregisterPublisher(x.Name));
+                Where(x => x.Members.Contains(CallerId)).
+                ForEach(x => Master.UnregisterPublisher(x.Topic));
         }
 
         public void Cleanup()
@@ -287,8 +313,8 @@ namespace Iviz.RoslibSharp
                 subscribersByTopic[topic] = subscription;
             }
 
-            XmlRpc.RegisterSubscriberResponse masterResponse = Master.RegisterSubscriber(topic, topicInfo.Type);
-            if (masterResponse.Code != XmlRpc.StatusCode.Success)
+            var masterResponse = Master.RegisterSubscriber(topic, topicInfo.Type);
+            if (!masterResponse.IsValid)
             {
                 lock (subscribersByTopic)
                 {
@@ -343,7 +369,7 @@ namespace Iviz.RoslibSharp
 
             if (!subscriber.MessageTypeMatches(typeof(T)))
             {
-                throw new InvalidOperationException("Type does not match subscriber.");
+                throw new InvalidMessageTypeException("Type does not match subscriber.");
             }
 
             // local lambda wrapper for casting
@@ -468,7 +494,7 @@ namespace Iviz.RoslibSharp
             }
 
             var response = Master.RegisterPublisher(topic, topicInfo.Type);
-            if (response.Code != XmlRpc.StatusCode.Success)
+            if (!response.IsValid)
             {
                 lock (publishersByTopic)
                 {
@@ -587,10 +613,18 @@ namespace Iviz.RoslibSharp
         /// <returns>List of topic names and message types.</returns>
         public ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics()
         {
-            return new ReadOnlyCollection<BriefTopicInfo>(
-                Master.GetPublishedTopics().Topics.
-                Select(x => new BriefTopicInfo(x.Item1, x.Item2)).ToArray()
-                );
+            var response = Master.GetPublishedTopics();
+            if (response.IsValid)
+            {
+                return new ReadOnlyCollection<BriefTopicInfo>(
+                    Master.GetPublishedTopics().Topics.
+                    Select(x => new BriefTopicInfo(x.Item1, x.Item2)).ToArray()
+                    );
+            }
+            else
+            {
+                throw new XmlRpcException("Failed to retrieve topics: " + response.StatusMessage);
+            }
         }
 
         /// <summary>
@@ -608,8 +642,15 @@ namespace Iviz.RoslibSharp
         /// <returns>List of advertised topics, subscribed topics, and offered services, together with the involved nodes.</returns>
         public SystemState GetSystemState()
         {
-            XmlRpc.GetSystemStateResponse response = Master.GetSystemState();
-            return new SystemState(response.Publishers, response.Subscribers, response.Services);
+            var response = Master.GetSystemState();
+            if (response.IsValid)
+            {
+                return new SystemState(response.Publishers, response.Subscribers, response.Services);
+            }
+            else
+            {
+                throw new XmlRpcException("Failed to retrieve system state: " + response.StatusMessage);
+            }
         }
 
         /// <summary>
@@ -780,7 +821,8 @@ namespace Iviz.RoslibSharp
                         Uri remoteUri;
                         try
                         {
-                            remoteUri = Master.LookupNode(sender.RemoteId).Uri;
+                            var response = Master.LookupNode(sender.RemoteId);
+                            remoteUri = response.IsValid ? response.Uri : null;
                         }
                         catch (Exception e)
                         {
@@ -939,29 +981,6 @@ namespace Iviz.RoslibSharp
             Close();
             Listener.Dispose();
         }
-
-        public Uri GetNodeMasterUri(Uri other)
-        {
-            return CreateTalker(other).GetMasterUri().uri;
-        }
-
-        /*
-        public void CheckListenerHack()
-        {
-            try
-            {
-                CreateTalker(CallerUri, 500).GetMasterUri();
-            }
-            catch (WebException)
-            {
-                Logger.Log($"{this}: Resetting listener.");
-                Listener.Stop();
-                Listener = null;
-                Listener = new XmlRpc.NodeServer(this);
-                Listener.Start();
-            }
-        }
-        */
 
         public override string ToString()
         {

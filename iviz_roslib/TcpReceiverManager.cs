@@ -39,7 +39,7 @@ namespace Iviz.RoslibSharp
             }
             catch (Exception e) when (e is TimeoutException || e is AggregateException)
             {
-                Logger.Log($"{this}: Failed to add publisher {remoteUri}: {e}");
+                Logger.LogDebug($"{this}: Failed to add publisher {remoteUri}: {e}");
                 return false;
             }
             catch (Exception e)
@@ -47,21 +47,21 @@ namespace Iviz.RoslibSharp
                 Logger.LogError($"{this}: Failed to add publisher {remoteUri}: {e}");
                 return false;
             }
-            if (response.code != XmlRpc.StatusCode.Success)
+            if (!response.IsValid)
             {
-                Logger.LogDebug($"{this}: Topic request to {response.protocol.hostname}:{response.protocol.port} failed");
+                Logger.LogDebug($"{this}: Topic request to {response.Protocol.Hostname}:{response.Protocol.Port} failed");
                 return false;
             }
-            if (response.protocol.type == null)
+            if (response.Protocol.Type == null)
             {
-                Logger.LogDebug($"{this}: {response.protocol.hostname}:{response.protocol.port} has no suitable protocols");
+                Logger.LogDebug($"{this}: {response.Protocol.Hostname}:{response.Protocol.Port} has no suitable protocols");
                 return false;
             }
 
             TcpReceiver connection = new TcpReceiver(
                 remoteUri,
-                response.protocol.hostname,
-                response.protocol.port,
+                response.Protocol.Hostname,
+                response.Protocol.Port,
                 TopicInfo, Callback,
                 RequestNoDelay);
 
@@ -78,7 +78,7 @@ namespace Iviz.RoslibSharp
             Uri[] toAdd;
             lock (connectionsByUri)
             {
-                toAdd = publisherUris.Where(uri => !connectionsByUri.ContainsKey(uri)).ToArray();
+                toAdd = publisherUris.Where(uri => uri != null && !connectionsByUri.ContainsKey(uri)).ToArray();
 
                 HashSet<Uri> toDelete = new HashSet<Uri>(connectionsByUri.Keys);
                 publisherUris.ForEach(uri => toDelete.Remove(uri));

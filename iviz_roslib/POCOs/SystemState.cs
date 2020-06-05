@@ -2,41 +2,24 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Iviz.RoslibSharp.XmlRpc;
 
 namespace Iviz.RoslibSharp
 {
-    public class SystemStateEntry
-    {
-        public string Name { get; }
-        public ReadOnlyCollection<string> Nodes { get; }
-
-        internal SystemStateEntry(string name, IList<string> nodes)
-        {
-            Name = name;
-            Nodes = new ReadOnlyCollection<string>(nodes);
-        }
-    }
-
     public class SystemState : JsonToString
     {
-        public ReadOnlyCollection<SystemStateEntry> Publishers { get; }
-        public ReadOnlyCollection<SystemStateEntry> Subscribers { get; }
-        public ReadOnlyCollection<SystemStateEntry> Services { get; }
+        public ReadOnlyCollection<TopicTuple> Publishers { get; }
+        public ReadOnlyCollection<TopicTuple> Subscribers { get; }
+        public ReadOnlyCollection<TopicTuple> Services { get; }
 
         internal SystemState(
-            IList<Tuple<string, string[]>> publishers,
-            IList<Tuple<string, string[]>> subscribers,
-            IList<Tuple<string, string[]>> services)
+            ReadOnlyCollection<TopicTuple> publishers,
+            ReadOnlyCollection<TopicTuple> subscribers,
+            ReadOnlyCollection<TopicTuple> services)
         {
-            Publishers = new ReadOnlyCollection<SystemStateEntry>(
-                publishers.Select(x => new SystemStateEntry(x.Item1, x.Item2)).ToArray()
-                );
-            Subscribers = new ReadOnlyCollection<SystemStateEntry>(
-                subscribers.Select(x => new SystemStateEntry(x.Item1, x.Item2)).ToArray()
-                );
-            Services = new ReadOnlyCollection<SystemStateEntry>(
-                services.Select(x => new SystemStateEntry(x.Item1, x.Item2)).ToArray()
-                );
+            Publishers = publishers;
+            Subscribers = subscribers;
+            Services = services;
         }
     }
 }
