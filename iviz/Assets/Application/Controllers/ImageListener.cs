@@ -34,7 +34,10 @@ namespace Iviz.App.Listeners
         public ImageTexture ImageTexture => texture;
         public Texture2D Texture => texture.Texture;
         public Material Material => texture.Material;
-        public string Description => texture.Description;
+
+        string descriptionOverride;
+        public string Description => descriptionOverride ?? texture.Description;
+
         public bool IsMono => texture.IsMono;
 
         public override DisplayData DisplayData
@@ -132,7 +135,6 @@ namespace Iviz.App.Listeners
             }
         }
 
-
         void Awake()
         {
             texture = new ImageTexture();
@@ -165,9 +167,11 @@ namespace Iviz.App.Listeners
 
             if (msg.Format != "png")
             {
-                Logger.Error("ImageListener: Can only handle png compression");
+                //Logger.Error("ImageListener: Can only handle png compression");
+                descriptionOverride = $"[Format '{msg.Format}]";
                 return;
             }
+            descriptionOverride = null;
             texture.SetPng(msg.Data);
         }
 
@@ -182,6 +186,7 @@ namespace Iviz.App.Listeners
 
         public override void Stop()
         {
+            base.Stop();
             marker.Texture = null;
             ResourcePool.Dispose(Resource.Markers.Image, marker.gameObject);
             marker = null;

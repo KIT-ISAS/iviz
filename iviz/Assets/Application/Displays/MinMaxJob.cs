@@ -10,7 +10,7 @@ namespace Iviz.Displays
     public struct MinMaxJob : IJob
     {
         [ReadOnly]
-        NativeArray<float4> Input;
+        NativeSlice<float4> Input;
 
         [WriteOnly]
         NativeArray<float4> Output;
@@ -30,6 +30,7 @@ namespace Iviz.Displays
 
         public static void CalculateBounds(
             in NativeArray<float4> pointBuffer,
+            int size,
             out Bounds bounds,
             out Vector2 intensitySpan)
         {
@@ -37,7 +38,7 @@ namespace Iviz.Displays
 
             MinMaxJob job = new MinMaxJob
             {
-                Input = pointBuffer,
+                Input = pointBuffer.Slice(0, size),
                 Output = output
             };
             job.Schedule().Complete();

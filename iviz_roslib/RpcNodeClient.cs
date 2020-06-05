@@ -28,7 +28,7 @@ namespace Iviz.RoslibSharp.XmlRpc
 
             public RequestTopicResponse(object[] a) : base(a)
             {
-                if (hasParseError || Code != StatusCode.Success)
+                if (!IsValid || !EnsureSize(a, 3))
                 {
                     Protocol = new ProtocolResponse();
                     return;
@@ -40,9 +40,14 @@ namespace Iviz.RoslibSharp.XmlRpc
                 }
                 else
                 {
-                    if (a[0] is object[] tmp)
+                    if (a[2] is object[] tmp)
                     {
                         a = tmp;
+                        if (!EnsureSize(a, 3))
+                        {
+                            Protocol = new ProtocolResponse();
+                            return;
+                        }
                     }
                     Protocol = new ProtocolResponse
                     (
@@ -83,7 +88,7 @@ namespace Iviz.RoslibSharp.XmlRpc
 
             public GetPidResponse(object[] a) : base(a)
             {
-                if (hasParseError || Code != StatusCode.Success)
+                if (!IsValid || !EnsureSize(a, 3))
                 {
                     return;
                 }

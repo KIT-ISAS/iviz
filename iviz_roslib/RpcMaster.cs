@@ -20,7 +20,7 @@ namespace Iviz.RoslibSharp.XmlRpc
         public Uri MasterUri { get; }
         public Uri CallerUri { get; }
         public string CallerId { get; }
-        public int TimeoutInMs { get; set; }
+        public int TimeoutInMs { get; set; } = 2000;
 
         internal Master(Uri masterUri, string callerId, Uri callerUri)
         {
@@ -162,7 +162,7 @@ namespace Iviz.RoslibSharp.XmlRpc
         public string StatusMessage { get; }
         private protected bool hasParseError;
 
-        public bool IsValid => Code != StatusCode.Success && !hasParseError;
+        public bool IsValid => Code == StatusCode.Success && !hasParseError;
 
         private protected BaseResponse(object[] a)
         {

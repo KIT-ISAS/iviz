@@ -272,7 +272,7 @@ namespace Iviz.RoslibSharp
                 Status = SenderStatus.Waiting;
 
                 Task<TcpClient> task = tcpListener.AcceptTcpClientAsync();
-                if (!task.Wait(timeoutInMs) || task.IsCanceled || task.IsFaulted)
+                if (!task.Wait(timeoutInMs) || task.IsCanceled || task.IsFaulted || !keepRunning)
                 {
                     throw new TimeoutException();
                 }
@@ -335,7 +335,8 @@ namespace Iviz.RoslibSharp
                     }
                 }
             }
-            catch (Exception e) when (e is IOException || e is TimeoutException)
+            catch (Exception e) when
+            (e is IOException || e is TimeoutException || e is AggregateException || e is SocketException)
             {
                 Logger.LogDebug($"{this}: {e}");
             }

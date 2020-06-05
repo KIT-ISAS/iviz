@@ -206,7 +206,8 @@ namespace Iviz.RoslibSharp
                         }
                     }
                 }
-                catch (Exception e) when (e is IOException || e is AggregateException)
+                catch (Exception e) when
+                (e is IOException || e is AggregateException || e is SocketException || e is TimeoutException)
                 {
                     Logger.LogDebug($"{this}: " + e);
                 }

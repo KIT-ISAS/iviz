@@ -366,7 +366,8 @@ namespace Iviz.Resources
                 "com.willowgarage.pr2",
                 "edu.fraunhofer.iosb.bob",
                 "edu.fraunhofer.iosb.crayler",
-                "edu.kit.h2t.armar6"
+                "edu.kit.h2t.armar6",
+                "edu.kit.ipr.gammabot"
                 };
 
             public ReadOnlyCollection<string> Names { get; }

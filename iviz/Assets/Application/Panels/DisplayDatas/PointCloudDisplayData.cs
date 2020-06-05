@@ -40,6 +40,12 @@ namespace Iviz.App
         {
             panel.Listener.RosListener = listener.Listener;
 
+            panel.NumPoints.Label = $"Number of Points: {listener.Size}";
+
+            string minIntensityStr = listener.LastIntensityBounds.x.ToString("#,0.##", UnityUtils.Culture);
+            string maxIntensityStr = listener.LastIntensityBounds.y.ToString("#,0.##", UnityUtils.Culture);
+            panel.MinMax.Label = $"Min Intensity: {minIntensityStr} Max: {maxIntensityStr}";
+
             panel.Colormap.Index = (int)listener.Colormap;
             panel.PointSize.Value = listener.PointSize;
             panel.IntensityChannel.Options = listener.FieldNames;
@@ -51,6 +57,7 @@ namespace Iviz.App
             panel.MaxIntensity.Value = listener.MaxIntensity;
             panel.MinIntensity.Interactable = listener.ForceMinMax;
             panel.MaxIntensity.Interactable = listener.ForceMinMax;
+            panel.FlipMinMax.Value = listener.FlipMinMax;
 
             panel.PointSize.ValueChanged += f =>
             {
@@ -81,6 +88,10 @@ namespace Iviz.App
                 panel.MinIntensity.Interactable = f;
                 panel.MaxIntensity.Interactable = f;
             };
+            panel.FlipMinMax.ValueChanged += f =>
+            {
+                listener.FlipMinMax = f;
+            };
             panel.MinIntensity.ValueChanged += f =>
             {
                 listener.MinIntensity = f;
@@ -95,6 +106,11 @@ namespace Iviz.App
         {
             base.UpdatePanel();
             panel.IntensityChannel.Options = listener.FieldNames;
+            panel.NumPoints.Label = $"Number of Points: {listener.Size}";
+
+            string minIntensityStr = listener.LastIntensityBounds.x.ToString("#,0.##", UnityUtils.Culture);
+            string maxIntensityStr = listener.LastIntensityBounds.y.ToString("#,0.##", UnityUtils.Culture);
+            panel.MinMax.Label = $"Min Intensity: {minIntensityStr} Max: {maxIntensityStr}";
         }
 
         public override void AddToState(StateConfiguration config)

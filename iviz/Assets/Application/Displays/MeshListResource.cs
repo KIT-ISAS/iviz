@@ -133,9 +133,28 @@ namespace Iviz.Displays
                 }
                 else
                 {
-                    material.SetFloat(PropIntensityCoeff, 1 / intensitySpan);
-                    material.SetFloat(PropIntensityAdd, -intensityBounds.x / intensitySpan);
+                    if (FlipMinMax)
+                    {
+                        material.SetFloat(PropIntensityCoeff, 1 / intensitySpan);
+                        material.SetFloat(PropIntensityAdd, -intensityBounds.x / intensitySpan);
+                    }
+                    else
+                    {
+                        material.SetFloat(PropIntensityCoeff, -1 / intensitySpan);
+                        material.SetFloat(PropIntensityAdd, intensityBounds.y / intensitySpan);
+                    }
                 }
+            }
+        }
+
+        bool flipMinMax;
+        public bool FlipMinMax
+        {
+            get => flipMinMax;
+            set
+            {
+                flipMinMax = value;
+                IntensityBounds = IntensityBounds;
             }
         }
 
@@ -223,57 +242,18 @@ namespace Iviz.Displays
                     {
                         continue;
                     }
-                    pointBuffer[realSize++] = value[i];
+                    pointBuffer[realSize] = value[i];
+                    realSize++;
                 }
                 Size = realSize;
                 UpdateBuffer();
             }
         }
-        /*
-        public IEnumerable<Color32> Colors
-        {
-            get => pointBuffer.Select(x => x.Color);
-            set
-            {
-                int index = 0;
-                if (value == null)
-                {
-                    for (int i = 0; i < pointBufferSize; i++)
-                    {
-                        pointBuffer[index++].Color = Color;
-                    }
-                }
-                else
-                {
-                    foreach (Color32 color in value)
-                    {
-                        pointBuffer[index++].color = Color * color;
-                    }
-                }
-            }
-        }
-
-        public IEnumerable<Vector3> Points
-        {
-            get => pointBuffer.Select(x => x.position);
-            set
-            {
-                int index = 0;
-                foreach (Vector3 pos in value)
-                {
-                    pointBuffer[index++].position = pos;
-                }
-
-                pointComputeBuffer.SetData(pointBuffer, 0, 0, pointBufferSize);
-                UpdateBounds();
-            }
-        }
-        */
 
         void UpdateBuffer()
         {
             pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
-            MinMaxJob.CalculateBounds(pointBuffer, out Bounds bounds, out Vector2 _);
+            MinMaxJob.CalculateBounds(pointBuffer, Size, out Bounds bounds, out Vector2 _);
             Collider.center = bounds.center;
             Collider.size = bounds.size + Scale;
         }
@@ -305,17 +285,20 @@ namespace Iviz.Displays
             }
         }
 
-        public override string Name => "MeshListResource";
-
-        /*
-        void UpdateBounds()
+        public override bool Visible
         {
-            baseBounds = CalculateBounds();
-
-            Collider.center = Bounds.center;
-            Collider.size = Bounds.size;
+            get => base.Visible;
+            set
+            {
+                base.Visible = value;
+                if (value)
+                {
+                    OnApplicationFocus(true);
+                }
+            }
         }
-        */
+
+        public override string Name => "MeshListResource";
 
         protected override void Awake()
         {
@@ -334,41 +317,6 @@ namespace Iviz.Displays
             argsComputeBuffer = new ComputeBuffer(1, argsBuffer.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
             argsComputeBuffer.SetData(argsBuffer);
         }
-
-        /*
-        public void SetSize(int size)
-        {
-            int reqDataSize = (int)(size * 1.1f);
-            SetCapacity(reqDataSize);
-
-            if (argsComputeBuffer == null)
-            {
-                argsComputeBuffer = new ComputeBuffer(1, argsBuffer.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
-            }
-
-            argsBuffer[1] = (uint)size;
-            argsComputeBuffer.SetData(argsBuffer);
-
-            pointBufferSize = size;
-        }
-        */
-
-        /*
-        void Start()
-        {
-            List<Vector3> points = new List<Vector3>();
-            for (int i = 0; i < 20; i++)
-            {
-                points.Add(new Vector3(i, 0, i));
-            }
-            SetSize(points.Count);
-
-            Scale = 0.15f * Vector3.one;
-            Colors = null;
-            Color = Color.red;
-            Points = points;
-        }
-        */
 
         static readonly int PropLocalToWorld = Shader.PropertyToID("_LocalToWorld");
         static readonly int PropBoundaryCenter = Shader.PropertyToID("_BoundaryCenter");

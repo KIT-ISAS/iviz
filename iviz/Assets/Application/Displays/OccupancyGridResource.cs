@@ -172,7 +172,10 @@ namespace Iviz.Displays
             NumCellsX = 10;
             NumCellsY = 10;
             CellSize = 1.0f;
+
             UpdateSize();
+
+            InteriorVisible = false;
 
             Colormap = Resource.ColormapId.gray;
             IntensityBounds = new Vector2(0, 1);
@@ -206,14 +209,18 @@ namespace Iviz.Displays
                 for (int u = 0; u < NumCellsX; u++, i++)
                 {
                     sbyte val = values[i];
-                    if (val == 0)
+                    if (val <= 0)
                     {
                         continue;
                     }
-                    pointBuffer.Add(new PointWithColor(
+                    Vector3 pos = new Vector3(
                         (u - offsetX) * CellSize,
-                        0,
                         (v - offsetY) * CellSize,
+                        0
+                        );
+
+                    pointBuffer.Add(new PointWithColor(
+                        pos.Ros2Unity(),
                         val * 0.01f
                         ));
                 }

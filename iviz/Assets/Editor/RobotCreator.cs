@@ -27,9 +27,9 @@ namespace Iviz.App
         [MenuItem("MyMenu/Do Something")]
         static void DoSomething()
         {
-            //string projectRoot = packageRoot + "husky_description";
-            //string urdfFile = projectRoot + "/urdf/husky.urdf.xml";
-            //string materialsRoot = projectRoot + "/unity_materials/";
+            string projectRoot = packageRoot + "husky_description";
+            string urdfFile = projectRoot + "/urdf/husky_ur5.urdf.xml";
+            string materialsRoot = projectRoot + "/unity_materials/";
 
             //string projectRoot = packageRoot + "iosb";
             //string urdfFile = projectRoot + "/urdf/iosb.urdf.xml";
@@ -44,9 +44,14 @@ namespace Iviz.App
             //string urdfFile = projectRoot + "/robots/robot.urdf.xml";
             //string materialsRoot = projectRoot + "/unity_materials/";
 
-            string projectRoot = packageRoot + "crayler";
-            string urdfFile = projectRoot + "/urdf/crayler_high_res.urdf.xml";
-            string materialsRoot = projectRoot + "/unity_materials/";
+            //string projectRoot = packageRoot + "crayler";
+            //string urdfFile = projectRoot + "/urdf/crayler_high_res.urdf.xml";
+            //string materialsRoot = projectRoot + "/unity_materials/";
+
+            //string projectRoot = packageRoot + "neo_mp_500";
+            //string urdfFile = projectRoot + "/robot_model/mp_500.urdf.xml";
+            //string materialsRoot = projectRoot + "/unity_materials/";
+
 
             AssetDatabase.CreateFolder(projectRoot, "unity_materials");
 
@@ -210,7 +215,7 @@ namespace Iviz.App
             {
                 XDocument xdoc = XDocument.Load(stream);
                 XElement node = xdoc.Element("robot");
-                robot.name = node.Attribute("name").Value;
+                robot.name = node.Attribute("name")?.Value ?? "";
                 robot.materials = node.Elements("material").Select(x => new Link.Visual.Material(x)).ToList();
                 robot.links = node.Elements("link").Select(x => new Link(x)).ToList();
                 robot.joints = node.Elements("joint").Select(x => new Joint(x)).ToList();
@@ -528,7 +533,7 @@ namespace Iviz.App
 
         static GameObject CreateMeshVisual(Link.Geometry.Mesh mesh)
         {
-            string path = GetRelativeAssetPathFromUrdfPath(mesh.filename + ".dae");
+            string path = GetRelativeAssetPathFromUrdfPath(mesh.filename); /*  + ".dae" */
             GameObject meshObject = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             if (meshObject == null)
             {

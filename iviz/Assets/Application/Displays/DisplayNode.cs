@@ -37,6 +37,12 @@ namespace Iviz.App.Displays
                     }
                 }
                 transform.SetParentLocal(value?.transform);
+                /*
+                if (value != null)
+                {
+                    transform.SetPose(value.transform.AsPose());
+                }
+                */
             }
         }
 

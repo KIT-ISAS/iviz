@@ -9,55 +9,6 @@ using Unity.Mathematics;
 
 namespace Iviz.Displays
 {
-    [StructLayout(LayoutKind.Sequential)]
-    public readonly struct LineWithColor
-    {
-        readonly float4x2 f;
-
-        public Vector3 A => new Vector3(f.c0.x, f.c0.y, f.c0.z);
-        public Color32 ColorA
-        {
-            get
-            {
-                unsafe
-                {
-                    float w = f.c0.w;
-                    return *(Color32*)&w;
-                }
-            }
-        }
-        public Vector3 B => new Vector3(f.c1.x, f.c1.y, f.c1.z);
-        public Color32 ColorB
-        {
-            get
-            {
-                unsafe
-                {
-                    float w = f.c1.w;
-                    return *(Color32*)&w;
-                }
-            }
-        }
-
-        public LineWithColor(Vector3 a, Color32 colorA, Vector3 b, Color32 colorB)
-        {
-            f.c0.x = a.x;
-            f.c0.y = a.y;
-            f.c0.z = a.z;
-
-            f.c1.x = b.x;
-            f.c1.y = b.y;
-            f.c1.z = b.z;
-
-            unsafe
-            {
-                f.c0.w = *(float*)&colorA;
-                f.c1.w = *(float*)&colorB;
-            }
-        }
-
-        public static implicit operator float4x2(LineWithColor c) => c.f;
-    };
 
     public class LineResource : MarkerResource
     {
@@ -113,9 +64,10 @@ namespace Iviz.Displays
                     lineBuffer[i] = value[i];
                 }
                 lineComputeBuffer.SetData(lineBuffer, 0, 0, Size);
-                Bounds bounds = CalculateBounds();
+                CalculateBounds(out Bounds bounds, out Vector2 span);
                 Collider.center = bounds.center;
                 Collider.size = bounds.size;
+                IntensityBounds = span;
             }
         }
 
@@ -124,9 +76,10 @@ namespace Iviz.Displays
             Size = size;
             func(lineBuffer);
             lineComputeBuffer.SetData(lineBuffer, 0, 0, Size);
-            Bounds bounds = CalculateBounds();
+            CalculateBounds(out Bounds bounds, out Vector2 span);
             Collider.center = bounds.center;
             Collider.size = bounds.size;
+            IntensityBounds = span;
         }
 
         float scale;
@@ -149,10 +102,6 @@ namespace Iviz.Displays
             get => useIntensityTexture;
             set
             {
-                if (useIntensityTexture == value)
-                {
-                    return;
-                }
                 useIntensityTexture = value;
                 if (useIntensityTexture)
                 {
@@ -199,8 +148,40 @@ namespace Iviz.Displays
                 }
                 else
                 {
-                    material.SetFloat(PropIntensityCoeff, 1 / intensitySpan);
-                    material.SetFloat(PropIntensityAdd, -intensityBounds.x / intensitySpan);
+                    if (FlipMinMax)
+                    {
+                        material.SetFloat(PropIntensityCoeff, 1 / intensitySpan);
+                        material.SetFloat(PropIntensityAdd, -intensityBounds.x / intensitySpan);
+                    }
+                    else
+                    {
+                        material.SetFloat(PropIntensityCoeff, -1 / intensitySpan);
+                        material.SetFloat(PropIntensityAdd, intensityBounds.y / intensitySpan);
+                    }
+                }
+            }
+        }
+
+        bool flipMinMax;
+        public bool FlipMinMax
+        {
+            get => flipMinMax;
+            set
+            {
+                flipMinMax = value;
+                IntensityBounds = IntensityBounds;
+            }
+        }
+
+        public override bool Visible
+        {
+            get => base.Visible;
+            set
+            {
+                base.Visible = value;
+                if (value)
+                {
+                    OnApplicationFocus(true);
                 }
             }
         }
@@ -211,10 +192,10 @@ namespace Iviz.Displays
         {
             base.Awake();
 
-            Scale = 0.1f;
-
             material = Resource.Materials.Line.Instantiate();
             material.DisableKeyword("USE_TEXTURE");
+
+            Scale = 0.1f;
 
             UseIntensityTexture = false;
             IntensityBounds = new Vector2(0, 1);
@@ -253,34 +234,34 @@ namespace Iviz.Displays
             Graphics.DrawProcedural(material, worldBounds, MeshTopology.Quads, 4, Size);
         }
 
-        Bounds CalculateBounds()
+        void CalculateBounds(out Bounds bounds, out Vector2 intensityBounds)
         {
-            Vector3 positionMin = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
-            Vector3 positionMax = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+            float4 min = new float4(float.MaxValue);
+            float4 max = new float4(float.MinValue);
             for (int i = 0; i < Size; i++)
             {
-                Vector3 pA = lineBuffer[i].A;
-                if (float.IsNaN(pA.x) ||
-                    float.IsNaN(pA.y) ||
-                    float.IsNaN(pA.z))
+                float4 pA = lineBuffer[i].PA;
+                if (math.any(math.isnan(pA)))
                 {
                     continue;
                 }
-                positionMin = Vector3.Min(positionMin, pA);
-                positionMax = Vector3.Max(positionMax, pA);
+                min = math.min(min, pA);
+                max = math.max(max, pA);
 
-                Vector3 pB = lineBuffer[i].B;
-                if (float.IsNaN(pB.x) ||
-                    float.IsNaN(pB.y) ||
-                    float.IsNaN(pB.z))
+                float4 pB = lineBuffer[i].PB;
+                if (math.any(math.isnan(pB)))
                 {
                     continue;
                 }
-                positionMin = Vector3.Min(positionMin, pB);
-                positionMax = Vector3.Max(positionMax, pB);
-
+                min = math.min(min, pB);
+                max = math.max(max, pB);
             }
-            return new Bounds((positionMax + positionMin) / 2, positionMax - positionMin);
+
+            Vector3 positionMin = new Vector3(min.x, min.y, min.z);
+            Vector3 positionMax = new Vector3(max.x, max.y, max.z);
+
+            bounds = new Bounds((positionMax + positionMin) / 2, positionMax - positionMin);
+            intensityBounds = new Vector2(min.w, max.w);
         }
 
         void OnDestroy()
@@ -327,6 +308,7 @@ namespace Iviz.Displays
             }
             UpdateQuadComputeBuffer();
 
+            UseIntensityTexture = UseIntensityTexture;
             IntensityBounds = IntensityBounds;
             Colormap = Colormap;
 

@@ -73,9 +73,9 @@ Shader "iviz/Line"
 
 	#if USE_TEXTURE
 				float intensityA = _Lines[inst].intensityA;
-				half4 rgbA = tex2Dlod(_IntensityTexture, float4(intensityA * _IntensityCoeff + _IntensityAdd, 0, 0, 0));
+				half4 rgbaA = tex2Dlod(_IntensityTexture, float4(intensityA * _IntensityCoeff + _IntensityAdd, 0, 0, 0));
 				float intensityB = _Lines[inst].intensityB;
-				half4 rgbB = tex2Dlod(_IntensityTexture, float4(intensityB * _IntensityCoeff + _IntensityAdd, 0, 0, 0));
+				half4 rgbaB = tex2Dlod(_IntensityTexture, float4(intensityB * _IntensityCoeff + _IntensityAdd, 0, 0, 0));
     #else
 				int cA = _Lines[inst].colorA;
 				half4 rgbaA = half4(

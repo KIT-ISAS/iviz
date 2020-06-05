@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 
 namespace Iviz.Msgs
 {
+    [DataContract(Name = "time")]
     [StructLayout(LayoutKind.Sequential)]
     public readonly struct time : IEquatable<time>
     {
-        public uint Secs { get; }
-        public uint Nsecs { get; }
+        [DataMember(Name = "secs")] public uint Secs { get; }
+        [DataMember(Name = "nsecs")] public uint Nsecs { get; }
 
         public time(uint secs, uint nsecs)
         {

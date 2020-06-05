@@ -45,6 +45,7 @@ namespace Iviz.App
         public override void SetupPanel()
         {
             panel.Listener.RosListener = listener.Listener;
+            panel.ListenerStatic.RosListener = listener.ListenerStatic;
             panel.ShowAxes.Value = listener.AxisVisible;
             panel.FrameSize.Value = listener.AxisSize;
             panel.ShowFrameLabels.Value = listener.AxisLabelVisible;

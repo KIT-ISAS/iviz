@@ -30,6 +30,7 @@ namespace Iviz.App.Listeners
     public class TFListener : TopicListener
     {
         public const string DefaultTopic = "/tf";
+        public const string DefaultTopicStatic = "/tf_static";
         public const string BaseFrameId = "map";
 
         public static TFListener Instance { get; private set; }
@@ -40,13 +41,17 @@ namespace Iviz.App.Listeners
         public static TFFrame ListenersFrame { get; private set; }
 
         FlyCamera guiManager;
-        DisplayNode dummy;
+        DisplayNode dummyListener;
+        DisplayNode staticListener;
 
         readonly Dictionary<string, TFFrame> frames = new Dictionary<string, TFFrame>();
 
-        public RosSender<tfMessage_v2> Publisher { get; set; }
+        public RosSender<tfMessage_v2> Publisher { get; private set; }
 
         public override DisplayData DisplayData { get; set; }
+
+        public RosListener ListenerStatic { get; private set; }
+
 
         readonly TFConfiguration config = new TFConfiguration();
         public TFConfiguration Config
@@ -125,12 +130,12 @@ namespace Iviz.App.Listeners
                 config.ShowAllFrames = value;
                 if (value)
                 {
-                    frames.Values.ForEach(x => x.AddListener(dummy));
+                    frames.Values.ForEach(x => x.AddListener(dummyListener));
                 }
                 else
                 {
                     // we create a copy because this generally modifies the collection
-                    frames.Values.ToArray().ForEach(x => x.RemoveListener(dummy));
+                    frames.Values.ToArray().ForEach(x => x.RemoveListener(dummyListener));
                 }
             }
         }
@@ -139,7 +144,8 @@ namespace Iviz.App.Listeners
         {
             Instance = this;
 
-            dummy = SimpleDisplayNode.Instantiate("TFNode", transform);
+            dummyListener = SimpleDisplayNode.Instantiate("TFNode", transform);
+            staticListener = SimpleDisplayNode.Instantiate("TFStatic", transform);
 
             GameObject mainCameraObj = GameObject.Find("MainCamera");
             MainCamera = mainCameraObj.GetComponent<Camera>();
@@ -155,7 +161,7 @@ namespace Iviz.App.Listeners
             ListenersFrame.ForceInvisible = true;
 
             TFFrame f;
-            f = GetOrCreateFrame("navigation", dummy);
+            f = GetOrCreateFrame("navigation", dummyListener);
             f.AddListener(null);
             f.IgnoreUpdates = true;
 
@@ -165,7 +171,8 @@ namespace Iviz.App.Listeners
         public override void StartListening()
         {
             base.StartListening();
-            Listener = new RosListener<tfMessage_v2>(Config.Topic, SubscriptionHandler_v2);
+            Listener = new RosListener<tfMessage_v2>(DefaultTopic, SubscriptionHandler_v2);
+            ListenerStatic = new RosListener<tfMessage_v2>(DefaultTopicStatic, SubscriptionHandlerStatic);
         }
 
         void TopicsUpdated()
@@ -187,7 +194,7 @@ namespace Iviz.App.Listeners
             */
         }
 
-        void ProcessMessages(TransformStamped[] transforms)
+        void ProcessMessages(TransformStamped[] transforms, bool forceKeep)
         {
             foreach (TransformStamped t in transforms)
             {
@@ -197,9 +204,13 @@ namespace Iviz.App.Listeners
                     childId = childId.Substring(1);
                 }
                 TFFrame child;
-                if (config.ShowAllFrames)
+                if (forceKeep)
                 {
-                    child = GetOrCreateFrame(childId, dummy); ;
+                    child = GetOrCreateFrame(childId, staticListener);
+                }
+                else if (config.ShowAllFrames)
+                {
+                    child = GetOrCreateFrame(childId, dummyListener);
                 }
                 else if (!TryGetFrameImpl(childId, out child))
                 {
@@ -283,12 +294,17 @@ namespace Iviz.App.Listeners
 
         void SubscriptionHandler_v1(tfMessage msg)
         {
-            ProcessMessages(msg.Transforms);
+            ProcessMessages(msg.Transforms, false);
         }
 
         void SubscriptionHandler_v2(tfMessage_v2 msg)
         {
-            ProcessMessages(msg.Transforms);
+            ProcessMessages(msg.Transforms, false);
+        }
+
+        void SubscriptionHandlerStatic(tfMessage_v2 msg)
+        {
+            ProcessMessages(msg.Transforms, true);
         }
 
         public void MarkAsDead(TFFrame frame)

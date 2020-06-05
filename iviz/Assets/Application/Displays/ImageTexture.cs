@@ -87,13 +87,17 @@ namespace Iviz.Displays
             {
                 case "rgba8":
                 case "bgra8":
+                case "8SC4":
                     return 4;
                 case "rgb8":
                 case "bgr8":
+                case "8SC3":
                     return 3;
                 case "mono16":
+                case "16UC1":
                     return 2;
                 case "mono8":
+                case "8UC1":
                     return 1;
                 default:
                     return -1;
@@ -184,6 +188,7 @@ namespace Iviz.Displays
             switch (encoding)
             {
                 case "rgba8":
+                case "8SC4":
                     IsMono = false;
                     Material.DisableKeyword("USE_INTENSITY");
                     Material.DisableKeyword("FLIP_RB");
@@ -196,6 +201,7 @@ namespace Iviz.Displays
                     ApplyTexture(width, height, data, encoding, size * 4);
                     break;
                 case "rgb8":
+                case "8SC3":
                     Task.Run(() =>
                     {
                         FillRGBABuffer(width, height, data);
@@ -222,11 +228,13 @@ namespace Iviz.Displays
                     });
                     break;
                 case "mono16":
+                case "16UC1":
                     IsMono = true;
                     Material.EnableKeyword("USE_INTENSITY");
                     ApplyTexture(width, height, data, encoding, size * 2);
                     break;
                 case "mono8":
+                case "8UC1":
                     IsMono = true;
                     Material.EnableKeyword("USE_INTENSITY");
                     ApplyTexture(width, height, data, encoding, size);
@@ -266,12 +274,16 @@ namespace Iviz.Displays
                 case "bgr8":
                 case "rgba8":
                 case "bgra8":
+                case "8SC3":
+                case "8SC4":
                     EnsureSize(width, height, TextureFormat.RGBA32);
                     break;
                 case "mono16":
+                case "16UC1":
                     EnsureSize(width, height, TextureFormat.R16);
                     break;
                 case "mono8":
+                case "8UC1":
                     EnsureSize(width, height, TextureFormat.R8);
                     break;
                 default:

@@ -2,6 +2,7 @@
 {
     public class TFPanelContents : ListenerPanelContents
     {
+        public ListenerWidget ListenerStatic { get; protected set; }
         public ToggleWidget ShowAxes { get; private set; }
         public ToggleWidget ShowFrameLabels { get; private set; }
         public SliderWidget FrameSize { get; private set; }
@@ -15,6 +16,7 @@
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("TF");
             Listener = p.AddListener();
+            ListenerStatic = p.AddListener();
             ShowAxes = p.AddToggle("Show Axes");
             ShowFrameLabels = p.AddToggle("Show Frame Names");
             FrameSize = p.AddSlider("Frame Size").SetMinValue(0.01f).SetMaxValue(0.5f);

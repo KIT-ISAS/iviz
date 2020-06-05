@@ -4,12 +4,12 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs
 {
-    [DataContract]
+    [DataContract(Name = "duration")]
     [StructLayout(LayoutKind.Sequential)]
     public readonly struct duration : IEquatable<duration>
     {
-        [DataMember] public int Secs { get; }
-        [DataMember] public int Nsecs { get; }
+        [DataMember(Name = "secs")] public int Secs { get; }
+        [DataMember(Name = "nsecs")] public int Nsecs { get; }
 
         public duration(int secs, int nsecs)
         {

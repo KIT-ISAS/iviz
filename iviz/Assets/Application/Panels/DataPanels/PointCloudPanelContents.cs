@@ -7,6 +7,8 @@ namespace Iviz.App
     public class PointCloudPanelContents : ListenerPanelContents
     {
         static readonly List<string> DefaultChannels = new List<string> { "x", "y", "z" };
+        public DataLabelWidget NumPoints { get; private set; }
+        public DataLabelWidget MinMax { get; private set; }
         public SliderWidget PointSize { get; private set; }
         public DropdownWidget Colormap { get; private set; }
         public DropdownWidget IntensityChannel { get; private set; }
@@ -16,6 +18,7 @@ namespace Iviz.App
         public ToggleWidget ForceMinMax { get; private set; }
         public NumberInputFieldWidget MinIntensity { get; private set; }
         public NumberInputFieldWidget MaxIntensity { get; private set; }
+        public ToggleWidget FlipMinMax { get; private set; }
 
 
         void Start()
@@ -23,17 +26,20 @@ namespace Iviz.App
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("PointCloud");
             Listener = p.AddListener();
+            NumPoints = p.AddDataLabel("Number of Points");
+            MinMax = p.AddDataLabel("Min/Max");
             PointSize = p.AddSlider("Point Size").SetMinValue(0.01f).SetMaxValue(0.1f);
             //p.AddToggle("Calculate Min/Max");
+            IntensityChannel = p.AddDropdown("Intensity Channel")
+                        .SetOptions(DefaultChannels);
             Colormap = p.AddDropdown("Colormap")
                         .SetOptions(Resource.Colormaps.Names)
                         .SetIndex((int)Resource.ColormapId.hsv);
-            IntensityChannel = p.AddDropdown("Intensity Channel")
-                        .SetOptions(DefaultChannels);
 
             ForceMinMax = p.AddToggle("Force Min/Max");
             MinIntensity = p.AddNumberInputField("Min");
             MaxIntensity = p.AddNumberInputField("Max");
+            FlipMinMax = p.AddToggle("Flip Min/Max");
 
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();

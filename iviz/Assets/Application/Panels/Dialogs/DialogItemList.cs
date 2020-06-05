@@ -198,7 +198,7 @@ namespace Iviz.App
             rectTransform.sizeDelta =
                 (items.Count == 0) ?
                 new Vector2(0, 2 * yOffset) :
-                new Vector2(0, 3 * yOffset + (items.Count  + 1) * items[0].ButtonHeight);
+                new Vector2(0, 2 * yOffset + items.Count * (items[0].ButtonHeight + yOffset));
 
             emptyText.gameObject.SetActive(items.Count == 0);
         }

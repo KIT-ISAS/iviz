@@ -8,70 +8,6 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public readonly struct PointWithColor
-    {
-        readonly float4 f;
-
-        public float X => f.x;
-        public float Y => f.y;
-        public float Z => f.z;
-        public Vector3 Position => new Vector3(f.x, f.y, f.z);
-        public Color32 Color
-        {
-            get
-            {
-                unsafe
-                {
-                    float w = f.w;
-                    return *(Color32*)&w;
-                }
-            }
-
-        }
-        public float Intensity => f.w;
-
-        public PointWithColor(Vector3 position, Color32 color)
-        {
-            f.x = position.x;
-            f.y = position.y;
-            f.z = position.z;
-            unsafe
-            {
-                f.w = *(float*)&color;
-            }
-        }
-
-        public PointWithColor(Vector3 position, float intensity)
-        {
-            f.x = position.x;
-            f.y = position.y;
-            f.z = position.z;
-            f.w = intensity;
-        }
-
-        public PointWithColor(float x, float y, float z, float w)
-        {
-            f.x = x;
-            f.y = y;
-            f.z = z;
-            f.w = w;
-        }
-
-        public PointWithColor(float4 f)
-        {
-            this.f = f;
-        }
-
-        public bool HasNaN => math.any(math.isnan(f));
-
-        public static implicit operator float4(PointWithColor c) => c.f;
-
-        public override string ToString()
-        {
-            return $"[x={X} y={Y} z={Z} i={Intensity} c={Color}]";
-        }
-    };
-
     public class PointListResource : MarkerResource
     {
         Material material;
@@ -137,9 +73,28 @@ namespace Iviz.Displays
                 }
                 else
                 {
-                    material.SetFloat(PropIntensityCoeff, 1 / intensitySpan);
-                    material.SetFloat(PropIntensityAdd, -intensityBounds.x / intensitySpan);
+                    if (FlipMinMax)
+                    {
+                        material.SetFloat(PropIntensityCoeff, 1 / intensitySpan);
+                        material.SetFloat(PropIntensityAdd, -intensityBounds.x / intensitySpan);
+                    }
+                    else
+                    {
+                        material.SetFloat(PropIntensityCoeff, -1 / intensitySpan);
+                        material.SetFloat(PropIntensityAdd, intensityBounds.y / intensitySpan);
+                    }
                 }
+            }
+        }
+
+        bool flipMinMax;
+        public bool FlipMinMax
+        {
+            get => flipMinMax;
+            set
+            {
+                flipMinMax = value;
+                IntensityBounds = IntensityBounds;
             }
         }
 
@@ -233,7 +188,7 @@ namespace Iviz.Displays
         void UpdateBuffer()
         {
             pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
-            MinMaxJob.CalculateBounds(pointBuffer, out Bounds bounds, out Vector2 span);
+            MinMaxJob.CalculateBounds(pointBuffer, Size, out Bounds bounds, out Vector2 span);
             Collider.center = bounds.center;
             Collider.size = bounds.size;
             IntensityBounds = span;
@@ -249,6 +204,19 @@ namespace Iviz.Displays
                 {
                     scale = value;
                     UpdateQuadComputeBuffer();
+                }
+            }
+        }
+
+        public override bool Visible
+        {
+            get => base.Visible;
+            set
+            {
+                base.Visible = value;
+                if (value)
+                {
+                    OnApplicationFocus(true);
                 }
             }
         }

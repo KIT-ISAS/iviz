@@ -110,7 +110,11 @@ namespace Iviz.App.Listeners
             }
 
             node.SetParent(msg.Header.FrameId);
-            grid.transform.SetLocalPose(msg.Info.Origin.Ros2Unity());
+            
+            Pose origin = msg.Info.Origin.Ros2Unity();
+            origin.position += new Vector3(grid.NumCellsX, grid.NumCellsY, 0).Ros2Unity() * (grid.CellSize / 2f);
+
+            grid.transform.SetLocalPose(origin);
             grid.NumCellsX = (int)msg.Info.Width;
             grid.NumCellsY = (int)msg.Info.Height;
             grid.CellSize = msg.Info.Resolution;

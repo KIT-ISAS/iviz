@@ -191,7 +191,7 @@ namespace Iviz.RoslibSharp
                 Listener = new XmlRpc.NodeServer(this);
                 Listener.Start();
             }
-            catch (HttpListenerException e)
+            catch (SocketException e)
             {
                 Listener.Stop();
                 throw new ConnectionException($"Failed to bind to local URI '{callerUri}'", e);
@@ -228,13 +228,16 @@ namespace Iviz.RoslibSharp
                 {
                     if (response.Pid != Process.GetCurrentProcess().Id)
                     {
-                        throw new UnreachableUriException($"My uri {CallerUri} appears to belong to someone else!");
+                        Listener.Stop();
+                        throw new UnreachableUriException($"My uri '{CallerUri}' appears to belong to someone else!");
                     }
                 }
             }
-            catch (WebException)
+            catch (Exception e) when
+            (e is SocketException || e is TimeoutException || e is AggregateException)
             {
-                throw new UnreachableUriException($"My uri {CallerUri} does not appear to be reachable!");
+                Listener.Stop();
+                throw new UnreachableUriException($"My uri '{CallerUri}' does not appear to be reachable!");
             }
 
         }

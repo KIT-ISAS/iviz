@@ -15,12 +15,15 @@ namespace iviz_test
         static void Main()
         {
             RosClient client = new RosClient(
-                "http://192.168.0.73:11311",
+                //"http://192.168.0.73:11311",
+                "http://141.3.59.5:11311",
                 null,
-                "http://192.168.0.157:7614"
+                //"http://192.168.0.157:7614"
+                "http://141.3.59.19:7614"
                 );
 
             Console.WriteLine(client.GetSystemState());
+            client.Subscribe<TFMessage>("/tf", Callback);
             Console.In.Read();
         }
 
