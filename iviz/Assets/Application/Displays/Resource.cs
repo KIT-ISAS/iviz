@@ -48,6 +48,8 @@ namespace Iviz.Resources
             { LaserScan.RosMessageType, Module.LaserScan },
             { PoseStamped.RosMessageType, Module.Odometry },
             { PointStamped.RosMessageType, Module.Odometry },
+            { WrenchStamped.RosMessageType, Module.Odometry },
+            { TwistStamped.RosMessageType, Module.Odometry },
             { OccupancyGrid.RosMessageType, Module.OccupancyGrid },
         };
 
