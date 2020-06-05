@@ -96,6 +96,24 @@ namespace Iviz.App.Listeners
 
             switch (msg.Type())
             {
+                case MarkerType.ARROW:
+                    ArrowResource arrowMarker = (ArrowResource)resource;
+                    arrowMarker.Color = msg.Color.Sanitize().ToUnityColor();
+                    if (msg.Points.Length == 2)
+                    {
+                        arrowMarker.Set(msg.Points[0].Ros2Unity(), msg.Points[1].Ros2Unity());
+                        Vector3 scale = new Vector3(1, (float)msg.Scale.X, (float)msg.Scale.X);
+                        transform.localScale = scale.Ros2Unity().Abs();
+                    }
+                    else if (msg.Points.Length == 0)
+                    {
+                        transform.localScale = msg.Scale.Ros2Unity().Abs();
+                    }
+                    else
+                    {
+                        Logger.Debug("MarkerObject: Cannot understand marker message.");
+                    }
+                    break;
                 case MarkerType.CUBE:
                 case MarkerType.SPHERE:
                 case MarkerType.CYLINDER:

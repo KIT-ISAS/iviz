@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public sealed class MeshMarkerResource : MarkerResource
+    public class MeshMarkerResource : MarkerResource
     {
         MeshRenderer mainRenderer;
         protected override void Awake()

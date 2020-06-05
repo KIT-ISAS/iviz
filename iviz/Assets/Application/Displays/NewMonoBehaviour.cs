@@ -14,6 +14,7 @@ namespace Iviz.App
 
         private void Start()
         {
+            /*
             resource = gameObject.AddComponent<OccupancyGridResource>();
             resource.NumCellsX = 1000;
             resource.NumCellsY = 1000;
@@ -26,6 +27,11 @@ namespace Iviz.App
             }
 
             resource.SetOccupancy(bytes);
+            */
+            /*
+            ArrowResource resource = GetComponent<ArrowResource>();
+            resource.Set(new Vector3(0, 3, 0), new Vector3(-2, 2, 2));
+            */
         }
     }
 }
