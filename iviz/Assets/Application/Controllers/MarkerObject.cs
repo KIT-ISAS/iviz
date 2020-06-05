@@ -162,13 +162,6 @@ namespace Iviz.App.Listeners
                             }
                         }
                         meshList.PointsWithColor = points;
-                        /*
-                        meshList.SetSize(msg.Points.Length);
-                        meshList.Scale = msg.Scale.Ros2Unity().Abs();
-                        meshList.Color = msg.Color.Sanitize().ToUnityColor();
-                        meshList.Colors = (msg.Colors.Length == 0) ? null : msg.Colors.Select(x => x.ToUnityColor32());
-                        meshList.Points = msg.Points.Select(x => x.Ros2Unity());
-                        */
                         break;
                     }
                 case MarkerType.LINE_LIST:

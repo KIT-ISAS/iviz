@@ -1,4 +1,5 @@
 ﻿using Iviz.App.Listeners;
+using Iviz.Msgs.GeometryMsgs;
 using Iviz.Resources;
 using UnityEngine;
 
@@ -40,12 +41,14 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
-            panel.TrailEnabled.Value = listener.ShowTrail;
+            panel.ShowTrail.Value = listener.ShowTrail;
+            panel.ShowAxis.Value = listener.ShowAxis;
+            panel.ShowVector.Value = listener.ShowVector;
             panel.Color.Value = listener.Color;
             panel.TrailTime.Value = listener.TrailTime;
             panel.Scale.Value = listener.Scale;
 
-            panel.TrailEnabled.ValueChanged += f =>
+            panel.ShowTrail.ValueChanged += f =>
             {
                 listener.ShowTrail = f;
             };
@@ -61,6 +64,30 @@ namespace Iviz.App
             {
                 listener.Scale = f;
             };
+            panel.ShowAxis.ValueChanged += f =>
+            {
+                listener.ShowAxis = f;
+            };
+            panel.ShowVector.ValueChanged += f =>
+            {
+                listener.ShowVector = f;
+            };
+
+            switch(listener.Config.Type)
+            {
+                case PoseStamped.RosMessageType:
+                    panel.ShowVector.Interactable = false;
+                    break;
+                case PointStamped.RosMessageType:
+                    panel.ShowVector.Interactable = false;
+                    break;
+                case WrenchStamped.RosMessageType:
+                    panel.ShowVector.Interactable = true;
+                    break;
+                case TwistStamped.RosMessageType:
+                    panel.ShowVector.Interactable = true;
+                    break;
+            }
 
             panel.Listener.RosListener = listener.Listener;
             panel.CloseButton.Clicked += () =>

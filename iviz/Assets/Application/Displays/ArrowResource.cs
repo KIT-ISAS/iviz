@@ -13,7 +13,7 @@ namespace Iviz.Displays
             float scale = diff.magnitude;
 
             transform.localScale = scale * Vector3.one;
-            transform.position = A;
+            transform.localPosition = A;
 
             if (scale == 0)
             {
@@ -36,7 +36,7 @@ namespace Iviz.Displays
             M.SetColumn(1, Y);
             M.SetColumn(2, Z);
 
-            transform.rotation = M.rotation;
+            transform.localRotation = M.rotation;
         }
     }
 }

@@ -19,6 +19,8 @@ namespace Iviz.App.Listeners
         [DataMember] public string Type { get; set; } = "";
         [DataMember] public float Scale { get; set; } = 1.0f;
         [DataMember] public bool ShowTrail { get; set; } = true;
+        [DataMember] public bool ShowAxis { get; set; } = true;
+        [DataMember] public bool ShowVector { get; set; } = true;
         [DataMember] public SerializableColor Color { get; set; } = UnityEngine.Color.red;
         [DataMember] public float TrailTime { get; set; } = 2.0f;
     }
@@ -30,6 +32,7 @@ namespace Iviz.App.Listeners
         AxisResource axis;
         TrailResource trail;
         MeshMarkerResource sphere;
+        ArrowResource arrow;
 
         public override DisplayData DisplayData
         {
@@ -48,6 +51,8 @@ namespace Iviz.App.Listeners
                 Visible = value.Visible;
                 Scale = value.Scale;
                 ShowTrail = value.ShowTrail;
+                ShowAxis = value.ShowAxis;
+                ShowVector = value.ShowVector;
                 Color = value.Color;
                 TrailTime = value.TrailTime;
             }
@@ -59,8 +64,19 @@ namespace Iviz.App.Listeners
             set
             {
                 config.Visible = value;
-                axis.Visible = value;
+                if (axis != null)
+                {
+                    axis.Visible = value && ShowAxis;
+                }
+                if (sphere != null)
+                {
+                    sphere.Visible = value && ShowAxis;
+                }
                 trail.Visible = value && ShowTrail;
+                if (arrow != null)
+                {
+                    arrow.Visible = value && ShowVector;
+                }
             }
         }
 
@@ -74,6 +90,36 @@ namespace Iviz.App.Listeners
             }
         }
 
+        public bool ShowAxis
+        {
+            get => config.ShowAxis;
+            set
+            {
+                config.ShowAxis = value;
+                if (axis != null)
+                {
+                    axis.Visible = value && Visible;
+                }
+                if (sphere != null)
+                {
+                    sphere.Visible = value && Visible;
+                }
+            }
+        }
+
+        public bool ShowVector
+        {
+            get => config.ShowVector;
+            set
+            {
+                config.ShowVector = value;
+                if (arrow != null)
+                {
+                    arrow.Visible = value && Visible;
+                }
+            }
+        }
+
         public Color Color
         {
             get => config.Color;
@@ -84,6 +130,10 @@ namespace Iviz.App.Listeners
                 if (sphere != null)
                 {
                     sphere.Color = value;
+                }
+                if (arrow != null)
+                {
+                    arrow.Color = value;
                 }
             }
         }
@@ -123,26 +173,41 @@ namespace Iviz.App.Listeners
         public override void StartListening()
         {
             base.StartListening();
-            switch(config.Type)
+
+            name = "Odometry:" + config.Topic;
+            displayNode.SetName($"[{config.Topic}]");
+
+            switch (config.Type)
             {
                 case PoseStamped.RosMessageType:
                     Listener = new RosListener<PoseStamped>(config.Topic, Handler);
-                    name = "Odometry:" + config.Topic;
-                    displayNode.SetName($"[{config.Topic}]");
-
                     axis = ResourcePool.GetOrCreate<AxisResource>(Resource.Markers.Axis);
                     displayNode.Target = axis;
                     break;
 
                 case PointStamped.RosMessageType:
                     Listener = new RosListener<PointStamped>(config.Topic, Handler);
-                    name = "Odometry:" + config.Topic;
-                    displayNode.SetName($"[{config.Topic}]");
 
                     sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Markers.Sphere);
                     sphere.transform.localScale = 0.125f * UnityEngine.Vector3.one;
                     sphere.Color = Color;
                     displayNode.Target = sphere;
+                    break;
+
+                case WrenchStamped.RosMessageType:
+                    Listener = new RosListener<WrenchStamped>(config.Topic, Handler);
+                    axis = ResourcePool.GetOrCreate<AxisResource>(Resource.Markers.Axis);
+                    displayNode.Target = axis;
+                    arrow = ResourcePool.GetOrCreate<ArrowResource>(Resource.Markers.Arrow);
+                    arrow.Parent = displayNode.transform.parent;
+                    break;
+
+                case TwistStamped.RosMessageType:
+                    Listener = new RosListener<TwistStamped>(config.Topic, Handler);
+                    axis = ResourcePool.GetOrCreate<AxisResource>(Resource.Markers.Axis);
+                    displayNode.Target = axis;
+                    arrow = ResourcePool.GetOrCreate<ArrowResource>(Resource.Markers.Arrow);
+                    arrow.Parent = displayNode.transform.parent;
                     break;
             }
         }
@@ -157,6 +222,24 @@ namespace Iviz.App.Listeners
         {
             displayNode.SetParent(msg.Header.FrameId);
             displayNode.transform.localPosition = msg.Point.Ros2Unity();
+        }
+
+        void Handler(WrenchStamped msg)
+        {
+            displayNode.SetParent(msg.Header.FrameId);
+
+            UnityEngine.Vector3 dir = msg.Wrench.Force.Ros2Unity();
+            arrow.Set(UnityEngine.Vector3.zero, dir);
+            trail.DataSource = () => displayNode.transform.TransformPoint(dir);
+        }
+
+        void Handler(TwistStamped msg)
+        {
+            displayNode.SetParent(msg.Header.FrameId);
+
+            UnityEngine.Vector3 dir = msg.Twist.Linear.Ros2Unity();
+            arrow.Set(UnityEngine.Vector3.zero, dir);
+            trail.DataSource = () => displayNode.transform.TransformPoint(dir);
         }
     }
 }
