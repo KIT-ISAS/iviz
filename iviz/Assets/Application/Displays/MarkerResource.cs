@@ -30,7 +30,7 @@ namespace Iviz.Displays
         public Vector3 WorldScale => transform.lossyScale;
         public Pose WorldPose => transform.AsPose();
 
-        public int Layer
+        public virtual int Layer
         {
             get => gameObject.layer;
             set => gameObject.layer = value;
@@ -43,6 +43,7 @@ namespace Iviz.Displays
 
         public virtual void Stop()
         {
+            Layer = 0;
         }
     }
 }

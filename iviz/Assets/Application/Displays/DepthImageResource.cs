@@ -9,16 +9,9 @@ using Iviz.Resources;
 
 namespace Iviz.App.Displays
 {
-
-    public class DepthImageResource : MonoBehaviour, IDisplay
+    public class DepthImageResource : MarkerResource
     {
         Material material;
-
-        public virtual bool Visible
-        {
-            get => gameObject.activeSelf;
-            set => gameObject.SetActive(this);
-        }
 
         float pointSize = 1;
         public float PointSize
@@ -94,27 +87,7 @@ namespace Iviz.App.Displays
             }
         }
 
-        public string Name => "DepthImageProjector";
-
-
-        public Bounds WorldBounds { get; private set; }
-        public Bounds Bounds { get; private set; }
-        public bool ColliderEnabled { get => false; set { } }
-
-        public Transform Parent
-        {
-            get => transform.parent;
-            set => transform.parent = value;
-        }
-
-        public Vector3 WorldScale => transform.lossyScale;
-        public Pose WorldPose => transform.AsPose();
-
-        public int Layer
-        {
-            get => gameObject.layer;
-            set => gameObject.layer = value;
-        }
+        public override string Name => "DepthImageProjector";
 
         int width, height;
         Vector2[] uvs = new Vector2[0];
@@ -122,12 +95,10 @@ namespace Iviz.App.Displays
         ComputeBuffer pointComputeBuffer;
         ComputeBuffer quadComputeBuffer;
 
-        void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             material = Resource.Materials.DepthImageProjector.Instantiate();
-
-            Debug.Log("Supports Compute Shaders: " + SystemInfo.supportsComputeShaders);
-            Bounds = new Bounds(Vector3.zero, Vector3.one * 20);
         }
 
         static readonly int PropQuad = Shader.PropertyToID("_Quad");
@@ -235,6 +206,13 @@ namespace Iviz.App.Displays
 
             material.SetFloat(PropPointSize, posCoeff_X / texture.width * PointSize);
             material.SetVector(PropPosST, new Vector4(posCoeff_X, posCoeff_Y, posAdd_X, posAdd_Y));
+
+            const float maxDepth = 5.0f;
+            Vector3 size = new Vector3(posCoeff_X, 1, posCoeff_Y) * maxDepth;
+            Vector3 center = new Vector3(0, maxDepth / 2, 0);
+
+            Collider.center = center;
+            Collider.size = size;
         }
 
 
@@ -250,12 +228,13 @@ namespace Iviz.App.Displays
             material.SetMatrix(PropLocalToWorld, transform.localToWorldMatrix);
             material.SetMatrix(PropWorldToLocal, transform.worldToLocalMatrix);
 
-            WorldBounds = UnityUtils.TransformBound(Bounds, transform);
             Graphics.DrawProcedural(material, WorldBounds, MeshTopology.Quads, 4, uvs.Length);
         }
 
-        public void Stop()
+        public override void Stop()
         {
+            base.Stop();
+
             if (colorImage != null)
             {
                 colorImage.TextureChanged -= UpdateColorTexture;
@@ -324,7 +303,6 @@ namespace Iviz.App.Displays
             UpdateQuadComputeBuffer();
             ColorImage = ColorImage;
             DepthImage = DepthImage;
-            Debug.Log("DepthImageProjector: Rebuilding compute buffers");
         }
     }
 }

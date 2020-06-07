@@ -8,10 +8,8 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public sealed class MeshListResource : MarkerResource
+    public sealed class MeshListResource : MarkerResourceWithColormap
     {
-        Material material;
-
         NativeArray<float4> pointBuffer = new NativeArray<float4>();
         ComputeBuffer pointComputeBuffer;
 
@@ -33,38 +31,6 @@ namespace Iviz.Displays
 
         public Color Color { get; set; } = Color.white;
 
-        /*
-        void SetCapacity(int reqDataSize)
-        {
-            if (pointBuffer == null || pointBuffer.Length < reqDataSize)
-            {
-                pointBuffer = new PointWithColor[reqDataSize];
-
-                if (pointComputeBuffer != null)
-                {
-                    pointComputeBuffer.Release();
-                }
-                pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithColor>());
-                material.SetBuffer(PropPoints, pointComputeBuffer);
-            }
-        }
-        */
-
-        bool useIntensityTexture;
-        public bool UseIntensityTexture
-        {
-            get => useIntensityTexture;
-            set
-            {
-                if (useIntensityTexture == value)
-                {
-                    return;
-                }
-                useIntensityTexture = value;
-                UpdateMaterialKeywords();
-            }
-        }
-
         bool perVertexScale;
         public bool UsePerVertexScale
         {
@@ -80,7 +46,7 @@ namespace Iviz.Displays
             }
         }
 
-        void UpdateMaterialKeywords()
+        protected override void UpdateMaterialKeywords()
         {
             if (UsePerVertexScale && UseIntensityTexture)
             {
@@ -96,65 +62,6 @@ namespace Iviz.Displays
             {
                 material.DisableKeyword("USE_TEXTURE_SCALE");
                 material.DisableKeyword("USE_TEXTURE");
-            }
-        }
-
-        static readonly int PropIntensity = Shader.PropertyToID("_IntensityTexture");
-
-        Resource.ColormapId colormap;
-        public Resource.ColormapId Colormap
-        {
-            get => colormap;
-            set
-            {
-                colormap = value;
-
-                Texture2D texture = Resource.Colormaps.Textures[Colormap];
-                material.SetTexture(PropIntensity, texture);
-            }
-        }
-
-        static readonly int PropIntensityCoeff = Shader.PropertyToID("_IntensityCoeff");
-        static readonly int PropIntensityAdd = Shader.PropertyToID("_IntensityAdd");
-
-        Vector2 intensityBounds;
-        public Vector2 IntensityBounds
-        {
-            get => intensityBounds;
-            set
-            {
-                intensityBounds = value;
-                float intensitySpan = intensityBounds.y - intensityBounds.x;
-
-                if (intensitySpan == 0)
-                {
-                    material.SetFloat(PropIntensityCoeff, 1);
-                    material.SetFloat(PropIntensityAdd, 0);
-                }
-                else
-                {
-                    if (FlipMinMax)
-                    {
-                        material.SetFloat(PropIntensityCoeff, 1 / intensitySpan);
-                        material.SetFloat(PropIntensityAdd, -intensityBounds.x / intensitySpan);
-                    }
-                    else
-                    {
-                        material.SetFloat(PropIntensityCoeff, -1 / intensitySpan);
-                        material.SetFloat(PropIntensityAdd, intensityBounds.y / intensitySpan);
-                    }
-                }
-            }
-        }
-
-        bool flipMinMax;
-        public bool FlipMinMax
-        {
-            get => flipMinMax;
-            set
-            {
-                flipMinMax = value;
-                IntensityBounds = IntensityBounds;
             }
         }
 
@@ -193,8 +100,6 @@ namespace Iviz.Displays
             UpdateBuffer();
         }
 
-        static readonly int PropPoints = Shader.PropertyToID("_Points");
-
         int size_;
         public int Size
         {
@@ -207,25 +112,29 @@ namespace Iviz.Displays
                 }
                 size_ = value;
 
+                Reserve(size_ * 11 / 10);
+
                 argsBuffer[1] = (uint)size_;
                 argsComputeBuffer.SetData(argsBuffer);
+            }
+        }
 
-                int reqDataSize = size_ * 11 / 10;
-                if (pointBuffer.Length < reqDataSize)
+        public void Reserve(int reqDataSize)
+        {
+            if (pointBuffer == null || pointBuffer.Length < reqDataSize)
+            {
+                if (pointBuffer.Length != 0)
                 {
-                    if (pointBuffer.Length != 0)
-                    {
-                        pointBuffer.Dispose();
-                    }
-                    pointBuffer = new NativeArray<float4>(reqDataSize, Allocator.Persistent);
-
-                    if (pointComputeBuffer != null)
-                    {
-                        pointComputeBuffer.Release();
-                    }
-                    pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithColor>());
-                    material.SetBuffer(PropPoints, pointComputeBuffer);
+                    pointBuffer.Dispose();
                 }
+                pointBuffer = new NativeArray<float4>(reqDataSize, Allocator.Persistent);
+
+                if (pointComputeBuffer != null)
+                {
+                    pointComputeBuffer.Release();
+                }
+                pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithColor>());
+                material.SetBuffer(PropPoints, pointComputeBuffer);
             }
         }
 
@@ -253,9 +162,10 @@ namespace Iviz.Displays
         void UpdateBuffer()
         {
             pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
-            MinMaxJob.CalculateBounds(pointBuffer, Size, out Bounds bounds, out Vector2 _);
+            MinMaxJob.CalculateBounds(pointBuffer, Size, out Bounds bounds, out Vector2 span);
             Collider.center = bounds.center;
             Collider.size = bounds.size + Scale;
+            IntensityBounds = span;
         }
 
 
@@ -281,20 +191,7 @@ namespace Iviz.Displays
             set
             {
                 offset = value;
-                material.SetVector(PropLocalOffset, new Vector4(offset.x, offset.y, offset.z, 0));
-            }
-        }
-
-        public override bool Visible
-        {
-            get => base.Visible;
-            set
-            {
-                base.Visible = value;
-                if (value)
-                {
-                    OnApplicationFocus(true);
-                }
+                material.SetVector(PropLocalOffset, offset);
             }
         }
 
@@ -306,6 +203,8 @@ namespace Iviz.Displays
 
             material = Resource.Materials.MeshList.Instantiate();
             material.enableInstancing = true;
+
+            UseIntensityTexture = true;
             UpdateMaterialKeywords();
 
             Mesh = Resource.Markers.SphereSimple.Object.GetComponent<MeshFilter>().sharedMesh;
@@ -318,27 +217,22 @@ namespace Iviz.Displays
             argsComputeBuffer.SetData(argsBuffer);
         }
 
-        static readonly int PropLocalToWorld = Shader.PropertyToID("_LocalToWorld");
-        static readonly int PropBoundaryCenter = Shader.PropertyToID("_BoundaryCenter");
-
         void Update()
         {
             if (Size == 0)
             {
                 return;
             }
-            material.SetMatrix(PropLocalToWorld, transform.localToWorldMatrix);
+            UpdateTransform();
             Bounds worldBounds = Collider.bounds;
             material.SetVector(PropBoundaryCenter, worldBounds.center);
             Graphics.DrawMeshInstancedIndirect(mesh, 0, material, worldBounds, argsComputeBuffer);
         }
 
-        void OnDestroy()
+        protected override void OnDestroy()
         {
-            if (material != null)
-            {
-                Destroy(material);
-            }
+            base.OnDestroy();
+
             if (pointComputeBuffer != null)
             {
                 pointComputeBuffer.Release();
@@ -353,15 +247,8 @@ namespace Iviz.Displays
             }
         }
 
-
-
-        void OnApplicationFocus(bool hasFocus)
+        protected override void Rebuild()
         {
-            if (!hasFocus)
-            {
-                return;
-            }
-            // unity bug causes all compute buffers to disappear when focus is lost
             if (pointComputeBuffer != null)
             {
                 pointComputeBuffer.Release();

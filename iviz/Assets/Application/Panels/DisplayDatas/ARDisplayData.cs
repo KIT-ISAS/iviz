@@ -42,6 +42,13 @@ namespace Iviz.App
             panel.WorldScale.Value = display.WorldScale;
             panel.Origin.Value = display.Origin;
 
+            panel.SearchMarker.Value = display.SearchMarker;
+            panel.MarkerSize.Value = display.MarkerSize;
+            panel.MarkerHorizontal.Value = display.MarkerHorizontal;
+            panel.MarkerAngle.Value = display.MarkerAngle;
+            panel.MarkerFrame.Value = display.MarkerFrame;
+            panel.MarkerOffset.Value = display.MarkerOffset;
+
             panel.WorldScale.ValueChanged += f =>
             {
                 display.WorldScale = f;
@@ -50,6 +57,31 @@ namespace Iviz.App
             {
                 display.Origin = f;
             };
+            panel.SearchMarker.ValueChanged += f =>
+            {
+                display.SearchMarker = f;
+            };
+            panel.MarkerSize.ValueChanged += f =>
+            {
+                display.MarkerSize = f;
+            };
+            panel.MarkerHorizontal.ValueChanged += f =>
+            {
+                display.MarkerHorizontal = f;
+            };
+            panel.MarkerAngle.ValueChanged += f =>
+            {
+                display.MarkerAngle = (int)f;
+            };
+            panel.MarkerFrame.ValueChanged += f =>
+            {
+                display.MarkerFrame = f;
+            };
+            panel.MarkerOffset.ValueChanged += f =>
+            {
+                display.MarkerOffset = f;
+            };
+
             panel.CloseButton.Clicked += () =>
             {
                 DataPanelManager.HideSelectedPanel();

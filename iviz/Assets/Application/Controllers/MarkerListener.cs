@@ -76,6 +76,16 @@ namespace Iviz.App.Listeners
             switch (msg.Action)
             {
                 case Marker.ADD:
+                    if (!msg.Pose.ValidateNaN())
+                    {
+                        Logger.Debug("MarkerListener: NaN in pose!");
+                        return;
+                    }
+                    if (!msg.Scale.ValidateNaN())
+                    {
+                        Logger.Debug("MarkerListener: NaN in scale!");
+                        return;
+                    }
                     if (!markers.TryGetValue(id, out MarkerObject markerToAdd))
                     {
                         markerToAdd = CreateMarkerObject();

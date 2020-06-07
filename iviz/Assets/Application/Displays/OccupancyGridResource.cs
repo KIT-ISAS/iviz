@@ -8,7 +8,6 @@ using System.Linq;
 
 namespace Iviz.Displays
 {
-
     public sealed class OccupancyGridResource : MonoBehaviour, IDisplay, IRecyclable
     {
         const int MaxSize = 10000;
@@ -226,6 +225,7 @@ namespace Iviz.Displays
                 }
             }
             resource.PointsWithColor = pointBuffer;
+            resource.IntensityBounds = new Vector2(0, 1);
         }
     }
 

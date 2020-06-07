@@ -133,6 +133,11 @@ namespace Iviz.App.Listeners
 
             for (int i = 0; i < msg.Name.Length; i++)
             {
+                if (double.IsNaN(msg.Position[i]))
+                {
+                    Debug.Log($"JointStateListener: Joint {i} is NaN!");
+                    continue;
+                }
                 string msgJoint = msg.Name[i];
                 if (MsgTrimFromEnd != 0 && msgJoint.Length >= MsgTrimFromEnd) 
                 {

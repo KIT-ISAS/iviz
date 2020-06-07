@@ -86,5 +86,13 @@ namespace Iviz.Displays
             ColorY = Color.green;
             ColorZ = Color.blue;
         }
+
+        public override void Stop()
+        {
+            base.Stop();
+            ColorX = Color.red;
+            ColorY = Color.green;
+            ColorZ = Color.blue;
+        }
     }
 }

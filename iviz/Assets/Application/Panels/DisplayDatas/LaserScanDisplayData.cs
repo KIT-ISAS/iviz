@@ -44,8 +44,8 @@ namespace Iviz.App
 
             panel.NumPoints.Label = $"Number of Points: {listener.Size}";
 
-            string minIntensityStr = listener.LastIntensityBounds.x.ToString("#,0.##", UnityUtils.Culture);
-            string maxIntensityStr = listener.LastIntensityBounds.y.ToString("#,0.##", UnityUtils.Culture);
+            string minIntensityStr = listener.MeasuredIntensityBounds.x.ToString("#,0.##", UnityUtils.Culture);
+            string maxIntensityStr = listener.MeasuredIntensityBounds.y.ToString("#,0.##", UnityUtils.Culture);
             panel.MinMax.Label = $"Min Intensity: {minIntensityStr} Max: {maxIntensityStr}";
 
             panel.Colormap.Index = (int)listener.Colormap;
@@ -114,8 +114,8 @@ namespace Iviz.App
             base.UpdatePanel();
             panel.NumPoints.Label = $"Number of Points: {listener.Size}";
 
-            string minIntensityStr = listener.LastIntensityBounds.x.ToString("#,0.##", UnityUtils.Culture);
-            string maxIntensityStr = listener.LastIntensityBounds.y.ToString("#,0.##", UnityUtils.Culture);
+            string minIntensityStr = listener.MeasuredIntensityBounds.x.ToString("#,0.##", UnityUtils.Culture);
+            string maxIntensityStr = listener.MeasuredIntensityBounds.y.ToString("#,0.##", UnityUtils.Culture);
             panel.MinMax.Label = $"Min Intensity: {minIntensityStr} Max: {maxIntensityStr}";
         }
 

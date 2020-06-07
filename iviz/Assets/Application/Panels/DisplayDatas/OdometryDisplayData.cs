@@ -47,6 +47,7 @@ namespace Iviz.App
             panel.Color.Value = listener.Color;
             panel.TrailTime.Value = listener.TrailTime;
             panel.Scale.Value = listener.Scale;
+            panel.VectorScale.Value = listener.VectorScale;
 
             panel.ShowTrail.ValueChanged += f =>
             {
@@ -72,8 +73,12 @@ namespace Iviz.App
             {
                 listener.ShowVector = f;
             };
+            panel.VectorScale.ValueChanged += f =>
+            {
+                listener.VectorScale = f;
+            };
 
-            switch(listener.Config.Type)
+            switch (listener.Config.Type)
             {
                 case PoseStamped.RosMessageType:
                     panel.ShowVector.Interactable = false;

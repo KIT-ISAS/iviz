@@ -175,36 +175,25 @@ namespace Iviz.App.Listeners
             ListenerStatic = new RosListener<tfMessage_v2>(DefaultTopicStatic, SubscriptionHandlerStatic);
         }
 
-        void TopicsUpdated()
-        {
-            /*
-            if (ConnectionManager.Topics.TryGetValue("/tf", out string messageType))
-            {
-                if (messageType == tfMessage.MessageType)
-                {
-                    Listener = new RosListener<tfMessage>(Topic, SubscriptionHandler_v1);
-                    ConnectionManager.Instance.TopicsUpdated -= TopicsUpdated;
-                }
-                else if (messageType == tfMessage_v2.MessageType)
-                {
-                    Listener = new RosListener<tfMessage_v2>(Topic, SubscriptionHandler_v2);
-                    ConnectionManager.Instance.TopicsUpdated -= TopicsUpdated;
-                }
-            }
-            */
-        }
-
-        void ProcessMessages(TransformStamped[] transforms, bool forceKeep)
+        void ProcessMessages(TransformStamped[] transforms, bool isStatic)
         {
             foreach (TransformStamped t in transforms)
             {
+                if (!t.Transform.ValidateNaN())
+                {
+                    continue;
+                }
+                if (t.Header.Stamp.Nsecs == 0 && t.Header.Stamp.Secs == 0)
+                {
+                    continue;
+                }
                 string childId = t.ChildFrameId;
                 if (childId.Length != 0 && childId[0] == '/')
                 {
                     childId = childId.Substring(1);
                 }
                 TFFrame child;
-                if (forceKeep)
+                if (isStatic)
                 {
                     child = GetOrCreateFrame(childId, staticListener);
                 }
@@ -221,14 +210,15 @@ namespace Iviz.App.Listeners
                 {
                     parentId = parentId.Substring(1);
                 }
+                DateTime timestamp = t.Header.Stamp.ToDateTime();
                 TFFrame parent = string.IsNullOrEmpty(parentId) ?
                     null :
                     GetOrCreateFrame(parentId, null);
-                if (!child.SetParent(parent))
+
+                if (child.SetParent(timestamp, parent))
                 {
-                    continue;
+                    child.SetPose(timestamp, t.Transform.Ros2Unity());
                 }
-                child.Pose = t.Transform.Ros2Unity();
             }
         }
 

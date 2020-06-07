@@ -32,7 +32,7 @@ namespace Iviz.App.Listeners
             transform.SetLocalPose(msg.Pose.Ros2Unity());
             transform.localScale = msg.Scale * Vector3.one;
 
-            SetParent(msg.Header.FrameId);
+            AttachTo(msg.Header.FrameId);
 
             controlsToDelete.Clear();
             controls.Keys.ForEach(x => controlsToDelete.Add(x));

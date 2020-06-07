@@ -163,7 +163,7 @@ namespace Iviz.App.Listeners
 
         void HandlerCompressed(CompressedImage msg)
         {
-            Node.SetParent(msg.Header.FrameId);
+            Node.AttachTo(msg.Header.FrameId);
 
             if (msg.Format != "png")
             {
@@ -177,7 +177,7 @@ namespace Iviz.App.Listeners
 
         void Handler(Image msg)
         {
-            Node.SetParent(msg.Header.FrameId);
+            Node.AttachTo(msg.Header.FrameId);
 
             int width = (int)msg.Width;
             int height = (int)msg.Height;

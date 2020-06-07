@@ -15,6 +15,10 @@ namespace Iviz.App
 
         public static GameObject GetOrCreate(Resource.Info<GameObject> resource, Transform parent = null, bool enable = true)
         {
+            if (Instance == null)
+            {
+                return resource.Instantiate();
+            }
             return Instance.GetImpl(resource, parent, enable);
         }
 
@@ -102,7 +106,7 @@ namespace Iviz.App
                 return gameObject;
             }
             return Instantiate(resource.Object, parent);
-                //gameObject.transform.SetParentLocal(parent);
+            //gameObject.transform.SetParentLocal(parent);
         }
 
         void AddImpl(Resource.Info<GameObject> resource, GameObject gameObject)
@@ -121,7 +125,7 @@ namespace Iviz.App
                 //Debug.Log("** State: " + string.Join(",", destroyedObjects));
                 return;
             }
-            
+
             if (pool.TryGetValue(resource.Id, out Queue<ObjectWithDeadline> objects))
             {
                 objects.Enqueue(new ObjectWithDeadline(gameObject));

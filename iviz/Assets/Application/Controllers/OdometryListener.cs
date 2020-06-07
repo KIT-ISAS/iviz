@@ -17,10 +17,11 @@ namespace Iviz.App.Listeners
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public string Type { get; set; } = "";
-        [DataMember] public float Scale { get; set; } = 1.0f;
         [DataMember] public bool ShowTrail { get; set; } = true;
         [DataMember] public bool ShowAxis { get; set; } = true;
+        [DataMember] public float Scale { get; set; } = 1.0f;
         [DataMember] public bool ShowVector { get; set; } = true;
+        [DataMember] public float VectorScale { get; set; } = 1.0f;
         [DataMember] public SerializableColor Color { get; set; } = UnityEngine.Color.red;
         [DataMember] public float TrailTime { get; set; } = 2.0f;
     }
@@ -29,7 +30,7 @@ namespace Iviz.App.Listeners
     {
         DisplayClickableNode displayNode;
         SimpleDisplayNode trailNode;
-        AxisResource axis;
+        AxisFrameResource axis;
         TrailResource trail;
         MeshMarkerResource sphere;
         ArrowResource arrow;
@@ -159,6 +160,19 @@ namespace Iviz.App.Listeners
             }
         }
 
+        public float VectorScale
+        {
+            get => config.VectorScale;
+            set
+            {
+                config.VectorScale = value;
+                if (arrow != null)
+                {
+                    arrow.transform.localScale = value * UnityEngine.Vector3.one;
+                }
+            }
+        }
+
         void Awake()
         {
             displayNode = DisplayClickableNode.Instantiate("DisplayNode");
@@ -168,6 +182,7 @@ namespace Iviz.App.Listeners
             trail = trailNode.gameObject.AddComponent<TrailResource>();
             trail.DataSource = () => displayNode.transform.position;
 
+            Config = new OdometryConfiguration();
         }
 
         public override void StartListening()
@@ -181,7 +196,7 @@ namespace Iviz.App.Listeners
             {
                 case PoseStamped.RosMessageType:
                     Listener = new RosListener<PoseStamped>(config.Topic, Handler);
-                    axis = ResourcePool.GetOrCreate<AxisResource>(Resource.Markers.Axis);
+                    axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Markers.Axis);
                     displayNode.Target = axis;
                     break;
 
@@ -196,7 +211,7 @@ namespace Iviz.App.Listeners
 
                 case WrenchStamped.RosMessageType:
                     Listener = new RosListener<WrenchStamped>(config.Topic, Handler);
-                    axis = ResourcePool.GetOrCreate<AxisResource>(Resource.Markers.Axis);
+                    axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Markers.Axis);
                     displayNode.Target = axis;
                     arrow = ResourcePool.GetOrCreate<ArrowResource>(Resource.Markers.Arrow);
                     arrow.Parent = displayNode.transform.parent;
@@ -204,7 +219,7 @@ namespace Iviz.App.Listeners
 
                 case TwistStamped.RosMessageType:
                     Listener = new RosListener<TwistStamped>(config.Topic, Handler);
-                    axis = ResourcePool.GetOrCreate<AxisResource>(Resource.Markers.Axis);
+                    axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Markers.Axis);
                     displayNode.Target = axis;
                     arrow = ResourcePool.GetOrCreate<ArrowResource>(Resource.Markers.Arrow);
                     arrow.Parent = displayNode.transform.parent;
@@ -214,19 +229,19 @@ namespace Iviz.App.Listeners
 
         void Handler(PoseStamped msg)
         {
-            displayNode.SetParent(msg.Header.FrameId);
+            displayNode.AttachTo(msg.Header.FrameId);
             displayNode.transform.SetLocalPose(msg.Pose.Ros2Unity());
         }
 
         void Handler(PointStamped msg)
         {
-            displayNode.SetParent(msg.Header.FrameId);
+            displayNode.AttachTo(msg.Header.FrameId);
             displayNode.transform.localPosition = msg.Point.Ros2Unity();
         }
 
         void Handler(WrenchStamped msg)
         {
-            displayNode.SetParent(msg.Header.FrameId);
+            displayNode.AttachTo(msg.Header.FrameId);
 
             UnityEngine.Vector3 dir = msg.Wrench.Force.Ros2Unity();
             arrow.Set(UnityEngine.Vector3.zero, dir);
@@ -235,7 +250,7 @@ namespace Iviz.App.Listeners
 
         void Handler(TwistStamped msg)
         {
-            displayNode.SetParent(msg.Header.FrameId);
+            displayNode.AttachTo(msg.Header.FrameId);
 
             UnityEngine.Vector3 dir = msg.Twist.Linear.Ros2Unity();
             arrow.Set(UnityEngine.Vector3.zero, dir);

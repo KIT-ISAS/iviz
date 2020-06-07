@@ -7,6 +7,7 @@ using Iviz.Resources;
 using UnityEngine.XR.ARFoundation;
 using Iviz.Displays;
 using Iviz.Msgs.VisualizationMsgs;
+using Iviz.App.Displays;
 
 namespace Iviz.App.Listeners
 {
@@ -16,9 +17,14 @@ namespace Iviz.App.Listeners
         [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
         [DataMember] public Resource.Module Module => Resource.Module.AR;
         [DataMember] public bool Visible { get; set; } = true;
+        [DataMember] public float WorldScale { get; set; } = 1.0f;
         [DataMember] public SerializableVector3 Origin { get; set; } = new Vector3(0, 0, 1.5f);
         [DataMember] public bool SearchMarker { get; set; } = false;
-        [DataMember] public float WorldScale { get; set; } = 1.0f;
+        [DataMember] public float MarkerSize { get; set; } = 0.19f;
+        [DataMember] public bool MarkerHorizontal { get; set; } = false;
+        [DataMember] public int MarkerAngle { get; set; } = 0;
+        [DataMember] public string MarkerFrame { get; set; } = "";
+        [DataMember] public SerializableVector3 MarkerOffset { get; set; } = Vector3.zero;
         [DataMember] public bool PublishPose { get; set; } = true;
         [DataMember] public bool PublishMarkers { get; set; } = true;
     }
@@ -28,6 +34,9 @@ namespace Iviz.App.Listeners
         public Canvas Canvas;
         public Camera MainCamera;
         ARPlaneManager planeManager;
+
+        DisplayClickableNode node;
+        ARMarkerResource resource;
 
         readonly MeshToMarkerHelper helper = new MeshToMarkerHelper("ar");
         DateTime lastMarkerUpdate = DateTime.MinValue;
@@ -86,6 +95,7 @@ namespace Iviz.App.Listeners
             set
             {
                 config.Visible = value;
+                resource.Visible = MarkerFound && value;
                 MainCamera.gameObject.SetActive(!value);
                 ARCamera.gameObject.SetActive(value);
                 Canvas.worldCamera = value ? ARCamera : MainCamera;
@@ -137,6 +147,67 @@ namespace Iviz.App.Listeners
             }
         }
 
+        public bool MarkerFound { get; private set; }
+
+        public bool SearchMarker
+        {
+            get => config.SearchMarker;
+            set
+            {
+                config.SearchMarker = value;
+            }
+        }
+
+        public float MarkerSize
+        {
+            get => config.MarkerSize;
+            set
+            {
+                config.MarkerSize = value;
+                resource.Scale = value;
+            }
+        }
+
+        public bool MarkerHorizontal
+        {
+            get => config.MarkerHorizontal;
+            set
+            {
+                config.MarkerHorizontal = value;
+                resource.Horizontal = value;
+            }
+        }
+
+        public int MarkerAngle
+        {
+            get => config.MarkerAngle;
+            set
+            {
+                config.MarkerAngle = value;
+                resource.Angle = 45 * value; // deg
+            }
+        }
+
+        public string MarkerFrame
+        {
+            get => config.MarkerFrame;
+            set
+            {
+                config.MarkerFrame = value;
+                node.AttachTo(config.MarkerFrame);
+            }
+        }
+
+        public Vector3 MarkerOffset
+        {
+            get => config.MarkerOffset;
+            set
+            {
+                config.MarkerOffset = value;
+                resource.Offset = value;
+            }
+        }
+
         void Awake()
         {
             if (Canvas == null)
@@ -158,6 +229,10 @@ namespace Iviz.App.Listeners
 
             planeManager = ARSessionOrigin.GetComponent<ARPlaneManager>();
             Config = new ARConfiguration();
+
+            node = DisplayClickableNode.Instantiate("AR Node");
+            resource = ResourcePool.GetOrCreate<ARMarkerResource>(Resource.Markers.ARMarkerResource);
+            node.Target = resource;
         }
 
         uint headSeq = 0;
@@ -182,25 +257,28 @@ namespace Iviz.App.Listeners
                     lastMarkerUpdate = now;
 
                     int i = 0;
-                    //Debug.Log("planeManager: " + planeManager);
                     var trackables = planeManager.trackables;
-                    //Debug.Log("trackables: " + trackables);
                     Marker[] markers = new Marker[2 * trackables.count + 1];
                     markers[i++] = helper.CreateDeleteAll();
                     foreach (var trackable in trackables)
                     {
                         Mesh mesh = trackable?.gameObject.GetComponent<MeshFilter>()?.mesh;
-                        //Debug.Log("mesh: " + mesh);
+                        if (mesh == null)
+                        {
+                            continue;
+                        }
                         Marker[] meshMarkers = helper.MeshToMarker(mesh, trackable.transform.AsPose());
-                        markers[i] = meshMarkers[0];
-                        markers[i].Id = i;
-                        i++;
+                        if (meshMarkers.Length == 2)
+                        {
+                            markers[i] = meshMarkers[0];
+                            markers[i].Id = i;
+                            i++;
 
-                        markers[i] = meshMarkers[1];
-                        markers[i].Id = i;
-                        i++;
+                            markers[i] = meshMarkers[1];
+                            markers[i].Id = i;
+                            i++;
+                        }
                     }
-                    //Debug.Log("sender: " + rosSenderMarkers);
                     RosSenderMarkers.Publish(new MarkerArray(markers));
                 }
             }

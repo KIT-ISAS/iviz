@@ -8,97 +8,46 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public class PointListResource : MarkerResource
+    class NativeArrayList<T> where T : struct
     {
-        Material material;
+        NativeArray<T> pointBuffer = new NativeArray<T>();
+        int size;
 
-        //PointWithColor[] pointBuffer = new PointWithColor[0];
+        public bool Reserve (int reserved)
+        {
+            if (pointBuffer.Length < reserved)
+            {
+                if (pointBuffer.Length != 0)
+                {
+                    pointBuffer.Dispose();
+                }
+                pointBuffer = new NativeArray<T>(reserved, Allocator.Persistent);
+                return true;
+            }
+            return false;
+        }
+
+        public int Count => size;
+
+        public void Add(in T t)
+        {
+            pointBuffer[size++] = t;
+        }
+
+        public void Clear()
+        {
+            size = 0;
+        }
+
+        public NativeArray<T> Buffer => pointBuffer;
+    }
+
+    public class PointListResource : MarkerResourceWithColormap
+    {
+
         NativeArray<float4> pointBuffer = new NativeArray<float4>();
         ComputeBuffer pointComputeBuffer;
         ComputeBuffer quadComputeBuffer;
-
-        bool useIntensityTexture;
-        public bool UseIntensityTexture
-        {
-            get => useIntensityTexture;
-            set
-            {
-                if (useIntensityTexture == value)
-                {
-                    return;
-                }
-                useIntensityTexture = value;
-                if (useIntensityTexture)
-                {
-                    material.EnableKeyword("USE_TEXTURE");
-                }
-                else
-                {
-                    material.DisableKeyword("USE_TEXTURE");
-                }
-            }
-        }
-
-        static readonly int PropIntensity = Shader.PropertyToID("_IntensityTexture");
-
-        Resource.ColormapId colormap;
-        public Resource.ColormapId Colormap
-        {
-            get => colormap;
-            set
-            {
-                colormap = value;
-
-                Texture2D texture = Resource.Colormaps.Textures[Colormap];
-                material.SetTexture(PropIntensity, texture);
-            }
-        }
-
-        static readonly int PropIntensityCoeff = Shader.PropertyToID("_IntensityCoeff");
-        static readonly int PropIntensityAdd = Shader.PropertyToID("_IntensityAdd");
-
-        Vector2 intensityBounds;
-        public Vector2 IntensityBounds
-        {
-            get => intensityBounds;
-            set
-            {
-                intensityBounds = value;
-                float intensitySpan = intensityBounds.y - intensityBounds.x;
-
-                if (intensitySpan == 0)
-                {
-                    material.SetFloat(PropIntensityCoeff, 1);
-                    material.SetFloat(PropIntensityAdd, 0);
-                }
-                else
-                {
-                    if (FlipMinMax)
-                    {
-                        material.SetFloat(PropIntensityCoeff, 1 / intensitySpan);
-                        material.SetFloat(PropIntensityAdd, -intensityBounds.x / intensitySpan);
-                    }
-                    else
-                    {
-                        material.SetFloat(PropIntensityCoeff, -1 / intensitySpan);
-                        material.SetFloat(PropIntensityAdd, intensityBounds.y / intensitySpan);
-                    }
-                }
-            }
-        }
-
-        bool flipMinMax;
-        public bool FlipMinMax
-        {
-            get => flipMinMax;
-            set
-            {
-                flipMinMax = value;
-                IntensityBounds = IntensityBounds;
-            }
-        }
-
-        static readonly int PropPoints = Shader.PropertyToID("_Points");
 
         int size_;
         public int Size
@@ -111,25 +60,29 @@ namespace Iviz.Displays
                     return;
                 }
                 size_ = value;
-                int reqDataSize = size_ * 11 / 10;
-                if (pointBuffer.Length < reqDataSize)
-                {
-                    //pointBuffer = new PointWithColor[reqDataSize];
-                    if (pointBuffer.Length != 0)
-                    {
-                        pointBuffer.Dispose();
-                    }
-                    pointBuffer = new NativeArray<float4>(reqDataSize, Allocator.Persistent);
-
-                    if (pointComputeBuffer != null)
-                    {
-                        pointComputeBuffer.Release();
-                    }
-                    pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithColor>());
-                    material.SetBuffer(PropPoints, pointComputeBuffer);
-                }
+                Reserve(size_ * 11 / 10);
             }
         }
+
+        public void Reserve(int reqDataSize)
+        {
+            if (pointBuffer == null || pointBuffer.Length < reqDataSize)
+            {
+                if (pointBuffer.Length != 0)
+                {
+                    pointBuffer.Dispose();
+                }
+                pointBuffer = new NativeArray<float4>(reqDataSize, Allocator.Persistent);
+
+                if (pointComputeBuffer != null)
+                {
+                    pointComputeBuffer.Release();
+                }
+                pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithColor>());
+                material.SetBuffer(PropPoints, pointComputeBuffer);
+            }
+        }
+
         public IList<PointWithColor> PointsWithColor
         {
             set
@@ -208,19 +161,6 @@ namespace Iviz.Displays
             }
         }
 
-        public override bool Visible
-        {
-            get => base.Visible;
-            set
-            {
-                base.Visible = value;
-                if (value)
-                {
-                    OnApplicationFocus(true);
-                }
-            }
-        }
-
         public override string Name => "PointList";
 
         protected override void Awake()
@@ -254,9 +194,6 @@ namespace Iviz.Displays
         }
 
 
-        static readonly int PropLocalToWorld = Shader.PropertyToID("_LocalToWorld");
-        static readonly int PropWorldToLocal = Shader.PropertyToID("_WorldToLocal");
-
         void Update()
         {
             if (Size == 0)
@@ -264,19 +201,15 @@ namespace Iviz.Displays
                 return;
             }
 
-            material.SetMatrix(PropLocalToWorld, transform.localToWorldMatrix);
-            material.SetMatrix(PropWorldToLocal, transform.worldToLocalMatrix);
+            UpdateTransform();
 
             Bounds worldBounds = Collider.bounds;
             Graphics.DrawProcedural(material, worldBounds, MeshTopology.Quads, 4, Size);
         }
 
-        void OnDestroy()
+        protected override void OnDestroy()
         {
-            if (material != null)
-            {
-                Destroy(material);
-            }
+            base.OnDestroy();
             if (pointComputeBuffer != null)
             {
                 pointComputeBuffer.Release();
@@ -293,13 +226,8 @@ namespace Iviz.Displays
             }
         }
 
-        void OnApplicationFocus(bool hasFocus)
+        protected override void Rebuild()
         {
-            if (!hasFocus)
-            {
-                return;
-            }
-            // unity bug causes all compute buffers to disappear when focus is lost
             if (pointComputeBuffer != null)
             {
                 pointComputeBuffer.Release();
@@ -321,8 +249,6 @@ namespace Iviz.Displays
 
             IntensityBounds = IntensityBounds;
             Colormap = Colormap;
-
-            //Debug.Log("PointCloudListener: Rebuilding compute buffers");
         }
 
         public override void Stop()

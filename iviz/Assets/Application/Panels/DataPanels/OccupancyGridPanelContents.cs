@@ -23,7 +23,7 @@ namespace Iviz.App
                         .SetOptions(Resource.Colormaps.Names)
                         .SetIndex((int)Resource.ColormapId.gray);
             FlipColors = p.AddToggle("Flip Color Bounds");
-            ScaleZ = p.AddNumberInputField("Height Scale");
+            ScaleZ = p.AddNumberInputField("Height Multiplier");
 
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();

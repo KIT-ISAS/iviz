@@ -102,7 +102,8 @@ namespace Iviz.App.Listeners
                     if (msg.Points.Length == 2)
                     {
                         arrowMarker.Set(msg.Points[0].Ros2Unity(), msg.Points[1].Ros2Unity());
-                        Vector3 scale = new Vector3(1, (float)msg.Scale.X, (float)msg.Scale.X);
+                        float sx = (float)msg.Scale.X;
+                        Vector3 scale = new Vector3(1, sx, sx);
                         transform.localScale = scale.Ros2Unity().Abs();
                     }
                     else if (msg.Points.Length == 0)
@@ -149,7 +150,7 @@ namespace Iviz.App.Listeners
                             {
                                 points[i] = new PointWithColor(
                                     msg.Points[i].Ros2Unity(),
-                                    msg.Colors[i].ToUnityColor32());
+                                    msg.Colors[i].Sanitize().ToUnityColor32());
                             }
                         }
                         else
@@ -158,7 +159,7 @@ namespace Iviz.App.Listeners
                             {
                                 points[i] = new PointWithColor(
                                     msg.Points[i].Ros2Unity(),
-                                    color * msg.Colors[i].ToUnityColor());
+                                    color * msg.Colors[i].Sanitize().ToUnityColor());
                             }
                         }
                         meshList.PointsWithColor = points;
@@ -186,8 +187,8 @@ namespace Iviz.App.Listeners
                             for (int i = 0; i < lines.Length; i++)
                             {
                                 lines[i] = new LineWithColor(
-                                    msg.Points[2 * i + 0].Ros2Unity(), color * msg.Colors[2 * i + 0].ToUnityColor(),
-                                    msg.Points[2 * i + 1].Ros2Unity(), color * msg.Colors[2 * i + 1].ToUnityColor()
+                                    msg.Points[2 * i + 0].Ros2Unity(), color * msg.Colors[2 * i + 0].Sanitize().ToUnityColor(),
+                                    msg.Points[2 * i + 1].Ros2Unity(), color * msg.Colors[2 * i + 1].Sanitize().ToUnityColor()
                                     );
                             }
                         }
@@ -243,7 +244,7 @@ namespace Iviz.App.Listeners
                             {
                                 points[i] = new PointWithColor(
                                     msg.Points[i].Ros2Unity(),
-                                    msg.Colors[i].ToUnityColor32());
+                                    msg.Colors[i].Sanitize().ToUnityColor32());
                             }
                         }
                         else
@@ -252,7 +253,7 @@ namespace Iviz.App.Listeners
                             {
                                 points[i] = new PointWithColor(
                                     msg.Points[i].Ros2Unity(),
-                                    color * msg.Colors[i].ToUnityColor());
+                                    color * msg.Colors[i].Sanitize().ToUnityColor());
                             }
                         }
                         pointList.PointsWithColor = points;
@@ -266,13 +267,14 @@ namespace Iviz.App.Listeners
                     {
                         meshTriangles.Set(
                             msg.Points.Select(x => x.Ros2Unity()).ToArray(),
-                            msg.Colors.Select(x => x.ToUnityColor()).ToArray()
+                            msg.Colors.Select(x => x.Sanitize().ToUnityColor()).ToArray()
                             );
                     }
                     else
                     {
                         meshTriangles.Set(msg.Points.Select(x => x.Ros2Unity()).ToArray());
                     }
+                    transform.localScale = msg.Scale.Ros2Unity().Abs();
                     break;
             }
         }
@@ -281,7 +283,7 @@ namespace Iviz.App.Listeners
         {
             if (msg.FrameLocked)
             {
-                SetParent(msg.Header.FrameId);
+                AttachTo(msg.Header.FrameId);
             }
             else if (msg.Header.FrameId == "")
             {

@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace Iviz.Displays
 {
-    public class ArrowResource : MeshMarkerResource
+    public sealed class ArrowResource : MeshMarkerResource
     {
         public override string Name => "ArrowResource";
 

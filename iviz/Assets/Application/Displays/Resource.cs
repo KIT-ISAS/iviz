@@ -212,6 +212,9 @@ namespace Iviz.Resources
             public GameObjectInfo Axis { get; }
             public GameObjectInfo DepthImageResource { get; }
             public GameObjectInfo OccupancyGridResource { get; }
+            public GameObjectInfo RadialScanResource { get; }
+            public GameObjectInfo ARMarkerResource { get; }
+            public GameObjectInfo AxisFrameResource { get; }
 
             public ReadOnlyDictionary<string, GameObjectInfo> Generic { get; }
 
@@ -236,6 +239,8 @@ namespace Iviz.Resources
                 Axis = new GameObjectInfo("Displays/Axis");
                 DepthImageResource = new GameObjectInfo("Displays/DepthImageResource");
                 OccupancyGridResource = new GameObjectInfo("Displays/OccupancyGridResource");
+                ARMarkerResource = new GameObjectInfo("Displays/ARMarkerResource");
+                AxisFrameResource = new GameObjectInfo("Displays/AxisFrameResource");
 
                 Generic = new ReadOnlyDictionary<string, GameObjectInfo>(
                     new Dictionary<string, GameObjectInfo>()
@@ -251,41 +256,6 @@ namespace Iviz.Resources
         public class ListenersType
         {
             public GameObjectInfo AR { get; }
-
-            /*
-            public GameObjectInfo PointCloud { get; }
-            public GameObjectInfo Grid { get; }
-            public GameObjectInfo TF { get; }
-            public GameObjectInfo Image { get; }
-            public GameObjectInfo Robot { get; }
-            public GameObjectInfo MarkerObject { get; }
-            public GameObjectInfo Marker { get; }
-            public GameObjectInfo InteractiveMarkerControlObject { get; }
-            public GameObjectInfo InteractiveMarkerObject { get; }
-            public GameObjectInfo InteractiveMarker { get; }
-            public GameObjectInfo JointState { get; }
-            public GameObjectInfo DepthImageProjector { get; }
-            public GameObjectInfo LaserScan { get; }
-            public GameObjectInfo AR { get; }
-
-            public ListenersType()
-            {
-                PointCloud = new GameObjectInfo("Listeners/PointCloud");
-                Grid = new GameObjectInfo("Listeners/Grid");
-                TF = new GameObjectInfo("Listeners/TF");
-                Image = new GameObjectInfo("Listeners/Image");
-                Robot = new GameObjectInfo("Listeners/Robot");
-                MarkerObject = new GameObjectInfo("Listeners/MarkerObject");
-                Marker = new GameObjectInfo("Listeners/Marker");
-                InteractiveMarkerControlObject = new GameObjectInfo("Listeners/InteractiveMarkerControlObject");
-                InteractiveMarkerObject = new GameObjectInfo("Listeners/InteractiveMarkerObject");
-                InteractiveMarker = new GameObjectInfo("Listeners/InteractiveMarker");
-                JointState = new GameObjectInfo("Listeners/JointState");
-                DepthImageProjector = new GameObjectInfo("Listeners/DepthImageProjector");
-                LaserScan = new GameObjectInfo("Listeners/LaserScan");
-                AR = new GameObjectInfo("Listeners/AR");
-            }
-            */
 
             public ListenersType()
             {

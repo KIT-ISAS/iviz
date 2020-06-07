@@ -62,5 +62,7 @@ namespace Iviz.Displays
         }
 
         public static implicit operator float4x2(in LineWithColor c) => c.f;
+
+        public bool HasNaN => math.any(math.isnan(f.c0)) || math.any(math.isnan(f.c1));
     };
 }

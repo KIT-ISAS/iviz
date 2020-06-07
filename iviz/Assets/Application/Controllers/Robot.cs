@@ -106,7 +106,7 @@ namespace Iviz.App
                 }
                 if (BaseLink != null)
                 {
-                    node.SetParent(Decorate(BaseLink.name));
+                    node.AttachTo(Decorate(BaseLink.name));
                 }
             }
         }
@@ -128,7 +128,7 @@ namespace Iviz.App
                 }
                 if (BaseLink != null)
                 {
-                    node.SetParent(Decorate(BaseLink.name));
+                    node.AttachTo(Decorate(BaseLink.name));
                 }
             }
         }
@@ -204,7 +204,7 @@ namespace Iviz.App
                 }
                 else
                 {
-                    node.SetParent(Decorate(BaseLink.name));
+                    node.AttachTo(Decorate(BaseLink.name));
                 }
                 config.AttachToTF = value;
             }
@@ -293,7 +293,7 @@ namespace Iviz.App
             }
             else
             {
-                node.SetParent(Decorate(BaseLink.name));
+                node.AttachTo(Decorate(BaseLink.name));
             }
 
             if (oldAttachToTf)

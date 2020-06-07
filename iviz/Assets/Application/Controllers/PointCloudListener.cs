@@ -35,7 +35,7 @@ namespace Iviz.App.Listeners
 
         public override DisplayData DisplayData { get; set; }
 
-        public Vector2 LastIntensityBounds { get; private set; }
+        public Vector2 MeasuredIntensityBounds { get; private set; }
 
         public int Size { get; private set; }
 
@@ -107,6 +107,10 @@ namespace Iviz.App.Listeners
                 if (config.ForceMinMax)
                 {
                     pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
+                }
+                else
+                {
+                    pointCloud.IntensityBounds = MeasuredIntensityBounds;
                 }
             }
         }
@@ -193,7 +197,7 @@ namespace Iviz.App.Listeners
 
         void Handler(PointCloud2 msg)
         {
-            node.SetParent(msg.Header.FrameId);
+            node.AttachTo(msg.Header.FrameId, msg.Header.Stamp.ToDateTime());
 
             if (msg.PointStep < 3 * 4 ||
                 msg.RowStep < msg.PointStep * msg.Width ||
@@ -245,12 +249,6 @@ namespace Iviz.App.Listeners
 
                 GeneratePointBuffer(msg, xOffset, yOffset, zOffset, iOffset, iField.Datatype, rgbaHint);
 
-                /*
-                Vector2 intensityBounds = (!rgbaHint && ForceMinMax) ?
-                    CalculateBounds(newSize) :
-                    new Vector2(MinIntensity, MaxIntensity);
-                */
-
                 GameThread.RunOnce(() =>
                 {
                     if (pointCloud == null)
@@ -258,10 +256,9 @@ namespace Iviz.App.Listeners
                         return;
                     }
                     Size = newSize;
-                    //pointCloud.IntensityBounds = intensityBounds;
                     pointCloud.UseIntensityTexture = !rgbaHint;
                     pointCloud.PointsWithColor = new ArraySegment<PointWithColor>(pointBuffer, 0, Size);
-                    LastIntensityBounds = pointCloud.IntensityBounds;
+                    MeasuredIntensityBounds = pointCloud.IntensityBounds;
                     if (ForceMinMax)
                     {
                         pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
@@ -269,28 +266,6 @@ namespace Iviz.App.Listeners
                 });
             });
         }
-
-        /*
-        Vector2 CalculateBounds(int size)
-        {
-
-            float intensityMin = float.MaxValue, intensityMax = float.MinValue;
-            for (int i = 0; i < size; i++)
-            {
-                if (pointBuffer[i].HasNaN)
-                {
-                    continue;
-                }
-
-                float intensity = pointBuffer[i].Intensity;
-                intensityMin = Mathf.Min(intensityMin, intensity);
-                intensityMax = Mathf.Max(intensityMax, intensity);
-            }
-
-            return new Vector2(intensityMin, intensityMax);
-        }
-        */
-
 
         void GeneratePointBuffer(PointCloud2 msg, int xOffset, int yOffset, int zOffset, int iOffset, int iType, bool rgbaHint)
         {

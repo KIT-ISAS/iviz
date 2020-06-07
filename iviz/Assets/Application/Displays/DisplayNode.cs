@@ -46,9 +46,22 @@ namespace Iviz.App.Displays
             }
         }
 
-        public virtual void SetParent(string parentId)
+        public virtual void AttachTo(string parentId)
         {
             Parent = (parentId == "") ? TFListener.ListenersFrame : TFListener.GetOrCreateFrame(parentId);
+        }
+
+        public virtual void AttachTo(string parentId, DateTime timestamp)
+        {
+            Parent = TFListener.ListenersFrame;
+            if (parentId == "")
+            {
+                transform.SetPose(Pose.identity);
+            }
+            else
+            {
+                transform.SetPose(TFListener.GetOrCreateFrame(parentId).GetPose(timestamp));
+            }
         }
 
         public event Action Stopped;

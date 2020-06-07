@@ -138,11 +138,16 @@ namespace Iviz
         {
             return new ColorRGBA
             (
-                R: Mathf.Max(Mathf.Min(p.R, 1), 0),
-                G: Mathf.Max(Mathf.Min(p.G, 1), 0),
-                B: Mathf.Max(Mathf.Min(p.B, 1), 0),
-                A: Mathf.Max(Mathf.Min(p.A, 1), 0)
+                R: SanitizeColor(p.R),
+                G: SanitizeColor(p.G),
+                B: SanitizeColor(p.B),
+                A: SanitizeColor(p.A)
             );
+        }
+
+        static float SanitizeColor(float f)
+        {
+            return float.IsNaN(f) ? 0 : Mathf.Max(Mathf.Min(f, 1), 0);
         }
 
         public static Color32 ToUnityColor32(this ColorRGBA p)
@@ -291,6 +296,31 @@ namespace Iviz
                 FrameId: frame_id ?? TFListener.BaseFrameId,
                 Stamp: GetRosTime()
             );
+        }
+
+        public static bool ValidateNaN(this Msgs.GeometryMsgs.Vector3 v)
+        {
+            return !double.IsNaN(v.X) && !double.IsNaN(v.Y) && !double.IsNaN(v.Z);
+        }
+
+        public static bool ValidateNaN(this Msgs.GeometryMsgs.Point v)
+        {
+            return !double.IsNaN(v.X) && !double.IsNaN(v.Y) && !double.IsNaN(v.Z);
+        }
+
+        public static bool ValidateNaN(this Msgs.GeometryMsgs.Quaternion v)
+        {
+            return !double.IsNaN(v.X) && !double.IsNaN(v.Y) && !double.IsNaN(v.Z) && !double.IsNaN(v.W);
+        }
+
+        public static bool ValidateNaN(this Msgs.GeometryMsgs.Transform transform)
+        {
+            return ValidateNaN(transform.Rotation) && ValidateNaN(transform.Translation);
+        }
+
+        public static bool ValidateNaN(this Msgs.GeometryMsgs.Pose pose)
+        {
+            return ValidateNaN(pose.Orientation) && ValidateNaN(pose.Position);
         }
 
         public static string SanitizedText(string text, int size)

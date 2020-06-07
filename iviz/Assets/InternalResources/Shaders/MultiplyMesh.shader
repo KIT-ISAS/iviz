@@ -57,8 +57,8 @@ Shader "iviz/MultiplyMesh"
             UNITY_INITIALIZE_OUTPUT(Input, o);
 
 #ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED
-            v.vertex.xyz *= _LocalScale.xyz;
-            v.vertex.xyz += _LocalOffset.xyz;
+            v.vertex *= _LocalScale;
+            v.vertex += _LocalOffset;
 
 	#if USE_TEXTURE || USE_TEXTURE_SCALE
 			float intensity = _Points[v.instanceID].intensity;
@@ -70,7 +70,7 @@ Shader "iviz/MultiplyMesh"
 
             v.vertex.xyz += _Points[v.instanceID].pos;
             v.vertex = mul(_LocalToWorld, v.vertex);
-            v.vertex.xyz -= _BoundaryCenter;
+            v.vertex -= _BoundaryCenter;
 
 	#if USE_TEXTURE || USE_TEXTURE_SCALE
 			o.color = tex2Dlod(_IntensityTexture, float4(intensity * _IntensityCoeff + _IntensityAdd, 0, 0, 0));

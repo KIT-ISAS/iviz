@@ -32,17 +32,14 @@ namespace Iviz.App.Listeners
 
     public class LaserScanListener : TopicListener
     {
-        const float MaxDistance = 0.3f;
-        PointListResource pointCloud;
-        LineResource lines;
+        RadialScanResource resource;
         DisplayNode node;
 
         public override DisplayData DisplayData { get; set; }
 
-        public Vector2 LastIntensityBounds { get; private set; }
+        public Vector2 MeasuredIntensityBounds => resource.MeasuredIntensityBounds;
 
-        public int Size { get; private set; }
-        public bool CalculateMinMax { get; private set; } = true;
+        public int Size => resource.Size;
 
         readonly LaserScanConfiguration config = new LaserScanConfiguration();
         public LaserScanConfiguration Config
@@ -69,7 +66,7 @@ namespace Iviz.App.Listeners
             set
             {
                 config.Visible = value;
-                pointCloud.Visible = value;
+                resource.Visible = value;
             }
         }
 
@@ -79,8 +76,7 @@ namespace Iviz.App.Listeners
             set
             {
                 config.PointSize = value;
-                pointCloud.Scale = value * Vector2.one;
-                lines.Scale = value;
+                resource.PointSize = value;
             }
         }
 
@@ -90,8 +86,7 @@ namespace Iviz.App.Listeners
             set
             {
                 config.Colormap = value;
-                pointCloud.Colormap = value;
-                lines.Colormap = value;
+                resource.Colormap = value;
             }
         }
 
@@ -101,6 +96,7 @@ namespace Iviz.App.Listeners
             set
             {
                 config.UseIntensity = value;
+                resource.UseIntensityNoRange = value;
             }
         }
 
@@ -110,11 +106,7 @@ namespace Iviz.App.Listeners
             set
             {
                 config.ForceMinMax = value;
-                if (config.ForceMinMax)
-                {
-                    pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
-                    lines.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
-                }
+                resource.ForceMinMax = value;
             }
         }
 
@@ -124,8 +116,7 @@ namespace Iviz.App.Listeners
             set
             {
                 config.FlipMinMax = value;
-                pointCloud.FlipMinMax = value;
-                lines.FlipMinMax = value;
+                resource.FlipMinMax = value;
             }
         }
 
@@ -136,11 +127,7 @@ namespace Iviz.App.Listeners
             set
             {
                 config.MinIntensity = value;
-                if (config.ForceMinMax)
-                {
-                    pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
-                    lines.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
-                }
+                resource.MinIntensity = value;
             }
         }
 
@@ -150,11 +137,7 @@ namespace Iviz.App.Listeners
             set
             {
                 config.MaxIntensity = value;
-                if (config.ForceMinMax)
-                {
-                    pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
-                    lines.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
-                }
+                resource.MaxIntensity = value;
             }
         }
 
@@ -164,8 +147,7 @@ namespace Iviz.App.Listeners
             set
             {
                 config.UseLines = value;
-                lines.Visible = value;
-                pointCloud.Visible = !value;
+                resource.UseLines = value;
             }
         }
 
@@ -177,12 +159,8 @@ namespace Iviz.App.Listeners
             transform.parent = TFListener.ListenersFrame.transform;
 
             node = SimpleDisplayNode.Instantiate("LaserScanNode", transform);
-            pointCloud = ResourcePool.GetOrCreate<PointListResource>(Resource.Markers.PointList, node.transform);
-            lines = ResourcePool.GetOrCreate<LineResource>(Resource.Markers.Line, node.transform);
+            resource = ResourcePool.GetOrCreate<RadialScanResource>(Resource.Markers.RadialScanResource, node.transform);
             Config = new LaserScanConfiguration();
-
-            pointCloud.UseIntensityTexture = true;
-            lines.UseIntensityTexture = true;
         }
 
         public override void StartListening()
@@ -195,7 +173,15 @@ namespace Iviz.App.Listeners
 
         void Handler(LaserScan msg)
         {
-            node.SetParent(msg.Header.FrameId);
+            node.AttachTo(msg.Header.FrameId);
+
+            if (float.IsNaN(msg.AngleMin) || float.IsNaN(msg.AngleMax) ||
+                float.IsNaN(msg.RangeMin) || float.IsNaN(msg.RangeMax) ||
+                float.IsNaN(msg.AngleIncrement))
+            {
+                Logger.Info("LaserScanListener: NaN in header!");
+                return;
+            }
 
             if (msg.AngleMin >= msg.AngleMax || msg.RangeMin >= msg.RangeMax)
             {
@@ -203,95 +189,21 @@ namespace Iviz.App.Listeners
                 return;
             }
 
-            bool useIntensity = (UseIntensity && msg.Ranges.Length == msg.Intensities.Length && msg.RangeMin < msg.RangeMax);
-
-            float x = Mathf.Cos(msg.AngleMin);
-            float y = Mathf.Sin(msg.AngleMin);
-
-            float dx = Mathf.Cos(msg.AngleIncrement);
-            float dy = Mathf.Sin(msg.AngleIncrement);
-
-            pointBuffer.Clear();
-
-            if (!useIntensity)
+            if (msg.Intensities.Length != 0 && msg.Intensities.Length != msg.Ranges.Length)
             {
-                for (int i = 0; i < msg.Ranges.Length; i++)
-                {
-                    float range = msg.Ranges[i];
-                    if (range > msg.RangeMax || range < msg.RangeMin)
-                    {
-                        range = float.NaN;
-                    }
-                    pointBuffer.Add(new PointWithColor(new Unity.Mathematics.float4(-y, 0, x, 1) * range));
-                    x = dx * x - dy * y;
-                    y = dy * x + dx * y;
-                }
-            }
-            else
-            {
-                for (int i = 0; i < msg.Ranges.Length; i++)
-                {
-                    float range = msg.Ranges[i];
-                    if (range > msg.RangeMax || range < msg.RangeMin)
-                    {
-                        range = float.NaN;
-                    }
-                    pointBuffer.Add(new PointWithColor(
-                        new Vector3(x * range, y * range, 0).Ros2Unity(),
-                        msg.Intensities[i]
-                    ));
-                    x = dx * x - dy * y;
-                    y = dy * x + dx * y;
-                }
+                Logger.Info("LaserScanListener: Invalid intensities length!");
+                return;
             }
 
-            Size = pointBuffer.Count;
-
-            if (!UseLines)
-            {
-                pointCloud.PointsWithColor = pointBuffer;
-                LastIntensityBounds = pointCloud.IntensityBounds;
-                if (ForceMinMax)
-                {
-                    pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
-                }
-            }
-            else
-            {
-                int n = pointBuffer.Count;
-
-                lineBuffer.Clear();
-                for (int i = 0; i < pointBuffer.Count; i++)
-                {
-                    PointWithColor pA = pointBuffer[i];
-                    PointWithColor pB = pointBuffer[(i + 1) % n];
-                    if (!pB.HasNaN && (pB.Position - pA.Position).sqrMagnitude < MaxDistance * MaxDistance)
-                    {
-                        lineBuffer.Add(new LineWithColor(pA, pB));
-                    }
-                    else if (!pA.HasNaN)
-                    {
-                        lineBuffer.Add(new LineWithColor(pA, pA));
-                    }
-                }
-                lines.LinesWithColor = lineBuffer;
-                LastIntensityBounds = lines.IntensityBounds;
-                if (ForceMinMax)
-                {
-                    lines.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
-                }
-            }
+            resource.Set(msg.AngleMin, msg.AngleIncrement, msg.RangeMin, msg.RangeMax, msg.Ranges, msg.Intensities);
         }
 
         public override void Stop()
         {
             base.Stop();
 
-            pointCloud.Stop();
-            ResourcePool.Dispose(Resource.Markers.PointList, pointCloud.gameObject);
-
-            lines.Stop();
-            ResourcePool.Dispose(Resource.Markers.Line, lines.gameObject);
+            resource.Stop();
+            ResourcePool.Dispose(Resource.Markers.RadialScanResource, resource.gameObject);
 
             node.Stop();
             Destroy(node);

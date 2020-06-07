@@ -108,17 +108,27 @@ namespace Iviz.App.Listeners
                 Logger.Debug($"OccupancyGrid: Size {msg.Info.Width}x{msg.Info.Height} but data length {msg.Data.Length}");
                 return;
             }
+            if (float.IsNaN(msg.Info.Resolution))
+            {
+                Logger.Debug($"OccupancyGrid: NaN in header!");
+                return;
+            }
+            if (!msg.Info.Origin.ValidateNaN())
+            {
+                Logger.Debug($"OccupancyGrid: NaN in origin!");
+                return;
+            }
 
-            node.SetParent(msg.Header.FrameId);
-            
+            node.AttachTo(msg.Header.FrameId);
+
             Pose origin = msg.Info.Origin.Ros2Unity();
-            origin.position += new Vector3(grid.NumCellsX, grid.NumCellsY, 0).Ros2Unity() * (grid.CellSize / 2f);
 
             grid.transform.SetLocalPose(origin);
             grid.NumCellsX = (int)msg.Info.Width;
             grid.NumCellsY = (int)msg.Info.Height;
             grid.CellSize = msg.Info.Resolution;
 
+            origin.position += new Vector3(grid.NumCellsX, grid.NumCellsY, 0).Ros2Unity() * (grid.CellSize / 2f);
             grid.SetOccupancy(msg.Data);
         }
 

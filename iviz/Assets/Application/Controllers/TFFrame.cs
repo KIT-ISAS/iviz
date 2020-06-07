@@ -6,15 +6,15 @@ using Iviz.Displays;
 using Iviz.App.Listeners;
 using Iviz.Resources;
 using Iviz.App.Displays;
+using System;
 
 namespace Iviz.App.Listeners
 {
     public sealed class TFFrame : ClickableNode, IRecyclable
     {
         public const int Layer = 9;
-        static readonly string[] names = { "Axis-X", "Axis-Y", "Axis-Z" };
+        static readonly Timeline timeline = new Timeline();
 
-        //bool isDead;
         string id;
         public string Id
         {
@@ -23,7 +23,6 @@ namespace Iviz.App.Listeners
             {
                 id = value;
                 labelObjectText.text = id;
-                //isDead = false;
             }
         }
 
@@ -57,23 +56,15 @@ namespace Iviz.App.Listeners
                 orbitColorEnabled = value;
                 if (!value)
                 {
-                    axisRenderers[0].SetPropertyColor(Color.red);
-                    axisRenderers[1].SetPropertyColor(Color.green);
-                    axisRenderers[2].SetPropertyColor(Color.blue);
-
-                    axisRenderers[0].SetPropertyEmissiveColor(Color.red * 0.2f);
-                    axisRenderers[1].SetPropertyEmissiveColor(Color.green * 0.2f);
-                    axisRenderers[2].SetPropertyEmissiveColor(Color.blue * 0.2f);
+                    resource.ColorX = Color.red;
+                    resource.ColorY = Color.green;
+                    resource.ColorZ = Color.blue;
                 }
                 else
                 {
-                    axisRenderers[0].SetPropertyColor(Color.black);
-                    axisRenderers[1].SetPropertyColor(Color.black);
-                    axisRenderers[2].SetPropertyColor(Color.black);
-
-                    axisRenderers[0].SetPropertyEmissiveColor(Color.yellow);
-                    axisRenderers[1].SetPropertyEmissiveColor(Color.yellow);
-                    axisRenderers[2].SetPropertyEmissiveColor(Color.yellow);
+                    resource.ColorX = Color.yellow;
+                    resource.ColorY = Color.yellow;
+                    resource.ColorZ = Color.yellow;
                 }
             }
         }
@@ -82,10 +73,10 @@ namespace Iviz.App.Listeners
 
         GameObject labelObject;
         TextMesh labelObjectText;
-        GameObject[] axisObjects;
-        MeshRenderer[] axisRenderers;
         LineConnector parentConnector;
         BoxCollider boxCollider;
+        AxisFrameResource resource;
+
         readonly HashSet<DisplayNode> listeners = new HashSet<DisplayNode>();
         readonly Dictionary<string, TFFrame> children = new Dictionary<string, TFFrame>();
 
@@ -95,12 +86,6 @@ namespace Iviz.App.Listeners
 
         public void AddListener(DisplayNode display)
         {
-            /*
-            if (isDead)
-            {
-                Debug.LogWarning("Adding listener to dead frame!");
-            }
-            */
             listeners.Add(display);
         }
 
@@ -116,12 +101,6 @@ namespace Iviz.App.Listeners
 
         public void AddChild(TFFrame frame)
         {
-            /*
-            if (isDead)
-            {
-                Debug.LogWarning("Adding child to dead frame!");
-            }
-            */
             children.Add(frame.Id, frame);
         }
 
@@ -139,52 +118,13 @@ namespace Iviz.App.Listeners
             if (HasNoListeners && IsChildless)
             {
                 TFListener.Instance.MarkAsDead(this);
-                //isDead = true;
             }
-        }
-
-        public void UpdateFrameMesh(float newFrameAxisLength, float newFrameAxisWidth)
-        {
-            if (axisObjects == null)
-            {
-                axisObjects = new GameObject[3];
-                axisRenderers = new MeshRenderer[3];
-                for (int i = 0; i < 3; i++)
-                {
-                    GameObject gameObject = ResourcePool.GetOrCreate(Resource.Markers.Cube, transform);
-                    gameObject.name = names[i];
-                    gameObject.layer = Layer;
-                    MeshRenderer renderer = gameObject.GetComponent<MeshRenderer>();
-                    renderer.sharedMaterial = Resource.Materials.SimpleLit.Object;
-                    renderer.receiveShadows = false;
-                    renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-                    axisObjects[i] = gameObject;
-                    axisRenderers[i] = renderer;
-                }
-            }
-
-            axisObjects[0].transform.localScale = new Vector3(newFrameAxisLength, newFrameAxisWidth, newFrameAxisWidth);
-            axisObjects[0].transform.localPosition = -0.5f * newFrameAxisLength * Vector3.right;
-            axisObjects[1].transform.localScale = new Vector3(newFrameAxisWidth, newFrameAxisWidth, newFrameAxisLength);
-            axisObjects[1].transform.localPosition = -0.5f * newFrameAxisLength * Vector3.forward;
-            axisObjects[2].transform.localScale = new Vector3(newFrameAxisWidth, newFrameAxisLength, newFrameAxisWidth);
-            axisObjects[2].transform.localPosition = 0.5f * newFrameAxisLength * Vector3.up;
-
-            boxCollider.center = 0.5f * (newFrameAxisLength - newFrameAxisWidth / 2) * new Vector3(-1, 1, -1);
-            boxCollider.size = (newFrameAxisLength + newFrameAxisWidth / 2) * Vector3.one;
         }
 
         public bool AxisVisible
         {
-            get => axisObjects[0].activeSelf;
-            set
-            {
-                bool visible = !ForceInvisible && value;
-                axisObjects[0].SetActive(visible);
-                axisObjects[1].SetActive(visible);
-                axisObjects[2].SetActive(visible);
-                boxCollider.enabled = visible;
-            }
+            get => resource.Visible;
+            set { resource.Visible = value; }
         }
 
         bool labelVisible;
@@ -216,35 +156,19 @@ namespace Iviz.App.Listeners
             }
         }
 
-        float axisLength;
         public float AxisLength
         {
-            get => axisLength;
+            get => resource.AxisLength;
             set
             {
-                axisLength = value;
-                UpdateFrameMesh(axisLength, axisLength / 20);
-                parentConnector.LineWidth = axisLength / 20;
+                resource.AxisLength = value;
+                parentConnector.LineWidth = AxisLength / 20;
             }
         }
 
-        public override TFFrame Parent
-        {
-            get => base.Parent;
-            set
-            {
-                SetParent(value);
-                /*
-                if (isDead)
-                {
-                    Debug.LogWarning("Accessing dead frame!");
-                }
-                */
+        public override TFFrame Parent => base.Parent;
 
-            }
-        }
-
-        public bool SetParent(TFFrame newParent)
+        public bool SetParent(in DateTime _, TFFrame newParent)
         {
             if (newParent == Parent)
             {
@@ -261,6 +185,12 @@ namespace Iviz.App.Listeners
                 newParent.CheckIfDead();
                 return false;
             }
+            /*
+            if (!timeline.Empty && time < timeline.LastTime)
+            {
+                return true; //??
+            }
+            */
             if (Parent != null)
             {
                 Parent.RemoveChild(this);
@@ -291,23 +221,42 @@ namespace Iviz.App.Listeners
         public IReadOnlyDictionary<string, TFFrame> Children => children;
 
         Pose pose;
+        public Pose Pose => pose;
+        /*
         public Pose Pose
         {
             get => pose;
             set
             {
-                /*
-                if (isDead)
-                {
-                    Debug.LogWarning("Getting pose of dead frame!");
-                }
-                */
+                
+                //if (isDead)
+                //{
+                //    Debug.LogWarning("Getting pose of dead frame!");
+                //}
                 if (!IgnoreUpdates)
                 {
                     pose = value;
                     transform.SetLocalPose(pose);
                 }
             }
+        }
+        */
+
+        public void SetPose(in DateTime time, in Pose newPose)
+        {
+            if (!IgnoreUpdates)
+            {
+                timeline.Add(time, newPose);
+
+                Pose lastPose = timeline.Last;
+                pose = lastPose;
+                transform.SetLocalPose(lastPose);
+            }
+        }
+
+        public Pose GetPose(in DateTime time)
+        {
+            return timeline.Get(time);
         }
 
         public bool HasNoListeners => !listeners.Any();
@@ -336,7 +285,8 @@ namespace Iviz.App.Listeners
                 transform.parent :
                 TFListener.BaseFrame?.transform; // TFListener.BaseFrame may not exist yet
 
-            gameObject.layer = Layer;
+            resource = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Markers.AxisFrameResource, transform);
+            resource.Layer = Layer;
 
             AxisLength = 0.25f;
             OrbitColorEnabled = false;
@@ -346,12 +296,10 @@ namespace Iviz.App.Listeners
 
         public void Recycle()
         {
-            ResourcePool.Dispose(Resource.Markers.Cube, axisObjects[0]);
-            ResourcePool.Dispose(Resource.Markers.Cube, axisObjects[1]);
-            ResourcePool.Dispose(Resource.Markers.Cube, axisObjects[2]);
+            ResourcePool.Dispose(Resource.Markers.AxisFrameResource, resource.gameObject);
             ResourcePool.Dispose(Resource.Markers.Text, labelObject);
             ResourcePool.Dispose(Resource.Markers.LineConnector, parentConnector.gameObject);
-            axisObjects = null;
+            resource = null;
             labelObject = null;
             parentConnector = null;
         }
