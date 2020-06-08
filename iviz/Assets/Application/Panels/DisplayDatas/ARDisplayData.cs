@@ -49,6 +49,9 @@ namespace Iviz.App
             panel.MarkerFrame.Value = display.MarkerFrame;
             panel.MarkerOffset.Value = display.MarkerOffset;
 
+            panel.HeadSender.RosSender = display.RosSenderHead;
+            panel.MarkersSender.RosSender = display.RosSenderMarkers;
+
             panel.WorldScale.ValueChanged += f =>
             {
                 display.WorldScale = f;

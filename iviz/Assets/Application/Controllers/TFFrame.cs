@@ -13,7 +13,7 @@ namespace Iviz.App.Listeners
     public sealed class TFFrame : ClickableNode, IRecyclable
     {
         public const int Layer = 9;
-        static readonly Timeline timeline = new Timeline();
+        readonly Timeline timeline = new Timeline();
 
         string id;
         public string Id
@@ -54,6 +54,7 @@ namespace Iviz.App.Listeners
             set
             {
                 orbitColorEnabled = value;
+                /*
                 if (!value)
                 {
                     resource.ColorX = Color.red;
@@ -66,6 +67,7 @@ namespace Iviz.App.Listeners
                     resource.ColorY = Color.yellow;
                     resource.ColorZ = Color.yellow;
                 }
+                */
             }
         }
 
@@ -166,9 +168,18 @@ namespace Iviz.App.Listeners
             }
         }
 
-        public override TFFrame Parent => base.Parent;
+        
+        public override TFFrame Parent
+        {
+            get => base.Parent;
+            set
+            {
+                SetParent(value);
+            }
+        }
+        
 
-        public bool SetParent(in DateTime _, TFFrame newParent)
+        public bool SetParent(TFFrame newParent)
         {
             if (newParent == Parent)
             {
@@ -246,11 +257,15 @@ namespace Iviz.App.Listeners
         {
             if (!IgnoreUpdates)
             {
-                timeline.Add(time, newPose);
+                if (newPose.position.magnitude > 1000)
+                {
+                    return; // lel
+                }
 
-                Pose lastPose = timeline.Last;
-                pose = lastPose;
-                transform.SetLocalPose(lastPose);
+                pose = newPose;
+                transform.SetLocalPose(newPose);
+
+                timeline.Add(time, transform.AsPose(), Id);
             }
         }
 
@@ -302,6 +317,12 @@ namespace Iviz.App.Listeners
             resource = null;
             labelObject = null;
             parentConnector = null;
+        }
+
+        public override void Stop()
+        {
+            base.Stop();
+            timeline.Clear();
         }
 
         /*

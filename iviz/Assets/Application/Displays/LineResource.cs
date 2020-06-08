@@ -19,6 +19,9 @@ namespace Iviz.Displays
         public Color Color { get; set; } = Color.white;
 
         static readonly int PropLines = Shader.PropertyToID("_Lines");
+        static readonly int PropFront = Shader.PropertyToID("_Front");
+        static readonly int PropQuad = Shader.PropertyToID("_Quad");
+
 
         int size_;
         public int Size
@@ -37,7 +40,7 @@ namespace Iviz.Displays
 
         public void Reserve(int reqDataSize)
         {
-            if (lineBuffer == null || lineBuffer.Length < reqDataSize)
+            if (lineBuffer.Length < reqDataSize)
             {
                 if (lineBuffer.Length != 0)
                 {
@@ -83,10 +86,14 @@ namespace Iviz.Displays
 
         void UpdateBuffer()
         {
+            if (Size == 0)
+            {
+                return;
+            }
             lineComputeBuffer.SetData(lineBuffer, 0, 0, Size);
             MinMaxJob.CalculateBounds(lineBuffer, Size, out Bounds bounds, out Vector2 span);
             Collider.center = bounds.center;
-            Collider.size = bounds.size;
+            Collider.size = bounds.size + Scale * Vector3.one;
             IntensityBounds = span;
         }
 
@@ -119,8 +126,6 @@ namespace Iviz.Displays
             IntensityBounds = new Vector2(0, 1);
         }
 
-        static readonly int PropQuad = Shader.PropertyToID("_Quad");
-
         void UpdateQuadComputeBuffer()
         {
             Vector3[] quad = {
@@ -139,10 +144,15 @@ namespace Iviz.Displays
 
         void Update()
         {
+            if (Size == 0)
+            {
+                return;
+            }
             UpdateTransform();
 
             Camera camera = TFListener.MainCamera;
-            material.SetVector("_Front", transform.InverseTransformDirection(camera.transform.forward));
+            //material.SetVector(PropFront, transform.InverseTransformDirection(camera.transform.forward));
+            material.SetVector(PropFront, transform.InverseTransformPoint(camera.transform.position));
 
             Bounds worldBounds = Collider.bounds;
             Graphics.DrawProcedural(material, worldBounds, MeshTopology.Quads, 4, Size);
@@ -162,6 +172,10 @@ namespace Iviz.Displays
                 quadComputeBuffer.Release();
                 quadComputeBuffer = null;
             }
+            if (lineBuffer.Length > 0)
+            {
+                lineBuffer.Dispose();
+            }
         }
 
         protected override void Rebuild()
@@ -176,7 +190,7 @@ namespace Iviz.Displays
                 lineComputeBuffer = new ComputeBuffer(lineBuffer.Length, Marshal.SizeOf<LineWithColor>());
                 lineComputeBuffer.SetData(lineBuffer, 0, 0, Size);
                 material.SetBuffer(PropLines, lineComputeBuffer);
-            }
+            } 
 
             if (quadComputeBuffer != null)
             {
@@ -185,7 +199,7 @@ namespace Iviz.Displays
             }
             UpdateQuadComputeBuffer();
 
-            UseIntensityTexture = UseIntensityTexture;
+            UpdateMaterialKeywords();
             IntensityBounds = IntensityBounds;
             Colormap = Colormap;
         }

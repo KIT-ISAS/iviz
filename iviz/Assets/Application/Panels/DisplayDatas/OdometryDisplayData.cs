@@ -12,7 +12,7 @@ namespace Iviz.App
 
         public override DataPanelContents Panel => panel;
         protected override TopicListener Listener => listener;
-        public override Resource.Module Module => Resource.Module.Odometry;
+        public override Resource.Module Module => Resource.Module.Magnitude;
         public override IConfiguration Configuration => listener.Config;
 
 
@@ -21,9 +21,9 @@ namespace Iviz.App
                 constructor.GetConfiguration<OdometryConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.GetConfiguration<OdometryConfiguration>()?.Type ?? constructor.Type)
         {
-            GameObject listenerObject = new GameObject("Odometry:" + Topic);
+            GameObject listenerObject = new GameObject("Magnitude:" + Topic);
 
-            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Odometry) as OdometryPanelContents;
+            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Magnitude) as OdometryPanelContents;
             listener = listenerObject.AddComponent<OdometryListener>();
             listener.DisplayData = this;
             if (constructor.Configuration == null)
@@ -81,16 +81,14 @@ namespace Iviz.App
             switch (listener.Config.Type)
             {
                 case PoseStamped.RosMessageType:
-                    panel.ShowVector.Interactable = false;
-                    break;
                 case PointStamped.RosMessageType:
                     panel.ShowVector.Interactable = false;
+                    panel.VectorScale.Interactable = false;
                     break;
                 case WrenchStamped.RosMessageType:
-                    panel.ShowVector.Interactable = true;
-                    break;
                 case TwistStamped.RosMessageType:
                     panel.ShowVector.Interactable = true;
+                    panel.VectorScale.Interactable = true;
                     break;
             }
 

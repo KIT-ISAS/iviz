@@ -64,7 +64,10 @@ Shader "iviz/Line"
 				float3 B = _Lines[inst].B;
 				float3 BA = B - A;
                 float3 right = normalize(BA);
-                float3 up = normalize(cross(_Front, right));
+
+				float3 mid = (B + A) / 2;
+				float3 front = mid - _Front;
+                float3 up = normalize(cross(front, right));
 
                 float3 p = right * V.x + up * V.y + BA * V.z + A;
 

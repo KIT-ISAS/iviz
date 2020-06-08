@@ -111,7 +111,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.40796, y: -82.75975}
+  m_AnchoredPosition: {x: 0.40795898, y: -82.75975}
   m_SizeDelta: {x: -4.856, y: 122.47}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5338011060733885219
@@ -135,7 +135,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.77599996, g: 0.77599996, b: 0.77599996, a: 0.37254903}
+  m_Color: {r: 0.881, g: 0.9879275, b: 1, a: 0.37254903}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -209,6 +209,7 @@ MonoBehaviour:
   sliderZ: {fileID: 6133715518722364357}
   label: {fileID: 5338011060698270012}
   button: {fileID: 5338011061367933319}
+  panel: {fileID: 5338011060733885218}
 --- !u!1 &5338011061367933313
 GameObject:
   m_ObjectHideFlags: 0

@@ -163,13 +163,15 @@ namespace Iviz.Displays
                 useLines = value;
                 if (useLines)
                 {
-                    SetLines();
                     lines.Visible = Visible;
+                    pointCloud.Visible = !Visible;
+                    SetLines();
                 }
                 else
                 {
-                    SetPoints();
                     pointCloud.Visible = Visible;
+                    lines.Visible = !Visible;
+                    SetPoints();
                 }
             }
         }
@@ -202,6 +204,7 @@ namespace Iviz.Displays
             UseLines = true;
             Colormap = Resource.ColormapId.hsv;
             PointSize = 0.01f;
+            MaxLineDistance = 0.3f;
         }
 
         public void Set(float angleMin, float angleIncrement, float rangeMin, float rangeMax, float[] ranges, float[] intensities)

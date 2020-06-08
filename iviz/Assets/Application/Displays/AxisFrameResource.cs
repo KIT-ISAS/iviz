@@ -42,6 +42,18 @@ namespace Iviz.Displays
             set => axisObjects[2].Color = value;
         }
 
+        public override int Layer
+        {
+            get => base.Layer;
+            set
+            {
+                base.Layer = value;
+                axisObjects[0].Layer = value;
+                axisObjects[1].Layer = value;
+                axisObjects[2].Layer = value;
+            }
+        }
+
         protected override void Awake()
         {
             base.Awake();
@@ -50,6 +62,7 @@ namespace Iviz.Displays
             {
                 axisObjects[i] = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Markers.Cube, transform);
                 axisObjects[i].gameObject.name = names[i];
+                axisObjects[i].ColliderEnabled = false;
             }
 
             AxisLength = 0.25f;
