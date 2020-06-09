@@ -21,12 +21,24 @@ namespace Iviz.App
                 label.text = value;
             }
         }
+
         public float Value
+        {
+            get => Min + (Max - Min) * ValueInternal / NumberOfSteps;
+            set
+            {
+                ValueInternal = (value - Min) / (Max - Min) * NumberOfSteps;
+                //Debug.Log("val: " + Label + " " + Min + " " + Max + " " + NumberOfSteps + " " + ValueInternal + " " + value);
+            }
+        }
+
+        float ValueInternal
         {
             get => slider.value;
             set
             {
-                slider.value = value;
+                //Debug.Log("val: " + Label + " " + value);
+                slider.value = Math.Max((int)value, 0);
             }
         }
 
@@ -41,34 +53,43 @@ namespace Iviz.App
             }
         }
 
+        float max = 1;
         public float Max
         {
-            get => slider.maxValue;
+            get => max;
             set
             {
-                slider.maxValue = value;
+                float v = Value;
+                max = value;
+                Value = v;
             }
         }
 
+        float min = 0;
         public float Min
         {
-            get => slider.minValue;
+            get => min;
             set
             {
-                slider.minValue = value;
+                float v = Value;
+                min = value;
+                Value = v;
             }
         }
 
-        int numberOfSteps = 50;
+        int numberOfSteps = 99;
         public int NumberOfSteps
         {
             get => numberOfSteps;
             set
             {
-                numberOfSteps = value;
+                float v = Value;
 
+                numberOfSteps = value;
                 slider.minValue = 0;
                 slider.maxValue = NumberOfSteps;
+                //Debug.Log(Label + " " + NumberOfSteps);
+                Value = v;
             }
         }
 
@@ -79,6 +100,9 @@ namespace Iviz.App
             set
             {
                 integerOnly = value;
+                Max = (int)Max;
+                Min = (int)Min;
+                NumberOfSteps = (int)(Max - Min);
             }
         }
 
@@ -86,15 +110,26 @@ namespace Iviz.App
 
         void Awake()
         {
-            Min = 0;
-            Max = 1;
+            slider.wholeNumbers = true;
+            //ValueInternal = 0;
+            NumberOfSteps = NumberOfSteps;
+            Min = Min;
+            Max = Max;
+            //Value = Value;
         }
 
         public void OnValueChanged(float f)
         {
-            float v = f / NumberOfSteps;
-            value.text = f.ToString("0.###", CultureInfo.InvariantCulture);
-            ValueChanged?.Invoke(f);
+            float v = Min + (Max - Min) * f / NumberOfSteps;
+            //Debug.Log("vc: " + Label + " " + Min + " " + Max + " " + NumberOfSteps + " " + f + " " + v);
+            //Debug.Log("vc: " + Label + " " + f);
+            UpdateLabel(v);
+            ValueChanged?.Invoke(v);
+        }
+
+        void UpdateLabel(float v)
+        {
+            value.text = v.ToString("0.###", CultureInfo.InvariantCulture);
         }
 
         public void ClearSubscribers()
@@ -128,7 +163,7 @@ namespace Iviz.App
         
         public SliderWidget UpdateValue()
         {
-            OnValueChanged(Value);
+            OnValueChanged(ValueInternal);
             return this;
         }
 
@@ -150,5 +185,10 @@ namespace Iviz.App
             return this;
         }
 
+        public SliderWidget SetNumberOfSteps(int num)
+        {
+            NumberOfSteps = num;
+            return this;
+        }
     }
 }

@@ -160,9 +160,9 @@ namespace Iviz.App
 
         void Awake()
         {
-            sliderX.SetMinValue(0).SetMaxValue(1).SubscribeValueChanged(f => OnValueChanged());
-            sliderY.SetMinValue(0).SetMaxValue(1).SubscribeValueChanged(f => OnValueChanged());
-            sliderZ.SetMinValue(0).SetMaxValue(1).SubscribeValueChanged(f => OnValueChanged());
+            sliderX.SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256).SubscribeValueChanged(f => OnValueChanged());
+            sliderY.SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256).SubscribeValueChanged(f => OnValueChanged());
+            sliderZ.SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256).SubscribeValueChanged(f => OnValueChanged());
             button.onClick.AddListener(SwitchColorMode);
         }
 

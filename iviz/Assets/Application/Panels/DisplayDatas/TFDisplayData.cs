@@ -44,6 +44,7 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
+            panel.Frame.Frame = TFListener.BaseFrame;
             panel.Listener.RosListener = listener.Listener;
             panel.ListenerStatic.RosListener = listener.ListenerStatic;
             panel.ShowAxes.Value = listener.AxisVisible;

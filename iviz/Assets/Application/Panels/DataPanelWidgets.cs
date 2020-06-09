@@ -134,6 +134,12 @@ namespace Iviz.App
             return AddToBottom(o).GetComponent<ListenerWidget>();
         }
 
+        public FrameWidget AddFrame()
+        {
+            GameObject o = Resource.Widgets.Frame.Instantiate(nonstatics.transform);
+            return AddToBottom(o).GetComponent<FrameWidget>();
+        }
+
         public void UpdateSize()
         {
             content.GetComponent<RectTransform>().sizeDelta = new Vector2(0, y);

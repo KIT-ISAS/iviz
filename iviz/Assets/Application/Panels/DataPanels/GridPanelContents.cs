@@ -22,7 +22,7 @@ namespace Iviz.App
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();
             LineWidth = p.AddSlider("Grid Line Width").SetMinValue(0.01f).SetMaxValue(0.1f).UpdateValue();
-            CellSize = p.AddSlider("Grid Cell Size").SetMinValue(0.01f).SetMaxValue(0.1f).SetValue(1.0f).UpdateValue();
+            CellSize = p.AddSlider("Grid Cell Size").SetMinValue(0.1f).SetMaxValue(10f).SetValue(1.0f).UpdateValue();
             NumberOfCells = p.AddSlider("Number of Cells").SetMinValue(1).SetMaxValue(50).SetIntegerOnly(true).SetValue(10).UpdateValue();
             Orientation = p.AddDropdown("Orientation").SetOptions(GridResource.OrientationNames).SetIndex(0);
             ColorPicker = p.AddColorPicker("Grid Color").SetValue(Color.gray);

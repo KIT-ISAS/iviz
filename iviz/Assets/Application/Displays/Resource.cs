@@ -305,6 +305,7 @@ namespace Iviz.Resources
             public GameObjectInfo Vector3 { get; }
             public GameObjectInfo Sender { get; }
             public GameObjectInfo Listener { get; }
+            public GameObjectInfo Frame { get; }
 
             public WidgetsType()
             {
@@ -330,6 +331,7 @@ namespace Iviz.Resources
                 Vector3 = new GameObjectInfo("Widgets/Vector3");
                 Sender = new GameObjectInfo("Widgets/Sender");
                 Listener = new GameObjectInfo("Widgets/Listener");
+                Frame = new GameObjectInfo("Widgets/Frame");
             }
         }
 

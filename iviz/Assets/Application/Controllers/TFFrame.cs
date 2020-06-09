@@ -290,6 +290,7 @@ namespace Iviz.App.Listeners
             labelObject.gameObject.SetActive(false);
             labelObject.name = "Frame Axis Label";
             labelObjectText = labelObject.GetComponent<TextMesh>();
+            labelObject.name = "[Label]";
 
             parentConnector = ResourcePool.
                 GetOrCreate(Resource.Markers.LineConnector, transform).
@@ -299,9 +300,11 @@ namespace Iviz.App.Listeners
             parentConnector.B = transform.parent != null ?
                 transform.parent :
                 TFListener.BaseFrame?.transform; // TFListener.BaseFrame may not exist yet
+            parentConnector.name = "[Connector]";
 
             resource = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Markers.AxisFrameResource, transform);
             resource.Layer = Layer;
+            resource.name = "[Axis]";
 
             AxisLength = 0.25f;
             OrbitColorEnabled = false;
@@ -322,6 +325,7 @@ namespace Iviz.App.Listeners
         public override void Stop()
         {
             base.Stop();
+            Id = "";
             timeline.Clear();
         }
 

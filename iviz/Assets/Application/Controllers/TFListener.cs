@@ -258,10 +258,8 @@ namespace Iviz.App.Listeners
 
         TFFrame CreateFrameObject(string id, GameObject parent)
         {
-            GameObject o = ResourcePool.GetOrCreate(Resource.Markers.TFFrame, parent.transform);
-            o.name = id;
-
-            TFFrame frame = o.GetComponent<TFFrame>();
+            TFFrame frame = ResourcePool.GetOrCreate<TFFrame>(Resource.Markers.TFFrame, parent.transform);
+            frame.name = id;
             frame.Id = id;
             frame.IgnoreUpdates = false;
             frame.AxisVisible = config.AxisVisible;

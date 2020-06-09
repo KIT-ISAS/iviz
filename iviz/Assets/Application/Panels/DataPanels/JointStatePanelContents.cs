@@ -16,7 +16,7 @@
             Robot = p.AddDropdown("Robot");
             JointPrefix = p.AddInputField("Joint Prefix").SetPlaceholder("<none>");
             JointSuffix = p.AddInputField("Joint Suffix").SetPlaceholder("<none>");
-            TrimFromEnd = p.AddSlider("Trim End Characters").SetIntegerOnly(true).SetMinValue(0).SetMaxValue(10);
+            TrimFromEnd = p.AddSlider("Trim End Characters").SetMinValue(0).SetMaxValue(10).SetIntegerOnly(true);
             CloseButton = p.AddTrashButton();
             p.UpdateSize();
             gameObject.SetActive(false);
