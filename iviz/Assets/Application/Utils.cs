@@ -365,6 +365,15 @@ namespace Iviz
             return p.rotation * v + p.position;
         }
 
+        public static Pose Multiply(this Pose p, in Pose o)
+        {
+            return new Pose
+            (
+                rotation: p.rotation * o.rotation,
+                position: p.rotation * o.position + p.position
+            );
+        }
+
         public static void SetPose(this Transform t, in Pose p)
         {
             t.position = p.position;

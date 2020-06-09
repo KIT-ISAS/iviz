@@ -53,6 +53,7 @@ MonoBehaviour:
   label: {fileID: 4996971548240524337}
   text: {fileID: 4996971548442829304}
   placeholder: {fileID: 4996971547877882632}
+  textImage: {fileID: 0}
 --- !u!1 &4996971547877882638
 GameObject:
   m_ObjectHideFlags: 0
@@ -112,7 +113,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 0.5}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []

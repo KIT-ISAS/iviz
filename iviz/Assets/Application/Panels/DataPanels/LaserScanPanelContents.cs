@@ -2,8 +2,14 @@
 
 namespace Iviz.App
 {
+    /// <summary>
+    /// <see cref="LaserScanDisplayData"/> 
+    /// </summary>
+
     public class LaserScanPanelContents : ListenerPanelContents
     {
+        public FrameWidget Frame { get; private set; }
+
         public ToggleWidget UseIntensity { get; private set; }
         public DataLabelWidget NumPoints { get; private set; }
         public DataLabelWidget MinMax { get; private set; }
@@ -24,6 +30,7 @@ namespace Iviz.App
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("LaserScan");
             Listener = p.AddListener();
+            Frame = p.AddFrame();
             NumPoints = p.AddDataLabel("Number of Points");
             MinMax = p.AddDataLabel("Min/Max");
             PointSize = p.AddSlider("Point Size").SetMinValue(0.01f).SetMaxValue(0.1f);

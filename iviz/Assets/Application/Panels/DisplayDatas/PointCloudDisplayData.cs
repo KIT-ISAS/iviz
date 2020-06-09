@@ -4,6 +4,10 @@ using UnityEngine;
 
 namespace Iviz.App
 {
+    /// <summary>
+    /// <see cref="PointCloudPanelContents"/> 
+    /// </summary>
+
     public class PointCloudDisplayData : ListenerDisplayData
     {
         readonly PointCloudListener listener;
@@ -39,6 +43,7 @@ namespace Iviz.App
         public override void SetupPanel()
         {
             panel.Listener.RosListener = listener.Listener;
+            panel.Frame.Owner = listener;
 
             panel.NumPoints.Label = $"Number of Points: {listener.Size}";
 

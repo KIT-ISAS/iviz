@@ -31,6 +31,8 @@ namespace Iviz.App.Listeners
         public DisplayClickableNode Node { get; private set; }
         ImageResource marker;
 
+        public override TFFrame Frame => Node.Parent;
+
         public ImageTexture ImageTexture => texture;
         public Texture2D Texture => texture.Texture;
         public Material Material => texture.Material;

@@ -7,8 +7,8 @@ namespace Iviz.App
 {
     public class ToggleWidget : MonoBehaviour, IWidget
     {
-        public Toggle toggle;
-        public Text label;
+        [SerializeField] Toggle toggle;
+        [SerializeField] Text label;
 
         public string Label
         {

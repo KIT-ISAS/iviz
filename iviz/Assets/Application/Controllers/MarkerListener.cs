@@ -24,6 +24,8 @@ namespace Iviz.App.Listeners
 
         public override DisplayData DisplayData { get; set; }
 
+        public override TFFrame Frame => TFListener.BaseFrame;
+
         readonly MarkerConfiguration config = new MarkerConfiguration();
         public MarkerConfiguration Config
         {

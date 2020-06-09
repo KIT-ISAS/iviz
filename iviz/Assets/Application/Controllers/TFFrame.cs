@@ -10,6 +10,11 @@ using System;
 
 namespace Iviz.App.Listeners
 {
+    public interface IHasFrame
+    {
+        TFFrame Frame { get; }
+    }
+
     public sealed class TFFrame : ClickableNode, IRecyclable
     {
         public const int Layer = 9;
@@ -233,6 +238,9 @@ namespace Iviz.App.Listeners
 
         Pose pose;
         public Pose Pose => pose;
+
+        public Pose WorldPose => transform.AsPose();
+
         /*
         public Pose Pose
         {
@@ -264,9 +272,21 @@ namespace Iviz.App.Listeners
 
                 pose = newPose;
                 transform.SetLocalPose(newPose);
+                LogPose(time);
+            }
+        }
 
+        void LogPose(in DateTime time)
+        {
+            if (listeners.Count != 0)
+            {
                 timeline.Add(time, transform.AsPose(), Id);
             }
+            foreach(TFFrame child in children.Values)
+            {
+                child.LogPose(time);
+            }
+            //Debug.Log(timeline.Count + " " + (timeline.LastTime - timeline.FirstTime).Milliseconds);
         }
 
         public Pose GetPose(in DateTime time)

@@ -118,7 +118,7 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 3927959003498002733}
+  - {fileID: 7786611110930008992}
   - {fileID: 7786611111468096670}
   - {fileID: 7786611111125302775}
   - {fileID: 7786611111092987665}
@@ -181,7 +181,7 @@ MonoBehaviour:
   contentObject: {fileID: 7786611109904658291}
   emptyText: {fileID: 7786611111092987678}
   titleText: {fileID: 7786611111468096671}
-  closeButton: {fileID: 843236670540645312}
+  closeButton: {fileID: 7786611110930009511}
 --- !u!1 &7786611109904658291
 GameObject:
   m_ObjectHideFlags: 0
@@ -600,8 +600,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 7786611111062374574}
   m_HandleRect: {fileID: 7786611111062374561}
   m_Direction: 2
-  m_Value: 1
-  m_Size: 0.828768
+  m_Value: 0
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1160,7 +1160,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: da7ab3b9ffc07dd4f801efc74796acd4, type: 3}
---- !u!114 &843236670540645312 stripped
+--- !u!114 &7786611110930009511 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7474953677808031820, guid: da7ab3b9ffc07dd4f801efc74796acd4,
     type: 3}
@@ -1172,7 +1172,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2d948a05eda04e46bedb11eec1aa15e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!224 &3927959003498002733 stripped
+--- !u!224 &7786611110930008992 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6524995043497632417, guid: da7ab3b9ffc07dd4f801efc74796acd4,
     type: 3}

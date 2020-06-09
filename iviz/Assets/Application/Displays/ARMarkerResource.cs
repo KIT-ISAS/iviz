@@ -63,6 +63,7 @@ namespace Iviz.Displays
         {
             base.Awake();
             Color = new Color(0, 1, 0, 0.25f);
+            Scale = 0.19f;
         }
     }
 }

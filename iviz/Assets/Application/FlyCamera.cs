@@ -462,6 +462,12 @@ namespace Iviz.App
             transform.position += transform.rotation * p;
             //transform.position = -orbitRadius * (transform.rotation * Vector3.forward) + OrbitCenter;
         }
+
+        public void LookAt(in Vector3 position)
+        {
+            transform.position = position - transform.forward * 3;
+        }
+
         private Vector3 GetBaseInput()
         { //returns the basic values, if it's 0 than it's not active.
             Vector3 p_Velocity = new Vector3();

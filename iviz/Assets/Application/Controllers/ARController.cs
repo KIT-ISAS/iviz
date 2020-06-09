@@ -8,6 +8,7 @@ using UnityEngine.XR.ARFoundation;
 using Iviz.Displays;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.App.Displays;
+using System.Linq;
 
 namespace Iviz.App.Listeners
 {
@@ -20,8 +21,8 @@ namespace Iviz.App.Listeners
         [DataMember] public float WorldScale { get; set; } = 1.0f;
         [DataMember] public SerializableVector3 Origin { get; set; } = new Vector3(0, 0, 1.5f);
         [DataMember] public bool SearchMarker { get; set; } = false;
-        [DataMember] public float MarkerSize { get; set; } = 0.19f;
-        [DataMember] public bool MarkerHorizontal { get; set; } = false;
+        [DataMember] public float MarkerSize { get; set; } = 0.198f;
+        [DataMember] public bool MarkerHorizontal { get; set; } = true;
         [DataMember] public int MarkerAngle { get; set; } = 0;
         [DataMember] public string MarkerFrame { get; set; } = "";
         [DataMember] public SerializableVector3 MarkerOffset { get; set; } = Vector3.zero;
@@ -29,11 +30,15 @@ namespace Iviz.App.Listeners
         [DataMember] public bool PublishMarkers { get; set; } = true;
     }
 
-    public class ARController : MonoBehaviour, IController
+    public class ARController : MonoBehaviour, IController, IHasFrame
     {
-        public Canvas Canvas;
-        public Camera MainCamera;
+        [SerializeField] Camera ARCamera;
+        [SerializeField] ARSessionOrigin ARSessionOrigin;
+        [SerializeField] Canvas Canvas;
+        [SerializeField] Camera MainCamera;
+
         ARPlaneManager planeManager;
+        ARTrackedImageManager tracker;
 
         DisplayClickableNode node;
         ARMarkerResource resource;
@@ -42,9 +47,6 @@ namespace Iviz.App.Listeners
         DateTime lastMarkerUpdate = DateTime.MinValue;
 
         GameObject TFRoot => TFListener.Instance.gameObject;
-
-        public Camera ARCamera;
-        public ARSessionOrigin ARSessionOrigin;
 
         public string HeadFrameName => $"{ConnectionManager.MyId}/ar_head";
         public string HeadPoseTopic => $"{ConnectionManager.MyId}/ar_head";
@@ -66,6 +68,12 @@ namespace Iviz.App.Listeners
                 WorldScale = config.WorldScale;
                 PublishPose = config.PublishPose;
                 PublishMarkers = config.PublishMarkers;
+                SearchMarker = config.SearchMarker;
+                MarkerSize = config.MarkerSize;
+                MarkerHorizontal = config.MarkerHorizontal;
+                MarkerAngle = config.MarkerAngle;
+                MarkerFrame = config.MarkerFrame;
+                MarkerOffset = config.MarkerOffset;
             }
         }
 
@@ -75,7 +83,8 @@ namespace Iviz.App.Listeners
             set
             {
                 config.Origin = value;
-                ARSessionOrigin.gameObject.transform.position = value.Ros2Unity();
+                TFRoot.transform.position = -value.Ros2Unity();
+                //ARSessionOrigin.transform.position = value.Ros2Unity();
             }
         }
 
@@ -95,7 +104,7 @@ namespace Iviz.App.Listeners
             set
             {
                 config.Visible = value;
-                resource.Visible = MarkerFound && value;
+                resource.Visible = value;
                 MainCamera.gameObject.SetActive(!value);
                 ARCamera.gameObject.SetActive(value);
                 Canvas.worldCamera = value ? ARCamera : MainCamera;
@@ -147,7 +156,16 @@ namespace Iviz.App.Listeners
             }
         }
 
-        public bool MarkerFound { get; private set; }
+        bool markerFound;
+        public bool MarkerFound
+        {
+            get => markerFound;
+            private set
+            {
+                markerFound = value;
+                resource.Visible = Visible && value;
+            }
+        }
 
         public bool SearchMarker
         {
@@ -155,6 +173,15 @@ namespace Iviz.App.Listeners
             set
             {
                 config.SearchMarker = value;
+                tracker.enabled = value;
+                if (value)
+                {
+                    tracker.trackedImagesChanged += OnTrackedImagesChanged;
+                }
+                else
+                {
+                    tracker.trackedImagesChanged -= OnTrackedImagesChanged;
+                }
             }
         }
 
@@ -184,7 +211,7 @@ namespace Iviz.App.Listeners
             set
             {
                 config.MarkerAngle = value;
-                resource.Angle = 45 * value; // deg
+                resource.Angle = value; // deg
             }
         }
 
@@ -198,13 +225,15 @@ namespace Iviz.App.Listeners
             }
         }
 
+        public TFFrame Frame => node.Parent;
+
         public Vector3 MarkerOffset
         {
             get => config.MarkerOffset;
             set
             {
                 config.MarkerOffset = value;
-                resource.Offset = value;
+                resource.Offset = value.Ros2Unity();
             }
         }
 
@@ -228,11 +257,13 @@ namespace Iviz.App.Listeners
             }
 
             planeManager = ARSessionOrigin.GetComponent<ARPlaneManager>();
-            Config = new ARConfiguration();
+            tracker = ARSessionOrigin.GetComponent<ARTrackedImageManager>();
 
             node = DisplayClickableNode.Instantiate("AR Node");
             resource = ResourcePool.GetOrCreate<ARMarkerResource>(Resource.Markers.ARMarkerResource);
             node.Target = resource;
+
+            Config = new ARConfiguration();
         }
 
         uint headSeq = 0;
@@ -283,6 +314,37 @@ namespace Iviz.App.Listeners
                 }
             }
 
+        }
+
+        void OnTrackedImagesChanged(ARTrackedImagesChangedEventArgs obj)
+        {
+            Pose newPose = new Pose();
+            if (obj.added.Any())
+            {
+                Debug.Log("Added " + obj.added.Count() + " images!");
+                /*
+                transform.position = obj.added[0].transform.position;
+                transform.rotation = obj.added[0].transform.rotation;
+                */
+                newPose = obj.added[0].transform.AsPose();
+            }
+            if (obj.updated.Any())
+            {
+                Debug.Log("Updated " + obj.updated.Count() + " images!");
+                /*
+                transform.position = obj.updated[0].transform.position;
+                transform.rotation = obj.updated[0].transform.rotation;
+                */
+                newPose = obj.updated[0].transform.AsPose();
+            }
+            Pose expectedPose = TFListener.RelativePose(resource.transform.AsPose());
+            Pose change = newPose.Multiply(expectedPose.Inverse());
+
+            MarkerFound = true;
+            TFRoot.transform.SetPose(change);
+
+            //Debug.Log("Found pose: " + newPose + "\nExpected pose: " + expectedPose + "\nChange: " + change);
+            //Debug.Log("Found pose: " + newPose + "\nCamera pose: " + ARCamera.transform.AsPose());
         }
 
         public void Stop()

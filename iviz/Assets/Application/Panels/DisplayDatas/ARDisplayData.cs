@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace Iviz.App
 {
+    /// <summary>
+    /// <see cref="ARPanelContents"/> 
+    /// </summary>
     public class ARDisplayData : DisplayData
     {
         readonly ARController display;
@@ -39,6 +42,7 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
+            panel.Frame.Owner = display;
             panel.WorldScale.Value = display.WorldScale;
             panel.Origin.Value = display.Origin;
 
@@ -52,6 +56,8 @@ namespace Iviz.App
             panel.HeadSender.RosSender = display.RosSenderHead;
             panel.MarkersSender.RosSender = display.RosSenderMarkers;
 
+            CheckInteractable();
+
             panel.WorldScale.ValueChanged += f =>
             {
                 display.WorldScale = f;
@@ -63,6 +69,7 @@ namespace Iviz.App
             panel.SearchMarker.ValueChanged += f =>
             {
                 display.SearchMarker = f;
+                CheckInteractable();
             };
             panel.MarkerSize.ValueChanged += f =>
             {
@@ -76,9 +83,10 @@ namespace Iviz.App
             {
                 display.MarkerAngle = (int)f;
             };
-            panel.MarkerFrame.ValueChanged += f =>
+            panel.MarkerFrame.EndEdit += f =>
             {
                 display.MarkerFrame = f;
+                CheckInteractable();
             };
             panel.MarkerOffset.ValueChanged += f =>
             {
@@ -96,6 +104,16 @@ namespace Iviz.App
                 panel.HideButton.State = display.Visible;
                 UpdateButtonText();
             };
+        }
+
+        void CheckInteractable()
+        {
+            panel.Origin.Interactable = !display.SearchMarker;
+            panel.MarkerHorizontal.Interactable = display.SearchMarker;
+            panel.MarkerAngle.Interactable = display.SearchMarker;
+            panel.MarkerFrame.Interactable = display.SearchMarker;
+            panel.MarkerOffset.Interactable = display.SearchMarker && display.MarkerFrame.Length != 0;
+            panel.MarkerSize.Interactable = display.SearchMarker;
         }
 
         public override void AddToState(StateConfiguration config)

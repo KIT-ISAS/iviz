@@ -3,9 +3,11 @@ using UnityEngine;
 
 namespace Iviz.App.Listeners
 {
-    public abstract class TopicListener : MonoBehaviour, IController
+    public abstract class TopicListener : MonoBehaviour, IController, IHasFrame
     {
         public RosListener Listener { get; protected set; }
+
+        public abstract TFFrame Frame { get; }
 
         public int NumPublishers =>
             (!ConnectionManager.Connected || Listener == null) ? -1 : Listener.NumPublishers;

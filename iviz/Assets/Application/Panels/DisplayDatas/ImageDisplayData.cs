@@ -6,6 +6,9 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
+    /// <summary>
+    /// <see cref="ImagePanelContents"/> 
+    /// </summary>
     public class ImageDisplayData : ListenerDisplayData
     {
         readonly ImageListener listener;
@@ -120,8 +123,7 @@ namespace Iviz.App
             panel.Min.Interactable = listener.IsMono;
             panel.Max.Interactable = listener.IsMono;
             panel.Description.Label = listener.Description;
-            panel.PreviewWidget.image.enabled = false;
-            panel.PreviewWidget.image.enabled = true;
+            panel.PreviewWidget.ToggleImageEnabled();
         }
 
         /*

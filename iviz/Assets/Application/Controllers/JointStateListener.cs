@@ -25,6 +25,8 @@ namespace Iviz.App.Listeners
     {
         public override DisplayData DisplayData { get; set; }
 
+        public override TFFrame Frame => TFListener.BaseFrame;
+
         readonly JointStateConfiguration config = new JointStateConfiguration();
         public JointStateConfiguration Config
         {

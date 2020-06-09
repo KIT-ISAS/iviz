@@ -29,6 +29,8 @@ namespace Iviz.App.Listeners
 
         public DisplayData DisplayData { get; set; }
 
+        public TFFrame Frame => depthImage?.Frame;
+
         readonly DepthImageProjectorConfiguration config = new DepthImageProjectorConfiguration();
         public DepthImageProjectorConfiguration Config
         {

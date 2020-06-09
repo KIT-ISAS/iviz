@@ -41,6 +41,8 @@ namespace Iviz.App.Listeners
 
         public bool CalculateMinMax { get; private set; } = true;
 
+        public override TFFrame Frame => node.Parent;
+
         readonly PointCloudConfiguration config = new PointCloudConfiguration();
         public PointCloudConfiguration Config
         {

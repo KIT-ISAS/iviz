@@ -11,6 +11,7 @@ namespace Iviz.App
         public InputFieldWidget inputY;
         public InputFieldWidget inputZ;
         public Text label;
+        public Image panel;
         bool disableUpdates;
 
         public string Label
@@ -43,6 +44,7 @@ namespace Iviz.App
                 inputY.Interactable = value;
                 inputZ.Interactable = value;
                 label.color = value ? Resource.Colors.EnabledFontColor : Resource.Colors.DisabledFontColor;
+                panel.color = value ? Resource.Colors.EnabledPanelColor : Resource.Colors.DisabledPanelColor;
             }
         }
 
@@ -112,6 +114,7 @@ namespace Iviz.App
 
         void Awake()
         {
+            Interactable = true;
             UpdateInputLabels();
             inputX.SubscribeValueChanged(_ => OnValueChanged());
             inputY.SubscribeValueChanged(_ => OnValueChanged());

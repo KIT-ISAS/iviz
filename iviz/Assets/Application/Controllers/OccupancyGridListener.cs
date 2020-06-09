@@ -32,6 +32,8 @@ namespace Iviz.App.Listeners
 
         public override DisplayData DisplayData { get; set; }
 
+        public override TFFrame Frame => node.Parent;
+
         readonly OccupancyGridConfiguration config = new OccupancyGridConfiguration();
         public OccupancyGridConfiguration Config
         {

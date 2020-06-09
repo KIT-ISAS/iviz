@@ -5,6 +5,10 @@ using UnityEngine;
 
 namespace Iviz.App
 {
+    /// <summary>
+    /// <see cref="LaserScanPanelContents"/> 
+    /// </summary>
+
     public class LaserScanDisplayData : ListenerDisplayData
     {
         readonly LaserScanListener listener;
@@ -41,6 +45,7 @@ namespace Iviz.App
         public override void SetupPanel()
         {
             panel.Listener.RosListener = listener.Listener;
+            panel.Frame.Owner = listener;
 
             panel.NumPoints.Label = $"Number of Points: {listener.Size}";
 

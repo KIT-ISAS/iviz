@@ -8,7 +8,7 @@ namespace Iviz.App
     {
         const int Size = 30;
 
-        public Text text;
+        [SerializeField] Text text;
 
         RosListener listener;
         public RosListener RosListener

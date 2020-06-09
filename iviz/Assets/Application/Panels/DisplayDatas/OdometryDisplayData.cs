@@ -5,6 +5,10 @@ using UnityEngine;
 
 namespace Iviz.App
 {
+    /// <summary>
+    /// <see cref="OdometryPanelContents"/> 
+    /// </summary>
+
     public class OdometryDisplayData : ListenerDisplayData
     {
         readonly OdometryListener listener;
@@ -41,6 +45,7 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
+            panel.Frame.Owner = listener;
             panel.ShowTrail.Value = listener.ShowTrail;
             panel.ShowAxis.Value = listener.ShowAxis;
             panel.ShowVector.Value = listener.ShowVector;
@@ -97,6 +102,12 @@ namespace Iviz.App
             {
                 DataPanelManager.HideSelectedPanel();
                 DisplayListPanel.RemoveDisplay(this);
+            };
+            panel.HideButton.Clicked += () =>
+            {
+                listener.Visible = !listener.Visible;
+                panel.HideButton.State = listener.Visible;
+                UpdateButtonText();
             };
         }
 

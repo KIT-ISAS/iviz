@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace Iviz.App
 {
+    /// <summary>
+    /// <see cref="GridDisplayData"/> 
+    /// </summary>
     public class GridPanelContents : DataPanelContents
     {
         public TrashButtonWidget CloseButton { get; private set; }

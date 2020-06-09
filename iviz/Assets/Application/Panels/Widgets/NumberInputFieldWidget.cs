@@ -9,9 +9,10 @@ namespace Iviz.App
 {
     public class NumberInputFieldWidget : MonoBehaviour, IWidget
     {
-        public Text label;
-        public InputField text;
-        public Text placeholder;
+        [SerializeField] Text label;
+        [SerializeField] InputField text;
+        [SerializeField] Text placeholder;
+        [SerializeField] Image textImage;
 
         public string Label
         {
@@ -51,6 +52,7 @@ namespace Iviz.App
             set
             {
                 text.interactable = value;
+                textImage.raycastTarget = value;
                 label.color = value ? Resource.Colors.EnabledFontColor : Resource.Colors.DisabledFontColor;
             }
         }
@@ -61,7 +63,7 @@ namespace Iviz.App
 
         void Awake()
         {
-            Value = 0;
+            Value = Value;
         }
 
         public void OnValueChanged(string text)

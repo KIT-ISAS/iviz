@@ -7,7 +7,7 @@ namespace Iviz.App
     public class SenderWidget : MonoBehaviour, IWidget
     {
         const int Size = 30;
-        public Text text;
+        [SerializeField] Text text;
 
         RosSender sender;
         public RosSender RosSender

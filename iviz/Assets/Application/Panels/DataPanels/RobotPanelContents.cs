@@ -2,8 +2,13 @@
 
 namespace Iviz.App
 {
+    /// <summary>
+    /// <see cref="RobotDisplayData"/> 
+    /// </summary>
+    /// 
     public class RobotPanelContents : DataPanelContents
     {
+        public FrameWidget Frame { get; private set; }
         public DropdownWidget ResourceType { get; private set; }
         public ToggleWidget AttachToTF { get; private set; }
         public InputFieldWidget FramePrefix { get; private set; }
@@ -15,6 +20,7 @@ namespace Iviz.App
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("Robot");
+            Frame = p.AddFrame();
             ResourceType = p.AddDropdown("Resource").SetOptions(Resource.Robots.Names);
             AttachToTF = p.AddToggle("Attach to TF Frames");
             FramePrefix = p.AddInputField("TF Frame Prefix").SetPlaceholder("<none>");

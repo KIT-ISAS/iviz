@@ -41,6 +41,8 @@ namespace Iviz.App.Listeners
             set => displayNode.DisplayData = value;
         }
 
+        public override TFFrame Frame => displayNode.Parent;
+
         readonly OdometryConfiguration config = new OdometryConfiguration();
         public OdometryConfiguration Config
         {
@@ -191,6 +193,7 @@ namespace Iviz.App.Listeners
 
             name = "Magnitude:" + config.Topic;
             displayNode.SetName($"[{config.Topic}]");
+            displayNode.DisplayData = DisplayData;
 
             switch (config.Type)
             {

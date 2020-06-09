@@ -26,6 +26,8 @@ namespace Iviz.App.Listeners
     {
         RosSender<InteractiveMarkerFeedback> rosSender;
 
+        public override TFFrame Frame => TFListener.BaseFrame;
+
         readonly Dictionary<string, InteractiveMarkerObject> imarkers =
             new Dictionary<string, InteractiveMarkerObject>();
 

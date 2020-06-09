@@ -20,23 +20,7 @@ namespace Iviz.App.Displays
             get => parent;
             set
             {
-                if (value != parent)
-                {
-                    if (parent != null)
-                    {
-                        parent.RemoveListener(this);
-                    }
-                    parent = value;
-                    if (parent != null)
-                    {
-                        parent.AddListener(this);
-                    }
-                    else
-                    {
-                        //Debug.LogWarning("Display: Setting parent of " + name + " to null! (ok if removing)");
-                    }
-                }
-                transform.SetParentLocal(value?.transform);
+                SetParent(value, true);
             }
         }
 
@@ -66,12 +50,12 @@ namespace Iviz.App.Displays
 
         public virtual void AttachTo(string parentId)
         {
-            Parent = (parentId == "") ? TFListener.ListenersFrame : TFListener.GetOrCreateFrame(parentId);
+            Parent = (parentId == "") ? TFListener.BaseFrame : TFListener.GetOrCreateFrame(parentId);
         }
 
         public virtual void AttachTo(string parentId, DateTime timestamp)
         {
-            transform.SetParentLocal(TFListener.ListenersFrame.transform);
+            transform.SetParentLocal(TFListener.BaseFrame.transform);
             if (parentId == "")
             {
                 transform.SetPose(Pose.identity);
@@ -106,7 +90,7 @@ namespace Iviz.App.Displays
             }
             else
             {
-                node.Parent = TFListener.ListenersFrame;
+                node.Parent = TFListener.BaseFrame;
             }
             return node;
         }

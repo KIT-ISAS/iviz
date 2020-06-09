@@ -5,8 +5,8 @@ namespace Iviz.App
 {
     public class ImagePreviewWidget : MonoBehaviour, IWidget
     {
-        public Text label;
-        public RawImage image;
+        [SerializeField] Text label;
+        [SerializeField] RawImage image;
 
         public bool Interactable
         {
@@ -42,6 +42,12 @@ namespace Iviz.App
         {
             Material = f;
             return this;
+        }
+
+        public void ToggleImageEnabled()
+        {
+            image.enabled = false;
+            image.enabled = true;
         }
 
         public void ClearSubscribers()

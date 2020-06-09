@@ -4,9 +4,14 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
+    /// <summary>
+    /// <see cref="PointCloudDisplayData"/> 
+    /// </summary>
+
     public class PointCloudPanelContents : ListenerPanelContents
     {
         static readonly List<string> DefaultChannels = new List<string> { "x", "y", "z" };
+        public FrameWidget Frame { get; private set; }
         public DataLabelWidget NumPoints { get; private set; }
         public DataLabelWidget MinMax { get; private set; }
         public SliderWidget PointSize { get; private set; }
@@ -26,6 +31,7 @@ namespace Iviz.App
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("PointCloud");
             Listener = p.AddListener();
+            Frame = p.AddFrame();
             NumPoints = p.AddDataLabel("Number of Points");
             MinMax = p.AddDataLabel("Min/Max");
             PointSize = p.AddSlider("Point Size").SetMinValue(0.01f).SetMaxValue(0.1f);

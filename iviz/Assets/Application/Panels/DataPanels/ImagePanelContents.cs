@@ -2,6 +2,9 @@
 
 namespace Iviz.App
 {
+    /// <summary>
+    /// <see cref="ImageDisplayData"/> 
+    /// </summary>
     public class ImagePanelContents : ListenerPanelContents
     {
         public ToggleWidget ShowBillboard { get; private set; }

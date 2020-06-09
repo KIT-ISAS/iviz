@@ -1,12 +1,16 @@
 ﻿
 namespace Iviz.App
 {
+    /// <summary>
+    /// <see cref="ARDisplayData"/> 
+    /// </summary>
     public class ARPanelContents : DataPanelContents
     {
+        public FrameWidget Frame { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
         public ToggleButtonWidget HideButton { get; private set; }
         public Vector3Widget Origin { get; private set; }
-        public NumberInputFieldWidget WorldScale { get; private set; }
+        public SliderWidget WorldScale { get; private set; }
         public ToggleWidget SearchMarker { get; private set; }
         public NumberInputFieldWidget MarkerSize { get; private set; }
         public ToggleWidget MarkerHorizontal { get; private set; }
@@ -23,14 +27,15 @@ namespace Iviz.App
             p.AddHeadTitleWidget("AR");
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();
-            Origin = p.AddVector3("Origin");
-            WorldScale = p.AddNumberInputField("World Scale");
+            Frame = p.AddFrame();
+            WorldScale = p.AddSlider("World Scale").SetMinValue(0.01f).SetMaxValue(1f);
             SearchMarker = p.AddToggle("Use Origin Marker");
-            MarkerSize = p.AddNumberInputField("Origin Marker Size");
+            Origin = p.AddVector3("Session Start Position");
             MarkerHorizontal = p.AddToggle("Is Marker Horizontal");
-            MarkerAngle = p.AddSlider("Marker Angle").SetMinValue(0).SetMaxValue(7).SetIntegerOnly(true);
-            MarkerFrame = p.AddInputField("Marker Frame");
-            MarkerOffset = p.AddVector3("Marker Offset");
+            MarkerAngle = p.AddSlider("Marker Angle").SetMinValue(0).SetMaxValue(7*45).SetNumberOfSteps(7);
+            MarkerFrame = p.AddInputField("Marker Follows TF Frame").SetPlaceholder("(none)");
+            MarkerOffset = p.AddVector3("Offset From TF Frame");
+            MarkerSize = p.AddNumberInputField("Size (m)");
             HeadSender = p.AddSender();
             MarkersSender = p.AddSender();
             p.UpdateSize();

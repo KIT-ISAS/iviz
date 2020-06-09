@@ -7,6 +7,9 @@ using UnityEngine;
 
 namespace Iviz.App
 {
+    /// <summary>
+    /// <see cref="GridPanelContents"/> 
+    /// </summary>
     public class GridDisplayData : DisplayData
     {
         readonly Listeners.Grid display;

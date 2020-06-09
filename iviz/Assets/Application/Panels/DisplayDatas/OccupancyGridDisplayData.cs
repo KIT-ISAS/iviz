@@ -4,6 +4,10 @@ using UnityEngine;
 
 namespace Iviz.App
 {
+    /// <summary>
+    /// <see cref="OccupancyGridPanelContents"/> 
+    /// </summary>
+
     public class OccupancyGridDisplayData : ListenerDisplayData
     {
         readonly OccupancyGridListener listener;
@@ -39,6 +43,7 @@ namespace Iviz.App
         public override void SetupPanel()
         {
             panel.Listener.RosListener = listener.Listener;
+            panel.Frame.Owner = listener;
 
             panel.Colormap.Index = (int)listener.Colormap;
             panel.HideButton.State = listener.Visible;

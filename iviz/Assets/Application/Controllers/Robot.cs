@@ -31,10 +31,12 @@ namespace Iviz.App
         [DataMember] public bool AttachToTF { get; set; } = false;
     }
 
-    public class Robot : MonoBehaviour, IController
+    public class Robot : MonoBehaviour, IController, IHasFrame
     {
         ObjectClickableNode node;
         RobotInfo robotInfo;
+
+        public TFFrame Frame => node.Parent;
 
         public GameObject RobotObject { get; private set; }
         public GameObject BaseLink { get; private set; }

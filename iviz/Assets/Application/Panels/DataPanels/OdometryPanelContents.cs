@@ -1,8 +1,13 @@
 ﻿
 namespace Iviz.App
 {
+    /// <summary>
+    /// <see cref="OdometryDisplayData"/> 
+    /// </summary>
+    /// 
     public class OdometryPanelContents : ListenerPanelContents
     {
+        public FrameWidget Frame { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
         public ToggleButtonWidget HideButton { get; private set; }
         public SliderWidget Scale { get; private set; }
@@ -18,6 +23,7 @@ namespace Iviz.App
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("Magnitude");
             Listener = p.AddListener();
+            Frame = p.AddFrame();
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();
             Scale = p.AddSlider("Axis Scale").SetMinValue(0.1f).SetMaxValue(10.0f);

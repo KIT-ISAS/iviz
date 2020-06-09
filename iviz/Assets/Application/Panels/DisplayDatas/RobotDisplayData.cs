@@ -5,6 +5,10 @@ using UnityEngine;
 
 namespace Iviz.App
 {
+    /// <summary>
+    /// <see cref="RobotPanelContents"/> 
+    /// </summary>
+
     public class RobotDisplayData : DisplayData
     {
         readonly RobotPanelContents panel;
@@ -39,6 +43,7 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
+            panel.Frame.Owner = Robot;
             panel.ResourceType.Value = Robot.RobotResource;
             panel.FramePrefix.Value = Robot.FramePrefix;
             panel.FrameSuffix.Value = Robot.FrameSuffix;

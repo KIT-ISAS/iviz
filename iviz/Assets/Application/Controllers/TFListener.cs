@@ -40,6 +40,8 @@ namespace Iviz.App.Listeners
         public static TFFrame BaseFrame { get; private set; }
         public static TFFrame ListenersFrame { get; private set; }
 
+        public override TFFrame Frame => BaseFrame;
+
         FlyCamera guiManager;
         DisplayNode dummyListener;
         DisplayNode staticListener;
@@ -303,6 +305,16 @@ namespace Iviz.App.Listeners
             Instance.Publisher.Publish(msg);
         }
 
+        public static UnityEngine.Pose RelativePose(in UnityEngine.Pose unityPose)
+        {
+            UnityEngine.Pose baseFrameInverse = BaseFrame.transform.AsPose().Inverse();
+            UnityEngine.Pose relative = baseFrameInverse.Multiply(unityPose);
+            relative.position.x /= BaseFrame.transform.localScale.x;
+            relative.position.y /= BaseFrame.transform.localScale.y;
+            relative.position.z /= BaseFrame.transform.localScale.z;
+            return relative;
+        }
+
         static uint tfSeq = 0;
         public static void Publish(string parentFrame, string childFrame, in UnityEngine.Pose unityPose)
         {
@@ -314,7 +326,7 @@ namespace Iviz.App.Listeners
                     (
                         Header: RosUtils.CreateHeader(tfSeq++, parentFrame ?? BaseFrameId),
                         ChildFrameId: childFrame ?? "",
-                        Transform: unityPose.Unity2RosTransform()
+                        Transform:  RelativePose(unityPose).Unity2RosTransform()
                     )
                 }
             );

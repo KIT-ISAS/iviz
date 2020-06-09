@@ -11,11 +11,13 @@ namespace Iviz.App
         class PoseInfo
         {
             public Pose Pose { get; }
+            public DateTime Key { get; }
             public DateTime Insertion { get; }
             public readonly string Id;
 
-            public PoseInfo(in Pose pose, string id)
+            public PoseInfo(in DateTime key, in Pose pose, string id)
             {
+                Key = key;
                 Pose = pose;
                 Insertion = DateTime.Now;
                 Id = id;
@@ -28,16 +30,21 @@ namespace Iviz.App
         }
 
         readonly SortedList<DateTime, PoseInfo> poses = new SortedList<DateTime, PoseInfo>();
-        const int MaxSize = 20;
+        readonly SortedList<DateTime, PoseInfo> insertions = new SortedList<DateTime, PoseInfo>();
+
+        const int MaxSize = 50;
 
         public void Add(in DateTime t, in Pose p, string id)
         {
-            poses[t] = new PoseInfo(p, id);
+            var poseInfo = new PoseInfo(t, p, id);
+            poses[t] = poseInfo;
+            insertions[poseInfo.Insertion] = poseInfo;
 
             if (poses.Count > MaxSize)
             {
-                DateTime minKey = poses.Select(x => (x.Value.Insertion, x.Key)).Min().Key;
+                DateTime minKey = insertions.Values[0].Key;
                 poses.Remove(minKey);
+                insertions.RemoveAt(0);
             }
         }
 
@@ -57,9 +64,9 @@ namespace Iviz.App
             }
             else
             {
-                for (int i = 0; i < poses.Count - 1; i++)
+                for (int i = poses.Count - 2; i >= 0; i--) // most likely to be at the end
                 {
-                    if (T < poses.Keys[i + 1])
+                    if (T > poses.Keys[i])
                     {
                         DateTime A = poses.Keys[i];
                         DateTime B = poses.Keys[i + 1];
@@ -68,6 +75,8 @@ namespace Iviz.App
                         Pose pA = poses.Values[i].Pose;
                         Pose pB = poses.Values[i + 1].Pose;
 
+
+                        //Debug.Log(i + "/" + poses.Count + "/" + insertions.Count);
                         return pA.Lerp(pB, (float)t);
                     }
                 }

@@ -7,58 +7,73 @@ namespace Iviz.App
 {
     public class FrameWidget : MonoBehaviour, IWidget
     {
-        public Text text;
+        [SerializeField] Text text;
 
-        string frameId;
-        TFFrame frame;
-        public TFFrame Frame
+        IHasFrame owner;
+        public IHasFrame Owner
         {
-            get => frame;
+            get => owner;
             set
             {
-                if (frame == null && value != null)
+                if (owner == null && value != null)
                 {
                     GameThread.EverySecond += UpdateStats;
                 }
-                else if (frame != null && value == null)
+                else if (owner != null && value == null)
                 {
                     GameThread.EverySecond -= UpdateStats;
                 }
 
+                owner = value;
+                Frame = owner?.Frame;
+            }
+        }
+
+        TFFrame frame;
+        public TFFrame Frame
+        {
+            get => frame;
+            private set
+            {
+                if (frame == value)
+                {
+                    return;
+                }
                 frame = value;
                 if (frame != null)
                 {
-                    frameId = value.Id;
-                    text.text = "<b>►</b>" + frameId;
+                    text.text = "<b>" + frame.Id + "</b>";
                     UpdateStats();
                 }
                 else
                 {
-                    frameId = null;
+                    text.text = "<i>(none)</i>";
                 }
             }
         }
 
+        void Awake()
+        {
+            Frame = null;
+        }
+
         void UpdateStats()
         {
-            if (Frame == null)
-            {
-                return;
-            }
-            
-            if (Frame.Id != frameId) // disposed
-            {
-                Frame = null;
-            }
+            Frame = Owner?.Frame;
         }
 
         public void ClearSubscribers()
         {
+            Owner = null;
             Frame = null;
         }
 
         public void OnGotoClick()
         {
+            if (Frame != null)
+            {
+                TFListener.GuiManager.LookAt(Frame.WorldPose.position);
+            }
         }
 
         public void OnTrailClick()

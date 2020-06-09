@@ -45,10 +45,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e7dc2e58335d49cbab0e29cd439b2d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Canvas: {fileID: 0}
-  MainCamera: {fileID: 0}
   ARCamera: {fileID: 6019251948242916433}
   ARSessionOrigin: {fileID: 6019251946659006209}
+  Canvas: {fileID: 0}
+  MainCamera: {fileID: 0}
 --- !u!1 &6019251946498178307
 GameObject:
   m_ObjectHideFlags: 0
@@ -118,6 +118,8 @@ GameObject:
   - component: {fileID: 6019251946659006208}
   - component: {fileID: 6019251946659006209}
   - component: {fileID: 2073293449537332265}
+  - component: {fileID: 4123752780789567426}
+  - component: {fileID: 4353230375184450486}
   m_Layer: 0
   m_Name: AR Session Origin
   m_TagString: Untagged
@@ -168,6 +170,38 @@ MonoBehaviour:
   m_PlanePrefab: {fileID: 666795433288981299, guid: 75a5cdd81f9844f6b9d69890de63b125,
     type: 3}
   m_DetectionMode: -1
+--- !u!114 &4123752780789567426
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6019251946659006334}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73a025b51106444e18fb408fde19ac53, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_AutomaticPlacement: 1
+  m_EnvironmentTextureFilterMode: 2
+  m_EnvironmentTextureHDR: 1
+  m_DebugPrefab: {fileID: 0}
+--- !u!114 &4353230375184450486
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6019251946659006334}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4dea56a9eaadd1c439095de4f9a371cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SerializedLibrary: {fileID: 11400000, guid: 6370256f7dca44b55b23d4a05965b796,
+    type: 2}
+  m_MaxNumberOfMovingImages: 0
+  m_TrackedImagePrefab: {fileID: 0}
 --- !u!1 &6019251948242916430
 GameObject:
   m_ObjectHideFlags: 0
@@ -182,9 +216,7 @@ GameObject:
   - component: {fileID: 6019251948242916432}
   - component: {fileID: 851342195858701130}
   - component: {fileID: 7404689011173654653}
-  - component: {fileID: 8852862980460391371}
   - component: {fileID: 3395489962138412187}
-  - component: {fileID: 7872115345486754675}
   m_Layer: 0
   m_Name: AR Camera
   m_TagString: Untagged
@@ -306,22 +338,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Camera: {fileID: 0}
---- !u!114 &8852862980460391371
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6019251948242916430}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4dea56a9eaadd1c439095de4f9a371cb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SerializedLibrary: {fileID: 11400000, guid: 6370256f7dca44b55b23d4a05965b796,
-    type: 2}
-  m_MaxNumberOfMovingImages: 0
-  m_TrackedImagePrefab: {fileID: 0}
 --- !u!114 &3395489962138412187
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -334,19 +350,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e3c44306fb1e439a9f18b2212b8ab70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &7872115345486754675
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6019251948242916430}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 73a025b51106444e18fb408fde19ac53, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_AutomaticPlacement: 1
-  m_EnvironmentTextureFilterMode: 2
-  m_EnvironmentTextureHDR: 1
-  m_DebugPrefab: {fileID: 0}
