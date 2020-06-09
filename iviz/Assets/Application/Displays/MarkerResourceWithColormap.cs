@@ -122,7 +122,7 @@ namespace Iviz.Displays
 
         abstract protected void Rebuild();
 
-        void OnApplicationFocus(bool hasFocus)
+        protected virtual void OnApplicationFocus(bool hasFocus)
         {
             if (!hasFocus)
             {

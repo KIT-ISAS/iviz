@@ -170,8 +170,8 @@ namespace Iviz.App.Listeners
         {
             base.StartListening();
             Listener = new RosListener<PointCloud2>(config.Topic, Handler);
-            name = "PointCloud:" + config.Topic;
-            node.name = "PointCloudNode:" + config.Topic;
+            name = "[" + config.Topic + "]";
+            node.name = name;
         }
 
         static int FieldSizeFromType(int datatype)
@@ -198,6 +198,7 @@ namespace Iviz.App.Listeners
         void Handler(PointCloud2 msg)
         {
             node.AttachTo(msg.Header.FrameId, msg.Header.Stamp.ToDateTime());
+            //node.AttachTo(msg.Header.FrameId);
 
             if (msg.PointStep < 3 * 4 ||
                 msg.RowStep < msg.PointStep * msg.Width ||

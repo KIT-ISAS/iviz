@@ -160,11 +160,6 @@ namespace Iviz.App.Listeners
             ListenersFrame.AddListener(null);
             ListenersFrame.ForceInvisible = true;
 
-            TFFrame f;
-            f = GetOrCreateFrame("navigation", dummyListener);
-            f.AddListener(null);
-            f.IgnoreUpdates = true;
-
             Publisher = new RosSender<tfMessage_v2>(DefaultTopic);
         }
 
@@ -215,7 +210,7 @@ namespace Iviz.App.Listeners
                     null :
                     GetOrCreateFrame(parentId, null);
 
-                if (child.SetParent(timestamp, parent))
+                if (child.SetParent(parent))
                 {
                     child.SetPose(timestamp, t.Transform.Ros2Unity());
                 }
@@ -301,7 +296,7 @@ namespace Iviz.App.Listeners
         {
             frames.Remove(frame.Id);
             GuiManager.Unselect(frame);
-            frame.Parent = null;
+            frame.Stop();
             ResourcePool.Dispose(Resource.Markers.TFFrame, frame.gameObject);
         }
 

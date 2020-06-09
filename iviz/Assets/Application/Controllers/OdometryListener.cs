@@ -189,14 +189,14 @@ namespace Iviz.App.Listeners
         {
             base.StartListening();
 
-            name = "Odometry:" + config.Topic;
+            name = "Magnitude:" + config.Topic;
             displayNode.SetName($"[{config.Topic}]");
 
             switch (config.Type)
             {
                 case PoseStamped.RosMessageType:
                     Listener = new RosListener<PoseStamped>(config.Topic, Handler);
-                    axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Markers.Axis);
+                    axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Markers.AxisFrameResource);
                     displayNode.Target = axis;
                     break;
 
@@ -211,7 +211,7 @@ namespace Iviz.App.Listeners
 
                 case WrenchStamped.RosMessageType:
                     Listener = new RosListener<WrenchStamped>(config.Topic, Handler);
-                    axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Markers.Axis);
+                    axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Markers.AxisFrameResource);
                     displayNode.Target = axis;
                     arrow = ResourcePool.GetOrCreate<ArrowResource>(Resource.Markers.Arrow);
                     arrow.Parent = displayNode.transform.parent;
@@ -219,7 +219,7 @@ namespace Iviz.App.Listeners
 
                 case TwistStamped.RosMessageType:
                     Listener = new RosListener<TwistStamped>(config.Topic, Handler);
-                    axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Markers.Axis);
+                    axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Markers.AxisFrameResource);
                     displayNode.Target = axis;
                     arrow = ResourcePool.GetOrCreate<ArrowResource>(Resource.Markers.Arrow);
                     arrow.Parent = displayNode.transform.parent;

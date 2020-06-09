@@ -37,12 +37,30 @@ namespace Iviz.App.Displays
                     }
                 }
                 transform.SetParentLocal(value?.transform);
-                /*
-                if (value != null)
+            }
+        }
+
+        void SetParent(TFFrame newParent, bool attach)
+        {
+            if (newParent != parent)
+            {
+                if (parent != null)
                 {
-                    transform.SetPose(value.transform.AsPose());
+                    parent.RemoveListener(this);
                 }
-                */
+                parent = newParent;
+                if (parent != null)
+                {
+                    parent.AddListener(this);
+                }
+                else
+                {
+                    //Debug.LogWarning("Display: Setting parent of " + name + " to null! (ok if removing)");
+                }
+            }
+            if (attach)
+            {
+                transform.SetParentLocal(newParent?.transform);
             }
         }
 
@@ -53,14 +71,16 @@ namespace Iviz.App.Displays
 
         public virtual void AttachTo(string parentId, DateTime timestamp)
         {
-            Parent = TFListener.ListenersFrame;
+            transform.SetParentLocal(TFListener.ListenersFrame.transform);
             if (parentId == "")
             {
                 transform.SetPose(Pose.identity);
             }
             else
             {
-                transform.SetPose(TFListener.GetOrCreateFrame(parentId).GetPose(timestamp));
+                TFFrame frame = TFListener.GetOrCreateFrame(parentId);
+                SetParent(frame, false);
+                transform.SetPose(frame.GetPose(timestamp));
             }
         }
 

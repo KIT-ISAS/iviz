@@ -26,6 +26,11 @@ namespace Iviz.App
                 this.type = type;
                 this.resource = resource;
             }
+
+            public override string ToString()
+            {
+                return $"{RosUtils.SanitizedText(topic, Size)}\n<b>{type}</b>";
+            }
         }
 
         readonly List<TopicWithResource> topics = new List<TopicWithResource>();
@@ -57,7 +62,7 @@ namespace Iviz.App
         {
             GetTopics();
             itemList.Title = "Available Topics";
-            itemList.Items = topics.Select(x => $"{RosUtils.SanitizedText(x.topic, Size)}\n<b>{x.resource}</b>");
+            itemList.Items = topics.Select(x => x.ToString());
             itemList.ItemClicked += OnItemClicked;
             itemList.CloseClicked += OnCloseClicked;
             lastTime = DateTime.Now;
@@ -68,7 +73,7 @@ namespace Iviz.App
             base.UpdatePanel();
 
             GetTopics();
-            itemList.Items = topics.Select(x => $"{RosUtils.SanitizedText(x.topic, Size)}\n<b>{x.resource}</b>");
+            itemList.Items = topics.Select(x => x.ToString());
         }
 
 

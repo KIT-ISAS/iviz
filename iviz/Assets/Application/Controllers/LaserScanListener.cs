@@ -151,9 +151,6 @@ namespace Iviz.App.Listeners
             }
         }
 
-        readonly List<PointWithColor> pointBuffer = new List<PointWithColor>();
-        readonly List<LineWithColor> lineBuffer = new List<LineWithColor>();
-
         void Awake()
         {
             transform.parent = TFListener.ListenersFrame.transform;
@@ -173,7 +170,7 @@ namespace Iviz.App.Listeners
 
         void Handler(LaserScan msg)
         {
-            node.AttachTo(msg.Header.FrameId);
+            node.AttachTo(msg.Header.FrameId, msg.Header.Stamp.ToDateTime());
 
             if (float.IsNaN(msg.AngleMin) || float.IsNaN(msg.AngleMax) ||
                 float.IsNaN(msg.RangeMin) || float.IsNaN(msg.RangeMax) ||

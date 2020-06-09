@@ -24,9 +24,9 @@ namespace Iviz.App
             ShowAxis = p.AddToggle("Show Frame");
             ShowTrail = p.AddToggle("Enable Trail");
             TrailTime = p.AddSlider("Trail Time").SetMinValue(0.5f).SetMaxValue(5.0f);
+            Color = p.AddColorPicker("Color");
             ShowVector = p.AddToggle("Enable Vector");
             VectorScale = p.AddSlider("Vector Scale").SetMinValue(0.1f).SetMaxValue(10.0f);
-            Color = p.AddColorPicker("Color");
             p.UpdateSize();
             gameObject.SetActive(false);
         }

@@ -32,7 +32,7 @@ namespace Iviz.Resources
             DepthImageProjector,
             LaserScan,
             AR,
-            Odometry,
+            Magnitude,
             OccupancyGrid,
         }
 
@@ -46,10 +46,10 @@ namespace Iviz.Resources
             { InteractiveMarkerUpdate.RosMessageType, Module.InteractiveMarker },
             { JointState.RosMessageType, Module.JointState },
             { LaserScan.RosMessageType, Module.LaserScan },
-            { PoseStamped.RosMessageType, Module.Odometry },
-            { PointStamped.RosMessageType, Module.Odometry },
-            { WrenchStamped.RosMessageType, Module.Odometry },
-            { TwistStamped.RosMessageType, Module.Odometry },
+            { PoseStamped.RosMessageType, Module.Magnitude },
+            { PointStamped.RosMessageType, Module.Magnitude },
+            { WrenchStamped.RosMessageType, Module.Magnitude },
+            { TwistStamped.RosMessageType, Module.Magnitude },
             { OccupancyGrid.RosMessageType, Module.OccupancyGrid },
         };
 
@@ -60,11 +60,16 @@ namespace Iviz.Resources
         {
             public Color EnabledFontColor { get; }
             public Color DisabledFontColor { get; }
+            public Color EnabledPanelColor { get; }
+            public Color DisabledPanelColor { get; }
 
             public ColorScheme()
             {
-                EnabledFontColor = new Color(0.196f, 0.196f, 0.196f);
+                EnabledFontColor = new Color(0.196f, 0.196f, 0.196f, 1.0f);
                 DisabledFontColor = EnabledFontColor * 3;
+
+                EnabledPanelColor = new Color(0.88f, 0.99f, 1f, 0.373f);
+                DisabledPanelColor = new Color(0.777f, 0.777f, 0.777f, 0.373f);
             }
         }
 
@@ -239,6 +244,7 @@ namespace Iviz.Resources
                 Axis = new GameObjectInfo("Displays/Axis");
                 DepthImageResource = new GameObjectInfo("Displays/DepthImageResource");
                 OccupancyGridResource = new GameObjectInfo("Displays/OccupancyGridResource");
+                RadialScanResource = new GameObjectInfo("Displays/RadialScanResource");
                 ARMarkerResource = new GameObjectInfo("Displays/ARMarkerResource");
                 AxisFrameResource = new GameObjectInfo("Displays/AxisFrameResource");
 

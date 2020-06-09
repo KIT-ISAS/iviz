@@ -18,10 +18,7 @@ namespace Iviz.Displays
             set
             {
                 colorX = value;
-                Material material = value.a > 254f / 255f ?
-                    Resource.Materials.Lit.Object :
-                    Resource.Materials.TransparentLit.Object;
-                SetMaterial(material, 0);
+                SetMaterial(MatForAlpha(value.a), 0);
                 Renderer.SetPropertyColor(value, 0);
             }
         }
@@ -33,10 +30,7 @@ namespace Iviz.Displays
             set
             {
                 colorY = value;
-                Material material = value.a > 254f / 255f ?
-                    Resource.Materials.Lit.Object :
-                    Resource.Materials.TransparentLit.Object;
-                SetMaterial(material, 1);
+                SetMaterial(MatForAlpha(value.a), 1);
                 Renderer.SetPropertyColor(value, 1);
             }
         }
@@ -48,12 +42,16 @@ namespace Iviz.Displays
             set
             {
                 colorZ = value;
-                Material material = value.a > 254f / 255f ?
-                    Resource.Materials.Lit.Object :
-                    Resource.Materials.TransparentLit.Object;
-                SetMaterial(material, 2);
+                SetMaterial(MatForAlpha(value.a), 2);
                 Renderer.SetPropertyColor(value, 2);
             }
+        }
+
+        static Material MatForAlpha(float a)
+        {
+            return a > 254f / 255f ?
+                Resource.Materials.Lit.Object :
+                Resource.Materials.TransparentLit.Object;
         }
 
         float scale = 0.25f;

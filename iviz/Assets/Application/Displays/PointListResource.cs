@@ -140,10 +140,14 @@ namespace Iviz.Displays
 
         void UpdateBuffer()
         {
+            if (Size == 0)
+            {
+                return;
+            }
             pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
             MinMaxJob.CalculateBounds(pointBuffer, Size, out Bounds bounds, out Vector2 span);
             Collider.center = bounds.center;
-            Collider.size = bounds.size;
+            Collider.size = bounds.size + Scale.x * Vector3.one;
             IntensityBounds = span;
         }
 

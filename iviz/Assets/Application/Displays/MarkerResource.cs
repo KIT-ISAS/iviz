@@ -16,11 +16,13 @@ namespace Iviz.Displays
             get => Collider.enabled;
             set => Collider.enabled = value;
         }
+
         public Transform Parent
         {
             get => transform.parent;
             set => transform.parent = value;
         }
+
         public virtual bool Visible
         {
             get => gameObject.activeSelf;
@@ -28,6 +30,7 @@ namespace Iviz.Displays
         }
 
         public Vector3 WorldScale => transform.lossyScale;
+
         public Pose WorldPose => transform.AsPose();
 
         public virtual int Layer

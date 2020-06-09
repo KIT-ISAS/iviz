@@ -291,9 +291,7 @@ namespace Iviz.App.Listeners
             }
             else
             {
-                Pose pose = TFListener.GetOrCreateFrame(msg.Header.FrameId).transform.AsPose();
-                Parent = TFListener.BaseFrame;
-                transform.SetLocalPose(pose);
+                AttachTo(msg.Header.FrameId, msg.Header.Stamp.ToDateTime());
             }
 
             transform.SetLocalPose(msg.Pose.Ros2Unity());

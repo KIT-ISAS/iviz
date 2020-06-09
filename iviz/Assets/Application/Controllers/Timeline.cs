@@ -8,21 +8,40 @@ namespace Iviz.App
 {
     public class Timeline
     {
-        static readonly TimeSpan MaxDistance = TimeSpan.FromSeconds(20);
-
-        readonly SortedList<DateTime, Pose> poses = new SortedList<DateTime, Pose>();
-
-        public void Add(in DateTime t, in Pose p)
+        class PoseInfo
         {
-            poses[t] = p;
+            public Pose Pose { get; }
+            public DateTime Insertion { get; }
+            public readonly string Id;
 
-            while (LastTime - FirstTime > MaxDistance)
+            public PoseInfo(in Pose pose, string id)
             {
-                poses.RemoveAt(0);
+                Pose = pose;
+                Insertion = DateTime.Now;
+                Id = id;
+            }
+
+            public override string ToString()
+            {
+                return Pose.ToString() + " " + Id;
             }
         }
 
-        public Pose Get(DateTime T)
+        readonly SortedList<DateTime, PoseInfo> poses = new SortedList<DateTime, PoseInfo>();
+        const int MaxSize = 20;
+
+        public void Add(in DateTime t, in Pose p, string id)
+        {
+            poses[t] = new PoseInfo(p, id);
+
+            if (poses.Count > MaxSize)
+            {
+                DateTime minKey = poses.Select(x => (x.Value.Insertion, x.Key)).Min().Key;
+                poses.Remove(minKey);
+            }
+        }
+
+        public Pose Get(in DateTime T)
         {
             if (poses.Count == 0)
             {
@@ -46,17 +65,24 @@ namespace Iviz.App
                         DateTime B = poses.Keys[i + 1];
                         double t = (T - A).TotalMilliseconds / (B - A).TotalMilliseconds;
 
-                        Pose pA = poses.Values[i];
-                        Pose pB = poses.Values[i + 1];
+                        Pose pA = poses.Values[i].Pose;
+                        Pose pB = poses.Values[i + 1].Pose;
+
                         return pA.Lerp(pB, (float)t);
                     }
                 }
             }
+            Debug.Log("OUT! " +  (T - LastTime).TotalMilliseconds);
             return Pose.identity; // shouldn't happen
         }
 
-        public Pose First => poses.Values[0];
-        public Pose Last => poses.Values[poses.Count - 1];
+        public void Clear()
+        {
+            poses.Clear();
+        }
+
+        public Pose First => poses.Values[0].Pose;
+        public Pose Last => poses.Values[poses.Count - 1].Pose;
 
         public DateTime FirstTime => poses.Keys[0];
         public DateTime LastTime => poses.Keys[poses.Count - 1];

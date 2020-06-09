@@ -119,7 +119,7 @@ namespace Iviz.App.Listeners
                 return;
             }
 
-            node.AttachTo(msg.Header.FrameId);
+            node.AttachTo(msg.Header.FrameId, msg.Header.Stamp.ToDateTime());
 
             Pose origin = msg.Info.Origin.Ros2Unity();
 

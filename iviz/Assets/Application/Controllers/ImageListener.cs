@@ -163,12 +163,12 @@ namespace Iviz.App.Listeners
 
         void HandlerCompressed(CompressedImage msg)
         {
-            Node.AttachTo(msg.Header.FrameId);
+            Node.AttachTo(msg.Header.FrameId, msg.Header.Stamp.ToDateTime());
 
             if (msg.Format != "png")
             {
                 //Logger.Error("ImageListener: Can only handle png compression");
-                descriptionOverride = $"[Format '{msg.Format}]";
+                descriptionOverride = $"<color=red>Format '{msg.Format}'</color>";
                 return;
             }
             descriptionOverride = null;
@@ -177,7 +177,7 @@ namespace Iviz.App.Listeners
 
         void Handler(Image msg)
         {
-            Node.AttachTo(msg.Header.FrameId);
+            Node.AttachTo(msg.Header.FrameId, msg.Header.Stamp.ToDateTime());
 
             int width = (int)msg.Width;
             int height = (int)msg.Height;

@@ -12,6 +12,7 @@ namespace Iviz.App
         public SliderWidget sliderZ;
         public Text label;
         public Button button;
+        public Image panel;
         Color color;
 
         enum ColorMode
@@ -51,6 +52,7 @@ namespace Iviz.App
                 sliderZ.Interactable = value;
                 button.interactable = value;
                 label.color = value ? Resource.Colors.EnabledFontColor : Resource.Colors.DisabledFontColor;
+                panel.color = value ? Resource.Colors.EnabledPanelColor : Resource.Colors.DisabledPanelColor;
             }
         }
 

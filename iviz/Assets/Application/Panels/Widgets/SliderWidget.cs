@@ -59,19 +59,40 @@ namespace Iviz.App
             }
         }
 
-        public bool IntegerOnly
+        int numberOfSteps = 50;
+        public int NumberOfSteps
         {
-            get => slider.wholeNumbers;
+            get => numberOfSteps;
             set
             {
-                slider.wholeNumbers = value;
+                numberOfSteps = value;
+
+                slider.minValue = 0;
+                slider.maxValue = NumberOfSteps;
+            }
+        }
+
+        bool integerOnly;
+        public bool IntegerOnly
+        {
+            get => integerOnly;
+            set
+            {
+                integerOnly = value;
             }
         }
 
         public event Action<float> ValueChanged;
 
+        void Awake()
+        {
+            Min = 0;
+            Max = 1;
+        }
+
         public void OnValueChanged(float f)
         {
+            float v = f / NumberOfSteps;
             value.text = f.ToString("0.###", CultureInfo.InvariantCulture);
             ValueChanged?.Invoke(f);
         }
