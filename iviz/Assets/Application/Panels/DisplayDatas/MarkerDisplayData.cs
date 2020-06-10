@@ -48,13 +48,6 @@ namespace Iviz.App
             };
         }
 
-        /*
-        public override JToken Serialize()
-        {
-            return JToken.FromObject(listener.Config);
-        }
-        */
-
         public override void AddToState(StateConfiguration config)
         {
             config.Markers.Add(listener.Config);

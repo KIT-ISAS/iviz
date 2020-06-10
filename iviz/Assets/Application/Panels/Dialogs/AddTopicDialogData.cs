@@ -29,7 +29,7 @@ namespace Iviz.App
 
             public override string ToString()
             {
-                return $"{RosUtils.SanitizedText(topic, Size)}\n<b>{type}</b>";
+                return $"{UnityUtils.SanitizedText(topic, Size)}\n<b>{type}</b>";
             }
         }
 

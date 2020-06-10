@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace Iviz.App
@@ -7,6 +8,14 @@ namespace Iviz.App
     {
         [SerializeField] Text label;
         [SerializeField] RawImage image;
+        [SerializeField] Button button;
+
+        public Action Clicked;
+
+        void Awake()
+        {
+            button.onClick.AddListener(() => { Clicked?.Invoke(); });
+        }
 
         public bool Interactable
         {
@@ -52,6 +61,7 @@ namespace Iviz.App
 
         public void ClearSubscribers()
         {
+            Clicked = null;
         }
     }
 }

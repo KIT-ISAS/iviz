@@ -21,7 +21,7 @@
             DisplayListPanel = null;
         }
 
-        public void Select()
+        public void Show()
         {
             DialogPanelManager.TogglePanel(this);
             DisplayListPanel.AllGuiVisible = true;

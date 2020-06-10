@@ -323,17 +323,6 @@ namespace Iviz
             return ValidateNaN(pose.Orientation) && ValidateNaN(pose.Position);
         }
 
-        public static string SanitizedText(string text, int size)
-        {
-            if (text.Length <= size + 5)
-            {
-                return text;
-            }
-            else
-            {
-                return text.Substring(0, size) + "...\n→ " + text.Substring(size);
-            }
-        }
     }
 
     public static class UnityUtils
@@ -348,6 +337,18 @@ namespace Iviz
             }
             f = 0;
             return false;
+        }
+
+        public static string SanitizedText(string text, int size)
+        {
+            if (text.Length <= size + 5)
+            {
+                return text;
+            }
+            else
+            {
+                return text.Substring(0, size) + "...\n→ " + text.Substring(size);
+            }
         }
 
         public static Pose AsPose(this Transform t)
@@ -394,10 +395,11 @@ namespace Iviz
 
         public static Pose Inverse(this Pose p)
         {
-            Pose q = new Pose();
-            q.rotation = Quaternion.Inverse(p.rotation);
-            q.position = -(q.rotation * p.position);
-            return q;
+            Quaternion q = Quaternion.Inverse(p.rotation);
+            return new Pose(
+                rotation: q,
+                position: q * -p.position
+                );
         }
 
         public static Pose Lerp(this Pose p, in Pose o, float t)
@@ -448,6 +450,7 @@ namespace Iviz
             }
         }
 
+        /*
         public static Bounds TransformBound(Bounds b, Transform T)
         {
             return TransformBound(b, T.rotation, T.position);
@@ -473,6 +476,7 @@ namespace Iviz
             }
             return new Bounds((positionMax + positionMin) / 2, positionMax - positionMin);
         }
+        */
 
         static MaterialPropertyBlock propBlock;
         static readonly int ColorPropId = Shader.PropertyToID("_Color");

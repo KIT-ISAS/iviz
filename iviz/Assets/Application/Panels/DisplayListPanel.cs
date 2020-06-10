@@ -113,6 +113,7 @@ namespace Iviz.App
         DialogData availableDisplays;
         DialogData availableTopics;
         ConnectionDialogData connectionData;
+        ImageDialogData imageData;
 
         readonly List<GameObject> buttons = new List<GameObject>();
 
@@ -140,6 +141,8 @@ namespace Iviz.App
             availableDisplays = CreateDialog<AddDisplayDialogData>();
             availableTopics = CreateDialog<AddTopicDialogData>();
 
+            imageData = CreateDialog<ImageDialogData>();
+
             connectionData = CreateDialog<ConnectionDialogData>();
             LoadSimpleConfiguration();
 
@@ -159,7 +162,7 @@ namespace Iviz.App
             MasterUriStr.Label = connectionData.MasterUri + " →";
             MasterUriButton.Clicked += () =>
             {
-                connectionData.Select();
+                connectionData.Show();
             };
 
             ConnectionManager.Connection.MasterUri = connectionData.MasterUri;
@@ -439,12 +442,12 @@ namespace Iviz.App
 
         void OnAddDisplayByTopicClick()
         {
-            availableTopics.Select();
+            availableTopics.Show();
         }
 
         void OnAddDisplayClick()
         {
-            availableDisplays.Select();
+            availableDisplays.Show();
         }
 
         public DisplayData CreateDisplay(Resource.Module resource, string topic = "", string type = "", IConfiguration configuration = null)
@@ -562,6 +565,12 @@ namespace Iviz.App
         public void RegisterDisplayedTopic(string topic)
         {
             displayedTopics.Add(topic);
+        }
+
+        public void ShowImageDialog(ImageListener caller)
+        {
+            imageData.Listener = caller;
+            imageData.Show();
         }
     }
 }

@@ -7,7 +7,8 @@ namespace Iviz.App
     public enum DialogPanelType
     {
         ItemList,
-        Connection
+        Connection,
+        Image
     }
 
     public class DialogPanelManager : MonoBehaviour
@@ -34,6 +35,7 @@ namespace Iviz.App
             gameObject.SetActive(false);
             PanelByType[DialogPanelType.ItemList] = Resource.Widgets.ItemListPanel.Instantiate(transform).GetComponent<DialogItemList>();
             PanelByType[DialogPanelType.Connection] = Resource.Widgets.ConnectionPanel.Instantiate(transform).GetComponent<ConnectionDialogContents>();
+            PanelByType[DialogPanelType.Image] = Resource.Widgets.ImagePanel.Instantiate(transform).GetComponent<ImageDialogContents>();
 
             PanelByType.Values.ForEach(x => x.Active = false);
             Active = false;

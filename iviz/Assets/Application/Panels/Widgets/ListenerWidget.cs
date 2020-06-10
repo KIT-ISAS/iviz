@@ -52,7 +52,7 @@ namespace Iviz.App
             string messagesPerSecond = MessagesPerSecond.ToString(UnityUtils.Culture);
             string kbPerSecond = (BytesPerSecond * 0.001f).ToString("#,0.#", UnityUtils.Culture);
 
-            text.text = $"{RosUtils.SanitizedText(Topic ?? "", Size)}\n" +
+            text.text = $"{UnityUtils.SanitizedText(Topic ?? "", Size)}\n" +
                 $"<b>In: {subscriberStatus} | {messagesPerSecond} Hz | {kbPerSecond} kB/s</b>";
         }
 

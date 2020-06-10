@@ -82,7 +82,7 @@ namespace Iviz.App
 
         protected override void UpdateButtonText()
         {
-            ButtonText = $"{RosUtils.SanitizedText(Robot.LongName, MaxTextRowLength)}\n<b>{Module}</b>";
+            ButtonText = $"{UnityUtils.SanitizedText(Robot.LongName, MaxTextRowLength)}\n<b>{Module}</b>";
         }
 
         public override void AddToState(StateConfiguration config)

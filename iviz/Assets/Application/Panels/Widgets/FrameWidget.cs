@@ -42,12 +42,12 @@ namespace Iviz.App
                 frame = value;
                 if (frame != null)
                 {
-                    text.text = "<b>" + frame.Id + "</b>";
+                    text.text = "<b>⮑ " + frame.Id + "</b>";
                     UpdateStats();
                 }
                 else
                 {
-                    text.text = "<i>(none)</i>";
+                    text.text = "<i>⮑ (none)</i>";
                 }
             }
         }

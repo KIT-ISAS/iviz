@@ -307,12 +307,18 @@ namespace Iviz.App.Listeners
 
         public static UnityEngine.Pose RelativePose(in UnityEngine.Pose unityPose)
         {
-            UnityEngine.Pose baseFrameInverse = BaseFrame.transform.AsPose().Inverse();
-            UnityEngine.Pose relative = baseFrameInverse.Multiply(unityPose);
-            relative.position.x /= BaseFrame.transform.localScale.x;
-            relative.position.y /= BaseFrame.transform.localScale.y;
-            relative.position.z /= BaseFrame.transform.localScale.z;
-            return relative;
+            if (FlyCamera.IsMobile)
+            {
+                UnityEngine.Pose baseFrameInverse = BaseFrame.transform.AsPose().Inverse();
+                UnityEngine.Pose relative = baseFrameInverse.Multiply(unityPose);
+                relative.position.x /= BaseFrame.transform.localScale.x;
+                relative.position.y /= BaseFrame.transform.localScale.y;
+                relative.position.z /= BaseFrame.transform.localScale.z;
+                return relative;
+            } else
+            {
+                return unityPose;
+            }
         }
 
         static uint tfSeq = 0;

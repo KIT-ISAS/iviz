@@ -287,6 +287,7 @@ namespace Iviz.Resources
             public GameObjectInfo TopicsButton { get; }
             public GameObjectInfo ItemListPanel { get; }
             public GameObjectInfo ConnectionPanel { get; }
+            public GameObjectInfo ImagePanel { get; }
 
             public GameObjectInfo HeadTitle { get; }
             public GameObjectInfo SectionTitle { get; }
@@ -313,6 +314,7 @@ namespace Iviz.Resources
                 TopicsButton = new GameObjectInfo("Widgets/Topics Button");
                 ItemListPanel = new GameObjectInfo("Widgets/Item List Panel");
                 ConnectionPanel = new GameObjectInfo("Widgets/Connection Panel");
+                ImagePanel = new GameObjectInfo("Widgets/Image Panel");
 
                 HeadTitle = new GameObjectInfo("Widgets/Head Title");
                 SectionTitle = new GameObjectInfo("Widgets/Section Title");

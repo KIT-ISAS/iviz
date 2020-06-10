@@ -53,7 +53,7 @@ namespace Iviz.App
             string text;
             if (!string.IsNullOrEmpty(Topic))
             {
-                string topicShort = RosUtils.SanitizedText(Topic, MaxTextRowLength);
+                string topicShort = UnityUtils.SanitizedText(Topic, MaxTextRowLength);
                 text = $"{topicShort}\n<b>{Module}</b>";
             }
             else
