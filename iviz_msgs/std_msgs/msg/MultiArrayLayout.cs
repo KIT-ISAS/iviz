@@ -54,25 +54,25 @@ namespace Iviz.Msgs.StdMsgs
             DataOffset = b.Deserialize<uint>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new MultiArrayLayout(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeArray(Dim, 0);
-            b.Serialize(this.DataOffset);
+            b.Serialize(DataOffset);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Dim is null) throw new System.NullReferenceException();
             for (int i = 0; i < Dim.Length; i++)
             {
                 if (Dim[i] is null) throw new System.NullReferenceException();
-                Dim[i].Validate();
+                Dim[i].RosValidate();
             }
         }
     
@@ -88,7 +88,7 @@ namespace Iviz.Msgs.StdMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "std_msgs/MultiArrayLayout";

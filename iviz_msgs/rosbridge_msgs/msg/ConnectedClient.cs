@@ -28,19 +28,19 @@ namespace Iviz.Msgs.RosbridgeMsgs
             ConnectionTime = b.Deserialize<time>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new ConnectedClient(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.IpAddress);
-            b.Serialize(this.ConnectionTime);
+            b.Serialize(IpAddress);
+            b.Serialize(ConnectionTime);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (IpAddress is null) throw new System.NullReferenceException();
         }
@@ -54,7 +54,7 @@ namespace Iviz.Msgs.RosbridgeMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "rosbridge_msgs/ConnectedClient";

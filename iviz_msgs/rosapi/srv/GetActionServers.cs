@@ -63,17 +63,17 @@ namespace Iviz.Msgs.Rosapi
         {
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new GetActionServersRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
         }
         
-        public void Validate()
+        public void RosValidate()
         {
         }
     
@@ -102,18 +102,18 @@ namespace Iviz.Msgs.Rosapi
             ActionServers = b.DeserializeStringArray();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new GetActionServersResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeArray(ActionServers, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (ActionServers is null) throw new System.NullReferenceException();
             for (int i = 0; i < ActionServers.Length; i++)

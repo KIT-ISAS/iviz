@@ -26,18 +26,18 @@ namespace Iviz.Msgs.ShapeMsgs
             VertexIndices = b.DeserializeStructArray<uint>(3);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new MeshTriangle(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeStructArray(VertexIndices, 3);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (VertexIndices is null) throw new System.NullReferenceException();
             if (VertexIndices.Length != 3) throw new System.IndexOutOfRangeException();
@@ -45,7 +45,7 @@ namespace Iviz.Msgs.ShapeMsgs
     
         public int RosMessageLength => 12;
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "shape_msgs/MeshTriangle";

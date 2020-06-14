@@ -19,7 +19,7 @@ namespace Iviz.Msgs
         /// The position of the message end will be written to this pointer.
         /// </param>
         /// <param name="end">The maximum position that the function is allowed to read from.</param>
-        ISerializable Deserialize(Buffer b);
+        ISerializable RosDeserialize(Buffer b);
 
         /// <summary>
         /// Fills the buffer with the information from this message.
@@ -29,7 +29,7 @@ namespace Iviz.Msgs
         /// The position of the message end will be written to this pointer.
         /// </param>
         /// <param name="end">The maximum position that the function is allowed to write to.</param>
-        void Serialize(Buffer b);
+        void RosSerialize(Buffer b);
 
         /// <summary>
         /// Length of this message in bytes after serialization.
@@ -39,7 +39,7 @@ namespace Iviz.Msgs
         /// <summary>
         /// Checks if this message is valid. If not, throws an exception.
         /// </summary>
-        void Validate();
+        void RosValidate();
     }
 
 

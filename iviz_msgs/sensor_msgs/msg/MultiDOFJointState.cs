@@ -33,7 +33,6 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public MultiDOFJointState()
         {
-            Header = new StdMsgs.Header();
             JointNames = System.Array.Empty<string>();
             Transforms = System.Array.Empty<GeometryMsgs.Transform>();
             Twist = System.Array.Empty<GeometryMsgs.Twist>();
@@ -41,7 +40,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MultiDOFJointState(StdMsgs.Header Header, string[] JointNames, GeometryMsgs.Transform[] Transforms, GeometryMsgs.Twist[] Twist, GeometryMsgs.Wrench[] Wrench)
+        public MultiDOFJointState(in StdMsgs.Header Header, string[] JointNames, GeometryMsgs.Transform[] Transforms, GeometryMsgs.Twist[] Twist, GeometryMsgs.Wrench[] Wrench)
         {
             this.Header = Header;
             this.JointNames = JointNames;
@@ -68,25 +67,24 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new MultiDOFJointState(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
+            Header.RosSerialize(b);
             b.SerializeArray(JointNames, 0);
             b.SerializeStructArray(Transforms, 0);
             b.SerializeArray(Twist, 0);
             b.SerializeArray(Wrench, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (JointNames is null) throw new System.NullReferenceException();
             for (int i = 0; i < JointNames.Length; i++)
             {
@@ -97,13 +95,13 @@ namespace Iviz.Msgs.SensorMsgs
             for (int i = 0; i < Twist.Length; i++)
             {
                 if (Twist[i] is null) throw new System.NullReferenceException();
-                Twist[i].Validate();
+                Twist[i].RosValidate();
             }
             if (Wrench is null) throw new System.NullReferenceException();
             for (int i = 0; i < Wrench.Length; i++)
             {
                 if (Wrench[i] is null) throw new System.NullReferenceException();
-                Wrench[i].Validate();
+                Wrench[i].RosValidate();
             }
         }
     
@@ -124,7 +122,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/MultiDOFJointState";

@@ -12,12 +12,11 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor for empty message. </summary>
         public TwistStamped()
         {
-            Header = new StdMsgs.Header();
             Twist = new Twist();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TwistStamped(StdMsgs.Header Header, Twist Twist)
+        public TwistStamped(in StdMsgs.Header Header, Twist Twist)
         {
             this.Header = Header;
             this.Twist = Twist;
@@ -30,24 +29,23 @@ namespace Iviz.Msgs.GeometryMsgs
             Twist = new Twist(b);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new TwistStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(Twist);
+            Header.RosSerialize(b);
+            Twist.RosSerialize(b);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Twist is null) throw new System.NullReferenceException();
-            Twist.Validate();
+            Twist.RosValidate();
         }
     
         public int RosMessageLength
@@ -59,7 +57,7 @@ namespace Iviz.Msgs.GeometryMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "geometry_msgs/TwistStamped";

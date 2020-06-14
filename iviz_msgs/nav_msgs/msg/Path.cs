@@ -12,12 +12,11 @@ namespace Iviz.Msgs.NavMsgs
         /// <summary> Constructor for empty message. </summary>
         public Path()
         {
-            Header = new StdMsgs.Header();
             Poses = System.Array.Empty<GeometryMsgs.PoseStamped>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Path(StdMsgs.Header Header, GeometryMsgs.PoseStamped[] Poses)
+        public Path(in StdMsgs.Header Header, GeometryMsgs.PoseStamped[] Poses)
         {
             this.Header = Header;
             this.Poses = Poses;
@@ -34,27 +33,26 @@ namespace Iviz.Msgs.NavMsgs
             }
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new Path(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
+            Header.RosSerialize(b);
             b.SerializeArray(Poses, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Poses is null) throw new System.NullReferenceException();
             for (int i = 0; i < Poses.Length; i++)
             {
                 if (Poses[i] is null) throw new System.NullReferenceException();
-                Poses[i].Validate();
+                Poses[i].RosValidate();
             }
         }
     
@@ -71,7 +69,7 @@ namespace Iviz.Msgs.NavMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "nav_msgs/Path";

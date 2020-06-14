@@ -72,18 +72,18 @@ namespace Iviz.Msgs.Rosapi
             Service = b.DeserializeString();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new ServiceTypeRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.Service);
+            b.Serialize(Service);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Service is null) throw new System.NullReferenceException();
         }
@@ -120,18 +120,18 @@ namespace Iviz.Msgs.Rosapi
             Type = b.DeserializeString();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new ServiceTypeResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.Type);
+            b.Serialize(Type);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Type is null) throw new System.NullReferenceException();
         }

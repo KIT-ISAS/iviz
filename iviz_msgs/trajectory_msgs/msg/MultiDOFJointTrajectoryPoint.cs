@@ -47,34 +47,34 @@ namespace Iviz.Msgs.TrajectoryMsgs
             TimeFromStart = b.Deserialize<duration>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new MultiDOFJointTrajectoryPoint(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeStructArray(Transforms, 0);
             b.SerializeArray(Velocities, 0);
             b.SerializeArray(Accelerations, 0);
-            b.Serialize(this.TimeFromStart);
+            b.Serialize(TimeFromStart);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Transforms is null) throw new System.NullReferenceException();
             if (Velocities is null) throw new System.NullReferenceException();
             for (int i = 0; i < Velocities.Length; i++)
             {
                 if (Velocities[i] is null) throw new System.NullReferenceException();
-                Velocities[i].Validate();
+                Velocities[i].RosValidate();
             }
             if (Accelerations is null) throw new System.NullReferenceException();
             for (int i = 0; i < Accelerations.Length; i++)
             {
                 if (Accelerations[i] is null) throw new System.NullReferenceException();
-                Accelerations[i].Validate();
+                Accelerations[i].RosValidate();
             }
         }
     
@@ -89,7 +89,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "trajectory_msgs/MultiDOFJointTrajectoryPoint";

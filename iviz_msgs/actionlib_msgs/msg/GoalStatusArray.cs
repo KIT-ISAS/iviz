@@ -13,12 +13,11 @@ namespace Iviz.Msgs.ActionlibMsgs
         /// <summary> Constructor for empty message. </summary>
         public GoalStatusArray()
         {
-            Header = new StdMsgs.Header();
             StatusList = System.Array.Empty<GoalStatus>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GoalStatusArray(StdMsgs.Header Header, GoalStatus[] StatusList)
+        public GoalStatusArray(in StdMsgs.Header Header, GoalStatus[] StatusList)
         {
             this.Header = Header;
             this.StatusList = StatusList;
@@ -35,27 +34,26 @@ namespace Iviz.Msgs.ActionlibMsgs
             }
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new GoalStatusArray(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
+            Header.RosSerialize(b);
             b.SerializeArray(StatusList, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (StatusList is null) throw new System.NullReferenceException();
             for (int i = 0; i < StatusList.Length; i++)
             {
                 if (StatusList[i] is null) throw new System.NullReferenceException();
-                StatusList[i].Validate();
+                StatusList[i].RosValidate();
             }
         }
     
@@ -72,7 +70,7 @@ namespace Iviz.Msgs.ActionlibMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "actionlib_msgs/GoalStatusArray";

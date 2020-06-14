@@ -12,12 +12,11 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor for empty message. </summary>
         public PoseArray()
         {
-            Header = new StdMsgs.Header();
             Poses = System.Array.Empty<Pose>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public PoseArray(StdMsgs.Header Header, Pose[] Poses)
+        public PoseArray(in StdMsgs.Header Header, Pose[] Poses)
         {
             this.Header = Header;
             this.Poses = Poses;
@@ -30,22 +29,21 @@ namespace Iviz.Msgs.GeometryMsgs
             Poses = b.DeserializeStructArray<Pose>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new PoseArray(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
+            Header.RosSerialize(b);
             b.SerializeStructArray(Poses, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Poses is null) throw new System.NullReferenceException();
         }
     
@@ -59,7 +57,7 @@ namespace Iviz.Msgs.GeometryMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "geometry_msgs/PoseArray";

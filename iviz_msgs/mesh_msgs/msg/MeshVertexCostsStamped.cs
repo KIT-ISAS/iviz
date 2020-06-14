@@ -14,14 +14,13 @@ namespace Iviz.Msgs.MeshMsgs
         /// <summary> Constructor for empty message. </summary>
         public MeshVertexCostsStamped()
         {
-            Header = new StdMsgs.Header();
             Uuid = "";
             Type = "";
             MeshVertexCosts = new MeshMsgs.MeshVertexCosts();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MeshVertexCostsStamped(StdMsgs.Header Header, string Uuid, string Type, MeshMsgs.MeshVertexCosts MeshVertexCosts)
+        public MeshVertexCostsStamped(in StdMsgs.Header Header, string Uuid, string Type, MeshMsgs.MeshVertexCosts MeshVertexCosts)
         {
             this.Header = Header;
             this.Uuid = Uuid;
@@ -38,28 +37,27 @@ namespace Iviz.Msgs.MeshMsgs
             MeshVertexCosts = new MeshMsgs.MeshVertexCosts(b);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new MeshVertexCostsStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(this.Uuid);
-            b.Serialize(this.Type);
-            b.Serialize(MeshVertexCosts);
+            Header.RosSerialize(b);
+            b.Serialize(Uuid);
+            b.Serialize(Type);
+            MeshVertexCosts.RosSerialize(b);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Uuid is null) throw new System.NullReferenceException();
             if (Type is null) throw new System.NullReferenceException();
             if (MeshVertexCosts is null) throw new System.NullReferenceException();
-            MeshVertexCosts.Validate();
+            MeshVertexCosts.RosValidate();
         }
     
         public int RosMessageLength
@@ -74,7 +72,7 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "mesh_msgs/MeshVertexCostsStamped";

@@ -17,13 +17,12 @@ namespace Iviz.Msgs.MeshMsgs
         /// <summary> Constructor for empty message. </summary>
         public MeshFaceClusterStamped()
         {
-            Header = new StdMsgs.Header();
             Uuid = "";
             Cluster = new MeshFaceCluster();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MeshFaceClusterStamped(StdMsgs.Header Header, string Uuid, MeshFaceCluster Cluster, bool @override)
+        public MeshFaceClusterStamped(in StdMsgs.Header Header, string Uuid, MeshFaceCluster Cluster, bool @override)
         {
             this.Header = Header;
             this.Uuid = Uuid;
@@ -40,27 +39,26 @@ namespace Iviz.Msgs.MeshMsgs
             @override = b.Deserialize<bool>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new MeshFaceClusterStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(this.Uuid);
-            b.Serialize(Cluster);
-            b.Serialize(this.@override);
+            Header.RosSerialize(b);
+            b.Serialize(Uuid);
+            Cluster.RosSerialize(b);
+            b.Serialize(@override);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Uuid is null) throw new System.NullReferenceException();
             if (Cluster is null) throw new System.NullReferenceException();
-            Cluster.Validate();
+            Cluster.RosValidate();
         }
     
         public int RosMessageLength
@@ -74,7 +72,7 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "mesh_msgs/MeshFaceClusterStamped";

@@ -17,13 +17,12 @@ namespace Iviz.Msgs.NavMsgs
         /// <summary> Constructor for empty message. </summary>
         public OccupancyGrid()
         {
-            Header = new StdMsgs.Header();
             Info = new MapMetaData();
             Data = System.Array.Empty<sbyte>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public OccupancyGrid(StdMsgs.Header Header, MapMetaData Info, sbyte[] Data)
+        public OccupancyGrid(in StdMsgs.Header Header, MapMetaData Info, sbyte[] Data)
         {
             this.Header = Header;
             this.Info = Info;
@@ -38,25 +37,24 @@ namespace Iviz.Msgs.NavMsgs
             Data = b.DeserializeStructArray<sbyte>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new OccupancyGrid(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(Info);
+            Header.RosSerialize(b);
+            Info.RosSerialize(b);
             b.SerializeStructArray(Data, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Info is null) throw new System.NullReferenceException();
-            Info.Validate();
+            Info.RosValidate();
             if (Data is null) throw new System.NullReferenceException();
         }
     
@@ -70,7 +68,7 @@ namespace Iviz.Msgs.NavMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "nav_msgs/OccupancyGrid";

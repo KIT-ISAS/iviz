@@ -13,13 +13,12 @@ namespace Iviz.Msgs.MeshMsgs
         /// <summary> Constructor for empty message. </summary>
         public MeshVertexColorsStamped()
         {
-            Header = new StdMsgs.Header();
             Uuid = "";
             MeshVertexColors = new MeshMsgs.MeshVertexColors();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MeshVertexColorsStamped(StdMsgs.Header Header, string Uuid, MeshMsgs.MeshVertexColors MeshVertexColors)
+        public MeshVertexColorsStamped(in StdMsgs.Header Header, string Uuid, MeshMsgs.MeshVertexColors MeshVertexColors)
         {
             this.Header = Header;
             this.Uuid = Uuid;
@@ -34,26 +33,25 @@ namespace Iviz.Msgs.MeshMsgs
             MeshVertexColors = new MeshMsgs.MeshVertexColors(b);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new MeshVertexColorsStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(this.Uuid);
-            b.Serialize(MeshVertexColors);
+            Header.RosSerialize(b);
+            b.Serialize(Uuid);
+            MeshVertexColors.RosSerialize(b);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Uuid is null) throw new System.NullReferenceException();
             if (MeshVertexColors is null) throw new System.NullReferenceException();
-            MeshVertexColors.Validate();
+            MeshVertexColors.RosValidate();
         }
     
         public int RosMessageLength
@@ -67,7 +65,7 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "mesh_msgs/MeshVertexColorsStamped";

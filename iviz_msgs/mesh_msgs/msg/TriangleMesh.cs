@@ -67,12 +67,12 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new TriangleMesh(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeStructArray(Triangles, 0);
@@ -86,7 +86,7 @@ namespace Iviz.Msgs.MeshMsgs
             b.SerializeArray(Clusters, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Triangles is null) throw new System.NullReferenceException();
             if (Vertices is null) throw new System.NullReferenceException();
@@ -99,13 +99,13 @@ namespace Iviz.Msgs.MeshMsgs
             for (int i = 0; i < Textures.Length; i++)
             {
                 if (Textures[i] is null) throw new System.NullReferenceException();
-                Textures[i].Validate();
+                Textures[i].RosValidate();
             }
             if (Clusters is null) throw new System.NullReferenceException();
             for (int i = 0; i < Clusters.Length; i++)
             {
                 if (Clusters[i] is null) throw new System.NullReferenceException();
-                Clusters[i].Validate();
+                Clusters[i].RosValidate();
             }
         }
     
@@ -132,7 +132,7 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "mesh_msgs/TriangleMesh";

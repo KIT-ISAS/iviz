@@ -14,12 +14,11 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public TimeReference()
         {
-            Header = new StdMsgs.Header();
             Source = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TimeReference(StdMsgs.Header Header, time TimeRef, string Source)
+        public TimeReference(in StdMsgs.Header Header, time TimeRef, string Source)
         {
             this.Header = Header;
             this.TimeRef = TimeRef;
@@ -34,23 +33,22 @@ namespace Iviz.Msgs.SensorMsgs
             Source = b.DeserializeString();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new TimeReference(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(this.TimeRef);
-            b.Serialize(this.Source);
+            Header.RosSerialize(b);
+            b.Serialize(TimeRef);
+            b.Serialize(Source);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Source is null) throw new System.NullReferenceException();
         }
     
@@ -64,7 +62,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/TimeReference";

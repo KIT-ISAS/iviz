@@ -48,28 +48,28 @@ namespace Iviz.Msgs.SensorMsgs
             DoRectify = b.Deserialize<bool>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new RegionOfInterest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.XOffset);
-            b.Serialize(this.YOffset);
-            b.Serialize(this.Height);
-            b.Serialize(this.Width);
-            b.Serialize(this.DoRectify);
+            b.Serialize(XOffset);
+            b.Serialize(YOffset);
+            b.Serialize(Height);
+            b.Serialize(Width);
+            b.Serialize(DoRectify);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
         }
     
         public int RosMessageLength => 17;
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/RegionOfInterest";

@@ -72,18 +72,18 @@ namespace Iviz.Msgs.MeshMsgs
             Uuid = b.DeserializeString();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new GetMaterialsRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.Uuid);
+            b.Serialize(Uuid);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Uuid is null) throw new System.NullReferenceException();
         }
@@ -120,21 +120,21 @@ namespace Iviz.Msgs.MeshMsgs
             MeshMaterialsStamped = new MeshMsgs.MeshMaterialsStamped(b);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new GetMaterialsResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(MeshMaterialsStamped);
+            MeshMaterialsStamped.RosSerialize(b);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (MeshMaterialsStamped is null) throw new System.NullReferenceException();
-            MeshMaterialsStamped.Validate();
+            MeshMaterialsStamped.RosValidate();
         }
     
         public int RosMessageLength

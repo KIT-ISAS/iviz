@@ -13,8 +13,8 @@ namespace Iviz.Msgs
 
         public time(uint secs, uint nsecs)
         {
-            this.Secs = secs;
-            this.Nsecs = nsecs;
+            Secs = secs;
+            Nsecs = nsecs;
         }
 
         static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
@@ -31,9 +31,14 @@ namespace Iviz.Msgs
             return UnixEpoch.AddSeconds(Secs).AddTicks(Nsecs / 100);
         }
 
+        public TimeSpan ToTimeSpan()
+        {
+            return TimeSpan.FromSeconds(Secs) + TimeSpan.FromTicks(Nsecs / 100);
+        }
+
         public override bool Equals(object obj)
         {
-            return (obj is time d) ? (this == d) : false;
+            return (obj is time d) && (this == d);
         }
 
         public override int GetHashCode()

@@ -59,18 +59,18 @@ namespace Iviz.Msgs
         [DataContract]
         public class EmptyRequest : IRequest
         {
-            ISerializable ISerializable.Deserialize(Buffer b)
+            ISerializable ISerializable.RosDeserialize(Buffer b)
             {
                 return new EmptyRequest();
             }
 
-            void ISerializable.Serialize(Buffer b)
+            void ISerializable.RosSerialize(Buffer b)
             {
             }
 
             int ISerializable.RosMessageLength => 0;
 
-            public void Validate()
+            public void RosValidate()
             {
             }
         }
@@ -81,18 +81,18 @@ namespace Iviz.Msgs
         [DataContract]
         public class EmptyResponse : IResponse
         {
-            ISerializable ISerializable.Deserialize(Buffer b)
+            ISerializable ISerializable.RosDeserialize(Buffer b)
             {
                 return new EmptyResponse();
             }
 
-            void ISerializable.Serialize(Buffer b)
+            void ISerializable.RosSerialize(Buffer b)
             {
             }
 
             int ISerializable.RosMessageLength => 0;
 
-            public void Validate()
+            public void RosValidate()
             {
             }
         }

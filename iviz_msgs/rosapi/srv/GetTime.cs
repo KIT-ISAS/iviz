@@ -75,18 +75,18 @@ namespace Iviz.Msgs.Rosapi
             Time = b.Deserialize<time>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new GetTimeResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.Time);
+            b.Serialize(Time);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
         }
     

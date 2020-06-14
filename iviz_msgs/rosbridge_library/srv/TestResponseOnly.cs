@@ -75,18 +75,18 @@ namespace Iviz.Msgs.RosbridgeLibrary
             Data = b.Deserialize<int>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new TestResponseOnlyResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.Data);
+            b.Serialize(Data);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
         }
     

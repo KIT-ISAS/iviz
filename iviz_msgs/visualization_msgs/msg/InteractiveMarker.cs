@@ -29,7 +29,6 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarker()
         {
-            Header = new StdMsgs.Header();
             Name = "";
             Description = "";
             MenuEntries = System.Array.Empty<MenuEntry>();
@@ -37,7 +36,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public InteractiveMarker(StdMsgs.Header Header, in GeometryMsgs.Pose Pose, string Name, string Description, float Scale, MenuEntry[] MenuEntries, InteractiveMarkerControl[] Controls)
+        public InteractiveMarker(in StdMsgs.Header Header, in GeometryMsgs.Pose Pose, string Name, string Description, float Scale, MenuEntry[] MenuEntries, InteractiveMarkerControl[] Controls)
         {
             this.Header = Header;
             this.Pose = Pose;
@@ -68,40 +67,39 @@ namespace Iviz.Msgs.VisualizationMsgs
             }
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new InteractiveMarker(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(Pose);
-            b.Serialize(this.Name);
-            b.Serialize(this.Description);
-            b.Serialize(this.Scale);
+            Header.RosSerialize(b);
+            Pose.RosSerialize(b);
+            b.Serialize(Name);
+            b.Serialize(Description);
+            b.Serialize(Scale);
             b.SerializeArray(MenuEntries, 0);
             b.SerializeArray(Controls, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Name is null) throw new System.NullReferenceException();
             if (Description is null) throw new System.NullReferenceException();
             if (MenuEntries is null) throw new System.NullReferenceException();
             for (int i = 0; i < MenuEntries.Length; i++)
             {
                 if (MenuEntries[i] is null) throw new System.NullReferenceException();
-                MenuEntries[i].Validate();
+                MenuEntries[i].RosValidate();
             }
             if (Controls is null) throw new System.NullReferenceException();
             for (int i = 0; i < Controls.Length; i++)
             {
                 if (Controls[i] is null) throw new System.NullReferenceException();
-                Controls[i].Validate();
+                Controls[i].RosValidate();
             }
         }
     
@@ -124,7 +122,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "visualization_msgs/InteractiveMarker";

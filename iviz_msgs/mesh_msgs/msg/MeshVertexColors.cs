@@ -26,18 +26,18 @@ namespace Iviz.Msgs.MeshMsgs
             VertexColors = b.DeserializeStructArray<StdMsgs.ColorRGBA>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new MeshVertexColors(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeStructArray(VertexColors, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (VertexColors is null) throw new System.NullReferenceException();
         }
@@ -51,7 +51,7 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "mesh_msgs/MeshVertexColors";

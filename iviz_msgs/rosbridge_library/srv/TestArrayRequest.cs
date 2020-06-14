@@ -72,18 +72,18 @@ namespace Iviz.Msgs.RosbridgeLibrary
             @int = b.DeserializeStructArray<int>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new TestArrayRequestRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeStructArray(@int, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (@int is null) throw new System.NullReferenceException();
         }

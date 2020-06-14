@@ -16,12 +16,11 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarkerPose()
         {
-            Header = new StdMsgs.Header();
             Name = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public InteractiveMarkerPose(StdMsgs.Header Header, in GeometryMsgs.Pose Pose, string Name)
+        public InteractiveMarkerPose(in StdMsgs.Header Header, in GeometryMsgs.Pose Pose, string Name)
         {
             this.Header = Header;
             this.Pose = Pose;
@@ -36,23 +35,22 @@ namespace Iviz.Msgs.VisualizationMsgs
             Name = b.DeserializeString();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new InteractiveMarkerPose(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(Pose);
-            b.Serialize(this.Name);
+            Header.RosSerialize(b);
+            Pose.RosSerialize(b);
+            b.Serialize(Name);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Name is null) throw new System.NullReferenceException();
         }
     
@@ -66,7 +64,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "visualization_msgs/InteractiveMarkerPose";

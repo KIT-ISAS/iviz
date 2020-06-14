@@ -17,13 +17,12 @@ namespace Iviz.Msgs.TrajectoryMsgs
         /// <summary> Constructor for empty message. </summary>
         public MultiDOFJointTrajectory()
         {
-            Header = new StdMsgs.Header();
             JointNames = System.Array.Empty<string>();
             Points = System.Array.Empty<MultiDOFJointTrajectoryPoint>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MultiDOFJointTrajectory(StdMsgs.Header Header, string[] JointNames, MultiDOFJointTrajectoryPoint[] Points)
+        public MultiDOFJointTrajectory(in StdMsgs.Header Header, string[] JointNames, MultiDOFJointTrajectoryPoint[] Points)
         {
             this.Header = Header;
             this.JointNames = JointNames;
@@ -42,23 +41,22 @@ namespace Iviz.Msgs.TrajectoryMsgs
             }
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new MultiDOFJointTrajectory(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
+            Header.RosSerialize(b);
             b.SerializeArray(JointNames, 0);
             b.SerializeArray(Points, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (JointNames is null) throw new System.NullReferenceException();
             for (int i = 0; i < JointNames.Length; i++)
             {
@@ -68,7 +66,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
             for (int i = 0; i < Points.Length; i++)
             {
                 if (Points[i] is null) throw new System.NullReferenceException();
-                Points[i].Validate();
+                Points[i].RosValidate();
             }
         }
     
@@ -90,7 +88,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "trajectory_msgs/MultiDOFJointTrajectory";

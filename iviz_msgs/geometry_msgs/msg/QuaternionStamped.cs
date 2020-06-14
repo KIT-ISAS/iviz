@@ -12,11 +12,10 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor for empty message. </summary>
         public QuaternionStamped()
         {
-            Header = new StdMsgs.Header();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public QuaternionStamped(StdMsgs.Header Header, in Quaternion Quaternion)
+        public QuaternionStamped(in StdMsgs.Header Header, in Quaternion Quaternion)
         {
             this.Header = Header;
             this.Quaternion = Quaternion;
@@ -29,22 +28,21 @@ namespace Iviz.Msgs.GeometryMsgs
             Quaternion = new Quaternion(b);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new QuaternionStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(Quaternion);
+            Header.RosSerialize(b);
+            Quaternion.RosSerialize(b);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
         }
     
         public int RosMessageLength
@@ -56,7 +54,7 @@ namespace Iviz.Msgs.GeometryMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "geometry_msgs/QuaternionStamped";

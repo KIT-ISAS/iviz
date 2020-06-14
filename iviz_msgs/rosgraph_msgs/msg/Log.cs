@@ -28,7 +28,6 @@ namespace Iviz.Msgs.RosgraphMsgs
         /// <summary> Constructor for empty message. </summary>
         public Log()
         {
-            Header = new StdMsgs.Header();
             Name = "";
             Msg = "";
             File = "";
@@ -37,7 +36,7 @@ namespace Iviz.Msgs.RosgraphMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Log(StdMsgs.Header Header, byte Level, string Name, string Msg, string File, string Function, uint Line, string[] Topics)
+        public Log(in StdMsgs.Header Header, byte Level, string Name, string Msg, string File, string Function, uint Line, string[] Topics)
         {
             this.Header = Header;
             this.Level = Level;
@@ -62,28 +61,27 @@ namespace Iviz.Msgs.RosgraphMsgs
             Topics = b.DeserializeStringArray();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new Log(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(this.Level);
-            b.Serialize(this.Name);
-            b.Serialize(this.Msg);
-            b.Serialize(this.File);
-            b.Serialize(this.Function);
-            b.Serialize(this.Line);
+            Header.RosSerialize(b);
+            b.Serialize(Level);
+            b.Serialize(Name);
+            b.Serialize(Msg);
+            b.Serialize(File);
+            b.Serialize(Function);
+            b.Serialize(Line);
             b.SerializeArray(Topics, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Name is null) throw new System.NullReferenceException();
             if (Msg is null) throw new System.NullReferenceException();
             if (File is null) throw new System.NullReferenceException();
@@ -113,7 +111,7 @@ namespace Iviz.Msgs.RosgraphMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "rosgraph_msgs/Log";

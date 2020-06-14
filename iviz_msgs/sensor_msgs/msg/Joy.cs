@@ -13,13 +13,12 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public Joy()
         {
-            Header = new StdMsgs.Header();
             Axes = System.Array.Empty<float>();
             Buttons = System.Array.Empty<int>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Joy(StdMsgs.Header Header, float[] Axes, int[] Buttons)
+        public Joy(in StdMsgs.Header Header, float[] Axes, int[] Buttons)
         {
             this.Header = Header;
             this.Axes = Axes;
@@ -34,23 +33,22 @@ namespace Iviz.Msgs.SensorMsgs
             Buttons = b.DeserializeStructArray<int>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new Joy(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
+            Header.RosSerialize(b);
             b.SerializeStructArray(Axes, 0);
             b.SerializeStructArray(Buttons, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Axes is null) throw new System.NullReferenceException();
             if (Buttons is null) throw new System.NullReferenceException();
         }
@@ -66,7 +64,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/Joy";

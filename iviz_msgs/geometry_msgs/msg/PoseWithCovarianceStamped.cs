@@ -12,12 +12,11 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor for empty message. </summary>
         public PoseWithCovarianceStamped()
         {
-            Header = new StdMsgs.Header();
             Pose = new PoseWithCovariance();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public PoseWithCovarianceStamped(StdMsgs.Header Header, PoseWithCovariance Pose)
+        public PoseWithCovarianceStamped(in StdMsgs.Header Header, PoseWithCovariance Pose)
         {
             this.Header = Header;
             this.Pose = Pose;
@@ -30,24 +29,23 @@ namespace Iviz.Msgs.GeometryMsgs
             Pose = new PoseWithCovariance(b);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new PoseWithCovarianceStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(Pose);
+            Header.RosSerialize(b);
+            Pose.RosSerialize(b);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Pose is null) throw new System.NullReferenceException();
-            Pose.Validate();
+            Pose.RosValidate();
         }
     
         public int RosMessageLength
@@ -59,7 +57,7 @@ namespace Iviz.Msgs.GeometryMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "geometry_msgs/PoseWithCovarianceStamped";

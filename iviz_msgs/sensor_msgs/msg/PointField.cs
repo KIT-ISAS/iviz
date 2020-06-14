@@ -44,21 +44,21 @@ namespace Iviz.Msgs.SensorMsgs
             Count = b.Deserialize<uint>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new PointField(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.Name);
-            b.Serialize(this.Offset);
-            b.Serialize(this.Datatype);
-            b.Serialize(this.Count);
+            b.Serialize(Name);
+            b.Serialize(Offset);
+            b.Serialize(Datatype);
+            b.Serialize(Count);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Name is null) throw new System.NullReferenceException();
         }
@@ -72,7 +72,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/PointField";

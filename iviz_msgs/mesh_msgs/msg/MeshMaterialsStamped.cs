@@ -13,13 +13,12 @@ namespace Iviz.Msgs.MeshMsgs
         /// <summary> Constructor for empty message. </summary>
         public MeshMaterialsStamped()
         {
-            Header = new StdMsgs.Header();
             Uuid = "";
             MeshMaterials = new MeshMsgs.MeshMaterials();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MeshMaterialsStamped(StdMsgs.Header Header, string Uuid, MeshMsgs.MeshMaterials MeshMaterials)
+        public MeshMaterialsStamped(in StdMsgs.Header Header, string Uuid, MeshMsgs.MeshMaterials MeshMaterials)
         {
             this.Header = Header;
             this.Uuid = Uuid;
@@ -34,26 +33,25 @@ namespace Iviz.Msgs.MeshMsgs
             MeshMaterials = new MeshMsgs.MeshMaterials(b);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new MeshMaterialsStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(this.Uuid);
-            b.Serialize(MeshMaterials);
+            Header.RosSerialize(b);
+            b.Serialize(Uuid);
+            MeshMaterials.RosSerialize(b);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Uuid is null) throw new System.NullReferenceException();
             if (MeshMaterials is null) throw new System.NullReferenceException();
-            MeshMaterials.Validate();
+            MeshMaterials.RosValidate();
         }
     
         public int RosMessageLength
@@ -67,7 +65,7 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "mesh_msgs/MeshMaterialsStamped";

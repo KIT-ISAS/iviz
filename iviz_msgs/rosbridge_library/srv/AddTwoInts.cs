@@ -74,19 +74,19 @@ namespace Iviz.Msgs.RosbridgeLibrary
             B = b.Deserialize<long>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new AddTwoIntsRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.A);
-            b.Serialize(this.B);
+            b.Serialize(A);
+            b.Serialize(B);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
         }
     
@@ -114,18 +114,18 @@ namespace Iviz.Msgs.RosbridgeLibrary
             Sum = b.Deserialize<long>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new AddTwoIntsResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.Sum);
+            b.Serialize(Sum);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
         }
     

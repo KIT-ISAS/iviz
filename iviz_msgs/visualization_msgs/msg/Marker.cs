@@ -47,7 +47,6 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// <summary> Constructor for empty message. </summary>
         public Marker()
         {
-            Header = new StdMsgs.Header();
             Ns = "";
             Points = System.Array.Empty<GeometryMsgs.Point>();
             Colors = System.Array.Empty<StdMsgs.ColorRGBA>();
@@ -56,7 +55,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Marker(StdMsgs.Header Header, string Ns, int Id, int Type, int Action, in GeometryMsgs.Pose Pose, in GeometryMsgs.Vector3 Scale, in StdMsgs.ColorRGBA Color, duration Lifetime, bool FrameLocked, GeometryMsgs.Point[] Points, StdMsgs.ColorRGBA[] Colors, string Text, string MeshResource, bool MeshUseEmbeddedMaterials)
+        public Marker(in StdMsgs.Header Header, string Ns, int Id, int Type, int Action, in GeometryMsgs.Pose Pose, in GeometryMsgs.Vector3 Scale, in StdMsgs.ColorRGBA Color, duration Lifetime, bool FrameLocked, GeometryMsgs.Point[] Points, StdMsgs.ColorRGBA[] Colors, string Text, string MeshResource, bool MeshUseEmbeddedMaterials)
         {
             this.Header = Header;
             this.Ns = Ns;
@@ -95,35 +94,34 @@ namespace Iviz.Msgs.VisualizationMsgs
             MeshUseEmbeddedMaterials = b.Deserialize<bool>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new Marker(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(this.Ns);
-            b.Serialize(this.Id);
-            b.Serialize(this.Type);
-            b.Serialize(this.Action);
-            b.Serialize(Pose);
-            b.Serialize(Scale);
-            b.Serialize(Color);
-            b.Serialize(this.Lifetime);
-            b.Serialize(this.FrameLocked);
+            Header.RosSerialize(b);
+            b.Serialize(Ns);
+            b.Serialize(Id);
+            b.Serialize(Type);
+            b.Serialize(Action);
+            Pose.RosSerialize(b);
+            Scale.RosSerialize(b);
+            Color.RosSerialize(b);
+            b.Serialize(Lifetime);
+            b.Serialize(FrameLocked);
             b.SerializeStructArray(Points, 0);
             b.SerializeStructArray(Colors, 0);
-            b.Serialize(this.Text);
-            b.Serialize(this.MeshResource);
-            b.Serialize(this.MeshUseEmbeddedMaterials);
+            b.Serialize(Text);
+            b.Serialize(MeshResource);
+            b.Serialize(MeshUseEmbeddedMaterials);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Ns is null) throw new System.NullReferenceException();
             if (Points is null) throw new System.NullReferenceException();
             if (Colors is null) throw new System.NullReferenceException();
@@ -145,7 +143,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "visualization_msgs/Marker";

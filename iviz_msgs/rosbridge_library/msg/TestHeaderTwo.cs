@@ -10,11 +10,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
         /// <summary> Constructor for empty message. </summary>
         public TestHeaderTwo()
         {
-            Header = new StdMsgs.Header();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TestHeaderTwo(StdMsgs.Header Header)
+        public TestHeaderTwo(in StdMsgs.Header Header)
         {
             this.Header = Header;
         }
@@ -25,21 +24,20 @@ namespace Iviz.Msgs.RosbridgeLibrary
             Header = new StdMsgs.Header(b);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new TestHeaderTwo(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
+            Header.RosSerialize(b);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
         }
     
         public int RosMessageLength
@@ -51,7 +49,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "rosbridge_library/TestHeaderTwo";

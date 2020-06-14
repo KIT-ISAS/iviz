@@ -14,12 +14,11 @@ namespace Iviz.Msgs.NavMsgs
         /// <summary> Constructor for empty message. </summary>
         public GridCells()
         {
-            Header = new StdMsgs.Header();
             Cells = System.Array.Empty<GeometryMsgs.Point>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GridCells(StdMsgs.Header Header, float CellWidth, float CellHeight, GeometryMsgs.Point[] Cells)
+        public GridCells(in StdMsgs.Header Header, float CellWidth, float CellHeight, GeometryMsgs.Point[] Cells)
         {
             this.Header = Header;
             this.CellWidth = CellWidth;
@@ -36,24 +35,23 @@ namespace Iviz.Msgs.NavMsgs
             Cells = b.DeserializeStructArray<GeometryMsgs.Point>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new GridCells(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(this.CellWidth);
-            b.Serialize(this.CellHeight);
+            Header.RosSerialize(b);
+            b.Serialize(CellWidth);
+            b.Serialize(CellHeight);
             b.SerializeStructArray(Cells, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Cells is null) throw new System.NullReferenceException();
         }
     
@@ -67,7 +65,7 @@ namespace Iviz.Msgs.NavMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "nav_msgs/GridCells";

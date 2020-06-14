@@ -55,26 +55,26 @@ namespace Iviz.Msgs.GridMapMsgs
             InnerStartIndex = b.Deserialize<ushort>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new GridMap(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Info);
+            Info.RosSerialize(b);
             b.SerializeArray(Layers, 0);
             b.SerializeArray(BasicLayers, 0);
             b.SerializeArray(Data, 0);
-            b.Serialize(this.OuterStartIndex);
-            b.Serialize(this.InnerStartIndex);
+            b.Serialize(OuterStartIndex);
+            b.Serialize(InnerStartIndex);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Info is null) throw new System.NullReferenceException();
-            Info.Validate();
+            Info.RosValidate();
             if (Layers is null) throw new System.NullReferenceException();
             for (int i = 0; i < Layers.Length; i++)
             {
@@ -89,7 +89,7 @@ namespace Iviz.Msgs.GridMapMsgs
             for (int i = 0; i < Data.Length; i++)
             {
                 if (Data[i] is null) throw new System.NullReferenceException();
-                Data[i].Validate();
+                Data[i].RosValidate();
             }
         }
     
@@ -116,7 +116,7 @@ namespace Iviz.Msgs.GridMapMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "grid_map_msgs/GridMap";

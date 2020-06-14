@@ -34,29 +34,29 @@ namespace Iviz.Msgs.GeometryMsgs
             Covariance = b.DeserializeStructArray<double>(36);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new AccelWithCovariance(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Accel);
+            Accel.RosSerialize(b);
             b.SerializeStructArray(Covariance, 36);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Accel is null) throw new System.NullReferenceException();
-            Accel.Validate();
+            Accel.RosValidate();
             if (Covariance is null) throw new System.NullReferenceException();
             if (Covariance.Length != 36) throw new System.IndexOutOfRangeException();
         }
     
         public int RosMessageLength => 336;
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "geometry_msgs/AccelWithCovariance";

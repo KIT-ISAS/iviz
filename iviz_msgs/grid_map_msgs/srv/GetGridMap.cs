@@ -94,23 +94,23 @@ namespace Iviz.Msgs.GridMapMsgs
             Layers = b.DeserializeStringArray();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new GetGridMapRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.FrameId);
-            b.Serialize(this.PositionX);
-            b.Serialize(this.PositionY);
-            b.Serialize(this.LengthX);
-            b.Serialize(this.LengthY);
+            b.Serialize(FrameId);
+            b.Serialize(PositionX);
+            b.Serialize(PositionY);
+            b.Serialize(LengthX);
+            b.Serialize(LengthY);
             b.SerializeArray(Layers, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (FrameId is null) throw new System.NullReferenceException();
             if (Layers is null) throw new System.NullReferenceException();
@@ -158,21 +158,21 @@ namespace Iviz.Msgs.GridMapMsgs
             Map = new GridMapMsgs.GridMap(b);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new GetGridMapResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Map);
+            Map.RosSerialize(b);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Map is null) throw new System.NullReferenceException();
-            Map.Validate();
+            Map.RosValidate();
         }
     
         public int RosMessageLength

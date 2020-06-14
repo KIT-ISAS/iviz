@@ -20,13 +20,12 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public CompressedImage()
         {
-            Header = new StdMsgs.Header();
             Format = "";
             Data = System.Array.Empty<byte>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public CompressedImage(StdMsgs.Header Header, string Format, byte[] Data)
+        public CompressedImage(in StdMsgs.Header Header, string Format, byte[] Data)
         {
             this.Header = Header;
             this.Format = Format;
@@ -41,23 +40,22 @@ namespace Iviz.Msgs.SensorMsgs
             Data = b.DeserializeStructArray<byte>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new CompressedImage(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(this.Format);
+            Header.RosSerialize(b);
+            b.Serialize(Format);
             b.SerializeStructArray(Data, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Format is null) throw new System.NullReferenceException();
             if (Data is null) throw new System.NullReferenceException();
         }
@@ -73,7 +71,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/CompressedImage";

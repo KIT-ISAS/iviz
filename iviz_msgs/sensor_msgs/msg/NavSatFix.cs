@@ -45,13 +45,12 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public NavSatFix()
         {
-            Header = new StdMsgs.Header();
             Status = new NavSatStatus();
             PositionCovariance = new double[9];
         }
         
         /// <summary> Explicit constructor. </summary>
-        public NavSatFix(StdMsgs.Header Header, NavSatStatus Status, double Latitude, double Longitude, double Altitude, double[] PositionCovariance, byte PositionCovarianceType)
+        public NavSatFix(in StdMsgs.Header Header, NavSatStatus Status, double Latitude, double Longitude, double Altitude, double[] PositionCovariance, byte PositionCovarianceType)
         {
             this.Header = Header;
             this.Status = Status;
@@ -74,29 +73,28 @@ namespace Iviz.Msgs.SensorMsgs
             PositionCovarianceType = b.Deserialize<byte>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new NavSatFix(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(Status);
-            b.Serialize(this.Latitude);
-            b.Serialize(this.Longitude);
-            b.Serialize(this.Altitude);
+            Header.RosSerialize(b);
+            Status.RosSerialize(b);
+            b.Serialize(Latitude);
+            b.Serialize(Longitude);
+            b.Serialize(Altitude);
             b.SerializeStructArray(PositionCovariance, 9);
-            b.Serialize(this.PositionCovarianceType);
+            b.Serialize(PositionCovarianceType);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Status is null) throw new System.NullReferenceException();
-            Status.Validate();
+            Status.RosValidate();
             if (PositionCovariance is null) throw new System.NullReferenceException();
             if (PositionCovariance.Length != 9) throw new System.IndexOutOfRangeException();
         }
@@ -110,7 +108,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/NavSatFix";

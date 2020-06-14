@@ -79,19 +79,19 @@ namespace Iviz.Msgs.StdSrvs
             Message = b.DeserializeString();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new TriggerResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.Success);
-            b.Serialize(this.Message);
+            b.Serialize(Success);
+            b.Serialize(Message);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Message is null) throw new System.NullReferenceException();
         }

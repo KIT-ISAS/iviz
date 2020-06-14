@@ -18,12 +18,11 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor for empty message. </summary>
         public TransformStamped()
         {
-            Header = new StdMsgs.Header();
             ChildFrameId = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TransformStamped(StdMsgs.Header Header, string ChildFrameId, in Transform Transform)
+        public TransformStamped(in StdMsgs.Header Header, string ChildFrameId, in Transform Transform)
         {
             this.Header = Header;
             this.ChildFrameId = ChildFrameId;
@@ -38,23 +37,22 @@ namespace Iviz.Msgs.GeometryMsgs
             Transform = new Transform(b);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new TransformStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(this.ChildFrameId);
-            b.Serialize(Transform);
+            Header.RosSerialize(b);
+            b.Serialize(ChildFrameId);
+            Transform.RosSerialize(b);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (ChildFrameId is null) throw new System.NullReferenceException();
         }
     
@@ -68,7 +66,7 @@ namespace Iviz.Msgs.GeometryMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "geometry_msgs/TransformStamped";

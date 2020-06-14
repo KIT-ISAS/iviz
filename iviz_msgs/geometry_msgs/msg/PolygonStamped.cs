@@ -12,12 +12,11 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor for empty message. </summary>
         public PolygonStamped()
         {
-            Header = new StdMsgs.Header();
             Polygon = new Polygon();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public PolygonStamped(StdMsgs.Header Header, Polygon Polygon)
+        public PolygonStamped(in StdMsgs.Header Header, Polygon Polygon)
         {
             this.Header = Header;
             this.Polygon = Polygon;
@@ -30,24 +29,23 @@ namespace Iviz.Msgs.GeometryMsgs
             Polygon = new Polygon(b);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new PolygonStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(Polygon);
+            Header.RosSerialize(b);
+            Polygon.RosSerialize(b);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Polygon is null) throw new System.NullReferenceException();
-            Polygon.Validate();
+            Polygon.RosValidate();
         }
     
         public int RosMessageLength
@@ -60,7 +58,7 @@ namespace Iviz.Msgs.GeometryMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "geometry_msgs/PolygonStamped";

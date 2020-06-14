@@ -69,36 +69,36 @@ namespace Iviz.Msgs.VisualizationMsgs
             Erases = b.DeserializeStringArray();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new InteractiveMarkerUpdate(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.ServerId);
-            b.Serialize(this.SeqNum);
-            b.Serialize(this.Type);
+            b.Serialize(ServerId);
+            b.Serialize(SeqNum);
+            b.Serialize(Type);
             b.SerializeArray(Markers, 0);
             b.SerializeArray(Poses, 0);
             b.SerializeArray(Erases, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (ServerId is null) throw new System.NullReferenceException();
             if (Markers is null) throw new System.NullReferenceException();
             for (int i = 0; i < Markers.Length; i++)
             {
                 if (Markers[i] is null) throw new System.NullReferenceException();
-                Markers[i].Validate();
+                Markers[i].RosValidate();
             }
             if (Poses is null) throw new System.NullReferenceException();
             for (int i = 0; i < Poses.Length; i++)
             {
                 if (Poses[i] is null) throw new System.NullReferenceException();
-                Poses[i].Validate();
+                Poses[i].RosValidate();
             }
             if (Erases is null) throw new System.NullReferenceException();
             for (int i = 0; i < Erases.Length; i++)
@@ -129,7 +129,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "visualization_msgs/InteractiveMarkerUpdate";

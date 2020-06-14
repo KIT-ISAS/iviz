@@ -73,21 +73,21 @@ namespace Iviz.Msgs.GridMapMsgs
             Map = new GridMapMsgs.GridMap(b);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new SetGridMapRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Map);
+            Map.RosSerialize(b);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Map is null) throw new System.NullReferenceException();
-            Map.Validate();
+            Map.RosValidate();
         }
     
         public int RosMessageLength

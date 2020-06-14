@@ -12,12 +12,11 @@ namespace Iviz.Msgs.DiagnosticMsgs
         /// <summary> Constructor for empty message. </summary>
         public DiagnosticArray()
         {
-            Header = new StdMsgs.Header();
             Status = System.Array.Empty<DiagnosticStatus>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public DiagnosticArray(StdMsgs.Header Header, DiagnosticStatus[] Status)
+        public DiagnosticArray(in StdMsgs.Header Header, DiagnosticStatus[] Status)
         {
             this.Header = Header;
             this.Status = Status;
@@ -34,27 +33,26 @@ namespace Iviz.Msgs.DiagnosticMsgs
             }
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new DiagnosticArray(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
+            Header.RosSerialize(b);
             b.SerializeArray(Status, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Status is null) throw new System.NullReferenceException();
             for (int i = 0; i < Status.Length; i++)
             {
                 if (Status[i] is null) throw new System.NullReferenceException();
-                Status[i].Validate();
+                Status[i].RosValidate();
             }
         }
     
@@ -71,7 +69,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "diagnostic_msgs/DiagnosticArray";

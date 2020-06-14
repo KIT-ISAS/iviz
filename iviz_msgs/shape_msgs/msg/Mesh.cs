@@ -36,25 +36,25 @@ namespace Iviz.Msgs.ShapeMsgs
             Vertices = b.DeserializeStructArray<GeometryMsgs.Point>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new Mesh(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeArray(Triangles, 0);
             b.SerializeStructArray(Vertices, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Triangles is null) throw new System.NullReferenceException();
             for (int i = 0; i < Triangles.Length; i++)
             {
                 if (Triangles[i] is null) throw new System.NullReferenceException();
-                Triangles[i].Validate();
+                Triangles[i].RosValidate();
             }
             if (Vertices is null) throw new System.NullReferenceException();
         }
@@ -69,7 +69,7 @@ namespace Iviz.Msgs.ShapeMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "shape_msgs/Mesh";

@@ -12,11 +12,10 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor for empty message. </summary>
         public Vector3Stamped()
         {
-            Header = new StdMsgs.Header();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Vector3Stamped(StdMsgs.Header Header, in Vector3 Vector)
+        public Vector3Stamped(in StdMsgs.Header Header, in Vector3 Vector)
         {
             this.Header = Header;
             this.Vector = Vector;
@@ -29,22 +28,21 @@ namespace Iviz.Msgs.GeometryMsgs
             Vector = new Vector3(b);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new Vector3Stamped(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(Vector);
+            Header.RosSerialize(b);
+            Vector.RosSerialize(b);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
         }
     
         public int RosMessageLength
@@ -56,7 +54,7 @@ namespace Iviz.Msgs.GeometryMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "geometry_msgs/Vector3Stamped";

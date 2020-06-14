@@ -33,13 +33,12 @@ namespace Iviz.Msgs.StereoMsgs
         /// <summary> Constructor for empty message. </summary>
         public DisparityImage()
         {
-            Header = new StdMsgs.Header();
             Image = new SensorMsgs.Image();
             ValidWindow = new SensorMsgs.RegionOfInterest();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public DisparityImage(StdMsgs.Header Header, SensorMsgs.Image Image, float F, float T, SensorMsgs.RegionOfInterest ValidWindow, float MinDisparity, float MaxDisparity, float DeltaD)
+        public DisparityImage(in StdMsgs.Header Header, SensorMsgs.Image Image, float F, float T, SensorMsgs.RegionOfInterest ValidWindow, float MinDisparity, float MaxDisparity, float DeltaD)
         {
             this.Header = Header;
             this.Image = Image;
@@ -64,32 +63,31 @@ namespace Iviz.Msgs.StereoMsgs
             DeltaD = b.Deserialize<float>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new DisparityImage(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(Image);
-            b.Serialize(this.F);
-            b.Serialize(this.T);
-            b.Serialize(ValidWindow);
-            b.Serialize(this.MinDisparity);
-            b.Serialize(this.MaxDisparity);
-            b.Serialize(this.DeltaD);
+            Header.RosSerialize(b);
+            Image.RosSerialize(b);
+            b.Serialize(F);
+            b.Serialize(T);
+            ValidWindow.RosSerialize(b);
+            b.Serialize(MinDisparity);
+            b.Serialize(MaxDisparity);
+            b.Serialize(DeltaD);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Image is null) throw new System.NullReferenceException();
-            Image.Validate();
+            Image.RosValidate();
             if (ValidWindow is null) throw new System.NullReferenceException();
-            ValidWindow.Validate();
+            ValidWindow.RosValidate();
         }
     
         public int RosMessageLength
@@ -102,7 +100,7 @@ namespace Iviz.Msgs.StereoMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "stereo_msgs/DisparityImage";

@@ -51,31 +51,31 @@ namespace Iviz.Msgs.GeometryMsgs
             Izz = b.Deserialize<double>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new Inertia(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.M);
-            b.Serialize(Com);
-            b.Serialize(this.Ixx);
-            b.Serialize(this.Ixy);
-            b.Serialize(this.Ixz);
-            b.Serialize(this.Iyy);
-            b.Serialize(this.Iyz);
-            b.Serialize(this.Izz);
+            b.Serialize(M);
+            Com.RosSerialize(b);
+            b.Serialize(Ixx);
+            b.Serialize(Ixy);
+            b.Serialize(Ixz);
+            b.Serialize(Iyy);
+            b.Serialize(Iyz);
+            b.Serialize(Izz);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
         }
     
         public int RosMessageLength => 80;
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "geometry_msgs/Inertia";

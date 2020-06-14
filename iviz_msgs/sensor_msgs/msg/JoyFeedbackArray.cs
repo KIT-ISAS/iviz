@@ -30,24 +30,24 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new JoyFeedbackArray(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeArray(Array, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Array is null) throw new System.NullReferenceException();
             for (int i = 0; i < Array.Length; i++)
             {
                 if (Array[i] is null) throw new System.NullReferenceException();
-                Array[i].Validate();
+                Array[i].RosValidate();
             }
         }
     
@@ -60,7 +60,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/JoyFeedbackArray";

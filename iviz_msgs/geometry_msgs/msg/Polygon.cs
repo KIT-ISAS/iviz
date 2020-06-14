@@ -26,18 +26,18 @@ namespace Iviz.Msgs.GeometryMsgs
             Points = b.DeserializeStructArray<Point32>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new Polygon(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeStructArray(Points, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Points is null) throw new System.NullReferenceException();
         }
@@ -51,7 +51,7 @@ namespace Iviz.Msgs.GeometryMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "geometry_msgs/Polygon";

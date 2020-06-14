@@ -35,26 +35,26 @@ namespace Iviz.Msgs.GeometryMsgs
             Theta = b.Deserialize<double>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new Pose2D(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.X);
-            b.Serialize(this.Y);
-            b.Serialize(this.Theta);
+            b.Serialize(X);
+            b.Serialize(Y);
+            b.Serialize(Theta);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
         }
     
         public int RosMessageLength => 24;
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "geometry_msgs/Pose2D";

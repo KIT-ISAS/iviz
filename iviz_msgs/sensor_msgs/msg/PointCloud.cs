@@ -20,13 +20,12 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public PointCloud()
         {
-            Header = new StdMsgs.Header();
             Points = System.Array.Empty<GeometryMsgs.Point32>();
             Channels = System.Array.Empty<ChannelFloat32>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public PointCloud(StdMsgs.Header Header, GeometryMsgs.Point32[] Points, ChannelFloat32[] Channels)
+        public PointCloud(in StdMsgs.Header Header, GeometryMsgs.Point32[] Points, ChannelFloat32[] Channels)
         {
             this.Header = Header;
             this.Points = Points;
@@ -45,29 +44,28 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new PointCloud(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
+            Header.RosSerialize(b);
             b.SerializeStructArray(Points, 0);
             b.SerializeArray(Channels, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Points is null) throw new System.NullReferenceException();
             if (Channels is null) throw new System.NullReferenceException();
             for (int i = 0; i < Channels.Length; i++)
             {
                 if (Channels[i] is null) throw new System.NullReferenceException();
-                Channels[i].Validate();
+                Channels[i].RosValidate();
             }
         }
     
@@ -85,7 +83,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/PointCloud";

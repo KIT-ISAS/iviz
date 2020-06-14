@@ -30,18 +30,18 @@ namespace Iviz.Msgs.ShapeMsgs
             Coef = b.DeserializeStructArray<double>(4);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new Plane(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeStructArray(Coef, 4);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Coef is null) throw new System.NullReferenceException();
             if (Coef.Length != 4) throw new System.IndexOutOfRangeException();
@@ -49,7 +49,7 @@ namespace Iviz.Msgs.ShapeMsgs
     
         public int RosMessageLength => 32;
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "shape_msgs/Plane";

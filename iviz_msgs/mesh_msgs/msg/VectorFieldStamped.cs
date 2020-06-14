@@ -11,12 +11,11 @@ namespace Iviz.Msgs.MeshMsgs
         /// <summary> Constructor for empty message. </summary>
         public VectorFieldStamped()
         {
-            Header = new StdMsgs.Header();
             VectorField = new MeshMsgs.VectorField();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public VectorFieldStamped(StdMsgs.Header Header, MeshMsgs.VectorField VectorField)
+        public VectorFieldStamped(in StdMsgs.Header Header, MeshMsgs.VectorField VectorField)
         {
             this.Header = Header;
             this.VectorField = VectorField;
@@ -29,24 +28,23 @@ namespace Iviz.Msgs.MeshMsgs
             VectorField = new MeshMsgs.VectorField(b);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new VectorFieldStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(VectorField);
+            Header.RosSerialize(b);
+            VectorField.RosSerialize(b);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (VectorField is null) throw new System.NullReferenceException();
-            VectorField.Validate();
+            VectorField.RosValidate();
         }
     
         public int RosMessageLength
@@ -59,7 +57,7 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "mesh_msgs/VectorFieldStamped";

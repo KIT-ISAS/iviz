@@ -72,18 +72,18 @@ namespace Iviz.Msgs.RosbridgeLibrary
             Pose = new GeometryMsgs.Pose(b);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new TestNestedServiceRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Pose);
+            Pose.RosSerialize(b);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
         }
     
@@ -113,21 +113,21 @@ namespace Iviz.Msgs.RosbridgeLibrary
             Data = new StdMsgs.Float64(b);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new TestNestedServiceResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Data);
+            Data.RosSerialize(b);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Data is null) throw new System.NullReferenceException();
-            Data.Validate();
+            Data.RosValidate();
         }
     
         public int RosMessageLength => 8;

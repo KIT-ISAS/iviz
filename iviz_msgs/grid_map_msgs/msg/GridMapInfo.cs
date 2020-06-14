@@ -19,11 +19,10 @@ namespace Iviz.Msgs.GridMapMsgs
         /// <summary> Constructor for empty message. </summary>
         public GridMapInfo()
         {
-            Header = new StdMsgs.Header();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GridMapInfo(StdMsgs.Header Header, double Resolution, double LengthX, double LengthY, in GeometryMsgs.Pose Pose)
+        public GridMapInfo(in StdMsgs.Header Header, double Resolution, double LengthX, double LengthY, in GeometryMsgs.Pose Pose)
         {
             this.Header = Header;
             this.Resolution = Resolution;
@@ -42,25 +41,24 @@ namespace Iviz.Msgs.GridMapMsgs
             Pose = new GeometryMsgs.Pose(b);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new GridMapInfo(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(this.Resolution);
-            b.Serialize(this.LengthX);
-            b.Serialize(this.LengthY);
-            b.Serialize(Pose);
+            Header.RosSerialize(b);
+            b.Serialize(Resolution);
+            b.Serialize(LengthX);
+            b.Serialize(LengthY);
+            Pose.RosSerialize(b);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
         }
     
         public int RosMessageLength
@@ -72,7 +70,7 @@ namespace Iviz.Msgs.GridMapMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "grid_map_msgs/GridMapInfo";

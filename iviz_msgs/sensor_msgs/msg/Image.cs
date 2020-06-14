@@ -31,13 +31,12 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public Image()
         {
-            Header = new StdMsgs.Header();
             Encoding = "";
             Data = System.Array.Empty<byte>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Image(StdMsgs.Header Header, uint Height, uint Width, string Encoding, byte IsBigendian, uint Step, byte[] Data)
+        public Image(in StdMsgs.Header Header, uint Height, uint Width, string Encoding, byte IsBigendian, uint Step, byte[] Data)
         {
             this.Header = Header;
             this.Height = Height;
@@ -60,27 +59,26 @@ namespace Iviz.Msgs.SensorMsgs
             Data = b.DeserializeStructArray<byte>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new Image(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(this.Height);
-            b.Serialize(this.Width);
-            b.Serialize(this.Encoding);
-            b.Serialize(this.IsBigendian);
-            b.Serialize(this.Step);
+            Header.RosSerialize(b);
+            b.Serialize(Height);
+            b.Serialize(Width);
+            b.Serialize(Encoding);
+            b.Serialize(IsBigendian);
+            b.Serialize(Step);
             b.SerializeStructArray(Data, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Encoding is null) throw new System.NullReferenceException();
             if (Data is null) throw new System.NullReferenceException();
         }
@@ -96,7 +94,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/Image";

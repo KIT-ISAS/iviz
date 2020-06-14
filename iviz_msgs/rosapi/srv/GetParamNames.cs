@@ -76,18 +76,18 @@ namespace Iviz.Msgs.Rosapi
             Names = b.DeserializeStringArray();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new GetParamNamesResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeArray(Names, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Names is null) throw new System.NullReferenceException();
             for (int i = 0; i < Names.Length; i++)

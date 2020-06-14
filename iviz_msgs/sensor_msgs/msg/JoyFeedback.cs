@@ -38,26 +38,26 @@ namespace Iviz.Msgs.SensorMsgs
             Intensity = b.Deserialize<float>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new JoyFeedback(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.Type);
-            b.Serialize(this.Id);
-            b.Serialize(this.Intensity);
+            b.Serialize(Type);
+            b.Serialize(Id);
+            b.Serialize(Intensity);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
         }
     
         public int RosMessageLength => 6;
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/JoyFeedback";

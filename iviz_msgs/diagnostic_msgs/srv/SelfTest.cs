@@ -87,27 +87,27 @@ namespace Iviz.Msgs.DiagnosticMsgs
             }
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new SelfTestResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.Id);
-            b.Serialize(this.Passed);
+            b.Serialize(Id);
+            b.Serialize(Passed);
             b.SerializeArray(Status, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Id is null) throw new System.NullReferenceException();
             if (Status is null) throw new System.NullReferenceException();
             for (int i = 0; i < Status.Length; i++)
             {
                 if (Status[i] is null) throw new System.NullReferenceException();
-                Status[i].Validate();
+                Status[i].RosValidate();
             }
         }
     

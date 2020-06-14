@@ -30,13 +30,12 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public PointCloud2()
         {
-            Header = new StdMsgs.Header();
             Fields = System.Array.Empty<PointField>();
             Data = System.Array.Empty<byte>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public PointCloud2(StdMsgs.Header Header, uint Height, uint Width, PointField[] Fields, bool IsBigendian, uint PointStep, uint RowStep, byte[] Data, bool IsDense)
+        public PointCloud2(in StdMsgs.Header Header, uint Height, uint Width, PointField[] Fields, bool IsBigendian, uint PointStep, uint RowStep, byte[] Data, bool IsDense)
         {
             this.Header = Header;
             this.Height = Height;
@@ -67,34 +66,33 @@ namespace Iviz.Msgs.SensorMsgs
             IsDense = b.Deserialize<bool>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new PointCloud2(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(this.Height);
-            b.Serialize(this.Width);
+            Header.RosSerialize(b);
+            b.Serialize(Height);
+            b.Serialize(Width);
             b.SerializeArray(Fields, 0);
-            b.Serialize(this.IsBigendian);
-            b.Serialize(this.PointStep);
-            b.Serialize(this.RowStep);
+            b.Serialize(IsBigendian);
+            b.Serialize(PointStep);
+            b.Serialize(RowStep);
             b.SerializeStructArray(Data, 0);
-            b.Serialize(this.IsDense);
+            b.Serialize(IsDense);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Fields is null) throw new System.NullReferenceException();
             for (int i = 0; i < Fields.Length; i++)
             {
                 if (Fields[i] is null) throw new System.NullReferenceException();
-                Fields[i].Validate();
+                Fields[i].RosValidate();
             }
             if (Data is null) throw new System.NullReferenceException();
         }
@@ -113,7 +111,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/PointCloud2";

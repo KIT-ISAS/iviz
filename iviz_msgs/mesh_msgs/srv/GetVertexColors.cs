@@ -72,18 +72,18 @@ namespace Iviz.Msgs.MeshMsgs
             Uuid = b.DeserializeString();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new GetVertexColorsRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.Uuid);
+            b.Serialize(Uuid);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Uuid is null) throw new System.NullReferenceException();
         }
@@ -120,21 +120,21 @@ namespace Iviz.Msgs.MeshMsgs
             MeshVertexColorsStamped = new MeshMsgs.MeshVertexColorsStamped(b);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new GetVertexColorsResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(MeshVertexColorsStamped);
+            MeshVertexColorsStamped.RosSerialize(b);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (MeshVertexColorsStamped is null) throw new System.NullReferenceException();
-            MeshVertexColorsStamped.Validate();
+            MeshVertexColorsStamped.RosValidate();
         }
     
         public int RosMessageLength

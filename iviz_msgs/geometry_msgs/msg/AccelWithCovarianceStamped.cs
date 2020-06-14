@@ -12,12 +12,11 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor for empty message. </summary>
         public AccelWithCovarianceStamped()
         {
-            Header = new StdMsgs.Header();
             Accel = new AccelWithCovariance();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public AccelWithCovarianceStamped(StdMsgs.Header Header, AccelWithCovariance Accel)
+        public AccelWithCovarianceStamped(in StdMsgs.Header Header, AccelWithCovariance Accel)
         {
             this.Header = Header;
             this.Accel = Accel;
@@ -30,24 +29,23 @@ namespace Iviz.Msgs.GeometryMsgs
             Accel = new AccelWithCovariance(b);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new AccelWithCovarianceStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(Accel);
+            Header.RosSerialize(b);
+            Accel.RosSerialize(b);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Accel is null) throw new System.NullReferenceException();
-            Accel.Validate();
+            Accel.RosValidate();
         }
     
         public int RosMessageLength
@@ -59,7 +57,7 @@ namespace Iviz.Msgs.GeometryMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "geometry_msgs/AccelWithCovarianceStamped";

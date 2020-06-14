@@ -71,18 +71,18 @@ namespace Iviz.Msgs.RosbridgeLibrary
             Count = b.Deserialize<long>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new SendBytesRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.Count);
+            b.Serialize(Count);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
         }
     
@@ -111,18 +111,18 @@ namespace Iviz.Msgs.RosbridgeLibrary
             Data = b.DeserializeString();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new SendBytesResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.Data);
+            b.Serialize(Data);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Data is null) throw new System.NullReferenceException();
         }

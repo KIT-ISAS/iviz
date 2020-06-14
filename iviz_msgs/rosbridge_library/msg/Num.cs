@@ -24,24 +24,24 @@ namespace Iviz.Msgs.RosbridgeLibrary
             Num_ = b.Deserialize<long>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new Num(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.Num_);
+            b.Serialize(Num_);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
         }
     
         public int RosMessageLength => 8;
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "rosbridge_library/Num";

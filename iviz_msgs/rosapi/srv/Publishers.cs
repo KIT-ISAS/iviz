@@ -72,18 +72,18 @@ namespace Iviz.Msgs.Rosapi
             Topic = b.DeserializeString();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new PublishersRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.Topic);
+            b.Serialize(Topic);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Topic is null) throw new System.NullReferenceException();
         }
@@ -120,18 +120,18 @@ namespace Iviz.Msgs.Rosapi
             Publishers_ = b.DeserializeStringArray();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new PublishersResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeArray(Publishers_, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Publishers_ is null) throw new System.NullReferenceException();
             for (int i = 0; i < Publishers_.Length; i++)

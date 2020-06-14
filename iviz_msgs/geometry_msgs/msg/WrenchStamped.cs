@@ -12,12 +12,11 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor for empty message. </summary>
         public WrenchStamped()
         {
-            Header = new StdMsgs.Header();
             Wrench = new Wrench();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public WrenchStamped(StdMsgs.Header Header, Wrench Wrench)
+        public WrenchStamped(in StdMsgs.Header Header, Wrench Wrench)
         {
             this.Header = Header;
             this.Wrench = Wrench;
@@ -30,24 +29,23 @@ namespace Iviz.Msgs.GeometryMsgs
             Wrench = new Wrench(b);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new WrenchStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(Wrench);
+            Header.RosSerialize(b);
+            Wrench.RosSerialize(b);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Wrench is null) throw new System.NullReferenceException();
-            Wrench.Validate();
+            Wrench.RosValidate();
         }
     
         public int RosMessageLength
@@ -59,7 +57,7 @@ namespace Iviz.Msgs.GeometryMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "geometry_msgs/WrenchStamped";

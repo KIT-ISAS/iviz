@@ -55,7 +55,6 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public BatteryState()
         {
-            Header = new StdMsgs.Header();
             CellVoltage = System.Array.Empty<float>();
             CellTemperature = System.Array.Empty<float>();
             Location = "";
@@ -63,7 +62,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public BatteryState(StdMsgs.Header Header, float Voltage, float Temperature, float Current, float Charge, float Capacity, float DesignCapacity, float Percentage, byte PowerSupplyStatus, byte PowerSupplyHealth, byte PowerSupplyTechnology, bool Present, float[] CellVoltage, float[] CellTemperature, string Location, string SerialNumber)
+        public BatteryState(in StdMsgs.Header Header, float Voltage, float Temperature, float Current, float Charge, float Capacity, float DesignCapacity, float Percentage, byte PowerSupplyStatus, byte PowerSupplyHealth, byte PowerSupplyTechnology, bool Present, float[] CellVoltage, float[] CellTemperature, string Location, string SerialNumber)
         {
             this.Header = Header;
             this.Voltage = Voltage;
@@ -104,36 +103,35 @@ namespace Iviz.Msgs.SensorMsgs
             SerialNumber = b.DeserializeString();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new BatteryState(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(this.Voltage);
-            b.Serialize(this.Temperature);
-            b.Serialize(this.Current);
-            b.Serialize(this.Charge);
-            b.Serialize(this.Capacity);
-            b.Serialize(this.DesignCapacity);
-            b.Serialize(this.Percentage);
-            b.Serialize(this.PowerSupplyStatus);
-            b.Serialize(this.PowerSupplyHealth);
-            b.Serialize(this.PowerSupplyTechnology);
-            b.Serialize(this.Present);
+            Header.RosSerialize(b);
+            b.Serialize(Voltage);
+            b.Serialize(Temperature);
+            b.Serialize(Current);
+            b.Serialize(Charge);
+            b.Serialize(Capacity);
+            b.Serialize(DesignCapacity);
+            b.Serialize(Percentage);
+            b.Serialize(PowerSupplyStatus);
+            b.Serialize(PowerSupplyHealth);
+            b.Serialize(PowerSupplyTechnology);
+            b.Serialize(Present);
             b.SerializeStructArray(CellVoltage, 0);
             b.SerializeStructArray(CellTemperature, 0);
-            b.Serialize(this.Location);
-            b.Serialize(this.SerialNumber);
+            b.Serialize(Location);
+            b.Serialize(SerialNumber);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (CellVoltage is null) throw new System.NullReferenceException();
             if (CellTemperature is null) throw new System.NullReferenceException();
             if (Location is null) throw new System.NullReferenceException();
@@ -153,7 +151,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/BatteryState";

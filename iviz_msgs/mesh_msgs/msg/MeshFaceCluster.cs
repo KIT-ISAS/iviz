@@ -31,19 +31,19 @@ namespace Iviz.Msgs.MeshMsgs
             Label = b.DeserializeString();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new MeshFaceCluster(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeStructArray(FaceIndices, 0);
-            b.Serialize(this.Label);
+            b.Serialize(Label);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (FaceIndices is null) throw new System.NullReferenceException();
             if (Label is null) throw new System.NullReferenceException();
@@ -59,7 +59,7 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "mesh_msgs/MeshFaceCluster";

@@ -29,14 +29,13 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public Imu()
         {
-            Header = new StdMsgs.Header();
             OrientationCovariance = new double[9];
             AngularVelocityCovariance = new double[9];
             LinearAccelerationCovariance = new double[9];
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Imu(StdMsgs.Header Header, in GeometryMsgs.Quaternion Orientation, double[] OrientationCovariance, in GeometryMsgs.Vector3 AngularVelocity, double[] AngularVelocityCovariance, in GeometryMsgs.Vector3 LinearAcceleration, double[] LinearAccelerationCovariance)
+        public Imu(in StdMsgs.Header Header, in GeometryMsgs.Quaternion Orientation, double[] OrientationCovariance, in GeometryMsgs.Vector3 AngularVelocity, double[] AngularVelocityCovariance, in GeometryMsgs.Vector3 LinearAcceleration, double[] LinearAccelerationCovariance)
         {
             this.Header = Header;
             this.Orientation = Orientation;
@@ -59,27 +58,26 @@ namespace Iviz.Msgs.SensorMsgs
             LinearAccelerationCovariance = b.DeserializeStructArray<double>(9);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new Imu(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(Orientation);
+            Header.RosSerialize(b);
+            Orientation.RosSerialize(b);
             b.SerializeStructArray(OrientationCovariance, 9);
-            b.Serialize(AngularVelocity);
+            AngularVelocity.RosSerialize(b);
             b.SerializeStructArray(AngularVelocityCovariance, 9);
-            b.Serialize(LinearAcceleration);
+            LinearAcceleration.RosSerialize(b);
             b.SerializeStructArray(LinearAccelerationCovariance, 9);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (OrientationCovariance is null) throw new System.NullReferenceException();
             if (OrientationCovariance.Length != 9) throw new System.IndexOutOfRangeException();
             if (AngularVelocityCovariance is null) throw new System.NullReferenceException();
@@ -97,7 +95,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/Imu";

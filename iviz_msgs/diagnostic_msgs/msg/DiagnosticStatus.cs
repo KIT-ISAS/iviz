@@ -51,22 +51,22 @@ namespace Iviz.Msgs.DiagnosticMsgs
             }
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new DiagnosticStatus(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.Level);
-            b.Serialize(this.Name);
-            b.Serialize(this.Message);
-            b.Serialize(this.HardwareId);
+            b.Serialize(Level);
+            b.Serialize(Name);
+            b.Serialize(Message);
+            b.Serialize(HardwareId);
             b.SerializeArray(Values, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Name is null) throw new System.NullReferenceException();
             if (Message is null) throw new System.NullReferenceException();
@@ -75,7 +75,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             for (int i = 0; i < Values.Length; i++)
             {
                 if (Values[i] is null) throw new System.NullReferenceException();
-                Values[i].Validate();
+                Values[i].RosValidate();
             }
         }
     
@@ -94,7 +94,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "diagnostic_msgs/DiagnosticStatus";

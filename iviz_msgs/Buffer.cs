@@ -151,7 +151,7 @@ namespace Iviz.Msgs
 
         internal void Serialize(ISerializable val)
         {
-            val.Serialize(this);
+            val.RosSerialize(this);
         }
 
         internal void SerializeArray(string[] val, uint count)
@@ -224,7 +224,7 @@ namespace Iviz.Msgs
             }
             for (int i = 0; i < val.Length; i++)
             {
-                val[i].Serialize(this);
+                val[i].RosSerialize(this);
             }
         }
 
@@ -242,7 +242,7 @@ namespace Iviz.Msgs
             fixed (byte* b_ptr = buffer)
             {
                 Buffer b = new Buffer(b_ptr, b_ptr + size);
-                return (T)generator.Deserialize(b);
+                return (T)generator.RosDeserialize(b);
                 //return (uint)(b.ptr - b_ptr);
             }
         }
@@ -262,7 +262,7 @@ namespace Iviz.Msgs
             fixed (byte* b_ptr = buffer)
             {
                 Buffer b = new Buffer(b_ptr, b_ptr + buffer.Length);
-                message.Serialize(b);
+                message.RosSerialize(b);
                 return (uint)(b.ptr - b_ptr);
             }
         }

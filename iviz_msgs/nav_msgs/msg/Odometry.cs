@@ -16,14 +16,13 @@ namespace Iviz.Msgs.NavMsgs
         /// <summary> Constructor for empty message. </summary>
         public Odometry()
         {
-            Header = new StdMsgs.Header();
             ChildFrameId = "";
             Pose = new GeometryMsgs.PoseWithCovariance();
             Twist = new GeometryMsgs.TwistWithCovariance();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Odometry(StdMsgs.Header Header, string ChildFrameId, GeometryMsgs.PoseWithCovariance Pose, GeometryMsgs.TwistWithCovariance Twist)
+        public Odometry(in StdMsgs.Header Header, string ChildFrameId, GeometryMsgs.PoseWithCovariance Pose, GeometryMsgs.TwistWithCovariance Twist)
         {
             this.Header = Header;
             this.ChildFrameId = ChildFrameId;
@@ -40,29 +39,28 @@ namespace Iviz.Msgs.NavMsgs
             Twist = new GeometryMsgs.TwistWithCovariance(b);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new Odometry(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(this.ChildFrameId);
-            b.Serialize(Pose);
-            b.Serialize(Twist);
+            Header.RosSerialize(b);
+            b.Serialize(ChildFrameId);
+            Pose.RosSerialize(b);
+            Twist.RosSerialize(b);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (ChildFrameId is null) throw new System.NullReferenceException();
             if (Pose is null) throw new System.NullReferenceException();
-            Pose.Validate();
+            Pose.RosValidate();
             if (Twist is null) throw new System.NullReferenceException();
-            Twist.Validate();
+            Twist.RosValidate();
         }
     
         public int RosMessageLength
@@ -75,7 +73,7 @@ namespace Iviz.Msgs.NavMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "nav_msgs/Odometry";

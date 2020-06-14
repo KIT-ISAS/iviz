@@ -76,19 +76,19 @@ namespace Iviz.Msgs.Rosapi
             @default = b.DeserializeString();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new GetParamRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.Name);
-            b.Serialize(this.@default);
+            b.Serialize(Name);
+            b.Serialize(@default);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Name is null) throw new System.NullReferenceException();
             if (@default is null) throw new System.NullReferenceException();
@@ -127,18 +127,18 @@ namespace Iviz.Msgs.Rosapi
             Value = b.DeserializeString();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new GetParamResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.Value);
+            b.Serialize(Value);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Value is null) throw new System.NullReferenceException();
         }

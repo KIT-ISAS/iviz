@@ -34,12 +34,12 @@ namespace Iviz.Msgs.MeshMsgs
             Faces = b.DeserializeStructArray<MeshMsgs.TriangleIndices>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new MeshGeometry(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeStructArray(Vertices, 0);
@@ -47,7 +47,7 @@ namespace Iviz.Msgs.MeshMsgs
             b.SerializeStructArray(Faces, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Vertices is null) throw new System.NullReferenceException();
             if (VertexNormals is null) throw new System.NullReferenceException();
@@ -65,7 +65,7 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "mesh_msgs/MeshGeometry";

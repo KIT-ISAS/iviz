@@ -29,24 +29,24 @@ namespace Iviz.Msgs.Tf2Msgs
             }
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new TFMessage(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeArray(Transforms, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Transforms is null) throw new System.NullReferenceException();
             for (int i = 0; i < Transforms.Length; i++)
             {
                 if (Transforms[i] is null) throw new System.NullReferenceException();
-                Transforms[i].Validate();
+                Transforms[i].RosValidate();
             }
         }
     
@@ -62,7 +62,7 @@ namespace Iviz.Msgs.Tf2Msgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "tf2_msgs/TFMessage";

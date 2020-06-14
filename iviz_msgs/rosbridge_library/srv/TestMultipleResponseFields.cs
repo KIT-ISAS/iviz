@@ -85,21 +85,21 @@ namespace Iviz.Msgs.RosbridgeLibrary
             @bool = b.Deserialize<bool>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new TestMultipleResponseFieldsResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.@int);
-            b.Serialize(this.@float);
-            b.Serialize(this.@string);
-            b.Serialize(this.@bool);
+            b.Serialize(@int);
+            b.Serialize(@float);
+            b.Serialize(@string);
+            b.Serialize(@bool);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (@string is null) throw new System.NullReferenceException();
         }

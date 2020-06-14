@@ -33,24 +33,24 @@ namespace Iviz.Msgs.MeshMsgs
             Image = new SensorMsgs.Image(b);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new MeshTexture(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.Uuid);
-            b.Serialize(this.TextureIndex);
-            b.Serialize(Image);
+            b.Serialize(Uuid);
+            b.Serialize(TextureIndex);
+            Image.RosSerialize(b);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Uuid is null) throw new System.NullReferenceException();
             if (Image is null) throw new System.NullReferenceException();
-            Image.Validate();
+            Image.RosValidate();
         }
     
         public int RosMessageLength
@@ -63,7 +63,7 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "mesh_msgs/MeshTexture";

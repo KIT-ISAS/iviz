@@ -11,12 +11,11 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor for empty message. </summary>
         public InertiaStamped()
         {
-            Header = new StdMsgs.Header();
             Inertia = new Inertia();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public InertiaStamped(StdMsgs.Header Header, Inertia Inertia)
+        public InertiaStamped(in StdMsgs.Header Header, Inertia Inertia)
         {
             this.Header = Header;
             this.Inertia = Inertia;
@@ -29,24 +28,23 @@ namespace Iviz.Msgs.GeometryMsgs
             Inertia = new Inertia(b);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new InertiaStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(Inertia);
+            Header.RosSerialize(b);
+            Inertia.RosSerialize(b);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Inertia is null) throw new System.NullReferenceException();
-            Inertia.Validate();
+            Inertia.RosValidate();
         }
     
         public int RosMessageLength
@@ -58,7 +56,7 @@ namespace Iviz.Msgs.GeometryMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "geometry_msgs/InertiaStamped";

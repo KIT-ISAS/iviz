@@ -43,28 +43,28 @@ namespace Iviz.Msgs.NavMsgs
             Origin = new GeometryMsgs.Pose(b);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new MapMetaData(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.MapLoadTime);
-            b.Serialize(this.Resolution);
-            b.Serialize(this.Width);
-            b.Serialize(this.Height);
-            b.Serialize(Origin);
+            b.Serialize(MapLoadTime);
+            b.Serialize(Resolution);
+            b.Serialize(Width);
+            b.Serialize(Height);
+            Origin.RosSerialize(b);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
         }
     
         public int RosMessageLength => 76;
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "nav_msgs/MapMetaData";

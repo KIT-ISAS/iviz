@@ -84,25 +84,25 @@ namespace Iviz.Msgs.NavMsgs
             Tolerance = b.Deserialize<float>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new GetPlanRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Start);
-            b.Serialize(Goal);
-            b.Serialize(this.Tolerance);
+            Start.RosSerialize(b);
+            Goal.RosSerialize(b);
+            b.Serialize(Tolerance);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Start is null) throw new System.NullReferenceException();
-            Start.Validate();
+            Start.RosValidate();
             if (Goal is null) throw new System.NullReferenceException();
-            Goal.Validate();
+            Goal.RosValidate();
         }
     
         public int RosMessageLength
@@ -138,21 +138,21 @@ namespace Iviz.Msgs.NavMsgs
             Plan = new NavMsgs.Path(b);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new GetPlanResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Plan);
+            Plan.RosSerialize(b);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Plan is null) throw new System.NullReferenceException();
-            Plan.Validate();
+            Plan.RosValidate();
         }
     
         public int RosMessageLength

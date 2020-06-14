@@ -78,19 +78,19 @@ namespace Iviz.Msgs.GridMapMsgs
             TopicName = b.DeserializeString();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new ProcessFileRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.FilePath);
-            b.Serialize(this.TopicName);
+            b.Serialize(FilePath);
+            b.Serialize(TopicName);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (FilePath is null) throw new System.NullReferenceException();
             if (TopicName is null) throw new System.NullReferenceException();
@@ -129,18 +129,18 @@ namespace Iviz.Msgs.GridMapMsgs
             Success = b.Deserialize<bool>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new ProcessFileResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.Success);
+            b.Serialize(Success);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
         }
     

@@ -26,12 +26,11 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public MagneticField()
         {
-            Header = new StdMsgs.Header();
             MagneticFieldCovariance = new double[9];
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MagneticField(StdMsgs.Header Header, in GeometryMsgs.Vector3 MagneticField_, double[] MagneticFieldCovariance)
+        public MagneticField(in StdMsgs.Header Header, in GeometryMsgs.Vector3 MagneticField_, double[] MagneticFieldCovariance)
         {
             this.Header = Header;
             this.MagneticField_ = MagneticField_;
@@ -46,23 +45,22 @@ namespace Iviz.Msgs.SensorMsgs
             MagneticFieldCovariance = b.DeserializeStructArray<double>(9);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new MagneticField(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(MagneticField_);
+            Header.RosSerialize(b);
+            MagneticField_.RosSerialize(b);
             b.SerializeStructArray(MagneticFieldCovariance, 9);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (MagneticFieldCovariance is null) throw new System.NullReferenceException();
             if (MagneticFieldCovariance.Length != 9) throw new System.IndexOutOfRangeException();
         }
@@ -76,7 +74,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/MagneticField";

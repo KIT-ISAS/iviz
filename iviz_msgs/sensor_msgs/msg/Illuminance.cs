@@ -25,11 +25,10 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public Illuminance()
         {
-            Header = new StdMsgs.Header();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Illuminance(StdMsgs.Header Header, double Illuminance_, double Variance)
+        public Illuminance(in StdMsgs.Header Header, double Illuminance_, double Variance)
         {
             this.Header = Header;
             this.Illuminance_ = Illuminance_;
@@ -44,23 +43,22 @@ namespace Iviz.Msgs.SensorMsgs
             Variance = b.Deserialize<double>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new Illuminance(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(this.Illuminance_);
-            b.Serialize(this.Variance);
+            Header.RosSerialize(b);
+            b.Serialize(Illuminance_);
+            b.Serialize(Variance);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
         }
     
         public int RosMessageLength
@@ -72,7 +70,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/Illuminance";

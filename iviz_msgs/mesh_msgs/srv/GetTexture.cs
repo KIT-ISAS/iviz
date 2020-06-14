@@ -75,19 +75,19 @@ namespace Iviz.Msgs.MeshMsgs
             TextureIndex = b.Deserialize<uint>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new GetTextureRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.Uuid);
-            b.Serialize(this.TextureIndex);
+            b.Serialize(Uuid);
+            b.Serialize(TextureIndex);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Uuid is null) throw new System.NullReferenceException();
         }
@@ -124,21 +124,21 @@ namespace Iviz.Msgs.MeshMsgs
             Texture = new MeshMsgs.MeshTexture(b);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new GetTextureResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Texture);
+            Texture.RosSerialize(b);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Texture is null) throw new System.NullReferenceException();
-            Texture.Validate();
+            Texture.RosValidate();
         }
     
         public int RosMessageLength

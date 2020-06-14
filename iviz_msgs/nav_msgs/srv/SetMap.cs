@@ -77,24 +77,24 @@ namespace Iviz.Msgs.NavMsgs
             InitialPose = new GeometryMsgs.PoseWithCovarianceStamped(b);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new SetMapRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Map);
-            b.Serialize(InitialPose);
+            Map.RosSerialize(b);
+            InitialPose.RosSerialize(b);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Map is null) throw new System.NullReferenceException();
-            Map.Validate();
+            Map.RosValidate();
             if (InitialPose is null) throw new System.NullReferenceException();
-            InitialPose.Validate();
+            InitialPose.RosValidate();
         }
     
         public int RosMessageLength
@@ -129,18 +129,18 @@ namespace Iviz.Msgs.NavMsgs
             Success = b.Deserialize<bool>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new SetMapResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.Success);
+            b.Serialize(Success);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
         }
     

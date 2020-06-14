@@ -46,12 +46,12 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new MeshMaterials(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeArray(Clusters, 0);
@@ -60,13 +60,13 @@ namespace Iviz.Msgs.MeshMsgs
             b.SerializeArray(VertexTexCoords, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Clusters is null) throw new System.NullReferenceException();
             for (int i = 0; i < Clusters.Length; i++)
             {
                 if (Clusters[i] is null) throw new System.NullReferenceException();
-                Clusters[i].Validate();
+                Clusters[i].RosValidate();
             }
             if (Materials is null) throw new System.NullReferenceException();
             if (ClusterMaterials is null) throw new System.NullReferenceException();
@@ -74,7 +74,7 @@ namespace Iviz.Msgs.MeshMsgs
             for (int i = 0; i < VertexTexCoords.Length; i++)
             {
                 if (VertexTexCoords[i] is null) throw new System.NullReferenceException();
-                VertexTexCoords[i].Validate();
+                VertexTexCoords[i].RosValidate();
             }
         }
     
@@ -93,7 +93,7 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "mesh_msgs/MeshMaterials";

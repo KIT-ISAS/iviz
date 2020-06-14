@@ -32,25 +32,25 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new Feature(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Location);
+            Location.RosSerialize(b);
             b.SerializeArray(Descriptor, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Descriptor is null) throw new System.NullReferenceException();
             for (int i = 0; i < Descriptor.Length; i++)
             {
                 if (Descriptor[i] is null) throw new System.NullReferenceException();
-                Descriptor[i].Validate();
+                Descriptor[i].RosValidate();
             }
         }
     
@@ -63,7 +63,7 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "mesh_msgs/Feature";

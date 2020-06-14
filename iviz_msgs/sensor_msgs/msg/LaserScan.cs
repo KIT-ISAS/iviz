@@ -33,13 +33,12 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public LaserScan()
         {
-            Header = new StdMsgs.Header();
             Ranges = System.Array.Empty<float>();
             Intensities = System.Array.Empty<float>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public LaserScan(StdMsgs.Header Header, float AngleMin, float AngleMax, float AngleIncrement, float TimeIncrement, float ScanTime, float RangeMin, float RangeMax, float[] Ranges, float[] Intensities)
+        public LaserScan(in StdMsgs.Header Header, float AngleMin, float AngleMax, float AngleIncrement, float TimeIncrement, float ScanTime, float RangeMin, float RangeMax, float[] Ranges, float[] Intensities)
         {
             this.Header = Header;
             this.AngleMin = AngleMin;
@@ -68,30 +67,29 @@ namespace Iviz.Msgs.SensorMsgs
             Intensities = b.DeserializeStructArray<float>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new LaserScan(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(this.AngleMin);
-            b.Serialize(this.AngleMax);
-            b.Serialize(this.AngleIncrement);
-            b.Serialize(this.TimeIncrement);
-            b.Serialize(this.ScanTime);
-            b.Serialize(this.RangeMin);
-            b.Serialize(this.RangeMax);
+            Header.RosSerialize(b);
+            b.Serialize(AngleMin);
+            b.Serialize(AngleMax);
+            b.Serialize(AngleIncrement);
+            b.Serialize(TimeIncrement);
+            b.Serialize(ScanTime);
+            b.Serialize(RangeMin);
+            b.Serialize(RangeMax);
             b.SerializeStructArray(Ranges, 0);
             b.SerializeStructArray(Intensities, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Ranges is null) throw new System.NullReferenceException();
             if (Intensities is null) throw new System.NullReferenceException();
         }
@@ -107,7 +105,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/LaserScan";

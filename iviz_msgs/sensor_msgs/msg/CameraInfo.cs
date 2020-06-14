@@ -126,7 +126,6 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public CameraInfo()
         {
-            Header = new StdMsgs.Header();
             DistortionModel = "";
             D = System.Array.Empty<double>();
             K = new double[9];
@@ -136,7 +135,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public CameraInfo(StdMsgs.Header Header, uint Height, uint Width, string DistortionModel, double[] D, double[] K, double[] R, double[] P, uint BinningX, uint BinningY, RegionOfInterest Roi)
+        public CameraInfo(in StdMsgs.Header Header, uint Height, uint Width, string DistortionModel, double[] D, double[] K, double[] R, double[] P, uint BinningX, uint BinningY, RegionOfInterest Roi)
         {
             this.Header = Header;
             this.Height = Height;
@@ -167,31 +166,30 @@ namespace Iviz.Msgs.SensorMsgs
             Roi = new RegionOfInterest(b);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new CameraInfo(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(this.Height);
-            b.Serialize(this.Width);
-            b.Serialize(this.DistortionModel);
+            Header.RosSerialize(b);
+            b.Serialize(Height);
+            b.Serialize(Width);
+            b.Serialize(DistortionModel);
             b.SerializeStructArray(D, 0);
             b.SerializeStructArray(K, 9);
             b.SerializeStructArray(R, 9);
             b.SerializeStructArray(P, 12);
-            b.Serialize(this.BinningX);
-            b.Serialize(this.BinningY);
-            b.Serialize(Roi);
+            b.Serialize(BinningX);
+            b.Serialize(BinningY);
+            Roi.RosSerialize(b);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (DistortionModel is null) throw new System.NullReferenceException();
             if (D is null) throw new System.NullReferenceException();
             if (K is null) throw new System.NullReferenceException();
@@ -201,7 +199,7 @@ namespace Iviz.Msgs.SensorMsgs
             if (P is null) throw new System.NullReferenceException();
             if (P.Length != 12) throw new System.IndexOutOfRangeException();
             if (Roi is null) throw new System.NullReferenceException();
-            Roi.Validate();
+            Roi.RosValidate();
         }
     
         public int RosMessageLength
@@ -215,7 +213,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/CameraInfo";

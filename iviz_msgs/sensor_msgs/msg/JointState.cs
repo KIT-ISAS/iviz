@@ -32,7 +32,6 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public JointState()
         {
-            Header = new StdMsgs.Header();
             Name = System.Array.Empty<string>();
             Position = System.Array.Empty<double>();
             Velocity = System.Array.Empty<double>();
@@ -40,7 +39,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public JointState(StdMsgs.Header Header, string[] Name, double[] Position, double[] Velocity, double[] Effort)
+        public JointState(in StdMsgs.Header Header, string[] Name, double[] Position, double[] Velocity, double[] Effort)
         {
             this.Header = Header;
             this.Name = Name;
@@ -59,25 +58,24 @@ namespace Iviz.Msgs.SensorMsgs
             Effort = b.DeserializeStructArray<double>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new JointState(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
+            Header.RosSerialize(b);
             b.SerializeArray(Name, 0);
             b.SerializeStructArray(Position, 0);
             b.SerializeStructArray(Velocity, 0);
             b.SerializeStructArray(Effort, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Name is null) throw new System.NullReferenceException();
             for (int i = 0; i < Name.Length; i++)
             {
@@ -105,7 +103,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/JointState";

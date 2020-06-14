@@ -29,14 +29,13 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// <summary> Constructor for empty message. </summary>
         public ImageMarker()
         {
-            Header = new StdMsgs.Header();
             Ns = "";
             Points = System.Array.Empty<GeometryMsgs.Point>();
             OutlineColors = System.Array.Empty<StdMsgs.ColorRGBA>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public ImageMarker(StdMsgs.Header Header, string Ns, int Id, int Type, int Action, in GeometryMsgs.Point Position, float Scale, in StdMsgs.ColorRGBA OutlineColor, byte Filled, in StdMsgs.ColorRGBA FillColor, duration Lifetime, GeometryMsgs.Point[] Points, StdMsgs.ColorRGBA[] OutlineColors)
+        public ImageMarker(in StdMsgs.Header Header, string Ns, int Id, int Type, int Action, in GeometryMsgs.Point Position, float Scale, in StdMsgs.ColorRGBA OutlineColor, byte Filled, in StdMsgs.ColorRGBA FillColor, duration Lifetime, GeometryMsgs.Point[] Points, StdMsgs.ColorRGBA[] OutlineColors)
         {
             this.Header = Header;
             this.Ns = Ns;
@@ -71,33 +70,32 @@ namespace Iviz.Msgs.VisualizationMsgs
             OutlineColors = b.DeserializeStructArray<StdMsgs.ColorRGBA>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new ImageMarker(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(this.Ns);
-            b.Serialize(this.Id);
-            b.Serialize(this.Type);
-            b.Serialize(this.Action);
-            b.Serialize(Position);
-            b.Serialize(this.Scale);
-            b.Serialize(OutlineColor);
-            b.Serialize(this.Filled);
-            b.Serialize(FillColor);
-            b.Serialize(this.Lifetime);
+            Header.RosSerialize(b);
+            b.Serialize(Ns);
+            b.Serialize(Id);
+            b.Serialize(Type);
+            b.Serialize(Action);
+            Position.RosSerialize(b);
+            b.Serialize(Scale);
+            OutlineColor.RosSerialize(b);
+            b.Serialize(Filled);
+            FillColor.RosSerialize(b);
+            b.Serialize(Lifetime);
             b.SerializeStructArray(Points, 0);
             b.SerializeStructArray(OutlineColors, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Ns is null) throw new System.NullReferenceException();
             if (Points is null) throw new System.NullReferenceException();
             if (OutlineColors is null) throw new System.NullReferenceException();
@@ -115,7 +113,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "visualization_msgs/ImageMarker";

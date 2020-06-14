@@ -50,23 +50,23 @@ namespace Iviz.Msgs.ActionlibMsgs
             Text = b.DeserializeString();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new GoalStatus(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(GoalId);
-            b.Serialize(this.Status);
-            b.Serialize(this.Text);
+            GoalId.RosSerialize(b);
+            b.Serialize(Status);
+            b.Serialize(Text);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (GoalId is null) throw new System.NullReferenceException();
-            GoalId.Validate();
+            GoalId.RosValidate();
             if (Text is null) throw new System.NullReferenceException();
         }
     
@@ -80,7 +80,7 @@ namespace Iviz.Msgs.ActionlibMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "actionlib_msgs/GoalStatus";

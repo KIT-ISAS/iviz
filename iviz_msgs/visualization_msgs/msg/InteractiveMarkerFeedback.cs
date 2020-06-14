@@ -42,14 +42,13 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarkerFeedback()
         {
-            Header = new StdMsgs.Header();
             ClientId = "";
             MarkerName = "";
             ControlName = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public InteractiveMarkerFeedback(StdMsgs.Header Header, string ClientId, string MarkerName, string ControlName, byte EventType, in GeometryMsgs.Pose Pose, uint MenuEntryId, in GeometryMsgs.Point MousePoint, bool MousePointValid)
+        public InteractiveMarkerFeedback(in StdMsgs.Header Header, string ClientId, string MarkerName, string ControlName, byte EventType, in GeometryMsgs.Pose Pose, uint MenuEntryId, in GeometryMsgs.Point MousePoint, bool MousePointValid)
         {
             this.Header = Header;
             this.ClientId = ClientId;
@@ -76,29 +75,28 @@ namespace Iviz.Msgs.VisualizationMsgs
             MousePointValid = b.Deserialize<bool>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new InteractiveMarkerFeedback(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(this.ClientId);
-            b.Serialize(this.MarkerName);
-            b.Serialize(this.ControlName);
-            b.Serialize(this.EventType);
-            b.Serialize(Pose);
-            b.Serialize(this.MenuEntryId);
-            b.Serialize(MousePoint);
-            b.Serialize(this.MousePointValid);
+            Header.RosSerialize(b);
+            b.Serialize(ClientId);
+            b.Serialize(MarkerName);
+            b.Serialize(ControlName);
+            b.Serialize(EventType);
+            Pose.RosSerialize(b);
+            b.Serialize(MenuEntryId);
+            MousePoint.RosSerialize(b);
+            b.Serialize(MousePointValid);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (ClientId is null) throw new System.NullReferenceException();
             if (MarkerName is null) throw new System.NullReferenceException();
             if (ControlName is null) throw new System.NullReferenceException();
@@ -116,7 +114,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "visualization_msgs/InteractiveMarkerFeedback";

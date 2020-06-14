@@ -11,12 +11,11 @@ namespace Iviz.Msgs.MeshMsgs
         /// <summary> Constructor for empty message. </summary>
         public TriangleMeshStamped()
         {
-            Header = new StdMsgs.Header();
             Mesh = new MeshMsgs.TriangleMesh();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TriangleMeshStamped(StdMsgs.Header Header, MeshMsgs.TriangleMesh Mesh)
+        public TriangleMeshStamped(in StdMsgs.Header Header, MeshMsgs.TriangleMesh Mesh)
         {
             this.Header = Header;
             this.Mesh = Mesh;
@@ -29,24 +28,23 @@ namespace Iviz.Msgs.MeshMsgs
             Mesh = new MeshMsgs.TriangleMesh(b);
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new TriangleMeshStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Header);
-            b.Serialize(Mesh);
+            Header.RosSerialize(b);
+            Mesh.RosSerialize(b);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
-            Header.Validate();
+            Header.RosValidate();
             if (Mesh is null) throw new System.NullReferenceException();
-            Mesh.Validate();
+            Mesh.RosValidate();
         }
     
         public int RosMessageLength
@@ -59,7 +57,7 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "mesh_msgs/TriangleMeshStamped";

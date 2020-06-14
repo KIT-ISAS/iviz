@@ -77,31 +77,31 @@ namespace Iviz.Msgs.RosgraphMsgs
             StampAgeMax = b.Deserialize<duration>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new TopicStatistics(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.Topic);
-            b.Serialize(this.NodePub);
-            b.Serialize(this.NodeSub);
-            b.Serialize(this.WindowStart);
-            b.Serialize(this.WindowStop);
-            b.Serialize(this.DeliveredMsgs);
-            b.Serialize(this.DroppedMsgs);
-            b.Serialize(this.Traffic);
-            b.Serialize(this.PeriodMean);
-            b.Serialize(this.PeriodStddev);
-            b.Serialize(this.PeriodMax);
-            b.Serialize(this.StampAgeMean);
-            b.Serialize(this.StampAgeStddev);
-            b.Serialize(this.StampAgeMax);
+            b.Serialize(Topic);
+            b.Serialize(NodePub);
+            b.Serialize(NodeSub);
+            b.Serialize(WindowStart);
+            b.Serialize(WindowStop);
+            b.Serialize(DeliveredMsgs);
+            b.Serialize(DroppedMsgs);
+            b.Serialize(Traffic);
+            b.Serialize(PeriodMean);
+            b.Serialize(PeriodStddev);
+            b.Serialize(PeriodMax);
+            b.Serialize(StampAgeMean);
+            b.Serialize(StampAgeStddev);
+            b.Serialize(StampAgeMax);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Topic is null) throw new System.NullReferenceException();
             if (NodePub is null) throw new System.NullReferenceException();
@@ -119,7 +119,7 @@ namespace Iviz.Msgs.RosgraphMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "rosgraph_msgs/TopicStatistics";

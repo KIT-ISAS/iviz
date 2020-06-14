@@ -43,22 +43,22 @@ namespace Iviz.Msgs.TrajectoryMsgs
             TimeFromStart = b.Deserialize<duration>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new JointTrajectoryPoint(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeStructArray(Positions, 0);
             b.SerializeStructArray(Velocities, 0);
             b.SerializeStructArray(Accelerations, 0);
             b.SerializeStructArray(Effort, 0);
-            b.Serialize(this.TimeFromStart);
+            b.Serialize(TimeFromStart);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Positions is null) throw new System.NullReferenceException();
             if (Velocities is null) throw new System.NullReferenceException();
@@ -78,7 +78,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "trajectory_msgs/JointTrajectoryPoint";

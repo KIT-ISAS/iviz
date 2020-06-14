@@ -105,32 +105,32 @@ namespace Iviz.Msgs.VisualizationMsgs
             Description = b.DeserializeString();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new InteractiveMarkerControl(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.Name);
-            b.Serialize(Orientation);
-            b.Serialize(this.OrientationMode);
-            b.Serialize(this.InteractionMode);
-            b.Serialize(this.AlwaysVisible);
+            b.Serialize(Name);
+            Orientation.RosSerialize(b);
+            b.Serialize(OrientationMode);
+            b.Serialize(InteractionMode);
+            b.Serialize(AlwaysVisible);
             b.SerializeArray(Markers, 0);
-            b.Serialize(this.IndependentMarkerOrientation);
-            b.Serialize(this.Description);
+            b.Serialize(IndependentMarkerOrientation);
+            b.Serialize(Description);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Name is null) throw new System.NullReferenceException();
             if (Markers is null) throw new System.NullReferenceException();
             for (int i = 0; i < Markers.Length; i++)
             {
                 if (Markers[i] is null) throw new System.NullReferenceException();
-                Markers[i].Validate();
+                Markers[i].RosValidate();
             }
             if (Description is null) throw new System.NullReferenceException();
         }
@@ -149,7 +149,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "visualization_msgs/InteractiveMarkerControl";

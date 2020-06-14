@@ -25,18 +25,18 @@ namespace Iviz.Msgs.RosbridgeLibrary
             Times = b.DeserializeStructArray<time>();
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new TestTimeArray(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeStructArray(Times, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (Times is null) throw new System.NullReferenceException();
         }
@@ -50,7 +50,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "rosbridge_library/TestTimeArray";

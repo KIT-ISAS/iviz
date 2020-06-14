@@ -45,27 +45,27 @@ namespace Iviz.Msgs.VisualizationMsgs
             }
         }
         
-        ISerializable ISerializable.Deserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new InteractiveMarkerInit(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        void ISerializable.Serialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this.ServerId);
-            b.Serialize(this.SeqNum);
+            b.Serialize(ServerId);
+            b.Serialize(SeqNum);
             b.SerializeArray(Markers, 0);
         }
         
-        public void Validate()
+        public void RosValidate()
         {
             if (ServerId is null) throw new System.NullReferenceException();
             if (Markers is null) throw new System.NullReferenceException();
             for (int i = 0; i < Markers.Length; i++)
             {
                 if (Markers[i] is null) throw new System.NullReferenceException();
-                Markers[i].Validate();
+                Markers[i].RosValidate();
             }
         }
     
@@ -82,7 +82,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             }
         }
     
-        string IMessage.RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "visualization_msgs/InteractiveMarkerInit";
