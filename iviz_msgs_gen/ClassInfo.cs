@@ -22,6 +22,7 @@ namespace Iviz.MsgsGen
         string md5;
 
         readonly bool forceStruct;
+        readonly bool fakeStruct;
         readonly bool hasStrings;
 
         readonly List<MsgParser.Variable> variables = new List<MsgParser.Variable>();
@@ -79,6 +80,11 @@ namespace Iviz.MsgsGen
             "mesh_msgs/MeshMaterial",
         };
 
+        public static readonly HashSet<string> FakeStructs = new HashSet<string>
+        {
+            "std_msgs/Header",
+        };
+
         static readonly HashSet<string> forceSkip = new HashSet<string>
         {
             //"mesh_msgs/TriangleIndices",
@@ -98,6 +104,7 @@ namespace Iviz.MsgsGen
             elements = MsgParser.ParseFile(lines, name);
 
             forceStruct = ForceStructs.Contains(package + "/" + name);
+            fakeStruct = FakeStructs.Contains(package + "/" + name);
             hasStrings = elements.Any(x =>
                 ((x is MsgParser.Variable xv) && xv.className == "string") ||
                 ((x is MsgParser.Constant xc) && xc.className == "string")
@@ -179,9 +186,9 @@ namespace Iviz.MsgsGen
         }
 
 
-        internal static List<string> CreateLengthProperty(List<MsgParser.Variable> variables, int fixedSize, bool forceStruct)
+        internal static List<string> CreateLengthProperty(List<MsgParser.Variable> variables, int fixedSize, bool forceStruct, bool fakeStruct)
         {
-            string readOnlyId = forceStruct ? "readonly " : "";
+            string readOnlyId = (forceStruct || fakeStruct) ? "readonly " : "";
             if (fixedSize != -1)
             {
                 return new List<string> {
@@ -285,11 +292,11 @@ namespace Iviz.MsgsGen
             return lines;
         }
 
-        internal static List<string> CreateConstructors(List<MsgParser.Variable> variables, string name, bool forceStruct, string type)
+        internal static List<string> CreateConstructors(List<MsgParser.Variable> variables, string name, bool forceStruct, bool fakeStruct)
         {
             List<string> lines = new List<string>();
 
-            if (!forceStruct)
+            if (!forceStruct && !fakeStruct)
             {
                 lines.Add("/// <summary> Constructor for empty message. </summary>");
                 lines.Add("public " + name + "()");
@@ -321,7 +328,7 @@ namespace Iviz.MsgsGen
                         {
                             lines.Add("    " + variable.fieldName + " = new " + variable.className + "[" + variable.arraySize + "];");
                         }
-                        else if (!variable.classInfo.forceStruct)
+                        else if (variable.classInfo == null || !(variable.classInfo.forceStruct || variable.classInfo.fakeStruct))
                         {
                             lines.Add("    " + variable.fieldName + " = new " + variable.className + "();");
                         }
@@ -350,7 +357,7 @@ namespace Iviz.MsgsGen
                     {
                         return v.className + "[] " + v.fieldName;
                     }
-                    else if (v.classInfo != null && v.classInfo.forceStruct)
+                    else if (v.classInfo != null && (v.classInfo.forceStruct || v.classInfo.fakeStruct))
                     {
                         return "in " + v.className + " " + v.fieldName;
                     }
@@ -472,8 +479,8 @@ namespace Iviz.MsgsGen
             lines.Add("}");
             lines.Add("");
 
-            string readOnlyId = forceStruct ? "readonly " : "";
-            lines.Add(readOnlyId + "ISerializable ISerializable.Deserialize(Buffer b)");
+            string readOnlyId = (forceStruct || fakeStruct) ? "readonly " : "";
+            lines.Add("public " + readOnlyId + "ISerializable RosDeserialize(Buffer b)");
             lines.Add("{");
             lines.Add("    return new " + name + "(b ?? throw new System.ArgumentNullException(nameof(b)));");
             lines.Add("}");
@@ -481,13 +488,13 @@ namespace Iviz.MsgsGen
             return lines;
         }
 
-        public static List<string> CreateSerializers(List<MsgParser.Variable> variables, bool forceStruct, string type)
+        public static List<string> CreateSerializers(List<MsgParser.Variable> variables, bool forceStruct, bool fakeStruct)
         {
             List<string> lines = new List<string>();
 
-            string readOnlyId = forceStruct ? "readonly " : "";
+            string readOnlyId = (forceStruct || fakeStruct) ? "readonly " : "";
 
-            lines.Add(readOnlyId + "void ISerializable.Serialize(Buffer b)");
+            lines.Add("public " + readOnlyId + "void RosSerialize(Buffer b)");
             lines.Add("{");
             lines.Add("    if (b is null) throw new System.ArgumentNullException(nameof(b));");
             if (forceStruct)
@@ -502,7 +509,7 @@ namespace Iviz.MsgsGen
                     {
                         if (variable.arraySize == -1)
                         {
-                            lines.Add("    b.Serialize(this." + variable.fieldName + ");");
+                            lines.Add("    b.Serialize(" + variable.fieldName + ");");
                         }
                         else
                         {
@@ -520,7 +527,7 @@ namespace Iviz.MsgsGen
                     {
                         if (variable.arraySize == -1)
                         {
-                            lines.Add("    b.Serialize(" + variable.fieldName + ");");
+                            lines.Add("    " + variable.fieldName + ".RosSerialize(b);");
                         }
                         else
                         {
@@ -539,7 +546,7 @@ namespace Iviz.MsgsGen
             lines.Add("}");
 
             lines.Add("");
-            lines.Add("public " + readOnlyId + "void Validate()");
+            lines.Add("public " + readOnlyId + "void RosValidate()");
             lines.Add("{");
             foreach (var variable in variables)
             {
@@ -558,10 +565,13 @@ namespace Iviz.MsgsGen
                 }
                 else
                 {
-                    lines.Add("    if (" + variable.fieldName + " is null) throw new System.NullReferenceException();");
+                    if (!(variable.classInfo?.fakeStruct ?? false))
+                    {
+                        lines.Add("    if (" + variable.fieldName + " is null) throw new System.NullReferenceException();");
+                    }
                     if (variable.arraySize == -1 && variable.rosClassName != "string")
                     {
-                        lines.Add("    " + variable.fieldName + ".Validate();");
+                        lines.Add("    " + variable.fieldName + ".RosValidate();");
                     }
                 }
                 if (variable.arraySize != -1)
@@ -577,8 +587,11 @@ namespace Iviz.MsgsGen
                     {
                         lines.Add("    for (int i = 0; i < " + variable.fieldName + ".Length; i++)");
                         lines.Add("    {");
-                        lines.Add("        if (" + variable.fieldName + "[i] is null) throw new System.NullReferenceException();");
-                        lines.Add("        " + variable.fieldName + "[i].Validate();");
+                        if (!(variable.classInfo?.fakeStruct ?? false))
+                        {
+                            lines.Add("        if (" + variable.fieldName + "[i] is null) throw new System.NullReferenceException();");
+                        }
+                        lines.Add("        " + variable.fieldName + "[i].RosValidate();");
                         lines.Add("    }");
                     }
                 }
@@ -678,6 +691,10 @@ namespace Iviz.MsgsGen
                     lines.Add("public struct " + name + " : IMessage");
                 }
             }
+            else if (fakeStruct)
+            {
+                lines.Add("public struct " + name + " : IMessage");
+            }
             else
             {
                 lines.Add("public sealed class " + name + " : IMessage");
@@ -695,21 +712,21 @@ namespace Iviz.MsgsGen
             {
                 lines.Add("");
             }
-            List<string> deserializer = CreateConstructors(variables, name, forceStruct, "IMessage");
+            List<string> deserializer = CreateConstructors(variables, name, forceStruct, fakeStruct);
             foreach (var entry in deserializer)
             {
                 lines.Add("    " + entry);
             }
 
             lines.Add("");
-            List<string> serializer = CreateSerializers(variables, forceStruct, "IMessage");
+            List<string> serializer = CreateSerializers(variables, forceStruct, fakeStruct);
             foreach (var entry in serializer)
             {
                 lines.Add("    " + entry);
             }
 
             lines.Add("");
-            List<string> lengthProperty = CreateLengthProperty(variables, fixedSize, forceStruct);
+            List<string> lengthProperty = CreateLengthProperty(variables, fixedSize, forceStruct, fakeStruct);
             foreach (var entry in lengthProperty)
             {
                 lines.Add("    " + entry);
@@ -719,8 +736,8 @@ namespace Iviz.MsgsGen
             //lines.Add("    IMessage IMessage.Create() => new " + name + "();");
 
             lines.Add("");
-            string readOnlyId = forceStruct ? "readonly " : "";
-            lines.Add("    " + readOnlyId + "string IMessage.RosType => RosMessageType;");
+            string readOnlyId = (forceStruct || fakeStruct) ? "readonly " : "";
+            lines.Add("    public " + readOnlyId + "string RosType => RosMessageType;");
 
             lines.Add("");
             lines.Add("    /// <summary> Full ROS name of this message. </summary>");

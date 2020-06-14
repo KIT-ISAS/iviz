@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using System.Threading;
+using BitMiracle.LibJpeg;
 using Iviz.Bridge.Client;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.Tf2Msgs;
@@ -14,12 +15,27 @@ namespace iviz_test
     {
         static void Main()
         {
+            Stream stream = File.Open("/Users/akzeac/Downloads/001-0.jpg", FileMode.Open);
+            var image = new JpegImage(stream);
+            Console.WriteLine(image.BitsPerComponent);
+            Console.WriteLine(image.Colorspace);
+
+            const int bmpHeaderLength = 54;
+            byte[] buffer = new byte[image.Width * image.Height * 3 + bmpHeaderLength];
+            Stream stream2 = new MemoryStream(buffer);
+            image.WriteBitmap(stream2);
+            Console.WriteLine(image.Width + " " + image.Height + " " + buffer.Length + " " + stream2.Position);
+            Console.In.Read();
+        }
+
+        static void Main_Old3()
+        {
             RosClient client = new RosClient(
-                //"http://192.168.0.73:11311",
-                "http://141.3.59.5:11311",
+                "http://192.168.0.73:11311",
+                //"http://141.3.59.5:11311",
                 null,
-                //"http://192.168.0.157:7614"
-                "http://141.3.59.19:7614"
+                "http://192.168.0.157:7613"
+                //"http://141.3.59.19:7614"
                 );
 
             Console.WriteLine(client.GetSystemState());

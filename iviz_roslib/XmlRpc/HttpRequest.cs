@@ -54,6 +54,8 @@ namespace Iviz.RoslibSharp.XmlRpc
             writer.Write(msgIn);
             writer.Flush();
 
+            Task.Delay(100);
+
             StreamReader reader = new StreamReader(client.GetStream(), BuiltIns.UTF8);
             reader.BaseStream.ReadTimeout = timeoutInMs;
 
@@ -65,7 +67,7 @@ namespace Iviz.RoslibSharp.XmlRpc
                 index = response.IndexOf("\n\n", StringComparison.InvariantCulture);
                 if (index == -1)
                 {
-                    throw new ParseException("Cannot find double line-end in HTTP header");
+                    throw new ParseException($"Cannot find double line-end in HTTP header (received {response.Length} bytes)");
                 }
                 index += 2;
             }

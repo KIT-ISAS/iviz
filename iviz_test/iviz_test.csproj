@@ -19,5 +19,6 @@
   <ItemGroup>
     <PackageReference Include="System.Security.Permissions" Version="4.7.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="BitMiracle.LibJpeg.NET" Version="1.5.324" />
   </ItemGroup>
 </Project>

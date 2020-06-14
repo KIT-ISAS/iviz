@@ -10,6 +10,9 @@ using Iviz.Msgs;
 
 namespace Iviz.RoslibSharp
 {
+    /// <summary>
+    /// The provided message type is not correct.
+    /// </summary>
     public class InvalidMessageTypeException : Exception
     {
         public InvalidMessageTypeException(string message) : base(message) { }
@@ -17,6 +20,9 @@ namespace Iviz.RoslibSharp
         public InvalidMessageTypeException() { }
     }
 
+    /// <summary>
+    /// An error happened during the connection.
+    /// </summary>
     public class ConnectionException : Exception
     {
         public ConnectionException(string message) : base(message) { }
@@ -24,6 +30,9 @@ namespace Iviz.RoslibSharp
         public ConnectionException() { }
     }
 
+    /// <summary>
+    /// The uri provided for the caller (this node) is not reachable.
+    /// </summary>
     public class UnreachableUriException : Exception
     {
         public UnreachableUriException(string message) : base(message) { }
@@ -193,7 +202,7 @@ namespace Iviz.RoslibSharp
             }
             catch (SocketException e)
             {
-                Listener.Stop();
+                Listener?.Stop();
                 throw new ConnectionException($"Failed to bind to local URI '{callerUri}'", e);
             }
 
@@ -204,12 +213,13 @@ namespace Iviz.RoslibSharp
 
             try
             {
-                // check if the system thinks we are subscribed to or advertise topic, possibly from a previous session
-                // if so, remove them
+                // check if the system thinks we are subscribed to or advertise topic,
+                // possibly from a previous session. if so, remove them.
+                // this also doubles as a reachability test for the master
                 EnsureCleanSlate();
             }
             catch (Exception e) when
-            (e is SocketException || e is TimeoutException || e is AggregateException)
+            (e is SocketException || e is TimeoutException || e is AggregateException || e is IOException)
             {
                 Listener.Stop();
                 throw new ConnectionException($"Failed to contact the master URI '{masterUri}'", e);

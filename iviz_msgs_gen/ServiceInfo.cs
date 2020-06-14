@@ -108,23 +108,23 @@ namespace Iviz.MsgsGen
 
             lines.Add("");
 
-            string type = (isRequest ? "IRequest" : "IResponse");
+            //string type = (isRequest ? "IRequest" : "IResponse");
 
-            List<string> deserializer = ClassInfo.CreateConstructors(variables, name, forceStruct, type);
+            List<string> deserializer = ClassInfo.CreateConstructors(variables, name, forceStruct, false);
             foreach (var entry in deserializer)
             {
                 lines.Add("    " + entry);
             }
 
             lines.Add("");
-            List<string> serializer = ClassInfo.CreateSerializers(variables, forceStruct, type);
+            List<string> serializer = ClassInfo.CreateSerializers(variables, forceStruct, false);
             foreach (var entry in serializer)
             {
                 lines.Add("    " + entry);
             }
 
             lines.Add("");
-            List<string> lengthProperty = ClassInfo.CreateLengthProperty(variables, fixedSize, false);
+            List<string> lengthProperty = ClassInfo.CreateLengthProperty(variables, fixedSize, false, false);
             foreach (var entry in lengthProperty)
             {
                 lines.Add("    " + entry);

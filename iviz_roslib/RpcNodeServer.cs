@@ -139,7 +139,6 @@ namespace Iviz.RoslibSharp.XmlRpc
         public Arg[] GetPid(object[] _)
         {
             int id = Process.GetCurrentProcess().Id;
-            Logger.Log($"RcpNodeServer: Failed to get process id");
 
             return new[] {
                     new Arg((int)StatusCode.Success),
