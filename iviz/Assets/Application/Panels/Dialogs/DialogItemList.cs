@@ -17,6 +17,7 @@ namespace Iviz.App
         public Text emptyText;
         public Text titleText;
         public TrashButtonWidget closeButton;
+        public Canvas canvas;
 
         public event Action<int, string> ItemClicked;
         public event Action CloseClicked;
@@ -94,6 +95,7 @@ namespace Iviz.App
             get => items.Select(x => x.Text);
             set
             {
+                canvas.enabled = false;
                 if (value.Count() == items.Count)
                 {
                     int i = 0;
@@ -129,6 +131,7 @@ namespace Iviz.App
                     }
                     UpdateSize();
                 }
+                canvas.enabled = true;
             }
         }
 
@@ -182,6 +185,7 @@ namespace Iviz.App
                 return false;
             }
 
+            canvas.enabled = false;
             items[index].Invalidate();
             items.RemoveAt(index);
             for (int i = index; i < items.Count; i++)
@@ -189,6 +193,7 @@ namespace Iviz.App
                 items[i].Index = i;
             }
             UpdateSize();
+            canvas.enabled = true;
             return true;
         }
 

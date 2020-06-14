@@ -53,7 +53,12 @@ namespace Iviz.App.Displays
             Parent = (parentId == "") ? TFListener.BaseFrame : TFListener.GetOrCreateFrame(parentId);
         }
 
-        public virtual void AttachTo(string parentId, DateTime timestamp)
+        public virtual void AttachTo(string parentId, in Msgs.time timestamp)
+        {
+            AttachTo(parentId, timestamp.ToTimeSpan());
+        }
+
+        public virtual void AttachTo(string parentId, in TimeSpan timestamp)
         {
             transform.SetParentLocal(TFListener.BaseFrame.transform);
             if (parentId == "")

@@ -12,6 +12,7 @@ using MaterialInfo = Iviz.Resources.Resource.Info<UnityEngine.Material>;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.App;
 using Iviz.Msgs.NavMsgs;
+using System.Text;
 
 namespace Iviz.Resources
 {
@@ -34,6 +35,7 @@ namespace Iviz.Resources
             AR,
             Magnitude,
             OccupancyGrid,
+            Joystick
         }
 
         static readonly Dictionary<string, Module> resourceByRosMessageType = new Dictionary<string, Module>
@@ -131,6 +133,7 @@ namespace Iviz.Resources
             public MaterialInfo SimpleLit { get; }
             public MaterialInfo TexturedLit { get; }
             public MaterialInfo TransparentLit { get; }
+            public MaterialInfo TransparentTexturedLit { get; }
             public MaterialInfo ImagePreview { get; }
             public MaterialInfo PointCloud { get; }
             public MaterialInfo MeshList { get; }
@@ -138,18 +141,59 @@ namespace Iviz.Resources
             public MaterialInfo Grid { get; }
             public MaterialInfo Line { get; }
 
+            public MaterialInfo LitOcclusionOnly { get; }
+            public MaterialInfo MeshListOcclusionOnly { get; }
+
             public MaterialsType()
             {
                 SimpleLit = new MaterialInfo("Materials/SimpleWhite");
                 Lit = new MaterialInfo("Materials/White");
                 TexturedLit = new MaterialInfo("Materials/Textured Lit");
                 TransparentLit = new MaterialInfo("Materials/Transparent Lit");
+                TransparentTexturedLit = new MaterialInfo("Materials/Transparent Textured Lit");
                 ImagePreview = new MaterialInfo("Materials/ImagePreview");
                 PointCloud = new MaterialInfo("Materials/PointCloud Material");
                 MeshList = new MaterialInfo("Materials/MeshList Material");
                 Grid = new MaterialInfo("Materials/Grid");
                 Line = new MaterialInfo("Materials/Line Material");
                 DepthImageProjector = new MaterialInfo("Materials/DepthImage Material");
+
+                LitOcclusionOnly = new MaterialInfo("Materials/White OcclusionOnly");
+                MeshListOcclusionOnly = new MaterialInfo("Materials/MeshList OcclusionOnly");
+            }
+        }
+
+        public class TexturedMaterialsType
+        {
+            readonly Dictionary<Texture, Material> materialsByTexture = new Dictionary<Texture, Material>();
+            readonly Dictionary<Texture, Material> materialsByTextureAlpha = new Dictionary<Texture, Material>();
+
+            public Material Get(Texture texture)
+            {
+                if (materialsByTexture.TryGetValue(texture, out Material material))
+                {
+                    return material;
+                }
+
+                material = Materials.TexturedLit.Instantiate();
+                material.mainTexture = texture;
+                material.name = Materials.TexturedLit.Name + " - " + materialsByTexture.Count;
+                materialsByTexture[texture] = material;
+                return material;
+            }
+
+            public Material GetAlpha(Texture texture)
+            {
+                if (materialsByTextureAlpha.TryGetValue(texture, out Material material))
+                {
+                    return material;
+                }
+
+                material = Materials.TransparentTexturedLit.Instantiate();
+                material.mainTexture = texture;
+                material.name = Materials.TransparentTexturedLit.Name + " - " + materialsByTextureAlpha.Count;
+                materialsByTextureAlpha[texture] = material;
+                return material;
             }
         }
 
@@ -268,7 +312,7 @@ namespace Iviz.Resources
                 AR = new GameObjectInfo("Listeners/AR");
             }
 
-            public T Instantiate<T>(UnityEngine.Transform parent = null) where T: MonoBehaviour
+            public T Instantiate<T>(UnityEngine.Transform parent = null) where T : MonoBehaviour
             {
                 if (!typeof(IController).IsAssignableFrom(typeof(T)))
                 {
@@ -366,6 +410,63 @@ namespace Iviz.Resources
             }
         }
 
+        public class FontInfo
+        {
+            Font Font { get; }
+            readonly int DotWidth;
+            readonly int ArrowWidth;
+            readonly Dictionary<char, int> charWidths = new Dictionary<char, int>();
+
+            public FontInfo()
+            {
+                Font = UnityEngine.Resources.Load<Font>("Fonts/Montserrat Real NonDynamic");
+                DotWidth = CharWidth('.') * 3;
+                ArrowWidth = CharWidth('→') + CharWidth(' ');
+            }
+
+            public string Split(string s, int maxWidth)
+            {
+                int usableWidth = maxWidth - DotWidth;
+                StringBuilder str = new StringBuilder();
+                int usedWidth = 0;
+                int numLines = 0;
+                for (int i = 0; i < s.Length; i++)
+                {
+                    int charWidth = CharWidth(s[i]);
+                    if (usedWidth + charWidth > usableWidth)
+                    {
+                        if (numLines == 0)
+                        {
+                            str.Append("...\n→ ").Append(s[i]);
+                            usedWidth = ArrowWidth;
+                            numLines = 1;
+                        }
+                        else if (numLines == 1)
+                        {
+                            str.Append("...");
+                            return str.ToString();
+                        }
+                    } else
+                    {
+                        str.Append(s[i]);
+                        usedWidth += charWidth;
+                    }
+                }
+                return str.ToString();
+            }
+
+            int CharWidth(char c)
+            {
+                if (charWidths.TryGetValue(c, out int width))
+                {
+                    return width;
+                }
+                Font.GetCharacterInfo(c, out CharacterInfo ci, 12);
+                charWidths[c] = ci.advance;
+                return ci.advance;
+            }
+        }
+
         public const int ClickableLayer = 8;
 
         static MaterialsType materials;
@@ -387,5 +488,12 @@ namespace Iviz.Resources
         public static RobotsType Robots => robots ?? (robots = new RobotsType());
 
         public static ColorScheme Colors { get; } = new ColorScheme();
+
+        static TexturedMaterialsType texturedMaterials;
+        public static TexturedMaterialsType TexturedMaterials =>
+            texturedMaterials ?? (texturedMaterials = new TexturedMaterialsType());
+
+        static FontInfo font;
+        public static FontInfo Font => font ?? (font = new FontInfo());
     }
 }

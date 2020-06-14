@@ -6,9 +6,9 @@ namespace Iviz.App
 {
     public class ImagePreviewWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] Text label;
-        [SerializeField] RawImage image;
-        [SerializeField] Button button;
+        [SerializeField] Text label = null;
+        [SerializeField] RawImage image = null;
+        [SerializeField] Button button = null;
 
         public Action Clicked;
 
@@ -17,9 +17,18 @@ namespace Iviz.App
             button.onClick.AddListener(() => { Clicked?.Invoke(); });
         }
 
+        bool interactable = true;
         public bool Interactable
         {
-            get => false;
+            get => interactable;
+            set
+            {
+                interactable = value;
+                image.enabled = value;
+                image.color = value ? Color.white : Color.black;
+                button.interactable = value;
+                button.image.raycastTarget = value;
+            }
         }
 
         public string Label

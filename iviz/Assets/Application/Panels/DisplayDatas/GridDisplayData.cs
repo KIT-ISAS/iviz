@@ -55,6 +55,7 @@ namespace Iviz.App
             panel.ShowInterior.Value = display.ShowInterior;
             panel.HideButton.State = display.Visible;
             panel.Offset.Value = display.Offset;
+            panel.FollowCamera.Value = display.FollowCamera;
 
             panel.LineWidth.ValueChanged += f =>
             {
@@ -95,6 +96,10 @@ namespace Iviz.App
                 display.Visible = !display.Visible;
                 panel.HideButton.State = display.Visible;
                 UpdateButtonText();
+            };
+            panel.FollowCamera.ValueChanged += f =>
+            {
+                display.FollowCamera = f;
             };
         }
 

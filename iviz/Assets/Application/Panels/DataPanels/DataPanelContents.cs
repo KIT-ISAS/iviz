@@ -20,12 +20,12 @@ namespace Iviz.App
         {
             if (cachedWidgets == null)
             {
-                SetWidgets();
+                FindWidgets();
             }
             cachedWidgets.ForEach(w => w.ClearSubscribers());
         }
 
-        void SetWidgets()
+        void FindWidgets()
         {
             cachedWidgets = new List<IWidget>();
             PropertyInfo[] properties = GetType().GetProperties();
@@ -55,7 +55,8 @@ namespace Iviz.App
                 case Resource.Module.AR: return o.AddComponent<ARPanelContents>();
                 case Resource.Module.Magnitude: return o.AddComponent<OdometryPanelContents>();
                 case Resource.Module.OccupancyGrid: return o.AddComponent<OccupancyGridPanelContents>();
-                default: throw new ArgumentException();
+                case Resource.Module.Joystick: return o.AddComponent<JoystickPanelContents>();
+                default: throw new ArgumentException(nameof(resource));
             }
         }
     }

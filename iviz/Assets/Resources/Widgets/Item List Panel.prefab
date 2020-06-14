@@ -118,7 +118,7 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 7786611110930008992}
+  - {fileID: 3927959003498002733}
   - {fileID: 7786611111468096670}
   - {fileID: 7786611111125302775}
   - {fileID: 7786611111092987665}
@@ -181,7 +181,8 @@ MonoBehaviour:
   contentObject: {fileID: 7786611109904658291}
   emptyText: {fileID: 7786611111092987678}
   titleText: {fileID: 7786611111468096671}
-  closeButton: {fileID: 7786611110930009511}
+  closeButton: {fileID: 843236670540645312}
+  canvas: {fileID: 7786611111125302770}
 --- !u!1 &7786611109904658291
 GameObject:
   m_ObjectHideFlags: 0
@@ -214,7 +215,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.000030517578, y: 0}
+  m_AnchoredPosition: {x: 0.000030517578, y: -0.00015258789}
   m_SizeDelta: {x: 0, y: 403.4}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &7786611110102072469
@@ -378,7 +379,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &7786611110569429399
 RectTransform:
   m_ObjectHideFlags: 0
@@ -501,7 +502,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &7786611110884689649
 RectTransform:
   m_ObjectHideFlags: 0
@@ -639,7 +640,7 @@ RectTransform:
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -789,7 +790,7 @@ RectTransform:
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: NaN, y: 0}
   m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -1160,7 +1161,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: da7ab3b9ffc07dd4f801efc74796acd4, type: 3}
---- !u!114 &7786611110930009511 stripped
+--- !u!114 &843236670540645312 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7474953677808031820, guid: da7ab3b9ffc07dd4f801efc74796acd4,
     type: 3}
@@ -1172,7 +1173,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2d948a05eda04e46bedb11eec1aa15e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!224 &7786611110930008992 stripped
+--- !u!224 &3927959003498002733 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6524995043497632417, guid: da7ab3b9ffc07dd4f801efc74796acd4,
     type: 3}

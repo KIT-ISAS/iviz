@@ -6,27 +6,68 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public sealed class MeshTrianglesResource : MarkerResource
+    public sealed class MeshTrianglesResource : MarkerResource, ISupportsAROcclusion, ISupportsTint
     {
+        MeshRenderer mainRenderer;
         public Mesh Mesh { get; private set; }
 
-        Color color;
+        [SerializeField] Color color_ = Color.white;
         public Color Color
         {
-            get => color;
+            get => color_;
             set
             {
-                color = value;
-                mainRenderer.material = (color.a > 254f / 255f) ?
+                color_ = value;
+                SetEffectiveColor();
+            }
+        }
+
+        [SerializeField] bool occlusionOnly_;
+        public bool OcclusionOnly
+        {
+            get => occlusionOnly_;
+            set
+            {
+                occlusionOnly_ = value;
+                if (value)
+                {
+                    mainRenderer.material = Resource.Materials.LitOcclusionOnly.Object;
+                }
+                else
+                {
+                    Color = color_;
+                }
+            }
+        }
+
+        [SerializeField] Color tint_ = Color.white;
+        public Color Tint
+        {
+            get => tint_;
+            set
+            {
+                tint_ = value;
+                SetEffectiveColor();
+            }
+        }
+
+        Color EffectiveColor => Color * Tint;
+
+        void SetEffectiveColor()
+        {
+            if (!OcclusionOnly)
+            {
+                Color effectiveColor = EffectiveColor;
+                Material material = effectiveColor.a > 254f / 255f ?
                     Resource.Materials.Lit.Object :
                     Resource.Materials.TransparentLit.Object;
-                mainRenderer.SetPropertyColor(color);
+                mainRenderer.material = material;
+                mainRenderer.SetPropertyColor(effectiveColor);
             }
         }
 
         public override string Name => "MeshTriangles";
 
-        MeshRenderer mainRenderer;
         protected override void Awake()
         {
             base.Awake();
@@ -68,7 +109,8 @@ namespace Iviz.Displays
             }
         }
 
-        void SetTriangles(IList<int> indices)
+        
+        public void SetTriangles(IList<int> indices)
         {
             if (indices is List<int> indices_v)
             {
@@ -83,6 +125,7 @@ namespace Iviz.Displays
                 Mesh.SetTriangles(indices.ToArray(), 0);
             }
         }
+        
 
         public void Set(IList<Vector3> points, IList<Color> colors = null)
         {
@@ -111,6 +154,14 @@ namespace Iviz.Displays
 
             Collider.center = Mesh.bounds.center;
             Collider.size = Mesh.bounds.size;
+        }
+
+        public override void Stop()
+        {
+            base.Stop();
+            Color = Color.white;
+            ColliderEnabled = true;
+            OcclusionOnly = false;
         }
 
         /*

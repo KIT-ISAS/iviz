@@ -5,7 +5,7 @@ using Iviz.App;
 
 namespace Iviz.Displays
 {
-    public sealed class AxisFrameResource : MarkerResource, IRecyclable
+    public sealed class AxisFrameResource : MarkerResource, IRecyclable, ISupportsAROcclusion, ISupportsTint
     {
         public override string Name => "AxisFrame";
 
@@ -51,6 +51,32 @@ namespace Iviz.Displays
                 axisObjects[0].Layer = value;
                 axisObjects[1].Layer = value;
                 axisObjects[2].Layer = value;
+            }
+        }
+
+        bool occlusionOnly_;
+        public bool OcclusionOnly
+        {
+            get => occlusionOnly_;
+            set
+            {
+                occlusionOnly_ = value;
+                axisObjects[0].OcclusionOnly = value;
+                axisObjects[1].OcclusionOnly = value;
+                axisObjects[2].OcclusionOnly = value;
+            }
+        }
+
+        Color tint_;
+        public Color Tint
+        {
+            get => tint_;
+            set
+            {
+                tint_ = value;
+                axisObjects[0].Tint = value;
+                axisObjects[1].Tint = value;
+                axisObjects[2].Tint = value;
             }
         }
 
@@ -100,6 +126,7 @@ namespace Iviz.Displays
             ColorX = Color.red;
             ColorY = Color.green;
             ColorZ = Color.blue;
+            OcclusionOnly = false;
         }
     }
 }

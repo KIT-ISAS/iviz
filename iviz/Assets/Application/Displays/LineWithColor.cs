@@ -7,6 +7,8 @@ namespace Iviz.Displays
     [StructLayout(LayoutKind.Sequential)]
     public readonly struct LineWithColor
     {
+        static readonly float white = PointWithColor.WhiteAsIntensity();
+
         readonly float4x2 f;
 
         public Vector3 A => new Vector3(f.c0.x, f.c0.y, f.c0.z);
@@ -53,6 +55,19 @@ namespace Iviz.Displays
                 f.c0.w = *(float*)&colorA;
                 f.c1.w = *(float*)&colorB;
             }
+        }
+
+        public LineWithColor(in Vector3 a, in Vector3 b)
+        {
+            f.c0.x = a.x;
+            f.c0.y = a.y;
+            f.c0.z = a.z;
+            f.c0.w = white;
+
+            f.c1.x = b.x;
+            f.c1.y = b.y;
+            f.c1.z = b.z;
+            f.c1.w = white;
         }
 
         public LineWithColor(in PointWithColor A, in PointWithColor B)

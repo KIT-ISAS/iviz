@@ -29,6 +29,8 @@ namespace Iviz.App
         [DataMember] public string FramePrefix { get; set; } = "";
         [DataMember] public string FrameSuffix { get; set; } = "";
         [DataMember] public bool AttachToTF { get; set; } = false;
+        [DataMember] public bool RenderAsOcclusionOnly { get; set; } = false;
+        [DataMember] public SerializableColor Tint { get; set; } = Color.white;
     }
 
     public class Robot : MonoBehaviour, IController, IHasFrame
@@ -46,7 +48,7 @@ namespace Iviz.App
         readonly Dictionary<GameObject, GameObject> originalLinkParents = new Dictionary<GameObject, GameObject>();
         readonly Dictionary<GameObject, Pose> originalLinkPoses = new Dictionary<GameObject, Pose>();
         readonly Dictionary<string, JointInfo> jointWriters = new Dictionary<string, JointInfo>();
-        readonly List<MeshRenderer> renderers = new List<MeshRenderer>();
+        readonly List<MarkerWrapper> displays = new List<MarkerWrapper>();
 
         public IReadOnlyDictionary<string, JointInfo> JointWriters => new ReadOnlyDictionary<string, JointInfo>(jointWriters);
 
@@ -60,6 +62,9 @@ namespace Iviz.App
                 AttachToTF = value.AttachToTF;
                 FramePrefix = value.FramePrefix;
                 FrameSuffix = value.FrameSuffix;
+                Visible = value.Visible;
+                RenderAsOcclusionOnly = value.RenderAsOcclusionOnly;
+                Tint = value.Tint;  
             }
         }
 
@@ -141,11 +146,31 @@ namespace Iviz.App
             set
             {
                 config.Visible = value;
-                renderers.ForEach(x => x.enabled = value);
+                displays.ForEach(x => x.Visible = value);
                 if (RobotObject != null)
                 {
                     RobotObject.SetActive(value);
                 }
+            }
+        }
+
+        public bool RenderAsOcclusionOnly
+        {
+            get => config.RenderAsOcclusionOnly;
+            set
+            {
+                config.RenderAsOcclusionOnly = value;
+                displays.ForEach(x => x.OcclusionOnly = value);
+            }
+        }
+
+        public Color Tint
+        {
+            get => config.Tint;
+            set
+            {
+                config.Tint = value;
+                displays.ForEach(x => x.Tint = value);
             }
         }
 
@@ -261,7 +286,7 @@ namespace Iviz.App
             {
                 robotInfo = RobotObject.AddComponent<RobotInfo>();
                 robotInfo.owner = this;
-                OptimizeMaterials();
+                UpdateMaterials();
             }
 
             originalLinkParents.Clear();
@@ -281,7 +306,6 @@ namespace Iviz.App
                 }
             });
 
-            renderers.AddRange(RobotObject.GetComponentsInChildren<MeshRenderer>());
             RobotObject.SetActive(Visible);
 
             BaseLink = RobotObject.
@@ -304,42 +328,17 @@ namespace Iviz.App
             }
         }
 
-        void OptimizeMaterials()
+        void UpdateMaterials()
         {
             MeshRenderer[] renderers = RobotObject.GetComponentsInChildren<MeshRenderer>();
-            Dictionary<Texture, Material> materialsByTexture = new Dictionary<Texture, Material>();
 
+            this.displays.Clear();
             foreach (MeshRenderer meshRenderer in renderers)
             {
-                Material[] materials = meshRenderer.sharedMaterials.ToArray();
-                for (int i = 0; i < materials.Length; i++)
-                {
-                    if (materials[i] == null)
-                    {
-                        materials[i] = Resource.Materials.Lit.Object;
-                    }
-                    else if (materials[i].mainTexture == null)
-                    {
-                        Color c = materials[i].color;
-                        materials[i] = Resource.Materials.Lit.Object;
-                        meshRenderer.SetPropertyColor(c, i);
-                    }
-                    else
-                    {
-                        Texture tex = materials[i].mainTexture;
-                        if (!materialsByTexture.TryGetValue(tex, out Material material))
-                        {
-                            material = Resource.Materials.TexturedLit.Instantiate();
-                            material.mainTexture = tex;
-                            material.name = Resource.Materials.TexturedLit.Name + " - " + materialsByTexture.Count;
-                            materialsByTexture[tex] = material;
-                        }
-                        meshRenderer.SetPropertyColor(Color.white, i);
-                        meshRenderer.SetPropertyMainTexST(materials[i].mainTextureOffset, materials[i].mainTextureScale, i);
-                        materials[i] = material;
-                    }
-                }
-                meshRenderer.sharedMaterials = materials;
+                MarkerWrapper item = meshRenderer.gameObject.AddComponent<MarkerWrapper>();
+                item.Tint = Tint;
+                item.OcclusionOnly = RenderAsOcclusionOnly;
+                displays.Add(item);
             }
         }
 
@@ -391,7 +390,7 @@ namespace Iviz.App
             jointWriters.Clear();
             originalLinkParents.Clear();
             originalLinkPoses.Clear();
-            renderers.Clear();
+            displays.Clear();
         }
 
         //public override void Recycle()

@@ -7,9 +7,17 @@ namespace Iviz.Displays
     {
         public override string Name => "ArrowResource";
 
+        public float Scale { get; set; } = 1;
+
+        protected override void Awake()
+        {
+            base.Awake();
+            Set(Vector3.zero, Vector3.zero);
+        }
+
         public void Set(in Vector3 A, in Vector3 B)
         {
-            Vector3 diff = A - B; // arrow model is flipped
+            Vector3 diff = (A - B) * Scale; // arrow model is flipped
             float scale = diff.magnitude;
 
             transform.localScale = scale * Vector3.one;

@@ -25,6 +25,7 @@ Shader "iviz/PointCloud2"
 			float _IntensityAdd;
 			float4x4 _LocalToWorld;
 			float4x4 _WorldToLocal;
+	        float4 _Tint;
 
 			struct Point {
 				float3 position;
@@ -68,6 +69,7 @@ Shader "iviz/PointCloud2"
 					) / 255.0;
 				o.color = rgb;
 	#endif
+				o.color *= _Tint;
 				return o;
 			}
 

@@ -16,19 +16,25 @@ namespace Iviz.App
         public DropdownWidget Colormap { get; private set; }
         public ToggleWidget FlipColors { get; private set; }
         public NumberInputFieldWidget ScaleZ { get; private set; }
-
+        public ColorPickerWidget Tint { get; private set; }
+        //public SliderWidget Alpha { get; private set; }
+        public ToggleWidget OcclusionOnlyMode { get; private set; }
 
         void Start()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
-            p.AddHeadTitleWidget("OccupancyGrid");
-            p.AddFrame();
+            p.AddHeadTitleWidget("OccupGrid");
             Listener = p.AddListener();
+            Frame = p.AddFrame();
             Colormap = p.AddDropdown("Colormap")
                         .SetOptions(Resource.Colormaps.Names)
                         .SetIndex((int)Resource.ColormapId.gray);
             FlipColors = p.AddToggle("Flip Color Bounds");
             ScaleZ = p.AddNumberInputField("Height Multiplier");
+
+            Tint = p.AddColorPicker("Tint");
+            //Alpha = p.AddSlider("Alpha").SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256);
+            OcclusionOnlyMode = p.AddToggle("AR Occlusion Only Mode");
 
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();

@@ -35,7 +35,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -1.9055, y: -108.439}
+  m_AnchoredPosition: {x: -1.9055176, y: -108.439}
   m_SizeDelta: {x: 28.915, y: 178}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &546971895574467289
@@ -170,6 +170,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   label: {fileID: 6749017424179038155}
   image: {fileID: 6749017423723589935}
+  button: {fileID: 3290956658764598419}
 --- !u!1 &6749017423723589933
 GameObject:
   m_ObjectHideFlags: 0

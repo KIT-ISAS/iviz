@@ -5,10 +5,12 @@ using Iviz.Resources;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Mathematics;
+using System.Threading.Tasks;
 
 namespace Iviz.Displays
 {
-    public sealed class OccupancyGridResource : MonoBehaviour, IDisplay, IRecyclable
+    public sealed class OccupancyGridResource : MonoBehaviour, IDisplay, IRecyclable, ISupportsTint
     {
         const int MaxSize = 10000;
 
@@ -22,27 +24,27 @@ namespace Iviz.Displays
         public Vector3 WorldScale => resource.Scale;
         public Pose WorldPose => resource.WorldPose;
 
-        int layer;
+        int layer_;
         public int Layer
         {
-            get => layer;
+            get => layer_;
             set
             {
-                layer = value;
-                resource.Layer = layer;
-                plane.Layer = layer;
+                layer_ = value;
+                resource.Layer = layer_;
+                plane.Layer = layer_;
             }
         }
 
-        bool visible;
+        bool visible_;
         public bool Visible
         {
-            get => visible;
+            get => visible_;
             set
             {
-                visible = value;
+                visible_ = value;
                 resource.Visible = value;
-                plane.Visible = value && interiorVisible;
+                plane.Visible = value && interiorVisible_;
             }
         }
 
@@ -52,36 +54,36 @@ namespace Iviz.Displays
             set => transform.parent = value;
         }
 
-        bool colliderEnabled;
+        bool colliderEnabled_;
         public bool ColliderEnabled
         {
-            get => colliderEnabled;
+            get => colliderEnabled_;
             set
             {
-                colliderEnabled = value;
+                colliderEnabled_ = value;
                 resource.ColliderEnabled = value;
                 plane.ColliderEnabled = value;
             }
         }
 
-        bool interiorVisible;
+        [SerializeField] bool interiorVisible_;
         public bool InteriorVisible
         {
-            get => interiorVisible;
+            get => interiorVisible_;
             set
             {
-                interiorVisible = value;
+                interiorVisible_ = value;
                 plane.Visible = value && Visible;
             }
         }
 
-        int numCellsX;
+        [SerializeField] int numCellsX_;
         public int NumCellsX
         {
-            get => numCellsX;
+            get => numCellsX_;
             set
             {
-                if (value == numCellsX)
+                if (value == numCellsX_)
                 {
                     return;
                 }
@@ -89,18 +91,18 @@ namespace Iviz.Displays
                 {
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }
-                numCellsX = value;
+                numCellsX_ = value;
                 UpdateSize();
             }
         }
 
-        int numCellsY;
+        [SerializeField] int numCellsY_;
         public int NumCellsY
         {
-            get => numCellsY;
+            get => numCellsY_;
             set
             {
-                if (value == numCellsY)
+                if (value == numCellsY_)
                 {
                     return;
                 }
@@ -108,26 +110,38 @@ namespace Iviz.Displays
                 {
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }
-                numCellsY = value;
+                numCellsY_ = value;
                 UpdateSize();
             }
         }
 
-        float cellSize;
+        [SerializeField] float cellSize_;
         public float CellSize
         {
-            get => cellSize;
+            get => cellSize_;
             set
             {
-                if (value == cellSize)
+                if (value == cellSize_)
                 {
                     return;
                 }
-                cellSize = value;
+                cellSize_ = value;
                 resource.Scale = value * Vector3.one;
-                resource.Offset = new Vector3(0, cellSize / 2, 0);
+                resource.Offset = new Vector3(0, cellSize_ / 2, 0);
                 UpdateSize();
             }
+        }
+
+        public Color Tint
+        {
+            get => resource.Tint;
+            set => resource.Tint = value;
+        }
+
+        public bool OcclusionOnly
+        {
+            get => resource.OcclusionOnly;
+            set => resource.OcclusionOnly = value;
         }
 
         void UpdateSize()
@@ -197,35 +211,49 @@ namespace Iviz.Displays
             ResourcePool.Dispose(Resource.Markers.Cube, plane.gameObject);
         }
 
-        public void SetOccupancy(IList<sbyte> values)
+        volatile bool isProcessing;
+        public void SetOccupancy(sbyte[] values)
         {
-            pointBuffer.Clear();
-            int i = 0;
-            float offsetX = (NumCellsX - 1) / 2f;
-            float offsetY = (NumCellsY - 1) / 2f;
-            for (int v = 0; v < NumCellsY; v++)
+            if (isProcessing)
             {
-                for (int u = 0; u < NumCellsX; u++, i++)
-                {
-                    sbyte val = values[i];
-                    if (val <= 0)
-                    {
-                        continue;
-                    }
-                    Vector3 pos = new Vector3(
-                        (u - offsetX) * CellSize,
-                        (v - offsetY) * CellSize,
-                        0
-                        );
-
-                    pointBuffer.Add(new PointWithColor(
-                        pos.Ros2Unity(),
-                        val * 0.01f
-                        ));
-                }
+                return;
             }
-            resource.PointsWithColor = pointBuffer;
-            resource.IntensityBounds = new Vector2(0, 1);
+            isProcessing = true;
+            Task.Run(() =>
+            {
+                pointBuffer.Clear();
+
+                int i = 0;
+                float offsetX = (numCellsX_ - 1) / 2f;
+                float offsetY = (numCellsY_ - 1) / 2f;
+
+                float4 add = new float4(-offsetX, -offsetY, 0, 0);
+                float4 mul = new float4(cellSize_, cellSize_, 0, 0.01f);
+
+                float4 addmul = add * mul;
+
+                for (int v = 0; v < numCellsY_; v++)
+                {
+                    for (int u = 0; u < numCellsX_; u++, i++)
+                    {
+                        sbyte val = values[i];
+                        if (val <= 0)
+                        {
+                            continue;
+                        }
+                        float4 p = new float4(u, v, 0, val);
+                        float4 pc = p * mul + addmul;
+                        pointBuffer.Add(new PointWithColor(pc.Ros2Unity()));
+                    }
+                }
+                isProcessing = false;
+
+                GameThread.RunOnce(() =>
+                {
+                   resource.PointsWithColor = pointBuffer;
+                   resource.IntensityBounds = new Vector2(0, 1);
+                });
+            });
         }
     }
 

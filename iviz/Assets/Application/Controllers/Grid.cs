@@ -18,8 +18,9 @@ namespace Iviz.App.Listeners
         [DataMember] public SerializableColor InteriorColor { get; set; } = Color.white * 0.5f;
         [DataMember] public float GridLineWidth { get; set; } = 0.02f;
         [DataMember] public float GridCellSize { get; set; } = 1;
-        [DataMember] public int NumberOfGridCells { get; set; } = 20;
+        [DataMember] public int NumberOfGridCells { get; set; } = 30;
         [DataMember] public bool ShowInterior { get; set; } = true;
+        [DataMember] public bool FollowCamera { get; set; } = true;
         [DataMember] public SerializableVector3 Offset { get; set; } = Vector3.zero;
     }
 
@@ -49,6 +50,8 @@ namespace Iviz.App.Listeners
                 GridCellSize = value.GridCellSize;
                 NumberOfGridCells = value.NumberOfGridCells;
                 ShowInterior = value.ShowInterior;
+                FollowCamera = value.FollowCamera;
+                Offset = value.Offset;
             }
         }
 
@@ -136,6 +139,15 @@ namespace Iviz.App.Listeners
                 config.ShowInterior = value;
                 grid.ShowInterior = value;
                 UpdateMesh();
+            }
+        }
+
+        public bool FollowCamera
+        {
+            get => config.FollowCamera;
+            set
+            {
+                config.FollowCamera = value;
             }
         }
 

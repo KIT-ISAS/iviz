@@ -27,6 +27,15 @@ namespace Iviz.App
                 label.color = value ? Resource.Colors.EnabledFontColor : Resource.Colors.DisabledFontColor;
             }
         }
+        public bool HasRichText
+        {
+            get => label.supportRichText;
+            set
+            {
+                label.supportRichText = value;
+            }
+        }
+
 
         public DataLabelWidget SetLabel(string f)
         {
@@ -36,6 +45,12 @@ namespace Iviz.App
 
         public void ClearSubscribers()
         {
+        }
+
+        public DataLabelWidget SetHasRichText(bool b)
+        {
+            HasRichText = b;
+            return this;
         }
     }
 }

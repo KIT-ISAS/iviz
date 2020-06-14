@@ -28,7 +28,7 @@ namespace Iviz.App.Listeners
 
     public class MarkerObject : ClickableNode
     {
-        const string packagePrefix = "package://ibis/";
+        const string packagePrefix = "package://iviz/";
 
         public event Action<Vector3, int> Clicked;
 
@@ -291,7 +291,7 @@ namespace Iviz.App.Listeners
             }
             else
             {
-                AttachTo(msg.Header.FrameId, msg.Header.Stamp.ToDateTime());
+                AttachTo(msg.Header.FrameId, msg.Header.Stamp);
             }
 
             transform.SetLocalPose(msg.Pose.Ros2Unity());
@@ -358,27 +358,50 @@ namespace Iviz.App.Listeners
             }
         }
 
+        public bool OcclusionOnly
+        {
+            get => (resource as ISupportsAROcclusion)?.OcclusionOnly ?? false;
+            set
+            {
+                if (resource is ISupportsAROcclusion arResource)
+                {
+                    arResource.OcclusionOnly = value;
+                }
+            }
+        }
+
+        public Color Tint
+        {
+            get => (resource as ISupportsTint)?.Tint ?? Color.white;
+            set
+            {
+                if (resource is ISupportsTint tintResource)
+                {
+                    tintResource.Tint = value;
+                }
+            }
+        }
+
         public override string Name => name;
 
         public override Pose BoundsPose => resource?.transform.AsPose() ?? new Pose();
 
         public override Vector3 BoundsScale => Vector3.one;
 
+
         public override void OnPointerClick(PointerEventData eventData)
         {
-            if (!eventData.IsPointerMoving())
-            {
-                if (eventData.clickCount == 1)
-                {
-                    Clicked?.Invoke(eventData.pointerCurrentRaycast.worldPosition, 0);
-                }
-                else if (eventData.clickCount == 2)
-                {
-                    Clicked?.Invoke(eventData.pointerCurrentRaycast.worldPosition, 1);
-                }
-            }
             base.OnPointerClick(eventData);
+            if (LastClickCount == 1)
+            {
+                Clicked?.Invoke(eventData.pointerCurrentRaycast.worldPosition, 0);
+            }
+            else if (LastClickCount == 2)
+            {
+                Clicked?.Invoke(eventData.pointerCurrentRaycast.worldPosition, 1);
+            }
         }
+
     }
 
     static class MarkerTypeHelper

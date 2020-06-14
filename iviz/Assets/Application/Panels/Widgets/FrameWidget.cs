@@ -7,7 +7,7 @@ namespace Iviz.App
 {
     public class FrameWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] Text text;
+        [SerializeField] Text text = null;
 
         IHasFrame owner;
         public IHasFrame Owner

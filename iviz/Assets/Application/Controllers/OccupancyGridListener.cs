@@ -17,12 +17,15 @@ namespace Iviz.App.Listeners
     public class OccupancyGridConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
-        [DataMember] public Resource.Module Module => Resource.Module.PointCloud;
+        [DataMember] public Resource.Module Module => Resource.Module.OccupancyGrid;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public Resource.ColormapId Colormap { get; set; } = Resource.ColormapId.gray;
         [DataMember] public bool FlipColors { get; set; } = true;
         [DataMember] public float ScaleZ { get; set; } = 1.0f;
+        [DataMember] public bool RenderAsOcclusionOnly { get; set; } = false;
+        [DataMember] public SerializableColor Tint { get; set; } = Color.white;
+        [DataMember] public uint MaxQueueSize { get; set; } = 1;
     }
 
     public class OccupancyGridListener : TopicListener
@@ -44,6 +47,9 @@ namespace Iviz.App.Listeners
                 Visible = value.Visible;
                 Colormap = value.Colormap;
                 FlipColors = value.FlipColors;
+                MaxQueueSize = value.MaxQueueSize;
+                Tint = value.Tint;
+                RenderAsOcclusionOnly = value.RenderAsOcclusionOnly;
             }
         }
 
@@ -87,6 +93,39 @@ namespace Iviz.App.Listeners
             }
         }
 
+        public uint MaxQueueSize
+        {
+            get => config.MaxQueueSize;
+            set
+            {
+                config.MaxQueueSize = value;
+                if (Listener != null)
+                {
+                    Listener.MaxQueueSize = (int)value;
+                }
+            }
+        }
+
+        public bool RenderAsOcclusionOnly
+        {
+            get => config.RenderAsOcclusionOnly;
+            set
+            {
+                config.RenderAsOcclusionOnly = value;
+                grid.OcclusionOnly = value;
+            }
+        }
+
+        public Color Tint
+        {
+            get => config.Tint;
+            set
+            {
+                config.Tint = value;
+                grid.Tint = value;
+            }
+        }
+
         void Awake()
         {
             node = DisplayClickableNode.Instantiate("Node");
@@ -99,6 +138,7 @@ namespace Iviz.App.Listeners
         {
             base.StartListening();
             Listener = new RosListener<OccupancyGrid>(config.Topic, Handler);
+            Listener.MaxQueueSize = (int)MaxQueueSize;
             name = "OccupancyGrid:" + config.Topic;
             node.SetName($"[{config.Topic}]");
         }
@@ -115,22 +155,23 @@ namespace Iviz.App.Listeners
                 Logger.Debug($"OccupancyGrid: NaN in header!");
                 return;
             }
-            if (!msg.Info.Origin.ValidateNaN())
+            if (msg.Info.Origin.HasNaN())
             {
                 Logger.Debug($"OccupancyGrid: NaN in origin!");
                 return;
             }
 
-            node.AttachTo(msg.Header.FrameId, msg.Header.Stamp.ToDateTime());
+            node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
 
             Pose origin = msg.Info.Origin.Ros2Unity();
 
-            grid.transform.SetLocalPose(origin);
             grid.NumCellsX = (int)msg.Info.Width;
             grid.NumCellsY = (int)msg.Info.Height;
             grid.CellSize = msg.Info.Resolution;
 
             origin.position += new Vector3(grid.NumCellsX, grid.NumCellsY, 0).Ros2Unity() * (grid.CellSize / 2f);
+            grid.transform.SetLocalPose(origin);
+
             grid.SetOccupancy(msg.Data);
         }
 

@@ -8,6 +8,8 @@ namespace Iviz.App.Displays
         public Transform parent;
         public Vector3 offset;
 
+        public bool UseAbsoluteOffset { get; set; } = true;
+
         void Start()
         {
             if (parent == null)
@@ -20,7 +22,10 @@ namespace Iviz.App.Displays
         {
             GameObject mainCamera = TFListener.MainCamera.gameObject;
             transform.LookAt(2 * transform.position - mainCamera.transform.position, Vector3.up);
-            transform.position = parent.position + offset;
+            if (UseAbsoluteOffset)
+            {
+                transform.position = parent.position + offset;
+            } 
         }
     }
 }

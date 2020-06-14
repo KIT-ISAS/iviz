@@ -5,7 +5,6 @@ Shader "iviz/MultiplyMesh"
     {
         _Glossiness ("Smoothness", Range(0,1)) = 0.5
         _Metallic ("Metallic", Range(0,1)) = 0.0
-        _LocalScale("Local Scale", Float) = 1.0
     }
     SubShader
     {
@@ -48,6 +47,7 @@ Shader "iviz/MultiplyMesh"
 
         float4x4 _LocalToWorld;
         float4 _BoundaryCenter;
+        float4 _Tint;
 
         void setup() {}
 
@@ -83,6 +83,7 @@ Shader "iviz/MultiplyMesh"
                 ) / 255.0;
     #endif
 #endif
+            o.color *= _Tint;
         }
 
         void surf (Input IN, inout SurfaceOutputStandard o)

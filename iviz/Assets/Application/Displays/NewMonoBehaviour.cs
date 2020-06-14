@@ -14,6 +14,7 @@ namespace Iviz.App
 
         private void Start()
         {
+            transform.position = new Vector3(1, 0, 0).Ros2Unity();
             /*
             resource = gameObject.AddComponent<OccupancyGridResource>();
             resource.NumCellsX = 1000;

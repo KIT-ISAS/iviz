@@ -28,6 +28,7 @@ namespace Iviz.App.Listeners
         [DataMember] public float MinIntensity { get; set; } = 0;
         [DataMember] public float MaxIntensity { get; set; } = 1;
         [DataMember] public bool FlipMinMax { get; set; } = false;
+        [DataMember] public uint MaxQueueSize { get; set; } = 1;
     }
 
     public class LaserScanListener : TopicListener
@@ -59,6 +60,7 @@ namespace Iviz.App.Listeners
                 MaxIntensity = value.MaxIntensity;
                 FlipMinMax = value.FlipMinMax;
                 UseLines = value.UseLines;
+                MaxQueueSize = value.MaxQueueSize;
             }
         }
 
@@ -153,6 +155,19 @@ namespace Iviz.App.Listeners
             }
         }
 
+        public uint MaxQueueSize
+        {
+            get => config.MaxQueueSize;
+            set
+            {
+                config.MaxQueueSize = value;
+                if (Listener != null)
+                {
+                    Listener.MaxQueueSize = (int)value;
+                }
+            }
+        }
+
         void Awake()
         {
             transform.parent = TFListener.ListenersFrame.transform;
@@ -166,13 +181,14 @@ namespace Iviz.App.Listeners
         {
             base.StartListening();
             Listener = new RosListener<LaserScan>(config.Topic, Handler);
+            Listener.MaxQueueSize = (int)MaxQueueSize;
             name = "[" + config.Topic + "]";
             node.name = "[" + config.Topic + "]";
         }
 
         void Handler(LaserScan msg)
         {
-            node.AttachTo(msg.Header.FrameId, msg.Header.Stamp.ToDateTime());
+            node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
 
             if (float.IsNaN(msg.AngleMin) || float.IsNaN(msg.AngleMax) ||
                 float.IsNaN(msg.RangeMin) || float.IsNaN(msg.RangeMax) ||

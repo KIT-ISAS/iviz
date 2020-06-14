@@ -5,29 +5,30 @@ using System;
 
 namespace Iviz.Displays
 {
-    public abstract class MarkerResourceWithColormap : MarkerResource
+    public abstract class MarkerResourceWithColormap : MarkerResource, ISupportsTint
     {
-        static protected readonly int PropIntensityCoeff = Shader.PropertyToID("_IntensityCoeff");
-        static protected readonly int PropIntensityAdd = Shader.PropertyToID("_IntensityAdd");
-        static protected readonly int PropIntensity = Shader.PropertyToID("_IntensityTexture");
+        public static readonly int PropIntensityCoeff = Shader.PropertyToID("_IntensityCoeff");
+        public static readonly int PropIntensityAdd = Shader.PropertyToID("_IntensityAdd");
+        public static readonly int PropIntensity = Shader.PropertyToID("_IntensityTexture");
         static protected readonly int PropLocalToWorld = Shader.PropertyToID("_LocalToWorld");
         static protected readonly int PropWorldToLocal = Shader.PropertyToID("_WorldToLocal");
         static protected readonly int PropBoundaryCenter = Shader.PropertyToID("_BoundaryCenter");
         static protected readonly int PropPoints = Shader.PropertyToID("_Points");
+        static protected readonly int PropTint = Shader.PropertyToID("_Tint");
 
-        protected Material material;
+        [SerializeField] protected Material material;
 
-        bool useIntensityTexture;
+        [SerializeField] bool useIntensityTexture_;
         public bool UseIntensityTexture
         {
-            get => useIntensityTexture;
+            get => useIntensityTexture_;
             set
             {
-                if (useIntensityTexture == value)
+                if (useIntensityTexture_ == value)
                 {
                     return;
                 }
-                useIntensityTexture = value;
+                useIntensityTexture_ = value;
                 UpdateMaterialKeywords();
             }
         }
@@ -36,18 +37,16 @@ namespace Iviz.Displays
         {
             if (UseIntensityTexture)
             {
-                material.DisableKeyword("USE_TEXTURE_SCALE");
                 material.EnableKeyword("USE_TEXTURE");
             }
             else
             {
-                material.DisableKeyword("USE_TEXTURE_SCALE");
                 material.DisableKeyword("USE_TEXTURE");
             }
         }
 
 
-        Resource.ColormapId colormap;
+        [SerializeField] Resource.ColormapId colormap;
         public Resource.ColormapId Colormap
         {
             get => colormap;
@@ -60,14 +59,14 @@ namespace Iviz.Displays
             }
         }
 
-        Vector2 intensityBounds;
+        [SerializeField] Vector2 intensityBounds_;
         public Vector2 IntensityBounds
         {
-            get => intensityBounds;
+            get => intensityBounds_;
             set
             {
-                intensityBounds = value;
-                float intensitySpan = intensityBounds.y - intensityBounds.x;
+                intensityBounds_ = value;
+                float intensitySpan = intensityBounds_.y - intensityBounds_.x;
 
                 if (intensitySpan == 0)
                 {
@@ -76,27 +75,27 @@ namespace Iviz.Displays
                 }
                 else
                 {
-                    if (FlipMinMax)
+                    if (!FlipMinMax)
                     {
                         material.SetFloat(PropIntensityCoeff, 1 / intensitySpan);
-                        material.SetFloat(PropIntensityAdd, -intensityBounds.x / intensitySpan);
+                        material.SetFloat(PropIntensityAdd, -intensityBounds_.x / intensitySpan);
                     }
                     else
                     {
                         material.SetFloat(PropIntensityCoeff, -1 / intensitySpan);
-                        material.SetFloat(PropIntensityAdd, intensityBounds.y / intensitySpan);
+                        material.SetFloat(PropIntensityAdd, intensityBounds_.y / intensitySpan);
                     }
                 }
             }
         }
 
-        bool flipMinMax;
+        [SerializeField] bool flipMinMax_;
         public bool FlipMinMax
         {
-            get => flipMinMax;
+            get => flipMinMax_;
             set
             {
-                flipMinMax = value;
+                flipMinMax_ = value;
                 IntensityBounds = IntensityBounds;
             }
         }
@@ -112,6 +111,23 @@ namespace Iviz.Displays
                 }
                 base.Visible = value;
             }
+        }
+
+        [SerializeField] Color tint_;
+        public Color Tint
+        {
+            get => tint_;
+            set
+            {
+                tint_ = value;
+                material.SetColor(PropTint, value);
+            }
+        }
+
+        protected override void Awake()
+        {
+            base.Awake();
+            Tint = Color.white;
         }
 
         protected void UpdateTransform()

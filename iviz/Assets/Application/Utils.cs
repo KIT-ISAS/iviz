@@ -8,6 +8,7 @@ using Iviz.Msgs.StdMsgs;
 using System.Runtime.Serialization;
 using System.Globalization;
 using Iviz.App.Listeners;
+using Unity.Mathematics;
 
 namespace Iviz
 {
@@ -83,6 +84,8 @@ namespace Iviz
 
         static Quaternion Unity2Ros(this Quaternion quaternion)=> new Quaternion(-quaternion.z, quaternion.x, -quaternion.y, quaternion.w);
         //----
+
+        public static float4 Ros2Unity(this float4 v) => new float4(-v.y, v.z, v.x, v.w);
 
         static Vector3 ToUnity(this Msgs.GeometryMsgs.Vector3 p)
         {
@@ -298,29 +301,33 @@ namespace Iviz
             );
         }
 
-        public static bool ValidateNaN(this Msgs.GeometryMsgs.Vector3 v)
+        public static bool HasNaN(this float4 v) => math.any(math.isnan(v));
+
+        public static bool HasNaN(this Vector3 v) => float.IsNaN(v.x) || float.IsNaN(v.y) || float.IsNaN(v.z);
+
+        public static bool HasNaN(this Msgs.GeometryMsgs.Vector3 v)
         {
-            return !double.IsNaN(v.X) && !double.IsNaN(v.Y) && !double.IsNaN(v.Z);
+            return double.IsNaN(v.X) || double.IsNaN(v.Y) || double.IsNaN(v.Z);
         }
 
-        public static bool ValidateNaN(this Msgs.GeometryMsgs.Point v)
+        public static bool HasNaN(this Msgs.GeometryMsgs.Point v)
         {
-            return !double.IsNaN(v.X) && !double.IsNaN(v.Y) && !double.IsNaN(v.Z);
+            return double.IsNaN(v.X) || double.IsNaN(v.Y) || double.IsNaN(v.Z);
         }
 
-        public static bool ValidateNaN(this Msgs.GeometryMsgs.Quaternion v)
+        public static bool HasNaN(this Msgs.GeometryMsgs.Quaternion v)
         {
-            return !double.IsNaN(v.X) && !double.IsNaN(v.Y) && !double.IsNaN(v.Z) && !double.IsNaN(v.W);
+            return double.IsNaN(v.X) || double.IsNaN(v.Y) || double.IsNaN(v.Z) || double.IsNaN(v.W);
         }
 
-        public static bool ValidateNaN(this Msgs.GeometryMsgs.Transform transform)
+        public static bool HasNaN(this Msgs.GeometryMsgs.Transform transform)
         {
-            return ValidateNaN(transform.Rotation) && ValidateNaN(transform.Translation);
+            return HasNaN(transform.Rotation) || HasNaN(transform.Translation);
         }
 
-        public static bool ValidateNaN(this Msgs.GeometryMsgs.Pose pose)
+        public static bool HasNaN(this Msgs.GeometryMsgs.Pose pose)
         {
-            return ValidateNaN(pose.Orientation) && ValidateNaN(pose.Position);
+            return HasNaN(pose.Orientation) || HasNaN(pose.Position);
         }
 
     }
@@ -339,6 +346,7 @@ namespace Iviz
             return false;
         }
 
+        /*
         public static string SanitizedText(string text, int size)
         {
             if (text.Length <= size + 5)
@@ -350,6 +358,7 @@ namespace Iviz
                 return text.Substring(0, size) + "...\n→ " + text.Substring(size);
             }
         }
+        */
 
         public static Pose AsPose(this Transform t)
         {

@@ -7,12 +7,13 @@ namespace Iviz.App
 {
     public class AddDisplayDialogData : DialogData
     {
-        static readonly List<Tuple<string, Resource.Module>> Displays = new List<Tuple<string, Resource.Module>>()
+        static readonly List<Tuple<string, Resource.Module>> Modules = new List<Tuple<string, Resource.Module>>()
         {
             Tuple.Create("<b>Robot</b>\nA robot object", Resource.Module.Robot),
             Tuple.Create("<b>Grid</b>\nA reference plane", Resource.Module.Grid),
             Tuple.Create("<b>DepthProjector</b>\nPoint cloud generator for depth images", Resource.Module.DepthImageProjector),
             Tuple.Create("<b>AR</b>\nManager for augmented reality", Resource.Module.AR),
+            Tuple.Create("<b>Joystick</b>\nOn-screen joystick", Resource.Module.Joystick),
         };
 
         DialogItemList itemList;
@@ -26,8 +27,8 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
-            itemList.Title = "Available Displays";
-            itemList.Items = Displays.Select(x => x.Item1);
+            itemList.Title = "Available Modules";
+            itemList.Items = Modules.Select(x => x.Item1);
             itemList.ItemClicked += OnItemClicked;
             itemList.CloseClicked += OnCloseClicked;
 
@@ -42,7 +43,7 @@ namespace Iviz.App
 
         void OnItemClicked(int index, string _)
         {
-            DisplayListPanel.CreateDisplay(Displays[index].Item2);
+            DisplayListPanel.CreateDisplay(Modules[index].Item2);
             Close();
         }
 

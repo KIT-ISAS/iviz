@@ -28,6 +28,7 @@ Shader "iviz/Line"
 			float4x4 _LocalToWorld;
 			float4x4 _WorldToLocal;
 			float4 _Front;
+			float4 _Tint;
 
 			struct Line {
 				float3 A;
@@ -96,6 +97,7 @@ Shader "iviz/Line"
 					) / 255.0;
 	#endif
 				o.color = (rgbaB - rgbaA) * V.z + rgbaA;
+				o.color *= _Tint;
 				return o;
 			}
 

@@ -20,24 +20,24 @@ namespace Iviz.App.Listeners
         public const int Layer = 9;
         readonly Timeline timeline = new Timeline();
 
-        string id;
+        [SerializeField] string id_;
         public string Id
         {
-            get => id;
+            get => id_;
             set
             {
-                id = value;
-                labelObjectText.text = id;
+                id_ = value;
+                labelObjectText.text = id_;
             }
         }
 
-        bool forceInvisible;
+        [SerializeField] bool forceInvisible_;
         public bool ForceInvisible
         {
-            get => forceInvisible;
+            get => forceInvisible_;
             set
             {
-                forceInvisible = value;
+                forceInvisible_ = value;
                 LabelVisible = LabelVisible; // update
             }
         }
@@ -261,7 +261,9 @@ namespace Iviz.App.Listeners
         }
         */
 
-        public void SetPose(in DateTime time, in Pose newPose)
+        [SerializeField] Vector3 position_;
+
+        public void SetPose(in TimeSpan time, in Pose newPose)
         {
             if (!IgnoreUpdates)
             {
@@ -271,16 +273,17 @@ namespace Iviz.App.Listeners
                 }
 
                 pose = newPose;
+                position_ = pose.position.Unity2Ros();
                 transform.SetLocalPose(newPose);
                 LogPose(time);
             }
         }
 
-        void LogPose(in DateTime time)
+        void LogPose(in TimeSpan time)
         {
             if (listeners.Count != 0)
             {
-                timeline.Add(time, transform.AsPose(), Id);
+                timeline.Add(time, transform.AsPose());
             }
             foreach(TFFrame child in children.Values)
             {
@@ -289,7 +292,7 @@ namespace Iviz.App.Listeners
             //Debug.Log(timeline.Count + " " + (timeline.LastTime - timeline.FirstTime).Milliseconds);
         }
 
-        public Pose GetPose(in DateTime time)
+        public Pose GetPose(in TimeSpan time)
         {
             return timeline.Get(time);
         }

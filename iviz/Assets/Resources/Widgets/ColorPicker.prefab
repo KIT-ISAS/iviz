@@ -64,7 +64,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 5eb42640a823f0144bbb5a3be216d90f, type: 3}
+    m_Font: {fileID: 12800000, guid: 07aef5eff1792cb478e0d50020d3e011, type: 3}
     m_FontSize: 12
     m_FontStyle: 0
     m_BestFit: 0
@@ -838,6 +838,12 @@ PrefabInstance:
       propertyPath: m_Text
       value: R
       objectReference: {fileID: 0}
+    - target: {fileID: 2236944324981096086, guid: f4814752b52a24c4eb60c6322f4e24ab,
+        type: 3}
+      propertyPath: m_FontData.m_Font
+      value: 
+      objectReference: {fileID: 12800000, guid: 07aef5eff1792cb478e0d50020d3e011,
+        type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f4814752b52a24c4eb60c6322f4e24ab, type: 3}
 --- !u!224 &7462456043204683972 stripped

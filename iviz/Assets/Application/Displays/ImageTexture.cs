@@ -1,5 +1,7 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
+using BitMiracle.LibJpeg;
 using Iviz.App;
 using Iviz.Resources;
 using Unity.Collections;
@@ -10,47 +12,55 @@ namespace Iviz.Displays
 {
     public class ImageTexture
     {
+        static readonly int PropIntensityCoeff = MarkerResourceWithColormap.PropIntensityCoeff;
+        static readonly int PropIntensityAdd = MarkerResourceWithColormap.PropIntensityAdd;
+        static readonly int PropIntensity = MarkerResourceWithColormap.PropIntensity;
+
+
         byte[] rgbaBuffer;
         byte[] pngBuffer;
 
         public event Action<Texture2D> TextureChanged;
-
         public event Action<Texture2D> ColormapChanged;
 
-        float minIntensity = 0;
-        public float MinIntensity
+        Vector2 intensityBounds;
+        public Vector2 IntensityBounds
         {
-            get => minIntensity;
+            get => intensityBounds;
             set
             {
-                minIntensity = value;
-                UpdateIntensitySpan();
+                intensityBounds = value;
+                float intensitySpan = intensityBounds.y - intensityBounds.x;
+
+                if (intensitySpan == 0)
+                {
+                    Material.SetFloat(PropIntensityCoeff, 1);
+                    Material.SetFloat(PropIntensityAdd, 0);
+                }
+                else
+                {
+                    if (!FlipMinMax)
+                    {
+                        Material.SetFloat(PropIntensityCoeff, 1 / intensitySpan);
+                        Material.SetFloat(PropIntensityAdd, -intensityBounds.x / intensitySpan);
+                    }
+                    else
+                    {
+                        Material.SetFloat(PropIntensityCoeff, -1 / intensitySpan);
+                        Material.SetFloat(PropIntensityAdd, intensityBounds.y / intensitySpan);
+                    }
+                }
             }
         }
 
-        float maxIntensity = 1;
-        public float MaxIntensity
+        bool flipMinMax;
+        public bool FlipMinMax
         {
-            get => maxIntensity;
+            get => flipMinMax;
             set
             {
-                maxIntensity = value;
-                UpdateIntensitySpan();
-            }
-        }
-
-        void UpdateIntensitySpan()
-        {
-            float intensitySpan = MaxIntensity - MinIntensity;
-            if (intensitySpan == 0)
-            {
-                Material.SetFloat("_IntensityCoeff", 1);
-                Material.SetFloat("_IntensityAdd", 0);
-            }
-            else
-            {
-                Material.SetFloat("_IntensityCoeff", 1 / intensitySpan);
-                Material.SetFloat("_IntensityAdd", -MinIntensity / intensitySpan);
+                flipMinMax = value;
+                IntensityBounds = IntensityBounds;
             }
         }
 
@@ -69,7 +79,7 @@ namespace Iviz.Displays
             {
                 colormap = value;
 
-                Material.SetTexture("_IntensityTex", ColormapTexture);
+                Material.SetTexture(PropIntensity, ColormapTexture);
                 ColormapChanged?.Invoke(ColormapTexture);
             }
         }
@@ -137,53 +147,124 @@ namespace Iviz.Displays
         {
             Task.Run(() =>
             {
-                byte[] newData;
-                BigGustave.Png png = BigGustave.Png.Open(data);
-
-                if (png.RowOffset != 0)
+                try
                 {
-                    int reqSize = png.Height * png.RowSize;
+                    byte[] newData;
+                    BigGustave.Png png = BigGustave.Png.Open(data);
+
+                    if (png.RowOffset != 0)
+                    {
+                        int reqSize = png.Height * png.RowSize;
+                        if (pngBuffer == null || pngBuffer.Length < reqSize)
+                        {
+                            pngBuffer = new byte[reqSize];
+                        }
+
+                        int srcOffset = png.RowOffset;
+                        int dstOffset = 0;
+                        int rowSize = png.RowSize;
+                        for (int i = png.Height; i != 0; i--, srcOffset += png.RowStep, dstOffset += rowSize)
+                        {
+                            Buffer.BlockCopy(png.Data, srcOffset, pngBuffer, dstOffset, rowSize);
+                        }
+                        newData = pngBuffer;
+                    }
+                    else
+                    {
+                        newData = png.Data;
+                    }
+                    GameThread.RunOnce(() => Set(png.Width, png.Height, EncodingFromPng(png), newData));
+                }
+                catch (Exception e)
+                {
+                    Logger.Error(e);
+                }
+            });
+        }
+
+        public void SetJpg(byte[] data)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    Stream inStream = new MemoryStream(data);
+                    var image = new JpegImage(inStream);
+
+                    string encoding = null; ;
+                    int reqSize = image.Height * image.Width;
+                    if (image.Colorspace == Colorspace.RGB && image.BitsPerComponent == 8)
+                    {
+                        if (image.Width % 4 != 0)
+                        {
+                            Logger.Debug("ImageListener: Row padding not implemented");
+                            return;
+                        }
+                        encoding = "rgb";
+                        reqSize *= 3;
+                    }
+                    else if (image.Colorspace == Colorspace.Grayscale && image.BitsPerComponent == 8)
+                    {
+                        if (image.Width % 4 != 0)
+                        {
+                            Logger.Debug("ImageListener: Row padding not implemented");
+                            return;
+                        }
+                        encoding = "mono8";
+                    }
+                    else if (image.Colorspace == Colorspace.Grayscale && image.BitsPerComponent == 16)
+                    {
+                        if (image.Width % 2 != 0)
+                        {
+                            Logger.Debug("ImageListener: Row padding not implemented");
+                            return;
+                        }
+                        encoding = "mono16";
+                        reqSize *= 2;
+                    }
+                    if (encoding == null)
+                    {
+                        Logger.Debug("ImageListener: Unsupported encoding '" + image.Colorspace + "' with size " + image.BitsPerComponent);
+                        return;
+                    }
+
+                    const int bmpHeaderLength = 54;
+                    reqSize += bmpHeaderLength;
+
                     if (pngBuffer == null || pngBuffer.Length < reqSize)
                     {
                         pngBuffer = new byte[reqSize];
                     }
 
-                    int srcOffset = png.RowOffset;
-                    int dstOffset = 0;
-                    int rowSize = png.RowSize;
-                    for (int i = png.Height; i != 0; i--, srcOffset += png.RowStep, dstOffset += rowSize)
-                    {
-                        Buffer.BlockCopy(png.Data, srcOffset, pngBuffer, dstOffset, rowSize);
-                    }
-                    newData = pngBuffer;
+                    Stream outStream = new MemoryStream(pngBuffer);
+                    image.WriteBitmap(outStream);
+                    GameThread.RunOnce(() => Set(image.Width, image.Height, encoding, pngBuffer, bmpHeaderLength));
                 }
-                else
+                catch (Exception e)
                 {
-                    newData = png.Data;
+                    Logger.Error(e);
                 }
-
-                GameThread.RunOnce(() => Set(png.Width, png.Height, EncodingFromPng(png), newData));
             });
         }
 
 
-        public void Set(int width, int height, string encoding, byte[] data)
+        public void Set(int width, int height, string encoding, byte[] data, int dataStart = 0)
         {
             int size = width * height;
             int bpp = FieldSizeFromEncoding(encoding);
 
             if (bpp == -1)
             {
-                Logger.Error("ImageListener: Unsupported encoding '" + encoding + "'");
+                Logger.Debug("ImageListener: Unsupported encoding '" + encoding + "'");
                 return;
             }
             else if (data.Length < size * bpp)
             {
-                Debug.Log($"ImageListener: Invalid image! Expected at least {size * bpp} bytes, received {data.Length}");
+                Logger.Debug($"ImageListener: Invalid image! Expected at least {size * bpp} bytes, received {data.Length}");
                 return;
             }
 
-            Description = $"Format: {width}x{height} {encoding}";
+            Description = $"<b>Desc:</b>: {width}x{height} {encoding}";
 
             switch (encoding)
             {
@@ -192,16 +273,21 @@ namespace Iviz.Displays
                     IsMono = false;
                     Material.DisableKeyword("USE_INTENSITY");
                     Material.DisableKeyword("FLIP_RB");
-                    ApplyTexture(width, height, data, encoding, size * 4);
+                    ApplyTexture(width, height, data, encoding, size * 4, dataStart);
                     break;
                 case "bgra8":
                     IsMono = false;
                     Material.DisableKeyword("USE_INTENSITY");
                     Material.EnableKeyword("FLIP_RB");
-                    ApplyTexture(width, height, data, encoding, size * 4);
+                    ApplyTexture(width, height, data, encoding, size * 4, dataStart);
                     break;
                 case "rgb8":
                 case "8SC3":
+                    IsMono = false;
+                    Material.DisableKeyword("USE_INTENSITY");
+                    Material.DisableKeyword("FLIP_RB");
+                    ApplyTexture(width, height, data, encoding, size * 3, dataStart);
+                    /*
                     Task.Run(() =>
                     {
                         FillRGBABuffer(width, height, data);
@@ -213,8 +299,14 @@ namespace Iviz.Displays
                             Material.DisableKeyword("FLIP_RB");
                         });
                     });
+                    */
                     break;
                 case "bgr8":
+                    IsMono = false;
+                    Material.DisableKeyword("USE_INTENSITY");
+                    Material.EnableKeyword("FLIP_RB");
+                    ApplyTexture(width, height, data, encoding, size * 3, dataStart);
+                    /*
                     Task.Run(() =>
                     {
                         FillRGBABuffer(width, height, data);
@@ -226,18 +318,19 @@ namespace Iviz.Displays
                             Material.EnableKeyword("FLIP_RB");
                         });
                     });
+                    */
                     break;
                 case "mono16":
                 case "16UC1":
                     IsMono = true;
                     Material.EnableKeyword("USE_INTENSITY");
-                    ApplyTexture(width, height, data, encoding, size * 2);
+                    ApplyTexture(width, height, data, encoding, size * 2, dataStart);
                     break;
                 case "mono8":
                 case "8UC1":
                     IsMono = true;
                     Material.EnableKeyword("USE_INTENSITY");
-                    ApplyTexture(width, height, data, encoding, size);
+                    ApplyTexture(width, height, data, encoding, size, dataStart);
                     break;
             }
         }
@@ -266,15 +359,17 @@ namespace Iviz.Displays
             }
         }
 
-        void ApplyTexture(int width, int height, byte[] data, string type, int length)
+        void ApplyTexture(int width, int height, byte[] data, string type, int length, int dataStart)
         {
             switch (type)
             {
                 case "rgb8":
                 case "bgr8":
+                case "8SC3":
+                    EnsureSize(width, height, TextureFormat.RGB24);
+                    break;
                 case "rgba8":
                 case "bgra8":
-                case "8SC3":
                 case "8SC4":
                     EnsureSize(width, height, TextureFormat.RGBA32);
                     break;
@@ -289,7 +384,7 @@ namespace Iviz.Displays
                 default:
                     return;
             }
-            NativeArray<byte>.Copy(data, Texture.GetRawTextureData<byte>(), length);
+            NativeArray<byte>.Copy(data, dataStart, Texture.GetRawTextureData<byte>(), 0, length);
             Texture.Apply(false, false);
         }
 

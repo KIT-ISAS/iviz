@@ -18,6 +18,9 @@ namespace Iviz.App
         public InputFieldWidget MarkerFrame { get; private set; }
         public Vector3Widget MarkerOffset { get; private set; }
 
+        public ToggleWidget PublishHead { get; private set; }
+        public ToggleWidget PublishPlanes { get; private set; }
+
         public SenderWidget HeadSender { get; private set; }
         public SenderWidget MarkersSender { get; private set; }
 
@@ -36,6 +39,8 @@ namespace Iviz.App
             MarkerFrame = p.AddInputField("Marker Follows TF Frame").SetPlaceholder("(none)");
             MarkerOffset = p.AddVector3("Offset From TF Frame");
             MarkerSize = p.AddNumberInputField("Size (m)");
+            PublishHead = p.AddToggle("Publish Camera as PoseStamped");
+            PublishPlanes = p.AddToggle("Publish Planes as Markers");
             HeadSender = p.AddSender();
             MarkersSender = p.AddSender();
             p.UpdateSize();

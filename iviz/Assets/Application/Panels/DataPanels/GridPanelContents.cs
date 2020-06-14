@@ -16,6 +16,7 @@ namespace Iviz.App
         public DropdownWidget Orientation { get; private set; }
         public ColorPickerWidget ColorPicker { get; private set; }
         public ToggleWidget ShowInterior { get; private set; }
+        public ToggleWidget FollowCamera { get; private set; }
         public Vector3Widget Offset { get; private set; }
 
         void Awake()
@@ -30,6 +31,7 @@ namespace Iviz.App
             Orientation = p.AddDropdown("Orientation").SetOptions(GridResource.OrientationNames).SetIndex(0);
             ColorPicker = p.AddColorPicker("Grid Color").SetValue(Color.gray);
             ShowInterior = p.AddToggle("Show Interior").SetValue(true);
+            FollowCamera = p.AddToggle("Follow Camera").SetValue(true);
             Offset = p.AddVector3("Offset");
             p.UpdateSize();
             gameObject.SetActive(false);

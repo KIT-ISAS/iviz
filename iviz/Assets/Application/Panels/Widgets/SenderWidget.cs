@@ -1,19 +1,20 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using Iviz.Resources;
 
 namespace Iviz.App
 {
     public class SenderWidget : MonoBehaviour, IWidget
     {
-        const int Size = 30;
-        [SerializeField] Text text;
+        const int Size = 200;
+        [SerializeField] Text text = null;
 
         RosSender sender;
         public RosSender RosSender
         {
             get => sender;
-            set
+            private set
             {
                 if (sender == null && value != null)
                 {
@@ -36,6 +37,17 @@ namespace Iviz.App
         public int MessagesPerSecond => RosSender?.Stats.MessagesPerSecond ?? 0;
         public int BytesPerSecond => RosSender?.Stats.BytesPerSecond ?? 0;
 
+        public void Set<T>(RosSender<T> sender) where T : Msgs.IMessage, new()
+        {
+            RosSender = sender;
+            if (sender == null)
+            {
+                string messageType = Msgs.BuiltIns.GetMessageType(typeof(T));
+                text.text = $"<i>Empty</i>\n" +
+                    $"<b>{messageType}</b>";
+            }
+        }
+
         void UpdateStats()
         {
             string publisherStatus;
@@ -51,7 +63,7 @@ namespace Iviz.App
             string messagesPerSecond = MessagesPerSecond.ToString(UnityUtils.Culture);
             string kbPerSecond = (BytesPerSecond * 0.001f).ToString("#,0.#", UnityUtils.Culture);
 
-            text.text = $"{UnityUtils.SanitizedText(Topic ?? "", Size)}\n" +
+            text.text = $"{Resource.Font.Split(Topic ?? "", Size)}\n" +
                 $"<b>Out: {publisherStatus} | {messagesPerSecond} Hz | {kbPerSecond} kB/s</b>";
         }
 

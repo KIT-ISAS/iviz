@@ -44,8 +44,11 @@ namespace Iviz.App.Displays
                 (Time.realtimeSinceStartup - eventData.clickTime) < MaxClickTime;
         }
 
+        protected int LastClickCount { get; private set; }
+
         public virtual void OnPointerClick(PointerEventData eventData)
         {
+            LastClickCount = 0;
             if (!FlyCamera.IsMobile && eventData.button != PointerEventData.InputButton.Left)
             {
                 return;
@@ -60,26 +63,18 @@ namespace Iviz.App.Displays
                 return;
             }
             int clickCount = GetClickCount(eventData);
-            /*
-            if (eventData.IsPointerMoving()) {
-                if (clickCount != 1)
-                {
-                    clickCount = 1;
-                }
-                else
-                {
-                    return;
-                }
-            }
-            */
+            LastClickCount = clickCount;
 
             switch (clickCount)
             {
                 case 1:
-                    TFListener.GuiManager.ToggleSelect(this);
+                    TFListener.GuiManager.Select(this);
                     break;
                 case 2:
                     DisplayData?.Select();
+                    break;
+                case 3:
+                    TFListener.GuiManager.ToggleSelect(this);
                     break;
                     /*
                 case 3:

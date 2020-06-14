@@ -7,12 +7,12 @@ namespace Iviz.App
 {
     public class ColorPickerWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] SliderWidget sliderX;
-        [SerializeField] SliderWidget sliderY;
-        [SerializeField] SliderWidget sliderZ;
-        [SerializeField] Text label;
-        [SerializeField] Button button;
-        [SerializeField] Image panel;
+        [SerializeField] SliderWidget sliderX = null;
+        [SerializeField] SliderWidget sliderY = null;
+        [SerializeField] SliderWidget sliderZ = null;
+        [SerializeField] Text label = null;
+        [SerializeField] Button button = null;
+        [SerializeField] Image panel = null;
         Color color;
 
         enum ColorMode

@@ -8,13 +8,16 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public sealed class MeshListResource : MarkerResourceWithColormap
+    public sealed class MeshListResource : MarkerResourceWithColormap, ISupportsAROcclusion
     {
         NativeArray<float4> pointBuffer = new NativeArray<float4>();
         ComputeBuffer pointComputeBuffer;
 
         readonly uint[] argsBuffer = new uint[5] { 0, 0, 0, 0, 0 };
         ComputeBuffer argsComputeBuffer;
+
+        Material normalMaterial;
+        Material occlusionMaterial;
 
         Mesh mesh;
         public Mesh Mesh
@@ -29,19 +32,17 @@ namespace Iviz.Displays
             }
         }
 
-        public Color Color { get; set; } = Color.white;
-
-        bool perVertexScale;
+        bool perVertexScale_;
         public bool UsePerVertexScale
         {
-            get => perVertexScale;
+            get => perVertexScale_;
             set
             {
-                if (perVertexScale == value)
+                if (perVertexScale_ == value)
                 {
                     return;
                 }
-                perVertexScale = value;
+                perVertexScale_ = value;
                 UpdateMaterialKeywords();
             }
         }
@@ -63,41 +64,6 @@ namespace Iviz.Displays
                 material.DisableKeyword("USE_TEXTURE_SCALE");
                 material.DisableKeyword("USE_TEXTURE");
             }
-        }
-
-        public void Set(IList<Vector3> points, IList<Color> colors = null, Color? color = null)
-        {
-            Size = points.Count;
-            int realSize = 0;
-            if (colors == null || points.Count != colors.Count)
-            {
-                float intensity = new PointWithColor(Vector3.zero, color ?? Color.white).Intensity;
-                for (int i = 0; i < points.Count; i++)
-                {
-                    if (float.IsNaN(points[i].x) ||
-                        float.IsNaN(points[i].y) ||
-                        float.IsNaN(points[i].z))
-                    {
-                        continue;
-                    }
-                    pointBuffer[realSize++] = new PointWithColor(points[i], intensity);
-                }
-            }
-            else
-            {
-                for (int i = 0; i < points.Count; i++)
-                {
-                    if (float.IsNaN(points[i].x) ||
-                        float.IsNaN(points[i].y) ||
-                        float.IsNaN(points[i].z))
-                    {
-                        continue;
-                    }
-                    pointBuffer[realSize++] = new PointWithColor(points[i], colors[i]);
-                }
-            }
-            Size = realSize;
-            UpdateBuffer();
         }
 
         int size_;
@@ -171,38 +137,67 @@ namespace Iviz.Displays
 
         static readonly int PropLocalScale = Shader.PropertyToID("_LocalScale");
 
-        Vector3 scale;
+        Vector3 scale_;
         public Vector3 Scale
         {
-            get => scale;
+            get => scale_;
             set
             {
-                scale = value;
-                material.SetVector(PropLocalScale, new Vector4(scale.x, scale.y, scale.z, 1));
+                scale_ = value;
+                material.SetVector(PropLocalScale, new Vector4(scale_.x, scale_.y, scale_.z, 1));
             }
         }
 
         static readonly int PropLocalOffset = Shader.PropertyToID("_LocalOffset");
 
-        Vector3 offset;
+        Vector3 offset_;
         public Vector3 Offset
         {
-            get => offset;
+            get => offset_;
             set
             {
-                offset = value;
-                material.SetVector(PropLocalOffset, offset);
+                offset_ = value;
+                material.SetVector(PropLocalOffset, offset_);
             }
         }
 
         public override string Name => "MeshListResource";
 
+        bool occlussionOnly_;
+        public bool OcclusionOnly
+        {
+            get => occlussionOnly_;
+            set
+            {
+                if (occlussionOnly_ == value)
+                {
+                    return;
+                }
+                occlussionOnly_ = value;
+
+                if (value)
+                {
+                    if (occlusionMaterial == null)
+                    {
+                        occlusionMaterial = Resource.Materials.MeshListOcclusionOnly.Instantiate();
+                        occlusionMaterial.enableInstancing = true;
+                    }
+                    material = occlusionMaterial;
+                } else
+                {
+                    material = normalMaterial;
+                }
+                Rebuild();
+            }
+        }
+
         protected override void Awake()
         {
-            base.Awake();
+            normalMaterial = Resource.Materials.MeshList.Instantiate();
+            normalMaterial.enableInstancing = true;
+            material = normalMaterial;
 
-            material = Resource.Materials.MeshList.Instantiate();
-            material.enableInstancing = true;
+            base.Awake();
 
             UseIntensityTexture = true;
             UpdateMaterialKeywords();
@@ -215,6 +210,8 @@ namespace Iviz.Displays
 
             argsComputeBuffer = new ComputeBuffer(1, argsBuffer.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
             argsComputeBuffer.SetData(argsBuffer);
+
+            OcclusionOnly = true;
         }
 
         void Update()
@@ -231,6 +228,7 @@ namespace Iviz.Displays
 
         protected override void OnDestroy()
         {
+            material = null;
             base.OnDestroy();
 
             if (pointComputeBuffer != null)
@@ -244,6 +242,14 @@ namespace Iviz.Displays
             if (pointBuffer.Length > 0)
             {
                 pointBuffer.Dispose();
+            }
+            if (occlusionMaterial != null)
+            {
+                Destroy(occlusionMaterial);
+            }
+            if (normalMaterial != null)
+            {
+                Destroy(normalMaterial);
             }
         }
 
@@ -281,6 +287,7 @@ namespace Iviz.Displays
         {
             base.Stop();
             Size = 0;
+            OcclusionOnly = false;
         }
     }
 }

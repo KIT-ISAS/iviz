@@ -8,72 +8,78 @@ namespace Iviz.App
 {
     public class Timeline
     {
-        class PoseInfo
+        readonly struct PoseInfo
         {
+            public TimeSpan Key { get; }
             public Pose Pose { get; }
-            public DateTime Key { get; }
-            public DateTime Insertion { get; }
-            public readonly string Id;
 
-            public PoseInfo(in DateTime key, in Pose pose, string id)
+            public PoseInfo(in TimeSpan key, in Pose pose)
             {
                 Key = key;
                 Pose = pose;
-                Insertion = DateTime.Now;
-                Id = id;
             }
 
             public override string ToString()
             {
-                return Pose.ToString() + " " + Id;
+                return Pose.ToString();
             }
         }
 
-        readonly SortedList<DateTime, PoseInfo> poses = new SortedList<DateTime, PoseInfo>();
-        readonly SortedList<DateTime, PoseInfo> insertions = new SortedList<DateTime, PoseInfo>();
+        int start;
 
-        const int MaxSize = 50;
+        readonly List<PoseInfo> poses = new List<PoseInfo>();
 
-        public void Add(in DateTime t, in Pose p, string id)
+        const int MaxSize = 30;
+
+        public void Add(in TimeSpan t, in Pose p)
         {
-            var poseInfo = new PoseInfo(t, p, id);
-            poses[t] = poseInfo;
-            insertions[poseInfo.Insertion] = poseInfo;
+            var poseInfo = new PoseInfo(t, p);
 
-            if (poses.Count > MaxSize)
+            if (poses.Count == MaxSize)
             {
-                DateTime minKey = insertions.Values[0].Key;
-                poses.Remove(minKey);
-                insertions.RemoveAt(0);
-            }
-        }
-
-        public Pose Get(in DateTime T)
-        {
-            if (poses.Count == 0)
-            {
-                return Pose.identity;
-            }
-            else if (T >= LastTime)
-            {
-                return Last;
-            }
-            else if (T <= FirstTime)
-            {
-                return First;
+                poses[start] = poseInfo;
+                start++;
+                if (start == MaxSize)
+                {
+                    start = 0;
+                }
             }
             else
             {
-                for (int i = poses.Count - 2; i >= 0; i--) // most likely to be at the end
+                poses.Add(poseInfo);
+            }
+        }
+
+        public Pose Get(in TimeSpan T)
+        {
+            var poses = new List<PoseInfo>(this.poses);
+            poses.Sort((p1, p2) => p1.Key.CompareTo(p2.Key));
+
+            int n = poses.Count;
+            if (n == 0)
+            {
+                return Pose.identity;
+            }
+            else if (T >= poses[n - 1].Key)
+            {
+                return poses[n - 1].Pose;
+            }
+            else if (T <= poses[0].Key)
+            {
+                return poses[0].Pose;
+            }
+            else
+            {
+                for (int i = n - 2; i >= 0; i--) // most likely to be at the end
                 {
-                    if (T > poses.Keys[i])
+                    if (T > poses[i].Key)
                     {
-                        DateTime A = poses.Keys[i];
-                        DateTime B = poses.Keys[i + 1];
+                        TimeSpan A = poses[i].Key;
+                        TimeSpan B = poses[i + 1].Key;
                         double t = (T - A).TotalMilliseconds / (B - A).TotalMilliseconds;
 
-                        Pose pA = poses.Values[i].Pose;
-                        Pose pB = poses.Values[i + 1].Pose;
+                        Pose pA = poses[i].Pose;
+                        Pose pB = poses[i + 1].Pose;
 
 
                         //Debug.Log(i + "/" + poses.Count + "/" + insertions.Count);
@@ -81,20 +87,23 @@ namespace Iviz.App
                     }
                 }
             }
-            Debug.Log("OUT! " +  (T - LastTime).TotalMilliseconds);
+            Debug.Log("OUT!");
             return Pose.identity; // shouldn't happen
         }
 
         public void Clear()
         {
             poses.Clear();
+            start = 0;
         }
 
+        /*
         public Pose First => poses.Values[0].Pose;
         public Pose Last => poses.Values[poses.Count - 1].Pose;
 
-        public DateTime FirstTime => poses.Keys[0];
-        public DateTime LastTime => poses.Keys[poses.Count - 1];
+        public TimeSpan FirstTime => poses.Keys[0];
+        public TimeSpan LastTime => poses.Keys[poses.Count - 1];
+        */
 
         public int Count => poses.Count;
         public bool Empty => Count == 0;

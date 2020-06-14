@@ -26,6 +26,7 @@ namespace Iviz.App.Listeners
         [DataMember] public float MinIntensity { get; set; } = 0;
         [DataMember] public float MaxIntensity { get; set; } = 1;
         [DataMember] public bool FlipMinMax { get; set; } = false;
+        [DataMember] public uint MaxQueueSize { get; set; } = 1;
     }
 
     public class PointCloudListener : TopicListener
@@ -58,6 +59,7 @@ namespace Iviz.App.Listeners
                 MinIntensity = value.MinIntensity;
                 MaxIntensity = value.MaxIntensity;
                 FlipMinMax = value.FlipMinMax;
+                MaxQueueSize = value.MaxQueueSize;
             }
         }
 
@@ -154,6 +156,19 @@ namespace Iviz.App.Listeners
             }
         }
 
+        public uint MaxQueueSize
+        {
+            get => config.MaxQueueSize;
+            set
+            {
+                config.MaxQueueSize = value;
+                if (Listener != null)
+                {
+                    Listener.MaxQueueSize = (int)value;
+                }
+            }
+        }
+
         readonly List<string> fieldNames = new List<string>() { "x", "y", "z" };
         public IReadOnlyList<string> FieldNames => fieldNames;
 
@@ -172,6 +187,7 @@ namespace Iviz.App.Listeners
         {
             base.StartListening();
             Listener = new RosListener<PointCloud2>(config.Topic, Handler);
+            Listener.MaxQueueSize = (int)MaxQueueSize;
             name = "[" + config.Topic + "]";
             node.name = name;
         }
@@ -199,7 +215,7 @@ namespace Iviz.App.Listeners
 
         void Handler(PointCloud2 msg)
         {
-            node.AttachTo(msg.Header.FrameId, msg.Header.Stamp.ToDateTime());
+            node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
             //node.AttachTo(msg.Header.FrameId);
 
             if (msg.PointStep < 3 * 4 ||
@@ -218,7 +234,6 @@ namespace Iviz.App.Listeners
             {
                 pointBuffer = new PointWithColor[newSize * 11 / 10];
             }
-
 
             Task.Run(() =>
             {

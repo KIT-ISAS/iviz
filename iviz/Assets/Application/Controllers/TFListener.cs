@@ -169,14 +169,16 @@ namespace Iviz.App.Listeners
         {
             base.StartListening();
             Listener = new RosListener<tfMessage_v2>(DefaultTopic, SubscriptionHandler_v2);
+            Listener.MaxQueueSize = 200;
             ListenerStatic = new RosListener<tfMessage_v2>(DefaultTopicStatic, SubscriptionHandlerStatic);
+            ListenerStatic.MaxQueueSize = 200;
         }
 
         void ProcessMessages(TransformStamped[] transforms, bool isStatic)
         {
             foreach (TransformStamped t in transforms)
             {
-                if (!t.Transform.ValidateNaN())
+                if (t.Transform.HasNaN())
                 {
                     continue;
                 }
@@ -207,7 +209,7 @@ namespace Iviz.App.Listeners
                 {
                     parentId = parentId.Substring(1);
                 }
-                DateTime timestamp = t.Header.Stamp.ToDateTime();
+                TimeSpan timestamp = t.Header.Stamp.ToTimeSpan();
                 TFFrame parent = string.IsNullOrEmpty(parentId) ?
                     null :
                     GetOrCreateFrame(parentId, null);

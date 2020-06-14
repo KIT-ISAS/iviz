@@ -9,10 +9,10 @@ namespace Iviz.App
 {
     public class NumberInputFieldWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] Text label;
-        [SerializeField] InputField text;
-        [SerializeField] Text placeholder;
-        [SerializeField] Image textImage;
+        [SerializeField] Text label = null;
+        [SerializeField] InputField text = null;
+        [SerializeField] Text placeholder = null;
+        [SerializeField] Image textImage = null;
 
         public string Label
         {

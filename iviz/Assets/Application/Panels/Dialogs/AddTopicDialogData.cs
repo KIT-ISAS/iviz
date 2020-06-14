@@ -8,11 +8,10 @@ namespace Iviz.App
 {
     public class AddTopicDialogData : DialogData
     {
-        private const int Size = 30;
+        private const int Size = 250;
 
         DialogItemList itemList;
         public override IDialogPanelContents Panel => itemList;
-        DateTime lastTime = DateTime.MinValue;
 
         class TopicWithResource
         {
@@ -29,7 +28,7 @@ namespace Iviz.App
 
             public override string ToString()
             {
-                return $"{UnityUtils.SanitizedText(topic, Size)}\n<b>{type}</b>";
+                return $"{Resource.Font.Split(topic, Size)}\n<b>{type}</b>";
             }
         }
 
@@ -65,7 +64,6 @@ namespace Iviz.App
             itemList.Items = topics.Select(x => x.ToString());
             itemList.ItemClicked += OnItemClicked;
             itemList.CloseClicked += OnCloseClicked;
-            lastTime = DateTime.Now;
         }
 
         public override void UpdatePanel()

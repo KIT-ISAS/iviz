@@ -9,8 +9,8 @@ namespace Iviz.App
 {
     public class DropdownWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] Text label;
-        [SerializeField] Dropdown dropdown;
+        [SerializeField] Text label = null;
+        [SerializeField] Dropdown dropdown = null;
 
         public string Label
         {

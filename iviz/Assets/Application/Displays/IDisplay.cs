@@ -15,4 +15,14 @@ namespace Iviz.Displays
         void Stop();
         bool Visible { get; set; }
     }
+
+    public interface ISupportsAROcclusion
+    {
+        bool OcclusionOnly { get; set; }
+    }
+
+    public interface ISupportsTint
+    {
+        Color Tint { get; set; }
+    }
 }

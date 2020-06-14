@@ -13,18 +13,7 @@ namespace Iviz.Displays
         LineResource lines;
         bool keepGoing = true;
 
-        public GameObject source;
-
-        Func<Vector3> dataSource;
-        public Func<Vector3> DataSource
-        {
-            get => dataSource;
-            set
-            {
-                dataSource = value;
-                Reset();
-            }
-        }
+        public Func<Vector3> DataSource { get; set; }
 
         public Vector3 WorldScale => lines.WorldScale;
         public Pose WorldPose => lines.WorldPose;
@@ -40,26 +29,34 @@ namespace Iviz.Displays
 
         int totalMeasurements = 10 * 2;
 
-        const int MeasurementsPerSecond = 16;
+        const int MeasurementsPerSecond = 32;
 
-        int timeWindowInMs = 2000;
+        [SerializeField] int timeWindowInMs_ = 2000;
         public int TimeWindowInMs
         {
-            get => timeWindowInMs;
+            get => timeWindowInMs_;
             set
             {
-                timeWindowInMs = value;
-                Reset();
+                if (timeWindowInMs_ != value)
+                {
+                    timeWindowInMs_ = value;
+                    Reset();
+                }
             }
         }
 
-        public Color32 Color { get; set; } = UnityEngine.Color.red;
+        [SerializeField] Color color_ = UnityEngine.Color.red;
+        public Color32 Color
+        {
+            get => color_;
+            set => color_ = value;
+        }
 
         public void Reset()
         {
             measurements.Clear();
             startOffset = 0;
-            totalMeasurements = timeWindowInMs * MeasurementsPerSecond / 1000;
+            totalMeasurements = timeWindowInMs_ * MeasurementsPerSecond / 1000;
             lines.Reserve(totalMeasurements);
         }
 
@@ -94,6 +91,7 @@ namespace Iviz.Displays
         {
             lines = ResourcePool.GetOrCreate<LineResource>(Resource.Markers.Line, transform);
             lines.Scale = 0.01f;
+            TimeWindowInMs = 2000;
             StartCoroutine("GatherMeasurement");
         }
 
@@ -105,6 +103,7 @@ namespace Iviz.Displays
         public void Stop()
         {
             lines.Stop();
+            measurements.Clear();
             keepGoing = false;
         }
 
@@ -112,9 +111,10 @@ namespace Iviz.Displays
         {
             while (true)
             {
-                if (DataSource != null)
+                if (keepGoing && DataSource != null)
                 {
                     Vector3 newMeasurement = DataSource();
+                    //Debug.Log(newMeasurement);
                     if (measurements.Count != totalMeasurements)
                     {
                         measurements.Add(newMeasurement);
@@ -128,6 +128,7 @@ namespace Iviz.Displays
                             startOffset = 0;
                         }
                     }
+                    //Debug.Log("post: " + measurements.Count + " " + totalMeasurements);
                     lines.Set(measurements.Count, lineColors =>
                     {
                         int count = measurements.Count;
@@ -143,6 +144,7 @@ namespace Iviz.Displays
                                 measurements[indexB],
                                 new Color32(Color.r, Color.g, Color.b, (byte)alphaB)
                                 );
+                            //Debug.Log(lineColors[i]);
                         }
                     });
                 }

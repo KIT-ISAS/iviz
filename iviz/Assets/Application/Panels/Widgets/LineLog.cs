@@ -8,8 +8,8 @@ namespace Iviz.App
 {
     public class LineLog : MonoBehaviour, IWidget
     {
-        [SerializeField] Text text;
-        [SerializeField] GameObject content;
+        [SerializeField] Text text = null;
+        [SerializeField] GameObject content = null;
 
         readonly List<string> lines = new List<string>();
         const int maxLines = 100;

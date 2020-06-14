@@ -38,19 +38,24 @@ namespace Iviz.Displays
             set => transform.parent = value;
         }
 
-        bool colliderEnabled;
+        bool colliderEnabled_;
         public bool ColliderEnabled
         {
-            get => colliderEnabled;
+            get => colliderEnabled_;
             set
             {
-                colliderEnabled = value;
+                colliderEnabled_ = value;
                 lines.ColliderEnabled = value;
                 pointCloud.ColliderEnabled = value;
             }
         }
 
-        public int Size { get; private set; }
+        [SerializeField] int size_;
+        public int Size
+        {
+            get => size_;
+            private set { size_ = value; }
+        }
 
         public Vector2 MeasuredIntensityBounds { get; private set; }
 
@@ -66,19 +71,19 @@ namespace Iviz.Displays
             }
         }
 
-        float pointSize;
+        [SerializeField] float pointSize_;
         public float PointSize
         {
-            get => pointSize;
+            get => pointSize_;
             set
             {
-                pointSize = value;
+                pointSize_ = value;
                 pointCloud.Scale = value * Vector2.one;
                 lines.Scale = value;
             }
         }
 
-        Resource.ColormapId colormap;
+        [SerializeField] Resource.ColormapId colormap;
         public Resource.ColormapId Colormap
         {
             get => colormap;
@@ -90,15 +95,20 @@ namespace Iviz.Displays
             }
         }
 
-        public bool UseIntensityNoRange { get; set; }
+        [SerializeField] bool useIntensityNoRange_;
+        public bool UseIntensityNoRange
+        {
+            get => useIntensityNoRange_;
+            set => useIntensityNoRange_ = value;
+        }
 
-        bool forceMinMax;
+        [SerializeField] bool forceMinMax_;
         public bool ForceMinMax
         {
-            get => forceMinMax;
+            get => forceMinMax_;
             set
             {
-                forceMinMax = value;
+                forceMinMax_ = value;
                 if (value)
                 {
                     pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
@@ -112,25 +122,25 @@ namespace Iviz.Displays
             }
         }
 
-        bool flipMinMax;
+        [SerializeField] bool flipMinMax_;
         public bool FlipMinMax
         {
-            get => flipMinMax;
+            get => flipMinMax_;
             set
             {
-                flipMinMax = value;
+                flipMinMax_ = value;
                 pointCloud.FlipMinMax = value;
                 lines.FlipMinMax = value;
             }
         }
 
-        float minIntensity;
+        [SerializeField] float minIntensity_;
         public float MinIntensity
         {
-            get => minIntensity;
+            get => minIntensity_;
             set
             {
-                minIntensity = value;
+                minIntensity_ = value;
                 if (ForceMinMax)
                 {
                     pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
@@ -139,13 +149,13 @@ namespace Iviz.Displays
             }
         }
 
-        float maxIntensity;
+        [SerializeField] float maxIntensity_;
         public float MaxIntensity
         {
-            get => maxIntensity;
+            get => maxIntensity_;
             set
             {
-                maxIntensity = value;
+                maxIntensity_ = value;
                 if (ForceMinMax)
                 {
                     pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
@@ -154,14 +164,14 @@ namespace Iviz.Displays
             }
         }
 
-        bool useLines;
+        [SerializeField] bool useLines_;
         public bool UseLines
         {
-            get => useLines;
+            get => useLines_;
             set
             {
-                useLines = value;
-                if (useLines)
+                useLines_ = value;
+                if (useLines_)
                 {
                     lines.Visible = Visible;
                     pointCloud.Visible = !Visible;
@@ -176,14 +186,14 @@ namespace Iviz.Displays
             }
         }
 
-        float maxLineDistance;
+        [SerializeField] float maxLineDistance_;
         public float MaxLineDistance
         {
-            get => maxLineDistance;
+            get => maxLineDistance_;
             set
             {
-                bool changed = value != maxLineDistance;
-                maxLineDistance = value;
+                bool changed = value != maxLineDistance_;
+                maxLineDistance_ = value;
                 if (changed)
                 {
                     SetLines();
@@ -279,7 +289,7 @@ namespace Iviz.Displays
         void SetLines()
         {
             int n = pointBuffer.Count;
-            float maxLineDistanceSq = maxLineDistance * maxLineDistance;
+            float maxLineDistanceSq = maxLineDistance_ * maxLineDistance_;
 
             lineBuffer.Clear();
             for (int i = 0; i < pointBuffer.Count; i++)

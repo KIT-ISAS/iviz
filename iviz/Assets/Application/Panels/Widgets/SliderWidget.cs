@@ -8,9 +8,9 @@ namespace Iviz.App
 {
     public class SliderWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] Slider slider;
-        [SerializeField] Text label;
-        [SerializeField] Text value;
+        [SerializeField] Slider slider = null;
+        [SerializeField] Text label = null;
+        [SerializeField] Text value = null;
 
         public string Label
         {

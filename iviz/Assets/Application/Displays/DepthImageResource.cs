@@ -11,26 +11,26 @@ namespace Iviz.App.Displays
 {
     public class DepthImageResource : MarkerResource
     {
-        Material material;
+        [SerializeField] Material material;
 
-        float pointSize = 1;
+        [SerializeField] float pointSize_ = 1;
         public float PointSize
         {
-            get => pointSize;
+            get => pointSize_;
             set
             {
-                pointSize = value;
+                pointSize_ = value;
                 UpdateQuadComputeBuffer();
             }
         }
 
-        float fovAngle;
+        [SerializeField] float fovAngle_;
         public float FovAngle
         {
-            get => fovAngle;
+            get => fovAngle_;
             set
             {
-                fovAngle = value;
+                fovAngle_ = value;
                 if (DepthImage != null)
                 {
                     UpdatePosValues(DepthImage.Texture);
@@ -89,7 +89,9 @@ namespace Iviz.App.Displays
 
         public override string Name => "DepthImageProjector";
 
-        int width, height;
+        [SerializeField] int width;
+        [SerializeField] int height;
+
         Vector2[] uvs = new Vector2[0];
 
         ComputeBuffer pointComputeBuffer;

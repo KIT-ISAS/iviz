@@ -9,11 +9,10 @@ namespace Iviz.App
     /// <summary>
     /// <see cref="ImagePanelContents"/> 
     /// </summary>
-    public class ImageDisplayData : ListenerDisplayData
+    public class ImageDisplayData : ListenerDisplayData, IImageDialogListener
     {
         readonly ImageListener listener;
         readonly ImagePanelContents panel;
-        RawImage anchor;
 
         protected override TopicListener Listener => listener;
 
@@ -23,6 +22,9 @@ namespace Iviz.App
 
         public ImageListener Image => listener;
 
+        Material IImageDialogListener.Material => listener.Material;
+
+        Vector2 IImageDialogListener.ImageSize => new Vector2(listener.ImageWidth, listener.ImageHeight);
 
         public ImageDisplayData(DisplayDataConstructor constructor) :
             base(constructor.DisplayList,
@@ -48,6 +50,7 @@ namespace Iviz.App
         public override void SetupPanel()
         {
             panel.Listener.RosListener = listener.Listener;
+            panel.Frame.Owner = listener;
             panel.Description.Label = listener.Description;
 
             panel.PreviewWidget.Material = listener.Material;
@@ -63,34 +66,17 @@ namespace Iviz.App
 
             panel.ShowBillboard.Value = listener.EnableBillboard;
             panel.BillboardSize.Value = listener.BillboardSize;
+            panel.BillboardFollowsCamera.Value = listener.BillboardFollowsCamera;
+            panel.BillboardOffset.Value = listener.BillboardOffset;
 
             panel.BillboardSize.Interactable = listener.EnableBillboard;
+            panel.BillboardFollowsCamera.Interactable = listener.EnableBillboard;
+            panel.BillboardOffset.Interactable = listener.EnableBillboard;
 
             panel.Colormap.ValueChanged += (i, _) =>
             {
                 listener.Colormap = (Resource.ColormapId)i;
             };
-            /*
-            panel.Anchor.ValueChanged += (i, _) =>
-            {
-                RawImage newAnchor = DataPanelManager.AnchorCanvas.ImageFromAnchorType((AnchorCanvas.AnchorType)i);
-                if (anchor == newAnchor)
-                {
-                    return;
-                }
-                if (anchor != null && anchor.material == listener.Material)
-                {
-                    anchor.material = null;
-                    anchor.gameObject.SetActive(false);
-                }
-                anchor = newAnchor;
-                if (anchor != null)
-                {
-                    anchor.material = listener.Material;
-                    anchor.gameObject.SetActive(true);
-                }
-            };
-            */
             panel.Min.ValueChanged += f =>
             {
                 listener.MinIntensity = f;
@@ -107,13 +93,33 @@ namespace Iviz.App
             panel.ShowBillboard.ValueChanged += f =>
             {
                 panel.BillboardSize.Interactable = f;
+                panel.BillboardFollowsCamera.Interactable = f;
+                panel.BillboardOffset.Interactable = f;
                 listener.EnableBillboard = f;
             };
             panel.BillboardSize.ValueChanged += f =>
             {
                 listener.BillboardSize = f;
             };
-
+            panel.BillboardFollowsCamera.ValueChanged += f =>
+            {
+                listener.BillboardFollowsCamera = f;
+            };
+            panel.BillboardOffset.ValueChanged += f =>
+            {
+                listener.BillboardOffset = f;
+            };
+            panel.PreviewWidget.Clicked += () =>
+            {
+                DisplayListPanel.ShowImageDialog(this);
+                panel.PreviewWidget.Interactable = false;
+            };
+            panel.HideButton.Clicked += () =>
+            {
+                listener.Visible = !listener.Visible;
+                panel.HideButton.State = listener.Visible;
+                UpdateButtonText();
+            };
         }
 
         public override void UpdatePanel()
@@ -126,16 +132,14 @@ namespace Iviz.App
             panel.PreviewWidget.ToggleImageEnabled();
         }
 
-        /*
-        public override JToken Serialize()
-        {
-            return JToken.FromObject(listener.Config);
-        }
-        */
-
         public override void AddToState(StateConfiguration config)
         {
             config.Images.Add(listener.Config);
+        }
+
+        void IImageDialogListener.OnDialogClosed()
+        {
+            panel.PreviewWidget.Interactable = true;
         }
     }
 }

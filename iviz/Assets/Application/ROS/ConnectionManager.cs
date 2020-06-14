@@ -61,7 +61,7 @@ namespace Iviz.App
 
         void OnDestroy()
         {
-            Connection.Stop();
+            Connection?.Stop();
             Connection = null;
         }
 

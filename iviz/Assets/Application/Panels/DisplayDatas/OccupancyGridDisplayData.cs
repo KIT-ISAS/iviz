@@ -50,6 +50,29 @@ namespace Iviz.App
             panel.FlipColors.Value = listener.FlipColors;
             panel.ScaleZ.Value = listener.ScaleZ;
 
+            panel.OcclusionOnlyMode.Value = listener.RenderAsOcclusionOnly;
+            panel.Tint.Value = listener.Tint;
+            //panel.Alpha.Value = listener.Tint.a;
+
+            panel.Tint.ValueChanged += f =>
+            {
+                Color color = f;
+                color.a = 1;
+                listener.Tint = color;
+            };
+            /*
+            panel.Alpha.ValueChanged += f =>
+            {
+                Color color = panel.Tint.Value;
+                color.a = f;
+                listener.Tint = color;
+            };
+            */
+            panel.OcclusionOnlyMode.ValueChanged += f =>
+            {
+                listener.RenderAsOcclusionOnly = f;
+            };
+
             panel.FlipColors.ValueChanged += f =>
             {
                 listener.FlipColors = f;

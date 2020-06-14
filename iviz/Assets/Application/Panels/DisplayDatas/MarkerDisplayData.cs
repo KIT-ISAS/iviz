@@ -41,6 +41,28 @@ namespace Iviz.App
         public override void SetupPanel()
         {
             panel.Listener.RosListener = listener.Listener;
+
+            panel.OcclusionOnlyMode.Value = listener.RenderAsOcclusionOnly;
+            panel.Tint.Value = listener.Tint;
+            panel.Alpha.Value = listener.Tint.a;
+
+            panel.Tint.ValueChanged += f =>
+            {
+                Color color = f;
+                color.a = panel.Alpha.Value;
+                listener.Tint = color;
+            };
+            panel.Alpha.ValueChanged += f =>
+            {
+                Color color = panel.Tint.Value;
+                color.a = f;
+                listener.Tint = color;
+            };
+            panel.OcclusionOnlyMode.ValueChanged += f =>
+            {
+                listener.RenderAsOcclusionOnly = f;
+            };
+
             panel.CloseButton.Clicked += () =>
             {
                 DataPanelManager.HideSelectedPanel();

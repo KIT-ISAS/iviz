@@ -50,6 +50,27 @@ namespace Iviz.App
             panel.AttachToTF.Value = Robot.AttachToTF;
             panel.HideButton.State = Robot.Visible;
 
+            panel.OcclusionOnlyMode.Value = Robot.RenderAsOcclusionOnly;
+            panel.Tint.Value = Robot.Tint;
+            panel.Alpha.Value = Robot.Tint.a;
+
+            panel.Tint.ValueChanged += f =>
+            {
+                Color color = f;
+                color.a = panel.Alpha.Value;
+                Robot.Tint = color;
+            };
+            panel.Alpha.ValueChanged += f =>
+            {
+                Color color = panel.Tint.Value;
+                color.a = f;
+                Robot.Tint = color;
+            };
+            panel.OcclusionOnlyMode.ValueChanged += f =>
+            {
+                Robot.RenderAsOcclusionOnly = f;
+            };
+
             panel.ResourceType.ValueChanged += (_, f) =>
             {
                 Robot.RobotResource = f;
@@ -78,11 +99,12 @@ namespace Iviz.App
                 panel.HideButton.State = Robot.Visible;
                 UpdateButtonText();
             };
+
         }
 
         protected override void UpdateButtonText()
         {
-            ButtonText = $"{UnityUtils.SanitizedText(Robot.LongName, MaxTextRowLength)}\n<b>{Module}</b>";
+            ButtonText = $"{Resource.Font.Split(Robot.LongName, MaxTextRowLength)}\n<b>{Module}</b>";
         }
 
         public override void AddToState(StateConfiguration config)

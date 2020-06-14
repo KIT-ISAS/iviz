@@ -7,8 +7,11 @@ namespace Iviz.App
     /// </summary>
     public class ImagePanelContents : ListenerPanelContents
     {
+        public FrameWidget Frame { get; private set; }
         public ToggleWidget ShowBillboard { get; private set; }
+        public ToggleWidget BillboardFollowsCamera { get; private set; }
         public SliderWidget BillboardSize { get; private set; }
+        public Vector3Widget BillboardOffset { get; private set; }
         public ImagePreviewWidget PreviewWidget { get; private set; }
         public DataLabelWidget Description { get; private set; }
         public DropdownWidget Colormap { get; private set; }
@@ -23,21 +26,21 @@ namespace Iviz.App
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("Image");
             Listener = p.AddListener();
+            Frame = p.AddFrame();
+            Description = p.AddDataLabel("").SetHasRichText(true);
             Colormap = p.AddDropdown("Colormap")
                 .SetOptions(Resource.Colormaps.Names)
                 .SetIndex((int)Resource.ColormapId.gray);
             Min = p.AddSlider("Intensity Min").SetMinValue(0).SetMaxValue(1);
             Max = p.AddSlider("Intensity Max").SetMinValue(0).SetMaxValue(1);
-            /*
-            Anchor = p.AddDropdown("Anchor")
-                        .SetOptions(AnchorCanvas.AnchorNames)
-                        .SetIndex((int)AnchorCanvas.AnchorType.None);
-            */
-            ShowBillboard = p.AddToggle("Show Billboard");
-            BillboardSize = p.AddSlider("Billboard Size").SetMinValue(0.1f).SetMaxValue(10);
 
             PreviewWidget = p.AddImagePreviewWidget("Preview");
-            Description = p.AddDataLabel("");
+
+            ShowBillboard = p.AddToggle("Show Billboard");
+            BillboardSize = p.AddSlider("Billboard Size").SetMinValue(0.1f).SetMaxValue(10);
+            BillboardFollowsCamera = p.AddToggle("Billboard Follows Camera");
+            BillboardOffset = p.AddVector3("Billboard Offset");
+
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();
             p.UpdateSize();

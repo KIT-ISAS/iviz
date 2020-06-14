@@ -46,6 +46,7 @@ namespace Iviz.App
         [DataMember] public List<OdometryConfiguration> Odometries { get; set; } = new List<OdometryConfiguration>();
         [DataMember] public List<OccupancyGridConfiguration> OccupancyGrids { get; set; } = new List<OccupancyGridConfiguration>();
         [DataMember] public ARConfiguration AR { get; set; } = null;
+        [DataMember] public JoystickConfiguration Joystick { get; set; } = null;
 
         public List<IReadOnlyList<IConfiguration>> CreateListOfEntries() => new List<IReadOnlyList<IConfiguration>>
         {
@@ -104,6 +105,9 @@ namespace Iviz.App
         [SerializeField] Sprite ConnectingSprite = null;
         [SerializeField] Sprite DisconnectedSprite = null;
         [SerializeField] Sprite QuestionSprite = null;
+
+        [SerializeField] Joystick joystick = null;
+        public Joystick Joystick => joystick;
 
         public string Address { get; private set; }
 
@@ -502,7 +506,7 @@ namespace Iviz.App
             Button button = buttonObject.GetComponent<Button>();
             button.onClick.AddListener(() =>
             {
-                displayData.Select();
+                displayData.ToggleSelect();
             });
             (contentObject.transform as RectTransform).sizeDelta = new Vector2(0, y + buttonHeight + yOffset);
 
@@ -551,7 +555,9 @@ namespace Iviz.App
             (contentObject.transform as RectTransform).sizeDelta = new Vector2(0, 2 * yOffset + i * buttonHeight);
         }
 
-        public void SetButtonText(DisplayData entry, string text)
+        public const int DisplayDataCaptionWidth = 200;
+
+        public void SetDisplayDataCaption(DisplayData entry, string text)
         {
             int index = displayDatas.IndexOf(entry);
             if (index == -1)
@@ -567,7 +573,7 @@ namespace Iviz.App
             displayedTopics.Add(topic);
         }
 
-        public void ShowImageDialog(ImageListener caller)
+        public void ShowImageDialog(IImageDialogListener caller)
         {
             imageData.Listener = caller;
             imageData.Show();

@@ -5,56 +5,58 @@ namespace Iviz.Displays
 {
     public class ARMarkerResource : MeshMarkerResource
     {
-        float scale;
+        //[SerializeField] MeshMarkerResource back = null;
+
+        [SerializeField] float scale_;
         public float Scale
         {
-            get => scale;
+            get => scale_;
             set
             {
-                scale = value;
-                transform.localScale = 0.11f * scale * Vector3.one;
+                scale_ = value;
+                transform.localScale = 0.11f * scale_ * Vector3.one;
             }
         }
 
-        int angle;
+        [SerializeField] int angle_;
         public int Angle
         {
-            get => angle;
+            get => angle_;
             set
             {
-                angle = value;
+                angle_ = value;
                 UpdateRotation();
             }
         }
 
         void UpdateRotation()
         {
-            Quaternion rotation = Quaternion.AngleAxis(-angle, Vector3.up);
-            if (!horizontal)
+            Quaternion rotation = Quaternion.AngleAxis(-angle_, Vector3.up);
+            if (!horizontal_)
             {
                 rotation *= Quaternion.AngleAxis(90, Vector3.forward);
             }
             transform.rotation = rotation;
         }
 
-        bool horizontal;
+        [SerializeField] bool horizontal_;
         public bool Horizontal
         {
-            get => horizontal;
+            get => horizontal_;
             set
             {
-                horizontal = value;
+                horizontal_ = value;
                 UpdateRotation();
             }
         }
 
-        Vector3 offset;
+        [SerializeField] Vector3 offset_;
         public Vector3 Offset
         {
-            get => offset;
+            get => offset_;
             set
             {
-                offset = value;
+                offset_ = value;
                 transform.localPosition = value;
             }
         }
@@ -62,7 +64,6 @@ namespace Iviz.Displays
         protected override void Awake()
         {
             base.Awake();
-            Color = new Color(0, 1, 0, 0.25f);
             Scale = 0.19f;
         }
     }

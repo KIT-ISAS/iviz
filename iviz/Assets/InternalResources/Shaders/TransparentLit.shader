@@ -8,7 +8,7 @@
 	}
 		SubShader
 	{
-		Tags { "Queue" = "Transparent" "RenderType"="Transparent"}
+		Tags { "Queue"="Transparent" "RenderType"="Transparent"}
 		LOD 200
 
 		CGPROGRAM
@@ -30,9 +30,9 @@
 		void surf(Input IN, inout SurfaceOutputStandard o) {
 			fixed4 color = UNITY_ACCESS_INSTANCED_PROP(Props, _Color);
 			o.Albedo = color.rgb;
-			o.Metallic = _Metallic;
 			o.Smoothness = _Smoothness;
 			o.Alpha = color.a;
+            o.Metallic = _Metallic * o.Alpha;
 		}
 		ENDCG
 	}

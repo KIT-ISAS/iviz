@@ -22,7 +22,6 @@ namespace Iviz.Displays
         static readonly int PropFront = Shader.PropertyToID("_Front");
         static readonly int PropQuad = Shader.PropertyToID("_Quad");
 
-
         int size_;
         public int Size
         {
@@ -97,15 +96,15 @@ namespace Iviz.Displays
             IntensityBounds = span;
         }
 
-        float scale;
+        [SerializeField] float scale_;
         public float Scale
         {
-            get => scale;
+            get => scale_;
             set
             {
-                if (scale != value)
+                if (scale_ != value)
                 {
-                    scale = value;
+                    scale_ = value;
                     UpdateQuadComputeBuffer();
                 }
             }
@@ -115,10 +114,10 @@ namespace Iviz.Displays
 
         protected override void Awake()
         {
-            base.Awake();
-
             material = Resource.Materials.Line.Instantiate();
             material.DisableKeyword("USE_TEXTURE");
+
+            base.Awake();
 
             Scale = 0.1f;
 

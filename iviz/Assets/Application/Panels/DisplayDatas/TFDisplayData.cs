@@ -54,7 +54,7 @@ namespace Iviz.App
             panel.FrameLabelSize.Interactable = listener.AxisLabelVisible;
             panel.ConnectToParent.Value = listener.ParentConnectorVisible;
             panel.ShowAllFrames.Value = listener.ShowAllFrames;
-            panel.Sender.RosSender = listener.Publisher;
+            panel.Sender.Set(listener.Publisher);
 
             panel.ShowAxes.ValueChanged += f =>
             {

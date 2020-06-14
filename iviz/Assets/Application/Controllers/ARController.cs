@@ -8,7 +8,6 @@ using UnityEngine.XR.ARFoundation;
 using Iviz.Displays;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.App.Displays;
-using System.Linq;
 
 namespace Iviz.App.Listeners
 {
@@ -26,8 +25,8 @@ namespace Iviz.App.Listeners
         [DataMember] public int MarkerAngle { get; set; } = 0;
         [DataMember] public string MarkerFrame { get; set; } = "";
         [DataMember] public SerializableVector3 MarkerOffset { get; set; } = Vector3.zero;
-        [DataMember] public bool PublishPose { get; set; } = true;
-        [DataMember] public bool PublishMarkers { get; set; } = true;
+        [DataMember] public bool PublishPose { get; set; } = false;
+        [DataMember] public bool PublishMarkers { get; set; } = false;
     }
 
     public class ARController : MonoBehaviour, IController, IHasFrame
@@ -67,7 +66,7 @@ namespace Iviz.App.Listeners
                 Origin = config.Origin;
                 WorldScale = config.WorldScale;
                 PublishPose = config.PublishPose;
-                PublishMarkers = config.PublishMarkers;
+                PublishPlanesAsMarkers = config.PublishMarkers;
                 SearchMarker = config.SearchMarker;
                 MarkerSize = config.MarkerSize;
                 MarkerHorizontal = config.MarkerHorizontal;
@@ -133,7 +132,7 @@ namespace Iviz.App.Listeners
             }
         }
 
-        public bool PublishMarkers
+        public bool PublishPlanesAsMarkers
         {
             get => config.PublishMarkers;
             set
@@ -280,7 +279,7 @@ namespace Iviz.App.Listeners
                 );
                 RosSenderHead.Publish(pose);
             }
-            if (PublishMarkers)
+            if (PublishPlanesAsMarkers)
             {
                 DateTime now = DateTime.Now;
                 if ((now - lastMarkerUpdate).TotalSeconds > 2.5)
@@ -319,18 +318,18 @@ namespace Iviz.App.Listeners
         void OnTrackedImagesChanged(ARTrackedImagesChangedEventArgs obj)
         {
             Pose newPose = new Pose();
-            if (obj.added.Any())
+            if (obj.added.Count != 0)
             {
-                Debug.Log("Added " + obj.added.Count() + " images!");
+                Debug.Log("Added " + obj.added.Count + " images!");
                 /*
                 transform.position = obj.added[0].transform.position;
                 transform.rotation = obj.added[0].transform.rotation;
                 */
                 newPose = obj.added[0].transform.AsPose();
             }
-            if (obj.updated.Any())
+            if (obj.updated.Count != 0)
             {
-                Debug.Log("Updated " + obj.updated.Count() + " images!");
+                Debug.Log("Updated " + obj.updated.Count + " images!");
                 /*
                 transform.position = obj.updated[0].transform.position;
                 transform.rotation = obj.updated[0].transform.rotation;
@@ -350,6 +349,8 @@ namespace Iviz.App.Listeners
         public void Stop()
         {
             Visible = false;
+            RosSenderHead.Stop();
+            RosSenderMarkers.Stop();
         }
     }
 }

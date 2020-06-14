@@ -49,7 +49,7 @@ namespace Iviz.Displays
         ComputeBuffer pointComputeBuffer;
         ComputeBuffer quadComputeBuffer;
 
-        int size_;
+        [SerializeField] int size_;
         public int Size
         {
             get => size_;
@@ -103,6 +103,7 @@ namespace Iviz.Displays
             }
         }
 
+        /*
         public void Set(IList<Vector3> points, IList<Color> colors = null, Color? color = null)
         {
             Size = points.Count;
@@ -137,6 +138,7 @@ namespace Iviz.Displays
             Size = realSize;
             UpdateBuffer();
         }
+        */
 
         void UpdateBuffer()
         {
@@ -169,10 +171,10 @@ namespace Iviz.Displays
 
         protected override void Awake()
         {
-            base.Awake();
-
             material = Resource.Materials.PointCloud.Instantiate();
             material.DisableKeyword("USE_TEXTURE");
+
+            base.Awake();
 
             UseIntensityTexture = false;
             IntensityBounds = new Vector2(0, 1);

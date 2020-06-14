@@ -17,7 +17,7 @@ namespace Iviz.App
 
     public abstract class DisplayData
     {
-        protected const int MaxTextRowLength = 35;
+        protected const int MaxTextRowLength = 200;
         protected DisplayListPanel DisplayListPanel { get; }
         protected DataPanelManager DataPanelManager => DisplayListPanel.DataPanelManager;
 
@@ -28,7 +28,7 @@ namespace Iviz.App
             protected set
             {
                 buttonText = value;
-                DisplayListPanel.SetButtonText(this, buttonText);
+                DisplayListPanel.SetDisplayDataCaption(this, buttonText);
             }
         }
 
@@ -50,10 +50,12 @@ namespace Iviz.App
 
         protected virtual void UpdateButtonText()
         {
+            //Logger.Debug(DisplayListPanel.DisplayDataCaptionWidth);
             string text;
             if (!string.IsNullOrEmpty(Topic))
             {
-                string topicShort = UnityUtils.SanitizedText(Topic, MaxTextRowLength);
+                //string topicShort = UnityUtils.SanitizedText(Topic, MaxTextRowLength);
+                string topicShort = Resource.Font.Split(Topic, DisplayListPanel.DisplayDataCaptionWidth);
                 text = $"{topicShort}\n<b>{Module}</b>";
             }
             else
@@ -71,9 +73,15 @@ namespace Iviz.App
         public virtual void CleanupPanel() { }
         public virtual void UpdatePanel() { }
 
-        public void Select()
+        public void ToggleSelect()
         {
             DataPanelManager.TogglePanel(this);
+            DisplayListPanel.AllGuiVisible = true;
+        }
+
+        public void Select()
+        {
+            DataPanelManager.SelectPanelFor(this);
             DisplayListPanel.AllGuiVisible = true;
         }
 
@@ -101,6 +109,7 @@ namespace Iviz.App
                 case Resource.Module.AR: return new ARDisplayData(c);
                 case Resource.Module.Magnitude: return new OdometryDisplayData(c);
                 case Resource.Module.OccupancyGrid: return new OccupancyGridDisplayData(c);
+                case Resource.Module.Joystick: return new JoystickDisplayData(c);
                 default: throw new ArgumentException(nameof(c));
             }
         }

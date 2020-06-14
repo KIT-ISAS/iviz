@@ -1,4 +1,4 @@
-Shader "Ibis/DepthImage"
+Shader "iviz/DepthImage"
 {
 	Properties
 	{

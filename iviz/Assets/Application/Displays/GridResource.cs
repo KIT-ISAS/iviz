@@ -33,82 +33,84 @@ namespace Iviz.Displays
             { GridOrientation.YZ, Quaternion.Euler(0, 90, 0) }
         };
 
-        GridOrientation orientation;
+        GridOrientation orientation_;
         public GridOrientation Orientation
         {
-            get => orientation;
+            get => orientation_;
             set
             {
-                orientation = value;
+                orientation_ = value;
                 transform.localRotation = RotationByOrientation[value];
             }
         }
 
-        Color gridColor;
+        Color gridColor_;
         public Color GridColor
         {
-            get => gridColor;
+            get => gridColor_;
             set
             {
-                gridColor = value;
+                gridColor_ = value;
                 meshRenderer.SetPropertyColor(value);
             }
         }
 
-        Color interiorColor;
+        Color interiorColor_;
         public Color InteriorColor
         {
-            get => interiorColor;
+            get => interiorColor_;
             set
             {
-                interiorColor = value;
+                interiorColor_ = value;
                 interiorRenderer.SetPropertyColor(value);
             }
         }
 
-        float gridLineWidth;
+        float gridLineWidth_;
         public float GridLineWidth
         {
-            get => gridLineWidth;
+            get => gridLineWidth_;
             set
             {
-                gridLineWidth = value;
+                gridLineWidth_ = value;
                 UpdateMesh();
             }
         }
 
-        float gridCellSize;
+        float gridCellSize_;
         public float GridCellSize
         {
-            get => gridCellSize;
+            get => gridCellSize_;
             set
             {
-                gridCellSize = value;
+                gridCellSize_ = value;
                 UpdateMesh();
             }
         }
 
-        int numberOfGridCells;
+        int numberOfGridCells_;
         public int NumberOfGridCells
         {
-            get => numberOfGridCells;
+            get => numberOfGridCells_;
             set
             {
-                numberOfGridCells = value;
+                numberOfGridCells_ = value;
                 UpdateMesh();
             }
         }
 
-        bool showInterior;
+        bool showInterior_;
         public bool ShowInterior
         {
-            get => showInterior;
+            get => showInterior_;
             set
             {
-                showInterior = value;
+                showInterior_ = value;
                 interiorObject.SetActive(value);
             }
         }
+
+        public bool FollowCamera { get; set; } = true;
 
         public override string Name => "Grid";
 
@@ -141,6 +143,21 @@ namespace Iviz.Displays
             ShowInterior = true;
 
             gameObject.layer = Resource.ClickableLayer;
+        }
+
+        void Update()
+        {
+            if (!FollowCamera || TFListener.MainCamera == null) return;
+
+            Vector3 cameraPos = TFListener.MainCamera.transform.position;
+            switch(Orientation)
+            {
+                case GridOrientation.XY:
+                    int x = (int)cameraPos.x;
+                    int z = (int)cameraPos.z;
+                    transform.localPosition = new Vector3(x, 0, z);
+                    break;
+            }
         }
 
         void UpdateMesh()

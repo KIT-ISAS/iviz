@@ -3,7 +3,7 @@ Shader "iviz/ImagePreview"
 	Properties
 	{
 		_MainTex("Main Texture", 2D) = "white"
-		_IntensityTex("Intensity Texture", 2D) = "white"
+		_IntensityTexture("Intensity Texture", 2D) = "white"
 
 		_StencilComp("Stencil Comparison", Float) = 8
 		_Stencil("Stencil ID", Float) = 0
@@ -53,7 +53,7 @@ Shader "iviz/ImagePreview"
 			#pragma multi_compile _ USE_INTENSITY FLIP_RB
 
 			sampler2D _MainTex;
-			sampler2D _IntensityTex;
+			sampler2D _IntensityTexture;
 			float4 _MainTex_ST;
 			float _IntensityCoeff;
 			float _IntensityAdd;
@@ -88,7 +88,7 @@ Shader "iviz/ImagePreview"
 				half4 color;
 #if USE_INTENSITY
 				float i = tex2D(_MainTex, IN.texcoord).r * _IntensityCoeff + _IntensityAdd;
-				color = tex2D(_IntensityTex, float2(i, 0));
+				color = tex2D(_IntensityTexture, float2(i, 0));
 #elif FLIP_RB
 				color = tex2D(_MainTex, IN.texcoord).zyxw;
 #else

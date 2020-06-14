@@ -19,7 +19,7 @@
             Listener = p.AddListener();
             ListenerStatic = p.AddListener();
             Frame = p.AddFrame();
-            ShowAxes = p.AddToggle("Show Axes");
+            ShowAxes = p.AddToggle("Show Used Frames");
             ShowFrameLabels = p.AddToggle("Show Frame Names");
             FrameSize = p.AddSlider("Frame Size").SetMinValue(0.01f).SetMaxValue(0.5f).SetNumberOfSteps(49);
             FrameLabelSize = p.AddSlider("Frame Names Size").SetMinValue(0.01f).SetMaxValue(0.5f).SetNumberOfSteps(49);

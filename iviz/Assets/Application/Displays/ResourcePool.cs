@@ -17,7 +17,7 @@ namespace Iviz.App
         {
             if (Instance == null)
             {
-                return resource.Instantiate();
+                return resource.Instantiate(parent);
             }
             return Instance.GetImpl(resource, parent, enable);
         }

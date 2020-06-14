@@ -16,6 +16,8 @@ namespace Iviz.App.Listeners
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public string Type { get; set; } = "";
+        [DataMember] public bool RenderAsOcclusionOnly { get; set; } = false;
+        [DataMember] public SerializableColor Tint { get; set; } = Color.white;
     }
 
     public class MarkerListener : TopicListener
@@ -34,6 +36,36 @@ namespace Iviz.App.Listeners
             {
                 config.Topic = value.Topic;
                 config.Type = value.Type;
+                RenderAsOcclusionOnly = value.RenderAsOcclusionOnly;
+                Tint = value.Tint;
+            }
+        }
+
+        public bool RenderAsOcclusionOnly
+        {
+            get => config.RenderAsOcclusionOnly;
+            set
+            {
+                config.RenderAsOcclusionOnly = value;
+
+                foreach(MarkerObject marker in markers.Values)
+                {
+                    marker.OcclusionOnly = value;
+                }
+            }
+        }
+
+        public Color Tint
+        {
+            get => config.Tint;
+            set
+            {
+                config.Tint = value;
+
+                foreach (MarkerObject marker in markers.Values)
+                {
+                    marker.Tint = value;
+                }
             }
         }
 
@@ -78,12 +110,12 @@ namespace Iviz.App.Listeners
             switch (msg.Action)
             {
                 case Marker.ADD:
-                    if (!msg.Pose.ValidateNaN())
+                    if (msg.Pose.HasNaN())
                     {
                         Logger.Debug("MarkerListener: NaN in pose!");
                         return;
                     }
-                    if (!msg.Scale.ValidateNaN())
+                    if (msg.Scale.HasNaN())
                     {
                         Logger.Debug("MarkerListener: NaN in scale!");
                         return;
@@ -91,7 +123,10 @@ namespace Iviz.App.Listeners
                     if (!markers.TryGetValue(id, out MarkerObject markerToAdd))
                     {
                         markerToAdd = CreateMarkerObject();
+                        markerToAdd.DisplayData = DisplayData;
                         markerToAdd.Parent = TFListener.ListenersFrame;
+                        markerToAdd.OcclusionOnly = RenderAsOcclusionOnly;
+                        markerToAdd.Tint = Tint;
                         markers[id] = markerToAdd;
                     }
                     markerToAdd.Set(msg);

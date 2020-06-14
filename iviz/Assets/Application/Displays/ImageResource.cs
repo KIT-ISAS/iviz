@@ -1,11 +1,15 @@
-﻿using UnityEngine;
+﻿using Iviz.App.Displays;
+using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public class ImageResource : MarkerResource
+    public class ImageResource : MonoBehaviour, IDisplay
     {
         public GameObject front;
         public GameObject back;
+        public Billboard billboard;
+        Pose billboardStartPose;
+        BoxCollider Collider;
 
         ImageTexture texture;
         public ImageTexture Texture
@@ -26,41 +30,102 @@ namespace Iviz.Displays
             }
         }
 
-        float scale = 1;
-        public float Scale
+        public int Layer
         {
-            get => scale;
+            get => billboard.gameObject.layer;
+            set => billboard.gameObject.layer = value;
+        }
+
+        public bool EnableBillboard
+        {
+            get => billboard.enabled;
             set
             {
-                scale = value;
+                billboard.enabled = value;
+                if (!value)
+                {
+                    billboard.transform.SetLocalPose(billboardStartPose);
+                }
+            }
+        }
+
+        public Vector3 Offset
+        {
+            get => billboard.transform.localPosition;
+            set
+            {
+                //Vector3 v = new Vector3(-value.x, value.y, -value.z);
+                billboard.transform.localPosition = value;
+            }
+        }
+
+        [SerializeField] float scale_ = 1;
+        public float Scale
+        {
+            get => scale_;
+            set
+            {
+                scale_ = value;
                 UpdateSides();
             }
         }
+
         public float Width => Scale;
+
         float AspectRatio => (Texture == null || Texture.Width == 0) ? 1 : (float)Texture.Height / Texture.Width;
+
         public float Height => Width * AspectRatio;
 
-        public override string Name => "ImageResource";
+        public string Name => "ImageResource";
 
-        protected override void Awake()
+        public Bounds Bounds => new Bounds(Collider.center, Collider.size);
+
+        public Bounds WorldBounds => Collider.bounds;
+
+        public Pose WorldPose => billboard.transform.AsPose();
+
+        public Vector3 WorldScale => billboard.transform.lossyScale;
+
+        public bool ColliderEnabled
         {
-            base.Awake();
-            Collider = GetComponent<BoxCollider>();
+            get => Collider.enabled;
+            set => Collider.enabled = value;
         }
 
-        public override void Stop()
+        public Transform Parent
         {
-            base.Stop();
+            get => transform.parent;
+            set => transform.parent = value;
+        }
+
+        public virtual bool Visible
+        {
+            get => gameObject.activeSelf;
+            set => gameObject.SetActive(value);
+        }
+
+        void Awake()
+        {
+            Collider = billboard.GetComponent<BoxCollider>();
+            billboard.UseAbsoluteOffset = false;
+            billboardStartPose = billboard.transform.AsLocalPose();
+        }
+
+        public void Stop()
+        {
             if (texture != null)
             {
                 texture.TextureChanged -= OnTextureChanged;
                 texture = null;
             }
+            Offset = Vector3.zero;
+            EnableBillboard = false;
+            Scale = 1;
         }
 
         void UpdateSides()
         {
-            transform.localScale = new Vector3(Width, 1, Height);
+            billboard.transform.localScale = new Vector3(Width, Height, 1);
         }
 
         void OnTextureChanged(Texture2D obj)
