@@ -252,6 +252,10 @@ namespace Iviz.RoslibSharp
         bool DoHandshake()
         {
             byte[] readBuffer = ReceiveHeader();
+            if (readBuffer == null)
+            {
+                throw new TimeoutException("Connection closed during handshake.");
+            }
             List<string> fields = ParseHeader(readBuffer);
             string errorMessage = ProcessRemoteHeader(fields);
 

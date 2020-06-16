@@ -12,7 +12,10 @@ namespace Iviz.App.Listeners
 {
     public sealed class TFFrame : ClickableNode, IRecyclable
     {
+        const int MaxPoseMagnitude = 1000;
+
         public const int Layer = 9;
+
         readonly Timeline timeline = new Timeline();
 
         [SerializeField] string id_;
@@ -222,7 +225,7 @@ namespace Iviz.App.Listeners
         {
             if (!IgnoreUpdates)
             {
-                if (newPose.position.magnitude > 1000)
+                if (newPose.position.sqrMagnitude > MaxPoseMagnitude * MaxPoseMagnitude)
                 {
                     return; // lel
                 }

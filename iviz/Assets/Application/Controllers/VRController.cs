@@ -308,6 +308,6 @@ namespace Iviz.App
 
             CheckForSelectClick();
         }
-#endif
 }
+#endif
 }

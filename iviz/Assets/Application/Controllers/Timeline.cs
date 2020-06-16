@@ -28,6 +28,8 @@ namespace Iviz.App
         int start;
 
         readonly List<PoseInfo> poses = new List<PoseInfo>();
+        readonly List<PoseInfo> sortedPoses = new List<PoseInfo>();
+        bool needsSorting;
 
         const int MaxSize = 30;
 
@@ -48,38 +50,44 @@ namespace Iviz.App
             {
                 poses.Add(poseInfo);
             }
+            needsSorting = true;
         }
 
         public Pose Get(in TimeSpan T)
         {
-            var poses = new List<PoseInfo>(this.poses);
-            poses.Sort((p1, p2) => p1.Key.CompareTo(p2.Key));
+            if (needsSorting)
+            {
+                sortedPoses.Clear();
+                sortedPoses.AddRange(poses);
+                sortedPoses.Sort((p1, p2) => p1.Key.CompareTo(p2.Key));
+                needsSorting = false;
+            }
 
-            int n = poses.Count;
+            int n = sortedPoses.Count;
             if (n == 0)
             {
                 return Pose.identity;
             }
-            else if (T >= poses[n - 1].Key)
+            else if (T >= sortedPoses[n - 1].Key)
             {
-                return poses[n - 1].Pose;
+                return sortedPoses[n - 1].Pose;
             }
-            else if (T <= poses[0].Key)
+            else if (T <= sortedPoses[0].Key)
             {
-                return poses[0].Pose;
+                return sortedPoses[0].Pose;
             }
             else
             {
                 for (int i = n - 2; i >= 0; i--) // most likely to be at the end
                 {
-                    if (T > poses[i].Key)
+                    if (T > sortedPoses[i].Key)
                     {
-                        TimeSpan A = poses[i].Key;
-                        TimeSpan B = poses[i + 1].Key;
+                        TimeSpan A = sortedPoses[i].Key;
+                        TimeSpan B = sortedPoses[i + 1].Key;
                         double t = (T - A).TotalMilliseconds / (B - A).TotalMilliseconds;
 
-                        Pose pA = poses[i].Pose;
-                        Pose pB = poses[i + 1].Pose;
+                        Pose pA = sortedPoses[i].Pose;
+                        Pose pB = sortedPoses[i + 1].Pose;
 
 
                         //Debug.Log(i + "/" + poses.Count + "/" + insertions.Count);

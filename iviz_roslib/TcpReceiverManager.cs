@@ -86,6 +86,7 @@ namespace Iviz.RoslibSharp
                 connectionsByUri.Where(x => !x.Value.IsAlive).ForEach(x => toDelete.Add(x.Key));
                 foreach (Uri uri in toDelete)
                 {
+                    Logger.Log($"{this}: Removing connection with '{uri}' - dead x_x");
                     connectionsByUri[uri].Stop();
                     connectionsByUri.Remove(uri);
                 }

@@ -282,7 +282,7 @@ namespace Iviz.Resources
                 MeshTriangles = new GameObjectInfo("Displays/MeshTriangles");
                 TFFrame = new GameObjectInfo("Displays/TFFrame");
                 Image = new GameObjectInfo("Displays/ImageResource");
-                Square = new GameObjectInfo("Displays/Square");
+                Square = new GameObjectInfo("Displays/Plane");
                 Line = new GameObjectInfo("Displays/Line");
                 Grid = new GameObjectInfo("Displays/Grid");
                 Axis = new GameObjectInfo("Displays/Axis");

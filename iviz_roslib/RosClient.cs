@@ -101,7 +101,7 @@ namespace Iviz.RoslibSharp
             }
         }
 
-        TimeSpan rpcNodeTimeout = TimeSpan.FromSeconds(2);
+        TimeSpan rpcNodeTimeout = TimeSpan.FromSeconds(5);
 
         /// <summary>
         /// Timeout in milliseconds for XML-RPC communications with another node.

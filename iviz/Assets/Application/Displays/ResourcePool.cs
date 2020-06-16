@@ -42,13 +42,13 @@ namespace Iviz.App
 
         class ObjectWithDeadline
         {
-            public readonly DateTime Expiration;
-            public readonly GameObject GameObject;
+            public float Expiration { get; }
+            public GameObject GameObject { get; }
 
             public ObjectWithDeadline(GameObject o)
             {
                 GameObject = o;
-                Expiration = DateTime.Now.AddSeconds(TimeToDestroy);
+                Expiration = Time.time + TimeToDestroy;
             }
         }
 
@@ -63,7 +63,7 @@ namespace Iviz.App
 
         void CheckDead()
         {
-            DateTime now = DateTime.Now;
+            float now = Time.time;
             objectsToDestroy.Clear();
 
             foreach (var entry in pool)
