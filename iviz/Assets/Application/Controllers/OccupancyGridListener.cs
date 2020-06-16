@@ -14,7 +14,7 @@ using UnityEngine;
 namespace Iviz.App.Listeners
 {
     [DataContract]
-    public class OccupancyGridConfiguration : JsonToString, IConfiguration
+    public sealed class OccupancyGridConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
         [DataMember] public Resource.Module Module => Resource.Module.OccupancyGrid;
@@ -28,12 +28,12 @@ namespace Iviz.App.Listeners
         [DataMember] public uint MaxQueueSize { get; set; } = 1;
     }
 
-    public class OccupancyGridListener : TopicListener
+    public sealed class OccupancyGridListener : ListenerController
     {
         DisplayClickableNode node;
         OccupancyGridResource grid;
 
-        public override DisplayData DisplayData { get; set; }
+        public override ModuleData ModuleData { get; set; }
 
         public override TFFrame Frame => node.Parent;
 

@@ -11,7 +11,7 @@ using Iviz.App.Displays;
 namespace Iviz.App.Listeners
 {
     [DataContract]
-    public class DepthImageProjectorConfiguration : JsonToString, IConfiguration
+    public sealed class DepthImageProjectorConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public Guid Id { get; set; }
         [DataMember] public Resource.Module Module => Resource.Module.DepthImageProjector;
@@ -22,12 +22,12 @@ namespace Iviz.App.Listeners
         [DataMember] public float FovAngle { get; set; } = 1.0f * Mathf.Rad2Deg;
     }
 
-    public class DepthImageProjector : MonoBehaviour, IController
+    public sealed class DepthImageProjector : MonoBehaviour, IController
     {
         DepthImageResource resource;
         DisplayClickableNode node;
 
-        public DisplayData DisplayData { get; set; }
+        public ModuleData ModuleData { get; set; }
 
         public TFFrame Frame => depthImage?.Frame;
 
@@ -37,6 +37,7 @@ namespace Iviz.App.Listeners
             get => config;
             set
             {
+                Visible = value.Visible;
                 ColorName = value.ColorName;
                 DepthName = value.DepthName;
                 PointSize = value.PointSize;
@@ -44,7 +45,7 @@ namespace Iviz.App.Listeners
             }
         }
 
-        public virtual bool Visible
+        public bool Visible
         {
             get => config.Visible;
             set

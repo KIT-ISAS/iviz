@@ -10,17 +10,15 @@ using Unity.Collections;
 
 namespace Iviz.Displays
 {
-    public class LineResource : MarkerResourceWithColormap
+    public sealed class LineResource : MarkerResourceWithColormap
     {
-        NativeArray<float4x2> lineBuffer = new NativeArray<float4x2>();
-        ComputeBuffer lineComputeBuffer;
-        ComputeBuffer quadComputeBuffer;
-
-        public Color Color { get; set; } = Color.white;
-
         static readonly int PropLines = Shader.PropertyToID("_Lines");
         static readonly int PropFront = Shader.PropertyToID("_Front");
         static readonly int PropQuad = Shader.PropertyToID("_Quad");
+
+        NativeArray<float4x2> lineBuffer = new NativeArray<float4x2>();
+        ComputeBuffer lineComputeBuffer;
+        ComputeBuffer quadComputeBuffer;
 
         int size_;
         public int Size

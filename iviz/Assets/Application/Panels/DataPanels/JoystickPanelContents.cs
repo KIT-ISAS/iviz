@@ -2,7 +2,7 @@
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="JoystickDisplayData"/> 
+    /// <see cref="JoystickModuleData"/> 
     /// </summary>
     public class JoystickPanelContents : DataPanelContents
     {

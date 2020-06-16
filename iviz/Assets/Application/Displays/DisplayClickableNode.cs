@@ -40,7 +40,7 @@ namespace Iviz.App.Displays
             displayName = name;
         }
 
-        public override Pose BoundsPose => Target?.WorldPose ?? new Pose();
+        public override Pose BoundsPose => Target?.WorldPose ?? Pose.identity;
 
         public static DisplayClickableNode Instantiate(string name, TFFrame frame = null)
         {

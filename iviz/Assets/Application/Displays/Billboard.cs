@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Iviz.App.Displays
 {
-    public class Billboard : MonoBehaviour
+    public sealed class Billboard : MonoBehaviour
     {
         public Transform parent;
         public Vector3 offset;

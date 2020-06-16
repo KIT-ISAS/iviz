@@ -17,7 +17,7 @@ namespace Iviz.Displays
         XY, YZ, XZ
     }
 
-    public class GridResource : MarkerResource
+    public sealed class GridResource : MarkerResource
     {
         Mesh mesh;
         MeshRenderer meshRenderer;

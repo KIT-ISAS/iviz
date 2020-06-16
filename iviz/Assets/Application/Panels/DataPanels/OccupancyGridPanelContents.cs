@@ -5,7 +5,7 @@ using UnityEngine.UI;
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="OccupancyGridDisplayData"/> 
+    /// <see cref="OccupancyGridModuleData"/> 
     /// </summary>
     public class OccupancyGridPanelContents : ListenerPanelContents
     {

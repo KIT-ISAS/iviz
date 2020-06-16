@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace Iviz.Displays
 {
-    public class ARMarkerResource : MeshMarkerResource
+    public sealed class ARMarkerResource : MeshMarkerResource
     {
         //[SerializeField] MeshMarkerResource back = null;
 

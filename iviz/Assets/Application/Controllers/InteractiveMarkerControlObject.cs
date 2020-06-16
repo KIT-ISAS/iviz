@@ -7,7 +7,7 @@ using Iviz.Resources;
 
 namespace Iviz.App.Listeners
 {
-    public class InteractiveMarkerControlObject : DisplayNode
+    public sealed class InteractiveMarkerControlObject : DisplayNode
     {
         public string Description { get; private set; }
         public string Id { get; private set; }
@@ -67,7 +67,7 @@ namespace Iviz.App.Listeners
                     case Marker.ADD:
                         if (!markers.TryGetValue(id, out MarkerObject markerToAdd))
                         {
-                            markerToAdd = Resource.Listeners.Instantiate<MarkerObject>(transform);
+                            markerToAdd = Resource.Controllers.Instantiate<MarkerObject>(transform);
                             markerToAdd.Parent = TFListener.ListenersFrame;
                             markerToAdd.Clicked += (point, button) => Clicked?.Invoke(transform.AsPose(), point, button);
                             markers[id] = markerToAdd;

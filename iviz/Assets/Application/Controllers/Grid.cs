@@ -30,7 +30,7 @@ namespace Iviz.App.Listeners
         ReflectionProbe reflectionProbe;
         GridResource grid;
 
-        public DisplayData DisplayData
+        public ModuleData ModuleData
         {
             get => node.DisplayData;
             set => node.DisplayData = value;

@@ -9,7 +9,7 @@ using UnityEngine;
 namespace Iviz.App.Listeners
 {
     [DataContract]
-    public class MarkerConfiguration : JsonToString, IConfiguration
+    public sealed class MarkerConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
         [DataMember] public Resource.Module Module => Resource.Module.Marker;
@@ -20,11 +20,11 @@ namespace Iviz.App.Listeners
         [DataMember] public SerializableColor Tint { get; set; } = Color.white;
     }
 
-    public class MarkerListener : TopicListener
+    public class MarkerListener : ListenerController
     {
         readonly Dictionary<string, MarkerObject> markers = new Dictionary<string, MarkerObject>();
 
-        public override DisplayData DisplayData { get; set; }
+        public override ModuleData ModuleData { get; set; }
 
         public override TFFrame Frame => TFListener.BaseFrame;
 
@@ -48,7 +48,7 @@ namespace Iviz.App.Listeners
             {
                 config.RenderAsOcclusionOnly = value;
 
-                foreach(MarkerObject marker in markers.Values)
+                foreach (MarkerObject marker in markers.Values)
                 {
                     marker.OcclusionOnly = value;
                 }
@@ -123,7 +123,7 @@ namespace Iviz.App.Listeners
                     if (!markers.TryGetValue(id, out MarkerObject markerToAdd))
                     {
                         markerToAdd = CreateMarkerObject();
-                        markerToAdd.DisplayData = DisplayData;
+                        markerToAdd.DisplayData = ModuleData;
                         markerToAdd.Parent = TFListener.ListenersFrame;
                         markerToAdd.OcclusionOnly = RenderAsOcclusionOnly;
                         markerToAdd.Tint = Tint;

@@ -8,7 +8,7 @@ using Iviz.Resources;
 namespace Iviz.App.Listeners
 {
     [DataContract]
-    public class JoystickConfiguration : JsonToString, IConfiguration
+    public sealed class JoystickConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
         [DataMember] public Resource.Module Module => Resource.Module.Joystick;
@@ -22,9 +22,9 @@ namespace Iviz.App.Listeners
     }
 
 
-    public class JoystickController : MonoBehaviour, IController
+    public sealed class JoystickController : MonoBehaviour, IController
     {
-        public DisplayData DisplayData { get; set; }
+        public ModuleData ModuleData { get; set; }
 
         readonly JoystickConfiguration config = new JoystickConfiguration();
         public JoystickConfiguration Config

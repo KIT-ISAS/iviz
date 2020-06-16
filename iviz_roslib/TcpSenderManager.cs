@@ -19,7 +19,7 @@ namespace Iviz.RoslibSharp
         public string TopicType => topicInfo.Type;
         public int NumConnections => connectionsByCallerId.Count;
 
-        public int TimeoutInMs { get; set; }
+        public int TimeoutInMs { get; set; } = 5000;
 
         public IMessage LatchedMessage { get; private set; }
 

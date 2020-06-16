@@ -53,7 +53,7 @@ namespace Iviz.App
                 case Resource.Module.DepthImageProjector: return o.AddComponent<DepthImageProjectorPanelContents>();
                 case Resource.Module.LaserScan: return o.AddComponent<LaserScanPanelContents>();
                 case Resource.Module.AR: return o.AddComponent<ARPanelContents>();
-                case Resource.Module.Magnitude: return o.AddComponent<OdometryPanelContents>();
+                case Resource.Module.Magnitude: return o.AddComponent<MagnitudePanelContents>();
                 case Resource.Module.OccupancyGrid: return o.AddComponent<OccupancyGridPanelContents>();
                 case Resource.Module.Joystick: return o.AddComponent<JoystickPanelContents>();
                 default: throw new ArgumentException(nameof(resource));

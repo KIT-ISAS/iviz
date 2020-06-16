@@ -2,7 +2,7 @@
 
 namespace Iviz.Displays
 {
-    public class LineConnector : MonoBehaviour, IDisplay
+    public sealed class LineConnector : MonoBehaviour, IDisplay
     {
         public Transform A;
         public Transform B;

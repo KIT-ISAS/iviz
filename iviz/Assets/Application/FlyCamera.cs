@@ -27,6 +27,7 @@ namespace Iviz.App
 
         public bool PointerOnGui { get; private set; }
 
+        /*
         TFFrame orbitFrame;
         public TFFrame OrbitFrame
         {
@@ -36,6 +37,7 @@ namespace Iviz.App
                 StartOrbitingAround(value);
             }
         }
+        */
 
         Vector3 orbitCenter;
         public Vector3 OrbitCenter
@@ -124,7 +126,7 @@ namespace Iviz.App
             }
         }
 
-        public void ShowBoundary(ClickableNode display, Bounds bounds, string name, Transform parent)
+        public void ShowBoundary(ClickableNode display)
         {
             if (display != SelectedDisplay)
             {
@@ -183,10 +185,12 @@ namespace Iviz.App
             }
             if (IsMobile)
             {
+                /*
                 if (OrbitFrame != null)
                 {
                     orbitCenter = OrbitFrame.transform.position;
                 }
+                */
                 ProcessOrbiting();
                 ProcessScaling();
             }
@@ -197,6 +201,7 @@ namespace Iviz.App
             }
         }
 
+        /*
         public void StartOrbitingAround(TFFrame frame)
         {
             if (OrbitFrame == frame)
@@ -223,6 +228,7 @@ namespace Iviz.App
                 Debug.Log("Stopped orbiting");
             }
         }
+        */
 
         public void StartOrbiting()
         {
@@ -468,7 +474,7 @@ namespace Iviz.App
             transform.position = position - transform.forward * 3;
         }
 
-        private Vector3 GetBaseInput()
+        Vector3 GetBaseInput()
         { //returns the basic values, if it's 0 than it's not active.
             Vector3 p_Velocity = new Vector3();
             if (Input.GetKey(KeyCode.W))

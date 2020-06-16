@@ -8,62 +8,12 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Iviz.App
 {
-
-    [DataContract]
-    public class ConnectionConfiguration
-    {
-        [DataMember] public Uri MasterUri { get; set; } = null;
-        [DataMember] public Uri MyUri { get; set; } = null;
-        [DataMember] public string MyId { get; set; } = null;
-    }
-
-    [DataContract]
-    public class StateConfiguration
-    {
-        [DataMember] public Uri MasterUri { get; set; } = null;
-        [DataMember] public Uri MyUri { get; set; } = null;
-        [DataMember] public string MyId { get; set; } = null;
-
-        [DataMember] public List<Guid> Entries { get; set; } = new List<Guid>();
-
-        [DataMember] public TFConfiguration Tf { get; set; } = null;
-        [DataMember] public List<GridConfiguration> Grids { get; set; } = new List<GridConfiguration>();
-        [DataMember] public List<RobotConfiguration> Robots { get; set; } = new List<RobotConfiguration>();
-        [DataMember] public List<PointCloudConfiguration> PointClouds { get; set; } = new List<PointCloudConfiguration>();
-        [DataMember] public List<LaserScanConfiguration> LaserScans { get; set; } = new List<LaserScanConfiguration>();
-        [DataMember] public List<JointStateConfiguration> JointStates { get; set; } = new List<JointStateConfiguration>();
-        [DataMember] public List<ImageConfiguration> Images { get; set; } = new List<ImageConfiguration>();
-        [DataMember] public List<MarkerConfiguration> Markers { get; set; } = new List<MarkerConfiguration>();
-        [DataMember] public List<InteractiveMarkerConfiguration> InteractiveMarkers { get; set; } = new List<InteractiveMarkerConfiguration>();
-        [DataMember] public List<DepthImageProjectorConfiguration> DepthImageProjectors { get; set; } = new List<DepthImageProjectorConfiguration>();
-        [DataMember] public List<OdometryConfiguration> Odometries { get; set; } = new List<OdometryConfiguration>();
-        [DataMember] public List<OccupancyGridConfiguration> OccupancyGrids { get; set; } = new List<OccupancyGridConfiguration>();
-        [DataMember] public ARConfiguration AR { get; set; } = null;
-        [DataMember] public JoystickConfiguration Joystick { get; set; } = null;
-
-        public List<IReadOnlyList<IConfiguration>> CreateListOfEntries() => new List<IReadOnlyList<IConfiguration>>
-        {
-            Grids,
-            Robots,
-            PointClouds,
-            LaserScans,
-            JointStates,
-            Images,
-            Markers,
-            InteractiveMarkers,
-            DepthImageProjectors
-        };
-
-    }
-
-
     public class DisplayListPanel : MonoBehaviour
     {
         float buttonHeight;
@@ -111,20 +61,20 @@ namespace Iviz.App
 
         public string Address { get; private set; }
 
-        readonly List<DisplayData> displayDatas = new List<DisplayData>();
-        public ReadOnlyCollection<DisplayData> DisplayDatas => new ReadOnlyCollection<DisplayData>(displayDatas);
+        readonly List<ModuleData> moduleDatas = new List<ModuleData>();
+        public ReadOnlyCollection<ModuleData> ModuleDatas => new ReadOnlyCollection<ModuleData>(moduleDatas);
 
-        DialogData availableDisplays;
+        DialogData availableModules;
         DialogData availableTopics;
         ConnectionDialogData connectionData;
         ImageDialogData imageData;
 
         readonly List<GameObject> buttons = new List<GameObject>();
 
-        TFDisplayData TFData => (TFDisplayData)displayDatas[0];
+        TFModuleData TFData => (TFModuleData)moduleDatas[0];
 
-        readonly HashSet<string> displayedTopics = new HashSet<string>();
-        public IReadOnlyCollection<string> DisplayedTopics => displayedTopics;
+        readonly HashSet<string> topicsWithModule = new HashSet<string>();
+        public IReadOnlyCollection<string> DisplayedTopics => topicsWithModule;
 
         bool KeepReconnecting
         {
@@ -142,7 +92,7 @@ namespace Iviz.App
 
             buttonHeight = Resource.Widgets.DisplayButton.Object.GetComponent<RectTransform>().rect.height;
 
-            availableDisplays = CreateDialog<AddDisplayDialogData>();
+            availableModules = CreateDialog<AddModuleDialogData>();
             availableTopics = CreateDialog<AddTopicDialogData>();
 
             imageData = CreateDialog<ImageDialogData>();
@@ -152,8 +102,8 @@ namespace Iviz.App
 
             Logger.Internal("<b>Welcome to iviz</b>");
 
-            CreateDisplay(Resource.Module.TF, TFListener.DefaultTopic);
-            CreateDisplay(Resource.Module.Grid);
+            CreateModule(Resource.Module.TF, TFListener.DefaultTopic);
+            CreateModule(Resource.Module.Grid);
 
 
             save.onClick.AddListener(SaveStateConfiguration);
@@ -260,23 +210,6 @@ namespace Iviz.App
             TFListener.GuiManager.Canvases.Add(dialogPanelManager.GetComponentInParent<Canvas>());
         }
 
-        /*
-        void OnAddressChanged(string newUri)
-        {
-            if (newUri == "")
-            {
-                status.enabled = false;
-                return;
-            }
-            status.enabled = true;
-            if (!ConnectionManager.Connection.TrySetUri(newUri))
-            {
-                status.sprite = QuestionSprite;
-            }
-        }
-        */
-
-
         void OnConnectionStateChanged(ConnectionState state)
         {
             status.rectTransform.localRotation = Quaternion.identity;
@@ -329,9 +262,9 @@ namespace Iviz.App
                 MasterUri = connectionData.MasterUri,
                 MyUri = connectionData.MyUri,
                 MyId = connectionData.MyId,
-                Entries = displayDatas.Select(x => x.Configuration.Id).ToList()
+                Entries = moduleDatas.Select(x => x.Configuration.Id).ToList()
             };
-            displayDatas.ForEach(x => x.AddToState(config));
+            moduleDatas.ForEach(x => x.AddToState(config));
 
             try
             {
@@ -374,9 +307,9 @@ namespace Iviz.App
                 return;
             }
 
-            while (displayDatas.Count > 1)
+            while (moduleDatas.Count > 1)
             {
-                RemoveDisplay(1);
+                RemoveModule(1);
             }
 
             StateConfiguration stateConfig = JsonConvert.DeserializeObject<StateConfiguration>(text);
@@ -393,7 +326,7 @@ namespace Iviz.App
                     {
                         if (displayConfig != null)
                         {
-                            CreateDisplay(displayConfig.Module, configuration: displayConfig);
+                            CreateModule(displayConfig.Module, configuration: displayConfig);
                         }
                     }));
 
@@ -451,32 +384,27 @@ namespace Iviz.App
 
         void OnAddDisplayClick()
         {
-            availableDisplays.Show();
+            availableModules.Show();
         }
 
-        public DisplayData CreateDisplay(Resource.Module resource, string topic = "", string type = "", IConfiguration configuration = null)
+        public ModuleData CreateModule(Resource.Module resource, string topic = "", string type = "", IConfiguration configuration = null)
         {
-            DisplayDataConstructor constructor = new DisplayDataConstructor()
-            {
-                Module = resource,
-                DisplayList = this,
-                Topic = topic,
-                Type = type,
-                Configuration = configuration
-            };
-            DisplayData displayData;
+            ModuleDataConstructor constructor =
+                new ModuleDataConstructor(resource, this, topic, type, configuration);
+
+            ModuleData moduleData;
             try
             {
-                displayData = DisplayData.CreateFromResource(constructor);
+                moduleData = ModuleData.CreateFromResource(constructor);
             }
             catch (Exception e)
             {
                 Debug.LogError(e);
                 return null;
             }
-            displayDatas.Add(displayData);
-            CreateButtonObject(displayData);
-            return displayData;
+            moduleDatas.Add(moduleData);
+            CreateButtonObject(moduleData);
+            return moduleData;
         }
 
         T CreateDialog<T>() where T : DialogData, new()
@@ -488,7 +416,7 @@ namespace Iviz.App
 
         const float yOffset = 5;
 
-        void CreateButtonObject(DisplayData displayData)
+        void CreateButtonObject(ModuleData moduleData)
         {
             GameObject buttonObject = ResourcePool.GetOrCreate(Resource.Widgets.DisplayButton, contentObject.transform, false);
 
@@ -498,41 +426,41 @@ namespace Iviz.App
             (buttonObject.transform as RectTransform).anchoredPosition = new Vector2(0, -y);
 
             Text buttonObjectText = buttonObject.GetComponentInChildren<Text>();
-            buttonObjectText.text = displayData.ButtonText; // $"<b>{displayData.Module}</b>";
-            buttonObject.name = $"Button:{displayData.Module}";
+            buttonObjectText.text = moduleData.ButtonText; // $"<b>{displayData.Module}</b>";
+            buttonObject.name = $"Button:{moduleData.Module}";
             buttonObject.SetActive(true);
             buttons.Add(buttonObject);
 
             Button button = buttonObject.GetComponent<Button>();
             button.onClick.AddListener(() =>
             {
-                displayData.ToggleSelect();
+                moduleData.ToggleSelect();
             });
             (contentObject.transform as RectTransform).sizeDelta = new Vector2(0, y + buttonHeight + yOffset);
 
             //return buttonObject;
         }
 
-        public DisplayData CreateDisplayForTopic(string topic, string type)
+        public ModuleData CreateModuleForTopic(string topic, string type)
         {
             if (!Resource.ResourceByRosMessageType.TryGetValue(type, out Resource.Module resource))
             {
                 throw new ArgumentException(nameof(type));
             }
 
-            return CreateDisplay(resource, topic, type);
+            return CreateModule(resource, topic, type);
         }
 
-        public void RemoveDisplay(DisplayData entry)
+        public void RemoveModule(ModuleData entry)
         {
-            RemoveDisplay(displayDatas.IndexOf(entry));
+            RemoveModule(moduleDatas.IndexOf(entry));
         }
 
-        public void RemoveDisplay(int index)
+        void RemoveModule(int index)
         {
-            displayedTopics.Remove(displayDatas[index].Topic);
-            displayDatas[index].Stop();
-            displayDatas.RemoveAt(index);
+            topicsWithModule.Remove(moduleDatas[index].Topic);
+            moduleDatas[index].Stop();
+            moduleDatas.RemoveAt(index);
 
             RemoveButton(index);
         }
@@ -557,9 +485,9 @@ namespace Iviz.App
 
         public const int DisplayDataCaptionWidth = 200;
 
-        public void SetDisplayDataCaption(DisplayData entry, string text)
+        public void SetDisplayDataCaption(ModuleData entry, string text)
         {
-            int index = displayDatas.IndexOf(entry);
+            int index = moduleDatas.IndexOf(entry);
             if (index == -1)
             {
                 return;
@@ -570,7 +498,7 @@ namespace Iviz.App
 
         public void RegisterDisplayedTopic(string topic)
         {
-            displayedTopics.Add(topic);
+            topicsWithModule.Add(topic);
         }
 
         public void ShowImageDialog(IImageDialogListener caller)

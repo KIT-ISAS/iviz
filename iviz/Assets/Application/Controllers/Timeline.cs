@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Iviz.App
 {
-    public class Timeline
+    public sealed class Timeline
     {
         readonly struct PoseInfo
         {
@@ -96,14 +96,6 @@ namespace Iviz.App
             poses.Clear();
             start = 0;
         }
-
-        /*
-        public Pose First => poses.Values[0].Pose;
-        public Pose Last => poses.Values[poses.Count - 1].Pose;
-
-        public TimeSpan FirstTime => poses.Keys[0];
-        public TimeSpan LastTime => poses.Keys[poses.Count - 1];
-        */
 
         public int Count => poses.Count;
         public bool Empty => Count == 0;

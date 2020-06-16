@@ -7,8 +7,7 @@ using System.Collections.Generic;
 
 namespace Iviz.Displays
 {
-
-    public class TrailResource : MonoBehaviour, IDisplay, IRecyclable
+    public sealed class TrailResource : MonoBehaviour, IDisplay, IRecyclable
     {
         LineResource lines;
         bool keepGoing = true;

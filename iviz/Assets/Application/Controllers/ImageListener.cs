@@ -10,7 +10,7 @@ using Iviz.Resources;
 namespace Iviz.App.Listeners
 {
     [DataContract]
-    public class ImageConfiguration : JsonToString, IConfiguration
+    public sealed class ImageConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
         [DataMember] public Resource.Module Module => Resource.Module.Image;
@@ -28,7 +28,7 @@ namespace Iviz.App.Listeners
         [DataMember] public uint MaxQueueSize { get; set; } = 1;
     }
 
-    public class ImageListener : TopicListener
+    public sealed class ImageListener : ListenerController
     {
         public DisplayClickableNode Node { get; private set; }
         ImageResource marker;
@@ -47,7 +47,7 @@ namespace Iviz.App.Listeners
 
         public bool IsMono => ImageTexture.IsMono;
 
-        public override DisplayData DisplayData
+        public override ModuleData ModuleData
         {
             get => Node.DisplayData;
             set => Node.DisplayData = value;
@@ -210,7 +210,7 @@ namespace Iviz.App.Listeners
         {
             Node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
 
-            switch(msg.Format)
+            switch (msg.Format)
             {
                 case "png":
                     descriptionOverride = null;

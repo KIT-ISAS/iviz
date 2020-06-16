@@ -3,7 +3,7 @@
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="ImageDisplayData"/> 
+    /// <see cref="ImageModuleData"/> 
     /// </summary>
     public class ImagePanelContents : ListenerPanelContents
     {

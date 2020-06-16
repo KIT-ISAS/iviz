@@ -9,7 +9,7 @@ using Iviz.Resources;
 namespace Iviz.App.Listeners
 {
     [DataContract]
-    public class JointStateConfiguration : JsonToString, IConfiguration
+    public sealed class JointStateConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
         [DataMember] public Resource.Module Module => Resource.Module.JointState;
@@ -21,9 +21,9 @@ namespace Iviz.App.Listeners
         [DataMember] public int MsgTrimFromEnd { get; set; } = 0;
     }
 
-    public class JointStateListener : TopicListener
+    public sealed class JointStateListener : ListenerController
     {
-        public override DisplayData DisplayData { get; set; }
+        public override ModuleData ModuleData { get; set; }
 
         public override TFFrame Frame => TFListener.BaseFrame;
 
@@ -141,7 +141,7 @@ namespace Iviz.App.Listeners
                     continue;
                 }
                 string msgJoint = msg.Name[i];
-                if (MsgTrimFromEnd != 0 && msgJoint.Length >= MsgTrimFromEnd) 
+                if (MsgTrimFromEnd != 0 && msgJoint.Length >= MsgTrimFromEnd)
                 {
                     msgJoint = msgJoint.Substring(0, msgJoint.Length - MsgTrimFromEnd);
                 }

@@ -10,7 +10,7 @@ using Logger = Iviz.App.Logger;
 
 namespace Iviz.Displays
 {
-    public class ImageTexture
+    public sealed class ImageTexture
     {
         static readonly int PropIntensityCoeff = MarkerResourceWithColormap.PropIntensityCoeff;
         static readonly int PropIntensityAdd = MarkerResourceWithColormap.PropIntensityAdd;

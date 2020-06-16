@@ -119,7 +119,7 @@ namespace Iviz.RoslibSharp
             }
         }
 
-        TimeSpan tcpRosTimeout = TimeSpan.FromSeconds(2);
+        TimeSpan tcpRosTimeout = TimeSpan.FromSeconds(5);
 
         /// <summary>
         /// Timeout in milliseconds for TCP-ROS communications (topics, services).

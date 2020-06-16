@@ -3,7 +3,7 @@
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="RobotDisplayData"/> 
+    /// <see cref="RobotModuleData"/> 
     /// </summary>
     /// 
     public class RobotPanelContents : DataPanelContents

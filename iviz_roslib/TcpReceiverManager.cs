@@ -21,7 +21,7 @@ namespace Iviz.RoslibSharp
         public string TopicType => TopicInfo.Type;
         public int NumConnections => connectionsByUri.Count;
         public bool RequestNoDelay { get; }
-        public int TimeoutInMs { get; set; } = 2000;
+        public int TimeoutInMs { get; set; } = 5000;
 
         public TcpReceiverManager(TopicInfo topicInfo, bool requestNoDelay)
         {

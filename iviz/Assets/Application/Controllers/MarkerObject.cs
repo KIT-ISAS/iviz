@@ -26,27 +26,62 @@ namespace Iviz.App.Listeners
         TRIANGLE_LIST = Marker.TRIANGLE_LIST,
     }
 
-    public class MarkerObject : ClickableNode
+    public sealed class MarkerObject : ClickableNode
     {
+        static Mesh CachedCube => Resource.Markers.Cube.Object.GetComponent<MeshFilter>().sharedMesh;
+        static Mesh CachedSphere => Resource.Markers.SphereSimple.Object.GetComponent<MeshFilter>().sharedMesh;
+
         const string packagePrefix = "package://iviz/";
+
+        MarkerResource resource;
+        Resource.Info<GameObject> resourceType;
 
         public event Action<Vector3, int> Clicked;
 
         public string Id { get; private set; }
 
-        MarkerResource resource;
-        Resource.Info<GameObject> resourceType;
-        Mesh cacheCube, cacheSphere;
-
         public override Bounds Bounds => resource?.Bounds ?? new Bounds();
         public override Bounds WorldBounds => resource?.WorldBounds ?? new Bounds();
+        public override string Name => name;
+        public override Pose BoundsPose => resource?.WorldPose ?? Pose.identity;
+        public override Vector3 BoundsScale => resource?.WorldScale ?? Vector3.one;
 
         public DateTime ExpirationTime { get; private set; }
 
-        void Awake()
+        public bool ColliderEnabled
         {
-            cacheCube = Resource.Markers.Cube.Object.GetComponent<MeshFilter>().sharedMesh;
-            cacheSphere = Resource.Markers.SphereSimple.Object.GetComponent<MeshFilter>().sharedMesh;
+            get => resource?.ColliderEnabled ?? false;
+            set
+            {
+                if (resource != null)
+                {
+                    resource.ColliderEnabled = value;
+                }
+            }
+        }
+
+        public bool OcclusionOnly
+        {
+            get => (resource as ISupportsAROcclusion)?.OcclusionOnly ?? false;
+            set
+            {
+                if (resource is ISupportsAROcclusion arResource)
+                {
+                    arResource.OcclusionOnly = value;
+                }
+            }
+        }
+
+        public Color Tint
+        {
+            get => (resource as ISupportsTint)?.Tint ?? Color.white;
+            set
+            {
+                if (resource is ISupportsTint tintResource)
+                {
+                    tintResource.Tint = value;
+                }
+            }
         }
 
         public void Set(Marker msg)
@@ -134,7 +169,7 @@ namespace Iviz.App.Listeners
                         MeshListResource meshList = (MeshListResource)resource;
                         meshList.UseIntensityTexture = false;
                         meshList.UsePerVertexScale = false;
-                        meshList.Mesh = (msg.Type() == MarkerType.CUBE_LIST) ? cacheCube : cacheSphere;
+                        meshList.Mesh = (msg.Type() == MarkerType.CUBE_LIST) ? CachedCube : CachedSphere;
                         PointWithColor[] points = new PointWithColor[msg.Points.Length];
                         Color color = msg.Color.Sanitize().ToUnityColor();
                         if (msg.Colors.Length == 0 || color == Color.black)
@@ -150,7 +185,7 @@ namespace Iviz.App.Listeners
                             {
                                 points[i] = new PointWithColor(
                                     msg.Points[i].Ros2Unity(),
-                                    msg.Colors[i].Sanitize().ToUnityColor32());
+                                    msg.Colors[i].ToUnityColor32());
                             }
                         }
                         else
@@ -159,7 +194,7 @@ namespace Iviz.App.Listeners
                             {
                                 points[i] = new PointWithColor(
                                     msg.Points[i].Ros2Unity(),
-                                    color * msg.Colors[i].Sanitize().ToUnityColor());
+                                    color * msg.Colors[i].ToUnityColor());
                             }
                         }
                         meshList.PointsWithColor = points;
@@ -187,8 +222,8 @@ namespace Iviz.App.Listeners
                             for (int i = 0; i < lines.Length; i++)
                             {
                                 lines[i] = new LineWithColor(
-                                    msg.Points[2 * i + 0].Ros2Unity(), color * msg.Colors[2 * i + 0].Sanitize().ToUnityColor(),
-                                    msg.Points[2 * i + 1].Ros2Unity(), color * msg.Colors[2 * i + 1].Sanitize().ToUnityColor()
+                                    msg.Points[2 * i + 0].Ros2Unity(), color * msg.Colors[2 * i + 0].ToUnityColor(),
+                                    msg.Points[2 * i + 1].Ros2Unity(), color * msg.Colors[2 * i + 1].ToUnityColor()
                                     );
                             }
                         }
@@ -244,7 +279,7 @@ namespace Iviz.App.Listeners
                             {
                                 points[i] = new PointWithColor(
                                     msg.Points[i].Ros2Unity(),
-                                    msg.Colors[i].Sanitize().ToUnityColor32());
+                                    msg.Colors[i].ToUnityColor32());
                             }
                         }
                         else
@@ -253,7 +288,7 @@ namespace Iviz.App.Listeners
                             {
                                 points[i] = new PointWithColor(
                                     msg.Points[i].Ros2Unity(),
-                                    color * msg.Colors[i].Sanitize().ToUnityColor());
+                                    color * msg.Colors[i].ToUnityColor());
                             }
                         }
                         pointList.PointsWithColor = points;
@@ -267,7 +302,7 @@ namespace Iviz.App.Listeners
                     {
                         meshTriangles.Set(
                             msg.Points.Select(x => x.Ros2Unity()).ToArray(),
-                            msg.Colors.Select(x => x.Sanitize().ToUnityColor()).ToArray()
+                            msg.Colors.Select(x => x.ToUnityColor()).ToArray()
                             );
                     }
                     else
@@ -294,10 +329,13 @@ namespace Iviz.App.Listeners
                 AttachTo(msg.Header.FrameId, msg.Header.Stamp);
             }
 
-            transform.SetLocalPose(msg.Pose.Ros2Unity());
+            if (!msg.Pose.HasNaN())
+            {
+                transform.SetLocalPose(msg.Pose.Ros2Unity());
+            }
         }
 
-        Resource.Info<GameObject> GetRequestedResource(Marker msg)
+        static Resource.Info<GameObject> GetRequestedResource(Marker msg)
         {
             switch (msg.Type())
             {
@@ -335,6 +373,8 @@ namespace Iviz.App.Listeners
         public override void Stop()
         {
             base.Stop();
+            Clicked = null;
+
             if (resource == null)
             {
                 return;
@@ -343,51 +383,7 @@ namespace Iviz.App.Listeners
             ResourcePool.Dispose(resourceType, resource.gameObject);
             resource = null;
             resourceType = null;
-            Clicked = null;
         }
-
-        public bool ColliderEnabled
-        {
-            get => resource?.ColliderEnabled ?? false;
-            set
-            {
-                if (resource != null)
-                {
-                    resource.ColliderEnabled = value;
-                }
-            }
-        }
-
-        public bool OcclusionOnly
-        {
-            get => (resource as ISupportsAROcclusion)?.OcclusionOnly ?? false;
-            set
-            {
-                if (resource is ISupportsAROcclusion arResource)
-                {
-                    arResource.OcclusionOnly = value;
-                }
-            }
-        }
-
-        public Color Tint
-        {
-            get => (resource as ISupportsTint)?.Tint ?? Color.white;
-            set
-            {
-                if (resource is ISupportsTint tintResource)
-                {
-                    tintResource.Tint = value;
-                }
-            }
-        }
-
-        public override string Name => name;
-
-        public override Pose BoundsPose => resource?.transform.AsPose() ?? new Pose();
-
-        public override Vector3 BoundsScale => Vector3.one;
-
 
         public override void OnPointerClick(PointerEventData eventData)
         {

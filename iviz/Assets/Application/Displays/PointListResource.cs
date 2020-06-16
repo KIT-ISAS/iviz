@@ -42,9 +42,8 @@ namespace Iviz.Displays
         public NativeArray<T> Buffer => pointBuffer;
     }
 
-    public class PointListResource : MarkerResourceWithColormap
+    public sealed class PointListResource : MarkerResourceWithColormap
     {
-
         NativeArray<float4> pointBuffer = new NativeArray<float4>();
         ComputeBuffer pointComputeBuffer;
         ComputeBuffer quadComputeBuffer;

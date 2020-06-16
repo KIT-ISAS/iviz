@@ -1,9 +1,9 @@
 ﻿
-namespace Iviz.App
+namespace Iviz.App.Listeners
 {
     public interface IController
     {
-        DisplayData DisplayData { get; set; }
+        ModuleData ModuleData { get; set; }
         void Stop();
     }
 }

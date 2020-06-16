@@ -3,7 +3,7 @@
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="LaserScanDisplayData"/> 
+    /// <see cref="LaserScanModuleData"/> 
     /// </summary>
 
     public class LaserScanPanelContents : ListenerPanelContents

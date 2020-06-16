@@ -18,9 +18,17 @@ using Valve.VR.InteractionSystem;
 
 namespace Iviz.App
 {
+#if !USING_VR
     public class VRController : MonoBehaviour
     {
+        public const bool UsingVR = false;
+    }
+#endif
+
 #if USING_VR
+    public class VRController : MonoBehaviour
+        public const bool UsingVR = true;
+
         public GameObject LeftController;
         public GameObject RightController;
         public GameObject Head;
@@ -301,5 +309,5 @@ namespace Iviz.App
             CheckForSelectClick();
         }
 #endif
-    }
+}
 }

@@ -1,5 +1,8 @@
 ﻿namespace Iviz.App
 {
+    /// <summary>
+    /// <see cref="MarkerModuleData"/> 
+    /// </summary>
     public class MarkerPanelContents : ListenerPanelContents
     {
         public TrashButtonWidget CloseButton { get; private set; }

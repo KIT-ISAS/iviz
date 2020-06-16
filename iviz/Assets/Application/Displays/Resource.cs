@@ -10,9 +10,9 @@ using Iviz.Msgs.VisualizationMsgs;
 using GameObjectInfo = Iviz.Resources.Resource.Info<UnityEngine.GameObject>;
 using MaterialInfo = Iviz.Resources.Resource.Info<UnityEngine.Material>;
 using Iviz.Msgs.GeometryMsgs;
-using Iviz.App;
 using Iviz.Msgs.NavMsgs;
 using System.Text;
+using Iviz.App.Listeners;
 
 namespace Iviz.Resources
 {
@@ -303,11 +303,11 @@ namespace Iviz.Resources
             }
         }
 
-        public class ListenersType
+        public class ControllersType
         {
             public GameObjectInfo AR { get; }
 
-            public ListenersType()
+            public ControllersType()
             {
                 AR = new GameObjectInfo("Listeners/AR");
             }
@@ -412,21 +412,21 @@ namespace Iviz.Resources
 
         public class FontInfo
         {
-            Font Font { get; }
-            readonly int DotWidth;
-            readonly int ArrowWidth;
+            readonly Font font;
+            readonly int dotWidth;
+            readonly int arrowWidth;
             readonly Dictionary<char, int> charWidths = new Dictionary<char, int>();
 
             public FontInfo()
             {
-                Font = UnityEngine.Resources.Load<Font>("Fonts/Montserrat Real NonDynamic");
-                DotWidth = CharWidth('.') * 3;
-                ArrowWidth = CharWidth('→') + CharWidth(' ');
+                font = UnityEngine.Resources.Load<Font>("Fonts/Montserrat Real NonDynamic");
+                dotWidth = CharWidth('.') * 3;
+                arrowWidth = CharWidth('→') + CharWidth(' ');
             }
 
             public string Split(string s, int maxWidth)
             {
-                int usableWidth = maxWidth - DotWidth;
+                int usableWidth = maxWidth - dotWidth;
                 StringBuilder str = new StringBuilder();
                 int usedWidth = 0;
                 int numLines = 0;
@@ -438,7 +438,7 @@ namespace Iviz.Resources
                         if (numLines == 0)
                         {
                             str.Append("...\n→ ").Append(s[i]);
-                            usedWidth = ArrowWidth;
+                            usedWidth = arrowWidth;
                             numLines = 1;
                         }
                         else if (numLines == 1)
@@ -461,7 +461,7 @@ namespace Iviz.Resources
                 {
                     return width;
                 }
-                Font.GetCharacterInfo(c, out CharacterInfo ci, 12);
+                font.GetCharacterInfo(c, out CharacterInfo ci, 12);
                 charWidths[c] = ci.advance;
                 return ci.advance;
             }
@@ -478,8 +478,8 @@ namespace Iviz.Resources
         static MarkersType markers;
         public static MarkersType Markers => markers ?? (markers = new MarkersType());
 
-        static ListenersType listeners;
-        public static ListenersType Listeners => listeners ?? (listeners = new ListenersType());
+        static ControllersType controllers;
+        public static ControllersType Controllers => controllers ?? (controllers = new ControllersType());
 
         static WidgetsType widgets;
         public static WidgetsType Widgets => widgets ?? (widgets = new WidgetsType());

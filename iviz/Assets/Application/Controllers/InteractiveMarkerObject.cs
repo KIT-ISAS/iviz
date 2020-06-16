@@ -7,7 +7,7 @@ using Iviz.Resources;
 
 namespace Iviz.App.Listeners
 {
-    public class InteractiveMarkerObject : DisplayNode
+    public sealed class InteractiveMarkerObject : DisplayNode
     {
         public string Description { get; private set; }
         public string Id { get; private set; }
@@ -42,7 +42,7 @@ namespace Iviz.App.Listeners
                 string id = controlMsg.Name;
                 if (!controls.TryGetValue(id, out InteractiveMarkerControlObject control))
                 {
-                    control = Resource.Listeners.Instantiate<InteractiveMarkerControlObject>(transform);
+                    control = Resource.Controllers.Instantiate<InteractiveMarkerControlObject>(transform);
                     control.Parent = TFListener.ListenersFrame;
                     control.Clicked += (pose, point, button) => Clicked?.Invoke(id, pose, point, button);
                     control.transform.SetParentLocal(transform);

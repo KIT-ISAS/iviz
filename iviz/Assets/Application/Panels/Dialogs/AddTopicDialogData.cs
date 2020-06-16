@@ -49,7 +49,7 @@ namespace Iviz.App
                 string topic = entry.Topic;
                 string msgType = entry.Type;
                 if (!Resource.ResourceByRosMessageType.TryGetValue(msgType, out Resource.Module resource) ||
-                    DisplayListPanel.DisplayedTopics.Contains(topic))
+                    ModuleListPanel.DisplayedTopics.Contains(topic))
                 {
                     continue;
                 }
@@ -82,7 +82,7 @@ namespace Iviz.App
 
         void OnItemClicked(int index, string _)
         {
-            DisplayListPanel.CreateDisplayForTopic(topics[index].topic, topics[index].type);
+            ModuleListPanel.CreateModuleForTopic(topics[index].topic, topics[index].type);
             Close();
         }
 

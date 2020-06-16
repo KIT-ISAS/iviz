@@ -95,7 +95,6 @@ namespace Iviz.App
             get => items.Select(x => x.Text);
             set
             {
-                canvas.enabled = false;
                 if (value.Count() == items.Count)
                 {
                     int i = 0;
@@ -106,6 +105,7 @@ namespace Iviz.App
                 }
                 else if (value.Count() < items.Count)
                 {
+                    canvas.enabled = false;
                     int i = 0;
                     foreach (string str in value)
                     {
@@ -117,9 +117,11 @@ namespace Iviz.App
                     }
                     items.RemoveRange(i, items.Count - i);
                     UpdateSize();
+                    canvas.enabled = true;
                 }
                 else
                 {
+                    canvas.enabled = false;
                     int i = 0;
                     foreach (string str in value)
                     {
@@ -130,8 +132,8 @@ namespace Iviz.App
                         items[i++].Text = str;
                     }
                     UpdateSize();
+                    canvas.enabled = true;
                 }
-                canvas.enabled = true;
             }
         }
 

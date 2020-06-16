@@ -12,7 +12,7 @@ using Iviz.App.Displays;
 namespace Iviz.App.Listeners
 {
     [DataContract]
-    public class ARConfiguration : JsonToString, IConfiguration
+    public sealed class ARConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
         [DataMember] public Resource.Module Module => Resource.Module.AR;
@@ -29,7 +29,7 @@ namespace Iviz.App.Listeners
         [DataMember] public bool PublishMarkers { get; set; } = false;
     }
 
-    public class ARController : MonoBehaviour, IController, IHasFrame
+    public sealed class ARController : MonoBehaviour, IController, IHasFrame
     {
         [SerializeField] Camera ARCamera;
         [SerializeField] ARSessionOrigin ARSessionOrigin;
@@ -54,7 +54,7 @@ namespace Iviz.App.Listeners
         public RosSender<Msgs.GeometryMsgs.PoseStamped> RosSenderHead { get; private set; }
         public RosSender<MarkerArray> RosSenderMarkers { get; private set; }
 
-        public DisplayData DisplayData { get; set; }
+        public ModuleData ModuleData { get; set; }
 
         readonly ARConfiguration config = new ARConfiguration();
         public ARConfiguration Config

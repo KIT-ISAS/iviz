@@ -414,8 +414,29 @@ namespace Iviz.App
             }
         }
 
-        public override ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics() =>
-            client?.GetSystemPublishedTopics() ?? EmptyTopics;
+        ReadOnlyCollection<BriefTopicInfo> cachedTopics = EmptyTopics;
+
+        public override ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics()
+        {
+            AddTask(() =>
+            {
+                try
+                {
+                    if (client == null)
+                    {
+                        cachedTopics = EmptyTopics;
+                        return;
+                    }
+                    cachedTopics = client.GetSystemPublishedTopics();
+                }
+                catch (Exception e)
+                {
+                    Logger.Error(e);
+                }
+            });
+
+            return cachedTopics;
+        }
 
         protected override void Update()
         {

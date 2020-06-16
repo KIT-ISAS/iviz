@@ -2,7 +2,7 @@
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="ARDisplayData"/> 
+    /// <see cref="ARModuleData"/> 
     /// </summary>
     public class ARPanelContents : DataPanelContents
     {

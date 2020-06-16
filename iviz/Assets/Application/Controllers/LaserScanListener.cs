@@ -31,12 +31,12 @@ namespace Iviz.App.Listeners
         [DataMember] public uint MaxQueueSize { get; set; } = 1;
     }
 
-    public class LaserScanListener : TopicListener
+    public class LaserScanListener : ListenerController
     {
         RadialScanResource resource;
         DisplayNode node;
 
-        public override DisplayData DisplayData { get; set; }
+        public override ModuleData ModuleData { get; set; }
 
         public override TFFrame Frame => node.Parent;
 
@@ -55,11 +55,11 @@ namespace Iviz.App.Listeners
                 PointSize = value.PointSize;
                 Colormap = value.Colormap;
                 UseIntensity = value.UseIntensity;
+                UseLines = value.UseLines;
                 ForceMinMax = value.ForceMinMax;
                 MinIntensity = value.MinIntensity;
                 MaxIntensity = value.MaxIntensity;
                 FlipMinMax = value.FlipMinMax;
-                UseLines = value.UseLines;
                 MaxQueueSize = value.MaxQueueSize;
             }
         }

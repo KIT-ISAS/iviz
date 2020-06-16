@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="GridDisplayData"/> 
+    /// <see cref="GridModuleData"/> 
     /// </summary>
     public class GridPanelContents : DataPanelContents
     {

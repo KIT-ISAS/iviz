@@ -2,13 +2,13 @@
 {
     public abstract class DialogData
     {
-        protected DisplayListPanel DisplayListPanel { get; private set; }
-        protected DialogPanelManager DialogPanelManager => DisplayListPanel.DialogPanelManager;
+        protected DisplayListPanel ModuleListPanel { get; private set; }
+        protected DialogPanelManager DialogPanelManager => ModuleListPanel.DialogPanelManager;
         public abstract IDialogPanelContents Panel { get; }
 
         public virtual void Initialize(DisplayListPanel panel)
         {
-            DisplayListPanel = panel;
+            ModuleListPanel = panel;
         }
 
         public abstract void SetupPanel();
@@ -18,13 +18,13 @@
         public virtual void Cleanup()
         {
             DialogPanelManager.HidePanelFor(this);
-            DisplayListPanel = null;
+            ModuleListPanel = null;
         }
 
         public void Show()
         {
             DialogPanelManager.TogglePanel(this);
-            DisplayListPanel.AllGuiVisible = true;
+            ModuleListPanel.AllGuiVisible = true;
         }
     }
 }

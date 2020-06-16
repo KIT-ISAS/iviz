@@ -3,11 +3,11 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public class ImageResource : MonoBehaviour, IDisplay
+    public sealed class ImageResource : MonoBehaviour, IDisplay
     {
-        public GameObject front;
-        public GameObject back;
-        public Billboard billboard;
+        [SerializeField] GameObject front = null;
+        //[SerializeField] GameObject back = null;
+        [SerializeField] Billboard billboard = null;
         Pose billboardStartPose;
         BoxCollider Collider;
 
@@ -98,7 +98,7 @@ namespace Iviz.Displays
             set => transform.parent = value;
         }
 
-        public virtual bool Visible
+        public bool Visible
         {
             get => gameObject.activeSelf;
             set => gameObject.SetActive(value);

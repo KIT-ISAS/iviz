@@ -5,7 +5,7 @@ using Iviz.Displays;
 
 namespace Iviz.App
 {
-    public class MarkerWrapper : MonoBehaviour, IDisplay, ISupportsAROcclusion, ISupportsTint
+    public sealed class MarkerWrapper : MonoBehaviour, IDisplay, ISupportsAROcclusion, ISupportsTint
     {
         MeshRenderer meshRenderer;
         Collider Collider;

@@ -22,7 +22,7 @@ namespace Iviz.App.Listeners
         [DataMember] public bool DisableExpiration { get; set; } = false;
     }
 
-    public class InteractiveMarkerListener : TopicListener
+    public class InteractiveMarkerListener : ListenerController
     {
         RosSender<InteractiveMarkerFeedback> rosSender;
 
@@ -31,7 +31,7 @@ namespace Iviz.App.Listeners
         readonly Dictionary<string, InteractiveMarkerObject> imarkers =
             new Dictionary<string, InteractiveMarkerObject>();
 
-        public override DisplayData DisplayData { get; set; }
+        public override ModuleData ModuleData { get; set; }
 
         public bool DisableExpiration
         {
@@ -102,7 +102,7 @@ namespace Iviz.App.Listeners
             string id = msg.Name;
             if (!imarkers.TryGetValue(id, out InteractiveMarkerObject imarker))
             {
-                imarker = Resource.Listeners.Instantiate<InteractiveMarkerObject>(transform);
+                imarker = Resource.Controllers.Instantiate<InteractiveMarkerObject>(transform);
                 imarker.Parent = TFListener.ListenersFrame;
                 imarker.Clicked += (control, pose, point, button) => OnInteractiveControlObjectClicked(id, pose, control, point, button);
                 imarker.transform.SetParentLocal(transform);

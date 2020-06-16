@@ -29,12 +29,12 @@ namespace Iviz.App.Listeners
         [DataMember] public uint MaxQueueSize { get; set; } = 1;
     }
 
-    public class PointCloudListener : TopicListener
+    public class PointCloudListener : ListenerController
     {
         DisplayNode node;
         PointListResource pointCloud;
 
-        public override DisplayData DisplayData { get; set; }
+        public override ModuleData ModuleData { get; set; }
 
         public Vector2 MeasuredIntensityBounds { get; private set; }
 

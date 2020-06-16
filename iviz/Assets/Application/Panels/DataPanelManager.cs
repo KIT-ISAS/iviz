@@ -10,7 +10,7 @@ namespace Iviz.App
         readonly Dictionary<Resource.Module, DataPanelContents> PanelByResourceType = new Dictionary<Resource.Module, DataPanelContents>();
         DataPanelContents DefaultPanel;
 
-        DisplayData SelectedDisplayData;
+        ModuleData SelectedDisplayData;
         Canvas parentCanvas;
         bool started;
 
@@ -58,7 +58,7 @@ namespace Iviz.App
             return DefaultPanel;
         }
 
-        public void SelectPanelFor(DisplayData newSelected)
+        public void SelectPanelFor(ModuleData newSelected)
         {
             if (!started)
             {
@@ -79,7 +79,7 @@ namespace Iviz.App
             }
         }
 
-        void ShowPanel(DisplayData newSelected)
+        void ShowPanel(ModuleData newSelected)
         {
             SelectedDisplayData = newSelected;
             SelectedDisplayData.SetupPanel();
@@ -87,7 +87,7 @@ namespace Iviz.App
             Active = true;
         }
 
-        public void HidePanelFor(DisplayData newSelected)
+        public void HidePanelFor(ModuleData newSelected)
         {
             if (SelectedDisplayData == newSelected)
             {
@@ -115,7 +115,7 @@ namespace Iviz.App
             Active = false;
         }
 
-        public void TogglePanel(DisplayData selected)
+        public void TogglePanel(ModuleData selected)
         {
             if (SelectedDisplayData == selected)
             {

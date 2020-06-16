@@ -7,7 +7,7 @@ using Iviz.Displays;
 
 namespace Iviz.App
 {
-    public class ResourcePool : MonoBehaviour
+    public sealed class ResourcePool : MonoBehaviour
     {
         const int TimeToDestroy = 60;
 

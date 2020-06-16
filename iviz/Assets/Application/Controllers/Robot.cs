@@ -19,7 +19,7 @@ namespace Iviz.App
     }
 
     [DataContract]
-    public class RobotConfiguration : JsonToString, IConfiguration
+    public sealed class RobotConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public Guid Id { get; set; }
         [DataMember] public Resource.Module Module => Resource.Module.Robot;
@@ -33,7 +33,7 @@ namespace Iviz.App
         [DataMember] public SerializableColor Tint { get; set; } = Color.white;
     }
 
-    public class Robot : MonoBehaviour, IController, IHasFrame
+    public sealed class Robot : MonoBehaviour, IController, IHasFrame
     {
         ObjectClickableNode node;
         RobotInfo robotInfo;
@@ -64,7 +64,7 @@ namespace Iviz.App
                 FrameSuffix = value.FrameSuffix;
                 Visible = value.Visible;
                 RenderAsOcclusionOnly = value.RenderAsOcclusionOnly;
-                Tint = value.Tint;  
+                Tint = value.Tint;
             }
         }
 
@@ -237,7 +237,7 @@ namespace Iviz.App
             }
         }
 
-        public DisplayData DisplayData
+        public ModuleData ModuleData
         {
             get => node.DisplayData;
             set => node.DisplayData = value;

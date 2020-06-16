@@ -10,11 +10,6 @@ using System;
 
 namespace Iviz.App.Listeners
 {
-    public interface IHasFrame
-    {
-        TFFrame Frame { get; }
-    }
-
     public sealed class TFFrame : ClickableNode, IRecyclable
     {
         public const int Layer = 9;
@@ -47,32 +42,12 @@ namespace Iviz.App.Listeners
             get => base.Selected;
             set
             {
-                selected = value;
+                selected_ = value;
                 labelObject.SetActive(value || LabelVisible);
-            }
-        }
-
-        bool orbitColorEnabled;
-        public bool OrbitColorEnabled
-        {
-            get => orbitColorEnabled;
-            set
-            {
-                orbitColorEnabled = value;
-                /*
-                if (!value)
+                if (value)
                 {
-                    resource.ColorX = Color.red;
-                    resource.ColorY = Color.green;
-                    resource.ColorZ = Color.blue;
+                    TFListener.GuiManager.ShowBoundary(null);
                 }
-                else
-                {
-                    resource.ColorX = Color.yellow;
-                    resource.ColorY = Color.yellow;
-                    resource.ColorZ = Color.yellow;
-                }
-                */
             }
         }
 
@@ -173,7 +148,7 @@ namespace Iviz.App.Listeners
             }
         }
 
-        
+
         public override TFFrame Parent
         {
             get => base.Parent;
@@ -182,7 +157,7 @@ namespace Iviz.App.Listeners
                 SetParent(value);
             }
         }
-        
+
 
         public bool SetParent(TFFrame newParent)
         {
@@ -241,27 +216,7 @@ namespace Iviz.App.Listeners
 
         public Pose WorldPose => transform.AsPose();
 
-        /*
-        public Pose Pose
-        {
-            get => pose;
-            set
-            {
-                
-                //if (isDead)
-                //{
-                //    Debug.LogWarning("Getting pose of dead frame!");
-                //}
-                if (!IgnoreUpdates)
-                {
-                    pose = value;
-                    transform.SetLocalPose(pose);
-                }
-            }
-        }
-        */
-
-        [SerializeField] Vector3 position_;
+        [SerializeField] Vector3 rosPosition_;
 
         public void SetPose(in TimeSpan time, in Pose newPose)
         {
@@ -273,7 +228,7 @@ namespace Iviz.App.Listeners
                 }
 
                 pose = newPose;
-                position_ = pose.position.Unity2Ros();
+                rosPosition_ = pose.position.Unity2Ros();
                 transform.SetLocalPose(newPose);
                 LogPose(time);
             }
@@ -285,7 +240,7 @@ namespace Iviz.App.Listeners
             {
                 timeline.Add(time, transform.AsPose());
             }
-            foreach(TFFrame child in children.Values)
+            foreach (TFFrame child in children.Values)
             {
                 child.LogPose(time);
             }
@@ -330,7 +285,7 @@ namespace Iviz.App.Listeners
             resource.name = "[Axis]";
 
             AxisLength = 0.25f;
-            OrbitColorEnabled = false;
+            //OrbitColorEnabled = false;
 
             parentConnector.gameObject.SetActive(false);
         }

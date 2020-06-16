@@ -15,28 +15,28 @@ namespace Iviz.App.Displays
         public abstract Vector3 BoundsScale { get; }
         public abstract string Name { get; }
 
-        public DisplayData DisplayData;
+        public ModuleData DisplayData { get; set; }
 
-        protected bool selected;
+        protected bool selected_;
         public virtual bool Selected
         {
-            get => selected;
+            get => selected_;
             set
             {
-                selected = value;
+                selected_ = value;
                 if (value)
                 {
-                    TFListener.GuiManager.ShowBoundary(this, WorldBounds, name, transform);
+                    TFListener.GuiManager.ShowBoundary(this);
                 }
             }
         }
 
-        protected static int GetClickCount(PointerEventData eventData)
+        static int GetClickCount(PointerEventData eventData)
         {
             return FlyCamera.IsMobile ? Input.GetTouch(0).tapCount : eventData.clickCount;
         }
 
-        protected bool IsRealClick(PointerEventData eventData)
+        bool IsRealClick(PointerEventData eventData)
         {
             return
                 eventData.button == PointerEventData.InputButton.Left &&

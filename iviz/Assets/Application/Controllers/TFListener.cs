@@ -13,7 +13,7 @@ using Iviz.Resources;
 namespace Iviz.App.Listeners
 {
     [DataContract]
-    public class TFConfiguration : JsonToString, IConfiguration
+    public sealed class TFConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
         [DataMember] public Resource.Module Module => Resource.Module.TF;
@@ -27,7 +27,7 @@ namespace Iviz.App.Listeners
         [DataMember] public bool ShowAllFrames { get; set; } = false;
     }
 
-    public class TFListener : TopicListener
+    public sealed class TFListener : ListenerController
     {
         public const string DefaultTopic = "/tf";
         public const string DefaultTopicStatic = "/tf_static";
@@ -50,7 +50,7 @@ namespace Iviz.App.Listeners
 
         public RosSender<tfMessage_v2> Publisher { get; private set; }
 
-        public override DisplayData DisplayData { get; set; }
+        public override ModuleData ModuleData { get; set; }
 
         public RosListener ListenerStatic { get; private set; }
 
@@ -317,7 +317,8 @@ namespace Iviz.App.Listeners
                 relative.position.y /= BaseFrame.transform.localScale.y;
                 relative.position.z /= BaseFrame.transform.localScale.z;
                 return relative;
-            } else
+            }
+            else
             {
                 return unityPose;
             }

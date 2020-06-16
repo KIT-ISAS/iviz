@@ -95,11 +95,11 @@ namespace Iviz.Displays
             }
         }
 
-        [SerializeField] bool useIntensityNoRange_;
-        public bool UseIntensityNoRange
+        [SerializeField] bool useIntensityNotRange_;
+        public bool UseIntensityNotRange
         {
-            get => useIntensityNoRange_;
-            set => useIntensityNoRange_ = value;
+            get => useIntensityNotRange_;
+            set => useIntensityNotRange_ = value;
         }
 
         [SerializeField] bool forceMinMax_;
@@ -235,7 +235,7 @@ namespace Iviz.Displays
             float dy = Mathf.Sin(angleIncrement);
 
             pointBuffer.Clear();
-            if (!UseIntensityNoRange)
+            if (!UseIntensityNotRange)
             {
                 for (int i = 0; i < ranges.Length; i++)
                 {
