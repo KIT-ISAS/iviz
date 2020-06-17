@@ -240,7 +240,7 @@ namespace Iviz.Resources
             }
         }
 
-        public class MarkersType
+        public class DisplaysType
         {
             public GameObjectInfo Cube { get; }
             public GameObjectInfo Cylinder { get; }
@@ -265,9 +265,9 @@ namespace Iviz.Resources
             public GameObjectInfo ARMarkerResource { get; }
             public GameObjectInfo AxisFrameResource { get; }
 
-            public ReadOnlyDictionary<string, GameObjectInfo> Generic { get; }
+            public ReadOnlyDictionary<Uri, GameObjectInfo> Generic { get; }
 
-            public MarkersType()
+            public DisplaysType()
             {
                 Cube = new GameObjectInfo("Displays/Cube");
                 Cylinder = new GameObjectInfo("Displays/Cylinder");
@@ -292,15 +292,21 @@ namespace Iviz.Resources
                 ARMarkerResource = new GameObjectInfo("Displays/ARMarkerResource");
                 AxisFrameResource = new GameObjectInfo("Displays/AxisFrameResource");
 
-                Generic = new ReadOnlyDictionary<string, GameObjectInfo>(
-                    new Dictionary<string, GameObjectInfo>()
+                Generic = new ReadOnlyDictionary<Uri, GameObjectInfo>(
+                    new Dictionary<Uri, GameObjectInfo>()
                     {
-                        ["Cube"] = Cube,
-                        ["Cylinder"] = Cylinder,
-                        ["Sphere"] = Sphere,
-                        ["RightHand"] = new GameObjectInfo("Displays/RightHand"),
+                        [CreateUri("Cube")] = Cube,
+                        [CreateUri("Cylinder")] = Cylinder,
+                        [CreateUri("Sphere")] = Sphere,
+                        [CreateUri("RightHand")] = new GameObjectInfo("Displays/RightHand"),
                     });
             }
+
+            static Uri CreateUri(string name)
+            {
+                return new Uri("package://iviz/" + name);
+            }
+
         }
 
         public class ControllersType
@@ -475,8 +481,8 @@ namespace Iviz.Resources
         static ColormapsType colormaps;
         public static ColormapsType Colormaps => colormaps ?? (colormaps = new ColormapsType());
 
-        static MarkersType markers;
-        public static MarkersType Markers => markers ?? (markers = new MarkersType());
+        static DisplaysType displays;
+        public static DisplaysType Displays => displays ?? (displays = new DisplaysType());
 
         static ControllersType controllers;
         public static ControllersType Controllers => controllers ?? (controllers = new ControllersType());

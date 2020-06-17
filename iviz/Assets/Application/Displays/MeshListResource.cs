@@ -183,7 +183,8 @@ namespace Iviz.Displays
                         occlusionMaterial.enableInstancing = true;
                     }
                     material = occlusionMaterial;
-                } else
+                }
+                else
                 {
                     material = normalMaterial;
                 }
@@ -202,7 +203,7 @@ namespace Iviz.Displays
             UseIntensityTexture = true;
             UpdateMaterialKeywords();
 
-            Mesh = Resource.Markers.SphereSimple.Object.GetComponent<MeshFilter>().sharedMesh;
+            Mesh = Resource.Displays.SphereSimple.Object.GetComponent<MeshFilter>().sharedMesh;
             Scale = new Vector3(1, 1, 1);
             Offset = new Vector3(0, 0, 0);
             IntensityBounds = new Vector2(0, 1);

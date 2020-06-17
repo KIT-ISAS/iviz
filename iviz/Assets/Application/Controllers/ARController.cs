@@ -259,7 +259,7 @@ namespace Iviz.App.Listeners
             tracker = ARSessionOrigin.GetComponent<ARTrackedImageManager>();
 
             node = DisplayClickableNode.Instantiate("AR Node");
-            resource = ResourcePool.GetOrCreate<ARMarkerResource>(Resource.Markers.ARMarkerResource);
+            resource = ResourcePool.GetOrCreate<ARMarkerResource>(Resource.Displays.ARMarkerResource);
             node.Target = resource;
 
             Config = new ARConfiguration();

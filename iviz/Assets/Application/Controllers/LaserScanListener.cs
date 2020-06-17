@@ -173,7 +173,7 @@ namespace Iviz.App.Listeners
             transform.parent = TFListener.ListenersFrame.transform;
 
             node = SimpleDisplayNode.Instantiate("LaserScanNode", transform);
-            resource = ResourcePool.GetOrCreate<RadialScanResource>(Resource.Markers.RadialScanResource, node.transform);
+            resource = ResourcePool.GetOrCreate<RadialScanResource>(Resource.Displays.RadialScanResource, node.transform);
             Config = new LaserScanConfiguration();
         }
 
@@ -218,7 +218,7 @@ namespace Iviz.App.Listeners
             base.Stop();
 
             resource.Stop();
-            ResourcePool.Dispose(Resource.Markers.RadialScanResource, resource.gameObject);
+            ResourcePool.Dispose(Resource.Displays.RadialScanResource, resource.gameObject);
 
             node.Stop();
             Destroy(node);

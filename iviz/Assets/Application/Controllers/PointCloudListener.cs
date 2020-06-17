@@ -177,7 +177,7 @@ namespace Iviz.App.Listeners
         void Awake()
         {
             node = SimpleDisplayNode.Instantiate("PointCloudNode", transform);
-            pointCloud = ResourcePool.GetOrCreate<PointListResource>(Resource.Markers.PointList, node.transform);
+            pointCloud = ResourcePool.GetOrCreate<PointListResource>(Resource.Displays.PointList, node.transform);
 
             Config = new PointCloudConfiguration();
             transform.localRotation = new Msgs.GeometryMsgs.Quaternion(0, 0, 0, 1).Ros2Unity();
@@ -460,7 +460,7 @@ namespace Iviz.App.Listeners
         {
             base.Stop();
 
-            ResourcePool.Dispose(Resource.Markers.PointList, pointCloud.gameObject);
+            ResourcePool.Dispose(Resource.Displays.PointList, pointCloud.gameObject);
             pointCloud = null;
 
             node.Stop();

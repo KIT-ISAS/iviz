@@ -125,7 +125,7 @@ namespace Iviz.App.Listeners
 
         void Awake()
         {
-            resource = ResourcePool.GetOrCreate<DepthImageResource>(Resource.Markers.DepthImageResource, transform);
+            resource = ResourcePool.GetOrCreate<DepthImageResource>(Resource.Displays.DepthImageResource, transform);
             node = DisplayClickableNode.Instantiate("DepthImage");
             node.Target = resource;
             Config = new DepthImageProjectorConfiguration();
@@ -135,7 +135,7 @@ namespace Iviz.App.Listeners
         {
             resource.Stop();
             Destroy(node);
-            ResourcePool.Dispose(Resource.Markers.DepthImageResource, resource.gameObject);
+            ResourcePool.Dispose(Resource.Displays.DepthImageResource, resource.gameObject);
         }
     }
 }

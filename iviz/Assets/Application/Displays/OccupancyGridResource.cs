@@ -179,8 +179,8 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            resource = ResourcePool.GetOrCreate<MeshListResource>(Resource.Markers.MeshList, transform);
-            plane = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Markers.Cube, transform);
+            resource = ResourcePool.GetOrCreate<MeshListResource>(Resource.Displays.MeshList, transform);
+            plane = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Cube, transform);
 
             NumCellsX = 10;
             NumCellsY = 10;
@@ -207,8 +207,8 @@ namespace Iviz.Displays
 
         public void Recycle()
         {
-            ResourcePool.Dispose(Resource.Markers.MeshList, resource.gameObject);
-            ResourcePool.Dispose(Resource.Markers.Cube, plane.gameObject);
+            ResourcePool.Dispose(Resource.Displays.MeshList, resource.gameObject);
+            ResourcePool.Dispose(Resource.Displays.Cube, plane.gameObject);
         }
 
         volatile bool isProcessing;
@@ -250,8 +250,8 @@ namespace Iviz.Displays
 
                 GameThread.RunOnce(() =>
                 {
-                   resource.PointsWithColor = pointBuffer;
-                   resource.IntensityBounds = new Vector2(0, 1);
+                    resource.PointsWithColor = pointBuffer;
+                    resource.IntensityBounds = new Vector2(0, 1);
                 });
             });
         }

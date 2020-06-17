@@ -72,7 +72,17 @@ namespace Iviz.App.Listeners
             set
             {
                 config.Visible = value;
-                grid.Visible = value;
+                if (!value)
+                {
+                    reflectionProbe.transform.parent = TFListener.BaseFrame.transform;
+                    grid.Visible = false;
+                }
+                else
+                {
+                    grid.Visible = true;
+                    reflectionProbe.transform.parent = grid.transform;
+                }
+                reflectionProbe.RenderProbe();
             }
         }
 
@@ -166,7 +176,7 @@ namespace Iviz.App.Listeners
         {
             name = "Grid Controller";
 
-            grid = ResourcePool.GetOrCreate<GridResource>(Resource.Markers.Grid);
+            grid = ResourcePool.GetOrCreate<GridResource>(Resource.Displays.Grid);
             grid.name = "Grid";
 
             node = DisplayClickableNode.Instantiate("GridNode");
@@ -177,6 +187,8 @@ namespace Iviz.App.Listeners
             reflectionProbe.gameObject.name = "Grid Reflection Probe";
             reflectionProbe.transform.parent = grid.transform;
             reflectionProbe.transform.position = new Vector3(0, 2.0f, 0);
+            reflectionProbe.nearClipPlane = 0.5f;
+            reflectionProbe.farClipPlane = 100f;
             reflectionProbe.mode = UnityEngine.Rendering.ReflectionProbeMode.Realtime;
             reflectionProbe.refreshMode = UnityEngine.Rendering.ReflectionProbeRefreshMode.ViaScripting;
             reflectionProbe.clearFlags = UnityEngine.Rendering.ReflectionProbeClearFlags.SolidColor;
@@ -195,7 +207,7 @@ namespace Iviz.App.Listeners
 
         public void Stop()
         {
-            ResourcePool.Dispose(Resource.Markers.Grid, grid.gameObject);
+            ResourcePool.Dispose(Resource.Displays.Grid, grid.gameObject);
             node.Stop();
             Destroy(node.gameObject);
             Destroy(reflectionProbe.gameObject);

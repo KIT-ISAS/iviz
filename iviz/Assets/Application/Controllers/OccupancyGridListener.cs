@@ -129,7 +129,7 @@ namespace Iviz.App.Listeners
         void Awake()
         {
             node = DisplayClickableNode.Instantiate("Node");
-            grid = ResourcePool.GetOrCreate<OccupancyGridResource>(Resource.Markers.OccupancyGridResource, node.transform);
+            grid = ResourcePool.GetOrCreate<OccupancyGridResource>(Resource.Displays.OccupancyGridResource, node.transform);
 
             Config = new OccupancyGridConfiguration();
         }
@@ -179,7 +179,7 @@ namespace Iviz.App.Listeners
         public override void Stop()
         {
             base.Stop();
-            ResourcePool.Dispose(Resource.Markers.OccupancyGridResource, grid.gameObject);
+            ResourcePool.Dispose(Resource.Displays.OccupancyGridResource, grid.gameObject);
             node.Stop();
             Destroy(node);
         }

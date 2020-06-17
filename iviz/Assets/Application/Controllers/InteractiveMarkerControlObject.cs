@@ -7,11 +7,10 @@ using Iviz.Resources;
 
 namespace Iviz.App.Listeners
 {
-    public sealed class InteractiveMarkerControlObject : DisplayNode
+    public sealed class InteractiveMarkerControlObject : MonoBehaviour
     {
         public string Description { get; private set; }
         public string Id { get; private set; }
-
         public int InteractionMode { get; private set; }
 
         readonly Dictionary<string, MarkerObject> markers = new Dictionary<string, MarkerObject>();
@@ -67,8 +66,7 @@ namespace Iviz.App.Listeners
                     case Marker.ADD:
                         if (!markers.TryGetValue(id, out MarkerObject markerToAdd))
                         {
-                            markerToAdd = Resource.Controllers.Instantiate<MarkerObject>(transform);
-                            markerToAdd.Parent = TFListener.ListenersFrame;
+                            markerToAdd = CreateMarkerObject();
                             markerToAdd.Clicked += (point, button) => Clicked?.Invoke(transform.AsPose(), point, button);
                             markers[id] = markerToAdd;
                         }
@@ -82,8 +80,7 @@ namespace Iviz.App.Listeners
                     case Marker.DELETE:
                         if (markers.TryGetValue(id, out MarkerObject markerToDelete))
                         {
-                            markerToDelete.Stop();
-                            Destroy(markerToDelete.gameObject);
+                            DeleteMarkerObject(markerToDelete);
                             markers.Remove(id);
                             markersToDelete.Remove(id);
                         }
@@ -93,64 +90,33 @@ namespace Iviz.App.Listeners
             markersToDelete.ForEach(x =>
             {
                 MarkerObject markerToDelete = markers[x];
-                markerToDelete.Stop();
-                Destroy(markerToDelete.gameObject);
+                DeleteMarkerObject(markerToDelete);
                 markers.Remove(x);
             });
         }
 
-        public override void Stop()
+        public void Stop()
         {
-            markers.Values.ForEach(markerToDelete =>
-            {
-                markerToDelete.Stop();
-                Destroy(markerToDelete.gameObject);
-            });
+            markers.Values.ForEach(DeleteMarkerObject);
             markers.Clear();
             markersToDelete.Clear();
             Clicked = null;
         }
 
+        static void DeleteMarkerObject(MarkerObject marker)
+        {
+            marker.Stop();
+            Destroy(marker.gameObject);
+        }
+
+        static MarkerObject CreateMarkerObject()
+        {
+            GameObject gameObject = new GameObject();
+            gameObject.name = "MarkerObject";
+            return gameObject.AddComponent<MarkerObject>();
+        }
+
         /*
-        public override InteractiveMarkerFeedback OnClick(Vector3 point, int button)
-        {
-            //if (button == 1)
-            {
-                Vector3 hint = Bounds.center;
-                Parent.ShowMenu(hint);
-            }
-            if (button != responseButton)
-            {
-                return null;
-            }
-
-            Debug.Log("InteractiveMarker Control: Sending feedback");
-
-            return new InteractiveMarkerFeedback
-            {
-                header = Utils.CreateHeader(),
-                client_id = RosConfig.MyId,
-                marker_name = Parent.Id,
-                control_name = Id,
-                event_type = InteractiveMarkerFeedback.BUTTON_CLICK,
-                pose = Parent.transform.AsPose().Unity2RosPose(),
-                mouse_point = point.Unity2RosPoint(),
-                mouse_point_valid = true
-            };
-        }
-
-        public override void Select()
-        {
-            if (selectFrame != null)
-            {
-                Destroy(selectFrame);
-            }
-            selectFrame = Instantiate(Resources.Load<GameObject>("SelectFrame"));
-            selectFrame.transform.localScale = Bounds.size;
-            //selectFrame.transform.localPosition = Bounds.center;
-            selectFrame.transform.SetParentLocal(transform);
-        }
-
         public override void Deselect(InteractableObject newSelection)
         {
             if (newSelection == null || newSelection.Parent != Parent)

@@ -17,33 +17,6 @@ namespace Iviz.App
         Connected,
     }
 
-    /*
-    public interface IRosConnection
-    {
-        event Action<ConnectionState> ConnectionStateChanged;
-
-        ConnectionState ConnectionState { get; }
-
-        Uri MasterUri { get; set; }
-        Uri MyUri { get; set; }
-        string MyId { get; set; }
-
-        ReadOnlyCollection<BriefTopicInfo> PublishedTopics { get; }
-
-        void Subscribe<T>(RosListener<T> listener) where T : IMessage, new();
-        void Unsubscribe(RosListener subscriber);
-
-        void Advertise<T>(RosSender<T> advertiser) where T : IMessage;
-        void Unadvertise(RosSender advertiser);
-        void Publish(RosSender advertiser, IMessage msg);
-        void Stop();
-
-        bool HasPublishers(string topic);
-
-        ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics();
-    }
-    */
-
     public class ConnectionManager : MonoBehaviour
     {
         public static ConnectionManager Instance { get; private set; }
@@ -210,7 +183,7 @@ namespace Iviz.App
             }
             catch (Exception e)
             {
-                Debug.LogError("LEFT THREAD: " + e);
+                Debug.Log("Left connection thread: " + e);
             }
         }
 

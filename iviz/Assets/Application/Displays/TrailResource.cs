@@ -88,7 +88,7 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            lines = ResourcePool.GetOrCreate<LineResource>(Resource.Markers.Line, transform);
+            lines = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, transform);
             lines.Scale = 0.01f;
             TimeWindowInMs = 2000;
             StartCoroutine("GatherMeasurement");
@@ -96,7 +96,7 @@ namespace Iviz.Displays
 
         public void Recycle()
         {
-            ResourcePool.Dispose(Resource.Markers.Line, lines.gameObject);
+            ResourcePool.Dispose(Resource.Displays.Line, lines.gameObject);
         }
 
         public void Stop()

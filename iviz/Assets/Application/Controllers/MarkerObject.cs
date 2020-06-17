@@ -28,10 +28,8 @@ namespace Iviz.App.Listeners
 
     public sealed class MarkerObject : ClickableNode
     {
-        static Mesh CachedCube => Resource.Markers.Cube.Object.GetComponent<MeshFilter>().sharedMesh;
-        static Mesh CachedSphere => Resource.Markers.SphereSimple.Object.GetComponent<MeshFilter>().sharedMesh;
-
-        const string packagePrefix = "package://iviz/";
+        static Mesh CachedCube => Resource.Displays.Cube.Object.GetComponent<MeshFilter>().sharedMesh;
+        static Mesh CachedSphere => Resource.Displays.SphereSimple.Object.GetComponent<MeshFilter>().sharedMesh;
 
         MarkerResource resource;
         Resource.Info<GameObject> resourceType;
@@ -153,6 +151,7 @@ namespace Iviz.App.Listeners
                 case MarkerType.CUBE:
                 case MarkerType.SPHERE:
                 case MarkerType.CYLINDER:
+                case MarkerType.MESH_RESOURCE:
                     MeshMarkerResource meshMarker = (MeshMarkerResource)resource;
                     meshMarker.Color = msg.Color.Sanitize().ToUnityColor();
                     transform.localScale = msg.Scale.Ros2Unity().Abs();
@@ -320,10 +319,6 @@ namespace Iviz.App.Listeners
             {
                 AttachTo(msg.Header.FrameId);
             }
-            else if (msg.Header.FrameId == "")
-            {
-                Parent = TFListener.ListenersFrame;
-            }
             else
             {
                 AttachTo(msg.Header.FrameId, msg.Header.Stamp);
@@ -339,32 +334,27 @@ namespace Iviz.App.Listeners
         {
             switch (msg.Type())
             {
-                case MarkerType.ARROW: return Resource.Markers.Arrow;
-                case MarkerType.CYLINDER: return Resource.Markers.Cylinder;
-                case MarkerType.CUBE: return Resource.Markers.Cube;
-                case MarkerType.SPHERE: return Resource.Markers.Sphere;
-                case MarkerType.TEXT_VIEW_FACING: return Resource.Markers.Text;
+                case MarkerType.ARROW: return Resource.Displays.Arrow;
+                case MarkerType.CYLINDER: return Resource.Displays.Cylinder;
+                case MarkerType.CUBE: return Resource.Displays.Cube;
+                case MarkerType.SPHERE: return Resource.Displays.Sphere;
+                case MarkerType.TEXT_VIEW_FACING: return Resource.Displays.Text;
                 case MarkerType.LINE_STRIP:
                 case MarkerType.LINE_LIST:
-                    return Resource.Markers.Line;
+                    return Resource.Displays.Line;
                 case MarkerType.MESH_RESOURCE:
-                    if (!Uri.IsWellFormedUriString(msg.MeshResource, UriKind.Absolute))
+                    if (!Uri.TryCreate(msg.MeshResource, UriKind.Absolute, out Uri uri))
                     {
                         return null;
                     }
-                    if (msg.MeshResource.StartsWith(packagePrefix))
-                    {
-                        string resourcePath = msg.MeshResource.Substring(packagePrefix.Length);
-                        return Resource.Markers.Generic.TryGetValue(resourcePath, out Resource.Info<GameObject> info) ? info : null;
-                    }
-                    return null;
+                    return Resource.Displays.Generic.TryGetValue(uri, out Resource.Info<GameObject> info) ? info : null;
                 case MarkerType.CUBE_LIST:
                 case MarkerType.SPHERE_LIST:
-                    return Resource.Markers.MeshList;
+                    return Resource.Displays.MeshList;
                 case MarkerType.POINTS:
-                    return Resource.Markers.PointList;
+                    return Resource.Displays.PointList;
                 case MarkerType.TRIANGLE_LIST:
-                    return Resource.Markers.MeshTriangles;
+                    return Resource.Displays.MeshTriangles;
                 default:
                     return null;
             }

@@ -9,18 +9,18 @@ namespace Iviz.App.Listeners
 {
     public sealed class InteractiveMarkerObject : DisplayNode
     {
+        readonly Dictionary<string, InteractiveMarkerControlObject> controls =
+            new Dictionary<string, InteractiveMarkerControlObject>();
+        readonly HashSet<string> controlsToDelete = new HashSet<string>();
+        const int LifetimeInSec = 15;
+
         public string Description { get; private set; }
         public string Id { get; private set; }
-
         public event Action<string, Pose, Vector3, int> Clicked;
-
-        readonly Dictionary<string, InteractiveMarkerControlObject> controls = new Dictionary<string, InteractiveMarkerControlObject>();
-        readonly HashSet<string> controlsToDelete = new HashSet<string>();
 
         MenuObject menuObject = null;
         public bool HasMenu => menuObject != null;
 
-        const int LifetimeInSec = 15;
         public DateTime ExpirationTime { get; private set; }
 
         public void Set(InteractiveMarker msg)
@@ -42,8 +42,7 @@ namespace Iviz.App.Listeners
                 string id = controlMsg.Name;
                 if (!controls.TryGetValue(id, out InteractiveMarkerControlObject control))
                 {
-                    control = Resource.Controllers.Instantiate<InteractiveMarkerControlObject>(transform);
-                    control.Parent = TFListener.ListenersFrame;
+                    control = CreateControlObject();
                     control.Clicked += (pose, point, button) => Clicked?.Invoke(id, pose, point, button);
                     control.transform.SetParentLocal(transform);
                     controls[id] = control;
@@ -55,8 +54,7 @@ namespace Iviz.App.Listeners
             controlsToDelete.ForEach(x =>
             {
                 InteractiveMarkerControlObject control = controls[x];
-                control.Stop();
-                Destroy(control.gameObject);
+                DeleteControlObject(control);
                 controls.Remove(x);
             });
 
@@ -74,13 +72,24 @@ namespace Iviz.App.Listeners
             */
         }
 
+        static void DeleteControlObject(InteractiveMarkerControlObject control)
+        {
+            control.Stop();
+            Destroy(control.gameObject);
+        }
+
+        static InteractiveMarkerControlObject CreateControlObject()
+        {
+            GameObject gameObject = new GameObject();
+            gameObject.name = "InteractiveMarkerControlObject";
+            return gameObject.AddComponent<InteractiveMarkerControlObject>();
+        }
+
         public override void Stop()
         {
-            controls.Values.ForEach(control =>
-            {
-                control.Stop();
-                Destroy(control.gameObject);
-            });
+            base.Stop();
+            Clicked = null;
+            controls.Values.ForEach(DeleteControlObject);
             controls.Clear();
             controlsToDelete.Clear();
             Clicked = null;

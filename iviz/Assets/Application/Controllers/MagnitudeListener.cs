@@ -196,33 +196,33 @@ namespace Iviz.App.Listeners
             {
                 case PoseStamped.RosMessageType:
                     Listener = new RosListener<PoseStamped>(config.Topic, Handler);
-                    axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Markers.AxisFrameResource, displayNode.transform);
+                    axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Displays.AxisFrameResource, displayNode.transform);
                     break;
 
                 case PointStamped.RosMessageType:
                     Listener = new RosListener<PointStamped>(config.Topic, Handler);
 
-                    sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Markers.Sphere, displayNode.transform);
+                    sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere, displayNode.transform);
                     sphere.transform.localScale = 0.125f * UnityEngine.Vector3.one;
                     sphere.Color = Color;
                     break;
 
                 case WrenchStamped.RosMessageType:
                     Listener = new RosListener<WrenchStamped>(config.Topic, Handler);
-                    axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Markers.AxisFrameResource, displayNode.transform);
-                    arrow = ResourcePool.GetOrCreate<ArrowResource>(Resource.Markers.Arrow, displayNode.transform);
+                    axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Displays.AxisFrameResource, displayNode.transform);
+                    arrow = ResourcePool.GetOrCreate<ArrowResource>(Resource.Displays.Arrow, displayNode.transform);
                     arrow.Color = Color;
-                    sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Markers.Sphere, displayNode.transform);
+                    sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere, displayNode.transform);
                     sphere.transform.localScale = 0.125f * UnityEngine.Vector3.one;
                     sphere.Color = Color;
                     break;
 
                 case TwistStamped.RosMessageType:
                     Listener = new RosListener<TwistStamped>(config.Topic, Handler);
-                    axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Markers.AxisFrameResource, displayNode.transform);
-                    arrow = ResourcePool.GetOrCreate<ArrowResource>(Resource.Markers.Arrow, displayNode.transform);
+                    axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Displays.AxisFrameResource, displayNode.transform);
+                    arrow = ResourcePool.GetOrCreate<ArrowResource>(Resource.Displays.Arrow, displayNode.transform);
                     arrow.Color = Color;
-                    sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Markers.Sphere, displayNode.transform);
+                    sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere, displayNode.transform);
                     sphere.transform.localScale = 0.125f * UnityEngine.Vector3.one;
                     sphere.Color = Color;
                     break;

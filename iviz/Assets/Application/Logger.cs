@@ -85,7 +85,10 @@ namespace Iviz.App
             str.Append($"<b>[{DateTime.Now:HH:mm:ss}]</b> {msg}");
             while (e != null)
             {
-                str.Append($"\n<color=red>→ {e.GetType()}</color> {e.Message}");
+                if (!(e is AggregateException))
+                {
+                    str.Append($"\n<color=red>→ {e.GetType()}</color> {e.Message}");
+                }
                 e = e.InnerException;
             }
             LogInternal?.Invoke(str.ToString());

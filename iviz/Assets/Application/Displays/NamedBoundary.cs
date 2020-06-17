@@ -103,7 +103,7 @@ namespace Iviz.App.Displays
             Holder = CreateSelectionFrame();
             Holder.transform.SetParentLocal(transform);
 
-            labelObject = ResourcePool.GetOrCreate(Resource.Markers.Text, transform);
+            labelObject = ResourcePool.GetOrCreate(Resource.Displays.Text, transform);
             labelObject.name = "Frame Axis Label";
             labelObjectText = labelObject.GetComponent<TextMesh>();
             labelObject.transform.SetParentLocal(transform);
@@ -162,7 +162,7 @@ namespace Iviz.App.Displays
             GameObject[] Frame = new GameObject[3];
             for (int i = 0; i < 3; i++)
             {
-                GameObject gameObject = ResourcePool.GetOrCreate(Resource.Markers.Cube, Holder.transform);
+                GameObject gameObject = ResourcePool.GetOrCreate(Resource.Displays.Cube, Holder.transform);
                 gameObject.name = "Cube";
                 MeshRenderer renderer = gameObject.GetComponent<MeshRenderer>();
                 renderer.sharedMaterial = Resource.Materials.SimpleLit.Object;
@@ -186,10 +186,10 @@ namespace Iviz.App.Displays
 
         public void Recycle()
         {
-            GetComponentsInChildren<MeshRenderer>().ForEach(x => ResourcePool.Dispose(Resource.Markers.Cube, x.gameObject));
+            GetComponentsInChildren<MeshRenderer>().ForEach(x => ResourcePool.Dispose(Resource.Displays.Cube, x.gameObject));
             Destroy(Holder);
 
-            ResourcePool.Dispose(Resource.Markers.Text, labelObject);
+            ResourcePool.Dispose(Resource.Displays.Text, labelObject);
             labelObject = null;
             labelObjectText = null;
             labelBillboard = null;
@@ -214,7 +214,7 @@ namespace Iviz.App.Displays
             Pose pose = Target.BoundsPose;
             transform.position = pose.position;
             transform.rotation = pose.rotation;
-            LabelOffset = Bounds.center + new Vector3(0, Target.WorldBounds.size.y/2 + 0.15f, 0);
+            LabelOffset = Bounds.center + new Vector3(0, Target.WorldBounds.size.y / 2 + 0.15f, 0);
             Name = target?.Name;
         }
 

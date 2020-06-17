@@ -79,7 +79,7 @@ namespace Iviz.App
                 Application.targetFrameRate = 30;
             }
 
-            namedBoundary = ResourcePool.GetOrCreate<NamedBoundary>(Resource.Markers.NamedBoundary);
+            namedBoundary = ResourcePool.GetOrCreate<NamedBoundary>(Resource.Displays.NamedBoundary);
             StartOrbiting();
         }
 
@@ -486,6 +486,7 @@ namespace Iviz.App
             else
             {
                 OrbitCenter = position;
+                orbitRadius = Mathf.Min(orbitRadius, 3.0f);
                 transform.position = -orbitRadius * (transform.rotation * Vector3.forward) + OrbitCenter;
             }
         }

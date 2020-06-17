@@ -212,8 +212,6 @@ namespace Iviz.App.Listeners
         }
 
 
-        public IReadOnlyDictionary<string, TFFrame> Children => children;
-
         Pose pose;
         public Pose Pose => pose;
 
@@ -267,14 +265,14 @@ namespace Iviz.App.Listeners
         {
             boxCollider = GetComponent<BoxCollider>();
 
-            labelObject = ResourcePool.GetOrCreate(Resource.Markers.Text, transform);
+            labelObject = ResourcePool.GetOrCreate(Resource.Displays.Text, transform);
             labelObject.gameObject.SetActive(false);
             labelObject.name = "Frame Axis Label";
             labelObjectText = labelObject.GetComponent<TextMesh>();
             labelObject.name = "[Label]";
 
             parentConnector = ResourcePool.
-                GetOrCreate(Resource.Markers.LineConnector, transform).
+                GetOrCreate(Resource.Displays.LineConnector, transform).
                 GetComponent<LineConnector>();
             parentConnector.name = "Parent Connector";
             parentConnector.A = transform;
@@ -283,7 +281,7 @@ namespace Iviz.App.Listeners
                 TFListener.BaseFrame?.transform; // TFListener.BaseFrame may not exist yet
             parentConnector.name = "[Connector]";
 
-            resource = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Markers.AxisFrameResource, transform);
+            resource = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Displays.AxisFrameResource, transform);
             resource.Layer = Layer;
             resource.name = "[Axis]";
 
@@ -295,9 +293,9 @@ namespace Iviz.App.Listeners
 
         public void Recycle()
         {
-            ResourcePool.Dispose(Resource.Markers.AxisFrameResource, resource.gameObject);
-            ResourcePool.Dispose(Resource.Markers.Text, labelObject);
-            ResourcePool.Dispose(Resource.Markers.LineConnector, parentConnector.gameObject);
+            ResourcePool.Dispose(Resource.Displays.AxisFrameResource, resource.gameObject);
+            ResourcePool.Dispose(Resource.Displays.Text, labelObject);
+            ResourcePool.Dispose(Resource.Displays.LineConnector, parentConnector.gameObject);
             resource = null;
             labelObject = null;
             parentConnector = null;

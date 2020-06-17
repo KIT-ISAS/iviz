@@ -262,7 +262,7 @@ namespace Iviz.App.Listeners
 
         TFFrame CreateFrameObject(string id, GameObject parent)
         {
-            TFFrame frame = ResourcePool.GetOrCreate<TFFrame>(Resource.Markers.TFFrame, parent.transform);
+            TFFrame frame = ResourcePool.GetOrCreate<TFFrame>(Resource.Displays.TFFrame, parent.transform);
             frame.name = id;
             frame.Id = id;
             frame.IgnoreUpdates = false;
@@ -299,7 +299,7 @@ namespace Iviz.App.Listeners
             frames.Remove(frame.Id);
             GuiManager.Unselect(frame);
             frame.Stop();
-            ResourcePool.Dispose(Resource.Markers.TFFrame, frame.gameObject);
+            ResourcePool.Dispose(Resource.Displays.TFFrame, frame.gameObject);
         }
 
         public static void Publish(tfMessage_v2 msg)

@@ -2,14 +2,6 @@
 using System;
 using Iviz.App.Listeners;
 
-namespace Iviz.Displays
-{
-    public interface IRecyclable
-    {
-        void Recycle();
-    }
-}
-
 namespace Iviz.App.Displays
 {
     public abstract class DisplayNode : MonoBehaviour

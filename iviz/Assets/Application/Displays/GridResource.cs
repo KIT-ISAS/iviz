@@ -125,7 +125,7 @@ namespace Iviz.Displays
             meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             //meshRenderer.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
 
-            interiorObject = Resource.Markers.Cube.Instantiate(transform);
+            interiorObject = Resource.Displays.Cube.Instantiate(transform);
             interiorObject.name = "Grid Interior";
             interiorObject.transform.localPosition = new Vector3(0, 0, 0.01f);
             interiorRenderer = interiorObject.GetComponent<MeshRenderer>();
@@ -150,7 +150,7 @@ namespace Iviz.Displays
             if (!FollowCamera || TFListener.MainCamera == null) return;
 
             Vector3 cameraPos = TFListener.MainCamera.transform.position;
-            switch(Orientation)
+            switch (Orientation)
             {
                 case GridOrientation.XY:
                     int x = (int)cameraPos.x;
@@ -162,7 +162,7 @@ namespace Iviz.Displays
 
         void UpdateMesh()
         {
-            Mesh squareMesh = Resource.Markers.Square.Object.GetComponent<MeshFilter>().sharedMesh;
+            Mesh squareMesh = Resource.Displays.Square.Object.GetComponent<MeshFilter>().sharedMesh;
             IEnumerable<int> squareIndices = squareMesh.GetIndices(0);
 
             float totalSize = GridCellSize * NumberOfGridCells + GridLineWidth;

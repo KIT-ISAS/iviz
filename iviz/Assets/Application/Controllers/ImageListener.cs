@@ -183,7 +183,7 @@ namespace Iviz.App.Listeners
         {
             ImageTexture = new ImageTexture();
             Node = DisplayClickableNode.Instantiate("ImageNode");
-            marker = ResourcePool.GetOrCreate<ImageResource>(Resource.Markers.Image);
+            marker = ResourcePool.GetOrCreate<ImageResource>(Resource.Displays.Image);
             marker.Texture = ImageTexture;
             Node.Target = marker;
 
@@ -241,7 +241,7 @@ namespace Iviz.App.Listeners
         {
             base.Stop();
             marker.Texture = null;
-            ResourcePool.Dispose(Resource.Markers.Image, marker.gameObject);
+            ResourcePool.Dispose(Resource.Displays.Image, marker.gameObject);
             marker = null;
 
             ImageTexture.Stop();

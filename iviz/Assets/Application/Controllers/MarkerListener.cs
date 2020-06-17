@@ -134,15 +134,20 @@ namespace Iviz.App.Listeners
                 case Marker.DELETE:
                     if (markers.TryGetValue(id, out MarkerObject markerToDelete))
                     {
-                        markerToDelete.Stop();
-                        Destroy(markerToDelete.gameObject);
+                        DeleteMarkerObject(markerToDelete);
                         markers.Remove(id);
                     }
                     break;
             }
         }
 
-        MarkerObject CreateMarkerObject()
+        static void DeleteMarkerObject(MarkerObject markerToDelete)
+        {
+            markerToDelete.Stop();
+            Destroy(markerToDelete.gameObject);
+        }
+
+        static MarkerObject CreateMarkerObject()
         {
             GameObject gameObject = new GameObject();
             gameObject.name = "MarkerObject";

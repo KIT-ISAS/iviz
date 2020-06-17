@@ -86,7 +86,7 @@ namespace Iviz.Displays
 
             for (int i = 0; i < 3; i++)
             {
-                axisObjects[i] = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Markers.Cube, transform);
+                axisObjects[i] = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Cube, transform);
                 axisObjects[i].gameObject.name = names[i];
                 axisObjects[i].ColliderEnabled = false;
             }
@@ -113,9 +113,9 @@ namespace Iviz.Displays
 
         public void Recycle()
         {
-            ResourcePool.Dispose(Resource.Markers.Cube, axisObjects[0].gameObject);
-            ResourcePool.Dispose(Resource.Markers.Cube, axisObjects[1].gameObject);
-            ResourcePool.Dispose(Resource.Markers.Cube, axisObjects[2].gameObject);
+            ResourcePool.Dispose(Resource.Displays.Cube, axisObjects[0].gameObject);
+            ResourcePool.Dispose(Resource.Displays.Cube, axisObjects[1].gameObject);
+            ResourcePool.Dispose(Resource.Displays.Cube, axisObjects[2].gameObject);
         }
 
         public override void Stop()

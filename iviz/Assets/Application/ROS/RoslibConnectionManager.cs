@@ -170,7 +170,7 @@ namespace Iviz.App
             try
             {
 
-                RoslibSharp.Logger.LogDebug = x => Logger.Debug(x);
+                //RoslibSharp.Logger.LogDebug = x => Logger.Debug(x);
                 RoslibSharp.Logger.LogError = x => Logger.Error(x);
                 RoslibSharp.Logger.Log = x => Logger.Info(x);
 
@@ -225,19 +225,23 @@ namespace Iviz.App
                 return;
             }
 
-            Debug.Log("RosLibConnection: Disconnecting...");
-            client.Close();
-            client = null;
-            foreach (var entry in publishersByTopic)
+            AddTask(() =>
             {
-                entry.Value.Invalidate();
+               Debug.Log("RosLibConnection: Disconnecting...");
+               client.Close();
+               client = null;
+               foreach (var entry in publishersByTopic)
+               {
+                   entry.Value.Invalidate();
+               }
+               foreach (var entry in subscribersByTopic)
+               {
+                   entry.Value.Invalidate();
+               }
+               publishers.Clear();
+               Debug.Log("RosLibConnection: Disconnection finished.");
             }
-            foreach (var entry in subscribersByTopic)
-            {
-                entry.Value.Invalidate();
-            }
-            publishers.Clear();
-            Debug.Log("RosLibConnection: Disconnection finished.");
+            );
         }
 
         public override void Advertise<T>(RosSender<T> advertiser)
@@ -437,7 +441,6 @@ namespace Iviz.App
                         cachedTopics = EmptyTopics;
                         return;
                     }
-                    Debug.Log("was here");
                     cachedTopics = client.GetSystemPublishedTopics();
                 }
                 catch (Exception e)

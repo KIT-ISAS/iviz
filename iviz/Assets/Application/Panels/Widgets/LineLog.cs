@@ -10,6 +10,7 @@ namespace Iviz.App
     {
         [SerializeField] Text text = null;
         [SerializeField] GameObject content = null;
+        [SerializeField] Scrollbar vertical = null;
 
         readonly List<string> lines = new List<string>();
         const int maxLines = 100;
@@ -23,6 +24,7 @@ namespace Iviz.App
                 active = value;
                 if (value)
                 {
+                    vertical.value = 0;
                     Flush();
                 }
             }
@@ -40,6 +42,9 @@ namespace Iviz.App
             {
                 return;
             }
+
+            float value = vertical.value;
+
             int overflow = lines.Count - maxLines;
             if (overflow > 0)
             {
@@ -54,6 +59,11 @@ namespace Iviz.App
 
             RectTransform ctransform = (RectTransform)content.transform;
             ctransform.sizeDelta = new Vector2(0, y);
+
+            if (value < 0.05f)
+            {
+                vertical.value = 0;
+            }
         }
 
         public void ClearSubscribers()

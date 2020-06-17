@@ -1,5 +1,4 @@
-﻿//#define SEND_TEST_MSG
-
+﻿
 using UnityEngine;
 
 using System.Collections.Generic;
@@ -66,22 +65,14 @@ namespace Iviz.App.Listeners
             base.Stop();
             GameThread.EverySecond -= CheckForExpiredMarkers;
 
-            foreach (InteractiveMarkerObject imarker in imarkers.Values)
-            {
-                imarker.Stop();
-                Destroy(imarker.gameObject);
-            }
+            imarkers.Values.ForEach(DeleteMarkerObject);
             imarkers.Clear();
             rosSender.Stop();
         }
 
         public void ClearAll()
         {
-            foreach (InteractiveMarkerObject imarker in imarkers.Values)
-            {
-                imarker.Stop();
-                Destroy(imarker.gameObject);
-            }
+            imarkers.Values.ForEach(DeleteMarkerObject);
             imarkers.Clear();
         }
 
@@ -102,13 +93,26 @@ namespace Iviz.App.Listeners
             string id = msg.Name;
             if (!imarkers.TryGetValue(id, out InteractiveMarkerObject imarker))
             {
-                imarker = Resource.Controllers.Instantiate<InteractiveMarkerObject>(transform);
+                imarker = CreateMarkerObject();
                 imarker.Parent = TFListener.ListenersFrame;
                 imarker.Clicked += (control, pose, point, button) => OnInteractiveControlObjectClicked(id, pose, control, point, button);
                 imarker.transform.SetParentLocal(transform);
                 imarkers[id] = imarker;
             }
             imarker.Set(msg);
+        }
+
+        static InteractiveMarkerObject CreateMarkerObject()
+        {
+            GameObject gameObject = new GameObject();
+            gameObject.name = "InteractiveMarkerObject";
+            return gameObject.AddComponent<InteractiveMarkerObject>();
+        }
+
+        static void DeleteMarkerObject(InteractiveMarkerObject imarker)
+        {
+            imarker.Stop();
+            Destroy(imarker.gameObject);
         }
 
         void UpdateInteractiveMarkerPose(InteractiveMarkerPose msg)

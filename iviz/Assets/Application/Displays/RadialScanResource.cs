@@ -203,8 +203,8 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            pointCloud = ResourcePool.GetOrCreate<PointListResource>(Resource.Markers.PointList, transform);
-            lines = ResourcePool.GetOrCreate<LineResource>(Resource.Markers.Line, transform);
+            pointCloud = ResourcePool.GetOrCreate<PointListResource>(Resource.Displays.PointList, transform);
+            lines = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, transform);
 
             pointCloud.UseIntensityTexture = true;
             lines.UseIntensityTexture = true;
@@ -321,8 +321,8 @@ namespace Iviz.Displays
 
         public void Recycle()
         {
-            ResourcePool.Dispose(Resource.Markers.PointList, pointCloud.gameObject);
-            ResourcePool.Dispose(Resource.Markers.Line, lines.gameObject);
+            ResourcePool.Dispose(Resource.Displays.PointList, pointCloud.gameObject);
+            ResourcePool.Dispose(Resource.Displays.Line, lines.gameObject);
         }
     }
 }
