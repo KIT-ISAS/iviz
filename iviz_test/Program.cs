@@ -13,7 +13,7 @@ namespace iviz_test
 {
     class Program
     {
-        static void Main()
+        static void Main_Old4()
         {
             Stream stream = File.Open("/Users/akzeac/Downloads/001-0.jpg", FileMode.Open);
             var image = new JpegImage(stream);
@@ -28,14 +28,14 @@ namespace iviz_test
             Console.In.Read();
         }
 
-        static void Main_Old3()
+        static void Main()
         {
             RosClient client = new RosClient(
-                "http://192.168.0.73:11311",
-                //"http://141.3.59.5:11311",
+                //"http://192.168.0.73:11311",
+                "http://141.3.59.5:11311",
                 null,
-                "http://192.168.0.157:7613"
-                //"http://141.3.59.19:7614"
+                //"http://192.168.0.157:7613"
+                "http://141.3.59.19:7614"
                 );
 
             Console.WriteLine(client.GetSystemState());

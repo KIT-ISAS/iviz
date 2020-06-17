@@ -437,6 +437,7 @@ namespace Iviz.App
                         cachedTopics = EmptyTopics;
                         return;
                     }
+                    Debug.Log("was here");
                     cachedTopics = client.GetSystemPublishedTopics();
                 }
                 catch (Exception e)
