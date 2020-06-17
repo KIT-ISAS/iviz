@@ -362,7 +362,7 @@ namespace Iviz.App
         {
             node.Stop();
             DisposeRobot();
-            Config = new RobotConfiguration();
+            //Config = new RobotConfiguration();
             Stopped?.Invoke();
         }
 

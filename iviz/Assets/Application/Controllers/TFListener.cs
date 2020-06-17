@@ -182,9 +182,10 @@ namespace Iviz.App.Listeners
                 {
                     continue;
                 }
+                TimeSpan timestamp = t.Header.Stamp.ToTimeSpan();
                 if (t.Header.Stamp.Nsecs == 0 && t.Header.Stamp.Secs == 0)
                 {
-                    continue;
+                    timestamp = TimeSpan.MaxValue;
                 }
                 string childId = t.ChildFrameId;
                 if (childId.Length != 0 && childId[0] == '/')
@@ -209,7 +210,6 @@ namespace Iviz.App.Listeners
                 {
                     parentId = parentId.Substring(1);
                 }
-                TimeSpan timestamp = t.Header.Stamp.ToTimeSpan();
                 TFFrame parent = string.IsNullOrEmpty(parentId) ?
                     null :
                     GetOrCreateFrame(parentId, null);

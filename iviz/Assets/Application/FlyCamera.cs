@@ -39,13 +39,13 @@ namespace Iviz.App
         }
         */
 
-        Vector3 orbitCenter;
+        Vector3 orbitCenter_;
         public Vector3 OrbitCenter
         {
-            get => orbitCenter;
+            get => orbitCenter_;
             set
             {
-                orbitCenter = value;
+                orbitCenter_ = value;
                 StartOrbiting();
             }
         }
@@ -328,12 +328,20 @@ namespace Iviz.App
             const float tangentCoeff = 0.001f;
 
             orbitRadius += altDistanceDiff * radiusCoeff;
+            /*
             if (orbitRadius < 0.1f)
             {
                 orbitRadius = 0.1f;
             }
-            orbitCenter -= tangentCoeff * pointerAltDiff.x * transform.TransformDirection(Vector3.right);
-            orbitCenter += tangentCoeff * pointerAltDiff.y * transform.TransformDirection(Vector3.down);
+            */
+            if (orbitRadius < 0.5f)
+            {
+                float diff = 0.5f - orbitRadius;
+                orbitCenter_ += diff * (transform.rotation * Vector3.forward);
+                orbitRadius = 0.5f;
+            }
+            orbitCenter_ -= tangentCoeff * pointerAltDiff.x * transform.TransformDirection(Vector3.right);
+            orbitCenter_ += tangentCoeff * pointerAltDiff.y * transform.TransformDirection(Vector3.down);
             transform.position = -orbitRadius * (transform.rotation * Vector3.forward) + OrbitCenter;
         }
 
@@ -471,7 +479,15 @@ namespace Iviz.App
 
         public void LookAt(in Vector3 position)
         {
-            transform.position = position - transform.forward * 3;
+            if (!IsMobile)
+            {
+                transform.position = position - transform.forward * 3;
+            }
+            else
+            {
+                OrbitCenter = position;
+                transform.position = -orbitRadius * (transform.rotation * Vector3.forward) + OrbitCenter;
+            }
         }
 
         Vector3 GetBaseInput()

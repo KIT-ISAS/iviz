@@ -191,10 +191,20 @@ namespace Iviz.App
 
                 return true;
             }
-            catch (Exception e) when (e is UnreachableUriException || e is ConnectionException || e is XmlRpcException)
+            catch (Exception e) when
+            (e is UnreachableUriException || e is ConnectionException || e is XmlRpcException)
             {
                 Logger.Debug(e);
                 Logger.Internal("Error:", e);
+                client = null;
+                return false;
+            }
+            catch (Exception e) when
+            (e is IOException)
+            {
+                Logger.Debug(e);
+                Logger.Internal("Error:", e);
+                client.Close();
                 client = null;
                 return false;
             }

@@ -182,30 +182,36 @@ namespace Iviz.App
 
         void Run()
         {
-            while (keepRunning)
+            try
             {
-                if (KeepReconnecting && ConnectionState != ConnectionState.Connected)
+                while (keepRunning)
                 {
-                    SetConnectionState(ConnectionState.Connecting);
-
-                    if (Connect())
+                    if (KeepReconnecting && ConnectionState != ConnectionState.Connected)
                     {
-                        SetConnectionState(ConnectionState.Connected);
-                    }
-                    else
-                    {
-                        SetConnectionState(ConnectionState.Disconnected);
-                    }
-                }
+                        SetConnectionState(ConnectionState.Connecting);
 
-                lock (condVar)
-                {
-                    Monitor.Wait(condVar, TaskWaitTime);
+                        if (Connect())
+                        {
+                            SetConnectionState(ConnectionState.Connected);
+                        }
+                        else
+                        {
+                            SetConnectionState(ConnectionState.Disconnected);
+                        }
+                    }
+
+                    lock (condVar)
+                    {
+                        Monitor.Wait(condVar, TaskWaitTime);
+                    }
+                    ExecuteTasks();
                 }
-                ExecuteTasks();
+                SetConnectionState(ConnectionState.Disconnected);
             }
-
-            SetConnectionState(ConnectionState.Disconnected);
+            catch (Exception e)
+            {
+                Debug.LogError("LEFT THREAD: " + e);
+            }
         }
 
         void ExecuteTasks()

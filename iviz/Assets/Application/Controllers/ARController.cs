@@ -138,7 +138,7 @@ namespace Iviz.App.Listeners
             set
             {
                 config.PublishMarkers = value;
-                planeManager.gameObject.SetActive(value);
+                planeManager.enabled = value;
                 if (value)
                 {
                     if (RosSenderMarkers != null && RosSenderMarkers.Topic != MarkersTopic)
@@ -263,6 +263,7 @@ namespace Iviz.App.Listeners
             node.Target = resource;
 
             Config = new ARConfiguration();
+            Debug.Log(ARSessionOrigin.gameObject.activeSelf);
         }
 
         uint headSeq = 0;
