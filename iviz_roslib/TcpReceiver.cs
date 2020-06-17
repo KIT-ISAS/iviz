@@ -146,6 +146,10 @@ namespace Iviz.RoslibSharp
             SerializeHeader();
 
             int totalLength = ReceivePacket();
+            if (totalLength == 0)
+            {
+                throw new TimeoutException("Connection closed before handshake finished.");
+            }
             return ParseHeader(totalLength);
         }
 

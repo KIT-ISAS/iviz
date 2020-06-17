@@ -24,11 +24,11 @@ namespace Iviz.RoslibSharp.XmlRpc
             Task task = client.ConnectAsync(hostname, port);
             if (!task.Wait(TimeoutInMs) || task.IsCanceled)
             {
-                throw new TimeoutException("Node failed to answer");
+                throw new TimeoutException("HttpRequest: Node failed to answer");
             }
             if (task.IsFaulted)
             {
-                throw new TimeoutException("Node failed to answer", task.Exception);
+                throw new TimeoutException("HttpRequest: Node failed to answer", task.Exception);
             }
         }
 
@@ -54,12 +54,19 @@ namespace Iviz.RoslibSharp.XmlRpc
             writer.Write(msgIn);
             writer.Flush();
 
-            Task.Delay(100);
-
             StreamReader reader = new StreamReader(client.GetStream(), BuiltIns.UTF8);
             reader.BaseStream.ReadTimeout = timeoutInMs;
 
-            string response = reader.ReadToEnd();
+            string response;
+
+            try
+            {
+                response = reader.ReadToEnd();
+            }
+            catch (IOException e)
+            {
+                throw new TimeoutException("HttpRequest: Request response timed out!", e);
+            }
 
             int index = response.IndexOf("\r\n\r\n", StringComparison.InvariantCulture);
             if (index == -1)

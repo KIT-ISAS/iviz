@@ -100,7 +100,7 @@ namespace Iviz.App.Listeners
             set
             {
                 config.UseIntensity = value;
-                resource.UseIntensityNoRange = value;
+                resource.UseIntensityNotRange = value;
             }
         }
 

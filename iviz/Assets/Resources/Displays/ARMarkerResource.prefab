@@ -56,6 +56,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -93,6 +94,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   color: {r: 0, g: 1, b: 0, a: 0.2509804}
+  occlusionOnly_: 0
+  tint_: {r: 1, g: 1, b: 1, a: 1}
 --- !u!65 &967880120042637132
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -150,7 +153,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5428010335786616791}
-  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: -462981019419857548, guid: e5e884af6e9d7467dbf80b183417de36, type: 3}
 --- !u!23 &5428010335786616785
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -165,6 +168,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -202,7 +206,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   color: {r: 0, g: 1, b: 0, a: 0.2509804}
-  back: {fileID: 7898249148954481019}
+  occlusionOnly_: 0
+  tint_: {r: 1, g: 1, b: 1, a: 1}
+  scale_: 0
+  angle_: 0
+  horizontal_: 0
+  offset_: {x: 0, y: 0, z: 0}
 --- !u!65 &5428010335786616784
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -255,7 +264,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5428010336399050378}
-  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: -462981019419857548, guid: e5e884af6e9d7467dbf80b183417de36, type: 3}
 --- !u!23 &5428010336399050373
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -270,6 +279,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -305,6 +315,26 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Text
+      objectReference: {fileID: 0}
+    - target: {fileID: 3616584195209632818, guid: f89b75492bba14bc598806f892dbdf00,
+        type: 3}
+      propertyPath: m_Text
+      value: AR
+      objectReference: {fileID: 0}
+    - target: {fileID: 3616584195209632818, guid: f89b75492bba14bc598806f892dbdf00,
+        type: 3}
+      propertyPath: m_Alignment
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3616584195209632818, guid: f89b75492bba14bc598806f892dbdf00,
+        type: 3}
+      propertyPath: m_FontSize
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 3616584195209632818, guid: f89b75492bba14bc598806f892dbdf00,
+        type: 3}
+      propertyPath: m_Color.rgba
+      value: 4278255360
       objectReference: {fileID: 0}
     - target: {fileID: 3616584195209632828, guid: f89b75492bba14bc598806f892dbdf00,
         type: 3}
@@ -375,26 +405,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalScale.z
       value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 3616584195209632818, guid: f89b75492bba14bc598806f892dbdf00,
-        type: 3}
-      propertyPath: m_Text
-      value: AR
-      objectReference: {fileID: 0}
-    - target: {fileID: 3616584195209632818, guid: f89b75492bba14bc598806f892dbdf00,
-        type: 3}
-      propertyPath: m_Alignment
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3616584195209632818, guid: f89b75492bba14bc598806f892dbdf00,
-        type: 3}
-      propertyPath: m_FontSize
-      value: 50
-      objectReference: {fileID: 0}
-    - target: {fileID: 3616584195209632818, guid: f89b75492bba14bc598806f892dbdf00,
-        type: 3}
-      propertyPath: m_Color.rgba
-      value: 4278255360
       objectReference: {fileID: 0}
     - target: {fileID: 3697026927689715932, guid: f89b75492bba14bc598806f892dbdf00,
         type: 3}

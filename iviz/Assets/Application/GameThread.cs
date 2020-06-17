@@ -9,7 +9,7 @@ namespace Iviz.App
     {
         readonly List<Action> actionsOnlyOnce = new List<Action>();
         readonly List<Action> actionsOnlyOnceTmp = new List<Action>();
-        DateTime lastRunTime;
+        float lastRunTime;
 
         public static event Action EveryFrame;
         public static event Action EverySecond;
@@ -19,7 +19,7 @@ namespace Iviz.App
         void Awake()
         {
             Instance = this;
-            lastRunTime = DateTime.Now;
+            lastRunTime = Time.time;
         }
 
         void OnDestroy()
@@ -43,8 +43,8 @@ namespace Iviz.App
         {
             EveryFrame?.Invoke();
 
-            DateTime newRunTime = DateTime.Now;
-            if ((newRunTime - lastRunTime).TotalMilliseconds > 1000)
+            float newRunTime = Time.time;
+            if (newRunTime - lastRunTime > 1)
             {
                 EverySecond?.Invoke();
                 lastRunTime = newRunTime;
@@ -52,7 +52,7 @@ namespace Iviz.App
 
             lock (actionsOnlyOnce)
             {
-                if (!actionsOnlyOnce.Any()) return;
+                if (actionsOnlyOnce.Count == 0) return;
                 actionsOnlyOnceTmp.Clear();
                 actionsOnlyOnceTmp.AddRange(actionsOnlyOnce);
                 actionsOnlyOnce.Clear();
