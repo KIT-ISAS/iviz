@@ -14,6 +14,7 @@ namespace Iviz.RoslibSharp.XmlRpc
         readonly RosClient client;
         Task task;
 
+        public Uri ListenerUri => listener.LocalEndpoint;
         public Uri Uri => client.CallerUri;
 
         public NodeServer(RosClient client)

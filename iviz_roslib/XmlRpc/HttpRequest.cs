@@ -59,12 +59,14 @@ namespace Iviz.RoslibSharp.XmlRpc
 
             string response;
 
+            //Logger.Log("Start: " + DateTime.Now);
             try
             {
                 response = reader.ReadToEnd();
             }
             catch (IOException e)
             {
+                //Logger.Log("End: " + DateTime.Now);
                 throw new TimeoutException("HttpRequest: Request response timed out!", e);
             }
 

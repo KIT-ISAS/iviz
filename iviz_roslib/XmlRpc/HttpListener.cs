@@ -12,6 +12,8 @@ namespace Iviz.RoslibSharp.XmlRpc
         bool keepGoing = true;
         const int timeoutInMs = 2000;
 
+        public Uri LocalEndpoint { get; }
+
         public HttpListener(Uri uri)
         {
             if (uri is null)
@@ -19,38 +21,30 @@ namespace Iviz.RoslibSharp.XmlRpc
                 throw new ArgumentNullException(nameof(uri));
             }
 
-            listener = new TcpListener(IPAddress.Any, uri.Port);
+            int port = uri.Port;
+            if (uri.IsDefaultPort)
+            {
+                port = 0;
+            }
+            listener = new TcpListener(IPAddress.Any, port);
             listener.Start();
+
+            IPEndPoint endpoint = (IPEndPoint)listener.LocalEndpoint;
+            LocalEndpoint = new Uri($"http://{endpoint.Address}:{endpoint.Port}/");
         }
 
         public void Start(Action<HttpListenerContext> callback)
         {
             while (keepGoing)
             {
-                TcpClient client;
-
                 try
                 {
-                    while (keepGoing && !listener.Pending())
-                    {
-                        Task.Delay(10);
-                    }
-                    if (!keepGoing)
-                    {
-                        break;
-                    }
-                    Task<TcpClient> task = listener.AcceptTcpClientAsync();
-                    if (!task.Wait(timeoutInMs) || task.IsCanceled || task.IsFaulted || !keepGoing)
-                    {
-                        Logger.Log("HttpListener: Incoming connection timed out!");
-                        continue;
-                    }
-                    callback(new HttpListenerContext(task.Result));
+                    TcpClient client = listener.AcceptTcpClient();
+                    callback(new HttpListenerContext(client));
                 }
-                catch (Exception e) when
-                (e is ObjectDisposedException || e is SocketException)
+                catch (Exception e)
                 {
-                    Logger.Log("Break");
+                    Logger.LogError("HttpListener: Leaving thread! " + e);
                     break;
                 }
             }
@@ -58,15 +52,19 @@ namespace Iviz.RoslibSharp.XmlRpc
 
         public void Stop()
         {
+            Logger.LogError("HttpListener: Requesting stop.");
             keepGoing = false;
-            /*
             try
             {
                 listener.Server.Shutdown(SocketShutdown.Both);
             }
-            catch (SocketException) { }
-            */
-            listener.Stop();
+            catch (Exception) {}
+            try
+            {
+                listener.Stop();
+            }
+            catch (Exception) {}
+            Logger.LogError("HttpListener: Stopped.");
         }
 
         public void Dispose()

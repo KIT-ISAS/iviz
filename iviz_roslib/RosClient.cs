@@ -199,6 +199,10 @@ namespace Iviz.RoslibSharp
             {
                 Listener = new XmlRpc.NodeServer(this);
                 Listener.Start();
+                if (CallerUri.Port == 0 || CallerUri.IsDefaultPort)
+                {
+                    CallerUri = new Uri($"http://{CallerUri.Host}:{Listener.ListenerUri.Port}{CallerUri.AbsolutePath}");
+                }
             }
             catch (SocketException e)
             {
