@@ -70,7 +70,7 @@ namespace Iviz.RoslibSharp
                 }
                 foreach (int id in toDelete)
                 {
-                    Logger.Log($"{this}: Removing service connection with '{connections[id].Hostname}' - dead x_x");
+                    Logger.LogDebug($"{this}: Removing service connection with '{connections[id].Hostname}' - dead x_x");
                     connections[id].Stop();
                     connections.RemoveAt(id);
                 }
