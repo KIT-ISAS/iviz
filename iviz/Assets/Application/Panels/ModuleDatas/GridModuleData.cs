@@ -25,7 +25,7 @@ namespace Iviz.App
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Grid) as GridPanelContents;
 
-            controller = Resource.Controllers.Instantiate<Listeners.Grid>();
+            controller = Instantiate<Listeners.Grid>();
             controller.ModuleData = this;
             if (constructor.Configuration != null)
             {

@@ -25,7 +25,7 @@ namespace Iviz.App
                 constructor.GetConfiguration<MarkerConfiguration>()?.Type ?? constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Marker) as MarkerPanelContents;
-            listener = Resource.Controllers.Instantiate<MarkerListener>();
+            listener = Instantiate<MarkerListener>();
             listener.name = "Marker:" + Topic;
             listener.ModuleData = this;
             if (constructor.Configuration == null)

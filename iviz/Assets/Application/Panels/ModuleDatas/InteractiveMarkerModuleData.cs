@@ -24,7 +24,7 @@ namespace Iviz.App
         {
 
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.InteractiveMarker) as InteractiveMarkerPanelContents;
-            listener = Resource.Controllers.Instantiate<InteractiveMarkerListener>();
+            listener = Instantiate<InteractiveMarkerListener>();
             listener.name = "InteractiveMarkers";
             listener.ModuleData = this;
             if (constructor.Configuration != null)

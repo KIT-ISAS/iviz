@@ -317,18 +317,6 @@ namespace Iviz.Resources
             {
                 AR = new GameObjectInfo("Listeners/AR");
             }
-
-            public T Instantiate<T>(UnityEngine.Transform parent = null) where T : MonoBehaviour
-            {
-                if (!typeof(IController).IsAssignableFrom(typeof(T)))
-                {
-                    throw new ArgumentException(nameof(T));
-                }
-                GameObject gameObject = new GameObject();
-                gameObject.transform.parent = parent;
-                gameObject.name = typeof(T).Name;
-                return gameObject.AddComponent<T>();
-            }
         }
 
         public class WidgetsType

@@ -24,7 +24,7 @@ namespace Iviz.App
         public RobotModuleData(ModuleDataConstructor constructor) :
         base(constructor.DisplayList, constructor.Topic, constructor.Type)
         {
-            Robot = Resource.Controllers.Instantiate<Robot>();
+            Robot = Instantiate<Robot>();
             Robot.ModuleData = this;
             if (constructor.Configuration != null)
             {

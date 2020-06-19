@@ -22,7 +22,7 @@ namespace Iviz.App
                 constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.TF) as TFPanelContents;
-            listener = Resource.Controllers.Instantiate<TFListener>();
+            listener = Instantiate<TFListener>();
             listener.name = "TF";
             listener.ModuleData = this;
             if (constructor.Configuration != null)

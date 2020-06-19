@@ -1,6 +1,7 @@
 ﻿using System;
 using Iviz.App.Listeners;
 using Iviz.Resources;
+using UnityEngine;
 
 namespace Iviz.App
 {
@@ -79,7 +80,19 @@ namespace Iviz.App
         {
             DataPanelManager.HidePanelFor(this);
         }
-        
+
+        protected T Instantiate<T>(UnityEngine.Transform parent = null) where T : MonoBehaviour
+        {
+            if (!typeof(IController).IsAssignableFrom(typeof(T)))
+            {
+                throw new ArgumentException(nameof(T));
+            }
+            GameObject gameObject = new GameObject();
+            gameObject.transform.parent = parent;
+            gameObject.name = typeof(T).Name;
+            return gameObject.AddComponent<T>();
+        }
+
         public static ModuleData CreateFromResource(ModuleDataConstructor c)
         {
             switch (c.Module)

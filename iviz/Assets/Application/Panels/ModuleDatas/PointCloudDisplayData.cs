@@ -25,7 +25,7 @@ namespace Iviz.App
             constructor.GetConfiguration<PointCloudConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.PointCloud) as PointCloudPanelContents;
-            listener = Resource.Controllers.Instantiate<PointCloudListener>();
+            listener = Instantiate<PointCloudListener>();
             listener.name = "PointCloud:" + Topic;
             listener.ModuleData = this;
             if (constructor.Configuration == null)

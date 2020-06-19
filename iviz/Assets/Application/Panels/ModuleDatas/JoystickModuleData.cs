@@ -22,7 +22,7 @@ namespace Iviz.App
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Joystick) as JoystickPanelContents;
 
-            controller = Resource.Controllers.Instantiate<JoystickController>();
+            controller = Instantiate<JoystickController>();
             controller.ModuleData = this;
             if (constructor.Configuration != null)
             {

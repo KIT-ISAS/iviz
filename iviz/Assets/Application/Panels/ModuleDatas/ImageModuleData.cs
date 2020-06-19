@@ -32,7 +32,7 @@ namespace Iviz.App
                 constructor.GetConfiguration<ImageConfiguration>()?.Type ?? constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Image) as ImagePanelContents;
-            listener = Resource.Controllers.Instantiate<ImageListener>();
+            listener = Instantiate<ImageListener>();
             listener.name = "Image";
             if (constructor.Configuration != null)
             {

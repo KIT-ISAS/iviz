@@ -27,7 +27,7 @@ namespace Iviz.App
 
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.DepthImageProjector) as DepthImageProjectorPanelContents;
 
-            controller = Resource.Controllers.Instantiate<DepthImageProjector>();
+            controller = Instantiate<DepthImageProjector>();
             controller.ModuleData = this;
             if (constructor.Configuration != null)
             {
