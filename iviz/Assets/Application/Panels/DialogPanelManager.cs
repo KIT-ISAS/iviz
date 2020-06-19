@@ -8,7 +8,8 @@ namespace Iviz.App
     {
         ItemList,
         Connection,
-        Image
+        Image,
+        TF
     }
 
     public class DialogPanelManager : MonoBehaviour
@@ -36,6 +37,7 @@ namespace Iviz.App
             PanelByType[DialogPanelType.ItemList] = Resource.Widgets.ItemListPanel.Instantiate(transform).GetComponent<DialogItemList>();
             PanelByType[DialogPanelType.Connection] = Resource.Widgets.ConnectionPanel.Instantiate(transform).GetComponent<ConnectionDialogContents>();
             PanelByType[DialogPanelType.Image] = Resource.Widgets.ImagePanel.Instantiate(transform).GetComponent<ImageDialogContents>();
+            PanelByType[DialogPanelType.TF] = Resource.Widgets.TFPanel.Instantiate(transform).GetComponent<TFDialogContents>();
 
             PanelByType.Values.ForEach(x => x.Active = false);
             Active = false;

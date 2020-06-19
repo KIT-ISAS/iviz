@@ -130,20 +130,6 @@ namespace Iviz.App
             }
         }
 
-        /*
-        public bool TrySetUri(string uristr)
-        {
-            if (!Uri.TryCreate(uristr, UriKind.Absolute, out Uri uri) ||
-                uri.Scheme != "http" || (uri.AbsolutePath != "/"))
-            {
-                MasterUri = null;
-                return false;
-            }
-            MasterUri = uri;
-            return true;
-        }
-        */
-
         protected void AddTask(Action a)
         {
             lock (condVar)

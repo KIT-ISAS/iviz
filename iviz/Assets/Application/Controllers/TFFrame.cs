@@ -7,6 +7,7 @@ using Iviz.App.Listeners;
 using Iviz.Resources;
 using Iviz.App.Displays;
 using System;
+using System.Collections.ObjectModel;
 
 namespace Iviz.App.Listeners
 {
@@ -64,6 +65,8 @@ namespace Iviz.App.Listeners
 
         readonly HashSet<DisplayNode> listeners = new HashSet<DisplayNode>();
         readonly Dictionary<string, TFFrame> children = new Dictionary<string, TFFrame>();
+
+        public ReadOnlyDictionary<string, TFFrame> Children => new ReadOnlyDictionary<string, TFFrame>(children);
 
         public override Bounds Bounds => new Bounds(boxCollider.center, boxCollider.size);
         public override Bounds WorldBounds => boxCollider.bounds;
@@ -215,7 +218,7 @@ namespace Iviz.App.Listeners
         Pose pose;
         public Pose Pose => pose;
 
-        public Pose WorldPose => transform.AsPose();
+        public Pose WorldPose => TFListener.RelativePose(transform.AsPose());
 
         [SerializeField] Vector3 rosPosition_;
 

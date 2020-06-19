@@ -49,6 +49,7 @@ namespace Iviz.App
 
         [SerializeField] Button addDisplayByTopic = null;
         [SerializeField] Button addDisplay = null;
+        [SerializeField] Button showTFTree = null;
         //[SerializeField] Toggle keepReconnecting = null;
 
         [SerializeField] Sprite ConnectedSprite = null;
@@ -68,6 +69,7 @@ namespace Iviz.App
         DialogData availableTopics;
         ConnectionDialogData connectionData;
         ImageDialogData imageData;
+        TFDialogData tfTreeData;
 
         readonly List<GameObject> buttons = new List<GameObject>();
 
@@ -96,6 +98,7 @@ namespace Iviz.App
             availableTopics = CreateDialog<AddTopicDialogData>();
 
             imageData = CreateDialog<ImageDialogData>();
+            tfTreeData = CreateDialog<TFDialogData>();
 
             connectionData = CreateDialog<ConnectionDialogData>();
             LoadSimpleConfiguration();
@@ -110,8 +113,10 @@ namespace Iviz.App
             load.onClick.AddListener(LoadStateConfiguration);
             hide.onClick.AddListener(OnHideClick);
 
-            addDisplayByTopic.onClick.AddListener(OnAddDisplayByTopicClick);
-            addDisplay.onClick.AddListener(OnAddDisplayClick);
+
+            addDisplayByTopic.onClick.AddListener(() => { availableTopics.Show(); });
+            addDisplay.onClick.AddListener(() => { availableModules.Show(); });
+            showTFTree.onClick.AddListener(() => { tfTreeData.Show(); });
 
             MasterUriStr.Label = connectionData.MasterUri + " →";
             MasterUriButton.Clicked += () =>
@@ -251,7 +256,6 @@ namespace Iviz.App
         void OnHideClick()
         {
             AllGuiVisible = !AllGuiVisible;
-            //topicsPanel.Active = false;
             EventSystem.current.SetSelectedGameObject(null);
         }
 
@@ -374,17 +378,6 @@ namespace Iviz.App
             {
                 //Debug.Log(e);
             }
-        }
-
-
-        void OnAddDisplayByTopicClick()
-        {
-            availableTopics.Show();
-        }
-
-        void OnAddDisplayClick()
-        {
-            availableModules.Show();
         }
 
         public ModuleData CreateModule(Resource.Module resource, string topic = "", string type = "", IConfiguration configuration = null)
