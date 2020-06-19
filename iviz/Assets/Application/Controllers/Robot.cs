@@ -38,6 +38,9 @@ namespace Iviz.App
         ObjectClickableNode node;
         RobotInfo robotInfo;
 
+        GameObject carrier;
+        BoxCollider carrierCollider;
+
         public TFFrame Frame => node.Parent;
 
         public GameObject RobotObject { get; private set; }
@@ -204,6 +207,7 @@ namespace Iviz.App
                         TFFrame parentFrame = TFListener.GetOrCreateFrame(Decorate(x.Value.name), node);
                         frame.Parent = parentFrame;
                     });
+                    //BaseLink.transform.SetParentLocal(node.transform);
                 }
                 else
                 {
@@ -222,7 +226,7 @@ namespace Iviz.App
                         x.Key.transform.SetLocalPose(originalLinkPoses[x.Key]);
                     });
                     node.Parent = null;
-                    RobotObject.transform.SetParentLocal(node.transform);
+                    //RobotObject.transform.SetParentLocal(node.transform);
                     jointWriters.Values.ForEach(x => x.Reset());
                 }
                 if (BaseLink == null)
@@ -232,6 +236,7 @@ namespace Iviz.App
                 else
                 {
                     node.AttachTo(Decorate(BaseLink.name));
+                    BaseLink.transform.SetParentLocal(node.transform);
                 }
                 config.AttachToTF = value;
             }
@@ -246,8 +251,10 @@ namespace Iviz.App
         void Awake()
         {
             node = ObjectClickableNode.Instantiate("RobotNode");
-            //gameObject.layer = Resource.ClickableLayer;
-            //boxCollider = GetComponent<BoxCollider>();
+
+            carrier = new GameObject();
+            carrierCollider = carrier.AddComponent<BoxCollider>();
+            node.Target = carrier;
 
             Config = new RobotConfiguration();
         }
@@ -262,19 +269,15 @@ namespace Iviz.App
             bool oldAttachToTf = AttachToTF;
 
             DisposeRobot();
+            //node.Target = null;
 
             config.RobotResource = newResource;
 
             RobotObject = ResourcePool.GetOrCreate(Resource.Robots.Objects[newResource], TFListener.BaseFrame.transform);
             RobotObject.name = newResource;
-            //RobotObject.layer = Resource.ClickableLayer;
 
             Name = Name; // update name;
 
-            node.Target = RobotObject;
-            //robotCollider = RobotObject.GetComponent<BoxCollider>();
-            //boxCollider.size = robotCollider.size;
-            //boxCollider.center = robotCollider.center;
 
             if (node.Selected)
             {
@@ -320,6 +323,14 @@ namespace Iviz.App
             else
             {
                 node.AttachTo(Decorate(BaseLink.name));
+                BaseLink.transform.SetParentLocal(node.transform);
+
+                BoxCollider robotCollider = RobotObject.GetComponent<BoxCollider>();
+                carrierCollider.center = robotCollider.center;
+                carrierCollider.size = robotCollider.size;
+                robotCollider.enabled = false;
+
+                carrier.name = "[" + newResource + "]";
             }
 
             if (oldAttachToTf)
@@ -362,8 +373,10 @@ namespace Iviz.App
         {
             node.Stop();
             DisposeRobot();
-            //Config = new RobotConfiguration();
             Stopped?.Invoke();
+
+            Destroy(carrier);
+            Destroy(node);
         }
 
         void DisposeRobot()
@@ -379,8 +392,7 @@ namespace Iviz.App
             }
             config.RobotResource = null;
             RobotObject = null;
-            node.Target = null;
-            //robotCollider = null;
+
             if (robotInfo != null)
             {
                 robotInfo.owner = null;
@@ -392,12 +404,6 @@ namespace Iviz.App
             originalLinkPoses.Clear();
             displays.Clear();
         }
-
-        //public override void Recycle()
-        //{
-        //ResourcePool.Dispose(Resource.Markers.NamedBoundary, namedBoundary.gameObject);
-        //namedBoundary = null;
-        //}
     }
 
     public class JointInfo : MonoBehaviour
