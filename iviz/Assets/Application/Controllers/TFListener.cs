@@ -38,7 +38,9 @@ namespace Iviz.App.Listeners
         public static FlyCamera GuiManager => Instance.guiManager;
 
         public static TFFrame BaseFrame { get; private set; }
-        public static TFFrame ListenersFrame { get; private set; }
+        public static TFFrame RootFrame { get; private set; }
+
+        public static TFFrame ListenersFrame => RootFrame;
 
         public override TFFrame Frame => BaseFrame;
 
@@ -155,12 +157,12 @@ namespace Iviz.App.Listeners
 
             Config = new TFConfiguration();
 
-            BaseFrame = Add(CreateFrameObject(BaseFrameId, gameObject));
-            BaseFrame.AddListener(null);
+            RootFrame = Add(CreateFrameObject("/", gameObject));
+            RootFrame.ForceInvisible = true;
 
-            ListenersFrame = Add(CreateFrameObject("_displays_", gameObject));
-            ListenersFrame.AddListener(null);
-            ListenersFrame.ForceInvisible = true;
+            BaseFrame = Add(CreateFrameObject(BaseFrameId, gameObject));
+            BaseFrame.Parent = RootFrame;
+            BaseFrame.AddListener(null);
 
             Publisher = new RosSender<tfMessage_v2>(DefaultTopic);
         }
@@ -211,7 +213,7 @@ namespace Iviz.App.Listeners
                     parentId = parentId.Substring(1);
                 }
                 TFFrame parent = string.IsNullOrEmpty(parentId) ?
-                    null :
+                    RootFrame :
                     GetOrCreateFrame(parentId, null);
 
                 if (child.SetParent(parent))
@@ -271,6 +273,7 @@ namespace Iviz.App.Listeners
             frame.LabelSize = config.AxisLabelSize;
             frame.LabelVisible = config.AxisLabelVisible;
             frame.ConnectorVisible = config.ParentConnectorVisible;
+            frame.Parent = RootFrame;
             return frame;
         }
 
@@ -311,11 +314,11 @@ namespace Iviz.App.Listeners
         {
             if (FlyCamera.IsMobile)
             {
-                UnityEngine.Pose baseFrameInverse = BaseFrame.transform.AsPose().Inverse();
-                UnityEngine.Pose relative = baseFrameInverse.Multiply(unityPose);
-                relative.position.x /= BaseFrame.transform.localScale.x;
-                relative.position.y /= BaseFrame.transform.localScale.y;
-                relative.position.z /= BaseFrame.transform.localScale.z;
+                UnityEngine.Pose rootFrameInverse = RootFrame.transform.AsPose().Inverse();
+                UnityEngine.Pose relative = rootFrameInverse.Multiply(unityPose);
+                relative.position.x /= RootFrame.transform.localScale.x;
+                relative.position.y /= RootFrame.transform.localScale.y;
+                relative.position.z /= RootFrame.transform.localScale.z;
                 return relative;
             }
             else

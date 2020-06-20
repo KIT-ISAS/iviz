@@ -32,6 +32,7 @@ namespace Iviz.App
         [SerializeField] DataLabelWidget MasterUriStr = null;
         [SerializeField] TrashButtonWidget MasterUriButton = null;
         [SerializeField] TrashButtonWidget ConnectButton = null;
+        [SerializeField] TrashButtonWidget StopButton = null;
 
 
         [SerializeField] Button save = null;
@@ -165,20 +166,7 @@ namespace Iviz.App
                     Logger.Internal($"Changing caller uri to '{uri}'");
                 }
             };
-            connectionData.ConnectClicked += () =>
-            {
-                if (ConnectionManager.Connected)
-                {
-                    Logger.Internal("Reconnection requested.");
-                }
-                else
-                {
-                    Logger.Internal("Connection requested.");
-                }
-                ConnectionManager.Connection.Disconnect();
-                KeepReconnecting = true;
-            };
-            connectionData.StopClicked += () =>
+            StopButton.Clicked += () =>
             {
                 if (ConnectionManager.Connected)
                 {

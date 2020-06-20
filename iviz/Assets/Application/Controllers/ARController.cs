@@ -45,7 +45,7 @@ namespace Iviz.App.Listeners
         readonly MeshToMarkerHelper helper = new MeshToMarkerHelper("ar");
         DateTime lastMarkerUpdate = DateTime.MinValue;
 
-        GameObject TFRoot => TFListener.Instance.gameObject;
+        GameObject TFRoot => TFListener.RootFrame.gameObject;
 
         public string HeadFrameName => $"{ConnectionManager.MyId}/ar_head";
         public string HeadPoseTopic => $"{ConnectionManager.MyId}/ar_head";

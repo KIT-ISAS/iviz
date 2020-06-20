@@ -51,8 +51,6 @@ namespace Iviz.App
         public event Action<Uri> MasterUriChanged;
         public event Action<Uri> MyUriChanged;
         public event Action<string> MyIdChanged;
-        public event Action ConnectClicked;
-        public event Action StopClicked;
         
         public override void Initialize(DisplayListPanel panel)
         {
@@ -91,14 +89,6 @@ namespace Iviz.App
             {
                 MyId = text;
                 MyIdChanged?.Invoke(MyId);
-            };
-            panel.Stop.Clicked += () =>
-            {
-                StopClicked?.Invoke();
-            };
-            panel.Connect.Clicked += () =>
-            {
-                ConnectClicked?.Invoke();
             };
             panel.RefreshMyId.Clicked += () =>
             {

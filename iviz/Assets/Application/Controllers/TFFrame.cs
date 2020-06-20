@@ -226,13 +226,14 @@ namespace Iviz.App.Listeners
         {
             if (!IgnoreUpdates)
             {
+                pose = newPose;
+                rosPosition_ = pose.position.Unity2Ros();
+
                 if (newPose.position.sqrMagnitude > MaxPoseMagnitude * MaxPoseMagnitude)
                 {
                     return; // lel
                 }
 
-                pose = newPose;
-                rosPosition_ = pose.position.Unity2Ros();
                 transform.SetLocalPose(newPose);
                 LogPose(time);
             }

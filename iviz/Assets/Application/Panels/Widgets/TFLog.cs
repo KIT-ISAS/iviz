@@ -10,6 +10,7 @@ namespace Iviz.App
     public class TFLog : MonoBehaviour, IWidget
     {
         [SerializeField] Text text = null;
+        [SerializeField] GameObject content = null;
 
         class TFNode
         {
@@ -70,15 +71,15 @@ namespace Iviz.App
                 return;
             }
 
-            TFNode root = new TFNode(TFListener.BaseFrame);
+            TFNode root = new TFNode(TFListener.RootFrame);
 
             StringBuilder str = new StringBuilder();
             root.Write(str, 0);
 
             text.text = str.ToString();
 
-            //RectTransform ctransform = (RectTransform)content.transform;
-            //ctransform.sizeDelta = new Vector2(0, text.preferredHeight);
+            RectTransform ctransform = (RectTransform)content.transform;
+            ctransform.sizeDelta = new Vector2(text.preferredWidth + 10, text.preferredHeight + 10);
         }
 
         public void ClearSubscribers()

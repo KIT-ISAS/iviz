@@ -3,6 +3,7 @@ using System.Runtime.Serialization;
 using Iviz.App.Displays;
 using Iviz.Displays;
 using Iviz.Msgs.GeometryMsgs;
+using Iviz.Msgs.NavMsgs;
 using Iviz.Resources;
 using Iviz.RoslibSharp;
 using UnityEngine;
@@ -29,6 +30,7 @@ namespace Iviz.App.Listeners
     public sealed class MagnitudeListener : ListenerController
     {
         SimpleDisplayNode displayNode;
+        SimpleDisplayNode childNode;
         SimpleDisplayNode trailNode;
         AxisFrameResource axis;
         TrailResource trail;
@@ -226,6 +228,19 @@ namespace Iviz.App.Listeners
                     sphere.transform.localScale = 0.125f * UnityEngine.Vector3.one;
                     sphere.Color = Color;
                     break;
+
+                case Odometry.RosMessageType:
+                    Listener = new RosListener<Odometry>(config.Topic, Handler);
+                    axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Displays.AxisFrameResource, displayNode.transform);
+
+                    childNode = SimpleDisplayNode.Instantiate("ChildNode");
+                    arrow = ResourcePool.GetOrCreate<ArrowResource>(Resource.Displays.Arrow, childNode.transform);
+                    arrow.Color = Color;
+
+                    sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere, displayNode.transform);
+                    sphere.transform.localScale = 0.125f * UnityEngine.Vector3.one;
+                    sphere.Color = Color;
+                    break;
             }
         }
 
@@ -275,6 +290,57 @@ namespace Iviz.App.Listeners
             UnityEngine.Vector3 dir = msg.Twist.Linear.Ros2Unity();
             arrow.Set(UnityEngine.Vector3.zero, dir);
             trail.DataSource = () => displayNode.transform.TransformPoint(dir * VectorScale);
+        }
+
+        void Handler(Odometry msg)
+        {
+            displayNode.AttachTo(msg.Header.FrameId);
+            childNode.AttachTo(msg.ChildFrameId);
+
+            if (msg.Pose.Pose.HasNaN())
+            {
+                return;
+            }
+            if (msg.Twist.Twist.Angular.HasNaN() || msg.Twist.Twist.Linear.HasNaN())
+            {
+                return;
+            }
+            displayNode.transform.SetLocalPose(msg.Pose.Pose.Ros2Unity());
+
+            UnityEngine.Vector3 dir = msg.Twist.Twist.Linear.Ros2Unity();
+            arrow.Set(UnityEngine.Vector3.zero, dir);
+            trail.DataSource = () => displayNode.transform.TransformPoint(dir * VectorScale);
+        }
+
+        public override void Stop()
+        {
+            base.Stop();
+
+            trail.DataSource = null;
+
+            displayNode.Stop();
+            trailNode.Stop();
+            Destroy(displayNode);
+            Destroy(trailNode);
+
+            if (childNode != null)
+            {
+                childNode.Stop();
+                Destroy(childNode);
+            }
+
+            if (axis != null)
+            {
+                ResourcePool.Dispose(Resource.Displays.AxisFrameResource, axis.gameObject);
+            }
+            if (arrow != null)
+            {
+                ResourcePool.Dispose(Resource.Displays.Arrow, arrow.gameObject);
+            }
+            if (sphere != null)
+            {
+                ResourcePool.Dispose(Resource.Displays.Sphere, sphere.gameObject);
+            }
         }
     }
 }

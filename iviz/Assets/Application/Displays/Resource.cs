@@ -51,6 +51,7 @@ namespace Iviz.Resources
             { PoseStamped.RosMessageType, Module.Magnitude },
             { PointStamped.RosMessageType, Module.Magnitude },
             { WrenchStamped.RosMessageType, Module.Magnitude },
+            { Odometry.RosMessageType, Module.Magnitude },
             { TwistStamped.RosMessageType, Module.Magnitude },
             { OccupancyGrid.RosMessageType, Module.OccupancyGrid },
         };

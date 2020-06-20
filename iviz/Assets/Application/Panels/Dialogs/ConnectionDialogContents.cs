@@ -11,9 +11,7 @@ namespace Iviz.App
         public InputFieldWidget MyId;
         public TrashButtonWidget RefreshMyUri;
         public TrashButtonWidget RefreshMyId;
-        public TrashButtonWidget Connect;
         public TrashButtonWidget Close;
-        public TrashButtonWidget Stop;
         public LineLog LineLog;
         //public Text Text;
 
@@ -30,9 +28,7 @@ namespace Iviz.App
             MyId.ClearSubscribers();
             RefreshMyUri.ClearSubscribers();
             RefreshMyId.ClearSubscribers();
-            Connect.ClearSubscribers();
             Close.ClearSubscribers();
-            Stop.ClearSubscribers();
         }
     }
 }
