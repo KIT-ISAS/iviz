@@ -346,7 +346,7 @@ namespace Iviz.RoslibSharp
             }
             catch (Exception e)
             {
-                Logger.LogError($"{this}: {e}");
+                Logger.Log($"{this}: {e}");
             }
             Status = SenderStatus.Dead;
             tcpClient = null;

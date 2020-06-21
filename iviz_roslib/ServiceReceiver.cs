@@ -51,6 +51,9 @@ namespace Iviz.RoslibSharp
             RemoteHostname = remoteUri.Host;
             RemotePort = remoteUri.Port;
 
+            tcpClient.ReceiveTimeout = 5000;
+            tcpClient.SendTimeout = 5000;
+
             tcpClient.Connect(RemoteHostname, RemotePort);
             NetworkStream stream = tcpClient.GetStream();
             reader = new BinaryReader(stream);

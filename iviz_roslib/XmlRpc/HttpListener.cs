@@ -10,7 +10,6 @@ namespace Iviz.RoslibSharp.XmlRpc
     {
         readonly TcpListener listener;
         bool keepGoing = true;
-        const int timeoutInMs = 2000;
 
         public Uri LocalEndpoint { get; }
 
@@ -44,7 +43,7 @@ namespace Iviz.RoslibSharp.XmlRpc
                 }
                 catch (Exception e)
                 {
-                    Logger.LogError("HttpListener: Leaving thread! " + e);
+                    Logger.Log("HttpListener: Leaving thread! " + e);
                     break;
                 }
             }
@@ -52,7 +51,7 @@ namespace Iviz.RoslibSharp.XmlRpc
 
         public void Stop()
         {
-            Logger.LogError("HttpListener: Requesting stop.");
+            Logger.Log("HttpListener: Requesting stop.");
             keepGoing = false;
             try
             {
@@ -64,7 +63,7 @@ namespace Iviz.RoslibSharp.XmlRpc
                 listener.Stop();
             }
             catch (Exception) {}
-            Logger.LogError("HttpListener: Stopped.");
+            Logger.Log("HttpListener: Stopped.");
         }
 
         public void Dispose()

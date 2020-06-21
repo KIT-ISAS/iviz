@@ -25,10 +25,11 @@ namespace Iviz.RoslibSharp
 
             keepGoing = true;
 
-            listener = new TcpListener(new IPEndPoint(IPAddress.Any, 0));
+            listener = new TcpListener(IPAddress.Any, 0);
             listener.Start();
 
-            Uri = new Uri($"rosrpc://{host}:{((IPEndPoint)listener.LocalEndpoint).Port}/");
+            IPEndPoint localEndpoint = (IPEndPoint)listener.LocalEndpoint;
+            Uri = new Uri($"rosrpc://{host}:{localEndpoint.Port}/");
             Logger.Log("RosRpcServer: Starting at " + Uri);
 
             task = Task.Run(Run);
@@ -86,7 +87,16 @@ namespace Iviz.RoslibSharp
                 connections.Clear();
             }
             keepGoing = false;
-            listener.Stop();
+            try
+            {
+                listener.Server.Shutdown(SocketShutdown.Both);
+            }
+            catch (Exception) { }
+            try
+            {
+                listener.Stop();
+            }
+            catch (Exception) { }
             task?.Wait();
         }
     }

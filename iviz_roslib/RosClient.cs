@@ -883,21 +883,32 @@ namespace Iviz.RoslibSharp
                 return serviceReceiver.Execute(service);
             }
 
-            Uri serviceUri = Master.LookupService(serviceName).ServiceUrl;
-            ServiceInfo serviceInfo = new ServiceInfo(CallerId, serviceName, typeof(T), null);
-            using (serviceReceiver = new ServiceReceiver(serviceInfo, serviceUri, true, persistent))
+            XmlRpc.LookupServiceResponse response = Master.LookupService(serviceName);
+            if (!response.IsValid)
             {
-                serviceReceiver.Start();
-                bool result = serviceReceiver.Execute(service);
-
-                if (persistent && serviceReceiver.IsAlive)
+                throw new XmlRpcException("Failed to call service: " + response.StatusMessage);
+            }
+            Uri serviceUri = response.ServiceUrl;
+            ServiceInfo serviceInfo = new ServiceInfo(CallerId, serviceName, typeof(T), null);
+            try
+            {
+                using (serviceReceiver = new ServiceReceiver(serviceInfo, serviceUri, true, persistent))
                 {
-                    lock (subscribedServicesByName)
+                    serviceReceiver.Start();
+                    bool result = serviceReceiver.Execute(service);
+
+                    if (persistent && serviceReceiver.IsAlive)
                     {
-                        subscribedServicesByName.Add(serviceName, serviceReceiver);
+                        lock (subscribedServicesByName)
+                        {
+                            subscribedServicesByName.Add(serviceName, serviceReceiver);
+                        }
                     }
+                    return result;
                 }
-                return result;
+            } catch(Exception e) when (e is SocketException)
+            {
+                throw new TimeoutException($"Service uri '{serviceUri}' is not reachable", e);
             }
         }
 

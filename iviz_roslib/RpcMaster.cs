@@ -177,7 +177,7 @@ namespace Iviz.RoslibSharp.XmlRpc
             StatusMessage = Cast<string>(a[1]);
             if (!IsValid)
             {
-                Logger.Log($"Rpc Response: {GetType().Name} failed! " + StatusMessage);
+                Logger.LogDebug($"Rpc Response: {GetType().Name} failed! " + StatusMessage);
             }
         }
 
@@ -185,7 +185,7 @@ namespace Iviz.RoslibSharp.XmlRpc
         {
             if (!(a is T t))
             {
-                Logger.Log($"Rpc Response: Expected type '{typeof(T).Name}, got {a.GetType().Name}");
+                Logger.LogDebug($"Rpc Response: Expected type '{typeof(T).Name}, got {a.GetType().Name}");
                 hasParseError = true;
                 return default;
             }
