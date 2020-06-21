@@ -87,8 +87,6 @@ namespace Iviz.App.Displays
             }
         }
 
-        public override string Name => "DepthImageProjector";
-
         [SerializeField] int width;
         [SerializeField] int height;
 

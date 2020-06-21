@@ -7,8 +7,6 @@ namespace Iviz.Displays
 {
     public sealed class AxisFrameResource : MarkerResource, IRecyclable, ISupportsAROcclusion, ISupportsTint
     {
-        public override string Name => "AxisFrame";
-
         static readonly string[] names = { "Axis-X", "Axis-Y", "Axis-Z" };
 
         readonly MeshMarkerResource[] axisObjects = new MeshMarkerResource[3];

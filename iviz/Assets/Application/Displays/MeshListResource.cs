@@ -32,7 +32,7 @@ namespace Iviz.Displays
             }
         }
 
-        bool perVertexScale_;
+        [SerializeField] bool perVertexScale_;
         public bool UsePerVertexScale
         {
             get => perVertexScale_;
@@ -66,7 +66,7 @@ namespace Iviz.Displays
             }
         }
 
-        int size_;
+        [SerializeField] int size_;
         public int Size
         {
             get => size_;
@@ -87,7 +87,7 @@ namespace Iviz.Displays
 
         public void Reserve(int reqDataSize)
         {
-            if (pointBuffer == null || pointBuffer.Length < reqDataSize)
+            if (pointBuffer.Length < reqDataSize)
             {
                 if (pointBuffer.Length != 0)
                 {
@@ -127,6 +127,10 @@ namespace Iviz.Displays
 
         void UpdateBuffer()
         {
+            if (Size == 0)
+            {
+                return;
+            }
             pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
             MinMaxJob.CalculateBounds(pointBuffer, Size, out Bounds bounds, out Vector2 span);
             Collider.center = bounds.center;
@@ -137,7 +141,7 @@ namespace Iviz.Displays
 
         static readonly int PropLocalScale = Shader.PropertyToID("_LocalScale");
 
-        Vector3 scale_;
+        [SerializeField] Vector3 scale_;
         public Vector3 Scale
         {
             get => scale_;
@@ -150,7 +154,7 @@ namespace Iviz.Displays
 
         static readonly int PropLocalOffset = Shader.PropertyToID("_LocalOffset");
 
-        Vector3 offset_;
+        [SerializeField] Vector3 offset_;
         public Vector3 Offset
         {
             get => offset_;
@@ -161,9 +165,7 @@ namespace Iviz.Displays
             }
         }
 
-        public override string Name => "MeshListResource";
-
-        bool occlussionOnly_;
+        [SerializeField] bool occlussionOnly_;
         public bool OcclusionOnly
         {
             get => occlussionOnly_;

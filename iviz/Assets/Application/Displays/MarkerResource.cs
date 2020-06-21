@@ -9,7 +9,11 @@ namespace Iviz.Displays
         public Bounds Bounds => new Bounds(Collider.center, Collider.size);
         public Bounds WorldBounds => Collider.bounds;
 
-        public abstract string Name { get; }
+        public virtual string Name
+        {
+            get => gameObject.name;
+            set => gameObject.name = value;
+        }
 
         public bool ColliderEnabled
         {
@@ -41,6 +45,7 @@ namespace Iviz.Displays
 
         protected virtual void Awake()
         {
+            Name = GetType().Name;
             Collider = GetComponent<BoxCollider>();
         }
 

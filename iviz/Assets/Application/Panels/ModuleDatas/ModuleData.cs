@@ -81,14 +81,14 @@ namespace Iviz.App
             DataPanelManager.HidePanelFor(this);
         }
 
-        protected T Instantiate<T>(UnityEngine.Transform parent = null) where T : MonoBehaviour
+        protected T Instantiate<T>(Transform parent = null) where T : MonoBehaviour
         {
             if (!typeof(IController).IsAssignableFrom(typeof(T)))
             {
                 throw new ArgumentException(nameof(T));
             }
             GameObject gameObject = new GameObject();
-            gameObject.transform.parent = parent;
+            gameObject.transform.parent = parent ?? TFListener.ListenersFrame?.gameObject.transform;
             gameObject.name = typeof(T).Name;
             return gameObject.AddComponent<T>();
         }
@@ -111,6 +111,7 @@ namespace Iviz.App
                 case Resource.Module.Magnitude: return new MagnitudeModuleData(c);
                 case Resource.Module.OccupancyGrid: return new OccupancyGridModuleData(c);
                 case Resource.Module.Joystick: return new JoystickModuleData(c);
+                case Resource.Module.Path: return new PathModuleData(c);
                 default: throw new ArgumentException(nameof(c));
             }
         }

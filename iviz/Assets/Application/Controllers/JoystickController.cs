@@ -41,8 +41,8 @@ namespace Iviz.App.Listeners
             }
         }
 
-        public string JoyTopic => $"{ConnectionManager.MyId}/joy";
-        public string TwistTopic => $"{ConnectionManager.MyId}/twist";
+        public const string JoyTopic = "joy";
+        public const string TwistTopic = "twist";
 
         Joystick joystick_;
         public Joystick Joystick
@@ -77,17 +77,9 @@ namespace Iviz.App.Listeners
             set
             {
                 config.PublishJoy = value;
-                if (value)
+                if (value && RosSenderJoy == null)
                 {
-                    if (RosSenderJoy != null && RosSenderJoy.Topic != JoyTopic)
-                    {
-                        RosSenderJoy.Stop();
-                        RosSenderJoy = null;
-                    }
-                    if (RosSenderJoy == null)
-                    {
-                        RosSenderJoy = new RosSender<Msgs.SensorMsgs.Joy>(JoyTopic);
-                    }
+                    RosSenderJoy = new RosSender<Msgs.SensorMsgs.Joy>(JoyTopic);
                 }
             }
         }
@@ -98,17 +90,9 @@ namespace Iviz.App.Listeners
             set
             {
                 config.PublishTwist = value;
-                if (value)
+                if (value && RosSenderTwist == null)
                 {
-                    if (RosSenderTwist != null && RosSenderTwist.Topic != TwistTopic)
-                    {
-                        RosSenderTwist.Stop();
-                        RosSenderTwist = null;
-                    }
-                    if (RosSenderTwist == null)
-                    {
-                        RosSenderTwist = new RosSender<Msgs.GeometryMsgs.TwistStamped>(TwistTopic);
-                    }
+                    RosSenderTwist = new RosSender<Msgs.GeometryMsgs.TwistStamped>(TwistTopic);
 
                 }
             }

@@ -56,6 +56,7 @@ namespace Iviz.App
                 case Resource.Module.Magnitude: return o.AddComponent<MagnitudePanelContents>();
                 case Resource.Module.OccupancyGrid: return o.AddComponent<OccupancyGridPanelContents>();
                 case Resource.Module.Joystick: return o.AddComponent<JoystickPanelContents>();
+                case Resource.Module.Path: return o.AddComponent<PathPanelContents>();
                 default: throw new ArgumentException(nameof(resource));
             }
         }

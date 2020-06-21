@@ -18,13 +18,19 @@ namespace Iviz.App
 
         abstract class AdvertisedTopic
         {
+            public string Topic { get; }
             public RosPublisher Publisher { get; protected set; }
             public virtual int Id { get; set; }
 
             public abstract void Add(RosSender subscriber);
             public abstract void Remove(RosSender subscriber);
             public abstract int Count { get; }
-            public abstract void Advertise(RosClient client, string topic);
+            public abstract void Advertise(RosClient client);
+
+            public AdvertisedTopic(string topic)
+            {
+                Topic = topic;
+            }
 
             public void Invalidate()
             {
@@ -36,6 +42,8 @@ namespace Iviz.App
         class AdvertisedTopic<T> : AdvertisedTopic where T : IMessage
         {
             readonly HashSet<RosSender<T>> senders = new HashSet<RosSender<T>>();
+
+            public AdvertisedTopic(string topic) : base(topic) { }
 
             public override int Id
             {
@@ -62,8 +70,9 @@ namespace Iviz.App
 
             public override int Count => senders.Count;
 
-            public override void Advertise(RosClient client, string topic)
+            public override void Advertise(RosClient client)
             {
+                string topic = (Topic[0] == '/') ? Topic : $"{client.CallerId}/{Topic}";
                 RosPublisher publisher = null;
                 client?.Advertise<T>(topic, out publisher);
                 Publisher = publisher;
@@ -72,12 +81,17 @@ namespace Iviz.App
 
         abstract class SubscribedTopic
         {
+            public string Topic { get; }
             public RosSubscriber Subscriber { get; protected set; }
-
             public abstract void Add(RosListener subscriber);
             public abstract void Remove(RosListener subscriber);
             public abstract int Count { get; }
-            public abstract void Subscribe(RosClient client, string topic);
+            public abstract void Subscribe(RosClient client);
+
+            public SubscribedTopic(string topic)
+            {
+                Topic = topic;
+            }
 
             public void Invalidate()
             {
@@ -88,6 +102,8 @@ namespace Iviz.App
         class SubscribedTopic<T> : SubscribedTopic where T : IMessage, new()
         {
             readonly HashSet<RosListener<T>> listeners = new HashSet<RosListener<T>>();
+
+            public SubscribedTopic(string topic) : base(topic) { }
 
             public override void Add(RosListener subscriber)
             {
@@ -107,8 +123,9 @@ namespace Iviz.App
                 }
             }
 
-            public override void Subscribe(RosClient client, string topic)
+            public override void Subscribe(RosClient client)
             {
+                string topic = (Topic[0] == '/') ? Topic : $"{client.CallerId}/{Topic}";
                 RosSubscriber subscriber = null;
                 client?.Subscribe<T>(topic, Callback, out subscriber);
                 Subscriber = subscriber;
@@ -118,8 +135,37 @@ namespace Iviz.App
 
         }
 
+        abstract class AdvertisedService
+        {
+            public string Service { get; }
+
+            public AdvertisedService(string service)
+            {
+                Service = service;
+            }
+
+            public abstract void Advertise(RosClient client);
+        }
+
+        class AdvertisedService<T> : AdvertisedService where T : IService, new()
+        {
+            readonly Action<T> callback;
+
+            public AdvertisedService(string service, Action<T> callback) : base(service)
+            {
+                this.callback = callback;
+            }
+
+            public override void Advertise(RosClient client)
+            {
+                string service = (Service[0] == '/') ? Service : $"{client.CallerId}/{Service}";
+                client?.AdvertiseService(service, callback);
+            }
+        }
+
         readonly Dictionary<string, AdvertisedTopic> publishersByTopic = new Dictionary<string, AdvertisedTopic>();
         readonly Dictionary<string, SubscribedTopic> subscribersByTopic = new Dictionary<string, SubscribedTopic>();
+        readonly Dictionary<string, AdvertisedService> servicesByTopic = new Dictionary<string, AdvertisedService>();
         readonly List<RosPublisher> publishers = new List<RosPublisher>();
 
         public override Uri MasterUri
@@ -179,14 +225,19 @@ namespace Iviz.App
                 foreach (var entry in publishersByTopic)
                 {
                     //Logger.Debug("Late advertisement for " + entry.Key);
-                    entry.Value.Advertise(client, entry.Key);
+                    entry.Value.Advertise(client);
                     entry.Value.Id = publishers.Count;
                     publishers.Add(entry.Value.Publisher);
                 }
                 foreach (var entry in subscribersByTopic)
                 {
                     //Logger.Debug("Late subscription for " + entry.Key);
-                    entry.Value.Subscribe(client, entry.Key);
+                    entry.Value.Subscribe(client);
+                }
+                foreach (var entry in servicesByTopic)
+                {
+                    //Logger.Debug("Late subscription for " + entry.Key);
+                    entry.Value.Advertise(client);
                 }
 
                 return true;
@@ -211,6 +262,7 @@ namespace Iviz.App
             catch (Exception e)
             {
                 Logger.Error(e);
+                client?.Close();
                 client = null;
                 return false;
             }
@@ -265,12 +317,12 @@ namespace Iviz.App
             if (!publishersByTopic.TryGetValue(advertiser.Topic, out AdvertisedTopic advertisedTopic))
             {
                 RosPublisher publisher = null;
-                AdvertisedTopic<T> newAdvertisedTopic = new AdvertisedTopic<T>();
+                AdvertisedTopic<T> newAdvertisedTopic = new AdvertisedTopic<T>(advertiser.Topic);
 
                 int id;
                 if (client != null)
                 {
-                    newAdvertisedTopic.Advertise(client, advertiser.Topic);
+                    newAdvertisedTopic.Advertise(client);
 
                     publisher = newAdvertisedTopic.Publisher;
                     //Logger.Debug("Direct advertisement for " + advertiser.Topic);
@@ -302,6 +354,37 @@ namespace Iviz.App
             advertisedTopic.Add(advertiser);
             advertiser.SetId(advertisedTopic.Id);
         }
+
+        public override void AdvertiseService<T>(string service, Action<T> callback)
+        {
+            AddTask(() =>
+            {
+                try
+                {
+                    AdvertiseServiceImpl(service, callback);
+                }
+                catch (Exception e)
+                {
+                    Logger.Error(e);
+                    Disconnect();
+                }
+            });
+        }
+
+        void AdvertiseServiceImpl<T>(string service, Action<T> callback) where T : IService, new()
+        {
+            if (!servicesByTopic.ContainsKey(service))
+            {
+                AdvertisedService<T> newAdvertisedService = new AdvertisedService<T>(service, callback);
+
+                if (client != null)
+                {
+                    newAdvertisedService.Advertise(client);
+                }
+                servicesByTopic.Add(service, newAdvertisedService);
+            }
+        }
+
 
         public override void Publish(RosSender advertiser, IMessage msg)
         {
@@ -350,9 +433,9 @@ namespace Iviz.App
         {
             if (!subscribersByTopic.TryGetValue(listener.Topic, out SubscribedTopic subscribedTopic))
             {
-                SubscribedTopic<T> newSubscribedTopic = new SubscribedTopic<T>();
+                SubscribedTopic<T> newSubscribedTopic = new SubscribedTopic<T>(listener.Topic);
 
-                newSubscribedTopic.Subscribe(client, listener.Topic);
+                newSubscribedTopic.Subscribe(client);
                 //client?.Subscribe<T>(listener.Topic, newSubscribedTopic.Callback, out subscriber);
 
                 subscribedTopic = newSubscribedTopic;

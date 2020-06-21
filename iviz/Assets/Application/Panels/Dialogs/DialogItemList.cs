@@ -153,7 +153,7 @@ namespace Iviz.App
         }
 
         // Use this for initialization
-        void Start()
+        protected virtual void Start()
         {
             closeButton.Clicked += RaiseClose;
         }
@@ -210,7 +210,7 @@ namespace Iviz.App
             emptyText.gameObject.SetActive(items.Count == 0);
         }
 
-        public void ClearSubscribers()
+        public virtual void ClearSubscribers()
         {
             ItemClicked = null;
             CloseClicked = null;

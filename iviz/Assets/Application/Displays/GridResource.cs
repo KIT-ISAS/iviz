@@ -112,8 +112,6 @@ namespace Iviz.Displays
 
         public bool FollowCamera { get; set; } = true;
 
-        public override string Name => "Grid";
-
         protected override void Awake()
         {
             base.Awake();

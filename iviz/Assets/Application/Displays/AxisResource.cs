@@ -6,8 +6,6 @@ namespace Iviz.Displays
 {
     public class AxisResource : MarkerResource
     {
-        public override string Name => "Axis";
-
         MeshRenderer Renderer;
         Material[] materials;
 

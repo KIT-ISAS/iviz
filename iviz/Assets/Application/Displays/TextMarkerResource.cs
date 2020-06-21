@@ -21,8 +21,6 @@ namespace Iviz.Displays
             }
         }
 
-        public override string Name => "TextMarker";
-
         public Color Color
         {
             get => textMesh.color;

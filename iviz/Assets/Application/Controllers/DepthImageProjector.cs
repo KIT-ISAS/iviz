@@ -134,7 +134,7 @@ namespace Iviz.App.Listeners
         public void Stop()
         {
             resource.Stop();
-            Destroy(node);
+            Destroy(node.gameObject);
             ResourcePool.Dispose(Resource.Displays.DepthImageResource, resource.gameObject);
         }
     }

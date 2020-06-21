@@ -254,6 +254,10 @@ namespace Iviz.App.Listeners
 
         public Pose GetPose(in TimeSpan time)
         {
+            if (timeline.Count == 0)
+            {
+                return Pose;
+            }
             return timeline.Get(time);
         }
 

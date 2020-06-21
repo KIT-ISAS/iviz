@@ -90,34 +90,32 @@ namespace Iviz.Displays
             lineComputeBuffer.SetData(lineBuffer, 0, 0, Size);
             MinMaxJob.CalculateBounds(lineBuffer, Size, out Bounds bounds, out Vector2 span);
             Collider.center = bounds.center;
-            Collider.size = bounds.size + Scale * Vector3.one;
+            Collider.size = bounds.size + LineScale * Vector3.one;
             IntensityBounds = span;
         }
 
-        [SerializeField] float scale_;
-        public float Scale
+        [SerializeField] float lineScale_;
+        public float LineScale
         {
-            get => scale_;
+            get => lineScale_;
             set
             {
-                if (scale_ != value)
+                if (lineScale_ != value)
                 {
-                    scale_ = value;
+                    lineScale_ = value;
                     UpdateQuadComputeBuffer();
                 }
             }
         }
 
-        public override string Name => "LineResource";
-
         protected override void Awake()
         {
-            material = Resource.Materials.Line.Instantiate();
+            material = Resource.Materials.TransparentLine.Instantiate();
             material.DisableKeyword("USE_TEXTURE");
 
             base.Awake();
 
-            Scale = 0.1f;
+            LineScale = 0.1f;
 
             UseIntensityTexture = false;
             IntensityBounds = new Vector2(0, 1);
@@ -126,10 +124,10 @@ namespace Iviz.Displays
         void UpdateQuadComputeBuffer()
         {
             Vector3[] quad = {
-                    new Vector3( 0.5f * Scale,  0.5f * Scale, 1),
-                    new Vector3( 0.5f * Scale, -0.5f * Scale, 1),
-                    new Vector3(-0.5f * Scale, -0.5f * Scale, 0),
-                    new Vector3(-0.5f * Scale,  0.5f * Scale, 0),
+                    new Vector3( 0.5f * LineScale,  0.5f * LineScale, 1),
+                    new Vector3( 0.5f * LineScale, -0.5f * LineScale, 1),
+                    new Vector3(-0.5f * LineScale, -0.5f * LineScale, 0),
+                    new Vector3(-0.5f * LineScale,  0.5f * LineScale, 0),
             };
             if (quadComputeBuffer == null)
             {
@@ -187,7 +185,7 @@ namespace Iviz.Displays
                 lineComputeBuffer = new ComputeBuffer(lineBuffer.Length, Marshal.SizeOf<LineWithColor>());
                 lineComputeBuffer.SetData(lineBuffer, 0, 0, Size);
                 material.SetBuffer(PropLines, lineComputeBuffer);
-            } 
+            }
 
             if (quadComputeBuffer != null)
             {

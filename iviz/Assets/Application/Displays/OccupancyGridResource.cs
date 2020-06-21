@@ -211,8 +211,24 @@ namespace Iviz.Displays
             ResourcePool.Dispose(Resource.Displays.Cube, plane.gameObject);
         }
 
+        public struct Rect
+        {
+            public readonly int xmin;
+            public readonly int xmax;
+            public readonly int ymin;
+            public readonly int ymax;
+
+            public Rect(int xmin, int xmax, int ymin, int ymax)
+            {
+                this.xmin = xmin;
+                this.xmax = xmax;
+                this.ymin = ymin;
+                this.ymax = ymax;
+            }
+        }
+
         volatile bool isProcessing;
-        public void SetOccupancy(sbyte[] values)
+        public void SetOccupancy(sbyte[] values, Rect? tbounds = null)
         {
             if (isProcessing)
             {
@@ -221,20 +237,22 @@ namespace Iviz.Displays
             isProcessing = true;
             Task.Run(() =>
             {
+                Rect bounds = tbounds ?? new Rect(0, numCellsX_, 0, numCellsY_);
+
                 pointBuffer.Clear();
 
-                int i = 0;
-                float offsetX = (numCellsX_ - 1) / 2f;
-                float offsetY = (numCellsY_ - 1) / 2f;
+                //float offsetX = (numCellsX_ - 1) / 2f;
+                //float offsetY = (numCellsY_ - 1) / 2f;
 
-                float4 add = new float4(-offsetX, -offsetY, 0, 0);
+                //float4 add = new float4(-offsetX, -offsetY, 0, 0);
                 float4 mul = new float4(cellSize_, cellSize_, 0, 0.01f);
 
-                float4 addmul = add * mul;
+                //float4 addmul = add * mul;
 
-                for (int v = 0; v < numCellsY_; v++)
+                for (int v = bounds.ymin; v < bounds.ymax; v++)
                 {
-                    for (int u = 0; u < numCellsX_; u++, i++)
+                    int i = v * numCellsX_ + bounds.xmin;
+                    for (int u = bounds.xmin; u < bounds.xmax; u++, i++)
                     {
                         sbyte val = values[i];
                         if (val <= 0)
@@ -242,7 +260,8 @@ namespace Iviz.Displays
                             continue;
                         }
                         float4 p = new float4(u, v, 0, val);
-                        float4 pc = p * mul + addmul;
+                        //float4 pc = p * mul + addmul;
+                        float4 pc = p * mul;
                         pointBuffer.Add(new PointWithColor(pc.Ros2Unity()));
                     }
                 }

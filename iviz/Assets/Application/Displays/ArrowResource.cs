@@ -5,8 +5,6 @@ namespace Iviz.Displays
 {
     public sealed class ArrowResource : MeshMarkerResource
     {
-        public override string Name => "ArrowResource";
-
         public float Scale { get; set; } = 1;
 
         protected override void Awake()

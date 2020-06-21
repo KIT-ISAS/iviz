@@ -47,9 +47,9 @@ namespace Iviz.App.Listeners
 
         GameObject TFRoot => TFListener.RootFrame.gameObject;
 
-        public string HeadFrameName => $"{ConnectionManager.MyId}/ar_head";
-        public string HeadPoseTopic => $"{ConnectionManager.MyId}/ar_head";
-        public string MarkersTopic => $"{ConnectionManager.MyId}/ar_markers";
+        public string HeadFrameName => ConnectionManager.Connection.MyId + "/ar_head";
+        public const string HeadPoseTopic = "ar_head";
+        public const string MarkersTopic = "ar_markers";
 
         public RosSender<Msgs.GeometryMsgs.PoseStamped> RosSenderHead { get; private set; }
         public RosSender<MarkerArray> RosSenderMarkers { get; private set; }
@@ -117,17 +117,9 @@ namespace Iviz.App.Listeners
             set
             {
                 config.PublishPose = value;
-                if (value)
+                if (value && RosSenderHead == null)
                 {
-                    if (RosSenderHead != null && RosSenderHead.Topic != HeadPoseTopic)
-                    {
-                        RosSenderHead.Stop();
-                        RosSenderHead = null;
-                    }
-                    if (RosSenderHead == null)
-                    {
-                        RosSenderHead = new RosSender<Msgs.GeometryMsgs.PoseStamped>(HeadPoseTopic);
-                    }
+                    RosSenderHead = new RosSender<Msgs.GeometryMsgs.PoseStamped>(HeadPoseTopic);
                 }
             }
         }
@@ -139,18 +131,9 @@ namespace Iviz.App.Listeners
             {
                 config.PublishMarkers = value;
                 planeManager.enabled = value;
-                if (value)
+                if (value && RosSenderMarkers == null)
                 {
-                    if (RosSenderMarkers != null && RosSenderMarkers.Topic != MarkersTopic)
-                    {
-                        RosSenderMarkers.Stop();
-                        RosSenderMarkers = null;
-                    }
-                    if (RosSenderMarkers == null)
-                    {
-                        RosSenderMarkers = new RosSender<MarkerArray>(MarkersTopic);
-                    }
-
+                    RosSenderMarkers = new RosSender<MarkerArray>(MarkersTopic);
                 }
             }
         }

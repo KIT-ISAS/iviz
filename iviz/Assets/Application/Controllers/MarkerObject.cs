@@ -202,7 +202,7 @@ namespace Iviz.App.Listeners
                 case MarkerType.LINE_LIST:
                     {
                         LineResource lineResource = (LineResource)resource;
-                        lineResource.Scale = (float)msg.Scale.X;
+                        lineResource.LineScale = (float)msg.Scale.X;
                         LineWithColor[] lines = new LineWithColor[msg.Points.Length / 2];
                         if (msg.Colors.Length == 0)
                         {
@@ -232,7 +232,7 @@ namespace Iviz.App.Listeners
                 case MarkerType.LINE_STRIP:
                     {
                         LineResource lineResource = (LineResource)resource;
-                        lineResource.Scale = (float)msg.Scale.X;
+                        lineResource.LineScale = (float)msg.Scale.X;
                         LineWithColor[] lines = new LineWithColor[msg.Points.Length - 1];
                         if (msg.Colors.Length == 0)
                         {

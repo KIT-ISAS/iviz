@@ -152,21 +152,19 @@ namespace Iviz.Displays
             IntensityBounds = span;
         }
 
-        Vector2 scale;
+        [SerializeField] Vector2 scale_;
         public Vector2 Scale
         {
-            get => scale;
+            get => scale_;
             set
             {
-                if (scale != value)
+                if (scale_ != value)
                 {
-                    scale = value;
+                    scale_ = value;
                     UpdateQuadComputeBuffer();
                 }
             }
         }
-
-        public override string Name => "PointList";
 
         protected override void Awake()
         {

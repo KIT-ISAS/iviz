@@ -221,7 +221,7 @@ namespace Iviz.App.Listeners
             ResourcePool.Dispose(Resource.Displays.RadialScanResource, resource.gameObject);
 
             node.Stop();
-            Destroy(node);
+            Destroy(node.gameObject);
         }
     }
 }

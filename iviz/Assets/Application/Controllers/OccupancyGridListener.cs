@@ -31,7 +31,7 @@ namespace Iviz.App.Listeners
     public sealed class OccupancyGridListener : ListenerController
     {
         DisplayClickableNode node;
-        OccupancyGridResource grid;
+        OccupancyGridResource[] grid;
 
         public override ModuleData ModuleData { get; set; }
 
@@ -59,7 +59,10 @@ namespace Iviz.App.Listeners
             set
             {
                 config.Visible = value;
-                grid.Visible = value;
+                for (int i = 0; i < grid.Length; i++)
+                {
+                    grid[i].Visible = value;
+                }
             }
         }
 
@@ -69,7 +72,10 @@ namespace Iviz.App.Listeners
             set
             {
                 config.Colormap = value;
-                grid.Colormap = value;
+                for (int i = 0; i < grid.Length; i++)
+                {
+                    grid[i].Colormap = value;
+                }
             }
         }
 
@@ -79,7 +85,10 @@ namespace Iviz.App.Listeners
             set
             {
                 config.FlipColors = value;
-                grid.IntensityBounds = value ? new Vector2(1, 0) : new Vector2(0, 1);
+                for (int i = 0; i < grid.Length; i++)
+                {
+                    grid[i].IntensityBounds = value ? new Vector2(1, 0) : new Vector2(0, 1);
+                }
             }
         }
 
@@ -112,7 +121,10 @@ namespace Iviz.App.Listeners
             set
             {
                 config.RenderAsOcclusionOnly = value;
-                grid.OcclusionOnly = value;
+                for (int i = 0; i < grid.Length; i++)
+                {
+                    grid[i].OcclusionOnly = value;
+                }
             }
         }
 
@@ -122,14 +134,22 @@ namespace Iviz.App.Listeners
             set
             {
                 config.Tint = value;
-                grid.Tint = value;
+                for (int i = 0; i < grid.Length; i++)
+                {
+                    grid[i].Tint = value;
+                }
             }
         }
 
         void Awake()
         {
             node = DisplayClickableNode.Instantiate("Node");
-            grid = ResourcePool.GetOrCreate<OccupancyGridResource>(Resource.Displays.OccupancyGridResource, node.transform);
+
+            grid = new OccupancyGridResource[16];
+            for (int i = 0; i < grid.Length; i++)
+            {
+                grid[i] = ResourcePool.GetOrCreate<OccupancyGridResource>(Resource.Displays.OccupancyGridResource, node.transform);
+            }
 
             Config = new OccupancyGridConfiguration();
         }
@@ -165,23 +185,51 @@ namespace Iviz.App.Listeners
 
             Pose origin = msg.Info.Origin.Ros2Unity();
 
-            grid.NumCellsX = (int)msg.Info.Width;
-            grid.NumCellsY = (int)msg.Info.Height;
-            grid.CellSize = msg.Info.Resolution;
+            int numCellsX = (int)msg.Info.Width;
+            int numCellsY = (int)msg.Info.Height;
+            float cellSize = msg.Info.Resolution;
 
-            origin.position += new Vector3(grid.NumCellsX, grid.NumCellsY, 0).Ros2Unity() * (grid.CellSize / 2f);
-            grid.transform.SetLocalPose(origin);
+            //float totalWidth = numCellsX * cellSize;
+            //float totalHeight = numCellsY * cellSize;
 
-            grid.SetOccupancy(msg.Data);
+            //origin.position += new Vector3(numCellsX, numCellsY, 0).Ros2Unity() * (cellSize / 2f);
+
+            int i = 0;
+            for (int v = 0; v < 4; v++)
+            {
+                for (int u = 0; u < 4; u++, i++)
+                {
+                    grid[i].NumCellsX = (int)msg.Info.Width;
+                    grid[i].NumCellsY = (int)msg.Info.Height;
+                    grid[i].CellSize = msg.Info.Resolution;
+                    grid[i].transform.SetLocalPose(origin);
+
+                    var rect = new OccupancyGridResource.Rect
+                    (
+                        xmin: u * numCellsX / 4,
+                        xmax: (u + 1) * numCellsX / 4,
+                        ymin: v * numCellsY / 4,
+                        ymax: (v + 1) * numCellsY / 4
+                    );
+                    grid[i].SetOccupancy(msg.Data, rect);
+                }
+            }
         }
 
 
         public override void Stop()
         {
             base.Stop();
-            ResourcePool.Dispose(Resource.Displays.OccupancyGridResource, grid.gameObject);
+            if (grid != null)
+            {
+                for (int i = 0; i < grid.Length; i++)
+                {
+                    grid[i].Stop();
+                    ResourcePool.Dispose(Resource.Displays.OccupancyGridResource, grid[i].gameObject);
+                }
+            }
             node.Stop();
-            Destroy(node);
+            Destroy(node.gameObject);
         }
     }
 }

@@ -26,6 +26,7 @@ namespace Iviz.App
         [DataMember] public List<DepthImageProjectorConfiguration> DepthImageProjectors { get; set; } = new List<DepthImageProjectorConfiguration>();
         [DataMember] public List<MagnitudeConfiguration> Odometries { get; set; } = new List<MagnitudeConfiguration>();
         [DataMember] public List<OccupancyGridConfiguration> OccupancyGrids { get; set; } = new List<OccupancyGridConfiguration>();
+        [DataMember] public List<PathConfiguration> Paths { get; set; } = new List<PathConfiguration>();
         [DataMember] public ARConfiguration AR { get; set; } = null;
         [DataMember] public JoystickConfiguration Joystick { get; set; } = null;
 
@@ -42,6 +43,7 @@ namespace Iviz.App
             DepthImageProjectors,
             Odometries,
             OccupancyGrids,
+            Paths,
             new[] { AR },
             new[] { Joystick },
         };

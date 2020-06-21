@@ -464,7 +464,7 @@ namespace Iviz.App.Listeners
             pointCloud = null;
 
             node.Stop();
-            Destroy(node);
+            Destroy(node.gameObject);
         }
     }
 }

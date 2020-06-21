@@ -29,7 +29,7 @@ namespace Iviz.App
             Scale = p.AddSlider("Axis Scale").SetMinValue(0.1f).SetMaxValue(10.0f);
             ShowAxis = p.AddToggle("Show Frame");
             ShowTrail = p.AddToggle("Enable Trail");
-            TrailTime = p.AddSlider("Trail Time").SetMinValue(0.5f).SetMaxValue(5.0f);
+            TrailTime = p.AddSlider("Trail Time").SetMinValue(0.5f).SetMaxValue(5.0f).SetNumberOfSteps(45);
             Color = p.AddColorPicker("Color");
             ShowVector = p.AddToggle("Enable Vector");
             VectorScale = p.AddSlider("Vector Scale").SetMinValue(0.1f).SetMaxValue(10.0f);

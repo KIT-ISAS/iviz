@@ -1,4 +1,4 @@
-Shader "iviz/Line"
+Shader "iviz/TransparentLine"
 {
 	Properties
 	{
@@ -7,8 +7,7 @@ Shader "iviz/Line"
 	SubShader
 	{
 		Cull Off
-		Tags { "Queue" = "Transparent" "RenderType"="Transparent"}
-		Blend SrcAlpha OneMinusSrcAlpha
+		Tags { "RenderType"="Opaque"}
 
 		Pass
 		{
@@ -52,7 +51,7 @@ Shader "iviz/Line"
 			struct v2f
 			{
 				float4 position : SV_POSITION;
-				half4 color : COLOR;
+				half3 color : COLOR;
 			};
 
 			v2f vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
@@ -82,18 +81,16 @@ Shader "iviz/Line"
 				half4 rgbaB = tex2Dlod(_IntensityTexture, float4(intensityB * _IntensityCoeff + _IntensityAdd, 0, 0, 0));
     #else
 				int cA = _Lines[inst].colorA;
-				half4 rgbaA = half4(
+				half3 rgbaA = half3(
 					(cA >>  0) & 0xff,
 					(cA >>  8) & 0xff,
-					(cA >> 16) & 0xff,
-					(cA >> 24) & 0xff
+					(cA >> 16) & 0xff
 					) / 255.0;
 				int cB = _Lines[inst].colorB;
-				half4 rgbaB = half4(
+				half3 rgbaB = half3(
 					(cB >>  0) & 0xff,
 					(cB >>  8) & 0xff,
-					(cB >> 16) & 0xff,
-					(cB >> 24) & 0xff
+					(cB >> 16) & 0xff
 					) / 255.0;
 	#endif
 				o.color = (rgbaB - rgbaA) * V.z + rgbaA;
@@ -103,7 +100,7 @@ Shader "iviz/Line"
 
 			half4 frag(v2f i) : SV_Target
 			{
-				return i.color;
+				return half4(i.color, 1);
 			}
 
 			ENDCG

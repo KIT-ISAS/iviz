@@ -82,14 +82,14 @@ namespace Iviz.Displays
         }
         public float Scale
         {
-            get => lines.Scale;
-            set => lines.Scale = value;
+            get => lines.LineScale;
+            set => lines.LineScale = value;
         }
 
         void Awake()
         {
             lines = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, transform);
-            lines.Scale = 0.01f;
+            lines.LineScale = 0.01f;
             TimeWindowInMs = 2000;
             StartCoroutine("GatherMeasurement");
         }

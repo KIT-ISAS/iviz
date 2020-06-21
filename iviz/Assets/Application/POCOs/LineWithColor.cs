@@ -57,6 +57,8 @@ namespace Iviz.Displays
             }
         }
 
+        public LineWithColor(in Vector3 a, in Vector3 b, Color32 color) : this(a, color, b, color) { }
+
         public LineWithColor(in Vector3 a, in Vector3 b)
         {
             f.c0.x = a.x;

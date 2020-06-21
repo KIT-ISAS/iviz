@@ -6,72 +6,14 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public sealed class MeshTrianglesResource : MarkerResource, ISupportsAROcclusion, ISupportsTint
+    public sealed class MeshTrianglesResource : MeshMarkerResource
     {
-        MeshRenderer mainRenderer;
         public Mesh Mesh { get; private set; }
-
-        [SerializeField] Color color_ = Color.white;
-        public Color Color
-        {
-            get => color_;
-            set
-            {
-                color_ = value;
-                SetEffectiveColor();
-            }
-        }
-
-        [SerializeField] bool occlusionOnly_;
-        public bool OcclusionOnly
-        {
-            get => occlusionOnly_;
-            set
-            {
-                occlusionOnly_ = value;
-                if (value)
-                {
-                    mainRenderer.material = Resource.Materials.LitOcclusionOnly.Object;
-                }
-                else
-                {
-                    Color = color_;
-                }
-            }
-        }
-
-        [SerializeField] Color tint_ = Color.white;
-        public Color Tint
-        {
-            get => tint_;
-            set
-            {
-                tint_ = value;
-                SetEffectiveColor();
-            }
-        }
-
-        Color EffectiveColor => Color * Tint;
-
-        void SetEffectiveColor()
-        {
-            if (!OcclusionOnly)
-            {
-                Color effectiveColor = EffectiveColor;
-                Material material = effectiveColor.a > 254f / 255f ?
-                    Resource.Materials.Lit.Object :
-                    Resource.Materials.TransparentLit.Object;
-                mainRenderer.material = material;
-                mainRenderer.SetPropertyColor(effectiveColor);
-            }
-        }
-
-        public override string Name => "MeshTriangles";
 
         protected override void Awake()
         {
             base.Awake();
-            mainRenderer = GetComponent<MeshRenderer>();
+
             Mesh = new Mesh();
             Mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
             GetComponent<MeshFilter>().mesh = Mesh;
@@ -93,6 +35,22 @@ namespace Iviz.Displays
             }
         }
 
+        void SetNormals(IList<Vector3> points)
+        {
+            if (points is List<Vector3> points_v)
+            {
+                Mesh.SetNormals(points_v);
+            }
+            else if (points is Vector3[] points_a)
+            {
+                Mesh.normals = points_a;
+            }
+            else
+            {
+                Mesh.normals = points.ToArray();
+            }
+        }
+
         void SetColors(IList<Color> colors)
         {
             if (colors is List<Color> colors_v)
@@ -109,23 +67,38 @@ namespace Iviz.Displays
             }
         }
 
-        
-        public void SetTriangles(IList<int> indices)
+        void SetColors(IList<Color32> colors)
         {
-            if (indices is List<int> indices_v)
+            if (colors is List<Color32> colors_v)
             {
-                Mesh.SetTriangles(indices_v, 0);
+                Mesh.SetColors(colors_v);
             }
-            else if (indices is int[] indices_a)
+            else if (colors is Color32[] colors_a)
             {
-                Mesh.SetTriangles(indices_a, 0);
+                Mesh.colors32 = colors_a;
             }
             else
             {
-                Mesh.SetTriangles(indices.ToArray(), 0);
+                Mesh.colors32 = colors.ToArray();
             }
         }
-        
+
+        public void SetTriangles(IList<int> indices, int i)
+        {
+            if (indices is List<int> indices_v)
+            {
+                Mesh.SetTriangles(indices_v, i);
+            }
+            else if (indices is int[] indices_a)
+            {
+                Mesh.SetTriangles(indices_a, i);
+            }
+            else
+            {
+                Mesh.SetTriangles(indices.ToArray(), i);
+            }
+        }
+
 
         public void Set(IList<Vector3> points, IList<Color> colors = null)
         {
@@ -133,7 +106,7 @@ namespace Iviz.Displays
             {
                 throw new ArgumentException("Invalid triangle list " + points.Count, nameof(points));
             }
-            if (colors != null && colors.Count != points.Count)
+            if (colors != null && colors.Count != 0 && colors.Count != points.Count)
             {
                 throw new ArgumentException("Inconsistent color size!");
             }
@@ -145,7 +118,7 @@ namespace Iviz.Displays
 
             Mesh.Clear();
             SetVertices(points);
-            if (colors != null)
+            if (colors != null && colors.Count != 0)
             {
                 SetColors(colors);
             }
@@ -156,28 +129,38 @@ namespace Iviz.Displays
             Collider.size = Mesh.bounds.size;
         }
 
-        public override void Stop()
+        public void Set(IList<Vector3> points, IList<Vector3> normals, IList<int> triangles, IList<Color32> colors = null)
         {
-            base.Stop();
-            Color = Color.white;
-            ColliderEnabled = true;
-            OcclusionOnly = false;
-        }
-
-        /*
-        public void Set(IList<Vector3> points, IList<int> triangles)
-        {
-            if (triangles.Count % 3 != 0)
+            if (points.Count % 3 != 0)
             {
-                throw new ArgumentException("Invalid triangle list " + triangles.Count, nameof(triangles));
+                throw new ArgumentException("Invalid triangle list " + points.Count, nameof(points));
+            }
+            if (colors != null && colors.Count != 0 && colors.Count != points.Count)
+            {
+                throw new ArgumentException("Inconsistent color size!");
             }
 
             Mesh.Clear();
             SetVertices(points);
-            SetTriangles(triangles);
-            Mesh.RecalculateBounds();
+            SetNormals(normals);
+            if (colors != null && colors.Count != 0)
+            {
+                SetColors(colors);
+            }
+            SetTriangles(triangles, 0);
             Mesh.RecalculateNormals();
+
+            Collider.center = Mesh.bounds.center;
+            Collider.size = Mesh.bounds.size;
+
+            Mesh.Optimize();
         }
-        */
+
+        public override void Stop()
+        {
+            base.Stop();
+            Mesh.Clear();
+        }
+
     }
 }

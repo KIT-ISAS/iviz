@@ -13,6 +13,7 @@ using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.NavMsgs;
 using System.Text;
 using Iviz.App.Listeners;
+using Iviz.App.Resources;
 
 namespace Iviz.Resources
 {
@@ -35,7 +36,8 @@ namespace Iviz.Resources
             AR,
             Magnitude,
             OccupancyGrid,
-            Joystick
+            Joystick,
+            Path
         }
 
         static readonly Dictionary<string, Module> resourceByRosMessageType = new Dictionary<string, Module>
@@ -54,6 +56,8 @@ namespace Iviz.Resources
             { Odometry.RosMessageType, Module.Magnitude },
             { TwistStamped.RosMessageType, Module.Magnitude },
             { OccupancyGrid.RosMessageType, Module.OccupancyGrid },
+            { Path.RosMessageType, Module.Path },
+            { PoseArray.RosMessageType, Module.Path },
         };
 
         public static ReadOnlyDictionary<string, Module> ResourceByRosMessageType { get; }
@@ -111,6 +115,12 @@ namespace Iviz.Resources
                 this.resourceName = resourceName;
             }
 
+            public Info(string resourceName, T baseObject)
+            {
+                this.resourceName = resourceName;
+                this.baseObject = baseObject;
+            }
+
             public string Name => Object.name;
 
             public override string ToString()
@@ -126,6 +136,11 @@ namespace Iviz.Resources
                 }
                 return UnityEngine.Object.Instantiate(Object, parent);
             }
+
+            public override int GetHashCode()
+            {
+                return Id.GetHashCode();
+            }
         }
 
         public class MaterialsType
@@ -140,7 +155,9 @@ namespace Iviz.Resources
             public MaterialInfo MeshList { get; }
             public MaterialInfo DepthImageProjector { get; }
             public MaterialInfo Grid { get; }
+
             public MaterialInfo Line { get; }
+            public MaterialInfo TransparentLine { get; }
 
             public MaterialInfo LitOcclusionOnly { get; }
             public MaterialInfo MeshListOcclusionOnly { get; }
@@ -156,8 +173,10 @@ namespace Iviz.Resources
                 PointCloud = new MaterialInfo("Materials/PointCloud Material");
                 MeshList = new MaterialInfo("Materials/MeshList Material");
                 Grid = new MaterialInfo("Materials/Grid");
-                Line = new MaterialInfo("Materials/Line Material");
                 DepthImageProjector = new MaterialInfo("Materials/DepthImage Material");
+
+                Line = new MaterialInfo("Materials/Line Material");
+                TransparentLine = new MaterialInfo("Materials/Transparent Line Material");
 
                 LitOcclusionOnly = new MaterialInfo("Materials/White OcclusionOnly");
                 MeshListOcclusionOnly = new MaterialInfo("Materials/MeshList OcclusionOnly");
@@ -328,6 +347,7 @@ namespace Iviz.Resources
             public GameObjectInfo ConnectionPanel { get; }
             public GameObjectInfo ImagePanel { get; }
             public GameObjectInfo TFPanel { get; }
+            public GameObjectInfo SaveAsPanel { get; }
 
             public GameObjectInfo HeadTitle { get; }
             public GameObjectInfo SectionTitle { get; }
@@ -356,6 +376,7 @@ namespace Iviz.Resources
                 ConnectionPanel = new GameObjectInfo("Widgets/Connection Panel");
                 ImagePanel = new GameObjectInfo("Widgets/Image Panel");
                 TFPanel = new GameObjectInfo("Widgets/TF Tree Panel");
+                SaveAsPanel = new GameObjectInfo("Widgets/Save As Panel");
 
                 HeadTitle = new GameObjectInfo("Widgets/Head Title");
                 SectionTitle = new GameObjectInfo("Widgets/Section Title");
@@ -492,5 +513,8 @@ namespace Iviz.Resources
 
         static FontInfo font;
         public static FontInfo Font => font ?? (font = new FontInfo());
+
+        static ExternalResourceManager external;
+        public static ExternalResourceManager External => external ?? (external = new ExternalResourceManager());
     }
 }

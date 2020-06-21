@@ -248,7 +248,7 @@ namespace Iviz.App.Listeners
             ImageTexture.Destroy();
 
             Node.Stop();
-            Destroy(Node);
+            Destroy(Node.gameObject);
         }
 
     }

@@ -73,6 +73,9 @@ namespace Iviz.App
         public static void Unadvertise(RosSender advertiser) => Connection.Unadvertise(advertiser);
         public static void Publish(RosSender advertiser, IMessage msg) => Connection.Publish(advertiser, msg);
 
+        public static void AdvertiseService<T>(string service, Action<T> callback) where T : IService, new()
+            => Connection.AdvertiseService(service, callback);
+
         public static ReadOnlyCollection<BriefTopicInfo>  GetSystemPublishedTopics() => Connection.GetSystemPublishedTopics();
     }
 
@@ -209,6 +212,7 @@ namespace Iviz.App
         public abstract void Advertise<T>(RosSender<T> advertiser) where T : IMessage;
         public abstract void Unadvertise(RosSender advertiser);
         public abstract void Publish(RosSender advertiser, IMessage msg);
+        public abstract void AdvertiseService<T>(string service, Action<T> callback) where T : IService, new();
         public abstract ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics();
         public abstract int GetNumPublishers(string topic);
         public abstract int GetNumSubscribers(string topic);

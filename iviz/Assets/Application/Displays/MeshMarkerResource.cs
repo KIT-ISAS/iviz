@@ -8,20 +8,37 @@ namespace Iviz.Displays
 {
     public class MeshMarkerResource : MarkerResource, ISupportsAROcclusion, ISupportsTint
     {
-        MeshRenderer mainRenderer;
+        protected MeshRenderer MainRenderer { get; private set; }
 
-        [SerializeField] Color color = Color.white;
-        public Color Color
+        Material textureMaterial;
+        Material textureMaterialAlpha;
+
+        [SerializeField] Texture2D texture_;
+        public Texture2D Texture
         {
-            get => color;
+            get => texture_;
             set
             {
-                color = value;
-                SetEffectiveColor();
+                if (texture_ != value)
+                {
+                    textureMaterial = null;
+                    textureMaterialAlpha = null;
+                    texture_ = value;
+                    SetEffectiveColor();
+                }
             }
         }
 
-        public override string Name => "MeshMarker";
+        [SerializeField] Color color_ = Color.white;
+        public Color Color
+        {
+            get => color_;
+            set
+            {
+                color_ = value;
+                SetEffectiveColor();
+            }
+        }
 
         [SerializeField] bool occlusionOnly_;
         public bool OcclusionOnly
@@ -32,7 +49,7 @@ namespace Iviz.Displays
                 occlusionOnly_ = value;
                 if (value)
                 {
-                    mainRenderer.material = Resource.Materials.LitOcclusionOnly.Object;
+                    MainRenderer.material = Resource.Materials.LitOcclusionOnly.Object;
                 }
                 else
                 {
@@ -59,19 +76,38 @@ namespace Iviz.Displays
             if (!OcclusionOnly)
             {
                 Color effectiveColor = EffectiveColor;
-                Material material = effectiveColor.a > 254f / 255f ?
-                    Resource.Materials.Lit.Object :
-                    Resource.Materials.TransparentLit.Object;
-                mainRenderer.material = material;
-                mainRenderer.SetPropertyColor(effectiveColor);
+                if (Texture == null)
+                {
+                    Material material = effectiveColor.a > 254f / 255f ?
+                        Resource.Materials.Lit.Object :
+                        Resource.Materials.TransparentLit.Object;
+                    MainRenderer.material = material;
+                }
+                else if (effectiveColor.a > 254f / 255f)
+                {
+                    if (textureMaterial == null)
+                    {
+                        textureMaterial = Resource.TexturedMaterials.Get(Texture);
+                    }
+                    MainRenderer.material = textureMaterial;
+                }
+                else
+                {
+                    if (textureMaterialAlpha == null)
+                    {
+                        textureMaterialAlpha = Resource.TexturedMaterials.GetAlpha(Texture);
+                    }
+                    MainRenderer.material = textureMaterial;
+                }
+                MainRenderer.SetPropertyColor(effectiveColor);
             }
         }
 
         protected override void Awake()
         {
             base.Awake();
-            mainRenderer = GetComponent<MeshRenderer>();
-            Color = color;
+            MainRenderer = GetComponent<MeshRenderer>();
+            Color = color_;
         }
 
         public override void Stop()

@@ -320,13 +320,13 @@ namespace Iviz.App.Listeners
 
             displayNode.Stop();
             trailNode.Stop();
-            Destroy(displayNode);
-            Destroy(trailNode);
+            Destroy(displayNode.gameObject);
+            Destroy(trailNode.gameObject);
 
             if (childNode != null)
             {
                 childNode.Stop();
-                Destroy(childNode);
+                Destroy(childNode.gameObject);
             }
 
             if (axis != null)

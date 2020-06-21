@@ -330,7 +330,8 @@ namespace Iviz.App
                 carrierCollider.size = robotCollider.size;
                 robotCollider.enabled = false;
 
-                carrier.name = "[" + newResource + "]";
+                node.name = "Node [" + newResource + "]";
+                carrier.name = "Carrier [" + newResource + "]";
             }
 
             if (oldAttachToTf)
@@ -375,8 +376,8 @@ namespace Iviz.App
             DisposeRobot();
             Stopped?.Invoke();
 
-            Destroy(carrier);
-            Destroy(node);
+            Destroy(carrier.gameObject);
+            Destroy(node.gameObject);
         }
 
         void DisposeRobot()
@@ -388,6 +389,10 @@ namespace Iviz.App
 
             if (RobotObject != null)
             {
+                if (BaseLink != null)
+                {
+                    BaseLink.transform.SetParentLocal(RobotObject.transform);
+                }
                 ResourcePool.Dispose(Resource.Robots.Objects[config.RobotResource], RobotObject);
             }
             config.RobotResource = null;

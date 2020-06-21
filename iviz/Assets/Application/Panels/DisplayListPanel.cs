@@ -71,6 +71,8 @@ namespace Iviz.App
         ConnectionDialogData connectionData;
         ImageDialogData imageData;
         TFDialogData tfTreeData;
+        LoadConfigDialogData loadConfigData;
+        SaveConfigDialogData saveConfigData;
 
         readonly List<GameObject> buttons = new List<GameObject>();
 
@@ -100,6 +102,8 @@ namespace Iviz.App
 
             imageData = CreateDialog<ImageDialogData>();
             tfTreeData = CreateDialog<TFDialogData>();
+            loadConfigData = CreateDialog<LoadConfigDialogData>();
+            saveConfigData = CreateDialog<SaveConfigDialogData>();
 
             connectionData = CreateDialog<ConnectionDialogData>();
             LoadSimpleConfiguration();
@@ -109,9 +113,13 @@ namespace Iviz.App
             CreateModule(Resource.Module.TF, TFListener.DefaultTopic);
             CreateModule(Resource.Module.Grid);
 
+            if (Resource.External == null)
+            {
+                Debug.LogError("Failed to load external manager!");
+            }
 
-            save.onClick.AddListener(SaveStateConfiguration);
-            load.onClick.AddListener(LoadStateConfiguration);
+            save.onClick.AddListener(() => { saveConfigData.Show(); });
+            load.onClick.AddListener(() => { loadConfigData.Show(); });
             hide.onClick.AddListener(OnHideClick);
 
 
@@ -247,7 +255,7 @@ namespace Iviz.App
             EventSystem.current.SetSelectedGameObject(null);
         }
 
-        void SaveStateConfiguration()
+        public void SaveStateConfiguration(string file)
         {
             StateConfiguration config = new StateConfiguration
             {
@@ -262,7 +270,7 @@ namespace Iviz.App
             {
                 Logger.Internal("Saving config file...");
                 string text = JsonConvert.SerializeObject(config, Formatting.Indented);
-                File.WriteAllText(Application.persistentDataPath + "/config.json", text);
+                File.WriteAllText(Application.persistentDataPath + "/" + file, text);
                 Logger.Internal("Done.");
             }
             catch (Exception e) when
@@ -272,18 +280,18 @@ namespace Iviz.App
                 Logger.Internal("Error:", e);
                 return;
             }
-            Logger.Debug("DisplayListPanel: Writing config to " + Application.persistentDataPath + "/config.json");
+            Logger.Debug("DisplayListPanel: Writing config to " + Application.persistentDataPath + "/" + file);
 
         }
 
-        void LoadStateConfiguration()
+        public void LoadStateConfiguration(string file)
         {
-            Logger.Debug("DisplayListPanel: Reading config from " + Application.persistentDataPath + "/config.json");
+            Logger.Debug("DisplayListPanel: Reading config from " + Application.persistentDataPath + "/" + file);
             string text;
             try
             {
                 Logger.Internal("Loading config file...");
-                text = File.ReadAllText(Application.persistentDataPath + "/config.json");
+                text = File.ReadAllText(Application.persistentDataPath + "/" + file);
                 Logger.Internal("Done.");
             }
             catch (FileNotFoundException)
@@ -332,9 +340,14 @@ namespace Iviz.App
 
         void LoadSimpleConfiguration()
         {
+            string path = Application.persistentDataPath + "/connection.json";
+            if (!File.Exists(path))
+            {
+                return;
+            }
             try
             {
-                string text = File.ReadAllText(Application.persistentDataPath + "/connection.json");
+                string text = File.ReadAllText(path);
                 ConnectionConfiguration config = JsonConvert.DeserializeObject<ConnectionConfiguration>(text);
                 connectionData.MasterUri = config.MasterUri;
                 connectionData.MyUri = config.MyUri;
