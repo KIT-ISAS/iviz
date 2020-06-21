@@ -78,6 +78,11 @@ namespace Iviz.MsgsGen
             "std_msgs/ColorRGBA",
             "mesh_msgs/TriangleIndices",
             "mesh_msgs/MeshMaterial",
+            "iviz_msgs/Color",
+            "iviz_msgs/Vector2",
+            "iviz_msgs/Vector3",
+            "iviz_msgs/Triangle",
+            "iviz_msgs/BoundingBox",
         };
 
         public static readonly HashSet<string> FakeStructs = new HashSet<string>
