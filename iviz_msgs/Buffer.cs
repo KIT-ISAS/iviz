@@ -132,12 +132,6 @@ namespace Iviz.Msgs
 
         internal void Serialize(string val)
         {
-            /*
-            if (val is null)
-            {
-                throw new ArgumentNullException(nameof(val));
-            }
-            */
             uint count = (uint)BuiltIns.UTF8.GetByteCount(val);
             AssertInRange(4 + count);
             *(uint*)ptr = count; ptr += 4;
@@ -156,12 +150,6 @@ namespace Iviz.Msgs
 
         internal void SerializeArray(string[] val, uint count)
         {
-            /*
-            if (val is null)
-            {
-                throw new ArgumentNullException(nameof(val));
-            }
-            */
             if (count == 0)
             {
                 AssertInRange(4);
@@ -179,12 +167,6 @@ namespace Iviz.Msgs
 
         internal void SerializeStructArray<T>(T[] val, uint count) where T : unmanaged
         {
-            /*
-            if (val is null)
-            {
-                throw new ArgumentNullException(nameof(val));
-            }
-            */
             if (count == 0)
             {
                 AssertInRange((uint)(4 + val.Length * sizeof(T)));
@@ -206,13 +188,6 @@ namespace Iviz.Msgs
 
         internal void SerializeArray<T>(T[] val, uint count) where T : IMessage
         {
-            /*
-            if (val is null)
-            {
-                throw new ArgumentNullException(nameof(val));
-            }
-            */
-
             if (count == 0)
             {
                 AssertInRange(4);
@@ -243,7 +218,6 @@ namespace Iviz.Msgs
             {
                 Buffer b = new Buffer(b_ptr, b_ptr + size);
                 return (T)generator.RosDeserialize(b);
-                //return (uint)(b.ptr - b_ptr);
             }
         }
 
