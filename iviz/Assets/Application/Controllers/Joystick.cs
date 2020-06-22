@@ -1,9 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Iviz.App.Listeners;
 
 namespace Iviz.App
 {
-    public class Joystick : MonoBehaviour
+    public interface IBlocksPointer
+    {
+        bool IsPointerOnGui(Vector2 PointerPosition);
+    }
+
+    public class Joystick : MonoBehaviour, IBlocksPointer
     {
         [SerializeField] FixedJoystick left = null;
         [SerializeField] FixedJoystick right = null;
@@ -27,6 +33,14 @@ namespace Iviz.App
         void Awake()
         {
             Visible = false;
+        }
+
+        public bool IsPointerOnGui(Vector2 PointerPosition)
+        {
+            Camera MainCamera = TFListener.MainCamera;
+            return Visible &&
+                (RectTransformUtility.RectangleContainsScreenPoint(left.transform as RectTransform, PointerPosition, MainCamera) ||
+                RectTransformUtility.RectangleContainsScreenPoint(right.transform as RectTransform, PointerPosition, MainCamera));
         }
     }
 }

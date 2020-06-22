@@ -469,7 +469,10 @@ namespace Iviz.App
                 if (advertisedTopic.Count == 0)
                 {
                     publishersByTopic.Remove(advertiser.Topic);
-                    publishers[advertiser.Id] = null;
+                    if (advertiser.Id != -1)
+                    {
+                        publishers[advertiser.Id] = null;
+                    }
 
                     if (client != null)
                     {

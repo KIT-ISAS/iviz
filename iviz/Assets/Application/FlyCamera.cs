@@ -72,6 +72,8 @@ namespace Iviz.App
 
         public HashSet<Canvas> Canvases { get; } = new HashSet<Canvas>();
 
+        public HashSet<IBlocksPointer> GuiPointerBlockers { get; } = new HashSet<IBlocksPointer>();
+
         void Start()
         {
             if (IsMobile)
@@ -133,14 +135,6 @@ namespace Iviz.App
                 return;
             }
             namedBoundary.Target = display;
-            /*
-            float maxSize = Mathf.Max(Mathf.Max(bounds.size.x, bounds.size.y), bounds.size.z);
-            namedBoundary.Bounds = bounds;
-            namedBoundary.LabelOffset = parent.TransformDirection(bounds.center) + new Vector3(0, maxSize / 2 + 0.15f, 0);
-            namedBoundary.Name = name;
-            namedBoundary.transform.SetParentLocal(parent);
-            namedBoundary.Active = true;
-            */
         }
 
         float tmpAltDistance;
@@ -153,7 +147,8 @@ namespace Iviz.App
                 {
                     PointerPosition = Input.GetTouch(0).position;
                     PointerOnGui = Canvases.Any(x => x.enabled && x.gameObject.activeInHierarchy &&
-                        RectTransformUtility.RectangleContainsScreenPoint(x.transform as RectTransform, PointerPosition, MainCamera));
+                        RectTransformUtility.RectangleContainsScreenPoint(x.transform as RectTransform, PointerPosition, MainCamera))
+                        || GuiPointerBlockers.Any(x => x.IsPointerOnGui(PointerPosition));
                 }
                 PointerAltDown = Input.touchCount == 2;
                 if (PointerAltDown)
@@ -170,27 +165,12 @@ namespace Iviz.App
                 if (PointerDown)
                 {
                     PointerPosition = Input.mousePosition;
-                    PointerOnGui = Canvases.Any(x => x.enabled && x.gameObject.activeInHierarchy &&
-                        RectTransformUtility.RectangleContainsScreenPoint(x.transform as RectTransform, PointerPosition, MainCamera));
+                    PointerOnGui = Canvases.Any(x => IsPointerOnGui(x, PointerPosition))
+                        || GuiPointerBlockers.Any(x => x.IsPointerOnGui(PointerPosition));
                 }
-                /*
-                PointerAltDown = Input.GetMouseButton(1) || (Input.mouseScrollDelta.y != 0);
-                if (PointerAltDown)
-                {
-                    PointerAltPosition = Input.mousePosition;
-                }
-                tmpAltDistance -= Input.mouseScrollDelta.y;
-                PointerAltDistance = tmpAltDistance;
-                */
             }
             if (IsMobile)
             {
-                /*
-                if (OrbitFrame != null)
-                {
-                    orbitCenter = OrbitFrame.transform.position;
-                }
-                */
                 ProcessOrbiting();
                 ProcessScaling();
             }
@@ -199,6 +179,12 @@ namespace Iviz.App
                 ProcessTurning();
                 ProcessFlying();
             }
+        }
+
+        bool IsPointerOnGui(Canvas canvas, Vector2 PointerPosition)
+        {
+            return canvas.enabled && canvas.gameObject.activeInHierarchy &&
+                        RectTransformUtility.RectangleContainsScreenPoint(canvas.transform as RectTransform, PointerPosition, MainCamera);
         }
 
         /*
@@ -340,8 +326,11 @@ namespace Iviz.App
                 orbitCenter_ += diff * (transform.rotation * Vector3.forward);
                 orbitRadius = 0.5f;
             }
-            orbitCenter_ -= tangentCoeff * pointerAltDiff.x * transform.TransformDirection(Vector3.right);
-            orbitCenter_ += tangentCoeff * pointerAltDiff.y * transform.TransformDirection(Vector3.down);
+
+            float orbitScale = 0.75f * orbitRadius;
+
+            orbitCenter_ -= tangentCoeff * pointerAltDiff.x * orbitScale * transform.TransformDirection(Vector3.right);
+            orbitCenter_ += tangentCoeff * pointerAltDiff.y * orbitScale * transform.TransformDirection(Vector3.down);
             transform.position = -orbitRadius * (transform.rotation * Vector3.forward) + OrbitCenter;
         }
 

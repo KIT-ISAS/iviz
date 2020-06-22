@@ -53,10 +53,19 @@ namespace Iviz.App
 
         protected RosListener(string topic, string type)
         {
+            if (string.IsNullOrWhiteSpace(topic))
+            {
+                throw new System.ArgumentException("Invalid topic!", nameof(topic));
+            }
+            if (string.IsNullOrWhiteSpace(type))
+            {
+                throw new System.ArgumentException("Invalid type!", nameof(type));
+            }
+
             Logger.Internal($"Subscribing to <b>{topic}</b> <i>[{type}]</i>.");
 
-            Topic = topic ?? throw new ArgumentNullException(nameof(topic));
-            Type = type ?? throw new ArgumentNullException(nameof(type));
+            Topic = topic;
+            Type = type;
 
             GameThread.EverySecond += UpdateStats;
         }

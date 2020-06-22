@@ -8,7 +8,7 @@ namespace Iviz.App
 {
     public class AddTopicDialogData : DialogData
     {
-        private const int Size = 250;
+        const int MaxLineWidth = 250;
 
         DialogItemList itemList;
         public override IDialogPanelContents Panel => itemList;
@@ -28,7 +28,7 @@ namespace Iviz.App
 
             public override string ToString()
             {
-                return $"{Resource.Font.Split(topic, Size)}\n<b>{type}</b>";
+                return $"{Resource.Font.Split(topic, MaxLineWidth)}\n<b>{type}</b>";
             }
         }
 
@@ -61,6 +61,9 @@ namespace Iviz.App
         {
             GetTopics();
             itemList.Title = "Available Topics";
+            itemList.EmptyText = ConnectionManager.Connected ?
+                "No Topics Available" :
+                "(Not Connected)";
             itemList.Items = topics.Select(x => x.ToString());
             itemList.ItemClicked += OnItemClicked;
             itemList.CloseClicked += OnCloseClicked;
@@ -72,6 +75,9 @@ namespace Iviz.App
 
             GetTopics();
             itemList.Items = topics.Select(x => x.ToString());
+            itemList.EmptyText = ConnectionManager.Connected ?
+                "No Topics Available" :
+                "(Not Connected)";
         }
 
 

@@ -14,7 +14,9 @@ namespace Iviz.App.Listeners
         [DataMember] public Resource.Module Module => Resource.Module.Joystick;
         [DataMember] public bool Visible { get; set; } = true;
 
+        [DataMember] public string JoyTopic { get; set; } = "joy";
         [DataMember] public bool PublishJoy { get; set; } = true;
+        [DataMember] public string TwistTopic { get; set; } = "twist";
         [DataMember] public bool PublishTwist { get; set; } = true;
         [DataMember] public SerializableVector3 MaxSpeed { get; set; } = Vector3.one * 0.25f;
         [DataMember] public string AttachToFrame { get; set; } = "";
@@ -33,7 +35,9 @@ namespace Iviz.App.Listeners
             set
             {
                 Visible = config.Visible;
+                JoyTopic = config.JoyTopic;
                 PublishJoy = config.PublishJoy;
+                TwistTopic = config.TwistTopic;
                 PublishTwist = config.PublishTwist;
                 MaxSpeed = config.MaxSpeed;
                 AttachToFrame = config.AttachToFrame;
@@ -41,8 +45,33 @@ namespace Iviz.App.Listeners
             }
         }
 
-        public const string JoyTopic = "joy";
-        public const string TwistTopic = "twist";
+        public string JoyTopic
+        {
+            get => config.JoyTopic;
+            set
+            {
+                config.JoyTopic = string.IsNullOrEmpty(value) ? "joy" : value;
+                if (RosSenderJoy != null && RosSenderJoy.Topic != config.JoyTopic)
+                {
+                    RosSenderJoy.Stop();
+                    RosSenderJoy = new RosSender<Msgs.SensorMsgs.Joy>(JoyTopic);
+                }
+            }
+        }
+
+        public string TwistTopic
+        {
+            get => config.TwistTopic;
+            set
+            {
+                config.TwistTopic = string.IsNullOrEmpty(value) ? "twist" : value;
+                if (RosSenderTwist != null && RosSenderTwist.Topic != config.TwistTopic)
+                {
+                    RosSenderTwist.Stop();
+                    RosSenderTwist = new RosSender<Msgs.GeometryMsgs.TwistStamped>(TwistTopic);
+                }
+            }
+        }
 
         Joystick joystick_;
         public Joystick Joystick
@@ -81,6 +110,11 @@ namespace Iviz.App.Listeners
                 {
                     RosSenderJoy = new RosSender<Msgs.SensorMsgs.Joy>(JoyTopic);
                 }
+                else if (!value && RosSenderJoy != null)
+                {
+                    RosSenderJoy.Stop();
+                    RosSenderJoy = null;
+                }
             }
         }
 
@@ -94,6 +128,11 @@ namespace Iviz.App.Listeners
                 {
                     RosSenderTwist = new RosSender<Msgs.GeometryMsgs.TwistStamped>(TwistTopic);
 
+                }
+                else if (!value && RosSenderTwist != null)
+                {
+                    RosSenderTwist.Stop();
+                    RosSenderTwist = null;
                 }
             }
         }
@@ -179,6 +218,7 @@ namespace Iviz.App.Listeners
         {
             RosSenderJoy.Stop();
             RosSenderTwist.Stop();
+            Visible = false;
         }
     }
 }

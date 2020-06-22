@@ -48,18 +48,24 @@ namespace Iviz.App
             panel.SendJoy.Value = controller.PublishJoy;
             panel.SendTwist.Value = controller.PublishTwist;
 
+            panel.JoyTopic.Value = controller.JoyTopic;
+            panel.TwistTopic.Value = controller.TwistTopic;
+
             panel.MaxSpeed.Value = controller.MaxSpeed;
             panel.AttachToFrame.Value = controller.AttachToFrame;
             panel.XIsFront.Value = controller.XIsFront;
 
             panel.MaxSpeed.Interactable = controller.PublishTwist;
             panel.AttachToFrame.Interactable = controller.PublishTwist;
+            panel.TwistTopic.Interactable = controller.PublishTwist;
 
+            panel.JoyTopic.Interactable = controller.PublishJoy;
 
             panel.SendJoy.ValueChanged += f =>
             {
                 controller.PublishJoy = f;
                 panel.JoySender.Set(controller.RosSenderJoy);
+                panel.JoyTopic.Interactable = f;
             };
             panel.SendTwist.ValueChanged += f =>
             {
@@ -68,6 +74,7 @@ namespace Iviz.App
                 panel.AttachToFrame.Interactable = f;
                 panel.XIsFront.Interactable = f;
                 panel.TwistSender.Set(controller.RosSenderTwist);
+                panel.TwistTopic.Interactable = f;
             };
             panel.MaxSpeed.ValueChanged += f =>
             {
@@ -80,6 +87,16 @@ namespace Iviz.App
             panel.XIsFront.ValueChanged += f =>
             {
                 controller.XIsFront = f;
+            };
+            panel.JoyTopic.EndEdit += f =>
+            {
+                controller.JoyTopic = f;
+                panel.JoySender.Set(controller.RosSenderJoy);
+            };
+            panel.TwistTopic.EndEdit += f =>
+            {
+                controller.TwistTopic = f;
+                panel.TwistSender.Set(controller.RosSenderTwist);
             };
 
             panel.CloseButton.Clicked += () =>

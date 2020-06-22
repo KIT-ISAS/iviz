@@ -58,6 +58,9 @@ namespace Iviz.App
         [SerializeField] Sprite DisconnectedSprite = null;
         [SerializeField] Sprite QuestionSprite = null;
 
+        [SerializeField] Text bottomTime = null;
+        [SerializeField] Text bottomFps = null;
+
         [SerializeField] Joystick joystick = null;
         public Joystick Joystick => joystick;
 
@@ -209,6 +212,10 @@ namespace Iviz.App
             TFListener.GuiManager.Canvases.Add(GetComponentInParent<Canvas>());
             TFListener.GuiManager.Canvases.Add(dataPanelManager.GetComponentInParent<Canvas>());
             TFListener.GuiManager.Canvases.Add(dialogPanelManager.GetComponentInParent<Canvas>());
+            TFListener.GuiManager.GuiPointerBlockers.Add(Joystick);
+
+            GameThread.EverySecond += UpdateBottomText;
+            UpdateBottomText();
         }
 
         void OnConnectionStateChanged(ConnectionState state)
@@ -499,6 +506,20 @@ namespace Iviz.App
         {
             imageData.Listener = caller;
             imageData.Show();
+        }
+
+        int frames = 0;
+
+        void UpdateBottomText()
+        {
+            bottomTime.text = $"<b>{DateTime.Now:HH:mm:ss}</b>";
+            bottomFps.text = $"<b>{frames} FPS</b>";
+            frames = 0;
+        }
+
+        void Update()
+        {
+            frames++;
         }
     }
 }

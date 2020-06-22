@@ -7,7 +7,7 @@ namespace Iviz.App
     public class DataPanelWidgets : MonoBehaviour
     {
         const float yOffset = 5;
-        const float yCloseButton = -31.5f;
+        const float yCloseButton = -17.5f;
 
         public GameObject content;
         public GameObject statics;

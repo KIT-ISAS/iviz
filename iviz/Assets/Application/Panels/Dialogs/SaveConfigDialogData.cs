@@ -12,6 +12,8 @@ namespace Iviz.App
         SaveConfigDialogContents panel;
         public override IDialogPanelContents Panel => panel;
 
+        const string Suffix = ".config.json";
+
         readonly List<string> files = new List<string>();
 
         public override void Initialize(DisplayListPanel panel)
@@ -24,14 +26,21 @@ namespace Iviz.App
         {
             files.Clear();
             files.AddRange(Directory.GetFiles(Application.persistentDataPath).
-                Where(x => RoslibSharp.Utils.HasSuffix(x, "config.json")).
-                Select(Path.GetFileName));
+                Where(x => RoslibSharp.Utils.HasSuffix(x, Suffix)).
+                Select(GetFileName));
             panel.Items = files;
             panel.ItemClicked += OnItemClicked;
             panel.CloseClicked += OnCloseClicked;
             panel.EmptyText = "No Config Files Found";
+            panel.input.Value = DateTime.Now.ToString("MM_dd_yyyy HH_mm");
 
             panel.saveButton.Clicked += OnSaveClicked;
+        }
+
+        static string GetFileName(string s)
+        {
+            string fs = Path.GetFileName(s);
+            return fs.Substring(0, fs.Length - Suffix.Length);
         }
 
         void OnCloseClicked()
@@ -47,7 +56,7 @@ namespace Iviz.App
 
         void OnSaveClicked()
         {
-            ModuleListPanel.SaveStateConfiguration(panel.input.Value + ".config.json");
+            ModuleListPanel.SaveStateConfiguration(panel.input.Value + Suffix);
             Close();
         }
 
