@@ -21,7 +21,7 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
         public JointStateModuleData(ModuleDataConstructor constructor) :
-            base(constructor.DisplayList,
+            base(constructor.ModuleList,
                 constructor.GetConfiguration<JointStateConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.Type)
         {
@@ -91,9 +91,9 @@ namespace Iviz.App
             };
         }
 
-        Robot GetRobotWithName(string name)
+        RobotController GetRobotWithName(string name)
         {
-            return (Robot)
+            return (RobotController)
                 ModuleListPanel.ModuleDatas.
                 Where(x => x.Module == Resource.Module.Robot).
                 Cast<RobotModuleData>().

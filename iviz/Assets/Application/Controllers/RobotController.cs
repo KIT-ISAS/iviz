@@ -15,7 +15,7 @@ namespace Iviz.App
 {
     class RobotInfo : MonoBehaviour
     {
-        public Robot owner;
+        public RobotController owner;
     }
 
     [DataContract]
@@ -33,7 +33,7 @@ namespace Iviz.App
         [DataMember] public SerializableColor Tint { get; set; } = Color.white;
     }
 
-    public sealed class Robot : MonoBehaviour, IController, IHasFrame
+    public sealed class RobotController : MonoBehaviour, IController, IHasFrame
     {
         ObjectClickableNode node;
         RobotInfo robotInfo;
@@ -154,6 +154,8 @@ namespace Iviz.App
                 {
                     RobotObject.SetActive(value);
                 }
+                node.Selected = false;
+                
             }
         }
 

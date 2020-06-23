@@ -25,7 +25,7 @@ namespace Iviz.App.Listeners
     public sealed class DepthImageProjector : MonoBehaviour, IController
     {
         DepthImageResource resource;
-        DisplayClickableNode node;
+        SimpleDisplayNode node;
 
         public ModuleData ModuleData { get; set; }
 
@@ -125,9 +125,8 @@ namespace Iviz.App.Listeners
 
         void Awake()
         {
-            resource = ResourcePool.GetOrCreate<DepthImageResource>(Resource.Displays.DepthImageResource, transform);
-            node = DisplayClickableNode.Instantiate("DepthImage");
-            node.Target = resource;
+            node = SimpleDisplayNode.Instantiate("DepthImage");
+            resource = ResourcePool.GetOrCreate<DepthImageResource>(Resource.Displays.DepthImageResource, node.transform);
             Config = new DepthImageProjectorConfiguration();
         }
 

@@ -5,7 +5,7 @@ using UnityEngine.UI;
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="PointCloudDisplayData"/> 
+    /// <see cref="PointCloudModuleData"/> 
     /// </summary>
 
     public class PathPanelContents : ListenerPanelContents

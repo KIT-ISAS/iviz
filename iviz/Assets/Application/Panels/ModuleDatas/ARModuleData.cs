@@ -18,7 +18,7 @@ namespace Iviz.App
         public override IController Controller => controller;
 
         public ARModuleData(ModuleDataConstructor constructor) :
-            base(constructor.DisplayList, constructor.Topic, constructor.Type)
+            base(constructor.ModuleList, constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.AR) as ARPanelContents;
 

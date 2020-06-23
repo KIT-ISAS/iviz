@@ -12,7 +12,7 @@ namespace Iviz.App
     /// </summary>
     public class GridModuleData : ModuleData
     {
-        readonly Listeners.Grid controller;
+        readonly Listeners.GridController controller;
         readonly GridPanelContents panel;
 
         public override Resource.Module Module => Resource.Module.Grid;
@@ -21,11 +21,11 @@ namespace Iviz.App
         public override IController Controller => controller;
 
         public GridModuleData(ModuleDataConstructor constructor) :
-            base(constructor.DisplayList, constructor.Topic, constructor.Type)
+            base(constructor.ModuleList, constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Grid) as GridPanelContents;
 
-            controller = Instantiate<Listeners.Grid>();
+            controller = Instantiate<Listeners.GridController>();
             controller.ModuleData = this;
             if (constructor.Configuration != null)
             {

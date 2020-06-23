@@ -23,6 +23,8 @@ namespace Iviz.Displays
         MeshRenderer meshRenderer;
         GameObject interiorObject;
         MeshRenderer interiorRenderer;
+        readonly List<MeshMarkerResource> horizontals = new List<MeshMarkerResource>();
+        readonly List<MeshMarkerResource> verticals = new List<MeshMarkerResource>();
 
         public static readonly List<string> OrientationNames = new List<string> { "XY", "YZ", "XZ" };
 
@@ -143,6 +145,7 @@ namespace Iviz.Displays
             gameObject.layer = Resource.ClickableLayer;
         }
 
+        int lastX = 0, lastZ = 0;
         void Update()
         {
             if (!FollowCamera || TFListener.MainCamera == null) return;
@@ -151,11 +154,37 @@ namespace Iviz.Displays
             switch (Orientation)
             {
                 case GridOrientation.XY:
-                    int x = (int)cameraPos.x;
-                    int z = (int)cameraPos.z;
-                    transform.localPosition = new Vector3(x, 0, z);
+                    int x = (int)(cameraPos.x + 0.5f);
+                    int z = (int)(cameraPos.z + 0.5f);
+                    if (x != lastX || z != lastZ)
+                    {
+                        UpdatePosition(x, z);
+                    }
                     break;
             }
+        }
+
+        void UpdatePosition(int x, int z)
+        {
+            transform.localPosition = new Vector3(x, 0, z);
+
+
+            int baseHoriz = Mathf.FloorToInt((z + 5) / 10f) * 10;
+            for (int i = 0; i < horizontals.Count; i++)
+            {
+                float za = (i - (horizontals.Count - 1f) / 2) * 10;
+                horizontals[i].transform.localPosition = new Vector3(0, baseHoriz + za - z, -0.002f);
+            }
+
+            int baseVert = Mathf.FloorToInt((x + 5) / 10f) * 10;
+            for (int i = 0; i < verticals.Count; i++)
+            {
+                float xa = (i - (verticals.Count - 1f) / 2) * 10;
+                verticals[i].transform.localPosition = new Vector3(baseVert + xa - x, 0, -0.003f);
+            }
+
+            lastX = x;
+            lastZ = z;
         }
 
         void UpdateMesh()
@@ -217,12 +246,62 @@ namespace Iviz.Displays
             interiorObject.transform.localScale = new Vector3(totalSize, totalSize, GridLineWidth / 8.1f);
 
             Collider.size = new Vector3(totalSize, totalSize, GridLineWidth / 8);
+
+
+            int size = NumberOfGridCells / 10;
+            if (horizontals.Count > size)
+            {
+                while (horizontals.Count != size)
+                {
+                    ResourcePool.Dispose(Resource.Displays.Square, horizontals[horizontals.Count - 1].gameObject);
+                    horizontals.RemoveAt(horizontals.Count - 1);
+                    ResourcePool.Dispose(Resource.Displays.Square, verticals[verticals.Count - 1].gameObject);
+                    verticals.RemoveAt(verticals.Count - 1);
+                }
+            }
+            else if (horizontals.Count < size)
+            {
+                for (int i = horizontals.Count; i < size; i++)
+                {
+                    var resource = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Square, transform);
+                    resource.transform.localRotation = Quaternion.AngleAxis(-90, Vector3.right);
+                    horizontals.Add(resource);
+
+                    resource = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Square, transform);
+                    resource.transform.localRotation = Quaternion.AngleAxis(-90, Vector3.right);
+                    verticals.Add(resource);
+                }
+            }
+            foreach (MeshMarkerResource resource in horizontals)
+            {
+                resource.transform.localScale = new Vector3(totalSize, 1, 2 * GridLineWidth) / 10;
+                resource.Color = new Color(0, 0.3f, 0);
+            }
+            foreach (MeshMarkerResource resource in verticals)
+            {
+                resource.transform.localScale = new Vector3(2 * GridLineWidth, 1, totalSize) / 10;
+                resource.Color = new Color(0.3f, 0, 0);
+            }
+
+            lastX = int.MaxValue;
+            lastZ = int.MaxValue;
         }
 
         public override void Stop()
         {
             Destroy(interiorObject);
             interiorObject = null;
+
+            foreach (var plane in horizontals)
+            {
+                plane.Stop();
+                ResourcePool.Dispose(Resource.Displays.Square, plane.gameObject);
+            }
+            foreach (var plane in verticals)
+            {
+                plane.Stop();
+                ResourcePool.Dispose(Resource.Displays.Square, plane.gameObject);
+            }
         }
     }
 }

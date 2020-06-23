@@ -103,7 +103,7 @@ namespace Iviz.App.Listeners
             set
             {
                 config.Visible = value;
-                resource.Visible = value;
+                resource.Visible = value && MarkerFound;
                 MainCamera.gameObject.SetActive(!value);
                 ARCamera.gameObject.SetActive(value);
                 Canvas.worldCamera = value ? ARCamera : MainCamera;
@@ -244,9 +244,9 @@ namespace Iviz.App.Listeners
             node = DisplayClickableNode.Instantiate("AR Node");
             resource = ResourcePool.GetOrCreate<ARMarkerResource>(Resource.Displays.ARMarkerResource);
             node.Target = resource;
+            MarkerFound = false;
 
             Config = new ARConfiguration();
-            Debug.Log(ARSessionOrigin.gameObject.activeSelf);
         }
 
         uint headSeq = 0;

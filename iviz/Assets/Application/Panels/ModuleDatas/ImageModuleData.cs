@@ -27,7 +27,7 @@ namespace Iviz.App
         Vector2 IImageDialogListener.ImageSize => new Vector2(listener.ImageWidth, listener.ImageHeight);
 
         public ImageModuleData(ModuleDataConstructor constructor) :
-            base(constructor.DisplayList,
+            base(constructor.ModuleList,
                 constructor.GetConfiguration<ImageConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.GetConfiguration<ImageConfiguration>()?.Type ?? constructor.Type)
         {

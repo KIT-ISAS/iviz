@@ -20,7 +20,7 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
         public MarkerModuleData(ModuleDataConstructor constructor) :
-            base(constructor.DisplayList,
+            base(constructor.ModuleList,
                 constructor.GetConfiguration<MarkerConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.GetConfiguration<MarkerConfiguration>()?.Type ?? constructor.Type)
         {

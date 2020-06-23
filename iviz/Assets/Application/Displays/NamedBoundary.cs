@@ -60,7 +60,7 @@ namespace Iviz.App.Displays
             set
             {
                 target = value;
-                if (target == null)
+                if (target == null || !target.UsesBoundaryBox)
                 {
                     gameObject.SetActive(false);
                 }

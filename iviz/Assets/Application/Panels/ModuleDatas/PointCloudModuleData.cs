@@ -8,7 +8,7 @@ namespace Iviz.App
     /// <see cref="PointCloudPanelContents"/> 
     /// </summary>
 
-    public class PointCloudDisplayData : ListenerModuleData
+    public class PointCloudModuleData : ListenerModuleData
     {
         readonly PointCloudListener listener;
         readonly PointCloudPanelContents panel;
@@ -20,8 +20,8 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
 
-        public PointCloudDisplayData(ModuleDataConstructor constructor) :
-        base(constructor.DisplayList,
+        public PointCloudModuleData(ModuleDataConstructor constructor) :
+        base(constructor.ModuleList,
             constructor.GetConfiguration<PointCloudConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.PointCloud) as PointCloudPanelContents;

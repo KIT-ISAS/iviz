@@ -13,7 +13,7 @@ namespace Iviz.App
     {
         readonly RobotPanelContents panel;
 
-        readonly Robot Robot;
+        readonly RobotController Robot;
         public string RobotName => Robot.LongName;
 
         public override DataPanelContents Panel => panel;
@@ -22,9 +22,9 @@ namespace Iviz.App
         public override IController Controller => Robot;
 
         public RobotModuleData(ModuleDataConstructor constructor) :
-        base(constructor.DisplayList, constructor.Topic, constructor.Type)
+        base(constructor.ModuleList, constructor.Topic, constructor.Type)
         {
-            Robot = Instantiate<Robot>();
+            Robot = Instantiate<RobotController>();
             Robot.ModuleData = this;
             if (constructor.Configuration != null)
             {

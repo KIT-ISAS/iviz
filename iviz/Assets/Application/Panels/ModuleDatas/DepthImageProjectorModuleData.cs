@@ -22,7 +22,7 @@ namespace Iviz.App
         readonly List<string> colorImageCandidates = new List<string>();
 
         public DepthImageProjectorModuleData(ModuleDataConstructor constructor) :
-        base(constructor.DisplayList, constructor.Topic, constructor.Type)
+        base(constructor.ModuleList, constructor.Topic, constructor.Type)
         {
 
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.DepthImageProjector) as DepthImageProjectorPanelContents;
@@ -106,6 +106,12 @@ namespace Iviz.App
             {
                 DataPanelManager.HideSelectedPanel();
                 ModuleListPanel.RemoveModule(this);
+            };
+            panel.HideButton.Clicked += () =>
+            {
+                controller.Visible = !controller.Visible;
+                panel.HideButton.State = controller.Visible;
+                UpdateButtonText();
             };
         }
 

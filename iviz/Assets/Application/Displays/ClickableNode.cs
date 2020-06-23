@@ -16,6 +16,8 @@ namespace Iviz.App.Displays
         public abstract string Name { get; }
 
         public ModuleData DisplayData { get; set; }
+        public bool UsesBoundaryBox { get; protected set; } = true;
+
 
         protected bool selected_;
         public virtual bool Selected
@@ -23,10 +25,17 @@ namespace Iviz.App.Displays
             get => selected_;
             set
             {
-                selected_ = value;
-                if (value)
+                if (value && !selected_)
                 {
-                    TFListener.GuiManager.ShowBoundary(this);
+                    selected_ = true;
+                    //TFListener.GuiManager.ShowBoundary(this);
+                    TFListener.GuiManager.Select(this);
+                }
+                else if (!value && selected_)
+                {
+                    selected_ = false;
+                    //TFListener.GuiManager.ShowBoundary(null);
+                    TFListener.GuiManager.Unselect(this);
                 }
             }
         }

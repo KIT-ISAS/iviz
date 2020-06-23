@@ -17,7 +17,7 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
         public TFModuleData(ModuleDataConstructor constructor) :
-            base(constructor.DisplayList,
+            base(constructor.ModuleList,
                 constructor.GetConfiguration<TFConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.Type)
         {

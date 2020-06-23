@@ -18,7 +18,7 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
         public InteractiveMarkerModuleData(ModuleDataConstructor constructor) :
-        base(constructor.DisplayList,
+        base(constructor.ModuleList,
             constructor.GetConfiguration<InteractiveMarkerConfiguration>()?.Topic ?? constructor.Topic,
             constructor.Type)
         {

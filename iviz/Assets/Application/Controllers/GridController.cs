@@ -24,7 +24,7 @@ namespace Iviz.App.Listeners
         [DataMember] public SerializableVector3 Offset { get; set; } = Vector3.zero;
     }
 
-    public class Grid : MonoBehaviour, IController
+    public class GridController : MonoBehaviour, IController
     {
         DisplayClickableNode node;
         ReflectionProbe reflectionProbe;
@@ -76,6 +76,7 @@ namespace Iviz.App.Listeners
                 {
                     reflectionProbe.transform.parent = TFListener.BaseFrame.transform;
                     grid.Visible = false;
+                    node.Selected = false;
                 }
                 else
                 {
@@ -158,6 +159,7 @@ namespace Iviz.App.Listeners
             set
             {
                 config.FollowCamera = value;
+                grid.FollowCamera = value;
             }
         }
 

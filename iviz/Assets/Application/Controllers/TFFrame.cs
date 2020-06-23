@@ -46,12 +46,15 @@ namespace Iviz.App.Listeners
             get => base.Selected;
             set
             {
-                selected_ = value;
+                //selected_ = value;
+                base.Selected = value;
                 labelObject.SetActive(value || LabelVisible);
+                /*
                 if (value)
                 {
                     TFListener.GuiManager.ShowBoundary(null);
                 }
+                */
             }
         }
 
@@ -297,6 +300,8 @@ namespace Iviz.App.Listeners
             //OrbitColorEnabled = false;
 
             parentConnector.gameObject.SetActive(false);
+
+            UsesBoundaryBox = false;
         }
 
         public void Recycle()

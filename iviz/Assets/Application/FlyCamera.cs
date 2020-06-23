@@ -94,8 +94,6 @@ namespace Iviz.App
             SelectedDisplay.Selected = false;
             SelectedDisplay = null;
             namedBoundary.Target = null;
-            //namedBoundary.Active = false;
-            //namedBoundary.transform.SetParentLocal(transform);
         }
 
         public void Select(ClickableNode display)
@@ -113,6 +111,7 @@ namespace Iviz.App
             if (SelectedDisplay != null)
             {
                 SelectedDisplay.Selected = true;
+                namedBoundary.Target = display;
             }
         }
 

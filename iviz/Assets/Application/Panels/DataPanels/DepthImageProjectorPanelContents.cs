@@ -7,6 +7,7 @@
         public SliderWidget FOV { get; private set; }
         public SliderWidget PointSize { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
+        public ToggleButtonWidget HideButton { get; private set; }
 
         void Start()
         {
@@ -17,6 +18,7 @@
             FOV = p.AddSlider("FOV Angle").SetMinValue(0).SetMaxValue(89);
             PointSize = p.AddSlider("Point Size").SetMinValue(0.1f).SetMaxValue(5f);
             CloseButton = p.AddTrashButton();
+            HideButton = p.AddHideButton();
             p.UpdateSize();
             gameObject.SetActive(false);
         }

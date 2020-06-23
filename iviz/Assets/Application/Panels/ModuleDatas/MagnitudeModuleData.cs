@@ -21,7 +21,7 @@ namespace Iviz.App
 
 
         public MagnitudeModuleData(ModuleDataConstructor constructor) :
-            base(constructor.DisplayList,
+            base(constructor.ModuleList,
                 constructor.GetConfiguration<MagnitudeConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.GetConfiguration<MagnitudeConfiguration>()?.Type ?? constructor.Type)
         {

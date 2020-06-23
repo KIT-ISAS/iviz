@@ -59,8 +59,8 @@ namespace Iviz.App.Listeners
             }
         }
 
-        Robot robot;
-        public Robot Robot
+        RobotController robot;
+        public RobotController Robot
         {
             get => robot;
             set

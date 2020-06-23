@@ -22,7 +22,7 @@ namespace Iviz.App
 
 
         public LaserScanModuleData(ModuleDataConstructor constructor) :
-        base(constructor.DisplayList,
+        base(constructor.ModuleList,
             constructor.GetConfiguration<LaserScanConfiguration>()?.Topic ?? constructor.Topic,
             constructor.Type)
         {

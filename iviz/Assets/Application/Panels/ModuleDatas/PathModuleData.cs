@@ -21,7 +21,7 @@ namespace Iviz.App
 
 
         public PathModuleData(ModuleDataConstructor constructor) :
-        base(constructor.DisplayList,
+        base(constructor.ModuleList,
             constructor.GetConfiguration<PathConfiguration>()?.Topic ?? constructor.Topic,
             constructor.GetConfiguration<PathConfiguration>()?.Type ?? constructor.Type)
         {

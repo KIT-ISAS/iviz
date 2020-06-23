@@ -98,7 +98,7 @@ namespace Iviz.App
             switch (c.Module)
             {
                 case Resource.Module.TF: return new TFModuleData(c);
-                case Resource.Module.PointCloud: return new PointCloudDisplayData(c);
+                case Resource.Module.PointCloud: return new PointCloudModuleData(c);
                 case Resource.Module.Grid: return new GridModuleData(c);
                 case Resource.Module.Image: return new ImageModuleData(c);
                 case Resource.Module.Robot: return new RobotModuleData(c);
