@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 
@@ -32,17 +33,19 @@ namespace Iviz.RoslibSharp
             Uri = new Uri($"rosrpc://{host}:{localEndpoint.Port}/");
             Logger.Log("RosRpcServer: Starting at " + Uri);
 
-            task = Task.Run(Run);
+            //task = Task.Run(Run);
+            Run();
         }
 
 
-        void Run()
+        async void Run()
         {
             try
             {
                 while (keepGoing)
                 {
-                    TcpClient client = listener.AcceptTcpClient();
+                    //TcpClient client = listener.AcceptTcpClient();
+                    TcpClient client = await listener.AcceptTcpClientAsync().ConfigureAwait(false);
                     ServiceSender sender = new ServiceSender(serviceInfo, client, callback);
                     lock (connections)
                     {
@@ -50,10 +53,15 @@ namespace Iviz.RoslibSharp
                     }
                 }
             }
+            catch (ThreadAbortException e)
+            {
+                Logger.Log("RosRcpServer: Thread aborted! " + e);
+                Thread.ResetAbort();
+                return;
+            }
             catch (Exception e)
             {
-                Logger.Log("RosRcpServer: Stopped thread");
-                Logger.Log(e);
+                Logger.Log("RosRcpServer: Stopped thread" + e);
             }
         }
 
@@ -87,17 +95,19 @@ namespace Iviz.RoslibSharp
                 connections.Clear();
             }
             keepGoing = false;
+            /*
             try
             {
                 listener.Server.Shutdown(SocketShutdown.Both);
             }
             catch (Exception) { }
+            */
             try
             {
                 listener.Stop();
             }
             catch (Exception) { }
-            task?.Wait();
+            //task.Wait();
         }
     }
 }

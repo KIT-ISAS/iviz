@@ -32,14 +32,27 @@ namespace Iviz.RoslibSharp.XmlRpc
             LocalEndpoint = new Uri($"http://{endpoint.Address}:{endpoint.Port}/");
         }
 
-        public void Start(Action<HttpListenerContext> callback)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability",
+            "CA2000:Objekte verwerfen, bevor Bereich verloren geht",
+            Justification = "Wird später in 'callback' verworfen")]
+        public async void Start(Action<HttpListenerContext> callback)
         {
             while (keepGoing)
             {
                 try
                 {
-                    TcpClient client = listener.AcceptTcpClient();
+                    //Logger.Log("Entering");
+                    //TcpClient client = listener.AcceptTcpClient();
+
+                    TcpClient client = await listener.AcceptTcpClientAsync().ConfigureAwait(false);
+                    //Logger.Log("Out");
                     callback(new HttpListenerContext(client));
+                }
+                catch (ThreadAbortException e)
+                {
+                    Logger.Log("RosRcpServer: Thread aborted! " + e);
+                    Thread.ResetAbort();
+                    return;
                 }
                 catch (Exception e)
                 {
@@ -51,18 +64,26 @@ namespace Iviz.RoslibSharp.XmlRpc
 
         public void Stop()
         {
-            Logger.Log("HttpListener: Requesting stop.");
+            Logger.Log("HttpListener: Requesting stop 2.");
             keepGoing = false;
+            /*
             try
             {
-                listener.Server.Shutdown(SocketShutdown.Both);
+                Logger.Log("HttpListener: Shutdown.");
+                //listener.Server.Shutdown(SocketShutdown.Both);
+                listener.Server.Dispose();
             }
-            catch (Exception) {}
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            */
             try
             {
+                Logger.Log("HttpListener: Stop.");
                 listener.Stop();
             }
-            catch (Exception) {}
+            catch (Exception) { }
             Logger.Log("HttpListener: Stopped.");
         }
 
