@@ -2,9 +2,12 @@
 using System.IO;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using BitMiracle.LibJpeg;
 using Iviz.Bridge.Client;
+using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
+using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.Tf2Msgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.RoslibSharp;
@@ -13,6 +16,75 @@ namespace iviz_test
 {
     class Program
     {
+        static void Main()
+        { 
+            RosClient client = new RosClient(
+                //"http://192.168.0.73:11311",
+                "http://141.3.59.5:11311",
+                null,
+                //"http://192.168.0.157:7613"
+                "http://141.3.59.19:7621"
+                );
+            /*
+            Console.WriteLine(client.GetSystemState());
+            client.Subscribe<TFMessage>("/tf", Callback);
+            */
+
+
+            client.Advertise<TFMessage>("/tf", out RosPublisher publisherTf);
+            client.Advertise<MarkerArray>("/test_markers", out RosPublisher publisherMarkers);
+
+            TransformStamped[] tfs = new TransformStamped[1];
+            tfs[0] = new TransformStamped
+            (
+                Header: new Header(0, new time(DateTime.Now), "map"),
+                ChildFrameId: "ar_marker",
+                Transform: new Transform
+                (
+                    Translation: new Vector3
+                    (
+                        X: 0,
+                        Y: 0,
+                        Z: 0.725f
+                    ),
+                    Rotation: new Quaternion
+                    (
+                        X: 0,
+                        Y: 0,
+                        Z: 0,
+                        W: 1
+                    )
+                )
+            );
+            TFMessage tf = new TFMessage
+            {
+                Transforms = tfs
+            };
+
+            Marker marker = new Marker()
+            {
+                Header = new Header(0, new time(DateTime.Now), "ar_marker"),
+                Ns = "iviz",
+                Id = 0,
+                Type = Marker.CYLINDER,
+                Action = Marker.ADD,
+                Pose = new Pose(new Point(0, 0, -0.0125f), new Quaternion(0, 0, 0, 1)),
+                Scale = new Vector3(0.90f, 0.90f, 0.025f),
+                Color = new ColorRGBA(1, 1, 1, 1),
+                Lifetime = new duration(),
+                FrameLocked = true,
+            };
+            MarkerArray array = new MarkerArray(new[] { marker });
+
+            while(true)
+            {
+                publisherTf.Publish(tf);
+                publisherMarkers.Publish(array);
+                Thread.Sleep(1000);
+            }
+            Console.In.Read();
+        }
+
         static void Main_Old4()
         {
             Stream stream = File.Open("/Users/akzeac/Downloads/001-0.jpg", FileMode.Open);
@@ -28,7 +100,7 @@ namespace iviz_test
             Console.In.Read();
         }
 
-        static void Main()
+        static void Main_Old5()
         {
             RosClient client = new RosClient(
                 //"http://192.168.0.73:11311",

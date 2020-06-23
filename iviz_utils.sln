@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_bridge_client", "iviz_
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_loader", "iviz_loader\iviz_loader.csproj", "{34265C03-B3F5-43B0-85F1-95C6BCBE9437}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_markertest", "iviz_markertest\iviz_markertest.csproj", "{FBEB2EF1-EA61-4448-831C-2015326EE8FD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +64,10 @@ Global
 		{34265C03-B3F5-43B0-85F1-95C6BCBE9437}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{34265C03-B3F5-43B0-85F1-95C6BCBE9437}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{34265C03-B3F5-43B0-85F1-95C6BCBE9437}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBEB2EF1-EA61-4448-831C-2015326EE8FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBEB2EF1-EA61-4448-831C-2015326EE8FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBEB2EF1-EA61-4448-831C-2015326EE8FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBEB2EF1-EA61-4448-831C-2015326EE8FD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
