@@ -19,7 +19,7 @@ namespace Iviz.App.Listeners
         [DataMember] public string TwistTopic { get; set; } = "twist";
         [DataMember] public bool PublishTwist { get; set; } = true;
         [DataMember] public SerializableVector3 MaxSpeed { get; set; } = Vector3.one * 0.25f;
-        [DataMember] public string AttachToFrame { get; set; } = "";
+        [DataMember] public string AttachToFrame { get; set; } = "map";
         [DataMember] public bool XIsFront { get; set; } = true;
     }
 
@@ -191,7 +191,7 @@ namespace Iviz.App.Listeners
                     Header: RosUtils.CreateHeader(twistSeq++, frame),
                     Twist: new Msgs.GeometryMsgs.Twist(
                         Linear: new Msgs.GeometryMsgs.Vector3(linear.x * MaxSpeed.x, linear.y * MaxSpeed.y, 0),
-                        Angular: new Msgs.GeometryMsgs.Vector3(0, 0, rightDir.x * MaxSpeed.z)
+                        Angular: new Msgs.GeometryMsgs.Vector3(0, 0, -rightDir.x * MaxSpeed.z)
                         )
                     );
                 RosSenderTwist.Publish(twist);

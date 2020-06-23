@@ -69,7 +69,8 @@ namespace Iviz.App.Listeners
         readonly HashSet<DisplayNode> listeners = new HashSet<DisplayNode>();
         readonly Dictionary<string, TFFrame> children = new Dictionary<string, TFFrame>();
 
-        public ReadOnlyDictionary<string, TFFrame> Children => new ReadOnlyDictionary<string, TFFrame>(children);
+        public ReadOnlyDictionary<string, TFFrame> Children =>
+            new ReadOnlyDictionary<string, TFFrame>(children);
 
         public override Bounds Bounds => new Bounds(boxCollider.center, boxCollider.size);
         public override Bounds WorldBounds => boxCollider.bounds;
@@ -92,6 +93,7 @@ namespace Iviz.App.Listeners
 
         public void AddChild(TFFrame frame)
         {
+            //Debug.Log(Id + " has new child " + frame);
             children.Add(frame.Id, frame);
         }
 
@@ -101,6 +103,7 @@ namespace Iviz.App.Listeners
             {
                 return;
             }
+            //Debug.Log(Id + " loses child " + frame);
             children.Remove(frame.Id);
         }
 
@@ -170,15 +173,18 @@ namespace Iviz.App.Listeners
 
         public bool SetParent(TFFrame newParent)
         {
+            //Debug.Log("a child " + Id + " parent " + newParent?.Id);
             if (newParent == Parent)
             {
                 return true;
             }
+            //Debug.Log("b child " + Id + " parent " + newParent?.Id);
             if (newParent == this)
             {
                 Logger.Error($"TFFrame: Cannot set '{newParent.Id}' as a parent to itself!");
                 return false;
             }
+            //Debug.Log("c child " + Id + " parent " + newParent?.Id);
             if (newParent != null && newParent.IsChildOf(this))
             {
                 Logger.Error($"TFFrame: Cannot set '{newParent.Id}' as parent to '{Id}' because it causes a cycle!");
@@ -191,15 +197,19 @@ namespace Iviz.App.Listeners
                 return true; //??
             }
             */
+            //Debug.Log("d child " + Id + " parent " + newParent?.Id);
             if (Parent != null)
             {
                 Parent.RemoveChild(this);
             }
+            //Debug.Log("3 child " + Id + " parent " + newParent?.Id);
             base.Parent = newParent;
+            //Debug.Log("2 child " + Id + " parent " + newParent?.Id);
             if (Parent != null)
             {
                 Parent.AddChild(this);
             }
+            //Debug.Log("1 child " + Id + " parent " + newParent?.Id);
 
             parentConnector.B = transform.parent != null ?
                 transform.parent :

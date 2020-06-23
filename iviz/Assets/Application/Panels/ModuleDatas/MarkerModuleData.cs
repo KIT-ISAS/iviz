@@ -48,6 +48,7 @@ namespace Iviz.App
             panel.OcclusionOnlyMode.Value = listener.RenderAsOcclusionOnly;
             panel.Tint.Value = listener.Tint;
             panel.Alpha.Value = listener.Tint.a;
+            panel.HideButton.State = listener.Visible;
 
             panel.Tint.ValueChanged += f =>
             {
@@ -70,6 +71,12 @@ namespace Iviz.App
             {
                 DataPanelManager.HideSelectedPanel();
                 ModuleListPanel.RemoveModule(this);
+            };
+            panel.HideButton.Clicked += () =>
+            {
+                listener.Visible = !listener.Visible;
+                panel.HideButton.State = listener.Visible;
+                UpdateButtonText();
             };
         }
 

@@ -23,10 +23,12 @@ namespace Iviz.App
         {
             panel.Active = true;
             panel.Close.Clicked += Close;
+            panel.TFLog.Flush();
         }
 
         public override void UpdatePanel()
         {
+            //Debug.Log("update panel");
             base.UpdatePanel();
             panel.TFLog.Flush();
         }

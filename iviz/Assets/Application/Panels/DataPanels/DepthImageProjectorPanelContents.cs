@@ -2,6 +2,7 @@
 {
     public class DepthImageProjectorPanelContents : DataPanelContents
     {
+        public FrameWidget Frame { get; private set; }
         public DropdownWidget Depth { get; private set; }
         public DropdownWidget Color { get; private set; }
         public SliderWidget FOV { get; private set; }
@@ -13,6 +14,7 @@
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("DepthProjector");
+            Frame = p.AddFrame();
             Depth = p.AddDropdown("Depth Image");
             Color = p.AddDropdown("Color Image");
             FOV = p.AddSlider("FOV Angle").SetMinValue(0).SetMaxValue(89);

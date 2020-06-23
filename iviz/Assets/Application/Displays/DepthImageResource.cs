@@ -112,7 +112,7 @@ namespace Iviz.App.Displays
             };
             if (quadComputeBuffer == null)
             {
-                Debug.Log("Building quadComputeBuffer");
+                //Debug.Log("Building quadComputeBuffer");
                 quadComputeBuffer = new ComputeBuffer(4, Marshal.SizeOf<Vector2>());
                 material.SetBuffer(PropQuad, quadComputeBuffer);
             }

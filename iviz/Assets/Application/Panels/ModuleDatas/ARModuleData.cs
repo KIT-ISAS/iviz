@@ -42,6 +42,7 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
+            panel.HideButton.State = controller.Visible;
             panel.Frame.Owner = controller;
             panel.WorldScale.Value = controller.WorldScale;
             panel.Origin.Value = controller.Origin;

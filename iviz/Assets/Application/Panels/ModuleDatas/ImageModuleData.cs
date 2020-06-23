@@ -52,6 +52,7 @@ namespace Iviz.App
             panel.Listener.RosListener = listener.Listener;
             panel.Frame.Owner = listener;
             panel.Description.Label = listener.Description;
+            panel.HideButton.State = listener.Visible;
 
             panel.PreviewWidget.Material = listener.Material;
 

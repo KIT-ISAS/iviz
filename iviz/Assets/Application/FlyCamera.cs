@@ -142,13 +142,6 @@ namespace Iviz.App
             if (IsMobile)
             {
                 PointerDown = Input.touchCount == 1;
-                if (PointerDown)
-                {
-                    PointerPosition = Input.GetTouch(0).position;
-                    PointerOnGui = Canvases.Any(x => x.enabled && x.gameObject.activeInHierarchy &&
-                        RectTransformUtility.RectangleContainsScreenPoint(x.transform as RectTransform, PointerPosition, MainCamera))
-                        || GuiPointerBlockers.Any(x => x.IsPointerOnGui(PointerPosition));
-                }
                 PointerAltDown = Input.touchCount == 2;
                 if (PointerAltDown)
                 {
@@ -157,6 +150,12 @@ namespace Iviz.App
                 PointerAltDistance = PointerAltDown ?
                     Vector2.Distance(Input.GetTouch(0).position, Input.GetTouch(1).position) :
                     0;
+                if (PointerDown || PointerAltDown)
+                {
+                    PointerPosition = Input.GetTouch(0).position;
+                    PointerOnGui = Canvases.Any(x => IsPointerOnGui(x, PointerPosition))
+                        || GuiPointerBlockers.Any(x => x.IsPointerOnGui(PointerPosition));
+                }
             }
             else
             {

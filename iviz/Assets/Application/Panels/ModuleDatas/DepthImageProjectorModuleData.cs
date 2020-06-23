@@ -47,6 +47,9 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
+            panel.Frame.Owner = controller;
+            panel.HideButton.State = controller.Visible;
+
             depthImageCandidates.Clear();
             depthImageCandidates.Add("<none>");
             depthImageCandidates.AddRange(

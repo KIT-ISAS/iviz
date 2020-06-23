@@ -205,7 +205,7 @@ namespace Iviz.App.Listeners
                     Listener = new RosListener<PointStamped>(config.Topic, Handler);
 
                     sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere, displayNode.transform);
-                    sphere.transform.localScale = 0.125f * UnityEngine.Vector3.one;
+                    sphere.transform.localScale = 0.1f * UnityEngine.Vector3.one;
                     sphere.Color = Color;
                     break;
 
@@ -215,7 +215,7 @@ namespace Iviz.App.Listeners
                     arrow = ResourcePool.GetOrCreate<ArrowResource>(Resource.Displays.Arrow, displayNode.transform);
                     arrow.Color = Color;
                     sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere, displayNode.transform);
-                    sphere.transform.localScale = 0.125f * UnityEngine.Vector3.one;
+                    sphere.transform.localScale = 0.1f * UnityEngine.Vector3.one;
                     sphere.Color = Color;
                     break;
 
@@ -225,7 +225,7 @@ namespace Iviz.App.Listeners
                     arrow = ResourcePool.GetOrCreate<ArrowResource>(Resource.Displays.Arrow, displayNode.transform);
                     arrow.Color = Color;
                     sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere, displayNode.transform);
-                    sphere.transform.localScale = 0.125f * UnityEngine.Vector3.one;
+                    sphere.transform.localScale = 0.1f * UnityEngine.Vector3.one;
                     sphere.Color = Color;
                     break;
 
@@ -238,7 +238,7 @@ namespace Iviz.App.Listeners
                     arrow.Color = Color;
 
                     sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere, displayNode.transform);
-                    sphere.transform.localScale = 0.125f * UnityEngine.Vector3.one;
+                    sphere.transform.localScale = 0.1f * UnityEngine.Vector3.one;
                     sphere.Color = Color;
                     break;
             }

@@ -27,7 +27,7 @@ namespace Iviz.App.Displays
                 parent = newParent;
                 if (parent != null)
                 {
-                    parent.AddListener(this);
+                    //parent.AddListener(this);
                 }
                 else
                 {
@@ -59,7 +59,7 @@ namespace Iviz.App.Displays
             }
             else
             {
-                TFFrame frame = TFListener.GetOrCreateFrame(parentId);
+                TFFrame frame = TFListener.GetOrCreateFrame(parentId, this);
                 SetParent(frame, false);
                 transform.SetPose(frame.GetPose(timestamp));
             }

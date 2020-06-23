@@ -48,7 +48,7 @@ namespace Iviz.App
 
         void OnItemClicked(int index, string _)
         {
-            ModuleListPanel.LoadStateConfiguration(files[index]);
+            ModuleListPanel.LoadStateConfiguration(files[index] + Suffix);
             Close();
         }
 

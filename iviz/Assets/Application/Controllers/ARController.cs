@@ -82,7 +82,10 @@ namespace Iviz.App.Listeners
             set
             {
                 config.Origin = value;
-                TFRoot.transform.position = -value.Ros2Unity();
+                if (!SearchMarker)
+                {
+                    TFRoot.transform.position = -value.Ros2Unity();
+                }
                 //ARSessionOrigin.transform.position = value.Ros2Unity();
             }
         }
@@ -158,10 +161,12 @@ namespace Iviz.App.Listeners
                 tracker.enabled = value;
                 if (value)
                 {
+                    TFRoot.transform.SetPose(Pose.identity);
                     tracker.trackedImagesChanged += OnTrackedImagesChanged;
                 }
                 else
                 {
+                    Origin = Origin;
                     tracker.trackedImagesChanged -= OnTrackedImagesChanged;
                 }
             }

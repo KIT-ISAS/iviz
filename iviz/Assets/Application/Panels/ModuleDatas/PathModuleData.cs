@@ -45,6 +45,7 @@ namespace Iviz.App
         {
             panel.Listener.RosListener = listener.Listener;
             panel.Frame.Owner = listener;
+            panel.HideButton.State = listener.Visible;
 
             panel.LineWidth.Value = listener.Width;
             panel.ShowAxes.Value = listener.ShowAxes;

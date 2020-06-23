@@ -453,6 +453,11 @@ namespace Iviz.Resources
                     int charWidth = CharWidth(s[i]);
                     if (usedWidth + charWidth > usableWidth)
                     {
+                        if (i >= s.Length - 2)
+                        {
+                            str.Append(s[i]);
+                            continue;
+                        }
                         if (numLines == 0)
                         {
                             str.Append("...\n→ ").Append(s[i]);

@@ -38,6 +38,7 @@ namespace Iviz.App.Listeners
                 config.Type = value.Type;
                 RenderAsOcclusionOnly = value.RenderAsOcclusionOnly;
                 Tint = value.Tint;
+                Visible = value.Visible;
             }
         }
 
@@ -65,6 +66,20 @@ namespace Iviz.App.Listeners
                 foreach (MarkerObject marker in markers.Values)
                 {
                     marker.Tint = value;
+                }
+            }
+        }
+
+        public bool Visible
+        {
+            get => config.Visible;
+            set
+            {
+                config.Visible = value;
+
+                foreach (MarkerObject marker in markers.Values)
+                {
+                    marker.Visible = value;
                 }
             }
         }
@@ -127,6 +142,7 @@ namespace Iviz.App.Listeners
                         markerToAdd.Parent = TFListener.ListenersFrame;
                         markerToAdd.OcclusionOnly = RenderAsOcclusionOnly;
                         markerToAdd.Tint = Tint;
+                        markerToAdd.Visible = Visible;
                         markers[id] = markerToAdd;
                     }
                     markerToAdd.Set(msg);

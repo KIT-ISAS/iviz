@@ -53,6 +53,7 @@ namespace Iviz.App
             panel.TrailTime.Value = listener.TrailTime;
             panel.Scale.Value = listener.Scale;
             panel.VectorScale.Value = listener.VectorScale;
+            panel.HideButton.State = listener.Visible;
 
             panel.ShowTrail.ValueChanged += f =>
             {

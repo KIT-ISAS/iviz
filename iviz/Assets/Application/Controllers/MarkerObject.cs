@@ -82,6 +82,18 @@ namespace Iviz.App.Listeners
             }
         }
 
+        public bool Visible
+        {
+            get => resource?.Visible ?? true;
+            set
+            {
+                if (resource != null)
+                {
+                    resource.Visible = value;
+                }
+            }
+        }
+
         public void Set(Marker msg)
         {
             Id = MarkerListener.IdFromMessage(msg);

@@ -27,6 +27,7 @@ namespace Iviz.App
                 var childrenList = frame.Children;
                 foreach (TFFrame child in childrenList.Values)
                 {
+                    //Debug.Log(Name + " -> " + child.Id);
                     Children.Add(new TFNode(child));
                 }
                 Children.Sort((x, y) => string.CompareOrdinal(x.Name, y.Name));
@@ -50,6 +51,7 @@ namespace Iviz.App
             }
         }
 
+        /*
         bool active = true;
         public bool Active
         {
@@ -63,16 +65,20 @@ namespace Iviz.App
                 }
             }
         }
+        */
 
         public void Flush()
         {
+            /*
             if (!Active)
             {
                 return;
             }
+            */
 
             TFNode root = new TFNode(TFListener.RootFrame);
 
+            //Debug.Log("Flush!!!");
             StringBuilder str = new StringBuilder();
             root.Write(str, 0);
 
@@ -84,7 +90,7 @@ namespace Iviz.App
 
         public void ClearSubscribers()
         {
-            Active = false;
+            //Active = false;
         }
     }
 }

@@ -50,7 +50,7 @@ namespace Iviz.App
 
         void OnItemClicked(int index, string _)
         {
-            ModuleListPanel.SaveStateConfiguration(files[index]);
+            ModuleListPanel.SaveStateConfiguration(files[index] + Suffix);
             Close();
         }
 

@@ -43,6 +43,8 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
+            panel.HideButton.State = controller.Visible;
+
             panel.JoySender.Set(controller.RosSenderJoy);
             panel.TwistSender.Set(controller.RosSenderTwist);
             panel.SendJoy.Value = controller.PublishJoy;

@@ -22,7 +22,7 @@ namespace Iviz.App.Listeners
         [DataMember] public float FovAngle { get; set; } = 1.0f * Mathf.Rad2Deg;
     }
 
-    public sealed class DepthImageProjector : MonoBehaviour, IController
+    public sealed class DepthImageProjector : MonoBehaviour, IController, IHasFrame
     {
         DepthImageResource resource;
         SimpleDisplayNode node;
@@ -112,12 +112,12 @@ namespace Iviz.App.Listeners
             {
                 if (depthImage != null)
                 {
-                    node.transform.parent = null;
+                    node.transform.SetParentLocal(null);
                 }
                 depthImage = value;
                 if (depthImage != null)
                 {
-                    node.transform.parent = depthImage.Node.transform;
+                    node.transform.SetParentLocal(depthImage.Node.transform);
                 }
                 resource.DepthImage = value?.ImageTexture;
             }

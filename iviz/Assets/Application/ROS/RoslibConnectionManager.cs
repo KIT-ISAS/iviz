@@ -280,7 +280,7 @@ namespace Iviz.App
             AddTask(() =>
             {
                Debug.Log("RosLibConnection: Disconnecting...");
-               client.Close();
+               client?.Close();
                client = null;
                foreach (var entry in publishersByTopic)
                {

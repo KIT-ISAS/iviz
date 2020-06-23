@@ -212,9 +212,11 @@ namespace Iviz.App.Listeners
                 {
                     parentId = parentId.Substring(1);
                 }
+                //Debug.Log("Id " + childId + " requests parent " + parentId);
                 TFFrame parent = string.IsNullOrEmpty(parentId) ?
                     RootFrame :
                     GetOrCreateFrame(parentId, null);
+                //Debug.Log("Parent has parent " + parent.Parent.Id);
 
                 if (child.SetParent(parent))
                 {
