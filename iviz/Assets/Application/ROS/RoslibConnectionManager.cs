@@ -22,14 +22,20 @@ namespace Iviz.App
             public RosPublisher Publisher { get; protected set; }
             public virtual int Id { get; set; }
 
+            public AdvertisedTopic(string topic)
+            {
+                Topic = topic;
+            }
+
             public abstract void Add(RosSender subscriber);
             public abstract void Remove(RosSender subscriber);
             public abstract int Count { get; }
             public abstract void Advertise(RosClient client);
 
-            public AdvertisedTopic(string topic)
+            public void Unadvertise(RosClient client)
             {
-                Topic = topic;
+                string topic = (Topic[0] == '/') ? Topic : $"{client.CallerId}/{Topic}";
+                Publisher?.Unadvertise(topic);
             }
 
             public void Invalidate()
@@ -83,14 +89,21 @@ namespace Iviz.App
         {
             public string Topic { get; }
             public RosSubscriber Subscriber { get; protected set; }
-            public abstract void Add(RosListener subscriber);
-            public abstract void Remove(RosListener subscriber);
             public abstract int Count { get; }
-            public abstract void Subscribe(RosClient client);
 
             public SubscribedTopic(string topic)
             {
                 Topic = topic;
+            }
+
+            public abstract void Add(RosListener subscriber);
+            public abstract void Remove(RosListener subscriber);
+            public abstract void Subscribe(RosClient client);
+
+            public void Unsubscribe(RosClient client)
+            {
+                string topic = (Topic[0] == '/') ? Topic : $"{client.CallerId}/{Topic}";
+                Subscriber?.Unsubscribe(topic);
             }
 
             public void Invalidate()
@@ -476,7 +489,7 @@ namespace Iviz.App
 
                     if (client != null)
                     {
-                        advertisedTopic.Publisher.Unadvertise(advertiser.Topic);
+                        advertisedTopic.Unadvertise(client);
                         PublishedTopics = client.PublishedTopics;
                     }
                 }
@@ -508,8 +521,7 @@ namespace Iviz.App
                 if (subscribedTopic.Count == 0)
                 {
                     subscribersByTopic.Remove(subscriber.Topic);
-
-                    subscribedTopic.Subscriber?.Unsubscribe(subscriber.Topic);
+                    subscribedTopic.Unsubscribe(client);
                 }
             }
         }

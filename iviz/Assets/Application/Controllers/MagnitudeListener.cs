@@ -192,17 +192,32 @@ namespace Iviz.App.Listeners
 
             name = "Magnitude:" + config.Topic;
             displayNode.name = $"[{config.Topic}]";
+            displayNode.AttachTo("");
             //displayNode.DisplayData = DisplayData;
 
             switch (config.Type)
             {
                 case PoseStamped.RosMessageType:
                     Listener = new RosListener<PoseStamped>(config.Topic, Handler);
+                    goto case Msgs.GeometryMsgs.Pose.RosMessageType;
+
+                case Msgs.GeometryMsgs.Pose.RosMessageType:
+                    if (Listener == null)
+                    {
+                        Listener = new RosListener<Msgs.GeometryMsgs.Pose>(config.Topic, Handler);
+                    }
                     axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Displays.AxisFrameResource, displayNode.transform);
                     break;
 
                 case PointStamped.RosMessageType:
                     Listener = new RosListener<PointStamped>(config.Topic, Handler);
+                    goto case Point.RosMessageType;
+
+                case Point.RosMessageType:
+                    if (Listener == null)
+                    {
+                        Listener = new RosListener<Point>(config.Topic, Handler);
+                    }
 
                     sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere, displayNode.transform);
                     sphere.transform.localScale = 0.1f * UnityEngine.Vector3.one;
@@ -211,6 +226,13 @@ namespace Iviz.App.Listeners
 
                 case WrenchStamped.RosMessageType:
                     Listener = new RosListener<WrenchStamped>(config.Topic, Handler);
+                    goto case Wrench.RosMessageType;
+
+                case Wrench.RosMessageType:
+                    if (Listener == null)
+                    {
+                        Listener = new RosListener<Wrench>(config.Topic, Handler);
+                    }
                     axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Displays.AxisFrameResource, displayNode.transform);
                     arrow = ResourcePool.GetOrCreate<ArrowResource>(Resource.Displays.Arrow, displayNode.transform);
                     arrow.Color = Color;
@@ -221,6 +243,13 @@ namespace Iviz.App.Listeners
 
                 case TwistStamped.RosMessageType:
                     Listener = new RosListener<TwistStamped>(config.Topic, Handler);
+                    goto case Twist.RosMessageType;
+
+                case Twist.RosMessageType:
+                    if (Listener == null)
+                    {
+                        Listener = new RosListener<Twist>(config.Topic, Handler);
+                    }
                     axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Displays.AxisFrameResource, displayNode.transform);
                     arrow = ResourcePool.GetOrCreate<ArrowResource>(Resource.Displays.Arrow, displayNode.transform);
                     arrow.Color = Color;
@@ -247,33 +276,47 @@ namespace Iviz.App.Listeners
         void Handler(PoseStamped msg)
         {
             displayNode.AttachTo(msg.Header.FrameId);
-            if (msg.Pose.HasNaN())
+            Handler(msg.Pose);
+        }
+
+        void Handler(Msgs.GeometryMsgs.Pose msg)
+        {
+            if (msg.HasNaN())
             {
                 return;
             }
-            displayNode.transform.SetLocalPose(msg.Pose.Ros2Unity());
+            displayNode.transform.SetLocalPose(msg.Ros2Unity());
         }
 
         void Handler(PointStamped msg)
         {
             displayNode.AttachTo(msg.Header.FrameId);
-            if (msg.Point.HasNaN())
+            Handler(msg.Point);
+        }
+
+        void Handler(Point msg)
+        {
+            if (msg.HasNaN())
             {
                 return;
             }
-            displayNode.transform.localPosition = msg.Point.Ros2Unity();
+            displayNode.transform.localPosition = msg.Ros2Unity();
         }
 
         void Handler(WrenchStamped msg)
         {
             displayNode.AttachTo(msg.Header.FrameId);
+            Handler(msg.Wrench);
+        }
 
-            if (msg.Wrench.Force.HasNaN() || msg.Wrench.Torque.HasNaN())
+        void Handler(Wrench msg)
+        {
+            if (msg.Force.HasNaN() || msg.Torque.HasNaN())
             {
                 return;
             }
 
-            UnityEngine.Vector3 dir = msg.Wrench.Force.Ros2Unity();
+            UnityEngine.Vector3 dir = msg.Force.Ros2Unity();
             arrow.Set(UnityEngine.Vector3.zero, dir);
             trail.DataSource = () => displayNode.transform.TransformPoint(dir * VectorScale);
         }
@@ -281,13 +324,17 @@ namespace Iviz.App.Listeners
         void Handler(TwistStamped msg)
         {
             displayNode.AttachTo(msg.Header.FrameId);
+            Handler(msg.Twist);
+        }
 
-            if (msg.Twist.Angular.HasNaN() || msg.Twist.Linear.HasNaN())
+        void Handler(Twist msg)
+        {
+            if (msg.Angular.HasNaN() || msg.Linear.HasNaN())
             {
                 return;
             }
 
-            UnityEngine.Vector3 dir = msg.Twist.Linear.Ros2Unity();
+            UnityEngine.Vector3 dir = msg.Linear.Ros2Unity();
             arrow.Set(UnityEngine.Vector3.zero, dir);
             trail.DataSource = () => displayNode.transform.TransformPoint(dir * VectorScale);
         }

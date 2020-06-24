@@ -338,8 +338,8 @@ namespace Iviz.App.Listeners
         public void Stop()
         {
             Visible = false;
-            RosSenderHead.Stop();
-            RosSenderMarkers.Stop();
+            RosSenderHead?.Stop();
+            RosSenderMarkers?.Stop();
         }
     }
 }

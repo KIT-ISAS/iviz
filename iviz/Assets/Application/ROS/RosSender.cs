@@ -60,6 +60,8 @@ namespace Iviz.App
             GameThread.EverySecond -= UpdateStats;
         }
 
+        public abstract void Publish(IMessage msg);
+
         void UpdateStats()
         {
             if (LastMsgCounter == 0)
@@ -93,6 +95,11 @@ namespace Iviz.App
         public void SetId(int id)
         {
             Id = id;
+        }
+
+        public override void Publish(IMessage msg)
+        {
+            Publish((T)msg);
         }
 
         public void Publish(T msg)

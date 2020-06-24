@@ -52,6 +52,7 @@ namespace Iviz.App
 
             panel.JoyTopic.Value = controller.JoyTopic;
             panel.TwistTopic.Value = controller.TwistTopic;
+            panel.UseStamped.Value = controller.TwistStamped;
 
             panel.MaxSpeed.Value = controller.MaxSpeed;
             panel.AttachToFrame.Value = controller.AttachToFrame;
@@ -73,7 +74,7 @@ namespace Iviz.App
             {
                 controller.PublishTwist = f;
                 panel.MaxSpeed.Interactable = f;
-                panel.AttachToFrame.Interactable = f;
+                panel.AttachToFrame.Interactable = f && controller.TwistStamped;
                 panel.XIsFront.Interactable = f;
                 panel.TwistSender.Set(controller.RosSenderTwist);
                 panel.TwistTopic.Interactable = f;
@@ -99,6 +100,11 @@ namespace Iviz.App
             {
                 controller.TwistTopic = f;
                 panel.TwistSender.Set(controller.RosSenderTwist);
+            };
+            panel.UseStamped.ValueChanged += f =>
+            {
+                controller.TwistStamped = f;
+                panel.AttachToFrame.Interactable = f && controller.PublishTwist;
             };
 
             panel.CloseButton.Clicked += () =>

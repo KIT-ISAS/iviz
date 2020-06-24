@@ -2,6 +2,7 @@
 using System.Collections;
 using UnityEngine.UI;
 using Iviz.Resources;
+using Iviz.Msgs;
 
 namespace Iviz.App
 {
@@ -37,12 +38,22 @@ namespace Iviz.App
         public int MessagesPerSecond => RosSender?.Stats.MessagesPerSecond ?? 0;
         public int BytesPerSecond => RosSender?.Stats.BytesPerSecond ?? 0;
 
-        public void Set<T>(RosSender<T> sender) where T : Msgs.IMessage, new()
+        public void Set(RosSender sender)
         {
             RosSender = sender;
             if (sender == null)
             {
-                string messageType = Msgs.BuiltIns.GetMessageType(typeof(T));
+                text.text = $"<i>Empty</i>\n" +
+                    $"<b>(?)</b>";
+            }
+        }
+
+        public void Set<T>(RosSender<T> sender) where T : IMessage, new()
+        {
+            RosSender = sender;
+            if (sender == null)
+            {
+                string messageType = BuiltIns.GetMessageType(typeof(T));
                 text.text = $"<i>Empty</i>\n" +
                     $"<b>{messageType}</b>";
             }
@@ -58,7 +69,7 @@ namespace Iviz.App
             }
             else
             {
-                publisherStatus = "On ← " + numSubscribers;
+                publisherStatus = numSubscribers + "↑ ";
             }
             string messagesPerSecond = MessagesPerSecond.ToString(UnityUtils.Culture);
             string kbPerSecond = (BytesPerSecond * 0.001f).ToString("#,0.#", UnityUtils.Culture);

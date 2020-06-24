@@ -15,9 +15,10 @@ namespace Iviz.App.Listeners
         [DataMember] public bool Visible { get; set; } = true;
 
         [DataMember] public string JoyTopic { get; set; } = "joy";
-        [DataMember] public bool PublishJoy { get; set; } = true;
+        [DataMember] public bool PublishJoy { get; set; } = false;
         [DataMember] public string TwistTopic { get; set; } = "twist";
         [DataMember] public bool PublishTwist { get; set; } = true;
+        [DataMember] public bool TwistStamped { get; set; } = true;
         [DataMember] public SerializableVector3 MaxSpeed { get; set; } = Vector3.one * 0.25f;
         [DataMember] public string AttachToFrame { get; set; } = "map";
         [DataMember] public bool XIsFront { get; set; } = true;
@@ -51,11 +52,30 @@ namespace Iviz.App.Listeners
             set
             {
                 config.JoyTopic = string.IsNullOrEmpty(value) ? "joy" : value;
-                if (RosSenderJoy != null && RosSenderJoy.Topic != config.JoyTopic)
-                {
-                    RosSenderJoy.Stop();
-                    RosSenderJoy = new RosSender<Msgs.SensorMsgs.Joy>(JoyTopic);
-                }
+                RebuildJoy();
+            }
+        }
+
+        void RebuildJoy()
+        {
+            if (RosSenderJoy != null && RosSenderJoy.Topic != config.JoyTopic)
+            {
+                RosSenderJoy.Stop();
+                RosSenderJoy = null;
+            }
+            if (RosSenderJoy == null)
+            {
+                RosSenderJoy = new RosSender<Msgs.SensorMsgs.Joy>(JoyTopic);
+            }
+        }
+
+        public bool TwistStamped
+        {
+            get => config.TwistStamped;
+            set
+            {
+                config.TwistStamped = value;
+                RebuildTwist();
             }
         }
 
@@ -65,10 +85,33 @@ namespace Iviz.App.Listeners
             set
             {
                 config.TwistTopic = string.IsNullOrEmpty(value) ? "twist" : value;
-                if (RosSenderTwist != null && RosSenderTwist.Topic != config.TwistTopic)
+                RebuildTwist();
+            }
+        }
+
+        void RebuildTwist()
+        {
+            string twistType = TwistStamped ?
+                Msgs.GeometryMsgs.TwistStamped.RosMessageType :
+                Msgs.GeometryMsgs.Twist.RosMessageType;
+
+            if (RosSenderTwist != null &&
+                (RosSenderTwist.Topic != config.TwistTopic || RosSenderTwist.Type != twistType))
+            {
+                //Debug.Log("Stopping");
+                RosSenderTwist.Stop();
+                RosSenderTwist = null;
+            }
+            if (RosSenderTwist == null)
+            {
+                //Debug.Log("Rebuilding " + TwistStamped);
+                if (TwistStamped)
                 {
-                    RosSenderTwist.Stop();
                     RosSenderTwist = new RosSender<Msgs.GeometryMsgs.TwistStamped>(TwistTopic);
+                }
+                else
+                {
+                    RosSenderTwist = new RosSender<Msgs.GeometryMsgs.Twist>(TwistTopic);
                 }
             }
         }
@@ -85,7 +128,8 @@ namespace Iviz.App.Listeners
         }
 
         public RosSender<Msgs.SensorMsgs.Joy> RosSenderJoy { get; private set; }
-        public RosSender<Msgs.GeometryMsgs.TwistStamped> RosSenderTwist { get; private set; }
+        //public RosSender<Msgs.GeometryMsgs.TwistStamped> RosSenderTwist { get; private set; }
+        public RosSender RosSenderTwist { get; private set; }
 
         public bool Visible
         {
@@ -108,7 +152,7 @@ namespace Iviz.App.Listeners
                 config.PublishJoy = value;
                 if (value && RosSenderJoy == null)
                 {
-                    RosSenderJoy = new RosSender<Msgs.SensorMsgs.Joy>(JoyTopic);
+                    RebuildJoy();
                 }
                 else if (!value && RosSenderJoy != null)
                 {
@@ -126,8 +170,7 @@ namespace Iviz.App.Listeners
                 config.PublishTwist = value;
                 if (value && RosSenderTwist == null)
                 {
-                    RosSenderTwist = new RosSender<Msgs.GeometryMsgs.TwistStamped>(TwistTopic);
-
+                    RebuildTwist();
                 }
                 else if (!value && RosSenderTwist != null)
                 {
@@ -187,14 +230,23 @@ namespace Iviz.App.Listeners
                     new Vector2(leftDir.y, -leftDir.x) :
                     new Vector2(leftDir.x, leftDir.y);
 
-                Msgs.GeometryMsgs.TwistStamped twist = new Msgs.GeometryMsgs.TwistStamped(
-                    Header: RosUtils.CreateHeader(twistSeq++, frame),
-                    Twist: new Msgs.GeometryMsgs.Twist(
+                Msgs.GeometryMsgs.Twist twist = new Msgs.GeometryMsgs.Twist(
                         Linear: new Msgs.GeometryMsgs.Vector3(linear.x * MaxSpeed.x, linear.y * MaxSpeed.y, 0),
                         Angular: new Msgs.GeometryMsgs.Vector3(0, 0, -rightDir.x * MaxSpeed.z)
-                        )
                     );
-                RosSenderTwist.Publish(twist);
+
+                if (TwistStamped)
+                {
+                    Msgs.GeometryMsgs.TwistStamped twistStamped = new Msgs.GeometryMsgs.TwistStamped(
+                        Header: RosUtils.CreateHeader(twistSeq++, frame),
+                        Twist: twist
+                        );
+                    RosSenderTwist.Publish(twistStamped);
+                }
+                else
+                {
+                    RosSenderTwist.Publish(twist);
+                }
             }
             if (RosSenderJoy != null)
             {

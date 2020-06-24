@@ -15,11 +15,13 @@
         public virtual void CleanupPanel() { }
         public virtual void UpdatePanel() { }
 
+        /*
         public virtual void Cleanup()
         {
             DialogPanelManager.HidePanelFor(this);
             ModuleListPanel = null;
         }
+        */
 
         public void Show()
         {

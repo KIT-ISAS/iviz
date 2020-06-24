@@ -55,5 +55,19 @@ namespace Iviz.App
             DialogPanelManager.HidePanelFor(this);
         }
 
+        public override void CleanupPanel()
+        {
+            base.CleanupPanel();
+            itemList[3].Interactable = true;
+            itemList[4].Interactable = true;
+        }
+
+        /*
+        public override void Cleanup()
+        {
+            base.Cleanup();
+        }
+        */
+
     }
 }

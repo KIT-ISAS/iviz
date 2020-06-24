@@ -57,14 +57,14 @@ namespace Iviz.App
             }
             else
             {
-                subscriberStatus = "On → " + numPublishers;
+                subscriberStatus = numPublishers + "↓ ";
             }
             string messagesPerSecond = MessagesPerSecond.ToString(UnityUtils.Culture);
             string kbPerSecond = (BytesPerSecond * 0.001f).ToString("#,0.#", UnityUtils.Culture);
             string dropped = Dropped.ToString(UnityUtils.Culture);
 
             text.text = $"{Resource.Font.Split(Topic ?? "", Size)}\n" +
-                $"<b>{subscriberStatus} | {messagesPerSecond} Hz | {kbPerSecond} kB/s | <color=grey>{dropped}</color></b>";
+                $"<b>{subscriberStatus} | {messagesPerSecond} Hz | {kbPerSecond} kB/s | {dropped} drop</b>";
         }
 
         public void OnClick()
