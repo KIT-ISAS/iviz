@@ -33,7 +33,7 @@ namespace Iviz.App
                 Children.Sort((x, y) => string.CompareOrdinal(x.Name, y.Name));
             }
 
-            public void Write(StringBuilder str, int level)
+            void Write(StringBuilder str, int level)
             {
                 string tabs = new string(' ', level * 4);
 
@@ -47,6 +47,14 @@ namespace Iviz.App
                 foreach(TFNode node in Children)
                 {
                     node.Write(str, level + 1);
+                }
+            }
+
+            public void Write(StringBuilder str)
+            {
+                foreach (TFNode node in Children)
+                {
+                    node.Write(str, 0);
                 }
             }
         }
@@ -80,7 +88,7 @@ namespace Iviz.App
 
             //Debug.Log("Flush!!!");
             StringBuilder str = new StringBuilder();
-            root.Write(str, 0);
+            root.Write(str);
 
             text.text = str.ToString();
 

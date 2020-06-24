@@ -73,6 +73,9 @@ namespace Iviz.App
                     LastMsgCounter,
                     LastMsgBytes
                 );
+
+                ConnectionManager.ReportUp(LastMsgBytes);
+
                 LastMsgBytes = 0;
                 LastMsgCounter = 0;
             }

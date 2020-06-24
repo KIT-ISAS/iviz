@@ -64,7 +64,7 @@ namespace Iviz.App
             string dropped = Dropped.ToString(UnityUtils.Culture);
 
             text.text = $"{Resource.Font.Split(Topic ?? "", Size)}\n" +
-                $"<b>{subscriberStatus} | {messagesPerSecond} Hz | {kbPerSecond} kB/s | {dropped} ↓</b>";
+                $"<b>{subscriberStatus} | {messagesPerSecond} Hz | {kbPerSecond} kB/s | <color=grey>{dropped}</color></b>";
         }
 
         public void OnClick()

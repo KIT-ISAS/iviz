@@ -47,7 +47,7 @@ namespace Iviz.App
         public int TotalMsgCounter { get; protected set; }
         public int MsgsInQueue { get; protected set; }
         public int MaxQueueSize { get; set; } = 50;
-        public int TotalMsgBytes { get; protected set; }
+        public int LastMsgBytes { get; protected set; }
         public int Dropped { get; protected set; }
         protected readonly List<float> timesOfArrival = new List<float>();
 
@@ -100,11 +100,14 @@ namespace Iviz.App
                     jitterMax,
                     timesOfArrival.Count == 0 ? 0 : (timesOfArrival.Last() - timesOfArrival.First()) / timesOfArrival.Count(),
                     timesOfArrival.Count,
-                    TotalMsgBytes,
+                    LastMsgBytes,
                     MsgsInQueue,
                     Dropped
                 );
-                TotalMsgBytes = 0;
+
+                ConnectionManager.ReportDown(LastMsgBytes);
+
+                LastMsgBytes = 0;
                 Dropped = 0;
                 timesOfArrival.Clear();
             }
@@ -162,7 +165,7 @@ namespace Iviz.App
             {
                 foreach(T t in queue)
                 {
-                    TotalMsgBytes += t.RosMessageLength;
+                    LastMsgBytes += t.RosMessageLength;
                     timesOfArrival.Add(Time.time);
 
                     subscriptionHandler(t);

@@ -23,6 +23,8 @@ namespace Iviz.App
         public static RosConnection Connection { get; private set; }
         RosSender<Log> sender;
 
+        int collectedUp, collectedDown;
+
         void Awake()
         {
             Instance = this;
@@ -77,6 +79,24 @@ namespace Iviz.App
             => Connection.AdvertiseService(service, callback);
 
         public static ReadOnlyCollection<BriefTopicInfo>  GetSystemPublishedTopics() => Connection.GetSystemPublishedTopics();
+
+        public static void ReportUp(int size)
+        {
+            Instance.collectedUp += size;
+        }
+
+        public static void ReportDown(int size)
+        {
+            Instance.collectedDown += size;
+        }
+
+        public static (int, int) CollectReported()
+        {
+            (int, int) result = (Instance.collectedDown, Instance.collectedUp);
+            Instance.collectedDown = 0;
+            Instance.collectedUp = 0;
+            return result;
+        }
     }
 
     public abstract class RosConnection

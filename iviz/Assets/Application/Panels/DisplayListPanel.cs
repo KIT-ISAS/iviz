@@ -60,6 +60,7 @@ namespace Iviz.App
 
         [SerializeField] Text bottomTime = null;
         [SerializeField] Text bottomFps = null;
+        [SerializeField] Text bottomBandwidth = null;
 
         [SerializeField] Joystick joystick = null;
         public Joystick Joystick => joystick;
@@ -214,7 +215,8 @@ namespace Iviz.App
             TFListener.GuiManager.Canvases.Add(dialogPanelManager.GetComponentInParent<Canvas>());
             TFListener.GuiManager.GuiPointerBlockers.Add(Joystick);
 
-            GameThread.EverySecond += UpdateBottomText;
+            GameThread.LateEverySecond += UpdateBottomText;
+            GameThread.EveryFrame += UpdateFpsCounter;
             UpdateBottomText();
         }
 
@@ -515,9 +517,14 @@ namespace Iviz.App
             bottomTime.text = $"<b>{DateTime.Now:HH:mm:ss}</b>";
             bottomFps.text = $"<b>{frames} FPS</b>";
             frames = 0;
+
+            (int, int) bandwidth = ConnectionManager.CollectReported();
+            int down = bandwidth.Item1 / 1000;
+            int up = bandwidth.Item2 / 1000;
+            bottomBandwidth.text = $"<b>↓{down:N0}kB/s ↑{up:N0}kB/s</b>";
         }
 
-        void Update()
+        void UpdateFpsCounter()
         {
             frames++;
         }

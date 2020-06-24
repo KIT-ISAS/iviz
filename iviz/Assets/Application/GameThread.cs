@@ -13,6 +13,7 @@ namespace Iviz.App
 
         public static event Action EveryFrame;
         public static event Action EverySecond;
+        public static event Action LateEverySecond;
 
         static GameThread Instance;
 
@@ -47,6 +48,7 @@ namespace Iviz.App
             if (newRunTime - lastRunTime > 1)
             {
                 EverySecond?.Invoke();
+                LateEverySecond?.Invoke();
                 lastRunTime = newRunTime;
             }
 
