@@ -10,6 +10,8 @@ namespace Iviz.App
     {
         TMP_Text text;
 
+        public event Action<string> LinkClicked;
+
         void Awake()
         {
             text = GetComponent<TMP_Text>();
@@ -21,7 +23,7 @@ namespace Iviz.App
             if (linkIndex != -1)
             { 
                 TMP_LinkInfo linkInfo = text.textInfo.linkInfo[linkIndex];
-                Debug.Log(linkInfo.GetLinkText());
+                LinkClicked?.Invoke(linkInfo.GetLinkID());
             }
         }
     }

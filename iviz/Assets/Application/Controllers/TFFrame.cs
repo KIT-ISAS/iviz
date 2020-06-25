@@ -18,6 +18,7 @@ namespace Iviz.App.Listeners
         public const int Layer = 9;
 
         readonly Timeline timeline = new Timeline();
+        TrailResource trail;
 
         [SerializeField] string id_;
         public string Id
@@ -160,6 +161,14 @@ namespace Iviz.App.Listeners
             }
         }
 
+        public bool TrailVisible
+        {
+            get => trail.enabled;
+            set
+            {
+                trail.enabled = value;
+            }
+        }
 
         public override TFFrame Parent
         {
@@ -312,6 +321,9 @@ namespace Iviz.App.Listeners
             parentConnector.gameObject.SetActive(false);
 
             UsesBoundaryBox = false;
+
+            trail = GetComponent<TrailResource>();
+            TrailVisible = false;
         }
 
         public void Recycle()

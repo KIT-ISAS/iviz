@@ -8,6 +8,7 @@ using UnityEngine.XR.ARFoundation;
 using Iviz.Displays;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.App.Displays;
+using UnityEngine.XR.ARSubsystems;
 
 namespace Iviz.App.Listeners
 {
