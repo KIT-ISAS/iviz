@@ -112,8 +112,25 @@ namespace Iviz.App.Listeners
                 ARCamera.gameObject.SetActive(value);
                 Canvas.worldCamera = value ? ARCamera : MainCamera;
                 TFListener.MainCamera = value ? ARCamera : MainCamera;
+
             }
         }
+
+        /*
+        private void AnchorManager_anchorsChanged(ARAnchorsChangedEventArgs obj)
+        {
+            if (obj.added.Count != 0)
+            {
+                Debug.Log("Added " + obj.added.Count + " anchors!");
+                trackedObject = obj.added[0].gameObject;
+            }
+            if (obj.updated.Count != 0)
+            {
+                Debug.Log("Updated " + obj.updated.Count + " anchors!");
+                trackedObject = obj.updated[0].gameObject;
+            }
+        }
+        */
 
         public bool PublishPose
         {
@@ -302,12 +319,19 @@ namespace Iviz.App.Listeners
                     RosSenderMarkers.Publish(new MarkerArray(markers));
                 }
             }
-
+            /*
+            if (trackedObject != null)
+            {
+                Debug.Log(trackedObject.name + " -> " + trackedObject.transform.AsPose());
+            }
+            */
         }
+
+        //GameObject trackedObject;
 
         void OnTrackedImagesChanged(ARTrackedImagesChangedEventArgs obj)
         {
-            Pose newPose = new Pose();
+            Pose? newPose = null;
             if (obj.added.Count != 0)
             {
                 Debug.Log("Added " + obj.added.Count + " images!");
@@ -316,6 +340,15 @@ namespace Iviz.App.Listeners
                 transform.rotation = obj.added[0].transform.rotation;
                 */
                 newPose = obj.added[0].transform.AsPose();
+
+                /*
+                var anchorManager = ARSessionOrigin.GetComponent<ARAnchorManager>();
+                anchorManager.anchorsChanged += AnchorManager_anchorsChanged;
+                anchorManager.AddAnchor(newPose.Value);
+                */
+
+                //trackedObject = obj.added[0].gameObject;
+                //Debug.Log("Added: " + trackedObject.name + " " + newPose);
             }
             if (obj.updated.Count != 0)
             {
@@ -325,9 +358,16 @@ namespace Iviz.App.Listeners
                 transform.rotation = obj.updated[0].transform.rotation;
                 */
                 newPose = obj.updated[0].transform.AsPose();
+
+                //trackedObject = obj.updated[0].gameObject;
+                //Debug.Log("Added: " + trackedObject.name + " " + newPose);
+            }
+            if (newPose == null)
+            {
+                return;
             }
             Pose expectedPose = TFListener.RelativePose(resource.transform.AsPose());
-            Pose change = newPose.Multiply(expectedPose.Inverse());
+            Pose change = newPose.Value.Multiply(expectedPose.Inverse());
 
             MarkerFound = true;
             TFRoot.transform.SetPose(change);
