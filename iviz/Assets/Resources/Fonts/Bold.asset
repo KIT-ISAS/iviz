@@ -51,16 +51,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 71c1514a6bd24e1e882cebbe1904ce04, type: 3}
-  m_Name: Montserrat-Bold SDF
+  m_Name: Bold
   m_EditorClassIdentifier: 
-  hashCode: -1220389694
+  hashCode: 2491237
   material: {fileID: 7326951699809050119}
   materialHashCode: 102408969
   m_Version: 1.1.0
   m_SourceFontFileGUID: c7aee36b57c73924db63395f7f086121
-  m_SourceFontFile_EditorRef: {fileID: 0}
+  m_SourceFontFile_EditorRef: {fileID: 12800000, guid: c7aee36b57c73924db63395f7f086121,
+    type: 3}
   m_SourceFontFile: {fileID: 0}
-  m_AtlasPopulationMode: 0
+  m_AtlasPopulationMode: 1
   m_FaceInfo:
     m_FamilyName: Montserrat
     m_StyleName: Bold
@@ -2535,7 +2536,8 @@ MonoBehaviour:
   m_FontFeatureTable:
     m_GlyphPairAdjustmentRecords: []
   fallbackFontAssets: []
-  m_FallbackFontAssetTable: []
+  m_FallbackFontAssetTable:
+  - {fileID: 11400000, guid: dc54f1d3eecc74e6b9465ca6ea532ed6, type: 2}
   m_CreationSettings:
     sourceFontFileName: 
     sourceFontFileGUID: c7aee36b57c73924db63395f7f086121

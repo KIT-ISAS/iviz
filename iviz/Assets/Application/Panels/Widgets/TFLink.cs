@@ -24,6 +24,9 @@ namespace Iviz.App
             { 
                 TMP_LinkInfo linkInfo = text.textInfo.linkInfo[linkIndex];
                 LinkClicked?.Invoke(linkInfo.GetLinkID());
+            } else
+            {
+                LinkClicked?.Invoke(null);
             }
         }
     }

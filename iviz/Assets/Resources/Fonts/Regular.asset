@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 71c1514a6bd24e1e882cebbe1904ce04, type: 3}
-  m_Name: Montserrat-Regular SDF 1
+  m_Name: Regular
   m_EditorClassIdentifier: 
-  hashCode: 41709964
+  hashCode: -1861696966
   material: {fileID: 518525549465842797}
   materialHashCode: 161356172
   m_Version: 1.1.0

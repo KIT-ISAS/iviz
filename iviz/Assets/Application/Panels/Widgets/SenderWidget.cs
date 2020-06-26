@@ -11,21 +11,21 @@ namespace Iviz.App
         const int Size = 200;
         [SerializeField] Text text = null;
 
-        RosSender sender;
+        RosSender _sender;
         public RosSender RosSender
         {
-            get => sender;
+            get => _sender;
             private set
             {
-                if (sender == null && value != null)
+                if (_sender == null && value != null)
                 {
                     GameThread.EverySecond += UpdateStats;
                 }
-                else if (sender != null && value == null)
+                else if (_sender != null && value == null)
                 {
                     GameThread.EverySecond -= UpdateStats;
                 }
-                sender = value;
+                _sender = value;
                 if (value != null)
                 {
                     UpdateStats();

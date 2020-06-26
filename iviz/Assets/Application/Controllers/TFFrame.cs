@@ -242,6 +242,8 @@ namespace Iviz.App.Listeners
 
         public Pose WorldPose => TFListener.RelativePose(transform.AsPose());
 
+        public Pose AbsolutePose => transform.AsPose();
+
         [SerializeField] Vector3 rosPosition_;
 
         public void SetPose(in TimeSpan time, in Pose newPose)

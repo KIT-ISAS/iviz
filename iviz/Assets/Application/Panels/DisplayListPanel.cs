@@ -28,6 +28,8 @@ namespace Iviz.App
             }
         }
 
+        public static DisplayListPanel Instance { get; private set; }
+
         //[SerializeField] InputField address = null;
         [SerializeField] DataLabelWidget MasterUriStr = null;
         [SerializeField] TrashButtonWidget MasterUriButton = null;
@@ -39,6 +41,9 @@ namespace Iviz.App
         [SerializeField] Button load = null;
         [SerializeField] Button hide = null;
         [SerializeField] Image status = null;
+
+        [SerializeField] Button unlock = null;
+        public Button UnlockButton => unlock;
 
         [SerializeField] GameObject contentObject = null;
 
@@ -85,6 +90,12 @@ namespace Iviz.App
         readonly HashSet<string> topicsWithModule = new HashSet<string>();
         public IReadOnlyCollection<string> DisplayedTopics => topicsWithModule;
 
+        public bool UnlockButtonVisible
+        {
+            get => unlock.gameObject.activeSelf;
+            set => unlock.gameObject.SetActive(value);
+        }
+
         bool KeepReconnecting
         {
             get => ConnectionManager.Connection.KeepReconnecting;
@@ -93,6 +104,11 @@ namespace Iviz.App
                 ConnectionManager.Connection.KeepReconnecting = value;
                 status.enabled = value;
             }
+        }
+
+        void Awake()
+        {
+            Instance = this;
         }
 
         void Start()

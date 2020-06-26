@@ -5,6 +5,7 @@ using System;
 using System.Net;
 using System.Text;
 using System.IO;
+using Iviz.App.Listeners;
 
 namespace Iviz.App
 {
@@ -23,6 +24,7 @@ namespace Iviz.App
         {
             panel.Active = true;
             panel.Close.Clicked += Close;
+            panel.TFLog.Close += Close;
             panel.TFLog.Flush();
         }
 

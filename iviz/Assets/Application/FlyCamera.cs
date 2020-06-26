@@ -27,19 +27,39 @@ namespace Iviz.App
 
         public bool PointerOnGui { get; private set; }
 
-        /*
-        TFFrame orbitFrame;
-        public TFFrame OrbitFrame
+        Vector3 orbitCenter;
+
+        TFFrame _orbitCenterOverride;
+        public TFFrame OrbitCenterOverride
         {
-            get => orbitFrame;
+            get => _orbitCenterOverride;
             set
             {
-                StartOrbitingAround(value);
+                _orbitCenterOverride = value;
+                if (value != null)
+                {
+                    StartOrbiting();
+                    CameraViewOverride = null;
+                }
+                DisplayListPanel.Instance.UnlockButtonVisible = value;
             }
         }
-        */
 
-        Vector3 orbitCenter_;
+        TFFrame _cameraViewOverride;
+        public TFFrame CameraViewOverride
+        {
+            get => _cameraViewOverride;
+            set
+            {
+                _cameraViewOverride = value;
+                if (value != null)
+                {
+                    OrbitCenterOverride = null;
+                }
+                DisplayListPanel.Instance.UnlockButtonVisible = value;
+            }
+        }
+        /*
         public Vector3 OrbitCenter
         {
             get => orbitCenter_;
@@ -49,6 +69,7 @@ namespace Iviz.App
                 StartOrbiting();
             }
         }
+        */
 
         public const bool IsMobile =
 
@@ -57,6 +78,12 @@ namespace Iviz.App
 #else
                 false;
 #endif
+
+        void OnUnlockClick()
+        {
+            CameraViewOverride = null;
+            OrbitCenterOverride = null;
+        }
 
         public ClickableNode SelectedDisplay { get; private set; }
 
@@ -80,6 +107,9 @@ namespace Iviz.App
             {
                 Application.targetFrameRate = 30;
             }
+
+
+            DisplayListPanel.Instance.UnlockButton.onClick.AddListener(OnUnlockClick);
 
             namedBoundary = ResourcePool.GetOrCreate<NamedBoundary>(Resource.Displays.NamedBoundary);
             StartOrbiting();
@@ -174,8 +204,20 @@ namespace Iviz.App
             }
             else
             {
-                ProcessTurning();
-                ProcessFlying();
+                if (CameraViewOverride != null)
+                {
+                    transform.SetPose(CameraViewOverride.AbsolutePose);
+                }
+                if (OrbitCenterOverride != null)
+                {
+                    ProcessOrbiting();
+                    orbitCenter = OrbitCenterOverride.AbsolutePose.position;
+                }
+                else
+                {
+                    ProcessTurning();
+                    ProcessFlying();
+                }
             }
         }
 
@@ -216,13 +258,13 @@ namespace Iviz.App
 
         public void StartOrbiting()
         {
-            Vector3 diff = OrbitCenter - transform.position;
+            Vector3 diff = orbitCenter - transform.position;
             orbitRadius = diff.magnitude;
             orbitX = Mathf.Atan2(diff.x, diff.z) * Mathf.Rad2Deg;
             orbitY = -Mathf.Atan2(diff.y, new Vector2(diff.x, diff.z).magnitude) * Mathf.Rad2Deg;
 
             transform.rotation = Quaternion.Euler(orbitY, orbitX, 0);
-            transform.position = -orbitRadius * (transform.rotation * Vector3.forward) + OrbitCenter;
+            transform.position = -orbitRadius * (transform.rotation * Vector3.forward) + orbitCenter;
         }
 
         void ProcessOrbiting()
@@ -264,19 +306,21 @@ namespace Iviz.App
             if (orbitY > 90) orbitY = 90;
             if (orbitY < -90) orbitY = -90;
 
-            /*
+
             if (Input.GetKey(KeyCode.W))
             {
+                orbitRadius -= 0.1f;
             }
+            else
             if (Input.GetKey(KeyCode.S))
             {
                 orbitRadius += 0.1f;
             }
-            */
+
 
             //Vector3 parentPosition = OrbitCenter.transform.position;
             transform.rotation = Quaternion.Euler(orbitY, orbitX, 0);
-            transform.position = -orbitRadius * (transform.rotation * Vector3.forward) + OrbitCenter;
+            transform.position = -orbitRadius * (transform.rotation * Vector3.forward) + orbitCenter;
         }
 
         void ProcessScaling()
@@ -321,15 +365,15 @@ namespace Iviz.App
             if (orbitRadius < 0.5f)
             {
                 float diff = 0.5f - orbitRadius;
-                orbitCenter_ += diff * (transform.rotation * Vector3.forward);
+                orbitCenter += diff * (transform.rotation * Vector3.forward);
                 orbitRadius = 0.5f;
             }
 
             float orbitScale = 0.75f * orbitRadius;
 
-            orbitCenter_ -= tangentCoeff * pointerAltDiff.x * orbitScale * transform.TransformDirection(Vector3.right);
-            orbitCenter_ += tangentCoeff * pointerAltDiff.y * orbitScale * transform.TransformDirection(Vector3.down);
-            transform.position = -orbitRadius * (transform.rotation * Vector3.forward) + OrbitCenter;
+            orbitCenter -= tangentCoeff * pointerAltDiff.x * orbitScale * transform.TransformDirection(Vector3.right);
+            orbitCenter += tangentCoeff * pointerAltDiff.y * orbitScale * transform.TransformDirection(Vector3.down);
+            transform.position = -orbitRadius * (transform.rotation * Vector3.forward) + orbitCenter;
         }
 
         void ProcessTurning()
@@ -472,9 +516,9 @@ namespace Iviz.App
             }
             else
             {
-                OrbitCenter = position;
+                orbitCenter = position;
                 orbitRadius = Mathf.Min(orbitRadius, 3.0f);
-                transform.position = -orbitRadius * (transform.rotation * Vector3.forward) + OrbitCenter;
+                transform.position = -orbitRadius * (transform.rotation * Vector3.forward) + orbitCenter;
             }
         }
 

@@ -20,18 +20,18 @@ namespace Iviz.Displays
         ComputeBuffer lineComputeBuffer;
         ComputeBuffer quadComputeBuffer;
 
-        int size_;
+        int _size;
         public int Size
         {
-            get => size_;
+            get => _size;
             private set
             {
-                if (value == size_)
+                if (value == _size)
                 {
                     return;
                 }
-                size_ = value;
-                Reserve(size_ * 11 / 10);
+                _size = value;
+                Reserve(_size * 11 / 10);
             }
         }
 
@@ -94,15 +94,15 @@ namespace Iviz.Displays
             IntensityBounds = span;
         }
 
-        [SerializeField] float lineScale_;
+        [SerializeField] float _lineScale;
         public float LineScale
         {
-            get => lineScale_;
+            get => _lineScale;
             set
             {
-                if (lineScale_ != value)
+                if (_lineScale != value)
                 {
-                    lineScale_ = value;
+                    _lineScale = value;
                     UpdateQuadComputeBuffer();
                 }
             }
