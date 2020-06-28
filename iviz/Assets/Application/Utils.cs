@@ -281,23 +281,18 @@ namespace Iviz
             );
         }
 
-        public static time GetRosTime()
-        {
-            return new time(DateTime.Now);
-        }
-
         public static TimeSpan ToTimeSpan(this duration duration)
         {
             return TimeSpan.FromSeconds(duration.Secs) + TimeSpan.FromTicks(duration.Nsecs / 100);
         }
 
-        public static Header CreateHeader(uint seq = 0, string frame_id = null)
+        public static Header CreateHeader(uint seq = 0, string frameId = null)
         {
             return new Header
             (
                 Seq: seq,
-                FrameId: frame_id ?? TFListener.BaseFrameId,
-                Stamp: GetRosTime()
+                FrameId: frameId ?? TFListener.BaseFrameId,
+                Stamp: new time(DateTime.Now)
             );
         }
 
@@ -386,8 +381,7 @@ namespace Iviz
 
         public static void SetPose(this Transform t, in Pose p)
         {
-            t.position = p.position;
-            t.rotation = p.rotation;
+            t.SetPositionAndRotation(p.position, p.rotation);
         }
 
         public static void SetParentLocal(this Transform t, Transform parent)
@@ -445,17 +439,17 @@ namespace Iviz
 
         public static void ForEach<T>(this T[] col, Action<T> action)
         {
-            for (int i = 0; i < col.Length; i++)
+            foreach (var t in col)
             {
-                action(col[i]);
+                action(t);
             }
         }
 
         public static void ForEach<T>(this IList<T> col, Action<T> action)
         {
-            for (int i = 0; i < col.Count; i++)
+            foreach (var t in col)
             {
-                action(col[i]);
+                action(t);
             }
         }
 

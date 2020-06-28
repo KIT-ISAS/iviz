@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Iviz.App
 {
-    public class InteractiveMarkerModuleData : ListenerModuleData
+    public sealed class InteractiveMarkerModuleData : ListenerModuleData
     {
         readonly InteractiveMarkerListener listener;
         readonly InteractiveMarkerPanelContents panel;
@@ -36,7 +36,7 @@ namespace Iviz.App
                 listener.Config.Topic = Topic;
             }
             listener.StartListening();
-            UpdateButtonText();
+            UpdateModuleButton();
         }
 
         public override void SetupPanel()

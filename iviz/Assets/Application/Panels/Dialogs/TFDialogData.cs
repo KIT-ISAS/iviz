@@ -26,6 +26,7 @@ namespace Iviz.App
             panel.Close.Clicked += Close;
             panel.TFLog.Close += Close;
             panel.TFLog.Flush();
+            panel.TFLog.UpdateFrameTexts();
         }
 
         public override void UpdatePanel()

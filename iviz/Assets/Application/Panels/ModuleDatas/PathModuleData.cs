@@ -8,7 +8,7 @@ namespace Iviz.App
     /// <see cref="PointCloudPanelContents"/> 
     /// </summary>
 
-    public class PathModuleData : ListenerModuleData
+    public sealed class PathModuleData : ListenerModuleData
     {
         readonly PathListener listener;
         readonly PathPanelContents panel;
@@ -38,7 +38,7 @@ namespace Iviz.App
                 listener.Config = (PathConfiguration)constructor.Configuration;
             }
             listener.StartListening();
-            UpdateButtonText();
+            UpdateModuleButton();
         }
 
         public override void SetupPanel()
@@ -74,7 +74,7 @@ namespace Iviz.App
             {
                 listener.Visible = !listener.Visible;
                 panel.HideButton.State = listener.Visible;
-                UpdateButtonText();
+                UpdateModuleButton();
             };
         }
 

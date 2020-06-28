@@ -6,8 +6,11 @@ namespace Iviz.App
 {
     public class TFDialogContents : MonoBehaviour, IDialogPanelContents
     {
-        public TrashButtonWidget Close;
-        public TFLog TFLog;
+        [SerializeField] TrashButtonWidget close = null;
+        [SerializeField] TFLog tfLog = null;
+
+        public TrashButtonWidget Close => close;
+        public TFLog TFLog => tfLog;
 
         public bool Active
         {

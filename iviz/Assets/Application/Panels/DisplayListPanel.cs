@@ -22,10 +22,7 @@ namespace Iviz.App
         public bool AllGuiVisible
         {
             get => parentCanvas.gameObject.activeSelf;
-            set
-            {
-                parentCanvas.gameObject.SetActive(value);
-            }
+            set => parentCanvas.gameObject.SetActive(value);
         }
 
         public static DisplayListPanel Instance { get; private set; }
@@ -69,8 +66,6 @@ namespace Iviz.App
 
         [SerializeField] Joystick joystick = null;
         public Joystick Joystick => joystick;
-
-        public string Address { get; private set; }
 
         readonly List<ModuleData> moduleDatas = new List<ModuleData>();
         public ReadOnlyCollection<ModuleData> ModuleDatas => new ReadOnlyCollection<ModuleData>(moduleDatas);
@@ -185,38 +180,29 @@ namespace Iviz.App
             {
                 ConnectionManager.Connection.MyUri = uri;
                 KeepReconnecting = false;
-                if (uri == null)
-                {
-                    Logger.Internal($"Failed to set caller uri.");
-                }
-                else
-                {
-                    Logger.Internal($"Changing caller uri to '{uri}'");
-                }
+                Logger.Internal(
+                    uri == null ? 
+                    "Failed to set caller uri." : 
+                    "Changing caller uri to '{uri}'"
+                    );
             };
             StopButton.Clicked += () =>
             {
-                if (ConnectionManager.Connected)
-                {
-                    Logger.Internal("Disconnection requested.");
-                }
-                else
-                {
-                    Logger.Internal("Disconnection requested (but already disconnected).");
-                }
+                Logger.Internal(
+                    ConnectionManager.Connected ?
+                    "Disconnection requested." :
+                    "Disconnection requested (but already disconnected)."
+                    );
                 KeepReconnecting = false;
                 ConnectionManager.Connection.Disconnect();
             };
             ConnectButton.Clicked += () =>
             {
-                if (ConnectionManager.Connected)
-                {
-                    Logger.Internal("Reconnection requested.");
-                }
-                else
-                {
-                    Logger.Internal("Connection requested.");
-                }
+                Logger.Internal(
+                    ConnectionManager.Connected ? 
+                    "Reconnection requested." : 
+                    "Connection requested."
+                );
                 ConnectionManager.Connection.Disconnect();
                 KeepReconnecting = true;
             };
@@ -442,7 +428,7 @@ namespace Iviz.App
             int size = buttons.Count();
             float y = yOffset + size * buttonHeight;
 
-            (buttonObject.transform as RectTransform).anchoredPosition = new Vector2(0, -y);
+            ((RectTransform)buttonObject.transform).anchoredPosition = new Vector2(0, -y);
 
             Text buttonObjectText = buttonObject.GetComponentInChildren<Text>();
             buttonObjectText.text = moduleData.ButtonText; // $"<b>{displayData.Module}</b>";
@@ -451,11 +437,8 @@ namespace Iviz.App
             buttons.Add(buttonObject);
 
             Button button = buttonObject.GetComponent<Button>();
-            button.onClick.AddListener(() =>
-            {
-                moduleData.ToggleSelect();
-            });
-            (contentObject.transform as RectTransform).sizeDelta = new Vector2(0, y + buttonHeight + yOffset);
+            button.onClick.AddListener(moduleData.ToggleSelect);
+            ((RectTransform)contentObject.transform).sizeDelta = new Vector2(0, y + buttonHeight + yOffset);
 
             //return buttonObject;
         }
@@ -497,14 +480,14 @@ namespace Iviz.App
             {
                 GameObject buttonObject = buttons[i];
                 float y = yOffset + i * buttonHeight;
-                (buttonObject.transform as RectTransform).anchoredPosition = new Vector3(0, -y);
+                ((RectTransform)buttonObject.transform).anchoredPosition = new Vector3(0, -y);
             }
-            (contentObject.transform as RectTransform).sizeDelta = new Vector2(0, 2 * yOffset + i * buttonHeight);
+            ((RectTransform)contentObject.transform).sizeDelta = new Vector2(0, 2 * yOffset + i * buttonHeight);
         }
 
-        public const int DisplayDataCaptionWidth = 200;
+        public const int ModuleDataCaptionWidth = 200;
 
-        public void SetDisplayDataCaption(ModuleData entry, string text)
+        public void UpdateModuleButton(ModuleData entry, string text)
         {
             int index = moduleDatas.IndexOf(entry);
             if (index == -1)

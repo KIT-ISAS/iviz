@@ -7,18 +7,17 @@ namespace Iviz.App
 {
     public abstract class ModuleData
     {
-        protected const int MaxTextRowLength = 200;
         protected DisplayListPanel ModuleListPanel { get; }
         protected DataPanelManager DataPanelManager => ModuleListPanel.DataPanelManager;
 
-        string buttonText_;
+        string buttonText;
         public string ButtonText
         {
-            get => buttonText_;
+            get => buttonText;
             protected set
             {
-                buttonText_ = value;
-                ModuleListPanel.SetDisplayDataCaption(this, buttonText_);
+                buttonText = value;
+                ModuleListPanel.UpdateModuleButton(this, buttonText);
             }
         }
 
@@ -30,19 +29,19 @@ namespace Iviz.App
         public abstract IConfiguration Configuration { get; }
         protected virtual bool Visible => Configuration?.Visible ?? true;
 
-        protected ModuleData(DisplayListPanel displayList, string topic, string type)
+        protected ModuleData(DisplayListPanel moduleList, string topic, string type)
         {
-            ModuleListPanel = displayList;
+            ModuleListPanel = moduleList;
             Topic = topic;
             Type = type;
         }
 
-        protected virtual void UpdateButtonText()
+        public virtual void UpdateModuleButton()
         {
             string text;
             if (!string.IsNullOrEmpty(Topic))
             {
-                string topicShort = Resource.Font.Split(Topic, DisplayListPanel.DisplayDataCaptionWidth);
+                string topicShort = Resource.Font.Split(Topic, DisplayListPanel.ModuleDataCaptionWidth);
                 text = $"{topicShort}\n<b>{Module}</b>";
             }
             else
@@ -81,7 +80,7 @@ namespace Iviz.App
             DataPanelManager.HidePanelFor(this);
         }
 
-        protected T Instantiate<T>(Transform parent = null) where T : MonoBehaviour
+        protected static T Instantiate<T>(Transform parent = null) where T : MonoBehaviour
         {
             if (!typeof(IController).IsAssignableFrom(typeof(T)))
             {

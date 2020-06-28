@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Iviz.App
 {
-    public class DepthImageProjectorModuleData : ModuleData
+    public sealed class DepthImageProjectorModuleData : ModuleData
     {
         readonly DepthImageProjector controller;
         readonly DepthImageProjectorPanelContents panel;
@@ -35,7 +35,7 @@ namespace Iviz.App
                 controller.ColorImage = GetImageWithName(controller.ColorName);
                 controller.DepthImage = GetImageWithName(controller.DepthName);
             }
-            UpdateButtonText();
+            UpdateModuleButton();
         }
 
         public override void Stop()
@@ -114,7 +114,7 @@ namespace Iviz.App
             {
                 controller.Visible = !controller.Visible;
                 panel.HideButton.State = controller.Visible;
-                UpdateButtonText();
+                UpdateModuleButton();
             };
         }
 

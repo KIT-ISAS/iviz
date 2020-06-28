@@ -10,7 +10,7 @@ namespace Iviz.App
     /// <summary>
     /// <see cref="GridPanelContents"/> 
     /// </summary>
-    public class GridModuleData : ModuleData
+    public sealed class GridModuleData : ModuleData
     {
         readonly Listeners.GridController controller;
         readonly GridPanelContents panel;
@@ -25,14 +25,14 @@ namespace Iviz.App
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Grid) as GridPanelContents;
 
-            controller = Instantiate<Listeners.GridController>();
+            controller = Instantiate<GridController>();
             controller.ModuleData = this;
             if (constructor.Configuration != null)
             {
                 controller.Config = (GridConfiguration)constructor.Configuration;
             }
 
-            UpdateButtonText();
+            UpdateModuleButton();
         }
 
         public override void Stop()
@@ -95,7 +95,7 @@ namespace Iviz.App
             {
                 controller.Visible = !controller.Visible;
                 panel.HideButton.State = controller.Visible;
-                UpdateButtonText();
+                UpdateModuleButton();
             };
             panel.FollowCamera.ValueChanged += f =>
             {

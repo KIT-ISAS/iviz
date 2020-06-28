@@ -36,7 +36,7 @@ namespace Iviz.Displays
             {
                 rotation *= Quaternion.AngleAxis(90, Vector3.forward);
             }
-            transform.rotation = rotation;
+            transform.localRotation = rotation;
         }
 
         [SerializeField] bool horizontal_;

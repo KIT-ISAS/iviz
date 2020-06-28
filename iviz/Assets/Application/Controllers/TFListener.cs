@@ -79,7 +79,10 @@ namespace Iviz.App.Listeners
             set
             {
                 config.AxisVisible = value;
-                frames.Values.ForEach(x => x.AxisVisible = value);
+                foreach (var x in frames.Values)
+                {
+                    x.AxisVisible = value;
+                }
             }
         }
 
@@ -89,7 +92,10 @@ namespace Iviz.App.Listeners
             set
             {
                 config.AxisLabelVisible = value;
-                frames.Values.ForEach(x => x.LabelVisible = value);
+                foreach (var x in frames.Values)
+                {
+                    x.LabelVisible = value;
+                }
             }
         }
 
@@ -99,10 +105,10 @@ namespace Iviz.App.Listeners
             set
             {
                 config.AxisLabelSize = value;
-                frames.Values.ForEach(x =>
+                foreach (var x in frames.Values)
                 {
                     x.LabelSize = value;
-                });
+                }
             }
         }
 
@@ -112,7 +118,10 @@ namespace Iviz.App.Listeners
             set
             {
                 config.AxisSize = value;
-                frames.Values.ForEach(x => x.AxisLength = value);
+                foreach (var x in frames.Values)
+                {
+                    x.AxisLength = value;
+                }
             }
         }
 
@@ -122,7 +131,10 @@ namespace Iviz.App.Listeners
             set
             {
                 config.ParentConnectorVisible = value;
-                frames.Values.ForEach(x => x.ConnectorVisible = value);
+                foreach (var x in frames.Values)
+                {
+                    x.ConnectorVisible = value;
+                }
             }
         }
 
@@ -134,12 +146,19 @@ namespace Iviz.App.Listeners
                 config.ShowAllFrames = value;
                 if (value)
                 {
-                    frames.Values.ForEach(x => x.AddListener(dummyListener));
+                    foreach (var x in frames.Values)
+                    {
+                        x.AddListener(dummyListener);
+                    }
                 }
                 else
                 {
                     // we create a copy because this generally modifies the collection
-                    frames.Values.ToArray().ForEach(x => x.RemoveListener(dummyListener));
+                    var frameObjs = frames.Values.ToList();
+                    foreach (var x in frameObjs)
+                    {
+                        x.RemoveListener(dummyListener);
+                    }
                 }
             }
         }
@@ -163,6 +182,7 @@ namespace Iviz.App.Listeners
             BaseFrame = Add(CreateFrameObject(BaseFrameId, gameObject));
             BaseFrame.Parent = RootFrame;
             BaseFrame.AddListener(null);
+            //BaseFrame.ForceInvisible = true;
 
             Publisher = new RosSender<tfMessage_v2>(DefaultTopic);
         }
@@ -176,7 +196,7 @@ namespace Iviz.App.Listeners
             ListenerStatic.MaxQueueSize = 200;
         }
 
-        void ProcessMessages(TransformStamped[] transforms, bool isStatic)
+        void ProcessMessages(IEnumerable<TransformStamped> transforms, bool isStatic)
         {
             foreach (TransformStamped t in transforms)
             {
@@ -248,7 +268,7 @@ namespace Iviz.App.Listeners
             {
                 Debug.LogWarning("Error: Broken resource pool! Requested " + id + ", received " + frame.Id);
             }
-            if (listener != null)
+            if (!(listener is null))
             {
                 frame.AddListener(listener);
             }
@@ -257,11 +277,9 @@ namespace Iviz.App.Listeners
 
         TFFrame GetOrCreateFrameImpl(string id)
         {
-            if (TryGetFrameImpl(id, out TFFrame t))
-            {
-                return t;
-            }
-            return Add(CreateFrameObject(id, BaseFrame.gameObject));
+            return TryGetFrameImpl(id, out TFFrame t) ? 
+                t : 
+                Add(CreateFrameObject(id, BaseFrame.gameObject));
         }
 
         TFFrame CreateFrameObject(string id, GameObject parent)
@@ -318,9 +336,10 @@ namespace Iviz.App.Listeners
             {
                 UnityEngine.Pose rootFrameInverse = RootFrame.transform.AsPose().Inverse();
                 UnityEngine.Pose relative = rootFrameInverse.Multiply(unityPose);
-                relative.position.x /= RootFrame.transform.localScale.x;
-                relative.position.y /= RootFrame.transform.localScale.y;
-                relative.position.z /= RootFrame.transform.localScale.z;
+                var localScale = RootFrame.transform.localScale;
+                relative.position.x /= localScale.x;
+                relative.position.y /= localScale.y;
+                relative.position.z /= localScale.z;
                 return relative;
             }
             else

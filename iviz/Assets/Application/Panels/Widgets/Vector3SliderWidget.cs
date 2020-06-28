@@ -5,11 +5,11 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class Vector3Widget : MonoBehaviour, IWidget
+    public class Vector3SliderWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] InputFieldWidget inputX = null;
-        [SerializeField] InputFieldWidget inputY = null;
-        [SerializeField] InputFieldWidget inputZ = null;
+        [SerializeField] SliderWidget inputX = null;
+        [SerializeField] SliderWidget inputY = null;
+        [SerializeField] SliderWidget inputZ = null;
         [SerializeField] Text label = null;
         [SerializeField] Image panel = null;
         bool disableUpdates;
@@ -19,7 +19,7 @@ namespace Iviz.App
             get => label.text;
             set
             {
-                name = "ColorPicker:" + value;
+                name = "Vector3SliderWidget:" + value;
                 label.text = value;
             }
         }
@@ -32,6 +32,21 @@ namespace Iviz.App
             {
                 this.value = value;
                 UpdateInputLabels();
+            }
+        }
+
+        float range;
+        public float Range
+        {
+            get => range;
+            set
+            {
+                range = value;
+                int numSteps = (int)(2 * range * 100);
+                inputX.SetMinValue(-range).SetMaxValue(range).SetNumberOfSteps(numSteps);
+                inputY.SetMinValue(-range).SetMaxValue(range).SetNumberOfSteps(numSteps);
+                inputZ.SetMinValue(-range).SetMaxValue(range).SetNumberOfSteps(numSteps);
+                
             }
         }
 
@@ -56,20 +71,11 @@ namespace Iviz.App
             {
                 return;
             }
-            Vector3 v;
-            if (!float.TryParse(inputX.Value, out v.x))
-            {
-                v.x = 0;
-            }
-            if (!float.TryParse(inputY.Value, out v.y))
-            {
-                v.y = 0;
-            }
-            if (!float.TryParse(inputZ.Value, out v.z))
-            {
-                v.z = 0;
-            }
-            value = v;
+            value = new Vector3(
+                inputX.Value,
+                inputY.Value,
+                inputZ.Value
+                );
             ValueChanged?.Invoke(value);
         }
 
@@ -77,9 +83,9 @@ namespace Iviz.App
         void UpdateInputLabels()
         {
             disableUpdates = true;
-            inputX.Value = value.x.ToString(UnityUtils.Culture);
-            inputY.Value = value.y.ToString(UnityUtils.Culture);
-            inputZ.Value = value.z.ToString(UnityUtils.Culture);
+            inputX.Value = value.x;
+            inputY.Value = value.y;
+            inputZ.Value = value.z;
             disableUpdates = false;
         }
 
@@ -88,33 +94,43 @@ namespace Iviz.App
             ValueChanged = null;
         }
 
-        public Vector3Widget SetLabel(string f)
+        public Vector3SliderWidget SetLabel(string f)
         {
             Label = f;
             return this;
         }
 
-        public Vector3Widget SetValue(Vector3 f)
+        public Vector3SliderWidget SetValue(Vector3 f)
         {
             Value = f;
             return this;
         }
 
-        public Vector3Widget SetInteractable(bool f)
+        public Vector3SliderWidget SetInteractable(bool f)
         {
             Interactable = f;
             return this;
         }
 
-        public Vector3Widget SubscribeValueChanged(Action<Vector3> f)
+        public Vector3SliderWidget SubscribeValueChanged(Action<Vector3> f)
         {
             ValueChanged += f;
+            return this;
+        }
+        
+        public Vector3SliderWidget SetRange(float f)
+        {
+            Range = f;
             return this;
         }
 
         void Awake()
         {
             Interactable = true;
+            inputX.SetNumberOfSteps(100);
+            inputY.SetNumberOfSteps(100);
+            inputZ.SetNumberOfSteps(100);
+            Range = 0.5f;
             UpdateInputLabels();
             inputX.SubscribeValueChanged(_ => OnValueChanged());
             inputY.SubscribeValueChanged(_ => OnValueChanged());

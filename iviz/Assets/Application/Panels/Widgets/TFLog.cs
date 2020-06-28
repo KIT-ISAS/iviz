@@ -16,14 +16,14 @@ namespace Iviz.App
         [SerializeField] Text tfName = null;
         [SerializeField] GameObject content = null;
 
-        [SerializeField] Button gotoButton;
-        [SerializeField] Button trail;
-        [SerializeField] Button lockPivot;
-        [SerializeField] Button lock1PV;
+        [SerializeField] Button gotoButton = null;
+        [SerializeField] Button trail = null;
+        [SerializeField] Button lockPivot = null;
+        [SerializeField] Button lock1PV = null;
 
-        [SerializeField] Text trailText;
-        [SerializeField] Text lockPivotText;
-        [SerializeField] Text lock1PVText;
+        [SerializeField] Text trailText = null;
+        [SerializeField] Text lockPivotText = null;
+        [SerializeField] Text lock1PVText = null;
 
         [SerializeField] TFLink tfLink = null;
 
@@ -50,7 +50,7 @@ namespace Iviz.App
                 {
                     tfName.text = "[ ⮑" + value.Id + "]";
                 }
-                UpdateText();
+                UpdateFrameTexts();
             }
         }
 
@@ -146,7 +146,7 @@ namespace Iviz.App
         public void OnTrailClicked()
         {
             SelectedFrame.TrailVisible = !SelectedFrame.TrailVisible;
-            UpdateText();
+            UpdateFrameTexts();
         }
 
         public void OnLockPivotClicked()
@@ -159,11 +159,11 @@ namespace Iviz.App
             {
                 TFListener.GuiManager.OrbitCenterOverride = SelectedFrame;
             }
-            UpdateText();
+            UpdateFrameTexts();
             Close?.Invoke();
         }
 
-        void UpdateText()
+        public void UpdateFrameTexts()
         {
             if (SelectedFrame == null)
             {
@@ -210,7 +210,7 @@ namespace Iviz.App
             {
                 TFListener.GuiManager.CameraViewOverride = SelectedFrame;
             }
-            UpdateText();
+            UpdateFrameTexts();
             Close?.Invoke();
         }
     }

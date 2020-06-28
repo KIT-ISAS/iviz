@@ -352,6 +352,7 @@ namespace Iviz.Resources
             public GameObjectInfo ImagePanel { get; }
             public GameObjectInfo TFPanel { get; }
             public GameObjectInfo SaveAsPanel { get; }
+            public GameObjectInfo AddTopicPanel { get; }
 
             public GameObjectInfo HeadTitle { get; }
             public GameObjectInfo SectionTitle { get; }
@@ -371,6 +372,7 @@ namespace Iviz.Resources
             public GameObjectInfo Sender { get; }
             public GameObjectInfo Listener { get; }
             public GameObjectInfo Frame { get; }
+            public GameObjectInfo Vector3Slider { get; }
 
             public WidgetsType()
             {
@@ -381,6 +383,7 @@ namespace Iviz.Resources
                 ImagePanel = new GameObjectInfo("Widgets/Image Panel");
                 TFPanel = new GameObjectInfo("Widgets/TF Tree Panel");
                 SaveAsPanel = new GameObjectInfo("Widgets/Save As Panel");
+                AddTopicPanel = new GameObjectInfo("Widgets/Add Topic Panel");
 
                 HeadTitle = new GameObjectInfo("Widgets/Head Title");
                 SectionTitle = new GameObjectInfo("Widgets/Section Title");
@@ -400,6 +403,7 @@ namespace Iviz.Resources
                 Sender = new GameObjectInfo("Widgets/Sender");
                 Listener = new GameObjectInfo("Widgets/Listener");
                 Frame = new GameObjectInfo("Widgets/Frame");
+                Vector3Slider = new GameObjectInfo("Widgets/Vector3 Slider");
             }
         }
 

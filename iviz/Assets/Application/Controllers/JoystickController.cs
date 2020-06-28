@@ -217,7 +217,7 @@ namespace Iviz.App.Listeners
             {
                 return;
             }
-            if (RosSenderTwist != null)
+            if (RosSenderTwist != null && Visible)
             {
                 Vector2 leftDir = Joystick.Left;
                 Vector2 rightDir = Joystick.Right;
@@ -248,7 +248,7 @@ namespace Iviz.App.Listeners
                     RosSenderTwist.Publish(twist);
                 }
             }
-            if (RosSenderJoy != null)
+            if (RosSenderJoy != null && Visible)
             {
                 Vector2 leftDir = Joystick.Left;
                 Vector2 rightDir = Joystick.Right;
@@ -268,8 +268,8 @@ namespace Iviz.App.Listeners
 
         public void Stop()
         {
-            RosSenderJoy.Stop();
-            RosSenderTwist.Stop();
+            RosSenderJoy?.Stop();
+            RosSenderTwist?.Stop();
             Visible = false;
         }
     }

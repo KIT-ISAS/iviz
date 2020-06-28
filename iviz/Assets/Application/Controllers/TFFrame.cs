@@ -38,6 +38,10 @@ namespace Iviz.App.Listeners
             set
             {
                 forceInvisible_ = value;
+                if (value)
+                {
+                    resource.Visible = false;
+                }
                 LabelVisible = LabelVisible; // update
             }
         }
@@ -119,7 +123,7 @@ namespace Iviz.App.Listeners
         public bool AxisVisible
         {
             get => resource.Visible;
-            set { resource.Visible = value; }
+            set { resource.Visible = value && !ForceInvisible; }
         }
 
         bool labelVisible;
@@ -167,6 +171,14 @@ namespace Iviz.App.Listeners
             set
             {
                 trail.enabled = value;
+                if (value)
+                {
+                    trail.DataSource = () => WorldPose.position;
+                }
+                else
+                {
+                    trail.DataSource = null;
+                }
             }
         }
 
@@ -325,6 +337,8 @@ namespace Iviz.App.Listeners
             UsesBoundaryBox = false;
 
             trail = GetComponent<TrailResource>();
+            trail.TimeWindowInMs = 5000;
+            trail.Color = Color.yellow;
             TrailVisible = false;
         }
 

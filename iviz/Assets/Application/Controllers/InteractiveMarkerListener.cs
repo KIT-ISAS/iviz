@@ -35,10 +35,7 @@ namespace Iviz.App.Listeners
         public bool DisableExpiration
         {
             get => config.DisableExpiration;
-            set
-            {
-                config.DisableExpiration = value;
-            }
+            set => config.DisableExpiration = value;
         }
 
         readonly InteractiveMarkerConfiguration config = new InteractiveMarkerConfiguration();

@@ -11,10 +11,12 @@ namespace Iviz.App
         [SerializeField] RawImage image = null;
         [SerializeField] TrashButtonWidget closeButton = null;
 
+        public Text Text => text;
+        public RawImage Image => image;
+        public TrashButtonWidget CloseButton => closeButton;
+
         float maxWidth;
         float maxHeight;
-
-        public TrashButtonWidget CloseButton => closeButton;
 
         public string Label
         {

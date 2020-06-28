@@ -7,17 +7,17 @@ using Iviz.Resources;
 
 namespace Iviz.App
 {
-    public class DialogItemList : MonoBehaviour, IDialogPanelContents
+    public class ItemListDialogContents : MonoBehaviour, IDialogPanelContents
     {
         const float yOffset = 5;
 
         readonly List<ItemEntry> items = new List<ItemEntry>();
 
-        public GameObject contentObject;
-        public Text emptyText;
-        public Text titleText;
-        public TrashButtonWidget closeButton;
-        public Canvas canvas;
+        [SerializeField] GameObject contentObject = null;
+        [SerializeField] Text emptyText = null;
+        [SerializeField] Text titleText = null;
+        [SerializeField] TrashButtonWidget closeButton = null;
+        [SerializeField] Canvas canvas = null;
 
         public event Action<int, string> ItemClicked;
         public event Action CloseClicked;
@@ -86,6 +86,7 @@ namespace Iviz.App
             public void Invalidate()
             {
                 button.onClick.RemoveAllListeners();
+                button.interactable = true;
                 ResourcePool.Dispose(Resource.Widgets.TopicsButton, buttonObject);
             }
         }
@@ -208,6 +209,7 @@ namespace Iviz.App
                 new Vector2(0, 2 * yOffset + items.Count * (items[0].ButtonHeight + yOffset));
 
             emptyText.gameObject.SetActive(items.Count == 0);
+            items.ForEach(x => x.Interactable = true);
         }
 
         public virtual void ClearSubscribers()

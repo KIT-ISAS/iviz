@@ -7,7 +7,7 @@ namespace Iviz.App
     /// <summary>
     /// <see cref="JoystickPanelContents"/> 
     /// </summary>
-    public class JoystickModuleData : ModuleData
+    public sealed class JoystickModuleData : ModuleData
     {
         readonly JoystickController controller;
         readonly JoystickPanelContents panel;
@@ -30,7 +30,7 @@ namespace Iviz.App
             }
             controller.Joystick = ModuleListPanel.Joystick;
 
-            UpdateButtonText();
+            UpdateModuleButton();
         }
 
         public override void Stop()
@@ -116,7 +116,7 @@ namespace Iviz.App
             {
                 controller.Visible = !controller.Visible;
                 panel.HideButton.State = controller.Visible;
-                UpdateButtonText();
+                UpdateModuleButton();
             };
         }
 

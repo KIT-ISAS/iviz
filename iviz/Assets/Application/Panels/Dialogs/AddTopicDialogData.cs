@@ -10,8 +10,8 @@ namespace Iviz.App
     {
         const int MaxLineWidth = 250;
 
-        DialogItemList itemList;
-        public override IDialogPanelContents Panel => itemList;
+        AddTopicDialogContents panel;
+        public override IDialogPanelContents Panel => panel;
 
         class TopicWithResource
         {
@@ -37,7 +37,8 @@ namespace Iviz.App
         public override void Initialize(DisplayListPanel panel)
         {
             base.Initialize(panel);
-            itemList = (DialogItemList)DialogPanelManager.GetPanelByType(DialogPanelType.ItemList);
+            this.panel = (AddTopicDialogContents)DialogPanelManager.GetPanelByType(DialogPanelType.AddTopic);
+            this.panel.ShowAll.Value = false;
         }
 
         void GetTopics()
@@ -48,8 +49,14 @@ namespace Iviz.App
             {
                 string topic = entry.Topic;
                 string msgType = entry.Type;
-                if (!Resource.ResourceByRosMessageType.TryGetValue(msgType, out Resource.Module resource) ||
-                    ModuleListPanel.DisplayedTopics.Contains(topic))
+
+                if (ModuleListPanel.DisplayedTopics.Contains(topic))
+                {
+                    continue;
+                }
+                bool resourceFound =
+                    Resource.ResourceByRosMessageType.TryGetValue(msgType, out Resource.Module resource);
+                if (!resourceFound && !panel.ShowAll.Value)
                 {
                     continue;
                 }
@@ -59,14 +66,16 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
-            GetTopics();
-            itemList.Title = "Available Topics";
-            itemList.EmptyText = ConnectionManager.Connected ?
-                "No Topics Available" :
-                "(Not Connected)";
-            itemList.Items = topics.Select(x => x.ToString());
-            itemList.ItemClicked += OnItemClicked;
-            itemList.CloseClicked += OnCloseClicked;
+            panel.Title = "Available Topics";
+            panel.ItemClicked += OnItemClicked;
+            panel.CloseClicked += OnClose;
+
+            UpdatePanel();
+
+            panel.ShowAll.ValueChanged += _ =>
+            {
+                UpdatePanel();
+            };
         }
 
         public override void UpdatePanel()
@@ -74,25 +83,29 @@ namespace Iviz.App
             base.UpdatePanel();
 
             GetTopics();
-            itemList.Items = topics.Select(x => x.ToString());
-            itemList.EmptyText = ConnectionManager.Connected ?
+            panel.Items = topics.Select(x => x.ToString());
+            if (panel.ShowAll.Value)
+            {
+                for (int i = 0; i < topics.Count; i++)
+                {
+                    if (topics[i].resource == Resource.Module.Invalid)
+                    {
+                        panel[i].Interactable = false;
+                    }
+                }
+            }
+            panel.EmptyText = ConnectionManager.Connected ?
                 "No Topics Available" :
                 "(Not Connected)";
-        }
-
-
-        void OnCloseClicked()
-        {
-            Close();
         }
 
         void OnItemClicked(int index, string _)
         {
             ModuleListPanel.CreateModuleForTopic(topics[index].topic, topics[index].type);
-            Close();
+            OnClose();
         }
 
-        void Close()
+        void OnClose()
         {
             DialogPanelManager.HidePanelFor(this);
         }

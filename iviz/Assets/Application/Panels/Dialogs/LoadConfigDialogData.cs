@@ -9,7 +9,7 @@ namespace Iviz.App
 {
     public sealed class LoadConfigDialogData : DialogData
     {
-        DialogItemList itemList;
+        ItemListDialogContents itemList;
         public override IDialogPanelContents Panel => itemList;
 
         const string Suffix = ".config.json";
@@ -19,7 +19,7 @@ namespace Iviz.App
         public override void Initialize(DisplayListPanel panel)
         {
             base.Initialize(panel);
-            itemList = (DialogItemList)DialogPanelManager.GetPanelByType(DialogPanelType.ItemList);
+            itemList = (ItemListDialogContents)DialogPanelManager.GetPanelByType(DialogPanelType.ItemList);
         }
 
         public override void SetupPanel()

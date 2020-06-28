@@ -267,11 +267,7 @@ namespace Iviz.RoslibSharp
             {
                 return hostname;
             }
-            if ((hostname = Dns.GetHostName()) != null)
-            {
-                return hostname;
-            }
-            return "localhost";
+            return Dns.GetHostName();
         }
 
         /// <summary>
@@ -349,7 +345,9 @@ namespace Iviz.RoslibSharp
         /// Subscribes to the given topic.
         /// </summary>
         /// <typeparam name="T">Message type.</typeparam>
+        /// <param name="topic">Name of the topic.</param>
         /// <param name="callback">Function to be called when a message arrives.</param>
+        /// <param name="requestNoDelay">Whether a request of NoDelay should be sent.</param>
         /// <returns>A token that can be used to unsubscribe from this topic.</returns>
         public string Subscribe<T>(string topic, Action<T> callback, bool requestNoDelay = false)
             where T : IMessage, new()
@@ -362,9 +360,11 @@ namespace Iviz.RoslibSharp
         /// </summary>
         /// <typeparam name="T">Message type.</typeparam>
         /// <param name="topic">Name of the topic.</param>
+        /// <param name="callback">Function to be called when a message arrives.</param>
         /// <param name="subscriber">
         /// The shared subscriber for this topic, used by all subscribers from this client.
         /// </param>
+        /// <param name="requestNoDelay">Whether a request of NoDelay should be sent.</param>
         /// <returns>A token that can be used to unsubscribe from this topic.</returns>
         public string Subscribe<T>(string topic, Action<T> callback, out RosSubscriber subscriber, bool requestNoDelay = false)
             where T : IMessage, new()
@@ -442,16 +442,16 @@ namespace Iviz.RoslibSharp
             {
                 subscriber = subscribersByTopic.Values.FirstOrDefault(x => x.ContainsId(topicId));
             }
-            if (subscriber == null)
-            {
-                return false;
-            }
-            return subscriber.Unsubscribe(topicId);
+            return subscriber != null && subscriber.Unsubscribe(topicId);
         }
 
         internal void RemoveSubscriber(RosSubscriber subscriber)
         {
-            subscribersByTopic.Remove(subscriber.Topic);
+            lock (subscribersByTopic)
+            {
+                subscribersByTopic.Remove(subscriber.Topic);
+            }
+
             Master.UnregisterSubscriber(subscriber.Topic);
         }
 
@@ -574,16 +574,16 @@ namespace Iviz.RoslibSharp
             {
                 publisher = publishersByTopic.Values.FirstOrDefault(x => x.ContainsId(topicId));
             }
-            if (publisher == null)
-            {
-                return false;
-            }
-            return publisher.Unadvertise(topicId);
+            return publisher != null && publisher.Unadvertise(topicId);
         }
 
         internal void RemovePublisher(RosPublisher publisher)
         {
-            publishersByTopic.Remove(publisher.Topic);
+            lock (publishersByTopic)
+            {
+                publishersByTopic.Remove(publisher.Topic);
+            }
+
             Master.UnregisterPublisher(publisher.Topic);
         }
 

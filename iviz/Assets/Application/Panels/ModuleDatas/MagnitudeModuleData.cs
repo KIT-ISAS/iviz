@@ -9,7 +9,7 @@ namespace Iviz.App
     /// <see cref="MagnitudePanelContents"/> 
     /// </summary>
 
-    public class MagnitudeModuleData : ListenerModuleData
+    public sealed class MagnitudeModuleData : ListenerModuleData
     {
         readonly MagnitudeListener listener;
         readonly MagnitudePanelContents panel;
@@ -40,7 +40,7 @@ namespace Iviz.App
                 listener.Config = (MagnitudeConfiguration)constructor.Configuration;
             }
             listener.StartListening();
-            UpdateButtonText();
+            UpdateModuleButton();
         }
 
         public override void SetupPanel()
@@ -108,7 +108,7 @@ namespace Iviz.App
             {
                 listener.Visible = !listener.Visible;
                 panel.HideButton.State = listener.Visible;
-                UpdateButtonText();
+                UpdateModuleButton();
             };
         }
 

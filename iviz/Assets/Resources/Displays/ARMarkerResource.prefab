@@ -93,7 +93,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91e53ae859eaa2a449bf829338ecce5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  color: {r: 0, g: 1, b: 0, a: 0.2509804}
+  texture_: {fileID: 0}
+  color_: {r: 1, g: 1, b: 1, a: 1}
   occlusionOnly_: 0
   tint_: {r: 1, g: 1, b: 1, a: 1}
 --- !u!65 &967880120042637132
@@ -205,7 +206,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ed7f2d580d18479aa475eb45ad7c787, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  color: {r: 0, g: 1, b: 0, a: 0.2509804}
+  texture_: {fileID: 0}
+  color_: {r: 1, g: 1, b: 1, a: 1}
   occlusionOnly_: 0
   tint_: {r: 1, g: 1, b: 1, a: 1}
   scale_: 0
@@ -264,7 +266,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5428010336399050378}
-  m_Mesh: {fileID: -462981019419857548, guid: e5e884af6e9d7467dbf80b183417de36, type: 3}
+  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!23 &5428010336399050373
 MeshRenderer:
   m_ObjectHideFlags: 0

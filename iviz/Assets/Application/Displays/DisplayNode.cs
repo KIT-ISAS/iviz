@@ -10,29 +10,16 @@ namespace Iviz.App.Displays
         public virtual TFFrame Parent
         {
             get => parent;
-            set
-            {
-                SetParent(value, true);
-            }
+            set => SetParent(value, true);
         }
 
         void SetParent(TFFrame newParent, bool attach)
         {
             if (newParent != parent)
             {
-                if (parent != null)
-                {
-                    parent.RemoveListener(this);
-                }
+                parent?.RemoveListener(this);
                 parent = newParent;
-                if (parent != null)
-                {
-                    //parent.AddListener(this);
-                }
-                else
-                {
-                    //Debug.LogWarning("Display: Setting parent of " + name + " to null! (ok if removing)");
-                }
+                parent?.AddListener(this);
             }
             if (attach)
             {
@@ -50,10 +37,10 @@ namespace Iviz.App.Displays
             AttachTo(parentId, timestamp.ToTimeSpan());
         }
 
-        public virtual void AttachTo(string parentId, in TimeSpan timestamp)
+        public void AttachTo(string parentId, in TimeSpan timestamp)
         {
             transform.SetParentLocal(TFListener.BaseFrame.transform);
-            if (parentId == "")
+            if (parentId.Length == 0)
             {
                 transform.SetPose(Pose.identity);
             }
@@ -81,7 +68,7 @@ namespace Iviz.App.Displays
         {
             GameObject obj = new GameObject(name);
             SimpleDisplayNode node = obj.AddComponent<SimpleDisplayNode>();
-            if (transform != null)
+            if (!(transform is null))
             {
                 obj.transform.parent = transform;
             }

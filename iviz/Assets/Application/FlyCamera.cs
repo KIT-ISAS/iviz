@@ -5,6 +5,7 @@ using Iviz.Resources;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.XR.ARFoundation;
 
 #pragma warning disable CS0162 // Unerreichbarer Code wurde entdeckt.
 
@@ -29,13 +30,13 @@ namespace Iviz.App
 
         Vector3 orbitCenter;
 
-        TFFrame _orbitCenterOverride;
+        TFFrame orbitCenterOverride_;
         public TFFrame OrbitCenterOverride
         {
-            get => _orbitCenterOverride;
+            get => orbitCenterOverride_;
             set
             {
-                _orbitCenterOverride = value;
+                orbitCenterOverride_ = value;
                 if (value != null)
                 {
                     StartOrbiting();
@@ -45,13 +46,13 @@ namespace Iviz.App
             }
         }
 
-        TFFrame _cameraViewOverride;
+        TFFrame cameraViewOverride;
         public TFFrame CameraViewOverride
         {
-            get => _cameraViewOverride;
+            get => cameraViewOverride;
             set
             {
-                _cameraViewOverride = value;
+                cameraViewOverride = value;
                 if (value != null)
                 {
                     OrbitCenterOverride = null;
@@ -107,8 +108,6 @@ namespace Iviz.App
             {
                 Application.targetFrameRate = 30;
             }
-
-
             DisplayListPanel.Instance.UnlockButton.onClick.AddListener(OnUnlockClick);
 
             namedBoundary = ResourcePool.GetOrCreate<NamedBoundary>(Resource.Displays.NamedBoundary);
@@ -132,13 +131,12 @@ namespace Iviz.App
             {
                 return;
             }
-
-            if (SelectedDisplay != null)
+            if (!(SelectedDisplay is null))
             {
                 SelectedDisplay.Selected = false;
             }
             SelectedDisplay = display;
-            if (SelectedDisplay != null)
+            if (!(SelectedDisplay is null))
             {
                 SelectedDisplay.Selected = true;
                 namedBoundary.Target = display;
@@ -183,7 +181,7 @@ namespace Iviz.App
                 if (PointerDown || PointerAltDown)
                 {
                     PointerPosition = Input.GetTouch(0).position;
-                    PointerOnGui = Canvases.Any(x => IsPointerOnGui(x, PointerPosition))
+                    PointerOnGui = Canvases.Any(IsPointerOnCanvas)
                         || GuiPointerBlockers.Any(x => x.IsPointerOnGui(PointerPosition));
                 }
             }
@@ -193,24 +191,41 @@ namespace Iviz.App
                 if (PointerDown)
                 {
                     PointerPosition = Input.mousePosition;
-                    PointerOnGui = Canvases.Any(x => IsPointerOnGui(x, PointerPosition))
+                    PointerOnGui = Canvases.Any(IsPointerOnCanvas)
                         || GuiPointerBlockers.Any(x => x.IsPointerOnGui(PointerPosition));
                 }
             }
             if (IsMobile)
             {
-                ProcessOrbiting();
-                ProcessScaling();
+                if (!(OrbitCenterOverride is null))
+                {
+                    ProcessOrbiting();
+                    ProcessScaling(false);
+                    Quaternion q = OrbitCenterOverride.AbsolutePose.rotation * Quaternion.Euler(orbitY, orbitX, 0);
+                    transform.SetPositionAndRotation(
+                        -orbitRadius * (q * Vector3.forward) + orbitCenter, 
+                        q);
+                    orbitCenter = OrbitCenterOverride.AbsolutePose.position;
+                }
+                else
+                {
+                    ProcessOrbiting();
+                    ProcessScaling(true);
+                }
             }
             else
             {
-                if (CameraViewOverride != null)
+                if (!(CameraViewOverride is null))
                 {
                     transform.SetPose(CameraViewOverride.AbsolutePose);
                 }
-                if (OrbitCenterOverride != null)
+                if (!(OrbitCenterOverride is null))
                 {
                     ProcessOrbiting();
+                    Quaternion q = OrbitCenterOverride.AbsolutePose.rotation * Quaternion.Euler(orbitY, orbitX, 0);
+                    transform.SetPositionAndRotation(
+                        -orbitRadius * (q * Vector3.forward) + orbitCenter, 
+                        q);
                     orbitCenter = OrbitCenterOverride.AbsolutePose.position;
                 }
                 else
@@ -221,7 +236,7 @@ namespace Iviz.App
             }
         }
 
-        bool IsPointerOnGui(Canvas canvas, Vector2 PointerPosition)
+        bool IsPointerOnCanvas(Canvas canvas)
         {
             return canvas.enabled && canvas.gameObject.activeInHierarchy &&
                         RectTransformUtility.RectangleContainsScreenPoint(canvas.transform as RectTransform, PointerPosition, MainCamera);
@@ -256,15 +271,17 @@ namespace Iviz.App
         }
         */
 
-        public void StartOrbiting()
+        void StartOrbiting()
         {
             Vector3 diff = orbitCenter - transform.position;
-            orbitRadius = diff.magnitude;
+            orbitRadius = Mathf.Min(5, diff.magnitude);
             orbitX = Mathf.Atan2(diff.x, diff.z) * Mathf.Rad2Deg;
             orbitY = -Mathf.Atan2(diff.y, new Vector2(diff.x, diff.z).magnitude) * Mathf.Rad2Deg;
 
-            transform.rotation = Quaternion.Euler(orbitY, orbitX, 0);
-            transform.position = -orbitRadius * (transform.rotation * Vector3.forward) + orbitCenter;
+            Quaternion q = Quaternion.Euler(orbitY, orbitX, 0);
+            transform.SetPositionAndRotation(
+                -orbitRadius * (q * Vector3.forward) + orbitCenter,
+                q);
         }
 
         void ProcessOrbiting()
@@ -303,13 +320,19 @@ namespace Iviz.App
 
             orbitX += pointerDiff.x * orbitCoeff;
             orbitY -= pointerDiff.y * orbitCoeff;
-            if (orbitY > 90) orbitY = 90;
-            if (orbitY < -90) orbitY = -90;
+            if (orbitY > 90)
+            {
+                orbitY = 90;
+            }
+            if (orbitY < -90)
+            {
+                orbitY = -90;
+            }
 
 
             if (Input.GetKey(KeyCode.W))
             {
-                orbitRadius -= 0.1f;
+                orbitRadius = Mathf.Max(0, orbitRadius - 0.1f);
             }
             else
             if (Input.GetKey(KeyCode.S))
@@ -317,13 +340,13 @@ namespace Iviz.App
                 orbitRadius += 0.1f;
             }
 
-
-            //Vector3 parentPosition = OrbitCenter.transform.position;
-            transform.rotation = Quaternion.Euler(orbitY, orbitX, 0);
-            transform.position = -orbitRadius * (transform.rotation * Vector3.forward) + orbitCenter;
+            Quaternion q = Quaternion.Euler(orbitY, orbitX, 0);
+            transform.SetPositionAndRotation(
+                -orbitRadius * (q * Vector3.forward) + orbitCenter, 
+                q);
         }
 
-        void ProcessScaling()
+        void ProcessScaling(bool allowPivotMotion)
         {
 
             if (!PointerAltDown)
@@ -356,24 +379,31 @@ namespace Iviz.App
             const float tangentCoeff = 0.001f;
 
             orbitRadius += altDistanceDiff * radiusCoeff;
-            /*
-            if (orbitRadius < 0.1f)
-            {
-                orbitRadius = 0.1f;
-            }
-            */
-            if (orbitRadius < 0.5f)
-            {
-                float diff = 0.5f - orbitRadius;
-                orbitCenter += diff * (transform.rotation * Vector3.forward);
-                orbitRadius = 0.5f;
-            }
 
-            float orbitScale = 0.75f * orbitRadius;
+            Transform ttransform = transform;
+            Quaternion q = ttransform.rotation;
 
-            orbitCenter -= tangentCoeff * pointerAltDiff.x * orbitScale * transform.TransformDirection(Vector3.right);
-            orbitCenter += tangentCoeff * pointerAltDiff.y * orbitScale * transform.TransformDirection(Vector3.down);
-            transform.position = -orbitRadius * (transform.rotation * Vector3.forward) + orbitCenter;
+            if (!allowPivotMotion)
+            {
+                if (orbitRadius < 0.1f)
+                {
+                    orbitRadius = 0.1f;
+                }
+            }
+            else
+            {
+                if (orbitRadius < 0.5f)
+                {
+                    float diff = 0.5f - orbitRadius;
+                    orbitCenter += diff * (q * Vector3.forward);
+                    orbitRadius = 0.5f;
+                }
+                
+                float orbitScale = 0.75f * orbitRadius;
+                orbitCenter -= tangentCoeff * pointerAltDiff.x * orbitScale * ttransform.TransformDirection(Vector3.right);
+                orbitCenter += tangentCoeff * pointerAltDiff.y * orbitScale * ttransform.TransformDirection(Vector3.down);
+            }
+            ttransform.position = -orbitRadius * (q * Vector3.forward) + orbitCenter;
         }
 
         void ProcessTurning()
@@ -433,7 +463,7 @@ namespace Iviz.App
         {
             const float mainSpeed = 7.5f; //regular speed
             const float shiftAdd = 1.0f; //multiplied by how long shift is held.  Basically running
-            const float maxShift = 100.0f; //Maximum speed when holdin gshift
+            const float maxShift = 100.0f; //Maximum speed when holding shift
             //const float camSens = 0.25f; //How sensitive it with mouse
 
             if (!PointerDown)
@@ -524,25 +554,25 @@ namespace Iviz.App
 
         Vector3 GetBaseInput()
         { //returns the basic values, if it's 0 than it's not active.
-            Vector3 p_Velocity = new Vector3();
+            Vector3 pVelocity = new Vector3();
             if (Input.GetKey(KeyCode.W))
             {
                 //Debug.Log("was here");
-                p_Velocity += new Vector3(0, 0, 1);
+                pVelocity += new Vector3(0, 0, 1);
             }
             if (Input.GetKey(KeyCode.S))
             {
-                p_Velocity += new Vector3(0, 0, -1);
+                pVelocity += new Vector3(0, 0, -1);
             }
             if (Input.GetKey(KeyCode.A))
             {
-                p_Velocity += new Vector3(-1, 0, 0);
+                pVelocity += new Vector3(-1, 0, 0);
             }
             if (Input.GetKey(KeyCode.D))
             {
-                p_Velocity += new Vector3(1, 0, 0);
+                pVelocity += new Vector3(1, 0, 0);
             }
-            return p_Velocity;
+            return pVelocity;
         }
     }
 }

@@ -11,15 +11,13 @@ namespace Iviz.App
     {
         const int TimeToDestroy = 60;
 
-        public static ResourcePool Instance { get; private set; }
+        static ResourcePool Instance { get; set; }
 
         public static GameObject GetOrCreate(Resource.Info<GameObject> resource, Transform parent = null, bool enable = true)
         {
-            if (Instance == null)
-            {
-                return resource.Instantiate(parent);
-            }
-            return Instance.GetImpl(resource, parent, enable);
+            return Instance is null ? 
+                resource.Instantiate(parent) : 
+                Instance.GetImpl(resource, parent, enable);
         }
 
         public static T GetOrCreate<T>(Resource.Info<GameObject> resource, Transform parent = null, bool enable = true) where T : MonoBehaviour
@@ -34,10 +32,7 @@ namespace Iviz.App
 
         public static void Dispose(Resource.Info<GameObject> resource, GameObject instance)
         {
-            if (Instance != null)
-            {
-                Instance.AddImpl(resource, instance);
-            }
+            Instance?.AddImpl(resource, instance);
         }
 
         class ObjectWithDeadline
@@ -92,59 +87,59 @@ namespace Iviz.App
 
         GameObject GetImpl(Resource.Info<GameObject> resource, Transform parent, bool enable)
         {
-            GameObject gameObject;
-            if (pool.TryGetValue(resource.Id, out Queue<ObjectWithDeadline> instances) && instances.Any())
+            if (!pool.TryGetValue(resource.Id, out Queue<ObjectWithDeadline> instances) || !instances.Any())
             {
-                gameObject = instances.Dequeue().GameObject;
-                gameObject.transform.SetParentLocal(parent);
-                if (enable)
-                {
-                    gameObject.SetActive(true);
-                }
-                destroyedObjects.Remove(gameObject.GetInstanceID());
-                //Debug.Log("State: " + string.Join(",", destroyedObjects));
-                return gameObject;
+                return Instantiate(resource.Object, parent);
             }
-            return Instantiate(resource.Object, parent);
+
+            GameObject obj = instances.Dequeue().GameObject;
+            obj.transform.SetParentLocal(parent);
+            if (enable)
+            {
+                obj.SetActive(true);
+            }
+            destroyedObjects.Remove(obj.GetInstanceID());
+            //Debug.Log("State: " + string.Join(",", destroyedObjects));
+            return obj;
             //gameObject.transform.SetParentLocal(parent);
         }
 
-        void AddImpl(Resource.Info<GameObject> resource, GameObject gameObject)
+        void AddImpl(Resource.Info<GameObject> resource, GameObject obj)
         {
             //Debug.Log("Adding " + resource.GameObject.name + " " + gameObject.GetInstanceID());
-            if (gameObject == null)
+            if (obj is null)
             {
                 Debug.LogWarning("ResourcePool: Attempted to dispose null object of type '" + resource + "'");
                 return;
             }
 
-            if (destroyedObjects.Contains(gameObject.GetInstanceID()))
+            if (destroyedObjects.Contains(obj.GetInstanceID()))
             {
-                Debug.LogWarning($"ResourcePool: Attempting to dispose of object {gameObject} " +
-                    $"[ type={resource.Object.name} id {gameObject.GetInstanceID()} ] multiple times!");
+                Debug.LogWarning($"ResourcePool: Attempting to dispose of object {obj} " +
+                    $"[ type={resource.Object.name} id {obj.GetInstanceID()} ] multiple times!");
                 //Debug.Log("** State: " + string.Join(",", destroyedObjects));
                 return;
             }
 
             if (pool.TryGetValue(resource.Id, out Queue<ObjectWithDeadline> objects))
             {
-                objects.Enqueue(new ObjectWithDeadline(gameObject));
+                objects.Enqueue(new ObjectWithDeadline(obj));
             }
             else
             {
                 Queue<ObjectWithDeadline> queue = new Queue<ObjectWithDeadline>();
-                queue.Enqueue(new ObjectWithDeadline(gameObject));
+                queue.Enqueue(new ObjectWithDeadline(obj));
                 pool[resource.Id] = queue;
             }
-            gameObject.SetActive(false);
-            gameObject.name = resource.Name;
-            gameObject.transform.SetParentLocal(transform);
+            obj.SetActive(false);
+            obj.name = resource.Name;
+            obj.transform.SetParentLocal(transform);
             //Debug.Log("Parent of " + gameObject + " is " + gameObject.transform.parent.gameObject);
-            gameObject.transform.localPosition = resource.Object.transform.localPosition;
-            gameObject.transform.localRotation = resource.Object.transform.localRotation;
-            gameObject.transform.localScale = resource.Object.transform.localScale;
+            obj.transform.localPosition = resource.Object.transform.localPosition;
+            obj.transform.localRotation = resource.Object.transform.localRotation;
+            obj.transform.localScale = resource.Object.transform.localScale;
             //gameObject.layer = resource.GameObject.layer;
-            destroyedObjects.Add(gameObject.GetInstanceID());
+            destroyedObjects.Add(obj.GetInstanceID());
             //Debug.Log("State: " + string.Join(",", destroyedObjects));
         }
     }

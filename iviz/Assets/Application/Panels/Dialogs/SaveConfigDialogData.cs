@@ -32,9 +32,9 @@ namespace Iviz.App
             panel.ItemClicked += OnItemClicked;
             panel.CloseClicked += OnCloseClicked;
             panel.EmptyText = "No Config Files Found";
-            panel.input.Value = DateTime.Now.ToString("MM_dd_yyyy HH_mm");
+            panel.Input.Value = DateTime.Now.ToString("MM_dd_yyyy HH_mm");
 
-            panel.saveButton.Clicked += OnSaveClicked;
+            panel.SaveButton.Clicked += OnSaveClicked;
         }
 
         static string GetFileName(string s)
@@ -56,7 +56,7 @@ namespace Iviz.App
 
         void OnSaveClicked()
         {
-            ModuleListPanel.SaveStateConfiguration(panel.input.Value + Suffix);
+            ModuleListPanel.SaveStateConfiguration(panel.Input.Value + Suffix);
             Close();
         }
 

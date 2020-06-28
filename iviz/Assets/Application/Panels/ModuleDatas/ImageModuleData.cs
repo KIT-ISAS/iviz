@@ -9,7 +9,7 @@ namespace Iviz.App
     /// <summary>
     /// <see cref="ImagePanelContents"/> 
     /// </summary>
-    public class ImageModuleData : ListenerModuleData, IImageDialogListener
+    public sealed class ImageModuleData : ListenerModuleData, IImageDialogListener
     {
         readonly ImageListener listener;
         readonly ImagePanelContents panel;
@@ -44,7 +44,7 @@ namespace Iviz.App
                 listener.Config.Type = Type;
             }
             listener.StartListening();
-            UpdateButtonText();
+            UpdateModuleButton();
         }
 
         public override void SetupPanel()
@@ -119,7 +119,7 @@ namespace Iviz.App
             {
                 listener.Visible = !listener.Visible;
                 panel.HideButton.State = listener.Visible;
-                UpdateButtonText();
+                UpdateModuleButton();
             };
         }
 

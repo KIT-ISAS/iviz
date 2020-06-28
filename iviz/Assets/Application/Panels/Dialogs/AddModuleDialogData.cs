@@ -16,13 +16,13 @@ namespace Iviz.App
             Tuple.Create("<b>Joystick</b>\nOn-screen joystick", Resource.Module.Joystick),
         };
 
-        DialogItemList itemList;
+        ItemListDialogContents itemList;
         public override IDialogPanelContents Panel => itemList;
 
         public override void Initialize(DisplayListPanel panel)
         {
             base.Initialize(panel);
-            itemList = (DialogItemList)DialogPanelManager.GetPanelByType(DialogPanelType.ItemList);
+            itemList = (ItemListDialogContents)DialogPanelManager.GetPanelByType(DialogPanelType.ItemList);
         }
 
         public override void SetupPanel()
@@ -61,13 +61,6 @@ namespace Iviz.App
             itemList[3].Interactable = true;
             itemList[4].Interactable = true;
         }
-
-        /*
-        public override void Cleanup()
-        {
-            base.Cleanup();
-        }
-        */
 
     }
 }

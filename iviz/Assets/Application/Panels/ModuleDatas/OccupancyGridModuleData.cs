@@ -8,7 +8,7 @@ namespace Iviz.App
     /// <see cref="OccupancyGridPanelContents"/> 
     /// </summary>
 
-    public class OccupancyGridModuleData : ListenerModuleData
+    public sealed class OccupancyGridModuleData : ListenerModuleData
     {
         readonly OccupancyGridListener listener;
         readonly OccupancyGridPanelContents panel;
@@ -37,7 +37,7 @@ namespace Iviz.App
                 listener.Config = (OccupancyGridConfiguration)constructor.Configuration;
             }
             listener.StartListening();
-            UpdateButtonText();
+            UpdateModuleButton();
         }
 
         public override void SetupPanel()
@@ -95,7 +95,7 @@ namespace Iviz.App
             {
                 listener.Visible = !listener.Visible;
                 panel.HideButton.State = listener.Visible;
-                UpdateButtonText();
+                UpdateModuleButton();
             };
         }
 

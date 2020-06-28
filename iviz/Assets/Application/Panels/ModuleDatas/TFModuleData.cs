@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Iviz.App
 {
-    public class TFModuleData : ListenerModuleData
+    public sealed class TFModuleData : ListenerModuleData
     {
         readonly TFListener listener;
         readonly TFPanelContents panel;
@@ -34,7 +34,7 @@ namespace Iviz.App
                 listener.Config.Topic = Topic;
             }
             listener.StartListening();
-            UpdateButtonText();
+            UpdateModuleButton();
         }
 
         public void UpdateConfiguration(TFConfiguration configuration)

@@ -6,14 +6,21 @@ namespace Iviz.App
 {
     public class ConnectionDialogContents : MonoBehaviour, IDialogPanelContents
     {
-        public InputFieldWidget MasterUri;
-        public InputFieldWidget MyUri;
-        public InputFieldWidget MyId;
-        public TrashButtonWidget RefreshMyUri;
-        public TrashButtonWidget RefreshMyId;
-        public TrashButtonWidget Close;
-        public LineLog LineLog;
-        //public Text Text;
+        [SerializeField] InputFieldWidget masterUri = null;
+        [SerializeField] InputFieldWidget myUri = null;
+        [SerializeField] InputFieldWidget myId = null;
+        [SerializeField] TrashButtonWidget refreshMyUri = null;
+        [SerializeField] TrashButtonWidget refreshMyId = null;
+        [SerializeField] TrashButtonWidget close = null;
+        [SerializeField] LineLog lineLog = null;
+
+        public InputFieldWidget MasterUri => masterUri;
+        public InputFieldWidget MyUri => myUri;
+        public InputFieldWidget MyId => myId;
+        public TrashButtonWidget RefreshMyUri => refreshMyUri;
+        public TrashButtonWidget RefreshMyId => refreshMyId;
+        public TrashButtonWidget Close => close;
+        public LineLog LineLog => lineLog;
 
         public bool Active
         {

@@ -1,4 +1,5 @@
-﻿using Iviz.App.Listeners;
+﻿using System.Linq;
+using Iviz.App.Listeners;
 using Iviz.Resources;
 using UnityEngine;
 
@@ -7,7 +8,7 @@ namespace Iviz.App
     /// <summary>
     /// <see cref="ARPanelContents"/> 
     /// </summary>
-    public class ARModuleData : ModuleData
+    public sealed class ARModuleData : ModuleData
     {
         readonly ARController controller;
         readonly ARPanelContents panel;
@@ -29,7 +30,17 @@ namespace Iviz.App
                 controller.Config = (ARConfiguration)constructor.Configuration;
             }
 
-            UpdateButtonText();
+            foreach (var x in ModuleListPanel.ModuleDatas)
+            {
+                if (x.Module != Resource.Module.Grid)
+                {
+                    continue;
+                }
+                ((GridController)x.Controller).Visible = false;
+                ((GridModuleData)x.Controller.ModuleData).UpdateModuleButton();
+            }
+
+            UpdateModuleButton();
         }
 
         public override void Stop()
@@ -45,10 +56,10 @@ namespace Iviz.App
             panel.HideButton.State = controller.Visible;
             panel.Frame.Owner = controller;
             panel.WorldScale.Value = controller.WorldScale;
-            panel.Origin.Value = controller.Origin;
+            panel.Origin.Value = controller.Offset;
 
-            panel.SearchMarker.Value = controller.SearchMarker;
-            panel.MarkerSize.Value = controller.MarkerSize;
+            panel.SearchMarker.Value = controller.UseMarker;
+            //panel.MarkerSize.Value = controller.MarkerSize;
             panel.MarkerHorizontal.Value = controller.MarkerHorizontal;
             panel.MarkerAngle.Value = controller.MarkerAngle;
             panel.MarkerFrame.Value = controller.MarkerFrame;
@@ -68,17 +79,19 @@ namespace Iviz.App
             };
             panel.Origin.ValueChanged += f =>
             {
-                controller.Origin = f;
+                controller.Offset = f;
             };
             panel.SearchMarker.ValueChanged += f =>
             {
-                controller.SearchMarker = f;
+                controller.UseMarker = f;
                 CheckInteractable();
             };
+            /*
             panel.MarkerSize.ValueChanged += f =>
             {
                 controller.MarkerSize = f;
             };
+            */
             panel.MarkerHorizontal.ValueChanged += f =>
             {
                 controller.MarkerHorizontal = f;
@@ -116,18 +129,18 @@ namespace Iviz.App
             {
                 controller.Visible = !controller.Visible;
                 panel.HideButton.State = controller.Visible;
-                UpdateButtonText();
+                UpdateModuleButton();
             };
         }
 
         void CheckInteractable()
         {
-            panel.Origin.Interactable = !controller.SearchMarker;
-            panel.MarkerHorizontal.Interactable = controller.SearchMarker;
-            panel.MarkerAngle.Interactable = controller.SearchMarker;
-            panel.MarkerFrame.Interactable = controller.SearchMarker;
-            panel.MarkerOffset.Interactable = controller.SearchMarker && controller.MarkerFrame.Length != 0;
-            panel.MarkerSize.Interactable = controller.SearchMarker;
+            //panel.Origin.Interactable = !controller.SearchMarker;
+            panel.MarkerHorizontal.Interactable = controller.UseMarker;
+            panel.MarkerAngle.Interactable = controller.UseMarker;
+            panel.MarkerFrame.Interactable = controller.UseMarker;
+            panel.MarkerOffset.Interactable = controller.UseMarker && controller.MarkerFrame.Length != 0;
+            //panel.MarkerSize.Interactable = controller.SearchMarker;
         }
 
         public override void AddToState(StateConfiguration config)

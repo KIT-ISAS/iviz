@@ -315,10 +315,10 @@ namespace Iviz.App
 
             BaseLink = RobotObject.
                 GetComponentsInChildren<UrdfLink>().
-                First(x => x.transform.parent.GetComponentInParent<UrdfLink>() == null).
+                FirstOrDefault(x => x.transform.parent.GetComponentInParent<UrdfLink>() is null)?.
                 gameObject;
 
-            if (BaseLink == null)
+            if (BaseLink is null)
             {
                 Debug.LogWarning("Robot " + newResource + " has no base link!");
             }
@@ -333,7 +333,7 @@ namespace Iviz.App
                 robotCollider.enabled = false;
 
                 node.name = "Node [" + newResource + "]";
-                carrier.name = "Carrier [" + newResource + "]";
+                carrier.name = "Robot [" + newResource + "]";
             }
 
             if (oldAttachToTf)

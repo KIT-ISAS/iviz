@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Iviz.App
 {
-    public class JointStateModuleData : ListenerModuleData
+    public sealed class JointStateModuleData : ListenerModuleData
     {
         readonly JointStateListener listener;
         readonly JointStatePanelContents panel;
@@ -39,7 +39,7 @@ namespace Iviz.App
                 listener.Config.Topic = Topic;
             }
             listener.StartListening();
-            UpdateButtonText();
+            UpdateModuleButton();
         }
 
         public override void SetupPanel()

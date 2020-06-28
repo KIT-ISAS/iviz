@@ -9,7 +9,7 @@ namespace Iviz.App
     /// <see cref="LaserScanPanelContents"/> 
     /// </summary>
 
-    public class LaserScanModuleData : ListenerModuleData
+    public sealed class LaserScanModuleData : ListenerModuleData
     {
         readonly LaserScanListener listener;
         readonly LaserScanPanelContents panel;
@@ -39,7 +39,7 @@ namespace Iviz.App
                 listener.Config = (LaserScanConfiguration)constructor.Configuration;
             }
             listener.StartListening();
-            UpdateButtonText();
+            UpdateModuleButton();
         }
 
         public override void SetupPanel()
@@ -88,7 +88,7 @@ namespace Iviz.App
             {
                 listener.Visible = !listener.Visible;
                 panel.HideButton.State = listener.Visible;
-                UpdateButtonText();
+                UpdateModuleButton();
             };
             panel.ForceMinMax.ValueChanged += f =>
             {

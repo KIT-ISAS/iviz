@@ -8,7 +8,7 @@ namespace Iviz.App
     /// <see cref="PointCloudPanelContents"/> 
     /// </summary>
 
-    public class PointCloudModuleData : ListenerModuleData
+    public sealed class PointCloudModuleData : ListenerModuleData
     {
         readonly PointCloudListener listener;
         readonly PointCloudPanelContents panel;
@@ -37,7 +37,7 @@ namespace Iviz.App
                 listener.Config = (PointCloudConfiguration)constructor.Configuration;
             }
             listener.StartListening();
-            UpdateButtonText();
+            UpdateModuleButton();
         }
 
         public override void SetupPanel()
@@ -85,7 +85,7 @@ namespace Iviz.App
             {
                 listener.Visible = !listener.Visible;
                 panel.HideButton.State = listener.Visible;
-                UpdateButtonText();
+                UpdateModuleButton();
             };
             panel.ForceMinMax.ValueChanged += f =>
             {

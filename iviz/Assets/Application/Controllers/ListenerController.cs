@@ -11,13 +11,7 @@ namespace Iviz.App.Listeners
 
         public int NumPublishers =>
             (!ConnectionManager.Connected || Listener == null) ? -1 : Listener.NumPublishers;
-
-        public string Topic => Listener?.Topic;
-        public int MessagesPerSecond => Listener?.Stats.MessagesPerSecond ?? 0;
-        public float MessagesJitterMax => Listener?.Stats.JitterMax ?? 0;
-        public float MessagesJitterMin => Listener?.Stats.JitterMin ?? 0;
-        public int BytesPerSecond => Listener?.Stats.BytesPerSecond ?? 0;
-
+        
         public abstract ModuleData ModuleData { get; set; }
 
         public virtual void StartListening()

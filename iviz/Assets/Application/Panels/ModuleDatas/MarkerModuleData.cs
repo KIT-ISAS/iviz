@@ -8,7 +8,7 @@ namespace Iviz.App
     /// <summary>
     /// <see cref="MarkerPanelContents"/> 
     /// </summary>
-    public class MarkerModuleData : ListenerModuleData
+    public sealed class MarkerModuleData : ListenerModuleData
     {
         readonly MarkerListener listener;
         readonly MarkerPanelContents panel;
@@ -38,7 +38,7 @@ namespace Iviz.App
                 listener.Config = (MarkerConfiguration)constructor.Configuration;
             }
             listener.StartListening();
-            UpdateButtonText();
+            UpdateModuleButton();
         }
 
         public override void SetupPanel()
@@ -76,7 +76,7 @@ namespace Iviz.App
             {
                 listener.Visible = !listener.Visible;
                 panel.HideButton.State = listener.Visible;
-                UpdateButtonText();
+                UpdateModuleButton();
             };
         }
 

@@ -4,6 +4,7 @@ using Iviz.App;
 using Iviz.Resources;
 using System;
 using System.Collections.Generic;
+using Iviz.App.Listeners;
 
 namespace Iviz.Displays
 {
@@ -56,7 +57,7 @@ namespace Iviz.Displays
             measurements.Clear();
             startOffset = 0;
             totalMeasurements = timeWindowInMs_ * MeasurementsPerSecond / 1000;
-            lines.Reserve(totalMeasurements);
+            lines?.Reserve(totalMeasurements);
         }
 
         public string Name => "TrailResource";
@@ -88,9 +89,9 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            lines = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, transform);
+            lines = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, TFListener.BaseFrame?.transform);
             lines.LineScale = 0.01f;
-            TimeWindowInMs = 2000;
+            TimeWindowInMs = TimeWindowInMs;
             StartCoroutine("GatherMeasurement");
         }
 
