@@ -53,7 +53,7 @@ namespace Iviz.App
             needsSorting = true;
         }
 
-        public Pose Get(in TimeSpan T)
+        public Pose Get(in TimeSpan ts)
         {
             if (needsSorting)
             {
@@ -68,34 +68,35 @@ namespace Iviz.App
             {
                 return Pose.identity;
             }
-            else if (T >= sortedPoses[n - 1].Key)
+
+            if (ts >= sortedPoses[n - 1].Key)
             {
                 return sortedPoses[n - 1].Pose;
             }
-            else if (T <= sortedPoses[0].Key)
+
+            if (ts <= sortedPoses[0].Key)
             {
                 return sortedPoses[0].Pose;
             }
-            else
+
+            for (int i = n - 2; i >= 0; i--) // most likely to be at the end
             {
-                for (int i = n - 2; i >= 0; i--) // most likely to be at the end
+                if (ts <= sortedPoses[i].Key)
                 {
-                    if (T > sortedPoses[i].Key)
-                    {
-                        TimeSpan A = sortedPoses[i].Key;
-                        TimeSpan B = sortedPoses[i + 1].Key;
-                        double t = (T - A).TotalMilliseconds / (B - A).TotalMilliseconds;
-
-                        Pose pA = sortedPoses[i].Pose;
-                        Pose pB = sortedPoses[i + 1].Pose;
-
-
-                        //Debug.Log(i + "/" + poses.Count + "/" + insertions.Count);
-                        return pA.Lerp(pB, (float)t);
-                    }
+                    continue;
                 }
+                TimeSpan a = sortedPoses[i].Key;
+                TimeSpan b = sortedPoses[i + 1].Key;
+                double t = (ts - a).TotalMilliseconds / (b - a).TotalMilliseconds;
+
+                Pose pA = sortedPoses[i].Pose;
+                Pose pB = sortedPoses[i + 1].Pose;
+
+
+                //Debug.Log(i + "/" + poses.Count + "/" + insertions.Count);
+                return pA.Lerp(pB, (float)t);
             }
-            Debug.Log("OUT!");
+            //Debug.Log("OUT!");
             return Pose.identity; // shouldn't happen
         }
 

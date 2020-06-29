@@ -51,7 +51,7 @@ namespace Iviz.App.Listeners
             get => resource?.ColliderEnabled ?? false;
             set
             {
-                if (resource != null)
+                if (!(resource is null))
                 {
                     resource.ColliderEnabled = value;
                 }
@@ -87,7 +87,7 @@ namespace Iviz.App.Listeners
             get => resource?.Visible ?? true;
             set
             {
-                if (resource != null)
+                if (!(resource is null))
                 {
                     resource.Visible = value;
                 }
@@ -106,7 +106,7 @@ namespace Iviz.App.Listeners
             Resource.Info<GameObject> newResourceType = GetRequestedResource(msg);
             if (newResourceType != resourceType)
             {
-                if (resource != null)
+                if (!(resource is null))
                 {
                     ResourcePool.Dispose(resourceType, resource.gameObject);
                     resource = null;
@@ -125,12 +125,12 @@ namespace Iviz.App.Listeners
                     return;
                 }
                 resource = ResourcePool.GetOrCreate<MarkerResource>(resourceType, transform);
-                if (resource == null)
+                if (resource is null)
                 {
                     Debug.LogError("Resource " + resourceType + " has no MarkerResource!");
                 }
             }
-            if (resource == null)
+            if (resource is null)
             {
                 return;
             }
@@ -322,6 +322,8 @@ namespace Iviz.App.Listeners
                     }
                     transform.localScale = msg.Scale.Ros2Unity().Abs();
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -377,7 +379,7 @@ namespace Iviz.App.Listeners
             base.Stop();
             Clicked = null;
 
-            if (resource == null)
+            if (resource is null)
             {
                 return;
             }

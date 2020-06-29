@@ -215,24 +215,5 @@ namespace Iviz.App.Listeners
             Destroy(reflectionProbe.gameObject);
         }
 
-        /*
-        public override void OnPointerClick(PointerEventData eventData)
-        {
-            if (GetClickCount(eventData) == 2 &&
-                eventData.button == PointerEventData.InputButton.Left &&
-                TFListener.GuiManager.OrbitFrame != null)
-            {
-                TFListener.GuiManager.OrbitFrame = null;
-                return;
-            }
-            if (GetClickCount(eventData) == 1 && IsRealClick(eventData))
-            {
-                TFListener.GuiManager.Select(null);
-            }
-            
-            //base.OnPointerClick(eventData);
-        }
-        */
-
     }
 }

@@ -51,7 +51,7 @@ namespace Iviz.App.Listeners
         const string HeadPoseTopic = "ar_head";
         const string MarkersTopic = "ar_markers";
 
-        public string HeadFrameName => ConnectionManager.Connection.MyId + "/ar_head";
+        static string HeadFrameName => ConnectionManager.Connection.MyId + "/ar_head";
 
         public RosSender<Msgs.GeometryMsgs.PoseStamped> RosSenderHead { get; private set; }
         public RosSender<MarkerArray> RosSenderMarkers { get; private set; }
@@ -63,17 +63,17 @@ namespace Iviz.App.Listeners
             get => config;
             set
             {
-                Visible = config.Visible;
-                Offset = config.Offset;
-                WorldScale = config.WorldScale;
-                PublishPose = config.PublishPose;
-                PublishPlanesAsMarkers = config.PublishMarkers;
-                UseMarker = config.SearchMarker;
-                MarkerSize = config.MarkerSize;
-                MarkerHorizontal = config.MarkerHorizontal;
-                MarkerAngle = config.MarkerAngle;
-                MarkerFrame = config.MarkerFrame;
-                MarkerOffset = config.MarkerOffset;
+                Visible = value.Visible;
+                Offset = value.Offset;
+                WorldScale = value.WorldScale;
+                PublishPose = value.PublishPose;
+                PublishPlanesAsMarkers = value.PublishMarkers;
+                UseMarker = value.SearchMarker;
+                MarkerSize = value.MarkerSize;
+                MarkerHorizontal = value.MarkerHorizontal;
+                MarkerAngle = value.MarkerAngle;
+                MarkerFrame = value.MarkerFrame;
+                MarkerOffset = value.MarkerOffset;
             }
         }
 

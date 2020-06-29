@@ -4,7 +4,7 @@ using Iviz.Resources;
 
 namespace Iviz.Displays
 {
-    public class AxisResource : MarkerResource
+    public sealed class AxisResource : MarkerResource
     {
         MeshRenderer Renderer;
         Material[] materials;
@@ -65,11 +65,12 @@ namespace Iviz.Displays
 
         void SetMaterial(Material material, int index)
         {
-            if (materials[index] != material)
+            if (materials[index] == material)
             {
-                materials[index] = material;
-                Renderer.materials = materials;
+                return;
             }
+            materials[index] = material;
+            Renderer.materials = materials;
         }
 
 

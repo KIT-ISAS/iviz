@@ -140,19 +140,13 @@ namespace Iviz.App.Listeners
         public float LabelSize
         {
             get => labelObject.transform.localScale.x;
-            set
-            {
-                labelObject.transform.localScale = value * Vector3.one;
-            }
+            set => labelObject.transform.localScale = value * Vector3.one;
         }
 
         public bool ConnectorVisible
         {
             get => parentConnector.gameObject.activeSelf;
-            set
-            {
-                parentConnector.gameObject.SetActive(value);
-            }
+            set => parentConnector.gameObject.SetActive(value);
         }
 
         public float AxisLength
@@ -185,10 +179,7 @@ namespace Iviz.App.Listeners
         public override TFFrame Parent
         {
             get => base.Parent;
-            set
-            {
-                SetParent(value);
-            }
+            set => SetParent(value);
         }
 
 
@@ -358,17 +349,6 @@ namespace Iviz.App.Listeners
             Id = "";
             timeline.Clear();
         }
-
-        /*
-        public override void OnPointerClick(PointerEventData eventData)
-        {
-            base.OnPointerClick(eventData);
-            if (GetClickCount(eventData) == 3)
-            {
-                TFListener.GuiManager.StartOrbitingAround(OrbitColorEnabled ? null : this);
-            }
-        }
-        */
 
     }
 }

@@ -7,7 +7,7 @@ namespace Iviz.Displays
 {
     public sealed class AxisFrameResource : MarkerResource, IRecyclable, ISupportsAROcclusion, ISupportsTint
     {
-        static readonly string[] names = { "Axis-X", "Axis-Y", "Axis-Z" };
+        static readonly string[] Names = { "Axis-X", "Axis-Y", "Axis-Z" };
 
         readonly MeshMarkerResource[] axisObjects = new MeshMarkerResource[3];
 
@@ -52,26 +52,26 @@ namespace Iviz.Displays
             }
         }
 
-        bool occlusionOnly_;
+        bool occlusionOnly;
         public bool OcclusionOnly
         {
-            get => occlusionOnly_;
+            get => occlusionOnly;
             set
             {
-                occlusionOnly_ = value;
+                occlusionOnly = value;
                 axisObjects[0].OcclusionOnly = value;
                 axisObjects[1].OcclusionOnly = value;
                 axisObjects[2].OcclusionOnly = value;
             }
         }
 
-        Color tint_;
+        Color tint;
         public Color Tint
         {
-            get => tint_;
+            get => tint;
             set
             {
-                tint_ = value;
+                tint = value;
                 axisObjects[0].Tint = value;
                 axisObjects[1].Tint = value;
                 axisObjects[2].Tint = value;
@@ -85,7 +85,7 @@ namespace Iviz.Displays
             for (int i = 0; i < 3; i++)
             {
                 axisObjects[i] = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Cube, transform);
-                axisObjects[i].gameObject.name = names[i];
+                axisObjects[i].gameObject.name = Names[i];
                 axisObjects[i].ColliderEnabled = false;
             }
 

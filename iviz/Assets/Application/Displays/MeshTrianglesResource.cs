@@ -21,13 +21,13 @@ namespace Iviz.Displays
 
         void SetVertices(IList<Vector3> points)
         {
-            if (points is List<Vector3> points_v)
+            if (points is List<Vector3> pointsV)
             {
-                Mesh.SetVertices(points_v);
+                Mesh.SetVertices(pointsV);
             }
-            else if (points is Vector3[] points_a)
+            else if (points is Vector3[] pointsA)
             {
-                Mesh.vertices = points_a;
+                Mesh.vertices = pointsA;
             }
             else
             {
@@ -35,15 +35,15 @@ namespace Iviz.Displays
             }
         }
 
-        void SetNormals(IList<Vector3> points)
+        void SetNormals(IEnumerable<Vector3> points)
         {
-            if (points is List<Vector3> points_v)
+            if (points is List<Vector3> pointsV)
             {
-                Mesh.SetNormals(points_v);
+                Mesh.SetNormals(pointsV);
             }
-            else if (points is Vector3[] points_a)
+            else if (points is Vector3[] pointsA)
             {
-                Mesh.normals = points_a;
+                Mesh.normals = pointsA;
             }
             else
             {
@@ -51,15 +51,15 @@ namespace Iviz.Displays
             }
         }
 
-        void SetColors(IList<Color> colors)
+        void SetColors(IEnumerable<Color> colors)
         {
-            if (colors is List<Color> colors_v)
+            if (colors is List<Color> colorsV)
             {
-                Mesh.SetColors(colors_v);
+                Mesh.SetColors(colorsV);
             }
-            else if (colors is Color[] colors_a)
+            else if (colors is Color[] colorsA)
             {
-                Mesh.colors = colors_a;
+                Mesh.colors = colorsA;
             }
             else
             {
@@ -67,15 +67,15 @@ namespace Iviz.Displays
             }
         }
 
-        void SetColors(IList<Color32> colors)
+        void SetColors(IEnumerable<Color32> colors)
         {
-            if (colors is List<Color32> colors_v)
+            if (colors is List<Color32> colorsV)
             {
-                Mesh.SetColors(colors_v);
+                Mesh.SetColors(colorsV);
             }
-            else if (colors is Color32[] colors_a)
+            else if (colors is Color32[] colorsA)
             {
-                Mesh.colors32 = colors_a;
+                Mesh.colors32 = colorsA;
             }
             else
             {
@@ -83,15 +83,15 @@ namespace Iviz.Displays
             }
         }
 
-        public void SetTriangles(IList<int> indices, int i)
+        void SetTriangles(IEnumerable<int> indices, int i)
         {
-            if (indices is List<int> indices_v)
+            if (indices is List<int> indicesV)
             {
-                Mesh.SetTriangles(indices_v, i);
+                Mesh.SetTriangles(indicesV, i);
             }
-            else if (indices is int[] indices_a)
+            else if (indices is int[] indicesA)
             {
-                Mesh.SetTriangles(indices_a, i);
+                Mesh.SetTriangles(indicesA, i);
             }
             else
             {

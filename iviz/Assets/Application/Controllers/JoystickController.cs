@@ -35,14 +35,14 @@ namespace Iviz.App.Listeners
             get => config;
             set
             {
-                Visible = config.Visible;
-                JoyTopic = config.JoyTopic;
-                PublishJoy = config.PublishJoy;
-                TwistTopic = config.TwistTopic;
-                PublishTwist = config.PublishTwist;
-                MaxSpeed = config.MaxSpeed;
-                AttachToFrame = config.AttachToFrame;
-                XIsFront = config.XIsFront;
+                Visible = value.Visible;
+                JoyTopic = value.JoyTopic;
+                PublishJoy = value.PublishJoy;
+                TwistTopic = value.TwistTopic;
+                PublishTwist = value.PublishTwist;
+                MaxSpeed = value.MaxSpeed;
+                AttachToFrame = value.AttachToFrame;
+                XIsFront = value.XIsFront;
             }
         }
 

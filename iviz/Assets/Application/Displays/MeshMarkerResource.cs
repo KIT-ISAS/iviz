@@ -19,13 +19,14 @@ namespace Iviz.Displays
             get => texture_;
             set
             {
-                if (texture_ != value)
+                if (texture_ == value)
                 {
-                    textureMaterial = null;
-                    textureMaterialAlpha = null;
-                    texture_ = value;
-                    SetEffectiveColor();
+                    return;
                 }
+                textureMaterial = null;
+                textureMaterialAlpha = null;
+                texture_ = value;
+                SetEffectiveColor();
             }
         }
 
@@ -73,34 +74,35 @@ namespace Iviz.Displays
 
         void SetEffectiveColor()
         {
-            if (!OcclusionOnly)
+            if (OcclusionOnly)
             {
-                Color effectiveColor = EffectiveColor;
-                if (Texture == null)
-                {
-                    Material material = effectiveColor.a > 254f / 255f ?
-                        Resource.Materials.Lit.Object :
-                        Resource.Materials.TransparentLit.Object;
-                    MainRenderer.material = material;
-                }
-                else if (effectiveColor.a > 254f / 255f)
-                {
-                    if (textureMaterial == null)
-                    {
-                        textureMaterial = Resource.TexturedMaterials.Get(Texture);
-                    }
-                    MainRenderer.material = textureMaterial;
-                }
-                else
-                {
-                    if (textureMaterialAlpha == null)
-                    {
-                        textureMaterialAlpha = Resource.TexturedMaterials.GetAlpha(Texture);
-                    }
-                    MainRenderer.material = textureMaterial;
-                }
-                MainRenderer.SetPropertyColor(effectiveColor);
+                return;
             }
+            Color effectiveColor = EffectiveColor;
+            if (Texture is null)
+            {
+                Material material = effectiveColor.a > 254f / 255f ?
+                    Resource.Materials.Lit.Object :
+                    Resource.Materials.TransparentLit.Object;
+                MainRenderer.material = material;
+            }
+            else if (effectiveColor.a > 254f / 255f)
+            {
+                if (textureMaterial is null)
+                {
+                    textureMaterial = Resource.TexturedMaterials.Get(Texture);
+                }
+                MainRenderer.material = textureMaterial;
+            }
+            else
+            {
+                if (textureMaterialAlpha is null)
+                {
+                    textureMaterialAlpha = Resource.TexturedMaterials.GetAlpha(Texture);
+                }
+                MainRenderer.material = textureMaterial;
+            }
+            MainRenderer.SetPropertyColor(effectiveColor);
         }
 
         protected override void Awake()

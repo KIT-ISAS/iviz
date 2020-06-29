@@ -19,21 +19,21 @@ namespace Iviz.App.Displays
         public bool UsesBoundaryBox { get; protected set; } = true;
 
 
-        protected bool selected_;
+        bool selected;
         public virtual bool Selected
         {
-            get => selected_;
+            get => selected;
             set
             {
-                if (value && !selected_)
+                if (value && !selected)
                 {
-                    selected_ = true;
+                    selected = true;
                     //TFListener.GuiManager.ShowBoundary(this);
                     TFListener.GuiManager.Select(this);
                 }
-                else if (!value && selected_)
+                else if (!value && selected)
                 {
-                    selected_ = false;
+                    selected = false;
                     //TFListener.GuiManager.ShowBoundary(null);
                     TFListener.GuiManager.Unselect(this);
                 }
@@ -85,11 +85,6 @@ namespace Iviz.App.Displays
                 case 3:
                     TFListener.GuiManager.ToggleSelect(this);
                     break;
-                    /*
-                case 3:
-                    TFListener.GuiManager.OrbitCenter = transform.TransformPoint(WorldBounds.center);
-                    break;
-                    */
             }
         }
 

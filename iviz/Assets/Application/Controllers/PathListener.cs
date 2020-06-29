@@ -51,6 +51,9 @@ namespace Iviz.App.Listeners
                 Width = value.Width;
                 ShowAxes = value.ShowAxes;
                 MaxQueueSize = value.MaxQueueSize;
+                AxisLength = value.AxisLength;
+                LineColor = value.LineColor;
+                ShowLines = value.ShowLines;
             }
         }
 

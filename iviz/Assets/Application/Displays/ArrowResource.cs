@@ -13,34 +13,34 @@ namespace Iviz.Displays
             Set(Vector3.zero, Vector3.zero);
         }
 
-        public void Set(in Vector3 A, in Vector3 B)
+        public void Set(in Vector3 a, in Vector3 b)
         {
-            Vector3 diff = (A - B) * Scale; // arrow model is flipped
+            Vector3 diff = (a - b) * Scale; // arrow model is flipped
             float scale = diff.magnitude;
 
             transform.localScale = scale * Vector3.one;
-            transform.localPosition = A;
+            transform.localPosition = a;
 
             if (scale == 0)
             {
                 return;
             }
             
-            Vector3 X = diff / scale;
+            Vector3 x = diff / scale;
 
             Vector3 up = new Vector3(0, 0, 1);
-            if (X == up)
+            if (x == up)
             {
                 up = new Vector3(0, 1, 0);
             }
 
-            Vector3 Y = Vector3.Cross(X, up).normalized;
-            Vector3 Z = Vector3.Cross(X, Y).normalized;
+            Vector3 y = Vector3.Cross(x, up).normalized;
+            Vector3 z = Vector3.Cross(x, y).normalized;
 
             Matrix4x4 M = Matrix4x4.identity;
-            M.SetColumn(0, X);
-            M.SetColumn(1, Y);
-            M.SetColumn(2, Z);
+            M.SetColumn(0, x);
+            M.SetColumn(1, y);
+            M.SetColumn(2, z);
 
             transform.localRotation = M.rotation;
         }

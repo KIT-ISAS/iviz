@@ -15,16 +15,16 @@ namespace Iviz.Displays
 
         public bool Reserve (int reserved)
         {
-            if (pointBuffer.Length < reserved)
+            if (pointBuffer.Length >= reserved)
             {
-                if (pointBuffer.Length != 0)
-                {
-                    pointBuffer.Dispose();
-                }
-                pointBuffer = new NativeArray<T>(reserved, Allocator.Persistent);
-                return true;
+                return false;
             }
-            return false;
+            if (pointBuffer.Length != 0)
+            {
+                pointBuffer.Dispose();
+            }
+            pointBuffer = new NativeArray<T>(reserved, Allocator.Persistent);
+            return true;
         }
 
         public int Count => size;
@@ -44,7 +44,7 @@ namespace Iviz.Displays
 
     public sealed class PointListResource : MarkerResourceWithColormap
     {
-        NativeArray<float4> pointBuffer = new NativeArray<float4>();
+        NativeArray<float4> pointBuffer;
         ComputeBuffer pointComputeBuffer;
         ComputeBuffer quadComputeBuffer;
 
@@ -65,7 +65,7 @@ namespace Iviz.Displays
 
         public void Reserve(int reqDataSize)
         {
-            if (pointBuffer == null || pointBuffer.Length < reqDataSize)
+            if (pointBuffer.Length < reqDataSize)
             {
                 if (pointBuffer.Length != 0)
                 {
@@ -73,10 +73,7 @@ namespace Iviz.Displays
                 }
                 pointBuffer = new NativeArray<float4>(reqDataSize, Allocator.Persistent);
 
-                if (pointComputeBuffer != null)
-                {
-                    pointComputeBuffer.Release();
-                }
+                pointComputeBuffer?.Release();
                 pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithColor>());
                 material.SetBuffer(PropPoints, pointComputeBuffer);
             }
@@ -89,13 +86,13 @@ namespace Iviz.Displays
                 Size = value.Count;
 
                 int realSize = 0;
-                for (int i = 0; i < value.Count; i++)
+                foreach (var t in value)
                 {
-                    if (value[i].HasNaN)
+                    if (t.HasNaN)
                     {
                         continue;
                     }
-                    pointBuffer[realSize++] = value[i];
+                    pointBuffer[realSize++] = t;
                 }
                 Size = realSize;
                 UpdateBuffer();
@@ -158,11 +155,12 @@ namespace Iviz.Displays
             get => scale_;
             set
             {
-                if (scale_ != value)
+                if (scale_ == value)
                 {
-                    scale_ = value;
-                    UpdateQuadComputeBuffer();
+                    return;
                 }
+                scale_ = value;
+                UpdateQuadComputeBuffer();
             }
         }
 

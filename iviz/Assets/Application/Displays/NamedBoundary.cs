@@ -12,7 +12,7 @@ namespace Iviz.App.Displays
 
         readonly GameObject[] frames = new GameObject[8];
 
-        GameObject Holder;
+        GameObject holder;
         GameObject labelObject;
         TextMesh labelObjectText;
         Billboard labelBillboard;
@@ -20,28 +20,19 @@ namespace Iviz.App.Displays
         public string Name
         {
             get => labelObjectText.text;
-            set
-            {
-                labelObjectText.text = value;
-            }
+            private set => labelObjectText.text = value;
         }
 
         public Vector3 LabelOffset
         {
             get => labelBillboard.offset;
-            set
-            {
-                labelBillboard.offset = value;
-            }
+            set => labelBillboard.offset = value;
         }
 
         public bool Visible
         {
             get => gameObject.activeSelf;
-            set
-            {
-                gameObject.SetActive(value);
-            }
+            set => gameObject.SetActive(value);
         }
 
         public Vector3 WorldScale => transform.lossyScale;
@@ -60,7 +51,7 @@ namespace Iviz.App.Displays
             set
             {
                 target = value;
-                if (target == null || !target.UsesBoundaryBox)
+                if (target is null || !target.UsesBoundaryBox)
                 {
                     gameObject.SetActive(false);
                 }
@@ -76,7 +67,7 @@ namespace Iviz.App.Displays
         public Bounds Bounds
         {
             get => bounds;
-            set
+            private set
             {
                 Vector3 center = value.center;
                 Vector3 size = value.size;
@@ -94,14 +85,14 @@ namespace Iviz.App.Displays
             }
         }
 
-        public Bounds WorldBounds => bounds;
+        public Bounds WorldBounds => Bounds;
 
         public bool ColliderEnabled { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
 
         void Awake()
         {
-            Holder = CreateSelectionFrame();
-            Holder.transform.SetParentLocal(transform);
+            holder = CreateSelectionFrame();
+            holder.transform.SetParentLocal(transform);
 
             labelObject = ResourcePool.GetOrCreate(Resource.Displays.Text, transform);
             labelObject.name = "Frame Axis Label";
@@ -117,52 +108,52 @@ namespace Iviz.App.Displays
 
         GameObject CreateSelectionFrame()
         {
-            GameObject Holder = new GameObject("Selection Frame");
+            GameObject tmpHolder = new GameObject("Selection Frame");
 
             GameObject frame;
-            frame = CreateFrame(Holder);
+            frame = CreateFrame(tmpHolder);
             frames[0] = frame;
 
-            frame = CreateFrame(Holder);
+            frame = CreateFrame(tmpHolder);
             frame.transform.localRotation = Quaternion.Euler(0, 90, 0);
             frames[1] = frame;
 
-            frame = CreateFrame(Holder);
+            frame = CreateFrame(tmpHolder);
             frame.transform.localRotation = Quaternion.Euler(0, 180, 0);
             frames[2] = frame;
 
-            frame = CreateFrame(Holder);
+            frame = CreateFrame(tmpHolder);
             frame.transform.localRotation = Quaternion.Euler(0, 270, 0);
             frames[3] = frame;
 
-            frame = CreateFrame(Holder);
+            frame = CreateFrame(tmpHolder);
             frame.transform.localRotation = Quaternion.Euler(0, 90, 180);
             frames[4] = frame;
 
-            frame = CreateFrame(Holder);
+            frame = CreateFrame(tmpHolder);
             frame.transform.localRotation = Quaternion.Euler(0, 180, 180);
             frames[5] = frame;
 
-            frame = CreateFrame(Holder);
+            frame = CreateFrame(tmpHolder);
             frame.transform.localRotation = Quaternion.Euler(0, 270, 180);
             frames[6] = frame;
 
-            frame = CreateFrame(Holder);
+            frame = CreateFrame(tmpHolder);
             frame.transform.localRotation = Quaternion.Euler(0, 0, 180);
             frames[7] = frame;
 
-            return Holder;
+            return tmpHolder;
         }
 
-        GameObject CreateFrame(GameObject parent)
+        static GameObject CreateFrame(GameObject parent)
         {
-            GameObject Holder = new GameObject("Frame Corner");
-            Holder.transform.SetParentLocal(parent.transform);
+            GameObject tmpHolder = new GameObject("Frame Corner");
+            tmpHolder.transform.SetParentLocal(parent.transform);
 
-            GameObject[] Frame = new GameObject[3];
+            GameObject[] frame = new GameObject[3];
             for (int i = 0; i < 3; i++)
             {
-                GameObject gameObject = ResourcePool.GetOrCreate(Resource.Displays.Cube, Holder.transform);
+                GameObject gameObject = ResourcePool.GetOrCreate(Resource.Displays.Cube, tmpHolder.transform);
                 gameObject.name = "Cube";
                 MeshRenderer renderer = gameObject.GetComponent<MeshRenderer>();
                 renderer.sharedMaterial = Resource.Materials.SimpleLit.Object;
@@ -171,23 +162,23 @@ namespace Iviz.App.Displays
                 renderer.SetPropertyEmissiveColor(Color.green / 2);
                 renderer.SetPropertyColor(Color.green);
 
-                Frame[i] = gameObject;
+                frame[i] = gameObject;
             }
 
-            Frame[0].transform.localScale = new Vector3(FrameAxisLength, FrameAxisWidth, FrameAxisWidth);
-            Frame[0].transform.localPosition = -0.5f * FrameAxisLength * Vector3.right;
-            Frame[1].transform.localScale = new Vector3(FrameAxisWidth, FrameAxisWidth, FrameAxisLength);
-            Frame[1].transform.localPosition = -0.5f * FrameAxisLength * Vector3.forward;
-            Frame[2].transform.localScale = new Vector3(FrameAxisWidth, FrameAxisLength, FrameAxisWidth);
-            Frame[2].transform.localPosition = 0.5f * FrameAxisLength * Vector3.up;
+            frame[0].transform.localScale = new Vector3(FrameAxisLength, FrameAxisWidth, FrameAxisWidth);
+            frame[0].transform.localPosition = -0.5f * FrameAxisLength * Vector3.right;
+            frame[1].transform.localScale = new Vector3(FrameAxisWidth, FrameAxisWidth, FrameAxisLength);
+            frame[1].transform.localPosition = -0.5f * FrameAxisLength * Vector3.forward;
+            frame[2].transform.localScale = new Vector3(FrameAxisWidth, FrameAxisLength, FrameAxisWidth);
+            frame[2].transform.localPosition = 0.5f * FrameAxisLength * Vector3.up;
 
-            return Holder;
+            return tmpHolder;
         }
 
         public void Recycle()
         {
             GetComponentsInChildren<MeshRenderer>().ForEach(x => ResourcePool.Dispose(Resource.Displays.Cube, x.gameObject));
-            Destroy(Holder);
+            Destroy(holder);
 
             ResourcePool.Dispose(Resource.Displays.Text, labelObject);
             labelObject = null;
@@ -203,17 +194,15 @@ namespace Iviz.App.Displays
 
         void Update()
         {
-            if (target == null)
+            if (target is null)
             {
                 return;
             }
 
             //float maxSize = Mathf.Max(Mathf.Max(bounds.size.x, bounds.size.y), bounds.size.z);
-            Bounds bounds = Target.Bounds;
-            Bounds = new Bounds(bounds.center, Vector3.Scale(bounds.size, Target.BoundsScale));
-            Pose pose = Target.BoundsPose;
-            transform.position = pose.position;
-            transform.rotation = pose.rotation;
+            Bounds targetBounds = Target.Bounds;
+            Bounds = new Bounds(targetBounds.center, Vector3.Scale(targetBounds.size, Target.BoundsScale));
+            transform.SetPose(Target.BoundsPose);
             LabelOffset = Bounds.center + new Vector3(0, Target.WorldBounds.size.y / 2 + 0.15f, 0);
             Name = target?.Name;
         }

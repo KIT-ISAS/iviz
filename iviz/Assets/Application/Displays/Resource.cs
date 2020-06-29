@@ -17,7 +17,7 @@ using Iviz.App.Resources;
 
 namespace Iviz.Resources
 {
-    public class Resource
+    public static class Resource
     {
         [JsonConverter(typeof(StringEnumConverter))]
         public enum Module
@@ -93,7 +93,7 @@ namespace Iviz.Resources
             {
                 get
                 {
-                    if (baseObject != null)
+                    if (!(baseObject is null))
                     {
                         return baseObject;
                     }
@@ -111,12 +111,7 @@ namespace Iviz.Resources
 
             public Info(string resourceName)
             {
-                if (resourceName is null)
-                {
-                    throw new ArgumentNullException(nameof(resourceName));
-                }
-
-                this.resourceName = resourceName;
+                this.resourceName = resourceName ?? throw new ArgumentNullException(nameof(resourceName));
             }
 
             public Info(string resourceName, T baseObject)
@@ -524,8 +519,8 @@ namespace Iviz.Resources
         public static TexturedMaterialsType TexturedMaterials =>
             texturedMaterials ?? (texturedMaterials = new TexturedMaterialsType());
 
-        static FontInfo font;
-        public static FontInfo Font => font ?? (font = new FontInfo());
+        static FontInfo fontInfo;
+        public static FontInfo Font => fontInfo ?? (fontInfo = new FontInfo());
 
         static ExternalResourceManager external;
         public static ExternalResourceManager External => external ?? (external = new ExternalResourceManager());

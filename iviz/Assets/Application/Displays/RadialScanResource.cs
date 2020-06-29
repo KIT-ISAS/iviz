@@ -54,7 +54,7 @@ namespace Iviz.Displays
         public int Size
         {
             get => size_;
-            private set { size_ = value; }
+            private set => size_ = value;
         }
 
         public Vector2 MeasuredIntensityBounds { get; private set; }

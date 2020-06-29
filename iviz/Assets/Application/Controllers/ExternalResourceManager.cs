@@ -22,7 +22,7 @@ namespace Iviz.App.Resources
         readonly GameObject node;
         readonly Msgs.IvizMsgs.Model generator = new Msgs.IvizMsgs.Model();
 
-        readonly static HashSet<char> InvalidPathCharacters = new HashSet<char>(Path.GetInvalidFileNameChars());
+        static readonly HashSet<char> InvalidPathCharacters = new HashSet<char>(Path.GetInvalidFileNameChars());
 
         public ExternalResourceManager()
         {
@@ -200,16 +200,16 @@ namespace Iviz.App.Resources
                 r.Name = mesh.Name;
 
                 Vector3[] vertices = new Vector3[mesh.Vertices.Length];
-                Memcpy(mesh.Vertices, vertices, vertices.Length * 3 * sizeof(float));
+                MemCopy(mesh.Vertices, vertices, vertices.Length * 3 * sizeof(float));
 
                 Vector3[] normals = new Vector3[mesh.Normals.Length];
-                Memcpy(mesh.Normals, normals, normals.Length * 3 * sizeof(float));
+                MemCopy(mesh.Normals, normals, normals.Length * 3 * sizeof(float));
 
                 Color32[] colors = new Color32[mesh.Colors.Length];
-                Memcpy(mesh.Colors, colors, colors.Length * 4);
+                MemCopy(mesh.Colors, colors, colors.Length * 4);
 
                 int[] triangles = new int[mesh.Faces.Length * 3];
-                Memcpy(mesh.Faces, triangles, triangles.Length * 4);
+                MemCopy(mesh.Faces, triangles, triangles.Length * 4);
 
                 var material = msg.Materials[mesh.MaterialIndex];
                 r.Color = new Color32(material.Diffuse.R, material.Diffuse.G, material.Diffuse.B, material.Diffuse.A);
@@ -222,7 +222,7 @@ namespace Iviz.App.Resources
             return model;
         }
 
-        static void Memcpy<A, B>(A[] src, B[] dst, int bytes)
+        static void MemCopy<A, B>(A[] src, B[] dst, int bytes)
             where A : unmanaged
             where B : unmanaged
         {
