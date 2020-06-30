@@ -20,14 +20,18 @@ namespace Iviz.App.Listeners
         readonly Timeline timeline = new Timeline();
         TrailResource trail;
 
+        public bool isDead;
+        
         [SerializeField] string id;
         public string Id
         {
             get => id;
             set
             {
+                isDead = false;
                 id = value;
                 labelObjectText.text = id;
+                trail.Name = "Trail:" + id;
             }
         }
 
@@ -164,9 +168,11 @@ namespace Iviz.App.Listeners
             get => trail.enabled;
             set
             {
+                //Debug.Log("Enabled: " + value);
                 trail.enabled = value;
                 if (value)
                 {
+                    //Debug.Log("Setting datasource for " + Id);
                     trail.DataSource = () => transform.position;
                 }
                 else
@@ -340,8 +346,12 @@ namespace Iviz.App.Listeners
         public override void Stop()
         {
             base.Stop();
-            Id = "";
+            //Id = "";
+            isDead = true;
             timeline.Clear();
+
+            TrailVisible = false;
+            trail.Stop();
         }
 
     }

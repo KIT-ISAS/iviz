@@ -197,8 +197,11 @@ namespace Iviz.App
                         TFFrame frame = TFListener.GetOrCreateFrame(Decorate(x.Key.name), node);
                         TFFrame parentFrame = TFListener.GetOrCreateFrame(Decorate(x.Value.name), node);
 
-                        frame.Parent = null;
-                        parentFrame.Parent = null;
+                        //Debug.Log(frame.Id + " " + Decorate(x.Key.name));
+                        //frame.Parent = null;
+                        //Debug.Log(parentFrame.Id);
+                        //Debug.Log(parentFrame.Id + " " + Decorate(x.Value.name));
+                        //parentFrame.Parent = null;
 
                         x.Key.transform.SetParentLocal(frame.transform);
                         x.Key.transform.SetLocalPose(Pose.identity);
@@ -224,7 +227,7 @@ namespace Iviz.App
                             parentFrame.RemoveListener(node);
                         }
 
-                        x.Key.transform.SetParentLocal(x.Value == null ? node.transform : x.Value.transform);
+                        x.Key.transform.SetParentLocal(x.Value is null ? node.transform : x.Value.transform);
                         x.Key.transform.SetLocalPose(originalLinkPoses[x.Key]);
                     });
                     node.Parent = null;
@@ -276,7 +279,7 @@ namespace Iviz.App
             config.RobotResource = newResource;
 
             RobotObject = ResourcePool.GetOrCreate(Resource.Robots.Objects[newResource], TFListener.MapFrame.transform);
-            RobotObject.name = newResource;
+            RobotObject.name = newResource + "!";
 
             Name = Name; // update name;
 
@@ -300,6 +303,7 @@ namespace Iviz.App
             RobotObject.GetComponentsInChildren<UrdfLink>().ForEach(x =>
             {
                 GameObject parentObject = x.transform.parent.gameObject;
+                //Debug.Log("Original parent: " + x.gameObject + " -> " + parentObject);
                 originalLinkParents.Add(x.gameObject, parentObject);
                 originalLinkPoses.Add(x.gameObject, x.transform.AsLocalPose());
             });
@@ -325,6 +329,7 @@ namespace Iviz.App
             else
             {
                 node.AttachTo(Decorate(BaseLink.name));
+                
                 BaseLink.transform.SetParentLocal(node.transform);
 
                 BoxCollider robotCollider = RobotObject.GetComponent<BoxCollider>();

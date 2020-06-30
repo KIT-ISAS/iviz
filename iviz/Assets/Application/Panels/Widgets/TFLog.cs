@@ -7,6 +7,7 @@ using Iviz.App.Listeners;
 using UnityEngine.EventSystems;
 using TMPro;
 using System;
+using Iviz.App.Displays;
 
 namespace Iviz.App
 {
@@ -29,13 +30,23 @@ namespace Iviz.App
 
         public event Action Close;
 
+        SimpleDisplayNode dummy;
+
         TFFrame selectedFrame;
+
         public TFFrame SelectedFrame
         {
             get => selectedFrame;
             set
             {
+                if (value == selectedFrame)
+                {
+                    return;
+                }
+
+                selectedFrame?.RemoveListener(dummy);
                 selectedFrame = value;
+                selectedFrame?.AddListener(dummy);
 
                 gotoButton.interactable = selectedFrame != null;
                 trail.interactable = selectedFrame != null;
@@ -50,6 +61,7 @@ namespace Iviz.App
                 {
                     tfName.text = "[ ⮑" + value.Id + "]";
                 }
+
                 UpdateFrameTexts();
             }
         }
@@ -59,6 +71,14 @@ namespace Iviz.App
             tfLink.LinkClicked += OnTfLinkClicked;
             SelectedFrame = null;
 
+            dummy = SimpleDisplayNode.Instantiate("TFLog Dummy", TFListener.RootFrame.transform);
+
+            gotoButton.interactable = false;
+            trail.interactable = false;
+            lockPivot.interactable = false;
+            lock1PV.interactable = false;
+            tfName.text = "<color=grey>[ ⮑none ]</color>";
+            UpdateFrameTexts();
         }
 
         void OnTfLinkClicked(string frameId)
@@ -90,6 +110,7 @@ namespace Iviz.App
                 {
                     Children.Add(new TFNode(child));
                 }
+
                 Children.Sort((x, y) => string.CompareOrdinal(x.Name, y.Name));
             }
 
@@ -121,7 +142,6 @@ namespace Iviz.App
 
         public void Flush()
         {
-
             TFNode root = new TFNode(TFListener.RootFrame);
 
             StringBuilder str = new StringBuilder();
@@ -129,7 +149,7 @@ namespace Iviz.App
 
             tfText.text = str.ToString();
 
-            RectTransform ctransform = (RectTransform)content.transform;
+            RectTransform ctransform = (RectTransform) content.transform;
             ctransform.sizeDelta = new Vector2(tfText.preferredWidth + 10, tfText.preferredHeight + 10);
         }
 
@@ -159,6 +179,7 @@ namespace Iviz.App
             {
                 TFListener.GuiManager.OrbitCenterOverride = SelectedFrame;
             }
+
             UpdateFrameTexts();
             Close?.Invoke();
         }
@@ -181,6 +202,7 @@ namespace Iviz.App
                 {
                     trailText.text = "Trail:\nOff";
                 }
+
                 if (TFListener.GuiManager.OrbitCenterOverride == SelectedFrame)
                 {
                     lockPivotText.text = "Lock Pivot\n<b>On</b>";
@@ -189,6 +211,7 @@ namespace Iviz.App
                 {
                     lockPivotText.text = "Lock Pivot\nOff";
                 }
+
                 if (TFListener.GuiManager.CameraViewOverride == SelectedFrame)
                 {
                     lock1PVText.text = "Lock 1PV\n<b>On</b>";
@@ -210,6 +233,7 @@ namespace Iviz.App
             {
                 TFListener.GuiManager.CameraViewOverride = SelectedFrame;
             }
+
             UpdateFrameTexts();
             Close?.Invoke();
         }

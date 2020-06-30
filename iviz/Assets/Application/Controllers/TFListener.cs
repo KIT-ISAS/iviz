@@ -179,10 +179,12 @@ namespace Iviz.App.Listeners
 
             UnityFrame = Add(CreateFrameObject("/unity/", gameObject));
             UnityFrame.ForceInvisible = true;
+            UnityFrame.AddListener(null);
             
             RootFrame = Add(CreateFrameObject("/", gameObject));
             RootFrame.Parent = UnityFrame;
             RootFrame.ForceInvisible = true;
+            RootFrame.AddListener(null);
 
             MapFrame = Add(CreateFrameObject(BaseFrameId, gameObject));
             MapFrame.Parent = RootFrame;
@@ -327,6 +329,7 @@ namespace Iviz.App.Listeners
             frames.Remove(frame.Id);
             GuiManager.Unselect(frame);
             frame.Stop();
+            //Debug.Log("Frame " + frame.gameObject.GetInstanceID() + " with formed id '" + frame.Id + "' is dead!");
             ResourcePool.Dispose(Resource.Displays.TFFrame, frame.gameObject);
         }
 

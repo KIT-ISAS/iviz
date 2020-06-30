@@ -271,7 +271,7 @@ namespace Iviz.App.Listeners
                     childNode = SimpleDisplayNode.Instantiate("ChildNode");
                     arrow = ResourcePool.GetOrCreate<ArrowResource>(Resource.Displays.Arrow, childNode.transform);
                     arrow.Color = Color;
-                    angleAxis = ResourcePool.GetOrCreate<AngleAxisResource>(Resource.Displays.AngleAxis, displayNode.transform);
+                    angleAxis = ResourcePool.GetOrCreate<AngleAxisResource>(Resource.Displays.AngleAxis, childNode.transform);
                     angleAxis.Color = Color.yellow;
                     sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere, displayNode.transform);
                     sphere.transform.localScale = 0.1f * UnityEngine.Vector3.one;
@@ -324,7 +324,7 @@ namespace Iviz.App.Listeners
             }
 
             Vector3 dir = msg.Force.Ros2Unity();
-            arrow.Set(UnityEngine.Vector3.zero, dir);
+            arrow.Set(Vector3.zero, dir);
             angleAxis.Set(msg.Torque.Ros2Unity());
             trail.DataSource = () => displayNode.transform.TransformPoint(dir * VectorScale);
         }
@@ -337,6 +337,7 @@ namespace Iviz.App.Listeners
 
         static Quaternion AngularToQuaternion(float angularX, float angularY, float angularZ)
         {
+            //Debug.Log("In message: " + angularX + " " + angularY + " " + angularZ);
             return Quaternion.AngleAxis(angularX * Mathf.Rad2Deg, new Vector3(1, 0, 0)) *
                    Quaternion.AngleAxis(angularY * Mathf.Rad2Deg, new Vector3(0, 1, 0)) *
                    Quaternion.AngleAxis(angularZ * Mathf.Rad2Deg, new Vector3(0, 0, 1));

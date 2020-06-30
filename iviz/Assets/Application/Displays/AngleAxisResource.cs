@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Iviz.App;
 using Iviz.Resources;
 using RosSharp.RosBridgeClient.Actionlib;
+using UnityEngine.XR.ARKit;
 
 namespace Iviz.Displays
 {
@@ -98,19 +99,27 @@ namespace Iviz.Displays
             set => resource.Tint = value;
         }
         
-        public void Set(float angle, in Vector3 axis, float scale = 0.3f)
+        public void Set(float angle, Vector3 axis, float scale = 0.3f)
         {
             if (angle == 0 || axis.magnitude == 0)
             {
-                Debug.Log("out!");
+                //Debug.Log("out!");
                 resource.Visible = false;
                 return;
             }
             
             resource.Visible = true;
+
+            angle *= -1;
+
+            if (axis.y < 0)
+            {
+                angle *= -1;
+                axis *= -1;
+            }
             
             lines.Clear();
-            lines.Add(new LineWithColor(Vector3.zero, scale * axis, Color));
+            //lines.Add(new LineWithColor(Vector3.zero, scale * axis, Color));
 
             Vector3 x = new Vector3(0, 0, 1);
             if (x == axis)
@@ -122,13 +131,13 @@ namespace Iviz.Displays
             dirx *= scale;
             diry *= scale;
 
-            int n = (int)(angle / (2 * Mathf.PI) * 32 + 1);
+            int n = (int)(Mathf.Abs(angle) / (2 * Mathf.PI) * 32 + 1);
             Debug.Log(angle + " -> " + n);
             
-            Vector3 v0 = dirx * scale;
+            Vector3 v0 = dirx;
             Vector3 v1 = Vector3.zero;
 
-            lines.Add(new LineWithColor(Vector3.zero, v0, Color));
+            lines.Add(new LineWithColor(Vector3.zero, 1.2f * v0, Color));
 
             for (int i = 1; i <= n; i++)
             {
@@ -142,7 +151,7 @@ namespace Iviz.Displays
                 v0 = v1;
             }
 
-            lines.Add(new LineWithColor(Vector3.zero, v1, Color));
+            lines.Add(new LineWithColor(Vector3.zero, 1.2f * v1, Color));
             resource.LinesWithColor = lines;
         }
         
