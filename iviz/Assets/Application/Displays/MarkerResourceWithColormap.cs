@@ -10,25 +10,25 @@ namespace Iviz.Displays
         public static readonly int PropIntensityCoeff = Shader.PropertyToID("_IntensityCoeff");
         public static readonly int PropIntensityAdd = Shader.PropertyToID("_IntensityAdd");
         public static readonly int PropIntensity = Shader.PropertyToID("_IntensityTexture");
-        static protected readonly int PropLocalToWorld = Shader.PropertyToID("_LocalToWorld");
-        static protected readonly int PropWorldToLocal = Shader.PropertyToID("_WorldToLocal");
-        static protected readonly int PropBoundaryCenter = Shader.PropertyToID("_BoundaryCenter");
-        static protected readonly int PropPoints = Shader.PropertyToID("_Points");
-        static protected readonly int PropTint = Shader.PropertyToID("_Tint");
+        static readonly int PropLocalToWorld = Shader.PropertyToID("_LocalToWorld");
+        static readonly int PropWorldToLocal = Shader.PropertyToID("_WorldToLocal");
+        protected static readonly int PropBoundaryCenter = Shader.PropertyToID("_BoundaryCenter");
+        protected static readonly int PropPoints = Shader.PropertyToID("_Points");
+        static readonly int PropTint = Shader.PropertyToID("_Tint");
 
         [SerializeField] protected Material material;
 
-        [SerializeField] bool useIntensityTexture_;
+        [SerializeField] bool useIntensityTexture;
         public bool UseIntensityTexture
         {
-            get => useIntensityTexture_;
+            get => useIntensityTexture;
             set
             {
-                if (useIntensityTexture_ == value)
+                if (useIntensityTexture == value)
                 {
                     return;
                 }
-                useIntensityTexture_ = value;
+                useIntensityTexture = value;
                 UpdateMaterialKeywords();
             }
         }
@@ -59,14 +59,14 @@ namespace Iviz.Displays
             }
         }
 
-        [SerializeField] Vector2 intensityBounds_;
+        [SerializeField] Vector2 intensityBounds;
         public Vector2 IntensityBounds
         {
-            get => intensityBounds_;
+            get => intensityBounds;
             set
             {
-                intensityBounds_ = value;
-                float intensitySpan = intensityBounds_.y - intensityBounds_.x;
+                intensityBounds = value;
+                float intensitySpan = intensityBounds.y - intensityBounds.x;
 
                 if (intensitySpan == 0)
                 {
@@ -78,24 +78,24 @@ namespace Iviz.Displays
                     if (!FlipMinMax)
                     {
                         material.SetFloat(PropIntensityCoeff, 1 / intensitySpan);
-                        material.SetFloat(PropIntensityAdd, -intensityBounds_.x / intensitySpan);
+                        material.SetFloat(PropIntensityAdd, -intensityBounds.x / intensitySpan);
                     }
                     else
                     {
                         material.SetFloat(PropIntensityCoeff, -1 / intensitySpan);
-                        material.SetFloat(PropIntensityAdd, intensityBounds_.y / intensitySpan);
+                        material.SetFloat(PropIntensityAdd, intensityBounds.y / intensitySpan);
                     }
                 }
             }
         }
 
-        [SerializeField] bool flipMinMax_;
+        [SerializeField] bool flipMinMax;
         public bool FlipMinMax
         {
-            get => flipMinMax_;
+            get => flipMinMax;
             set
             {
-                flipMinMax_ = value;
+                flipMinMax = value;
                 IntensityBounds = IntensityBounds;
             }
         }
@@ -113,13 +113,13 @@ namespace Iviz.Displays
             }
         }
 
-        [SerializeField] Color tint_;
+        [SerializeField] Color tint;
         public Color Tint
         {
-            get => tint_;
+            get => tint;
             set
             {
-                tint_ = value;
+                tint = value;
                 material.SetColor(PropTint, value);
             }
         }
@@ -136,7 +136,7 @@ namespace Iviz.Displays
             material.SetMatrix(PropWorldToLocal, transform.worldToLocalMatrix);
         }
 
-        abstract protected void Rebuild();
+        protected abstract void Rebuild();
 
         protected virtual void OnApplicationFocus(bool hasFocus)
         {

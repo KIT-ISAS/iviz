@@ -282,7 +282,8 @@ namespace Iviz.Resources
             public GameObjectInfo OccupancyGridResource { get; }
             public GameObjectInfo RadialScanResource { get; }
             public GameObjectInfo ARMarkerResource { get; }
-            public GameObjectInfo AxisFrameResource { get; }
+            public GameObjectInfo AxisFrame { get; }
+            public GameObjectInfo AngleAxis { get; }
 
             public ReadOnlyDictionary<Uri, GameObjectInfo> Generic { get; }
 
@@ -309,7 +310,8 @@ namespace Iviz.Resources
                 OccupancyGridResource = new GameObjectInfo("Displays/OccupancyGridResource");
                 RadialScanResource = new GameObjectInfo("Displays/RadialScanResource");
                 ARMarkerResource = new GameObjectInfo("Displays/ARMarkerResource");
-                AxisFrameResource = new GameObjectInfo("Displays/AxisFrameResource");
+                AxisFrame = new GameObjectInfo("Displays/AxisFrameResource");
+                AngleAxis = new GameObjectInfo("Displays/AngleAxis");
 
                 Generic = new ReadOnlyDictionary<Uri, GameObjectInfo>(
                     new Dictionary<Uri, GameObjectInfo>()

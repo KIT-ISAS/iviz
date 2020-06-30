@@ -80,9 +80,9 @@ namespace Iviz
 
         public static Vector3 Ros2Unity(this Vector3 vector3)=> new Vector3(-vector3.y, vector3.z, vector3.x);
 
-        static Quaternion Ros2Unity(this Quaternion quaternion) => new Quaternion(quaternion.y, -quaternion.z, -quaternion.x, quaternion.w);
+        public static Quaternion Ros2Unity(this Quaternion quaternion) => new Quaternion(quaternion.y, -quaternion.z, -quaternion.x, quaternion.w);
 
-        static Quaternion Unity2Ros(this Quaternion quaternion)=> new Quaternion(-quaternion.z, quaternion.x, -quaternion.y, quaternion.w);
+        public static Quaternion Unity2Ros(this Quaternion quaternion) => new Quaternion(-quaternion.z, quaternion.x, -quaternion.y, quaternion.w);
         //----
 
         public static float4 Ros2Unity(this float4 v) => new float4(-v.y, v.z, v.x, v.w);

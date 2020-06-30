@@ -228,11 +228,11 @@ namespace Iviz.Displays
                 throw new ArgumentException(nameof(ranges));
             }
 
-            float x = Mathf.Cos(angleMin);
-            float y = Mathf.Sin(angleMin);
+            //float x = Mathf.Cos(angleMin);
+            //float y = Mathf.Sin(angleMin);
 
-            float dx = Mathf.Cos(angleIncrement);
-            float dy = Mathf.Sin(angleIncrement);
+            //float dx = Mathf.Cos(angleIncrement);
+            //float dy = Mathf.Sin(angleIncrement);
 
             pointBuffer.Clear();
             if (!UseIntensityNotRange)
@@ -244,9 +244,13 @@ namespace Iviz.Displays
                     {
                         continue;
                     }
+
+                    float a = angleMin + angleIncrement * i;
+                    float x = Mathf.Cos(a); 
+                    float y = Mathf.Sin(a); 
                     pointBuffer.Add(new PointWithColor(new Unity.Mathematics.float4(-y, 0, x, 1) * range));
-                    x = dx * x - dy * y;
-                    y = dy * x + dx * y;
+                    //x = dx * x - dy * y;
+                    //y = dy * x + dx * y;
                 }
             }
             else
@@ -258,9 +262,13 @@ namespace Iviz.Displays
                     {
                         continue;
                     }
+                    
+                    float a = angleMin + angleIncrement * i;
+                    float x = Mathf.Cos(a); 
+                    float y = Mathf.Sin(a); 
                     pointBuffer.Add(new PointWithColor(-y * range, 0, x * range, intensities[i]));
-                    x = dx * x - dy * y;
-                    y = dy * x + dx * y;
+                    //x = dx * x - dy * y;
+                    //y = dy * x + dx * y;
                 }
             }
 

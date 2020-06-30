@@ -10,11 +10,15 @@ namespace Iviz.App
 
     public class NewMonoBehaviour : MonoBehaviour
     {
-        OccupancyGridResource resource;
+        //OccupancyGridResource resource;
+        AngleAxisResource resource;
 
         private void Start()
         {
-            transform.position = new Vector3(1, 0, 0).Ros2Unity();
+            resource = GetComponent<AngleAxisResource>();
+            //resource.Set(Quaternion.Euler(30, 270, 40));
+            resource.Set(new Vector3(0, 1, 1) * 20);
+            //transform.position = new Vector3(1, 0, 0).Ros2Unity();
             /*
             resource = gameObject.AddComponent<OccupancyGridResource>();
             resource.NumCellsX = 1000;

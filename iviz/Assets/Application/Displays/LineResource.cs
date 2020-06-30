@@ -20,38 +20,67 @@ namespace Iviz.Displays
         ComputeBuffer lineComputeBuffer;
         ComputeBuffer quadComputeBuffer;
 
-        int _size;
-        public int Size
+        Material materialAlpha;
+        Material materialNoAlpha;
+        
+        public bool UseAlpha
         {
-            get => _size;
-            private set
+            get => material == materialAlpha;
+            set
             {
-                if (value == _size)
+                if (UseAlpha == value)
                 {
                     return;
                 }
-                _size = value;
-                Reserve(_size * 11 / 10);
+                if (value)
+                {
+                    material = materialAlpha;
+                }
+                else
+                {
+                    if (materialNoAlpha == null)
+                    {
+                        materialNoAlpha = Resource.Materials.Line.Instantiate();
+                        materialNoAlpha.DisableKeyword("USE_TEXTURE");
+                    }
+
+                    material = materialNoAlpha;
+                }
+                Rebuild();
+            }
+        } 
+        
+        int size;
+        public int Size
+        {
+            get => size;
+            private set
+            {
+                if (value == size)
+                {
+                    return;
+                }
+                size = value;
+                Reserve(size * 11 / 10);
             }
         }
 
         public void Reserve(int reqDataSize)
         {
-            if (lineBuffer.Length < reqDataSize)
+            if (lineBuffer.Length >= reqDataSize)
             {
-                if (lineBuffer.Length != 0)
-                {
-                    lineBuffer.Dispose();
-                }
-                lineBuffer = new NativeArray<float4x2>(reqDataSize, Allocator.Persistent);
-
-                if (lineComputeBuffer != null)
-                {
-                    lineComputeBuffer.Release();
-                }
-                lineComputeBuffer = new ComputeBuffer(lineBuffer.Length, Marshal.SizeOf<LineWithColor>());
-                material.SetBuffer(PropLines, lineComputeBuffer);
+                return;
             }
+
+            if (lineBuffer.Length != 0)
+            {
+                lineBuffer.Dispose();
+            }
+            lineBuffer = new NativeArray<float4x2>(reqDataSize, Allocator.Persistent);
+
+            lineComputeBuffer?.Release();
+            lineComputeBuffer = new ComputeBuffer(lineBuffer.Length, Marshal.SizeOf<LineWithColor>());
+            material.SetBuffer(PropLines, lineComputeBuffer);
         }
 
         public IList<LineWithColor> LinesWithColor
@@ -61,22 +90,22 @@ namespace Iviz.Displays
                 Size = value.Count;
 
                 int realSize = 0;
-                for (int i = 0; i < value.Count; i++)
+                foreach (var t in value)
                 {
-                    if (value[i].HasNaN)
+                    if (t.HasNaN)
                     {
                         continue;
                     }
-                    lineBuffer[realSize++] = value[i];
+                    lineBuffer[realSize++] = t;
                 }
                 Size = realSize;
                 UpdateBuffer();
             }
         }
 
-        public void Set(int size, Action<NativeArray<float4x2>> func)
+        public void Set(int newSize, Action<NativeArray<float4x2>> func)
         {
-            Size = size;
+            Size = newSize;
             func(lineBuffer);
             UpdateBuffer();
         }
@@ -94,23 +123,27 @@ namespace Iviz.Displays
             IntensityBounds = span;
         }
 
-        [SerializeField] float _lineScale;
+        [SerializeField] float lineScale;
         public float LineScale
         {
-            get => _lineScale;
+            get => lineScale;
             set
             {
-                if (_lineScale != value)
+                if (lineScale == value)
                 {
-                    _lineScale = value;
-                    UpdateQuadComputeBuffer();
+                    return;
                 }
+
+                lineScale = value;
+                UpdateQuadComputeBuffer();
             }
         }
 
         protected override void Awake()
         {
-            material = Resource.Materials.TransparentLine.Instantiate();
+            materialAlpha = Resource.Materials.TransparentLine.Instantiate();
+            
+            material = materialAlpha;
             material.DisableKeyword("USE_TEXTURE");
 
             base.Awake();
@@ -145,9 +178,9 @@ namespace Iviz.Displays
             }
             UpdateTransform();
 
-            Camera camera = TFListener.MainCamera;
+            Camera mainCamera = TFListener.MainCamera;
             //material.SetVector(PropFront, transform.InverseTransformDirection(camera.transform.forward));
-            material.SetVector(PropFront, transform.InverseTransformPoint(camera.transform.position));
+            material.SetVector(PropFront, transform.InverseTransformPoint(mainCamera.transform.position));
 
             Bounds worldBounds = Collider.bounds;
             Graphics.DrawProcedural(material, worldBounds, MeshTopology.Quads, 4, Size);
@@ -155,6 +188,7 @@ namespace Iviz.Displays
 
         protected override void OnDestroy()
         {
+            material = null;
             base.OnDestroy();
 
             if (lineComputeBuffer != null)
@@ -171,6 +205,15 @@ namespace Iviz.Displays
             {
                 lineBuffer.Dispose();
             }
+            if (!(materialAlpha is null))
+            {
+                Destroy(materialAlpha);
+            }
+            if (!(materialNoAlpha is null))
+            {
+                Destroy(materialNoAlpha);
+            }
+            
         }
 
         protected override void Rebuild()
@@ -197,6 +240,7 @@ namespace Iviz.Displays
             UpdateMaterialKeywords();
             IntensityBounds = IntensityBounds;
             Colormap = Colormap;
+            Tint = Tint;
         }
 
         public override void Stop()

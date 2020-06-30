@@ -7,6 +7,8 @@ using Iviz.Msgs.NavMsgs;
 using Iviz.Resources;
 using Iviz.RoslibSharp;
 using UnityEngine;
+using Quaternion = UnityEngine.Quaternion;
+using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.App.Listeners
 {
@@ -36,6 +38,7 @@ namespace Iviz.App.Listeners
         TrailResource trail;
         MeshMarkerResource sphere;
         ArrowResource arrow;
+        AngleAxisResource angleAxis;
 
         public override ModuleData ModuleData { get; set; }
 
@@ -179,7 +182,6 @@ namespace Iviz.App.Listeners
             displayNode = SimpleDisplayNode.Instantiate("DisplayNode");
 
             trailNode = SimpleDisplayNode.Instantiate("TrailNode", transform);
-            trailNode.Parent = TFListener.MapFrame;
             trail = trailNode.gameObject.AddComponent<TrailResource>();
             trail.DataSource = () => displayNode.transform.position;
 
@@ -206,7 +208,7 @@ namespace Iviz.App.Listeners
                     {
                         Listener = new RosListener<Msgs.GeometryMsgs.Pose>(config.Topic, Handler);
                     }
-                    axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Displays.AxisFrameResource, displayNode.transform);
+                    axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Displays.AxisFrame, displayNode.transform);
                     break;
 
                 case PointStamped.RosMessageType:
@@ -233,9 +235,11 @@ namespace Iviz.App.Listeners
                     {
                         Listener = new RosListener<Wrench>(config.Topic, Handler);
                     }
-                    axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Displays.AxisFrameResource, displayNode.transform);
+                    axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Displays.AxisFrame, displayNode.transform);
                     arrow = ResourcePool.GetOrCreate<ArrowResource>(Resource.Displays.Arrow, displayNode.transform);
                     arrow.Color = Color;
+                    angleAxis = ResourcePool.GetOrCreate<AngleAxisResource>(Resource.Displays.AngleAxis, displayNode.transform);
+                    angleAxis.Color = Color.yellow;
                     sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere, displayNode.transform);
                     sphere.transform.localScale = 0.1f * UnityEngine.Vector3.one;
                     sphere.Color = Color;
@@ -250,9 +254,11 @@ namespace Iviz.App.Listeners
                     {
                         Listener = new RosListener<Twist>(config.Topic, Handler);
                     }
-                    axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Displays.AxisFrameResource, displayNode.transform);
+                    axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Displays.AxisFrame, displayNode.transform);
                     arrow = ResourcePool.GetOrCreate<ArrowResource>(Resource.Displays.Arrow, displayNode.transform);
                     arrow.Color = Color;
+                    angleAxis = ResourcePool.GetOrCreate<AngleAxisResource>(Resource.Displays.AngleAxis, displayNode.transform);
+                    angleAxis.Color = Color.yellow;
                     sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere, displayNode.transform);
                     sphere.transform.localScale = 0.1f * UnityEngine.Vector3.one;
                     sphere.Color = Color;
@@ -260,12 +266,13 @@ namespace Iviz.App.Listeners
 
                 case Odometry.RosMessageType:
                     Listener = new RosListener<Odometry>(config.Topic, Handler);
-                    axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Displays.AxisFrameResource, displayNode.transform);
+                    axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Displays.AxisFrame, displayNode.transform);
 
                     childNode = SimpleDisplayNode.Instantiate("ChildNode");
                     arrow = ResourcePool.GetOrCreate<ArrowResource>(Resource.Displays.Arrow, childNode.transform);
                     arrow.Color = Color;
-
+                    angleAxis = ResourcePool.GetOrCreate<AngleAxisResource>(Resource.Displays.AngleAxis, displayNode.transform);
+                    angleAxis.Color = Color.yellow;
                     sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere, displayNode.transform);
                     sphere.transform.localScale = 0.1f * UnityEngine.Vector3.one;
                     sphere.Color = Color;
@@ -316,8 +323,9 @@ namespace Iviz.App.Listeners
                 return;
             }
 
-            UnityEngine.Vector3 dir = msg.Force.Ros2Unity();
+            Vector3 dir = msg.Force.Ros2Unity();
             arrow.Set(UnityEngine.Vector3.zero, dir);
+            angleAxis.Set(msg.Torque.Ros2Unity());
             trail.DataSource = () => displayNode.transform.TransformPoint(dir * VectorScale);
         }
 
@@ -327,6 +335,13 @@ namespace Iviz.App.Listeners
             Handler(msg.Twist);
         }
 
+        static Quaternion AngularToQuaternion(float angularX, float angularY, float angularZ)
+        {
+            return Quaternion.AngleAxis(angularX * Mathf.Rad2Deg, new Vector3(1, 0, 0)) *
+                   Quaternion.AngleAxis(angularY * Mathf.Rad2Deg, new Vector3(0, 1, 0)) *
+                   Quaternion.AngleAxis(angularZ * Mathf.Rad2Deg, new Vector3(0, 0, 1));
+        }
+        
         void Handler(Twist msg)
         {
             if (msg.Angular.HasNaN() || msg.Linear.HasNaN())
@@ -334,8 +349,9 @@ namespace Iviz.App.Listeners
                 return;
             }
 
-            UnityEngine.Vector3 dir = msg.Linear.Ros2Unity();
-            arrow.Set(UnityEngine.Vector3.zero, dir);
+            Vector3 dir = msg.Linear.Ros2Unity();
+            arrow.Set(Vector3.zero, dir);
+            angleAxis.Set(AngularToQuaternion((float)msg.Angular.X, (float)msg.Angular.Y, (float)msg.Angular.Z).Ros2Unity());
             trail.DataSource = () => displayNode.transform.TransformPoint(dir * VectorScale);
         }
 
@@ -354,8 +370,13 @@ namespace Iviz.App.Listeners
             }
             displayNode.transform.SetLocalPose(msg.Pose.Pose.Ros2Unity());
 
-            UnityEngine.Vector3 dir = msg.Twist.Twist.Linear.Ros2Unity();
-            arrow.Set(UnityEngine.Vector3.zero, dir);
+            Vector3 dir = msg.Twist.Twist.Linear.Ros2Unity();
+            arrow.Set(Vector3.zero, dir);
+            angleAxis.Set(AngularToQuaternion(
+                (float)msg.Twist.Twist.Angular.X, 
+                (float)msg.Twist.Twist.Angular.Y, 
+                (float)msg.Twist.Twist.Angular.Z)
+                .Ros2Unity());
             trail.DataSource = () => displayNode.transform.TransformPoint(dir * VectorScale);
         }
 
@@ -378,7 +399,11 @@ namespace Iviz.App.Listeners
 
             if (!(axis is null))
             {
-                ResourcePool.Dispose(Resource.Displays.AxisFrameResource, axis.gameObject);
+                ResourcePool.Dispose(Resource.Displays.AxisFrame, axis.gameObject);
+            }
+            if (!(angleAxis is null))
+            {
+                ResourcePool.Dispose(Resource.Displays.AngleAxis, angleAxis.gameObject);
             }
             if (!(arrow is null))
             {

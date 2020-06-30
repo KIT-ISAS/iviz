@@ -31,32 +31,34 @@ namespace Iviz.Displays
 
         const int MeasurementsPerSecond = 32;
 
-        [SerializeField] int timeWindowInMs_ = 2000;
+        [SerializeField] int timeWindowInMs = 2000;
         public int TimeWindowInMs
         {
-            get => timeWindowInMs_;
+            get => timeWindowInMs;
             set
             {
-                if (timeWindowInMs_ != value)
+                if (timeWindowInMs == value)
                 {
-                    timeWindowInMs_ = value;
-                    Reset();
+                    return;
                 }
+
+                timeWindowInMs = value;
+                Reset();
             }
         }
 
-        [SerializeField] Color color_ = UnityEngine.Color.red;
+        [SerializeField] Color color = UnityEngine.Color.red;
         public Color32 Color
         {
-            get => color_;
-            set => color_ = value;
+            get => color;
+            set => color = value;
         }
 
         public void Reset()
         {
             measurements.Clear();
             startOffset = 0;
-            totalMeasurements = timeWindowInMs_ * MeasurementsPerSecond / 1000;
+            totalMeasurements = timeWindowInMs * MeasurementsPerSecond / 1000;
             lines?.Reserve(totalMeasurements);
         }
 
@@ -89,7 +91,7 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            lines = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, TFListener.MapFrame?.transform);
+            lines = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, TFListener.UnityFrame?.transform);
             lines.LineScale = 0.01f;
             TimeWindowInMs = TimeWindowInMs;
             StartCoroutine(nameof(GatherMeasurement));

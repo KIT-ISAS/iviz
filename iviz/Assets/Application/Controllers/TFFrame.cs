@@ -224,7 +224,7 @@ namespace Iviz.App.Listeners
 
         bool IsChildOf(TFFrame frame)
         {
-            if (Parent == null)
+            if (Parent is null)
             {
                 return false;
             }
@@ -243,19 +243,21 @@ namespace Iviz.App.Listeners
 
         public void SetPose(in TimeSpan time, in Pose newPose)
         {
-            if (!IgnoreUpdates)
+            if (IgnoreUpdates)
             {
-                pose = newPose;
-                rosPosition_ = pose.position.Unity2Ros();
-
-                if (newPose.position.sqrMagnitude > MaxPoseMagnitude * MaxPoseMagnitude)
-                {
-                    return; // lel
-                }
-
-                transform.SetLocalPose(newPose);
-                LogPose(time);
+                return;
             }
+
+            pose = newPose;
+            rosPosition_ = pose.position.Unity2Ros();
+
+            if (newPose.position.sqrMagnitude > MaxPoseMagnitude * MaxPoseMagnitude)
+            {
+                return; // lel
+            }
+
+            transform.SetLocalPose(newPose);
+            LogPose(time);
         }
 
         void LogPose(in TimeSpan time)
@@ -308,7 +310,7 @@ namespace Iviz.App.Listeners
                 TFListener.MapFrame?.transform; // TFListener.BaseFrame may not exist yet
             parentConnector.name = "[Connector]";
 
-            resource = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Displays.AxisFrameResource, transform);
+            resource = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Displays.AxisFrame, transform);
             resource.Layer = Layer;
             resource.name = "[Axis]";
 
@@ -327,7 +329,7 @@ namespace Iviz.App.Listeners
 
         public void Recycle()
         {
-            ResourcePool.Dispose(Resource.Displays.AxisFrameResource, resource.gameObject);
+            ResourcePool.Dispose(Resource.Displays.AxisFrame, resource.gameObject);
             ResourcePool.Dispose(Resource.Displays.Text, labelObject);
             ResourcePool.Dispose(Resource.Displays.LineConnector, parentConnector.gameObject);
             resource = null;
