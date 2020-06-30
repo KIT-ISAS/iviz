@@ -15,40 +15,49 @@ namespace Iviz.App.Displays
 
         void SetParent(TFFrame newParent, bool attach)
         {
-            if (newParent != parent)
+            if (newParent == parent)
             {
-                parent?.RemoveListener(this);
-                parent = newParent;
-                parent?.AddListener(this);
+                return;
             }
+            parent?.RemoveListener(this);
+            parent = newParent;
+            parent?.AddListener(this);
             if (attach)
             {
                 transform.SetParentLocal(newParent?.transform);
             }
         }
 
-        public virtual void AttachTo(string parentId)
+        public void AttachTo(string parentId)
         {
-            Parent = (parentId == "") ? TFListener.BaseFrame : TFListener.GetOrCreateFrame(parentId);
+            if (Parent is null || parentId != Parent.Id)
+            {
+                Parent = string.IsNullOrEmpty(parentId) ? 
+                    TFListener.MapFrame : 
+                    TFListener.GetOrCreateFrame(parentId);
+            }
         }
 
-        public virtual void AttachTo(string parentId, in Msgs.time timestamp)
+        public void AttachTo(string parentId, in Msgs.time timestamp)
         {
             AttachTo(parentId, timestamp.ToTimeSpan());
         }
 
         public void AttachTo(string parentId, in TimeSpan timestamp)
         {
-            transform.SetParentLocal(TFListener.BaseFrame.transform);
+            transform.SetParentLocal(TFListener.MapFrame.transform);
             if (parentId.Length == 0)
             {
                 transform.SetPose(Pose.identity);
             }
             else
             {
-                TFFrame frame = TFListener.GetOrCreateFrame(parentId, this);
-                SetParent(frame, false);
-                transform.SetPose(frame.GetPose(timestamp));
+                if (Parent is null || parentId != Parent.Id)
+                {
+                    TFFrame frame = TFListener.GetOrCreateFrame(parentId, this);
+                    SetParent(frame, false);
+                }
+                transform.SetPose(Parent.GetPose(timestamp));
             }
         }
 
@@ -74,7 +83,7 @@ namespace Iviz.App.Displays
             }
             else
             {
-                node.Parent = TFListener.BaseFrame;
+                node.Parent = TFListener.MapFrame;
             }
             return node;
         }

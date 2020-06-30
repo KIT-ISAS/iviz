@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.Collections.ObjectModel;
 using System;
+using System.Linq;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Msgs.VisualizationMsgs;
 
@@ -40,32 +41,31 @@ namespace Iviz.Resources
             Path
         }
 
-        static readonly Dictionary<string, Module> resourceByRosMessageType = new Dictionary<string, Module>
-        {
-            { PointCloud2.RosMessageType, Module.PointCloud },
-            { Image.RosMessageType, Module.Image },
-            { CompressedImage.RosMessageType, Module.Image },
-            { Marker.RosMessageType, Module.Marker },
-            { MarkerArray.RosMessageType, Module.Marker },
-            { InteractiveMarkerUpdate.RosMessageType, Module.InteractiveMarker },
-            { JointState.RosMessageType, Module.JointState },
-            { LaserScan.RosMessageType, Module.LaserScan },
-            { PoseStamped.RosMessageType, Module.Magnitude },
-            { Msgs.GeometryMsgs.Pose.RosMessageType, Module.Magnitude },
-            { PointStamped.RosMessageType, Module.Magnitude },
-            { Point.RosMessageType, Module.Magnitude },
-            { WrenchStamped.RosMessageType, Module.Magnitude },
-            { Wrench.RosMessageType, Module.Magnitude },
-            { Odometry.RosMessageType, Module.Magnitude },
-            { TwistStamped.RosMessageType, Module.Magnitude },
-            { Twist.RosMessageType, Module.Magnitude },
-            { OccupancyGrid.RosMessageType, Module.OccupancyGrid },
-            { Path.RosMessageType, Module.Path },
-            { PoseArray.RosMessageType, Module.Path },
-        };
-
         public static ReadOnlyDictionary<string, Module> ResourceByRosMessageType { get; }
-            = new ReadOnlyDictionary<string, Module>(resourceByRosMessageType);
+            = new ReadOnlyDictionary<string, Module>(new Dictionary<string, Module>
+            {
+                { PointCloud2.RosMessageType, Module.PointCloud },
+                { Image.RosMessageType, Module.Image },
+                { CompressedImage.RosMessageType, Module.Image },
+                { Marker.RosMessageType, Module.Marker },
+                { MarkerArray.RosMessageType, Module.Marker },
+                { InteractiveMarkerUpdate.RosMessageType, Module.InteractiveMarker },
+                { JointState.RosMessageType, Module.JointState },
+                { LaserScan.RosMessageType, Module.LaserScan },
+                { PoseStamped.RosMessageType, Module.Magnitude },
+                { Msgs.GeometryMsgs.Pose.RosMessageType, Module.Magnitude },
+                { PointStamped.RosMessageType, Module.Magnitude },
+                { Point.RosMessageType, Module.Magnitude },
+                { WrenchStamped.RosMessageType, Module.Magnitude },
+                { Wrench.RosMessageType, Module.Magnitude },
+                { Odometry.RosMessageType, Module.Magnitude },
+                { TwistStamped.RosMessageType, Module.Magnitude },
+                { Twist.RosMessageType, Module.Magnitude },
+                { OccupancyGrid.RosMessageType, Module.OccupancyGrid },
+                { Path.RosMessageType, Module.Path },
+                { PoseArray.RosMessageType, Module.Path },
+            }
+            );
 
         public class ColorScheme
         {
@@ -404,29 +404,25 @@ namespace Iviz.Resources
 
         public class RobotsType
         {
-            static readonly string[] names =
+            public ReadOnlyCollection<string> Names { get; } = 
+                new ReadOnlyCollection<string>(new[] 
                 {
-                "edu.iviz.dummybot",
-                "com.clearpath.husky",
-                "com.willowgarage.pr2",
-                "edu.fraunhofer.iosb.bob",
-                "edu.fraunhofer.iosb.crayler",
-                "edu.kit.h2t.armar6",
-                "edu.kit.ipr.gammabot"
-                };
-
-            public ReadOnlyCollection<string> Names { get; }
+                    "edu.iviz.dummybot",
+                    "com.clearpath.husky",
+                    "com.willowgarage.pr2",
+                    "edu.fraunhofer.iosb.bob",
+                    "edu.fraunhofer.iosb.crayler",
+                    "edu.kit.h2t.armar6",
+                    "edu.kit.ipr.gammabot"
+                }
+                );
             public ReadOnlyDictionary<string, GameObjectInfo> Objects { get; }
 
             public RobotsType()
             {
-                Names = new ReadOnlyCollection<string>(names);
-
-                Dictionary<string, GameObjectInfo> objects = new Dictionary<string, GameObjectInfo>();
-                foreach (string name in names)
-                {
-                    objects.Add(name, new GameObjectInfo("Robots/" + name));
-                }
+                Dictionary<string, GameObjectInfo> objects = Names.ToDictionary(
+                    name => name, 
+                    name => new GameObjectInfo("Robots/" + name));
                 Objects = new ReadOnlyDictionary<string, GameObjectInfo>(objects);
             }
         }

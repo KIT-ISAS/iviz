@@ -37,12 +37,13 @@ namespace Iviz.App.Listeners
         public static Camera MainCamera { get; set; }
         public static FlyCamera GuiManager => Instance.guiManager;
 
-        public static TFFrame BaseFrame { get; private set; }
+        public static TFFrame MapFrame { get; private set; }
         public static TFFrame RootFrame { get; private set; }
+        public static TFFrame UnityFrame { get; private set; }
 
         public static TFFrame ListenersFrame => RootFrame;
 
-        public override TFFrame Frame => BaseFrame;
+        public override TFFrame Frame => MapFrame;
 
         FlyCamera guiManager;
         DisplayNode dummyListener;
@@ -176,12 +177,16 @@ namespace Iviz.App.Listeners
 
             Config = new TFConfiguration();
 
+            UnityFrame = Add(CreateFrameObject("/unity/", gameObject));
+            UnityFrame.ForceInvisible = true;
+            
             RootFrame = Add(CreateFrameObject("/", gameObject));
+            RootFrame.Parent = UnityFrame;
             RootFrame.ForceInvisible = true;
 
-            BaseFrame = Add(CreateFrameObject(BaseFrameId, gameObject));
-            BaseFrame.Parent = RootFrame;
-            BaseFrame.AddListener(null);
+            MapFrame = Add(CreateFrameObject(BaseFrameId, gameObject));
+            MapFrame.Parent = RootFrame;
+            MapFrame.AddListener(null);
             //BaseFrame.ForceInvisible = true;
 
             Publisher = new RosSender<tfMessage_v2>(DefaultTopic);
@@ -279,7 +284,7 @@ namespace Iviz.App.Listeners
         {
             return TryGetFrameImpl(id, out TFFrame t) ? 
                 t : 
-                Add(CreateFrameObject(id, BaseFrame.gameObject));
+                Add(CreateFrameObject(id, MapFrame.gameObject));
         }
 
         TFFrame CreateFrameObject(string id, GameObject parent)

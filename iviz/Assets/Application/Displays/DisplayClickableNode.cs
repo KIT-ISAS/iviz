@@ -47,7 +47,7 @@ namespace Iviz.App.Displays
             GameObject obj = new GameObject(name);
             DisplayClickableNode node = obj.AddComponent<DisplayClickableNode>();
             node.SetName(name);
-            node.Parent = frame ?? TFListener.BaseFrame;
+            node.Parent = frame ?? TFListener.MapFrame;
             return node;
         }
 

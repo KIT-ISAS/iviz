@@ -1,4 +1,4 @@
-﻿#define USING_VR
+﻿//#define USING_VR
 
 using UnityEngine;
 using Iviz.Msgs.SensorMsgs;

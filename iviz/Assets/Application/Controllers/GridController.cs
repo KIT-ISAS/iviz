@@ -74,7 +74,7 @@ namespace Iviz.App.Listeners
                 config.Visible = value;
                 if (!value)
                 {
-                    reflectionProbe.transform.parent = TFListener.BaseFrame.transform;
+                    reflectionProbe.transform.parent = TFListener.MapFrame.transform;
                     grid.Visible = false;
                     node.Selected = false;
                 }

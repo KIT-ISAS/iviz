@@ -19,7 +19,7 @@ namespace Iviz.App
 
     public class ConnectionManager : MonoBehaviour
     {
-        public static ConnectionManager Instance { get; private set; }
+        static ConnectionManager Instance;
         public static RosConnection Connection { get; private set; }
         RosSender<Log> sender;
 
@@ -103,13 +103,11 @@ namespace Iviz.App
     {
         static readonly TimeSpan TaskWaitTime = TimeSpan.FromMilliseconds(2000);
 
-        readonly Queue<Action> ToDos = new Queue<Action>();
+        readonly Queue<Action> toDos = new Queue<Action>();
         readonly object condVar = new object();
         readonly Task task;
-
-        protected readonly Dictionary<string, HashSet<RosSender>> senders = new Dictionary<string, HashSet<RosSender>>();
-        protected readonly Dictionary<string, HashSet<RosListener>> listeners = new Dictionary<string, HashSet<RosListener>>();
-        protected volatile bool keepRunning;
+        
+        volatile bool keepRunning;
 
         public event Action<ConnectionState> ConnectionStateChanged;
 
@@ -157,7 +155,7 @@ namespace Iviz.App
         {
             lock (condVar)
             {
-                ToDos.Enqueue(a);
+                toDos.Enqueue(a);
                 Monitor.Pulse(condVar);
             }
         }
@@ -203,11 +201,11 @@ namespace Iviz.App
                 Action action;
                 lock (condVar)
                 {
-                    if (ToDos.Count == 0)
+                    if (toDos.Count == 0)
                     {
                         break;
                     }
-                    action = ToDos.Dequeue();
+                    action = toDos.Dequeue();
                 }
                 try
                 {

@@ -66,16 +66,16 @@ namespace Iviz.App.Listeners
             set
             {
                 config.Visible = value;
-                if (axis != null)
+                if (!(axis is null))
                 {
                     axis.Visible = value && ShowAxis;
                 }
-                if (sphere != null)
+                if (!(sphere is null))
                 {
                     sphere.Visible = value && ShowAxis;
                 }
                 trail.Visible = value && ShowTrail;
-                if (arrow != null)
+                if (!(arrow is null))
                 {
                     arrow.Visible = value && ShowVector;
                 }
@@ -98,11 +98,11 @@ namespace Iviz.App.Listeners
             set
             {
                 config.ShowAxis = value;
-                if (axis != null)
+                if (!(axis is null))
                 {
                     axis.Visible = value && Visible;
                 }
-                if (sphere != null)
+                if (!(sphere is null))
                 {
                     sphere.Visible = value && Visible;
                 }
@@ -115,7 +115,7 @@ namespace Iviz.App.Listeners
             set
             {
                 config.ShowVector = value;
-                if (arrow != null)
+                if (!(arrow is null))
                 {
                     arrow.Visible = value && Visible;
                 }
@@ -129,11 +129,11 @@ namespace Iviz.App.Listeners
             {
                 config.Color = value;
                 trail.Color = value;
-                if (sphere != null)
+                if (!(sphere is null))
                 {
                     sphere.Color = value;
                 }
-                if (arrow != null)
+                if (!(arrow is null))
                 {
                     arrow.Color = value;
                 }
@@ -167,7 +167,7 @@ namespace Iviz.App.Listeners
             set
             {
                 config.VectorScale = value;
-                if (arrow != null)
+                if (!(arrow is null))
                 {
                     arrow.Scale = value;
                 }
@@ -179,7 +179,7 @@ namespace Iviz.App.Listeners
             displayNode = SimpleDisplayNode.Instantiate("DisplayNode");
 
             trailNode = SimpleDisplayNode.Instantiate("TrailNode", transform);
-            trailNode.Parent = TFListener.BaseFrame;
+            trailNode.Parent = TFListener.MapFrame;
             trail = trailNode.gameObject.AddComponent<TrailResource>();
             trail.DataSource = () => displayNode.transform.position;
 
@@ -370,21 +370,21 @@ namespace Iviz.App.Listeners
             Destroy(displayNode.gameObject);
             Destroy(trailNode.gameObject);
 
-            if (childNode != null)
+            if (!(childNode is null))
             {
                 childNode.Stop();
                 Destroy(childNode.gameObject);
             }
 
-            if (axis != null)
+            if (!(axis is null))
             {
                 ResourcePool.Dispose(Resource.Displays.AxisFrameResource, axis.gameObject);
             }
-            if (arrow != null)
+            if (!(arrow is null))
             {
                 ResourcePool.Dispose(Resource.Displays.Arrow, arrow.gameObject);
             }
-            if (sphere != null)
+            if (!(sphere is null))
             {
                 ResourcePool.Dispose(Resource.Displays.Sphere, sphere.gameObject);
             }

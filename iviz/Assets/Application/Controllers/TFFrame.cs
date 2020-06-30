@@ -20,24 +20,24 @@ namespace Iviz.App.Listeners
         readonly Timeline timeline = new Timeline();
         TrailResource trail;
 
-        [SerializeField] string id_;
+        [SerializeField] string id;
         public string Id
         {
-            get => id_;
+            get => id;
             set
             {
-                id_ = value;
-                labelObjectText.text = id_;
+                id = value;
+                labelObjectText.text = id;
             }
         }
 
-        [SerializeField] bool forceInvisible_;
+        [SerializeField] bool forceInvisible;
         public bool ForceInvisible
         {
-            get => forceInvisible_;
+            get => forceInvisible;
             set
             {
-                forceInvisible_ = value;
+                forceInvisible = value;
                 if (value)
                 {
                     resource.Visible = false;
@@ -123,7 +123,7 @@ namespace Iviz.App.Listeners
         public bool AxisVisible
         {
             get => resource.Visible;
-            set { resource.Visible = value && !ForceInvisible; }
+            set => resource.Visible = value && !ForceInvisible;
         }
 
         bool labelVisible;
@@ -167,7 +167,7 @@ namespace Iviz.App.Listeners
                 trail.enabled = value;
                 if (value)
                 {
-                    trail.DataSource = () => WorldPose.position;
+                    trail.DataSource = () => transform.position;
                 }
                 else
                 {
@@ -197,7 +197,7 @@ namespace Iviz.App.Listeners
                 return false;
             }
             //Debug.Log("c child " + Id + " parent " + newParent?.Id);
-            if (newParent != null && newParent.IsChildOf(this))
+            if (!(newParent is null) && newParent.IsChildOf(this))
             {
                 Logger.Error($"TFFrame: Cannot set '{newParent.Id}' as parent to '{Id}' because it causes a cycle!");
                 newParent.CheckIfDead();
@@ -210,22 +210,14 @@ namespace Iviz.App.Listeners
             }
             */
             //Debug.Log("d child " + Id + " parent " + newParent?.Id);
-            if (Parent != null)
-            {
-                Parent.RemoveChild(this);
-            }
+            Parent?.RemoveChild(this);
             //Debug.Log("3 child " + Id + " parent " + newParent?.Id);
             base.Parent = newParent;
             //Debug.Log("2 child " + Id + " parent " + newParent?.Id);
-            if (Parent != null)
-            {
-                Parent.AddChild(this);
-            }
+            Parent?.AddChild(this);
             //Debug.Log("1 child " + Id + " parent " + newParent?.Id);
 
-            parentConnector.B = transform.parent != null ?
-                transform.parent :
-                TFListener.BaseFrame.transform;
+            parentConnector.B = transform.parent ?? TFListener.MapFrame.transform;
 
             return true;
         }
@@ -313,7 +305,7 @@ namespace Iviz.App.Listeners
             parentConnector.A = transform;
             parentConnector.B = transform.parent != null ?
                 transform.parent :
-                TFListener.BaseFrame?.transform; // TFListener.BaseFrame may not exist yet
+                TFListener.MapFrame?.transform; // TFListener.BaseFrame may not exist yet
             parentConnector.name = "[Connector]";
 
             resource = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Displays.AxisFrameResource, transform);

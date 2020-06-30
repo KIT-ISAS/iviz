@@ -191,7 +191,7 @@ namespace Iviz.App
             {
                 if (value)
                 {
-                    RobotObject.transform.SetParentLocal(TFListener.BaseFrame.transform);
+                    RobotObject.transform.SetParentLocal(TFListener.MapFrame.transform);
                     originalLinkParents.ForEach(x =>
                     {
                         TFFrame frame = TFListener.GetOrCreateFrame(Decorate(x.Key.name), node);
@@ -233,7 +233,7 @@ namespace Iviz.App
                 }
                 if (BaseLink == null)
                 {
-                    node.Parent = TFListener.BaseFrame;
+                    node.Parent = TFListener.MapFrame;
                 }
                 else
                 {
@@ -275,7 +275,7 @@ namespace Iviz.App
 
             config.RobotResource = newResource;
 
-            RobotObject = ResourcePool.GetOrCreate(Resource.Robots.Objects[newResource], TFListener.BaseFrame.transform);
+            RobotObject = ResourcePool.GetOrCreate(Resource.Robots.Objects[newResource], TFListener.MapFrame.transform);
             RobotObject.name = newResource;
 
             Name = Name; // update name;

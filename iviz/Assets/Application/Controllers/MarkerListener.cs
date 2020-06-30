@@ -26,7 +26,7 @@ namespace Iviz.App.Listeners
 
         public override ModuleData ModuleData { get; set; }
 
-        public override TFFrame Frame => TFListener.BaseFrame;
+        public override TFFrame Frame => TFListener.MapFrame;
 
         readonly MarkerConfiguration config = new MarkerConfiguration();
         public MarkerConfiguration Config

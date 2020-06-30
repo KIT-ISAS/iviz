@@ -89,10 +89,10 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            lines = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, TFListener.BaseFrame?.transform);
+            lines = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, TFListener.MapFrame?.transform);
             lines.LineScale = 0.01f;
             TimeWindowInMs = TimeWindowInMs;
-            StartCoroutine("GatherMeasurement");
+            StartCoroutine(nameof(GatherMeasurement));
         }
 
         public void Recycle()
@@ -113,7 +113,7 @@ namespace Iviz.Displays
             {
                 if (keepGoing && DataSource != null)
                 {
-                    Vector3 newMeasurement = DataSource();
+                    Vector3 newMeasurement = transform.InverseTransformPoint(DataSource());
                     //Debug.Log(newMeasurement);
                     if (measurements.Count != totalMeasurements)
                     {
