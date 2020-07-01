@@ -7,7 +7,7 @@ namespace Iviz.Displays
     {
         public static unsafe float WhiteAsIntensity()
         {
-            Color tmp = UnityEngine.Color.white;
+            Color32 tmp = UnityEngine.Color.white;
             return *(float*)&tmp;
         }
         static readonly float White = WhiteAsIntensity();

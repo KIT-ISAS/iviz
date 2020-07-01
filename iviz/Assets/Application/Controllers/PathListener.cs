@@ -20,7 +20,7 @@ namespace Iviz.App.Listeners
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public string Type { get; set; } = "";
-        [DataMember] public float Width { get; set; } = 0.03f;
+        [DataMember] public float Width { get; set; } = 0.01f;
         [DataMember] public bool ShowAxes { get; set; } = false;
         [DataMember] public float AxisLength { get; set; } = 0.125f;
         [DataMember] public bool ShowLines { get; set; } = true;
@@ -38,6 +38,7 @@ namespace Iviz.App.Listeners
         public override TFFrame Frame => node.Parent;
 
         readonly PathConfiguration config = new PathConfiguration();
+
         public PathConfiguration Config
         {
             get => config;
@@ -134,7 +135,7 @@ namespace Iviz.App.Listeners
                 config.MaxQueueSize = value;
                 if (Listener != null)
                 {
-                    Listener.MaxQueueSize = (int)value;
+                    Listener.MaxQueueSize = (int) value;
                 }
             }
         }
@@ -144,10 +145,11 @@ namespace Iviz.App.Listeners
 
         void Awake()
         {
-            node = SimpleDisplayNode.Instantiate("PathNode", transform);
+            node = SimpleDisplayNode.Instantiate("PathNode");
             resource = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, node.transform);
-            resource.LineScale = 0.01f;
+            resource.LineScale = 0.005f;
             resource.Tint = Color.white;
+            resource.UseAlpha = false;
             Config = new PathConfiguration();
         }
 
@@ -161,9 +163,20 @@ namespace Iviz.App.Listeners
                     break;
                 case Msgs.GeometryMsgs.PoseArray.RosMessageType:
                     Listener = new RosListener<Msgs.GeometryMsgs.PoseArray>(config.Topic, Handler);
+                    ShowLines = false;
+                    break;
+                case Msgs.GeometryMsgs.PolygonStamped.RosMessageType:
+                    Listener = new RosListener<Msgs.GeometryMsgs.PoseArray>(config.Topic, Handler);
+                    ShowAxes = false;
+                    break;
+                case Msgs.GeometryMsgs.Polygon.RosMessageType:
+                    node.Parent = TFListener.MapFrame;
+                    Listener = new RosListener<Msgs.GeometryMsgs.PoseArray>(config.Topic, Handler);
+                    ShowAxes = false;
                     break;
             }
-            Listener.MaxQueueSize = (int)MaxQueueSize;
+
+            Listener.MaxQueueSize = (int) MaxQueueSize;
             name = "[" + config.Topic + "]";
             node.name = name;
         }
@@ -207,6 +220,7 @@ namespace Iviz.App.Listeners
                     savedPoses.Add(ps.Pose.Ros2Unity());
                 }
             }
+
             ProcessPoses();
         }
 
@@ -219,8 +233,26 @@ namespace Iviz.App.Listeners
             {
                 savedPoses.Add(ps.Ros2Unity());
             }
+
             ProcessPoses();
         }
+
+        void Handler(Msgs.GeometryMsgs.PolygonStamped msg)
+        {
+            node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
+            Handler(msg.Polygon);
+        }        
+
+        void Handler(Msgs.GeometryMsgs.Polygon msg)
+        {
+            savedPoses.Clear();
+            foreach (Msgs.GeometryMsgs.Point32 p in msg.Points)
+            {
+                savedPoses.Add(new Pose(p.Ros2Unity(), Quaternion.identity));
+            }
+
+            ProcessPoses();
+        }        
 
         void ProcessPoses()
         {
@@ -228,6 +260,7 @@ namespace Iviz.App.Listeners
             {
                 return;
             }
+
             lines.Clear();
             if (ShowLines)
             {
@@ -236,6 +269,7 @@ namespace Iviz.App.Listeners
                     lines.Add(new LineWithColor(savedPoses[i].position, savedPoses[i + 1].position, LineColor));
                 }
             }
+
             if (ShowAxes)
             {
                 Vector3 xDir = new Vector3(1, 0, 0).Ros2Unity() * AxisLength;
@@ -248,9 +282,9 @@ namespace Iviz.App.Listeners
                     lines.Add(new LineWithColor(p, p + q * xDir, Color.red));
                     lines.Add(new LineWithColor(p, p + q * yDir, Color.green));
                     lines.Add(new LineWithColor(p, p + q * zDir, Color.blue));
-                    Debug.Log(p + " " + q * zDir);
                 }
             }
+
             resource.LinesWithColor = lines;
         }
 
@@ -264,6 +298,3 @@ namespace Iviz.App.Listeners
         }
     }
 }
-
-
-

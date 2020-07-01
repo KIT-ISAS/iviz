@@ -13,44 +13,44 @@ namespace Iviz.Displays
         Material textureMaterial;
         Material textureMaterialAlpha;
 
-        [SerializeField] Texture2D texture_;
+        [SerializeField] Texture2D texture;
         public Texture2D Texture
         {
-            get => texture_;
+            get => texture;
             set
             {
-                if (texture_ == value)
+                if (texture == value)
                 {
                     return;
                 }
                 textureMaterial = null;
                 textureMaterialAlpha = null;
-                texture_ = value;
+                texture = value;
                 SetEffectiveColor();
             }
         }
 
-        [SerializeField] Color color_ = Color.white;
+        [SerializeField] Color color = Color.white;
         public Color Color
         {
-            get => color_;
+            get => color;
             set
             {
-                color_ = value;
+                color = value;
                 SetEffectiveColor();
             }
         }
 
-        [SerializeField] bool occlusionOnly_;
+        [SerializeField] bool occlusionOnly;
         public bool OcclusionOnly
         {
-            get => occlusionOnly_;
+            get => occlusionOnly;
             set
             {
-                occlusionOnly_ = value;
+                occlusionOnly = value;
                 if (value)
                 {
-                    MainRenderer.material = Resource.Materials.LitOcclusionOnly.Object;
+                    MainRenderer.sharedMaterial = Resource.Materials.LitOcclusionOnly.Object;
                 }
                 else
                 {
@@ -59,13 +59,13 @@ namespace Iviz.Displays
             }
         }
 
-        [SerializeField] Color tint_ = Color.white;
+        [SerializeField] Color tint = Color.white;
         public Color Tint
         {
-            get => tint_;
+            get => tint;
             set
             {
-                tint_ = value;
+                tint = value;
                 SetEffectiveColor();
             }
         }
@@ -84,7 +84,7 @@ namespace Iviz.Displays
                 Material material = effectiveColor.a > 254f / 255f ?
                     Resource.Materials.Lit.Object :
                     Resource.Materials.TransparentLit.Object;
-                MainRenderer.material = material;
+                MainRenderer.sharedMaterial = material;
             }
             else if (effectiveColor.a > 254f / 255f)
             {
@@ -100,7 +100,7 @@ namespace Iviz.Displays
                 {
                     textureMaterialAlpha = Resource.TexturedMaterials.GetAlpha(Texture);
                 }
-                MainRenderer.material = textureMaterial;
+                MainRenderer.sharedMaterial = textureMaterial;
             }
             MainRenderer.SetPropertyColor(effectiveColor);
         }
@@ -109,7 +109,7 @@ namespace Iviz.Displays
         {
             base.Awake();
             MainRenderer = GetComponent<MeshRenderer>();
-            Color = color_;
+            Color = color;
         }
 
         public override void Stop()

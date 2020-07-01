@@ -1,11 +1,11 @@
 ﻿using Iviz.App.Listeners;
+using Iviz.Msgs.GeometryMsgs;
 using Iviz.Resources;
-using UnityEngine;
 
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="PointCloudPanelContents"/> 
+    /// <see cref="PathPanelContents"/> 
     /// </summary>
 
     public sealed class PathModuleData : ListenerModuleData
@@ -54,6 +54,23 @@ namespace Iviz.App
             panel.ShowLines.Value = listener.ShowLines;
             panel.LineColor.Value = listener.LineColor;
 
+            switch (Type)
+            {
+                case PoseArray.RosMessageType:
+                    panel.ShowAxes.Interactable = false;
+                    panel.ShowLines.Interactable = true;
+                    break;
+                case PolygonStamped.RosMessageType:
+                case Polygon.RosMessageType:
+                    panel.ShowAxes.Interactable = false;
+                    panel.ShowLines.Interactable = true;
+                    break;
+                default:
+                    panel.ShowAxes.Interactable = true;
+                    panel.ShowLines.Interactable = true;
+                    break;
+            }
+
             panel.LineWidth.ValueChanged += f =>
             {
                 listener.Width = f;
@@ -62,9 +79,17 @@ namespace Iviz.App
             {
                 listener.ShowAxes = f;
             };
+            panel.ShowLines.ValueChanged += f =>
+            {
+                listener.ShowLines = f;
+            };
             panel.AxesLength.ValueChanged += f =>
             {
                 listener.AxisLength = f;
+            };
+            panel.LineColor.ValueChanged += f =>
+            {
+                listener.LineColor = f;
             };
             panel.CloseButton.Clicked += () =>
             {

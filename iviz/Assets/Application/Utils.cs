@@ -91,12 +91,22 @@ namespace Iviz
         {
             return new Vector3((float)p.X, (float)p.Y, (float)p.Z);
         }
+        
+        static Vector3 ToUnity(this Msgs.GeometryMsgs.Point32 p)
+        {
+            return new Vector3(p.X, p.Y, p.Z);
+        }
 
         public static Vector3 Ros2Unity(this Msgs.GeometryMsgs.Vector3 p)
         {
             return p.ToUnity().Ros2Unity();
         }
 
+        public static Vector3 Ros2Unity(this Msgs.GeometryMsgs.Point32 p)
+        {
+            return p.ToUnity().Ros2Unity();
+        }
+        
         public static Vector3 Abs(this Vector3 p)
         {
             return new Vector3(Mathf.Abs(p.x), Mathf.Abs(p.y), Mathf.Abs(p.z));
@@ -296,7 +306,7 @@ namespace Iviz
             );
         }
 
-        public static bool HasNaN(this float4 v) => math.any(math.isnan(v));
+        public static bool HasNaN(this float4 v) => float.IsNaN(v.x) || float.IsNaN(v.y) || float.IsNaN(v.z);
 
         public static bool HasNaN(this Vector3 v) => float.IsNaN(v.x) || float.IsNaN(v.y) || float.IsNaN(v.z);
 

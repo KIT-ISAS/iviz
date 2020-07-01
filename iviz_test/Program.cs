@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -20,20 +21,25 @@ namespace iviz_test
         static void Main()
         {
             RosClient client = new RosClient(
-                //"http://192.168.0.73:11311",
-                "http://141.3.59.5:11311",
+                "http://192.168.0.73:11311",
+                //"http://141.3.59.5:11311",
                 null,
-                //"http://192.168.0.157:7613"
-                "http://141.3.59.19:7621"
+                "http://192.168.0.157:7619"
+                //"http://141.3.59.19:7621"
             );
             Iviz.Msgs.NavMsgs.Path path = new Iviz.Msgs.NavMsgs.Path();
+            
+            List<PoseStamped> list = new List<PoseStamped>();
+
             path.Header = new Header(0, new time(DateTime.Now), "map");
-            path.Poses = new[]
+            for (int i = 0; i < 5; i++)
             {
-                new PoseStamped(path.Header, new Pose(new Point(0, 0, 0), new Quaternion(0, 0, 0, 1) )), 
-                new PoseStamped(path.Header, new Pose(new Point(1, 0, 0), new Quaternion(0, 0, 0, 1) )), 
-                new PoseStamped(path.Header, new Pose(new Point(2, 0, 0), new Quaternion(0, 0, 0, 1) )), 
-            };
+                float t = i / 5f * 6;
+                list.Add(new PoseStamped(path.Header, new Pose(
+                    new Point(Math.Sin(t), Math.Cos(t), t), new Quaternion(0, 0, 0, 1))));
+            }
+            
+            path.Poses = list.ToArray();
 
             client.Advertise<Iviz.Msgs.NavMsgs.Path>("/my_path", out RosPublisher publisher);
             while (true)

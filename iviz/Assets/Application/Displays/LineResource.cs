@@ -16,7 +16,7 @@ namespace Iviz.Displays
         static readonly int PropFront = Shader.PropertyToID("_Front");
         static readonly int PropQuad = Shader.PropertyToID("_Quad");
 
-        NativeArray<float4x2> lineBuffer = new NativeArray<float4x2>();
+        NativeArray<float4x2> lineBuffer;
         ComputeBuffer lineComputeBuffer;
         ComputeBuffer quadComputeBuffer;
 
@@ -149,7 +149,6 @@ namespace Iviz.Displays
             base.Awake();
 
             LineScale = 0.1f;
-
             UseIntensityTexture = false;
             IntensityBounds = new Vector2(0, 1);
         }
@@ -157,10 +156,10 @@ namespace Iviz.Displays
         void UpdateQuadComputeBuffer()
         {
             Vector3[] quad = {
-                    new Vector3( 0.5f * LineScale,  0.5f * LineScale, 1),
-                    new Vector3( 0.5f * LineScale, -0.5f * LineScale, 1),
-                    new Vector3(-0.5f * LineScale, -0.5f * LineScale, 0),
-                    new Vector3(-0.5f * LineScale,  0.5f * LineScale, 0),
+                    new Vector3( 0.1f * LineScale,  0.5f * LineScale, 1),
+                    new Vector3( 0.1f * LineScale, -0.5f * LineScale, 1),
+                    new Vector3(-0.1f * LineScale, -0.5f * LineScale, 0),
+                    new Vector3(-0.1f * LineScale,  0.5f * LineScale, 0),
             };
             if (quadComputeBuffer == null)
             {

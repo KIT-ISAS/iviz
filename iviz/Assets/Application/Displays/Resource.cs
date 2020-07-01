@@ -64,6 +64,8 @@ namespace Iviz.Resources
                 { OccupancyGrid.RosMessageType, Module.OccupancyGrid },
                 { Path.RosMessageType, Module.Path },
                 { PoseArray.RosMessageType, Module.Path },
+                { PolygonStamped.RosMessageType, Module.Path },
+                { Polygon.RosMessageType, Module.Path },
             }
             );
 

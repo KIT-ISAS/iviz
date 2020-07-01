@@ -35,13 +35,13 @@ Shader "iviz/TransparentLine"
 #if USE_TEXTURE
 				float intensityA;
 #else
-				int colorA;
+				uint colorA;
 #endif
 				float3 B;
 #if USE_TEXTURE
 				float intensityB;
 #else
-				int colorB;
+				uint colorB;
 #endif
 			};
 
@@ -81,14 +81,14 @@ Shader "iviz/TransparentLine"
 				float intensityB = _Lines[inst].intensityB;
 				half4 rgbaB = tex2Dlod(_IntensityTexture, float4(intensityB * _IntensityCoeff + _IntensityAdd, 0, 0, 0));
     #else
-				int cA = _Lines[inst].colorA;
+				uint cA = _Lines[inst].colorA;
 				half4 rgbaA = half4(
 					(cA >>  0) & 0xff,
 					(cA >>  8) & 0xff,
 					(cA >> 16) & 0xff,
 					(cA >> 24) & 0xff
 					) / 255.0;
-				int cB = _Lines[inst].colorB;
+				uint cB = _Lines[inst].colorB;
 				half4 rgbaB = half4(
 					(cB >>  0) & 0xff,
 					(cB >>  8) & 0xff,

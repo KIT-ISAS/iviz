@@ -57,7 +57,9 @@ namespace Iviz.Displays
             }
         }
 
-        public LineWithColor(in Vector3 a, in Vector3 b, Color32 color) : this(a, color, b, color) { }
+        public LineWithColor(in Vector3 a, in Vector3 b, Color32 color) : this(a, color, b, color)
+        {
+        }
 
         public LineWithColor(in Vector3 a, in Vector3 b)
         {
@@ -80,6 +82,6 @@ namespace Iviz.Displays
 
         public static implicit operator float4x2(in LineWithColor c) => c.f;
 
-        public bool HasNaN => math.any(math.isnan(f.c0)) || math.any(math.isnan(f.c1));
+        public bool HasNaN => f.c0.HasNaN() || f.c1.HasNaN();
     };
 }
