@@ -27,7 +27,9 @@ namespace Iviz.App
                 throw new ArgumentNullException(nameof(resource));
             }
 
-            return GetOrCreate(resource, parent, enable).GetComponent<T>();
+            T t = GetOrCreate(resource, parent, enable).GetComponent<T>();
+            //Debug.Log("2) " + parent + " -> " + t.transform.parent);
+            return t;
         }
 
         public static void Dispose(Resource.Info<GameObject> resource, GameObject instance)

@@ -71,7 +71,7 @@ namespace Iviz.App
             tfLink.LinkClicked += OnTfLinkClicked;
             SelectedFrame = null;
 
-            dummy = SimpleDisplayNode.Instantiate("TFLog Dummy", TFListener.RootFrame.transform);
+            dummy = SimpleDisplayNode.Instantiate("TFLog Dummy", TFListener.ListenersFrame.transform);
 
             gotoButton.interactable = false;
             trail.interactable = false;

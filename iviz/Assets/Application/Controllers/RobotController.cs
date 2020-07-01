@@ -93,10 +93,7 @@ namespace Iviz.App
         public string RobotResource
         {
             get => config.RobotResource;
-            set
-            {
-                LoadRobotFromResource(value);
-            }
+            set => LoadRobotFromResource(value);
         }
 
         public string FramePrefix
@@ -114,7 +111,7 @@ namespace Iviz.App
                 {
                     config.FramePrefix = value;
                 }
-                if (BaseLink != null)
+                if (!(BaseLink is null))
                 {
                     node.AttachTo(Decorate(BaseLink.name));
                 }
@@ -136,7 +133,7 @@ namespace Iviz.App
                 {
                     config.FrameSuffix = value;
                 }
-                if (BaseLink != null)
+                if (!(BaseLink is null))
                 {
                     node.AttachTo(Decorate(BaseLink.name));
                 }
@@ -179,7 +176,7 @@ namespace Iviz.App
             }
         }
 
-        public string Decorate(string jointName)
+        string Decorate(string jointName)
         {
             return $"{config.FramePrefix}{jointName}{config.FrameSuffix}";
         }
@@ -192,6 +189,14 @@ namespace Iviz.App
                 if (value)
                 {
                     RobotObject.transform.SetParentLocal(TFListener.MapFrame.transform);
+                    foreach (var link in originalLinkPoses.Keys)
+                    {
+                        TFFrame frame = TFListener.GetOrCreateFrame(Decorate(link.name), node);
+                        link.transform.SetParentLocal(frame.transform);
+                        link.transform.SetLocalPose(Pose.identity);
+                    }
+
+                    /*
                     originalLinkParents.ForEach(x =>
                     {
                         TFFrame frame = TFListener.GetOrCreateFrame(Decorate(x.Key.name), node);
@@ -206,35 +211,39 @@ namespace Iviz.App
                         x.Key.transform.SetParentLocal(frame.transform);
                         x.Key.transform.SetLocalPose(Pose.identity);
                     });
+                    **/
+                    /*
                     originalLinkParents.ForEach(x =>
                     {
                         TFFrame frame = TFListener.GetOrCreateFrame(Decorate(x.Key.name), node);
                         TFFrame parentFrame = TFListener.GetOrCreateFrame(Decorate(x.Value.name), node);
                         frame.Parent = parentFrame;
                     });
+                    */
                     //BaseLink.transform.SetParentLocal(node.transform);
                 }
                 else
                 {
-                    originalLinkParents.ForEach(x =>
+                    foreach (var entry in originalLinkParents)
                     {
-                        if (TFListener.TryGetFrame(Decorate(x.Key.name), out TFFrame frame))
+                        if (TFListener.TryGetFrame(Decorate(entry.Key.name), out TFFrame frame))
                         {
                             frame.RemoveListener(node);
                         }
-                        if (TFListener.TryGetFrame(Decorate(x.Value.name), out TFFrame parentFrame))
+                        if (TFListener.TryGetFrame(Decorate(entry.Value.name), out TFFrame parentFrame))
                         {
                             parentFrame.RemoveListener(node);
                         }
 
-                        x.Key.transform.SetParentLocal(x.Value is null ? node.transform : x.Value.transform);
-                        x.Key.transform.SetLocalPose(originalLinkPoses[x.Key]);
-                    });
+                        entry.Key.transform.SetParentLocal(entry.Value.transform);
+                        entry.Key.transform.SetLocalPose(originalLinkPoses[entry.Key]);
+                    }
+
                     node.Parent = null;
                     //RobotObject.transform.SetParentLocal(node.transform);
                     jointWriters.Values.ForEach(x => x.Reset());
                 }
-                if (BaseLink == null)
+                if (BaseLink is null)
                 {
                     node.Parent = TFListener.MapFrame;
                 }
@@ -300,13 +309,17 @@ namespace Iviz.App
             originalLinkParents.Clear();
             originalLinkPoses.Clear();
             BaseLink = null;
-            RobotObject.GetComponentsInChildren<UrdfLink>().ForEach(x =>
+            
+            UrdfLink[] links = RobotObject.GetComponentsInChildren<UrdfLink>();
+            
+            links.ForEach(x =>
             {
                 GameObject parentObject = x.transform.parent.gameObject;
                 //Debug.Log("Original parent: " + x.gameObject + " -> " + parentObject);
                 originalLinkParents.Add(x.gameObject, parentObject);
                 originalLinkPoses.Add(x.gameObject, x.transform.AsLocalPose());
             });
+            
             RobotObject.GetComponentsInChildren<UrdfJoint>().ForEach(x =>
             {
                 if (x.JointType != UrdfJoint.JointTypes.Fixed)
@@ -317,8 +330,7 @@ namespace Iviz.App
 
             RobotObject.SetActive(Visible);
 
-            BaseLink = RobotObject.
-                GetComponentsInChildren<UrdfLink>().
+            BaseLink = links.
                 FirstOrDefault(x => x.transform.parent.GetComponentInParent<UrdfLink>() is null)?.
                 gameObject;
 
@@ -329,7 +341,6 @@ namespace Iviz.App
             else
             {
                 node.AttachTo(Decorate(BaseLink.name));
-                
                 BaseLink.transform.SetParentLocal(node.transform);
 
                 BoxCollider robotCollider = RobotObject.GetComponent<BoxCollider>();
@@ -394,9 +405,9 @@ namespace Iviz.App
                 AttachToTF = false;
             }
 
-            if (RobotObject != null)
+            if (!(RobotObject is null))
             {
-                if (BaseLink != null)
+                if (!(BaseLink is null))
                 {
                     BaseLink.transform.SetParentLocal(RobotObject.transform);
                 }

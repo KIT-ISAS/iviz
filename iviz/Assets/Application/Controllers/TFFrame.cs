@@ -20,7 +20,7 @@ namespace Iviz.App.Listeners
         readonly Timeline timeline = new Timeline();
         TrailResource trail;
 
-        public bool isDead;
+        //public bool isDead;
         
         [SerializeField] string id;
         public string Id
@@ -28,10 +28,10 @@ namespace Iviz.App.Listeners
             get => id;
             set
             {
-                isDead = false;
+                //isDead = false;
                 id = value;
                 labelObjectText.text = id;
-                trail.Name = "Trail:" + id;
+                trail.Name = "[Trail:" + id + "]";
             }
         }
 
@@ -165,11 +165,11 @@ namespace Iviz.App.Listeners
 
         public bool TrailVisible
         {
-            get => trail.enabled;
+            get => trail.Visible;
             set
             {
                 //Debug.Log("Enabled: " + value);
-                trail.enabled = value;
+                trail.Visible = value;
                 if (value)
                 {
                     //Debug.Log("Setting datasource for " + Id);
@@ -223,7 +223,7 @@ namespace Iviz.App.Listeners
             Parent?.AddChild(this);
             //Debug.Log("1 child " + Id + " parent " + newParent?.Id);
 
-            parentConnector.B = transform.parent ?? TFListener.MapFrame.transform;
+            parentConnector.B = transform.parent ?? TFListener.RootFrame.transform;
 
             return true;
         }
@@ -313,7 +313,7 @@ namespace Iviz.App.Listeners
             parentConnector.A = transform;
             parentConnector.B = transform.parent != null ?
                 transform.parent :
-                TFListener.MapFrame?.transform; // TFListener.BaseFrame may not exist yet
+                TFListener.RootFrame?.transform; // TFListener.BaseFrame may not exist yet
             parentConnector.name = "[Connector]";
 
             resource = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Displays.AxisFrame, transform);
@@ -327,7 +327,7 @@ namespace Iviz.App.Listeners
 
             UsesBoundaryBox = false;
 
-            trail = GetComponent<TrailResource>();
+            trail = ResourcePool.GetOrCreate<TrailResource>(Resource.Displays.Trail);
             trail.TimeWindowInMs = 5000;
             trail.Color = Color.yellow;
             TrailVisible = false;
@@ -338,19 +338,21 @@ namespace Iviz.App.Listeners
             ResourcePool.Dispose(Resource.Displays.AxisFrame, resource.gameObject);
             ResourcePool.Dispose(Resource.Displays.Text, labelObject);
             ResourcePool.Dispose(Resource.Displays.LineConnector, parentConnector.gameObject);
+            ResourcePool.Dispose(Resource.Displays.Trail, trail.gameObject);
             resource = null;
             labelObject = null;
             parentConnector = null;
+            trail = null;
         }
 
         public override void Stop()
         {
             base.Stop();
-            //Id = "";
-            isDead = true;
+            Id = "";
+            trail.Name = "[Trail:in trash]";
+            //isDead = true;
             timeline.Clear();
-
-            TrailVisible = false;
+            resource.Stop();
             trail.Stop();
         }
 

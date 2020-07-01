@@ -33,7 +33,6 @@ namespace Iviz.App.Listeners
     {
         SimpleDisplayNode displayNode;
         SimpleDisplayNode childNode;
-        SimpleDisplayNode trailNode;
         AxisFrameResource axis;
         TrailResource trail;
         MeshMarkerResource sphere;
@@ -149,7 +148,7 @@ namespace Iviz.App.Listeners
             set
             {
                 config.Scale = value;
-                displayNode.transform.localScale = value * UnityEngine.Vector3.one;
+                displayNode.transform.localScale = value * Vector3.one;
                 trail.Scale = 0.02f * value;
             }
         }
@@ -181,8 +180,7 @@ namespace Iviz.App.Listeners
         {
             displayNode = SimpleDisplayNode.Instantiate("DisplayNode");
 
-            trailNode = SimpleDisplayNode.Instantiate("TrailNode", transform);
-            trail = trailNode.gameObject.AddComponent<TrailResource>();
+            trail = ResourcePool.GetOrCreate<TrailResource>(Resource.Displays.Trail);
             trail.DataSource = () => displayNode.transform.position;
 
             Config = new MagnitudeConfiguration();
@@ -388,10 +386,10 @@ namespace Iviz.App.Listeners
             trail.DataSource = null;
 
             displayNode.Stop();
-            trailNode.Stop();
             Destroy(displayNode.gameObject);
-            Destroy(trailNode.gameObject);
 
+            ResourcePool.Dispose(Resource.Displays.Trail, trail.gameObject);
+            
             if (!(childNode is null))
             {
                 childNode.Stop();

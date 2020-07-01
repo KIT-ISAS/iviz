@@ -9,6 +9,7 @@ using Iviz.Msgs.Tf;
 using System.Runtime.Serialization;
 using System;
 using Iviz.Resources;
+using Transform = UnityEngine.Transform;
 
 namespace Iviz.App.Listeners
 {
@@ -177,21 +178,24 @@ namespace Iviz.App.Listeners
 
             Config = new TFConfiguration();
 
-            UnityFrame = Add(CreateFrameObject("/unity/", gameObject));
+            UnityFrame = Add(CreateFrameObject("/unity/", transform, null));
             UnityFrame.ForceInvisible = true;
             UnityFrame.AddListener(null);
             
-            RootFrame = Add(CreateFrameObject("/", gameObject));
-            RootFrame.Parent = UnityFrame;
+            Debug.Log(UnityFrame.transform.parent);
+            
+            RootFrame = Add(CreateFrameObject("/", transform, UnityFrame));
             RootFrame.ForceInvisible = true;
             RootFrame.AddListener(null);
 
-            MapFrame = Add(CreateFrameObject(BaseFrameId, gameObject));
+            MapFrame = Add(CreateFrameObject(BaseFrameId, transform, RootFrame));
             MapFrame.Parent = RootFrame;
             MapFrame.AddListener(null);
             //BaseFrame.ForceInvisible = true;
 
             Publisher = new RosSender<tfMessage_v2>(DefaultTopic);
+            Debug.Log(UnityFrame.transform.parent);
+
         }
 
         public override void StartListening()
@@ -286,13 +290,14 @@ namespace Iviz.App.Listeners
         {
             return TryGetFrameImpl(id, out TFFrame t) ? 
                 t : 
-                Add(CreateFrameObject(id, MapFrame.gameObject));
+                Add(CreateFrameObject(id, RootFrame.transform, RootFrame));
         }
 
-        TFFrame CreateFrameObject(string id, GameObject parent)
+        TFFrame CreateFrameObject(string id, Transform parent, TFFrame parentFrame)
         {
-            TFFrame frame = ResourcePool.GetOrCreate<TFFrame>(Resource.Displays.TFFrame, parent.transform);
-            frame.name = id;
+            TFFrame frame = ResourcePool.GetOrCreate<TFFrame>(Resource.Displays.TFFrame, parent);
+            //Debug.Log(parent + " -> " + frame.transform.parent);
+            frame.name = "{" + id + "}";
             frame.Id = id;
             frame.IgnoreUpdates = false;
             frame.AxisVisible = config.AxisVisible;
@@ -300,7 +305,11 @@ namespace Iviz.App.Listeners
             frame.LabelSize = config.AxisLabelSize;
             frame.LabelVisible = config.AxisLabelVisible;
             frame.ConnectorVisible = config.ParentConnectorVisible;
-            frame.Parent = RootFrame;
+            if (!(parentFrame is null))
+            {
+                frame.Parent = parentFrame;
+            }
+
             return frame;
         }
 

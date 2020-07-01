@@ -7,6 +7,7 @@ namespace Iviz.App.Displays
     public abstract class DisplayNode : MonoBehaviour
     {
         TFFrame parent;
+
         public virtual TFFrame Parent
         {
             get => parent;
@@ -19,12 +20,15 @@ namespace Iviz.App.Displays
             {
                 return;
             }
+
             parent?.RemoveListener(this);
             parent = newParent;
             parent?.AddListener(this);
             if (attach)
             {
-                transform.SetParentLocal(newParent?.transform);
+                transform.SetParentLocal(newParent is null ? 
+                    TFListener.RootFrame.transform : 
+                    newParent.transform);
             }
         }
 
@@ -32,9 +36,7 @@ namespace Iviz.App.Displays
         {
             if (Parent is null || parentId != Parent.Id)
             {
-                Parent = string.IsNullOrEmpty(parentId) ? 
-                    TFListener.MapFrame : 
-                    TFListener.GetOrCreateFrame(parentId);
+                Parent = string.IsNullOrEmpty(parentId) ? TFListener.MapFrame : TFListener.GetOrCreateFrame(parentId);
             }
         }
 
@@ -57,6 +59,7 @@ namespace Iviz.App.Displays
                     TFFrame frame = TFListener.GetOrCreateFrame(parentId, this);
                     SetParent(frame, false);
                 }
+
                 transform.SetPose(Parent.GetPose(timestamp));
             }
         }
@@ -85,6 +88,7 @@ namespace Iviz.App.Displays
             {
                 node.Parent = TFListener.MapFrame;
             }
+
             return node;
         }
     }

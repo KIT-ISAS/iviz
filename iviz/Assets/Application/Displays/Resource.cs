@@ -284,6 +284,7 @@ namespace Iviz.Resources
             public GameObjectInfo ARMarkerResource { get; }
             public GameObjectInfo AxisFrame { get; }
             public GameObjectInfo AngleAxis { get; }
+            public GameObjectInfo Trail { get; }
 
             public ReadOnlyDictionary<Uri, GameObjectInfo> Generic { get; }
 
@@ -312,6 +313,7 @@ namespace Iviz.Resources
                 ARMarkerResource = new GameObjectInfo("Displays/ARMarkerResource");
                 AxisFrame = new GameObjectInfo("Displays/AxisFrameResource");
                 AngleAxis = new GameObjectInfo("Displays/AngleAxis");
+                Trail = new GameObjectInfo("Displays/Trail");
 
                 Generic = new ReadOnlyDictionary<Uri, GameObjectInfo>(
                     new Dictionary<Uri, GameObjectInfo>()

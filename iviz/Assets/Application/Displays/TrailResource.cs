@@ -11,7 +11,6 @@ namespace Iviz.Displays
     public sealed class TrailResource : MonoBehaviour, IDisplay, IRecyclable
     {
         LineResource lines;
-        const bool keepGoing = true;
 
         public Func<Vector3> DataSource { get; set; }
 
@@ -44,7 +43,7 @@ namespace Iviz.Displays
                 }
 
                 timeWindowInMs = value;
-                Reset();
+                ResetMeasurements();
             }
         }
 
@@ -56,21 +55,10 @@ namespace Iviz.Displays
             set => color = value;
         }
 
-        public void Reset()
-        {
-            measurements.Clear();
-            startOffset = 0;
-            totalMeasurements = timeWindowInMs * MeasurementsPerSecond / 1000;
-            lines?.Reserve(totalMeasurements);
-        }
-
         public string Name
         {
-            get => lines.name;
-            set
-            {
-                if (lines != null) lines.name = value;
-            }
+            get => gameObject.name;
+            set => gameObject.name = value;
         }
 
         public Bounds Bounds => lines.Bounds;
@@ -80,7 +68,7 @@ namespace Iviz.Displays
         public bool ColliderEnabled
         {
             get => lines.ColliderEnabled;
-            set => ColliderEnabled = value;
+            set => lines.ColliderEnabled = value;
         }
 
         public Transform Parent
@@ -91,8 +79,8 @@ namespace Iviz.Displays
 
         public bool Visible
         {
-            get => lines.Visible;
-            set => lines.Visible = value;
+            get => gameObject.activeSelf;
+            set => gameObject.SetActive(value);
         }
 
         public float Scale
@@ -103,12 +91,21 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            lines = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, TFListener.UnityFrame?.transform);
+            lines = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, transform);
             lines.LineScale = 0.01f;
             TimeWindowInMs = TimeWindowInMs;
-            //StartCoroutine(nameof(GatherMeasurement));
+
+            transform.parent = TFListener.UnityFrame?.transform;
         }
 
+        void ResetMeasurements()
+        {
+            measurements.Clear();
+            startOffset = 0;
+            totalMeasurements = timeWindowInMs * MeasurementsPerSecond / 1000;
+            lines?.Reserve(totalMeasurements);
+        }
+        
         public void Recycle()
         {
             ResourcePool.Dispose(Resource.Displays.Line, lines.gameObject);
@@ -118,7 +115,6 @@ namespace Iviz.Displays
         {
             lines.Stop();
             measurements.Clear();
-            //keepGoing = false;    
             DataSource = null;
         }
 
@@ -131,45 +127,46 @@ namespace Iviz.Displays
                 return;
             }
             lastTick = tick;
-            
-            if (DataSource != null)
-            {
-                Vector3 newMeasurement = DataSource();
-                //Debug.Log(newMeasurement);
-                if (measurements.Count != totalMeasurements)
-                {
-                    measurements.Add(newMeasurement);
-                }
-                else
-                {
-                    measurements[startOffset] = newMeasurement;
-                    startOffset++;
-                    if (startOffset == measurements.Count)
-                    {
-                        startOffset = 0;
-                    }
-                }
 
-                //Debug.Log("post: " + measurements.Count + " " + totalMeasurements);
-                lines.Set(measurements.Count, lineColors =>
-                {
-                    int count = measurements.Count;
-                    for (int i = 0; i < count - 1; i++)
-                    {
-                        int indexA = (startOffset + i) % count;
-                        int indexB = (indexA + 1) % count;
-                        int alphaA = i * 255 / count;
-                        int alphaB = (i + 1) * 255 / count;
-                        lineColors[i] = new LineWithColor(
-                            measurements[indexA],
-                            new Color32(Color.r, Color.g, Color.b, (byte) alphaA),
-                            measurements[indexB],
-                            new Color32(Color.r, Color.g, Color.b, (byte) alphaB)
-                        );
-                        //Debug.Log(lineColors[i]);
-                    }
-                });
+            if (DataSource == null)
+            {
+                return;
             }
+            Vector3 newMeasurement = DataSource();
+            //Debug.Log(newMeasurement);
+            if (measurements.Count != totalMeasurements)
+            {
+                measurements.Add(newMeasurement);
+            }
+            else
+            {
+                measurements[startOffset] = newMeasurement;
+                startOffset++;
+                if (startOffset == measurements.Count)
+                {
+                    startOffset = 0;
+                }
+            }
+
+            //Debug.Log("post: " + measurements.Count + " " + totalMeasurements);
+            lines.Set(measurements.Count, lineColors =>
+            {
+                int count = measurements.Count;
+                for (int i = 0; i < count - 1; i++)
+                {
+                    int indexA = (startOffset + i) % count;
+                    int indexB = (indexA + 1) % count;
+                    int alphaA = i * 255 / count;
+                    int alphaB = (i + 1) * 255 / count;
+                    lineColors[i] = new LineWithColor(
+                        measurements[indexA],
+                        new Color32(Color.r, Color.g, Color.b, (byte) alphaA),
+                        measurements[indexB],
+                        new Color32(Color.r, Color.g, Color.b, (byte) alphaB)
+                    );
+                    //Debug.Log(lineColors[i]);
+                }
+            });
         }
     }
 }
