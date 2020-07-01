@@ -27,9 +27,9 @@ namespace Iviz.App
         [MenuItem("MyMenu/Do Something")]
         static void DoSomething()
         {
-            string projectRoot = packageRoot + "husky_description";
-            string urdfFile = projectRoot + "/urdf/husky_ur5.urdf.xml";
-            string materialsRoot = projectRoot + "/unity_materials/";
+            //string projectRoot = packageRoot + "husky_description";
+            //string urdfFile = projectRoot + "/urdf/husky_ur5.urdf.xml";
+            //string materialsRoot = projectRoot + "/unity_materials/";
 
             //string projectRoot = packageRoot + "iosb";
             //string urdfFile = projectRoot + "/urdf/iosb.urdf.xml";
@@ -52,6 +52,10 @@ namespace Iviz.App
             //string urdfFile = projectRoot + "/robot_model/mp_500.urdf.xml";
             //string materialsRoot = projectRoot + "/unity_materials/";
 
+            string projectRoot = packageRoot + "e2_urdf_model";
+            string urdfFile = projectRoot + "/urdf/e2.urdf.xml";
+            string materialsRoot = projectRoot + "/unity_materials/";
+            
 
             AssetDatabase.CreateFolder(projectRoot, "unity_materials");
 
@@ -340,9 +344,14 @@ namespace Iviz.App
 
             urdfVisual.GeometryType = GetGeometryType(visual.geometry);
             CreateGeometry(visualObject.transform, urdfVisual.GeometryType, visual.geometry);
-            //if (visualObject.GetComponentInChildren<Renderer>().material == null)
-            //{
+
+            if (visual?.material?.name != "material_velodyne")
+            {
                 SetUrdfMaterial(visualObject, visual.material);
+            }
+            //if (visualObject.GetComponentInChildren<Renderer>().sharedMaterial == null)
+            //{
+                //SetUrdfMaterial(visualObject, visual.material);
             //}
 
             UrdfOrigin.ImportOriginData(visualObject.transform, visual.origin);

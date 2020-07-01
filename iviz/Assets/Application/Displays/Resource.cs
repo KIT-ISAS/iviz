@@ -417,7 +417,8 @@ namespace Iviz.Resources
                     "edu.fraunhofer.iosb.bob",
                     "edu.fraunhofer.iosb.crayler",
                     "edu.kit.h2t.armar6",
-                    "edu.kit.ipr.gammabot"
+                    "edu.kit.ipr.gammabot",
+                    "edu.fraunhofer.iosb.e2"
                 }
                 );
             public ReadOnlyDictionary<string, GameObjectInfo> Objects { get; }

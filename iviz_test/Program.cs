@@ -11,12 +11,39 @@ using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.Tf2Msgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.RoslibSharp;
+using Newtonsoft.Json.Serialization;
 
 namespace iviz_test
 {
     class Program
     {
         static void Main()
+        {
+            RosClient client = new RosClient(
+                //"http://192.168.0.73:11311",
+                "http://141.3.59.5:11311",
+                null,
+                //"http://192.168.0.157:7613"
+                "http://141.3.59.19:7621"
+            );
+            Iviz.Msgs.NavMsgs.Path path = new Iviz.Msgs.NavMsgs.Path();
+            path.Header = new Header(0, new time(DateTime.Now), "map");
+            path.Poses = new[]
+            {
+                new PoseStamped(path.Header, new Pose(new Point(0, 0, 0), new Quaternion(0, 0, 0, 1) )), 
+                new PoseStamped(path.Header, new Pose(new Point(1, 0, 0), new Quaternion(0, 0, 0, 1) )), 
+                new PoseStamped(path.Header, new Pose(new Point(2, 0, 0), new Quaternion(0, 0, 0, 1) )), 
+            };
+
+            client.Advertise<Iviz.Msgs.NavMsgs.Path>("/my_path", out RosPublisher publisher);
+            while (true)
+            {
+                Console.WriteLine("publishing...");
+                publisher.Publish(path);
+                Thread.Sleep(1000);
+            }
+        }
+        static void Main_N()
         { 
             RosClient client = new RosClient(
                 //"http://192.168.0.73:11311",
@@ -25,6 +52,7 @@ namespace iviz_test
                 //"http://192.168.0.157:7613"
                 "http://141.3.59.19:7621"
                 );
+            
             /*
             Console.WriteLine(client.GetSystemState());
             client.Subscribe<TFMessage>("/tf", Callback);

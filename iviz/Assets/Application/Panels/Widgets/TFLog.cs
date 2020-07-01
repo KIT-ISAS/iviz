@@ -8,6 +8,7 @@ using UnityEngine.EventSystems;
 using TMPro;
 using System;
 using Iviz.App.Displays;
+using Newtonsoft.Json;
 
 namespace Iviz.App
 {
@@ -28,6 +29,8 @@ namespace Iviz.App
 
         [SerializeField] TFLink tfLink = null;
 
+        static TFLog Instance;
+        
         public event Action Close;
 
         SimpleDisplayNode dummy;
@@ -62,12 +65,15 @@ namespace Iviz.App
                     tfName.text = "[ ⮑" + value.Id + "]";
                 }
 
+                Flush();
                 UpdateFrameTexts();
             }
         }
 
         void Awake()
         {
+            Instance = this;
+                
             tfLink.LinkClicked += OnTfLinkClicked;
             SelectedFrame = null;
 
@@ -78,6 +84,7 @@ namespace Iviz.App
             lockPivot.interactable = false;
             lock1PV.interactable = false;
             tfName.text = "<color=grey>[ ⮑none ]</color>";
+
             UpdateFrameTexts();
         }
 
@@ -98,12 +105,16 @@ namespace Iviz.App
             public string Name { get; }
             List<TFNode> Children { get; }
             Pose Pose { get; }
+            bool HasTrail { get; }
+            bool Selected { get; }
 
             public TFNode(TFFrame frame)
             {
                 Name = frame.Id;
                 Children = new List<TFNode>();
                 Pose = frame.WorldPose;
+                HasTrail = frame.TrailVisible;
+                Selected = (frame == Instance.SelectedFrame);
 
                 var childrenList = frame.Children;
                 foreach (TFFrame child in childrenList.Values)
@@ -123,7 +134,17 @@ namespace Iviz.App
                 string y = position.y.ToString("#,0.#", UnityUtils.Culture);
                 string z = position.z.ToString("#,0.#", UnityUtils.Culture);
 
-                str.Append(tabs).AppendLine($"<link={Name}><u><font=Bold>{Name}</font></u> [{x}, {y}, {z}]</link>");
+                string decoratedName = Name;
+                if (HasTrail)
+                {
+                    decoratedName = $"~{decoratedName}~";
+                }
+                if (Selected)
+                {
+                    decoratedName = $"<color=blue>{decoratedName}</color>";
+                }
+                
+                str.Append(tabs).AppendLine($"<link={Name}><u><font=Bold>{decoratedName}</font></u> [{x}, {y}, {z}]</link>");
 
                 foreach (TFNode node in Children)
                 {
@@ -190,7 +211,7 @@ namespace Iviz.App
             {
                 trailText.text = "Trail:\nOff";
                 lockPivotText.text = "Lock Pivot\nOff";
-                lock1PVText.text = "Lock 1PV\nOff";
+                //lock1PVText.text = "Lock 1PV\nOff";
             }
             else
             {
@@ -212,6 +233,7 @@ namespace Iviz.App
                     lockPivotText.text = "Lock Pivot\nOff";
                 }
 
+                /*
                 if (TFListener.GuiManager.CameraViewOverride == SelectedFrame)
                 {
                     lock1PVText.text = "Lock 1PV\n<b>On</b>";
@@ -220,6 +242,7 @@ namespace Iviz.App
                 {
                     lock1PVText.text = "Lock 1PV\nOff";
                 }
+                */
             }
         }
 

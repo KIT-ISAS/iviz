@@ -345,7 +345,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: TF Tree
+  m_Text: TFs
 --- !u!222 &9206681
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -5400,7 +5400,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1659761}
   m_Direction: 0
   m_Value: 0
-  m_Size: 1
+  m_Size: 0.9999999
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -7641,6 +7641,36 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 1756832558}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1903064959
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1903064960}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &1903064960
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1903064959}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.37220296, y: 2.0095575, z: 3.3316011}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 9
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1909959139
 GameObject:
   m_ObjectHideFlags: 0
@@ -8215,7 +8245,7 @@ RectTransform:
   - {fileID: 913012241}
   - {fileID: 1066004756}
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -8613,6 +8643,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: TrailResource
       objectReference: {fileID: 0}
+    - target: {fileID: 3045043143408952572, guid: 287fc9c08ef9d4183b317a1693cc66f8,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6703917503316600139, guid: 287fc9c08ef9d4183b317a1693cc66f8,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -8731,7 +8766,7 @@ PrefabInstance:
     - target: {fileID: 3519643506196918200, guid: 01c562bee98e94e3d93cde8f28a2103d,
         type: 3}
       propertyPath: m_RootOrder
-      value: 7
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 3519643506196918200, guid: 01c562bee98e94e3d93cde8f28a2103d,
         type: 3}

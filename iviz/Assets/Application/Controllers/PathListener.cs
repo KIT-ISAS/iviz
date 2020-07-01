@@ -35,8 +35,6 @@ namespace Iviz.App.Listeners
 
         public override ModuleData ModuleData { get; set; }
 
-        public int Size { get; private set; }
-
         public override TFFrame Frame => node.Parent;
 
         readonly PathConfiguration config = new PathConfiguration();
@@ -87,7 +85,7 @@ namespace Iviz.App.Listeners
             set
             {
                 config.ShowAxes = value;
-                resource.Visible = value;
+                //resource.Visible = value;
                 ProcessPoses();
             }
         }
@@ -148,6 +146,8 @@ namespace Iviz.App.Listeners
         {
             node = SimpleDisplayNode.Instantiate("PathNode", transform);
             resource = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, node.transform);
+            resource.LineScale = 0.01f;
+            resource.Tint = Color.white;
             Config = new PathConfiguration();
         }
 
@@ -248,6 +248,7 @@ namespace Iviz.App.Listeners
                     lines.Add(new LineWithColor(p, p + q * xDir, Color.red));
                     lines.Add(new LineWithColor(p, p + q * yDir, Color.green));
                     lines.Add(new LineWithColor(p, p + q * zDir, Color.blue));
+                    Debug.Log(p + " " + q * zDir);
                 }
             }
             resource.LinesWithColor = lines;

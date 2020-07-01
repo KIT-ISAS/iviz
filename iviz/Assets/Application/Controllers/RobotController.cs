@@ -196,6 +196,17 @@ namespace Iviz.App
                         link.transform.SetLocalPose(Pose.identity);
                     }
 
+                    // fill in missing frame parents, but only if it hasn't been provided already
+                    foreach (var entry in originalLinkParents)
+                    {
+                        TFFrame frame = TFListener.GetOrCreateFrame(Decorate(entry.Key.name), node);
+                        if (frame.Parent == TFListener.RootFrame)
+                        {
+                            TFFrame parentFrame = TFListener.GetOrCreateFrame(Decorate(entry.Value.name), node);
+                            frame.Parent = parentFrame;
+                        }
+                    }
+
                     /*
                     originalLinkParents.ForEach(x =>
                     {
@@ -315,8 +326,12 @@ namespace Iviz.App
             links.ForEach(x =>
             {
                 GameObject parentObject = x.transform.parent.gameObject;
-                //Debug.Log("Original parent: " + x.gameObject + " -> " + parentObject);
-                originalLinkParents.Add(x.gameObject, parentObject);
+                if (parentObject.GetComponent<UrdfLink>() != null)
+                {
+                    //Debug.Log("Original parent: " + x.gameObject + " -> " + parentObject);
+                    originalLinkParents.Add(x.gameObject, parentObject);
+                }
+
                 originalLinkPoses.Add(x.gameObject, x.transform.AsLocalPose());
             });
             

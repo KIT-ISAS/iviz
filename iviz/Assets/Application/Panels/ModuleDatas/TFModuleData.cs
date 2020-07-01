@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace Iviz.App
 {
+    /// <summary>
+    /// <see cref="TFPanelContents"/> 
+    /// </summary>
     public sealed class TFModuleData : ListenerModuleData
     {
         readonly TFListener listener;
@@ -53,7 +56,7 @@ namespace Iviz.App
             panel.FrameLabelSize.Value = listener.AxisLabelSize;
             panel.FrameLabelSize.Interactable = listener.AxisLabelVisible;
             panel.ConnectToParent.Value = listener.ParentConnectorVisible;
-            panel.ShowAllFrames.Value = listener.ShowAllFrames;
+            panel.KeepOnlyUsedFrames.Value = !listener.ShowAllFrames;
             panel.Sender.Set(listener.Publisher);
 
             panel.ShowAxes.ValueChanged += f =>
@@ -77,9 +80,9 @@ namespace Iviz.App
             {
                 listener.ParentConnectorVisible = f;
             };
-            panel.ShowAllFrames.ValueChanged += f =>
+            panel.KeepOnlyUsedFrames.ValueChanged += f =>
             {
-                listener.ShowAllFrames = f;
+                listener.ShowAllFrames = !f;
             };
         }
 

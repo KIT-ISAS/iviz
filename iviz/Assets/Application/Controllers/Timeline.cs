@@ -91,9 +91,6 @@ namespace Iviz.App
 
                 Pose pA = sortedPoses[i].Pose;
                 Pose pB = sortedPoses[i + 1].Pose;
-
-
-                //Debug.Log(i + "/" + poses.Count + "/" + insertions.Count);
                 return pA.Lerp(pB, (float)t);
             }
             //Debug.Log("OUT!");

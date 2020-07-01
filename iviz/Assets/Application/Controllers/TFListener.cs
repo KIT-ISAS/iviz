@@ -182,8 +182,6 @@ namespace Iviz.App.Listeners
             UnityFrame.ForceInvisible = true;
             UnityFrame.AddListener(null);
             
-            Debug.Log(UnityFrame.transform.parent);
-            
             RootFrame = Add(CreateFrameObject("/", transform, UnityFrame));
             RootFrame.ForceInvisible = true;
             RootFrame.AddListener(null);
@@ -194,8 +192,6 @@ namespace Iviz.App.Listeners
             //BaseFrame.ForceInvisible = true;
 
             Publisher = new RosSender<tfMessage_v2>(DefaultTopic);
-            Debug.Log(UnityFrame.transform.parent);
-
         }
 
         public override void StartListening()
@@ -299,7 +295,6 @@ namespace Iviz.App.Listeners
             //Debug.Log(parent + " -> " + frame.transform.parent);
             frame.name = "{" + id + "}";
             frame.Id = id;
-            frame.IgnoreUpdates = false;
             frame.AxisVisible = config.AxisVisible;
             frame.AxisLength = config.AxisSize;
             frame.LabelSize = config.AxisLabelSize;

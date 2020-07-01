@@ -51,7 +51,7 @@ Shader "iviz/TransparentLine"
 			struct v2f
 			{
 				float4 position : SV_POSITION;
-				half3 color : COLOR;
+				half4 color : COLOR;
 			};
 
 			v2f vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
@@ -81,16 +81,18 @@ Shader "iviz/TransparentLine"
 				half4 rgbaB = tex2Dlod(_IntensityTexture, float4(intensityB * _IntensityCoeff + _IntensityAdd, 0, 0, 0));
     #else
 				int cA = _Lines[inst].colorA;
-				half3 rgbaA = half3(
+				half4 rgbaA = half4(
 					(cA >>  0) & 0xff,
 					(cA >>  8) & 0xff,
-					(cA >> 16) & 0xff
+					(cA >> 16) & 0xff,
+					(cA >> 24) & 0xff
 					) / 255.0;
 				int cB = _Lines[inst].colorB;
-				half3 rgbaB = half3(
+				half4 rgbaB = half4(
 					(cB >>  0) & 0xff,
 					(cB >>  8) & 0xff,
-					(cB >> 16) & 0xff
+					(cB >> 16) & 0xff,
+					(cB >> 24) & 0xff
 					) / 255.0;
 	#endif
 				o.color = (rgbaB - rgbaA) * V.z + rgbaA;
@@ -100,7 +102,7 @@ Shader "iviz/TransparentLine"
 
 			half4 frag(v2f i) : SV_Target
 			{
-				return half4(i.color, 1);
+				return i.color;
 			}
 
 			ENDCG

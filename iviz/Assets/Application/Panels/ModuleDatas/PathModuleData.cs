@@ -32,6 +32,7 @@ namespace Iviz.App
             if (constructor.Configuration == null)
             {
                 listener.Config.Topic = Topic;
+                listener.Config.Type = Type;
             }
             else
             {

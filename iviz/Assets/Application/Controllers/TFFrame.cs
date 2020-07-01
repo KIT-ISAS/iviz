@@ -20,15 +20,12 @@ namespace Iviz.App.Listeners
         readonly Timeline timeline = new Timeline();
         TrailResource trail;
 
-        //public bool isDead;
-        
         [SerializeField] string id;
         public string Id
         {
             get => id;
             set
             {
-                //isDead = false;
                 id = value;
                 labelObjectText.text = id;
                 trail.Name = "[Trail:" + id + "]";
@@ -67,7 +64,7 @@ namespace Iviz.App.Listeners
             }
         }
 
-        public bool IgnoreUpdates { get; set; }
+        //public bool IgnoreUpdates { get; set; }
 
         GameObject labelObject;
         TextMesh labelObjectText;
@@ -100,13 +97,13 @@ namespace Iviz.App.Listeners
             CheckIfDead();
         }
 
-        public void AddChild(TFFrame frame)
+        void AddChild(TFFrame frame)
         {
             //Debug.Log(Id + " has new child " + frame);
             children.Add(frame.Id, frame);
         }
 
-        public void RemoveChild(TFFrame frame)
+        void RemoveChild(TFFrame frame)
         {
             if (IsChildless)
             {
@@ -185,7 +182,13 @@ namespace Iviz.App.Listeners
         public override TFFrame Parent
         {
             get => base.Parent;
-            set => SetParent(value);
+            set
+            {
+                if (!SetParent(value))
+                {
+                    Logger.Error($"TFFrame: Failed to set '{value.Id}' as a parent to {Id}");
+                }
+            }
         }
 
 
@@ -199,13 +202,13 @@ namespace Iviz.App.Listeners
             //Debug.Log("b child " + Id + " parent " + newParent?.Id);
             if (newParent == this)
             {
-                Logger.Error($"TFFrame: Cannot set '{newParent.Id}' as a parent to itself!");
+                //Logger.Error($"TFFrame: Cannot set '{newParent.Id}' as a parent to itself!");
                 return false;
             }
             //Debug.Log("c child " + Id + " parent " + newParent?.Id);
             if (!(newParent is null) && newParent.IsChildOf(this))
             {
-                Logger.Error($"TFFrame: Cannot set '{newParent.Id}' as parent to '{Id}' because it causes a cycle!");
+                //Logger.Error($"TFFrame: Cannot set '{newParent.Id}' as parent to '{Id}' because it causes a cycle!");
                 newParent.CheckIfDead();
                 return false;
             }
@@ -245,17 +248,12 @@ namespace Iviz.App.Listeners
 
         public Pose AbsolutePose => transform.AsPose();
 
-        [SerializeField] Vector3 rosPosition_;
+        [SerializeField] Vector3 debugRosPosition;
 
         public void SetPose(in TimeSpan time, in Pose newPose)
         {
-            if (IgnoreUpdates)
-            {
-                return;
-            }
-
             pose = newPose;
-            rosPosition_ = pose.position.Unity2Ros();
+            debugRosPosition = pose.position.Unity2Ros();
 
             if (newPose.position.sqrMagnitude > MaxPoseMagnitude * MaxPoseMagnitude)
             {
@@ -281,16 +279,12 @@ namespace Iviz.App.Listeners
 
         public Pose GetPose(in TimeSpan time)
         {
-            if (timeline.Count == 0)
-            {
-                return Pose;
-            }
-            return timeline.Get(time);
+            return timeline.Count == 0 ? Pose : timeline.Get(time);
         }
 
-        public bool HasNoListeners => !listeners.Any();
+        bool HasNoListeners => !listeners.Any();
 
-        public bool IsChildless => !children.Any();
+        bool IsChildless => !children.Any();
 
         public override string Name => Id;
 
@@ -349,8 +343,7 @@ namespace Iviz.App.Listeners
         {
             base.Stop();
             Id = "";
-            trail.Name = "[Trail:in trash]";
-            //isDead = true;
+            trail.Name = "[Trail:In Trash]";
             timeline.Clear();
             resource.Stop();
             trail.Stop();
