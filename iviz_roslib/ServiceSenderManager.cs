@@ -53,11 +53,14 @@ namespace Iviz.RoslibSharp
                     }
                 }
             }
+            catch (ObjectDisposedException)
+            {
+                Logger.LogDebug("HttpListener: Leaving thread."); // expected
+            }
             catch (ThreadAbortException e)
             {
                 Logger.Log("RosRcpServer: Thread aborted! " + e);
                 Thread.ResetAbort();
-                return;
             }
             catch (Exception e)
             {

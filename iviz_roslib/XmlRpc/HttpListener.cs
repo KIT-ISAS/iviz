@@ -48,11 +48,16 @@ namespace Iviz.RoslibSharp.XmlRpc
                     //Logger.Log("Out");
                     callback(new HttpListenerContext(client));
                 }
+                catch (ObjectDisposedException)
+                {
+                    Logger.LogDebug("HttpListener: Leaving thread."); // expected
+                    break;
+                }
                 catch (ThreadAbortException e)
                 {
                     Logger.Log("RosRcpServer: Thread aborted! " + e);
                     Thread.ResetAbort();
-                    return;
+                    break;
                 }
                 catch (Exception e)
                 {
@@ -64,7 +69,7 @@ namespace Iviz.RoslibSharp.XmlRpc
 
         public void Stop()
         {
-            Logger.Log("HttpListener: Requesting stop 2.");
+            //Logger.Log("HttpListener: Requesting stop 2.");
             keepGoing = false;
             /*
             try
@@ -80,11 +85,11 @@ namespace Iviz.RoslibSharp.XmlRpc
             */
             try
             {
-                Logger.Log("HttpListener: Stop.");
+                //Logger.Log("HttpListener: Stop.");
                 listener.Stop();
             }
             catch (Exception) { }
-            Logger.Log("HttpListener: Stopped.");
+            //Logger.Log("HttpListener: Stopped.");
         }
 
         public void Dispose()
