@@ -16,12 +16,11 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor for empty message. </summary>
         public TwistWithCovariance()
         {
-            Twist = new Twist();
             Covariance = new double[36];
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TwistWithCovariance(Twist Twist, double[] Covariance)
+        public TwistWithCovariance(in Twist Twist, double[] Covariance)
         {
             this.Twist = Twist;
             this.Covariance = Covariance;
@@ -48,8 +47,6 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
-            if (Twist is null) throw new System.NullReferenceException();
-            Twist.RosValidate();
             if (Covariance is null) throw new System.NullReferenceException();
             if (Covariance.Length != 36) throw new System.IndexOutOfRangeException();
         }

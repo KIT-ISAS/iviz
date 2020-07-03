@@ -98,11 +98,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
         /// <summary> Constructor for empty message. </summary>
         public TestNestedServiceResponse()
         {
-            Data = new StdMsgs.Float64();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TestNestedServiceResponse(StdMsgs.Float64 Data)
+        public TestNestedServiceResponse(in StdMsgs.Float64 Data)
         {
             this.Data = Data;
         }
@@ -126,8 +125,6 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         public void RosValidate()
         {
-            if (Data is null) throw new System.NullReferenceException();
-            Data.RosValidate();
         }
     
         public int RosMessageLength => 8;

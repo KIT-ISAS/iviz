@@ -1,19 +1,16 @@
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Twist")]
-    public sealed class Twist : IMessage
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Twist : IMessage
     {
         // This expresses velocity in free space broken into its linear and angular parts.
         [DataMember (Name = "linear")] public Vector3 Linear { get; set; }
         [DataMember (Name = "angular")] public Vector3 Angular { get; set; }
     
-        /// <summary> Constructor for empty message. </summary>
-        public Twist()
-        {
-        }
-        
         /// <summary> Explicit constructor. </summary>
         public Twist(in Vector3 Linear, in Vector3 Angular)
         {
@@ -24,29 +21,27 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor with buffer. </summary>
         internal Twist(Buffer b)
         {
-            Linear = new Vector3(b);
-            Angular = new Vector3(b);
+            b.Deserialize(out this);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public readonly ISerializable RosDeserialize(Buffer b)
         {
             return new Twist(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void RosSerialize(Buffer b)
+        public readonly void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Linear.RosSerialize(b);
-            Angular.RosSerialize(b);
+            b.Serialize(this);
         }
         
-        public void RosValidate()
+        public readonly void RosValidate()
         {
         }
     
-        public int RosMessageLength => 48;
+        public readonly int RosMessageLength => 48;
     
-        public string RosType => RosMessageType;
+        public readonly string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "geometry_msgs/Twist";

@@ -55,16 +55,8 @@ namespace Iviz.Msgs.SensorMsgs
             Header = new StdMsgs.Header(b);
             JointNames = b.DeserializeStringArray();
             Transforms = b.DeserializeStructArray<GeometryMsgs.Transform>();
-            Twist = b.DeserializeArray<GeometryMsgs.Twist>();
-            for (int i = 0; i < this.Twist.Length; i++)
-            {
-                Twist[i] = new GeometryMsgs.Twist(b);
-            }
-            Wrench = b.DeserializeArray<GeometryMsgs.Wrench>();
-            for (int i = 0; i < this.Wrench.Length; i++)
-            {
-                Wrench[i] = new GeometryMsgs.Wrench(b);
-            }
+            Twist = b.DeserializeStructArray<GeometryMsgs.Twist>();
+            Wrench = b.DeserializeStructArray<GeometryMsgs.Wrench>();
         }
         
         public ISerializable RosDeserialize(Buffer b)
@@ -78,8 +70,8 @@ namespace Iviz.Msgs.SensorMsgs
             Header.RosSerialize(b);
             b.SerializeArray(JointNames, 0);
             b.SerializeStructArray(Transforms, 0);
-            b.SerializeArray(Twist, 0);
-            b.SerializeArray(Wrench, 0);
+            b.SerializeStructArray(Twist, 0);
+            b.SerializeStructArray(Wrench, 0);
         }
         
         public void RosValidate()
@@ -92,17 +84,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
             if (Transforms is null) throw new System.NullReferenceException();
             if (Twist is null) throw new System.NullReferenceException();
-            for (int i = 0; i < Twist.Length; i++)
-            {
-                if (Twist[i] is null) throw new System.NullReferenceException();
-                Twist[i].RosValidate();
-            }
             if (Wrench is null) throw new System.NullReferenceException();
-            for (int i = 0; i < Wrench.Length; i++)
-            {
-                if (Wrench[i] is null) throw new System.NullReferenceException();
-                Wrench[i].RosValidate();
-            }
         }
     
         public int RosMessageLength

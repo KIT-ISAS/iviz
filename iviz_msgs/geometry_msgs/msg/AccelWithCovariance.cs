@@ -16,12 +16,11 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor for empty message. </summary>
         public AccelWithCovariance()
         {
-            Accel = new Accel();
             Covariance = new double[36];
         }
         
         /// <summary> Explicit constructor. </summary>
-        public AccelWithCovariance(Accel Accel, double[] Covariance)
+        public AccelWithCovariance(in Accel Accel, double[] Covariance)
         {
             this.Accel = Accel;
             this.Covariance = Covariance;
@@ -48,8 +47,6 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
-            if (Accel is null) throw new System.NullReferenceException();
-            Accel.RosValidate();
             if (Covariance is null) throw new System.NullReferenceException();
             if (Covariance.Length != 36) throw new System.IndexOutOfRangeException();
         }

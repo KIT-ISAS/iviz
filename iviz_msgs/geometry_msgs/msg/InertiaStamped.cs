@@ -11,11 +11,10 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor for empty message. </summary>
         public InertiaStamped()
         {
-            Inertia = new Inertia();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public InertiaStamped(in StdMsgs.Header Header, Inertia Inertia)
+        public InertiaStamped(in StdMsgs.Header Header, in Inertia Inertia)
         {
             this.Header = Header;
             this.Inertia = Inertia;
@@ -43,8 +42,6 @@ namespace Iviz.Msgs.GeometryMsgs
         public void RosValidate()
         {
             Header.RosValidate();
-            if (Inertia is null) throw new System.NullReferenceException();
-            Inertia.RosValidate();
         }
     
         public int RosMessageLength
