@@ -188,8 +188,6 @@ namespace Iviz.App.Listeners
 
         public override void StartListening()
         {
-            base.StartListening();
-
             name = "Magnitude:" + config.Topic;
             displayNode.name = $"[{config.Topic}]";
             displayNode.AttachTo("");
@@ -220,7 +218,7 @@ namespace Iviz.App.Listeners
                     }
 
                     sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere, displayNode.transform);
-                    sphere.transform.localScale = 0.1f * UnityEngine.Vector3.one;
+                    sphere.transform.localScale = 0.1f * Vector3.one;
                     sphere.Color = Color;
                     break;
 
@@ -239,7 +237,7 @@ namespace Iviz.App.Listeners
                     angleAxis = ResourcePool.GetOrCreate<AngleAxisResource>(Resource.Displays.AngleAxis, displayNode.transform);
                     angleAxis.Color = Color.yellow;
                     sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere, displayNode.transform);
-                    sphere.transform.localScale = 0.1f * UnityEngine.Vector3.one;
+                    sphere.transform.localScale = 0.1f * Vector3.one;
                     sphere.Color = Color;
                     break;
 
@@ -258,7 +256,7 @@ namespace Iviz.App.Listeners
                     angleAxis = ResourcePool.GetOrCreate<AngleAxisResource>(Resource.Displays.AngleAxis, displayNode.transform);
                     angleAxis.Color = Color.yellow;
                     sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere, displayNode.transform);
-                    sphere.transform.localScale = 0.1f * UnityEngine.Vector3.one;
+                    sphere.transform.localScale = 0.1f * Vector3.one;
                     sphere.Color = Color;
                     break;
 
@@ -272,7 +270,7 @@ namespace Iviz.App.Listeners
                     angleAxis = ResourcePool.GetOrCreate<AngleAxisResource>(Resource.Displays.AngleAxis, childNode.transform);
                     angleAxis.Color = Color.yellow;
                     sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere, displayNode.transform);
-                    sphere.transform.localScale = 0.1f * UnityEngine.Vector3.one;
+                    sphere.transform.localScale = 0.1f * Vector3.one;
                     sphere.Color = Color;
                     break;
             }
@@ -336,9 +334,9 @@ namespace Iviz.App.Listeners
         static Quaternion AngularToQuaternion(float angularX, float angularY, float angularZ)
         {
             //Debug.Log("In message: " + angularX + " " + angularY + " " + angularZ);
-            return Quaternion.AngleAxis(angularX * Mathf.Rad2Deg, new Vector3(1, 0, 0)) *
-                   Quaternion.AngleAxis(angularY * Mathf.Rad2Deg, new Vector3(0, 1, 0)) *
-                   Quaternion.AngleAxis(angularZ * Mathf.Rad2Deg, new Vector3(0, 0, 1));
+            return Quaternion.AngleAxis(angularX * Mathf.Rad2Deg, Vector3.right) *
+                   Quaternion.AngleAxis(angularY * Mathf.Rad2Deg, Vector3.up) *
+                   Quaternion.AngleAxis(angularZ * Mathf.Rad2Deg, Vector3.forward);
         }
         
         void Handler(Twist msg)

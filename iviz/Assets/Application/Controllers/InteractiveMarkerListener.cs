@@ -51,7 +51,6 @@ namespace Iviz.App.Listeners
 
         public override void StartListening()
         {
-            base.StartListening();
             Listener = new RosListener<InteractiveMarkerUpdate>(config.Topic, Handler);
             GameThread.EverySecond += CheckForExpiredMarkers;
             rosSender = new RosSender<InteractiveMarkerFeedback>("/interactive_markers/feedback");

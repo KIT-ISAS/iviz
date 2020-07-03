@@ -32,14 +32,6 @@ namespace Iviz.App
             File = file;
             Line = line;
         }
-
-        /*
-        public override string ToString()
-        {
-            return RoslibSharp.Utils.ToJsonString(this);
-        }
-        */
-
     }
 
     public static class Logger

@@ -320,6 +320,11 @@ namespace Iviz
             return double.IsNaN(v.X) || double.IsNaN(v.Y) || double.IsNaN(v.Z);
         }
 
+        public static bool HasNaN(this Msgs.GeometryMsgs.Point32 v)
+        {
+            return float.IsNaN(v.X) || float.IsNaN(v.Y) || float.IsNaN(v.Z);
+        }
+        
         public static bool HasNaN(this Msgs.GeometryMsgs.Quaternion v)
         {
             return double.IsNaN(v.X) || double.IsNaN(v.Y) || double.IsNaN(v.Z) || double.IsNaN(v.W);

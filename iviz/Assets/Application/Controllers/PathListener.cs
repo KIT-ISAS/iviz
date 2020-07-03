@@ -13,7 +13,7 @@ using UnityEngine;
 namespace Iviz.App.Listeners
 {
     [DataContract]
-    public class PathConfiguration : JsonToString, IConfiguration
+    public sealed class PathConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
         [DataMember] public Resource.Module Module => Resource.Module.Path;
@@ -155,7 +155,6 @@ namespace Iviz.App.Listeners
 
         public override void StartListening()
         {
-            base.StartListening();
             switch (config.Type)
             {
                 case Msgs.NavMsgs.Path.RosMessageType:
@@ -166,12 +165,12 @@ namespace Iviz.App.Listeners
                     ShowLines = false;
                     break;
                 case Msgs.GeometryMsgs.PolygonStamped.RosMessageType:
-                    Listener = new RosListener<Msgs.GeometryMsgs.PoseArray>(config.Topic, Handler);
+                    Listener = new RosListener<Msgs.GeometryMsgs.PolygonStamped>(config.Topic, Handler);
                     ShowAxes = false;
                     break;
                 case Msgs.GeometryMsgs.Polygon.RosMessageType:
                     node.Parent = TFListener.MapFrame;
-                    Listener = new RosListener<Msgs.GeometryMsgs.PoseArray>(config.Topic, Handler);
+                    Listener = new RosListener<Msgs.GeometryMsgs.Polygon>(config.Topic, Handler);
                     ShowAxes = false;
                     break;
             }
@@ -231,6 +230,10 @@ namespace Iviz.App.Listeners
             savedPoses.Clear();
             foreach (Msgs.GeometryMsgs.Pose ps in msg.Poses)
             {
+                if (ps.HasNaN())
+                {
+                    continue;
+                }
                 savedPoses.Add(ps.Ros2Unity());
             }
 
@@ -248,8 +251,13 @@ namespace Iviz.App.Listeners
             savedPoses.Clear();
             foreach (Msgs.GeometryMsgs.Point32 p in msg.Points)
             {
+                if (p.HasNaN())
+                {
+                    continue;
+                }                
                 savedPoses.Add(new Pose(p.Ros2Unity(), Quaternion.identity));
             }
+            savedPoses.Add(savedPoses[0]);
 
             ProcessPoses();
         }        
@@ -272,9 +280,9 @@ namespace Iviz.App.Listeners
 
             if (ShowAxes)
             {
-                Vector3 xDir = new Vector3(1, 0, 0).Ros2Unity() * AxisLength;
-                Vector3 yDir = new Vector3(0, 1, 0).Ros2Unity() * AxisLength;
-                Vector3 zDir = new Vector3(0, 0, 1).Ros2Unity() * AxisLength;
+                Vector3 xDir = Vector3.right.Ros2Unity() * AxisLength;
+                Vector3 yDir = Vector3.up.Ros2Unity() * AxisLength;
+                Vector3 zDir = Vector3.forward.Ros2Unity() * AxisLength;
                 for (int i = 0; i < savedPoses.Count; i++)
                 {
                     Vector3 p = savedPoses[i].position;

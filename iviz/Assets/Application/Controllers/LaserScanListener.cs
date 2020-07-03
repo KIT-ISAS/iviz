@@ -179,7 +179,6 @@ namespace Iviz.App.Listeners
 
         public override void StartListening()
         {
-            base.StartListening();
             Listener = new RosListener<LaserScan>(config.Topic, Handler);
             Listener.MaxQueueSize = (int)MaxQueueSize;
             name = "[" + config.Topic + "]";

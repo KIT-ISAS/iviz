@@ -196,7 +196,6 @@ namespace Iviz.App.Listeners
 
         public override void StartListening()
         {
-            base.StartListening();
             Listener = new RosListener<tfMessage_v2>(DefaultTopic, SubscriptionHandler_v2);
             Listener.MaxQueueSize = 200;
             ListenerStatic = new RosListener<tfMessage_v2>(DefaultTopicStatic, SubscriptionHandlerStatic);

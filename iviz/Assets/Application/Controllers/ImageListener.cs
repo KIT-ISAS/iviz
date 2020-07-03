@@ -192,14 +192,14 @@ namespace Iviz.App.Listeners
 
         public override void StartListening()
         {
-            base.StartListening();
-            if (config.Type == Image.RosMessageType)
+            switch (config.Type)
             {
-                Listener = new RosListener<Image>(config.Topic, Handler);
-            }
-            else if (config.Type == CompressedImage.RosMessageType)
-            {
-                Listener = new RosListener<CompressedImage>(config.Topic, HandlerCompressed);
+                case Image.RosMessageType:
+                    Listener = new RosListener<Image>(config.Topic, Handler);
+                    break;
+                case CompressedImage.RosMessageType:
+                    Listener = new RosListener<CompressedImage>(config.Topic, HandlerCompressed);
+                    break;
             }
             Listener.MaxQueueSize = (int)MaxQueueSize;
             name = "Node:" + config.Topic;

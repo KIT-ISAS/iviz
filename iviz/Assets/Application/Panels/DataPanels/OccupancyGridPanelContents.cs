@@ -30,7 +30,7 @@ namespace Iviz.App
                         .SetOptions(Resource.Colormaps.Names)
                         .SetIndex((int)Resource.ColormapId.gray);
             FlipColors = p.AddToggle("Flip Color Bounds");
-            ScaleZ = p.AddNumberInputField("Height Multiplier");
+            ScaleZ = p.AddNumberInputField("Height Mult.");
 
             Tint = p.AddColorPicker("Tint");
             //Alpha = p.AddSlider("Alpha").SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256);

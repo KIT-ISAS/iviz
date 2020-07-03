@@ -185,7 +185,6 @@ namespace Iviz.App.Listeners
 
         public override void StartListening()
         {
-            base.StartListening();
             Listener = new RosListener<PointCloud2>(config.Topic, Handler);
             Listener.MaxQueueSize = (int)MaxQueueSize;
             name = "[" + config.Topic + "]";

@@ -44,19 +44,13 @@ namespace Iviz.App.Listeners
         public string RobotName
         {
             get => config.RobotName;
-            set
-            {
-                config.RobotName = value;
-            }
+            set => config.RobotName = value;
         }
 
         public bool Visible
         {
             get => config.Visible;
-            set
-            {
-                config.Visible = value;
-            }
+            set => config.Visible = value;
         }
 
         RobotController robot;
@@ -65,13 +59,13 @@ namespace Iviz.App.Listeners
             get => robot;
             set
             {
-                if (robot != null)
+                if (!(robot is null))
                 {
                     robot.Stopped -= OnRobotStopped;
                 }
                 robot = value;
                 warnNotFound.Clear();
-                if (robot != null)
+                if (!(robot is null))
                 {
                     robot.Stopped += OnRobotStopped;
                 }
@@ -81,10 +75,7 @@ namespace Iviz.App.Listeners
         public string MsgJointPrefix
         {
             get => config.MsgJointPrefix;
-            set
-            {
-                config.MsgJointPrefix = value;
-            }
+            set => config.MsgJointPrefix = value;
         }
 
         public string MsgJointSuffix
@@ -99,10 +90,7 @@ namespace Iviz.App.Listeners
         public int MsgTrimFromEnd
         {
             get => config.MsgTrimFromEnd;
-            set
-            {
-                config.MsgTrimFromEnd = value;
-            }
+            set => config.MsgTrimFromEnd = value;
         }
 
         readonly HashSet<string> warnNotFound = new HashSet<string>();
@@ -115,7 +103,6 @@ namespace Iviz.App.Listeners
 
         public override void StartListening()
         {
-            base.StartListening();
             Listener = new RosListener<JointState>(config.Topic, Handler);
         }
 
@@ -128,7 +115,7 @@ namespace Iviz.App.Listeners
 
         void Handler(JointState msg)
         {
-            if (Robot == null || Robot.AttachToTF)
+            if (Robot is null || Robot.AttachToTF)
             {
                 return;
             }

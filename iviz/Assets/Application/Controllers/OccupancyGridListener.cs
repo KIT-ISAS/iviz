@@ -156,7 +156,6 @@ namespace Iviz.App.Listeners
 
         public override void StartListening()
         {
-            base.StartListening();
             Listener = new RosListener<OccupancyGrid>(config.Topic, Handler);
             Listener.MaxQueueSize = (int)MaxQueueSize;
             name = "OccupancyGrid:" + config.Topic;

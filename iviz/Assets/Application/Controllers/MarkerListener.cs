@@ -86,14 +86,14 @@ namespace Iviz.App.Listeners
 
         public override void StartListening()
         {
-            base.StartListening();
-            if (config.Type == Marker.RosMessageType)
+            switch (config.Type)
             {
-                Listener = new RosListener<Marker>(config.Topic, Handler);
-            }
-            else if (config.Type == MarkerArray.RosMessageType)
-            {
-                Listener = new RosListener<MarkerArray>(config.Topic, ArrayHandler);
+                case Marker.RosMessageType:
+                    Listener = new RosListener<Marker>(config.Topic, Handler);
+                    break;
+                case MarkerArray.RosMessageType:
+                    Listener = new RosListener<MarkerArray>(config.Topic, ArrayHandler);
+                    break;
             }
         }
 
