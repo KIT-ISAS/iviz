@@ -12,7 +12,7 @@ namespace Iviz.App
     {
         public static Uri DefaultMasterUri { get; } = new Uri("http://localhost:11311/");
         public static Uri DefaultMyUri => new Uri($"http://{Dns.GetHostName()}:7614/");
-        public static string DefaultMyId { get; } = "/iviz_" + Application.platform.ToString().ToLower();
+        public static string DefaultMyId { get; } = "/iviz_" + UnityEngine.Application.platform.ToString().ToLower();
 
         ConnectionDialogContents panel;
         public override IDialogPanelContents Panel => panel;

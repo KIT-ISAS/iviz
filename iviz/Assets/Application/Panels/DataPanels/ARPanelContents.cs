@@ -18,11 +18,11 @@ namespace Iviz.App
         public InputFieldWidget MarkerFrame { get; private set; }
         public Vector3SliderWidget MarkerOffset { get; private set; }
 
-        public ToggleWidget PublishHead { get; private set; }
-        public ToggleWidget PublishPlanes { get; private set; }
+        //public ToggleWidget PublishHead { get; private set; }
+        //public ToggleWidget PublishPlanes { get; private set; }
 
-        public SenderWidget HeadSender { get; private set; }
-        public SenderWidget MarkersSender { get; private set; }
+        //public SenderWidget HeadSender { get; private set; }
+        //public SenderWidget MarkersSender { get; private set; }
 
         void Awake()
         {
@@ -32,17 +32,17 @@ namespace Iviz.App
             HideButton = p.AddHideButton();
             Frame = p.AddFrame();
             WorldScale = p.AddSlider("World Scale").SetMinValue(0.01f).SetMaxValue(1f);
-            Origin = p.AddVector3Slider("Move World By").SetRange(1.5f);
+            Origin = p.AddVector3Slider("Move World By").SetRange(0.5f);
             SearchMarker = p.AddToggle("Enable Marker Detection");
             MarkerHorizontal = p.AddToggle("Is Marker Horizontal");
             MarkerAngle = p.AddSlider("Marker Angle").SetMinValue(0).SetMaxValue(7*45).SetNumberOfSteps(7);
             MarkerFrame = p.AddInputField("Marker Follows TF Frame").SetPlaceholder("(none)");
             MarkerOffset = p.AddVector3Slider("Offset From TF Frame");
             //MarkerSize = p.AddNumberInputField("Size (m)");
-            PublishHead = p.AddToggle("Publish Camera as PoseStamped");
-            PublishPlanes = p.AddToggle("Publish Planes as Markers");
-            HeadSender = p.AddSender();
-            MarkersSender = p.AddSender();
+            //PublishHead = p.AddToggle("Publish Camera as PoseStamped");
+            //PublishPlanes = p.AddToggle("Publish Planes as Markers");
+            //HeadSender = p.AddSender();
+            //MarkersSender = p.AddSender();
             p.UpdateSize();
             gameObject.SetActive(false);
         }

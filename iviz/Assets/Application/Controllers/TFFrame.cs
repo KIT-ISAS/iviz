@@ -8,6 +8,7 @@ using Iviz.Resources;
 using Iviz.App.Displays;
 using System;
 using System.Collections.ObjectModel;
+using Application.Displays;
 
 namespace Iviz.App.Listeners
 {
@@ -19,6 +20,7 @@ namespace Iviz.App.Listeners
 
         readonly Timeline timeline = new Timeline();
         TrailResource trail;
+        AnchorLine anchor;
 
         [SerializeField] string id;
         public string Id
@@ -325,6 +327,8 @@ namespace Iviz.App.Listeners
             trail.TimeWindowInMs = 5000;
             trail.Color = Color.yellow;
             TrailVisible = false;
+            
+            anchor = ResourcePool.GetOrCreate<AnchorLine>(Resource.Displays.AnchorLine, TFListener.UnityFrame?.transform);
         }
 
         public void Recycle()
@@ -347,6 +351,18 @@ namespace Iviz.App.Listeners
             timeline.Clear();
             resource.Stop();
             trail.Stop();
+        }
+
+        public void UpdateAnchor(AnchorLine.FindAnchorFn findAnchorFn)
+        {
+            if (findAnchorFn is null)
+            {
+                anchor.Visible = false;
+                return;
+            }
+            anchor.Visible = true;
+            anchor.FindAnchor = findAnchorFn;
+            anchor.Position = transform.position;
         }
 
     }

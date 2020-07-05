@@ -287,6 +287,7 @@ namespace Iviz.Resources
             public GameObjectInfo AxisFrame { get; }
             public GameObjectInfo AngleAxis { get; }
             public GameObjectInfo Trail { get; }
+            public GameObjectInfo AnchorLine { get; }
 
             public ReadOnlyDictionary<Uri, GameObjectInfo> Generic { get; }
 
@@ -316,6 +317,7 @@ namespace Iviz.Resources
                 AxisFrame = new GameObjectInfo("Displays/AxisFrameResource");
                 AngleAxis = new GameObjectInfo("Displays/AngleAxis");
                 Trail = new GameObjectInfo("Displays/Trail");
+                AnchorLine = new GameObjectInfo("Displays/AnchorLine");
 
                 Generic = new ReadOnlyDictionary<Uri, GameObjectInfo>(
                     new Dictionary<Uri, GameObjectInfo>()

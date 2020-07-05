@@ -38,23 +38,23 @@ namespace Iviz.Displays
             set => transform.parent = value;
         }
 
-        bool colliderEnabled_;
+        bool colliderEnabled;
         public bool ColliderEnabled
         {
-            get => colliderEnabled_;
+            get => colliderEnabled;
             set
             {
-                colliderEnabled_ = value;
+                colliderEnabled = value;
                 lines.ColliderEnabled = value;
                 pointCloud.ColliderEnabled = value;
             }
         }
 
-        [SerializeField] int size_;
+        [SerializeField] int size;
         public int Size
         {
-            get => size_;
-            private set => size_ = value;
+            get => size;
+            private set => size = value;
         }
 
         public Vector2 MeasuredIntensityBounds { get; private set; }
@@ -71,13 +71,13 @@ namespace Iviz.Displays
             }
         }
 
-        [SerializeField] float pointSize_;
+        [SerializeField] float pointSize;
         public float PointSize
         {
-            get => pointSize_;
+            get => pointSize;
             set
             {
-                pointSize_ = value;
+                pointSize = value;
                 pointCloud.Scale = value * Vector2.one;
                 lines.LineScale = value;
             }
@@ -95,20 +95,20 @@ namespace Iviz.Displays
             }
         }
 
-        [SerializeField] bool useIntensityNotRange_;
+        [SerializeField] bool useIntensityNotRange;
         public bool UseIntensityNotRange
         {
-            get => useIntensityNotRange_;
-            set => useIntensityNotRange_ = value;
+            get => useIntensityNotRange;
+            set => useIntensityNotRange = value;
         }
 
-        [SerializeField] bool forceMinMax_;
+        [SerializeField] bool forceMinMax;
         public bool ForceMinMax
         {
-            get => forceMinMax_;
+            get => forceMinMax;
             set
             {
-                forceMinMax_ = value;
+                forceMinMax = value;
                 if (value)
                 {
                     pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);

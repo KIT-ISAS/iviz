@@ -129,7 +129,7 @@ namespace Iviz.Displays
             get => lineScale;
             set
             {
-                if (lineScale == value)
+                if (Mathf.Approximately(lineScale, value))
                 {
                     return;
                 }

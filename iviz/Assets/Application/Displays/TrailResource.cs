@@ -8,20 +8,13 @@ using Iviz.App.Listeners;
 
 namespace Iviz.Displays
 {
-    public sealed class TrailResource : MonoBehaviour, IDisplay, IRecyclable
+    public sealed class TrailResource : WrapperResource, IRecyclable
     {
         LineResource lines;
 
+        protected override IDisplay Display => lines;
+
         public Func<Vector3> DataSource { get; set; }
-
-        public Vector3 WorldScale => lines.WorldScale;
-        public Pose WorldPose => lines.WorldPose;
-
-        public int Layer
-        {
-            get => lines.Layer;
-            set => lines.Layer = value;
-        }
 
         readonly List<Vector3> measurements = new List<Vector3>();
         int startOffset = 0;
@@ -53,34 +46,6 @@ namespace Iviz.Displays
         {
             get => color;
             set => color = value;
-        }
-
-        public string Name
-        {
-            get => gameObject.name;
-            set => gameObject.name = value;
-        }
-
-        public Bounds Bounds => lines.Bounds;
-
-        public Bounds WorldBounds => lines.WorldBounds;
-
-        public bool ColliderEnabled
-        {
-            get => lines.ColliderEnabled;
-            set => lines.ColliderEnabled = value;
-        }
-
-        public Transform Parent
-        {
-            get => lines.Parent;
-            set => lines.Parent = value;
-        }
-
-        public bool Visible
-        {
-            get => gameObject.activeSelf;
-            set => gameObject.SetActive(value);
         }
 
         public float Scale

@@ -25,7 +25,7 @@ namespace Iviz.App
         public override void SetupPanel()
         {
             files.Clear();
-            files.AddRange(Directory.GetFiles(Application.persistentDataPath).
+            files.AddRange(Directory.GetFiles(ModuleListPanel.PersistentDataPath).
                 Where(x => RoslibSharp.Utils.HasSuffix(x, Suffix)).
                 Select(GetFileName));
             itemList.Title = "Load Config File";

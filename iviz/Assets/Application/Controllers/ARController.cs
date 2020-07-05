@@ -3,11 +3,13 @@ using System.Collections;
 using Iviz.RoslibSharp;
 using System.Runtime.Serialization;
 using System;
+using System.Collections.Generic;
 using Iviz.Resources;
 using UnityEngine.XR.ARFoundation;
 using Iviz.Displays;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.App.Displays;
+using TMPro;
 using UnityEngine.XR.ARSubsystems;
 
 namespace Iviz.App.Listeners
@@ -19,26 +21,27 @@ namespace Iviz.App.Listeners
         [DataMember] public Resource.Module Module => Resource.Module.AR;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public float WorldScale { get; set; } = 1.0f;
-        [DataMember] public SerializableVector3 Offset { get; set; } = new Vector3(0, 0, 0);
+        [DataMember] public SerializableVector3 Offset { get; set; } = Vector3.zero;
         [DataMember] public bool SearchMarker { get; set; } = false;
         [DataMember] public float MarkerSize { get; set; } = 0.198f;
         [DataMember] public bool MarkerHorizontal { get; set; } = true;
         [DataMember] public int MarkerAngle { get; set; } = 0;
         [DataMember] public string MarkerFrame { get; set; } = "";
         [DataMember] public SerializableVector3 MarkerOffset { get; set; } = Vector3.zero;
-        [DataMember] public bool PublishPose { get; set; } = false;
-        [DataMember] public bool PublishMarkers { get; set; } = false;
+        //[DataMember] public bool PublishPose { get; set; } = false;
+        //[DataMember] public bool PublishMarkers { get; set; } = false;
     }
 
     public sealed class ARController : MonoBehaviour, IController, IHasFrame
     {
-        [SerializeField] Camera ARCamera;
-        [SerializeField] ARSessionOrigin ARSessionOrigin;
-        [SerializeField] Canvas Canvas;
-        [SerializeField] Camera MainCamera;
+        [SerializeField] Camera ARCamera = null;
+        [SerializeField] ARSessionOrigin ARSessionOrigin = null;
+        [SerializeField] Canvas Canvas = null;
+        [SerializeField] Camera MainCamera = null;
 
         ARPlaneManager planeManager;
         ARTrackedImageManager tracker;
+        ARRaycastManager raycaster;
 
         DisplayClickableNode node;
         ARMarkerResource resource;
@@ -66,8 +69,8 @@ namespace Iviz.App.Listeners
                 Visible = value.Visible;
                 Offset = value.Offset;
                 WorldScale = value.WorldScale;
-                PublishPose = value.PublishPose;
-                PublishPlanesAsMarkers = value.PublishMarkers;
+                //PublishPose = value.PublishPose;
+                //PublishPlanesAsMarkers = value.PublishMarkers;
                 UseMarker = value.SearchMarker;
                 MarkerSize = value.MarkerSize;
                 MarkerHorizontal = value.MarkerHorizontal;
@@ -137,6 +140,7 @@ namespace Iviz.App.Listeners
         }
         */
 
+        /*
         public bool PublishPose
         {
             get => config.PublishPose;
@@ -149,7 +153,9 @@ namespace Iviz.App.Listeners
                 }
             }
         }
+        */
 
+        /*
         public bool PublishPlanesAsMarkers
         {
             get => config.PublishMarkers;
@@ -163,6 +169,7 @@ namespace Iviz.App.Listeners
                 }
             }
         }
+        */
 
         bool markerFound;
         public bool MarkerFound
@@ -280,6 +287,7 @@ namespace Iviz.App.Listeners
 
             planeManager = ARSessionOrigin.GetComponent<ARPlaneManager>();
             tracker = ARSessionOrigin.GetComponent<ARTrackedImageManager>();
+            raycaster = ARSessionOrigin.GetComponent<ARRaycastManager>();
 
             node = DisplayClickableNode.Instantiate("AR Node");
             resource = ResourcePool.GetOrCreate<ARMarkerResource>(Resource.Displays.ARMarkerResource);
@@ -289,9 +297,48 @@ namespace Iviz.App.Listeners
             Config = new ARConfiguration();
         }
 
-        uint headSeq = 0;
+        void UpdateARAnchors()
+        {
+            bool FindAnchorFn(in Vector3 position, out Vector3 anchor, out Vector3 normal)
+            {
+                List<ARRaycastHit> results = new List<ARRaycastHit>();
+                raycaster.Raycast(new Ray(position, Vector3.down), results, TrackableType.PlaneWithinBounds);
+                if (results.Count == 0)
+                {
+                    anchor = Vector3.zero;
+                    normal = Vector3.zero;
+                    return false;
+                }
+
+                var hit = results[0];
+                var plane = planeManager.GetPlane(hit.trackableId);
+                anchor = hit.pose.position;
+                normal = plane.normal;
+                return true;
+            }
+            
+            foreach (TFFrame frame in TFListener.Instance.Frames.Values)
+            {
+                frame.UpdateAnchor(FindAnchorFn);    
+            }            
+        }
+
+        //uint headSeq = 0;
         public void Update()
         {
+            UpdateARAnchors();
+            /*
+            bool FindAnchorFn(in Vector3 position, out Vector3 anchor, out Vector3 normal)
+            {
+                //Debug.Log("was here");
+                anchor = new Vector3(position.x, -1, position.z);
+                normal = Vector3.up;
+                return true;
+            }
+            */
+            
+
+            /*
             if (PublishPose && Visible)
             {
                 TFListener.Publish(null, HeadFrameName, ARCamera.transform.AsPose());
@@ -336,6 +383,7 @@ namespace Iviz.App.Listeners
                     RosSenderMarkers.Publish(new MarkerArray(markers));
                 }
             }
+            */
             /*
             if (trackedObject != null)
             {

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Application.Displays;
 using Iviz.App.Displays;
 using Iviz.Displays;
 using Iviz.Msgs.VisualizationMsgs;
@@ -11,13 +12,21 @@ namespace Iviz.App
     public class NewMonoBehaviour : MonoBehaviour
     {
         //OccupancyGridResource resource;
-        AngleAxisResource resource;
+        AnchorLine resource;
 
         private void Start()
         {
-            resource = GetComponent<AngleAxisResource>();
+            resource = GetComponent<AnchorLine>();
+
+            resource.FindAnchor = (in Vector3 position, out Vector3 anchor, out Vector3 normal) =>
+            {
+                anchor = new Vector3(position.x, 0, position.z);
+                normal = Vector3.up;
+                return true;
+            };
+
             //resource.Set(Quaternion.Euler(30, 270, 40));
-            resource.Set(new Vector3(0, 1, 1) * 20);
+            //resource.Set(new Vector3(0, 1, 1) * 20);
             //transform.position = new Vector3(1, 0, 0).Ros2Unity();
             /*
             resource = gameObject.AddComponent<OccupancyGridResource>();
@@ -37,6 +46,11 @@ namespace Iviz.App
             ArrowResource resource = GetComponent<ArrowResource>();
             resource.Set(new Vector3(0, 3, 0), new Vector3(-2, 2, 2));
             */
+        }
+
+        void Update()
+        {
+            resource.Position = transform.position;
         }
     }
 }

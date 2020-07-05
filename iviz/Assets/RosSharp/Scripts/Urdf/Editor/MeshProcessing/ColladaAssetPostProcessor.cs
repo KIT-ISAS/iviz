@@ -56,7 +56,7 @@ namespace RosSharp
 
         private static string getAbsolutePath(string relativeAssetPath)
         {
-            return Path.Combine(Path.GetDirectoryName(Application.dataPath), relativeAssetPath);
+            return Path.Combine(Path.GetDirectoryName(UnityEngine.Application.dataPath), relativeAssetPath);
         }
 
         private Vector3 getColladaPositionFix(Vector3 position, string orientation)

@@ -1,6 +1,7 @@
 ﻿using System;
 using Iviz.Resources;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Iviz.App
@@ -25,6 +26,7 @@ namespace Iviz.App
         }
 
         Vector3 value;
+
         public Vector3 Value
         {
             get => value;
@@ -36,17 +38,33 @@ namespace Iviz.App
         }
 
         float range;
+
         public float Range
         {
             get => range;
             set
             {
                 range = value;
-                int numSteps = (int)(2 * range * 100);
-                inputX.SetMinValue(-range).SetMaxValue(range).SetNumberOfSteps(numSteps);
-                inputY.SetMinValue(-range).SetMaxValue(range).SetNumberOfSteps(numSteps);
-                inputZ.SetMinValue(-range).SetMaxValue(range).SetNumberOfSteps(numSteps);
-                
+                int numSteps = (int) (2 * range * 100);
+                inputX.SetMinValue(mean.x - range).SetMaxValue(mean.x + range).SetNumberOfSteps(numSteps);
+                inputY.SetMinValue(mean.y - range).SetMaxValue(mean.y + range).SetNumberOfSteps(numSteps);
+                inputZ.SetMinValue(mean.z - range).SetMaxValue(mean.z + range).SetNumberOfSteps(numSteps);
+            }
+        }
+
+        Vector3 mean;
+        public Vector3 Mean
+        {
+            get => mean;
+            set
+            {
+                mean = value;
+                inputX.SetMinValue(mean.x - range).SetMaxValue(mean.x + range);
+                inputY.SetMinValue(mean.y - range).SetMaxValue(mean.y + range);
+                inputZ.SetMinValue(mean.z - range).SetMaxValue(mean.z + range);
+                inputX.Value = mean.x;
+                inputY.Value = mean.y;
+                inputZ.Value = mean.z;
             }
         }
 
@@ -71,11 +89,12 @@ namespace Iviz.App
             {
                 return;
             }
+
             value = new Vector3(
                 inputX.Value,
                 inputY.Value,
                 inputZ.Value
-                );
+            );
             ValueChanged?.Invoke(value);
         }
 
@@ -117,7 +136,7 @@ namespace Iviz.App
             ValueChanged += f;
             return this;
         }
-        
+
         public Vector3SliderWidget SetRange(float f)
         {
             Range = f;
@@ -135,6 +154,17 @@ namespace Iviz.App
             inputX.SubscribeValueChanged(_ => OnValueChanged());
             inputY.SubscribeValueChanged(_ => OnValueChanged());
             inputZ.SubscribeValueChanged(_ => OnValueChanged());
+
+            HandleLink[] links = GetComponentsInChildren<HandleLink>();
+            foreach (var link in links)
+            {
+                link.Clicked += LinkOnClicked;
+            }
+        }
+
+        void LinkOnClicked()
+        {
+            Mean = Value;
         }
 
         void Start()

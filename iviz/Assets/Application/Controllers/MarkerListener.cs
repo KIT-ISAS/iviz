@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System;
+using System.Linq;
 using Iviz.Msgs.VisualizationMsgs;
 using System.Runtime.Serialization;
 using Iviz.RoslibSharp;
@@ -116,7 +117,10 @@ namespace Iviz.App.Listeners
 
         void ArrayHandler(MarkerArray msg)
         {
-            msg.Markers.ForEach(Handler);
+            foreach (var marker in msg.Markers)
+            {
+                Handler(marker);
+            }
         }
 
         void Handler(Marker msg)

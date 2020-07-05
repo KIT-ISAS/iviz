@@ -91,6 +91,8 @@ namespace Iviz.App
             set => unlock.gameObject.SetActive(value);
         }
 
+        public string PersistentDataPath => UnityEngine.Application.persistentDataPath;
+        
         bool KeepReconnecting
         {
             get => ConnectionManager.Connection.KeepReconnecting;
@@ -281,7 +283,7 @@ namespace Iviz.App
             {
                 Logger.Internal("Saving config file...");
                 string text = JsonConvert.SerializeObject(config, Formatting.Indented);
-                File.WriteAllText(Application.persistentDataPath + "/" + file, text);
+                File.WriteAllText(PersistentDataPath + "/" + file, text);
                 Logger.Internal("Done.");
             }
             catch (Exception e) when
@@ -291,18 +293,18 @@ namespace Iviz.App
                 Logger.Internal("Error:", e);
                 return;
             }
-            Logger.Debug("DisplayListPanel: Writing config to " + Application.persistentDataPath + "/" + file);
+            Logger.Debug("DisplayListPanel: Writing config to " + PersistentDataPath + "/" + file);
 
         }
 
         public void LoadStateConfiguration(string file)
         {
-            Logger.Debug("DisplayListPanel: Reading config from " + Application.persistentDataPath + "/" + file);
+            Logger.Debug("DisplayListPanel: Reading config from " + PersistentDataPath + "/" + file);
             string text;
             try
             {
                 Logger.Internal("Loading config file...");
-                text = File.ReadAllText(Application.persistentDataPath + "/" + file);
+                text = File.ReadAllText(PersistentDataPath + "/" + file);
                 Logger.Internal("Done.");
             }
             catch (FileNotFoundException)
@@ -351,7 +353,7 @@ namespace Iviz.App
 
         void LoadSimpleConfiguration()
         {
-            string path = Application.persistentDataPath + "/connection.json";
+            string path = PersistentDataPath + "/connection.json";
             if (!File.Exists(path))
             {
                 return;
@@ -383,7 +385,7 @@ namespace Iviz.App
                 };
 
                 string text = JsonConvert.SerializeObject(config, Formatting.Indented);
-                File.WriteAllText(Application.persistentDataPath + "/connection.json", text);
+                File.WriteAllText(PersistentDataPath + "/connection.json", text);
             }
             catch (Exception e) when
             (e is IOException || e is System.Security.SecurityException || e is JsonException)

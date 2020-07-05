@@ -28,7 +28,7 @@ namespace RosSharp.Urdf.Editor
         {
             string urdfFile = EditorUtility.OpenFilePanel(
                 "Import local URDF",
-                Path.Combine(Path.GetDirectoryName(Application.dataPath),"Assets"),
+                Path.Combine(Path.GetDirectoryName(UnityEngine.Application.dataPath),"Assets"),
                 "urdf");
 
             if (urdfFile != "")

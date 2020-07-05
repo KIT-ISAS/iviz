@@ -8,6 +8,7 @@ using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.Tf;
 using System.Runtime.Serialization;
 using System;
+using System.Collections.ObjectModel;
 using Iviz.Resources;
 using Transform = UnityEngine.Transform;
 
@@ -52,6 +53,8 @@ namespace Iviz.App.Listeners
 
         readonly Dictionary<string, TFFrame> frames = new Dictionary<string, TFFrame>();
 
+        public ReadOnlyDictionary<string, TFFrame> Frames => new ReadOnlyDictionary<string, TFFrame>(frames);
+
         public RosSender<tfMessage_v2> Publisher { get; private set; }
 
         public override ModuleData ModuleData { get; set; }
@@ -60,6 +63,7 @@ namespace Iviz.App.Listeners
 
 
         readonly TFConfiguration config = new TFConfiguration();
+
         public TFConfiguration Config
         {
             get => config;
@@ -181,7 +185,7 @@ namespace Iviz.App.Listeners
             UnityFrame = Add(CreateFrameObject("/unity/", transform, null));
             UnityFrame.ForceInvisible = true;
             UnityFrame.AddListener(null);
-            
+
             RootFrame = Add(CreateFrameObject("/", transform, UnityFrame));
             RootFrame.ForceInvisible = true;
             RootFrame.AddListener(null);
@@ -210,16 +214,19 @@ namespace Iviz.App.Listeners
                 {
                     continue;
                 }
+
                 TimeSpan timestamp = t.Header.Stamp.ToTimeSpan();
                 if (t.Header.Stamp.Nsecs == 0 && t.Header.Stamp.Secs == 0)
                 {
                     timestamp = TimeSpan.MaxValue;
                 }
+
                 string childId = t.ChildFrameId;
                 if (childId.Length != 0 && childId[0] == '/')
                 {
                     childId = childId.Substring(1);
                 }
+
                 TFFrame child;
                 if (isStatic)
                 {
@@ -233,15 +240,15 @@ namespace Iviz.App.Listeners
                 {
                     continue;
                 }
+
                 string parentId = t.Header.FrameId;
                 if (parentId.Length != 0 && parentId[0] == '/')
                 {
                     parentId = parentId.Substring(1);
                 }
+
                 //Debug.Log("Id " + childId + " requests parent " + parentId);
-                TFFrame parent = string.IsNullOrEmpty(parentId) ?
-                    RootFrame :
-                    GetOrCreateFrame(parentId, null);
+                TFFrame parent = string.IsNullOrEmpty(parentId) ? RootFrame : GetOrCreateFrame(parentId, null);
                 //Debug.Log("Parent has parent " + parent.Parent.Id);
 
                 if (child.SetParent(parent))
@@ -269,23 +276,24 @@ namespace Iviz.App.Listeners
             {
                 id = id.Substring(1);
             }
+
             TFFrame frame = Instance.GetOrCreateFrameImpl(id);
             if (frame.Id != id)
             {
                 Debug.LogWarning("Error: Broken resource pool! Requested " + id + ", received " + frame.Id);
             }
+
             if (!(listener is null))
             {
                 frame.AddListener(listener);
             }
+
             return frame;
         }
 
         TFFrame GetOrCreateFrameImpl(string id)
         {
-            return TryGetFrameImpl(id, out TFFrame t) ? 
-                t : 
-                Add(CreateFrameObject(id, RootFrame.transform, RootFrame));
+            return TryGetFrameImpl(id, out TFFrame t) ? t : Add(CreateFrameObject(id, RootFrame.transform, RootFrame));
         }
 
         TFFrame CreateFrameObject(string id, Transform parent, TFFrame parentFrame)
@@ -360,6 +368,7 @@ namespace Iviz.App.Listeners
         }
 
         static uint tfSeq = 0;
+
         public static void Publish(string parentFrame, string childFrame, in UnityEngine.Pose unityPose)
         {
             tfMessage_v2 msg = new tfMessage_v2
@@ -370,7 +379,7 @@ namespace Iviz.App.Listeners
                     (
                         Header: RosUtils.CreateHeader(tfSeq++, parentFrame ?? BaseFrameId),
                         ChildFrameId: childFrame ?? "",
-                        Transform:  RelativePose(unityPose).Unity2RosTransform()
+                        Transform: RelativePose(unityPose).Unity2RosTransform()
                     )
                 }
             );

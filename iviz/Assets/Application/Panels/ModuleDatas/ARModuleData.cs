@@ -65,11 +65,13 @@ namespace Iviz.App
             panel.MarkerFrame.Value = controller.MarkerFrame;
             panel.MarkerOffset.Value = controller.MarkerOffset;
 
+            /*
             panel.HeadSender.Set(controller.RosSenderHead);
             panel.MarkersSender.Set(controller.RosSenderMarkers);
 
             panel.PublishHead.Value = controller.PublishPose;
             panel.PublishPlanes.Value = controller.PublishPlanesAsMarkers;
+            */
 
             CheckInteractable();
 
@@ -109,6 +111,7 @@ namespace Iviz.App
             {
                 controller.MarkerOffset = f;
             };
+            /*
             panel.PublishHead.ValueChanged += f =>
             {
                 controller.PublishPose = f;
@@ -119,6 +122,7 @@ namespace Iviz.App
                 controller.PublishPlanesAsMarkers = f;
                 panel.MarkersSender.Set(controller.RosSenderMarkers);
             };
+            */
 
             panel.CloseButton.Clicked += () =>
             {

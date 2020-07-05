@@ -11,7 +11,7 @@ namespace Iviz.App
     {
         const int TimeToDestroy = 60;
 
-        static ResourcePool Instance { get; set; }
+        static ResourcePool Instance;
 
         public static GameObject GetOrCreate(Resource.Info<GameObject> resource, Transform parent = null, bool enable = true)
         {
@@ -136,11 +136,9 @@ namespace Iviz.App
             obj.SetActive(false);
             obj.name = resource.Name;
             obj.transform.SetParentLocal(transform);
-            //Debug.Log("Parent of " + gameObject + " is " + gameObject.transform.parent.gameObject);
             obj.transform.localPosition = resource.Object.transform.localPosition;
             obj.transform.localRotation = resource.Object.transform.localRotation;
             obj.transform.localScale = resource.Object.transform.localScale;
-            //gameObject.layer = resource.GameObject.layer;
             destroyedObjects.Add(obj.GetInstanceID());
             //Debug.Log("State: " + string.Join(",", destroyedObjects));
         }

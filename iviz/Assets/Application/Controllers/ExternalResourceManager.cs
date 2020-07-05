@@ -32,7 +32,7 @@ namespace Iviz.App.Resources
             node.transform.parent = TFListener.ListenersFrame.transform;
             node.SetActive(false);
 
-            string path = Application.persistentDataPath + "/resources.json";
+            string path = UnityEngine.Application.persistentDataPath + "/resources.json";
             if (File.Exists(path))
             {
                 try
@@ -136,14 +136,14 @@ namespace Iviz.App.Resources
                 byte[] buffer = new byte[srv.Request.Model.RosMessageLength];
                 Msgs.Buffer.Serialize(srv.Request.Model, buffer);
 
-                File.WriteAllBytes($"{Application.persistentDataPath}/{path}", buffer);
-                Debug.Log($"ExternalResourceManager: ++ {uri} | {Application.persistentDataPath}/{path} | ({buffer.Length} bytes)");
+                File.WriteAllBytes($"{UnityEngine.Application.persistentDataPath}/{path}", buffer);
+                //Debug.Log($"ExternalResourceManager: ++ {uri} | {UnityEngine.Application.persistentDataPath}/{path} | ({buffer.Length} bytes)");
                 Logger.Internal($"Added external resource <i>{uri}</i>");
 
                 resourceFiles[uri] = path;
 
                 File.WriteAllText(
-                    Application.persistentDataPath + "/resources.json",
+                    UnityEngine.Application.persistentDataPath + "/resources.json",
                     JsonConvert.SerializeObject(resourceFiles, Formatting.Indented));
 
                 srv.Response.Success = true;

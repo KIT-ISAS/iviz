@@ -17,8 +17,8 @@ namespace Iviz.App
         public TrashButtonWidget AddCloseButton()
         {
             GameObject o = Resource.Widgets.CloseButton.Instantiate(nonstatics.transform);
-            RectTransform transform = (RectTransform)o.transform;
-            transform.anchoredPosition = new Vector2(transform.anchoredPosition.x, yCloseButton);
+            RectTransform ttransform = (RectTransform)o.transform;
+            ttransform.anchoredPosition = new Vector2(ttransform.anchoredPosition.x, yCloseButton);
             o.SetActive(true);
             return o.GetComponent<TrashButtonWidget>();
         }

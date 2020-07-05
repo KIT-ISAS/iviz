@@ -10,80 +10,22 @@ using System.Threading.Tasks;
 
 namespace Iviz.Displays
 {
-    public sealed class OccupancyGridResource : MonoBehaviour, IDisplay, IRecyclable, ISupportsTint
+    public sealed class OccupancyGridResource : WrapperResource, IRecyclable, ISupportsTint
     {
         const int MaxSize = 10000;
 
         MeshListResource resource;
-        MeshMarkerResource plane;
         readonly List<PointWithColor> pointBuffer = new List<PointWithColor>();
 
-        public string Name => "Occupancy Grid";
-        public Bounds Bounds => resource.Bounds;
-        public Bounds WorldBounds => resource.WorldBounds;
-        public Vector3 WorldScale => resource.Scale;
-        public Pose WorldPose => resource.WorldPose;
+        protected override IDisplay Display => resource;
 
-        int layer_;
-        public int Layer
-        {
-            get => layer_;
-            set
-            {
-                layer_ = value;
-                resource.Layer = layer_;
-                plane.Layer = layer_;
-            }
-        }
-
-        bool visible_;
-        public bool Visible
-        {
-            get => visible_;
-            set
-            {
-                visible_ = value;
-                resource.Visible = value;
-                plane.Visible = value && interiorVisible_;
-            }
-        }
-
-        public Transform Parent
-        {
-            get => transform.parent;
-            set => transform.parent = value;
-        }
-
-        bool colliderEnabled_;
-        public bool ColliderEnabled
-        {
-            get => colliderEnabled_;
-            set
-            {
-                colliderEnabled_ = value;
-                resource.ColliderEnabled = value;
-                plane.ColliderEnabled = value;
-            }
-        }
-
-        [SerializeField] bool interiorVisible_;
-        public bool InteriorVisible
-        {
-            get => interiorVisible_;
-            set
-            {
-                interiorVisible_ = value;
-                plane.Visible = value && Visible;
-            }
-        }
-
-        [SerializeField] int numCellsX_;
+        [SerializeField] int numCellsX;
         public int NumCellsX
         {
-            get => numCellsX_;
+            get => numCellsX;
             set
             {
-                if (value == numCellsX_)
+                if (value == numCellsX)
                 {
                     return;
                 }
@@ -91,18 +33,18 @@ namespace Iviz.Displays
                 {
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }
-                numCellsX_ = value;
+                numCellsX = value;
                 UpdateSize();
             }
         }
 
-        [SerializeField] int numCellsY_;
+        [SerializeField] int numCellsY;
         public int NumCellsY
         {
-            get => numCellsY_;
+            get => numCellsY;
             set
             {
-                if (value == numCellsY_)
+                if (value == numCellsY)
                 {
                     return;
                 }
@@ -110,24 +52,24 @@ namespace Iviz.Displays
                 {
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }
-                numCellsY_ = value;
+                numCellsY = value;
                 UpdateSize();
             }
         }
 
-        [SerializeField] float cellSize_;
+        [SerializeField] float cellSize;
         public float CellSize
         {
-            get => cellSize_;
+            get => cellSize;
             set
             {
-                if (value == cellSize_)
+                if (Mathf.Approximately(value, cellSize))
                 {
                     return;
                 }
-                cellSize_ = value;
+                cellSize = value;
                 resource.Scale = value * Vector3.one;
-                resource.Offset = new Vector3(0, cellSize_ / 2, 0);
+                resource.Offset = new Vector3(0, cellSize / 2, 0);
                 UpdateSize();
             }
         }
@@ -148,39 +90,23 @@ namespace Iviz.Displays
         {
             float totalSizeX = NumCellsX * CellSize;
             float totalSizeY = NumCellsY * CellSize;
-            plane.transform.localScale = new Vector3(totalSizeX, 0.001f, totalSizeY);
         }
 
         public Resource.ColormapId Colormap
         {
             get => resource.Colormap;
-            set
-            {
-                resource.Colormap = value;
-                UpdatePlaneColor();
-            }
+            set => resource.Colormap = value;
         }
 
         public Vector2 IntensityBounds
         {
             get => resource.IntensityBounds;
-            set
-            {
-                resource.IntensityBounds = value;
-                UpdatePlaneColor();
-            }
+            set => resource.IntensityBounds = value;
         }
-
-        void UpdatePlaneColor()
-        {
-            Texture2D texture = Resource.Colormaps.Textures[Colormap];
-            plane.Color = texture.GetPixel((int)(IntensityBounds.x * (texture.width - 1)), 0);
-        }
-
+        
         void Awake()
         {
             resource = ResourcePool.GetOrCreate<MeshListResource>(Resource.Displays.MeshList, transform);
-            plane = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Cube, transform);
 
             NumCellsX = 10;
             NumCellsY = 10;
@@ -188,30 +114,27 @@ namespace Iviz.Displays
 
             UpdateSize();
 
-            InteriorVisible = false;
-
             Colormap = Resource.ColormapId.gray;
             IntensityBounds = new Vector2(0, 1);
 
-            resource.Mesh = plane.GetComponent<MeshFilter>().sharedMesh;
+            GameObject cubeObject = Resource.Displays.Cube.Object;
+            resource.Mesh = cubeObject.GetComponent<MeshFilter>().sharedMesh;
             resource.UseIntensityTexture = true;
             resource.UsePerVertexScale = true;
         }
 
-        public void Stop()
+        public override void Stop()
         {
-            resource.Stop();
-            plane.Stop();
+            base.Stop();
             pointBuffer.Clear();
         }
 
         public void Recycle()
         {
             ResourcePool.Dispose(Resource.Displays.MeshList, resource.gameObject);
-            ResourcePool.Dispose(Resource.Displays.Cube, plane.gameObject);
         }
 
-        public struct Rect
+        public readonly struct Rect
         {
             public readonly int xmin;
             public readonly int xmax;
@@ -237,7 +160,7 @@ namespace Iviz.Displays
             isProcessing = true;
             Task.Run(() =>
             {
-                Rect bounds = tbounds ?? new Rect(0, numCellsX_, 0, numCellsY_);
+                Rect bounds = tbounds ?? new Rect(0, numCellsX, 0, numCellsY);
 
                 pointBuffer.Clear();
 
@@ -245,13 +168,13 @@ namespace Iviz.Displays
                 //float offsetY = (numCellsY_ - 1) / 2f;
 
                 //float4 add = new float4(-offsetX, -offsetY, 0, 0);
-                float4 mul = new float4(cellSize_, cellSize_, 0, 0.01f);
+                float4 mul = new float4(cellSize, cellSize, 0, 0.01f);
 
                 //float4 addmul = add * mul;
 
                 for (int v = bounds.ymin; v < bounds.ymax; v++)
                 {
-                    int i = v * numCellsX_ + bounds.xmin;
+                    int i = v * numCellsX + bounds.xmin;
                     for (int u = bounds.xmin; u < bounds.xmax; u++, i++)
                     {
                         sbyte val = values[i];

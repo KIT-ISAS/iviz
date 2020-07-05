@@ -7,46 +7,13 @@ using UnityEngine.XR.ARKit;
 
 namespace Iviz.Displays
 {
-    public sealed class AngleAxisResource : MonoBehaviour, IRecyclable, IDisplay, ISupportsTint
+    public sealed class AngleAxisResource : WrapperResource, IRecyclable, ISupportsTint
     {
         LineResource resource;
         readonly List<LineWithColor> lines = new List<LineWithColor>();
 
-        public string Name => "AxisAngleResource";
-        public Bounds Bounds => resource.Bounds;
-        public Bounds WorldBounds => resource.WorldBounds;
-        public Pose WorldPose => resource.WorldPose;
-        public Vector3 WorldScale => resource.WorldScale;
-
-        public int Layer
-        {
-            get => resource.Layer;
-            set => resource.Layer = value;
-        }
-
-        public Transform Parent
-        {
-            get => transform.parent;
-            set => transform.parent = value;
-        }
-
-        public bool ColliderEnabled
-        {
-            get => resource.ColliderEnabled;
-            set => resource.ColliderEnabled = value;
-        }
-
-        public void Stop()
-        {
-            resource.Stop();
-        }
-
-        public bool Visible
-        {
-            get => gameObject.activeSelf;
-            set => gameObject.SetActive(value);
-        }
-
+        protected override IDisplay Display => resource;
+        
         void Awake()
         {
             resource = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, transform);
@@ -58,16 +25,14 @@ namespace Iviz.Displays
         public void Set(in Quaternion q, float scale = 0.3f)
         {
             q.ToAngleAxis(out float angle, out Vector3 axis);
-            Debug.Log("in: " + q + "angle: " + angle + " " + axis);
             Set(angle * Mathf.Deg2Rad, axis, scale);
         }
 
         public void Set(in Vector3 rod, float scale = 0.3f)
         {
             float angle = rod.magnitude;
-            if (angle == 0)
+            if (Mathf.Approximately(angle, 0))
             {
-                Debug.Log("out!");
                 Set(0, Vector3.zero, 0);
             }
             else
@@ -101,9 +66,9 @@ namespace Iviz.Displays
         
         public void Set(float angle, Vector3 axis, float scale = 0.3f)
         {
-            if (angle == 0 || axis.magnitude == 0)
+            if (Mathf.Approximately(angle, 0) || 
+                Mathf.Approximately(axis.sqrMagnitude, 0))
             {
-                //Debug.Log("out!");
                 resource.Visible = false;
                 return;
             }
@@ -121,10 +86,10 @@ namespace Iviz.Displays
             lines.Clear();
             //lines.Add(new LineWithColor(Vector3.zero, scale * axis, Color));
 
-            Vector3 x = new Vector3(0, 0, 1);
+            Vector3 x = Vector3.forward;
             if (x == axis)
             {
-                x = new Vector3(1, 0, 0);
+                x = Vector3.right;
             }
             Vector3 diry = Vector3.Cross(x, axis).normalized;
             Vector3 dirx = Vector3.Cross(axis, diry).normalized;
@@ -132,7 +97,7 @@ namespace Iviz.Displays
             diry *= scale;
 
             int n = (int)(Mathf.Abs(angle) / (2 * Mathf.PI) * 32 + 1);
-            Debug.Log(angle + " -> " + n);
+            //Debug.Log(angle + " -> " + n);
             
             Vector3 v0 = dirx;
             Vector3 v1 = Vector3.zero;

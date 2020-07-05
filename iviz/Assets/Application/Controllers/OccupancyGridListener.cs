@@ -198,9 +198,9 @@ namespace Iviz.App.Listeners
             {
                 for (int u = 0; u < 4; u++, i++)
                 {
-                    grid[i].NumCellsX = (int)msg.Info.Width;
-                    grid[i].NumCellsY = (int)msg.Info.Height;
-                    grid[i].CellSize = msg.Info.Resolution;
+                    grid[i].NumCellsX = numCellsX;
+                    grid[i].NumCellsY = numCellsY;
+                    grid[i].CellSize = cellSize;
                     grid[i].transform.SetLocalPose(origin);
 
                     var rect = new OccupancyGridResource.Rect

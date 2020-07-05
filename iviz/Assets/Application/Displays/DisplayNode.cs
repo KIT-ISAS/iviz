@@ -36,7 +36,9 @@ namespace Iviz.App.Displays
         {
             if (Parent is null || parentId != Parent.Id)
             {
-                Parent = string.IsNullOrEmpty(parentId) ? TFListener.MapFrame : TFListener.GetOrCreateFrame(parentId);
+                Parent = string.IsNullOrEmpty(parentId) ? 
+                    TFListener.MapFrame : 
+                    TFListener.GetOrCreateFrame(parentId);
             }
         }
 
