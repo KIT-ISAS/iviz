@@ -101,9 +101,9 @@ namespace Iviz.Displays
             axisObjects[0].transform.localScale = new Vector3(newFrameAxisLength, newFrameAxisWidth, newFrameAxisWidth);
             axisObjects[0].transform.localPosition = -0.5f * newFrameAxisLength * Vector3.right;
             axisObjects[1].transform.localScale = new Vector3(newFrameAxisWidth, newFrameAxisWidth, newFrameAxisLength);
-            axisObjects[1].transform.localPosition = -0.5f * newFrameAxisLength * Vector3.forward;
+            axisObjects[1].transform.localPosition = newFrameAxisLength * new Vector3(0, 0.001f, -0.5f);
             axisObjects[2].transform.localScale = new Vector3(newFrameAxisWidth, newFrameAxisLength, newFrameAxisWidth);
-            axisObjects[2].transform.localPosition = 0.5f * newFrameAxisLength * Vector3.up;
+            axisObjects[2].transform.localPosition = newFrameAxisLength * new Vector3(0.001f, 0.5f, 0.001f);
 
             Collider.center = 0.5f * (newFrameAxisLength - newFrameAxisWidth / 2) * new Vector3(-1, 1, -1);
             Collider.size = (newFrameAxisLength + newFrameAxisWidth / 2) * Vector3.one;

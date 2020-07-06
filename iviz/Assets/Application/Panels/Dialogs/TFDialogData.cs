@@ -40,5 +40,11 @@ namespace Iviz.App
         {
             DialogPanelManager.HidePanelFor(this);
         }
+        
+        public void Show(TFFrame frame)
+        {
+            Show();
+            panel.TFLog.SelectedFrame = frame;
+        }        
     }
 }

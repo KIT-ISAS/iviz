@@ -40,7 +40,7 @@ namespace Iviz.Displays
             Display.Stop();
         }
 
-        public bool Visible
+        public virtual bool Visible
         {
             get => gameObject.activeSelf;
             set => gameObject.SetActive(value);

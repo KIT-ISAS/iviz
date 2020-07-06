@@ -34,45 +34,21 @@ namespace Iviz.App.Listeners
             }
         }
 
-        [SerializeField] bool forceInvisible;
-        public bool ForceInvisible
-        {
-            get => forceInvisible;
-            set
-            {
-                forceInvisible = value;
-                if (value)
-                {
-                    resource.Visible = false;
-                }
-                LabelVisible = LabelVisible; // update
-            }
-        }
-
         public override bool Selected
         {
             get => base.Selected;
             set
             {
-                //selected_ = value;
                 base.Selected = value;
                 labelObject.SetActive(value || LabelVisible);
-                /*
-                if (value)
-                {
-                    TFListener.GuiManager.ShowBoundary(null);
-                }
-                */
             }
         }
-
-        //public bool IgnoreUpdates { get; set; }
 
         GameObject labelObject;
         TextMesh labelObjectText;
         LineConnector parentConnector;
         BoxCollider boxCollider;
-        AxisFrameResource resource;
+        AxisFrameResource axis;
 
         readonly HashSet<DisplayNode> listeners = new HashSet<DisplayNode>();
         readonly Dictionary<string, TFFrame> children = new Dictionary<string, TFFrame>();
@@ -123,11 +99,42 @@ namespace Iviz.App.Listeners
             }
         }
 
-        public bool AxisVisible
+        bool forceVisible;
+        public bool ForceVisible
         {
-            get => resource.Visible;
-            set => resource.Visible = value && !ForceInvisible;
+            get => forceVisible;
+            set
+            {
+                forceVisible = value;
+                Visible = Visible;
+                AnchorVisible = AnchorVisible;
+                TrailVisible = TrailVisible;
+            }
         }
+
+        bool visible;
+        public bool Visible
+        {
+            get => visible;
+            set
+            {
+                visible = value;
+                axis.Visible = value || ForceVisible;
+                TrailVisible = TrailVisible;
+                AnchorVisible = AnchorVisible;
+            } 
+        }
+        
+        bool anchorVisible;
+        bool AnchorVisible
+        {
+            get => anchorVisible;
+            set
+            {
+                anchorVisible = value;
+                anchor.Visible = value && (Visible || ForceVisible);
+            } 
+        }        
 
         bool labelVisible;
         public bool LabelVisible
@@ -136,7 +143,7 @@ namespace Iviz.App.Listeners
             set
             {
                 labelVisible = value;
-                labelObject.SetActive(!ForceInvisible && (value || Selected));
+                labelObject.SetActive((value || Selected) && (ForceVisible || Visible));
             }
         }
 
@@ -154,24 +161,24 @@ namespace Iviz.App.Listeners
 
         public float AxisLength
         {
-            get => resource.AxisLength;
+            get => axis.AxisLength;
             set
             {
-                resource.AxisLength = value;
+                axis.AxisLength = value;
                 parentConnector.LineWidth = AxisLength / 20;
             }
         }
 
+        bool trailVisible;
         public bool TrailVisible
         {
-            get => trail.Visible;
+            get => trailVisible;
             set
             {
-                //Debug.Log("Enabled: " + value);
-                trail.Visible = value;
+                trailVisible = value;
+                trail.Visible = value && (Visible || ForceVisible);
                 if (value)
                 {
-                    //Debug.Log("Setting datasource for " + Id);
                     trail.DataSource = () => transform.position;
                 }
                 else
@@ -312,9 +319,9 @@ namespace Iviz.App.Listeners
                 TFListener.RootFrame?.transform; // TFListener.BaseFrame may not exist yet
             parentConnector.name = "[Connector]";
 
-            resource = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Displays.AxisFrame, transform);
-            resource.Layer = Layer;
-            resource.name = "[Axis]";
+            axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Displays.AxisFrame, transform);
+            axis.Layer = Layer;
+            axis.name = "[Axis]";
 
             AxisLength = 0.25f;
             //OrbitColorEnabled = false;
@@ -329,15 +336,16 @@ namespace Iviz.App.Listeners
             TrailVisible = false;
             
             anchor = ResourcePool.GetOrCreate<AnchorLine>(Resource.Displays.AnchorLine, TFListener.UnityFrame?.transform);
+            anchor.Visible = false;
         }
 
         public void Recycle()
         {
-            ResourcePool.Dispose(Resource.Displays.AxisFrame, resource.gameObject);
+            ResourcePool.Dispose(Resource.Displays.AxisFrame, axis.gameObject);
             ResourcePool.Dispose(Resource.Displays.Text, labelObject);
             ResourcePool.Dispose(Resource.Displays.LineConnector, parentConnector.gameObject);
             ResourcePool.Dispose(Resource.Displays.Trail, trail.gameObject);
-            resource = null;
+            axis = null;
             labelObject = null;
             parentConnector = null;
             trail = null;
@@ -349,21 +357,28 @@ namespace Iviz.App.Listeners
             Id = "";
             trail.Name = "[Trail:In Trash]";
             timeline.Clear();
-            resource.Stop();
+            axis.Stop();
             trail.Stop();
+            TrailVisible = false;
+            anchor.Visible = false;
         }
 
-        public void UpdateAnchor(AnchorLine.FindAnchorFn findAnchorFn)
+        public void UpdateAnchor(AnchorLine.FindAnchorFn findAnchorFn, bool forceRebuild = false)
         {
             if (findAnchorFn is null)
             {
-                anchor.Visible = false;
+                AnchorVisible = false;
                 return;
             }
-            anchor.Visible = true;
+            AnchorVisible = true;
             anchor.FindAnchor = findAnchorFn;
-            anchor.Position = transform.position;
+            anchor.SetPosition(transform.position, forceRebuild);
         }
-
+        
+        protected override void OnDoubleClick()
+        {
+            TFListener.GuiManager.Select(this);
+            DisplayListPanel.Instance.ShowFrame(this);
+        }        
     }
 }

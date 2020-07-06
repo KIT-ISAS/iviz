@@ -511,6 +511,11 @@ namespace Iviz.App
             imageData.Show();
         }
 
+        public void ShowFrame(TFFrame frame)
+        {
+            tfTreeData.Show(frame);
+        }
+        
         int frames = 0;
 
         void UpdateBottomText()

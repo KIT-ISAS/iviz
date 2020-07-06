@@ -21,11 +21,11 @@ namespace Iviz.App
         [SerializeField] Button gotoButton = null;
         [SerializeField] Button trail = null;
         [SerializeField] Button lockPivot = null;
-        [SerializeField] Button lock1PV = null;
+        //[SerializeField] Button lock1PV = null;
 
         [SerializeField] Text trailText = null;
         [SerializeField] Text lockPivotText = null;
-        [SerializeField] Text lock1PVText = null;
+        //[SerializeField] Text lock1PVText = null;
 
         [SerializeField] TFLink tfLink = null;
 
@@ -51,10 +51,12 @@ namespace Iviz.App
                 selectedFrame = value;
                 selectedFrame?.AddListener(dummy);
 
-                gotoButton.interactable = selectedFrame != null;
-                trail.interactable = selectedFrame != null;
-                lockPivot.interactable = selectedFrame != null;
-                lock1PV.interactable = selectedFrame != null;
+
+                bool interactable = selectedFrame != null;
+                gotoButton.interactable = interactable;
+                trail.interactable = interactable;
+                lockPivot.interactable = interactable;
+                //lock1PV.interactable = interactable;
 
                 if (selectedFrame == null)
                 {
@@ -82,7 +84,7 @@ namespace Iviz.App
             gotoButton.interactable = false;
             trail.interactable = false;
             lockPivot.interactable = false;
-            lock1PV.interactable = false;
+            //lock1PV.interactable = false;
             tfName.text = "<color=grey>[ ⮑none ]</color>";
 
             UpdateFrameTexts();

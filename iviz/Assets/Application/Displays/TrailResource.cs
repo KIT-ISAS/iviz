@@ -76,9 +76,9 @@ namespace Iviz.Displays
             ResourcePool.Dispose(Resource.Displays.Line, lines.gameObject);
         }
 
-        public void Stop()
+        public override void Stop()
         {
-            lines.Stop();
+            base.Stop();
             measurements.Clear();
             DataSource = null;
         }

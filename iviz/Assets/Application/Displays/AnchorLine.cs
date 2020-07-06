@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Application.Displays
 {
-    public class AnchorLine : WrapperResource, IRecyclable, ISupportsTint
+    public sealed class AnchorLine : WrapperResource, IRecyclable, ISupportsTint
     {
         LineResource resource;
         readonly List<LineWithColor> lines = new List<LineWithColor>();
@@ -33,29 +33,44 @@ namespace Application.Displays
             }
         }
 
+        public override bool Visible
+        {
+            get => base.Visible;
+            set
+            {
+                base.Visible = value;
+                if (value)
+                {
+                    SetPosition(Position, true);
+                }
+            }
+        }
+
         Vector3 position = Vector3.one * float.PositiveInfinity;
 
         public Vector3 Position
         {
             get => position;
-            set
-            {
-                if (Mathf.Approximately((value - Position).sqrMagnitude, 0))
-                {
-                    return;
-                }
-                position = value;
-                UpdateLines();
-            }
+            set => SetPosition(value);
         }
 
-        public void UpdateLines()
+        public void SetPosition(in Vector3 newPosition, bool forceRebuild = false)
         {
+            if (!forceRebuild && Mathf.Approximately((newPosition - Position).sqrMagnitude, 0))
+            {
+                return;
+            }
+            position = newPosition;
+
+            if (!Visible || FindAnchor is null)
+            {
+                return;
+            }
             lines.Clear();
             if (FindAnchor(position, out Vector3 anchor, out Vector3 normal))
             {
-                LineUtils.AddLineStipple(lines, anchor, position, Color.yellow);
-                LineUtils.AddCircleStipple(lines, anchor, 0.25f, normal, Color.yellow);
+                LineUtils.AddLineStipple(lines, anchor, position, Color);
+                LineUtils.AddCircleStipple(lines, anchor, 0.125f, normal, Color);
             }
             resource.LinesWithColor = lines;
         }
@@ -70,7 +85,7 @@ namespace Application.Displays
         {
             resource = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, transform);
             resource.UseAlpha = false;
-            resource.LineScale = 0.01f;
+            resource.LineScale = 0.003f;
             Color = Color.yellow;
         }
         

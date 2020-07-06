@@ -49,8 +49,8 @@ namespace Iviz.App.Listeners
 
         public override ModuleData ModuleData
         {
-            get => Node.DisplayData;
-            set => Node.DisplayData = value;
+            get => Node.ModuleData;
+            set => Node.ModuleData = value;
         }
 
         readonly ImageConfiguration config = new ImageConfiguration();

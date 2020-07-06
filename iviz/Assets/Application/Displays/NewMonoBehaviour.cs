@@ -16,6 +16,7 @@ namespace Iviz.App
 
         private void Start()
         {
+            transform.position = new Vector3(0, 2, 0);
             resource = GetComponent<AnchorLine>();
 
             resource.FindAnchor = (in Vector3 position, out Vector3 anchor, out Vector3 normal) =>
@@ -24,6 +25,7 @@ namespace Iviz.App
                 normal = Vector3.up;
                 return true;
             };
+            resource.SetPosition(new Vector3(0, 2, 0), true);
 
             //resource.Set(Quaternion.Euler(30, 270, 40));
             //resource.Set(new Vector3(0, 1, 1) * 20);

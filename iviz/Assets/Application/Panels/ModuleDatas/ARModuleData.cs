@@ -56,7 +56,8 @@ namespace Iviz.App
             panel.HideButton.State = controller.Visible;
             panel.Frame.Owner = controller;
             panel.WorldScale.Value = controller.WorldScale;
-            panel.Origin.Value = controller.Offset;
+            panel.WorldOffset.Value = controller.WorldOffset;
+            panel.WorldAngle.Value = controller.WorldAngle;
 
             panel.SearchMarker.Value = controller.UseMarker;
             //panel.MarkerSize.Value = controller.MarkerSize;
@@ -79,9 +80,13 @@ namespace Iviz.App
             {
                 controller.WorldScale = f;
             };
-            panel.Origin.ValueChanged += f =>
+            panel.WorldOffset.ValueChanged += f =>
             {
-                controller.Offset = f;
+                controller.WorldOffset = f;
+            };
+            panel.WorldAngle.ValueChanged += f =>
+            {
+                controller.WorldAngle = f;
             };
             panel.SearchMarker.ValueChanged += f =>
             {

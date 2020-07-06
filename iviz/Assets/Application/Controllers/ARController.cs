@@ -21,7 +21,8 @@ namespace Iviz.App.Listeners
         [DataMember] public Resource.Module Module => Resource.Module.AR;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public float WorldScale { get; set; } = 1.0f;
-        [DataMember] public SerializableVector3 Offset { get; set; } = Vector3.zero;
+        [DataMember] public SerializableVector3 WorldOffset { get; set; } = Vector3.zero;
+        [DataMember] public float WorldAngle { get; set; } = 0;
         [DataMember] public bool SearchMarker { get; set; } = false;
         [DataMember] public float MarkerSize { get; set; } = 0.198f;
         [DataMember] public bool MarkerHorizontal { get; set; } = true;
@@ -67,7 +68,7 @@ namespace Iviz.App.Listeners
             set
             {
                 Visible = value.Visible;
-                Offset = value.Offset;
+                WorldOffset = value.WorldOffset;
                 WorldScale = value.WorldScale;
                 //PublishPose = value.PublishPose;
                 //PublishPlanesAsMarkers = value.PublishMarkers;
@@ -80,13 +81,22 @@ namespace Iviz.App.Listeners
             }
         }
 
-        public Vector3 Offset
+        public Vector3 WorldOffset
         {
-            get => config.Offset;
+            get => config.WorldOffset;
             set
             {
-                config.Offset = value;
-                //Debug.Log(value);
+                config.WorldOffset = value;
+                TFRoot.transform.SetPose(RootPose);
+            }
+        }
+        
+        public float WorldAngle
+        {
+            get => config.WorldAngle;
+            set
+            {
+                config.WorldAngle = value;
                 TFRoot.transform.SetPose(RootPose);
             }
         }
@@ -196,7 +206,7 @@ namespace Iviz.App.Listeners
                 }
                 else
                 {
-                    Offset = Offset;
+                    WorldOffset = WorldOffset;
                     tracker.trackedImagesChanged -= OnTrackedImagesChanged;
                 }
             }
@@ -254,15 +264,19 @@ namespace Iviz.App.Listeners
             }
         }
 
-        public Pose RegisteredPose { get; set; } = Pose.identity;
+        Pose RegisteredPose { get; set; } = Pose.identity;
 
-        public Pose RootPose
+        Pose RootPose
         {
             get
             {
-                Pose pose = RegisteredPose;
-                pose.position += pose.rotation * Offset.Ros2Unity();
-                return pose;
+                //Pose pose = RegisteredPose;
+                Pose offsetPose = new Pose(
+                    WorldOffset.Ros2Unity(),
+                    Quaternion.AngleAxis(WorldAngle, Vector3.up)
+                    );
+                //offsetPose.position += offsetPose.rotation * WorldOffset.Ros2Unity();
+                return RegisteredPose.Multiply(offsetPose);
             }
         }
 
@@ -286,6 +300,8 @@ namespace Iviz.App.Listeners
             }
 
             planeManager = ARSessionOrigin.GetComponent<ARPlaneManager>();
+            planeManager.planesChanged += OnPlanesChanged;
+            
             tracker = ARSessionOrigin.GetComponent<ARTrackedImageManager>();
             raycaster = ARSessionOrigin.GetComponent<ARRaycastManager>();
 
@@ -295,6 +311,12 @@ namespace Iviz.App.Listeners
             MarkerFound = false;
 
             Config = new ARConfiguration();
+        }
+
+        bool forceAnchorRebuild;
+        void OnPlanesChanged(ARPlanesChangedEventArgs obj)
+        {
+            forceAnchorRebuild = true;
         }
 
         void UpdateARAnchors()
@@ -319,8 +341,10 @@ namespace Iviz.App.Listeners
             
             foreach (TFFrame frame in TFListener.Instance.Frames.Values)
             {
-                frame.UpdateAnchor(FindAnchorFn);    
-            }            
+                frame.UpdateAnchor(FindAnchorFn, forceAnchorRebuild);    
+            }
+
+            forceAnchorRebuild = false;
         }
 
         //uint headSeq = 0;

@@ -7,7 +7,7 @@ Shader "iviz/TransparentLine"
 	SubShader
 	{
 		Cull Off
-		Tags { "Queue" = "Transparent" "RenderType"="Transparent"}
+		Tags { "Queue" = "Transparent" "RenderType"="Transparent" "LightMode"="ForwardBase"}
 		Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass
@@ -96,8 +96,13 @@ Shader "iviz/TransparentLine"
 					(cB >> 24) & 0xff
 					) / 255.0;
 	#endif
-				o.color = (rgbaB - rgbaA) * V.z + rgbaA;
-				o.color *= _Tint;
+				half4 diffuse = (rgbaB - rgbaA) * V.z + rgbaA;
+				diffuse *= _Tint;
+				
+				float3 normal = normalize(cross(up, right));
+                o.color = diffuse;				
+			    o.color.rgb += 0.5f * ShadeSH9(half4(normal, 1));
+
 				return o;
 			}
 

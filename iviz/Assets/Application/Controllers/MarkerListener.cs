@@ -142,7 +142,7 @@ namespace Iviz.App.Listeners
                     if (!markers.TryGetValue(id, out MarkerObject markerToAdd))
                     {
                         markerToAdd = CreateMarkerObject();
-                        markerToAdd.DisplayData = ModuleData;
+                        markerToAdd.ModuleData = ModuleData;
                         markerToAdd.Parent = TFListener.ListenersFrame;
                         markerToAdd.OcclusionOnly = RenderAsOcclusionOnly;
                         markerToAdd.Tint = Tint;

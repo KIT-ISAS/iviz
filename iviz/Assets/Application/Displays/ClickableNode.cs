@@ -15,7 +15,7 @@ namespace Iviz.App.Displays
         public abstract Vector3 BoundsScale { get; }
         public abstract string Name { get; }
 
-        public ModuleData DisplayData { get; set; }
+        public ModuleData ModuleData { get; set; }
         public bool UsesBoundaryBox { get; protected set; } = true;
 
 
@@ -77,21 +77,29 @@ namespace Iviz.App.Displays
             switch (clickCount)
             {
                 case 1:
-                    TFListener.GuiManager.Select(this);
+                    OnSingleClick();
                     break;
                 case 2:
-                    DisplayData?.Select();
-                    break;
-                case 3:
-                    TFListener.GuiManager.ToggleSelect(this);
+                    OnDoubleClick();
                     break;
             }
         }
 
+        protected virtual void OnSingleClick()
+        {
+            TFListener.GuiManager.ToggleSelect(this);
+        }
+
+        protected virtual void OnDoubleClick()
+        {
+            TFListener.GuiManager.Select(this);
+            ModuleData?.Select();
+        }
+        
         public override void Stop()
         {
             base.Stop();
-            DisplayData = null;
+            ModuleData = null;
             TFListener.GuiManager.Unselect(this);
         }
     }

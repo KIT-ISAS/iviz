@@ -7,14 +7,15 @@ Shader "iviz/Line"
 	SubShader
 	{
 		Cull Off
-		Tags { "RenderType"="Opaque"}
+		Tags { "RenderType"="Opaque" "LightMode"="ForwardBase"}
 
 		Pass
 		{
 
 			CGPROGRAM
 			#include "UnityCG.cginc"
-
+            #include "UnityLightingCommon.cginc"
+            
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma multi_compile _ USE_TEXTURE
@@ -85,18 +86,22 @@ Shader "iviz/Line"
 					(cA >>  0) & 0xff,
 					(cA >>  8) & 0xff,
 					(cA >> 16) & 0xff,
-					(cA >> 24) & 0xff
+					255
 					) / 255.0;
 				uint cB = _Lines[inst].colorB;
 				half4 rgbaB = half4(
 					(cB >>  0) & 0xff,
 					(cB >>  8) & 0xff,
 					(cB >> 16) & 0xff,
-					(cB >> 24) & 0xff
+					255
 					) / 255.0;
 	#endif
-				o.color = (rgbaB - rgbaA) * V.z + rgbaA;
-				o.color *= _Tint;
+				half4 diffuse = (rgbaB - rgbaA) * V.z + rgbaA;
+				diffuse *= _Tint;
+				
+				float3 normal = normalize(cross(up, right));
+                o.color = diffuse;				
+			    o.color.rgb += 0.5f * ShadeSH9(half4(normal, 1));
 				return o;
 			}
 

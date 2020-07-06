@@ -269,8 +269,8 @@ namespace Iviz.App
 
         public ModuleData ModuleData
         {
-            get => node.DisplayData;
-            set => node.DisplayData = value;
+            get => node.ModuleData;
+            set => node.ModuleData = value;
         }
 
         void Awake()

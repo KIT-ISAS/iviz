@@ -1,4 +1,6 @@
 ﻿
+using UnityEngine.UIElements;
+
 namespace Iviz.App
 {
     /// <summary>
@@ -9,7 +11,8 @@ namespace Iviz.App
         public FrameWidget Frame { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
         public ToggleButtonWidget HideButton { get; private set; }
-        public Vector3SliderWidget Origin { get; private set; }
+        public Vector3SliderWidget WorldOffset { get; private set; }
+        public SliderWidget WorldAngle { get; private set; }
         public SliderWidget WorldScale { get; private set; }
         public ToggleWidget SearchMarker { get; private set; }
         //public NumberInputFieldWidget MarkerSize { get; private set; }
@@ -32,7 +35,8 @@ namespace Iviz.App
             HideButton = p.AddHideButton();
             Frame = p.AddFrame();
             WorldScale = p.AddSlider("World Scale").SetMinValue(0.01f).SetMaxValue(1f);
-            Origin = p.AddVector3Slider("Move World By").SetRange(0.5f);
+            WorldOffset = p.AddVector3Slider("Move World By").SetRange(0.5f);
+            WorldAngle = p.AddSlider("Rotate World By").SetMinValue(-180).SetMaxValue(180).SetNumberOfSteps(72);
             SearchMarker = p.AddToggle("Enable Marker Detection");
             MarkerHorizontal = p.AddToggle("Is Marker Horizontal");
             MarkerAngle = p.AddSlider("Marker Angle").SetMinValue(0).SetMaxValue(7*45).SetNumberOfSteps(7);

@@ -87,7 +87,7 @@ namespace Iviz.App.Listeners
                 config.AxisVisible = value;
                 foreach (var x in frames.Values)
                 {
-                    x.AxisVisible = value;
+                    x.Visible = value;
                 }
             }
         }
@@ -183,11 +183,11 @@ namespace Iviz.App.Listeners
             Config = new TFConfiguration();
 
             UnityFrame = Add(CreateFrameObject("/unity/", transform, null));
-            UnityFrame.ForceInvisible = true;
+            UnityFrame.Visible = false;
             UnityFrame.AddListener(null);
 
             RootFrame = Add(CreateFrameObject("/", transform, UnityFrame));
-            RootFrame.ForceInvisible = true;
+            RootFrame.Visible = false;
             RootFrame.AddListener(null);
 
             MapFrame = Add(CreateFrameObject(BaseFrameId, transform, RootFrame));
@@ -302,7 +302,7 @@ namespace Iviz.App.Listeners
             //Debug.Log(parent + " -> " + frame.transform.parent);
             frame.name = "{" + id + "}";
             frame.Id = id;
-            frame.AxisVisible = config.AxisVisible;
+            frame.Visible = config.AxisVisible;
             frame.AxisLength = config.AxisSize;
             frame.LabelSize = config.AxisLabelSize;
             frame.LabelVisible = config.AxisLabelVisible;
