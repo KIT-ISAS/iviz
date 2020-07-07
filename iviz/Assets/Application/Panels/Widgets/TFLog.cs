@@ -74,8 +74,20 @@ namespace Iviz.App
 
         void Awake()
         {
+            Initialize();
+        }
+
+        bool isAwake;
+        void Initialize()
+        {
+            if (isAwake)
+            {
+                return;
+            }
+
+            isAwake = true;
             Instance = this;
-                
+
             tfLink.LinkClicked += OnTfLinkClicked;
             SelectedFrame = null;
 
@@ -165,6 +177,8 @@ namespace Iviz.App
 
         public void Flush()
         {
+            Initialize();
+            
             TFNode root = new TFNode(TFListener.RootFrame);
 
             StringBuilder str = new StringBuilder();

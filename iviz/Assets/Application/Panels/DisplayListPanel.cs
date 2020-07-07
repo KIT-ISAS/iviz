@@ -524,10 +524,10 @@ namespace Iviz.App
             bottomFps.text = $"<b>{frames} FPS</b>";
             frames = 0;
 
-            (int, int) bandwidth = ConnectionManager.CollectReported();
-            int down = bandwidth.Item1 / 1000;
-            int up = bandwidth.Item2 / 1000;
-            bottomBandwidth.text = $"<b>↓{down:N0}kB/s ↑{up:N0}kB/s</b>";
+            var (downB, upB) = ConnectionManager.CollectReported();
+            int downKb = downB / 1000;
+            int upKb = upB / 1000;
+            bottomBandwidth.text = $"<b>↓{downKb:N0}kB/s ↑{upKb:N0}kB/s</b>";
         }
 
         void UpdateFpsCounter()

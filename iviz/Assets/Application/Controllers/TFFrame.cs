@@ -31,6 +31,7 @@ namespace Iviz.App.Listeners
                 id = value;
                 labelObjectText.text = id;
                 trail.Name = "[Trail:" + id + "]";
+                anchor.Name = "[Anchor:" + id + "]";
             }
         }
 
@@ -361,6 +362,7 @@ namespace Iviz.App.Listeners
             trail.Stop();
             TrailVisible = false;
             anchor.Visible = false;
+            anchor.Name = "[Anchor:In Trash]";
         }
 
         public void UpdateAnchor(AnchorLine.FindAnchorFn findAnchorFn, bool forceRebuild = false)
