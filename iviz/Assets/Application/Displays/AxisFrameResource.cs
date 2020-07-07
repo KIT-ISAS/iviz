@@ -18,7 +18,7 @@ namespace Iviz.Displays
             set
             {
                 axisLength = value;
-                UpdateFrameMesh(axisLength, axisLength / 20);
+                UpdateFrameMesh(axisLength, axisLength / 10);
             }
         }
 

@@ -48,7 +48,7 @@ namespace Iviz.App.Displays
         bool IsRealClick(PointerEventData eventData)
         {
             return
-                eventData.button == PointerEventData.InputButton.Left &&
+                eventData.button == PointerEventData.InputButton.Right &&
                 Vector2.Distance(eventData.pressPosition, eventData.position) < MovingThreshold &&
                 (Time.realtimeSinceStartup - eventData.clickTime) < MaxClickTime;
         }
@@ -58,11 +58,10 @@ namespace Iviz.App.Displays
         public virtual void OnPointerClick(PointerEventData eventData)
         {
             LastClickCount = 0;
-            if (!FlyCamera.IsMobile && eventData.button != PointerEventData.InputButton.Left)
-            {
-                return;
-            }
-            if (FlyCamera.IsMobile && Input.touchCount != 1)
+            if (
+                (!FlyCamera.IsMobile && eventData.button != PointerEventData.InputButton.Right) ||
+                (FlyCamera.IsMobile && Input.touchCount != 1)
+                )
             {
                 return;
             }

@@ -319,12 +319,13 @@ namespace Iviz.App.Listeners
             forceAnchorRebuild = true;
         }
 
-        void UpdateARAnchors()
+        void UpdateAnchors()
         {
             bool FindAnchorFn(in Vector3 position, out Vector3 anchor, out Vector3 normal)
             {
                 List<ARRaycastHit> results = new List<ARRaycastHit>();
-                raycaster.Raycast(new Ray(position, Vector3.down), results, TrackableType.PlaneWithinBounds);
+                Vector3 origin = position + 0.25f * Vector3.up;
+                raycaster.Raycast(new Ray(origin, Vector3.down), results, TrackableType.PlaneWithinBounds);
                 if (results.Count == 0)
                 {
                     anchor = Vector3.zero;
@@ -350,7 +351,7 @@ namespace Iviz.App.Listeners
         //uint headSeq = 0;
         public void Update()
         {
-            UpdateARAnchors();
+            UpdateAnchors();
             /*
             bool FindAnchorFn(in Vector3 position, out Vector3 anchor, out Vector3 normal)
             {
@@ -437,8 +438,12 @@ namespace Iviz.App.Listeners
             }
 
             Pose expectedPose = TFListener.RelativePose(resource.transform.AsPose());
-            RegisteredPose = newPose.Value.Multiply(expectedPose.Inverse());
-
+            Pose registeredPose = newPose.Value.Multiply(expectedPose.Inverse());
+            Quaternion corrected = new Quaternion(0, RegisteredPose.rotation.y, 0, RegisteredPose.rotation.w).normalized;
+            registeredPose.rotation = corrected;
+            
+            RegisteredPose = registeredPose;
+            
             MarkerFound = true;
             TFRoot.transform.SetPose(RootPose);
         }

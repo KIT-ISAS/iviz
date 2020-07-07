@@ -1,3 +1,4 @@
+using Iviz.App;
 using Iviz.App.Listeners;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -5,7 +6,7 @@ using UnityEngine.UIElements;
 
 namespace Application.Displays
 {
-    public class DraggableResource : MonoBehaviour, IPointerClickHandler, IPointerDownHandler
+    public class DraggableResource : MonoBehaviour, IPointerDownHandler, IDraggable
     {
         Vector3 line = Vector3.right;
 
@@ -23,16 +24,22 @@ namespace Application.Displays
         
         public void OnPointerClick(PointerEventData eventData)
         {
-            Vector2 pos = eventData.position;
-            Ray ray = new Ray(transform.position, line);
-            Ray other = TFListener.MainCamera.ScreenPointToRay(pos);
-            Debug.Log(TFListener.MainCamera.gameObject.name);
-            transform.position = ClosestPoint(ray, other);
+
         }
 
         public void OnPointerDown(PointerEventData eventData)
         {
-            Debug.Log("here");
+            Debug.Log("Starg!");
+            TFListener.GuiManager.DraggedObject = this;
+        }
+
+        public void OnPointerMove(Vector2 pos)
+        {
+            Ray ray = new Ray(transform.position, line);
+            Ray other = TFListener.MainCamera.ScreenPointToRay(pos);
+            Debug.Log(TFListener.MainCamera.gameObject.name);
+            transform.position = ClosestPoint(ray, other);
+            
         }
     }
 }

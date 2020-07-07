@@ -22,7 +22,7 @@ namespace Iviz.App.Listeners
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public bool AxisVisible { get; set; } = true;
-        [DataMember] public float AxisSize { get; set; } = 0.25f;
+        [DataMember] public float AxisSize { get; set; } = 0.125f;
         [DataMember] public bool AxisLabelVisible { get; set; } = false;
         [DataMember] public float AxisLabelSize { get; set; } = 0.1f;
         [DataMember] public bool ParentConnectorVisible { get; set; } = false;

@@ -324,7 +324,7 @@ namespace Iviz.App.Listeners
             axis.Layer = Layer;
             axis.name = "[Axis]";
 
-            AxisLength = 0.25f;
+            AxisLength = 0.125f;
             //OrbitColorEnabled = false;
 
             parentConnector.gameObject.SetActive(false);

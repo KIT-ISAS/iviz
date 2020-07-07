@@ -12,6 +12,11 @@ using UnityEngine.XR.ARFoundation;
 
 namespace Iviz.App
 {
+    public interface IDraggable
+    {
+        void OnPointerMove(Vector2 position);
+    }
+    
     public class FlyCamera : DisplayNode
     {
         Vector2 lastPointer;
@@ -93,6 +98,8 @@ namespace Iviz.App
 
         float PointerAltDistance { get; set; }
 
+        public IDraggable DraggedObject { get; set; }
+        
         public HashSet<Canvas> Canvases { get; } = new HashSet<Canvas>();
 
         public HashSet<IBlocksPointer> GuiPointerBlockers { get; } = new HashSet<IBlocksPointer>();
@@ -106,7 +113,7 @@ namespace Iviz.App
                 UnityEngine.Application.targetFrameRate = 30;
             }
 
-            Physics.autoSimulation = false;
+            //Physics.autoSimulation = false;
 
             DisplayListPanel.Instance.UnlockButton.onClick.AddListener(OnUnlockClick);
 
@@ -176,6 +183,7 @@ namespace Iviz.App
             {
                 PointerDown = Input.touchCount == 1;
                 PointerAltDown = Input.touchCount == 2;
+                
                 if (PointerAltDown)
                 {
                     PointerAltPosition = (Input.GetTouch(0).position + Input.GetTouch(1).position) / 2;
@@ -194,12 +202,23 @@ namespace Iviz.App
             else
             {
                 PointerDown = Input.GetMouseButton(1);
+
                 if (PointerDown)
                 {
                     PointerPosition = Input.mousePosition;
                     PointerOnGui = Canvases.Any(IsPointerOnCanvas)
                                    || GuiPointerBlockers.Any(x => x.IsPointerOnGui(PointerPosition));
                 }
+            }
+
+            if (!PointerDown)
+            {
+                DraggedObject = null;
+            }
+            if (!(DraggedObject is null))
+            {
+                DraggedObject.OnPointerMove(PointerPosition);
+                return;
             }
 
             if (IsMobile)
