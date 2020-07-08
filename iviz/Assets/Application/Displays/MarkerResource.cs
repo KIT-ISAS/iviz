@@ -45,7 +45,6 @@ namespace Iviz.Displays
 
         protected virtual void Awake()
         {
-            Name = GetType().Name;
             Collider = GetComponent<BoxCollider>();
         }
 

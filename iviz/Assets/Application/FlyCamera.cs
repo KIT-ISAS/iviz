@@ -14,7 +14,9 @@ namespace Iviz.App
 {
     public interface IDraggable
     {
-        void OnPointerMove(Vector2 position);
+        void OnPointerMove(in Vector2 cursorPos);
+        void OnStartDragging();
+        void OnEndDragging();
     }
     
     public class FlyCamera : DisplayNode
@@ -98,7 +100,22 @@ namespace Iviz.App
 
         float PointerAltDistance { get; set; }
 
-        public IDraggable DraggedObject { get; set; }
+        IDraggable draggedObject;
+
+        public IDraggable DraggedObject
+        {
+            get => draggedObject;
+            set
+            {
+                if (draggedObject == value)
+                {
+                    return;
+                }
+                draggedObject?.OnEndDragging();
+                draggedObject = value;
+                draggedObject?.OnStartDragging();
+            }
+        }
         
         public HashSet<Canvas> Canvases { get; } = new HashSet<Canvas>();
 
