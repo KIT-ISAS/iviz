@@ -147,10 +147,7 @@ namespace Iviz.App
             {
                 config.Visible = value;
                 displays.ForEach(x => x.Visible = value);
-                if (RobotObject != null)
-                {
-                    RobotObject.SetActive(value);
-                }
+                RobotObject?.SetActive(value);
                 node.Selected = false;
                 
             }
@@ -310,7 +307,7 @@ namespace Iviz.App
             }
 
             robotInfo = RobotObject.GetComponent<RobotInfo>(); // check if recycled
-            if (robotInfo == null)
+            if (robotInfo is null)
             {
                 robotInfo = RobotObject.AddComponent<RobotInfo>();
                 robotInfo.owner = this;
@@ -422,16 +419,13 @@ namespace Iviz.App
 
             if (!(RobotObject is null))
             {
-                if (!(BaseLink is null))
-                {
-                    BaseLink.transform.SetParentLocal(RobotObject.transform);
-                }
+                BaseLink?.transform.SetParentLocal(RobotObject.transform);
                 ResourcePool.Dispose(Resource.Robots.Objects[config.RobotResource], RobotObject);
             }
             config.RobotResource = null;
             RobotObject = null;
 
-            if (robotInfo != null)
+            if (!(robotInfo is null))
             {
                 robotInfo.owner = null;
             }

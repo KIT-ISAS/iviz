@@ -79,7 +79,7 @@ namespace Iviz.Displays
                 return;
             }
             Color effectiveColor = EffectiveColor;
-            if (Texture is null)
+            if (Texture == null)
             {
                 Material material = effectiveColor.a > 254f / 255f ?
                     Resource.Materials.Lit.Object :

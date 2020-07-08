@@ -93,7 +93,7 @@ namespace Iviz.App.Listeners
                     Listener = new RosListener<Marker>(config.Topic, Handler);
                     break;
                 case MarkerArray.RosMessageType:
-                    Listener = new RosListener<MarkerArray>(config.Topic, ArrayHandler);
+                    Listener = new RosListener<MarkerArray>(config.Topic, Handler);
                     break;
             }
         }
@@ -115,7 +115,7 @@ namespace Iviz.App.Listeners
             return $"{marker.Ns}/{marker.Id}";
         }
 
-        void ArrayHandler(MarkerArray msg)
+        void Handler(MarkerArray msg)
         {
             foreach (var marker in msg.Markers)
             {
@@ -169,8 +169,7 @@ namespace Iviz.App.Listeners
 
         static MarkerObject CreateMarkerObject()
         {
-            GameObject gameObject = new GameObject();
-            gameObject.name = "MarkerObject";
+            GameObject gameObject = new GameObject("MarkerObject");
             return gameObject.AddComponent<MarkerObject>();
         }
     }

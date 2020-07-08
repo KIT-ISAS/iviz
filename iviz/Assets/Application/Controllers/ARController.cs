@@ -21,10 +21,9 @@ namespace Iviz.App.Listeners
         [DataMember] public Resource.Module Module => Resource.Module.AR;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public float WorldScale { get; set; } = 1.0f;
-        [DataMember] public SerializableVector3 WorldOffset { get; set; } = Vector3.zero;
-        [DataMember] public float WorldAngle { get; set; } = 0;
+        public SerializableVector3 WorldOffset { get; set; } = Vector3.zero;
+        public float WorldAngle { get; set; } = 0;
         [DataMember] public bool SearchMarker { get; set; } = false;
-        [DataMember] public float MarkerSize { get; set; } = 0.198f;
         [DataMember] public bool MarkerHorizontal { get; set; } = true;
         [DataMember] public int MarkerAngle { get; set; } = 0;
         [DataMember] public string MarkerFrame { get; set; } = "";
@@ -73,7 +72,6 @@ namespace Iviz.App.Listeners
                 //PublishPose = value.PublishPose;
                 //PublishPlanesAsMarkers = value.PublishMarkers;
                 UseMarker = value.SearchMarker;
-                MarkerSize = value.MarkerSize;
                 MarkerHorizontal = value.MarkerHorizontal;
                 MarkerAngle = value.MarkerAngle;
                 MarkerFrame = value.MarkerFrame;
@@ -209,16 +207,6 @@ namespace Iviz.App.Listeners
                     WorldOffset = WorldOffset;
                     tracker.trackedImagesChanged -= OnTrackedImagesChanged;
                 }
-            }
-        }
-
-        public float MarkerSize
-        {
-            get => config.MarkerSize;
-            set
-            {
-                config.MarkerSize = value;
-                resource.Scale = value;
             }
         }
 

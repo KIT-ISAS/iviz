@@ -80,8 +80,7 @@ namespace Iviz.App.Listeners
 
         static InteractiveMarkerControlObject CreateControlObject()
         {
-            GameObject gameObject = new GameObject();
-            gameObject.name = "InteractiveMarkerControlObject";
+            GameObject gameObject = new GameObject("InteractiveMarkerControlObject");
             return gameObject.AddComponent<InteractiveMarkerControlObject>();
         }
 

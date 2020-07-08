@@ -1,4 +1,5 @@
-﻿using Iviz.App.Displays;
+﻿using System;
+using Iviz.App.Displays;
 using Iviz.App.Listeners;
 using Iviz.Resources;
 using System.Collections.Generic;
@@ -14,6 +15,8 @@ namespace Iviz.App
 {
     public interface IDraggable
     {
+        event Action<Pose> Moved;
+        bool Visible { get; set; }
         void OnPointerMove(in Vector2 cursorPos);
         void OnStartDragging();
         void OnEndDragging();

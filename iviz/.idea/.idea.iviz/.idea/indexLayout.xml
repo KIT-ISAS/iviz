@@ -27,6 +27,7 @@
       <Path>.vs</Path>
       <Path>Library</Path>
       <Path>Logs</Path>
+      <Path>Temp</Path>
       <Path>ios</Path>
       <Path>macos.app</Path>
       <Path>obj</Path>

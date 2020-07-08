@@ -1,3 +1,5 @@
+using System;
+using Iviz;
 using Iviz.App;
 using Iviz.App.Listeners;
 using UnityEngine;
@@ -26,10 +28,19 @@ namespace Application.Displays
             TFListener.GuiManager.DraggedObject = this;
         }
 
+        public event Action<Pose> Moved;
+
+        public bool Visible
+        {
+            get => gameObject.activeSelf;
+            set => gameObject.SetActive(value);
+        }
+
         public void OnPointerMove(in Vector2 cursorPos)
         {
             Transform mTransform = transform;
-            Ray ray = new Ray(mTransform.position, mTransform.parent.TransformDirection(normal));
+            Transform mParent = mTransform.parent;
+            Ray ray = new Ray(mTransform.position, mParent.TransformDirection(normal));
             Ray other = TFListener.MainCamera.ScreenPointToRay(cursorPos);
 
             (Vector3 intersection, float cameraDistance) = PlaneIntersection(ray, other);
@@ -38,7 +49,7 @@ namespace Application.Displays
                 return;
             }
 
-            Vector3 localIntersection = mTransform.parent.InverseTransformPoint(intersection);
+            Vector3 localIntersection = mParent.InverseTransformPoint(intersection);
             if (needsStart)
             {
                 startIntersection = localIntersection;
@@ -46,15 +57,16 @@ namespace Application.Displays
             }
             else
             {
-                Matrix4x4 M = Matrix4x4.identity;
-                M.SetColumn(0, startIntersection);
-                M.SetColumn(1, localIntersection);
-                M.SetColumn(2, normal);
+                Matrix4x4 m = Matrix4x4.identity;
+                m.SetColumn(0, startIntersection.normalized);
+                m.SetColumn(1, localIntersection.normalized);
+                m.SetColumn(2, normal);
 
-                float angle = Mathf.Asin(M.determinant) * Mathf.Rad2Deg; 
+                float angle = Mathf.Asin(m.determinant) * Mathf.Rad2Deg; 
 
                 Quaternion q = Quaternion.AngleAxis(angle, normal);
-                mTransform.parent.transform.localRotation *= q;
+                mTransform.parent.localRotation *= q;
+                Moved?.Invoke(mParent.AsPose());
             }
         }
 

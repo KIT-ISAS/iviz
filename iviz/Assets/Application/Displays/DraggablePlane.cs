@@ -8,12 +8,12 @@ using UnityEngine.UIElements;
 
 namespace Application.Displays
 {
-    public class DraggableTranslation : MonoBehaviour, IPointerDownHandler, IDraggable
+    public class DraggablePlane : MonoBehaviour, IPointerDownHandler, IDraggable
     {
-        public Vector3 line;
+        public Vector3 normal;
 
         bool needsStart;
-        Vector3 startOffset;
+        Vector3 startIntersection;
         
         public event Action<Pose> Moved;
 
@@ -23,18 +23,12 @@ namespace Application.Displays
             set => gameObject.SetActive(value);
         }
         
-        static (float, float) ClosestPointDelta(in Ray ray, in Ray other)
+        static (Vector3, float) PlaneIntersection(in Ray ray, in Ray other)
         {
-            Matrix4x4 m = Matrix4x4.identity;
-            m.SetColumn(0, ray.direction);
-            m.SetColumn(1, Vector3.Cross(ray.direction, other.direction));
-            m.SetColumn(2, -other.direction);
+            float t = Vector3.Dot(other.origin - ray.origin, ray.direction) / Vector3.Dot(-other.direction, ray.direction);
+            Vector3 p = other.origin + t * other.direction;
 
-            Matrix4x4 mInv = Matrix4x4.identity;
-            Matrix4x4.Inverse3DAffine(m, ref mInv);
-            Vector3 t = mInv * (other.origin - ray.origin);
-
-            return (t.x, t.z);
+            return (p, t);
         }
 
         public void OnPointerDown(PointerEventData eventData)
@@ -46,24 +40,31 @@ namespace Application.Displays
         {
             Transform mTransform = transform;
             Transform mParent = mTransform.parent;
-            Ray ray = new Ray(mTransform.position, mParent.TransformDirection(line));
+
+            Ray ray = new Ray(mTransform.position, mParent.TransformDirection(normal));
             Ray other = TFListener.MainCamera.ScreenPointToRay(cursorPos);
 
-            (float deltaDistance, float cameraDistance) = ClosestPointDelta(ray, other);
+            (Vector3 intersection, float cameraDistance) = PlaneIntersection(ray, other);
             if (cameraDistance < 0)
             {
                 return;
             }
-            deltaDistance = Mathf.Max(Mathf.Min(deltaDistance, 0.5f), -0.5f);
-            Vector3 deltaPosition = deltaDistance * ray.direction;
+
+            Vector3 localIntersection = mParent.InverseTransformPoint(intersection);
             if (needsStart)
             {
-                startOffset = deltaPosition;
+                startIntersection = localIntersection;
                 needsStart = false;
             }
             else
             {
-                mParent.position += deltaPosition - startOffset;
+                Vector3 deltaPosition = localIntersection - startIntersection;
+                float deltaDistance = deltaPosition.magnitude;
+                if (deltaDistance > 0.5f)
+                {
+                    deltaPosition *= 0.5f / deltaDistance;
+                }
+                mParent.position += mParent.TransformVector(deltaPosition);
                 Moved?.Invoke(mParent.AsPose());
             }
         }

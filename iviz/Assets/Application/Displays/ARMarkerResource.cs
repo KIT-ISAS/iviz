@@ -7,56 +7,56 @@ namespace Iviz.Displays
     {
         //[SerializeField] MeshMarkerResource back = null;
 
-        [SerializeField] float scale_;
+        [SerializeField] float scale;
         public float Scale
         {
-            get => scale_;
+            get => scale;
             set
             {
-                scale_ = value;
-                transform.localScale = 0.11f * scale_ * Vector3.one;
+                scale = value;
+                transform.localScale = 0.11f * scale * Vector3.one;
             }
         }
 
-        [SerializeField] int angle_;
+        [SerializeField] int angle;
         public int Angle
         {
-            get => angle_;
+            get => angle;
             set
             {
-                angle_ = value;
+                angle = value;
                 UpdateRotation();
             }
         }
 
         void UpdateRotation()
         {
-            Quaternion rotation = Quaternion.AngleAxis(-angle_, Vector3.up);
-            if (!horizontal_)
+            Quaternion rotation = Quaternion.AngleAxis(-Angle, Vector3.up);
+            if (!Horizontal)
             {
                 rotation *= Quaternion.AngleAxis(90, Vector3.forward);
             }
             transform.localRotation = rotation;
         }
 
-        [SerializeField] bool horizontal_;
+        [SerializeField] bool horizontal;
         public bool Horizontal
         {
-            get => horizontal_;
+            get => horizontal;
             set
             {
-                horizontal_ = value;
+                horizontal = value;
                 UpdateRotation();
             }
         }
 
-        [SerializeField] Vector3 offset_;
+        [SerializeField] Vector3 offset;
         public Vector3 Offset
         {
-            get => offset_;
+            get => offset;
             set
             {
-                offset_ = value;
+                offset = value;
                 transform.localPosition = value;
             }
         }
