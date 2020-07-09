@@ -452,7 +452,7 @@ namespace Iviz.Resources
                 arrowWidth = CharWidth('→') + CharWidth(' ');
             }
 
-            public string Split(string s, int maxWidth)
+            public string Split(string s, int maxWidth, int maxLines = 2)
             {
                 int usableWidth = maxWidth - dotWidth;
                 StringBuilder str = new StringBuilder();
@@ -468,13 +468,13 @@ namespace Iviz.Resources
                             str.Append(s[i]);
                             continue;
                         }
-                        if (numLines == 0)
+                        if (numLines != maxLines - 1)
                         {
                             str.Append("...\n→ ").Append(s[i]);
                             usedWidth = arrowWidth;
                             numLines = 1;
                         }
-                        else if (numLines == 1)
+                        else
                         {
                             str.Append("...");
                             return str.ToString();

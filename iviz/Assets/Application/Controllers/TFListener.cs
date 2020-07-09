@@ -353,18 +353,32 @@ namespace Iviz.App.Listeners
         {
             if (FlyCamera.IsMobile)
             {
+                /*
+                Transform rootFrame = RootFrame.transform;
                 UnityEngine.Pose rootFrameInverse = RootFrame.transform.AsPose().Inverse();
                 UnityEngine.Pose relative = rootFrameInverse.Multiply(unityPose);
                 var localScale = RootFrame.transform.localScale;
                 relative.position.x /= localScale.x;
                 relative.position.y /= localScale.y;
                 relative.position.z /= localScale.z;
-                return relative;
+                */
+                Transform rootFrame = RootFrame.transform;
+                return new UnityEngine.Pose(
+                    rootFrame.InverseTransformPoint(unityPose.position),
+                    UnityEngine.Quaternion.Inverse(rootFrame.rotation) * unityPose.rotation
+                    );
             }
             else
             {
                 return unityPose;
             }
+        }
+
+        public static UnityEngine.Vector3 RelativePosition(in UnityEngine.Vector3 unityPosition)
+        {
+            return FlyCamera.IsMobile ? 
+                RootFrame.transform.InverseTransformPoint(unityPosition) : 
+                unityPosition;
         }
 
         static uint tfSeq = 0;

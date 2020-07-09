@@ -11,12 +11,12 @@ namespace Iviz.Displays
     public class DraggablePlane : MonoBehaviour, IPointerDownHandler, IDraggable
     {
         public Vector3 normal;
-        public Transform ParentTransform { get; set; }
+        public Transform TargetTransform { get; set; }
         
         bool needsStart;
         Vector3 startIntersection;
         
-        public event Action<Pose> Moved;
+        public event InteractiveControl.MovedAction Moved;
 
         public bool Visible
         {
@@ -40,7 +40,8 @@ namespace Iviz.Displays
         public void OnPointerMove(in Vector2 cursorPos)
         {
             Transform mTransform = transform;
-            Transform mParent = ParentTransform;
+            Transform mParent = mTransform.parent;
+            Transform mTarget = TargetTransform;
 
             Ray ray = new Ray(mTransform.position, mParent.TransformDirection(normal));
             Ray other = TFListener.MainCamera.ScreenPointToRay(cursorPos);
@@ -65,8 +66,8 @@ namespace Iviz.Displays
                 {
                     deltaPosition *= 0.5f / deltaDistance;
                 }
-                mParent.position += mParent.TransformVector(deltaPosition);
-                Moved?.Invoke(mParent.AsPose());
+                mTarget.position += mParent.TransformVector(deltaPosition);
+                Moved?.Invoke(mTarget.AsPose());
             }
         }
 

@@ -26,6 +26,11 @@ namespace Iviz.Msgs
             Nsecs = (uint)(diff.Ticks % 10000000) * 100;
         }
 
+        public static time Now()
+        {
+            return new time(DateTime.Now);
+        }
+        
         public DateTime ToDateTime()
         {
             return UnixEpoch.AddSeconds(Secs).AddTicks(Nsecs / 100);

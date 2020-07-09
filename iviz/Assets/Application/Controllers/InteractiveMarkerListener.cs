@@ -1,6 +1,4 @@
-﻿
-using UnityEngine;
-
+﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using System;
@@ -18,12 +16,12 @@ namespace Iviz.App.Listeners
         [DataMember] public Resource.Module Module => Resource.Module.InteractiveMarker;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
-        [DataMember] public bool DisableExpiration { get; set; } = false;
+        [DataMember] public bool DisableExpiration { get; set; } = true;
     }
 
     public class InteractiveMarkerListener : ListenerController
     {
-        RosSender<InteractiveMarkerFeedback> rosSender;
+        public RosSender<InteractiveMarkerFeedback> RosSender { get; private set; }
 
         public override TFFrame Frame => TFListener.MapFrame;
 
@@ -39,6 +37,7 @@ namespace Iviz.App.Listeners
         }
 
         readonly InteractiveMarkerConfiguration config = new InteractiveMarkerConfiguration();
+
         public InteractiveMarkerConfiguration Config
         {
             get => config;
@@ -53,7 +52,7 @@ namespace Iviz.App.Listeners
         {
             Listener = new RosListener<InteractiveMarkerUpdate>(config.Topic, Handler);
             GameThread.EverySecond += CheckForExpiredMarkers;
-            rosSender = new RosSender<InteractiveMarkerFeedback>("/interactive_markers/feedback");
+            RosSender = new RosSender<InteractiveMarkerFeedback>("/interactive_markers/feedback");
         }
 
         public override void Stop()
@@ -63,7 +62,7 @@ namespace Iviz.App.Listeners
 
             imarkers.Values.ForEach(DeleteMarkerObject);
             imarkers.Clear();
-            rosSender.Stop();
+            RosSender.Stop();
         }
 
         public void ClearAll()
@@ -91,10 +90,18 @@ namespace Iviz.App.Listeners
             {
                 imarker = CreateMarkerObject();
                 imarker.Parent = TFListener.ListenersFrame;
-                imarker.Clicked += (control, pose, point, button) => OnInteractiveControlObjectClicked(id, pose, control, point, button);
+                imarker.MouseEvent += (string controlId, in Pose pose, in Vector3 point, MouseEventType type) =>
+                {
+                    OnInteractiveControlObjectMouseEvent(id, pose, controlId, point, type);
+                };
+                imarker.Moved += (string controlId, in Pose pose) =>
+                {
+                    OnInteractiveControlObjectMoved(id, pose, controlId);
+                };
                 imarker.transform.SetParentLocal(transform);
                 imarkers[id] = imarker;
             }
+
             imarker.Set(msg);
         }
 
@@ -117,6 +124,7 @@ namespace Iviz.App.Listeners
             {
                 return;
             }
+
             im.transform.SetLocalPose(msg.Pose.Ros2Unity());
             im.UpdateExpirationTime();
         }
@@ -134,21 +142,58 @@ namespace Iviz.App.Listeners
         }
 
         uint feedSeq = 0;
-        void OnInteractiveControlObjectClicked(string imarkerId, Pose controlPose, string controlId, Vector3 position, int button)
+
+        void OnInteractiveControlObjectMouseEvent(
+            string imarkerId, in Pose controlPose,
+            string controlId, in Vector3 position,
+            MouseEventType type)
+        {
+            byte eventType;
+            switch (type)
+            {
+                case MouseEventType.Click:
+                    eventType = InteractiveMarkerFeedback.BUTTON_CLICK;
+                    break;
+                case MouseEventType.Down:
+                    eventType = InteractiveMarkerFeedback.MOUSE_DOWN;
+                    break;
+                case MouseEventType.Up:
+                    eventType = InteractiveMarkerFeedback.MOUSE_UP;
+                    break;
+                default:
+                    return; // shouldn't happen
+            }
+
+            InteractiveMarkerFeedback msg = new InteractiveMarkerFeedback
+            (
+                Header: RosUtils.CreateHeader(feedSeq++),
+                ClientId: ConnectionManager.MyId,
+                MarkerName: imarkerId,
+                ControlName: controlId,
+                EventType: eventType,
+                Pose: TFListener.RelativePose(controlPose).Unity2RosPose(),
+                MenuEntryId: 0,
+                MousePoint: position.Unity2RosPoint(),
+                MousePointValid: true
+            );
+            RosSender.Publish(msg);
+        }
+
+        void OnInteractiveControlObjectMoved(string imarkerId, in Pose controlPose, string controlId)
         {
             InteractiveMarkerFeedback msg = new InteractiveMarkerFeedback
-            {
-                Header = RosUtils.CreateHeader(feedSeq++),
-                ClientId = "iviz",
-                MarkerName = imarkerId,
-                ControlName = controlId,
-                EventType = InteractiveMarkerFeedback.BUTTON_CLICK,
-                Pose = controlPose.Unity2RosPose(),
-                MousePoint = position.Unity2RosPoint(),
-                MousePointValid = true
-            };
-            rosSender.Publish(msg);
-            Debug.Log("Publishing feedback! " + msg.Pose);
+            (
+                Header: RosUtils.CreateHeader(feedSeq++),
+                ClientId: ConnectionManager.MyId,
+                MarkerName: imarkerId,
+                ControlName: controlId,
+                EventType: InteractiveMarkerFeedback.POSE_UPDATE,
+                Pose: controlPose.Unity2RosPose(),
+                MenuEntryId: 0,
+                MousePoint: Vector3.zero.Unity2RosPoint(),
+                MousePointValid: false
+            );
+            RosSender.Publish(msg);
         }
 
         void CheckForExpiredMarkers()
@@ -159,12 +204,15 @@ namespace Iviz.App.Listeners
             }
 
             DateTime now = DateTime.Now;
-            var deadMarkers = imarkers.Where(x => x.Value.ExpirationTime < now).ToArray();
-            foreach (var entry in deadMarkers)
+            string[] deadMarkers =
+                imarkers.
+                    Where(x => x.Value.ExpirationTime < now).
+                    Select(x => x.Key).
+                    ToArray();
+            foreach (string key in deadMarkers)
             {
-                DestroyInteractiveMarker(entry.Key);
+                DestroyInteractiveMarker(key);
             }
         }
     }
-
 }

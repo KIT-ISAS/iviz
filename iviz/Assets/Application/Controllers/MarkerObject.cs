@@ -26,7 +26,12 @@ namespace Iviz.App.Listeners
         TriangleList = Marker.TRIANGLE_LIST,
     }
 
-    public sealed class MarkerObject : ClickableNode
+    public enum MouseEventType
+    {
+        Click, Down, Up
+    }
+
+    public sealed class MarkerObject : ClickableNode, IPointerDownHandler, IPointerUpHandler
     {
         static Mesh CachedCube => Resource.Displays.Cube.Object.GetComponent<MeshFilter>().sharedMesh;
         static Mesh CachedSphere => Resource.Displays.SphereSimple.Object.GetComponent<MeshFilter>().sharedMesh;
@@ -34,7 +39,8 @@ namespace Iviz.App.Listeners
         MarkerResource resource;
         Resource.Info<GameObject> resourceType;
 
-        public event Action<Vector3, int> Clicked;
+        public delegate void MouseEventAction(in Vector3 point, MouseEventType type);
+        public event MouseEventAction MouseEvent;
 
         public string Id { get; private set; }
 
@@ -44,7 +50,7 @@ namespace Iviz.App.Listeners
         public override Pose BoundsPose => resource?.WorldPose ?? Pose.identity;
         public override Vector3 BoundsScale => resource?.WorldScale ?? Vector3.one;
 
-        public DateTime ExpirationTime { get; private set; }
+        DateTime expirationTime;
 
         bool clickable;
         public bool Clickable
@@ -102,7 +108,7 @@ namespace Iviz.App.Listeners
             Id = MarkerListener.IdFromMessage(msg);
             name = Id;
 
-            ExpirationTime = msg.Lifetime.IsZero ?
+            expirationTime = msg.Lifetime.IsZero ?
                 DateTime.MaxValue :
                 DateTime.Now + msg.Lifetime.ToTimeSpan();
 
@@ -380,7 +386,7 @@ namespace Iviz.App.Listeners
         public override void Stop()
         {
             base.Stop();
-            Clicked = null;
+            MouseEvent = null;
 
             if (resource is null)
             {
@@ -396,17 +402,18 @@ namespace Iviz.App.Listeners
         public override void OnPointerClick(PointerEventData eventData)
         {
             base.OnPointerClick(eventData);
-            switch (LastClickCount)
-            {
-                case 1:
-                    Clicked?.Invoke(eventData.pointerCurrentRaycast.worldPosition, 0);
-                    break;
-                case 2:
-                    Clicked?.Invoke(eventData.pointerCurrentRaycast.worldPosition, 1);
-                    break;
-            }
+            MouseEvent?.Invoke(eventData.pointerCurrentRaycast.worldPosition, MouseEventType.Click);
         }
 
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            MouseEvent?.Invoke(eventData.pointerCurrentRaycast.worldPosition, MouseEventType.Down);
+        }
+
+        public void OnPointerUp(PointerEventData eventData)
+        {
+            MouseEvent?.Invoke(eventData.pointerCurrentRaycast.worldPosition, MouseEventType.Up);
+        }
     }
 
     static class MarkerTypeHelper

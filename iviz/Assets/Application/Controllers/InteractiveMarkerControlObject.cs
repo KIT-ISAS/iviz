@@ -19,8 +19,10 @@ namespace Iviz.App.Listeners
 
         InteractiveControl control;
 
-        public event Action<Pose, Vector3, int> Clicked;
-        public event Action<Pose> Moved;
+        public delegate void MouseEventAction(in Pose pose, in Vector3 point, MouseEventType type);
+
+        public event MouseEventAction MouseEvent;
+        public event InteractiveControl.MovedAction Moved;
 
         public void Set(InteractiveMarkerControl msg)
         {
@@ -31,10 +33,10 @@ namespace Iviz.App.Listeners
             transform.localRotation = msg.Orientation.Ros2Unity();
 
             UpdateMarkers(msg.Markers);
-            UpdateInteractionMode(msg.InteractionMode);
+            UpdateInteractionMode(msg.InteractionMode, msg.OrientationMode, msg.IndependentMarkerOrientation);
         }
 
-        void EnsureControlExists()
+        void EnsureControlDisplayExists()
         {
             if (!(control is null))
             {
@@ -42,13 +44,13 @@ namespace Iviz.App.Listeners
             }
 
             control = ResourcePool.GetOrCreate<InteractiveControl>(Resource.Displays.InteractiveControl, transform);
-            control.ParentTransform = transform.parent;
-            control.Moved += pose => Moved?.Invoke(pose);
+            control.TargetTransform = transform.parent;
+            control.Moved += (in Pose pose) => Moved?.Invoke(pose);
         }
 
-        void UpdateInteractionMode(int mode)
+        void UpdateInteractionMode(int interactionMode, int orientationMode, bool independentMarkerOrientation)
         {
-            switch (mode)
+            switch (interactionMode)
             {
                 case InteractiveMarkerControl.NONE:
                     markers.Values.ForEach(x => x.Clickable = false);
@@ -58,40 +60,65 @@ namespace Iviz.App.Listeners
                     markers.Values.ForEach(x => x.Clickable = true);
                     break;
                 case InteractiveMarkerControl.MOVE_AXIS:
-                    EnsureControlExists();
+                    EnsureControlDisplayExists();
                     control.InteractionMode = InteractiveControl.InteractionModeType.MoveAxisX;
                     break;
                 case InteractiveMarkerControl.MOVE_PLANE:
-                    EnsureControlExists();
+                    EnsureControlDisplayExists();
                     control.InteractionMode = InteractiveControl.InteractionModeType.MovePlaneYZ;
                     break;
                 case InteractiveMarkerControl.ROTATE_AXIS:
-                    EnsureControlExists();
-                    control.InteractionMode = InteractiveControl.InteractionModeType.MoveAxisX;
+                    EnsureControlDisplayExists();
+                    control.InteractionMode = InteractiveControl.InteractionModeType.RotateAxisX;
                     break;
                 case InteractiveMarkerControl.MOVE_ROTATE:
-                    EnsureControlExists();
+                    EnsureControlDisplayExists();
                     control.InteractionMode = InteractiveControl.InteractionModeType.MovePlaneYZ_RotateAxisX;
                     break;
                 case InteractiveMarkerControl.MOVE_3D:
-                    EnsureControlExists();
+                    EnsureControlDisplayExists();
                     control.InteractionMode = InteractiveControl.InteractionModeType.Move3D;
                     break;
                 case InteractiveMarkerControl.ROTATE_3D:
-                    EnsureControlExists();
+                    EnsureControlDisplayExists();
                     control.InteractionMode = InteractiveControl.InteractionModeType.Rotate3D;
                     break;
                 case InteractiveMarkerControl.MOVE_ROTATE_3D:
-                    EnsureControlExists();
+                    EnsureControlDisplayExists();
                     control.InteractionMode = InteractiveControl.InteractionModeType.MoveRotate3D;
+                    break;
+            }
+
+            if (control is null)
+            {
+                return;
+            }
+
+            switch (orientationMode)
+            {
+                case InteractiveMarkerControl.VIEW_FACING:
+                    control.KeepAbsoluteRotation = false;
+                    control.PointsToCamera = true;
+                    control.PointToCameraByParent = !independentMarkerOrientation;
+                    break;
+                case InteractiveMarkerControl.INHERIT:
+                    control.PointsToCamera = false;
+                    control.KeepAbsoluteRotation = false;
+                    break;
+                case InteractiveMarkerControl.FIXED:
+                    control.PointsToCamera = false;
+                    control.KeepAbsoluteRotation = true;
                     break;
             }
         }
 
-        void UpdateMarkers(Marker[] msg)
+        void UpdateMarkers(IEnumerable<Marker> msg)
         {
             markersToDelete.Clear();
-            markers.Keys.ForEach(x => markersToDelete.Add(x));
+            foreach (string id in markers.Keys)
+            {
+                markersToDelete.Add(id);
+            }
 
             foreach (Marker marker in msg)
             {
@@ -102,11 +129,12 @@ namespace Iviz.App.Listeners
                         if (!markers.TryGetValue(id, out MarkerObject markerToAdd))
                         {
                             markerToAdd = CreateMarkerObject();
-                            markerToAdd.Clicked += (point, button) =>
-                                Clicked?.Invoke(transform.AsPose(), point, button);
+                            markerToAdd.MouseEvent += (in Vector3 point, MouseEventType type) =>
+                            {
+                                MouseEvent?.Invoke(transform.AsPose(), point, type);
+                            };
                             markers[id] = markerToAdd;
                         }
-
                         markerToAdd.Set(marker);
                         if (marker.Header.FrameId.Length == 0)
                         {
@@ -146,7 +174,8 @@ namespace Iviz.App.Listeners
                 control.Stop();
                 ResourcePool.Dispose(Resource.Displays.InteractiveControl, control.gameObject);
             }
-            Clicked = null;
+
+            MouseEvent = null;
             Moved = null;
         }
 

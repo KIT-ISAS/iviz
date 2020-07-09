@@ -23,7 +23,7 @@ namespace Iviz.App
         void Start()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
-            p.AddHeadTitleWidget("OccupGrid");
+            p.AddHeadTitleWidget("Occupancy\nGrid");
             Listener = p.AddListener();
             Frame = p.AddFrame();
             Colormap = p.AddDropdown("Colormap")

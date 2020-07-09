@@ -11,7 +11,7 @@ namespace Iviz.Displays
     public class DraggableRotation : MonoBehaviour, IPointerDownHandler, IDraggable
     {
         public Vector3 normal;
-        public Transform ParentTransform { get; set; }
+        public Transform TargetTransform { get; set; }
 
         bool needsStart;
         Vector3 startIntersection;
@@ -29,7 +29,7 @@ namespace Iviz.Displays
             TFListener.GuiManager.DraggedObject = this;
         }
 
-        public event Action<Pose> Moved;
+        public event InteractiveControl.MovedAction Moved;
 
         public bool Visible
         {
@@ -37,10 +37,13 @@ namespace Iviz.Displays
             set => gameObject.SetActive(value);
         }
 
+        public bool DoesRotationReset { get; set; }
+        
         public void OnPointerMove(in Vector2 cursorPos)
         {
             Transform mTransform = transform;
-            Transform mParent = ParentTransform;
+            Transform mTarget = TargetTransform;
+            Transform mParent = mTransform.parent;
             Ray ray = new Ray(mTransform.position, mParent.TransformDirection(normal));
             Ray other = TFListener.MainCamera.ScreenPointToRay(cursorPos);
 
@@ -53,8 +56,8 @@ namespace Iviz.Displays
             Vector3 localIntersection = mParent.InverseTransformPoint(intersection);
             if (needsStart)
             {
-                startIntersection = localIntersection;
                 needsStart = false;
+                startIntersection = localIntersection;
             }
             else
             {
@@ -65,9 +68,17 @@ namespace Iviz.Displays
 
                 float angle = Mathf.Asin(m.determinant) * Mathf.Rad2Deg; 
 
-                Quaternion q = Quaternion.AngleAxis(angle, normal);
-                mTransform.parent.localRotation *= q;
-                Moved?.Invoke(mParent.AsPose());
+                //Debug.Log(startIntersection.normalized + " " + localIntersection.normalized + " " + angle);
+                Quaternion q = Quaternion.AngleAxis(angle, mTarget.InverseTransformDirection(ray.direction));
+                mTarget.localRotation *= q;
+                Moved?.Invoke(mTarget.AsPose());
+                
+                //startIntersection = mTarget.transform.position + Quaternion.Inverse(q) * (localIntersection - mTarget.transform.position));
+            }
+
+            if (DoesRotationReset)
+            {
+                startIntersection = localIntersection;
             }
         }
 

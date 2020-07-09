@@ -18,7 +18,7 @@ namespace Iviz.App.Listeners
         [DataMember] public bool PublishJoy { get; set; } = false;
         [DataMember] public string TwistTopic { get; set; } = "twist";
         [DataMember] public bool PublishTwist { get; set; } = true;
-        [DataMember] public bool TwistStamped { get; set; } = true;
+        [DataMember] public bool TwistStamped { get; set; } = false;
         [DataMember] public SerializableVector3 MaxSpeed { get; set; } = Vector3.one * 0.25f;
         [DataMember] public string AttachToFrame { get; set; } = "map";
         [DataMember] public bool XIsFront { get; set; } = true;
@@ -137,7 +137,7 @@ namespace Iviz.App.Listeners
             set
             {
                 config.Visible = value;
-                if (Joystick != null)
+                if (!(Joystick is null))
                 {
                     Joystick.Visible = value;
                 }
@@ -213,7 +213,7 @@ namespace Iviz.App.Listeners
         uint joySeq = 0;
         void Update()
         {
-            if (Joystick == null)
+            if (Joystick is null)
             {
                 return;
             }

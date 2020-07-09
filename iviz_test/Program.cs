@@ -21,6 +21,70 @@ namespace iviz_test
         static void Main()
         {
             RosClient client = new RosClient(
+                //"http://192.168.0.73:11311",
+                "http://141.3.59.5:11311",
+                null,
+                //"http://192.168.0.157:7619"
+                "http://141.3.59.19:7621"
+            );
+            InteractiveMarker intMarker = new InteractiveMarker();
+            intMarker.Header = new Header()
+            {
+                FrameId = "map",
+                Stamp = time.Now(),
+            };
+            intMarker.Name = "my_marker";
+            intMarker.Scale = 1;
+            intMarker.Description = "Simple 1-DOF Control";
+                
+            Marker boxMarker = new Marker();
+            boxMarker.Header = new Header()
+            {
+                FrameId = ""
+            };
+            boxMarker.Action = Marker.ADD;
+            boxMarker.Type = Marker.CUBE;
+            boxMarker.Scale = new Vector3(0.45f, 0.45, 0.45);
+            boxMarker.Color = new ColorRGBA(0.5f, 0.5f, 0.5f, 1);
+            
+            InteractiveMarkerControl boxControl = new InteractiveMarkerControl();
+            boxControl.AlwaysVisible = true;
+            boxControl.Markers = new[] {boxMarker};
+
+            /*
+            InteractiveMarkerControl rotateControl = new InteractiveMarkerControl();
+            rotateControl.Name = "move_x";
+            rotateControl.InteractionMode = InteractiveMarkerControl.MOVE_AXIS;
+            */
+            InteractiveMarkerControl control = new InteractiveMarkerControl();
+            control.Name = "move";
+            control.Orientation = new Quaternion(0, 0, 0, 1);
+            control.InteractionMode = InteractiveMarkerControl.MOVE_PLANE;
+            control.OrientationMode = InteractiveMarkerControl.FIXED;
+            
+            InteractiveMarkerControl control2 = new InteractiveMarkerControl();
+            control2.Name = "rotate";
+            control2.Orientation = new Quaternion(0, 0, 0, 1);
+            control2.InteractionMode = InteractiveMarkerControl.ROTATE_AXIS;
+            control2.OrientationMode = InteractiveMarkerControl.FIXED;
+
+            intMarker.Controls = new[] {boxControl, control, control2};
+
+            client.Advertise<InteractiveMarkerUpdate>("/update", out RosPublisher publisher);
+            while (true)
+            {
+                Console.WriteLine("publishing...");
+                publisher.Publish(new InteractiveMarkerUpdate()
+                {
+                    Type = InteractiveMarkerUpdate.UPDATE,
+                    Markers = new []{ intMarker }
+                });
+                Thread.Sleep(1000);
+            }
+        }        
+        static void Main_D()
+        {
+            RosClient client = new RosClient(
                 "http://192.168.0.73:11311",
                 //"http://141.3.59.5:11311",
                 null,

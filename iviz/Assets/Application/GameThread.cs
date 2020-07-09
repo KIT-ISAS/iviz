@@ -12,6 +12,7 @@ namespace Iviz.App
         float lastRunTime;
 
         public static event Action EveryFrame;
+        public static event Action LateEveryFrame;
         public static event Action EverySecond;
         public static event Action LateEverySecond;
 
@@ -30,12 +31,14 @@ namespace Iviz.App
 
         public static void RunOnce(Action action)
         {
-            if (Instance != null)
+            if (Instance is null)
             {
-                lock (Instance.actionsOnlyOnce)
-                {
-                    Instance.actionsOnlyOnce.Add(action);
-                }
+                return;
+            }
+
+            lock (Instance.actionsOnlyOnce)
+            {
+                Instance.actionsOnlyOnce.Add(action);
             }
         }
 
@@ -60,6 +63,11 @@ namespace Iviz.App
                 actionsOnlyOnce.Clear();
             }
             actionsOnlyOnceTmp.ForEach(x => x());
+        }
+        
+        void LateUpdate()
+        {
+            LateEveryFrame?.Invoke();
         }
 
     }

@@ -11,21 +11,22 @@ namespace Iviz.App
         const int Size = 200;
         [SerializeField] Text text = null;
 
-        RosSender _sender;
+        RosSender rosSender;
         public RosSender RosSender
         {
-            get => _sender;
+            get => rosSender;
             private set
             {
-                if (_sender == null && value != null)
+                if (rosSender == null && value != null)
                 {
                     GameThread.EverySecond += UpdateStats;
                 }
-                else if (_sender != null && value == null)
+                else if (rosSender != null && value == null)
                 {
                     GameThread.EverySecond -= UpdateStats;
                 }
-                _sender = value;
+
+                rosSender = value;
                 if (value != null)
                 {
                     UpdateStats();
@@ -33,10 +34,13 @@ namespace Iviz.App
             }
         }
 
-        public string Topic => RosSender?.Topic;
-        public int NumSubscribers => (!ConnectionManager.Connected || RosSender == null) ? -1 : RosSender.NumSubscribers;
-        public int MessagesPerSecond => RosSender?.Stats.MessagesPerSecond ?? 0;
-        public int BytesPerSecond => RosSender?.Stats.BytesPerSecond ?? 0;
+        string Topic => RosSender?.Topic;
+
+        int NumSubscribers =>
+            (!ConnectionManager.Connected || RosSender == null) ? -1 : RosSender.NumSubscribers;
+
+        int MessagesPerSecond => RosSender?.Stats.MessagesPerSecond ?? 0;
+        int BytesPerSecond => RosSender?.Stats.BytesPerSecond ?? 0;
 
         public void Set(RosSender sender)
         {
@@ -44,19 +48,21 @@ namespace Iviz.App
             if (sender == null)
             {
                 text.text = $"<i>Empty</i>\n" +
-                    $"<b>(?)</b>";
+                            $"<b>(?)</b>";
             }
         }
 
         public void Set<T>(RosSender<T> sender) where T : IMessage, new()
         {
             RosSender = sender;
-            if (sender == null)
+            if (sender != null)
             {
-                string messageType = BuiltIns.GetMessageType(typeof(T));
-                text.text = $"<i>Empty</i>\n" +
-                    $"<b>{messageType}</b>";
+                return;
             }
+
+            string messageType = BuiltIns.GetMessageType(typeof(T));
+            text.text = $"<i>Empty</i>\n" +
+                        $"<b>{messageType}</b>";
         }
 
         void UpdateStats()
@@ -71,11 +77,12 @@ namespace Iviz.App
             {
                 publisherStatus = numSubscribers + "↑ ";
             }
+
             string messagesPerSecond = MessagesPerSecond.ToString(UnityUtils.Culture);
             string kbPerSecond = (BytesPerSecond * 0.001f).ToString("#,0.#", UnityUtils.Culture);
 
             text.text = $"{Resource.Font.Split(Topic ?? "", Size)}\n" +
-                $"<b>Out: {publisherStatus} | {messagesPerSecond} Hz | {kbPerSecond} kB/s</b>";
+                        $"<b>Out: {publisherStatus} | {messagesPerSecond} Hz | {kbPerSecond} kB/s</b>";
         }
 
         public void ClearSubscribers()

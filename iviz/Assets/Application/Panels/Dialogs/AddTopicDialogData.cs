@@ -15,20 +15,21 @@ namespace Iviz.App
 
         class TopicWithResource
         {
-            public readonly string topic;
-            public readonly string type;
-            public readonly Resource.Module resource;
+            public string Topic { get; }
+            public string Type { get; }
+            public Resource.Module Resource { get; }
 
             public TopicWithResource(string topic, string type, Resource.Module resource)
             {
-                this.topic = topic;
-                this.type = type;
-                this.resource = resource;
+                this.Topic = topic;
+                this.Type = type;
+                this.Resource = resource;
             }
 
             public override string ToString()
             {
-                return $"{Resource.Font.Split(topic, MaxLineWidth)}\n<b>{type}</b>";
+                return $"{Iviz.Resources.Resource.Font.Split(Topic, MaxLineWidth)}\n" +
+                       $"<b>{Iviz.Resources.Resource.Font.Split(Type, MaxLineWidth)}</b>";
             }
         }
 
@@ -88,7 +89,7 @@ namespace Iviz.App
             {
                 for (int i = 0; i < topics.Count; i++)
                 {
-                    if (topics[i].resource == Resource.Module.Invalid)
+                    if (topics[i].Resource == Resource.Module.Invalid)
                     {
                         panel[i].Interactable = false;
                     }
@@ -101,7 +102,7 @@ namespace Iviz.App
 
         void OnItemClicked(int index, string _)
         {
-            ModuleListPanel.CreateModuleForTopic(topics[index].topic, topics[index].type);
+            ModuleListPanel.CreateModuleForTopic(topics[index].Topic, topics[index].Type);
             OnClose();
         }
 

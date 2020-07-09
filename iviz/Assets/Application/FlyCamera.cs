@@ -4,6 +4,7 @@ using Iviz.App.Listeners;
 using Iviz.Resources;
 using System.Collections.Generic;
 using System.Linq;
+using Iviz.Displays;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 // ReSharper disable ConditionIsAlwaysTrueOrFalse
@@ -15,12 +16,12 @@ namespace Iviz.App
 {
     public interface IDraggable
     {
-        event Action<Pose> Moved;
+        event InteractiveControl.MovedAction Moved;
         bool Visible { get; set; }
         void OnPointerMove(in Vector2 cursorPos);
         void OnStartDragging();
         void OnEndDragging();
-        Transform ParentTransform { get; set; }
+        Transform TargetTransform { get; set; }
     }
     
     public class FlyCamera : DisplayNode

@@ -11,12 +11,12 @@ namespace Iviz.Displays
     public class DraggableTranslation : MonoBehaviour, IPointerDownHandler, IDraggable
     {
         public Vector3 line;
-        public Transform ParentTransform { get; set; }
+        public Transform TargetTransform { get; set; }
         
         bool needsStart;
         Vector3 startOffset;
         
-        public event Action<Pose> Moved;
+        public event InteractiveControl.MovedAction Moved;
 
         public bool Visible
         {
@@ -46,7 +46,8 @@ namespace Iviz.Displays
         public void OnPointerMove(in Vector2 cursorPos)
         {
             Transform mTransform = transform;
-            Transform mParent = ParentTransform;
+            Transform mParent = mTransform.parent;
+            Transform mTarget = TargetTransform;
             Ray ray = new Ray(mTransform.position, mParent.TransformDirection(line));
             Ray other = TFListener.MainCamera.ScreenPointToRay(cursorPos);
 
@@ -64,8 +65,8 @@ namespace Iviz.Displays
             }
             else
             {
-                mParent.position += deltaPosition - startOffset;
-                Moved?.Invoke(mParent.AsPose());
+                mTarget.position += deltaPosition - startOffset;
+                Moved?.Invoke(mTarget.AsPose());
             }
         }
 

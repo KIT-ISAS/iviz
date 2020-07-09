@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace Iviz.App
 {
+    /// <summary>
+    /// <see cref="InteractiveMarkerPanelContents"/> 
+    /// </summary>
     public sealed class InteractiveMarkerModuleData : ListenerModuleData
     {
         readonly InteractiveMarkerListener listener;
@@ -43,7 +46,8 @@ namespace Iviz.App
         {
             panel.Listener.RosListener = listener.Listener;
             panel.DisableExpiration.Value = listener.DisableExpiration;
-
+            panel.Sender.Set(listener.RosSender);
+            
             panel.DisableExpiration.ValueChanged += f =>
             {
                 listener.DisableExpiration = f;

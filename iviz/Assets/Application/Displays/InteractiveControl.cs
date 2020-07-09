@@ -1,5 +1,6 @@
 using System;
 using Iviz.App;
+using Iviz.App.Listeners;
 using Iviz.Displays;
 using UnityEngine;
 
@@ -43,23 +44,106 @@ namespace Iviz.Displays
 
         MeshMarkerResource[] allResources;
 
-        public event Action<Pose> Moved;
+        public delegate void MovedAction(in Pose pose);
 
-        Transform parentTransform;
-        public Transform ParentTransform
+        public event MovedAction Moved;
+
+        Transform targetTransform;
+
+        public Transform TargetTransform
         {
-            get => parentTransform;
+            get => targetTransform;
             set
             {
-                parentTransform = value;
+                targetTransform = value;
                 foreach (MeshMarkerResource resource in allResources)
                 {
-                    resource.GetComponent<IDraggable>().ParentTransform = value;
+                    resource.GetComponent<IDraggable>().TargetTransform = value;
+                }
+            }
+        }
+
+        bool pointsToCamera;
+
+        public bool PointsToCamera
+        {
+            get => pointsToCamera;
+            set
+            {
+                if (value == pointsToCamera)
+                {
+                    return;
+                }
+
+                pointsToCamera = value;
+                if (value)
+                {
+                    GameThread.LateEveryFrame += RotateToCamera;
+                }
+                else
+                {
+                    GameThread.LateEveryFrame -= RotateToCamera;
+                    PointToCameraByParent = false;
+                    transform.localRotation = Quaternion.identity;
+                }
+
+                foreach (MeshMarkerResource resource in allResources)
+                {
+                    var draggable = resource.GetComponent<DraggableRotation>();
+                    if (!(draggable is null))
+                    {
+                        draggable.DoesRotationReset = value;
+                    }
+                }
+            }
+        }
+
+        bool keepAbsoluteRotation;
+
+        public bool KeepAbsoluteRotation
+        {
+            get => keepAbsoluteRotation;
+            set
+            {
+                keepAbsoluteRotation = value;
+                if (value)
+                {
+                    GameThread.LateEveryFrame += RotateBackToFixed;
+                }
+                else
+                {
+                    GameThread.LateEveryFrame -= RotateBackToFixed;
+                    transform.localRotation = Quaternion.identity;
+                }
+
+                foreach (MeshMarkerResource resource in allResources)
+                {
+                    var draggable = resource.GetComponent<DraggableRotation>();
+                    if (!(draggable is null))
+                    {
+                        draggable.DoesRotationReset = value;
+                    }
+                }
+            }
+        }
+
+        bool pointToCameraByParent;
+
+        public bool PointToCameraByParent
+        {
+            get => pointToCameraByParent;
+            set
+            {
+                pointToCameraByParent = value;
+                if (!value)
+                {
+                    transform.localRotation = Quaternion.identity;
                 }
             }
         }
 
         InteractionModeType interactionMode;
+
         public InteractionModeType InteractionMode
         {
             get => interactionMode;
@@ -83,7 +167,7 @@ namespace Iviz.Displays
                         arrowMY.Visible = true;
                         arrowPZ.Visible = true;
                         arrowMZ.Visible = true;
-                        ringX.Visible = true;
+                        ringXPlane.Visible = true;
                         break;
                     case InteractionModeType.RotateAxisX:
                         ringX.Visible = true;
@@ -114,19 +198,36 @@ namespace Iviz.Displays
                         arrowPZ.Visible = true;
                         arrowMZ.Visible = true;
                         ringZPlane.Visible = true;
-                        break;                    
+                        break;
+                    case InteractionModeType.Rotate3D:
+                        ringX.Visible = true;
+                        ringY.Visible = true;
+                        ringZ.Visible = true;
+                        break;
+                    case InteractionModeType.MoveRotate3D:
+                        arrowPX.Visible = true;
+                        arrowMX.Visible = true;
+                        arrowPY.Visible = true;
+                        arrowMY.Visible = true;
+                        arrowPZ.Visible = true;
+                        arrowMZ.Visible = true;
+                        ringX.Visible = true;
+                        ringY.Visible = true;
+                        ringZ.Visible = true;
+                        break;
                 }
             }
         }
 
-        void OnMoved(Pose pose)
+        void OnMoved(in Pose pose)
         {
             Moved?.Invoke(pose);
         }
 
         public void Stop()
         {
-            
+            PointsToCamera = false;
+            KeepAbsoluteRotation = false;
         }
 
         void Awake()
@@ -138,12 +239,30 @@ namespace Iviz.Displays
             {
                 resource.GetComponent<IDraggable>().Moved += OnMoved;
             }
-            
-            InteractionMode = InteractionModeType.Frame;
-            if (ParentTransform is null)
+
+            InteractionMode = InteractionModeType.MovePlaneYZ;
+            if (TargetTransform is null)
             {
-                ParentTransform = transform;
+                TargetTransform = transform.parent ?? transform;
             }
+        }
+
+        void RotateToCamera()
+        {
+            Vector3 cameraForward = TFListener.MainCamera.transform.forward;
+            if (PointToCameraByParent)
+            {
+                transform.parent.LookAt(transform.parent.position + cameraForward);
+            }
+            else
+            {
+                transform.LookAt(transform.position + cameraForward);
+            }
+        }
+
+        void RotateBackToFixed()
+        {
+            transform.rotation = TFListener.RootFrame.transform.rotation;
         }
     }
 }
