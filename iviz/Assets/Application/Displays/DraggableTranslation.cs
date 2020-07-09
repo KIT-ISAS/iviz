@@ -6,12 +6,13 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UIElements;
 
-namespace Application.Displays
+namespace Iviz.Displays
 {
     public class DraggableTranslation : MonoBehaviour, IPointerDownHandler, IDraggable
     {
         public Vector3 line;
-
+        public Transform ParentTransform { get; set; }
+        
         bool needsStart;
         Vector3 startOffset;
         
@@ -45,7 +46,7 @@ namespace Application.Displays
         public void OnPointerMove(in Vector2 cursorPos)
         {
             Transform mTransform = transform;
-            Transform mParent = mTransform.parent;
+            Transform mParent = ParentTransform;
             Ray ray = new Ray(mTransform.position, mParent.TransformDirection(line));
             Ray other = TFListener.MainCamera.ScreenPointToRay(cursorPos);
 

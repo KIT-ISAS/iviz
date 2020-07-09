@@ -129,7 +129,7 @@ namespace Iviz.Displays
             pointBuffer.Clear();
         }
 
-        public void Recycle()
+        public void SplitForRecycle()
         {
             ResourcePool.Dispose(Resource.Displays.MeshList, resource.gameObject);
         }

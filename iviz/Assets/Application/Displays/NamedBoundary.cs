@@ -175,7 +175,7 @@ namespace Iviz.App.Displays
             return tmpHolder;
         }
 
-        public void Recycle()
+        public void SplitForRecycle()
         {
             GetComponentsInChildren<MeshRenderer>().ForEach(x => ResourcePool.Dispose(Resource.Displays.Cube, x.gameObject));
             Destroy(holder);

@@ -20,6 +20,7 @@ namespace Iviz.App
         void OnPointerMove(in Vector2 cursorPos);
         void OnStartDragging();
         void OnEndDragging();
+        Transform ParentTransform { get; set; }
     }
     
     public class FlyCamera : DisplayNode

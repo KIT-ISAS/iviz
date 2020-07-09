@@ -71,13 +71,13 @@ namespace Iviz.App
                 }
             }
 
-            objectsToDestroy.ForEach(deadObject =>
+            foreach (var deadObject in objectsToDestroy)
             {
                 IRecyclable recyclable = deadObject.GetComponent<IRecyclable>();
-                recyclable?.Recycle();
+                recyclable?.SplitForRecycle();
                 Debug.Log("ResourcePool: Destroying object of type '" + deadObject.name + "'");
                 Destroy(deadObject);
-            });
+            }
         }
 
         void OnDestroy()

@@ -288,6 +288,7 @@ namespace Iviz.Resources
             public GameObjectInfo AngleAxis { get; }
             public GameObjectInfo Trail { get; }
             public GameObjectInfo AnchorLine { get; }
+            public GameObjectInfo InteractiveControl { get; }
 
             public ReadOnlyDictionary<Uri, GameObjectInfo> Generic { get; }
 
@@ -318,6 +319,7 @@ namespace Iviz.Resources
                 AngleAxis = new GameObjectInfo("Displays/AngleAxis");
                 Trail = new GameObjectInfo("Displays/Trail");
                 AnchorLine = new GameObjectInfo("Displays/AnchorLine");
+                InteractiveControl = new GameObjectInfo("Displays/InteractiveControl");
 
                 Generic = new ReadOnlyDictionary<Uri, GameObjectInfo>(
                     new Dictionary<Uri, GameObjectInfo>()

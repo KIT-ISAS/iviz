@@ -340,7 +340,7 @@ namespace Iviz.App.Listeners
             anchor.Visible = false;
         }
 
-        public void Recycle()
+        public void SplitForRecycle()
         {
             ResourcePool.Dispose(Resource.Displays.AxisFrame, axis.gameObject);
             ResourcePool.Dispose(Resource.Displays.Text, labelObject);

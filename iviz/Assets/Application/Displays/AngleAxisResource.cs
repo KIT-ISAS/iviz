@@ -120,7 +120,7 @@ namespace Iviz.Displays
             resource.LinesWithColor = lines;
         }
         
-        public void Recycle()
+        public void SplitForRecycle()
         {
             ResourcePool.Dispose(Resource.Displays.Line, resource.gameObject);
         }

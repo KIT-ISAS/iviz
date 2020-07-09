@@ -71,7 +71,7 @@ namespace Iviz.Displays
             lines?.Reserve(totalMeasurements);
         }
         
-        public void Recycle()
+        public void SplitForRecycle()
         {
             ResourcePool.Dispose(Resource.Displays.Line, lines.gameObject);
         }

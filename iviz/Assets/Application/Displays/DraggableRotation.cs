@@ -6,11 +6,12 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UIElements;
 
-namespace Application.Displays
+namespace Iviz.Displays
 {
     public class DraggableRotation : MonoBehaviour, IPointerDownHandler, IDraggable
     {
         public Vector3 normal;
+        public Transform ParentTransform { get; set; }
 
         bool needsStart;
         Vector3 startIntersection;
@@ -39,7 +40,7 @@ namespace Application.Displays
         public void OnPointerMove(in Vector2 cursorPos)
         {
             Transform mTransform = transform;
-            Transform mParent = mTransform.parent;
+            Transform mParent = ParentTransform;
             Ray ray = new Ray(mTransform.position, mParent.TransformDirection(normal));
             Ray other = TFListener.MainCamera.ScreenPointToRay(cursorPos);
 

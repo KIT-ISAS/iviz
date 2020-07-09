@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System;
+using System.Linq;
 using Iviz.App.Displays;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
@@ -51,12 +52,12 @@ namespace Iviz.App.Listeners
                 controlsToDelete.Remove(id);
             }
 
-            controlsToDelete.ForEach(x =>
+            foreach (string id in controlsToDelete)
             {
-                InteractiveMarkerControlObject control = controls[x];
+                InteractiveMarkerControlObject control = controls[id];
                 DeleteControlObject(control);
-                controls.Remove(x);
-            });
+                controls.Remove(id);
+            }
 
             UpdateExpirationTime();
             /*

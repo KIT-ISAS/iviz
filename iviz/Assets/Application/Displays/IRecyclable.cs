@@ -2,6 +2,6 @@
 {
     public interface IRecyclable
     {
-        void Recycle();
+        void SplitForRecycle();
     }
 }

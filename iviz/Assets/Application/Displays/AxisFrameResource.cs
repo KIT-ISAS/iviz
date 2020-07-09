@@ -109,8 +109,11 @@ namespace Iviz.Displays
             Collider.size = (newFrameAxisLength + newFrameAxisWidth / 2) * Vector3.one;
         }
 
-        public void Recycle()
+        public void SplitForRecycle()
         {
+            axisObjects[0].Stop();
+            axisObjects[1].Stop();
+            axisObjects[2].Stop();
             ResourcePool.Dispose(Resource.Displays.Cube, axisObjects[0].gameObject);
             ResourcePool.Dispose(Resource.Displays.Cube, axisObjects[1].gameObject);
             ResourcePool.Dispose(Resource.Displays.Cube, axisObjects[2].gameObject);

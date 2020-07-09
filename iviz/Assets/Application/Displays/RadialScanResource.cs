@@ -327,7 +327,7 @@ namespace Iviz.Displays
             lines.Stop();
         }
 
-        public void Recycle()
+        public void SplitForRecycle()
         {
             ResourcePool.Dispose(Resource.Displays.PointList, pointCloud.gameObject);
             ResourcePool.Dispose(Resource.Displays.Line, lines.gameObject);

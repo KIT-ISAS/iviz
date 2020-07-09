@@ -3,7 +3,7 @@ using Iviz.App;
 using Iviz.Displays;
 using UnityEngine;
 
-namespace Application.Displays
+namespace Iviz.Displays
 {
     public class InteractiveControl : MonoBehaviour
     {
@@ -45,6 +45,20 @@ namespace Application.Displays
 
         public event Action<Pose> Moved;
 
+        Transform parentTransform;
+        public Transform ParentTransform
+        {
+            get => parentTransform;
+            set
+            {
+                parentTransform = value;
+                foreach (MeshMarkerResource resource in allResources)
+                {
+                    resource.GetComponent<IDraggable>().ParentTransform = value;
+                }
+            }
+        }
+
         InteractionModeType interactionMode;
         public InteractionModeType InteractionMode
         {
@@ -56,7 +70,6 @@ namespace Application.Displays
                 foreach (MeshMarkerResource resource in allResources)
                 {
                     resource.Visible = false;
-                    resource.GetComponent<IDraggable>().Moved += OnMoved;
                 }
 
                 switch (InteractionMode)
@@ -111,12 +124,26 @@ namespace Application.Displays
             Moved?.Invoke(pose);
         }
 
+        public void Stop()
+        {
+            
+        }
+
         void Awake()
         {
             allResources = new[]
                 {arrowPX, arrowMX, arrowPY, arrowMY, arrowPZ, arrowMZ, ringX, ringY, ringZ, ringXPlane, ringZPlane};
 
+            foreach (MeshMarkerResource resource in allResources)
+            {
+                resource.GetComponent<IDraggable>().Moved += OnMoved;
+            }
+            
             InteractionMode = InteractionModeType.Frame;
+            if (ParentTransform is null)
+            {
+                ParentTransform = transform;
+            }
         }
     }
 }

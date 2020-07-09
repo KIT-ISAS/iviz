@@ -89,7 +89,7 @@ namespace Application.Displays
             Color = Color.yellow;
         }
         
-        public void Recycle()
+        public void SplitForRecycle()
         {
             ResourcePool.Dispose(Resource.Displays.Line, resource.gameObject);
         }        
