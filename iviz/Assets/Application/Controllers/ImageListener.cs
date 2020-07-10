@@ -94,8 +94,6 @@ namespace Iviz.App.Listeners
             }
         }
 
-        public Texture2D ColormapTexture => Resource.Colormaps.Textures[Colormap];
-
         public float MinIntensity
         {
             get => config.MinIntensity;
@@ -182,7 +180,7 @@ namespace Iviz.App.Listeners
         void Awake()
         {
             ImageTexture = new ImageTexture();
-            Node = DisplayClickableNode.Instantiate("ImageNode");
+            Node = DisplayClickableNode.Instantiate("[ImageNode]");
             marker = ResourcePool.GetOrCreate<ImageResource>(Resource.Displays.Image);
             marker.Texture = ImageTexture;
             Node.Target = marker;

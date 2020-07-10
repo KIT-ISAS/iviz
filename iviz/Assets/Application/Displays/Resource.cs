@@ -15,6 +15,7 @@ using Iviz.Msgs.NavMsgs;
 using System.Text;
 using Iviz.App.Listeners;
 using Iviz.App.Resources;
+using Iviz.Msgs.GridMapMsgs;
 
 namespace Iviz.Resources
 {
@@ -38,7 +39,8 @@ namespace Iviz.Resources
             Magnitude,
             OccupancyGrid,
             Joystick,
-            Path
+            Path,
+            GridMap,
         }
 
         public static ReadOnlyDictionary<string, Module> ResourceByRosMessageType { get; }
@@ -66,6 +68,7 @@ namespace Iviz.Resources
                 { PoseArray.RosMessageType, Module.Path },
                 { PolygonStamped.RosMessageType, Module.Path },
                 { Polygon.RosMessageType, Module.Path },
+                { GridMap.RosMessageType, Module.GridMap },
             }
             );
 
@@ -156,6 +159,7 @@ namespace Iviz.Resources
             public MaterialInfo MeshList { get; }
             public MaterialInfo DepthImageProjector { get; }
             public MaterialInfo Grid { get; }
+            public MaterialInfo GridMap { get; }
 
             public MaterialInfo Line { get; }
             public MaterialInfo TransparentLine { get; }
@@ -174,6 +178,7 @@ namespace Iviz.Resources
                 PointCloud = new MaterialInfo("Materials/PointCloud Material");
                 MeshList = new MaterialInfo("Materials/MeshList Material");
                 Grid = new MaterialInfo("Materials/Grid");
+                GridMap = new MaterialInfo("Materials/GridMap");
                 DepthImageProjector = new MaterialInfo("Materials/DepthImage Material");
 
                 Line = new MaterialInfo("Materials/Line Material");
@@ -289,6 +294,7 @@ namespace Iviz.Resources
             public GameObjectInfo Trail { get; }
             public GameObjectInfo AnchorLine { get; }
             public GameObjectInfo InteractiveControl { get; }
+            public GameObjectInfo GridMap { get; }
 
             public ReadOnlyDictionary<Uri, GameObjectInfo> Generic { get; }
 
@@ -320,6 +326,7 @@ namespace Iviz.Resources
                 Trail = new GameObjectInfo("Displays/Trail");
                 AnchorLine = new GameObjectInfo("Displays/AnchorLine");
                 InteractiveControl = new GameObjectInfo("Displays/InteractiveControl");
+                GridMap = new GameObjectInfo("Displays/GridMap");
 
                 Generic = new ReadOnlyDictionary<Uri, GameObjectInfo>(
                     new Dictionary<Uri, GameObjectInfo>()

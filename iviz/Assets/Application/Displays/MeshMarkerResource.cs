@@ -8,8 +8,7 @@ namespace Iviz.Displays
 {
     public class MeshMarkerResource : MarkerResource, ISupportsAROcclusion, ISupportsTint
     {
-        protected MeshRenderer MainRenderer { get; private set; }
-
+        MeshRenderer MainRenderer { get; set; }
         Material textureMaterial;
         Material textureMaterialAlpha;
 
@@ -79,7 +78,7 @@ namespace Iviz.Displays
                 return;
             }
             Color effectiveColor = EffectiveColor;
-            if (Texture == null)
+            if (Texture == null) // do not use 'is' here
             {
                 Material material = effectiveColor.a > 254f / 255f ?
                     Resource.Materials.Lit.Object :

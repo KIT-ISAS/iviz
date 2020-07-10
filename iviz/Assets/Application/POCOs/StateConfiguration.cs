@@ -27,6 +27,7 @@ namespace Iviz.App
         [DataMember] public List<MagnitudeConfiguration> Odometries { get; set; } = new List<MagnitudeConfiguration>();
         [DataMember] public List<OccupancyGridConfiguration> OccupancyGrids { get; set; } = new List<OccupancyGridConfiguration>();
         [DataMember] public List<PathConfiguration> Paths { get; set; } = new List<PathConfiguration>();
+        [DataMember] public List<GridMapConfiguration> GridMaps { get; set; } = new List<GridMapConfiguration>();
         [DataMember] public ARConfiguration AR { get; set; } = null;
         [DataMember] public JoystickConfiguration Joystick { get; set; } = null;
 

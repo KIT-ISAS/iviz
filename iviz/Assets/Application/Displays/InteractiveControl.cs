@@ -83,7 +83,7 @@ namespace Iviz.Displays
                 else
                 {
                     GameThread.LateEveryFrame -= RotateToCamera;
-                    PointToCameraByParent = false;
+                    CameraPivotIsParent = false;
                     transform.localRotation = Quaternion.identity;
                 }
 
@@ -127,14 +127,14 @@ namespace Iviz.Displays
             }
         }
 
-        bool pointToCameraByParent;
+        bool cameraPivotIsParent;
 
-        public bool PointToCameraByParent
+        public bool CameraPivotIsParent
         {
-            get => pointToCameraByParent;
+            get => cameraPivotIsParent;
             set
             {
-                pointToCameraByParent = value;
+                cameraPivotIsParent = value;
                 if (!value)
                 {
                     transform.localRotation = Quaternion.identity;
@@ -250,7 +250,7 @@ namespace Iviz.Displays
         void RotateToCamera()
         {
             Vector3 cameraForward = TFListener.MainCamera.transform.forward;
-            if (PointToCameraByParent)
+            if (CameraPivotIsParent)
             {
                 transform.parent.LookAt(transform.parent.position + cameraForward);
             }

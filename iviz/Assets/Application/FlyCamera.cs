@@ -402,8 +402,8 @@ namespace Iviz.App
 
             orbitRadius += altDistanceDiff * radiusCoeff;
 
-            Transform tTransform = Transform;
-            Quaternion q = tTransform.rotation;
+            Transform mTransform = Transform;
+            Quaternion q = mTransform.rotation;
 
             if (!allowPivotMotion)
             {
@@ -423,12 +423,12 @@ namespace Iviz.App
 
                 float orbitScale = 0.75f * orbitRadius;
                 orbitCenter -= tangentCoeff * pointerAltDiff.x * orbitScale *
-                               tTransform.TransformDirection(Vector3.right);
+                               mTransform.TransformDirection(Vector3.right);
                 orbitCenter += tangentCoeff * pointerAltDiff.y * orbitScale *
-                               tTransform.TransformDirection(Vector3.down);
+                               mTransform.TransformDirection(Vector3.down);
             }
 
-            tTransform.position = -orbitRadius * (q * Vector3.forward) + orbitCenter;
+            mTransform.position = -orbitRadius * (q * Vector3.forward) + orbitCenter;
         }
 
         void ProcessTurning()

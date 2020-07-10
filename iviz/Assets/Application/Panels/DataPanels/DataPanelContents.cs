@@ -57,6 +57,7 @@ namespace Iviz.App
                 case Resource.Module.OccupancyGrid: return o.AddComponent<OccupancyGridPanelContents>();
                 case Resource.Module.Joystick: return o.AddComponent<JoystickPanelContents>();
                 case Resource.Module.Path: return o.AddComponent<PathPanelContents>();
+                case Resource.Module.GridMap: return o.AddComponent<GridMapPanelContents>();
                 default: throw new ArgumentException(nameof(resource));
             }
         }

@@ -12,7 +12,7 @@ namespace Iviz.App
     /// </summary>
     public sealed class GridModuleData : ModuleData
     {
-        readonly Listeners.GridController controller;
+        readonly GridController controller;
         readonly GridPanelContents panel;
 
         public override Resource.Module Module => Resource.Module.Grid;
@@ -25,8 +25,8 @@ namespace Iviz.App
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Grid) as GridPanelContents;
 
-            controller = Instantiate<GridController>();
-            controller.ModuleData = this;
+            //controller = Instantiate<GridController>();
+            controller = new GridController(this);
             if (constructor.Configuration != null)
             {
                 controller.Config = (GridConfiguration)constructor.Configuration;
@@ -40,7 +40,7 @@ namespace Iviz.App
             base.Stop();
 
             controller.Stop();
-            Object.Destroy(controller.gameObject);
+            //Object.Destroy(controller.gameObject);
         }
 
         const float InteriorColorFactor = 0.5f;

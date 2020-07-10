@@ -40,8 +40,6 @@ namespace Iviz.App.Listeners
 
         public int Size { get; private set; }
 
-        public bool CalculateMinMax { get; private set; } = true;
-
         public override TFFrame Frame => node.Parent;
 
         readonly PointCloudConfiguration config = new PointCloudConfiguration();
@@ -76,10 +74,7 @@ namespace Iviz.App.Listeners
         public string IntensityChannel
         {
             get => config.IntensityChannel;
-            set
-            {
-                config.IntensityChannel = value;
-            }
+            set => config.IntensityChannel = value;
         }
 
         public float PointSize
@@ -176,11 +171,11 @@ namespace Iviz.App.Listeners
 
         void Awake()
         {
-            node = SimpleDisplayNode.Instantiate("PointCloudNode", transform);
+            node = SimpleDisplayNode.Instantiate("[PointCloudNode]");
             pointCloud = ResourcePool.GetOrCreate<PointListResource>(Resource.Displays.PointList, node.transform);
 
             Config = new PointCloudConfiguration();
-            transform.localRotation = new Msgs.GeometryMsgs.Quaternion(0, 0, 0, 1).Ros2Unity();
+            //transform.localRotation = new Msgs.GeometryMsgs.Quaternion(0, 0, 0, 1).Ros2Unity();
         }
 
         public override void StartListening()
@@ -460,7 +455,6 @@ namespace Iviz.App.Listeners
             base.Stop();
 
             ResourcePool.Dispose(Resource.Displays.PointList, pointCloud.gameObject);
-            pointCloud = null;
 
             node.Stop();
             Destroy(node.gameObject);

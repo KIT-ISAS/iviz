@@ -1,175 +1,189 @@
 ﻿
-namespace Iviz.App
+using System;
+using System.Runtime.Serialization;
+using Iviz.App.Displays;
+using Iviz.Displays;
+using Iviz.Msgs.GridMapMsgs;
+using Iviz.Resources;
+using Iviz.RoslibSharp;
+using UnityEngine;
+
+namespace Iviz.App.Listeners
 {
-    /*
-    public class GridMapListener : DisplayableListener
+    [DataContract]
+    public class GridMapConfiguration : JsonToString, IConfiguration
     {
-        RosListener<GridMap> listener;
-        RosSender<GridMap> sender;
+        [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
+        [DataMember] public Resource.Module Module => Resource.Module.GridMap;
+        [DataMember] public bool Visible { get; set; } = true;
+        [DataMember] public string Topic { get; set; } = "";
+        //[DataMember] public string IntensityChannel { get; set; } = "x";
+        [DataMember] public Resource.ColormapId Colormap { get; set; } = Resource.ColormapId.hsv;
+        [DataMember] public bool ForceMinMax { get; set; } = false;
+        [DataMember] public float MinIntensity { get; set; } = 0;
+        [DataMember] public float MaxIntensity { get; set; } = 1;
+        [DataMember] public bool FlipMinMax { get; set; } = false;
+        [DataMember] public uint MaxQueueSize { get; set; } = 1;
+    }
+    
+    public class GridMapListener : ListenerController
+    {
+        DisplayNode node;
+        GridMapResource resource;
+        
+        public override ModuleData ModuleData { get; set; }
 
-        public int Width;
-        public int Height;
+        public Vector2 MeasuredIntensityBounds { get; private set; }
+        
+        public override TFFrame Frame => node.Parent;
 
-        public Resource.ColormapId colorMap = Resource.ColormapId.hsv;
-
-        Mesh mesh;
-        Material material;
-
-        Texture2D heightTexture;
-        Texture2D intensityTexture;
-        Texture2D colorMapTexture;
-
-        // Start is called before the first frame update
-        void Start()
+        readonly GridMapConfiguration config = new GridMapConfiguration();
+        public GridMapConfiguration Config
         {
-            listener = new RosListener<GridMap>(Topic, Handler);
-
-            mesh = new Mesh();
-            GetComponent<MeshFilter>().sharedMesh = mesh;
-
-            material = Instantiate(Resources.Load<Material>("Displays/GridMap Material"));
-            GetComponent<MeshRenderer>().material = material;
-
-            transform.rotation = Quaternion.Euler(-90, 0, 0);
-
-            colorMapTexture = Resource.Colormaps.Textures[colorMap];
-            material.SetTexture("_ColorMapTexture", colorMapTexture);
-
-            GameThread.EverySecond += UpdateStats;
+            get => config;
+            set
+            {
+                config.Topic = value.Topic;
+                Visible = value.Visible;
+                //IntensityChannel = value.IntensityChannel;
+                Colormap = value.Colormap;
+                ForceMinMax = value.ForceMinMax;
+                MinIntensity = value.MinIntensity;
+                MaxIntensity = value.MaxIntensity;
+                FlipMinMax = value.FlipMinMax;
+                MaxQueueSize = value.MaxQueueSize;
+            }
+        }
+        
+        public bool Visible
+        {
+            get => config.Visible;
+            set
+            {
+                config.Visible = value;
+                resource.Visible = value;
+            }
         }
 
+        /*
+        public string IntensityChannel
+        {
+            get => config.IntensityChannel;
+            set => config.IntensityChannel = value;
+        } 
+        */
+        
+        public Resource.ColormapId Colormap
+        {
+            get => config.Colormap;
+            set
+            {
+                config.Colormap = value;
+                resource.Colormap = value;
+            }
+        }
+
+        public bool ForceMinMax
+        {
+            get => config.ForceMinMax;
+            set
+            {
+                config.ForceMinMax = value;
+                if (config.ForceMinMax)
+                {
+                    resource.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
+                }
+                else
+                {
+                    resource.IntensityBounds = MeasuredIntensityBounds;
+                }
+            }
+        }        
+        
+
+        public bool FlipMinMax
+        {
+            get => config.FlipMinMax;
+            set
+            {
+                config.FlipMinMax = value;
+                resource.FlipMinMax = value;
+            }
+        }
+
+
+        public float MinIntensity
+        {
+            get => config.MinIntensity;
+            set
+            {
+                config.MinIntensity = value;
+                if (config.ForceMinMax)
+                {
+                    resource.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
+                }
+            }
+        }        
+
+        public float MaxIntensity
+        {
+            get => config.MaxIntensity;
+            set
+            {
+                config.MaxIntensity = value;
+                if (config.ForceMinMax)
+                {
+                    resource.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
+                }
+            }
+        }
+
+        public uint MaxQueueSize
+        {
+            get => config.MaxQueueSize;
+            set
+            {
+                config.MaxQueueSize = value;
+                if (Listener != null)
+                {
+                    Listener.MaxQueueSize = (int)value;
+                }
+            }
+        }
+
+        void Awake()
+        {
+            node = SimpleDisplayNode.Instantiate("[GridMapNode]");
+            resource = ResourcePool.GetOrCreate<GridMapResource>(Resource.Displays.PointList, node.transform);
+
+            Config = new GridMapConfiguration();            
+        }
+        
         public override void StartListening()
         {
-            //Topic = topic;
+            Listener = new RosListener<GridMap>(config.Topic, Handler);
+            Listener.MaxQueueSize = (int)MaxQueueSize;
+            name = "[" + config.Topic + "]";
         }
-
+        
         void Handler(GridMap msg)
         {
-            string parentId = msg.info.header.frame_id;
-            transform.SetParentLocal(TFListener.GetOrCreateFrame(parentId, null).transform);
+            node.AttachTo(msg.Info.Header.FrameId, msg.Info.Header.Stamp);
 
-            int width = (int)(msg.info.length_x / msg.info.resolution + 0.5);
-            int height = (int)(msg.info.length_y / msg.info.resolution + 0.5);
+            int width = (int)(msg.Info.LengthX / msg.Info.Resolution + 0.5);
+            int height = (int)(msg.Info.LengthY / msg.Info.Resolution + 0.5);
 
-            EnsureSize(width, height);
-
-            transform.localScale = new Vector3((float)msg.info.length_x, (float)msg.info.length_y, 1);
-            transform.localPosition = new Vector3(-(float)msg.info.length_x/2, 0, (float)msg.info.length_y/2);
-                       
-            heightTexture.GetRawTextureData<float>().CopyFrom(msg.data[0].data);
-            heightTexture.Apply();
-
-            intensityTexture.GetRawTextureData<float>().CopyFrom(msg.data[0].data);
-            intensityTexture.Apply();
-
-
-            float min = float.MaxValue, max = float.MinValue;
-            float[] array = msg.data[0].data;
-            for (int i = 0; i < array.Length; i++)
-            {
-                if (array[i] < min) min = array[i];
-                if (array[i] > max) max = array[i];
-            }
-
-            material.SetFloat("_MinIntensity", min);
-            material.SetFloat("_InvSpanIntensity", 1f / (max - min));
+            resource.Set(width, height, (float)msg.Info.LengthX, (float)msg.Info.LengthY, msg.Data[0].Data);
         }
 
-        void EnsureSize(int newWidth, int newHeight)
+        public override void Stop()
         {
-            if (newWidth == Width && newHeight == Height)
-            {
-                return;
-            }
+            base.Stop();
 
-            Width = newWidth;
-            Height = newHeight;
+            ResourcePool.Dispose(Resource.Displays.GridMap, resource.gameObject);
 
-            int size_p1 = (Width + 1) * (Height + 1);
-            Vector3[] points = new Vector3[size_p1];
-            float step_x = 1f / Width;
-            float step_y = 1f / Height;
-            for (int v = 0, off = 0; v <= Height; v++)
-            {
-                for (int u = 0; u <= Width; u++, off++)
-                {
-                    points[off] = new Vector3(
-                        u * step_x,
-                        v * step_y,
-                        0
-                        );
-                }
-            }
-
-            int size = Width * Height;
-            int[] indices = new int[size * 4];
-            for (int v = 0; v < Height; v++)
-            {
-                int i_off = v * Width * 4;
-                int p_off = v * (Width + 1);
-                for (int u = 0; u < Width; u++, i_off += 4, p_off++)
-                {
-                    indices[i_off + 0] = p_off;
-                    indices[i_off + 1] = p_off + 1;
-                    indices[i_off + 2] = p_off + (Width + 1) + 1;
-                    indices[i_off + 3] = p_off + (Width + 1);
-                }
-            }
-
-            mesh.vertices = points;
-            mesh.SetIndices(indices, MeshTopology.Quads, 0);
-            mesh.Optimize();
-
-            if (heightTexture != null)
-            {
-                Destroy(heightTexture);
-            }
-            heightTexture = new Texture2D(Width, Height, TextureFormat.RFloat, false);
-            material.SetTexture("_HeightTexture", heightTexture);
-
-            if (intensityTexture != null)
-            {
-                Destroy(intensityTexture);
-            }
-            intensityTexture = new Texture2D(Width, Height, TextureFormat.RFloat, false);
-            material.SetTexture("_IntensityTexture", intensityTexture);
-        }
-
-        // Update is called once per frame
-        void UpdateStats()
-        {
-            Connected = listener.Connected;
-            Subscribed = listener.Subscribed;
-            MessagesPerSecond = listener.UpdateStats().MessagesPerSecond;
-
-            if (colorMap.ToString() != colorMapTexture.name)
-            {
-                colorMapTexture = Resources.Load<Texture2D>("colormaps/" + colorMap);
-                if (colorMapTexture == null)
-                {
-                    Debug.LogError("Cannot find texture '" + colorMap + "'");
-                }
-                material.SetTexture("_ColorMapTexture", colorMapTexture);
-            }
-        }
-
-        public override void Recycle()
-        {
-        }
-
-        void OnDestroy()
-        {
-            if (mesh != null) Destroy(mesh);
-            if (heightTexture != null) Destroy(heightTexture);
-            if (intensityTexture != null) Destroy(intensityTexture);
-            if (material != null) Destroy(material);
-            listener?.Stop();
-        }
-
-        public override void Unsubscribe()
-        {
-            throw new System.NotImplementedException();
+            node.Stop();
+            Destroy(node.gameObject);
         }
     }
-    */
 }

@@ -22,8 +22,9 @@ namespace Iviz.App
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Joystick) as JoystickPanelContents;
 
-            controller = Instantiate<JoystickController>();
-            controller.ModuleData = this;
+            //controller = Instantiate<JoystickController>();
+            controller = new JoystickController(this);
+            //controller.ModuleData = this;
             if (constructor.Configuration != null)
             {
                 controller.Config = (JoystickConfiguration)constructor.Configuration;
@@ -36,9 +37,8 @@ namespace Iviz.App
         public override void Stop()
         {
             base.Stop();
-
             controller.Stop();
-            Object.Destroy(controller.gameObject);
+            //Object.Destroy(controller.gameObject);
         }
 
         public override void SetupPanel()

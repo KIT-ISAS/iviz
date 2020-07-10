@@ -24,11 +24,11 @@ namespace Iviz.App.Listeners
         [DataMember] public SerializableVector3 Offset { get; set; } = Vector3.zero;
     }
 
-    public class GridController : MonoBehaviour, IController
+    public class GridController : IController
     {
-        DisplayClickableNode node;
-        ReflectionProbe reflectionProbe;
-        GridResource grid;
+        readonly DisplayClickableNode node;
+        readonly ReflectionProbe reflectionProbe;
+        readonly GridResource grid;
 
         public ModuleData ModuleData
         {
@@ -174,9 +174,10 @@ namespace Iviz.App.Listeners
             }
         }
 
-        void Awake()
+        //void Awake()
+        public GridController(ModuleData moduleData)
         {
-            name = "Grid Controller";
+            //name = "Grid Controller";
 
             grid = ResourcePool.GetOrCreate<GridResource>(Resource.Displays.Grid);
             grid.name = "Grid";
@@ -184,6 +185,8 @@ namespace Iviz.App.Listeners
             node = DisplayClickableNode.Instantiate("GridNode");
             node.Target = grid;
             node.SetName("");
+
+            ModuleData = moduleData;
 
             reflectionProbe = new GameObject().AddComponent<ReflectionProbe>();
             reflectionProbe.gameObject.name = "Grid Reflection Probe";
@@ -197,7 +200,6 @@ namespace Iviz.App.Listeners
             UpdateMesh();
 
             Config = new GridConfiguration();
-            gameObject.layer = Resource.ClickableLayer;
         }
 
         void UpdateMesh()
@@ -211,8 +213,8 @@ namespace Iviz.App.Listeners
         {
             ResourcePool.Dispose(Resource.Displays.Grid, grid.gameObject);
             node.Stop();
-            Destroy(node.gameObject);
-            Destroy(reflectionProbe.gameObject);
+            UnityEngine.Object.Destroy(node.gameObject);
+            UnityEngine.Object.Destroy(reflectionProbe.gameObject);
         }
 
     }

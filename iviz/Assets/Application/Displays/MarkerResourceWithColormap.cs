@@ -68,23 +68,22 @@ namespace Iviz.Displays
                 intensityBounds = value;
                 float intensitySpan = intensityBounds.y - intensityBounds.x;
 
-                if (intensitySpan == 0)
+                if (Mathf.Approximately(intensitySpan,0))
                 {
                     material.SetFloat(PropIntensityCoeff, 1);
                     material.SetFloat(PropIntensityAdd, 0);
+                    return;
+                }
+
+                if (!FlipMinMax)
+                {
+                    material.SetFloat(PropIntensityCoeff, 1 / intensitySpan);
+                    material.SetFloat(PropIntensityAdd, -intensityBounds.x / intensitySpan);
                 }
                 else
                 {
-                    if (!FlipMinMax)
-                    {
-                        material.SetFloat(PropIntensityCoeff, 1 / intensitySpan);
-                        material.SetFloat(PropIntensityAdd, -intensityBounds.x / intensitySpan);
-                    }
-                    else
-                    {
-                        material.SetFloat(PropIntensityCoeff, -1 / intensitySpan);
-                        material.SetFloat(PropIntensityAdd, intensityBounds.y / intensitySpan);
-                    }
+                    material.SetFloat(PropIntensityCoeff, -1 / intensitySpan);
+                    material.SetFloat(PropIntensityAdd, intensityBounds.y / intensitySpan);
                 }
             }
         }

@@ -11,8 +11,8 @@ namespace Iviz.App.Listeners
 {
     public sealed class InteractiveMarkerControlObject : MonoBehaviour
     {
-        public string Description { get; private set; }
-        public string Id { get; private set; }
+        string Description { get; set; }
+        string Id { get; set; }
 
         readonly Dictionary<string, MarkerObject> markers = new Dictionary<string, MarkerObject>();
         readonly HashSet<string> markersToDelete = new HashSet<string>();
@@ -99,7 +99,7 @@ namespace Iviz.App.Listeners
                 case InteractiveMarkerControl.VIEW_FACING:
                     control.KeepAbsoluteRotation = false;
                     control.PointsToCamera = true;
-                    control.PointToCameraByParent = !independentMarkerOrientation;
+                    control.CameraPivotIsParent = !independentMarkerOrientation;
                     break;
                 case InteractiveMarkerControl.INHERIT:
                     control.PointsToCamera = false;

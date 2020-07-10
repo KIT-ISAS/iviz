@@ -111,6 +111,7 @@ namespace Iviz.App
                 case Resource.Module.OccupancyGrid: return new OccupancyGridModuleData(c);
                 case Resource.Module.Joystick: return new JoystickModuleData(c);
                 case Resource.Module.Path: return new PathModuleData(c);
+                case Resource.Module.GridMap: return new GridMapModuleData(c);
                 default: throw new ArgumentException(nameof(c));
             }
         }

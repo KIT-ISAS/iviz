@@ -7,11 +7,11 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: GridMap Material
-  m_Shader: {fileID: 4800000, guid: bb738a8703bec79439ca7d231094f7f2, type: 3}
+  m_Name: GridMap
+  m_Shader: {fileID: 4800000, guid: cdf51adabbc214ba79220307189e18ba, type: 3}
   m_ShaderKeywords: _DISTANCE_ON
   m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
+  m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
@@ -19,6 +19,10 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _ColorMapTexture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _ColorTexture:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -31,8 +35,14 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _IntensityTexture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Floats:
     - _Distance: 1
+    - _InvSpanIntensity: 1
+    - _MinIntensity: 0
     - _PointSize: 0.003
     m_Colors:
     - _Tint: {r: 0.5, g: 0.5, b: 0.5, a: 1}
