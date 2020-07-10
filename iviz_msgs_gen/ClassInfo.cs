@@ -105,7 +105,7 @@ namespace Iviz.MsgsGen
 
         public static readonly HashSet<string> FakeStructs = new HashSet<string>
         {
-            "std_msgs/Header",
+            //"std_msgs/Header",
         };
 
         static readonly HashSet<string> forceSkip = new HashSet<string>
