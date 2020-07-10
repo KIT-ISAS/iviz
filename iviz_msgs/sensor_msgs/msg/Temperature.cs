@@ -14,10 +14,11 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public Temperature()
         {
+            Header = new StdMsgs.Header();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Temperature(in StdMsgs.Header Header, double Temperature_, double Variance)
+        public Temperature(StdMsgs.Header Header, double Temperature_, double Variance)
         {
             this.Header = Header;
             this.Temperature_ = Temperature_;
@@ -47,6 +48,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
+            if (Header is null) throw new System.NullReferenceException();
             Header.RosValidate();
         }
     

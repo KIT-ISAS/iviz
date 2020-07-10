@@ -18,11 +18,12 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor for empty message. </summary>
         public TransformStamped()
         {
+            Header = new StdMsgs.Header();
             ChildFrameId = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TransformStamped(in StdMsgs.Header Header, string ChildFrameId, in Transform Transform)
+        public TransformStamped(StdMsgs.Header Header, string ChildFrameId, in Transform Transform)
         {
             this.Header = Header;
             this.ChildFrameId = ChildFrameId;
@@ -52,6 +53,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
+            if (Header is null) throw new System.NullReferenceException();
             Header.RosValidate();
             if (ChildFrameId is null) throw new System.NullReferenceException();
         }

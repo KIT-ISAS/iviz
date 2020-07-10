@@ -17,10 +17,11 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public FluidPressure()
         {
+            Header = new StdMsgs.Header();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public FluidPressure(in StdMsgs.Header Header, double FluidPressure_, double Variance)
+        public FluidPressure(StdMsgs.Header Header, double FluidPressure_, double Variance)
         {
             this.Header = Header;
             this.FluidPressure_ = FluidPressure_;
@@ -50,6 +51,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
+            if (Header is null) throw new System.NullReferenceException();
             Header.RosValidate();
         }
     

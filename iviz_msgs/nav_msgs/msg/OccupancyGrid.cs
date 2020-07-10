@@ -17,12 +17,13 @@ namespace Iviz.Msgs.NavMsgs
         /// <summary> Constructor for empty message. </summary>
         public OccupancyGrid()
         {
+            Header = new StdMsgs.Header();
             Info = new MapMetaData();
             Data = System.Array.Empty<sbyte>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public OccupancyGrid(in StdMsgs.Header Header, MapMetaData Info, sbyte[] Data)
+        public OccupancyGrid(StdMsgs.Header Header, MapMetaData Info, sbyte[] Data)
         {
             this.Header = Header;
             this.Info = Info;
@@ -52,6 +53,7 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
+            if (Header is null) throw new System.NullReferenceException();
             Header.RosValidate();
             if (Info is null) throw new System.NullReferenceException();
             Info.RosValidate();

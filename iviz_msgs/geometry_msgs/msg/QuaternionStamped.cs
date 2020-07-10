@@ -12,10 +12,11 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor for empty message. </summary>
         public QuaternionStamped()
         {
+            Header = new StdMsgs.Header();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public QuaternionStamped(in StdMsgs.Header Header, in Quaternion Quaternion)
+        public QuaternionStamped(StdMsgs.Header Header, in Quaternion Quaternion)
         {
             this.Header = Header;
             this.Quaternion = Quaternion;
@@ -42,6 +43,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
+            if (Header is null) throw new System.NullReferenceException();
             Header.RosValidate();
         }
     

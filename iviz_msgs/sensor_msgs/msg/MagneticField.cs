@@ -26,11 +26,12 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public MagneticField()
         {
+            Header = new StdMsgs.Header();
             MagneticFieldCovariance = new double[9];
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MagneticField(in StdMsgs.Header Header, in GeometryMsgs.Vector3 MagneticField_, double[] MagneticFieldCovariance)
+        public MagneticField(StdMsgs.Header Header, in GeometryMsgs.Vector3 MagneticField_, double[] MagneticFieldCovariance)
         {
             this.Header = Header;
             this.MagneticField_ = MagneticField_;
@@ -60,6 +61,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
+            if (Header is null) throw new System.NullReferenceException();
             Header.RosValidate();
             if (MagneticFieldCovariance is null) throw new System.NullReferenceException();
             if (MagneticFieldCovariance.Length != 9) throw new System.IndexOutOfRangeException();

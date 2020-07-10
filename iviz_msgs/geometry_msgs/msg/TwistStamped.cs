@@ -12,10 +12,11 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor for empty message. </summary>
         public TwistStamped()
         {
+            Header = new StdMsgs.Header();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TwistStamped(in StdMsgs.Header Header, in Twist Twist)
+        public TwistStamped(StdMsgs.Header Header, in Twist Twist)
         {
             this.Header = Header;
             this.Twist = Twist;
@@ -42,6 +43,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
+            if (Header is null) throw new System.NullReferenceException();
             Header.RosValidate();
         }
     

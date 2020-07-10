@@ -12,10 +12,11 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor for empty message. </summary>
         public Vector3Stamped()
         {
+            Header = new StdMsgs.Header();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Vector3Stamped(in StdMsgs.Header Header, in Vector3 Vector)
+        public Vector3Stamped(StdMsgs.Header Header, in Vector3 Vector)
         {
             this.Header = Header;
             this.Vector = Vector;
@@ -42,6 +43,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
+            if (Header is null) throw new System.NullReferenceException();
             Header.RosValidate();
         }
     

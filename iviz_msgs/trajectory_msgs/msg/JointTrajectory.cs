@@ -12,12 +12,13 @@ namespace Iviz.Msgs.TrajectoryMsgs
         /// <summary> Constructor for empty message. </summary>
         public JointTrajectory()
         {
+            Header = new StdMsgs.Header();
             JointNames = System.Array.Empty<string>();
             Points = System.Array.Empty<JointTrajectoryPoint>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public JointTrajectory(in StdMsgs.Header Header, string[] JointNames, JointTrajectoryPoint[] Points)
+        public JointTrajectory(StdMsgs.Header Header, string[] JointNames, JointTrajectoryPoint[] Points)
         {
             this.Header = Header;
             this.JointNames = JointNames;
@@ -51,6 +52,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
         
         public void RosValidate()
         {
+            if (Header is null) throw new System.NullReferenceException();
             Header.RosValidate();
             if (JointNames is null) throw new System.NullReferenceException();
             for (int i = 0; i < JointNames.Length; i++)

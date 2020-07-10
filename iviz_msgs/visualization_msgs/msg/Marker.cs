@@ -47,6 +47,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// <summary> Constructor for empty message. </summary>
         public Marker()
         {
+            Header = new StdMsgs.Header();
             Ns = "";
             Points = System.Array.Empty<GeometryMsgs.Point>();
             Colors = System.Array.Empty<StdMsgs.ColorRGBA>();
@@ -55,7 +56,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Marker(in StdMsgs.Header Header, string Ns, int Id, int Type, int Action, in GeometryMsgs.Pose Pose, in GeometryMsgs.Vector3 Scale, in StdMsgs.ColorRGBA Color, duration Lifetime, bool FrameLocked, GeometryMsgs.Point[] Points, StdMsgs.ColorRGBA[] Colors, string Text, string MeshResource, bool MeshUseEmbeddedMaterials)
+        public Marker(StdMsgs.Header Header, string Ns, int Id, int Type, int Action, in GeometryMsgs.Pose Pose, in GeometryMsgs.Vector3 Scale, in StdMsgs.ColorRGBA Color, duration Lifetime, bool FrameLocked, GeometryMsgs.Point[] Points, StdMsgs.ColorRGBA[] Colors, string Text, string MeshResource, bool MeshUseEmbeddedMaterials)
         {
             this.Header = Header;
             this.Ns = Ns;
@@ -121,6 +122,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
+            if (Header is null) throw new System.NullReferenceException();
             Header.RosValidate();
             if (Ns is null) throw new System.NullReferenceException();
             if (Points is null) throw new System.NullReferenceException();

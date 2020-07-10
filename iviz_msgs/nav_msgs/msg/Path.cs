@@ -12,11 +12,12 @@ namespace Iviz.Msgs.NavMsgs
         /// <summary> Constructor for empty message. </summary>
         public Path()
         {
+            Header = new StdMsgs.Header();
             Poses = System.Array.Empty<GeometryMsgs.PoseStamped>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Path(in StdMsgs.Header Header, GeometryMsgs.PoseStamped[] Poses)
+        public Path(StdMsgs.Header Header, GeometryMsgs.PoseStamped[] Poses)
         {
             this.Header = Header;
             this.Poses = Poses;
@@ -47,6 +48,7 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
+            if (Header is null) throw new System.NullReferenceException();
             Header.RosValidate();
             if (Poses is null) throw new System.NullReferenceException();
             for (int i = 0; i < Poses.Length; i++)

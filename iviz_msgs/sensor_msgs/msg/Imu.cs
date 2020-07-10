@@ -29,13 +29,14 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public Imu()
         {
+            Header = new StdMsgs.Header();
             OrientationCovariance = new double[9];
             AngularVelocityCovariance = new double[9];
             LinearAccelerationCovariance = new double[9];
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Imu(in StdMsgs.Header Header, in GeometryMsgs.Quaternion Orientation, double[] OrientationCovariance, in GeometryMsgs.Vector3 AngularVelocity, double[] AngularVelocityCovariance, in GeometryMsgs.Vector3 LinearAcceleration, double[] LinearAccelerationCovariance)
+        public Imu(StdMsgs.Header Header, in GeometryMsgs.Quaternion Orientation, double[] OrientationCovariance, in GeometryMsgs.Vector3 AngularVelocity, double[] AngularVelocityCovariance, in GeometryMsgs.Vector3 LinearAcceleration, double[] LinearAccelerationCovariance)
         {
             this.Header = Header;
             this.Orientation = Orientation;
@@ -77,6 +78,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
+            if (Header is null) throw new System.NullReferenceException();
             Header.RosValidate();
             if (OrientationCovariance is null) throw new System.NullReferenceException();
             if (OrientationCovariance.Length != 9) throw new System.IndexOutOfRangeException();

@@ -20,12 +20,13 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public PointCloud()
         {
+            Header = new StdMsgs.Header();
             Points = System.Array.Empty<GeometryMsgs.Point32>();
             Channels = System.Array.Empty<ChannelFloat32>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public PointCloud(in StdMsgs.Header Header, GeometryMsgs.Point32[] Points, ChannelFloat32[] Channels)
+        public PointCloud(StdMsgs.Header Header, GeometryMsgs.Point32[] Points, ChannelFloat32[] Channels)
         {
             this.Header = Header;
             this.Points = Points;
@@ -59,6 +60,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
+            if (Header is null) throw new System.NullReferenceException();
             Header.RosValidate();
             if (Points is null) throw new System.NullReferenceException();
             if (Channels is null) throw new System.NullReferenceException();
