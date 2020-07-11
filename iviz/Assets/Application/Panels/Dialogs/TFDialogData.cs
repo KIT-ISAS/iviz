@@ -14,10 +14,10 @@ namespace Iviz.App
         TFDialogContents panel;
         public override IDialogPanelContents Panel => panel;
 
-        public override void Initialize(DisplayListPanel panel)
+        public override void Initialize(DisplayListPanel newPanel)
         {
-            base.Initialize(panel);
-            this.panel = (TFDialogContents)DialogPanelManager.GetPanelByType(DialogPanelType.TF);
+            base.Initialize(newPanel);
+            panel = (TFDialogContents)DialogPanelManager.GetPanelByType(DialogPanelType.TF);
         }
 
         public override void SetupPanel()
@@ -27,6 +27,17 @@ namespace Iviz.App
             panel.TFLog.Close += Close;
             panel.TFLog.Flush();
             panel.TFLog.UpdateFrameTexts();
+
+            panel.ShowOnlyUsed.Value = !TFListener.Instance.ShowAllFrames;
+            panel.ShowOnlyUsed.ValueChanged += f =>
+            {
+                TFListener.Instance.ShowAllFrames = !f;
+                TFListener.Instance.ModuleData.ForceUpdatePanel();
+            };
+            panel.ResetAll.Clicked += () =>
+            {
+                TFListener.Instance.ForceClearFrames();
+            };
         }
 
         public override void UpdatePanel()

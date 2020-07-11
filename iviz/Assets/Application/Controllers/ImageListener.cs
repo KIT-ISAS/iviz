@@ -30,12 +30,12 @@ namespace Iviz.App.Listeners
 
     public sealed class ImageListener : ListenerController
     {
-        public DisplayClickableNode Node { get; private set; }
+        public DisplayClickableNode Node { get; }
         ImageResource marker;
 
         public override TFFrame Frame => Node.Parent;
 
-        public ImageTexture ImageTexture { get; private set; }
+        public ImageTexture ImageTexture { get; }
         public Texture2D Texture => ImageTexture.Texture;
         public Material Material => ImageTexture.Material;
 
@@ -47,11 +47,7 @@ namespace Iviz.App.Listeners
 
         public bool IsMono => ImageTexture.IsMono;
 
-        public override ModuleData ModuleData
-        {
-            get => Node.ModuleData;
-            set => Node.ModuleData = value;
-        }
+        public override ModuleData ModuleData => Node.ModuleData;
 
         readonly ImageConfiguration config = new ImageConfiguration();
         public ImageConfiguration Config
@@ -177,10 +173,11 @@ namespace Iviz.App.Listeners
             }
         }
 
-        void Awake()
+        public ImageListener(ModuleData moduleData)
         {
             ImageTexture = new ImageTexture();
             Node = DisplayClickableNode.Instantiate("[ImageNode]");
+            Node.ModuleData = moduleData; 
             marker = ResourcePool.GetOrCreate<ImageResource>(Resource.Displays.Image);
             marker.Texture = ImageTexture;
             Node.Target = marker;
@@ -200,7 +197,7 @@ namespace Iviz.App.Listeners
                     break;
             }
             Listener.MaxQueueSize = (int)MaxQueueSize;
-            name = "Node:" + config.Topic;
+            //name = "Node:" + config.Topic;
             Node.SetName($"[{config.Topic}]");
         }
 
@@ -246,7 +243,7 @@ namespace Iviz.App.Listeners
             ImageTexture.Destroy();
 
             Node.Stop();
-            Destroy(Node.gameObject);
+            UnityEngine.Object.Destroy(Node.gameObject);
         }
 
     }

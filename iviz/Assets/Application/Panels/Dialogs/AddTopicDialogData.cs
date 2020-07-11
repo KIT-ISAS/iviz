@@ -35,9 +35,9 @@ namespace Iviz.App
 
         readonly List<TopicWithResource> topics = new List<TopicWithResource>();
 
-        public override void Initialize(DisplayListPanel panel)
+        public override void Initialize(DisplayListPanel newPanel)
         {
-            base.Initialize(panel);
+            base.Initialize(newPanel);
             this.panel = (AddTopicDialogContents)DialogPanelManager.GetPanelByType(DialogPanelType.AddTopic);
             this.panel.ShowAll.Value = false;
         }

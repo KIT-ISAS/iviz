@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using Iviz.Msgs.VisualizationMsgs;
 using System.Runtime.Serialization;
@@ -25,7 +26,7 @@ namespace Iviz.App.Listeners
     {
         readonly Dictionary<string, MarkerObject> markers = new Dictionary<string, MarkerObject>();
 
-        public override ModuleData ModuleData { get; set; }
+        public override ModuleData ModuleData { get; }
 
         public override TFFrame Frame => TFListener.MapFrame;
 
@@ -85,6 +86,11 @@ namespace Iviz.App.Listeners
             }
         }
 
+        public MarkerListener(ModuleData moduleData)
+        {
+            ModuleData = moduleData;
+        }
+
         public override void StartListening()
         {
             switch (config.Type)
@@ -105,7 +111,7 @@ namespace Iviz.App.Listeners
             foreach (MarkerObject marker in markers.Values)
             {
                 marker.Stop();
-                Destroy(marker.gameObject);
+                UnityEngine.Object.Destroy(marker.gameObject);
             }
             markers.Clear();
         }
@@ -164,7 +170,7 @@ namespace Iviz.App.Listeners
         static void DeleteMarkerObject(MarkerObject markerToDelete)
         {
             markerToDelete.Stop();
-            Destroy(markerToDelete.gameObject);
+            UnityEngine.Object.Destroy(markerToDelete.gameObject);
         }
 
         static MarkerObject CreateMarkerObject()

@@ -26,9 +26,10 @@ namespace Iviz.App
                 constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.JointState) as JointStatePanelContents;
-            listener = Instantiate<JointStateListener>();
-            listener.name = "JointState:" + Topic;
-            listener.ModuleData = this;
+            //listener = Instantiate<JointStateListener>();
+            //listener.name = "JointState:" + Topic;
+            //listener.ModuleData = this;
+            listener = new JointStateListener(this);
             if (constructor.Configuration != null)
             {
                 listener.Config = (JointStateConfiguration)constructor.Configuration;

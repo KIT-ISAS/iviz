@@ -34,7 +34,7 @@ namespace Iviz.App.Listeners
         DisplayNode node;
         PointListResource pointCloud;
 
-        public override ModuleData ModuleData { get; set; }
+        public override ModuleData ModuleData { get; }
 
         public Vector2 MeasuredIntensityBounds { get; private set; }
 
@@ -169,8 +169,10 @@ namespace Iviz.App.Listeners
 
         PointWithColor[] pointBuffer = new PointWithColor[0];
 
-        void Awake()
+        public PointCloudListener(ModuleData moduleData)
         {
+            ModuleData = moduleData;
+            
             node = SimpleDisplayNode.Instantiate("[PointCloudNode]");
             pointCloud = ResourcePool.GetOrCreate<PointListResource>(Resource.Displays.PointList, node.transform);
 
@@ -182,8 +184,7 @@ namespace Iviz.App.Listeners
         {
             Listener = new RosListener<PointCloud2>(config.Topic, Handler);
             Listener.MaxQueueSize = (int)MaxQueueSize;
-            name = "[" + config.Topic + "]";
-            node.name = name;
+            node.name = "[" + config.Topic + "]";
         }
 
         static int FieldSizeFromType(int datatype)
@@ -457,7 +458,7 @@ namespace Iviz.App.Listeners
             ResourcePool.Dispose(Resource.Displays.PointList, pointCloud.gameObject);
 
             node.Stop();
-            Destroy(node.gameObject);
+            UnityEngine.Object.Destroy(node.gameObject);
         }
     }
 }

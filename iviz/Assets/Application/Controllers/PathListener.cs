@@ -30,10 +30,10 @@ namespace Iviz.App.Listeners
 
     public class PathListener : ListenerController
     {
-        DisplayNode node;
-        LineResource resource;
+        readonly DisplayNode node;
+        readonly LineResource resource;
 
-        public override ModuleData ModuleData { get; set; }
+        public override ModuleData ModuleData { get; }
 
         public override TFFrame Frame => node.Parent;
 
@@ -143,8 +143,10 @@ namespace Iviz.App.Listeners
         readonly List<Pose> savedPoses = new List<Pose>();
         readonly List<LineWithColor> lines = new List<LineWithColor>();
 
-        void Awake()
+        public PathListener(ModuleData moduleData)
         {
+            ModuleData = moduleData;
+            
             node = SimpleDisplayNode.Instantiate("PathNode");
             resource = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, node.transform);
             resource.LineScale = 0.005f;
@@ -176,8 +178,7 @@ namespace Iviz.App.Listeners
             }
 
             Listener.MaxQueueSize = (int) MaxQueueSize;
-            name = "[" + config.Topic + "]";
-            node.name = name;
+            node.name = "[" + config.Topic + "]";;
         }
 
 
@@ -302,7 +303,7 @@ namespace Iviz.App.Listeners
 
             ResourcePool.Dispose(Resource.Displays.Line, resource.gameObject);
             node.Stop();
-            Destroy(node.gameObject);
+            UnityEngine.Object.Destroy(node.gameObject);
         }
     }
 }

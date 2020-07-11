@@ -582,6 +582,11 @@ PrefabInstance:
       propertyPath: occlusionOnly
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2068465258899158208, guid: 71964f516a1b64eae9a12dd80a25b4d9,
+        type: 3}
+      propertyPath: color.a
+      value: 0.5019608
+      objectReference: {fileID: 0}
     - target: {fileID: 2578782629881925915, guid: 71964f516a1b64eae9a12dd80a25b4d9,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -667,6 +672,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Ring X Plane
       objectReference: {fileID: 0}
+    - target: {fileID: 3711671975711648372, guid: 71964f516a1b64eae9a12dd80a25b4d9,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: ba0c0be43c9754a05ba038603d1c41d4, type: 2}
     m_RemovedComponents:
     - {fileID: 2612954606819489526, guid: 71964f516a1b64eae9a12dd80a25b4d9, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 71964f516a1b64eae9a12dd80a25b4d9, type: 3}
@@ -1109,6 +1119,11 @@ PrefabInstance:
       propertyPath: occlusionOnly
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2068465258899158208, guid: 71964f516a1b64eae9a12dd80a25b4d9,
+        type: 3}
+      propertyPath: color.a
+      value: 0.5019608
+      objectReference: {fileID: 0}
     - target: {fileID: 2578782629881925915, guid: 71964f516a1b64eae9a12dd80a25b4d9,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1194,6 +1209,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Ring Z Plane
       objectReference: {fileID: 0}
+    - target: {fileID: 3711671975711648372, guid: 71964f516a1b64eae9a12dd80a25b4d9,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: ba0c0be43c9754a05ba038603d1c41d4, type: 2}
     m_RemovedComponents:
     - {fileID: 2612954606819489526, guid: 71964f516a1b64eae9a12dd80a25b4d9, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 71964f516a1b64eae9a12dd80a25b4d9, type: 3}

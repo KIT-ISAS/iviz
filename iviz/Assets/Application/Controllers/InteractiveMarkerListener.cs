@@ -5,6 +5,7 @@ using System;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.RoslibSharp;
 using System.Runtime.Serialization;
+using Iviz.App.Displays;
 using Iviz.Resources;
 
 namespace Iviz.App.Listeners
@@ -21,6 +22,8 @@ namespace Iviz.App.Listeners
 
     public class InteractiveMarkerListener : ListenerController
     {
+        readonly SimpleDisplayNode node;
+        
         public RosSender<InteractiveMarkerFeedback> RosSender { get; private set; }
 
         public override TFFrame Frame => TFListener.MapFrame;
@@ -28,7 +31,7 @@ namespace Iviz.App.Listeners
         readonly Dictionary<string, InteractiveMarkerObject> imarkers =
             new Dictionary<string, InteractiveMarkerObject>();
 
-        public override ModuleData ModuleData { get; set; }
+        public override ModuleData ModuleData { get; }
 
         public bool DisableExpiration
         {
@@ -48,6 +51,12 @@ namespace Iviz.App.Listeners
             }
         }
 
+        public InteractiveMarkerListener(ModuleData moduleData)
+        {
+            ModuleData = moduleData;
+            node = SimpleDisplayNode.Instantiate("[InteractiveMarkerListener]");
+        }
+
         public override void StartListening()
         {
             Listener = new RosListener<InteractiveMarkerUpdate>(config.Topic, Handler);
@@ -63,6 +72,9 @@ namespace Iviz.App.Listeners
             imarkers.Values.ForEach(DeleteMarkerObject);
             imarkers.Clear();
             RosSender.Stop();
+            
+            node.Stop();
+            UnityEngine.Object.Destroy(node.gameObject);
         }
 
         public void ClearAll()
@@ -98,7 +110,7 @@ namespace Iviz.App.Listeners
                 {
                     OnInteractiveControlObjectMoved(id, pose, controlId);
                 };
-                imarker.transform.SetParentLocal(transform);
+                imarker.transform.SetParentLocal(node.transform);
                 imarkers[id] = imarker;
             }
 
@@ -114,7 +126,7 @@ namespace Iviz.App.Listeners
         static void DeleteMarkerObject(InteractiveMarkerObject imarker)
         {
             imarker.Stop();
-            Destroy(imarker.gameObject);
+            UnityEngine.Object.Destroy(imarker.gameObject);
         }
 
         void UpdateInteractiveMarkerPose(InteractiveMarkerPose msg)
@@ -137,7 +149,7 @@ namespace Iviz.App.Listeners
             }
 
             imarker.Stop();
-            Destroy(imarker.gameObject);
+            UnityEngine.Object.Destroy(imarker.gameObject);
             imarkers.Remove(id);
         }
 
@@ -205,10 +217,7 @@ namespace Iviz.App.Listeners
 
             DateTime now = DateTime.Now;
             string[] deadMarkers =
-                imarkers.
-                    Where(x => x.Value.ExpirationTime < now).
-                    Select(x => x.Key).
-                    ToArray();
+                imarkers.Where(x => x.Value.ExpirationTime < now).Select(x => x.Key).ToArray();
             foreach (string key in deadMarkers)
             {
                 DestroyInteractiveMarker(key);

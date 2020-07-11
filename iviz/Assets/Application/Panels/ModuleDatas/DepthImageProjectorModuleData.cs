@@ -10,7 +10,7 @@ namespace Iviz.App
 {
     public sealed class DepthImageProjectorModuleData : ModuleData
     {
-        readonly DepthImageProjector controller;
+        readonly DepthImageProjectorController controller;
         readonly DepthImageProjectorPanelContents panel;
 
         public override DataPanelContents Panel => panel;
@@ -27,8 +27,7 @@ namespace Iviz.App
 
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.DepthImageProjector) as DepthImageProjectorPanelContents;
 
-            controller = Instantiate<DepthImageProjector>();
-            controller.ModuleData = this;
+            controller = new DepthImageProjectorController(this);
             if (constructor.Configuration != null)
             {
                 controller.Config = (DepthImageProjectorConfiguration)constructor.Configuration;
@@ -42,7 +41,6 @@ namespace Iviz.App
         {
             base.Stop();
             controller.Stop();
-            Object.Destroy(controller.gameObject);
         }
 
         public override void SetupPanel()

@@ -33,10 +33,10 @@ namespace Iviz.App.Listeners
 
     public class LaserScanListener : ListenerController
     {
-        RadialScanResource resource;
-        DisplayNode node;
+        readonly RadialScanResource resource;
+        readonly DisplayNode node;
 
-        public override ModuleData ModuleData { get; set; }
+        public override ModuleData ModuleData { get; }
 
         public override TFFrame Frame => node.Parent;
 
@@ -168,11 +168,12 @@ namespace Iviz.App.Listeners
             }
         }
 
-        void Awake()
+        public LaserScanListener(ModuleData moduleData)
         {
-            transform.parent = TFListener.ListenersFrame.transform;
+            ModuleData = moduleData;
+            //transform.parent = TFListener.ListenersFrame.transform;
 
-            node = SimpleDisplayNode.Instantiate("LaserScanNode", transform);
+            node = SimpleDisplayNode.Instantiate("[LaserScanNode]");
             resource = ResourcePool.GetOrCreate<RadialScanResource>(Resource.Displays.RadialScanResource, node.transform);
             Config = new LaserScanConfiguration();
         }
@@ -181,7 +182,7 @@ namespace Iviz.App.Listeners
         {
             Listener = new RosListener<LaserScan>(config.Topic, Handler);
             Listener.MaxQueueSize = (int)MaxQueueSize;
-            name = "[" + config.Topic + "]";
+            //name = "[" + config.Topic + "]";
             node.name = "[" + config.Topic + "]";
         }
 
@@ -220,7 +221,7 @@ namespace Iviz.App.Listeners
             ResourcePool.Dispose(Resource.Displays.RadialScanResource, resource.gameObject);
 
             node.Stop();
-            Destroy(node.gameObject);
+            UnityEngine.Object.Destroy(node.gameObject);
         }
     }
 }

@@ -3,7 +3,7 @@ namespace Iviz.App.Listeners
 {
     public interface IController
     {
-        ModuleData ModuleData { get; set; }
+        ModuleData ModuleData { get; }
         void Stop();
     }
 }

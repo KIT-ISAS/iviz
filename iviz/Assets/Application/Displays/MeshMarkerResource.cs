@@ -109,6 +109,7 @@ namespace Iviz.Displays
             base.Awake();
             MainRenderer = GetComponent<MeshRenderer>();
             Color = color;
+            Tint = tint;
         }
 
         public override void Stop()

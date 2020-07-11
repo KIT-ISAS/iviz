@@ -3,13 +3,13 @@ using UnityEngine;
 
 namespace Iviz.App.Listeners
 {
-    public abstract class ListenerController : MonoBehaviour, IController, IHasFrame
+    public abstract class ListenerController : IController, IHasFrame
     {
         public RosListener Listener { get; protected set; }
 
         public abstract TFFrame Frame { get; }
 
-        public abstract ModuleData ModuleData { get; set; }
+        public abstract ModuleData ModuleData { get; }
 
         public abstract void StartListening();
 
@@ -18,6 +18,7 @@ namespace Iviz.App.Listeners
             Listener?.Stop();
             Listener = null;
         }
+
     }
 
 }

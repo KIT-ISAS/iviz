@@ -489,7 +489,7 @@ namespace Iviz.App
 
         public const int ModuleDataCaptionWidth = 200;
 
-        public void UpdateModuleButton(ModuleData entry, string text)
+        public void UpdateModuleButton(ModuleData entry, string content)
         {
             int index = moduleDatas.IndexOf(entry);
             if (index == -1)
@@ -497,7 +497,21 @@ namespace Iviz.App
                 return;
             }
             GameObject buttonObject = buttons[index];
-            buttonObject.GetComponentInChildren<Text>().text = text;
+            Text text = buttonObject.GetComponentInChildren<Text>();
+            text.text = content;
+            int lineBreaks = content.Count(x => x == '\n');
+            switch (lineBreaks)
+            {
+                case 2:
+                    text.fontSize = 11;
+                    break;
+                case 3:
+                    text.fontSize = 10;
+                    break;
+                default:
+                    text.fontSize = 12;
+                    break;
+            }
         }
 
         public void RegisterDisplayedTopic(string topic)

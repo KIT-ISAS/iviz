@@ -16,7 +16,7 @@ namespace Iviz.App.Listeners
     {
         const int MaxPoseMagnitude = 1000;
 
-        public const int Layer = 9;
+        const int Layer = 9;
 
         readonly Timeline timeline = new Timeline();
         TrailResource trail;
@@ -113,6 +113,8 @@ namespace Iviz.App.Listeners
             }
         }
 
+        public bool ForceInvisible { get; set; }
+
         bool visible;
         public bool Visible
         {
@@ -120,7 +122,7 @@ namespace Iviz.App.Listeners
             set
             {
                 visible = value;
-                axis.Visible = value || ForceVisible;
+                axis.Visible = (value || ForceVisible) && !ForceInvisible;
                 TrailVisible = TrailVisible;
                 AnchorVisible = AnchorVisible;
             } 
@@ -189,6 +191,21 @@ namespace Iviz.App.Listeners
             }
         }
 
+        bool acceptsParents;
+
+        public bool AcceptsParents
+        {
+            get => acceptsParents;
+            set
+            {
+                acceptsParents = value;
+                if (!acceptsParents)
+                {
+                    Parent = TFListener.RootFrame;
+                }
+            }
+        }
+
         public override TFFrame Parent
         {
             get => base.Parent;
@@ -201,9 +218,16 @@ namespace Iviz.App.Listeners
             }
         }
 
-
         public bool SetParent(TFFrame newParent)
         {
+            if (!AcceptsParents && 
+                newParent != TFListener.RootFrame && 
+                newParent != TFListener.UnityFrame &&
+                !(newParent is null))
+            {
+                return false;
+            }
+
             //Debug.Log("a child " + Id + " parent " + newParent?.Id);
             if (newParent == Parent)
             {
@@ -267,7 +291,7 @@ namespace Iviz.App.Listeners
 
             if (newPose.position.sqrMagnitude > MaxPoseMagnitude * MaxPoseMagnitude)
             {
-                return; // lel
+                //return; // lel
             }
 
             transform.SetLocalPose(newPose);

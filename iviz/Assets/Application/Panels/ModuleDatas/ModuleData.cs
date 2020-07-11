@@ -11,6 +11,7 @@ namespace Iviz.App
         protected DataPanelManager DataPanelManager => ModuleListPanel.DataPanelManager;
 
         string buttonText;
+
         public string ButtonText
         {
             get => buttonText;
@@ -36,30 +37,41 @@ namespace Iviz.App
             Type = type;
         }
 
-        public virtual void UpdateModuleButton()
+        protected virtual void UpdateModuleButton()
         {
             string text;
             if (!string.IsNullOrEmpty(Topic))
             {
                 string topicShort = Resource.Font.Split(Topic, DisplayListPanel.ModuleDataCaptionWidth);
-                text = $"{topicShort}\n<b>{Module}</b>";
+                string typeShort = string.IsNullOrEmpty(Type)
+                    ? Module.ToString()
+                    : Resource.Font.Split(Type, DisplayListPanel.ModuleDataCaptionWidth);
+                text = $"{topicShort}\n<b>{typeShort}</b>";
             }
             else
             {
                 text = $"<b>{Module}</b>";
             }
+
             if (!Visible)
             {
                 text = $"<color=grey>{text}</color>";
             }
+
             ButtonText = text;
         }
 
         public abstract void SetupPanel();
 
-        public virtual void CleanupPanel() { }
+        /*
+        public virtual void CleanupPanel()
+        {
+        }
+        */
 
-        public virtual void UpdatePanel() { }
+        public virtual void UpdatePanel()
+        {
+        }
 
         public void ToggleSelect()
         {
@@ -75,22 +87,41 @@ namespace Iviz.App
 
         public abstract void AddToState(StateConfiguration config);
 
+        public virtual void OnARModeChanged(bool value)
+        {
+        }
+
         public virtual void Stop()
         {
             DataPanelManager.HidePanelFor(this);
         }
 
+        bool IsSelected => DataPanelManager.SelectedModuleData == this;
+        
+        public void ForceUpdatePanel()
+        {
+            if (!IsSelected)
+            {
+                return;
+            }
+            Panel.ClearSubscribers();
+            SetupPanel();
+        }
+
+        /*
         protected static T Instantiate<T>(Transform parent = null) where T : MonoBehaviour
         {
             if (!typeof(IController).IsAssignableFrom(typeof(T)))
             {
                 throw new ArgumentException(nameof(T));
             }
+
             GameObject gameObject = new GameObject();
             gameObject.transform.parent = parent ?? TFListener.ListenersFrame?.gameObject.transform;
             gameObject.name = typeof(T).Name;
             return gameObject.AddComponent<T>();
         }
+        */
 
         public static ModuleData CreateFromResource(ModuleDataConstructor c)
         {

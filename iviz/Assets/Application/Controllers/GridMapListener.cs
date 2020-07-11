@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Runtime.Serialization;
 using Iviz.App.Displays;
 using Iviz.Displays;
@@ -16,7 +15,9 @@ namespace Iviz.App.Listeners
         [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
         [DataMember] public Resource.Module Module => Resource.Module.GridMap;
         [DataMember] public bool Visible { get; set; } = true;
+
         [DataMember] public string Topic { get; set; } = "";
+
         //[DataMember] public string IntensityChannel { get; set; } = "x";
         [DataMember] public Resource.ColormapId Colormap { get; set; } = Resource.ColormapId.hsv;
         [DataMember] public bool ForceMinMax { get; set; } = false;
@@ -25,19 +26,23 @@ namespace Iviz.App.Listeners
         [DataMember] public bool FlipMinMax { get; set; } = false;
         [DataMember] public uint MaxQueueSize { get; set; } = 1;
     }
-    
-    public class GridMapListener : ListenerController
+
+    public sealed class GridMapListener : ListenerController
     {
-        DisplayNode node;
-        GridMapResource resource;
+        const int MaxGridSize = 4096;
         
-        public override ModuleData ModuleData { get; set; }
+        readonly DisplayNode node;
+        readonly DisplayNode link;
+        readonly GridMapResource resource;
+
+        public override ModuleData ModuleData { get; }
 
         public Vector2 MeasuredIntensityBounds { get; private set; }
-        
+
         public override TFFrame Frame => node.Parent;
 
         readonly GridMapConfiguration config = new GridMapConfiguration();
+
         public GridMapConfiguration Config
         {
             get => config;
@@ -54,7 +59,7 @@ namespace Iviz.App.Listeners
                 MaxQueueSize = value.MaxQueueSize;
             }
         }
-        
+
         public bool Visible
         {
             get => config.Visible;
@@ -72,7 +77,7 @@ namespace Iviz.App.Listeners
             set => config.IntensityChannel = value;
         } 
         */
-        
+
         public Resource.ColormapId Colormap
         {
             get => config.Colormap;
@@ -89,17 +94,12 @@ namespace Iviz.App.Listeners
             set
             {
                 config.ForceMinMax = value;
-                if (config.ForceMinMax)
-                {
-                    resource.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
-                }
-                else
-                {
-                    resource.IntensityBounds = MeasuredIntensityBounds;
-                }
+                resource.IntensityBounds = config.ForceMinMax ? 
+                    new Vector2(MinIntensity, MaxIntensity) : 
+                    MeasuredIntensityBounds;
             }
-        }        
-        
+        }
+
 
         public bool FlipMinMax
         {
@@ -123,7 +123,7 @@ namespace Iviz.App.Listeners
                     resource.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
                 }
             }
-        }        
+        }
 
         public float MaxIntensity
         {
@@ -146,34 +146,70 @@ namespace Iviz.App.Listeners
                 config.MaxQueueSize = value;
                 if (Listener != null)
                 {
-                    Listener.MaxQueueSize = (int)value;
+                    Listener.MaxQueueSize = (int) value;
                 }
             }
         }
 
-        void Awake()
+        public GridMapListener(ModuleData moduleData)
         {
+            ModuleData = moduleData;
             node = SimpleDisplayNode.Instantiate("[GridMapNode]");
-            resource = ResourcePool.GetOrCreate<GridMapResource>(Resource.Displays.PointList, node.transform);
+            link = SimpleDisplayNode.Instantiate("[GridMapLink]", node.transform);
+            resource = ResourcePool.GetOrCreate<GridMapResource>(Resource.Displays.GridMap, link.transform);
 
-            Config = new GridMapConfiguration();            
+            Config = new GridMapConfiguration();
         }
-        
+
         public override void StartListening()
         {
             Listener = new RosListener<GridMap>(config.Topic, Handler);
-            Listener.MaxQueueSize = (int)MaxQueueSize;
-            name = "[" + config.Topic + "]";
+            Listener.MaxQueueSize = (int) MaxQueueSize;
+            //name = "[" + config.Topic + "]";
+        }
+
+        static bool IsInvalidSize(double x)
+        {
+            return double.IsNaN(x) || x <= 0;
         }
         
         void Handler(GridMap msg)
         {
+            if (IsInvalidSize(msg.Info.LengthX) ||
+                IsInvalidSize(msg.Info.LengthY) ||
+                IsInvalidSize(msg.Info.Resolution) ||
+                msg.Info.Pose.HasNaN())
+            {
+                Debug.Log("GridMapListener: Message info has NaN!");
+                return;
+            }
+
+            int width = (int) (msg.Info.LengthX / msg.Info.Resolution + 0.5);
+            int height = (int) (msg.Info.LengthY / msg.Info.Resolution + 0.5);
+
+            if (width > MaxGridSize || height > MaxGridSize)
+            {
+                Debug.Log("GridMapListener: Gridmap is too large!");
+                return;
+            }
+            
+            int layer = 0;
+            if (msg.Data[layer].Data.Length < width * height)
+            {
+                Debug.Log("GridMapListener: Gridmap layer is too small!");
+                return;
+            }
+            
             node.AttachTo(msg.Info.Header.FrameId, msg.Info.Header.Stamp);
+            link.transform.SetLocalPose(msg.Info.Pose.Ros2Unity());
 
-            int width = (int)(msg.Info.LengthX / msg.Info.Resolution + 0.5);
-            int height = (int)(msg.Info.LengthY / msg.Info.Resolution + 0.5);
-
-            resource.Set(width, height, (float)msg.Info.LengthX, (float)msg.Info.LengthY, msg.Data[0].Data);
+            resource.Set(width, height,
+                (float) msg.Info.LengthX, (float) msg.Info.LengthY, msg.Data[layer].Data);
+            MeasuredIntensityBounds = resource.IntensityBounds;
+            if (ForceMinMax)
+            {
+                resource.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
+            }
         }
 
         public override void Stop()
@@ -182,8 +218,10 @@ namespace Iviz.App.Listeners
 
             ResourcePool.Dispose(Resource.Displays.GridMap, resource.gameObject);
 
+            link.Stop();
+            UnityEngine.Object.Destroy(link.gameObject);
             node.Stop();
-            Destroy(node.gameObject);
+            UnityEngine.Object.Destroy(node.gameObject);
         }
     }
 }

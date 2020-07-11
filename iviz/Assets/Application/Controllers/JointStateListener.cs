@@ -23,7 +23,7 @@ namespace Iviz.App.Listeners
 
     public sealed class JointStateListener : ListenerController
     {
-        public override ModuleData ModuleData { get; set; }
+        public override ModuleData ModuleData { get; }
 
         public override TFFrame Frame => TFListener.MapFrame;
 
@@ -81,10 +81,7 @@ namespace Iviz.App.Listeners
         public string MsgJointSuffix
         {
             get => config.MsgJointSuffix;
-            set
-            {
-                config.MsgJointSuffix = value;
-            }
+            set => config.MsgJointSuffix = value;
         }
 
         public int MsgTrimFromEnd
@@ -95,6 +92,10 @@ namespace Iviz.App.Listeners
 
         readonly HashSet<string> warnNotFound = new HashSet<string>();
 
+        public JointStateListener(ModuleData moduleData)
+        {
+            ModuleData = moduleData;
+        }
 
         void OnRobotStopped()
         {
@@ -141,7 +142,7 @@ namespace Iviz.App.Listeners
                 {
                     if (!warnNotFound.Contains(msgJoint))
                     {
-                        Debug.Log("JointStateListener for " + name + ": Cannot find joint '" + msgJoint + "' (original: '" + msg.Name[i] + "')");
+                        Debug.Log("JointStateListener for '" + config.Topic + "': Cannot find joint '" + msgJoint + "' (original: '" + msg.Name[i] + "')");
                         warnNotFound.Add(msgJoint);
                     }
                 }

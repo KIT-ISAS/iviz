@@ -17,6 +17,7 @@ namespace Iviz.App
         public ColorPickerWidget ColorPicker { get; private set; }
         public ToggleWidget ShowInterior { get; private set; }
         public ToggleWidget FollowCamera { get; private set; }
+        public ToggleWidget HideInARMode { get; private set; }
         public Vector3Widget Offset { get; private set; }
 
         void Awake()
@@ -32,6 +33,7 @@ namespace Iviz.App
             ColorPicker = p.AddColorPicker("Grid Color").SetValue(Color.gray);
             ShowInterior = p.AddToggle("Show Interior").SetValue(true);
             FollowCamera = p.AddToggle("Follow Camera").SetValue(true);
+            HideInARMode = p.AddToggle("Hide in AR Mode").SetValue(true);
             Offset = p.AddVector3("Offset");
             p.UpdateSize();
             gameObject.SetActive(false);

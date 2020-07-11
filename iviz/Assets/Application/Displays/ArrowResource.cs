@@ -5,6 +5,8 @@ namespace Iviz.Displays
 {
     public sealed class ArrowResource : MeshMarkerResource
     {
+        const float MaxArrowWidth = 5.0f;
+        
         public float Scale { get; set; } = 1;
 
         protected override void Awake()
@@ -16,17 +18,19 @@ namespace Iviz.Displays
         public void Set(in Vector3 a, in Vector3 b)
         {
             Vector3 diff = (a - b) * Scale; // arrow model is flipped
-            float scale = diff.magnitude;
+            float scaleX = diff.magnitude;
+            float scaleYZ = Mathf.Min(diff.magnitude, MaxArrowWidth);
 
-            transform.localScale = scale * Vector3.one;
-            transform.localPosition = a;
+            Transform mTransform = transform;
+            mTransform.localScale = new Vector3(scaleX, scaleYZ, scaleYZ);
+            mTransform.localPosition = a;
 
-            if (scale == 0)
+            if (Mathf.Approximately(scaleX, 0))
             {
                 return;
             }
             
-            Vector3 x = diff / scale;
+            Vector3 x = diff / scaleX;
 
             Vector3 up = new Vector3(0, 0, 1);
             if (x == up)
@@ -37,12 +41,12 @@ namespace Iviz.Displays
             Vector3 y = Vector3.Cross(x, up).normalized;
             Vector3 z = Vector3.Cross(x, y).normalized;
 
-            Matrix4x4 M = Matrix4x4.identity;
-            M.SetColumn(0, x);
-            M.SetColumn(1, y);
-            M.SetColumn(2, z);
+            Matrix4x4 m = Matrix4x4.identity;
+            m.SetColumn(0, x);
+            m.SetColumn(1, y);
+            m.SetColumn(2, z);
 
-            transform.localRotation = M.rotation;
+            mTransform.localRotation = m.rotation;
         }
     }
 }

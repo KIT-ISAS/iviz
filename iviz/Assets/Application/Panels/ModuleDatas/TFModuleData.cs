@@ -25,9 +25,10 @@ namespace Iviz.App
                 constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.TF) as TFPanelContents;
-            listener = Instantiate<TFListener>();
-            listener.name = "TF";
-            listener.ModuleData = this;
+            //listener = Instantiate<TFListener>();
+            //listener.name = "TF";
+            //listener.ModuleData = this;
+            listener = new TFListener(this);
             if (constructor.Configuration != null)
             {
                 listener.Config = (TFConfiguration)constructor.Configuration;

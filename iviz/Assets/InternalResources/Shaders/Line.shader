@@ -99,9 +99,9 @@ Shader "iviz/Line"
 				half4 diffuse = (rgbaB - rgbaA) * V.z + rgbaA;
 				diffuse *= _Tint;
 				
-				float3 normal = normalize(cross(up, right));
+				//float3 normal = normalize(cross(up, right));
                 o.color = diffuse;				
-			    o.color.rgb += 0.5f * ShadeSH9(half4(normal, 1));
+			    //o.color.rgb += 0.5f * ShadeSH9(half4(normal, 1));
 				return o;
 			}
 

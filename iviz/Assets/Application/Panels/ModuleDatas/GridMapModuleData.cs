@@ -25,9 +25,10 @@ namespace Iviz.App
             constructor.GetConfiguration<GridMapConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.GridMap) as GridMapPanelContents;
-            listener = Instantiate<GridMapListener>();
-            listener.name = "PointCloud:" + Topic;
-            listener.ModuleData = this;
+            //listener = Instantiate<GridMapListener>();
+            //listener.name = "PointCloud:" + Topic;
+            //listener.ModuleData = this;
+            listener = new GridMapListener(this);
             if (constructor.Configuration == null)
             {
                 listener.Config.Topic = Topic;

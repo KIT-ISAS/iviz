@@ -112,6 +112,7 @@ namespace Iviz.App
             get => draggedObject;
             set
             {
+                //Debug.Log(value is null ? "Not draggging!" : "Dragging!");
                 if (draggedObject == value)
                 {
                     return;
@@ -130,12 +131,7 @@ namespace Iviz.App
         {
             Transform = transform;
             
-            if (IsMobile)
-            {
-                UnityEngine.Application.targetFrameRate = 30;
-            }
-
-            //Physics.autoSimulation = false;
+            UnityEngine.Application.targetFrameRate = 60;
 
             DisplayListPanel.Instance.UnlockButton.onClick.AddListener(OnUnlockClick);
 
@@ -197,9 +193,18 @@ namespace Iviz.App
             namedBoundary.Target = display;
         }
 
-        float tmpAltDistance;
+        void OnEnable()
+        {
+            GameThread.EveryFrame -= UpdateEvenIfInactive;
+        }
 
-        void Update()
+        void OnDisable()
+        {
+            GameThread.EveryFrame += UpdateEvenIfInactive;
+        }
+
+        float tmpAltDistance;
+        void UpdateEvenIfInactive()
         {
             if (IsMobile)
             {
@@ -237,12 +242,24 @@ namespace Iviz.App
             {
                 DraggedObject = null;
             }
+
+            DraggedObject?.OnPointerMove(PointerPosition);
+        }
+        
+        void Update()
+        {
+            UpdateEvenIfInactive();
+
             if (!(DraggedObject is null))
             {
-                DraggedObject.OnPointerMove(PointerPosition);
                 return;
             }
 
+            if (!(CameraViewOverride is null))
+            {
+                Transform.SetPose(CameraViewOverride.AbsolutePose);
+            }
+                
             if (IsMobile)
             {
                 if (!(OrbitCenterOverride is null))
@@ -263,11 +280,6 @@ namespace Iviz.App
             }
             else
             {
-                if (!(CameraViewOverride is null))
-                {
-                    Transform.SetPose(CameraViewOverride.AbsolutePose);
-                }
-
                 if (!(OrbitCenterOverride is null))
                 {
                     ProcessOrbiting();

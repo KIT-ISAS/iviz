@@ -64,7 +64,7 @@ namespace Iviz.Displays
         protected override void Awake()
         {
             base.Awake();
-            Scale = 0.19f;
+            Scale = 0.105f;
         }
     }
 }

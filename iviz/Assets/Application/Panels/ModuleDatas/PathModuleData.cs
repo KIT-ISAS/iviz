@@ -26,9 +26,10 @@ namespace Iviz.App
             constructor.GetConfiguration<PathConfiguration>()?.Type ?? constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Path) as PathPanelContents;
-            listener = Instantiate<PathListener>();
-            listener.name = "Path:" + Topic;
-            listener.ModuleData = this;
+            //listener = Instantiate<PathListener>();
+            //listener.name = "Path:" + Topic;
+            //listener.ModuleData = this;
+            listener = new PathListener(this);
             if (constructor.Configuration == null)
             {
                 listener.Config.Topic = Topic;

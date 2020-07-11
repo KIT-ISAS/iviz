@@ -52,6 +52,7 @@ namespace Iviz.Displays
             Ray other = TFListener.MainCamera.ScreenPointToRay(cursorPos);
 
             (float deltaDistance, float cameraDistance) = ClosestPointDelta(ray, other);
+            //Debug.Log((deltaDistance, cameraDistance));
             if (cameraDistance < 0)
             {
                 return;

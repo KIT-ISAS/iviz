@@ -24,8 +24,9 @@ namespace Iviz.App
         public RobotModuleData(ModuleDataConstructor constructor) :
         base(constructor.ModuleList, constructor.Topic, constructor.Type)
         {
-            robot = Instantiate<RobotController>();
-            robot.ModuleData = this;
+            //robot = Instantiate<RobotController>();
+            robot = new RobotController(this);
+            //robot.ModuleData = this;
             if (constructor.Configuration != null)
             {
                 robot.Config = (RobotConfiguration)constructor.Configuration;
@@ -38,7 +39,7 @@ namespace Iviz.App
         {
             base.Stop();
             robot.Stop();
-            Object.Destroy(robot.gameObject);
+            //Object.Destroy(robot.gameObject);
         }
 
         public override void SetupPanel()
@@ -102,7 +103,7 @@ namespace Iviz.App
 
         }
 
-        public override void UpdateModuleButton()
+        protected override void UpdateModuleButton()
         {
             ButtonText = $"{Resource.Font.Split(robot.LongName, DisplayListPanel.ModuleDataCaptionWidth)}\n<b>{Module}</b>";
         }

@@ -31,15 +31,15 @@ namespace Iviz.App.Listeners
 
     public sealed class MagnitudeListener : ListenerController
     {
-        SimpleDisplayNode displayNode;
+        readonly SimpleDisplayNode displayNode;
         SimpleDisplayNode childNode;
         AxisFrameResource axis;
-        TrailResource trail;
+        readonly TrailResource trail;
         MeshMarkerResource sphere;
         ArrowResource arrow;
         AngleAxisResource angleAxis;
 
-        public override ModuleData ModuleData { get; set; }
+        public override ModuleData ModuleData { get; }
 
         public override TFFrame Frame => displayNode.Parent;
 
@@ -176,8 +176,10 @@ namespace Iviz.App.Listeners
             }
         }
 
-        void Awake()
+        public MagnitudeListener(ModuleData moduleData)
         {
+            ModuleData = moduleData;
+            
             displayNode = SimpleDisplayNode.Instantiate("DisplayNode");
 
             trail = ResourcePool.GetOrCreate<TrailResource>(Resource.Displays.Trail);
@@ -188,7 +190,7 @@ namespace Iviz.App.Listeners
 
         public override void StartListening()
         {
-            name = "Magnitude:" + config.Topic;
+            //name = "Magnitude:" + config.Topic;
             displayNode.name = $"[{config.Topic}]";
             displayNode.AttachTo("");
             //displayNode.DisplayData = DisplayData;
@@ -218,7 +220,7 @@ namespace Iviz.App.Listeners
                     }
 
                     sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere, displayNode.transform);
-                    sphere.transform.localScale = 0.1f * Vector3.one;
+                    sphere.transform.localScale = 0.05f * Vector3.one;
                     sphere.Color = Color;
                     break;
 
@@ -237,7 +239,7 @@ namespace Iviz.App.Listeners
                     angleAxis = ResourcePool.GetOrCreate<AngleAxisResource>(Resource.Displays.AngleAxis, displayNode.transform);
                     angleAxis.Color = Color.yellow;
                     sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere, displayNode.transform);
-                    sphere.transform.localScale = 0.1f * Vector3.one;
+                    sphere.transform.localScale = 0.05f * Vector3.one;
                     sphere.Color = Color;
                     break;
 
@@ -256,7 +258,7 @@ namespace Iviz.App.Listeners
                     angleAxis = ResourcePool.GetOrCreate<AngleAxisResource>(Resource.Displays.AngleAxis, displayNode.transform);
                     angleAxis.Color = Color.yellow;
                     sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere, displayNode.transform);
-                    sphere.transform.localScale = 0.1f * Vector3.one;
+                    sphere.transform.localScale = 0.05f * Vector3.one;
                     sphere.Color = Color;
                     break;
 
@@ -270,7 +272,7 @@ namespace Iviz.App.Listeners
                     angleAxis = ResourcePool.GetOrCreate<AngleAxisResource>(Resource.Displays.AngleAxis, childNode.transform);
                     angleAxis.Color = Color.yellow;
                     sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere, displayNode.transform);
-                    sphere.transform.localScale = 0.1f * Vector3.one;
+                    sphere.transform.localScale = 0.05f * Vector3.one;
                     sphere.Color = Color;
                     break;
             }
@@ -384,14 +386,14 @@ namespace Iviz.App.Listeners
             trail.DataSource = null;
 
             displayNode.Stop();
-            Destroy(displayNode.gameObject);
+            UnityEngine.Object.Destroy(displayNode.gameObject);
 
             ResourcePool.Dispose(Resource.Displays.Trail, trail.gameObject);
             
             if (!(childNode is null))
             {
                 childNode.Stop();
-                Destroy(childNode.gameObject);
+                UnityEngine.Object.Destroy(childNode.gameObject);
             }
 
             if (!(axis is null))

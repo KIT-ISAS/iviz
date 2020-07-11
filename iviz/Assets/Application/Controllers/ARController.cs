@@ -10,6 +10,7 @@ using Iviz.Displays;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.App.Displays;
 using TMPro;
+using UnityEngine.Rendering;
 using UnityEngine.XR.ARSubsystems;
 
 namespace Iviz.App.Listeners
@@ -36,8 +37,9 @@ namespace Iviz.App.Listeners
     {
         [SerializeField] Camera ARCamera = null;
         [SerializeField] ARSessionOrigin ARSessionOrigin = null;
-        [SerializeField] Canvas Canvas = null;
-        [SerializeField] Camera MainCamera = null;
+        [SerializeField] Light ARLight = null;
+        [SerializeField] Canvas canvas = null;
+        [SerializeField] Camera mainCamera = null;
 
         ARPlaneManager planeManager;
         ARTrackedImageManager tracker;
@@ -46,18 +48,18 @@ namespace Iviz.App.Listeners
         DisplayClickableNode node;
         ARMarkerResource resource;
 
-        readonly MeshToMarkerHelper helper = new MeshToMarkerHelper("ar");
-        DateTime lastMarkerUpdate = DateTime.MinValue;
+        //readonly MeshToMarkerHelper helper = new MeshToMarkerHelper("ar");
+        //DateTime lastMarkerUpdate = DateTime.MinValue;
 
-        GameObject TFRoot => TFListener.RootFrame.gameObject;
+        static Transform TFRoot => TFListener.RootFrame.transform;
 
         const string HeadPoseTopic = "ar_head";
         const string MarkersTopic = "ar_markers";
 
         static string HeadFrameName => ConnectionManager.Connection.MyId + "/ar_head";
 
-        public RosSender<Msgs.GeometryMsgs.PoseStamped> RosSenderHead { get; private set; }
-        public RosSender<MarkerArray> RosSenderMarkers { get; private set; }
+        //public RosSender<Msgs.GeometryMsgs.PoseStamped> RosSenderHead { get; private set; }
+        //public RosSender<MarkerArray> RosSenderMarkers { get; private set; }
         public ModuleData ModuleData { get; set; }
 
         readonly ARConfiguration config = new ARConfiguration();
@@ -85,7 +87,7 @@ namespace Iviz.App.Listeners
             set
             {
                 config.WorldOffset = value;
-                TFRoot.transform.SetPose(RootPose);
+                TFRoot.SetPose(RootPose);
             }
         }
         
@@ -95,7 +97,7 @@ namespace Iviz.App.Listeners
             set
             {
                 config.WorldAngle = value;
-                TFRoot.transform.SetPose(RootPose);
+                TFRoot.SetPose(RootPose);
             }
         }
 
@@ -105,7 +107,7 @@ namespace Iviz.App.Listeners
             set
             {
                 config.WorldScale = value;
-                TFRoot.transform.localScale = value * Vector3.one;
+                TFRoot.localScale = value * Vector3.one;
             }
         }
 
@@ -116,18 +118,31 @@ namespace Iviz.App.Listeners
             {
                 config.Visible = value;
                 resource.Visible = value && UseMarker;
-                MainCamera.gameObject.SetActive(!value);
+                mainCamera.gameObject.SetActive(!value);
                 ARCamera.gameObject.SetActive(value);
-                Canvas.worldCamera = value ? ARCamera : MainCamera;
-                TFListener.MainCamera = value ? ARCamera : MainCamera;
+                TFListener.MainLight.gameObject.SetActive(!value);
+                ARLight.gameObject.SetActive(value);
+                canvas.worldCamera = value ? ARCamera : mainCamera;
+                TFListener.MainCamera = value ? ARCamera : mainCamera;
+
+                TFRoot.SetPose(value ? RootPose : Pose.identity);
+                TFListener.RootControl.InteractionMode = value
+                    ? InteractiveControl.InteractionModeType.Frame
+                    : InteractiveControl.InteractionModeType.Disabled;
+
+                
+                foreach (var module in DisplayListPanel.Instance.ModuleDatas)
+                {
+                    module.OnARModeChanged(value);
+                }
 
                 if (value)
                 {
-                    TFRoot.transform.SetPose(RootPose);
+                    UpdateAnchors();
                 }
                 else
                 {
-                    TFRoot.transform.SetPose(Pose.identity);
+                    HideAnchors();
                 }
             }
         }
@@ -179,15 +194,7 @@ namespace Iviz.App.Listeners
         }
         */
 
-        bool markerFound;
-        public bool MarkerFound
-        {
-            get => markerFound;
-            private set
-            {
-                markerFound = value;
-            }
-        }
+        public bool MarkerFound { get; private set; }
 
         public bool UseMarker
         {
@@ -199,7 +206,7 @@ namespace Iviz.App.Listeners
                 resource.Visible = Visible && value;
                 if (value)
                 {
-                    TFRoot.transform.SetPose(RegisteredPose);
+                    TFRoot.SetPose(RegisteredPose);
                     tracker.trackedImagesChanged += OnTrackedImagesChanged;
                 }
                 else
@@ -270,13 +277,13 @@ namespace Iviz.App.Listeners
 
         void Awake()
         {
-            if (Canvas == null)
+            if (canvas == null)
             {
-                Canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
+                canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
             }
-            if (MainCamera == null)
+            if (mainCamera == null)
             {
-                MainCamera = GameObject.Find("MainCamera").GetComponent<Camera>();
+                mainCamera = GameObject.Find("MainCamera").GetComponent<Camera>();
             }
             if (ARCamera == null)
             {
@@ -293,18 +300,30 @@ namespace Iviz.App.Listeners
             tracker = ARSessionOrigin.GetComponent<ARTrackedImageManager>();
             raycaster = ARSessionOrigin.GetComponent<ARRaycastManager>();
 
+            var cameraManager = ARCamera.GetComponent<ARCameraManager>();
+            cameraManager.frameReceived += args =>
+            {
+                UpdateLights(args.lightEstimation);
+            };
+            
             node = DisplayClickableNode.Instantiate("AR Node");
             resource = ResourcePool.GetOrCreate<ARMarkerResource>(Resource.Displays.ARMarkerResource);
             node.Target = resource;
             MarkerFound = false;
 
             Config = new ARConfiguration();
+            //Visible = true;
         }
 
         bool forceAnchorRebuild;
         void OnPlanesChanged(ARPlanesChangedEventArgs obj)
         {
             forceAnchorRebuild = true;
+        }
+
+        void HideAnchors()
+        {
+            TFListener.RootFrame.UpdateAnchor(null);
         }
 
         void UpdateAnchors()
@@ -328,14 +347,51 @@ namespace Iviz.App.Listeners
                 return true;
             }
             
-            foreach (TFFrame frame in TFListener.Instance.Frames.Values)
-            {
-                frame.UpdateAnchor(FindAnchorFn, forceAnchorRebuild);    
-            }
-
+            //foreach (TFFrame frame in TFListener.Instance.Frames.Values)
+            //{
+            //    frame.UpdateAnchor(FindAnchorFn, forceAnchorRebuild);    
+            //}
+            TFListener.RootFrame.UpdateAnchor(FindAnchorFn, forceAnchorRebuild);
             forceAnchorRebuild = false;
         }
 
+        void UpdateLights(ARLightEstimationData lightEstimation)
+        {
+            if (lightEstimation.averageBrightness.HasValue)
+            {
+                ARLight.intensity = lightEstimation.averageBrightness.Value;
+            }
+
+            if (lightEstimation.averageColorTemperature.HasValue)
+            {
+                ARLight.colorTemperature = lightEstimation.averageColorTemperature.Value;
+            }            
+            
+            /*
+            if (lightEstimation.colorCorrection.HasValue)
+            {
+                ARLight.color = lightEstimation.colorCorrection.Value;
+            }
+            */
+
+            if (lightEstimation.mainLightDirection.HasValue)
+            {
+                ARLight.transform.rotation = Quaternion.LookRotation(lightEstimation.mainLightDirection.Value);
+            }
+
+            if (lightEstimation.mainLightColor.HasValue)
+            {
+                ARLight.color = lightEstimation.mainLightColor.Value;
+            }
+
+            if (lightEstimation.ambientSphericalHarmonics.HasValue)
+            {
+                var sphericalHarmonics = lightEstimation.ambientSphericalHarmonics;
+                RenderSettings.ambientMode = AmbientMode.Skybox;
+                RenderSettings.ambientProbe = sphericalHarmonics.Value;
+            }            
+        }
+        
         //uint headSeq = 0;
         public void Update()
         {
@@ -410,14 +466,15 @@ namespace Iviz.App.Listeners
         void OnTrackedImagesChanged(ARTrackedImagesChangedEventArgs obj)
         {
             Pose? newPose = null;
+            
             if (obj.added.Count != 0)
             {
-                Debug.Log("Added " + obj.added.Count + " images!");
+                //Debug.Log("Added " + obj.added.Count + " images!");
                 newPose = obj.added[0].transform.AsPose();
             }
             if (obj.updated.Count != 0)
             {
-                Debug.Log("Updated " + obj.updated.Count + " images!");
+                //Debug.Log("Updated " + obj.updated.Count + " images!");
                 newPose = obj.updated[0].transform.AsPose();
             }
             if (newPose == null)
@@ -427,23 +484,26 @@ namespace Iviz.App.Listeners
 
             Pose expectedPose = TFListener.RelativePose(resource.transform.AsPose());
             Pose registeredPose = newPose.Value.Multiply(expectedPose.Inverse());
-            Quaternion corrected = new Quaternion(0, RegisteredPose.rotation.y, 0, RegisteredPose.rotation.w).normalized;
+            Quaternion corrected = new Quaternion(0, registeredPose.rotation.y, 0, registeredPose.rotation.w).normalized;
+
+            //Debug.Log("Registration! " + registeredPose.rotation + " -> " + corrected);
+
             registeredPose.rotation = corrected;
             
             RegisteredPose = registeredPose;
             
             MarkerFound = true;
-            TFRoot.transform.SetPose(RootPose);
+            TFRoot.SetPose(RootPose);
         }
 
         public void Stop()
         {
             Visible = false;
-            RosSenderHead?.Stop();
-            RosSenderMarkers?.Stop();
+            //RosSenderHead?.Stop();
+            //RosSenderMarkers?.Stop();
 
             WorldScale = 1;
-            TFRoot.transform.SetPose(Pose.identity);
+            TFRoot.SetPose(Pose.identity);
         }
     }
 }

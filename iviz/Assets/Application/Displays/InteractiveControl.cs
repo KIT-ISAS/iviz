@@ -17,6 +17,8 @@ namespace Iviz.Displays
 
         public enum InteractionModeType
         {
+            Disabled,
+            
             MoveAxisX,
             MovePlaneYZ,
             RotateAxisX,
@@ -158,6 +160,8 @@ namespace Iviz.Displays
 
                 switch (InteractionMode)
                 {
+                    case InteractionModeType.Disabled:
+                        break;
                     case InteractionModeType.MoveAxisX:
                         arrowPX.Visible = true;
                         arrowMX.Visible = true;
@@ -221,6 +225,7 @@ namespace Iviz.Displays
 
         void OnMoved(in Pose pose)
         {
+            //Debug.Log(pose);
             Moved?.Invoke(pose);
         }
 

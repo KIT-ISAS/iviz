@@ -56,6 +56,7 @@ namespace Iviz.App
             panel.HideButton.State = controller.Visible;
             panel.Offset.Value = controller.Offset;
             panel.FollowCamera.Value = controller.FollowCamera;
+            panel.HideInARMode.Value = controller.HideInARMode;
 
             panel.LineWidth.ValueChanged += f =>
             {
@@ -101,11 +102,27 @@ namespace Iviz.App
             {
                 controller.FollowCamera = f;
             };
+            panel.HideInARMode.ValueChanged += f =>
+            {
+                controller.HideInARMode = f;
+            };
         }
 
         public override void AddToState(StateConfiguration config)
         {
             config.Grids.Add(controller.Config);
+        }
+
+        public override void OnARModeChanged(bool value)
+        {
+            base.OnARModeChanged(value);
+            if (!controller.HideInARMode)
+            {
+                return;
+            }
+
+            controller.Visible = !value;
+            UpdateModuleButton();
         }
     }
 }

@@ -9,6 +9,7 @@ namespace Iviz.Displays
     {
         static readonly int PropInputTexture = Shader.PropertyToID("_InputTexture");
         static readonly int PropSquareTexture = Shader.PropertyToID("_SquareTexture");
+        static readonly int PropSquareCoeff = Shader.PropertyToID("_SquareCoeff");
 
         [SerializeField] Texture squareTexture = null;
         Texture2D inputTexture;
@@ -21,45 +22,54 @@ namespace Iviz.Displays
         {
             material = Resource.Materials.GridMap.Instantiate();
             mesh = new Mesh();
-            
+
             base.Awake();
 
-            GetComponent<MeshRenderer>().material = material;            
+            GetComponent<MeshRenderer>().material = material;
             GetComponent<MeshFilter>().sharedMesh = mesh;
 
             IntensityBounds = new Vector2(0, 1);
             Colormap = Resource.ColormapId.gray;
-            
+
             material.SetTexture(PropSquareTexture, squareTexture);
         }
-        
+
         protected override void Rebuild()
         {
             // not needed
         }
-        
+
         public void Set(int cellsX, int cellsY, float width, float height, float[] data)
         {
             EnsureSize(cellsX, cellsY);
 
             Transform mTransform = transform;
-            mTransform.localScale = new Vector3(width, height, 1);
-            mTransform.localPosition = new Vector3(-width/2, 0, height/2);
-                       
+            mTransform.localScale = new Vector3(width, height, 1).Ros2Unity().Abs();
+            mTransform.localPosition = new Vector3(-width / 2, -height / 2, 0).Ros2Unity();
+
+            //Debug.Log(CellsX + "  " + CellsY);
             inputTexture.GetRawTextureData<float>().CopyFrom(data);
             inputTexture.Apply();
 
             float min = float.MaxValue, max = float.MinValue;
             foreach (float val in data)
             {
-                if (val < min) min = val;
-                if (val > max) max = val;
+                if (val < min)
+                {
+                    min = val;
+                }
+
+                if (val > max)
+                {
+                    max = val;
+                }
             }
-            Collider.center = new Vector3(0.5f, (max + min) / 2, 0.5f);
-            Collider.size = new Vector3(1, max - min, 1);
+
+            Collider.center = new Vector3(0.5f, 0.5f, (max + min) / 2).Ros2Unity();
+            Collider.size = new Vector3(1, 1, max - min).Ros2Unity().Abs();
             IntensityBounds = new Vector2(min, max);
-        }        
-        
+        }
+
         void EnsureSize(int newWidth, int newHeight)
         {
             if (newWidth == CellsX && newHeight == CellsY)
@@ -82,7 +92,7 @@ namespace Iviz.Displays
                         u * stepX,
                         v * stepY,
                         0
-                        ).Ros2Unity();
+                    ).Ros2Unity();
                 }
             }
 
@@ -94,10 +104,10 @@ namespace Iviz.Displays
                 int pOffset = v * (CellsX + 1);
                 for (int u = 0; u < CellsX; u++, iOffset += 4, pOffset++)
                 {
-                    indices[iOffset + 0] = pOffset;
-                    indices[iOffset + 1] = pOffset + 1;
-                    indices[iOffset + 2] = pOffset + (CellsX + 1) + 1;
-                    indices[iOffset + 3] = pOffset + (CellsX + 1);
+                    indices[iOffset + 3] = pOffset;
+                    indices[iOffset + 2] = pOffset + 1;
+                    indices[iOffset + 1] = pOffset + (CellsX + 1) + 1;
+                    indices[iOffset + 0] = pOffset + (CellsX + 1);
                 }
             }
 
@@ -105,12 +115,14 @@ namespace Iviz.Displays
             mesh.SetIndices(indices, MeshTopology.Quads, 0);
             mesh.Optimize();
 
-            if (inputTexture != null)
+            if (!(inputTexture is null))
             {
                 Destroy(inputTexture);
             }
+
             inputTexture = new Texture2D(CellsX, CellsY, TextureFormat.RFloat, false);
             material.SetTexture(PropInputTexture, inputTexture);
+            material.SetVector(PropSquareCoeff, new Vector4(CellsX, CellsY, 1f / CellsX, 1f / CellsY));
 
             /*
             if (intensityTexture != null)
@@ -120,8 +132,8 @@ namespace Iviz.Displays
             intensityTexture = new Texture2D(Width, Height, TextureFormat.RFloat, false);
             material.SetTexture("_IntensityTexture", intensityTexture);
             */
-        }     
-        
+        }
+
         protected override void OnDestroy()
         {
             base.OnDestroy();
@@ -129,6 +141,7 @@ namespace Iviz.Displays
             {
                 Destroy(inputTexture);
             }
+
             Destroy(mesh);
         }
 

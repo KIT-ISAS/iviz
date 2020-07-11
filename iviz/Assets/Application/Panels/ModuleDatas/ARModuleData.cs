@@ -30,16 +30,6 @@ namespace Iviz.App
                 controller.Config = (ARConfiguration)constructor.Configuration;
             }
 
-            foreach (var x in ModuleListPanel.ModuleDatas)
-            {
-                if (x.Module != Resource.Module.Grid)
-                {
-                    continue;
-                }
-                ((GridController)x.Controller).Visible = false;
-                ((GridModuleData)x.Controller.ModuleData).UpdateModuleButton();
-            }
-
             UpdateModuleButton();
         }
 

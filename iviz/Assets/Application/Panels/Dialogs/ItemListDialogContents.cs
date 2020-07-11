@@ -74,7 +74,23 @@ namespace Iviz.App
             public string Text
             {
                 get => text.text;
-                set => text.text = value;
+                set
+                {
+                    text.text = value;
+                    int lineBreaks = value.Count(x => x == '\n');
+                    switch (lineBreaks)
+                    {
+                        case 2:
+                            text.fontSize = 11;
+                            break;
+                        case 3:
+                            text.fontSize = 10;
+                            break;
+                        default:
+                            text.fontSize = 12;
+                            break;
+                    }
+                }
             }
 
             public bool Interactable

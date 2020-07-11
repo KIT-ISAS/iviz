@@ -18,9 +18,10 @@ namespace Iviz.App.Listeners
         [DataMember] public SerializableColor InteriorColor { get; set; } = Color.white * 0.5f;
         [DataMember] public float GridLineWidth { get; set; } = 0.02f;
         [DataMember] public float GridCellSize { get; set; } = 1;
-        [DataMember] public int NumberOfGridCells { get; set; } = 30;
+        [DataMember] public int NumberOfGridCells { get; set; } = 90;
         [DataMember] public bool ShowInterior { get; set; } = true;
         [DataMember] public bool FollowCamera { get; set; } = true;
+        [DataMember] public bool HideInARMode { get; set; } = true;
         [DataMember] public SerializableVector3 Offset { get; set; } = Vector3.zero;
     }
 
@@ -33,7 +34,7 @@ namespace Iviz.App.Listeners
         public ModuleData ModuleData
         {
             get => node.ModuleData;
-            set => node.ModuleData = value;
+            private set => node.ModuleData = value;
         }
 
         readonly GridConfiguration config = new GridConfiguration();
@@ -51,6 +52,7 @@ namespace Iviz.App.Listeners
                 NumberOfGridCells = value.NumberOfGridCells;
                 ShowInterior = value.ShowInterior;
                 FollowCamera = value.FollowCamera;
+                HideInARMode = value.HideInARMode;
                 Offset = value.Offset;
             }
         }
@@ -162,6 +164,12 @@ namespace Iviz.App.Listeners
                 grid.FollowCamera = value;
             }
         }
+        
+        public bool HideInARMode
+        {
+            get => config.HideInARMode;
+            set => config.HideInARMode = value;
+        }        
 
         public SerializableVector3 Offset
         {
@@ -169,7 +177,7 @@ namespace Iviz.App.Listeners
             set
             {
                 config.Offset = value;
-                node.transform.position = ((Vector3)value).Ros2Unity();
+                node.transform.localPosition = ((Vector3)value).Ros2Unity();
                 UpdateMesh();
             }
         }
@@ -191,9 +199,10 @@ namespace Iviz.App.Listeners
             reflectionProbe = new GameObject().AddComponent<ReflectionProbe>();
             reflectionProbe.gameObject.name = "Grid Reflection Probe";
             reflectionProbe.transform.parent = grid.transform;
-            reflectionProbe.transform.position = new Vector3(0, 2.0f, 0);
+            reflectionProbe.transform.localPosition = new Vector3(0, 2.0f, 0);
             reflectionProbe.nearClipPlane = 0.5f;
             reflectionProbe.farClipPlane = 100f;
+            reflectionProbe.backgroundColor = new Color32(62, 27, 68, 255);
             reflectionProbe.mode = UnityEngine.Rendering.ReflectionProbeMode.Realtime;
             reflectionProbe.refreshMode = UnityEngine.Rendering.ReflectionProbeRefreshMode.ViaScripting;
             reflectionProbe.clearFlags = UnityEngine.Rendering.ReflectionProbeClearFlags.SolidColor;

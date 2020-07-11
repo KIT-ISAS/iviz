@@ -9,8 +9,10 @@ using Iviz.Msgs.Tf;
 using System.Runtime.Serialization;
 using System;
 using System.Collections.ObjectModel;
+using Iviz.Displays;
 using Iviz.Resources;
 using Transform = UnityEngine.Transform;
+using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.App.Listeners
 {
@@ -39,17 +41,22 @@ namespace Iviz.App.Listeners
         public static Camera MainCamera { get; set; }
         public static FlyCamera GuiManager => Instance.guiManager;
 
+        public static Light MainLight { get; set; }
+
         public static TFFrame MapFrame { get; private set; }
         public static TFFrame RootFrame { get; private set; }
         public static TFFrame UnityFrame { get; private set; }
+
+        readonly InteractiveControl rootControl;
+        public static InteractiveControl RootControl => Instance.rootControl;
 
         public static TFFrame ListenersFrame => RootFrame;
 
         public override TFFrame Frame => MapFrame;
 
-        FlyCamera guiManager;
-        DisplayNode dummyListener;
-        DisplayNode staticListener;
+        readonly FlyCamera guiManager;
+        readonly DisplayNode dummyListener;
+        readonly DisplayNode staticListener;
 
         readonly Dictionary<string, TFFrame> frames = new Dictionary<string, TFFrame>();
 
@@ -57,7 +64,7 @@ namespace Iviz.App.Listeners
 
         public RosSender<tfMessage_v2> Publisher { get; private set; }
 
-        public override ModuleData ModuleData { get; set; }
+        public override ModuleData ModuleData { get; }
 
         public RosListener ListenerStatic { get; private set; }
 
@@ -85,9 +92,9 @@ namespace Iviz.App.Listeners
             set
             {
                 config.AxisVisible = value;
-                foreach (var x in frames.Values)
+                foreach (var frame in frames.Values)
                 {
-                    x.Visible = value;
+                    frame.Visible = value;
                 }
             }
         }
@@ -98,9 +105,9 @@ namespace Iviz.App.Listeners
             set
             {
                 config.AxisLabelVisible = value;
-                foreach (var x in frames.Values)
+                foreach (var frame in frames.Values)
                 {
-                    x.LabelVisible = value;
+                    frame.LabelVisible = value;
                 }
             }
         }
@@ -111,9 +118,9 @@ namespace Iviz.App.Listeners
             set
             {
                 config.AxisLabelSize = value;
-                foreach (var x in frames.Values)
+                foreach (var frame in frames.Values)
                 {
-                    x.LabelSize = value;
+                    frame.LabelSize = value;
                 }
             }
         }
@@ -124,9 +131,9 @@ namespace Iviz.App.Listeners
             set
             {
                 config.AxisSize = value;
-                foreach (var x in frames.Values)
+                foreach (var frame in frames.Values)
                 {
-                    x.AxisLength = value;
+                    frame.AxisLength = value;
                 }
             }
         }
@@ -137,9 +144,9 @@ namespace Iviz.App.Listeners
             set
             {
                 config.ParentConnectorVisible = value;
-                foreach (var x in frames.Values)
+                foreach (var frame in frames.Values)
                 {
-                    x.ConnectorVisible = value;
+                    frame.ConnectorVisible = value;
                 }
             }
         }
@@ -152,48 +159,63 @@ namespace Iviz.App.Listeners
                 config.ShowAllFrames = value;
                 if (value)
                 {
-                    foreach (var x in frames.Values)
+                    foreach (var frame in frames.Values)
                     {
-                        x.AddListener(dummyListener);
+                        frame.AddListener(dummyListener);
                     }
                 }
                 else
                 {
                     // we create a copy because this generally modifies the collection
-                    var frameObjs = frames.Values.ToList();
-                    foreach (var x in frameObjs)
+                    var framesCopy = frames.Values.ToList();
+                    foreach (var frame in framesCopy)
                     {
-                        x.RemoveListener(dummyListener);
+                        frame.RemoveListener(dummyListener);
                     }
                 }
             }
         }
 
-        void Awake()
+        public TFListener(ModuleData moduleData)
         {
+            ModuleData = moduleData;
             Instance = this;
 
-            dummyListener = SimpleDisplayNode.Instantiate("TFNode", transform);
-            staticListener = SimpleDisplayNode.Instantiate("TFStatic", transform);
+            UnityFrame = Add(CreateFrameObject("TF", null, null));
+            UnityFrame.ForceInvisible = true;
+            UnityFrame.Visible = false;
+            UnityFrame.AddListener(null);
+
+            dummyListener = SimpleDisplayNode.Instantiate("[TFNode]", UnityFrame.transform);
+            staticListener = SimpleDisplayNode.Instantiate("[TFStatic]", UnityFrame.transform);
 
             GameObject mainCameraObj = GameObject.Find("MainCamera");
             MainCamera = mainCameraObj.GetComponent<Camera>();
             guiManager = mainCameraObj.GetComponent<FlyCamera>();
 
+            GameObject mainLight = GameObject.Find("MainLight");
+            MainLight = mainLight.GetComponent<Light>();
+
             Config = new TFConfiguration();
 
-            UnityFrame = Add(CreateFrameObject("/unity/", transform, null));
-            UnityFrame.Visible = false;
-            UnityFrame.AddListener(null);
-
-            RootFrame = Add(CreateFrameObject("/", transform, UnityFrame));
+            RootFrame = Add(CreateFrameObject("/", UnityFrame.transform, UnityFrame));
+            RootFrame.ForceInvisible = true;
             RootFrame.Visible = false;
             RootFrame.AddListener(null);
 
-            MapFrame = Add(CreateFrameObject(BaseFrameId, transform, RootFrame));
+            MapFrame = Add(CreateFrameObject(BaseFrameId, UnityFrame.transform, RootFrame));
             MapFrame.Parent = RootFrame;
             MapFrame.AddListener(null);
+            MapFrame.AcceptsParents = false;
             //BaseFrame.ForceInvisible = true;
+
+            rootControl =
+                ResourcePool.GetOrCreate<InteractiveControl>(Resource.Displays.InteractiveControl,
+                    RootFrame.transform);
+            rootControl.name = "[InteractiveController for /]";
+            rootControl.TargetTransform = RootFrame.transform;
+            rootControl.InteractionMode = InteractiveControl.InteractionModeType.Disabled;
+            rootControl.transform.localScale = 0.4f * Vector3.one;
 
             Publisher = new RosSender<tfMessage_v2>(DefaultTopic);
         }
@@ -231,6 +253,10 @@ namespace Iviz.App.Listeners
                 if (isStatic)
                 {
                     child = GetOrCreateFrame(childId, staticListener);
+                    if (config.ShowAllFrames)
+                    {
+                        child.AddListener(dummyListener);
+                    }
                 }
                 else if (config.ShowAllFrames)
                 {
@@ -256,6 +282,26 @@ namespace Iviz.App.Listeners
                     child.SetPose(timestamp, t.Transform.Ros2Unity());
                 }
             }
+        }
+
+        public void ForceClearFrames()
+        {
+            bool prevShowAllFrames = ShowAllFrames;
+            ShowAllFrames = false;
+            
+            var framesCopy = frames.Values.ToList();
+            foreach (var frame in framesCopy)
+            {
+                frame.RemoveListener(staticListener);
+            }
+
+            ShowAllFrames = prevShowAllFrames;
+            
+            // unsubscribe and resubscribe
+            ListenerStatic.Pause();
+            ListenerStatic.Unpause();
+            Listener.Pause();
+            Listener.Unpause();
         }
 
         TFFrame Add(TFFrame t)
@@ -366,7 +412,7 @@ namespace Iviz.App.Listeners
                 return new UnityEngine.Pose(
                     rootFrame.InverseTransformPoint(unityPose.position),
                     UnityEngine.Quaternion.Inverse(rootFrame.rotation) * unityPose.rotation
-                    );
+                );
             }
             else
             {
@@ -376,9 +422,7 @@ namespace Iviz.App.Listeners
 
         public static UnityEngine.Vector3 RelativePosition(in UnityEngine.Vector3 unityPosition)
         {
-            return FlyCamera.IsMobile ? 
-                RootFrame.transform.InverseTransformPoint(unityPosition) : 
-                unityPosition;
+            return FlyCamera.IsMobile ? RootFrame.transform.InverseTransformPoint(unityPosition) : unityPosition;
         }
 
         static uint tfSeq = 0;

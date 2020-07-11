@@ -28,8 +28,9 @@ namespace Iviz.App
             GameObject listenerObject = new GameObject("Magnitude:" + Topic);
 
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Magnitude) as MagnitudePanelContents;
-            listener = listenerObject.AddComponent<MagnitudeListener>();
-            listener.ModuleData = this;
+            //listener = listenerObject.AddComponent<MagnitudeListener>();
+            //listener.ModuleData = this;
+            listener = new MagnitudeListener(this);
             if (constructor.Configuration == null)
             {
                 listener.Config.Topic = Topic;

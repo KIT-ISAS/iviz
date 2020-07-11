@@ -33,18 +33,18 @@ namespace Iviz.App
         [DataMember] public SerializableColor Tint { get; set; } = Color.white;
     }
 
-    public sealed class RobotController : MonoBehaviour, IController, IHasFrame
+    public sealed class RobotController : IController, IHasFrame
     {
-        ObjectClickableNode node;
+        readonly ObjectClickableNode node;
         RobotInfo robotInfo;
 
-        GameObject carrier;
-        BoxCollider carrierCollider;
+        readonly GameObject carrier;
+        readonly BoxCollider carrierCollider;
 
         public TFFrame Frame => node.Parent;
 
-        public GameObject RobotObject { get; private set; }
-        public GameObject BaseLink { get; private set; }
+        GameObject RobotObject { get; set; }
+        GameObject BaseLink { get; set; }
 
         public event Action Stopped;
 
@@ -71,21 +71,10 @@ namespace Iviz.App
             }
         }
 
-        public string Name
+        string Name
         {
             get => config.RobotName;
-            set
-            {
-                if (value == "")
-                {
-                    name = "Robot: " + config.RobotResource;
-                }
-                else
-                {
-                    name = "Robot: " + value;
-                }
-                config.RobotName = value;
-            }
+            set => config.RobotName = value;
         }
 
         public string LongName => (Name == "") ? config.RobotResource : Name;
@@ -267,13 +256,15 @@ namespace Iviz.App
         public ModuleData ModuleData
         {
             get => node.ModuleData;
-            set => node.ModuleData = value;
+            private set => node.ModuleData = value;
         }
 
-        void Awake()
+        public RobotController(ModuleData moduleData)
         {
             node = ObjectClickableNode.Instantiate("RobotNode");
-
+            node.Selectable = false;
+            ModuleData = moduleData;
+            
             carrier = new GameObject();
             carrierCollider = carrier.AddComponent<BoxCollider>();
             node.Target = carrier;
@@ -384,6 +375,7 @@ namespace Iviz.App
             }
         }
 
+        /*
         public void UpdateJoints(IReadOnlyDictionary<string, float> newJointValues, List<string> unmatched)
         {
             unmatched?.Clear();
@@ -399,6 +391,7 @@ namespace Iviz.App
                 }
             });
         }
+        */
 
         public void Stop()
         {
@@ -406,8 +399,8 @@ namespace Iviz.App
             DisposeRobot();
             Stopped?.Invoke();
 
-            Destroy(carrier.gameObject);
-            Destroy(node.gameObject);
+            UnityEngine.Object.Destroy(carrier.gameObject);
+            UnityEngine.Object.Destroy(node.gameObject);
         }
 
         void DisposeRobot()

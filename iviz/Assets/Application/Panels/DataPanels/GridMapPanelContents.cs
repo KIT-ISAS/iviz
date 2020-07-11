@@ -26,7 +26,7 @@ namespace Iviz.App
         void Start()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
-            p.AddHeadTitleWidget("PointCloud");
+            p.AddHeadTitleWidget("GridMap");
             Listener = p.AddListener();
             Frame = p.AddFrame();
             MinMax = p.AddDataLabel("Min/Max");

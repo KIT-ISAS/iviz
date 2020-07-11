@@ -22,10 +22,10 @@ namespace Iviz.App.Listeners
         [DataMember] public float FovAngle { get; set; } = 1.0f * Mathf.Rad2Deg;
     }
 
-    public sealed class DepthImageProjector : MonoBehaviour, IController, IHasFrame
+    public sealed class DepthImageProjectorController : IController, IHasFrame
     {
-        DepthImageResource resource;
-        SimpleDisplayNode node;
+        readonly DepthImageResource resource;
+        readonly SimpleDisplayNode node;
 
         public ModuleData ModuleData { get; set; }
 
@@ -58,19 +58,13 @@ namespace Iviz.App.Listeners
         public string ColorName
         {
             get => config.ColorName;
-            set
-            {
-                config.ColorName = value;
-            }
+            set => config.ColorName = value;
         }
 
         public string DepthName
         {
             get => config.DepthName;
-            set
-            {
-                config.DepthName = value;
-            }
+            set => config.DepthName = value;
         }
 
         public float PointSize
@@ -110,12 +104,12 @@ namespace Iviz.App.Listeners
             get => depthImage;
             set
             {
-                if (depthImage != null)
+                if (!(depthImage is null))
                 {
                     node.transform.SetParentLocal(null);
                 }
                 depthImage = value;
-                if (depthImage != null)
+                if (!(depthImage is null))
                 {
                     node.transform.SetParentLocal(depthImage.Node.transform);
                 }
@@ -123,8 +117,9 @@ namespace Iviz.App.Listeners
             }
         }
 
-        void Awake()
+        public DepthImageProjectorController(ModuleData moduleData)
         {
+            ModuleData = moduleData;
             node = SimpleDisplayNode.Instantiate("DepthImage");
             resource = ResourcePool.GetOrCreate<DepthImageResource>(Resource.Displays.DepthImageResource, node.transform);
             Config = new DepthImageProjectorConfiguration();
@@ -134,8 +129,8 @@ namespace Iviz.App.Listeners
         {
             resource.Stop();
             node.Stop();
-            Destroy(node.gameObject);
             ResourcePool.Dispose(Resource.Displays.DepthImageResource, resource.gameObject);
+            UnityEngine.Object.Destroy(node.gameObject);
         }
     }
 }

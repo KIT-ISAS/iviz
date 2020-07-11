@@ -25,9 +25,10 @@ namespace Iviz.App
             constructor.GetConfiguration<OccupancyGridConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.OccupancyGrid) as OccupancyGridPanelContents;
-            listener = Instantiate<OccupancyGridListener>();
-            listener.name = "OccupancyGrid:" + Topic;
-            listener.ModuleData = this;
+            //listener = Instantiate<OccupancyGridListener>();
+            //listener.name = "OccupancyGrid:" + Topic;
+            //listener.ModuleData = this;
+            listener = new OccupancyGridListener(this);
             if (constructor.Configuration == null)
             {
                 listener.Config.Topic = Topic;

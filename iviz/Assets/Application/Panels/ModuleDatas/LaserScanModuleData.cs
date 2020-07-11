@@ -27,9 +27,10 @@ namespace Iviz.App
             constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.LaserScan) as LaserScanPanelContents;
-            listener = Instantiate<LaserScanListener>();
-            listener.name = "LaserScan:" + Topic;
-            listener.ModuleData = this;
+            //listener = Instantiate<LaserScanListener>();
+            //listener.name = "LaserScan:" + Topic;
+            //listener.ModuleData = this;
+            listener = new LaserScanListener(this);
             if (constructor.Configuration == null)
             {
                 listener.Config.Topic = Topic;
