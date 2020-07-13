@@ -14,7 +14,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class DisplayListPanel : MonoBehaviour
+    public sealed class DisplayListPanel : MonoBehaviour
     {
         float buttonHeight;
 
@@ -439,7 +439,7 @@ namespace Iviz.App
             buttons.Add(buttonObject);
 
             Button button = buttonObject.GetComponent<Button>();
-            button.onClick.AddListener(moduleData.ToggleSelect);
+            button.onClick.AddListener(moduleData.ToggleShowPanel);
             ((RectTransform)contentObject.transform).sizeDelta = new Vector2(0, y + buttonHeight + yOffset);
 
             //return buttonObject;

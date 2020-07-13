@@ -6,7 +6,7 @@ namespace Iviz.App
     /// <summary>
     /// <see cref="GridModuleData"/> 
     /// </summary>
-    public class GridPanelContents : DataPanelContents
+    public sealed class GridPanelContents : DataPanelContents
     {
         public TrashButtonWidget CloseButton { get; private set; }
         public ToggleButtonWidget HideButton { get; private set; }

@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 
 namespace Iviz.Displays
 {
-    public class GridMapResource : MarkerResourceWithColormap
+    public sealed class GridMapResource : MarkerResourceWithColormap
     {
         static readonly int PropInputTexture = Shader.PropertyToID("_InputTexture");
         static readonly int PropSquareTexture = Shader.PropertyToID("_SquareTexture");

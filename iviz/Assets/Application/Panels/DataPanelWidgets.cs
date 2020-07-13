@@ -64,31 +64,37 @@ namespace Iviz.App
 
         public ToggleWidget AddToggle(string label)
         {
-            GameObject o = Resource.Widgets.ToggleWidget.Instantiate(nonstatics.transform);
+            GameObject o = Resource.Widgets.Toggle.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<ToggleWidget>().SetLabel(label);
         }
 
         public SliderWidget AddSlider(string label)
         {
-            GameObject o = Resource.Widgets.SliderWidget.Instantiate(nonstatics.transform);
+            GameObject o = Resource.Widgets.Slider.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<SliderWidget>().SetLabel(label);
         }
 
         public InputFieldWidget AddInputField(string label)
         {
-            GameObject o = Resource.Widgets.InputWidget.Instantiate(nonstatics.transform);
+            GameObject o = Resource.Widgets.Input.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<InputFieldWidget>().SetLabel(label);
+        }
+        
+        public InputFieldWithHintsWidget AddInputFieldWithHints(string label)
+        {
+            GameObject o = Resource.Widgets.InputWithHints.Instantiate(nonstatics.transform);
+            return AddToBottom(o).GetComponent<InputFieldWithHintsWidget>().SetLabel(label);
         }
 
         public InputFieldWidget AddShortInputField(string label)
         {
-            GameObject o = Resource.Widgets.ShortInputWidget.Instantiate(nonstatics.transform);
+            GameObject o = Resource.Widgets.ShortInput.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<InputFieldWidget>().SetLabel(label);
         }
 
         public NumberInputFieldWidget AddNumberInputField(string label)
         {
-            GameObject o = Resource.Widgets.NumberInputWidget.Instantiate(nonstatics.transform);
+            GameObject o = Resource.Widgets.NumberInput.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<NumberInputFieldWidget>().SetLabel(label);
         }
 

@@ -481,6 +481,9 @@ namespace Iviz.App.Listeners
             {
                 return;
             }
+            
+            WorldOffset = Vector3.zero;
+            WorldAngle = 0;
 
             Pose expectedPose = TFListener.RelativePose(resource.transform.AsPose());
             Pose registeredPose = newPose.Value.Multiply(expectedPose.Inverse());
@@ -494,6 +497,8 @@ namespace Iviz.App.Listeners
             
             MarkerFound = true;
             TFRoot.SetPose(RootPose);
+            
+            ModuleData.ResetPanel();
         }
 
         public void Stop()

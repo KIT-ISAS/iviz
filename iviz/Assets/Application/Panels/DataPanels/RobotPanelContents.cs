@@ -6,7 +6,7 @@ namespace Iviz.App
     /// <see cref="RobotModuleData"/> 
     /// </summary>
     /// 
-    public class RobotPanelContents : DataPanelContents
+    public sealed class RobotPanelContents : DataPanelContents
     {
         public TrashButtonWidget CloseButton { get; private set; }
         public ToggleButtonWidget HideButton { get; private set; }

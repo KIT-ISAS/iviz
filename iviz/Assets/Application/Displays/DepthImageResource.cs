@@ -9,7 +9,7 @@ using Iviz.Resources;
 
 namespace Iviz.App.Displays
 {
-    public class DepthImageResource : MarkerResource
+    public sealed class DepthImageResource : MarkerResource
     {
         [SerializeField] Material material;
 

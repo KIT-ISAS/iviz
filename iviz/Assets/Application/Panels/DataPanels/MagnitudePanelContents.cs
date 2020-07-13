@@ -5,7 +5,7 @@ namespace Iviz.App
     /// <see cref="MagnitudeModuleData"/> 
     /// </summary>
     /// 
-    public class MagnitudePanelContents : ListenerPanelContents
+    public sealed class MagnitudePanelContents : ListenerPanelContents
     {
         public FrameWidget Frame { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }

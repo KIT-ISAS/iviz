@@ -8,7 +8,7 @@ using UnityEngine.UIElements;
 
 namespace Iviz.Displays
 {
-    public class DraggableRotation : MonoBehaviour, IPointerDownHandler, IDraggable
+    public sealed class DraggableRotation : MonoBehaviour, IPointerDownHandler, IDraggable
     {
         public Vector3 normal;
         public Transform TargetTransform { get; set; }

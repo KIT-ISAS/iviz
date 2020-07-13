@@ -4,7 +4,7 @@ namespace Iviz.App
     /// <summary>
     /// <see cref="JoystickModuleData"/> 
     /// </summary>
-    public class JoystickPanelContents : DataPanelContents
+    public sealed class JoystickPanelContents : DataPanelContents
     {
         public TrashButtonWidget CloseButton { get; private set; }
         public ToggleButtonWidget HideButton { get; private set; }
@@ -18,9 +18,9 @@ namespace Iviz.App
         public ToggleWidget XIsFront { get; private set; }
 
 
-        public InputFieldWidget TwistTopic { get; private set; }
+        public InputFieldWithHintsWidget TwistTopic { get; private set; }
         public ToggleWidget UseStamped { get; private set; }
-        public InputFieldWidget AttachToFrame { get; private set; }
+        public InputFieldWithHintsWidget AttachToFrame { get; private set; }
         public SenderWidget TwistSender { get; private set; }
 
         void Awake()
@@ -39,8 +39,8 @@ namespace Iviz.App
             XIsFront = p.AddToggle("X is Front / Up");
 
             UseStamped = p.AddToggle("Use TwistStamped instead of Twist");
-            TwistTopic = p.AddInputField("Twist Topic").SetPlaceholder("twist");
-            AttachToFrame = p.AddInputField("TF Frame For Header").SetPlaceholder("map");
+            TwistTopic = p.AddInputFieldWithHints("Twist Topic").SetPlaceholder("twist");
+            AttachToFrame = p.AddInputFieldWithHints("TF Frame For Header").SetPlaceholder("map");
 
             TwistSender = p.AddSender();
 

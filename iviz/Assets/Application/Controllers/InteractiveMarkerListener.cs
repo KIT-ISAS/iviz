@@ -20,7 +20,7 @@ namespace Iviz.App.Listeners
         [DataMember] public bool DisableExpiration { get; set; } = true;
     }
 
-    public class InteractiveMarkerListener : ListenerController
+    public sealed class InteractiveMarkerListener : ListenerController
     {
         readonly SimpleDisplayNode node;
         

@@ -19,7 +19,7 @@ using Valve.VR.InteractionSystem;
 namespace Iviz.App
 {
 #if !USING_VR
-    public class VRController : MonoBehaviour
+    public sealed class VRController : MonoBehaviour
     {
         public const bool UsingVR = false;
     }

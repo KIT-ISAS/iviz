@@ -90,7 +90,7 @@ namespace Iviz.App.Displays
         protected virtual void OnDoubleClick()
         {
             TFListener.GuiManager.Select(this);
-            ModuleData?.Select();
+            ModuleData?.ShowPanel();
         }
         
         public override void Stop()

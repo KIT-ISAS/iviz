@@ -3,7 +3,7 @@
     /// <summary>
     /// <see cref="MarkerModuleData"/> 
     /// </summary>
-    public class MarkerPanelContents : ListenerPanelContents
+    public sealed class MarkerPanelContents : ListenerPanelContents
     {
         public TrashButtonWidget CloseButton { get; private set; }
         public ToggleButtonWidget HideButton { get; private set; }

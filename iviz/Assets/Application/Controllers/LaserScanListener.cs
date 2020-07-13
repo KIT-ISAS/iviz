@@ -31,7 +31,7 @@ namespace Iviz.App.Listeners
         [DataMember] public uint MaxQueueSize { get; set; } = 1;
     }
 
-    public class LaserScanListener : ListenerController
+    public sealed class LaserScanListener : ListenerController
     {
         readonly RadialScanResource resource;
         readonly DisplayNode node;

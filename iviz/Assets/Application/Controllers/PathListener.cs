@@ -28,7 +28,7 @@ namespace Iviz.App.Listeners
         [DataMember] public uint MaxQueueSize { get; set; } = 1;
     }
 
-    public class PathListener : ListenerController
+    public sealed class PathListener : ListenerController
     {
         readonly DisplayNode node;
         readonly LineResource resource;

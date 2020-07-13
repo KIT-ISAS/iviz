@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Iviz.App.Displays
 {
-    public class NamedBoundary : MonoBehaviour, IDisplay, IRecyclable
+    public sealed class NamedBoundary : MonoBehaviour, IDisplay, IRecyclable
     {
         const float FrameAxisLength = 0.15f;
         const float FrameAxisWidth = FrameAxisLength / 16;

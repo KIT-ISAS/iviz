@@ -550,6 +550,17 @@ namespace Iviz.App
             return cachedTopics;
         }
 
+        public override string GetParameter(string parameter)
+        {
+            if (client is null)
+            {
+                return null;
+            }
+
+            client.GetParameter(parameter, out object obj);
+            return obj as string;
+        }
+
         protected override void Update()
         {
             AddTask(() =>

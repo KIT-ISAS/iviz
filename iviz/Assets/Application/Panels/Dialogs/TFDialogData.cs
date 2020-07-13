@@ -9,7 +9,7 @@ using Iviz.App.Listeners;
 
 namespace Iviz.App
 {
-    public class TFDialogData : DialogData
+    public sealed class TFDialogData : DialogData
     {
         TFDialogContents panel;
         public override IDialogPanelContents Panel => panel;
@@ -32,7 +32,7 @@ namespace Iviz.App
             panel.ShowOnlyUsed.ValueChanged += f =>
             {
                 TFListener.Instance.ShowAllFrames = !f;
-                TFListener.Instance.ModuleData.ForceUpdatePanel();
+                TFListener.Instance.ModuleData.ResetPanel();
             };
             panel.ResetAll.Clicked += () =>
             {

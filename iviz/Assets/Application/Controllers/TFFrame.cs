@@ -15,7 +15,6 @@ namespace Iviz.App.Listeners
     public sealed class TFFrame : ClickableNode, IRecyclable
     {
         const int MaxPoseMagnitude = 1000;
-
         const int Layer = 9;
 
         readonly Timeline timeline = new Timeline();
@@ -23,6 +22,7 @@ namespace Iviz.App.Listeners
         AnchorLine anchor;
 
         [SerializeField] string id;
+
         public string Id
         {
             get => id;
@@ -72,6 +72,7 @@ namespace Iviz.App.Listeners
             {
                 return;
             }
+
             listeners.Remove(display);
             CheckIfDead();
         }
@@ -88,6 +89,7 @@ namespace Iviz.App.Listeners
             {
                 return;
             }
+
             //Debug.Log(Id + " loses child " + frame);
             children.Remove(frame.Id);
         }
@@ -125,9 +127,9 @@ namespace Iviz.App.Listeners
                 axis.Visible = (value || ForceVisible) && !ForceInvisible;
                 TrailVisible = TrailVisible;
                 AnchorVisible = AnchorVisible;
-            } 
+            }
         }
-        
+
         bool anchorVisible;
         bool AnchorVisible
         {
@@ -136,8 +138,8 @@ namespace Iviz.App.Listeners
             {
                 anchorVisible = value;
                 anchor.Visible = value && (Visible || ForceVisible);
-            } 
-        }        
+            }
+        }
 
         bool labelVisible;
         public bool LabelVisible
@@ -191,8 +193,7 @@ namespace Iviz.App.Listeners
             }
         }
 
-        bool acceptsParents;
-
+        bool acceptsParents = true;
         public bool AcceptsParents
         {
             get => acceptsParents;
@@ -220,8 +221,8 @@ namespace Iviz.App.Listeners
 
         public bool SetParent(TFFrame newParent)
         {
-            if (!AcceptsParents && 
-                newParent != TFListener.RootFrame && 
+            if (!AcceptsParents &&
+                newParent != TFListener.RootFrame &&
                 newParent != TFListener.UnityFrame &&
                 !(newParent is null))
             {
@@ -233,12 +234,14 @@ namespace Iviz.App.Listeners
             {
                 return true;
             }
+
             //Debug.Log("b child " + Id + " parent " + newParent?.Id);
             if (newParent == this)
             {
                 //Logger.Error($"TFFrame: Cannot set '{newParent.Id}' as a parent to itself!");
                 return false;
             }
+
             //Debug.Log("c child " + Id + " parent " + newParent?.Id);
             if (!(newParent is null) && newParent.IsChildOf(this))
             {
@@ -246,6 +249,7 @@ namespace Iviz.App.Listeners
                 newParent.CheckIfDead();
                 return false;
             }
+
             /*
             if (!timeline.Empty && time < timeline.LastTime)
             {
@@ -271,12 +275,12 @@ namespace Iviz.App.Listeners
             {
                 return false;
             }
+
             return Parent == frame || Parent.IsChildOf(frame);
         }
 
 
         Pose pose;
-        public Pose Pose => pose;
 
         public Pose WorldPose => TFListener.RelativePose(transform.AsPose());
 
@@ -291,7 +295,7 @@ namespace Iviz.App.Listeners
 
             if (newPose.position.sqrMagnitude > MaxPoseMagnitude * MaxPoseMagnitude)
             {
-                //return; // lel
+                return; // lel
             }
 
             transform.SetLocalPose(newPose);
@@ -304,16 +308,18 @@ namespace Iviz.App.Listeners
             {
                 timeline.Add(time, transform.AsPose());
             }
+
             foreach (TFFrame child in children.Values)
             {
                 child.LogPose(time);
             }
+
             //Debug.Log(timeline.Count + " " + (timeline.LastTime - timeline.FirstTime).Milliseconds);
         }
 
         public Pose GetPose(in TimeSpan time)
         {
-            return timeline.Count == 0 ? Pose : timeline.Get(time);
+            return timeline.Count == 0 ? pose : timeline.Get(time);
         }
 
         bool HasNoListeners => !listeners.Any();
@@ -330,18 +336,16 @@ namespace Iviz.App.Listeners
 
             labelObject = ResourcePool.GetOrCreate(Resource.Displays.Text, transform);
             labelObject.gameObject.SetActive(false);
-            labelObject.name = "Frame Axis Label";
             labelObjectText = labelObject.GetComponent<TextMesh>();
             labelObject.name = "[Label]";
 
-            parentConnector = ResourcePool.
-                GetOrCreate(Resource.Displays.LineConnector, transform).
-                GetComponent<LineConnector>();
-            parentConnector.name = "Parent Connector";
+            parentConnector = ResourcePool.GetOrCreate(Resource.Displays.LineConnector, transform)
+                .GetComponent<LineConnector>();
             parentConnector.A = transform;
-            parentConnector.B = transform.parent != null ?
-                transform.parent :
-                TFListener.RootFrame?.transform; // TFListener.BaseFrame may not exist yet
+            parentConnector.B =
+                transform.parent != null
+                    ? transform.parent
+                    : TFListener.RootFrame?.transform; // TFListener.BaseFrame may not exist yet
             parentConnector.name = "[Connector]";
 
             axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Displays.AxisFrame, transform);
@@ -349,7 +353,6 @@ namespace Iviz.App.Listeners
             axis.name = "[Axis]";
 
             AxisLength = 0.125f;
-            //OrbitColorEnabled = false;
 
             parentConnector.gameObject.SetActive(false);
 
@@ -359,8 +362,9 @@ namespace Iviz.App.Listeners
             trail.TimeWindowInMs = 5000;
             trail.Color = Color.yellow;
             TrailVisible = false;
-            
-            anchor = ResourcePool.GetOrCreate<AnchorLine>(Resource.Displays.AnchorLine, TFListener.UnityFrame?.transform);
+
+            anchor = ResourcePool.GetOrCreate<AnchorLine>(Resource.Displays.AnchorLine,
+                TFListener.UnityFrame?.transform);
             anchor.Visible = false;
         }
 
@@ -396,15 +400,16 @@ namespace Iviz.App.Listeners
                 AnchorVisible = false;
                 return;
             }
+
             AnchorVisible = true;
             anchor.FindAnchor = findAnchorFn;
             anchor.SetPosition(transform.position, forceRebuild);
         }
-        
+
         protected override void OnDoubleClick()
         {
             TFListener.GuiManager.Select(this);
             DisplayListPanel.Instance.ShowFrame(this);
-        }        
+        }
     }
 }

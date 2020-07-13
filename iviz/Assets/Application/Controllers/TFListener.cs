@@ -60,9 +60,14 @@ namespace Iviz.App.Listeners
 
         readonly Dictionary<string, TFFrame> frames = new Dictionary<string, TFFrame>();
 
-        public ReadOnlyDictionary<string, TFFrame> Frames => new ReadOnlyDictionary<string, TFFrame>(frames);
+        public static ReadOnlyDictionary<string, TFFrame> Frames =>
+            new ReadOnlyDictionary<string, TFFrame>(Instance.frames);
 
-        public RosSender<tfMessage_v2> Publisher { get; private set; }
+        static bool IsUsableByHints(TFFrame frame) => frame != RootFrame && frame != UnityFrame;
+
+        public static IEnumerable<string> FramesForHints => Instance.frames.Values.Where(IsUsableByHints).Select(frame => frame.Id);
+
+        public RosSender<tfMessage_v2> Publisher { get; }
 
         public override ModuleData ModuleData { get; }
 
@@ -288,7 +293,7 @@ namespace Iviz.App.Listeners
         {
             bool prevShowAllFrames = ShowAllFrames;
             ShowAllFrames = false;
-            
+
             var framesCopy = frames.Values.ToList();
             foreach (var frame in framesCopy)
             {
@@ -296,7 +301,7 @@ namespace Iviz.App.Listeners
             }
 
             ShowAllFrames = prevShowAllFrames;
-            
+
             // unsubscribe and resubscribe
             ListenerStatic.Pause();
             ListenerStatic.Unpause();

@@ -8,7 +8,7 @@ namespace Iviz.App
     /// <see cref="GridMapModuleData"/> 
     /// </summary>
 
-    public class GridMapPanelContents : ListenerPanelContents
+    public sealed class GridMapPanelContents : ListenerPanelContents
     {
         public FrameWidget Frame { get; private set; }
         public DataLabelWidget MinMax { get; private set; }
@@ -23,7 +23,7 @@ namespace Iviz.App
         public ToggleWidget FlipMinMax { get; private set; }
 
 
-        void Start()
+        void Awake()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("GridMap");

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public class MinMaxJob
+    public static class MinMaxJob
     {
         [BurstCompile(CompileSynchronously = true)]
         struct MinMaxJobPoints : IJob

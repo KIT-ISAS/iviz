@@ -8,11 +8,11 @@ using System.IO;
 
 namespace Iviz.App
 {
-    public class ConnectionDialogData : DialogData
+    public sealed class ConnectionDialogData : DialogData
     {
-        public static Uri DefaultMasterUri { get; } = new Uri("http://localhost:11311/");
-        public static Uri DefaultMyUri => new Uri($"http://{Dns.GetHostName()}:7614/");
-        public static string DefaultMyId { get; } = "/iviz_" + UnityEngine.Application.platform.ToString().ToLower();
+        static Uri DefaultMasterUri { get; } = new Uri("http://localhost:11311/");
+        static Uri DefaultMyUri => new Uri($"http://{Dns.GetHostName()}:7614/");
+        static string DefaultMyId { get; } = "/iviz_" + UnityEngine.Application.platform.ToString().ToLower();
 
         ConnectionDialogContents panel;
         public override IDialogPanelContents Panel => panel;

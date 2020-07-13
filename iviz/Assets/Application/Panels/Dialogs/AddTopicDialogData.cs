@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Iviz.Resources;
 using UnityEngine;
 
 namespace Iviz.App
 {
-    public class AddTopicDialogData : DialogData
+    public sealed class AddTopicDialogData : DialogData
     {
         const int MaxLineWidth = 250;
 
@@ -69,7 +70,7 @@ namespace Iviz.App
         {
             panel.Title = "Available Topics";
             panel.ItemClicked += OnItemClicked;
-            panel.CloseClicked += OnClose;
+            panel.CloseClicked += Close;
 
             UpdatePanel();
 
@@ -102,11 +103,12 @@ namespace Iviz.App
 
         void OnItemClicked(int index, string _)
         {
-            ModuleListPanel.CreateModuleForTopic(topics[index].Topic, topics[index].Type);
-            OnClose();
+            var moduleData = ModuleListPanel.CreateModuleForTopic(topics[index].Topic, topics[index].Type);
+            Close();
+            moduleData.ShowPanel();
         }
 
-        void OnClose()
+        void Close()
         {
             DialogPanelManager.HidePanelFor(this);
         }

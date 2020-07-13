@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Iviz.App.Listeners;
 using Iviz.Resources;
 using UnityEngine;
@@ -10,6 +11,8 @@ namespace Iviz.App
     /// </summary>
     public sealed class ARModuleData : ModuleData
     {
+        const string NoneString = "(none)";
+        
         readonly ARController controller;
         readonly ARPanelContents panel;
 
@@ -54,6 +57,11 @@ namespace Iviz.App
             panel.MarkerHorizontal.Value = controller.MarkerHorizontal;
             panel.MarkerAngle.Value = controller.MarkerAngle;
             panel.MarkerFrame.Value = controller.MarkerFrame;
+
+            List<string> frameHints = new List<string> {NoneString};
+            frameHints.AddRange(TFListener.FramesForHints);
+            panel.MarkerFrame.Hints = frameHints;
+            
             panel.MarkerOffset.Value = controller.MarkerOffset;
 
             /*
@@ -99,7 +107,15 @@ namespace Iviz.App
             };
             panel.MarkerFrame.EndEdit += f =>
             {
-                controller.MarkerFrame = f;
+                if (f == NoneString)
+                {
+                    panel.MarkerFrame.Value = "";
+                    controller.MarkerFrame = "";
+                }
+                else
+                {
+                    controller.MarkerFrame = f;
+                }
                 CheckInteractable();
             };
             panel.MarkerOffset.ValueChanged += f =>

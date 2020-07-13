@@ -22,7 +22,7 @@ namespace Iviz.App.Listeners
         [DataMember] public SerializableColor Tint { get; set; } = Color.white;
     }
 
-    public class MarkerListener : ListenerController
+    public sealed class MarkerListener : ListenerController
     {
         readonly Dictionary<string, MarkerObject> markers = new Dictionary<string, MarkerObject>();
 

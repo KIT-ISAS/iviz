@@ -235,6 +235,8 @@ namespace Iviz.App
         public abstract int GetNumPublishers(string topic);
         public abstract int GetNumSubscribers(string topic);
 
+        public abstract string GetParameter(string parameter);
+
         protected virtual void Update()
         {
             // do nothing

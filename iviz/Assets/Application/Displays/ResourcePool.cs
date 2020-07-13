@@ -9,7 +9,7 @@ namespace Iviz.App
 {
     public sealed class ResourcePool : MonoBehaviour
     {
-        const int TimeToDestroy = 60;
+        const int TimeToDestroy = 60; // sec
 
         static ResourcePool Instance;
 
@@ -28,7 +28,6 @@ namespace Iviz.App
             }
 
             T t = GetOrCreate(resource, parent, enable).GetComponent<T>();
-            //Debug.Log("2) " + parent + " -> " + t.transform.parent);
             return t;
         }
 
@@ -39,19 +38,20 @@ namespace Iviz.App
 
         class ObjectWithDeadline
         {
-            public float Expiration { get; }
+            public float ExpirationTime { get; }
             public GameObject GameObject { get; }
 
             public ObjectWithDeadline(GameObject o)
             {
                 GameObject = o;
-                Expiration = Time.time + TimeToDestroy;
+                ExpirationTime = Time.time + TimeToDestroy;
             }
         }
 
         readonly Dictionary<int, Queue<ObjectWithDeadline>> pool = new Dictionary<int, Queue<ObjectWithDeadline>>();
         readonly List<GameObject> objectsToDestroy = new List<GameObject>();
-
+        readonly HashSet<int> destroyedObjects = new HashSet<int>();
+        
         void Awake()
         {
             Instance = this;
@@ -65,7 +65,7 @@ namespace Iviz.App
 
             foreach (var entry in pool)
             {
-                while (entry.Value.Any() && entry.Value.Peek().Expiration < now)
+                while (entry.Value.Any() && entry.Value.Peek().ExpirationTime < now)
                 {
                     objectsToDestroy.Add(entry.Value.Dequeue().GameObject);
                 }
@@ -80,12 +80,7 @@ namespace Iviz.App
             }
         }
 
-        void OnDestroy()
-        {
-            Instance = null;
-        }
 
-        readonly HashSet<int> destroyedObjects = new HashSet<int>();
 
         GameObject GetImpl(Resource.Info<GameObject> resource, Transform parent, bool enable)
         {
@@ -142,5 +137,10 @@ namespace Iviz.App
             destroyedObjects.Add(obj.GetInstanceID());
             //Debug.Log("State: " + string.Join(",", destroyedObjects));
         }
+        
+        void OnDestroy()
+        {
+            Instance = null;
+        }        
     }
 }

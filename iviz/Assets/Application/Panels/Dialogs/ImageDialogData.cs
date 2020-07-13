@@ -11,7 +11,7 @@ namespace Iviz.App
         void OnDialogClosed();
     }
 
-    public class ImageDialogData : DialogData
+    public sealed class ImageDialogData : DialogData
     {
         ImageDialogContents panel;
         public override IDialogPanelContents Panel => panel;

@@ -3,7 +3,7 @@
     /// <summary>
     /// <see cref="InteractiveMarkerModuleData"/> 
     /// </summary>    
-    public class InteractiveMarkerPanelContents : ListenerPanelContents
+    public sealed class InteractiveMarkerPanelContents : ListenerPanelContents
     {
         public TrashButtonWidget CloseButton { get; private set; }
         public ToggleWidget DisableExpiration { get; private set; }

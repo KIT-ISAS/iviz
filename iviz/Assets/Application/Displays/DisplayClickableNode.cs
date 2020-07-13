@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Iviz.App.Displays
 {
-    public class DisplayClickableNode : ClickableNode
+    public sealed class DisplayClickableNode : ClickableNode
     {
         IDisplay target;
         public IDisplay Target

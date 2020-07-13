@@ -368,11 +368,11 @@ namespace Iviz.Resources
 
             public GameObjectInfo HeadTitle { get; }
             public GameObjectInfo SectionTitle { get; }
-            public GameObjectInfo ToggleWidget { get; }
-            public GameObjectInfo SliderWidget { get; }
-            public GameObjectInfo InputWidget { get; }
-            public GameObjectInfo ShortInputWidget { get; }
-            public GameObjectInfo NumberInputWidget { get; }
+            public GameObjectInfo Toggle { get; }
+            public GameObjectInfo Slider { get; }
+            public GameObjectInfo Input { get; }
+            public GameObjectInfo ShortInput { get; }
+            public GameObjectInfo NumberInput { get; }
             public GameObjectInfo Dropdown { get; }
             public GameObjectInfo ColorPicker { get; }
             public GameObjectInfo ImagePreview { get; }
@@ -385,6 +385,7 @@ namespace Iviz.Resources
             public GameObjectInfo Listener { get; }
             public GameObjectInfo Frame { get; }
             public GameObjectInfo Vector3Slider { get; }
+            public GameObjectInfo InputWithHints { get; }
 
             public WidgetsType()
             {
@@ -399,11 +400,11 @@ namespace Iviz.Resources
 
                 HeadTitle = new GameObjectInfo("Widgets/Head Title");
                 SectionTitle = new GameObjectInfo("Widgets/Section Title");
-                ToggleWidget = new GameObjectInfo("Widgets/Toggle");
-                SliderWidget = new GameObjectInfo("Widgets/Slider");
-                InputWidget = new GameObjectInfo("Widgets/Input Field");
-                ShortInputWidget = new GameObjectInfo("Widgets/Short Input Field");
-                NumberInputWidget = new GameObjectInfo("Widgets/Number Input Field");
+                Toggle = new GameObjectInfo("Widgets/Toggle");
+                Slider = new GameObjectInfo("Widgets/Slider");
+                Input = new GameObjectInfo("Widgets/Input Field");
+                ShortInput = new GameObjectInfo("Widgets/Short Input Field");
+                NumberInput = new GameObjectInfo("Widgets/Number Input Field");
                 ColorPicker = new GameObjectInfo("Widgets/ColorPicker");
                 ImagePreview = new GameObjectInfo("Widgets/Image Preview");
                 Dropdown = new GameObjectInfo("Widgets/Dropdown");
@@ -416,6 +417,7 @@ namespace Iviz.Resources
                 Listener = new GameObjectInfo("Widgets/Listener");
                 Frame = new GameObjectInfo("Widgets/Frame");
                 Vector3Slider = new GameObjectInfo("Widgets/Vector3 Slider");
+                InputWithHints = new GameObjectInfo("Widgets/Input Field With Hints");
             }
         }
 
@@ -455,7 +457,7 @@ namespace Iviz.Resources
             public FontInfo()
             {
                 font = UnityEngine.Resources.Load<Font>("Fonts/Montserrat Real NonDynamic");
-                dotWidth = CharWidth('.') * 3;
+                dotWidth = CharWidth('.') * 3; // ...
                 arrowWidth = CharWidth('→') + CharWidth(' ');
             }
 

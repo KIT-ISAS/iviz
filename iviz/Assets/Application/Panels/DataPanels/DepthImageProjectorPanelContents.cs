@@ -1,6 +1,6 @@
 ﻿namespace Iviz.App
 {
-    public class DepthImageProjectorPanelContents : DataPanelContents
+    public sealed class DepthImageProjectorPanelContents : DataPanelContents
     {
         public FrameWidget Frame { get; private set; }
         public DropdownWidget Depth { get; private set; }
@@ -10,7 +10,7 @@
         public TrashButtonWidget CloseButton { get; private set; }
         public ToggleButtonWidget HideButton { get; private set; }
 
-        void Start()
+        void Awake()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("DepthProjector");

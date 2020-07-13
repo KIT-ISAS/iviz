@@ -8,7 +8,7 @@ namespace Iviz.App
     /// <see cref="PathModuleData"/> 
     /// </summary>
 
-    public class PathPanelContents : ListenerPanelContents
+    public sealed class PathPanelContents : ListenerPanelContents
     {
         public FrameWidget Frame { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
@@ -19,7 +19,7 @@ namespace Iviz.App
         public ToggleWidget ShowLines { get; private set; }
         public ColorPickerWidget LineColor { get; private set; }
 
-        void Start()
+        void Awake()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("Path");

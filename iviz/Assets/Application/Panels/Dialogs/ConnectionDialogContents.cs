@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class ConnectionDialogContents : MonoBehaviour, IDialogPanelContents
+    public sealed class ConnectionDialogContents : MonoBehaviour, IDialogPanelContents
     {
         [SerializeField] InputFieldWidget masterUri = null;
         [SerializeField] InputFieldWidget myUri = null;

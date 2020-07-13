@@ -14,9 +14,9 @@ namespace Iviz.App.Listeners
         [DataMember] public Resource.Module Module => Resource.Module.Joystick;
         [DataMember] public bool Visible { get; set; } = true;
 
-        [DataMember] public string JoyTopic { get; set; } = "joy";
+        [DataMember] public string JoyTopic { get; set; } = "";
         [DataMember] public bool PublishJoy { get; set; } = false;
-        [DataMember] public string TwistTopic { get; set; } = "twist";
+        [DataMember] public string TwistTopic { get; set; } = "";
         [DataMember] public bool PublishTwist { get; set; } = true;
         [DataMember] public bool TwistStamped { get; set; } = false;
         [DataMember] public SerializableVector3 MaxSpeed { get; set; } = Vector3.one * 0.25f;
@@ -27,7 +27,7 @@ namespace Iviz.App.Listeners
 
     public sealed class JoystickController : IController
     {
-        public ModuleData ModuleData { get; set; }
+        public ModuleData ModuleData { get; }
 
         readonly JoystickConfiguration config = new JoystickConfiguration();
         public JoystickConfiguration Config

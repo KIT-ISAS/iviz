@@ -7,7 +7,7 @@ namespace Iviz.App
     /// <summary>
     /// <see cref="OccupancyGridModuleData"/> 
     /// </summary>
-    public class OccupancyGridPanelContents : ListenerPanelContents
+    public sealed class OccupancyGridPanelContents : ListenerPanelContents
     {
         public TrashButtonWidget CloseButton { get; private set; }
         public ToggleButtonWidget HideButton { get; private set; }
@@ -20,7 +20,7 @@ namespace Iviz.App
         //public SliderWidget Alpha { get; private set; }
         public ToggleWidget OcclusionOnlyMode { get; private set; }
 
-        void Start()
+        void Awake()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("Occupancy\nGrid");

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public class InteractiveControl : MonoBehaviour
+    public sealed class InteractiveControl : MonoBehaviour
     {
         public enum Orientation
         {

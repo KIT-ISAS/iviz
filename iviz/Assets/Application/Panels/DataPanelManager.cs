@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Iviz.App
 {
-    public class DataPanelManager : MonoBehaviour
+    public sealed class DataPanelManager : MonoBehaviour
     {
         readonly Dictionary<Resource.Module, DataPanelContents> panelByResourceType =
             new Dictionary<Resource.Module, DataPanelContents>();
@@ -72,7 +72,7 @@ namespace Iviz.App
             }
 
             HideSelectedPanel();
-            if (newSelected == null || newSelected.Panel is null)
+            if (newSelected?.Panel is null)
             {
                 ShowDefaultPanel();
             }

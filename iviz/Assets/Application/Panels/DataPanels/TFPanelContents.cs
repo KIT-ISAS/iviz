@@ -3,7 +3,7 @@
     /// <summary>
     /// <see cref="TFModuleData"/> 
     /// </summary>
-    public class TFPanelContents : ListenerPanelContents
+    public sealed class TFPanelContents : ListenerPanelContents
     {
         public ListenerWidget ListenerStatic { get; protected set; }
         public FrameWidget Frame { get; protected set; }

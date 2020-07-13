@@ -98,8 +98,7 @@ namespace Iviz.App
                     sliderZ.Value = color.b;
                     break;
                 case ColorMode.HSV:
-                    float h, s, v;
-                    Color.RGBToHSV(color, out h, out s, out v);
+                    Color.RGBToHSV(color, out var h, out var s, out var v);
                     sliderX.Value = h;
                     sliderY.Value = s;
                     sliderZ.Value = v;

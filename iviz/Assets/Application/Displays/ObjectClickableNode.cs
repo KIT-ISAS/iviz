@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Iviz.App.Displays
 {
-    public class ObjectClickableNode : ClickableNode
+    public sealed class ObjectClickableNode : ClickableNode
     {
         BoxCollider boxCollider;
 

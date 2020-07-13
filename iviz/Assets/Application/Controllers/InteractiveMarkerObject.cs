@@ -124,7 +124,7 @@ namespace Iviz.App.Listeners
             MouseEvent = null;
             Moved = null;
 
-            Destroy(controlNode);
+            Destroy(controlNode.gameObject);
 
             /*
             if (menuObject != null)

@@ -28,7 +28,8 @@ namespace Iviz.App
         public abstract DataPanelContents Panel { get; }
         public abstract IController Controller { get; }
         public abstract IConfiguration Configuration { get; }
-        protected virtual bool Visible => Configuration?.Visible ?? true;
+        bool Visible => Configuration?.Visible ?? true;
+        bool IsSelected => DataPanelManager.SelectedModuleData == this;
 
         protected ModuleData(DisplayListPanel moduleList, string topic, string type)
         {
@@ -63,6 +64,15 @@ namespace Iviz.App
 
         public abstract void SetupPanel();
 
+        public void ResetPanel()
+        {
+            if (!IsSelected)
+            {
+                return;
+            }
+            Panel.ClearSubscribers();
+            SetupPanel();
+        }
         /*
         public virtual void CleanupPanel()
         {
@@ -73,13 +83,13 @@ namespace Iviz.App
         {
         }
 
-        public void ToggleSelect()
+        public void ToggleShowPanel()
         {
             DataPanelManager.TogglePanel(this);
             ModuleListPanel.AllGuiVisible = true;
         }
 
-        public void Select()
+        public void ShowPanel()
         {
             DataPanelManager.SelectPanelFor(this);
             ModuleListPanel.AllGuiVisible = true;
@@ -95,34 +105,7 @@ namespace Iviz.App
         {
             DataPanelManager.HidePanelFor(this);
         }
-
-        bool IsSelected => DataPanelManager.SelectedModuleData == this;
         
-        public void ForceUpdatePanel()
-        {
-            if (!IsSelected)
-            {
-                return;
-            }
-            Panel.ClearSubscribers();
-            SetupPanel();
-        }
-
-        /*
-        protected static T Instantiate<T>(Transform parent = null) where T : MonoBehaviour
-        {
-            if (!typeof(IController).IsAssignableFrom(typeof(T)))
-            {
-                throw new ArgumentException(nameof(T));
-            }
-
-            GameObject gameObject = new GameObject();
-            gameObject.transform.parent = parent ?? TFListener.ListenersFrame?.gameObject.transform;
-            gameObject.name = typeof(T).Name;
-            return gameObject.AddComponent<T>();
-        }
-        */
-
         public static ModuleData CreateFromResource(ModuleDataConstructor c)
         {
             switch (c.Module)

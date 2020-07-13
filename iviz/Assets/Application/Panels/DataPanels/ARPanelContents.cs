@@ -6,7 +6,7 @@ namespace Iviz.App
     /// <summary>
     /// <see cref="ARModuleData"/> 
     /// </summary>
-    public class ARPanelContents : DataPanelContents
+    public sealed class ARPanelContents : DataPanelContents
     {
         public FrameWidget Frame { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
@@ -18,7 +18,7 @@ namespace Iviz.App
         //public NumberInputFieldWidget MarkerSize { get; private set; }
         public ToggleWidget MarkerHorizontal { get; private set; }
         public SliderWidget MarkerAngle { get; private set; }
-        public InputFieldWidget MarkerFrame { get; private set; }
+        public InputFieldWithHintsWidget MarkerFrame { get; private set; }
         public Vector3SliderWidget MarkerOffset { get; private set; }
 
         //public ToggleWidget PublishHead { get; private set; }
@@ -40,7 +40,7 @@ namespace Iviz.App
             SearchMarker = p.AddToggle("Enable Marker Detection");
             MarkerHorizontal = p.AddToggle("Is Marker Horizontal");
             MarkerAngle = p.AddSlider("Marker Angle").SetMinValue(0).SetMaxValue(7*45).SetNumberOfSteps(7);
-            MarkerFrame = p.AddInputField("Marker Follows TF Frame").SetPlaceholder("(none)");
+            MarkerFrame = p.AddInputFieldWithHints("Marker Follows TF Frame").SetPlaceholder("(none)");
             MarkerOffset = p.AddVector3Slider("Offset From TF Frame");
             //MarkerSize = p.AddNumberInputField("Size (m)");
             //PublishHead = p.AddToggle("Publish Camera as PoseStamped");

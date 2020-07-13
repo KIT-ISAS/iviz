@@ -45,7 +45,7 @@ namespace Iviz.App.Listeners
         public void Cleanup()
         {
             children.ForEach(x => x.Cleanup());
-            children.ForEach(Destroy);
+            children.ForEach(x => Destroy(x.gameObject));
             children.Clear();
         }
     }

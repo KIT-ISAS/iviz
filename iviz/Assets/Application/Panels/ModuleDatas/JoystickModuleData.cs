@@ -56,6 +56,7 @@ namespace Iviz.App
 
             panel.MaxSpeed.Value = controller.MaxSpeed;
             panel.AttachToFrame.Value = controller.AttachToFrame;
+            panel.AttachToFrame.Hints = TFListener.FramesForHints;
             panel.XIsFront.Value = controller.XIsFront;
 
             panel.MaxSpeed.Interactable = controller.PublishTwist;
@@ -83,7 +84,7 @@ namespace Iviz.App
             {
                 controller.MaxSpeed = f;
             };
-            panel.AttachToFrame.ValueChanged += f =>
+            panel.AttachToFrame.EndEdit += f =>
             {
                 controller.AttachToFrame = f;
             };

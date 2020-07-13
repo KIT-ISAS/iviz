@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class TFDialogContents : MonoBehaviour, IDialogPanelContents
+    public sealed class TFDialogContents : MonoBehaviour, IDialogPanelContents
     {
         [SerializeField] TrashButtonWidget close = null;
         [SerializeField] TFLog tfLog = null;

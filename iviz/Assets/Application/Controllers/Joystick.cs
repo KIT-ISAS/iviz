@@ -9,7 +9,7 @@ namespace Iviz.App
         bool IsPointerOnGui(in Vector2 pointerPosition);
     }
 
-    public class Joystick : MonoBehaviour, IBlocksPointer
+    public sealed class Joystick : MonoBehaviour, IBlocksPointer
     {
         [SerializeField] FixedJoystick left = null;
         [SerializeField] FixedJoystick right = null;

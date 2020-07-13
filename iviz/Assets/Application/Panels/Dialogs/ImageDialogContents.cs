@@ -5,7 +5,7 @@ using System;
 
 namespace Iviz.App
 {
-    public class ImageDialogContents : MonoBehaviour, IDialogPanelContents
+    public sealed class ImageDialogContents : MonoBehaviour, IDialogPanelContents
     {
         [SerializeField] Text text = null;
         [SerializeField] RawImage image = null;

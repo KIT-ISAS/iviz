@@ -25,7 +25,7 @@ namespace Iviz.App.Listeners
         [DataMember] public SerializableVector3 Offset { get; set; } = Vector3.zero;
     }
 
-    public class GridController : IController
+    public sealed class GridController : IController
     {
         readonly DisplayClickableNode node;
         readonly ReflectionProbe reflectionProbe;
