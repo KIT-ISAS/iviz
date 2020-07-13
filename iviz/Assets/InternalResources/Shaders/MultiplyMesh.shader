@@ -8,11 +8,14 @@ Shader "iviz/MultiplyMesh"
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
-        LOD 200
+        Tags {"RenderType"="Opaque" }
+        //Tags {"Queue" = "Transparent" "RenderType"="Transparent"  }
+		//Blend SrcAlpha OneMinusSrcAlpha
+		LOD 200
 
         CGPROGRAM
         #pragma surface surf Standard addshadow fullforwardshadows vertex:vert
+        //#pragma surface surf Standard vertex:vert alpha
         #pragma instancing_options procedural:setup 
 		#pragma multi_compile _ USE_TEXTURE USE_TEXTURE_SCALE
         #pragma multi_compile_instancing
@@ -91,6 +94,7 @@ Shader "iviz/MultiplyMesh"
             o.Albedo = IN.color;
             o.Metallic = _Metallic;
             o.Smoothness = _Glossiness;
+            //o.Alpha = 0.4f;
         }
         ENDCG
     }

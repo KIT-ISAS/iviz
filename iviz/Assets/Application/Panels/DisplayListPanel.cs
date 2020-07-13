@@ -219,6 +219,11 @@ namespace Iviz.App
             TFListener.GuiManager.Canvases.Add(dialogPanelManager.GetComponentInParent<Canvas>());
             TFListener.GuiManager.GuiPointerBlockers.Add(Joystick);
 
+            TFListener.GuiManager.Raycasters.Add(GetComponentInParent<GraphicRaycaster>());
+            TFListener.GuiManager.Raycasters.Add(dataPanelManager.GetComponentInParent<GraphicRaycaster>());
+            TFListener.GuiManager.Raycasters.Add(dialogPanelManager.GetComponentInParent<GraphicRaycaster>());
+
+            
             GameThread.LateEverySecond += UpdateBottomText;
             GameThread.EveryFrame += UpdateFpsCounter;
             UpdateBottomText();

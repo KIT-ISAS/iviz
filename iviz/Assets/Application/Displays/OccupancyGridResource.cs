@@ -20,6 +20,7 @@ namespace Iviz.Displays
         protected override IDisplay Display => resource;
 
         [SerializeField] int numCellsX;
+
         public int NumCellsX
         {
             get => numCellsX;
@@ -29,16 +30,19 @@ namespace Iviz.Displays
                 {
                     return;
                 }
+
                 if (value < 0 || value > MaxSize)
                 {
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }
+
                 numCellsX = value;
                 UpdateSize();
             }
         }
 
         [SerializeField] int numCellsY;
+
         public int NumCellsY
         {
             get => numCellsY;
@@ -48,16 +52,19 @@ namespace Iviz.Displays
                 {
                     return;
                 }
+
                 if (value < 0 || value > MaxSize)
                 {
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }
+
                 numCellsY = value;
                 UpdateSize();
             }
         }
 
         [SerializeField] float cellSize;
+
         public float CellSize
         {
             get => cellSize;
@@ -67,6 +74,7 @@ namespace Iviz.Displays
                 {
                     return;
                 }
+
                 cellSize = value;
                 resource.Scale = value * Vector3.one;
                 resource.Offset = new Vector3(0, cellSize / 2, 0);
@@ -98,12 +106,13 @@ namespace Iviz.Displays
             set => resource.Colormap = value;
         }
 
-        public Vector2 IntensityBounds
+        public bool FlipMinMax
         {
-            get => resource.IntensityBounds;
-            set => resource.IntensityBounds = value;
+            get => resource.FlipMinMax;
+            set => resource.FlipMinMax = value;
         }
-        
+
+
         void Awake()
         {
             resource = ResourcePool.GetOrCreate<MeshListResource>(Resource.Displays.MeshList, transform);
@@ -115,7 +124,6 @@ namespace Iviz.Displays
             UpdateSize();
 
             Colormap = Resource.ColormapId.gray;
-            IntensityBounds = new Vector2(0, 1);
 
             GameObject cubeObject = Resource.Displays.Cube.Object;
             resource.Mesh = cubeObject.GetComponent<MeshFilter>().sharedMesh;
@@ -151,6 +159,7 @@ namespace Iviz.Displays
         }
 
         volatile bool isProcessing;
+
         public void SetOccupancy(sbyte[] values, Rect? tbounds = null)
         {
             if (isProcessing)
@@ -159,44 +168,39 @@ namespace Iviz.Displays
             }
             isProcessing = true;
             Task.Run(() =>
-            {
-                Rect bounds = tbounds ?? new Rect(0, numCellsX, 0, numCellsY);
-
-                pointBuffer.Clear();
-
-                //float offsetX = (numCellsX_ - 1) / 2f;
-                //float offsetY = (numCellsY_ - 1) / 2f;
-
-                //float4 add = new float4(-offsetX, -offsetY, 0, 0);
-                float4 mul = new float4(cellSize, cellSize, 0, 0.01f);
-
-                //float4 addmul = add * mul;
-
-                for (int v = bounds.ymin; v < bounds.ymax; v++)
                 {
-                    int i = v * numCellsX + bounds.xmin;
-                    for (int u = bounds.xmin; u < bounds.xmax; u++, i++)
+                    Rect bounds = tbounds ?? new Rect(0, numCellsX, 0, numCellsY);
+
+                    pointBuffer.Clear();
+
+                    float4 mul = new float4(cellSize, cellSize, 0, 0.01f);
+
+                    for (int v = bounds.ymin; v < bounds.ymax; v++)
                     {
-                        sbyte val = values[i];
-                        if (val <= 0)
+                        int i = v * numCellsX + bounds.xmin;
+                        for (int u = bounds.xmin; u < bounds.xmax; u++, i++)
                         {
-                            continue;
-                        }
-                        float4 p = new float4(u, v, 0, val);
-                        //float4 pc = p * mul + addmul;
-                        float4 pc = p * mul;
-                        pointBuffer.Add(new PointWithColor(pc.Ros2Unity()));
-                    }
-                }
-                isProcessing = false;
+                            sbyte val = values[i];
+                            if (val <= 0)
+                            {
+                                continue;
+                            }
 
-                GameThread.RunOnce(() =>
-                {
-                    resource.PointsWithColor = pointBuffer;
-                    resource.IntensityBounds = new Vector2(0, 1);
-                });
-            });
+                            float4 p = new float4(u, v, 0, val);
+                            float4 pc = p * mul;
+                            pointBuffer.Add(new PointWithColor(pc.Ros2Unity()));
+                        }
+                    }
+                    GameThread.RunOnce(() =>
+                    {
+                        resource.PointsWithColor = pointBuffer;
+                        resource.IntensityBounds = new Vector2(0, 1);
+                        isProcessing = false;
+                    });
+                }
+            );
         }
     }
 
+//}
 }

@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Iviz.Displays;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 using UnityEngine.XR.ARFoundation;
 // ReSharper disable ConditionIsAlwaysTrueOrFalse
 // ReSharper disable HeuristicUnreachableCode
@@ -16,6 +18,8 @@ namespace Iviz.App
 {
     public interface IDraggable
     {
+        event Action PointerDown;
+        event Action PointerUp;
         event InteractiveControl.MovedAction Moved;
         bool Visible { get; set; }
         void OnPointerMove(in Vector2 cursorPos);
@@ -124,6 +128,7 @@ namespace Iviz.App
         }
         
         public HashSet<Canvas> Canvases { get; } = new HashSet<Canvas>();
+        public HashSet<GraphicRaycaster> Raycasters { get; } = new HashSet<GraphicRaycaster>();
 
         public HashSet<IBlocksPointer> GuiPointerBlockers { get; } = new HashSet<IBlocksPointer>();
 
@@ -206,6 +211,8 @@ namespace Iviz.App
         float tmpAltDistance;
         void UpdateEvenIfInactive()
         {
+            bool prevPointerDown = PointerDown;
+
             if (IsMobile)
             {
                 PointerDown = Input.touchCount == 1;
@@ -222,8 +229,15 @@ namespace Iviz.App
                 if (PointerDown || PointerAltDown)
                 {
                     PointerPosition = Input.GetTouch(0).position;
+                    
+                    /*
                     PointerOnGui = Canvases.Any(IsPointerOnCanvas)
                                    || GuiPointerBlockers.Any(x => x.IsPointerOnGui(PointerPosition));
+                                   */
+                    if (!prevPointerDown)
+                    {
+                        PointerOnGui = IsPointerOnGui();
+                    }                    
                 }
             }
             else
@@ -233,8 +247,21 @@ namespace Iviz.App
                 if (PointerDown)
                 {
                     PointerPosition = Input.mousePosition;
+
+                    if (!prevPointerDown)
+                    {
+                        PointerOnGui = IsPointerOnGui();
+                    }
+
+                    
+                    /*
                     PointerOnGui = Canvases.Any(IsPointerOnCanvas)
                                    || GuiPointerBlockers.Any(x => x.IsPointerOnGui(PointerPosition));
+                                   */
+                }
+                else
+                {
+                    PointerOnGui = false;
                 }
             }
 
@@ -244,6 +271,14 @@ namespace Iviz.App
             }
 
             DraggedObject?.OnPointerMove(PointerPosition);
+        }
+
+        bool IsPointerOnGui()
+        {
+            var eventSystem = EventSystem.current;
+            List<RaycastResult> results = new List<RaycastResult>();
+            eventSystem.RaycastAll(new PointerEventData(eventSystem) {position = PointerPosition},  results);
+            return results.Any(x => x.gameObject.layer == 5);            
         }
         
         void Update()
@@ -302,6 +337,13 @@ namespace Iviz.App
             return canvas.enabled && canvas.gameObject.activeInHierarchy &&
                    RectTransformUtility.RectangleContainsScreenPoint(canvas.transform as RectTransform, PointerPosition,
                        MainCamera);
+        }
+        
+        bool IsPointerOnRaycaster(GraphicRaycaster raycaster)
+        {
+            List<RaycastResult> results = new List<RaycastResult>();
+            raycaster.Raycast(new PointerEventData(EventSystem.current) { position = PointerPosition}, results);
+            return results.Count != 0;
         }
 
         void StartOrbiting()

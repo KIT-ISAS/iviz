@@ -103,6 +103,7 @@ namespace Iviz.App.Listeners
         }
 
         bool forceVisible;
+
         public bool ForceVisible
         {
             get => forceVisible;
@@ -118,6 +119,7 @@ namespace Iviz.App.Listeners
         public bool ForceInvisible { get; set; }
 
         bool visible;
+
         public bool Visible
         {
             get => visible;
@@ -131,6 +133,7 @@ namespace Iviz.App.Listeners
         }
 
         bool anchorVisible;
+
         bool AnchorVisible
         {
             get => anchorVisible;
@@ -142,6 +145,7 @@ namespace Iviz.App.Listeners
         }
 
         bool labelVisible;
+
         public bool LabelVisible
         {
             get => labelVisible;
@@ -175,6 +179,7 @@ namespace Iviz.App.Listeners
         }
 
         bool trailVisible;
+
         public bool TrailVisible
         {
             get => trailVisible;
@@ -194,6 +199,7 @@ namespace Iviz.App.Listeners
         }
 
         bool acceptsParents = true;
+
         public bool AcceptsParents
         {
             get => acceptsParents;
@@ -395,12 +401,14 @@ namespace Iviz.App.Listeners
 
         public void UpdateAnchor(AnchorLine.FindAnchorFn findAnchorFn, bool forceRebuild = false)
         {
+            //Debug.Log("lel");
             if (findAnchorFn is null)
             {
-                AnchorVisible = false;
+                AnchorVisible = forceRebuild;
                 return;
             }
 
+            //Debug.Log("was here");
             AnchorVisible = true;
             anchor.FindAnchor = findAnchorFn;
             anchor.SetPosition(transform.position, forceRebuild);

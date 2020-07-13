@@ -88,7 +88,7 @@ namespace Iviz.App.Listeners
                 config.FlipColors = value;
                 foreach (var elem in grids)
                 {
-                    elem.IntensityBounds = value ? new Vector2(1, 0) : new Vector2(0, 1);
+                    elem.FlipMinMax = value;
                 }
             }
         }

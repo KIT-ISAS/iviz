@@ -52,11 +52,15 @@ namespace Iviz.App
             //string urdfFile = projectRoot + "/robot_model/mp_500.urdf.xml";
             //string materialsRoot = projectRoot + "/unity_materials/";
 
-            string projectRoot = packageRoot + "e2_urdf_model";
-            string urdfFile = projectRoot + "/urdf/e2.urdf.xml";
-            string materialsRoot = projectRoot + "/unity_materials/";
+            //string projectRoot = packageRoot + "e2_urdf_model";
+            //string urdfFile = projectRoot + "/urdf/e2.urdf.xml";
+            //string materialsRoot = projectRoot + "/unity_materials/";
             
+            string projectRoot = packageRoot + "path_generation";
+            string urdfFile = projectRoot + "/urdf/car.urdf.xml";
+            string materialsRoot = projectRoot + "/unity_materials/";
 
+            
             AssetDatabase.CreateFolder(projectRoot, "unity_materials");
 
             Robot = CreateRobot(urdfFile);

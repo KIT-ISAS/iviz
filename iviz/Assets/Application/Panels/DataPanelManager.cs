@@ -112,7 +112,7 @@ namespace Iviz.App
             }
 
             SelectedModuleData.Panel.Active = false;
-            //SelectedDisplayData.CleanupPanel();
+            SelectedModuleData.CleanupPanel();
             SelectedModuleData.Panel.ClearSubscribers();
             SelectedModuleData = null;
             Active = false;

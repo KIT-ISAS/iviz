@@ -433,7 +433,8 @@ namespace Iviz.Resources
                     "edu.fraunhofer.iosb.crayler",
                     "edu.kit.h2t.armar6",
                     "edu.kit.ipr.gammabot",
-                    "edu.fraunhofer.iosb.e2"
+                    "edu.fraunhofer.iosb.e2",
+                        "test_car"
                 }
                 );
             public ReadOnlyDictionary<string, GameObjectInfo> Objects { get; }

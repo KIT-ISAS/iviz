@@ -67,7 +67,7 @@ namespace Iviz.Displays
             {
                 intensityBounds = value;
                 float intensitySpan = intensityBounds.y - intensityBounds.x;
-
+                
                 if (Mathf.Approximately(intensitySpan,0))
                 {
                     material.SetFloat(PropIntensityCoeff, 1);

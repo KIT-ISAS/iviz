@@ -8,17 +8,10 @@ namespace Iviz.Displays
 {
     public sealed class InteractiveControl : MonoBehaviour
     {
-        public enum Orientation
-        {
-            Inherit,
-            Fixed,
-            ViewFacing
-        }
-
         public enum InteractionModeType
         {
             Disabled,
-            
+
             MoveAxisX,
             MovePlaneYZ,
             RotateAxisX,
@@ -49,6 +42,8 @@ namespace Iviz.Displays
         public delegate void MovedAction(in Pose pose);
 
         public event MovedAction Moved;
+        public event Action PointerUp;
+        public event Action PointerDown;
 
         Transform targetTransform;
 
@@ -65,8 +60,13 @@ namespace Iviz.Displays
             }
         }
 
-        bool pointsToCamera;
+        public bool Visible
+        {
+            get => gameObject.activeSelf;
+            set => gameObject.SetActive(value);
+        }
 
+        bool pointsToCamera;
         public bool PointsToCamera
         {
             get => pointsToCamera;
@@ -101,7 +101,6 @@ namespace Iviz.Displays
         }
 
         bool keepAbsoluteRotation;
-
         public bool KeepAbsoluteRotation
         {
             get => keepAbsoluteRotation;
@@ -130,7 +129,6 @@ namespace Iviz.Displays
         }
 
         bool cameraPivotIsParent;
-
         public bool CameraPivotIsParent
         {
             get => cameraPivotIsParent;
@@ -145,7 +143,6 @@ namespace Iviz.Displays
         }
 
         InteractionModeType interactionMode;
-
         public InteractionModeType InteractionMode
         {
             get => interactionMode;
@@ -223,11 +220,6 @@ namespace Iviz.Displays
             }
         }
 
-        void OnMoved(in Pose pose)
-        {
-            //Debug.Log(pose);
-            Moved?.Invoke(pose);
-        }
 
         public void Stop()
         {
@@ -240,9 +232,17 @@ namespace Iviz.Displays
             allResources = new[]
                 {arrowPX, arrowMX, arrowPY, arrowMY, arrowPZ, arrowMZ, ringX, ringY, ringZ, ringXPlane, ringZPlane};
 
+
+            void OnMoved(in Pose pose) => Moved?.Invoke(pose);
+            void OnPointerUp() => PointerUp?.Invoke();
+            void OnPointerDown() => PointerDown?.Invoke();
+
             foreach (MeshMarkerResource resource in allResources)
             {
-                resource.GetComponent<IDraggable>().Moved += OnMoved;
+                var draggable = resource.GetComponent<IDraggable>();
+                draggable.Moved += OnMoved;
+                draggable.PointerUp += OnPointerUp;
+                draggable.PointerDown += OnPointerDown;
             }
 
             InteractionMode = InteractionModeType.MovePlaneYZ;

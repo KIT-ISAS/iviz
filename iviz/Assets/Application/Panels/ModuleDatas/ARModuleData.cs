@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Iviz.App.Listeners;
+using Iviz.Displays;
 using Iviz.Resources;
 using UnityEngine;
 
@@ -21,6 +22,8 @@ namespace Iviz.App
         public override IConfiguration Configuration => controller.Config;
         public override IController Controller => controller;
 
+        bool isDraggingControl;
+        
         public ARModuleData(ModuleDataConstructor constructor) :
             base(constructor.ModuleList, constructor.Topic, constructor.Type)
         {
@@ -49,7 +52,7 @@ namespace Iviz.App
             panel.HideButton.State = controller.Visible;
             panel.Frame.Owner = controller;
             panel.WorldScale.Value = controller.WorldScale;
-            panel.WorldOffset.Value = controller.WorldOffset;
+            panel.WorldOffset.Mean = controller.WorldOffset;
             panel.WorldAngle.Value = controller.WorldAngle;
 
             panel.SearchMarker.Value = controller.UseMarker;
@@ -64,6 +67,8 @@ namespace Iviz.App
             
             panel.MarkerOffset.Value = controller.MarkerOffset;
 
+            TFListener.RootControl.PointerUp += RootControlOnPointerUp;
+            
             /*
             panel.HeadSender.Set(controller.RosSenderHead);
             panel.MarkersSender.Set(controller.RosSenderMarkers);
@@ -146,6 +151,28 @@ namespace Iviz.App
                 panel.HideButton.State = controller.Visible;
                 UpdateModuleButton();
             };
+        }
+
+        void RootControlOnPointerUp()
+        {
+            var pose = TFListener.RelativePose(TFListener.RootControl.transform.AsPose());
+            controller.WorldOffset = pose.position.Unity2Ros();
+
+            float angle = pose.rotation.eulerAngles.y;
+            if (angle > 180)
+            {
+                angle -= 360;
+            }
+            controller.WorldAngle = angle; 
+            
+            panel.WorldOffset.Mean = controller.WorldOffset;
+            panel.WorldAngle.Value = controller.WorldAngle;
+        }
+
+        public override void CleanupPanel()
+        {
+            base.CleanupPanel();
+            TFListener.RootControl.PointerUp -= RootControlOnPointerUp;
         }
 
         void CheckInteractable()

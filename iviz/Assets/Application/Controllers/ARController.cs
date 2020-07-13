@@ -4,6 +4,7 @@ using Iviz.RoslibSharp;
 using System.Runtime.Serialization;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Iviz.Resources;
 using UnityEngine.XR.ARFoundation;
 using Iviz.Displays;
@@ -135,15 +136,8 @@ namespace Iviz.App.Listeners
                 {
                     module.OnARModeChanged(value);
                 }
-
-                if (value)
-                {
-                    UpdateAnchors();
-                }
-                else
-                {
-                    HideAnchors();
-                }
+                
+                TFListener.MapFrame.UpdateAnchor(null, value);
             }
         }
 
@@ -270,6 +264,7 @@ namespace Iviz.App.Listeners
                     WorldOffset.Ros2Unity(),
                     Quaternion.AngleAxis(WorldAngle, Vector3.up)
                     );
+                //Debug.Log("setting " + WorldOffset.Ros2Unity());
                 //offsetPose.position += offsetPose.rotation * WorldOffset.Ros2Unity();
                 return RegisteredPose.Multiply(offsetPose);
             }
@@ -319,11 +314,12 @@ namespace Iviz.App.Listeners
         void OnPlanesChanged(ARPlanesChangedEventArgs obj)
         {
             forceAnchorRebuild = true;
+            //Debug.Log("force rebuild");
         }
 
         void HideAnchors()
         {
-            TFListener.RootFrame.UpdateAnchor(null);
+            TFListener.MapFrame.UpdateAnchor(null);
         }
 
         void UpdateAnchors()
@@ -351,21 +347,27 @@ namespace Iviz.App.Listeners
             //{
             //    frame.UpdateAnchor(FindAnchorFn, forceAnchorRebuild);    
             //}
-            TFListener.RootFrame.UpdateAnchor(FindAnchorFn, forceAnchorRebuild);
+            
+            TFListener.MapFrame.UpdateAnchor(FindAnchorFn, forceAnchorRebuild);
             forceAnchorRebuild = false;
         }
 
         void UpdateLights(ARLightEstimationData lightEstimation)
         {
+            ARLight.intensity = 1;
+            /*
             if (lightEstimation.averageBrightness.HasValue)
             {
                 ARLight.intensity = lightEstimation.averageBrightness.Value;
             }
+            */
 
+            /*
             if (lightEstimation.averageColorTemperature.HasValue)
             {
                 ARLight.colorTemperature = lightEstimation.averageColorTemperature.Value;
-            }            
+            } 
+            */           
             
             /*
             if (lightEstimation.colorCorrection.HasValue)

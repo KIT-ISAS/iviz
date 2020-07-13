@@ -73,11 +73,10 @@ namespace Iviz.App
             Panel.ClearSubscribers();
             SetupPanel();
         }
-        /*
+        
         public virtual void CleanupPanel()
         {
         }
-        */
 
         public virtual void UpdatePanel()
         {

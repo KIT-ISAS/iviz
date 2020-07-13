@@ -8,7 +8,7 @@ using UnityEngine.UIElements;
 
 namespace Iviz.Displays
 {
-    public sealed class DraggableTranslation : MonoBehaviour, IPointerDownHandler, IDraggable
+    public sealed class DraggableTranslation : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDraggable
     {
         public Vector3 line;
         public Transform TargetTransform { get; set; }
@@ -17,6 +17,8 @@ namespace Iviz.Displays
         Vector3 startOffset;
         
         public event InteractiveControl.MovedAction Moved;
+        public event Action PointerDown;
+        public event Action PointerUp;
 
         public bool Visible
         {
@@ -41,6 +43,12 @@ namespace Iviz.Displays
         public void OnPointerDown(PointerEventData eventData)
         {
             TFListener.GuiManager.DraggedObject = this;
+            PointerDown?.Invoke();
+        }
+        
+        public void OnPointerUp(PointerEventData eventData)
+        {
+            PointerUp?.Invoke();
         }
 
         public void OnPointerMove(in Vector2 cursorPos)

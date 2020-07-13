@@ -8,14 +8,18 @@ using UnityEngine.UIElements;
 
 namespace Iviz.Displays
 {
-    public sealed class DraggableRotation : MonoBehaviour, IPointerDownHandler, IDraggable
+    public sealed class DraggableRotation : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDraggable
     {
         public Vector3 normal;
         public Transform TargetTransform { get; set; }
 
         bool needsStart;
         Vector3 startIntersection;
-        
+
+        public event InteractiveControl.MovedAction Moved;
+        public event Action PointerDown;
+        public event Action PointerUp;
+
         static (Vector3, float) PlaneIntersection(in Ray ray, in Ray other)
         {
             float t = Vector3.Dot(other.origin - ray.origin, ray.direction) / Vector3.Dot(-other.direction, ray.direction);
@@ -24,12 +28,12 @@ namespace Iviz.Displays
             return (p, t);
         }
 
+        
         public void OnPointerDown(PointerEventData eventData)
         {
             TFListener.GuiManager.DraggedObject = this;
+            PointerDown?.Invoke();
         }
-
-        public event InteractiveControl.MovedAction Moved;
 
         public bool Visible
         {
@@ -89,6 +93,11 @@ namespace Iviz.Displays
 
         public void OnEndDragging()
         {
+        }
+
+        public void OnPointerUp(PointerEventData eventData)
+        {
+            PointerUp?.Invoke();
         }
     }
 }

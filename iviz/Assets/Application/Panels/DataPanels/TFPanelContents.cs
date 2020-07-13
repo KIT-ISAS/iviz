@@ -5,8 +5,8 @@
     /// </summary>
     public sealed class TFPanelContents : ListenerPanelContents
     {
-        public ListenerWidget ListenerStatic { get; protected set; }
-        public FrameWidget Frame { get; protected set; }
+        public ListenerWidget ListenerStatic { get; private set; }
+        public FrameWidget Frame { get; private set; }
         public ToggleWidget ShowAxes { get; private set; }
         public ToggleWidget ShowFrameLabels { get; private set; }
         public SliderWidget FrameSize { get; private set; }

@@ -101,6 +101,11 @@ namespace Iviz.App.Listeners
                 {
                     frame.Visible = value;
                 }
+
+                if (!(rootControl is null))
+                {
+                    rootControl.Visible = value;
+                }
             }
         }
 
