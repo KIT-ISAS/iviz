@@ -107,12 +107,23 @@ namespace Iviz.App.Listeners
         public override void Stop()
         {
             base.Stop();
+            DestroyAllMarkers();
+        }
 
+        public override void Reset()
+        {
+            base.Reset();
+            DestroyAllMarkers();
+        }
+        
+        void DestroyAllMarkers()
+        {
             foreach (MarkerObject marker in markers.Values)
             {
                 marker.Stop();
                 UnityEngine.Object.Destroy(marker.gameObject);
             }
+
             markers.Clear();
         }
 

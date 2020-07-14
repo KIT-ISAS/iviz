@@ -294,8 +294,11 @@ namespace Iviz.App.Listeners
             }
         }
 
-        public void ForceClearFrames()
+        public override void Reset()
         {
+            base.Reset();
+            ListenerStatic?.Reset();
+            
             bool prevShowAllFrames = ShowAllFrames;
             ShowAllFrames = false;
 
@@ -306,12 +309,6 @@ namespace Iviz.App.Listeners
             }
 
             ShowAllFrames = prevShowAllFrames;
-
-            // unsubscribe and resubscribe
-            ListenerStatic.Pause();
-            ListenerStatic.Unpause();
-            Listener.Pause();
-            Listener.Unpause();
         }
 
         TFFrame Add(TFFrame t)

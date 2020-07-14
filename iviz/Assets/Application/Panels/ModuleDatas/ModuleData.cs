@@ -104,6 +104,11 @@ namespace Iviz.App
         {
             DataPanelManager.HidePanelFor(this);
         }
+
+        public void ResetController()
+        {
+            Controller.Reset();
+        }
         
         public static ModuleData CreateFromResource(ModuleDataConstructor c)
         {

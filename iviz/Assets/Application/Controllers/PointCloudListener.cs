@@ -208,16 +208,22 @@ namespace Iviz.App.Listeners
             }
         }
 
+        bool isProcessing;
         void Handler(PointCloud2 msg)
         {
-            node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
-            //node.AttachTo(msg.Header.FrameId);
+            if (isProcessing)
+            {
+                return;
+            }
+
+            isProcessing = true;
+            node.AttachTo(msg.Header.FrameId, msg.Header.Stamp); 
 
             if (msg.PointStep < 3 * 4 ||
                 msg.RowStep < msg.PointStep * msg.Width ||
                 msg.Data.Length < msg.RowStep * msg.Height)
             {
-                Logger.Info("PointCloudListener: Invalid point cloud dimensions!");
+                Logger.Info($"{this}: Invalid point cloud dimensions!");
                 return;
             }
 
@@ -239,7 +245,7 @@ namespace Iviz.App.Listeners
                     !fieldOffsets.TryGetValue("y", out PointField yField) || yField.Datatype != PointField.FLOAT32 ||
                     !fieldOffsets.TryGetValue("z", out PointField zField) || zField.Datatype != PointField.FLOAT32)
                 {
-                    Logger.Info("PointCloudListener: Unsupported point cloud! Expected XYZ as floats.");
+                    Logger.Info($"{this}: Unsupported point cloud! Expected XYZ as floats.");
                     return;
                 }
                 int xOffset = (int)xField.Offset;
@@ -254,7 +260,7 @@ namespace Iviz.App.Listeners
                 int iSize = FieldSizeFromType(iField.Datatype);
                 if (iSize == -1 || msg.PointStep < iOffset + iSize)
                 {
-                    Logger.Info("PointCloudListener: Invalid or unsupported intensity field type!");
+                    Logger.Info($"{this}: Invalid or unsupported intensity field type!");
                     return;
                 }
 
@@ -264,7 +270,7 @@ namespace Iviz.App.Listeners
 
                 GameThread.RunOnce(() =>
                 {
-                    if (pointCloud == null)
+                    if (pointCloud is null)
                     {
                         return;
                     }
@@ -276,6 +282,8 @@ namespace Iviz.App.Listeners
                     {
                         pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
                     }
+
+                    isProcessing = false;
                 });
             });
         }
@@ -346,23 +354,20 @@ namespace Iviz.App.Listeners
                 }
             }
 
-            if (intensityFn != null)
+            for (int v = (int)msg.Height; v > 0; v--, heightOffset += rowStep)
             {
-                for (int v = (int)msg.Height; v > 0; v--, heightOffset += rowStep)
+                int rowOffset = heightOffset;
+                for (int u = (int)msg.Width; u > 0; u--, rowOffset += pointStep, pointOffset++)
                 {
-                    int rowOffset = heightOffset;
-                    for (int u = (int)msg.Width; u > 0; u--, rowOffset += pointStep, pointOffset++)
-                    {
-                        Vector3 xyz = new Vector3(
-                            BitConverter.ToSingle(msg.Data, rowOffset + xOffset),
-                            BitConverter.ToSingle(msg.Data, rowOffset + yOffset),
-                            BitConverter.ToSingle(msg.Data, rowOffset + zOffset)
-                        );
-                        pointBuffer[pointOffset] = new PointWithColor(
-                            new Vector3(-xyz.y, xyz.z, xyz.x),
-                            intensityFn(msg.Data, rowOffset + iOffset)
-                        );
-                    }
+                    Vector3 xyz = new Vector3(
+                        BitConverter.ToSingle(msg.Data, rowOffset + xOffset),
+                        BitConverter.ToSingle(msg.Data, rowOffset + yOffset),
+                        BitConverter.ToSingle(msg.Data, rowOffset + zOffset)
+                    );
+                    pointBuffer[pointOffset] = new PointWithColor(
+                        new Vector3(-xyz.y, xyz.z, xyz.x),
+                        intensityFn(msg.Data, rowOffset + iOffset)
+                    );
                 }
             }
         }

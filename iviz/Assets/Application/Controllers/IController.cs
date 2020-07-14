@@ -5,5 +5,6 @@ namespace Iviz.App.Listeners
     {
         ModuleData ModuleData { get; }
         void Stop();
+        void Reset();
     }
 }

@@ -36,7 +36,7 @@ namespace Iviz.App
             };
             panel.ResetAll.Clicked += () =>
             {
-                TFListener.Instance.ForceClearFrames();
+                ModuleListPanel.ResetAllModules();
             };
         }
 

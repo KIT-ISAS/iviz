@@ -63,6 +63,11 @@ namespace Iviz.Displays
             get => resource.Tint;
             set => resource.Tint = value;
         }
+
+        public void Reset()
+        {
+            resource.Visible = false;            
+        }
         
         public void Set(float angle, Vector3 axis, float scale = 0.3f)
         {

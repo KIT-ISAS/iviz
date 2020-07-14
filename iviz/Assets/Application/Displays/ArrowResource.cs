@@ -48,5 +48,10 @@ namespace Iviz.Displays
 
             mTransform.localRotation = m.rotation;
         }
+
+        public void Reset()
+        {
+            Set(Vector3.zero, Vector3.zero);
+        }
     }
 }

@@ -399,6 +399,14 @@ namespace Iviz.App
             }
         }
 
+        public void ResetAllModules()
+        {
+            foreach (ModuleData m in moduleDatas)
+            {
+                m.ResetController();
+            }
+        }
+        
         public ModuleData CreateModule(Resource.Module resource, string topic = "", string type = "", IConfiguration configuration = null)
         {
             ModuleDataConstructor constructor =

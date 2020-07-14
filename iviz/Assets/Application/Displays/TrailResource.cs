@@ -36,7 +36,9 @@ namespace Iviz.Displays
                 }
 
                 timeWindowInMs = value;
-                ResetMeasurements();
+                totalMeasurements = timeWindowInMs * MeasurementsPerSecond / 1000;
+                Reset();
+                
             }
         }
 
@@ -62,14 +64,6 @@ namespace Iviz.Displays
 
             transform.parent = TFListener.UnityFrame?.transform;
         }
-
-        void ResetMeasurements()
-        {
-            measurements.Clear();
-            startOffset = 0;
-            totalMeasurements = timeWindowInMs * MeasurementsPerSecond / 1000;
-            lines?.Reserve(totalMeasurements);
-        }
         
         public void SplitForRecycle()
         {
@@ -81,6 +75,13 @@ namespace Iviz.Displays
             base.Stop();
             measurements.Clear();
             DataSource = null;
+        }
+
+        public void Reset()
+        {
+            measurements.Clear();
+            startOffset = 0;            
+            lines?.Reserve(totalMeasurements);
         }
 
         float lastTick = 0;

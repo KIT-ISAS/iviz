@@ -271,5 +271,10 @@ namespace Iviz.App.Listeners
             RosSenderTwist?.Stop();
             Visible = false;
         }
+
+        public void Reset()
+        {
+            
+        }
     }
 }

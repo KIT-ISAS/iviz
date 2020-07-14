@@ -158,15 +158,11 @@ namespace Iviz.Displays
             }
         }
 
-        volatile bool isProcessing;
-
+        public bool IsProcessing { get; private set; }
+        
         public void SetOccupancy(sbyte[] values, Rect? tbounds = null)
         {
-            if (isProcessing)
-            {
-                return;
-            }
-            isProcessing = true;
+            IsProcessing = true;
             Task.Run(() =>
                 {
                     Rect bounds = tbounds ?? new Rect(0, numCellsX, 0, numCellsY);
@@ -195,7 +191,7 @@ namespace Iviz.Displays
                     {
                         resource.PointsWithColor = pointBuffer;
                         resource.IntensityBounds = new Vector2(0, 1);
-                        isProcessing = false;
+                        IsProcessing = false;
                     });
                 }
             );

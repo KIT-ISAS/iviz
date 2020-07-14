@@ -1,10 +1,8 @@
-﻿using System;
-using Iviz.App.Displays;
+﻿using Iviz.App.Displays;
 using Iviz.App.Listeners;
 using Iviz.Resources;
 using System.Collections.Generic;
 using System.Linq;
-using Iviz.Displays;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -16,18 +14,6 @@ using UnityEngine.XR.ARFoundation;
 
 namespace Iviz.App
 {
-    public interface IDraggable
-    {
-        event Action PointerDown;
-        event Action PointerUp;
-        event InteractiveControl.MovedAction Moved;
-        bool Visible { get; set; }
-        void OnPointerMove(in Vector2 cursorPos);
-        void OnStartDragging();
-        void OnEndDragging();
-        Transform TargetTransform { get; set; }
-    }
-    
     public class FlyCamera : DisplayNode
     {
         Vector2 lastPointer;
@@ -332,6 +318,7 @@ namespace Iviz.App
             }
         }
 
+        /*
         bool IsPointerOnCanvas(Canvas canvas)
         {
             return canvas.enabled && canvas.gameObject.activeInHierarchy &&
@@ -345,6 +332,7 @@ namespace Iviz.App
             raycaster.Raycast(new PointerEventData(EventSystem.current) { position = PointerPosition}, results);
             return results.Count != 0;
         }
+        */
 
         void StartOrbiting()
         {

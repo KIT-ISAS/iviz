@@ -19,6 +19,15 @@ namespace Iviz.App.Listeners
             Listener = null;
         }
 
-    }
+        public virtual void Reset()
+        {
+            Debug.Log(this + ": Resetting!");
+            Listener?.Reset();
+        }
 
+        public override string ToString()
+        {
+            return $"[{GetType().Name}:'{Listener?.Topic}']";
+        }
+    }
 }

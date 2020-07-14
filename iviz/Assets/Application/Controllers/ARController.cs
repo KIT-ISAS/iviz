@@ -23,8 +23,8 @@ namespace Iviz.App.Listeners
         [DataMember] public Resource.Module Module => Resource.Module.AR;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public float WorldScale { get; set; } = 1.0f;
-        public SerializableVector3 WorldOffset { get; set; } = Vector3.zero;
-        public float WorldAngle { get; set; } = 0;
+        /* NonSerializable */ public SerializableVector3 WorldOffset { get; set; } = Vector3.zero;
+        /* NonSerializable */ public float WorldAngle { get; set; } = 0;
         [DataMember] public bool SearchMarker { get; set; } = false;
         [DataMember] public bool MarkerHorizontal { get; set; } = true;
         [DataMember] public int MarkerAngle { get; set; } = 0;
@@ -33,9 +33,19 @@ namespace Iviz.App.Listeners
         //[DataMember] public bool PublishPose { get; set; } = false;
         //[DataMember] public bool PublishMarkers { get; set; } = false;
     }
+    
+    [DataContract]
+    public sealed class ARSessionInfo : JsonToString
+    {
+        [DataMember] public float WorldScale { get; set; } = 1.0f;
+        [DataMember] public SerializableVector3 WorldOffset { get; set; } = Vector3.zero;
+        [DataMember] public float WorldAngle { get; set; } = 0;
+    }
 
     public sealed class ARController : MonoBehaviour, IController, IHasFrame
     {
+        static ARSessionInfo savedSessionInfo;
+        
         [SerializeField] Camera ARCamera = null;
         [SerializeField] ARSessionOrigin ARSessionOrigin = null;
         [SerializeField] Light ARLight = null;
@@ -70,7 +80,7 @@ namespace Iviz.App.Listeners
             set
             {
                 Visible = value.Visible;
-                WorldOffset = value.WorldOffset;
+                //WorldOffset = value.WorldOffset;
                 WorldScale = value.WorldScale;
                 //PublishPose = value.PublishPose;
                 //PublishPlanesAsMarkers = value.PublishMarkers;
@@ -188,7 +198,7 @@ namespace Iviz.App.Listeners
         }
         */
 
-        public bool MarkerFound { get; private set; }
+        bool MarkerFound { get; set; }
 
         public bool UseMarker
         {
@@ -308,6 +318,13 @@ namespace Iviz.App.Listeners
 
             Config = new ARConfiguration();
             //Visible = true;
+
+            if (savedSessionInfo != null)
+            {
+                WorldAngle = savedSessionInfo.WorldAngle;
+                WorldOffset = savedSessionInfo.WorldOffset;
+                WorldScale = savedSessionInfo.WorldScale;
+            }
         }
 
         bool forceAnchorRebuild;
@@ -505,12 +522,23 @@ namespace Iviz.App.Listeners
 
         public void Stop()
         {
+            savedSessionInfo = new ARSessionInfo()
+            {
+                WorldAngle = WorldAngle,
+                WorldOffset = WorldOffset,
+                WorldScale = WorldScale
+            };
+            
             Visible = false;
             //RosSenderHead?.Stop();
             //RosSenderMarkers?.Stop();
 
             WorldScale = 1;
             TFRoot.SetPose(Pose.identity);
+        }
+
+        void IController.Reset()
+        {
         }
     }
 }

@@ -5,8 +5,6 @@ namespace Iviz.Displays
 {
     public sealed class ARMarkerResource : MeshMarkerResource
     {
-        //[SerializeField] MeshMarkerResource back = null;
-
         [SerializeField] float scale;
         public float Scale
         {

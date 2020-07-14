@@ -274,7 +274,7 @@ namespace Iviz.App
 
         void LoadRobotFromResource(string newResource)
         {
-            if (newResource == config.RobotResource && RobotObject != null)
+            if (newResource == config.RobotResource && !(RobotObject is null))
             {
                 return;
             }
@@ -286,7 +286,18 @@ namespace Iviz.App
 
             config.RobotResource = newResource;
 
-            RobotObject = ResourcePool.GetOrCreate(Resource.Robots.Objects[newResource], TFListener.MapFrame.transform);
+            try
+            {
+                RobotObject =
+                    ResourcePool.GetOrCreate(Resource.Robots.Objects[newResource], TFListener.MapFrame.transform);
+            }
+            catch (ResourceNotFoundException)
+            {
+                Debug.LogError("Robot: Resource '" + newResource + "' not found!");
+                
+                node.Target = null;
+            }
+
             RobotObject.name = newResource + "!";
 
             Name = Name; // update name;
@@ -401,6 +412,11 @@ namespace Iviz.App
 
             UnityEngine.Object.Destroy(carrier.gameObject);
             UnityEngine.Object.Destroy(node.gameObject);
+        }
+
+        public void Reset()
+        {
+            
         }
 
         void DisposeRobot()

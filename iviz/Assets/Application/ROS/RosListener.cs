@@ -136,6 +136,12 @@ namespace Iviz.App
         public abstract void Pause();
 
         public abstract void Unpause();
+
+        public void Reset()
+        {
+            Pause();
+            Unpause();
+        }
     }
 
     public sealed class RosListener<T> : RosListener where T : IMessage, new()

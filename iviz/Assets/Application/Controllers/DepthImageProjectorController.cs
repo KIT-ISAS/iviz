@@ -132,5 +132,9 @@ namespace Iviz.App.Listeners
             ResourcePool.Dispose(Resource.Displays.DepthImageResource, resource.gameObject);
             UnityEngine.Object.Destroy(node.gameObject);
         }
+
+        public void Reset()
+        {
+        }
     }
 }

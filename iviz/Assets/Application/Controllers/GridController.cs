@@ -226,5 +226,8 @@ namespace Iviz.App.Listeners
             UnityEngine.Object.Destroy(reflectionProbe.gameObject);
         }
 
+        public void Reset()
+        {
+        }
     }
 }

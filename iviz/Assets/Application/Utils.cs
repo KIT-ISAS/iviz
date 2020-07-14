@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Runtime.InteropServices;
 using System;
-
 using System.Collections.Generic;
 using Iviz.Msgs;
 using Iviz.Msgs.StdMsgs;
@@ -76,22 +75,27 @@ namespace Iviz
     public static class RosUtils
     {
         //----
-        public static Vector3 Unity2Ros(this Vector3 vector3)=> new Vector3(vector3.z, -vector3.x, vector3.y);
+        public static Vector3 Unity2Ros(this Vector3 vector3) => new Vector3(vector3.z, -vector3.x, vector3.y);
 
-        public static Vector3 Ros2Unity(this Vector3 vector3)=> new Vector3(-vector3.y, vector3.z, vector3.x);
+        public static Vector3 Ros2Unity(this Vector3 vector3) => new Vector3(-vector3.y, vector3.z, vector3.x);
 
-        public static Quaternion Ros2Unity(this Quaternion quaternion) => new Quaternion(quaternion.y, -quaternion.z, -quaternion.x, quaternion.w);
+        public static Quaternion Ros2Unity(this Quaternion quaternion) =>
+            new Quaternion(quaternion.y, -quaternion.z, -quaternion.x, quaternion.w);
 
-        public static Quaternion Unity2Ros(this Quaternion quaternion) => new Quaternion(-quaternion.z, quaternion.x, -quaternion.y, quaternion.w);
+        public static Quaternion Unity2Ros(this Quaternion quaternion) =>
+            new Quaternion(-quaternion.z, quaternion.x, -quaternion.y, quaternion.w);
         //----
 
         public static float4 Ros2Unity(this float4 v) => new float4(-v.y, v.z, v.x, v.w);
 
+        public static Quaternion RosRpy2Unity(this Vector3 v) =>
+            Quaternion.Euler(v.y * Mathf.Rad2Deg, -v.z * Mathf.Rad2Deg, -v.x * Mathf.Rad2Deg);
+
         static Vector3 ToUnity(this Msgs.GeometryMsgs.Vector3 p)
         {
-            return new Vector3((float)p.X, (float)p.Y, (float)p.Z);
+            return new Vector3((float) p.X, (float) p.Y, (float) p.Z);
         }
-        
+
         static Vector3 ToUnity(this Msgs.GeometryMsgs.Point32 p)
         {
             return new Vector3(p.X, p.Y, p.Z);
@@ -106,7 +110,7 @@ namespace Iviz
         {
             return p.ToUnity().Ros2Unity();
         }
-        
+
         public static Vector3 Abs(this Vector3 p)
         {
             return new Vector3(Mathf.Abs(p.x), Mathf.Abs(p.y), Mathf.Abs(p.z));
@@ -134,7 +138,7 @@ namespace Iviz
 
         static Vector3 ToUnity(this Msgs.GeometryMsgs.Point p)
         {
-            return new Vector3((float)p.X, (float)p.Y, (float)p.Z);
+            return new Vector3((float) p.X, (float) p.Y, (float) p.Z);
         }
 
         public static Vector3 Ros2Unity(this Msgs.GeometryMsgs.Point p)
@@ -207,7 +211,7 @@ namespace Iviz
 
         static Quaternion ToUnity(this Msgs.GeometryMsgs.Quaternion p)
         {
-            return new Quaternion((float)p.X, (float)p.Y, (float)p.Z, (float)p.W);
+            return new Quaternion((float) p.X, (float) p.Y, (float) p.Z, (float) p.W);
         }
 
         public static Quaternion Ros2Unity(this Msgs.GeometryMsgs.Quaternion p)
@@ -324,7 +328,7 @@ namespace Iviz
         {
             return float.IsNaN(v.X) || float.IsNaN(v.Y) || float.IsNaN(v.Z);
         }
-        
+
         public static bool HasNaN(this Msgs.GeometryMsgs.Quaternion v)
         {
             return double.IsNaN(v.X) || double.IsNaN(v.Y) || double.IsNaN(v.Z) || double.IsNaN(v.W);
@@ -339,7 +343,6 @@ namespace Iviz
         {
             return HasNaN(pose.Orientation) || HasNaN(pose.Position);
         }
-
     }
 
     public static class UnityUtils
@@ -352,6 +355,7 @@ namespace Iviz
             {
                 return true;
             }
+
             f = 0;
             return false;
         }
@@ -417,7 +421,7 @@ namespace Iviz
             return new Pose(
                 rotation: q,
                 position: q * -p.position
-                );
+            );
         }
 
         public static Pose Lerp(this Pose p, in Pose o, float t)
@@ -425,7 +429,7 @@ namespace Iviz
             return new Pose(
                 Vector3.Lerp(p.position, o.position, t),
                 Quaternion.Lerp(p.rotation, o.rotation, t)
-                );
+            );
         }
 
         public static Pose Lerp(this Transform p, in Pose o, float t)
@@ -433,7 +437,7 @@ namespace Iviz
             return new Pose(
                 Vector3.Lerp(p.position, o.position, t),
                 Quaternion.Lerp(p.rotation, o.rotation, t)
-                );
+            );
         }
 
         public static Pose LocalLerp(this Transform p, in Pose o, float t)
@@ -441,7 +445,7 @@ namespace Iviz
             return new Pose(
                 Vector3.Lerp(p.localPosition, o.position, t),
                 Quaternion.Lerp(p.localRotation, o.rotation, t)
-                );
+            );
         }
 
         public static void ForEach<T>(this IEnumerable<T> col, Action<T> action)
@@ -505,30 +509,36 @@ namespace Iviz
             {
                 propBlock = new MaterialPropertyBlock();
             }
+
             meshRenderer.GetPropertyBlock(propBlock, id);
             propBlock.SetColor(ColorPropId, color);
             meshRenderer.SetPropertyBlock(propBlock, id);
         }
 
         static readonly int EmissiveColorPropId = Shader.PropertyToID("_EmissiveColor");
+
         public static void SetPropertyEmissiveColor(this MeshRenderer meshRenderer, Color color, int id = 0)
         {
             if (propBlock == null)
             {
                 propBlock = new MaterialPropertyBlock();
             }
+
             meshRenderer.GetPropertyBlock(propBlock, id);
             propBlock.SetColor(EmissiveColorPropId, color);
             meshRenderer.SetPropertyBlock(propBlock, id);
         }
 
         static readonly int MainTexSTPropId = Shader.PropertyToID("_MainTex_ST_");
-        public static void SetPropertyMainTexST(this MeshRenderer meshRenderer, in Vector2 xy, in Vector2 wh, int id = 0)
+
+        public static void SetPropertyMainTexST(this MeshRenderer meshRenderer, in Vector2 xy, in Vector2 wh,
+            int id = 0)
         {
             if (propBlock == null)
             {
                 propBlock = new MaterialPropertyBlock();
             }
+
             meshRenderer.GetPropertyBlock(propBlock, id);
             propBlock.SetVector(MainTexSTPropId, new Vector4(wh.x, wh.y, xy.x, xy.y));
             meshRenderer.SetPropertyBlock(propBlock, id);

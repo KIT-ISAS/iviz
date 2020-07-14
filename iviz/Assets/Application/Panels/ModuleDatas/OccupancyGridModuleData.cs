@@ -48,7 +48,7 @@ namespace Iviz.App
 
             panel.Colormap.Index = (int)listener.Colormap;
             panel.HideButton.State = listener.Visible;
-            panel.FlipColors.Value = listener.FlipColors;
+            panel.FlipColors.Value = listener.FlipMinMax;
             panel.ScaleZ.Value = listener.ScaleZ;
 
             panel.OcclusionOnlyMode.Value = listener.RenderAsOcclusionOnly;
@@ -76,7 +76,7 @@ namespace Iviz.App
 
             panel.FlipColors.ValueChanged += f =>
             {
-                listener.FlipColors = f;
+                listener.FlipMinMax = f;
             };
             panel.ScaleZ.ValueChanged += f =>
             {

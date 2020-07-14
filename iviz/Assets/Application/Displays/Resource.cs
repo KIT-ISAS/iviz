@@ -19,6 +19,11 @@ using Iviz.Msgs.GridMapMsgs;
 
 namespace Iviz.Resources
 {
+    public class ResourceNotFoundException : Exception
+    {
+            
+    }
+
     public static class Resource
     {
         [JsonConverter(typeof(StringEnumConverter))]
@@ -136,7 +141,7 @@ namespace Iviz.Resources
             {
                 if (Object is null)
                 {
-                    throw new NullReferenceException();
+                    throw new ResourceNotFoundException();
                 }
                 return UnityEngine.Object.Instantiate(Object, parent);
             }

@@ -77,8 +77,9 @@ namespace Iviz.App.Listeners
             UnityEngine.Object.Destroy(node.gameObject);
         }
 
-        public void ClearAll()
+        public override void Reset()
         {
+            base.Reset();
             imarkers.Values.ForEach(DeleteMarkerObject);
             imarkers.Clear();
         }

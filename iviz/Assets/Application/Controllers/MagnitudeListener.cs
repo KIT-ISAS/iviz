@@ -336,9 +336,12 @@ namespace Iviz.App.Listeners
         static Quaternion AngularToQuaternion(float angularX, float angularY, float angularZ)
         {
             //Debug.Log("In message: " + angularX + " " + angularY + " " + angularZ);
+            /*
             return Quaternion.AngleAxis(angularX * Mathf.Rad2Deg, Vector3.right) *
                    Quaternion.AngleAxis(angularY * Mathf.Rad2Deg, Vector3.up) *
                    Quaternion.AngleAxis(angularZ * Mathf.Rad2Deg, Vector3.forward);
+                   */
+            return new Vector3(angularX, angularY, angularZ).RosRpy2Unity();
         }
         
         void Handler(Twist msg)
@@ -350,7 +353,7 @@ namespace Iviz.App.Listeners
 
             Vector3 dir = msg.Linear.Ros2Unity();
             arrow.Set(Vector3.zero, dir);
-            angleAxis.Set(AngularToQuaternion((float)msg.Angular.X, (float)msg.Angular.Y, (float)msg.Angular.Z).Ros2Unity());
+            angleAxis.Set(AngularToQuaternion((float)msg.Angular.X, (float)msg.Angular.Y, (float)msg.Angular.Z));
             trail.DataSource = () => displayNode.transform.TransformPoint(dir * VectorScale);
         }
 
@@ -374,9 +377,16 @@ namespace Iviz.App.Listeners
             angleAxis.Set(AngularToQuaternion(
                 (float)msg.Twist.Twist.Angular.X, 
                 (float)msg.Twist.Twist.Angular.Y, 
-                (float)msg.Twist.Twist.Angular.Z)
-                .Ros2Unity());
+                (float)msg.Twist.Twist.Angular.Z));
             trail.DataSource = () => displayNode.transform.TransformPoint(dir * VectorScale);
+        }
+
+        public override void Reset()
+        {
+            base.Reset();
+            arrow?.Reset();
+            trail.Reset();
+            angleAxis?.Reset();
         }
 
         public override void Stop()
