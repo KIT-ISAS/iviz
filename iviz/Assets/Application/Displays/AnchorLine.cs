@@ -6,17 +6,22 @@ using UnityEngine;
 
 namespace Application.Displays
 {
+    public interface IAnchorProvider
+    {
+        bool FindAnchor(in Vector3 position, out Vector3 anchor, out Vector3 normal);
+    }
+
     public sealed class AnchorLine : WrapperResource, IRecyclable, ISupportsTint
     {
-        LineResource resource;
         readonly List<LineWithColor> lines = new List<LineWithColor>();
+        LineResource resource;
 
-        public delegate bool FindAnchorFn(in Vector3 position, out Vector3 anchor, out Vector3 normal);
-        
-        public FindAnchorFn FindAnchor { get; set; }
-        
+        Vector3 lastPosition = Vector3.one * float.PositiveInfinity;
+
+        public IAnchorProvider AnchorProvider { get; set; }
+
         protected override IDisplay Display => resource;
-        
+
         Color color;
         public Color Color
         {
@@ -29,6 +34,7 @@ namespace Application.Displays
                     LineWithColor prevLine = lines[i];
                     lines[i] = new LineWithColor(prevLine.A, prevLine.B, color);
                 }
+
                 resource.LinesWithColor = lines;
             }
         }
@@ -41,37 +47,32 @@ namespace Application.Displays
                 base.Visible = value;
                 if (value)
                 {
-                    SetPosition(Position, true);
+                    SetPosition(lastPosition, true);
                 }
             }
         }
 
-        Vector3 position = Vector3.one * float.PositiveInfinity;
-
-        public Vector3 Position
-        {
-            get => position;
-            set => SetPosition(value);
-        }
-
         public void SetPosition(in Vector3 newPosition, bool forceRebuild = false)
         {
-            if (!forceRebuild && Mathf.Approximately((newPosition - Position).sqrMagnitude, 0))
+            if (!forceRebuild && Mathf.Approximately((newPosition - lastPosition).sqrMagnitude, 0))
             {
                 return;
             }
-            position = newPosition;
 
-            if (!Visible || FindAnchor is null)
+            lastPosition = newPosition;
+
+            if (!Visible || AnchorProvider is null)
             {
                 return;
             }
+
             lines.Clear();
-            if (FindAnchor(position, out Vector3 anchor, out Vector3 normal))
+            if (AnchorProvider.FindAnchor(lastPosition, out Vector3 anchor, out Vector3 normal))
             {
-                LineUtils.AddLineStipple(lines, anchor, position, Color);
+                LineUtils.AddLineStipple(lines, anchor, lastPosition, Color);
                 LineUtils.AddCircleStipple(lines, anchor, 0.125f, normal, Color);
             }
+
             resource.LinesWithColor = lines;
         }
 
@@ -79,8 +80,8 @@ namespace Application.Displays
         {
             get => resource.Tint;
             set => resource.Tint = value;
-        }        
-        
+        }
+
         void Awake()
         {
             resource = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, transform);
@@ -88,10 +89,10 @@ namespace Application.Displays
             resource.LineScale = 0.003f;
             Color = Color.yellow;
         }
-        
+
         public void SplitForRecycle()
         {
             ResourcePool.Dispose(Resource.Displays.Line, resource.gameObject);
-        }        
+        }
     }
 }

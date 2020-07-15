@@ -30,7 +30,9 @@ namespace Iviz.App.Listeners
             name = msg.Name;
             Id = msg.Name;
 
+
             transform.localRotation = msg.Orientation.Ros2Unity();
+            //Debug.Log(transform.localRotation);
 
             UpdateMarkers(msg.Markers);
             UpdateInteractionMode(msg.InteractionMode, msg.OrientationMode, msg.IndependentMarkerOrientation);

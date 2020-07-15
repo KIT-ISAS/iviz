@@ -149,17 +149,17 @@ namespace Iviz.Displays
             IntensityBounds = span;
         }
 
-        [SerializeField] Vector2 scale_;
+        [SerializeField] Vector2 scale;
         public Vector2 Scale
         {
-            get => scale_;
+            get => scale;
             set
             {
-                if (scale_ == value)
+                if (scale == value)
                 {
                     return;
                 }
-                scale_ = value;
+                scale = value;
                 UpdateQuadComputeBuffer();
             }
         }

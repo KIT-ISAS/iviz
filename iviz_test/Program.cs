@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Transactions;
 using BitMiracle.LibJpeg;
 using Iviz.Bridge.Client;
 using Iviz.Msgs;
@@ -13,6 +15,7 @@ using Iviz.Msgs.Tf2Msgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.RoslibSharp;
 using Newtonsoft.Json.Serialization;
+using Int64 = System.Int64;
 
 namespace iviz_test
 {
@@ -36,7 +39,7 @@ namespace iviz_test
             intMarker.Name = "my_marker";
             intMarker.Scale = 1;
             intMarker.Description = "Simple 1-DOF Control";
-                
+
             Marker boxMarker = new Marker();
             boxMarker.Header = new Header()
             {
@@ -46,7 +49,7 @@ namespace iviz_test
             boxMarker.Type = Marker.CUBE;
             boxMarker.Scale = new Vector3(0.45f, 0.45, 0.45);
             boxMarker.Color = new ColorRGBA(0.5f, 0.5f, 0.5f, 1);
-            
+
             InteractiveMarkerControl boxControl = new InteractiveMarkerControl();
             boxControl.AlwaysVisible = true;
             boxControl.Markers = new[] {boxMarker};
@@ -56,32 +59,88 @@ namespace iviz_test
             rotateControl.Name = "move_x";
             rotateControl.InteractionMode = InteractiveMarkerControl.MOVE_AXIS;
             */
-            InteractiveMarkerControl control = new InteractiveMarkerControl();
-            control.Name = "move";
-            control.Orientation = new Quaternion(0, 0, 0, 1);
-            control.InteractionMode = InteractiveMarkerControl.MOVE_PLANE;
-            control.OrientationMode = InteractiveMarkerControl.FIXED;
-            
-            InteractiveMarkerControl control2 = new InteractiveMarkerControl();
-            control2.Name = "rotate";
-            control2.Orientation = new Quaternion(0, 0, 0, 1);
-            control2.InteractionMode = InteractiveMarkerControl.ROTATE_AXIS;
-            control2.OrientationMode = InteractiveMarkerControl.FIXED;
+            InteractiveMarkerControl control = new InteractiveMarkerControl
+            {
+                Name = "e2_move",
+                Orientation = new Quaternion(0, 1, 0, 1),
+                InteractionMode = InteractiveMarkerControl.MOVE_PLANE,
+                OrientationMode = InteractiveMarkerControl.INHERIT
+            };
+
+            InteractiveMarkerControl control2 = new InteractiveMarkerControl
+            {
+                Name = "e2_rotate",
+                Orientation = new Quaternion(0, 1, 0, 1),
+                InteractionMode = InteractiveMarkerControl.ROTATE_AXIS,
+                OrientationMode = InteractiveMarkerControl.INHERIT
+            };
 
             intMarker.Controls = new[] {boxControl, control, control2};
 
             client.Advertise<InteractiveMarkerUpdate>("/update", out RosPublisher publisher);
+            client.Advertise<TFMessage>("/tf", out RosPublisher publisher2);
+            client.Subscribe<InteractiveMarkerFeedback>("/interactive_markers/feedback", Callback);
             while (true)
             {
                 Console.WriteLine("publishing...");
                 publisher.Publish(new InteractiveMarkerUpdate()
                 {
                     Type = InteractiveMarkerUpdate.UPDATE,
-                    Markers = new []{ intMarker }
+                    Markers = new[] {intMarker}
                 });
-                Thread.Sleep(1000);
+
+                position = targetPosition.Subtract(position).Normalized().Multiply(v).Add(position);
+                if (targetPosition.Subtract(position).Magnitude() > 2)
+                {
+                    double newAngle = Math.Atan2(targetPosition.Y - position.Y, targetPosition.X - position.X);
+                    angle += (newAngle - angle) * v2;
+                }
+                Quaternion quaternion = VectorStuff.ToQuat(angle);
+
+                TFMessage msg = new TFMessage()
+                {
+                    Transforms = new[]
+                    {
+                        new TransformStamped()
+                        {
+                            Header = new Header()
+                            {
+                                FrameId = "map",
+                                Stamp = time.Now()
+                            },
+                            ChildFrameId = "e2/base_link",
+                            Transform = new Transform()
+                            {
+                                Translation = new Vector3(position.X, position.Y, position.Z),
+                                Rotation = quaternion
+                            }
+                        }
+                    }
+                };
+                publisher2.Publish(msg);
+
+                Thread.Sleep(10);
             }
-        }        
+        }
+
+        static double angle = 0;
+        static Point position = new Point(-20, 20, 0);
+        static double v = 0.01f;
+        static double v2 = 0.01f;
+        static Point targetPosition = new Point(0, 0, 0);
+
+
+        static void Callback(InteractiveMarkerFeedback f)
+        {
+            if (f.EventType != InteractiveMarkerFeedback.POSE_UPDATE ||
+                f.ControlName.Length < 3 ||
+                f.ControlName.Substring(0, 3) != "e2_")
+            {
+            }
+
+            targetPosition = f.Pose.Position;
+        }
+
         static void Main_D()
         {
             RosClient client = new RosClient(
@@ -92,7 +151,7 @@ namespace iviz_test
                 //"http://141.3.59.19:7621"
             );
             Iviz.Msgs.NavMsgs.Path path = new Iviz.Msgs.NavMsgs.Path();
-            
+
             List<PoseStamped> list = new List<PoseStamped>();
 
             path.Header = new Header(0, new time(DateTime.Now), "map");
@@ -102,7 +161,7 @@ namespace iviz_test
                 list.Add(new PoseStamped(path.Header, new Pose(
                     new Point(Math.Sin(t), Math.Cos(t), t), new Quaternion(0, 0, 0, 1))));
             }
-            
+
             path.Poses = list.ToArray();
 
             client.Advertise<Iviz.Msgs.NavMsgs.Path>("/my_path", out RosPublisher publisher);
@@ -113,16 +172,17 @@ namespace iviz_test
                 Thread.Sleep(1000);
             }
         }
+
         static void Main_N()
-        { 
+        {
             RosClient client = new RosClient(
                 //"http://192.168.0.73:11311",
                 "http://141.3.59.5:11311",
                 null,
                 //"http://192.168.0.157:7613"
                 "http://141.3.59.19:7621"
-                );
-            
+            );
+
             /*
             Console.WriteLine(client.GetSystemState());
             client.Subscribe<TFMessage>("/tf", Callback);
@@ -172,14 +232,15 @@ namespace iviz_test
                 Lifetime = new duration(),
                 FrameLocked = true,
             };
-            MarkerArray array = new MarkerArray(new[] { marker });
+            MarkerArray array = new MarkerArray(new[] {marker});
 
-            while(true)
+            while (true)
             {
                 publisherTf.Publish(tf);
                 publisherMarkers.Publish(array);
                 Thread.Sleep(1000);
             }
+
             Console.In.Read();
         }
 
@@ -206,7 +267,7 @@ namespace iviz_test
                 null,
                 //"http://192.168.0.157:7613"
                 "http://141.3.59.19:7614"
-                );
+            );
 
             Console.WriteLine(client.GetSystemState());
             client.Subscribe<TFMessage>("/tf", Callback);
@@ -262,7 +323,7 @@ namespace iviz_test
                 null,
                 //"http://192.168.0.157:7614"
                 "http://141.3.59.35:7614"
-                );
+            );
 
             /*
             AddTwoInts service = new AddTwoInts();
@@ -399,7 +460,6 @@ namespace iviz_test
 
             Console.Read();
             client.Close();
-
         }
 
         static void Callback(Iviz.Msgs.StdMsgs.Int32 value)
@@ -415,6 +475,44 @@ namespace iviz_test
         static void Callback(Marker value)
         {
             Console.WriteLine("<< " + value.ToJsonString());
+        }
+    }
+
+    public static class VectorStuff
+    {
+        public static Point Lerp(in Point A, in Point B, double t)
+        {
+            return new Point(A.X + t * (B.X - A.X), A.Y + t * (B.Y - A.Y), A.Z + t * (B.Z - A.Z));
+        }
+
+        public static double Magnitude(this Point A)
+        {
+            return Math.Sqrt(A.X * A.X + A.Y * A.Y + A.Z * A.Z);
+        }
+
+        public static Point Add(this Point A, in Point B)
+        {
+            return new Point(A.X + B.X, A.Y + B.Y, A.Z + B.Z);
+        }
+
+        public static Point Subtract(this Point A, in Point B)
+        {
+            return new Point(A.X - B.X, A.Y - B.Y, A.Z - B.Z);
+        }
+
+        public static Point Multiply(this Point A, double t)
+        {
+            return new Point(A.X * t, A.Y * t, A.Z * t);
+        }
+
+        public static Point Normalized(this Point A)
+        {
+            return A.Multiply(1 / A.Magnitude());
+        }
+
+        public static Quaternion ToQuat(double a)
+        {
+            return new Quaternion(0, 0, Math.Sin(a / 2), Math.Cos(a / 2));
         }
     }
 }

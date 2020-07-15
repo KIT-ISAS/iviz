@@ -8,14 +8,15 @@ using UnityEngine.UIElements;
 
 namespace Iviz.Displays
 {
-    public sealed class DraggableTranslation : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDraggable
+    public sealed class DraggableTranslation : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDraggable, IPointerClickHandler
     {
         public Vector3 line;
         public Transform TargetTransform { get; set; }
         
         bool needsStart;
         Vector3 startOffset;
-        
+
+        public event Action DoubleTap;
         public event InteractiveControl.MovedAction Moved;
         public event Action PointerDown;
         public event Action PointerUp;
@@ -86,6 +87,19 @@ namespace Iviz.Displays
 
         public void OnEndDragging()
         {
+        }
+
+        static int GetClickCount(PointerEventData eventData)
+        {
+            return FlyCamera.IsMobile ? Input.GetTouch(0).tapCount : eventData.clickCount;
+        }
+        
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            if (GetClickCount(eventData) == 2)
+            {
+                DoubleTap?.Invoke();    
+            }
         }
     }
 }

@@ -16,6 +16,7 @@ namespace Iviz.Displays
         bool needsStart;
         Vector3 startIntersection;
 
+        public event Action DoubleTap;
         public event InteractiveControl.MovedAction Moved;
         public event Action PointerDown;
         public event Action PointerUp;

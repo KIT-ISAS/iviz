@@ -73,6 +73,7 @@ namespace Iviz.App.Listeners
                     };
                     control.transform.SetParentLocal(controlNode.transform);
                     controls[id] = control;
+                    //Debug.Log("Creating " + id);
                 }
 
                 control.Set(controlMsg);

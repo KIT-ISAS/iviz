@@ -439,7 +439,7 @@ namespace Iviz.Resources
                     "edu.kit.h2t.armar6",
                     "edu.kit.ipr.gammabot",
                     "edu.fraunhofer.iosb.e2",
-                        "test_car"
+                    "test_car"
                 }
                 );
             public ReadOnlyDictionary<string, GameObjectInfo> Objects { get; }

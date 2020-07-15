@@ -1,8 +1,10 @@
 using System;
+using Application.Displays;
 using Iviz.App;
 using Iviz.App.Listeners;
 using Iviz.Displays;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace Iviz.Displays
 {
@@ -44,6 +46,7 @@ namespace Iviz.Displays
         public event MovedAction Moved;
         public event Action PointerUp;
         public event Action PointerDown;
+        public event Action DoubleTap;
 
         Transform targetTransform;
 
@@ -67,6 +70,7 @@ namespace Iviz.Displays
         }
 
         bool pointsToCamera;
+
         public bool PointsToCamera
         {
             get => pointsToCamera;
@@ -101,6 +105,7 @@ namespace Iviz.Displays
         }
 
         bool keepAbsoluteRotation;
+
         public bool KeepAbsoluteRotation
         {
             get => keepAbsoluteRotation;
@@ -129,6 +134,7 @@ namespace Iviz.Displays
         }
 
         bool cameraPivotIsParent;
+
         public bool CameraPivotIsParent
         {
             get => cameraPivotIsParent;
@@ -143,6 +149,7 @@ namespace Iviz.Displays
         }
 
         InteractionModeType interactionMode;
+
         public InteractionModeType InteractionMode
         {
             get => interactionMode;
@@ -233,9 +240,12 @@ namespace Iviz.Displays
                 {arrowPX, arrowMX, arrowPY, arrowMY, arrowPZ, arrowMZ, ringX, ringY, ringZ, ringXPlane, ringZPlane};
 
 
+            //void OnMoved(in Pose pose) => Moved?.Invoke(pose);
             void OnMoved(in Pose pose) => Moved?.Invoke(pose);
             void OnPointerUp() => PointerUp?.Invoke();
             void OnPointerDown() => PointerDown?.Invoke();
+            void OnDoubleTap() => DoubleTap?.Invoke();
+
 
             foreach (MeshMarkerResource resource in allResources)
             {
@@ -243,6 +253,7 @@ namespace Iviz.Displays
                 draggable.Moved += OnMoved;
                 draggable.PointerUp += OnPointerUp;
                 draggable.PointerDown += OnPointerDown;
+                draggable.DoubleTap += OnDoubleTap;
             }
 
             InteractionMode = InteractionModeType.MovePlaneYZ;
@@ -268,6 +279,16 @@ namespace Iviz.Displays
         void RotateBackToFixed()
         {
             transform.rotation = TFListener.RootFrame.transform.rotation;
+        }
+
+        public void SnapTo(IAnchorProvider anchorProvider)
+        {
+            Vector3 myPosition = transform.position;
+            anchorProvider.FindAnchor(myPosition, out Vector3 newPosition, out Vector3 _);
+            Debug.Log("Snapping to " + newPosition);
+
+            TargetTransform.position += newPosition - myPosition ;
+            Moved?.Invoke(TargetTransform.AsPose());
         }
     }
 }
