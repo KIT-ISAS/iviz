@@ -15,7 +15,8 @@ namespace Iviz.Displays
         
         bool needsStart;
         Vector3 startIntersection;
-        
+
+        public event Action DoubleTap;
         public event InteractiveControl.MovedAction Moved;
         public event Action PointerDown;
         public event Action PointerUp;
@@ -45,13 +46,18 @@ namespace Iviz.Displays
             PointerUp?.Invoke();
         }
 
+        bool enabed = true;
         public void OnPointerMove(in Vector2 cursorPos)
         {
             Transform mTransform = transform;
             Transform mParent = mTransform.parent;
             Transform mTarget = TargetTransform;
 
-            Ray ray = new Ray(mTransform.position, mParent.TransformDirection(normal));
+            //Debug.Log(mParent.TransformDirection(normal));
+            //Debug.Log(mParent.rotation);
+            
+            //Ray ray = new Ray(mTransform.position, mParent.TransformDirection(normal));/
+            Ray ray = new Ray(mParent.position, mParent.TransformDirection(normal));
             Ray other = TFListener.MainCamera.ScreenPointToRay(cursorPos);
 
             (Vector3 intersection, float cameraDistance) = PlaneIntersection(ray, other);
@@ -59,7 +65,7 @@ namespace Iviz.Displays
             {
                 return;
             }
-
+            
             Vector3 localIntersection = mParent.InverseTransformPoint(intersection);
             if (needsStart)
             {
@@ -68,14 +74,39 @@ namespace Iviz.Displays
             }
             else
             {
+                /*
+                Debug.Log("Parent: " + mParent.gameObject + " -> " + mParent.position + " " + mParent.rotation);
+                //Debug.Log("Position was: " + mParent.position.x + " " + mParent.position.y + " " + mParent.position.z);
+                Debug.Log("intersection: " + intersection.x + " " + intersection.y + " " + intersection.z);
+                Debug.Log("localIntersection: " + localIntersection.x + " " + localIntersection.y + " " + localIntersection.z);
+                Debug.Log("startIntersection: " + startIntersection.x + " " + startIntersection.y + " " + startIntersection.z);
+                */
                 Vector3 deltaPosition = localIntersection - startIntersection;
                 float deltaDistance = deltaPosition.magnitude;
                 if (deltaDistance > 0.5f)
                 {
                     deltaPosition *= 0.5f / deltaDistance;
                 }
-                mTarget.position += mParent.TransformVector(deltaPosition);
+                //Debug.Log("Moving by: " + deltaPosition.x + " " + deltaPosition.y + " " + deltaPosition.z);
+
+                var vec3 = mParent.TransformVector(deltaPosition);
+                //Debug.Log("Which transformed is: " + vec3.x + " " + vec3.y + " " + vec3.z);
+                mTarget.position += vec3;
+
+                //Debug.Log("New Position is: " + mParent.position.x + " " + mParent.position.y + " " + mParent.position.z);
+
+                
+                /*
+                Ray newRay = new Ray(mParent.position, mParent.TransformDirection(normal));
+                (Vector3 newIntersection, float _) = PlaneIntersection(newRay, other);
+                Vector3 newlLocalIntersection = mParent.InverseTransformPoint(newIntersection);
+
+                
+                Debug.Log("New: Intersection: " + newIntersection.x + " " + newIntersection.y + " " + newIntersection.z);
+                Debug.Log("New: LocalIntersection: " + newlLocalIntersection.x + " " + newlLocalIntersection.y + " " + newlLocalIntersection.z);
+                */
                 Moved?.Invoke(mTarget.AsPose());
+                //startIntersection = localIntersection;
             }
         }
 

@@ -3,6 +3,7 @@ using System.Linq;
 using Iviz.App.Listeners;
 using Iviz.Displays;
 using Iviz.Resources;
+using UnityEditor;
 using UnityEngine;
 
 namespace Iviz.App
@@ -13,7 +14,7 @@ namespace Iviz.App
     public sealed class ARModuleData : ModuleData
     {
         const string NoneString = "(none)";
-        
+
         readonly ARController controller;
         readonly ARPanelContents panel;
 
@@ -23,7 +24,7 @@ namespace Iviz.App
         public override IController Controller => controller;
 
         bool isDraggingControl;
-        
+
         public ARModuleData(ModuleDataConstructor constructor) :
             base(constructor.ModuleList, constructor.Topic, constructor.Type)
         {
@@ -33,7 +34,7 @@ namespace Iviz.App
             controller.ModuleData = this;
             if (constructor.Configuration != null)
             {
-                controller.Config = (ARConfiguration)constructor.Configuration;
+                controller.Config = (ARConfiguration) constructor.Configuration;
             }
 
             UpdateModuleButton();
@@ -64,11 +65,12 @@ namespace Iviz.App
             List<string> frameHints = new List<string> {NoneString};
             frameHints.AddRange(TFListener.FramesForHints);
             panel.MarkerFrame.Hints = frameHints;
-            
+
             panel.MarkerOffset.Value = controller.MarkerOffset;
 
             TFListener.RootControl.PointerUp += RootControlOnPointerUp;
-            
+            TFListener.RootControl.DoubleTap += RootControlOnDoubleTap;
+
             /*
             panel.HeadSender.Set(controller.RosSenderHead);
             panel.MarkersSender.Set(controller.RosSenderMarkers);
@@ -79,18 +81,9 @@ namespace Iviz.App
 
             CheckInteractable();
 
-            panel.WorldScale.ValueChanged += f =>
-            {
-                controller.WorldScale = f;
-            };
-            panel.WorldOffset.ValueChanged += f =>
-            {
-                controller.WorldOffset = f;
-            };
-            panel.WorldAngle.ValueChanged += f =>
-            {
-                controller.WorldAngle = f;
-            };
+            panel.WorldScale.ValueChanged += f => { controller.WorldScale = f; };
+            panel.WorldOffset.ValueChanged += f => { controller.WorldOffset = f; };
+            panel.WorldAngle.ValueChanged += f => { controller.WorldAngle = f; };
             panel.SearchMarker.ValueChanged += f =>
             {
                 controller.UseMarker = f;
@@ -102,14 +95,8 @@ namespace Iviz.App
                 controller.MarkerSize = f;
             };
             */
-            panel.MarkerHorizontal.ValueChanged += f =>
-            {
-                controller.MarkerHorizontal = f;
-            };
-            panel.MarkerAngle.ValueChanged += f =>
-            {
-                controller.MarkerAngle = (int)f;
-            };
+            panel.MarkerHorizontal.ValueChanged += f => { controller.MarkerHorizontal = f; };
+            panel.MarkerAngle.ValueChanged += f => { controller.MarkerAngle = (int) f; };
             panel.MarkerFrame.EndEdit += f =>
             {
                 if (f == NoneString)
@@ -121,12 +108,10 @@ namespace Iviz.App
                 {
                     controller.MarkerFrame = f;
                 }
+
                 CheckInteractable();
             };
-            panel.MarkerOffset.ValueChanged += f =>
-            {
-                controller.MarkerOffset = f;
-            };
+            panel.MarkerOffset.ValueChanged += f => { controller.MarkerOffset = f; };
             /*
             panel.PublishHead.ValueChanged += f =>
             {
@@ -153,9 +138,21 @@ namespace Iviz.App
             };
         }
 
+        void RootControlOnDoubleTap()
+        {
+            TFListener.RootControl.SnapTo(controller);
+            CopyControlPose();
+        }
+
         void RootControlOnPointerUp()
         {
-            var pose = TFListener.RelativePose(TFListener.RootControl.transform.AsPose());
+            CopyControlPose();
+        }
+
+        void CopyControlPose()
+        {
+            //Debug.Log("copy pose");
+            var pose = TFListener.RootControl.transform.AsPose();
             controller.WorldOffset = pose.position.Unity2Ros();
 
             float angle = pose.rotation.eulerAngles.y;
@@ -163,8 +160,10 @@ namespace Iviz.App
             {
                 angle -= 360;
             }
-            controller.WorldAngle = angle; 
-            
+
+            controller.WorldAngle = angle;
+
+            //Debug.Log("requesting " + controller.WorldOffset.Ros2Unity());
             panel.WorldOffset.Mean = controller.WorldOffset;
             panel.WorldAngle.Value = controller.WorldAngle;
         }
@@ -173,6 +172,7 @@ namespace Iviz.App
         {
             base.CleanupPanel();
             TFListener.RootControl.PointerUp -= RootControlOnPointerUp;
+            TFListener.RootControl.DoubleTap -= RootControlOnDoubleTap;
         }
 
         void CheckInteractable()

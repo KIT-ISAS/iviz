@@ -27,7 +27,7 @@ namespace Iviz.App.Listeners
         readonly DepthImageResource resource;
         readonly SimpleDisplayNode node;
 
-        public ModuleData ModuleData { get; set; }
+        public ModuleData ModuleData { get; }
 
         public TFFrame Frame => depthImage?.Frame;
 

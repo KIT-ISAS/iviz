@@ -400,6 +400,7 @@ namespace Iviz
 
         public static void SetPose(this Transform t, in Pose p)
         {
+            //Debug.Log("setting pose");
             t.SetPositionAndRotation(p.position, p.rotation);
         }
 

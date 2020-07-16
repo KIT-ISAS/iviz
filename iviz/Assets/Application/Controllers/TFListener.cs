@@ -225,6 +225,7 @@ namespace Iviz.App.Listeners
             rootControl.name = "[InteractiveController for /]";
             rootControl.TargetTransform = RootFrame.transform;
             rootControl.InteractionMode = InteractiveControl.InteractionModeType.Disabled;
+            //rootControl.InteractionMode = InteractiveControl.InteractionModeType.Frame;
             rootControl.transform.localScale = 0.4f * Vector3.one;
 
             Publisher = new RosSender<tfMessage_v2>(DefaultTopic);

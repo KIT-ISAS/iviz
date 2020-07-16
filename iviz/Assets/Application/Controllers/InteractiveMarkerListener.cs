@@ -201,7 +201,7 @@ namespace Iviz.App.Listeners
                 MarkerName: imarkerId,
                 ControlName: controlId,
                 EventType: InteractiveMarkerFeedback.POSE_UPDATE,
-                Pose: controlPose.Unity2RosPose(),
+                Pose: TFListener.RelativePose(controlPose).Unity2RosPose(),
                 MenuEntryId: 0,
                 MousePoint: Vector3.zero.Unity2RosPoint(),
                 MousePointValid: false

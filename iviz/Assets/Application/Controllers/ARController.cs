@@ -5,11 +5,13 @@ using System.Runtime.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Application.Displays;
 using Iviz.Resources;
 using UnityEngine.XR.ARFoundation;
 using Iviz.Displays;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.App.Displays;
+using Iviz.RoslibSharp.XmlRpc;
 using TMPro;
 using UnityEngine.Rendering;
 using UnityEngine.XR.ARSubsystems;
@@ -22,8 +24,8 @@ namespace Iviz.App.Listeners
         [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
         [DataMember] public Resource.Module Module => Resource.Module.AR;
         [DataMember] public bool Visible { get; set; } = true;
-        [DataMember] public float WorldScale { get; set; } = 1.0f;
-        /* NonSerializable */ public SerializableVector3 WorldOffset { get; set; } = Vector3.zero;
+        /* NonSerializable */ public float WorldScale { get; set; } = 1.0f;
+        /* NonSerializable */ public SerializableVector3 WorldOffset { get; set; } = ARController.DefaultWorldOffset;
         /* NonSerializable */ public float WorldAngle { get; set; } = 0;
         [DataMember] public bool SearchMarker { get; set; } = false;
         [DataMember] public bool MarkerHorizontal { get; set; } = true;
@@ -42,8 +44,10 @@ namespace Iviz.App.Listeners
         [DataMember] public float WorldAngle { get; set; } = 0;
     }
 
-    public sealed class ARController : MonoBehaviour, IController, IHasFrame
+    public sealed class ARController : MonoBehaviour, IController, IHasFrame, IAnchorProvider
     {
+        public static readonly Vector3 DefaultWorldOffset = new Vector3(0.5f, 0, -0.2f);
+        
         static ARSessionInfo savedSessionInfo;
         
         [SerializeField] Camera ARCamera = null;
@@ -131,16 +135,17 @@ namespace Iviz.App.Listeners
                 resource.Visible = value && UseMarker;
                 mainCamera.gameObject.SetActive(!value);
                 ARCamera.gameObject.SetActive(value);
-                TFListener.MainLight.gameObject.SetActive(!value);
+                //TFListener.MainLight.gameObject.SetActive(!value);
                 ARLight.gameObject.SetActive(value);
                 canvas.worldCamera = value ? ARCamera : mainCamera;
                 TFListener.MainCamera = value ? ARCamera : mainCamera;
 
                 TFRoot.SetPose(value ? RootPose : Pose.identity);
+
                 TFListener.RootControl.InteractionMode = value
                     ? InteractiveControl.InteractionModeType.Frame
                     : InteractiveControl.InteractionModeType.Disabled;
-
+                //TFListener.RootControl.InteractionMode = InteractiveControl.InteractionModeType.Frame;
                 
                 foreach (var module in DisplayListPanel.Instance.ModuleDatas)
                 {
@@ -339,33 +344,34 @@ namespace Iviz.App.Listeners
             TFListener.MapFrame.UpdateAnchor(null);
         }
 
+        public bool FindAnchor(in Vector3 position, out Vector3 anchor, out Vector3 normal)
+        {
+            List<ARRaycastHit> results = new List<ARRaycastHit>();
+            Vector3 origin = position + 0.25f * Vector3.up;
+            raycaster.Raycast(new Ray(origin, Vector3.down), results, TrackableType.PlaneWithinBounds);
+            if (results.Count == 0)
+            {
+                anchor = position;
+                normal = Vector3.zero;
+                return false;
+            }
+
+            var hit = results[0];
+            var plane = planeManager.GetPlane(hit.trackableId);
+            anchor = hit.pose.position;
+            normal = plane.normal;
+            return true;
+        }
+        
         void UpdateAnchors()
         {
-            bool FindAnchorFn(in Vector3 position, out Vector3 anchor, out Vector3 normal)
-            {
-                List<ARRaycastHit> results = new List<ARRaycastHit>();
-                Vector3 origin = position + 0.25f * Vector3.up;
-                raycaster.Raycast(new Ray(origin, Vector3.down), results, TrackableType.PlaneWithinBounds);
-                if (results.Count == 0)
-                {
-                    anchor = Vector3.zero;
-                    normal = Vector3.zero;
-                    return false;
-                }
-
-                var hit = results[0];
-                var plane = planeManager.GetPlane(hit.trackableId);
-                anchor = hit.pose.position;
-                normal = plane.normal;
-                return true;
-            }
             
             //foreach (TFFrame frame in TFListener.Instance.Frames.Values)
             //{
             //    frame.UpdateAnchor(FindAnchorFn, forceAnchorRebuild);    
             //}
             
-            TFListener.MapFrame.UpdateAnchor(FindAnchorFn, forceAnchorRebuild);
+            TFListener.MapFrame.UpdateAnchor(this, forceAnchorRebuild);
             forceAnchorRebuild = false;
         }
 

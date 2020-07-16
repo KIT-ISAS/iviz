@@ -399,10 +399,10 @@ namespace Iviz.App.Listeners
             anchor.Name = "[Anchor:In Trash]";
         }
 
-        public void UpdateAnchor(AnchorLine.FindAnchorFn findAnchorFn, bool forceRebuild = false)
+        public void UpdateAnchor(IAnchorProvider anchorProvider, bool forceRebuild = false)
         {
             //Debug.Log("lel");
-            if (findAnchorFn is null)
+            if (anchorProvider is null)
             {
                 AnchorVisible = forceRebuild;
                 return;
@@ -410,7 +410,7 @@ namespace Iviz.App.Listeners
 
             //Debug.Log("was here");
             AnchorVisible = true;
-            anchor.FindAnchor = findAnchorFn;
+            anchor.AnchorProvider = anchorProvider;
             anchor.SetPosition(transform.position, forceRebuild);
         }
 

@@ -45,6 +45,7 @@ namespace Iviz.App
             Odometries,
             OccupancyGrids,
             Paths,
+            GridMaps,
             new[] { AR },
             new[] { Joystick },
         };
