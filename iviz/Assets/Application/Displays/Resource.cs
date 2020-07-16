@@ -7,7 +7,6 @@ using System;
 using System.Linq;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Msgs.VisualizationMsgs;
-
 using GameObjectInfo = Iviz.Resources.Resource.Info<UnityEngine.GameObject>;
 using MaterialInfo = Iviz.Resources.Resource.Info<UnityEngine.Material>;
 using Iviz.Msgs.GeometryMsgs;
@@ -21,7 +20,6 @@ namespace Iviz.Resources
 {
     public class ResourceNotFoundException : Exception
     {
-            
     }
 
     public static class Resource
@@ -50,31 +48,31 @@ namespace Iviz.Resources
 
         public static ReadOnlyDictionary<string, Module> ResourceByRosMessageType { get; }
             = new ReadOnlyDictionary<string, Module>(new Dictionary<string, Module>
-            {
-                { PointCloud2.RosMessageType, Module.PointCloud },
-                { Image.RosMessageType, Module.Image },
-                { CompressedImage.RosMessageType, Module.Image },
-                { Marker.RosMessageType, Module.Marker },
-                { MarkerArray.RosMessageType, Module.Marker },
-                { InteractiveMarkerUpdate.RosMessageType, Module.InteractiveMarker },
-                { JointState.RosMessageType, Module.JointState },
-                { LaserScan.RosMessageType, Module.LaserScan },
-                { PoseStamped.RosMessageType, Module.Magnitude },
-                { Msgs.GeometryMsgs.Pose.RosMessageType, Module.Magnitude },
-                { PointStamped.RosMessageType, Module.Magnitude },
-                { Point.RosMessageType, Module.Magnitude },
-                { WrenchStamped.RosMessageType, Module.Magnitude },
-                { Wrench.RosMessageType, Module.Magnitude },
-                { Odometry.RosMessageType, Module.Magnitude },
-                { TwistStamped.RosMessageType, Module.Magnitude },
-                { Twist.RosMessageType, Module.Magnitude },
-                { OccupancyGrid.RosMessageType, Module.OccupancyGrid },
-                { Path.RosMessageType, Module.Path },
-                { PoseArray.RosMessageType, Module.Path },
-                { PolygonStamped.RosMessageType, Module.Path },
-                { Polygon.RosMessageType, Module.Path },
-                { GridMap.RosMessageType, Module.GridMap },
-            }
+                {
+                    {PointCloud2.RosMessageType, Module.PointCloud},
+                    {Image.RosMessageType, Module.Image},
+                    {CompressedImage.RosMessageType, Module.Image},
+                    {Marker.RosMessageType, Module.Marker},
+                    {MarkerArray.RosMessageType, Module.Marker},
+                    {InteractiveMarkerUpdate.RosMessageType, Module.InteractiveMarker},
+                    {JointState.RosMessageType, Module.JointState},
+                    {LaserScan.RosMessageType, Module.LaserScan},
+                    {PoseStamped.RosMessageType, Module.Magnitude},
+                    {Msgs.GeometryMsgs.Pose.RosMessageType, Module.Magnitude},
+                    {PointStamped.RosMessageType, Module.Magnitude},
+                    {Point.RosMessageType, Module.Magnitude},
+                    {WrenchStamped.RosMessageType, Module.Magnitude},
+                    {Wrench.RosMessageType, Module.Magnitude},
+                    {Odometry.RosMessageType, Module.Magnitude},
+                    {TwistStamped.RosMessageType, Module.Magnitude},
+                    {Twist.RosMessageType, Module.Magnitude},
+                    {OccupancyGrid.RosMessageType, Module.OccupancyGrid},
+                    {Path.RosMessageType, Module.Path},
+                    {PoseArray.RosMessageType, Module.Path},
+                    {PolygonStamped.RosMessageType, Module.Path},
+                    {Polygon.RosMessageType, Module.Path},
+                    {GridMap.RosMessageType, Module.GridMap},
+                }
             );
 
         public class ColorScheme
@@ -99,6 +97,7 @@ namespace Iviz.Resources
             readonly string resourceName;
 
             T baseObject;
+
             public T Object
             {
                 get
@@ -107,11 +106,14 @@ namespace Iviz.Resources
                     {
                         return baseObject;
                     }
+
                     baseObject = UnityEngine.Resources.Load<T>(resourceName);
                     if (baseObject is null)
                     {
-                        throw new ArgumentException("Cannot find resource '" + resourceName + "'", nameof(resourceName));
+                        throw new ArgumentException("Cannot find resource '" + resourceName + "'",
+                            nameof(resourceName));
                     }
+
                     return baseObject;
                 }
             }
@@ -143,6 +145,7 @@ namespace Iviz.Resources
                 {
                     throw new ResourceNotFoundException();
                 }
+
                 return UnityEngine.Object.Instantiate(Object, parent);
             }
 
@@ -231,7 +234,20 @@ namespace Iviz.Resources
         [JsonConverter(typeof(StringEnumConverter))]
         public enum ColormapId
         {
-            lines, pink, copper, bone, gray, winter, autumn, summer, spring, cool, hot, hsv, jet, parula
+            lines,
+            pink,
+            copper,
+            bone,
+            gray,
+            winter,
+            autumn,
+            summer,
+            spring,
+            cool,
+            hot,
+            hsv,
+            jet,
+            parula
         };
 
 
@@ -265,8 +281,9 @@ namespace Iviz.Resources
                 Dictionary<ColormapId, Texture2D> textures = new Dictionary<ColormapId, Texture2D>();
                 for (int i = 0; i < Names.Count; i++)
                 {
-                    textures[(ColormapId)i] = UnityEngine.Resources.Load<Texture2D>("Colormaps/" + Names[i]);
+                    textures[(ColormapId) i] = UnityEngine.Resources.Load<Texture2D>("Colormaps/" + Names[i]);
                 }
+
                 Textures = new ReadOnlyDictionary<ColormapId, Texture2D>(textures);
             }
         }
@@ -301,7 +318,7 @@ namespace Iviz.Resources
             public GameObjectInfo InteractiveControl { get; }
             public GameObjectInfo GridMap { get; }
 
-            public ReadOnlyDictionary<Uri, GameObjectInfo> Generic { get; }
+            //public ReadOnlyDictionary<Uri, GameObjectInfo> Generic { get; }
 
             public DisplaysType()
             {
@@ -332,23 +349,55 @@ namespace Iviz.Resources
                 AnchorLine = new GameObjectInfo("Displays/AnchorLine");
                 InteractiveControl = new GameObjectInfo("Displays/InteractiveControl");
                 GridMap = new GameObjectInfo("Displays/GridMap");
-
-                Generic = new ReadOnlyDictionary<Uri, GameObjectInfo>(
-                    new Dictionary<Uri, GameObjectInfo>()
-                    {
-                        [CreateUri("Cube")] = Cube,
-                        [CreateUri("Cylinder")] = Cylinder,
-                        [CreateUri("Sphere")] = Sphere,
-                        [CreateUri("RightHand")] = new GameObjectInfo("Displays/RightHand"),
-                    });
             }
 
             static Uri CreateUri(string name)
             {
                 return new Uri("package://iviz/" + name);
             }
-
         }
+
+        public class InternalsType
+        {
+            readonly Dictionary<Uri, GameObjectInfo> files;
+
+            public InternalsType()
+            {
+                files = new Dictionary<Uri, GameObjectInfo>()
+                {
+                    [new Uri("package://iviz/cube")] = Displays.Cube,
+                    [new Uri("package://iviz/cylinder")] = Displays.Cylinder,
+                    [new Uri("package://iviz/sphere")] = Displays.Sphere,
+                    [new Uri("package://iviz/rightHand")] = new GameObjectInfo("Displays/RightHand")
+                };
+            }
+            
+            public bool TryGet(Uri uri, out GameObjectInfo info)
+            {
+                if (files.TryGetValue(uri, out info))
+                {
+                    return true;
+                }
+                string path = "Packages/" + uri.Host + uri.AbsolutePath;
+//                Debug.Log(path);
+                GameObject resource = UnityEngine.Resources.Load<GameObject>(path);
+                if (resource is null)
+                {
+                    path = path.Substring(0, path.Length - 4);
+                    resource = UnityEngine.Resources.Load<GameObject>(path);
+                    if (resource is null)
+                    {
+                        Debug.Log("not found");
+                        return false;
+                    }
+                }
+                info = new GameObjectInfo(path, resource);
+                files[uri] = info;
+                return true;
+            }
+        }
+            
+
 
         public class ControllersType
         {
@@ -428,26 +477,27 @@ namespace Iviz.Resources
 
         public class RobotsType
         {
-            public ReadOnlyCollection<string> Names { get; } = 
-                new ReadOnlyCollection<string>(new[] 
-                {
-                    "edu.iviz.dummybot",
-                    "com.clearpath.husky",
-                    "com.willowgarage.pr2",
-                    "edu.fraunhofer.iosb.bob",
-                    "edu.fraunhofer.iosb.crayler",
-                    "edu.kit.h2t.armar6",
-                    "edu.kit.ipr.gammabot",
-                    "edu.fraunhofer.iosb.e2",
+            public ReadOnlyCollection<string> Names { get; } =
+                new ReadOnlyCollection<string>(new[]
+                    {
+                        "edu.iviz.dummybot",
+                        "com.clearpath.husky",
+                        "com.willowgarage.pr2",
+                        "edu.fraunhofer.iosb.bob",
+                        "edu.fraunhofer.iosb.crayler",
+                        "edu.kit.h2t.armar6",
+                        "edu.kit.ipr.gammabot",
+                        "edu.fraunhofer.iosb.e2",
                         "test_car"
-                }
+                    }
                 );
+
             public ReadOnlyDictionary<string, GameObjectInfo> Objects { get; }
 
             public RobotsType()
             {
                 Dictionary<string, GameObjectInfo> objects = Names.ToDictionary(
-                    name => name, 
+                    name => name,
                     name => new GameObjectInfo("Robots/" + name));
                 Objects = new ReadOnlyDictionary<string, GameObjectInfo>(objects);
             }
@@ -483,6 +533,7 @@ namespace Iviz.Resources
                             str.Append(s[i]);
                             continue;
                         }
+
                         if (numLines != maxLines - 1)
                         {
                             str.Append("...\n→ ").Append(s[i]);
@@ -494,12 +545,14 @@ namespace Iviz.Resources
                             str.Append("...");
                             return str.ToString();
                         }
-                    } else
+                    }
+                    else
                     {
                         str.Append(s[i]);
                         usedWidth += charWidth;
                     }
                 }
+
                 return str.ToString();
             }
 
@@ -509,6 +562,7 @@ namespace Iviz.Resources
                 {
                     return width;
                 }
+
                 font.GetCharacterInfo(c, out CharacterInfo ci, 12);
                 charWidths[c] = ci.advance;
                 return ci.advance;
@@ -538,13 +592,23 @@ namespace Iviz.Resources
         public static ColorScheme Colors { get; } = new ColorScheme();
 
         static TexturedMaterialsType texturedMaterials;
+
         public static TexturedMaterialsType TexturedMaterials =>
             texturedMaterials ?? (texturedMaterials = new TexturedMaterialsType());
 
         static FontInfo fontInfo;
         public static FontInfo Font => fontInfo ?? (fontInfo = new FontInfo());
 
+        static InternalsType internals;
+        public static InternalsType Internal => internals ?? (internals = new InternalsType());
+        
         static ExternalResourceManager external;
         public static ExternalResourceManager External => external ?? (external = new ExternalResourceManager());
+
+        public static bool TryGetResource(Uri uri, out GameObjectInfo info)
+        {
+            return Internal.TryGet(uri, out info) ||
+                   External.TryGet(uri, out info);
+        }
     }
 }
