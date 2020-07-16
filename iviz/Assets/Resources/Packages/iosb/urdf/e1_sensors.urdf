@@ -1,0 +1,162 @@
+<?xml version="1.0" ?>
+<!-- Copyright (c) 2013-2019 Fraunhofer IOSB, Karlsruhe, Germany. All rights reserved. -->
+<robot name="WackerNeusonET18">
+  <link name="box" >
+    <visual name="visual_box">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+	<mesh filename="package://e1_description/meshes/universalbox.dae" scale="1 1 1"/>
+        <!--outer dimensions: 0.6 0.6 0.25-->
+      </geometry>
+      <material name="material_box"/>
+    </visual>
+  </link>
+  <joint name="box_j" type="fixed">
+    <parent link="cabin"/>
+    <child link="box"/>
+    <origin xyz="-0.4 0.0 2.4005" rpy="0 0 0"/>
+    <axis xyz="1  0  0"/>
+    <limit effort="0" lower="0" upper="0" velocity="0"/>
+  </joint>
+  <link name="imu" >
+    <visual name="visual_imu">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="0.073" radius="0.04"/>
+      </geometry>
+      <material name="material_imugps"/>
+    </visual>
+  </link>
+  <joint name="imu_j" type="fixed">
+    <parent link="cabin"/>
+    <child link="imu"/>
+    <origin xyz="-0.603 -0.19 2.33" rpy="0 0 0"/>
+    <axis xyz="1  0  0"/>
+    <limit effort="0" lower="0" upper="0" velocity="0"/>
+  </joint>
+  <link name="gps" >
+    <visual name="visual_gps">
+      <origin xyz="0 0 0.01" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="0.02" radius="0.031"/>
+      </geometry>
+      <material name="material_imugps"/>
+    </visual>
+  </link>
+  <joint name="gps_j" type="fixed">
+    <parent link="cabin"/>
+    <child link="gps"/>
+    <origin xyz="-0.3060 0.05 2.513" rpy="0 0 0"/>
+    <axis xyz="1  0  0"/>
+    <limit effort="0" lower="0" upper="0" velocity="0"/>
+  </joint>
+  <link name="trimble_gps" >
+    <visual name="visual_trimble_gps">
+      <origin xyz="0 0 0.01" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="0.04" radius="0.072"/>
+      </geometry>
+      <material name="material_imugps"/>
+    </visual>
+  </link>
+  <joint name="trimble_gps_j" type="fixed">
+    <parent link="cabin"/>
+    <child link="trimble_gps"/>
+    <origin xyz="0.1340 0.45 2.483" rpy="0 0 0"/>
+    <axis xyz="1  0  0"/>
+    <limit effort="0" lower="0" upper="0" velocity="0"/>
+  </joint>
+  <link name="velodyne_boom">
+    <collision name="velodyne_boom_c">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="0.0717" radius="0.05165"/>
+      </geometry>
+    </collision>
+    <visual name="visual_velodyne_boom">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="0.0717" radius="0.05165"/>
+      </geometry>
+      <material name="material_velodyne"/>
+    </visual>
+  </link>
+   <joint name="velodyne_boom_j" type="fixed">
+    <parent link="boom"/>
+    <child link="velodyne_boom"/>
+    <origin xyz="0.266848 -0.02 1.03801" rpy="1.5726 -0.574965  3.1415"/>
+    <!--origin xyz="0.266848 0.0019812 1.03801" rpy="1.5726 -0.574965  3.1415"/-->
+    <!--origin xyz="0.053 0 1.0" rpy="1.5726 -0.52 3.14"/-->
+    <!--origin xyz="0.266848 0.0019812 1.03801" rpy="1.67339 -0.544965 3.09109"/-->
+<!--origin xyz="0.23 0.0 1.03" rpy="1.59 -0.55 3.09"/-->
+    <axis xyz="1  0  0"/>
+    <limit effort="0" lower="0" upper="0" velocity="0.1"/>
+  </joint>
+  <link name="velodyne_left" >
+    <visual name="visual_velodyne_left">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+	<cylinder length="0.0717" radius="0.05165"/>
+      </geometry>
+      <material name="material_velodyne"/>
+    </visual>
+    <collision name="collision_velodyne_left">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="0.0717" radius="0.05165"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint_velodyne_left" type="fixed">
+    <parent link="cabin"/>
+    <child link="velodyne_left"/>
+    <origin xyz="0.511925 0.53 1.292254" rpy="0.403021 -0.052493 1.583287"/>
+    <!--origin xyz="0.511925 0.53 1.302254" rpy="0.403021 -0.052493 1.583287"/-->
+    <!--origin xyz="0.402031 0.544676 1.26314" rpy="0.401424 -0.055307 1.623144"/-->
+    <!--origin xyz="0.441925 0.546301 1.262254" rpy="0.403021 -0.052493 1.583287"/-->
+    <!--origin xyz="0.44 0.56 1.23" rpy="0.380 -0.029 1.545"/-->
+    <!--origin xyz="0.40 0.56 1.23" rpy="0.380 -0.029 1.585"/-->
+    <axis xyz="1  0  0"/>
+    <limit effort="0" lower="0" upper="0" velocity="0"/>
+  </joint>
+  <link name="velodyne_right" >
+    <visual name="visual_velodyne_right">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+	<cylinder length="0.0717" radius="0.05165"/>
+      </geometry>
+      <material name="material_velodyne"/>
+    </visual>
+    <collision name="collision_velodyne_right">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="0.0717" radius="0.05165"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint_velodyne_right" type="fixed">
+    <parent link="cabin"/>
+    <child link="velodyne_right"/>
+    <origin xyz="0.503 -0.53 1.2468" rpy="0.327456 0.015904 1.598201"/>		
+    <!--origin xyz="0.40 -0.50 1.2" rpy="0.305 0.040 1.558"/-->
+    <axis xyz="1  0  0"/>
+    <limit effort="0" lower="0" upper="0" velocity="0"/>
+  </joint>
+  <link name="camera_link"/>
+  <joint name="joint_camera_link" type="fixed">
+    <parent link="quickcoupler"/>
+    <child link="camera_link"/>
+    <origin xyz="0.43 -0.0 0.005" rpy="3.141 0.02 0.0"/>
+    <axis xyz="1  0  0"/>
+    <limit effort="0" lower="0" upper="0" velocity="0"/>
+  </joint>
+  <link name="realsense_link"/>
+  <joint name="joint_realsense_camera" type="fixed">
+    <parent link="quickcoupler"/>
+    <child link="realsense_link"/>
+    <!--origin xyz="0.4 0.015 -0.03" rpy="0.0 -0.05 0.0"/-->
+    <origin xyz="0.39 0.025 -0.06" rpy="0.0 -0.05 0.0"/>
+    <axis xyz="1  0  0"/>
+    <limit effort="0" lower="0" upper="0" velocity="0"/>
+  </joint>
+</robot>
