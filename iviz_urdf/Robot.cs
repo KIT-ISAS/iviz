@@ -18,7 +18,7 @@ namespace Iviz.Urdf
             List<Joint> joints = new List<Joint>();
             List<Material> materials = new List<Material>();
 
-            Name = node.Attributes["name"]?.Value ?? ""; // !
+            Name = node.Attributes?["name"]?.Value ?? ""; // !
 
 
             foreach (XmlNode child in node.ChildNodes)

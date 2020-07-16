@@ -8,7 +8,7 @@ namespace Iviz.Urdf
 
         internal Box(XmlNode node)
         {
-            Size = new Vector3(node.Attributes["size"]);
+            Size = new Vector3(node.Attributes?["size"]);
         }
     }
 }

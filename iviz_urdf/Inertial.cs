@@ -40,10 +40,7 @@ namespace Iviz.Urdf
                 throw new MalformedUrdfException(node);
             }
 
-            if (Origin is null)
-            {
-                Origin = Origin.Identity;
-            }
+            Origin ??= Origin.Identity;
 
             if (Inertia is null)
             {

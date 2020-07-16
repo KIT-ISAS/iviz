@@ -8,7 +8,7 @@ namespace Iviz.Urdf
 
         internal Child(XmlNode node)
         {
-            Link = Utils.ParseString(node.Attributes["link"]);
+            Link = Utils.ParseString(node.Attributes?["link"]);
         }
     }
 }

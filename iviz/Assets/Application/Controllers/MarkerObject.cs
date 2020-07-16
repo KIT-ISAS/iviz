@@ -370,7 +370,7 @@ namespace Iviz.App.Listeners
                     {
                         return null;
                     }
-                    return Resource.Displays.Generic.TryGetValue(uri, out Resource.Info<GameObject> info) ? info : null;
+                    return Resource.TryGetResource(uri, out Resource.Info<GameObject> info) ? info : null;
                 case MarkerType.CubeList:
                 case MarkerType.SphereList:
                     return Resource.Displays.MeshList;

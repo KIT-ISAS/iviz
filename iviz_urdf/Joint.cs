@@ -24,8 +24,8 @@ namespace Iviz.Urdf
 
         internal Joint(XmlNode node)
         {
-            Name = Utils.ParseString(node.Attributes["name"]);
-            string typeStr = Utils.ParseString(node.Attributes["type"]);
+            Name = Utils.ParseString(node.Attributes?["name"]);
+            string typeStr = Utils.ParseString(node.Attributes?["type"]);
             Type = GetJointType(typeStr, node);
 
             foreach (XmlNode child in node.ChildNodes)
@@ -50,10 +50,7 @@ namespace Iviz.Urdf
                 }
             }
 
-            if (Origin is null)
-            {
-                Origin = Origin.Identity;
-            }
+            Origin ??= Origin.Identity;
 
             if (Parent is null)
             {
@@ -65,15 +62,9 @@ namespace Iviz.Urdf
                 throw new MalformedUrdfException(node);
             }
 
-            if (Axis is null)
-            {
-                Axis = Axis.Right;
-            }
+            Axis ??= Axis.Right;
 
-            if (Limit is null)
-            {
-                Limit = Limit.Empty;
-            }
+            Limit ??= Limit.Empty;
         }
 
         static JointType GetJointType(string type, XmlNode node)

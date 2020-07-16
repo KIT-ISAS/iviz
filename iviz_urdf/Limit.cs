@@ -18,6 +18,10 @@ namespace Iviz.Urdf
 
         internal Limit(XmlNode node)
         {
+            if (node.Attributes == null)
+            {
+                throw new MalformedUrdfException();
+            }
             Lower = Utils.ParseFloat(node.Attributes["lower"], 0);
             Upper = Utils.ParseFloat(node.Attributes["upper"], 0);
             Velocity = Utils.ParseFloat(node.Attributes["velocity"], 0);

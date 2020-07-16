@@ -8,7 +8,7 @@ namespace Iviz.Urdf
 
         internal Texture(XmlNode node)
         {
-            Filename = Utils.ParseString(node.Attributes["filename"]);
+            Filename = Utils.ParseString(node.Attributes?["filename"]);
         }
     }
 }

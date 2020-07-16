@@ -8,7 +8,7 @@ namespace Iviz.Urdf
 
         internal Sphere(XmlNode node)
         {
-            Radius = Utils.ParseFloat(node.Attributes["radius"]);
+            Radius = Utils.ParseFloat(node.Attributes?["radius"]);
         }
     }
 }

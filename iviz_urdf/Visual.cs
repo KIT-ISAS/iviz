@@ -11,7 +11,7 @@ namespace Iviz.Urdf
 
         internal Visual(XmlNode node)
         {
-            Name = node.Attributes["name"]?.Value;
+            Name = node.Attributes?["name"]?.Value;
 
             foreach (XmlNode child in node.ChildNodes)
             {
@@ -34,10 +34,7 @@ namespace Iviz.Urdf
                 throw new MalformedUrdfException(node);
             }
 
-            if (Origin is null)
-            {
-                Origin = Origin.Identity;
-            }
+            Origin ??= Origin.Identity;
         }
     }
 }

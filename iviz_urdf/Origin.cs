@@ -17,8 +17,8 @@ namespace Iviz.Urdf
 
         internal Origin(XmlNode node)
         {
-            Rpy = Vector3.Parse(node.Attributes["rpy"], Vector3.Zero);
-            Xyz = Vector3.Parse(node.Attributes["xyz"], Vector3.Zero);
+            Rpy = Vector3.Parse(node.Attributes?["rpy"], Vector3.Zero);
+            Xyz = Vector3.Parse(node.Attributes?["xyz"], Vector3.Zero);
         }
     }
 }

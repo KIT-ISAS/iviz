@@ -10,7 +10,7 @@ namespace Iviz.Urdf
 
         internal Collision(XmlNode node)
         {
-            Name = node.Attributes["name"]?.Value;
+            Name = node.Attributes?["name"]?.Value;
 
             foreach (XmlNode child in node.ChildNodes)
             {
@@ -25,10 +25,7 @@ namespace Iviz.Urdf
                 }
             }
 
-            if (Origin is null)
-            {
-                Origin = Origin.Identity;
-            }
+            Origin ??= Origin.Identity;
         }
     }
 }

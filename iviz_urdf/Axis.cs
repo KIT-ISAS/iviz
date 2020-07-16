@@ -15,7 +15,7 @@ namespace Iviz.Urdf
 
         internal Axis(XmlNode node)
         {
-            Xyz = new Vector3(node.Attributes["xyz"]);
+            Xyz = new Vector3(node.Attributes?["xyz"]);
         }
     }
 }

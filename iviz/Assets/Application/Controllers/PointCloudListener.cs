@@ -19,7 +19,7 @@ namespace Iviz.App.Listeners
         [DataMember] public Resource.Module Module => Resource.Module.PointCloud;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
-        [DataMember] public string IntensityChannel { get; set; } = "x";
+        [DataMember] public string IntensityChannel { get; set; } = "intensity";
         [DataMember] public float PointSize { get; set; } = 0.03f;
         [DataMember] public Resource.ColormapId Colormap { get; set; } = Resource.ColormapId.hsv;
         [DataMember] public bool ForceMinMax { get; set; } = false;

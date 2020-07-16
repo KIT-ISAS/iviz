@@ -9,8 +9,8 @@ namespace Iviz.Urdf
 
         internal Mesh(XmlNode node)
         {
-            Filename = Utils.ParseString(node.Attributes["filename"]);
-            Scale = Vector3.Parse(node.Attributes["scale"], Vector3.One);
+            Filename = Utils.ParseString(node.Attributes?["filename"]);
+            Scale = Vector3.Parse(node.Attributes?["scale"], Vector3.One);
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Iviz.Urdf
 
         internal Mass(XmlNode node)
         {
-            Value = Utils.ParseFloat(node.Attributes["value"]);
+            Value = Utils.ParseFloat(node.Attributes?["value"]);
         }
     }
 }

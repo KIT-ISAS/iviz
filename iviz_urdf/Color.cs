@@ -13,7 +13,7 @@ namespace Iviz.Urdf
 
         internal Color(XmlNode node)
         {
-            Rgba = new Rgba(node.Attributes["rgba"]);
+            Rgba = new Rgba(node.Attributes?["rgba"]);
         }
     }
 }

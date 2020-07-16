@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Xml;
 
 namespace Iviz.Urdf
@@ -6,12 +8,15 @@ namespace Iviz.Urdf
     {
         public string Name { get; }
         public Inertial Inertial { get; }
-        public Visual Visual { get; }
-        public Collision Collision { get; }
+        public ReadOnlyCollection<Visual> Visuals { get; }
+        public ReadOnlyCollection<Collision> Collisions { get; }
 
         internal Link(XmlNode node)
         {
-            Name = Utils.ParseString(node.Attributes["name"]);
+            Name = node.Attributes?["name"]?.Value;
+
+            List<Visual> visuals = new List<Visual>();
+            List<Collision> collisions = new List<Collision>();
 
             foreach (XmlNode child in node.ChildNodes)
             {
@@ -21,18 +26,17 @@ namespace Iviz.Urdf
                         Inertial = new Inertial(child);
                         break;
                     case "visual":
-                        Visual = new Visual(child);
+                        visuals.Add(new Visual(child));
                         break;
                     case "collision":
-                        Collision = new Collision(child);
+                        collisions.Add(new Collision(child));
                         break;
                 }
             }
 
-            if (Inertial == null)
-            {
-                Inertial = Inertial.Empty;
-            }
+            Inertial ??= Inertial.Empty;
+            Visuals = new ReadOnlyCollection<Visual>(visuals);
+            Collisions = new ReadOnlyCollection<Collision>(collisions);
         }
     }
 }

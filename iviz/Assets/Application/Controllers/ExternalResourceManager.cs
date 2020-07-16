@@ -29,7 +29,7 @@ namespace Iviz.App.Resources
             InvalidPathCharacters.Add(':');
 
             node = new GameObject("External Resources");
-            node.transform.parent = TFListener.ListenersFrame.transform;
+            node.transform.parent = TFListener.ListenersFrame?.transform;
             node.SetActive(false);
 
             string path = UnityEngine.Application.persistentDataPath + "/resources.json";
@@ -57,7 +57,7 @@ namespace Iviz.App.Resources
             //Logger.Internal($"Offering <b>{service}</b> <i>[{Msgs.BuiltIns.GetServiceType(typeof(T))}]</i>.");
         }
 
-        public bool TryGetResource(Uri uri, out Resource.Info<GameObject> resource)
+        public bool TryGet(Uri uri, out Resource.Info<GameObject> resource)
         {
             if (loadedObjects.TryGetValue(uri, out resource))
             {
