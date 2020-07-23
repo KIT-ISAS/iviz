@@ -5,6 +5,7 @@ namespace Iviz.Msgs.IvizMsgs
     [DataContract (Name = "iviz_msgs/Texture")]
     public sealed class Texture : IMessage
     {
+        [DataMember (Name = "path")] public string Path { get; set; }
         [DataMember (Name = "width")] public uint Width { get; set; }
         [DataMember (Name = "height")] public uint Height { get; set; }
         [DataMember (Name = "bpp")] public uint Bpp { get; set; }
@@ -13,12 +14,14 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> Constructor for empty message. </summary>
         public Texture()
         {
+            Path = "";
             Data = System.Array.Empty<byte>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Texture(uint Width, uint Height, uint Bpp, byte[] Data)
+        public Texture(string Path, uint Width, uint Height, uint Bpp, byte[] Data)
         {
+            this.Path = Path;
             this.Width = Width;
             this.Height = Height;
             this.Bpp = Bpp;
@@ -28,6 +31,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> Constructor with buffer. </summary>
         internal Texture(Buffer b)
         {
+            Path = b.DeserializeString();
             Width = b.Deserialize<uint>();
             Height = b.Deserialize<uint>();
             Bpp = b.Deserialize<uint>();
@@ -42,6 +46,7 @@ namespace Iviz.Msgs.IvizMsgs
         public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
+            b.Serialize(Path);
             b.Serialize(Width);
             b.Serialize(Height);
             b.Serialize(Bpp);
@@ -50,13 +55,15 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
+            if (Path is null) throw new System.NullReferenceException();
             if (Data is null) throw new System.NullReferenceException();
         }
     
         public int RosMessageLength
         {
             get {
-                int size = 16;
+                int size = 20;
+                size += BuiltIns.UTF8.GetByteCount(Path);
                 size += 1 * Data.Length;
                 return size;
             }
@@ -68,11 +75,12 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosMessageType = "iviz_msgs/Texture";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "cfa9bc58f341a68c382ac43a1da03b79";
+        [Preserve] public const string RosMd5Sum = "15648750e71eb8bc15207f2746db0398";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAEyvNzCsxNlIoz0wpyeAqhXAyUjPTM0pgvKSCAjDTIjpWISWxJJGLCwDzVI2NNAAAAA==";
+                "H4sIAAAAAAAAEysuKcrMS1coSCzJsOYqzcwrMTZSKM9MKcmAcTJSM9MzSmC8pIICMNMiOlYhJbEkkYsL" +
+                "AB/YPg5BAAAA";
                 
     }
 }

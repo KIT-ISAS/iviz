@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public abstract class WrapperResource : MonoBehaviour, IDisplay
+    public abstract class DisplayWrapperResource : MonoBehaviour, IDisplay
     {
         protected abstract IDisplay Display { get; }
 

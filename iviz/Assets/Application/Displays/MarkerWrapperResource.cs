@@ -5,7 +5,7 @@ using Iviz.Displays;
 
 namespace Iviz.App
 {
-    public sealed class MarkerWrapper : MonoBehaviour, IDisplay, ISupportsAROcclusion, ISupportsTint
+    public sealed class MarkerWrapperResource : MonoBehaviour, ISupportsTintAndAROcclusion
     {
         MeshRenderer meshRenderer;
         Collider Collider;
@@ -45,27 +45,40 @@ namespace Iviz.App
             set => meshRenderer.enabled = value;
         }
 
-        bool occlusionOnly_;
+        bool occlusionOnly;
         public bool OcclusionOnly
         {
-            get => occlusionOnly_;
+            get => occlusionOnly;
             set
             {
-                occlusionOnly_ = value;
+                occlusionOnly = value;
                 UpdateMaterials();
             }
         }
 
-        [SerializeField] Color tint_;
+        [SerializeField] Color tint = Color.white;
         public Color Tint
         {
-            get => tint_;
+            get => tint;
             set
             {
-                tint_ = value;
+                tint = value;
                 UpdateMaterials();
             }
         }
+        
+        [SerializeField] Color color = Color.white;
+        public Color Color
+        {
+            get => color;
+            set
+            {
+                color = value;
+                UpdateMaterials();
+            }
+        }       
+        
+        Color EffectiveColor => Color * Tint;
 
         void UpdateMaterials()
         {
@@ -80,8 +93,10 @@ namespace Iviz.App
                     }
                 }
                 meshRenderer.sharedMaterials = occlusionMaterials;
+                return;
             }
-            else if (Tint.a <= 254f / 255f)
+            Color effectiveColor = EffectiveColor;
+            if (effectiveColor.a <= 254f / 255f)
             {
                 if (transparentMaterials == null)
                 {
@@ -103,8 +118,8 @@ namespace Iviz.App
                 meshRenderer.sharedMaterials = transparentMaterials;
                 for (int i = 0; i < transparentMaterials.Length; i++)
                 {
-                    Color color = originalColors[i] * Tint;
-                    meshRenderer.SetPropertyColor(color, i);
+                    Color tmpColor = originalColors[i] * effectiveColor;
+                    meshRenderer.SetPropertyColor(tmpColor, i);
                 }
             }
             else
@@ -112,8 +127,8 @@ namespace Iviz.App
                 meshRenderer.sharedMaterials = materials;
                 for (int i = 0; i < materials.Length; i++)
                 {
-                    Color color = originalColors[i] * Tint;
-                    meshRenderer.SetPropertyColor(color, i);
+                    Color tmpColor = originalColors[i] * effectiveColor;
+                    meshRenderer.SetPropertyColor(tmpColor, i);
                 }
             }
         }

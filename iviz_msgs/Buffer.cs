@@ -3,7 +3,7 @@
 namespace Iviz.Msgs
 {
     /// <summary>
-    /// Class that contains information about an underlying buffer.
+    /// Wrapper around a byte array that contains a serialized ROS message. 
     /// </summary>
     public unsafe class Buffer
     {
@@ -38,17 +38,23 @@ namespace Iviz.Msgs
 
             if (array.Length != size)
             {
-                throw new ArgumentException("Invalid array size. Expected " + size + ", but got " + array.Length + ".", nameof(array));
+                throw new ArgumentException("Invalid array size. Expected " + size + ", but got " + array.Length + ".",
+                    nameof(array));
             }
         }
 
         internal string DeserializeString()
         {
             AssertInRange(4);
-            uint count = *(uint*)ptr; ptr += 4;
-            if (count == 0) { return string.Empty; }
+            uint count = *(uint*) ptr;
+            ptr += 4;
+            if (count == 0)
+            {
+                return string.Empty;
+            }
+
             AssertInRange(count);
-            string val = BuiltIns.UTF8.GetString(ptr, (int)count);
+            string val = BuiltIns.UTF8.GetString(ptr, (int) count);
             ptr += count;
             return val;
         }
@@ -58,32 +64,35 @@ namespace Iviz.Msgs
             if (count == 0)
             {
                 AssertInRange(4);
-                count = *(uint*)ptr; ptr += 4;
+                count = *(uint*) ptr;
+                ptr += 4;
                 if (count == 0)
                 {
                     return Array.Empty<string>();
                 }
             }
+
             string[] val = new string[count];
             for (int i = 0; i < val.Length; i++)
             {
                 val[i] = DeserializeString();
             }
+
             return val;
         }
 
         internal T Deserialize<T>() where T : unmanaged
         {
-            AssertInRange((uint)sizeof(T));
-            T val = *(T*)ptr;
+            AssertInRange((uint) sizeof(T));
+            T val = *(T*) ptr;
             ptr += sizeof(T);
             return val;
         }
 
         internal void Deserialize<T>(out T t) where T : unmanaged
         {
-            AssertInRange((uint)sizeof(T));
-            t = *(T*)ptr;
+            AssertInRange((uint) sizeof(T));
+            t = *(T*) ptr;
             ptr += sizeof(T);
         }
 
@@ -92,20 +101,23 @@ namespace Iviz.Msgs
             if (count == 0)
             {
                 AssertInRange(4);
-                count = *(uint*)ptr; ptr += 4;
+                count = *(uint*) ptr;
+                ptr += 4;
                 if (count == 0)
                 {
                     return Array.Empty<T>();
                 }
             }
-            AssertInRange(count * (uint)sizeof(T));
+
+            AssertInRange(count * (uint) sizeof(T));
             T[] val = new T[count];
-            fixed (T* b_ptr = val)
+            fixed (T* bPtr = val)
             {
-                uint size = count * (uint)sizeof(T);
-                Memcpy(b_ptr, ptr, size);
+                uint size = count * (uint) sizeof(T);
+                Memcpy(bPtr, ptr, size);
                 ptr += size;
             }
+
             return val;
         }
 
@@ -114,31 +126,34 @@ namespace Iviz.Msgs
             if (count == 0)
             {
                 AssertInRange(4);
-                count = *(uint*)ptr; ptr += 4;
+                count = *(uint*) ptr;
+                ptr += 4;
                 if (count == 0)
                 {
                     return Array.Empty<T>();
                 }
             }
+
             return new T[count];
         }
 
         internal void Serialize<T>(in T val) where T : unmanaged
         {
-            AssertInRange((uint)sizeof(T));
-            *(T*)ptr = val;
+            AssertInRange((uint) sizeof(T));
+            *(T*) ptr = val;
             ptr += sizeof(T);
         }
 
         internal void Serialize(string val)
         {
-            uint count = (uint)BuiltIns.UTF8.GetByteCount(val);
+            uint count = (uint) BuiltIns.UTF8.GetByteCount(val);
             AssertInRange(4 + count);
-            *(uint*)ptr = count; ptr += 4;
+            *(uint*) ptr = count;
+            ptr += 4;
             if (count == 0) return;
             fixed (char* b_ptr = val)
             {
-                BuiltIns.UTF8.GetBytes(b_ptr, val.Length, ptr, (int)count);
+                BuiltIns.UTF8.GetBytes(b_ptr, val.Length, ptr, (int) count);
                 ptr += count;
             }
         }
@@ -153,12 +168,14 @@ namespace Iviz.Msgs
             if (count == 0)
             {
                 AssertInRange(4);
-                *(int*)ptr = val.Length; ptr += 4;
+                *(int*) ptr = val.Length;
+                ptr += 4;
             }
             else
             {
                 AssertSize(val, count);
             }
+
             for (int i = 0; i < val.Length; i++)
             {
                 Serialize(val[i]);
@@ -169,18 +186,20 @@ namespace Iviz.Msgs
         {
             if (count == 0)
             {
-                AssertInRange((uint)(4 + val.Length * sizeof(T)));
-                *(int*)ptr = val.Length; ptr += 4;
+                AssertInRange((uint) (4 + val.Length * sizeof(T)));
+                *(int*) ptr = val.Length;
+                ptr += 4;
             }
             else
             {
                 AssertSize(val, count);
-                AssertInRange(count * (uint)sizeof(T));
+                AssertInRange(count * (uint) sizeof(T));
             }
-            fixed (T* b_ptr = val)
+
+            fixed (T* bPtr = val)
             {
-                uint size = (uint)(val.Length * sizeof(T));
-                Memcpy(ptr, b_ptr, size);
+                uint size = (uint) (val.Length * sizeof(T));
+                Memcpy(ptr, bPtr, size);
                 ptr += size;
             }
         }
@@ -191,54 +210,123 @@ namespace Iviz.Msgs
             if (count == 0)
             {
                 AssertInRange(4);
-                *(int*)ptr = val.Length; ptr += 4;
+                *(int*) ptr = val.Length;
+                ptr += 4;
             }
             else
             {
                 AssertSize(val, count);
             }
-            for (int i = 0; i < val.Length; i++)
+
+            foreach (T t in val)
             {
-                val[i].RosSerialize(this);
+                t.RosSerialize(this);
             }
         }
 
-        public static T Deserialize<T>(T generator, byte[] buffer, int size) where T : ISerializable
+        /// <summary>
+        /// Deserializes a message of the given type from the buffer array.  
+        /// </summary>
+        /// <param name="generator">
+        /// An arbitrary instance of the type T. Can be anything.
+        /// This is a (rather unclean) workaround to the fact that C# cannot invoke static functions from generics.
+        /// So instead of using T.Deserialize(), we need an instance to do this.
+        /// </param>
+        /// <param name="buffer">
+        /// The byte array that contains the serialized message. 
+        /// </param>
+        /// <typeparam name="T">Message type.</typeparam>
+        /// <returns>The deserialized message.</returns>
+        public static T Deserialize<T>(T generator, ArraySegment<byte> buffer) where T : ISerializable
         {
-            if (buffer is null)
+            if (generator == null)
+            {
+                throw new ArgumentNullException(nameof(generator));
+            }
+
+            fixed (byte* bPtr = buffer.Array)
+            {
+                Buffer b = new Buffer(bPtr + buffer.Offset, bPtr + buffer.Offset + buffer.Count);
+                return (T) generator.RosDeserialize(b);
+            }
+        }
+
+        /// <summary>
+        /// Deserializes a message of the given type from the buffer array.  
+        /// </summary>
+        /// <param name="generator">
+        /// An arbitrary instance of the type T. Can be anything.
+        /// This is a (rather unclean) workaround to the fact that C# cannot invoke static functions from generics.
+        /// So instead of using T.Deserialize(), we need an instance to do this.
+        /// </param>
+        /// <param name="buffer">
+        /// The source byte array. 
+        /// </param>
+        /// <param name="size">
+        /// Optional. The expected size of the message inside of the array. Must be less or equal the array size.
+        /// </param>
+        /// <typeparam name="T">Message type.</typeparam>
+        /// <returns>The deserialized message.</returns>
+        public static T Deserialize<T>(T generator, byte[] buffer, int size = -1) where T : ISerializable
+        {
+            ArraySegment<byte> segment;
+            if (buffer == null)
             {
                 throw new ArgumentNullException(nameof(buffer));
             }
-            if (size > buffer.Length)
+
+            if (size == -1)
             {
-                throw new ArgumentOutOfRangeException(nameof(buffer));
+                segment = new ArraySegment<byte>(buffer);
+            }
+            else
+            {
+                if (buffer.Length < size)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(buffer));
+                }
+
+                segment = new ArraySegment<byte>(buffer, 0, size);
             }
 
-            fixed (byte* b_ptr = buffer)
-            {
-                Buffer b = new Buffer(b_ptr, b_ptr + size);
-                return (T)generator.RosDeserialize(b);
-            }
+            return Deserialize(generator, segment);
         }
 
-        public static uint Serialize(ISerializable message, byte[] buffer)
+        /// <summary>
+        /// Serializes the given message into the buffer array.
+        /// </summary>
+        /// <param name="message">The ROS message.</param>
+        /// <param name="buffer">The destination byte array.</param>
+        /// <returns>The number of bytes written.</returns>
+        public static uint Serialize(ISerializable message, ArraySegment<byte> buffer)
         {
             if (message is null)
             {
                 throw new ArgumentNullException(nameof(message));
             }
 
-            if (buffer is null)
+            fixed (byte* bPtr = buffer.Array)
+            {
+                Buffer b = new Buffer(bPtr + buffer.Offset, bPtr + buffer.Offset + buffer.Count);
+                message.RosSerialize(b);
+                return (uint) (b.ptr - bPtr);
+            }
+        }
+
+        /// <summary>
+        /// Serializes the given message into the buffer array.
+        /// </summary>
+        /// <param name="message">The ROS message.</param>
+        /// <param name="buffer">The destination byte array.</param>
+        /// <returns>The number of bytes written.</returns>
+        public static uint Serialize(ISerializable message, byte[] buffer)
+        {
+            if (buffer == null)
             {
                 throw new ArgumentNullException(nameof(buffer));
             }
 
-            fixed (byte* b_ptr = buffer)
-            {
-                Buffer b = new Buffer(b_ptr, b_ptr + buffer.Length);
-                message.RosSerialize(b);
-                return (uint)(b.ptr - b_ptr);
-            }
+            return Serialize(message, new ArraySegment<byte>(buffer));
         }
     }
 }

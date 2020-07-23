@@ -6,7 +6,6 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class Mesh : IMessage
     {
         [DataMember (Name = "name")] public string Name { get; set; }
-        [DataMember (Name = "bounds")] public BoundingBox Bounds { get; set; }
         [DataMember (Name = "vertices")] public Vector3[] Vertices { get; set; }
         [DataMember (Name = "normals")] public Vector3[] Normals { get; set; }
         [DataMember (Name = "texCoords")] public Vector2[] TexCoords { get; set; }
@@ -26,10 +25,9 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Mesh(string Name, in BoundingBox Bounds, Vector3[] Vertices, Vector3[] Normals, Vector2[] TexCoords, Color[] Colors, Triangle[] Faces, uint MaterialIndex)
+        public Mesh(string Name, Vector3[] Vertices, Vector3[] Normals, Vector2[] TexCoords, Color[] Colors, Triangle[] Faces, uint MaterialIndex)
         {
             this.Name = Name;
-            this.Bounds = Bounds;
             this.Vertices = Vertices;
             this.Normals = Normals;
             this.TexCoords = TexCoords;
@@ -42,7 +40,6 @@ namespace Iviz.Msgs.IvizMsgs
         internal Mesh(Buffer b)
         {
             Name = b.DeserializeString();
-            Bounds = new BoundingBox(b);
             Vertices = b.DeserializeStructArray<Vector3>();
             Normals = b.DeserializeStructArray<Vector3>();
             TexCoords = b.DeserializeStructArray<Vector2>();
@@ -60,7 +57,6 @@ namespace Iviz.Msgs.IvizMsgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Name);
-            Bounds.RosSerialize(b);
             b.SerializeStructArray(Vertices, 0);
             b.SerializeStructArray(Normals, 0);
             b.SerializeStructArray(TexCoords, 0);
@@ -82,7 +78,7 @@ namespace Iviz.Msgs.IvizMsgs
         public int RosMessageLength
         {
             get {
-                int size = 52;
+                int size = 28;
                 size += BuiltIns.UTF8.GetByteCount(Name);
                 size += 12 * Vertices.Length;
                 size += 12 * Normals.Length;
@@ -99,14 +95,14 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosMessageType = "iviz_msgs/Mesh";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "f3a3007861d23d32f54471df3b83e314";
+        [Preserve] public const string RosMd5Sum = "b76923f54d0c429ac4071dd83be15982";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE71SsQrCMBDd7yvyB0K7iODSDuLgpLiIyLWNJZDmIElL2q83LY2N4GjN8u7eI3cv4Rmr" +
-                "haqZwoZDRq2qfJeRY8VYG7jy0pJOb3fWcW1FyWNKkW5QBibxjOUuJ9L+Yk6StGfKEQ1ctEBVS+6ZJ45T" +
-                "WqFsmrAGLfeSPKqKO4D9jw+czocdE50YHo2pzSZ6ITwl4WRBqKhB96H0sdLHyhArw/rW529/b11sLrb+" +
-                "ZiP5amP15VOopuhsWcB6xmJGXN9GCHMIMYaiCEUJ8ALPHwsOWQMAAA==";
+                "H4sIAAAAAAAAE72SsQrCMBCG93uKvIHQLiI4dRAHJ8VFRK7pNQSSHCSx1D69aWmKg6P1lv/nC9z9XC5E" +
+                "r50SDi3BlWRkX97uoiMftaTwgRx7iyaTIpFIfcXsmwAVG/aJyFEDXLxGpwwl0uLY5aldLAthMVJ6MkfX" +
+                "UA+w/3HB6XzYCd3p4WGDCps5O7SGcRzfL+61uOFfMYqvMVYfPv3MtP+tyKpmrWfF9WPki8iXgNnU2UiA" +
+                "NzpxquqLAgAA";
                 
     }
 }
