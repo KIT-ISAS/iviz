@@ -1,8 +1,7 @@
-﻿using Iviz.App.Listeners;
-using Iviz.Resources;
+﻿using Iviz.Resources;
 using UnityEngine;
 
-namespace Iviz.App.Displays
+namespace Iviz.Controllers
 {
     public sealed class ObjectClickableNode : ClickableNode
     {

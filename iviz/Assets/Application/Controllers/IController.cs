@@ -1,9 +1,15 @@
 ﻿
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
+    public interface IModuleData
+    {
+        void ResetPanel();
+        void ShowPanel();
+    }
+    
     public interface IController
     {
-        ModuleData ModuleData { get; }
+        IModuleData ModuleData { get; }
         void Stop();
         void Reset();
     }

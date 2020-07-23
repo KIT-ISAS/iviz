@@ -1,13 +1,10 @@
 ﻿using UnityEngine;
 using System.Linq;
 using System.Collections.Generic;
-using System;
-using UnityEngine.EventSystems;
+using Iviz.Controllers;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json;
-using Iviz.App.Listeners;
 using Iviz.Resources;
-using Iviz.App;
 
 namespace Iviz.Displays
 {

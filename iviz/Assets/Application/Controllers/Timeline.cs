@@ -1,10 +1,8 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
-namespace Iviz.App
+namespace Iviz.Controllers
 {
     public sealed class Timeline
     {

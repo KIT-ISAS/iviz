@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using Iviz.Resources;
-using UnityEngine.UI;
+﻿using Iviz.Resources;
 
 namespace Iviz.App
 {

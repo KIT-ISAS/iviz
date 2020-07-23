@@ -1,10 +1,7 @@
 ﻿using UnityEngine;
-using System.Collections;
-using Iviz.App;
 using Iviz.Resources;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Unity.Mathematics;
 using System.Threading.Tasks;
 
@@ -96,8 +93,6 @@ namespace Iviz.Displays
 
         void UpdateSize()
         {
-            float totalSizeX = NumCellsX * CellSize;
-            float totalSizeY = NumCellsY * CellSize;
         }
 
         public Resource.ColormapId Colormap
@@ -129,6 +124,7 @@ namespace Iviz.Displays
             resource.Mesh = cubeObject.GetComponent<MeshFilter>().sharedMesh;
             resource.UseIntensityTexture = true;
             resource.UsePerVertexScale = true;
+            resource.CastShadows = false; // fix weird shadow bug
         }
 
         public override void Stop()

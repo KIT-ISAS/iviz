@@ -1,14 +1,12 @@
 ﻿using UnityEngine;
 using System;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using Iviz.RoslibSharp;
 using Iviz.Displays;
-using Iviz.App.Listeners;
 using Iviz.Resources;
 using Iviz.App.Displays;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     [DataContract]
     public sealed class DepthImageProjectorConfiguration : JsonToString, IConfiguration
@@ -27,7 +25,7 @@ namespace Iviz.App.Listeners
         readonly DepthImageResource resource;
         readonly SimpleDisplayNode node;
 
-        public ModuleData ModuleData { get; }
+        public IModuleData ModuleData { get; }
 
         public TFFrame Frame => depthImage?.Frame;
 
@@ -117,7 +115,7 @@ namespace Iviz.App.Listeners
             }
         }
 
-        public DepthImageProjectorController(ModuleData moduleData)
+        public DepthImageProjectorController(IModuleData moduleData)
         {
             ModuleData = moduleData;
             node = SimpleDisplayNode.Instantiate("DepthImage");

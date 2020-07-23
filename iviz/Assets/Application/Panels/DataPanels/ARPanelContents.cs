@@ -1,6 +1,4 @@
 ﻿
-using UnityEngine.UIElements;
-
 namespace Iviz.App
 {
     /// <summary>

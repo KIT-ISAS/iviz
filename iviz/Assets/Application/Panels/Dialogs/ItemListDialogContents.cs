@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Iviz.Displays;
 using Iviz.Resources;
 
 namespace Iviz.App

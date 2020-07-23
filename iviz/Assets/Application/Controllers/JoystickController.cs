@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System.Runtime.Serialization;
 using Iviz.RoslibSharp;
 using System;
+using Iviz.Displays;
 using Iviz.Resources;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     [DataContract]
     public sealed class JoystickConfiguration : JsonToString, IConfiguration
@@ -27,7 +27,7 @@ namespace Iviz.App.Listeners
 
     public sealed class JoystickController : IController
     {
-        public ModuleData ModuleData { get; }
+        public IModuleData ModuleData { get; }
 
         readonly JoystickConfiguration config = new JoystickConfiguration();
         public JoystickConfiguration Config
@@ -203,7 +203,7 @@ namespace Iviz.App.Listeners
         }
 
         //void Awake()
-        public JoystickController(ModuleData moduleData)
+        public JoystickController(IModuleData moduleData)
         {
             ModuleData = moduleData;
             Config = new JoystickConfiguration();

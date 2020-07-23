@@ -4,13 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Net;
-using System.Net.Sockets;
-using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Iviz.App
+namespace Iviz.Controllers
 {
     public sealed class RoslibConnection : RosConnection
     {

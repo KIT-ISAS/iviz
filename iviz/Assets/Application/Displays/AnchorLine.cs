@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Iviz.App;
 using Iviz.Displays;
 using Iviz.Resources;
 using UnityEngine;

@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using Iviz.Resources;
-using Iviz.Displays;
 
-namespace Iviz.App
+namespace Iviz.Displays
 {
     public sealed class ResourcePool : MonoBehaviour
     {

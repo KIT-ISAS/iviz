@@ -1,11 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
+using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.RoslibSharp;
-using UnityEngine;
 
-namespace Iviz.App
+namespace Iviz.Controllers
 {
     [DataContract]
     public class RosSenderStats : JsonToString

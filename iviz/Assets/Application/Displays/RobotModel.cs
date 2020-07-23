@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Iviz.Displays;
 using Iviz.Resources;
 using Iviz.Urdf;
 using UnityEngine;

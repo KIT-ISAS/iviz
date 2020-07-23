@@ -1,11 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-using Iviz.App;
-using System;
-using System.Net;
-using System.Text;
-using System.IO;
-using Iviz.App.Listeners;
+﻿using Iviz.Controllers;
 
 namespace Iviz.App
 {
@@ -14,7 +7,7 @@ namespace Iviz.App
         TFDialogContents panel;
         public override IDialogPanelContents Panel => panel;
 
-        public override void Initialize(DisplayListPanel newPanel)
+        public override void Initialize(ModuleListPanel newPanel)
         {
             base.Initialize(newPanel);
             panel = (TFDialogContents)DialogPanelManager.GetPanelByType(DialogPanelType.TF);

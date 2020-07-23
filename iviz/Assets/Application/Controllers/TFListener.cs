@@ -3,18 +3,18 @@ using System.Collections.Generic;
 using tfMessage_v2 = Iviz.Msgs.Tf2Msgs.TFMessage;
 using System.Linq;
 using Iviz.RoslibSharp;
-using Iviz.App.Displays;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.Tf;
 using System.Runtime.Serialization;
 using System;
 using System.Collections.ObjectModel;
+using Iviz.App;
 using Iviz.Displays;
 using Iviz.Resources;
 using Transform = UnityEngine.Transform;
 using Vector3 = UnityEngine.Vector3;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     [DataContract]
     public sealed class TFConfiguration : JsonToString, IConfiguration
@@ -69,7 +69,7 @@ namespace Iviz.App.Listeners
 
         public RosSender<tfMessage_v2> Publisher { get; }
 
-        public override ModuleData ModuleData { get; }
+        public override IModuleData ModuleData { get; }
 
         public RosListener ListenerStatic { get; private set; }
 
@@ -186,7 +186,7 @@ namespace Iviz.App.Listeners
             }
         }
 
-        public TFListener(ModuleData moduleData)
+        public TFListener(IModuleData moduleData)
         {
             ModuleData = moduleData;
             Instance = this;

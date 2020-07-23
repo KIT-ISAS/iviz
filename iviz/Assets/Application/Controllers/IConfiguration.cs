@@ -1,7 +1,7 @@
 ﻿using Iviz.Resources;
 using System;
 
-namespace Iviz.App
+namespace Iviz.Controllers
 {
     public interface IConfiguration
     {

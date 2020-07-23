@@ -2,19 +2,15 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading;
-using Iviz.App.Listeners;
 using Iviz.Displays;
 using Iviz.Resources;
-using Iviz.RoslibSharp;
 using Newtonsoft.Json;
 using UnityEngine;
 
-namespace Iviz.App.Resources
+namespace Iviz.Controllers
 {
-
     public class ExternalResourceManager
     {
         readonly Dictionary<Uri, string> resourceFiles = new Dictionary<Uri, string>();

@@ -1,8 +1,8 @@
-﻿using Iviz.App.Listeners;
+﻿using Iviz.App;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace Iviz.App.Displays
+namespace Iviz.Controllers
 {
     public abstract class ClickableNode : DisplayNode, IPointerClickHandler
     {
@@ -15,7 +15,7 @@ namespace Iviz.App.Displays
         public abstract Vector3 BoundsScale { get; }
         public abstract string Name { get; }
 
-        public ModuleData ModuleData { get; set; }
+        public IModuleData ModuleData { get; set; }
         public bool UsesBoundaryBox { get; protected set; } = true;
 
 

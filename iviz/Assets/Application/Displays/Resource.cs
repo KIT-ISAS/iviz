@@ -12,8 +12,7 @@ using MaterialInfo = Iviz.Resources.Resource.Info<UnityEngine.Material>;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.NavMsgs;
 using System.Text;
-using Iviz.App.Listeners;
-using Iviz.App.Resources;
+using Iviz.Controllers;
 using Iviz.Msgs.GridMapMsgs;
 
 namespace Iviz.Resources

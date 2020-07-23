@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 using Iviz.RoslibSharp;
 using Iviz.Resources;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     [DataContract]
     public sealed class JointStateConfiguration : JsonToString, IConfiguration
@@ -23,7 +23,7 @@ namespace Iviz.App.Listeners
 
     public sealed class JointStateListener : ListenerController
     {
-        public override ModuleData ModuleData { get; }
+        public override IModuleData ModuleData { get; }
 
         public override TFFrame Frame => TFListener.MapFrame;
 
@@ -92,7 +92,7 @@ namespace Iviz.App.Listeners
 
         readonly HashSet<string> warnNotFound = new HashSet<string>();
 
-        public JointStateListener(ModuleData moduleData)
+        public JointStateListener(IModuleData moduleData)
         {
             ModuleData = moduleData;
         }

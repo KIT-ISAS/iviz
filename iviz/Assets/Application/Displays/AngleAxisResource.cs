@@ -1,9 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using Iviz.App;
 using Iviz.Resources;
-using RosSharp.RosBridgeClient.Actionlib;
-using UnityEngine.XR.ARKit;
 
 namespace Iviz.Displays
 {

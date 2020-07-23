@@ -1,11 +1,10 @@
 ﻿using UnityEngine;
 using System.Linq;
 using Iviz.Resources;
-using Iviz.Displays;
 
-namespace Iviz.App
+namespace Iviz.Displays
 {
-    public sealed class MarkerWrapper : MonoBehaviour, IDisplay, ISupportsAROcclusion, ISupportsTint
+    public sealed class MarkerWrapper : MonoBehaviour, ISupportsAROcclusion, ISupportsTint
     {
         MeshRenderer meshRenderer;
         Collider Collider;

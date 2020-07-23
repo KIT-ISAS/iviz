@@ -1,10 +1,6 @@
 ﻿using UnityEngine;
-using System;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using Iviz.RoslibSharp;
 using Iviz.Displays;
-using Iviz.App.Listeners;
 using Iviz.Resources;
 
 namespace Iviz.App.Displays

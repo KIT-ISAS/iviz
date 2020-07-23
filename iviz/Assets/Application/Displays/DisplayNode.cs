@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
 using System;
-using Iviz.App.Listeners;
 
-namespace Iviz.App.Displays
+namespace Iviz.Controllers
 {
     public abstract class DisplayNode : MonoBehaviour
     {

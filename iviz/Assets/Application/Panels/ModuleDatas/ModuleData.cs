@@ -1,13 +1,12 @@
 ﻿using System;
-using Iviz.App.Listeners;
+using Iviz.Controllers;
 using Iviz.Resources;
-using UnityEngine;
 
 namespace Iviz.App
 {
-    public abstract class ModuleData
+    public abstract class ModuleData : IModuleData
     {
-        protected DisplayListPanel ModuleListPanel { get; }
+        protected ModuleListPanel ModuleListPanel { get; }
         protected DataPanelManager DataPanelManager => ModuleListPanel.DataPanelManager;
 
         string buttonText;
@@ -31,7 +30,7 @@ namespace Iviz.App
         bool Visible => Configuration?.Visible ?? true;
         bool IsSelected => DataPanelManager.SelectedModuleData == this;
 
-        protected ModuleData(DisplayListPanel moduleList, string topic, string type)
+        protected ModuleData(ModuleListPanel moduleList, string topic, string type)
         {
             ModuleListPanel = moduleList;
             Topic = topic;
@@ -43,10 +42,10 @@ namespace Iviz.App
             string text;
             if (!string.IsNullOrEmpty(Topic))
             {
-                string topicShort = Resource.Font.Split(Topic, DisplayListPanel.ModuleDataCaptionWidth);
+                string topicShort = Resource.Font.Split(Topic, ModuleListPanel.ModuleDataCaptionWidth);
                 string typeShort = string.IsNullOrEmpty(Type)
                     ? Module.ToString()
-                    : Resource.Font.Split(Type, DisplayListPanel.ModuleDataCaptionWidth);
+                    : Resource.Font.Split(Type, ModuleListPanel.ModuleDataCaptionWidth);
                 text = $"{topicShort}\n<b>{typeShort}</b>";
             }
             else

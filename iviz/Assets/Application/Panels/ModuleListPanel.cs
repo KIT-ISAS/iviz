@@ -1,20 +1,20 @@
-﻿using Iviz.App.Displays;
-using Iviz.App.Listeners;
-using Iviz.Resources;
+﻿using Iviz.Resources;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using Iviz.Controllers;
+using Iviz.Displays;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using Logger = Iviz.Controllers.Logger; 
 
 namespace Iviz.App
 {
-    public sealed class DisplayListPanel : MonoBehaviour
+    public sealed class ModuleListPanel : MonoBehaviour
     {
         float buttonHeight;
 
@@ -25,7 +25,7 @@ namespace Iviz.App
             set => parentCanvas.gameObject.SetActive(value);
         }
 
-        public static DisplayListPanel Instance { get; private set; }
+        public static ModuleListPanel Instance { get; private set; }
 
         //[SerializeField] InputField address = null;
         [SerializeField] DataLabelWidget MasterUriStr = null;

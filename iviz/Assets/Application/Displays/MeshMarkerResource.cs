@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Iviz.Resources;
+﻿using Iviz.Resources;
 using UnityEngine;
 
 namespace Iviz.Displays

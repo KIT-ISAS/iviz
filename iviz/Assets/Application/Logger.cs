@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using Iviz.Msgs.RosgraphMsgs;
 
-namespace Iviz.App
+namespace Iviz.Controllers
 {
     [Flags]
     public enum LogLevel

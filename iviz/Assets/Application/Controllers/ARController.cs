@@ -1,22 +1,17 @@
 ﻿using UnityEngine;
-using System.Collections;
 using Iviz.RoslibSharp;
 using System.Runtime.Serialization;
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using Application.Displays;
+using Iviz.App;
 using Iviz.Resources;
 using UnityEngine.XR.ARFoundation;
 using Iviz.Displays;
-using Iviz.Msgs.VisualizationMsgs;
-using Iviz.App.Displays;
-using Iviz.RoslibSharp.XmlRpc;
-using TMPro;
 using UnityEngine.Rendering;
 using UnityEngine.XR.ARSubsystems;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     [DataContract]
     public sealed class ARConfiguration : JsonToString, IConfiguration
@@ -68,14 +63,7 @@ namespace Iviz.App.Listeners
 
         static Transform TFRoot => TFListener.RootFrame.transform;
 
-        const string HeadPoseTopic = "ar_head";
-        const string MarkersTopic = "ar_markers";
-
-        static string HeadFrameName => ConnectionManager.Connection.MyId + "/ar_head";
-
-        //public RosSender<Msgs.GeometryMsgs.PoseStamped> RosSenderHead { get; private set; }
-        //public RosSender<MarkerArray> RosSenderMarkers { get; private set; }
-        public ModuleData ModuleData { get; set; }
+        public IModuleData ModuleData { get; set; }
 
         readonly ARConfiguration config = new ARConfiguration();
         public ARConfiguration Config
@@ -147,7 +135,7 @@ namespace Iviz.App.Listeners
                     : InteractiveControl.InteractionModeType.Disabled;
                 //TFListener.RootControl.InteractionMode = InteractiveControl.InteractionModeType.Frame;
                 
-                foreach (var module in DisplayListPanel.Instance.ModuleDatas)
+                foreach (var module in ModuleListPanel.Instance.ModuleDatas)
                 {
                     module.OnARModeChanged(value);
                 }

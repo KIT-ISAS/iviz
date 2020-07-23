@@ -1,6 +1,5 @@
 ﻿
 using System;
-using System.Globalization;
 using Iviz.Resources;
 using UnityEngine;
 using UnityEngine.UI;

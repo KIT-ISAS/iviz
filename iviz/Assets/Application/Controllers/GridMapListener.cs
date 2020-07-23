@@ -1,13 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
-using Iviz.App.Displays;
 using Iviz.Displays;
 using Iviz.Msgs.GridMapMsgs;
 using Iviz.Resources;
 using Iviz.RoslibSharp;
 using UnityEngine;
+using UnityEngine.Rendering;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     [DataContract]
     public class GridMapConfiguration : JsonToString, IConfiguration
@@ -18,7 +20,7 @@ namespace Iviz.App.Listeners
 
         [DataMember] public string Topic { get; set; } = "";
 
-        //[DataMember] public string IntensityChannel { get; set; } = "x";
+        [DataMember] public string IntensityChannel { get; set; } = "";
         [DataMember] public Resource.ColormapId Colormap { get; set; } = Resource.ColormapId.hsv;
         [DataMember] public bool ForceMinMax { get; set; } = false;
         [DataMember] public float MinIntensity { get; set; } = 0;
@@ -30,12 +32,12 @@ namespace Iviz.App.Listeners
     public sealed class GridMapListener : ListenerController
     {
         const int MaxGridSize = 4096;
-        
+
         readonly DisplayNode node;
         readonly DisplayNode link;
         readonly GridMapResource resource;
 
-        public override ModuleData ModuleData { get; }
+        public override IModuleData ModuleData { get; }
 
         public Vector2 MeasuredIntensityBounds { get; private set; }
 
@@ -50,7 +52,7 @@ namespace Iviz.App.Listeners
             {
                 config.Topic = value.Topic;
                 Visible = value.Visible;
-                //IntensityChannel = value.IntensityChannel;
+                IntensityChannel = value.IntensityChannel;
                 Colormap = value.Colormap;
                 ForceMinMax = value.ForceMinMax;
                 MinIntensity = value.MinIntensity;
@@ -70,13 +72,11 @@ namespace Iviz.App.Listeners
             }
         }
 
-        /*
         public string IntensityChannel
         {
             get => config.IntensityChannel;
             set => config.IntensityChannel = value;
         } 
-        */
 
         public Resource.ColormapId Colormap
         {
@@ -94,9 +94,8 @@ namespace Iviz.App.Listeners
             set
             {
                 config.ForceMinMax = value;
-                resource.IntensityBounds = config.ForceMinMax ? 
-                    new Vector2(MinIntensity, MaxIntensity) : 
-                    MeasuredIntensityBounds;
+                resource.IntensityBounds =
+                    config.ForceMinMax ? new Vector2(MinIntensity, MaxIntensity) : MeasuredIntensityBounds;
             }
         }
 
@@ -151,9 +150,16 @@ namespace Iviz.App.Listeners
             }
         }
 
-        public GridMapListener(ModuleData moduleData)
+        readonly List<string> fieldNames = new List<string>();
+
+        public ReadOnlyCollection<string> FieldNames { get; }
+
+        public GridMapListener(IModuleData moduleData)
         {
             ModuleData = moduleData;
+         
+            FieldNames = new ReadOnlyCollection<string>(fieldNames);
+            
             node = SimpleDisplayNode.Instantiate("[GridMapNode]");
             link = SimpleDisplayNode.Instantiate("[GridMapLink]", node.transform);
             resource = ResourcePool.GetOrCreate<GridMapResource>(Resource.Displays.GridMap, link.transform);
@@ -172,7 +178,7 @@ namespace Iviz.App.Listeners
         {
             return double.IsNaN(x) || x <= 0;
         }
-        
+
         void Handler(GridMap msg)
         {
             if (IsInvalidSize(msg.Info.LengthX) ||
@@ -192,14 +198,29 @@ namespace Iviz.App.Listeners
                 Debug.Log("GridMapListener: Gridmap is too large!");
                 return;
             }
+
+            if (msg.Data.Length == 0)
+            {
+                Debug.Log("GridMapListener: Empty gridmap!");
+                return;
+            }
+
+            fieldNames.Clear();
+            fieldNames.AddRange(msg.Layers);
+
+            int layer = string.IsNullOrEmpty(IntensityChannel) ? 0 : fieldNames.IndexOf(IntensityChannel);
+            if (layer == -1 || layer >= msg.Data.Length)
+            {
+                Debug.Log("GridMapListener: Gridmap layer is not available!");
+                return;
+            }
             
-            int layer = 0;
             if (msg.Data[layer].Data.Length < width * height)
             {
                 Debug.Log("GridMapListener: Gridmap layer is too small!");
                 return;
             }
-            
+
             node.AttachTo(msg.Info.Header.FrameId, msg.Info.Header.Stamp);
             link.transform.SetLocalPose(msg.Info.Pose.Ros2Unity());
 

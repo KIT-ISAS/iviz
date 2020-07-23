@@ -15,9 +15,17 @@ namespace Iviz.RoslibSharp
     /// </summary>
     public class InvalidMessageTypeException : Exception
     {
-        public InvalidMessageTypeException(string message) : base(message) { }
-        public InvalidMessageTypeException(string message, Exception innerException) : base(message, innerException) { }
-        public InvalidMessageTypeException() { }
+        public InvalidMessageTypeException(string message) : base(message)
+        {
+        }
+
+        public InvalidMessageTypeException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        public InvalidMessageTypeException()
+        {
+        }
     }
 
     /// <summary>
@@ -25,9 +33,17 @@ namespace Iviz.RoslibSharp
     /// </summary>
     public class ConnectionException : Exception
     {
-        public ConnectionException(string message) : base(message) { }
-        public ConnectionException(string message, Exception innerException) : base(message, innerException) { }
-        public ConnectionException() { }
+        public ConnectionException(string message) : base(message)
+        {
+        }
+
+        public ConnectionException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        public ConnectionException()
+        {
+        }
     }
 
     /// <summary>
@@ -35,16 +51,32 @@ namespace Iviz.RoslibSharp
     /// </summary>
     public class UnreachableUriException : Exception
     {
-        public UnreachableUriException(string message) : base(message) { }
-        public UnreachableUriException(string message, Exception innerException) : base(message, innerException) { }
-        public UnreachableUriException() { }
+        public UnreachableUriException(string message) : base(message)
+        {
+        }
+
+        public UnreachableUriException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        public UnreachableUriException()
+        {
+        }
     }
 
     public class XmlRpcException : Exception
     {
-        public XmlRpcException(string message) : base(message) { }
-        public XmlRpcException(string message, Exception innerException) : base(message, innerException) { }
-        public XmlRpcException() { }
+        public XmlRpcException(string message) : base(message)
+        {
+        }
+
+        public XmlRpcException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        public XmlRpcException()
+        {
+        }
     }
 
     public sealed class RosClient : IDisposable
@@ -54,8 +86,11 @@ namespace Iviz.RoslibSharp
         readonly Dictionary<string, RosSubscriber> subscribersByTopic = new Dictionary<string, RosSubscriber>();
         readonly Dictionary<string, RosPublisher> publishersByTopic = new Dictionary<string, RosPublisher>();
 
-        readonly Dictionary<string, ServiceReceiver> subscribedServicesByName = new Dictionary<string, ServiceReceiver>();
-        readonly Dictionary<string, ServiceSenderManager> advertisedServicesByName = new Dictionary<string, ServiceSenderManager>();
+        readonly Dictionary<string, ServiceReceiver> subscribedServicesByName =
+            new Dictionary<string, ServiceReceiver>();
+
+        readonly Dictionary<string, ServiceSenderManager> advertisedServicesByName =
+            new Dictionary<string, ServiceSenderManager>();
 
         public delegate void ShutdownActionCall(
             string callerId, string reason,
@@ -97,7 +132,8 @@ namespace Iviz.RoslibSharp
                 {
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }
-                Master.TimeoutInMs = (int)value.TotalMilliseconds;
+
+                Master.TimeoutInMs = (int) value.TotalMilliseconds;
             }
         }
 
@@ -115,6 +151,7 @@ namespace Iviz.RoslibSharp
                 {
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }
+
                 rpcNodeTimeout = value;
             }
         }
@@ -133,16 +170,18 @@ namespace Iviz.RoslibSharp
                 {
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }
+
                 tcpRosTimeout = value;
                 lock (subscribersByTopic)
                 {
                     subscribersByTopic.Values.ForEach(
-                        x => x.TimeoutInMs = (int)value.TotalMilliseconds);
+                        x => x.TimeoutInMs = (int) value.TotalMilliseconds);
                 }
+
                 lock (publishersByTopic)
                 {
                     publishersByTopic.Values.ForEach(
-                        x => x.TimeoutInMs = (int)value.TotalMilliseconds);
+                        x => x.TimeoutInMs = (int) value.TotalMilliseconds);
                 }
             }
         }
@@ -170,11 +209,11 @@ namespace Iviz.RoslibSharp
         /// <param name="masterUri">URI to the master node. Example: new Uri("http://localhost:11311")</param>
         /// <param name="callerId">The ROS name of this node</param>
         /// <param name="callerUri">URI of this node. Leave empty to generate one automatically</param>
-        public RosClient(Uri masterUri, string callerId = null, Uri callerUri = null)
+        public RosClient(Uri masterUri = null, string callerId = null, Uri callerUri = null)
         {
             if (masterUri is null)
             {
-                throw new ArgumentNullException(nameof(masterUri));
+                masterUri = TryGetMasterUri();
             }
 
             if (masterUri.Scheme != "http")
@@ -184,7 +223,7 @@ namespace Iviz.RoslibSharp
 
             if (callerUri == null)
             {
-                callerUri = new Uri($"http://{TryGetHostname()}:7613/");
+                callerUri = TryGetCallerUri();
             }
 
             if (callerUri.Scheme != "http")
@@ -213,7 +252,8 @@ namespace Iviz.RoslibSharp
             Master = new XmlRpc.Master(masterUri, CallerId, CallerUri);
             Parameters = new XmlRpc.ParameterClient(masterUri, CallerId, CallerUri);
 
-            Logger.Log($"RosClient: Starting: My id is {CallerId}, my uri is {CallerUri}, and I'm talking to {MasterUri}");
+            Logger.Log(
+                $"RosClient: Starting: My id is {CallerId}, my uri is {CallerUri}, and I'm talking to {MasterUri}");
 
             try
             {
@@ -223,11 +263,12 @@ namespace Iviz.RoslibSharp
                 EnsureCleanSlate();
             }
             catch (Exception e) when
-            (e is SocketException || e is TimeoutException || e is AggregateException || e is IOException)
+                (e is SocketException || e is TimeoutException || e is AggregateException || e is IOException)
             {
                 Listener.Stop();
                 throw new ConnectionException($"Failed to contact the master URI '{masterUri}'", e);
             }
+
             Logger.Log("RosClient: Initialized.");
 
 
@@ -248,26 +289,28 @@ namespace Iviz.RoslibSharp
                 }
             }
             catch (Exception e) when
-            (e is SocketException || e is TimeoutException || e is AggregateException)
+                (e is SocketException || e is TimeoutException || e is AggregateException)
             {
                 Listener.Stop();
                 throw new UnreachableUriException($"My uri '{CallerUri}' does not appear to be reachable!");
             }
-
         }
 
-        public static string TryGetHostname()
+        public static Uri TryGetCallerUri()
         {
-            string hostname;
-            if ((hostname = Environment.GetEnvironmentVariable("ROS_HOSTNAME")) != null)
-            {
-                return hostname;
-            }
-            if ((hostname = Environment.GetEnvironmentVariable("ROS_IP")) != null)
-            {
-                return hostname;
-            }
-            return Dns.GetHostName();
+            string hostname =
+                Environment.GetEnvironmentVariable("ROS_HOSTNAME") ??
+                Environment.GetEnvironmentVariable("ROS_IP") ??
+                Dns.GetHostName();
+            return new Uri($"http://{hostname}:7613/");
+        }
+
+        public static Uri TryGetMasterUri()
+        {
+            string hostname = 
+                Environment.GetEnvironmentVariable("ROS_MASTER_URI") ?? 
+                Dns.GetHostName();
+            return new Uri($"http://{hostname}:11311/");
         }
 
         /// <summary>
@@ -277,7 +320,9 @@ namespace Iviz.RoslibSharp
         /// <param name="callerId">The name of this node</param>
         /// <param name="callerUri">URI of this node. Leave empty to generate one automatically</param>
         public RosClient(string masterUri, string callerId = null, string callerUri = null) :
-            this(new Uri(masterUri), callerId, callerUri == null ? null : new Uri(callerUri))
+            this(masterUri is null ? null : new Uri(masterUri), 
+                callerId, 
+                callerUri is null ? null : new Uri(callerUri))
         {
         }
 
@@ -287,12 +332,9 @@ namespace Iviz.RoslibSharp
         void EnsureCleanSlate()
         {
             SystemState state = GetSystemState();
-            state.Subscribers.
-                Where(x => x.Members.Contains(CallerId)).
-                ForEach(x => Master.UnregisterSubscriber(x.Topic));
-            state.Publishers.
-                Where(x => x.Members.Contains(CallerId)).
-                ForEach(x => Master.UnregisterPublisher(x.Topic));
+            state.Subscribers.Where(x => x.Members.Contains(CallerId))
+                .ForEach(x => Master.UnregisterSubscriber(x.Topic));
+            state.Publishers.Where(x => x.Members.Contains(CallerId)).ForEach(x => Master.UnregisterPublisher(x.Topic));
         }
 
         public void Cleanup()
@@ -301,6 +343,7 @@ namespace Iviz.RoslibSharp
             {
                 subscribersByTopic.Values.ForEach(x => x.Cleanup());
             }
+
             lock (publishersByTopic)
             {
                 publishersByTopic.Values.ForEach(x => x.Cleanup());
@@ -309,7 +352,7 @@ namespace Iviz.RoslibSharp
 
         internal XmlRpc.NodeClient CreateTalker(Uri otherUri)
         {
-            return new XmlRpc.NodeClient(CallerId, CallerUri, otherUri, (int)RpcNodeTimeout.TotalMilliseconds);
+            return new XmlRpc.NodeClient(CallerId, CallerUri, otherUri, (int) RpcNodeTimeout.TotalMilliseconds);
         }
 
         RosSubscriber CreateSubscriber(string topic, bool requestNoDelay, Type type, IMessage generator)
@@ -317,7 +360,7 @@ namespace Iviz.RoslibSharp
             TopicInfo topicInfo = new TopicInfo(CallerId, topic, type, generator);
             TcpReceiverManager manager = new TcpReceiverManager(topicInfo, requestNoDelay)
             {
-                TimeoutInMs = (int)TcpRosTimeout.TotalMilliseconds
+                TimeoutInMs = (int) TcpRosTimeout.TotalMilliseconds
             };
             RosSubscriber subscription = new RosSubscriber(this, manager);
 
@@ -333,7 +376,9 @@ namespace Iviz.RoslibSharp
                 {
                     subscribersByTopic.Remove(topic);
                 }
-                throw new ArgumentException("Error registering publisher: " + masterResponse.StatusMessage, nameof(topic));
+
+                throw new ArgumentException("Error registering publisher: " + masterResponse.StatusMessage,
+                    nameof(topic));
             }
 
             manager.PublisherUpdateRpc(this, masterResponse.Publishers);
@@ -366,7 +411,8 @@ namespace Iviz.RoslibSharp
         /// </param>
         /// <param name="requestNoDelay">Whether a request of NoDelay should be sent.</param>
         /// <returns>A token that can be used to unsubscribe from this topic.</returns>
-        public string Subscribe<T>(string topic, Action<T> callback, out RosSubscriber subscriber, bool requestNoDelay = false)
+        public string Subscribe<T>(string topic, Action<T> callback, out RosSubscriber subscriber,
+            bool requestNoDelay = false)
             where T : IMessage, new()
         {
             if (topic is null)
@@ -390,12 +436,16 @@ namespace Iviz.RoslibSharp
             }
 
             // local lambda wrapper for casting
-            void wrapper(IMessage x) { callback((T)x); }
+            void wrapper(IMessage x)
+            {
+                callback((T) x);
+            }
 
             return subscriber.Subscribe(wrapper);
         }
 
-        public string Subscribe(string topic, Action<IMessage> callback, Type type, out RosSubscriber subscriber, bool requestNoDelay = false)
+        public string Subscribe(string topic, Action<IMessage> callback, Type type, out RosSubscriber subscriber,
+            bool requestNoDelay = false)
         {
             if (topic is null)
             {
@@ -442,6 +492,7 @@ namespace Iviz.RoslibSharp
             {
                 subscriber = subscribersByTopic.Values.FirstOrDefault(x => x.ContainsId(topicId));
             }
+
             return subscriber != null && subscriber.Unsubscribe(topicId);
         }
 
@@ -501,7 +552,7 @@ namespace Iviz.RoslibSharp
             TopicInfo topicInfo = new TopicInfo(CallerId, topic, type);
             TcpSenderManager manager = new TcpSenderManager(topicInfo, CallerUri)
             {
-                TimeoutInMs = (int)TcpRosTimeout.TotalMilliseconds
+                TimeoutInMs = (int) TcpRosTimeout.TotalMilliseconds
             };
             RosPublisher publisher = new RosPublisher(this, manager);
 
@@ -517,6 +568,7 @@ namespace Iviz.RoslibSharp
                 {
                     publishersByTopic.Remove(topic);
                 }
+
                 throw new ArgumentException("Error registering publisher: " + response.StatusMessage, nameof(topic));
             }
 
@@ -554,6 +606,7 @@ namespace Iviz.RoslibSharp
             {
                 publisher = CreatePublisher(topic, type);
             }
+
             return publisher.Advertise();
         }
 
@@ -574,6 +627,7 @@ namespace Iviz.RoslibSharp
             {
                 publisher = publishersByTopic.Values.FirstOrDefault(x => x.ContainsId(topicId));
             }
+
             return publisher != null && publisher.Unadvertise(topicId);
         }
 
@@ -634,9 +688,8 @@ namespace Iviz.RoslibSharp
             if (response.IsValid)
             {
                 return new ReadOnlyCollection<BriefTopicInfo>(
-                    Master.GetPublishedTopics().Topics.
-                    Select(x => new BriefTopicInfo(x.Item1, x.Item2)).ToArray()
-                    );
+                    Master.GetPublishedTopics().Topics.Select(x => new BriefTopicInfo(x.Item1, x.Item2)).ToArray()
+                );
             }
             else
             {
@@ -688,8 +741,9 @@ namespace Iviz.RoslibSharp
                     int i = 0;
                     foreach (var entry in subscribersByTopic)
                     {
-                        result[i++] = new[] { entry.Key, entry.Value.TopicType };
+                        result[i++] = new[] {entry.Key, entry.Value.TopicType};
                     }
+
                     return result;
                 }
             }
@@ -711,8 +765,9 @@ namespace Iviz.RoslibSharp
                     int i = 0;
                     foreach (var entry in publishersByTopic)
                     {
-                        result[i++] = new[] { entry.Key, entry.Value.TopicType };
+                        result[i++] = new[] {entry.Key, entry.Value.TopicType};
                     }
+
                     return result;
                 }
             }
@@ -733,6 +788,7 @@ namespace Iviz.RoslibSharp
                     Logger.Log($"{this}: PublisherUpdate called for nonexisting topic '{topic}'");
                     return;
                 }
+
                 subscriber.PublisherUpdateRcp(publishers);
             }
             catch (Exception e)
@@ -752,6 +808,7 @@ namespace Iviz.RoslibSharp
                     port = 0;
                     return false;
                 }
+
                 publisher.RequestTopicRpc(remoteCallerId, out hostname, out port);
                 return true;
             }
@@ -775,6 +832,7 @@ namespace Iviz.RoslibSharp
                 publishers = publishersByTopic.Values.ToArray();
                 publishersByTopic.Clear();
             }
+
             publishers.ForEach(x => x.Stop());
 
             RosSubscriber[] subscribers;
@@ -783,6 +841,7 @@ namespace Iviz.RoslibSharp
                 subscribers = subscribersByTopic.Values.ToArray();
                 subscribersByTopic.Clear();
             }
+
             subscribers.ForEach(x => x.Stop());
 
             lock (subscribedServicesByName)
@@ -830,6 +889,7 @@ namespace Iviz.RoslibSharp
                             1));
                     }
                 }
+
                 PublisherState pstate = GetPublisherStatistics();
                 foreach (var topic in pstate.Topics)
                 {
@@ -846,6 +906,7 @@ namespace Iviz.RoslibSharp
                             Logger.Log($"{this}: LookupNode for {sender.RemoteId} failed: " + e);
                             remoteUri = null;
                         }
+
                         busInfos.Add(new BusInfo(
                             busInfos.Count,
                             remoteUri,
@@ -859,6 +920,7 @@ namespace Iviz.RoslibSharp
             {
                 Logger.Log($"{this}: GetBusInfoRcp failed: " + e);
             }
+
             return busInfos;
         }
 
@@ -888,6 +950,7 @@ namespace Iviz.RoslibSharp
             {
                 throw new XmlRpcException("Failed to call service: " + response.StatusMessage);
             }
+
             Uri serviceUri = response.ServiceUrl;
             ServiceInfo serviceInfo = new ServiceInfo(CallerId, serviceName, typeof(T), null);
             try
@@ -904,9 +967,11 @@ namespace Iviz.RoslibSharp
                             subscribedServicesByName.Add(serviceName, serviceReceiver);
                         }
                     }
+
                     return result;
                 }
-            } catch(Exception e) when (e is SocketException)
+            }
+            catch (Exception e) when (e is SocketException)
             {
                 throw new TimeoutException($"Service uri '{serviceUri}' is not reachable", e);
             }
@@ -923,7 +988,10 @@ namespace Iviz.RoslibSharp
                     throw new ArgumentException("Service already exists", nameof(serviceName));
                 }
 
-                void wrapper(IService x) { callback((T)x); }
+                void wrapper(IService x)
+                {
+                    callback((T) x);
+                }
 
                 ServiceInfo serviceInfo = new ServiceInfo(CallerId, serviceName, typeof(T), new T());
                 advertisedService = new ServiceSenderManager(serviceInfo, CallerUri.Host, wrapper);
@@ -945,8 +1013,10 @@ namespace Iviz.RoslibSharp
                 {
                     throw new ArgumentException("Service does not exist", nameof(name));
                 }
+
                 advertisedServicesByName.Remove(name);
             }
+
             advertisedService.Stop();
 
             Master.UnregisterService(name, advertisedService.Uri);
