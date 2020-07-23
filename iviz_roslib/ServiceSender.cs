@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 
-namespace Iviz.RoslibSharp
+namespace Iviz.Roslib
 {
     class ServiceSender
     {
@@ -218,6 +218,9 @@ namespace Iviz.RoslibSharp
             return errorMessage == null;
         }
 
+        const byte ErrorByte = 0;
+        const byte SuccessByte = 1;
+
         void Run()
         {
             try
@@ -248,19 +251,25 @@ namespace Iviz.RoslibSharp
                     NumReceived++;
                     BytesReceived += rcvLength + 4;
 
-                    const byte ErrorByte = 0;
-                    const byte SuccessByte = 1;
-
                     byte resultStatus;
                     string errorMessage;
 
-                    callback(serviceMsg);
+                    try
+                    {
+                        callback(serviceMsg);
+                        serviceMsg.Response.RosValidate();
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.LogError("Inner exception in service callback: " + e);
+                        serviceMsg.Response = null;
+                    }
 
                     IResponse responseMsg = serviceMsg.Response;
-                    if (responseMsg == null)
+                    if (responseMsg is null)
                     {
                         resultStatus = ErrorByte;
-                        errorMessage = serviceMsg.ErrorMessage ?? "Callback function returned null";
+                        errorMessage = serviceMsg.ErrorMessage ?? "Callback function returned null, an invalid value, or an exception happened.";
                     }
                     else if (serviceMsg.ErrorMessage != null)
                     {
@@ -292,7 +301,6 @@ namespace Iviz.RoslibSharp
                         writer.Write(errorMessage.Length);
                         writer.Write(errorMessage);
                         BytesSent += errorMessage.Length + 5;
-                        Logger.Log(errorMessage);
                     }
                     NumSent++;
                 }

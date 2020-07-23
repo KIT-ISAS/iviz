@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using Iviz.Resources;
 using Iviz.Displays;
+using JetBrains.Annotations;
 
 namespace Iviz.App
 {
@@ -13,14 +14,19 @@ namespace Iviz.App
 
         static ResourcePool Instance;
 
-        public static GameObject GetOrCreate(Resource.Info<GameObject> resource, Transform parent = null, bool enable = true)
+        public static GameObject GetOrCreate([NotNull] Resource.Info<GameObject> resource, Transform parent = null, bool enable = true)
         {
+            if (resource == null)
+            {
+                throw new ArgumentNullException(nameof(resource));
+            }
+            
             return Instance is null ? 
                 resource.Instantiate(parent) : 
                 Instance.GetImpl(resource, parent, enable);
         }
 
-        public static T GetOrCreate<T>(Resource.Info<GameObject> resource, Transform parent = null, bool enable = true) where T : MonoBehaviour
+        public static T GetOrCreate<T>([NotNull] Resource.Info<GameObject> resource, Transform parent = null, bool enable = true) where T : MonoBehaviour
         {
             if (resource is null)
             {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using Iviz.Msgs;
 
-namespace Iviz.RoslibSharp
+namespace Iviz.Roslib
 {
     public class RosPublisher
     {

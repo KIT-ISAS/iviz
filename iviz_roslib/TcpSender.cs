@@ -13,7 +13,7 @@ using Iviz.Msgs;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace Iviz.RoslibSharp
+namespace Iviz.Roslib
 {
 
     [JsonConverter(typeof(StringEnumConverter))]

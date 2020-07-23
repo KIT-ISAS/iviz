@@ -3,7 +3,7 @@ using System;
 using Iviz.App.Displays;
 using Iviz.Msgs.SensorMsgs;
 using System.Runtime.Serialization;
-using Iviz.RoslibSharp;
+using Iviz.Roslib;
 using Iviz.Displays;
 using Iviz.Resources;
 

@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Iviz.RoslibSharp.XmlRpc;
+using Iviz.Roslib.XmlRpc;
 
-namespace Iviz.RoslibSharp
+namespace Iviz.Roslib
 {
     public class SystemState : JsonToString
     {

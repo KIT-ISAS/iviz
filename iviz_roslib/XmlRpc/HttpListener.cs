@@ -4,7 +4,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Iviz.RoslibSharp.XmlRpc
+namespace Iviz.Roslib.XmlRpc
 {
     class HttpListener : IDisposable
     {

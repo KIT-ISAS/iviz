@@ -6,7 +6,7 @@ using System.Linq;
 using TopicTuple = System.Tuple<string, string>;
 using TopicTuples = System.Tuple<string, string[]>;
 
-namespace Iviz.RoslibSharp.XmlRpc
+namespace Iviz.Roslib.XmlRpc
 {
     public enum StatusCode
     {

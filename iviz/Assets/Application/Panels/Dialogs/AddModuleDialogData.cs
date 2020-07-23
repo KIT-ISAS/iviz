@@ -10,6 +10,7 @@ namespace Iviz.App
         static readonly List<Tuple<string, Resource.Module>> Modules = new List<Tuple<string, Resource.Module>>()
         {
             Tuple.Create("<b>Robot</b>\nA robot object", Resource.Module.Robot),
+            Tuple.Create("<b>Robot (New)</b>\nA robot object", Resource.Module.SimpleRobot),
             Tuple.Create("<b>Grid</b>\nA reference plane", Resource.Module.Grid),
             Tuple.Create("<b>DepthProjector</b>\nPoint cloud generator for depth images", Resource.Module.DepthImageProjector),
             Tuple.Create("<b>AR</b>\nManager for augmented reality", Resource.Module.AR),

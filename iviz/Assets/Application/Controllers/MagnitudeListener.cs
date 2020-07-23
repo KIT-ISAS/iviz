@@ -5,7 +5,7 @@ using Iviz.Displays;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.NavMsgs;
 using Iviz.Resources;
-using Iviz.RoslibSharp;
+using Iviz.Roslib;
 using UnityEngine;
 using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;

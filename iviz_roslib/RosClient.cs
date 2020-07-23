@@ -8,7 +8,7 @@ using System.Net;
 using System.Net.Sockets;
 using Iviz.Msgs;
 
-namespace Iviz.RoslibSharp
+namespace Iviz.Roslib
 {
     /// <summary>
     /// The provided message type is not correct.
@@ -862,6 +862,14 @@ namespace Iviz.RoslibSharp
             return busInfos;
         }
 
+        /// <summary>
+        /// Calls the given ROS service.
+        /// </summary>
+        /// <param name="serviceName">Name of the ROS service</param>
+        /// <param name="service">Service message. The response will be written in the response field.</param>
+        /// <param name="persistent">Whether a persistent connection with the provider should be maintained.</param>
+        /// <typeparam name="T">Service type.</typeparam>
+        /// <returns>Whether the call succeeded.</returns>
         public bool CallService<T>(string serviceName, T service, bool persistent = false) where T : IService
         {
             ServiceReceiver serviceReceiver = null;
@@ -912,6 +920,12 @@ namespace Iviz.RoslibSharp
             }
         }
 
+        /// <summary>
+        /// Advertises the given service.
+        /// </summary>
+        /// <param name="serviceName">Name of the ROS service.</param>
+        /// <param name="callback">Function to be called when a service request arrives. The response should be written in the response field.</param>
+        /// <typeparam name="T">Service type.</typeparam>
         public void AdvertiseService<T>(string serviceName, Action<T> callback) where T : IService, new()
         {
             ServiceSenderManager advertisedService;
@@ -923,16 +937,16 @@ namespace Iviz.RoslibSharp
                     throw new ArgumentException("Service already exists", nameof(serviceName));
                 }
 
-                void wrapper(IService x) { callback((T)x); }
+                void Wrapper(IService x) { callback((T)x); }
 
                 ServiceInfo serviceInfo = new ServiceInfo(CallerId, serviceName, typeof(T), new T());
-                advertisedService = new ServiceSenderManager(serviceInfo, CallerUri.Host, wrapper);
+                advertisedService = new ServiceSenderManager(serviceInfo, CallerUri.Host, Wrapper);
 
                 advertisedServicesByName.Add(serviceName, advertisedService);
             }
 
             // local lambda wrapper for casting
-            Master.RegisterService(serviceName, advertisedService.Uri);
+            Master.RegisterService(serviceName, advertisedService.uri);
         }
 
         public void UnadvertiseService(string name)
@@ -949,7 +963,7 @@ namespace Iviz.RoslibSharp
             }
             advertisedService.Stop();
 
-            Master.UnregisterService(name, advertisedService.Uri);
+            Master.UnregisterService(name, advertisedService.uri);
         }
 
         public XmlRpc.StatusCode SetParameter(string key, string value)

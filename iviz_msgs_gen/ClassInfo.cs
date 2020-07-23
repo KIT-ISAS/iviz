@@ -468,7 +468,7 @@ namespace Iviz.MsgsGen
                         }
                         else if (variable.arraySize == 0)
                         {
-                            if (variable.classInfo.forceStruct)
+                            if (variable.classInfo?.forceStruct ?? false)
                             {
                                 lines.Add("    " + variable.fieldName + " = b.DeserializeStructArray<" + variable.className + ">();");
                             }
@@ -483,7 +483,7 @@ namespace Iviz.MsgsGen
                         }
                         else
                         {
-                            if (variable.classInfo.forceStruct)
+                            if (variable.classInfo?.forceStruct ?? false)
                             {
                                 lines.Add("    " + variable.fieldName + " = b.DeserializeStructArray<" + variable.className + ">(" + variable.arraySize + ");");
                             }
@@ -554,7 +554,7 @@ namespace Iviz.MsgsGen
                         }
                         else
                         {
-                            if (variable.classInfo.forceStruct)
+                            if (variable.classInfo?.forceStruct ?? false)
                             {
                                 lines.Add("    b.SerializeStructArray(" + variable.fieldName + ", " + variable.arraySize + ");");
                             }

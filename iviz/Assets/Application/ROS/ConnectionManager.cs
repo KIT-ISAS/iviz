@@ -1,6 +1,6 @@
 ﻿using Iviz.Msgs;
 using Iviz.Msgs.RosgraphMsgs;
-using Iviz.RoslibSharp;
+using Iviz.Roslib;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -231,6 +231,8 @@ namespace Iviz.App
         public abstract void Unadvertise(RosSender advertiser);
         public abstract void Publish(RosSender advertiser, IMessage msg);
         public abstract void AdvertiseService<T>(string service, Action<T> callback) where T : IService, new();
+        public abstract void CallServiceAsync<T>(string service, T srv, Action<T> callback) where T : IService;
+        public abstract bool CallService<T>(string service, T srv) where T : IService;
         public abstract ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics();
         public abstract int GetNumPublishers(string topic);
         public abstract int GetNumSubscribers(string topic);

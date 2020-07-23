@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using RosSharp.Urdf;
 using Iviz.App.Displays;
 using System.Runtime.Serialization;
-using Iviz.RoslibSharp;
+using Iviz.Roslib;
 using System;
 using Iviz.App.Listeners;
 using Iviz.Resources;
@@ -33,7 +33,7 @@ namespace Iviz.App
         [DataMember] public SerializableColor Tint { get; set; } = Color.white;
     }
 
-    public sealed class RobotController : IController, IHasFrame
+    public sealed class RobotController : IController, IHasFrame, IJointProvider
     {
         readonly ObjectClickableNode node;
         RobotInfo robotInfo;
@@ -51,7 +51,7 @@ namespace Iviz.App
         readonly Dictionary<GameObject, GameObject> originalLinkParents = new Dictionary<GameObject, GameObject>();
         readonly Dictionary<GameObject, Pose> originalLinkPoses = new Dictionary<GameObject, Pose>();
         readonly Dictionary<string, JointInfo> jointWriters = new Dictionary<string, JointInfo>();
-        readonly List<MarkerWrapper> displays = new List<MarkerWrapper>();
+        readonly List<MarkerWrapperResource> displays = new List<MarkerWrapperResource>();
 
         public IReadOnlyDictionary<string, JointInfo> JointWriters => new ReadOnlyDictionary<string, JointInfo>(jointWriters);
 
@@ -62,7 +62,7 @@ namespace Iviz.App
             set
             {
                 RobotResource = value.RobotResource;
-                AttachToTF = value.AttachToTF;
+                AttachToTf = value.AttachToTF;
                 FramePrefix = value.FramePrefix;
                 FrameSuffix = value.FrameSuffix;
                 Visible = value.Visible;
@@ -71,10 +71,10 @@ namespace Iviz.App
             }
         }
 
-        string Name
+        public string Name
         {
             get => config.RobotName;
-            set => config.RobotName = value;
+            private set => config.RobotName = value;
         }
 
         public string LongName => (Name == "") ? config.RobotResource : Name;
@@ -90,11 +90,11 @@ namespace Iviz.App
             get => config.FramePrefix;
             set
             {
-                if (AttachToTF)
+                if (AttachToTf)
                 {
-                    AttachToTF = false;
+                    AttachToTf = false;
                     config.FramePrefix = value;
-                    AttachToTF = true;
+                    AttachToTf = true;
                 }
                 else
                 {
@@ -112,11 +112,11 @@ namespace Iviz.App
             get => config.FrameSuffix;
             set
             {
-                if (AttachToTF)
+                if (AttachToTf)
                 {
-                    AttachToTF = false;
+                    AttachToTf = false;
                     config.FrameSuffix = value;
-                    AttachToTF = true;
+                    AttachToTf = true;
                 }
                 else
                 {
@@ -167,7 +167,17 @@ namespace Iviz.App
             return $"{config.FramePrefix}{jointName}{config.FrameSuffix}";
         }
 
-        public bool AttachToTF
+        public bool TryWriteJoint(string joint, float value)
+        {
+            if (!JointWriters.TryGetValue(joint, out JointInfo writer))
+            {
+                return false;
+            }
+            writer.Write(value);
+            return true;
+        }
+
+        public bool AttachToTf
         {
             get => config.AttachToTF;
             set
@@ -279,7 +289,7 @@ namespace Iviz.App
                 return;
             }
 
-            bool oldAttachToTf = AttachToTF;
+            bool oldAttachToTf = AttachToTf;
 
             DisposeRobot();
             //node.Target = null;
@@ -368,7 +378,7 @@ namespace Iviz.App
 
             if (oldAttachToTf)
             {
-                AttachToTF = true;
+                AttachToTf = true;
             }
         }
 
@@ -379,7 +389,7 @@ namespace Iviz.App
             this.displays.Clear();
             foreach (MeshRenderer meshRenderer in renderers)
             {
-                MarkerWrapper item = meshRenderer.gameObject.AddComponent<MarkerWrapper>();
+                MarkerWrapperResource item = meshRenderer.gameObject.AddComponent<MarkerWrapperResource>();
                 item.Tint = Tint;
                 item.OcclusionOnly = RenderAsOcclusionOnly;
                 displays.Add(item);
@@ -421,9 +431,9 @@ namespace Iviz.App
 
         void DisposeRobot()
         {
-            if (AttachToTF)
+            if (AttachToTf)
             {
-                AttachToTF = false;
+                AttachToTf = false;
             }
 
             if (!(RobotObject is null))

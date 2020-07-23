@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public class MeshMarkerResource : MarkerResource, ISupportsAROcclusion, ISupportsTint
+    public class MeshMarkerResource : MarkerResource, ISupportsTintAndAROcclusion
     {
         MeshRenderer MainRenderer { get; set; }
         Material textureMaterial;
@@ -73,6 +73,10 @@ namespace Iviz.Displays
 
         void SetEffectiveColor()
         {
+            if (MainRenderer is null)
+            {
+                return;
+            }
             if (OcclusionOnly)
             {
                 return;
@@ -110,6 +114,8 @@ namespace Iviz.Displays
             MainRenderer = GetComponent<MeshRenderer>();
             Color = color;
             Tint = tint;
+
+            MainRenderer.SetPropertyMainTexST(Vector2.zero, Vector2.one, 0);
         }
 
         public override void Stop()

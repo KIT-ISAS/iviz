@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Iviz.Displays
 {
-    public sealed class OccupancyGridResource : WrapperResource, IRecyclable, ISupportsTint
+    public sealed class OccupancyGridResource : DisplayWrapperResource, IRecyclable, ISupportsTint
     {
         const int MaxSize = 10000;
 

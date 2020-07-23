@@ -26,9 +26,6 @@ namespace Iviz.App
                 constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.JointState) as JointStatePanelContents;
-            //listener = Instantiate<JointStateListener>();
-            //listener.name = "JointState:" + Topic;
-            //listener.ModuleData = this;
             listener = new JointStateListener(this);
             if (constructor.Configuration != null)
             {
@@ -51,8 +48,9 @@ namespace Iviz.App
             robotNames.Add("<none>");
             robotNames.AddRange(
                 ModuleListPanel.ModuleDatas.
-                Where(x => x.Module == Resource.Module.Robot).
-                Select(x => (x as RobotModuleData).RobotName)
+                    Select(x => x.Controller).
+                    OfType<IJointProvider>().
+                    Select(x => x.Name)
             );
             panel.Robot.Options = robotNames;
             panel.Robot.Value = listener.RobotName;
@@ -75,14 +73,7 @@ namespace Iviz.App
             };
             panel.Robot.ValueChanged += (i, s) =>
             {
-                if (i == 0)
-                {
-                    listener.Robot = null;
-                }
-                else
-                {
-                    listener.Robot = GetRobotWithName(s);
-                }
+                listener.Robot = (i == 0) ? null : GetRobotWithName(s);
                 listener.RobotName = s;
             };
             panel.CloseButton.Clicked += () =>
@@ -92,22 +83,13 @@ namespace Iviz.App
             };
         }
 
-        RobotController GetRobotWithName(string name)
+        IJointProvider GetRobotWithName(string name)
         {
-            return (RobotController)
-                ModuleListPanel.ModuleDatas.
-                Where(x => x.Module == Resource.Module.Robot).
-                Cast<RobotModuleData>().
-                FirstOrDefault(x => x.RobotName == name)?.
-                Controller;
+            return ModuleListPanel.ModuleDatas.
+                    Select(x => x.Controller).
+                    OfType<IJointProvider>().
+                    FirstOrDefault(x => x.Name == name);
         }
-
-        /*
-        public override JToken Serialize()
-        {
-            return JToken.FromObject(listener.Config);
-        }
-        */
 
         public override void AddToState(StateConfiguration config)
         {

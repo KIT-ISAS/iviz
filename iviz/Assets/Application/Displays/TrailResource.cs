@@ -8,7 +8,7 @@ using Iviz.App.Listeners;
 
 namespace Iviz.Displays
 {
-    public sealed class TrailResource : WrapperResource, IRecyclable
+    public sealed class TrailResource : DisplayWrapperResource, IRecyclable
     {
         LineResource lines;
 

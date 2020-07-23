@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 
-namespace Iviz.RoslibSharp
+namespace Iviz.Roslib
 {
     sealed class TcpReceiver : IDisposable
     {

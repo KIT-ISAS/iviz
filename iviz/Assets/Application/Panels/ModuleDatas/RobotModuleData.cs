@@ -48,7 +48,7 @@ namespace Iviz.App
             panel.ResourceType.Value = robot.RobotResource;
             panel.FramePrefix.Value = robot.FramePrefix;
             panel.FrameSuffix.Value = robot.FrameSuffix;
-            panel.AttachToTF.Value = robot.AttachToTF;
+            panel.AttachToTF.Value = robot.AttachToTf;
             panel.HideButton.State = robot.Visible;
 
             panel.OcclusionOnlyMode.Value = robot.RenderAsOcclusionOnly;
@@ -79,7 +79,7 @@ namespace Iviz.App
             };
             panel.AttachToTF.ValueChanged += f =>
             {
-                robot.AttachToTF = f;
+                robot.AttachToTf = f;
             }; 
             panel.CloseButton.Clicked += () =>
             {

@@ -18,7 +18,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_bridge_test", "iviz_br
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_bridge_client", "iviz_bridge_client\iviz_bridge_client.csproj", "{AE3DBE0F-8DAB-48CC-B21A-B4581EC2BED1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_loader", "iviz_loader\iviz_loader.csproj", "{34265C03-B3F5-43B0-85F1-95C6BCBE9437}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_model_service", "iviz_model_service\iviz_model_service.csproj", "{34265C03-B3F5-43B0-85F1-95C6BCBE9437}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_markertest", "iviz_markertest\iviz_markertest.csproj", "{FBEB2EF1-EA61-4448-831C-2015326EE8FD}"
 EndProject

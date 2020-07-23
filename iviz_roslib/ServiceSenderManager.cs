@@ -6,11 +6,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 
-namespace Iviz.RoslibSharp
+namespace Iviz.Roslib
 {
     class ServiceSenderManager
     {
-        public readonly Uri Uri;
+        public readonly Uri uri;
         readonly TcpListener listener;
         readonly ServiceInfo serviceInfo;
         readonly Task task;
@@ -30,8 +30,8 @@ namespace Iviz.RoslibSharp
             listener.Start();
 
             IPEndPoint localEndpoint = (IPEndPoint)listener.LocalEndpoint;
-            Uri = new Uri($"rosrpc://{host}:{localEndpoint.Port}/");
-            Logger.Log("RosRpcServer: Starting at " + Uri);
+            uri = new Uri($"rosrpc://{host}:{localEndpoint.Port}/");
+            Logger.Log("RosRpcServer: Starting at " + uri);
 
             //task = Task.Run(Run);
             Run();

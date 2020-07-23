@@ -3,11 +3,19 @@ using System.Collections.Generic;
 using System;
 using Iviz.Msgs.SensorMsgs;
 using System.Runtime.Serialization;
-using Iviz.RoslibSharp;
+using Iviz.Roslib;
 using Iviz.Resources;
 
 namespace Iviz.App.Listeners
 {
+    public interface IJointProvider
+    {
+        string Name { get; }
+        event Action Stopped;
+        bool TryWriteJoint(string joint, float value);
+        bool AttachToTf { get; }
+    }
+    
     [DataContract]
     public sealed class JointStateConfiguration : JsonToString, IConfiguration
     {
@@ -53,8 +61,8 @@ namespace Iviz.App.Listeners
             set => config.Visible = value;
         }
 
-        RobotController robot;
-        public RobotController Robot
+        IJointProvider robot;
+        public IJointProvider Robot
         {
             get => robot;
             set
@@ -116,7 +124,7 @@ namespace Iviz.App.Listeners
 
         void Handler(JointState msg)
         {
-            if (Robot is null || Robot.AttachToTF)
+            if (Robot is null || Robot.AttachToTf)
             {
                 return;
             }
@@ -134,17 +142,14 @@ namespace Iviz.App.Listeners
                     msgJoint = msgJoint.Substring(0, msgJoint.Length - MsgTrimFromEnd);
                 }
                 msgJoint = $"{MsgJointPrefix}{msgJoint}{MsgJointSuffix}";
-                if (Robot.JointWriters.TryGetValue(msgJoint, out JointInfo writer))
+                if (Robot.TryWriteJoint(msgJoint, (float) msg.Position[i]))
                 {
-                    writer.Write((float)msg.Position[i]);
+                    continue;
                 }
-                else
+                if (!warnNotFound.Contains(msgJoint))
                 {
-                    if (!warnNotFound.Contains(msgJoint))
-                    {
-                        Debug.Log("JointStateListener for '" + config.Topic + "': Cannot find joint '" + msgJoint + "' (original: '" + msg.Name[i] + "')");
-                        warnNotFound.Add(msgJoint);
-                    }
+                    Debug.Log("JointStateListener for '" + config.Topic + "': Cannot find joint '" + msgJoint + "' (original: '" + msg.Name[i] + "')");
+                    warnNotFound.Add(msgJoint);
                 }
             }
         }

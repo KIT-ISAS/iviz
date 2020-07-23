@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Iviz.RoslibSharp.XmlRpc
+namespace Iviz.Roslib.XmlRpc
 {
     sealed class NodeServer : IDisposable
     {

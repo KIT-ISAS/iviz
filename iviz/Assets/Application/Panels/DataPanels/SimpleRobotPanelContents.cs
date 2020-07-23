@@ -3,16 +3,16 @@
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="RobotModuleData"/> 
+    /// <see cref="SimpleRobotModuleData"/> 
     /// </summary>
     /// 
-    public sealed class RobotPanelContents : DataPanelContents
+    public sealed class SimpleRobotPanelContents : DataPanelContents
     {
         public TrashButtonWidget CloseButton { get; private set; }
         public ToggleButtonWidget HideButton { get; private set; }
         public FrameWidget Frame { get; private set; }
-        public DropdownWidget ResourceType { get; private set; }
-        public ToggleWidget AttachToTF { get; private set; }
+        public DropdownWidget SourceParam { get; private set; }
+        public ToggleWidget AttachToTf { get; private set; }
         public InputFieldWidget FramePrefix { get; private set; }
         public InputFieldWidget FrameSuffix { get; private set; }
         public ColorPickerWidget Tint { get; private set; }
@@ -25,8 +25,8 @@ namespace Iviz.App
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("Robot");
             Frame = p.AddFrame();
-            ResourceType = p.AddDropdown("Resource").SetOptions(Resource.Robots.Names);
-            AttachToTF = p.AddToggle("Attach to TF Frames");
+            SourceParam = p.AddDropdown("Source Parameter");
+            AttachToTf = p.AddToggle("Attach to TF Frames");
             FramePrefix = p.AddInputField("TF Frame Prefix").SetPlaceholder("<none>");
             FrameSuffix = p.AddInputField("TF Frame Suffix").SetPlaceholder("<none>");
             Tint = p.AddColorPicker("Tint");

@@ -7,7 +7,7 @@ using UnityEngine.XR.ARKit;
 
 namespace Iviz.Displays
 {
-    public sealed class AngleAxisResource : WrapperResource, IRecyclable, ISupportsTint
+    public sealed class AngleAxisResource : DisplayWrapperResource, IRecyclable, ISupportsTint
     {
         LineResource resource;
         readonly List<LineWithColor> lines = new List<LineWithColor>();

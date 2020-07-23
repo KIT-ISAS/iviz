@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Iviz.RoslibSharp
+namespace Iviz.Roslib
 {
     class BusInfo : JsonToString
     {

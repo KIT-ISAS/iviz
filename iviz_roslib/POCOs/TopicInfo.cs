@@ -1,7 +1,7 @@
 ﻿using System;
 using Iviz.Msgs;
 
-namespace Iviz.RoslibSharp
+namespace Iviz.Roslib
 {
     /// <summary>
     /// Full info about a ROS topic and its message type, including dependencies.

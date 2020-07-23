@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Iviz.Msgs;
 
-namespace Iviz.RoslibSharp
+namespace Iviz.Roslib
 {
     public class RosSubscriber
     {

@@ -1,4 +1,4 @@
-﻿namespace Iviz.RoslibSharp
+﻿namespace Iviz.Roslib
 {
     /// <summary>
     /// Topic name and message type.

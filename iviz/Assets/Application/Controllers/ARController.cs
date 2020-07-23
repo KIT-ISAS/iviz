@@ -1,18 +1,13 @@
 ﻿using UnityEngine;
-using System.Collections;
-using Iviz.RoslibSharp;
+using Iviz.Roslib;
 using System.Runtime.Serialization;
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using Application.Displays;
 using Iviz.Resources;
 using UnityEngine.XR.ARFoundation;
 using Iviz.Displays;
-using Iviz.Msgs.VisualizationMsgs;
 using Iviz.App.Displays;
-using Iviz.RoslibSharp.XmlRpc;
-using TMPro;
 using UnityEngine.Rendering;
 using UnityEngine.XR.ARSubsystems;
 

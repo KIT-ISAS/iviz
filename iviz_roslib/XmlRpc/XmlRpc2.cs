@@ -8,7 +8,7 @@ using System.Text;
 using System.Xml;
 using Iviz.Msgs;
 
-namespace Iviz.RoslibSharp.XmlRpc
+namespace Iviz.Roslib.XmlRpc
 {
     public class FaultException : Exception
     {

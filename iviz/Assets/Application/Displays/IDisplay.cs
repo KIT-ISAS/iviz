@@ -25,4 +25,9 @@ namespace Iviz.Displays
     {
         Color Tint { get; set; }
     }
+
+    public interface ISupportsTintAndAROcclusion : ISupportsAROcclusion, ISupportsTint
+    {
+    }
+
 }

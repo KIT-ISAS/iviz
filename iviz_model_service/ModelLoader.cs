@@ -1,31 +1,29 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Xml;
 using Assimp;
 using Iviz.Msgs.IvizMsgs;
-using Iviz.RoslibSharp;
+using Iviz.Msgs.SensorMsgs;
+using Iviz.Roslib;
 using Material = Assimp.Material;
 using Mesh = Assimp.Mesh;
+using Node = Assimp.Node;
 
-namespace Iviz.Loader
+namespace Iviz.ModelService
 {
     public static class ModelLoader
     {
-        static AssimpContext importer = new AssimpContext();
-        
-        static void Main(string[] args)
+        static readonly AssimpContext Importer = new AssimpContext();
+        static readonly List<string> PackagePaths = new List<string>();
+
+        static void Main()
         {
-            string fileName = @"/Users/akzeac/Downloads/crayler_data/crayler/meshes/base_link_simple.stl";
-
-            var msg = LoadModel(fileName);
-
-            RoslibSharp.RosClient client = new RoslibSharp.RosClient("http://i81node2:11311", "/iviz_model_service");
-
-            GetModel call = new GetModel();
-            call.Request.Uri = "package://iviz/simple_test";
-            call.Request.Model = msg;
-            client.CallService("/iviz_osxeditor/set_model", call);
+            Run();
         }
 
         static void Run()
@@ -38,10 +36,30 @@ namespace Iviz.Loader
                 //"http://141.3.59.19:7621"
             );
 
-            client.AdvertiseService<GetModelResource>("/iviz/load_model", Callback);
+            Console.WriteLine("** Searching package paths...");
+            string packagePath = Environment.GetEnvironmentVariable("ROS_PACKAGE_PATH");
+            if (packagePath is null)
+            {
+                Console.Error.WriteLine("EE Cannot retrieve environment variable ROS_PACKAGE_PATH");
+            }
+            else
+            {
+                string[] paths = packagePath.Split(new[] {':'}, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var path in paths)
+                {
+                    Console.WriteLine("++ " + path);
+                }
+
+                PackagePaths.AddRange(paths);
+            }
+
+            PackagePaths.Add("/Users/akzeac/Documents/iviz/iviz/Assets/Robots");
+
+            client.AdvertiseService<GetModelResource>("/iviz/get_model_resource", ModelCallback);
+            client.AdvertiseService<GetModelTexture>("/iviz/get_model_texture", TextureCallback);
 
             WaitForCancel();
-            
+
             client.UnadvertiseService("/iviz/load_model");
             client.Close();
         }
@@ -53,29 +71,133 @@ namespace Iviz.Loader
             {
                 lock (o) Monitor.Pulse(o);
             };
-
             lock (o) Monitor.Wait(o);
         }
 
-        void Callback(GetModelResource msg)
+        static string ResolvePath(Uri uri)
         {
-            //msg.Request.
-            throw new NotImplementedException();
-        }
-
-
-        Model LoadModel(string fileName)
-        {
-            Scene model = importer.ImportFile(fileName, PostProcessPreset.TargetRealTimeMaximumQuality);
-
-            Model msg = new Model();
-            msg.Meshes = new Msgs.IvizMsgs.Mesh[model.Meshes.Count];
-
-            List<Triangle> faces = new List<Triangle>();
-
-            for (int i = 0; i < model.MeshCount; i++)
+            string subPath = uri.Host + uri.AbsolutePath;
+            foreach (string packagePath in PackagePaths)
             {
-                Mesh srcMesh = model.Meshes[i];
+                string path = packagePath + "/" + subPath;
+                if (File.Exists(path))
+                {
+                    return path;
+                }
+            }
+
+            Console.Error.WriteLine("EE Failed to find resource '" + uri + "'. Searched paths:");
+            foreach (string packagePath in PackagePaths)
+            {
+                string path = packagePath + "/" + subPath;
+                Console.Error.WriteLine("\t" + path);
+            }
+            
+            return null;
+        }
+        
+        static void ModelCallback(GetModelResource msg)
+        {
+            bool success = Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out Uri uri);
+            if (!success)
+            {
+                msg.Response.Success = false;
+                msg.Response.Message = "Failed to parse uri from requested string";
+                return;
+            }
+
+            string modelPath = ResolvePath(uri);
+            if (modelPath is null)
+            {
+                msg.Response.Success = false;
+                msg.Response.Message = "Failed to find resource path";
+                return;
+            }
+
+            Model model;
+            try
+            {
+                model = LoadModel(modelPath);
+            }
+            catch (AssimpException e)
+            {
+                Console.Error.WriteLine("EE Assimp exception loading '" + modelPath + "':");
+                Console.Error.WriteLine(e);
+
+                msg.Response.Success = false;
+                msg.Response.Message = "Failed to load model";
+                return;
+            }            
+
+            msg.Response.Success = true;
+            msg.Response.Message = "";
+            msg.Response.Model = model;
+
+            Console.WriteLine(">> " + uri);
+        }
+        
+        static void TextureCallback(GetModelTexture msg)
+        {
+            bool success = Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out Uri uri);
+            if (!success)
+            {
+                msg.Response.Success = false;
+                msg.Response.Message = "Failed to parse uri from requested string";
+                return;
+            }
+
+            string texturePath = ResolvePath(uri);
+            if (texturePath is null)
+            {
+                msg.Response.Success = false;
+                msg.Response.Message = "Failed to find resource path";
+                return;
+            }
+
+            byte[] data = File.ReadAllBytes(texturePath);
+         
+
+            msg.Response.Success = true;
+            msg.Response.Message = "";
+            msg.Response.Image = new CompressedImage()
+            {
+                Format = Path.GetExtension(texturePath).Replace(".", ""),
+                Data = data
+            };
+
+            Console.WriteLine(">> " + uri);
+        }        
+
+
+        static Model LoadModel(string fileName)
+        {
+            string orientationHint = "";
+            if (fileName.EndsWith(".dae"))
+            { 
+                XmlDocument doc = new XmlDocument();
+                doc.Load(fileName);
+                var nodeList = doc.GetElementsByTagName("up_axis");
+                if (nodeList.Count != 0)
+                {
+                    orientationHint = nodeList[0].InnerText ?? "";
+                }
+            }
+
+            Scene scene = Importer.ImportFile(fileName, PostProcessPreset.TargetRealTimeMaximumQuality | PostProcessPreset.ConvertToLeftHanded);
+            Model msg = new Model
+            {
+                Filename = Path.GetFileName(fileName),
+                Meshes = new Msgs.IvizMsgs.Mesh[scene.Meshes.Count],
+                OrientationHint = orientationHint
+            };
+
+            //Console.WriteLine(msg.Filename + " -> " + msg.OrientationHint);
+
+            
+            List<Triangle> faces = new List<Triangle>();
+            for (int i = 0; i < scene.MeshCount; i++)
+            {
+                Mesh srcMesh = scene.Meshes[i];
 
                 faces.Clear();
                 for (int j = 0; j < srcMesh.FaceCount; j++)
@@ -108,39 +230,72 @@ namespace Iviz.Loader
                 Msgs.IvizMsgs.Mesh dstMesh = new Msgs.IvizMsgs.Mesh
                 (
                     Name: srcMesh.Name ?? "[mesh]",
-                    Bounds: new BoundingBox(),
                     Vertices: srcMesh.Vertices.Select(x => ToVector3(x)).ToArray(),
                     Normals: srcMesh.Normals.Select(x => ToVector3(x)).ToArray(),
                     TexCoords: srcMesh.HasTextureCoords(0)
                         ? srcMesh.TextureCoordinateChannels[0].Select(x => ToVector2(x)).ToArray()
-                        : null,
+                        : Array.Empty<Vector2>(),
                     Colors: srcMesh.HasVertexColors(0)
                         ? srcMesh.VertexColorChannels[0].Select(x => ToColor(x)).ToArray()
-                        : null,
+                        : Array.Empty<Color>(),
                     Faces: faces.ToArray(),
                     MaterialIndex: (uint) srcMesh.MaterialIndex
                 );
+                
+                //Console.WriteLine(srcMesh.HasTextureCoords(0));
 
                 msg.Meshes[i] = dstMesh;
             }
 
-            msg.Materials = new Msgs.IvizMsgs.Material[model.MaterialCount];
-            for (int i = 0; i < model.MaterialCount; i++)
+            msg.Materials = new Msgs.IvizMsgs.Material[scene.MaterialCount];
+            for (int i = 0; i < scene.MaterialCount; i++)
             {
-                Material srcMaterial = model.Materials[i];
-                Msgs.IvizMsgs.Material dstMaterial = new Msgs.IvizMsgs.Material
+                Material srcMaterial = scene.Materials[i];
+                msg.Materials[i] = new Msgs.IvizMsgs.Material
                 (
                     Name: srcMaterial.Name ?? "[material]",
                     Ambient: ToColor(srcMaterial.ColorAmbient),
                     Diffuse: ToColor(srcMaterial.ColorDiffuse),
                     Emissive: ToColor(srcMaterial.ColorEmissive),
                     DiffuseTexture: new Texture()
+                    {
+                        Path = srcMaterial.TextureDiffuse.FilePath ?? ""
+                    }
                 );
-
-                msg.Materials[i] = dstMaterial;
             }
 
+            List<Msgs.IvizMsgs.Node> nodes = new List<Msgs.IvizMsgs.Node>();
+            ProcessNode(scene.RootNode, nodes, new Dictionary<Node, int>());
+
+            msg.Nodes = nodes.ToArray();
+
             return msg;
+        }
+
+        static void ProcessNode(Node node, List<Msgs.IvizMsgs.Node> nodes, Dictionary<Node, int> ids)
+        {
+            if (node.Children.Count == 0 && node.MeshIndices.Count == 0)
+            {
+                return;
+            }
+            
+            //Console.WriteLine(string.Join("\n", node.Metadata));
+            
+            ids[node] = ids.Count;
+            int parentId = node.Parent is null ? -1 : ids[node.Parent];
+
+            nodes.Add(new Msgs.IvizMsgs.Node(
+                node.Name,
+                parentId,
+                ToMatrix(node.Transform),
+                node.MeshIndices.ToArray()
+            ));
+            
+            foreach (Node child in node.Children)
+            {
+                ProcessNode(child, nodes, ids);
+            }
+
         }
 
         static Vector3 ToVector3(in Vector3D v)
@@ -150,7 +305,7 @@ namespace Iviz.Loader
 
         static Vector2 ToVector2(in Vector3D v)
         {
-            return new Vector2(v.X, v.Y);
+            return new Vector2(v.X, 1 - v.Y);
         }
 
         static Color ToColor(in Color4D color)
@@ -158,8 +313,29 @@ namespace Iviz.Loader
             int r = (int) (Math.Max(Math.Min(color.R, 1), 0) * 255);
             int g = (int) (Math.Max(Math.Min(color.G, 1), 0) * 255);
             int b = (int) (Math.Max(Math.Min(color.B, 1), 0) * 255);
+
             int a = (int) (Math.Max(Math.Min(color.A, 1), 0) * 255);
             return new Color((byte) r, (byte) g, (byte) b, (byte) a);
+        }
+
+        static Matrix4 ToMatrix(in Matrix4x4 v)
+        {
+            /*
+            return new Matrix4(new[]
+            {
+                v.A1, v.A2, v.A3, v.A4,
+                v.B1, v.B2, v.B3, v.B4,
+                v.C1, v.C2, v.C3, v.C4,
+                v.D1, v.D2, v.D3, v.D4
+            });
+            */
+            return new Matrix4(new[]
+            {
+                v.A1, v.B1, v.C1, v.D1,
+                v.A2, v.B2, v.C2, v.D2,
+                v.A3, v.B3, v.C3, v.D3,
+                v.A4, v.B4, v.C4, v.D4,
+            });
         }
     }
 }

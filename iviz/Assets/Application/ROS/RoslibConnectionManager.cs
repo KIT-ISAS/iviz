@@ -1,5 +1,5 @@
 ﻿using Iviz.Msgs;
-using Iviz.RoslibSharp;
+using Iviz.Roslib;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -49,7 +49,9 @@ namespace Iviz.App
         {
             readonly HashSet<RosSender<T>> senders = new HashSet<RosSender<T>>();
 
-            public AdvertisedTopic(string topic) : base(topic) { }
+            public AdvertisedTopic(string topic) : base(topic)
+            {
+            }
 
             public override int Id
             {
@@ -66,12 +68,12 @@ namespace Iviz.App
 
             public override void Add(RosSender publisher)
             {
-                senders.Add((RosSender<T>)publisher);
+                senders.Add((RosSender<T>) publisher);
             }
 
             public override void Remove(RosSender publisher)
             {
-                senders.Remove((RosSender<T>)publisher);
+                senders.Remove((RosSender<T>) publisher);
             }
 
             public override int Count => senders.Count;
@@ -116,16 +118,18 @@ namespace Iviz.App
         {
             readonly HashSet<RosListener<T>> listeners = new HashSet<RosListener<T>>();
 
-            public SubscribedTopic(string topic) : base(topic) { }
+            public SubscribedTopic(string topic) : base(topic)
+            {
+            }
 
             public override void Add(RosListener subscriber)
             {
-                listeners.Add((RosListener<T>)subscriber);
+                listeners.Add((RosListener<T>) subscriber);
             }
 
             public override void Remove(RosListener subscriber)
             {
-                listeners.Remove((RosListener<T>)subscriber);
+                listeners.Remove((RosListener<T>) subscriber);
             }
 
             public void Callback(T msg)
@@ -145,7 +149,6 @@ namespace Iviz.App
             }
 
             public override int Count => listeners.Count;
-
         }
 
         abstract class AdvertisedService
@@ -228,10 +231,9 @@ namespace Iviz.App
 
             try
             {
-
                 //RoslibSharp.Logger.LogDebug = x => Logger.Debug(x);
-                RoslibSharp.Logger.LogError = x => Logger.Error(x);
-                RoslibSharp.Logger.Log = x => Logger.Info(x);
+                Roslib.Logger.LogError = x => Logger.Error(x);
+                Roslib.Logger.Log = x => Logger.Info(x);
 
                 client = new RosClient(MasterUri, MyId, MyUri);
 
@@ -242,11 +244,13 @@ namespace Iviz.App
                     entry.Value.Id = publishers.Count;
                     publishers.Add(entry.Value.Publisher);
                 }
+
                 foreach (var entry in subscribersByTopic)
                 {
                     //Logger.Debug("Late subscription for " + entry.Key);
                     entry.Value.Subscribe(client);
                 }
+
                 foreach (var entry in servicesByTopic)
                 {
                     //Logger.Debug("Late subscription for " + entry.Key);
@@ -256,7 +260,7 @@ namespace Iviz.App
                 return true;
             }
             catch (Exception e) when
-            (e is UnreachableUriException || e is ConnectionException || e is XmlRpcException)
+                (e is UnreachableUriException || e is ConnectionException || e is XmlRpcException)
             {
                 Logger.Debug(e);
                 Logger.Internal("Error:", e);
@@ -264,7 +268,7 @@ namespace Iviz.App
                 return false;
             }
             catch (Exception e) when
-            (e is IOException)
+                (e is IOException)
             {
                 Logger.Debug(e);
                 Logger.Internal("Error:", e);
@@ -291,21 +295,23 @@ namespace Iviz.App
             }
 
             AddTask(() =>
-            {
-               Debug.Log("RosLibConnection: Disconnecting...");
-               client?.Close();
-               client = null;
-               foreach (var entry in publishersByTopic)
-               {
-                   entry.Value.Invalidate();
-               }
-               foreach (var entry in subscribersByTopic)
-               {
-                   entry.Value.Invalidate();
-               }
-               publishers.Clear();
-               Debug.Log("RosLibConnection: Disconnection finished.");
-            }
+                {
+                    Debug.Log("RosLibConnection: Disconnecting...");
+                    client?.Close();
+                    client = null;
+                    foreach (var entry in publishersByTopic)
+                    {
+                        entry.Value.Invalidate();
+                    }
+
+                    foreach (var entry in subscribersByTopic)
+                    {
+                        entry.Value.Invalidate();
+                    }
+
+                    publishers.Clear();
+                    Debug.Log("RosLibConnection: Disconnection finished.");
+                }
             );
         }
 
@@ -353,6 +359,7 @@ namespace Iviz.App
                         publishers[id] = publisher;
                         //Logger.Debug("Id is " + id);
                     }
+
                     PublishedTopics = client.PublishedTopics;
                 }
                 else
@@ -364,6 +371,7 @@ namespace Iviz.App
                 advertisedTopic.Id = id;
                 publishersByTopic.Add(advertiser.Topic, advertisedTopic);
             }
+
             advertisedTopic.Add(advertiser);
             advertiser.SetId(advertisedTopic.Id);
         }
@@ -394,10 +402,42 @@ namespace Iviz.App
                 {
                     newAdvertisedService.Advertise(client);
                 }
+
                 servicesByTopic.Add(service, newAdvertisedService);
             }
         }
 
+        public override void CallServiceAsync<T>(string service, T srv, Action<T> callback)
+        {
+            AddTask(() =>
+            {
+                try
+                {
+                    if (client != null && client.CallService(service, srv))
+                    {
+                        GameThread.RunOnce(() => callback(srv));
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.Error(e);
+                    Disconnect();
+                }
+            });
+        }
+
+        public override bool CallService<T>(string service, T srv)
+        {
+            try
+            {
+                return !(client is null) && client.CallService(service, srv);
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e);
+                return false;
+            }
+        }
 
         public override void Publish(RosSender advertiser, IMessage msg)
         {
@@ -422,6 +462,7 @@ namespace Iviz.App
             {
                 return;
             }
+
             //Debug.Log("Trying to publish: " + advertiser.Id + " -> " + publishers[advertiser.Id]);
             publishers[advertiser.Id]?.Publish(msg);
         }
@@ -454,6 +495,7 @@ namespace Iviz.App
                 subscribedTopic = newSubscribedTopic;
                 subscribersByTopic.Add(listener.Topic, subscribedTopic);
             }
+
             subscribedTopic.Add(listener);
         }
 
@@ -464,7 +506,6 @@ namespace Iviz.App
                 try
                 {
                     UnadvertiseImpl(advertiser);
-
                 }
                 catch (Exception e)
                 {
@@ -539,6 +580,7 @@ namespace Iviz.App
                         cachedTopics = EmptyTopics;
                         return;
                     }
+
                     cachedTopics = client.GetSystemPublishedTopics();
                 }
                 catch (Exception e)
@@ -563,10 +605,7 @@ namespace Iviz.App
 
         protected override void Update()
         {
-            AddTask(() =>
-            {
-                client?.Cleanup();
-            }
+            AddTask(() => { client?.Cleanup(); }
             );
         }
 

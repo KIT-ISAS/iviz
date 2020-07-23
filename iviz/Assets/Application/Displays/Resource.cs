@@ -5,6 +5,7 @@ using Newtonsoft.Json.Converters;
 using System.Collections.ObjectModel;
 using System;
 using System.Linq;
+using System.Reflection;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Msgs.VisualizationMsgs;
 using GameObjectInfo = Iviz.Resources.Resource.Info<UnityEngine.GameObject>;
@@ -12,14 +13,20 @@ using MaterialInfo = Iviz.Resources.Resource.Info<UnityEngine.Material>;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.NavMsgs;
 using System.Text;
+using Iviz.App;
 using Iviz.App.Listeners;
-using Iviz.App.Resources;
+using Iviz.Displays;
+//using Iviz.App.Resources;
 using Iviz.Msgs.GridMapMsgs;
+using Transform = UnityEngine.Transform;
 
 namespace Iviz.Resources
 {
     public class ResourceNotFoundException : Exception
     {
+        public ResourceNotFoundException() {}
+        public ResourceNotFoundException(string message) : base(message) {}
+
     }
 
     public static class Resource
@@ -44,6 +51,7 @@ namespace Iviz.Resources
             Joystick,
             Path,
             GridMap,
+            SimpleRobot,
         }
 
         public static ReadOnlyDictionary<string, Module> ResourceByRosMessageType { get; }
@@ -92,7 +100,7 @@ namespace Iviz.Resources
             }
         }
 
-        public class Info<T> where T : UnityEngine.Object
+        public class Info<T> : IEquatable<Info<T>> where T : UnityEngine.Object
         {
             readonly string resourceName;
 
@@ -139,7 +147,7 @@ namespace Iviz.Resources
                 return Object.ToString();
             }
 
-            public T Instantiate(UnityEngine.Transform parent = null)
+            public T Instantiate(Transform parent = null)
             {
                 if (Object is null)
                 {
@@ -147,6 +155,16 @@ namespace Iviz.Resources
                 }
 
                 return UnityEngine.Object.Instantiate(Object, parent);
+            }
+
+            public bool Equals(Info<T> other)    
+            {
+                return !(other is null) && Id == other.Id;
+            }
+
+            public override bool Equals(object obj)
+            {
+                return !(obj is null) && obj is Info<T> info && Id == info.Id;
             }
 
             public override int GetHashCode()
@@ -318,7 +336,7 @@ namespace Iviz.Resources
             public GameObjectInfo InteractiveControl { get; }
             public GameObjectInfo GridMap { get; }
 
-            //public ReadOnlyDictionary<Uri, GameObjectInfo> Generic { get; }
+            public ReadOnlyDictionary<Type, GameObjectInfo> ResourceByType { get; }
 
             public DisplaysType()
             {
@@ -349,11 +367,57 @@ namespace Iviz.Resources
                 AnchorLine = new GameObjectInfo("Displays/AnchorLine");
                 InteractiveControl = new GameObjectInfo("Displays/InteractiveControl");
                 GridMap = new GameObjectInfo("Displays/GridMap");
+
+                ResourceByType = new ReadOnlyDictionary<Type, GameObjectInfo>(CreateTypeDictionary());
             }
 
-            static Uri CreateUri(string name)
+            Dictionary<Type, GameObjectInfo> CreateTypeDictionary()
             {
-                return new Uri("package://iviz/" + name);
+                Dictionary<Type, GameObjectInfo> resourceByType = new Dictionary<Type, GameObjectInfo>();
+                PropertyInfo[] properties = GetType().GetProperties();
+                foreach (var property in properties)
+                {
+                    if (!typeof(GameObjectInfo).IsAssignableFrom(property.PropertyType))
+                    {
+                        continue;
+                    }
+
+                    GameObjectInfo info = (GameObjectInfo) property.GetValue(this);
+                    IDisplay display = info.Object.GetComponent<IDisplay>();
+                    Type type = display?.GetType();
+                    string name = type?.FullName;
+                    if (name is null)
+                    {
+                        continue;
+                    }
+
+                    resourceByType[type] = info;
+                }
+
+                return resourceByType;
+            }
+
+            bool TryGetResource(Type type, out GameObjectInfo info)
+            {
+                return ResourceByType.TryGetValue(type, out info);
+            }
+
+            public T GetOrCreate<T>(Transform parent = null, bool enabled = true) where T : MonoBehaviour
+            {
+                if (!TryGetResource(typeof(T), out GameObjectInfo info))
+                {
+                    throw new ResourceNotFoundException("Cannot find unique display type for type " + nameof(T));
+                }
+                return ResourcePool.GetOrCreate<T>(info, parent, enabled);
+            }
+
+            public void Dispose<T>(T resource) where T : MonoBehaviour
+            {
+                if (!TryGetResource(typeof(T), out GameObjectInfo info))
+                {
+                    throw new ResourceNotFoundException("Cannot find unique display type for resource");
+                }
+                ResourcePool.Dispose(info, resource.gameObject);
             }
         }
 
@@ -368,18 +432,18 @@ namespace Iviz.Resources
                     [new Uri("package://iviz/cube")] = Displays.Cube,
                     [new Uri("package://iviz/cylinder")] = Displays.Cylinder,
                     [new Uri("package://iviz/sphere")] = Displays.Sphere,
-                    [new Uri("package://iviz/rightHand")] = new GameObjectInfo("Displays/RightHand")
+                    [new Uri("package://iviz/rightHand")] = new GameObjectInfo("Markers/RightHand")
                 };
             }
-            
+
             public bool TryGet(Uri uri, out GameObjectInfo info)
             {
                 if (files.TryGetValue(uri, out info))
                 {
                     return true;
                 }
+
                 string path = "Packages/" + uri.Host + uri.AbsolutePath;
-//                Debug.Log(path);
                 GameObject resource = UnityEngine.Resources.Load<GameObject>(path);
                 if (resource is null)
                 {
@@ -387,16 +451,15 @@ namespace Iviz.Resources
                     resource = UnityEngine.Resources.Load<GameObject>(path);
                     if (resource is null)
                     {
-                        Debug.Log("not found");
                         return false;
                     }
                 }
+
                 info = new GameObjectInfo(path, resource);
                 files[uri] = info;
                 return true;
             }
         }
-            
 
 
         public class ControllersType
@@ -601,9 +664,11 @@ namespace Iviz.Resources
 
         static InternalsType internals;
         public static InternalsType Internal => internals ?? (internals = new InternalsType());
-        
-        static ExternalResourceManager external;
-        public static ExternalResourceManager External => external ?? (external = new ExternalResourceManager());
+
+        static App.Resources.ExternalResourceManager external;
+
+        public static App.Resources.ExternalResourceManager External =>
+            external ?? (external = new App.Resources.ExternalResourceManager());
 
         public static bool TryGetResource(Uri uri, out GameObjectInfo info)
         {

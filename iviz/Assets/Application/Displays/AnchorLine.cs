@@ -11,7 +11,7 @@ namespace Application.Displays
         bool FindAnchor(in Vector3 position, out Vector3 anchor, out Vector3 normal);
     }
 
-    public sealed class AnchorLine : WrapperResource, IRecyclable, ISupportsTint
+    public sealed class AnchorLine : DisplayWrapperResource, IRecyclable, ISupportsTint
     {
         readonly List<LineWithColor> lines = new List<LineWithColor>();
         LineResource resource;

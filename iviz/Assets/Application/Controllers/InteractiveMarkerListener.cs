@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 using Iviz.Msgs.VisualizationMsgs;
-using Iviz.RoslibSharp;
+using Iviz.Roslib;
 using System.Runtime.Serialization;
 using Iviz.App.Displays;
 using Iviz.Resources;

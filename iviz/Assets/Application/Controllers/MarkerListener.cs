@@ -4,7 +4,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using Iviz.Msgs.VisualizationMsgs;
 using System.Runtime.Serialization;
-using Iviz.RoslibSharp;
+using Iviz.Roslib;
 using Iviz.Resources;
 using UnityEngine;
 

@@ -26,7 +26,7 @@ namespace Iviz.App
         {
             files.Clear();
             files.AddRange(Directory.GetFiles(ModuleListPanel.PersistentDataPath).
-                Where(x => RoslibSharp.Utils.HasSuffix(x, Suffix)).
+                Where(x => Roslib.Utils.HasSuffix(x, Suffix)).
                 Select(GetFileName));
             panel.Items = files;
             panel.ItemClicked += OnItemClicked;

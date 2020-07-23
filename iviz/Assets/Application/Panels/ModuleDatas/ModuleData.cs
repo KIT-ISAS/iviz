@@ -119,6 +119,7 @@ namespace Iviz.App
                 case Resource.Module.Grid: return new GridModuleData(c);
                 case Resource.Module.Image: return new ImageModuleData(c);
                 case Resource.Module.Robot: return new RobotModuleData(c);
+                case Resource.Module.SimpleRobot: return new SimpleRobotModuleData(c);
                 case Resource.Module.Marker: return new MarkerModuleData(c);
                 case Resource.Module.InteractiveMarker: return new InteractiveMarkerModuleData(c);
                 case Resource.Module.JointState: return new JointStateModuleData(c);
@@ -130,7 +131,7 @@ namespace Iviz.App
                 case Resource.Module.Joystick: return new JoystickModuleData(c);
                 case Resource.Module.Path: return new PathModuleData(c);
                 case Resource.Module.GridMap: return new GridMapModuleData(c);
-                default: throw new ArgumentException(nameof(c));
+                default: throw new ArgumentException("Failed to find a module of the given type: " + c.Module);
             }
         }
     }

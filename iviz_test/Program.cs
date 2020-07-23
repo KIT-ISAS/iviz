@@ -10,10 +10,11 @@ using BitMiracle.LibJpeg;
 using Iviz.Bridge.Client;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
+using Iviz.Msgs.SensorMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.Tf2Msgs;
 using Iviz.Msgs.VisualizationMsgs;
-using Iviz.RoslibSharp;
+using Iviz.Roslib;
 using Newtonsoft.Json.Serialization;
 using Int64 = System.Int64;
 
@@ -22,6 +23,36 @@ namespace iviz_test
     class Program
     {
         static void Main()
+        {
+            RosClient client = new RosClient(
+                "http://192.168.0.220:11311",
+                //"http://141.3.59.5:11311",
+                null,
+                "http://192.168.0.157:7619"
+                //"http://141.3.59.19:7621"
+            );            
+            client.Advertise<JointState>("/joints", out RosPublisher publisher2);
+
+            double k = 0.5f;
+            while (true)
+            {
+                Console.WriteLine("publishing...");
+                JointState msg = new JointState()
+                {
+                    
+                    Header = new Header(),
+                    Name = new []{ "boom_revolute" },
+                    Position = new []{ k }
+                };
+
+                publisher2.Publish(msg);
+
+                Thread.Sleep(100);
+            }
+        }
+        
+        
+        static void Main_P()
         {
             RosClient client = new RosClient(
                 //"http://192.168.0.73:11311",

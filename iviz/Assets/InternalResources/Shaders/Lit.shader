@@ -16,7 +16,7 @@
 		#pragma target 3.0
 
 		struct Input {
-			float dummy;
+			float4 color : COLOR;
 		};
 
 		half _Smoothness;
@@ -28,7 +28,7 @@
 
 
 		void surf(Input IN, inout SurfaceOutputStandard o) {
-			o.Albedo = UNITY_ACCESS_INSTANCED_PROP(Props, _Color).rgb;
+			o.Albedo = UNITY_ACCESS_INSTANCED_PROP(Props, _Color).rgb * IN.color;
 			o.Metallic = _Metallic;
 			o.Smoothness = _Smoothness;
 		}

@@ -9,29 +9,26 @@ namespace Iviz.App
     /// <see cref="RobotPanelContents"/> 
     /// </summary>
 
-    public sealed class RobotModuleData : ModuleData
+    public sealed class SimpleRobotModuleData : ModuleData
     {
-        readonly RobotPanelContents panel;
+        readonly SimpleRobotPanelContents panel;
 
-        readonly RobotController robot;
-        public string RobotName => robot.LongName;
+        readonly SimpleRobotController robot;
 
         public override DataPanelContents Panel => panel;
-        public override Resource.Module Module => Resource.Module.Robot;
+        public override Resource.Module Module => Resource.Module.SimpleRobot;
         public override IConfiguration Configuration => robot.Config;
         public override IController Controller => robot;
 
-        public RobotModuleData(ModuleDataConstructor constructor) :
+        public SimpleRobotModuleData(ModuleDataConstructor constructor) :
         base(constructor.ModuleList, constructor.Topic, constructor.Type)
         {
-            //robot = Instantiate<RobotController>();
-            robot = new RobotController(this);
-            //robot.ModuleData = this;
+            robot = new SimpleRobotController(this);
             if (constructor.Configuration != null)
             {
-                robot.Config = (RobotConfiguration)constructor.Configuration;
+                robot.Config = (SimpleRobotConfiguration)constructor.Configuration;
             }
-            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Robot) as RobotPanelContents;
+            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.SimpleRobot) as SimpleRobotPanelContents;
             UpdateModuleButton();
         }
 
@@ -39,16 +36,15 @@ namespace Iviz.App
         {
             base.Stop();
             robot.Stop();
-            //Object.Destroy(robot.gameObject);
         }
 
         public override void SetupPanel()
         {
             panel.Frame.Owner = robot;
-            panel.ResourceType.Value = robot.RobotResource;
+            //panel.ResourceType.Value = robot.RobotResource;
             panel.FramePrefix.Value = robot.FramePrefix;
             panel.FrameSuffix.Value = robot.FrameSuffix;
-            panel.AttachToTF.Value = robot.AttachToTf;
+            panel.AttachToTf.Value = robot.AttachToTf;
             panel.HideButton.State = robot.Visible;
 
             panel.OcclusionOnlyMode.Value = robot.RenderAsOcclusionOnly;
@@ -72,12 +68,14 @@ namespace Iviz.App
                 robot.RenderAsOcclusionOnly = f;
             };
 
+            /*
             panel.ResourceType.ValueChanged += (_, f) =>
             {
                 robot.RobotResource = f;
                 UpdateModuleButton();
             };
-            panel.AttachToTF.ValueChanged += f =>
+            */
+            panel.AttachToTf.ValueChanged += f =>
             {
                 robot.AttachToTf = f;
             }; 
@@ -100,17 +98,16 @@ namespace Iviz.App
                 panel.HideButton.State = robot.Visible;
                 UpdateModuleButton();
             };
-
         }
 
         protected override void UpdateModuleButton()
         {
-            ButtonText = $"{Resource.Font.Split(robot.LongName, DisplayListPanel.ModuleDataCaptionWidth)}\n<b>{Module}</b>";
+            ButtonText = $"{Resource.Font.Split(robot.Name, DisplayListPanel.ModuleDataCaptionWidth)}\n<b>{Module}</b>";
         }
 
         public override void AddToState(StateConfiguration config)
         {
-            config.Robots.Add(robot.Config);
+            //config.Robots.Add(robot.Config);
         }
     }
 }
