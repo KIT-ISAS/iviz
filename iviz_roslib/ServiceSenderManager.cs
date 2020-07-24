@@ -10,7 +10,7 @@ namespace Iviz.Roslib
 {
     class ServiceSenderManager
     {
-        public readonly Uri uri;
+        public Uri Uri { get; }
         readonly TcpListener listener;
         readonly ServiceInfo serviceInfo;
         readonly Task task;
@@ -30,8 +30,8 @@ namespace Iviz.Roslib
             listener.Start();
 
             IPEndPoint localEndpoint = (IPEndPoint)listener.LocalEndpoint;
-            uri = new Uri($"rosrpc://{host}:{localEndpoint.Port}/");
-            Logger.Log("RosRpcServer: Starting at " + uri);
+            Uri = new Uri($"rosrpc://{host}:{localEndpoint.Port}/");
+            Logger.Log("RosRpcServer: Starting at " + Uri);
 
             //task = Task.Run(Run);
             Run();
