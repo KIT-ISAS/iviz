@@ -76,6 +76,7 @@ namespace Iviz.Controllers
                 catch (Exception e)
                 {
                     Debug.LogError(e);
+                    robot = null;
                     config.SourceParameter = string.Empty;
                 }
             }

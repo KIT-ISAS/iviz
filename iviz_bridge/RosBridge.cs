@@ -15,19 +15,19 @@ namespace Iviz.Bridge
         readonly HashSet<SocketConnection> connections = new HashSet<SocketConnection>();
         volatile bool keepGoing;
 
-        public RosBridge(RosClient rosClient, string _)
+        public RosBridge(RosClient rosClient, int port)
         {
             SocketConnection.client = this;
             RosClient = rosClient;
-            
-            //Logger.Log("Bridge: Starting with url '" + websocketUrl + "'");
 
-            server = new WebSocketServer(System.Net.IPAddress.Any, 9090);
+            Logger.Log("** Starting with port " + port);
+
+            server = new WebSocketServer(port);
             //server.Log.Output = (_, __) => { };
             server.AddWebSocketService<SocketConnection>("/");
             server.Start();
 
-            Logger.Log("Bridge: Started!");
+            Logger.Log("** Started!");
         }
 
         void OnShutdownActionCall(string callerId, string reason, out StatusCode status, out string response)
@@ -43,18 +43,8 @@ namespace Iviz.Bridge
             e.Cancel = true;
         }
 
-        public void Run()
+        public void Close()
         {
-            RosClient.ShutdownAction = OnShutdownActionCall;
-            Console.CancelKeyPress += Console_CancelKeyPress;
-
-            keepGoing = true;
-            while (keepGoing)
-            {
-                Thread.Sleep(1000);
-                Cleanup();
-            }
-
             server.Stop();
             RosClient.Close();
         }
@@ -84,7 +74,6 @@ namespace Iviz.Bridge
             {
                 connections.Remove(connection);
             }
-
         }
     }
 }

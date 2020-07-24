@@ -66,8 +66,6 @@ namespace Iviz.ModelService
 
             WaitForCancel();
 
-            client.UnadvertiseService(ModelServiceName);
-            client.UnadvertiseService(TextureServiceName);
             client.Close();
         }
 
