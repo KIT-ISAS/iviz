@@ -14,7 +14,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class GuiCamera : DisplayNode
+    public sealed class GuiCamera : DisplayNode
     {
         public static GuiCamera Instance { get; private set; }
         

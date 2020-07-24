@@ -10,7 +10,7 @@ namespace Iviz.Displays
 {
     public sealed class MeshListResource : MarkerResourceWithColormap, ISupportsAROcclusion
     {
-        NativeArray<float4> pointBuffer = new NativeArray<float4>();
+        NativeArray<float4> pointBuffer;
         ComputeBuffer pointComputeBuffer;
 
         readonly uint[] argsBuffer = new uint[5] { 0, 0, 0, 0, 0 };
@@ -32,17 +32,17 @@ namespace Iviz.Displays
             }
         }
 
-        [SerializeField] bool perVertexScale_;
+        [SerializeField] bool perVertexScale;
         public bool UsePerVertexScale
         {
-            get => perVertexScale_;
+            get => perVertexScale;
             set
             {
-                if (perVertexScale_ == value)
+                if (perVertexScale == value)
                 {
                     return;
                 }
-                perVertexScale_ = value;
+                perVertexScale = value;
                 UpdateMaterialKeywords();
             }
         }
@@ -66,21 +66,21 @@ namespace Iviz.Displays
             }
         }
 
-        [SerializeField] int size_;
+        [SerializeField] int size;
         public int Size
         {
-            get => size_;
+            get => size;
             private set
             {
-                if (value == size_)
+                if (value == size)
                 {
                     return;
                 }
-                size_ = value;
+                size = value;
 
-                Reserve(size_ * 11 / 10);
+                Reserve(size * 11 / 10);
 
-                argsBuffer[1] = (uint)size_;
+                argsBuffer[1] = (uint)size;
                 argsComputeBuffer.SetData(argsBuffer);
             }
         }
@@ -97,10 +97,7 @@ namespace Iviz.Displays
                 }
                 pointBuffer = new NativeArray<float4>(reqDataSize, Allocator.Persistent);
 
-                if (pointComputeBuffer != null)
-                {
-                    pointComputeBuffer.Release();
-                }
+                pointComputeBuffer?.Release();
                 pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithColor>());
                 material.SetBuffer(PropPoints, pointComputeBuffer);
             }
@@ -113,13 +110,13 @@ namespace Iviz.Displays
                 Size = value.Count;
 
                 int realSize = 0;
-                for (int i = 0; i < value.Count; i++)
+                foreach (var point in value)
                 {
-                    if (value[i].HasNaN)
+                    if (point.HasNaN)
                     {
                         continue;
                     }
-                    pointBuffer[realSize] = value[i];
+                    pointBuffer[realSize] = point;
                     realSize++;
                 }
                 Size = realSize;
@@ -143,45 +140,45 @@ namespace Iviz.Displays
 
         static readonly int PropLocalScale = Shader.PropertyToID("_LocalScale");
 
-        [SerializeField] Vector3 scale_;
+        [SerializeField] Vector3 scale;
         public Vector3 Scale
         {
-            get => scale_;
+            get => scale;
             set
             {
-                scale_ = value;
-                material.SetVector(PropLocalScale, new Vector4(scale_.x, scale_.y, scale_.z, 1));
+                scale = value;
+                material.SetVector(PropLocalScale, new Vector4(scale.x, scale.y, scale.z, 1));
             }
         }
 
         static readonly int PropLocalOffset = Shader.PropertyToID("_LocalOffset");
 
-        [SerializeField] Vector3 offset_;
+        [SerializeField] Vector3 offset;
         public Vector3 Offset
         {
-            get => offset_;
+            get => offset;
             set
             {
-                offset_ = value;
-                material.SetVector(PropLocalOffset, offset_);
+                offset = value;
+                material.SetVector(PropLocalOffset, offset);
             }
         }
 
-        [SerializeField] bool occlussionOnly_;
+        [SerializeField] bool occlusionOnly;
         public bool OcclusionOnly
         {
-            get => occlussionOnly_;
+            get => occlusionOnly;
             set
             {
-                if (occlussionOnly_ == value)
+                if (occlusionOnly == value)
                 {
                     return;
                 }
-                occlussionOnly_ = value;
+                occlusionOnly = value;
 
                 if (value)
                 {
-                    if (occlusionMaterial == null)
+                    if (occlusionMaterial is null)
                     {
                         occlusionMaterial = Resource.Materials.MeshListOcclusionOnly.Instantiate();
                         occlusionMaterial.enableInstancing = true;
@@ -208,15 +205,15 @@ namespace Iviz.Displays
             UpdateMaterialKeywords();
 
             Mesh = Resource.Displays.SphereSimple.Object.GetComponent<MeshFilter>().sharedMesh;
-            Scale = new Vector3(1, 1, 1);
-            Offset = new Vector3(0, 0, 0);
+            Scale = Vector3.one;
+            Offset = Vector3.zero;
             IntensityBounds = new Vector2(0, 1);
             Colormap = Resource.ColormapId.gray;
 
             argsComputeBuffer = new ComputeBuffer(1, argsBuffer.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
             argsComputeBuffer.SetData(argsBuffer);
 
-            OcclusionOnly = true;
+            OcclusionOnly = false;
         }
 
         void Update()
@@ -245,14 +242,8 @@ namespace Iviz.Displays
             material = null;
             base.OnDestroy();
 
-            if (pointComputeBuffer != null)
-            {
-                pointComputeBuffer.Release();
-            }
-            if (argsComputeBuffer != null)
-            {
-                argsComputeBuffer.Release();
-            }
+            pointComputeBuffer?.Release();
+            argsComputeBuffer?.Release();
             if (pointBuffer.Length > 0)
             {
                 pointBuffer.Dispose();

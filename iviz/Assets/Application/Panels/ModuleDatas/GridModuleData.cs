@@ -22,7 +22,6 @@ namespace Iviz.App
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Grid) as GridPanelContents;
 
-            //controller = Instantiate<GridController>();
             controller = new GridController(this);
             if (constructor.Configuration != null)
             {
@@ -37,7 +36,6 @@ namespace Iviz.App
             base.Stop();
 
             controller.Stop();
-            //Object.Destroy(controller.gameObject);
         }
 
         const float InteriorColorFactor = 0.5f;
@@ -47,7 +45,7 @@ namespace Iviz.App
             panel.LineWidth.Value = controller.GridLineWidth;
             panel.NumberOfCells.Value = controller.NumberOfGridCells;
             //panel.CellSize.Value = controller.GridCellSize;
-            panel.Orientation.Index = (int)controller.Orientation;
+            //panel.Orientation.Index = (int)controller.Orientation;
             panel.ColorPicker.Value = controller.InteriorColor;
             panel.ShowInterior.Value = controller.ShowInterior;
             panel.HideButton.State = controller.Visible;
@@ -69,10 +67,12 @@ namespace Iviz.App
                 controller.GridCellSize = f;
             };
             */
+            /*
             panel.Orientation.ValueChanged += (i, _) =>
             {
                 controller.Orientation = (GridOrientation)i;
             };
+            */
             panel.ColorPicker.ValueChanged += f =>
             {
                 controller.GridColor = f * InteriorColorFactor;

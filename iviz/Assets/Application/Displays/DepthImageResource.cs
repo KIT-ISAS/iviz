@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Runtime.InteropServices;
 using Iviz.Resources;
 
@@ -8,24 +9,24 @@ namespace Iviz.Displays
     {
         [SerializeField] Material material;
 
-        [SerializeField] float pointSize_ = 1;
+        [SerializeField] float pointSize = 1;
         public float PointSize
         {
-            get => pointSize_;
+            get => pointSize;
             set
             {
-                pointSize_ = value;
+                pointSize = value;
                 UpdateQuadComputeBuffer();
             }
         }
 
-        [SerializeField] float fovAngle_;
+        [SerializeField] float fovAngle;
         public float FovAngle
         {
-            get => fovAngle_;
+            get => fovAngle;
             set
             {
-                fovAngle_ = value;
+                fovAngle = value;
                 if (DepthImage != null)
                 {
                     UpdatePosValues(DepthImage.Texture);
@@ -107,7 +108,6 @@ namespace Iviz.Displays
             };
             if (quadComputeBuffer == null)
             {
-                //Debug.Log("Building quadComputeBuffer");
                 quadComputeBuffer = new ComputeBuffer(4, Marshal.SizeOf<Vector2>());
                 material.SetBuffer(PropQuad, quadComputeBuffer);
             }
@@ -142,7 +142,7 @@ namespace Iviz.Displays
         static readonly int PropPoints = Shader.PropertyToID("_Points");
         void UpdatePointComputeBuffers(Texture2D sourceTexture)
         {
-            if (sourceTexture == null || (sourceTexture.width == width && sourceTexture.height == height))
+            if (sourceTexture is null || (sourceTexture.width == width && sourceTexture.height == height))
             {
                 return;
             }
@@ -161,10 +161,7 @@ namespace Iviz.Displays
                 }
             }
 
-            if (pointComputeBuffer != null)
-            {
-                pointComputeBuffer.Release();
-            }
+            pointComputeBuffer?.Release();
             pointComputeBuffer = new ComputeBuffer(uvs.Length, Marshal.SizeOf<Vector2>());
             pointComputeBuffer.SetData(uvs, 0, 0, uvs.Length);
             material.SetBuffer(PropPoints, pointComputeBuffer);
@@ -189,21 +186,21 @@ namespace Iviz.Displays
         static readonly int PropPosST = Shader.PropertyToID("_Pos_ST");
         void UpdatePosValues(Texture2D texture)
         {
-            if (texture == null)
+            if (texture is null)
             {
                 return;
             }
             float ratio = (float)texture.height / texture.width;
-            float posCoeff_X = 2 * Mathf.Tan(FovAngle * Mathf.Deg2Rad / 2);
-            float posCoeff_Y = posCoeff_X * ratio;
-            float posAdd_X = -0.5f * posCoeff_X;
-            float posAdd_Y = -0.5f * posCoeff_Y;
+            float posCoeffX = 2 * Mathf.Tan(FovAngle * Mathf.Deg2Rad / 2);
+            float posCoeffY = posCoeffX * ratio;
+            float posAddX = -0.5f * posCoeffX;
+            float posAddY = -0.5f * posCoeffY;
 
-            material.SetFloat(PropPointSize, posCoeff_X / texture.width * PointSize);
-            material.SetVector(PropPosST, new Vector4(posCoeff_X, posCoeff_Y, posAdd_X, posAdd_Y));
+            material.SetFloat(PropPointSize, posCoeffX / texture.width * PointSize);
+            material.SetVector(PropPosST, new Vector4(posCoeffX, posCoeffY, posAddX, posAddY));
 
             const float maxDepth = 5.0f;
-            Vector3 size = new Vector3(posCoeff_X, 1, posCoeff_Y) * maxDepth;
+            Vector3 size = new Vector3(posCoeffX, 1, posCoeffY) * maxDepth;
             Vector3 center = new Vector3(0, maxDepth / 2, 0);
 
             Collider.center = center;
@@ -211,17 +208,20 @@ namespace Iviz.Displays
         }
 
 
-        static readonly int PropLocalToWorld = Shader.PropertyToID("_LocalToWorld");
-        static readonly int PropWorldToLocal = Shader.PropertyToID("_WorldToLocal");
+        static readonly int PLocalToWorld = Shader.PropertyToID("_LocalToWorld");
+        static readonly int PWorldToLocal = Shader.PropertyToID("_WorldToLocal");
+        static readonly int PScale = Shader.PropertyToID("_Scale");
+
         void Update()
         {
-            if (DepthImage == null || DepthImage.Texture == null)
+            if (DepthImage?.Texture is null)
             {
                 return;
             }
 
-            material.SetMatrix(PropLocalToWorld, transform.localToWorldMatrix);
-            material.SetMatrix(PropWorldToLocal, transform.worldToLocalMatrix);
+            material.SetFloat(PScale, transform.lossyScale.x);
+            material.SetMatrix(PLocalToWorld, transform.localToWorldMatrix);
+            material.SetMatrix(PWorldToLocal, transform.worldToLocalMatrix);
 
             Graphics.DrawProcedural(material, WorldBounds, MeshTopology.Quads, 4, uvs.Length);
         }
@@ -254,7 +254,7 @@ namespace Iviz.Displays
 
             width = 0;
             height = 0;
-            uvs = new Vector2[0];
+            uvs = Array.Empty<Vector2>();
         }
 
         void OnDestroy()
@@ -263,14 +263,9 @@ namespace Iviz.Displays
             {
                 Destroy(material);
             }
-            if (pointComputeBuffer != null)
-            {
-                pointComputeBuffer.Release();
-            }
-            if (quadComputeBuffer != null)
-            {
-                quadComputeBuffer.Release();
-            }
+
+            pointComputeBuffer?.Release();
+            quadComputeBuffer?.Release();
         }
 
         void OnApplicationFocus(bool hasFocus)
@@ -291,7 +286,7 @@ namespace Iviz.Displays
                 quadComputeBuffer = null;
             }
 
-            uvs = new Vector2[0];
+            uvs = Array.Empty<Vector2>();
             width = 0;
             height = 0;
 

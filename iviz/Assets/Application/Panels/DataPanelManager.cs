@@ -16,8 +16,6 @@ namespace Iviz.App
         Canvas parentCanvas;
         bool started;
 
-        //public AnchorCanvas AnchorCanvas;
-
         bool Active
         {
             get => parentCanvas.enabled;

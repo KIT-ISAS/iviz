@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace Iviz.MsgsGen
 {
@@ -6,11 +7,8 @@ namespace Iviz.MsgsGen
     {
         static void Main(string[] args)
         {
-            //string RosBasePath = args.Length > 0 ? args[0] : @"D:\Ant\msgs";
-            //string IvizMsgPaths = args.Length > 1 ? args[1] : @"D:\Ant\iviz\iviz_msgs"; 
-
             string RosBasePath = args.Length > 0 ? args[0] : @"/Users/akzeac/Downloads/msgs";
-            string IvizMsgPaths = args.Length > 1 ? args[1] : @"/Users/akzeac/Documents/iviz/iviz_msgs"; 
+            string IvizMsgPaths = Path.GetFullPath("../../../../iviz_msgs");
 
             PackageInfo p = new PackageInfo();
 

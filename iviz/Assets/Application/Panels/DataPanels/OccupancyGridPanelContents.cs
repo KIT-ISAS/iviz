@@ -13,7 +13,7 @@ namespace Iviz.App
         public FrameWidget Frame { get; private set; }
         public DropdownWidget Colormap { get; private set; }
         public ToggleWidget FlipColors { get; private set; }
-        public NumberInputFieldWidget ScaleZ { get; private set; }
+        public SliderWidget ScaleZ { get; private set; }
         public ColorPickerWidget Tint { get; private set; }
         //public SliderWidget Alpha { get; private set; }
         public ToggleWidget OcclusionOnlyMode { get; private set; }
@@ -28,7 +28,7 @@ namespace Iviz.App
                         .SetOptions(Resource.Colormaps.Names)
                         .SetIndex((int)Resource.ColormapId.gray);
             FlipColors = p.AddToggle("Flip Color Bounds");
-            ScaleZ = p.AddNumberInputField("Height Mult.");
+            ScaleZ = p.AddSlider("Height").SetMinValue(0.01f).SetMaxValue(5.0f).SetNumberOfSteps(49);
 
             Tint = p.AddColorPicker("Tint");
             //Alpha = p.AddSlider("Alpha").SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256);

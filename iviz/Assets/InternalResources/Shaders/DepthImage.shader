@@ -37,6 +37,8 @@ Shader "iviz/DepthImage"
 			sampler2D _ColorTexture;
 			sampler2D _DepthTexture;
 
+			float _Scale;
+
 			StructuredBuffer<float2> _Quad;
 			StructuredBuffer<float2> _Points;
 
@@ -53,7 +55,7 @@ Shader "iviz/DepthImage"
 				unity_WorldToObject = _WorldToLocal;
 
 				float2 extent = abs(UNITY_MATRIX_P._11_22);
-				float2 quadVertex = _Quad[id];
+				float2 quadVertex = _Quad[id] * _Scale;
 				float2 center = _Points[inst];
 
 				float z = tex2Dlod(_DepthTexture, float4(center, 0, 0)).r * 65.535;
