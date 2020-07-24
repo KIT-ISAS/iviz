@@ -7,11 +7,11 @@ namespace Iviz.App
 {
     public class Vector3Widget : MonoBehaviour, IWidget
     {
-        public InputFieldWidget inputX;
-        public InputFieldWidget inputY;
-        public InputFieldWidget inputZ;
-        public Text label;
-        public Image panel;
+        [SerializeField] InputFieldWidget inputX = null;
+        [SerializeField] InputFieldWidget inputY = null;
+        [SerializeField] InputFieldWidget inputZ = null;
+        [SerializeField] Text label = null;
+        [SerializeField] Image panel = null;
         bool disableUpdates;
 
         public string Label

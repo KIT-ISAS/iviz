@@ -2,15 +2,20 @@
 using System.Collections.Generic;
 using tfMessage_v2 = Iviz.Msgs.Tf2Msgs.TFMessage;
 using System.Linq;
-using Iviz.RoslibSharp;
+using Iviz.Roslib;
 using Iviz.App.Displays;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.Tf;
 using System.Runtime.Serialization;
 using System;
+using System.Collections.ObjectModel;
+using Iviz.App;
+using Iviz.Displays;
 using Iviz.Resources;
+using Transform = UnityEngine.Transform;
+using Vector3 = UnityEngine.Vector3;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     [DataContract]
     public sealed class TFConfiguration : JsonToString, IConfiguration
@@ -20,7 +25,7 @@ namespace Iviz.App.Listeners
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public bool AxisVisible { get; set; } = true;
-        [DataMember] public float AxisSize { get; set; } = 0.25f;
+        [DataMember] public float AxisSize { get; set; } = 0.125f;
         [DataMember] public bool AxisLabelVisible { get; set; } = false;
         [DataMember] public float AxisLabelSize { get; set; } = 0.1f;
         [DataMember] public bool ParentConnectorVisible { get; set; } = false;
@@ -37,27 +42,41 @@ namespace Iviz.App.Listeners
         public static Camera MainCamera { get; set; }
         public static FlyCamera GuiManager => Instance.guiManager;
 
-        public static TFFrame BaseFrame { get; private set; }
+        public static Light MainLight { get; set; }
+
+        public static TFFrame MapFrame { get; private set; }
         public static TFFrame RootFrame { get; private set; }
+        public static TFFrame UnityFrame { get; private set; }
+
+        readonly InteractiveControl rootControl;
+        public static InteractiveControl RootControl => Instance.rootControl;
 
         public static TFFrame ListenersFrame => RootFrame;
 
-        public override TFFrame Frame => BaseFrame;
+        public override TFFrame Frame => MapFrame;
 
-        FlyCamera guiManager;
-        DisplayNode dummyListener;
-        DisplayNode staticListener;
+        readonly FlyCamera guiManager;
+        readonly DisplayNode dummyListener;
+        readonly DisplayNode staticListener;
 
         readonly Dictionary<string, TFFrame> frames = new Dictionary<string, TFFrame>();
 
-        public RosSender<tfMessage_v2> Publisher { get; private set; }
+        public static ReadOnlyDictionary<string, TFFrame> Frames =>
+            new ReadOnlyDictionary<string, TFFrame>(Instance.frames);
 
-        public override ModuleData ModuleData { get; set; }
+        static bool IsUsableByHints(TFFrame frame) => frame != RootFrame && frame != UnityFrame;
+
+        public static IEnumerable<string> FramesForHints => Instance.frames.Values.Where(IsUsableByHints).Select(frame => frame.Id);
+
+        public RosSender<tfMessage_v2> Publisher { get; }
+
+        public override IModuleData ModuleData { get; }
 
         public RosListener ListenerStatic { get; private set; }
 
 
         readonly TFConfiguration config = new TFConfiguration();
+
         public TFConfiguration Config
         {
             get => config;
@@ -79,7 +98,15 @@ namespace Iviz.App.Listeners
             set
             {
                 config.AxisVisible = value;
-                frames.Values.ForEach(x => x.AxisVisible = value);
+                foreach (var frame in frames.Values)
+                {
+                    frame.Visible = value;
+                }
+
+                if (!(rootControl is null))
+                {
+                    rootControl.Visible = value;
+                }
             }
         }
 
@@ -89,7 +116,10 @@ namespace Iviz.App.Listeners
             set
             {
                 config.AxisLabelVisible = value;
-                frames.Values.ForEach(x => x.LabelVisible = value);
+                foreach (var frame in frames.Values)
+                {
+                    frame.LabelVisible = value;
+                }
             }
         }
 
@@ -99,10 +129,10 @@ namespace Iviz.App.Listeners
             set
             {
                 config.AxisLabelSize = value;
-                frames.Values.ForEach(x =>
+                foreach (var frame in frames.Values)
                 {
-                    x.LabelSize = value;
-                });
+                    frame.LabelSize = value;
+                }
             }
         }
 
@@ -112,7 +142,10 @@ namespace Iviz.App.Listeners
             set
             {
                 config.AxisSize = value;
-                frames.Values.ForEach(x => x.AxisLength = value);
+                foreach (var frame in frames.Values)
+                {
+                    frame.AxisLength = value;
+                }
             }
         }
 
@@ -122,7 +155,10 @@ namespace Iviz.App.Listeners
             set
             {
                 config.ParentConnectorVisible = value;
-                frames.Values.ForEach(x => x.ConnectorVisible = value);
+                foreach (var frame in frames.Values)
+                {
+                    frame.ConnectorVisible = value;
+                }
             }
         }
 
@@ -134,49 +170,77 @@ namespace Iviz.App.Listeners
                 config.ShowAllFrames = value;
                 if (value)
                 {
-                    frames.Values.ForEach(x => x.AddListener(dummyListener));
+                    foreach (var frame in frames.Values)
+                    {
+                        frame.AddListener(dummyListener);
+                    }
                 }
                 else
                 {
                     // we create a copy because this generally modifies the collection
-                    frames.Values.ToArray().ForEach(x => x.RemoveListener(dummyListener));
+                    var framesCopy = frames.Values.ToList();
+                    foreach (var frame in framesCopy)
+                    {
+                        frame.RemoveListener(dummyListener);
+                    }
                 }
             }
         }
 
-        void Awake()
+        public TFListener(IModuleData moduleData)
         {
+            ModuleData = moduleData;
             Instance = this;
 
-            dummyListener = SimpleDisplayNode.Instantiate("TFNode", transform);
-            staticListener = SimpleDisplayNode.Instantiate("TFStatic", transform);
+            UnityFrame = Add(CreateFrameObject("TF", null, null));
+            UnityFrame.ForceInvisible = true;
+            UnityFrame.Visible = false;
+            UnityFrame.AddListener(null);
+
+            dummyListener = SimpleDisplayNode.Instantiate("[TFNode]", UnityFrame.transform);
+            staticListener = SimpleDisplayNode.Instantiate("[TFStatic]", UnityFrame.transform);
 
             GameObject mainCameraObj = GameObject.Find("MainCamera");
             MainCamera = mainCameraObj.GetComponent<Camera>();
             guiManager = mainCameraObj.GetComponent<FlyCamera>();
 
+            GameObject mainLight = GameObject.Find("MainLight");
+            MainLight = mainLight.GetComponent<Light>();
+
             Config = new TFConfiguration();
 
-            RootFrame = Add(CreateFrameObject("/", gameObject));
+            RootFrame = Add(CreateFrameObject("/", UnityFrame.transform, UnityFrame));
             RootFrame.ForceInvisible = true;
+            RootFrame.Visible = false;
+            RootFrame.AddListener(null);
 
-            BaseFrame = Add(CreateFrameObject(BaseFrameId, gameObject));
-            BaseFrame.Parent = RootFrame;
-            BaseFrame.AddListener(null);
+            MapFrame = Add(CreateFrameObject(BaseFrameId, UnityFrame.transform, RootFrame));
+            MapFrame.Parent = RootFrame;
+            MapFrame.AddListener(null);
+            MapFrame.AcceptsParents = false;
+            //BaseFrame.ForceInvisible = true;
+
+            rootControl =
+                ResourcePool.GetOrCreate<InteractiveControl>(Resource.Displays.InteractiveControl,
+                    RootFrame.transform);
+            rootControl.name = "[InteractiveController for /]";
+            rootControl.TargetTransform = RootFrame.transform;
+            rootControl.InteractionMode = InteractiveControl.InteractionModeType.Disabled;
+            //rootControl.InteractionMode = InteractiveControl.InteractionModeType.Frame;
+            rootControl.transform.localScale = 0.4f * Vector3.one;
 
             Publisher = new RosSender<tfMessage_v2>(DefaultTopic);
         }
 
         public override void StartListening()
         {
-            base.StartListening();
             Listener = new RosListener<tfMessage_v2>(DefaultTopic, SubscriptionHandler_v2);
             Listener.MaxQueueSize = 200;
             ListenerStatic = new RosListener<tfMessage_v2>(DefaultTopicStatic, SubscriptionHandlerStatic);
             ListenerStatic.MaxQueueSize = 200;
         }
 
-        void ProcessMessages(TransformStamped[] transforms, bool isStatic)
+        void ProcessMessages(IEnumerable<TransformStamped> transforms, bool isStatic)
         {
             foreach (TransformStamped t in transforms)
             {
@@ -184,20 +248,27 @@ namespace Iviz.App.Listeners
                 {
                     continue;
                 }
+
                 TimeSpan timestamp = t.Header.Stamp.ToTimeSpan();
                 if (t.Header.Stamp.Nsecs == 0 && t.Header.Stamp.Secs == 0)
                 {
                     timestamp = TimeSpan.MaxValue;
                 }
+
                 string childId = t.ChildFrameId;
                 if (childId.Length != 0 && childId[0] == '/')
                 {
                     childId = childId.Substring(1);
                 }
+
                 TFFrame child;
                 if (isStatic)
                 {
                     child = GetOrCreateFrame(childId, staticListener);
+                    if (config.ShowAllFrames)
+                    {
+                        child.AddListener(dummyListener);
+                    }
                 }
                 else if (config.ShowAllFrames)
                 {
@@ -207,20 +278,39 @@ namespace Iviz.App.Listeners
                 {
                     continue;
                 }
+
                 string parentId = t.Header.FrameId;
                 if (parentId.Length != 0 && parentId[0] == '/')
                 {
                     parentId = parentId.Substring(1);
                 }
-                TFFrame parent = string.IsNullOrEmpty(parentId) ?
-                    RootFrame :
-                    GetOrCreateFrame(parentId, null);
+
+                //Debug.Log("Id " + childId + " requests parent " + parentId);
+                TFFrame parent = string.IsNullOrEmpty(parentId) ? RootFrame : GetOrCreateFrame(parentId, null);
+                //Debug.Log("Parent has parent " + parent.Parent.Id);
 
                 if (child.SetParent(parent))
                 {
                     child.SetPose(timestamp, t.Transform.Ros2Unity());
                 }
             }
+        }
+
+        public override void Reset()
+        {
+            base.Reset();
+            ListenerStatic?.Reset();
+            
+            bool prevShowAllFrames = ShowAllFrames;
+            ShowAllFrames = false;
+
+            var framesCopy = frames.Values.ToList();
+            foreach (var frame in framesCopy)
+            {
+                frame.RemoveListener(staticListener);
+            }
+
+            ShowAllFrames = prevShowAllFrames;
         }
 
         TFFrame Add(TFFrame t)
@@ -241,39 +331,42 @@ namespace Iviz.App.Listeners
             {
                 id = id.Substring(1);
             }
+
             TFFrame frame = Instance.GetOrCreateFrameImpl(id);
             if (frame.Id != id)
             {
                 Debug.LogWarning("Error: Broken resource pool! Requested " + id + ", received " + frame.Id);
             }
-            if (listener != null)
+
+            if (!(listener is null))
             {
                 frame.AddListener(listener);
             }
+
             return frame;
         }
 
         TFFrame GetOrCreateFrameImpl(string id)
         {
-            if (TryGetFrameImpl(id, out TFFrame t))
-            {
-                return t;
-            }
-            return Add(CreateFrameObject(id, BaseFrame.gameObject));
+            return TryGetFrameImpl(id, out TFFrame t) ? t : Add(CreateFrameObject(id, RootFrame.transform, RootFrame));
         }
 
-        TFFrame CreateFrameObject(string id, GameObject parent)
+        TFFrame CreateFrameObject(string id, Transform parent, TFFrame parentFrame)
         {
-            TFFrame frame = ResourcePool.GetOrCreate<TFFrame>(Resource.Displays.TFFrame, parent.transform);
-            frame.name = id;
+            TFFrame frame = ResourcePool.GetOrCreate<TFFrame>(Resource.Displays.TFFrame, parent);
+            //Debug.Log(parent + " -> " + frame.transform.parent);
+            frame.name = "{" + id + "}";
             frame.Id = id;
-            frame.IgnoreUpdates = false;
-            frame.AxisVisible = config.AxisVisible;
+            frame.Visible = config.AxisVisible;
             frame.AxisLength = config.AxisSize;
             frame.LabelSize = config.AxisLabelSize;
             frame.LabelVisible = config.AxisLabelVisible;
             frame.ConnectorVisible = config.ParentConnectorVisible;
-            frame.Parent = RootFrame;
+            if (!(parentFrame is null))
+            {
+                frame.Parent = parentFrame;
+            }
+
             return frame;
         }
 
@@ -302,6 +395,7 @@ namespace Iviz.App.Listeners
             frames.Remove(frame.Id);
             GuiManager.Unselect(frame);
             frame.Stop();
+            //Debug.Log("Frame " + frame.gameObject.GetInstanceID() + " with formed id '" + frame.Id + "' is dead!");
             ResourcePool.Dispose(Resource.Displays.TFFrame, frame.gameObject);
         }
 
@@ -314,12 +408,20 @@ namespace Iviz.App.Listeners
         {
             if (FlyCamera.IsMobile)
             {
+                /*
+                Transform rootFrame = RootFrame.transform;
                 UnityEngine.Pose rootFrameInverse = RootFrame.transform.AsPose().Inverse();
                 UnityEngine.Pose relative = rootFrameInverse.Multiply(unityPose);
-                relative.position.x /= RootFrame.transform.localScale.x;
-                relative.position.y /= RootFrame.transform.localScale.y;
-                relative.position.z /= RootFrame.transform.localScale.z;
-                return relative;
+                var localScale = RootFrame.transform.localScale;
+                relative.position.x /= localScale.x;
+                relative.position.y /= localScale.y;
+                relative.position.z /= localScale.z;
+                */
+                Transform rootFrame = RootFrame.transform;
+                return new UnityEngine.Pose(
+                    rootFrame.InverseTransformPoint(unityPose.position),
+                    UnityEngine.Quaternion.Inverse(rootFrame.rotation) * unityPose.rotation
+                );
             }
             else
             {
@@ -327,7 +429,13 @@ namespace Iviz.App.Listeners
             }
         }
 
+        public static UnityEngine.Vector3 RelativePosition(in UnityEngine.Vector3 unityPosition)
+        {
+            return FlyCamera.IsMobile ? RootFrame.transform.InverseTransformPoint(unityPosition) : unityPosition;
+        }
+
         static uint tfSeq = 0;
+
         public static void Publish(string parentFrame, string childFrame, in UnityEngine.Pose unityPose)
         {
             tfMessage_v2 msg = new tfMessage_v2
@@ -338,7 +446,7 @@ namespace Iviz.App.Listeners
                     (
                         Header: RosUtils.CreateHeader(tfSeq++, parentFrame ?? BaseFrameId),
                         ChildFrameId: childFrame ?? "",
-                        Transform:  RelativePose(unityPose).Unity2RosTransform()
+                        Transform: RelativePose(unityPose).Unity2RosTransform()
                     )
                 }
             );

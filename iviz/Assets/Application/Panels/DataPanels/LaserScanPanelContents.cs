@@ -6,7 +6,7 @@ namespace Iviz.App
     /// <see cref="LaserScanModuleData"/> 
     /// </summary>
 
-    public class LaserScanPanelContents : ListenerPanelContents
+    public sealed class LaserScanPanelContents : ListenerPanelContents
     {
         public FrameWidget Frame { get; private set; }
 
@@ -25,7 +25,7 @@ namespace Iviz.App
 
         public ToggleWidget UseLines { get; private set; }
 
-        void Start()
+        void Awake()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("LaserScan");

@@ -5,7 +5,7 @@ namespace Iviz.App
     /// <summary>
     /// <see cref="ImageModuleData"/> 
     /// </summary>
-    public class ImagePanelContents : ListenerPanelContents
+    public sealed class ImagePanelContents : ListenerPanelContents
     {
         public FrameWidget Frame { get; private set; }
         public ToggleWidget ShowBillboard { get; private set; }
@@ -21,7 +21,7 @@ namespace Iviz.App
         public TrashButtonWidget CloseButton { get; private set; }
         public ToggleButtonWidget HideButton { get; private set; }
 
-        void Start()
+        void Awake()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("Image");
@@ -38,7 +38,7 @@ namespace Iviz.App
 
             ShowBillboard = p.AddToggle("Show Billboard");
             BillboardSize = p.AddSlider("Billboard Size").SetMinValue(0.1f).SetMaxValue(10);
-            BillboardFollowsCamera = p.AddToggle("Billboard Follows Camera");
+            BillboardFollowsCamera = p.AddToggle("Billboard Points To Camera");
             BillboardOffset = p.AddVector3("Billboard Offset");
 
             CloseButton = p.AddTrashButton();

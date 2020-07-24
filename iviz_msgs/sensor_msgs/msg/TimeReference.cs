@@ -14,11 +14,12 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public TimeReference()
         {
+            Header = new StdMsgs.Header();
             Source = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TimeReference(in StdMsgs.Header Header, time TimeRef, string Source)
+        public TimeReference(StdMsgs.Header Header, time TimeRef, string Source)
         {
             this.Header = Header;
             this.TimeRef = TimeRef;
@@ -48,6 +49,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
+            if (Header is null) throw new System.NullReferenceException();
             Header.RosValidate();
             if (Source is null) throw new System.NullReferenceException();
         }

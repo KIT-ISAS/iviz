@@ -1,15 +1,13 @@
-﻿using Iviz.App.Listeners;
+﻿using Iviz.Controllers;
 using Iviz.Resources;
-using Newtonsoft.Json.Linq;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Iviz.App
 {
     /// <summary>
     /// <see cref="ImagePanelContents"/> 
     /// </summary>
-    public class ImageModuleData : ListenerModuleData, IImageDialogListener
+    public sealed class ImageModuleData : ListenerModuleData, IImageDialogListener
     {
         readonly ImageListener listener;
         readonly ImagePanelContents panel;
@@ -32,8 +30,9 @@ namespace Iviz.App
                 constructor.GetConfiguration<ImageConfiguration>()?.Type ?? constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Image) as ImagePanelContents;
-            listener = Instantiate<ImageListener>();
-            listener.name = "Image";
+            listener = new ImageListener(this);
+            //listener = Instantiate<ImageListener>();
+            //listener.name = "Image";
             if (constructor.Configuration != null)
             {
                 listener.Config = (ImageConfiguration)constructor.Configuration;
@@ -44,7 +43,7 @@ namespace Iviz.App
                 listener.Config.Type = Type;
             }
             listener.StartListening();
-            UpdateButtonText();
+            UpdateModuleButton();
         }
 
         public override void SetupPanel()
@@ -52,6 +51,7 @@ namespace Iviz.App
             panel.Listener.RosListener = listener.Listener;
             panel.Frame.Owner = listener;
             panel.Description.Label = listener.Description;
+            panel.HideButton.State = listener.Visible;
 
             panel.PreviewWidget.Material = listener.Material;
 
@@ -118,7 +118,7 @@ namespace Iviz.App
             {
                 listener.Visible = !listener.Visible;
                 panel.HideButton.State = listener.Visible;
-                UpdateButtonText();
+                UpdateModuleButton();
             };
         }
 

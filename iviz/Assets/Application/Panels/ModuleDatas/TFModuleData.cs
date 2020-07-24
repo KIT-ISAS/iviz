@@ -1,11 +1,12 @@
-﻿using Iviz.App.Listeners;
+﻿using Iviz.Controllers;
 using Iviz.Resources;
-using Newtonsoft.Json.Linq;
-using UnityEngine;
 
 namespace Iviz.App
 {
-    public class TFModuleData : ListenerModuleData
+    /// <summary>
+    /// <see cref="TFPanelContents"/> 
+    /// </summary>
+    public sealed class TFModuleData : ListenerModuleData
     {
         readonly TFListener listener;
         readonly TFPanelContents panel;
@@ -22,9 +23,10 @@ namespace Iviz.App
                 constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.TF) as TFPanelContents;
-            listener = Instantiate<TFListener>();
-            listener.name = "TF";
-            listener.ModuleData = this;
+            //listener = Instantiate<TFListener>();
+            //listener.name = "TF";
+            //listener.ModuleData = this;
+            listener = new TFListener(this);
             if (constructor.Configuration != null)
             {
                 listener.Config = (TFConfiguration)constructor.Configuration;
@@ -34,7 +36,7 @@ namespace Iviz.App
                 listener.Config.Topic = Topic;
             }
             listener.StartListening();
-            UpdateButtonText();
+            UpdateModuleButton();
         }
 
         public void UpdateConfiguration(TFConfiguration configuration)
@@ -53,7 +55,7 @@ namespace Iviz.App
             panel.FrameLabelSize.Value = listener.AxisLabelSize;
             panel.FrameLabelSize.Interactable = listener.AxisLabelVisible;
             panel.ConnectToParent.Value = listener.ParentConnectorVisible;
-            panel.ShowAllFrames.Value = listener.ShowAllFrames;
+            panel.KeepOnlyUsedFrames.Value = !listener.ShowAllFrames;
             panel.Sender.Set(listener.Publisher);
 
             panel.ShowAxes.ValueChanged += f =>
@@ -77,9 +79,9 @@ namespace Iviz.App
             {
                 listener.ParentConnectorVisible = f;
             };
-            panel.ShowAllFrames.ValueChanged += f =>
+            panel.KeepOnlyUsedFrames.ValueChanged += f =>
             {
-                listener.ShowAllFrames = f;
+                listener.ShowAllFrames = !f;
             };
         }
 

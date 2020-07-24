@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
-using System.Collections;
 using Iviz.Resources;
 using System.Collections.Generic;
-using Iviz.App;
 using System;
 
 namespace Iviz.Displays
@@ -38,23 +36,23 @@ namespace Iviz.Displays
             set => transform.parent = value;
         }
 
-        bool colliderEnabled_;
+        bool colliderEnabled;
         public bool ColliderEnabled
         {
-            get => colliderEnabled_;
+            get => colliderEnabled;
             set
             {
-                colliderEnabled_ = value;
+                colliderEnabled = value;
                 lines.ColliderEnabled = value;
                 pointCloud.ColliderEnabled = value;
             }
         }
 
-        [SerializeField] int size_;
+        [SerializeField] int size;
         public int Size
         {
-            get => size_;
-            private set { size_ = value; }
+            get => size;
+            private set => size = value;
         }
 
         public Vector2 MeasuredIntensityBounds { get; private set; }
@@ -71,13 +69,13 @@ namespace Iviz.Displays
             }
         }
 
-        [SerializeField] float pointSize_;
+        [SerializeField] float pointSize;
         public float PointSize
         {
-            get => pointSize_;
+            get => pointSize;
             set
             {
-                pointSize_ = value;
+                pointSize = value;
                 pointCloud.Scale = value * Vector2.one;
                 lines.LineScale = value;
             }
@@ -95,20 +93,20 @@ namespace Iviz.Displays
             }
         }
 
-        [SerializeField] bool useIntensityNotRange_;
+        [SerializeField] bool useIntensityNotRange;
         public bool UseIntensityNotRange
         {
-            get => useIntensityNotRange_;
-            set => useIntensityNotRange_ = value;
+            get => useIntensityNotRange;
+            set => useIntensityNotRange = value;
         }
 
-        [SerializeField] bool forceMinMax_;
+        [SerializeField] bool forceMinMax;
         public bool ForceMinMax
         {
-            get => forceMinMax_;
+            get => forceMinMax;
             set
             {
-                forceMinMax_ = value;
+                forceMinMax = value;
                 if (value)
                 {
                     pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
@@ -228,11 +226,11 @@ namespace Iviz.Displays
                 throw new ArgumentException(nameof(ranges));
             }
 
-            float x = Mathf.Cos(angleMin);
-            float y = Mathf.Sin(angleMin);
+            //float x = Mathf.Cos(angleMin);
+            //float y = Mathf.Sin(angleMin);
 
-            float dx = Mathf.Cos(angleIncrement);
-            float dy = Mathf.Sin(angleIncrement);
+            //float dx = Mathf.Cos(angleIncrement);
+            //float dy = Mathf.Sin(angleIncrement);
 
             pointBuffer.Clear();
             if (!UseIntensityNotRange)
@@ -244,9 +242,13 @@ namespace Iviz.Displays
                     {
                         continue;
                     }
+
+                    float a = angleMin + angleIncrement * i;
+                    float x = Mathf.Cos(a); 
+                    float y = Mathf.Sin(a); 
                     pointBuffer.Add(new PointWithColor(new Unity.Mathematics.float4(-y, 0, x, 1) * range));
-                    x = dx * x - dy * y;
-                    y = dy * x + dx * y;
+                    //x = dx * x - dy * y;
+                    //y = dy * x + dx * y;
                 }
             }
             else
@@ -258,9 +260,13 @@ namespace Iviz.Displays
                     {
                         continue;
                     }
+                    
+                    float a = angleMin + angleIncrement * i;
+                    float x = Mathf.Cos(a); 
+                    float y = Mathf.Sin(a); 
                     pointBuffer.Add(new PointWithColor(-y * range, 0, x * range, intensities[i]));
-                    x = dx * x - dy * y;
-                    y = dy * x + dx * y;
+                    //x = dx * x - dy * y;
+                    //y = dy * x + dx * y;
                 }
             }
 
@@ -319,7 +325,7 @@ namespace Iviz.Displays
             lines.Stop();
         }
 
-        public void Recycle()
+        public void SplitForRecycle()
         {
             ResourcePool.Dispose(Resource.Displays.PointList, pointCloud.gameObject);
             ResourcePool.Dispose(Resource.Displays.Line, lines.gameObject);

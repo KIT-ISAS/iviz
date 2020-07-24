@@ -1,26 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
-using Iviz.App.Displays;
 using Iviz.Displays;
-using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
-using Iviz.RoslibSharp;
+using Iviz.Roslib;
 using UnityEngine;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     [DataContract]
-    public class PathConfiguration : JsonToString, IConfiguration
+    public sealed class PathConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
         [DataMember] public Resource.Module Module => Resource.Module.Path;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public string Type { get; set; } = "";
-        [DataMember] public float Width { get; set; } = 0.03f;
+        [DataMember] public float Width { get; set; } = 0.01f;
         [DataMember] public bool ShowAxes { get; set; } = false;
         [DataMember] public float AxisLength { get; set; } = 0.125f;
         [DataMember] public bool ShowLines { get; set; } = true;
@@ -28,18 +24,17 @@ namespace Iviz.App.Listeners
         [DataMember] public uint MaxQueueSize { get; set; } = 1;
     }
 
-    public class PathListener : ListenerController
+    public sealed class PathListener : ListenerController
     {
-        DisplayNode node;
-        LineResource resource;
+        readonly DisplayNode node;
+        readonly LineResource resource;
 
-        public override ModuleData ModuleData { get; set; }
-
-        public int Size { get; private set; }
+        public override IModuleData ModuleData { get; }
 
         public override TFFrame Frame => node.Parent;
 
         readonly PathConfiguration config = new PathConfiguration();
+
         public PathConfiguration Config
         {
             get => config;
@@ -51,6 +46,9 @@ namespace Iviz.App.Listeners
                 Width = value.Width;
                 ShowAxes = value.ShowAxes;
                 MaxQueueSize = value.MaxQueueSize;
+                AxisLength = value.AxisLength;
+                LineColor = value.LineColor;
+                ShowLines = value.ShowLines;
             }
         }
 
@@ -84,7 +82,7 @@ namespace Iviz.App.Listeners
             set
             {
                 config.ShowAxes = value;
-                resource.Visible = value;
+                //resource.Visible = value;
                 ProcessPoses();
             }
         }
@@ -133,7 +131,7 @@ namespace Iviz.App.Listeners
                 config.MaxQueueSize = value;
                 if (Listener != null)
                 {
-                    Listener.MaxQueueSize = (int)value;
+                    Listener.MaxQueueSize = (int) value;
                 }
             }
         }
@@ -141,16 +139,20 @@ namespace Iviz.App.Listeners
         readonly List<Pose> savedPoses = new List<Pose>();
         readonly List<LineWithColor> lines = new List<LineWithColor>();
 
-        void Awake()
+        public PathListener(IModuleData moduleData)
         {
-            node = SimpleDisplayNode.Instantiate("PathNode", transform);
+            ModuleData = moduleData;
+            
+            node = SimpleDisplayNode.Instantiate("PathNode");
             resource = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, node.transform);
+            resource.LineScale = 0.005f;
+            resource.Tint = Color.white;
+            resource.UseAlpha = false;
             Config = new PathConfiguration();
         }
 
         public override void StartListening()
         {
-            base.StartListening();
             switch (config.Type)
             {
                 case Msgs.NavMsgs.Path.RosMessageType:
@@ -158,11 +160,21 @@ namespace Iviz.App.Listeners
                     break;
                 case Msgs.GeometryMsgs.PoseArray.RosMessageType:
                     Listener = new RosListener<Msgs.GeometryMsgs.PoseArray>(config.Topic, Handler);
+                    ShowLines = false;
+                    break;
+                case Msgs.GeometryMsgs.PolygonStamped.RosMessageType:
+                    Listener = new RosListener<Msgs.GeometryMsgs.PolygonStamped>(config.Topic, Handler);
+                    ShowAxes = false;
+                    break;
+                case Msgs.GeometryMsgs.Polygon.RosMessageType:
+                    node.Parent = TFListener.MapFrame;
+                    Listener = new RosListener<Msgs.GeometryMsgs.Polygon>(config.Topic, Handler);
+                    ShowAxes = false;
                     break;
             }
-            Listener.MaxQueueSize = (int)MaxQueueSize;
-            name = "[" + config.Topic + "]";
-            node.name = name;
+
+            Listener.MaxQueueSize = (int) MaxQueueSize;
+            node.name = "[" + config.Topic + "]";;
         }
 
 
@@ -204,6 +216,7 @@ namespace Iviz.App.Listeners
                     savedPoses.Add(ps.Pose.Ros2Unity());
                 }
             }
+
             ProcessPoses();
         }
 
@@ -214,10 +227,37 @@ namespace Iviz.App.Listeners
             savedPoses.Clear();
             foreach (Msgs.GeometryMsgs.Pose ps in msg.Poses)
             {
+                if (ps.HasNaN())
+                {
+                    continue;
+                }
                 savedPoses.Add(ps.Ros2Unity());
             }
+
             ProcessPoses();
         }
+
+        void Handler(Msgs.GeometryMsgs.PolygonStamped msg)
+        {
+            node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
+            Handler(msg.Polygon);
+        }        
+
+        void Handler(Msgs.GeometryMsgs.Polygon msg)
+        {
+            savedPoses.Clear();
+            foreach (Msgs.GeometryMsgs.Point32 p in msg.Points)
+            {
+                if (p.HasNaN())
+                {
+                    continue;
+                }                
+                savedPoses.Add(new Pose(p.Ros2Unity(), Quaternion.identity));
+            }
+            savedPoses.Add(savedPoses[0]);
+
+            ProcessPoses();
+        }        
 
         void ProcessPoses()
         {
@@ -225,6 +265,7 @@ namespace Iviz.App.Listeners
             {
                 return;
             }
+
             lines.Clear();
             if (ShowLines)
             {
@@ -233,11 +274,12 @@ namespace Iviz.App.Listeners
                     lines.Add(new LineWithColor(savedPoses[i].position, savedPoses[i + 1].position, LineColor));
                 }
             }
+
             if (ShowAxes)
             {
-                Vector3 xDir = new Vector3(1, 0, 0).Ros2Unity() * AxisLength;
-                Vector3 yDir = new Vector3(0, 1, 0).Ros2Unity() * AxisLength;
-                Vector3 zDir = new Vector3(0, 0, 1).Ros2Unity() * AxisLength;
+                Vector3 xDir = Vector3.right.Ros2Unity() * AxisLength;
+                Vector3 yDir = Vector3.up.Ros2Unity() * AxisLength;
+                Vector3 zDir = Vector3.forward.Ros2Unity() * AxisLength;
                 for (int i = 0; i < savedPoses.Count; i++)
                 {
                     Vector3 p = savedPoses[i].position;
@@ -247,6 +289,7 @@ namespace Iviz.App.Listeners
                     lines.Add(new LineWithColor(p, p + q * zDir, Color.blue));
                 }
             }
+
             resource.LinesWithColor = lines;
         }
 
@@ -256,10 +299,7 @@ namespace Iviz.App.Listeners
 
             ResourcePool.Dispose(Resource.Displays.Line, resource.gameObject);
             node.Stop();
-            Destroy(node.gameObject);
+            UnityEngine.Object.Destroy(node.gameObject);
         }
     }
 }
-
-
-

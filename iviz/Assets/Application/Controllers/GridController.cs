@@ -3,9 +3,8 @@ using System;
 using System.Runtime.Serialization;
 using Iviz.Resources;
 using Iviz.Displays;
-using Iviz.App.Displays;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     [DataContract]
     public class GridConfiguration : IConfiguration
@@ -18,22 +17,23 @@ namespace Iviz.App.Listeners
         [DataMember] public SerializableColor InteriorColor { get; set; } = Color.white * 0.5f;
         [DataMember] public float GridLineWidth { get; set; } = 0.02f;
         [DataMember] public float GridCellSize { get; set; } = 1;
-        [DataMember] public int NumberOfGridCells { get; set; } = 30;
+        [DataMember] public int NumberOfGridCells { get; set; } = 90;
         [DataMember] public bool ShowInterior { get; set; } = true;
         [DataMember] public bool FollowCamera { get; set; } = true;
+        [DataMember] public bool HideInARMode { get; set; } = true;
         [DataMember] public SerializableVector3 Offset { get; set; } = Vector3.zero;
     }
 
-    public class GridController : MonoBehaviour, IController
+    public sealed class GridController : IController
     {
-        DisplayClickableNode node;
-        ReflectionProbe reflectionProbe;
-        GridResource grid;
+        readonly DisplayClickableNode node;
+        readonly ReflectionProbe reflectionProbe;
+        readonly GridResource grid;
 
-        public ModuleData ModuleData
+        public IModuleData ModuleData
         {
-            get => node.DisplayData;
-            set => node.DisplayData = value;
+            get => node.ModuleData;
+            private set => node.ModuleData = value;
         }
 
         readonly GridConfiguration config = new GridConfiguration();
@@ -51,6 +51,7 @@ namespace Iviz.App.Listeners
                 NumberOfGridCells = value.NumberOfGridCells;
                 ShowInterior = value.ShowInterior;
                 FollowCamera = value.FollowCamera;
+                HideInARMode = value.HideInARMode;
                 Offset = value.Offset;
             }
         }
@@ -74,7 +75,7 @@ namespace Iviz.App.Listeners
                 config.Visible = value;
                 if (!value)
                 {
-                    reflectionProbe.transform.parent = TFListener.BaseFrame.transform;
+                    reflectionProbe.transform.parent = TFListener.MapFrame.transform;
                     grid.Visible = false;
                     node.Selected = false;
                 }
@@ -162,6 +163,12 @@ namespace Iviz.App.Listeners
                 grid.FollowCamera = value;
             }
         }
+        
+        public bool HideInARMode
+        {
+            get => config.HideInARMode;
+            set => config.HideInARMode = value;
+        }        
 
         public SerializableVector3 Offset
         {
@@ -169,35 +176,39 @@ namespace Iviz.App.Listeners
             set
             {
                 config.Offset = value;
-                node.transform.position = ((Vector3)value).Ros2Unity();
+                node.transform.localPosition = ((Vector3)value).Ros2Unity();
                 UpdateMesh();
             }
         }
 
-        void Awake()
+        //void Awake()
+        public GridController(IModuleData moduleData)
         {
-            name = "Grid Controller";
+            //name = "Grid Controller";
 
-            grid = ResourcePool.GetOrCreate<GridResource>(Resource.Displays.Grid);
+            //grid = ResourcePool.GetOrCreate<GridResource>(Resource.Displays.Grid);
+            grid = Resource.Displays.GetOrCreate<GridResource>();
             grid.name = "Grid";
 
             node = DisplayClickableNode.Instantiate("GridNode");
             node.Target = grid;
             node.SetName("");
 
+            ModuleData = moduleData;
+
             reflectionProbe = new GameObject().AddComponent<ReflectionProbe>();
             reflectionProbe.gameObject.name = "Grid Reflection Probe";
             reflectionProbe.transform.parent = grid.transform;
-            reflectionProbe.transform.position = new Vector3(0, 2.0f, 0);
+            reflectionProbe.transform.localPosition = new Vector3(0, 2.0f, 0);
             reflectionProbe.nearClipPlane = 0.5f;
             reflectionProbe.farClipPlane = 100f;
+            reflectionProbe.backgroundColor = new Color32(62, 27, 68, 255);
             reflectionProbe.mode = UnityEngine.Rendering.ReflectionProbeMode.Realtime;
             reflectionProbe.refreshMode = UnityEngine.Rendering.ReflectionProbeRefreshMode.ViaScripting;
             reflectionProbe.clearFlags = UnityEngine.Rendering.ReflectionProbeClearFlags.SolidColor;
             UpdateMesh();
 
             Config = new GridConfiguration();
-            gameObject.layer = Resource.ClickableLayer;
         }
 
         void UpdateMesh()
@@ -209,30 +220,16 @@ namespace Iviz.App.Listeners
 
         public void Stop()
         {
-            ResourcePool.Dispose(Resource.Displays.Grid, grid.gameObject);
+            //ResourcePool.Dispose(Resource.Displays.Grid, grid.gameObject);
+            grid.Stop();
+            Resource.Displays.Dispose(grid);
             node.Stop();
-            Destroy(node.gameObject);
-            Destroy(reflectionProbe.gameObject);
+            UnityEngine.Object.Destroy(node.gameObject);
+            UnityEngine.Object.Destroy(reflectionProbe.gameObject);
         }
 
-        /*
-        public override void OnPointerClick(PointerEventData eventData)
+        public void Reset()
         {
-            if (GetClickCount(eventData) == 2 &&
-                eventData.button == PointerEventData.InputButton.Left &&
-                TFListener.GuiManager.OrbitFrame != null)
-            {
-                TFListener.GuiManager.OrbitFrame = null;
-                return;
-            }
-            if (GetClickCount(eventData) == 1 && IsRealClick(eventData))
-            {
-                TFListener.GuiManager.Select(null);
-            }
-            
-            //base.OnPointerClick(eventData);
         }
-        */
-
     }
 }

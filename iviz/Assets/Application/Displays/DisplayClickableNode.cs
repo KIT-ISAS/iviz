@@ -1,11 +1,10 @@
-﻿using Iviz.App.Listeners;
-using Iviz.Displays;
+﻿using Iviz.Displays;
 using Iviz.Resources;
 using UnityEngine;
 
-namespace Iviz.App.Displays
+namespace Iviz.Controllers
 {
-    public class DisplayClickableNode : ClickableNode
+    public sealed class DisplayClickableNode : ClickableNode
     {
         IDisplay target;
         public IDisplay Target
@@ -34,10 +33,10 @@ namespace Iviz.App.Displays
         string displayName;
         public override string Name => displayName ?? Target?.Name;
 
-        public void SetName(string name)
+        public void SetName(string newName)
         {
-            this.name = name;
-            displayName = name;
+            this.name = newName;
+            displayName = newName;
         }
 
         public override Pose BoundsPose => Target?.WorldPose ?? Pose.identity;
@@ -47,7 +46,7 @@ namespace Iviz.App.Displays
             GameObject obj = new GameObject(name);
             DisplayClickableNode node = obj.AddComponent<DisplayClickableNode>();
             node.SetName(name);
-            node.Parent = frame ?? TFListener.BaseFrame;
+            node.Parent = frame ?? TFListener.MapFrame;
             return node;
         }
 

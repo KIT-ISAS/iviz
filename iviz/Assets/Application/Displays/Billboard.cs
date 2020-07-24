@@ -1,7 +1,7 @@
-﻿using Iviz.App.Listeners;
+﻿using Iviz.Controllers;
 using UnityEngine;
 
-namespace Iviz.App.Displays
+namespace Iviz.Displays
 {
     public sealed class Billboard : MonoBehaviour
     {

@@ -43,6 +43,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a56fd5d161231304f836b30e87b1be01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  id_: 
-  forceInvisible_: 0
-  position_: {x: 0, y: 0, z: 0}
+  id: 
+  forceInvisible: 0
+  rosPosition_: {x: 0, y: 0, z: 0}

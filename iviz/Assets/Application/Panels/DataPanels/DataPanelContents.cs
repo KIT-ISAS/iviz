@@ -47,6 +47,7 @@ namespace Iviz.App
                 case Resource.Module.Grid: return o.AddComponent<GridPanelContents>();
                 case Resource.Module.Image: return o.AddComponent<ImagePanelContents>();
                 case Resource.Module.Robot: return o.AddComponent<RobotPanelContents>();
+                case Resource.Module.SimpleRobot: return o.AddComponent<SimpleRobotPanelContents>();
                 case Resource.Module.Marker: return o.AddComponent<MarkerPanelContents>();
                 case Resource.Module.InteractiveMarker: return o.AddComponent<InteractiveMarkerPanelContents>();
                 case Resource.Module.JointState: return o.AddComponent<JointStatePanelContents>();
@@ -57,6 +58,7 @@ namespace Iviz.App
                 case Resource.Module.OccupancyGrid: return o.AddComponent<OccupancyGridPanelContents>();
                 case Resource.Module.Joystick: return o.AddComponent<JoystickPanelContents>();
                 case Resource.Module.Path: return o.AddComponent<PathPanelContents>();
+                case Resource.Module.GridMap: return o.AddComponent<GridMapPanelContents>();
                 default: throw new ArgumentException(nameof(resource));
             }
         }

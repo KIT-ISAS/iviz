@@ -76,13 +76,13 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosMessageType = "iviz_msgs/Material";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "85fdd2e67e7550e3daaf42d48f8ebd04";
+        [Preserve] public const string RosMd5Sum = "73d4b822c17551ea49c3de1364f2e6d4";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAEysuKcrMS1fIS8xN5XLOz8kvUkjMTcpMzSuB8lIy09JKi2FyqbmZxcWZZalcIakVJaVF" +
-                "qTBpKJeLy5bKgMs32N1KIbMssyo+tzi9WB/sDK7SzLwSCwUYnQ6lk6B0Iu2dAfMvyEJjI4XyzJSSDBgn" +
-                "IzUzPaMExksqKIA4KzpWISWxBOg2ACcIsstyAQAA";
+                "H4sIAAAAAAAAE7WQMQ7CMAxFd5/CN0CCBYGYGJiYYEMVShQ3sUTSqHYK4vSgNrkBePl6+oOfLTpy8phM" +
+                "JDgOj2FEEy1T0kqO+75I6yiyCE8EV3ppGanVFQEOPx44X0475Inf9yheVrMGFE66xZa+pq1p/q/R7pXl" +
+                "e9lo2M/bN2t8stPQIBD7oI1szovjrUNn9Cv6AV9/IHZ/AQAA";
                 
     }
 }

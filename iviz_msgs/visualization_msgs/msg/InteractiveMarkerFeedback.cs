@@ -42,13 +42,14 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarkerFeedback()
         {
+            Header = new StdMsgs.Header();
             ClientId = "";
             MarkerName = "";
             ControlName = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public InteractiveMarkerFeedback(in StdMsgs.Header Header, string ClientId, string MarkerName, string ControlName, byte EventType, in GeometryMsgs.Pose Pose, uint MenuEntryId, in GeometryMsgs.Point MousePoint, bool MousePointValid)
+        public InteractiveMarkerFeedback(StdMsgs.Header Header, string ClientId, string MarkerName, string ControlName, byte EventType, in GeometryMsgs.Pose Pose, uint MenuEntryId, in GeometryMsgs.Point MousePoint, bool MousePointValid)
         {
             this.Header = Header;
             this.ClientId = ClientId;
@@ -96,6 +97,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
+            if (Header is null) throw new System.NullReferenceException();
             Header.RosValidate();
             if (ClientId is null) throw new System.NullReferenceException();
             if (MarkerName is null) throw new System.NullReferenceException();

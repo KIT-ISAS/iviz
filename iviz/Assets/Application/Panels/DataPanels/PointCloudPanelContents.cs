@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Iviz.Resources;
-using UnityEngine.UI;
 
 namespace Iviz.App
 {
@@ -8,7 +7,7 @@ namespace Iviz.App
     /// <see cref="PointCloudModuleData"/> 
     /// </summary>
 
-    public class PointCloudPanelContents : ListenerPanelContents
+    public sealed class PointCloudPanelContents : ListenerPanelContents
     {
         static readonly List<string> DefaultChannels = new List<string> { "x", "y", "z" };
         public FrameWidget Frame { get; private set; }
@@ -26,7 +25,7 @@ namespace Iviz.App
         public ToggleWidget FlipMinMax { get; private set; }
 
 
-        void Start()
+        void Awake()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("PointCloud");

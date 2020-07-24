@@ -6,7 +6,7 @@ using System.Linq;
 using TopicTuple = System.Tuple<string, string>;
 using TopicTuples = System.Tuple<string, string[]>;
 
-namespace Iviz.RoslibSharp.XmlRpc
+namespace Iviz.Roslib.XmlRpc
 {
     public sealed class ParameterClient
     {
@@ -88,19 +88,16 @@ namespace Iviz.RoslibSharp.XmlRpc
         {
             Arg[] args = {
                 new Arg(CallerId),
-                new Arg(key),
-                new Arg(CallerUri),
+                new Arg(key)
             };
             object response = Service.MethodCall(MasterUri, CallerUri, "hasParam", args);
             return new HasParamResponse((object[])response);
         }
 
-        public GetParamNamesResponse GetParamNames(string key)
+        public GetParamNamesResponse GetParamNames()
         {
             Arg[] args = {
                 new Arg(CallerId),
-                new Arg(key),
-                new Arg(CallerUri),
             };
             object response = Service.MethodCall(MasterUri, CallerUri, "getParamNames", args);
             return new GetParamNamesResponse((object[])response);

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Iviz.RoslibSharp.XmlRpc
+namespace Iviz.Roslib.XmlRpc
 {
     sealed class NodeServer : IDisposable
     {
@@ -39,8 +39,8 @@ namespace Iviz.RoslibSharp.XmlRpc
 
         public void Start()
         {
-            task = Task.Run(() =>
-            {
+            //task = Task.Run(() =>
+            //{
                 Logger.LogDebug("RcpNodeServer: Starting!");
                 listener.Start(context =>
                 {
@@ -61,13 +61,13 @@ namespace Iviz.RoslibSharp.XmlRpc
                 });
 
                 Logger.LogDebug("RcpNodeServer: Leaving thread.");
-            });
+            //});
         }
 
         public void Stop()
         {
             listener.Dispose();
-            task.Wait();
+            //task.Wait();
         }
 
         public void Dispose()

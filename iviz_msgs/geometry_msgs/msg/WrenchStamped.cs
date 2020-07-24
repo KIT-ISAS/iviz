@@ -12,11 +12,11 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor for empty message. </summary>
         public WrenchStamped()
         {
-            Wrench = new Wrench();
+            Header = new StdMsgs.Header();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public WrenchStamped(in StdMsgs.Header Header, Wrench Wrench)
+        public WrenchStamped(StdMsgs.Header Header, in Wrench Wrench)
         {
             this.Header = Header;
             this.Wrench = Wrench;
@@ -43,9 +43,8 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
+            if (Header is null) throw new System.NullReferenceException();
             Header.RosValidate();
-            if (Wrench is null) throw new System.NullReferenceException();
-            Wrench.RosValidate();
         }
     
         public int RosMessageLength

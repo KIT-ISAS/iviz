@@ -33,12 +33,13 @@ namespace Iviz.Msgs.StereoMsgs
         /// <summary> Constructor for empty message. </summary>
         public DisparityImage()
         {
+            Header = new StdMsgs.Header();
             Image = new SensorMsgs.Image();
             ValidWindow = new SensorMsgs.RegionOfInterest();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public DisparityImage(in StdMsgs.Header Header, SensorMsgs.Image Image, float F, float T, SensorMsgs.RegionOfInterest ValidWindow, float MinDisparity, float MaxDisparity, float DeltaD)
+        public DisparityImage(StdMsgs.Header Header, SensorMsgs.Image Image, float F, float T, SensorMsgs.RegionOfInterest ValidWindow, float MinDisparity, float MaxDisparity, float DeltaD)
         {
             this.Header = Header;
             this.Image = Image;
@@ -83,6 +84,7 @@ namespace Iviz.Msgs.StereoMsgs
         
         public void RosValidate()
         {
+            if (Header is null) throw new System.NullReferenceException();
             Header.RosValidate();
             if (Image is null) throw new System.NullReferenceException();
             Image.RosValidate();

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Iviz.Msgs
 {
-    public unsafe static class BuiltIns
+    public static class BuiltIns
     {
         public static UTF8Encoding UTF8 { get; } = new UTF8Encoding(false);
 
@@ -51,8 +51,8 @@ namespace Iviz.Msgs
 
         public static string DecompressDependency(Type type)
         {
-            string DependenciesBase64 = GetDependenciesBase64(type);
-            byte[] inputBytes = Convert.FromBase64String(DependenciesBase64);
+            string dependenciesBase64 = GetDependenciesBase64(type);
+            byte[] inputBytes = Convert.FromBase64String(dependenciesBase64);
 
             StringBuilder str = new StringBuilder();
             byte[] outputBytes = new byte[32];

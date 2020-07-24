@@ -1,28 +1,27 @@
 ﻿using UnityEngine;
-using System.Collections;
-using Iviz.App.Listeners;
+using External;
 
-namespace Iviz.App
+namespace Iviz.Controllers
 {
     public interface IBlocksPointer
     {
-        bool IsPointerOnGui(Vector2 PointerPosition);
+        bool IsPointerOnGui(in Vector2 pointerPosition);
     }
 
-    public class Joystick : MonoBehaviour, IBlocksPointer
+    public sealed class Joystick : MonoBehaviour, IBlocksPointer
     {
         [SerializeField] FixedJoystick left = null;
         [SerializeField] FixedJoystick right = null;
         [SerializeField] Canvas canvas = null;
 
-        bool visible_;
+        bool visible;
         public bool Visible
         {
-            get => visible_;
+            get => visible;
             set
             {
-                visible_ = value;
-                canvas.gameObject.SetActive(visible_);
+                visible = value;
+                canvas.gameObject.SetActive(visible);
             }
         }
 
@@ -35,12 +34,12 @@ namespace Iviz.App
             Visible = false;
         }
 
-        public bool IsPointerOnGui(Vector2 PointerPosition)
+        public bool IsPointerOnGui(in Vector2 pointerPosition)
         {
-            Camera MainCamera = TFListener.MainCamera;
+            Camera mainCamera = TFListener.MainCamera;
             return Visible &&
-                (RectTransformUtility.RectangleContainsScreenPoint(left.transform as RectTransform, PointerPosition, MainCamera) ||
-                RectTransformUtility.RectangleContainsScreenPoint(right.transform as RectTransform, PointerPosition, MainCamera));
+                (RectTransformUtility.RectangleContainsScreenPoint(left.transform as RectTransform, pointerPosition, mainCamera) ||
+                RectTransformUtility.RectangleContainsScreenPoint(right.transform as RectTransform, pointerPosition, mainCamera));
         }
     }
 }

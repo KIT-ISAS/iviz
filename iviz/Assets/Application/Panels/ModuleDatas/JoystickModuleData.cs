@@ -1,13 +1,12 @@
-﻿using Iviz.App.Listeners;
+﻿using Iviz.Controllers;
 using Iviz.Resources;
-using UnityEngine;
 
 namespace Iviz.App
 {
     /// <summary>
     /// <see cref="JoystickPanelContents"/> 
     /// </summary>
-    public class JoystickModuleData : ModuleData
+    public sealed class JoystickModuleData : ModuleData
     {
         readonly JoystickController controller;
         readonly JoystickPanelContents panel;
@@ -22,27 +21,29 @@ namespace Iviz.App
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Joystick) as JoystickPanelContents;
 
-            controller = Instantiate<JoystickController>();
-            controller.ModuleData = this;
+            //controller = Instantiate<JoystickController>();
+            controller = new JoystickController(this);
+            //controller.ModuleData = this;
             if (constructor.Configuration != null)
             {
                 controller.Config = (JoystickConfiguration)constructor.Configuration;
             }
             controller.Joystick = ModuleListPanel.Joystick;
 
-            UpdateButtonText();
+            UpdateModuleButton();
         }
 
         public override void Stop()
         {
             base.Stop();
-
             controller.Stop();
-            Object.Destroy(controller.gameObject);
+            //Object.Destroy(controller.gameObject);
         }
 
         public override void SetupPanel()
         {
+            panel.HideButton.State = controller.Visible;
+
             panel.JoySender.Set(controller.RosSenderJoy);
             panel.TwistSender.Set(controller.RosSenderTwist);
             panel.SendJoy.Value = controller.PublishJoy;
@@ -50,9 +51,11 @@ namespace Iviz.App
 
             panel.JoyTopic.Value = controller.JoyTopic;
             panel.TwistTopic.Value = controller.TwistTopic;
+            panel.UseStamped.Value = controller.TwistStamped;
 
             panel.MaxSpeed.Value = controller.MaxSpeed;
             panel.AttachToFrame.Value = controller.AttachToFrame;
+            panel.AttachToFrame.Hints = TFListener.FramesForHints;
             panel.XIsFront.Value = controller.XIsFront;
 
             panel.MaxSpeed.Interactable = controller.PublishTwist;
@@ -71,7 +74,7 @@ namespace Iviz.App
             {
                 controller.PublishTwist = f;
                 panel.MaxSpeed.Interactable = f;
-                panel.AttachToFrame.Interactable = f;
+                panel.AttachToFrame.Interactable = f && controller.TwistStamped;
                 panel.XIsFront.Interactable = f;
                 panel.TwistSender.Set(controller.RosSenderTwist);
                 panel.TwistTopic.Interactable = f;
@@ -80,7 +83,7 @@ namespace Iviz.App
             {
                 controller.MaxSpeed = f;
             };
-            panel.AttachToFrame.ValueChanged += f =>
+            panel.AttachToFrame.EndEdit += f =>
             {
                 controller.AttachToFrame = f;
             };
@@ -98,6 +101,11 @@ namespace Iviz.App
                 controller.TwistTopic = f;
                 panel.TwistSender.Set(controller.RosSenderTwist);
             };
+            panel.UseStamped.ValueChanged += f =>
+            {
+                controller.TwistStamped = f;
+                panel.AttachToFrame.Interactable = f && controller.PublishTwist;
+            };
 
             panel.CloseButton.Clicked += () =>
             {
@@ -108,7 +116,7 @@ namespace Iviz.App
             {
                 controller.Visible = !controller.Visible;
                 panel.HideButton.State = controller.Visible;
-                UpdateButtonText();
+                UpdateModuleButton();
             };
         }
 

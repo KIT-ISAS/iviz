@@ -2,31 +2,34 @@
 using System.Linq;
 using System;
 using UnityEngine.EventSystems;
-using Iviz.App.Displays;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Displays;
-using Iviz.App.Listeners;
 using Iviz.Resources;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     enum MarkerType
     {
-        ARROW = Marker.ARROW,
-        CUBE = Marker.CUBE,
-        SPHERE = Marker.SPHERE,
-        CYLINDER = Marker.CYLINDER,
-        LINE_STRIP = Marker.LINE_STRIP,
-        LINE_LIST = Marker.LINE_LIST,
-        CUBE_LIST = Marker.CUBE_LIST,
-        SPHERE_LIST = Marker.SPHERE_LIST,
-        POINTS = Marker.POINTS,
-        TEXT_VIEW_FACING = Marker.TEXT_VIEW_FACING,
-        MESH_RESOURCE = Marker.MESH_RESOURCE,
-        TRIANGLE_LIST = Marker.TRIANGLE_LIST,
+        Arrow = Marker.ARROW,
+        Cube = Marker.CUBE,
+        Sphere = Marker.SPHERE,
+        Cylinder = Marker.CYLINDER,
+        LineStrip = Marker.LINE_STRIP,
+        LineList = Marker.LINE_LIST,
+        CubeList = Marker.CUBE_LIST,
+        SphereList = Marker.SPHERE_LIST,
+        Points = Marker.POINTS,
+        TextViewFacing = Marker.TEXT_VIEW_FACING,
+        MeshResource = Marker.MESH_RESOURCE,
+        TriangleList = Marker.TRIANGLE_LIST,
     }
 
-    public sealed class MarkerObject : ClickableNode
+    public enum MouseEventType
+    {
+        Click, Down, Up
+    }
+
+    public sealed class MarkerObject : ClickableNode, IPointerDownHandler, IPointerUpHandler
     {
         static Mesh CachedCube => Resource.Displays.Cube.Object.GetComponent<MeshFilter>().sharedMesh;
         static Mesh CachedSphere => Resource.Displays.SphereSimple.Object.GetComponent<MeshFilter>().sharedMesh;
@@ -34,7 +37,8 @@ namespace Iviz.App.Listeners
         MarkerResource resource;
         Resource.Info<GameObject> resourceType;
 
-        public event Action<Vector3, int> Clicked;
+        public delegate void MouseEventAction(in Vector3 point, MouseEventType type);
+        public event MouseEventAction MouseEvent;
 
         public string Id { get; private set; }
 
@@ -44,17 +48,20 @@ namespace Iviz.App.Listeners
         public override Pose BoundsPose => resource?.WorldPose ?? Pose.identity;
         public override Vector3 BoundsScale => resource?.WorldScale ?? Vector3.one;
 
-        public DateTime ExpirationTime { get; private set; }
+        DateTime expirationTime;
 
-        public bool ColliderEnabled
+        bool clickable;
+        public bool Clickable
         {
-            get => resource?.ColliderEnabled ?? false;
+            get => clickable;
             set
             {
-                if (resource != null)
+                clickable = value;
+                if (resource is null)
                 {
-                    resource.ColliderEnabled = value;
+                    return;
                 }
+                resource.Layer = value ? Resource.ClickableLayer : 0;
             }
         }
 
@@ -82,27 +89,40 @@ namespace Iviz.App.Listeners
             }
         }
 
+        public bool Visible
+        {
+            get => resource?.Visible ?? true;
+            set
+            {
+                if (!(resource is null))
+                {
+                    resource.Visible = value;
+                }
+            }
+        }
+
         public void Set(Marker msg)
         {
             Id = MarkerListener.IdFromMessage(msg);
             name = Id;
 
-            ExpirationTime = msg.Lifetime.IsZero ?
+            expirationTime = msg.Lifetime.IsZero ?
                 DateTime.MaxValue :
                 DateTime.Now + msg.Lifetime.ToTimeSpan();
 
             Resource.Info<GameObject> newResourceType = GetRequestedResource(msg);
             if (newResourceType != resourceType)
             {
-                if (resource != null)
+                if (!(resource is null))
                 {
+                    resource.Stop();
                     ResourcePool.Dispose(resourceType, resource.gameObject);
                     resource = null;
                 }
                 resourceType = newResourceType;
                 if (resourceType == null)
                 {
-                    if (msg.Type() == MarkerType.MESH_RESOURCE)
+                    if (msg.Type() == MarkerType.MeshResource)
                     {
                         Logger.Error($"MarkerObject: Unknown mesh resource '{msg.MeshResource}'");
                     }
@@ -113,23 +133,22 @@ namespace Iviz.App.Listeners
                     return;
                 }
                 resource = ResourcePool.GetOrCreate<MarkerResource>(resourceType, transform);
-                if (resource == null)
+                Clickable = Clickable;
+                if (resource is null)
                 {
                     Debug.LogError("Resource " + resourceType + " has no MarkerResource!");
                 }
             }
-            if (resource == null)
+            if (resource is null)
             {
                 return;
             }
 
             UpdateTransform(msg);
 
-            resource.gameObject.layer = Resource.ClickableLayer;
-
             switch (msg.Type())
             {
-                case MarkerType.ARROW:
+                case MarkerType.Arrow:
                     ArrowResource arrowMarker = (ArrowResource)resource;
                     arrowMarker.Color = msg.Color.Sanitize().ToUnityColor();
                     if (msg.Points.Length == 2)
@@ -148,27 +167,27 @@ namespace Iviz.App.Listeners
                         Logger.Debug("MarkerObject: Cannot understand marker message.");
                     }
                     break;
-                case MarkerType.CUBE:
-                case MarkerType.SPHERE:
-                case MarkerType.CYLINDER:
-                case MarkerType.MESH_RESOURCE:
+                case MarkerType.Cube:
+                case MarkerType.Sphere:
+                case MarkerType.Cylinder:
+                case MarkerType.MeshResource:
                     MeshMarkerResource meshMarker = (MeshMarkerResource)resource;
                     meshMarker.Color = msg.Color.Sanitize().ToUnityColor();
                     transform.localScale = msg.Scale.Ros2Unity().Abs();
                     break;
-                case MarkerType.TEXT_VIEW_FACING:
+                case MarkerType.TextViewFacing:
                     TextMarkerResource textResource = (TextMarkerResource)resource;
                     textResource.Text = msg.Text;
                     textResource.Color = msg.Color.Sanitize().ToUnityColor();
                     transform.localScale = (float)msg.Scale.Z * Vector3.one;
                     break;
-                case MarkerType.CUBE_LIST:
-                case MarkerType.SPHERE_LIST:
+                case MarkerType.CubeList:
+                case MarkerType.SphereList:
                     {
                         MeshListResource meshList = (MeshListResource)resource;
                         meshList.UseIntensityTexture = false;
                         meshList.UsePerVertexScale = false;
-                        meshList.Mesh = (msg.Type() == MarkerType.CUBE_LIST) ? CachedCube : CachedSphere;
+                        meshList.Mesh = (msg.Type() == MarkerType.CubeList) ? CachedCube : CachedSphere;
                         PointWithColor[] points = new PointWithColor[msg.Points.Length];
                         Color color = msg.Color.Sanitize().ToUnityColor();
                         if (msg.Colors.Length == 0 || color == Color.black)
@@ -199,7 +218,7 @@ namespace Iviz.App.Listeners
                         meshList.PointsWithColor = points;
                         break;
                     }
-                case MarkerType.LINE_LIST:
+                case MarkerType.LineList:
                     {
                         LineResource lineResource = (LineResource)resource;
                         lineResource.LineScale = (float)msg.Scale.X;
@@ -229,7 +248,7 @@ namespace Iviz.App.Listeners
                         lineResource.LinesWithColor = lines;
                         break;
                     }
-                case MarkerType.LINE_STRIP:
+                case MarkerType.LineStrip:
                     {
                         LineResource lineResource = (LineResource)resource;
                         lineResource.LineScale = (float)msg.Scale.X;
@@ -259,7 +278,7 @@ namespace Iviz.App.Listeners
                         lineResource.LinesWithColor = lines;
                         break;
                     }
-                case MarkerType.POINTS:
+                case MarkerType.Points:
                     {
                         PointListResource pointList = (PointListResource)resource;
                         pointList.Scale = msg.Scale.Ros2Unity().Abs();
@@ -294,7 +313,7 @@ namespace Iviz.App.Listeners
                         pointList.UseIntensityTexture = false;
                         break;
                     }
-                case MarkerType.TRIANGLE_LIST:
+                case MarkerType.TriangleList:
                     MeshTrianglesResource meshTriangles = (MeshTrianglesResource)resource;
                     meshTriangles.Color = msg.Color.Sanitize().ToUnityColor();
                     if (msg.Colors.Length != 0)
@@ -310,6 +329,8 @@ namespace Iviz.App.Listeners
                     }
                     transform.localScale = msg.Scale.Ros2Unity().Abs();
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -334,26 +355,26 @@ namespace Iviz.App.Listeners
         {
             switch (msg.Type())
             {
-                case MarkerType.ARROW: return Resource.Displays.Arrow;
-                case MarkerType.CYLINDER: return Resource.Displays.Cylinder;
-                case MarkerType.CUBE: return Resource.Displays.Cube;
-                case MarkerType.SPHERE: return Resource.Displays.Sphere;
-                case MarkerType.TEXT_VIEW_FACING: return Resource.Displays.Text;
-                case MarkerType.LINE_STRIP:
-                case MarkerType.LINE_LIST:
+                case MarkerType.Arrow: return Resource.Displays.Arrow;
+                case MarkerType.Cylinder: return Resource.Displays.Cylinder;
+                case MarkerType.Cube: return Resource.Displays.Cube;
+                case MarkerType.Sphere: return Resource.Displays.Sphere;
+                case MarkerType.TextViewFacing: return Resource.Displays.Text;
+                case MarkerType.LineStrip:
+                case MarkerType.LineList:
                     return Resource.Displays.Line;
-                case MarkerType.MESH_RESOURCE:
+                case MarkerType.MeshResource:
                     if (!Uri.TryCreate(msg.MeshResource, UriKind.Absolute, out Uri uri))
                     {
                         return null;
                     }
-                    return Resource.Displays.Generic.TryGetValue(uri, out Resource.Info<GameObject> info) ? info : null;
-                case MarkerType.CUBE_LIST:
-                case MarkerType.SPHERE_LIST:
+                    return Resource.TryGetResource(uri, out Resource.Info<GameObject> info) ? info : null;
+                case MarkerType.CubeList:
+                case MarkerType.SphereList:
                     return Resource.Displays.MeshList;
-                case MarkerType.POINTS:
+                case MarkerType.Points:
                     return Resource.Displays.PointList;
-                case MarkerType.TRIANGLE_LIST:
+                case MarkerType.TriangleList:
                     return Resource.Displays.MeshTriangles;
                 default:
                     return null;
@@ -363,13 +384,14 @@ namespace Iviz.App.Listeners
         public override void Stop()
         {
             base.Stop();
-            Clicked = null;
+            MouseEvent = null;
 
-            if (resource == null)
+            if (resource is null)
             {
                 return;
             }
-            resource.ColliderEnabled = false;
+
+            resource.Stop();
             ResourcePool.Dispose(resourceType, resource.gameObject);
             resource = null;
             resourceType = null;
@@ -378,16 +400,18 @@ namespace Iviz.App.Listeners
         public override void OnPointerClick(PointerEventData eventData)
         {
             base.OnPointerClick(eventData);
-            if (LastClickCount == 1)
-            {
-                Clicked?.Invoke(eventData.pointerCurrentRaycast.worldPosition, 0);
-            }
-            else if (LastClickCount == 2)
-            {
-                Clicked?.Invoke(eventData.pointerCurrentRaycast.worldPosition, 1);
-            }
+            MouseEvent?.Invoke(eventData.pointerCurrentRaycast.worldPosition, MouseEventType.Click);
         }
 
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            MouseEvent?.Invoke(eventData.pointerCurrentRaycast.worldPosition, MouseEventType.Down);
+        }
+
+        public void OnPointerUp(PointerEventData eventData)
+        {
+            MouseEvent?.Invoke(eventData.pointerCurrentRaycast.worldPosition, MouseEventType.Up);
+        }
     }
 
     static class MarkerTypeHelper

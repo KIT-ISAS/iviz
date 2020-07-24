@@ -3,7 +3,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract (Name = "std_msgs/Header")]
-    public struct Header : IMessage
+    public sealed class Header : IMessage
     {
         // Standard metadata for higher-level stamped data types.
         // This is generally used to communicate timestamped data 
@@ -19,6 +19,12 @@ namespace Iviz.Msgs.StdMsgs
         //Frame this data is associated with
         [DataMember (Name = "frame_id")] public string FrameId { get; set; }
     
+        /// <summary> Constructor for empty message. </summary>
+        public Header()
+        {
+            FrameId = "";
+        }
+        
         /// <summary> Explicit constructor. </summary>
         public Header(uint Seq, time Stamp, string FrameId)
         {
@@ -35,12 +41,12 @@ namespace Iviz.Msgs.StdMsgs
             FrameId = b.DeserializeString();
         }
         
-        public readonly ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new Header(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public readonly void RosSerialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Seq);
@@ -48,12 +54,12 @@ namespace Iviz.Msgs.StdMsgs
             b.Serialize(FrameId);
         }
         
-        public readonly void RosValidate()
+        public void RosValidate()
         {
             if (FrameId is null) throw new System.NullReferenceException();
         }
     
-        public readonly int RosMessageLength
+        public int RosMessageLength
         {
             get {
                 int size = 16;
@@ -62,7 +68,7 @@ namespace Iviz.Msgs.StdMsgs
             }
         }
     
-        public readonly string RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "std_msgs/Header";

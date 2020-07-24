@@ -17,8 +17,8 @@ namespace Iviz.App
         public TrashButtonWidget AddCloseButton()
         {
             GameObject o = Resource.Widgets.CloseButton.Instantiate(nonstatics.transform);
-            RectTransform transform = o.transform as RectTransform;
-            transform.anchoredPosition = new Vector2(transform.anchoredPosition.x, yCloseButton);
+            RectTransform ttransform = (RectTransform)o.transform;
+            ttransform.anchoredPosition = new Vector2(ttransform.anchoredPosition.x, yCloseButton);
             o.SetActive(true);
             return o.GetComponent<TrashButtonWidget>();
         }
@@ -26,7 +26,7 @@ namespace Iviz.App
         public TrashButtonWidget AddTrashButton()
         {
             GameObject o = Resource.Widgets.TrashButton.Instantiate(nonstatics.transform);
-            RectTransform transform = o.transform as RectTransform;
+            RectTransform transform = (RectTransform)o.transform;
             transform.anchoredPosition = new Vector2(transform.anchoredPosition.x, yCloseButton);
             o.SetActive(true);
             return o.GetComponent<TrashButtonWidget>();
@@ -35,7 +35,7 @@ namespace Iviz.App
         public ToggleButtonWidget AddHideButton()
         {
             GameObject o = Resource.Widgets.HideButton.Instantiate(nonstatics.transform);
-            RectTransform transform = o.transform as RectTransform;
+            RectTransform transform = (RectTransform)o.transform;
             transform.anchoredPosition = new Vector2(transform.anchoredPosition.x, yCloseButton);
             o.SetActive(true);
             return o.GetComponent<ToggleButtonWidget>();
@@ -43,7 +43,7 @@ namespace Iviz.App
 
         GameObject AddToBottom(GameObject o)
         {
-            RectTransform transform = o.GetComponent<RectTransform>();
+            RectTransform transform = (RectTransform)o.transform;
             transform.anchoredPosition = new Vector2(transform.anchoredPosition.x, -y);
             y += transform.rect.height + yOffset;
             o.SetActive(true);
@@ -64,31 +64,37 @@ namespace Iviz.App
 
         public ToggleWidget AddToggle(string label)
         {
-            GameObject o = Resource.Widgets.ToggleWidget.Instantiate(nonstatics.transform);
+            GameObject o = Resource.Widgets.Toggle.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<ToggleWidget>().SetLabel(label);
         }
 
         public SliderWidget AddSlider(string label)
         {
-            GameObject o = Resource.Widgets.SliderWidget.Instantiate(nonstatics.transform);
+            GameObject o = Resource.Widgets.Slider.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<SliderWidget>().SetLabel(label);
         }
 
         public InputFieldWidget AddInputField(string label)
         {
-            GameObject o = Resource.Widgets.InputWidget.Instantiate(nonstatics.transform);
+            GameObject o = Resource.Widgets.Input.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<InputFieldWidget>().SetLabel(label);
+        }
+        
+        public InputFieldWithHintsWidget AddInputFieldWithHints(string label)
+        {
+            GameObject o = Resource.Widgets.InputWithHints.Instantiate(nonstatics.transform);
+            return AddToBottom(o).GetComponent<InputFieldWithHintsWidget>().SetLabel(label);
         }
 
         public InputFieldWidget AddShortInputField(string label)
         {
-            GameObject o = Resource.Widgets.ShortInputWidget.Instantiate(nonstatics.transform);
+            GameObject o = Resource.Widgets.ShortInput.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<InputFieldWidget>().SetLabel(label);
         }
 
         public NumberInputFieldWidget AddNumberInputField(string label)
         {
-            GameObject o = Resource.Widgets.NumberInputWidget.Instantiate(nonstatics.transform);
+            GameObject o = Resource.Widgets.NumberInput.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<NumberInputFieldWidget>().SetLabel(label);
         }
 
@@ -96,6 +102,12 @@ namespace Iviz.App
         {
             GameObject o = Resource.Widgets.Vector3.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<Vector3Widget>().SetLabel(label);
+        }
+
+        public Vector3SliderWidget AddVector3Slider(string label)
+        {
+            GameObject o = Resource.Widgets.Vector3Slider.Instantiate(nonstatics.transform);
+            return AddToBottom(o).GetComponent<Vector3SliderWidget>().SetLabel(label);
         }
 
         public DropdownWidget AddDropdown(string label)
@@ -149,8 +161,8 @@ namespace Iviz.App
                 {
                     x.gameObject.SetActive(false);
                     Vector3 absolutePosition = x.transform.position;
-                    x.gameObject.transform.SetParentLocal(statics.transform);
-                    x.gameObject.transform.position = absolutePosition;
+                    x.transform.SetParentLocal(statics.transform);
+                    x.transform.position = absolutePosition;
                     x.gameObject.SetActive(true);
                 });
         }

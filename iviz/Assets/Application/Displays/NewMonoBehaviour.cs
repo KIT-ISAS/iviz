@@ -1,38 +1,29 @@
-﻿using UnityEngine;
-using System.Collections;
-using Iviz.App.Displays;
+using System;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Runtime.CompilerServices;
 using Iviz.Displays;
-using Iviz.Msgs.VisualizationMsgs;
+using UnityEditor;
+using UnityEngine;
+using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.App
 {
-
-
     public class NewMonoBehaviour : MonoBehaviour
     {
-        OccupancyGridResource resource;
-
-        private void Start()
+        void OnEnable()
         {
-            transform.position = new Vector3(1, 0, 0).Ros2Unity();
-            /*
-            resource = gameObject.AddComponent<OccupancyGridResource>();
-            resource.NumCellsX = 1000;
-            resource.NumCellsY = 1000;
-            resource.CellSize = 0.01f;
+            //string robotDescription = File.ReadAllText("/Users/akzeac/Documents/iviz/iviz/Assets/Robots/neo_mp_500/robot_model/mp_500.urdf.xml");            
+            //string robotDescription = File.ReadAllText("/Users/akzeac/Documents/iviz/iviz/Assets/Robots/pr2_description/robots/robot.urdf.xml");            
+            //string robotDescription = File.ReadAllText("/Users/akzeac/Documents/iviz/iviz/Assets/Robots/crayler/urdf/crayler_high_res.urdf.xml");            
+            string robotDescription = File.ReadAllText("/Users/akzeac/Documents/iviz/iviz/Assets/Robots/iosb/urdf/iosb.urdf.xml");            
+            RobotModel robot = new RobotModel(robotDescription);
+            robot.BaseLinkObject.transform.position = new Vector3(-2, 0, 0);
 
-            sbyte[] bytes = new sbyte[resource.NumCellsX * resource.NumCellsY];
-            for (int i = 0; i < bytes.Length; i++)
-            {
-                bytes[i] = (sbyte)(Mathf.Sin(i) * 100);
-            }
-
-            resource.SetOccupancy(bytes);
-            */
-            /*
-            ArrowResource resource = GetComponent<ArrowResource>();
-            resource.Set(new Vector3(0, 3, 0), new Vector3(-2, 2, 2));
-            */
+            //robot.TryApplyJoint("boom_revolute", 0.5f, out Pose _, true);
+            //robot.ApplyCosmeticConfiguration();
         }
     }
+
+
 }

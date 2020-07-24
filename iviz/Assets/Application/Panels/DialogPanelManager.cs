@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using Iviz.Displays;
 using Iviz.Resources;
 
 namespace Iviz.App
@@ -8,6 +9,7 @@ namespace Iviz.App
     {
         ItemList,
         Connection,
+        AddTopic,
         Image,
         TF,
         SaveAs
@@ -35,11 +37,12 @@ namespace Iviz.App
             parentCanvas = GetComponentInParent<Canvas>();
 
             gameObject.SetActive(false);
-            PanelByType[DialogPanelType.ItemList] = Resource.Widgets.ItemListPanel.Instantiate(transform).GetComponent<DialogItemList>();
+            PanelByType[DialogPanelType.ItemList] = Resource.Widgets.ItemListPanel.Instantiate(transform).GetComponent<ItemListDialogContents>();
             PanelByType[DialogPanelType.Connection] = Resource.Widgets.ConnectionPanel.Instantiate(transform).GetComponent<ConnectionDialogContents>();
             PanelByType[DialogPanelType.Image] = Resource.Widgets.ImagePanel.Instantiate(transform).GetComponent<ImageDialogContents>();
             PanelByType[DialogPanelType.TF] = Resource.Widgets.TFPanel.Instantiate(transform).GetComponent<TFDialogContents>();
             PanelByType[DialogPanelType.SaveAs] = Resource.Widgets.SaveAsPanel.Instantiate(transform).GetComponent<SaveConfigDialogContents>();
+            PanelByType[DialogPanelType.AddTopic] = Resource.Widgets.AddTopicPanel.Instantiate(transform).GetComponent<AddTopicDialogContents>();
 
             PanelByType.Values.ForEach(x => x.Active = false);
             Active = false;

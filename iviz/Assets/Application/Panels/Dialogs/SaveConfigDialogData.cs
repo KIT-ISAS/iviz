@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Iviz.Resources;
-using UnityEngine;
 
 namespace Iviz.App
 {
@@ -16,7 +14,7 @@ namespace Iviz.App
 
         readonly List<string> files = new List<string>();
 
-        public override void Initialize(DisplayListPanel panel)
+        public override void Initialize(ModuleListPanel panel)
         {
             base.Initialize(panel);
             this.panel = (SaveConfigDialogContents)DialogPanelManager.GetPanelByType(DialogPanelType.SaveAs);
@@ -25,16 +23,16 @@ namespace Iviz.App
         public override void SetupPanel()
         {
             files.Clear();
-            files.AddRange(Directory.GetFiles(Application.persistentDataPath).
-                Where(x => RoslibSharp.Utils.HasSuffix(x, Suffix)).
+            files.AddRange(Directory.GetFiles(ModuleListPanel.PersistentDataPath).
+                Where(x => Roslib.Utils.HasSuffix(x, Suffix)).
                 Select(GetFileName));
             panel.Items = files;
             panel.ItemClicked += OnItemClicked;
             panel.CloseClicked += OnCloseClicked;
             panel.EmptyText = "No Config Files Found";
-            panel.input.Value = DateTime.Now.ToString("MM_dd_yyyy HH_mm");
+            panel.Input.Value = DateTime.Now.ToString("MM_dd_yyyy HH_mm");
 
-            panel.saveButton.Clicked += OnSaveClicked;
+            panel.SaveButton.Clicked += OnSaveClicked;
         }
 
         static string GetFileName(string s)
@@ -50,13 +48,13 @@ namespace Iviz.App
 
         void OnItemClicked(int index, string _)
         {
-            ModuleListPanel.SaveStateConfiguration(files[index]);
+            ModuleListPanel.SaveStateConfiguration(files[index] + Suffix);
             Close();
         }
 
         void OnSaveClicked()
         {
-            ModuleListPanel.SaveStateConfiguration(panel.input.Value + Suffix);
+            ModuleListPanel.SaveStateConfiguration(panel.Input.Value + Suffix);
             Close();
         }
 

@@ -4,7 +4,7 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 
-namespace Iviz.RoslibSharp.XmlRpc
+namespace Iviz.Roslib.XmlRpc
 {
     public sealed class HttpRequest : IDisposable
     {
@@ -24,11 +24,11 @@ namespace Iviz.RoslibSharp.XmlRpc
             Task task = client.ConnectAsync(hostname, port);
             if (!task.Wait(TimeoutInMs) || task.IsCanceled)
             {
-                throw new TimeoutException("HttpRequest: Node failed to answer");
+                throw new TimeoutException($"HttpRequest: Host '{hostname}' timed out");
             }
             if (task.IsFaulted)
             {
-                throw new TimeoutException("HttpRequest: Node failed to answer", task.Exception);
+                throw new TimeoutException($"HttpRequest: Host '{hostname}' timed out", task.Exception);
             }
         }
 

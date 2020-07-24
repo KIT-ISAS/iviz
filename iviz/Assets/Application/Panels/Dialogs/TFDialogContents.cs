@@ -1,13 +1,18 @@
-﻿using System;
-using UnityEngine;
-using UnityEngine.UI;
+﻿using UnityEngine;
 
 namespace Iviz.App
 {
-    public class TFDialogContents : MonoBehaviour, IDialogPanelContents
+    public sealed class TFDialogContents : MonoBehaviour, IDialogPanelContents
     {
-        public TrashButtonWidget Close;
-        public TFLog TFLog;
+        [SerializeField] TrashButtonWidget close = null;
+        [SerializeField] TFLog tfLog = null;
+        [SerializeField] ToggleWidget showOnlyUsed = null;
+        [SerializeField] TrashButtonWidget resetAll = null;
+
+        public TrashButtonWidget Close => close;
+        public TFLog TFLog => tfLog;
+        public ToggleWidget ShowOnlyUsed => showOnlyUsed;
+        public TrashButtonWidget ResetAll => resetAll;
 
         public bool Active
         {
@@ -19,6 +24,8 @@ namespace Iviz.App
         {
             Close.ClearSubscribers();
             TFLog.ClearSubscribers();
+            ShowOnlyUsed.ClearSubscribers();
+            ResetAll.ClearSubscribers();
         }
     }
 }

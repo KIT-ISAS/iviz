@@ -1,7 +1,7 @@
-﻿using Iviz.App.Listeners;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using Iviz.Controllers;
 
 namespace Iviz.App
 {
@@ -27,6 +27,7 @@ namespace Iviz.App
         [DataMember] public List<MagnitudeConfiguration> Odometries { get; set; } = new List<MagnitudeConfiguration>();
         [DataMember] public List<OccupancyGridConfiguration> OccupancyGrids { get; set; } = new List<OccupancyGridConfiguration>();
         [DataMember] public List<PathConfiguration> Paths { get; set; } = new List<PathConfiguration>();
+        [DataMember] public List<GridMapConfiguration> GridMaps { get; set; } = new List<GridMapConfiguration>();
         [DataMember] public ARConfiguration AR { get; set; } = null;
         [DataMember] public JoystickConfiguration Joystick { get; set; } = null;
 
@@ -44,6 +45,7 @@ namespace Iviz.App
             Odometries,
             OccupancyGrids,
             Paths,
+            GridMaps,
             new[] { AR },
             new[] { Joystick },
         };

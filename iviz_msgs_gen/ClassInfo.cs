@@ -75,7 +75,25 @@ namespace Iviz.MsgsGen
             "geometry_msgs/Quaternion",
             "geometry_msgs/Pose",
             "geometry_msgs/Transform",
+            "geometry_msgs/Twist",
+            "geometry_msgs/Wrench",
+            "geometry_msgs/Accel",
+            "geometry_msgs/Inertia",
             "std_msgs/ColorRGBA",
+            "std_msgs/Float32",
+            "std_msgs/Float64",
+            "std_msgs/Time",
+            "std_msgs/Duration",
+            "std_msgs/Int16",
+            "std_msgs/Int32",
+            "std_msgs/Int64",
+            "std_msgs/Int8",
+            "std_msgs/UInt16",
+            "std_msgs/UInt32",
+            "std_msgs/UInt64",
+            "std_msgs/UInt8",
+            "std_msgs/Byte",
+            "std_msgs/Char",
             "mesh_msgs/TriangleIndices",
             "mesh_msgs/MeshMaterial",
             "iviz_msgs/Color",
@@ -87,7 +105,7 @@ namespace Iviz.MsgsGen
 
         public static readonly HashSet<string> FakeStructs = new HashSet<string>
         {
-            "std_msgs/Header",
+            //"std_msgs/Header",
         };
 
         static readonly HashSet<string> forceSkip = new HashSet<string>
@@ -450,7 +468,7 @@ namespace Iviz.MsgsGen
                         }
                         else if (variable.arraySize == 0)
                         {
-                            if (variable.classInfo.forceStruct)
+                            if (variable.classInfo?.forceStruct ?? false)
                             {
                                 lines.Add("    " + variable.fieldName + " = b.DeserializeStructArray<" + variable.className + ">();");
                             }
@@ -465,7 +483,7 @@ namespace Iviz.MsgsGen
                         }
                         else
                         {
-                            if (variable.classInfo.forceStruct)
+                            if (variable.classInfo?.forceStruct ?? false)
                             {
                                 lines.Add("    " + variable.fieldName + " = b.DeserializeStructArray<" + variable.className + ">(" + variable.arraySize + ");");
                             }
@@ -536,7 +554,7 @@ namespace Iviz.MsgsGen
                         }
                         else
                         {
-                            if (variable.classInfo.forceStruct)
+                            if (variable.classInfo?.forceStruct ?? false)
                             {
                                 lines.Add("    b.SerializeStructArray(" + variable.fieldName + ", " + variable.arraySize + ");");
                             }

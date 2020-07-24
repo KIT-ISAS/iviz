@@ -14,11 +14,12 @@ namespace Iviz.Msgs.NavMsgs
         /// <summary> Constructor for empty message. </summary>
         public GridCells()
         {
+            Header = new StdMsgs.Header();
             Cells = System.Array.Empty<GeometryMsgs.Point>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GridCells(in StdMsgs.Header Header, float CellWidth, float CellHeight, GeometryMsgs.Point[] Cells)
+        public GridCells(StdMsgs.Header Header, float CellWidth, float CellHeight, GeometryMsgs.Point[] Cells)
         {
             this.Header = Header;
             this.CellWidth = CellWidth;
@@ -51,6 +52,7 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
+            if (Header is null) throw new System.NullReferenceException();
             Header.RosValidate();
             if (Cells is null) throw new System.NullReferenceException();
         }

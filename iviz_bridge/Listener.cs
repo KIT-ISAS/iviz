@@ -6,7 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using Iviz.Msgs;
-using Iviz.RoslibSharp;
+using Iviz.Roslib;
 
 namespace Iviz.Bridge
 {
@@ -18,7 +18,7 @@ namespace Iviz.Bridge
         protected bool keepRunning;
         protected RosClient client;
         protected RosSubscriber subscriber;
-        Task task;
+        //Task task;
 
         public int Port { get; private set; }
 
@@ -35,16 +35,18 @@ namespace Iviz.Bridge
             listener = new TcpListener(IPAddress.Any, 0);
             listener.Start();
             Port = ((IPEndPoint)listener.LocalEndpoint).Port;
-            task = Task.Run(Run);
+            //task = Task.Run(Run);
+            Run();
         }
 
-        void Run()
+        async void Run()
         {
             try
             {
                 while (keepRunning)
                 {
-                    TcpClient client = listener.AcceptTcpClient();
+                    //TcpClient client = listener.AcceptTcpClient();
+                    TcpClient client = await listener.AcceptTcpClientAsync().ConfigureAwait(false);
                     Process(client);
                 }
             }
@@ -59,7 +61,7 @@ namespace Iviz.Bridge
             keepRunning = false;
             listener?.Stop();
             listener = null;
-            task.Wait();
+            //task.Wait();
         }
 
         protected abstract void Process(TcpClient client);

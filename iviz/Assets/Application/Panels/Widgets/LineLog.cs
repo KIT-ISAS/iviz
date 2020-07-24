@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Text;
@@ -10,7 +9,7 @@ namespace Iviz.App
     {
         [SerializeField] Text text = null;
         [SerializeField] GameObject content = null;
-        [SerializeField] Scrollbar vertical = null;
+        //[SerializeField] Scrollbar vertical = null;
 
         readonly List<string> lines = new List<string>();
         const int maxLines = 100;

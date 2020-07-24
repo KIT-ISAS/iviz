@@ -1,6 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
-using Iviz.App.Listeners;
+﻿using Iviz.Controllers;
+using Iviz.Displays;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace Iviz.App
@@ -42,7 +42,7 @@ namespace Iviz.App
                 frame = value;
                 if (frame != null)
                 {
-                    text.text = "<b>⮑ " + frame.Id + "</b>";
+                    text.text = "<b>⮑" + frame.Id + "</b>";
                     UpdateStats();
                 }
                 else

@@ -1,13 +1,12 @@
 ﻿using UnityEngine;
 using System;
-using Iviz.App.Displays;
 using Iviz.Msgs.SensorMsgs;
 using System.Runtime.Serialization;
-using Iviz.RoslibSharp;
+using Iviz.Roslib;
 using Iviz.Displays;
 using Iviz.Resources;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     [DataContract]
     public sealed class ImageConfiguration : JsonToString, IConfiguration
@@ -30,12 +29,12 @@ namespace Iviz.App.Listeners
 
     public sealed class ImageListener : ListenerController
     {
-        public DisplayClickableNode Node { get; private set; }
+        public DisplayClickableNode Node { get; }
         ImageResource marker;
 
         public override TFFrame Frame => Node.Parent;
 
-        public ImageTexture ImageTexture { get; private set; }
+        public ImageTexture ImageTexture { get; }
         public Texture2D Texture => ImageTexture.Texture;
         public Material Material => ImageTexture.Material;
 
@@ -47,11 +46,7 @@ namespace Iviz.App.Listeners
 
         public bool IsMono => ImageTexture.IsMono;
 
-        public override ModuleData ModuleData
-        {
-            get => Node.DisplayData;
-            set => Node.DisplayData = value;
-        }
+        public override IModuleData ModuleData => Node.ModuleData;
 
         readonly ImageConfiguration config = new ImageConfiguration();
         public ImageConfiguration Config
@@ -93,8 +88,6 @@ namespace Iviz.App.Listeners
                 ImageTexture.Colormap = value;
             }
         }
-
-        public Texture2D ColormapTexture => Resource.Colormaps.Textures[Colormap];
 
         public float MinIntensity
         {
@@ -179,10 +172,11 @@ namespace Iviz.App.Listeners
             }
         }
 
-        void Awake()
+        public ImageListener(IModuleData moduleData)
         {
             ImageTexture = new ImageTexture();
-            Node = DisplayClickableNode.Instantiate("ImageNode");
+            Node = DisplayClickableNode.Instantiate("[ImageNode]");
+            Node.ModuleData = moduleData; 
             marker = ResourcePool.GetOrCreate<ImageResource>(Resource.Displays.Image);
             marker.Texture = ImageTexture;
             Node.Target = marker;
@@ -192,17 +186,17 @@ namespace Iviz.App.Listeners
 
         public override void StartListening()
         {
-            base.StartListening();
-            if (config.Type == Image.RosMessageType)
+            switch (config.Type)
             {
-                Listener = new RosListener<Image>(config.Topic, Handler);
-            }
-            else if (config.Type == CompressedImage.RosMessageType)
-            {
-                Listener = new RosListener<CompressedImage>(config.Topic, HandlerCompressed);
+                case Image.RosMessageType:
+                    Listener = new RosListener<Image>(config.Topic, Handler);
+                    break;
+                case CompressedImage.RosMessageType:
+                    Listener = new RosListener<CompressedImage>(config.Topic, HandlerCompressed);
+                    break;
             }
             Listener.MaxQueueSize = (int)MaxQueueSize;
-            name = "Node:" + config.Topic;
+            //name = "Node:" + config.Topic;
             Node.SetName($"[{config.Topic}]");
         }
 
@@ -248,7 +242,7 @@ namespace Iviz.App.Listeners
             ImageTexture.Destroy();
 
             Node.Stop();
-            Destroy(Node.gameObject);
+            UnityEngine.Object.Destroy(Node.gameObject);
         }
 
     }

@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using Iviz.App.Listeners;
+﻿using Iviz.Controllers;
 
 namespace Iviz.App
 {
@@ -8,7 +7,7 @@ namespace Iviz.App
         protected abstract ListenerController Listener { get; }
         public override IController Controller => Listener;
 
-        protected ListenerModuleData(DisplayListPanel moduleList, string topic, string type) :
+        protected ListenerModuleData(ModuleListPanel moduleList, string topic, string type) :
             base(moduleList, topic, type)
         {
             ModuleListPanel.RegisterDisplayedTopic(Topic);
@@ -18,7 +17,7 @@ namespace Iviz.App
         {
             base.Stop();
             Listener.Stop();
-            UnityEngine.Object.Destroy(Listener.gameObject);
+            //UnityEngine.Object.Destroy(Listener.gameObject);
         }
     }
 }

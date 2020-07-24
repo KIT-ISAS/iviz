@@ -1,9 +1,11 @@
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Inertia")]
-    public sealed class Inertia : IMessage
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Inertia : IMessage
     {
         // Mass [kg]
         [DataMember (Name = "m")] public double M { get; set; }
@@ -20,11 +22,6 @@ namespace Iviz.Msgs.GeometryMsgs
         [DataMember (Name = "iyz")] public double Iyz { get; set; }
         [DataMember (Name = "izz")] public double Izz { get; set; }
     
-        /// <summary> Constructor for empty message. </summary>
-        public Inertia()
-        {
-        }
-        
         /// <summary> Explicit constructor. </summary>
         public Inertia(double M, in GeometryMsgs.Vector3 Com, double Ixx, double Ixy, double Ixz, double Iyy, double Iyz, double Izz)
         {
@@ -41,41 +38,27 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor with buffer. </summary>
         internal Inertia(Buffer b)
         {
-            M = b.Deserialize<double>();
-            Com = new GeometryMsgs.Vector3(b);
-            Ixx = b.Deserialize<double>();
-            Ixy = b.Deserialize<double>();
-            Ixz = b.Deserialize<double>();
-            Iyy = b.Deserialize<double>();
-            Iyz = b.Deserialize<double>();
-            Izz = b.Deserialize<double>();
+            b.Deserialize(out this);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public readonly ISerializable RosDeserialize(Buffer b)
         {
             return new Inertia(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void RosSerialize(Buffer b)
+        public readonly void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(M);
-            Com.RosSerialize(b);
-            b.Serialize(Ixx);
-            b.Serialize(Ixy);
-            b.Serialize(Ixz);
-            b.Serialize(Iyy);
-            b.Serialize(Iyz);
-            b.Serialize(Izz);
+            b.Serialize(this);
         }
         
-        public void RosValidate()
+        public readonly void RosValidate()
         {
         }
     
-        public int RosMessageLength => 80;
+        public readonly int RosMessageLength => 80;
     
-        public string RosType => RosMessageType;
+        public readonly string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "geometry_msgs/Inertia";

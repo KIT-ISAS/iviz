@@ -1,6 +1,4 @@
-﻿using System;
-using Iviz.App.Listeners;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Iviz.App
 {
@@ -11,14 +9,14 @@ namespace Iviz.App
         void OnDialogClosed();
     }
 
-    public class ImageDialogData : DialogData
+    public sealed class ImageDialogData : DialogData
     {
         ImageDialogContents panel;
         public override IDialogPanelContents Panel => panel;
 
         public IImageDialogListener Listener { get; set; }
 
-        public override void Initialize(DisplayListPanel panel)
+        public override void Initialize(ModuleListPanel panel)
         {
             base.Initialize(panel);
             this.panel = (ImageDialogContents)DialogPanelManager.GetPanelByType(DialogPanelType.Image);

@@ -1,6 +1,6 @@
 ﻿namespace Iviz.App
 {
-    public class JointStatePanelContents : ListenerPanelContents
+    public sealed class JointStatePanelContents : ListenerPanelContents
     {
         public DropdownWidget Robot { get; private set; }
         public InputFieldWidget JointPrefix { get; private set; }
@@ -8,7 +8,7 @@
         public SliderWidget TrimFromEnd { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
 
-        void Start()
+        void Awake()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("JointState");

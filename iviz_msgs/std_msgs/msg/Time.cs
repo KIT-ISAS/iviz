@@ -1,17 +1,14 @@
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract (Name = "std_msgs/Time")]
-    public sealed class Time : IMessage
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Time : IMessage
     {
         [DataMember (Name = "data")] public time Data { get; set; }
     
-        /// <summary> Constructor for empty message. </summary>
-        public Time()
-        {
-        }
-        
         /// <summary> Explicit constructor. </summary>
         public Time(time Data)
         {
@@ -21,27 +18,27 @@ namespace Iviz.Msgs.StdMsgs
         /// <summary> Constructor with buffer. </summary>
         internal Time(Buffer b)
         {
-            Data = b.Deserialize<time>();
+            b.Deserialize(out this);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public readonly ISerializable RosDeserialize(Buffer b)
         {
             return new Time(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public void RosSerialize(Buffer b)
+        public readonly void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(Data);
+            b.Serialize(this);
         }
         
-        public void RosValidate()
+        public readonly void RosValidate()
         {
         }
     
-        public int RosMessageLength => 8;
+        public readonly int RosMessageLength => 8;
     
-        public string RosType => RosMessageType;
+        public readonly string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "std_msgs/Time";

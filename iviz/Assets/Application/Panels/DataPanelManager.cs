@@ -1,28 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Iviz.Controllers;
+using Iviz.Displays;
 using Iviz.Resources;
 using UnityEngine;
 
 namespace Iviz.App
 {
-    public class DataPanelManager : MonoBehaviour
+    public sealed class DataPanelManager : MonoBehaviour
     {
-        readonly Dictionary<Resource.Module, DataPanelContents> PanelByResourceType = new Dictionary<Resource.Module, DataPanelContents>();
-        DataPanelContents DefaultPanel;
+        readonly Dictionary<Resource.Module, DataPanelContents> panelByResourceType =
+            new Dictionary<Resource.Module, DataPanelContents>();
 
-        ModuleData SelectedDisplayData;
+        DataPanelContents defaultPanel;
+
+        public ModuleData SelectedModuleData { get; private set; }
         Canvas parentCanvas;
         bool started;
 
-        public AnchorCanvas AnchorCanvas;
+        //public AnchorCanvas AnchorCanvas;
 
-        public bool Active
+        bool Active
         {
             get => parentCanvas.enabled;
-            set
-            {
-                parentCanvas.enabled = value;
-            }
+            set => parentCanvas.enabled = value;
         }
 
         void Awake()
@@ -30,7 +30,7 @@ namespace Iviz.App
             parentCanvas = GetComponentInParent<Canvas>();
 
             gameObject.SetActive(false);
-            DefaultPanel = CreatePanelObject("Default Panel").AddComponent<DefaultPanelContents>();
+            defaultPanel = CreatePanelObject("Default Panel").AddComponent<DefaultPanelContents>();
             Active = false;
             gameObject.SetActive(true);
             started = true;
@@ -45,17 +45,19 @@ namespace Iviz.App
 
         public DataPanelContents GetPanelByResourceType(Resource.Module resource)
         {
-            if (PanelByResourceType.TryGetValue(resource, out DataPanelContents cm))
+            if (panelByResourceType.TryGetValue(resource, out DataPanelContents cm))
             {
                 return cm;
             }
+
             cm = DataPanelContents.AddTo(CreatePanelObject(resource + " Panel"), resource);
-            if (cm != null)
+            if (cm is null)
             {
-                PanelByResourceType[resource] = cm;
-                return cm;
+                return defaultPanel;
             }
-            return DefaultPanel;
+
+            panelByResourceType[resource] = cm;
+            return cm;
         }
 
         public void SelectPanelFor(ModuleData newSelected)
@@ -64,12 +66,14 @@ namespace Iviz.App
             {
                 return;
             }
-            if (newSelected == SelectedDisplayData)
+
+            if (newSelected == SelectedModuleData)
             {
                 return;
             }
+
             HideSelectedPanel();
-            if (newSelected == null || newSelected.Panel == null)
+            if (newSelected?.Panel is null)
             {
                 ShowDefaultPanel();
             }
@@ -81,43 +85,43 @@ namespace Iviz.App
 
         void ShowPanel(ModuleData newSelected)
         {
-            SelectedDisplayData = newSelected;
-            SelectedDisplayData.SetupPanel();
-            SelectedDisplayData.Panel.Active = true;
+            SelectedModuleData = newSelected;
+            SelectedModuleData.SetupPanel();
+            SelectedModuleData.Panel.Active = true;
             Active = true;
         }
 
         public void HidePanelFor(ModuleData newSelected)
         {
-            if (SelectedDisplayData == newSelected)
+            if (SelectedModuleData == newSelected)
             {
                 HideSelectedPanel();
             }
         }
 
-        public void ShowDefaultPanel()
+        void ShowDefaultPanel()
         {
-            SelectedDisplayData = null;
-            DefaultPanel.Active = true;
+            SelectedModuleData = null;
+            defaultPanel.Active = true;
         }
 
         public void HideSelectedPanel()
         {
-            if (SelectedDisplayData == null)
+            if (SelectedModuleData == null)
             {
                 return;
             }
 
-            SelectedDisplayData.Panel.Active = false;
-            SelectedDisplayData.CleanupPanel();
-            SelectedDisplayData.Panel.ClearSubscribers();
-            SelectedDisplayData = null;
+            SelectedModuleData.Panel.Active = false;
+            SelectedModuleData.CleanupPanel();
+            SelectedModuleData.Panel.ClearSubscribers();
+            SelectedModuleData = null;
             Active = false;
         }
 
         public void TogglePanel(ModuleData selected)
         {
-            if (SelectedDisplayData == selected)
+            if (SelectedModuleData == selected)
             {
                 HideSelectedPanel();
             }
@@ -127,16 +131,16 @@ namespace Iviz.App
             }
         }
 
-        GameObject CreatePanelObject(string name)
+        GameObject CreatePanelObject(string panelName)
         {
             GameObject o = Instantiate(UnityEngine.Resources.Load<GameObject>("Widgets/Data Panel"), transform);
-            o.name = name;
+            o.name = panelName;
             return o;
         }
 
         void UpdateSelected()
         {
-            SelectedDisplayData?.UpdatePanel();
+            SelectedModuleData?.UpdatePanel();
         }
     }
 }

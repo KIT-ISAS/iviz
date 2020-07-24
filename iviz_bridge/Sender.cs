@@ -8,7 +8,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
-using Iviz.RoslibSharp;
+using Iviz.Roslib;
 
 namespace Iviz.Bridge
 {

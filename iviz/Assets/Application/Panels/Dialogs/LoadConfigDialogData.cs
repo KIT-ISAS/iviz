@@ -1,32 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Iviz.Resources;
-using UnityEngine;
 
 namespace Iviz.App
 {
     public sealed class LoadConfigDialogData : DialogData
     {
-        DialogItemList itemList;
+        ItemListDialogContents itemList;
         public override IDialogPanelContents Panel => itemList;
 
         const string Suffix = ".config.json";
 
         readonly List<string> files = new List<string>();
 
-        public override void Initialize(DisplayListPanel panel)
+        public override void Initialize(ModuleListPanel panel)
         {
             base.Initialize(panel);
-            itemList = (DialogItemList)DialogPanelManager.GetPanelByType(DialogPanelType.ItemList);
+            itemList = (ItemListDialogContents)DialogPanelManager.GetPanelByType(DialogPanelType.ItemList);
         }
 
         public override void SetupPanel()
         {
             files.Clear();
-            files.AddRange(Directory.GetFiles(Application.persistentDataPath).
-                Where(x => RoslibSharp.Utils.HasSuffix(x, Suffix)).
+            files.AddRange(Directory.GetFiles(ModuleListPanel.PersistentDataPath).
+                Where(x => Roslib.Utils.HasSuffix(x, Suffix)).
                 Select(GetFileName));
             itemList.Title = "Load Config File";
             itemList.Items = files;
@@ -48,7 +45,7 @@ namespace Iviz.App
 
         void OnItemClicked(int index, string _)
         {
-            ModuleListPanel.LoadStateConfiguration(files[index]);
+            ModuleListPanel.LoadStateConfiguration(files[index] + Suffix);
             Close();
         }
 

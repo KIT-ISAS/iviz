@@ -4,9 +4,9 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public sealed class AggregatedMeshMarker : MonoBehaviour, IDisplay, ISupportsAROcclusion, ISupportsTint
+    public sealed class AggregatedMeshMarker : MonoBehaviour, ISupportsTintAndAROcclusion
     {
-        BoxCollider Collider;
+        [SerializeField] BoxCollider Collider;
 
         public Bounds Bounds => new Bounds(Collider.center, Collider.size);
         public Bounds WorldBounds => Collider.bounds;
@@ -46,24 +46,24 @@ namespace Iviz.Displays
             set => Collider.enabled = value;
         }
 
-        [SerializeField] bool occlusionOnly_;
+        [SerializeField] bool occlusionOnly;
         public bool OcclusionOnly
         {
-            get => occlusionOnly_;
+            get => occlusionOnly;
             set
             {
-                occlusionOnly_ = value;
+                occlusionOnly = value;
                 Children.ForEach(x => x.OcclusionOnly = value);
             }
         }
 
-        [SerializeField] Color tint_ = Color.white;
+        [SerializeField] Color tint = Color.white;
         public Color Tint
         {
-            get => tint_;
+            get => tint;
             set
             {
-                tint_ = value;
+                tint = value;
                 Children.ForEach(x => x.Tint = value);
             }
         }

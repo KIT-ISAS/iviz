@@ -1,27 +1,41 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System;
-using Iviz.App.Displays;
 using Iviz.Msgs.VisualizationMsgs;
-using Iviz.Resources;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     public sealed class InteractiveMarkerObject : DisplayNode
     {
         readonly Dictionary<string, InteractiveMarkerControlObject> controls =
             new Dictionary<string, InteractiveMarkerControlObject>();
+
         readonly HashSet<string> controlsToDelete = new HashSet<string>();
         const int LifetimeInSec = 15;
 
         public string Description { get; private set; }
         public string Id { get; private set; }
-        public event Action<string, Pose, Vector3, int> Clicked;
 
-        MenuObject menuObject = null;
-        public bool HasMenu => menuObject != null;
+        public delegate void MouseEventAction(string id, in Pose pose, in Vector3 point, MouseEventType type);
+
+        public event MouseEventAction MouseEvent;
+
+        public delegate void MovedAction(string id, in Pose pose);
+
+        public event MovedAction Moved;
+
+        //MenuObject menuObject = null;
+        //public bool HasMenu => menuObject != null;
 
         public DateTime ExpirationTime { get; private set; }
+
+        GameObject controlNode;
+
+        void Awake()
+        {
+            controlNode = new GameObject("[ControlNode]");
+            controlNode.transform.parent = transform;
+        }
 
         public void Set(InteractiveMarker msg)
         {
@@ -35,7 +49,10 @@ namespace Iviz.App.Listeners
             AttachTo(msg.Header.FrameId);
 
             controlsToDelete.Clear();
-            controls.Keys.ForEach(x => controlsToDelete.Add(x));
+            foreach (string id in controls.Keys)
+            {
+                controlsToDelete.Add(id);
+            }
 
             foreach (InteractiveMarkerControl controlMsg in msg.Controls)
             {
@@ -43,20 +60,29 @@ namespace Iviz.App.Listeners
                 if (!controls.TryGetValue(id, out InteractiveMarkerControlObject control))
                 {
                     control = CreateControlObject();
-                    control.Clicked += (pose, point, button) => Clicked?.Invoke(id, pose, point, button);
-                    control.transform.SetParentLocal(transform);
+                    control.MouseEvent += (in Pose pose, in Vector3 point, MouseEventType type) =>
+                    {
+                        MouseEvent?.Invoke(id, pose, point, type);
+                    };
+                    control.Moved += (in Pose pose) => 
+                    {
+                        Moved?.Invoke(id, pose);
+                    };
+                    control.transform.SetParentLocal(controlNode.transform);
                     controls[id] = control;
+                    //Debug.Log("Creating " + id);
                 }
+
                 control.Set(controlMsg);
                 controlsToDelete.Remove(id);
             }
 
-            controlsToDelete.ForEach(x =>
+            foreach (string id in controlsToDelete)
             {
-                InteractiveMarkerControlObject control = controls[x];
+                InteractiveMarkerControlObject control = controls[id];
                 DeleteControlObject(control);
-                controls.Remove(x);
-            });
+                controls.Remove(id);
+            }
 
             UpdateExpirationTime();
             /*
@@ -80,19 +106,23 @@ namespace Iviz.App.Listeners
 
         static InteractiveMarkerControlObject CreateControlObject()
         {
-            GameObject gameObject = new GameObject();
-            gameObject.name = "InteractiveMarkerControlObject";
+            GameObject gameObject = new GameObject("InteractiveMarkerControlObject");
             return gameObject.AddComponent<InteractiveMarkerControlObject>();
         }
 
         public override void Stop()
         {
             base.Stop();
-            Clicked = null;
-            controls.Values.ForEach(DeleteControlObject);
+            foreach (var controlObject in controls.Values)
+            {
+                DeleteControlObject(controlObject);
+            }
             controls.Clear();
             controlsToDelete.Clear();
-            Clicked = null;
+            MouseEvent = null;
+            Moved = null;
+
+            Destroy(controlNode.gameObject);
 
             /*
             if (menuObject != null)

@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2484398007276227242}
   - component: {fileID: 404951896843075168}
   - component: {fileID: 8452851355193822482}
+  - component: {fileID: 5214606922459341031}
   m_Layer: 0
   m_Name: Plane
   m_TagString: Untagged
@@ -92,7 +93,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91e53ae859eaa2a449bf829338ecce5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  texture_: {fileID: 0}
-  color_: {r: 1, g: 1, b: 1, a: 1}
-  occlusionOnly_: 0
-  tint_: {r: 1, g: 1, b: 1, a: 1}
+  texture: {fileID: 0}
+  color: {r: 1, g: 1, b: 1, a: 1}
+  occlusionOnly: 0
+  tint: {r: 1, g: 1, b: 1, a: 1}
+--- !u!65 &5214606922459341031
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2206290937164603317}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 10, y: 0.001, z: 10}
+  m_Center: {x: 0, y: 0, z: 0}

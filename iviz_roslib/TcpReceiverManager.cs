@@ -5,7 +5,7 @@ using System.Linq;
 using System.Net;
 using Iviz.Msgs;
 
-namespace Iviz.RoslibSharp
+namespace Iviz.Roslib
 {
     class TcpReceiverManager
     {

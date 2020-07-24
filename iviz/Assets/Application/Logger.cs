@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using Iviz.Msgs.RosgraphMsgs;
 
-namespace Iviz.App
+namespace Iviz.Controllers
 {
     [Flags]
     public enum LogLevel
@@ -32,14 +32,6 @@ namespace Iviz.App
             File = file;
             Line = line;
         }
-
-        /*
-        public override string ToString()
-        {
-            return RoslibSharp.Utils.ToJsonString(this);
-        }
-        */
-
     }
 
     public static class Logger

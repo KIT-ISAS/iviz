@@ -1,67 +1,67 @@
 ﻿using UnityEngine;
 using System;
-using Iviz.App.Listeners;
 
-namespace Iviz.App.Displays
+namespace Iviz.Controllers
 {
     public abstract class DisplayNode : MonoBehaviour
     {
         TFFrame parent;
+
         public virtual TFFrame Parent
         {
             get => parent;
-            set
-            {
-                SetParent(value, true);
-            }
+            set => SetParent(value, true);
         }
 
         void SetParent(TFFrame newParent, bool attach)
         {
-            if (newParent != parent)
+            if (newParent == parent)
             {
-                if (parent != null)
-                {
-                    parent.RemoveListener(this);
-                }
-                parent = newParent;
-                if (parent != null)
-                {
-                    parent.AddListener(this);
-                }
-                else
-                {
-                    //Debug.LogWarning("Display: Setting parent of " + name + " to null! (ok if removing)");
-                }
+                return;
             }
+
+            parent?.RemoveListener(this);
+            parent = newParent;
+            parent?.AddListener(this);
             if (attach)
             {
-                transform.SetParentLocal(newParent?.transform);
+                transform.SetParentLocal(newParent is null ? 
+                    TFListener.RootFrame.transform : 
+                    newParent.transform);
             }
         }
 
-        public virtual void AttachTo(string parentId)
+        public void AttachTo(string parentId)
         {
-            Parent = (parentId == "") ? TFListener.BaseFrame : TFListener.GetOrCreateFrame(parentId);
+            if (Parent is null || parentId != Parent.Id)
+            {
+                Parent = string.IsNullOrEmpty(parentId) ? 
+                    TFListener.MapFrame : 
+                    TFListener.GetOrCreateFrame(parentId);
+            }
         }
 
-        public virtual void AttachTo(string parentId, in Msgs.time timestamp)
+        public void AttachTo(string parentId, in Msgs.time timestamp)
         {
             AttachTo(parentId, timestamp.ToTimeSpan());
         }
 
-        public virtual void AttachTo(string parentId, in TimeSpan timestamp)
+        public void AttachTo(string parentId, in TimeSpan timestamp)
         {
-            transform.SetParentLocal(TFListener.BaseFrame.transform);
-            if (parentId == "")
+            transform.SetParentLocal(TFListener.MapFrame.transform);
+            if (parentId.Length == 0)
             {
                 transform.SetPose(Pose.identity);
             }
             else
             {
-                TFFrame frame = TFListener.GetOrCreateFrame(parentId);
-                SetParent(frame, false);
-                transform.SetPose(frame.GetPose(timestamp));
+                if (Parent is null || parentId != Parent.Id)
+                {
+                    TFFrame frame = TFListener.GetOrCreateFrame(parentId, this);
+                    SetParent(frame, false);
+                }
+
+                transform.SetPose(Parent.GetPose(timestamp));
             }
         }
 
@@ -81,14 +81,15 @@ namespace Iviz.App.Displays
         {
             GameObject obj = new GameObject(name);
             SimpleDisplayNode node = obj.AddComponent<SimpleDisplayNode>();
-            if (transform != null)
+            if (!(transform is null))
             {
                 obj.transform.parent = transform;
             }
             else
             {
-                node.Parent = TFListener.BaseFrame;
+                node.Parent = TFListener.MapFrame;
             }
+
             return node;
         }
     }

@@ -13,12 +13,13 @@ namespace Iviz.Msgs.MeshMsgs
         /// <summary> Constructor for empty message. </summary>
         public MeshMaterialsStamped()
         {
+            Header = new StdMsgs.Header();
             Uuid = "";
             MeshMaterials = new MeshMsgs.MeshMaterials();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MeshMaterialsStamped(in StdMsgs.Header Header, string Uuid, MeshMsgs.MeshMaterials MeshMaterials)
+        public MeshMaterialsStamped(StdMsgs.Header Header, string Uuid, MeshMsgs.MeshMaterials MeshMaterials)
         {
             this.Header = Header;
             this.Uuid = Uuid;
@@ -48,6 +49,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
+            if (Header is null) throw new System.NullReferenceException();
             Header.RosValidate();
             if (Uuid is null) throw new System.NullReferenceException();
             if (MeshMaterials is null) throw new System.NullReferenceException();

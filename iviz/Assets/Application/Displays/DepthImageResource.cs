@@ -1,15 +1,11 @@
 ﻿using UnityEngine;
-using System;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using Iviz.RoslibSharp;
 using Iviz.Displays;
-using Iviz.App.Listeners;
 using Iviz.Resources;
 
 namespace Iviz.App.Displays
 {
-    public class DepthImageResource : MarkerResource
+    public sealed class DepthImageResource : MarkerResource
     {
         [SerializeField] Material material;
 
@@ -112,7 +108,7 @@ namespace Iviz.App.Displays
             };
             if (quadComputeBuffer == null)
             {
-                Debug.Log("Building quadComputeBuffer");
+                //Debug.Log("Building quadComputeBuffer");
                 quadComputeBuffer = new ComputeBuffer(4, Marshal.SizeOf<Vector2>());
                 material.SetBuffer(PropQuad, quadComputeBuffer);
             }

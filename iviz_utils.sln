@@ -18,7 +18,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_bridge_test", "iviz_br
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_bridge_client", "iviz_bridge_client\iviz_bridge_client.csproj", "{AE3DBE0F-8DAB-48CC-B21A-B4581EC2BED1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_loader", "iviz_loader\iviz_loader.csproj", "{34265C03-B3F5-43B0-85F1-95C6BCBE9437}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_model_service", "iviz_model_service\iviz_model_service.csproj", "{34265C03-B3F5-43B0-85F1-95C6BCBE9437}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_markertest", "iviz_markertest\iviz_markertest.csproj", "{FBEB2EF1-EA61-4448-831C-2015326EE8FD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_urdf", "iviz_urdf\iviz_urdf.csproj", "{A7115C73-1777-402A-AA29-CEDD974463D2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "biggustave", "biggustave\biggustave.csproj", "{D298B614-AB22-4AA1-A07E-DEB2A5CBCF3D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -62,6 +68,18 @@ Global
 		{34265C03-B3F5-43B0-85F1-95C6BCBE9437}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{34265C03-B3F5-43B0-85F1-95C6BCBE9437}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{34265C03-B3F5-43B0-85F1-95C6BCBE9437}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBEB2EF1-EA61-4448-831C-2015326EE8FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBEB2EF1-EA61-4448-831C-2015326EE8FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBEB2EF1-EA61-4448-831C-2015326EE8FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBEB2EF1-EA61-4448-831C-2015326EE8FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7115C73-1777-402A-AA29-CEDD974463D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7115C73-1777-402A-AA29-CEDD974463D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7115C73-1777-402A-AA29-CEDD974463D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7115C73-1777-402A-AA29-CEDD974463D2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D298B614-AB22-4AA1-A07E-DEB2A5CBCF3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D298B614-AB22-4AA1-A07E-DEB2A5CBCF3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D298B614-AB22-4AA1-A07E-DEB2A5CBCF3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D298B614-AB22-4AA1-A07E-DEB2A5CBCF3D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

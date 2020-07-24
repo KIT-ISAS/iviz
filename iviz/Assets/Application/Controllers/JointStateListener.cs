@@ -3,11 +3,19 @@ using System.Collections.Generic;
 using System;
 using Iviz.Msgs.SensorMsgs;
 using System.Runtime.Serialization;
-using Iviz.RoslibSharp;
+using Iviz.Roslib;
 using Iviz.Resources;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
+    public interface IJointProvider
+    {
+        string Name { get; }
+        event Action Stopped;
+        bool TryWriteJoint(string joint, float value);
+        bool AttachToTf { get; }
+    }
+    
     [DataContract]
     public sealed class JointStateConfiguration : JsonToString, IConfiguration
     {
@@ -23,9 +31,9 @@ namespace Iviz.App.Listeners
 
     public sealed class JointStateListener : ListenerController
     {
-        public override ModuleData ModuleData { get; set; }
+        public override IModuleData ModuleData { get; }
 
-        public override TFFrame Frame => TFListener.BaseFrame;
+        public override TFFrame Frame => TFListener.MapFrame;
 
         readonly JointStateConfiguration config = new JointStateConfiguration();
         public JointStateConfiguration Config
@@ -44,34 +52,28 @@ namespace Iviz.App.Listeners
         public string RobotName
         {
             get => config.RobotName;
-            set
-            {
-                config.RobotName = value;
-            }
+            set => config.RobotName = value;
         }
 
         public bool Visible
         {
             get => config.Visible;
-            set
-            {
-                config.Visible = value;
-            }
+            set => config.Visible = value;
         }
 
-        RobotController robot;
-        public RobotController Robot
+        IJointProvider robot;
+        public IJointProvider Robot
         {
             get => robot;
             set
             {
-                if (robot != null)
+                if (!(robot is null))
                 {
                     robot.Stopped -= OnRobotStopped;
                 }
                 robot = value;
                 warnNotFound.Clear();
-                if (robot != null)
+                if (!(robot is null))
                 {
                     robot.Stopped += OnRobotStopped;
                 }
@@ -81,32 +83,27 @@ namespace Iviz.App.Listeners
         public string MsgJointPrefix
         {
             get => config.MsgJointPrefix;
-            set
-            {
-                config.MsgJointPrefix = value;
-            }
+            set => config.MsgJointPrefix = value;
         }
 
         public string MsgJointSuffix
         {
             get => config.MsgJointSuffix;
-            set
-            {
-                config.MsgJointSuffix = value;
-            }
+            set => config.MsgJointSuffix = value;
         }
 
         public int MsgTrimFromEnd
         {
             get => config.MsgTrimFromEnd;
-            set
-            {
-                config.MsgTrimFromEnd = value;
-            }
+            set => config.MsgTrimFromEnd = value;
         }
 
         readonly HashSet<string> warnNotFound = new HashSet<string>();
 
+        public JointStateListener(IModuleData moduleData)
+        {
+            ModuleData = moduleData;
+        }
 
         void OnRobotStopped()
         {
@@ -115,7 +112,6 @@ namespace Iviz.App.Listeners
 
         public override void StartListening()
         {
-            base.StartListening();
             Listener = new RosListener<JointState>(config.Topic, Handler);
         }
 
@@ -128,7 +124,7 @@ namespace Iviz.App.Listeners
 
         void Handler(JointState msg)
         {
-            if (Robot == null || Robot.AttachToTF)
+            if (Robot is null || Robot.AttachToTf)
             {
                 return;
             }
@@ -146,17 +142,14 @@ namespace Iviz.App.Listeners
                     msgJoint = msgJoint.Substring(0, msgJoint.Length - MsgTrimFromEnd);
                 }
                 msgJoint = $"{MsgJointPrefix}{msgJoint}{MsgJointSuffix}";
-                if (Robot.JointWriters.TryGetValue(msgJoint, out JointInfo writer))
+                if (Robot.TryWriteJoint(msgJoint, (float) msg.Position[i]))
                 {
-                    writer.Write((float)msg.Position[i]);
+                    continue;
                 }
-                else
+                if (!warnNotFound.Contains(msgJoint))
                 {
-                    if (!warnNotFound.Contains(msgJoint))
-                    {
-                        Debug.Log("JointStateListener for " + name + ": Cannot find joint '" + msgJoint + "' (original: '" + msg.Name[i] + "')");
-                        warnNotFound.Add(msgJoint);
-                    }
+                    Debug.Log("JointStateListener for '" + config.Topic + "': Cannot find joint '" + msgJoint + "' (original: '" + msg.Name[i] + "')");
+                    warnNotFound.Add(msgJoint);
                 }
             }
         }

@@ -93,9 +93,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91e53ae859eaa2a449bf829338ecce5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  color: {r: 0, g: 1, b: 0, a: 0.2509804}
-  occlusionOnly_: 0
-  tint_: {r: 1, g: 1, b: 1, a: 1}
+  texture: {fileID: 0}
+  color: {r: 1, g: 1, b: 1, a: 1}
+  occlusionOnly: 0
+  tint: {r: 1, g: 1, b: 1, a: 1}
 --- !u!65 &967880120042637132
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -138,7 +139,7 @@ Transform:
   m_GameObject: {fileID: 5428010335786616791}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.11, y: 0.11000001, z: 0.11000001}
+  m_LocalScale: {x: 0.105, y: 0.105, z: 0.105}
   m_Children:
   - {fileID: 8747286309100493133}
   - {fileID: 5428010336399050372}
@@ -205,13 +206,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ed7f2d580d18479aa475eb45ad7c787, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  color: {r: 0, g: 1, b: 0, a: 0.2509804}
-  occlusionOnly_: 0
-  tint_: {r: 1, g: 1, b: 1, a: 1}
-  scale_: 0
-  angle_: 0
-  horizontal_: 0
-  offset_: {x: 0, y: 0, z: 0}
+  texture: {fileID: 0}
+  color: {r: 1, g: 1, b: 1, a: 1}
+  occlusionOnly: 0
+  tint: {r: 1, g: 1, b: 1, a: 1}
+  scale: 0
+  angle: 0
+  horizontal: 0
+  offset: {x: 0, y: 0, z: 0}
 --- !u!65 &5428010335786616784
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -220,7 +222,7 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5428010335786616791}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 10, y: 0.1, z: 10}
@@ -264,7 +266,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5428010336399050378}
-  m_Mesh: {fileID: -462981019419857548, guid: e5e884af6e9d7467dbf80b183417de36, type: 3}
+  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!23 &5428010336399050373
 MeshRenderer:
   m_ObjectHideFlags: 0

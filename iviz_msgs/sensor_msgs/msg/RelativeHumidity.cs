@@ -18,10 +18,11 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public RelativeHumidity()
         {
+            Header = new StdMsgs.Header();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public RelativeHumidity(in StdMsgs.Header Header, double RelativeHumidity_, double Variance)
+        public RelativeHumidity(StdMsgs.Header Header, double RelativeHumidity_, double Variance)
         {
             this.Header = Header;
             this.RelativeHumidity_ = RelativeHumidity_;
@@ -51,6 +52,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
+            if (Header is null) throw new System.NullReferenceException();
             Header.RosValidate();
         }
     

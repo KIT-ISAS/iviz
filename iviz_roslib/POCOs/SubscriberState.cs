@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace Iviz.RoslibSharp
+namespace Iviz.Roslib
 {
     public class SubscriberReceiverState
     {

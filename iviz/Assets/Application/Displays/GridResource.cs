@@ -1,13 +1,10 @@
 ﻿using UnityEngine;
 using System.Linq;
 using System.Collections.Generic;
-using System;
-using UnityEngine.EventSystems;
+using Iviz.Controllers;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json;
-using Iviz.App.Listeners;
 using Iviz.Resources;
-using Iviz.App;
 
 namespace Iviz.Displays
 {
@@ -35,79 +32,79 @@ namespace Iviz.Displays
             { GridOrientation.YZ, Quaternion.Euler(0, 90, 0) }
         };
 
-        GridOrientation orientation_;
+        GridOrientation orientation;
         public GridOrientation Orientation
         {
-            get => orientation_;
+            get => orientation;
             set
             {
-                orientation_ = value;
+                orientation = value;
                 transform.localRotation = RotationByOrientation[value];
             }
         }
 
-        Color gridColor_;
+        Color gridColor;
         public Color GridColor
         {
-            get => gridColor_;
+            get => gridColor;
             set
             {
-                gridColor_ = value;
+                gridColor = value;
                 meshRenderer.SetPropertyColor(value);
             }
         }
 
-        Color interiorColor_;
+        Color interiorColor;
         public Color InteriorColor
         {
-            get => interiorColor_;
+            get => interiorColor;
             set
             {
-                interiorColor_ = value;
+                interiorColor = value;
                 interiorRenderer.SetPropertyColor(value);
             }
         }
 
-        float gridLineWidth_;
+        float gridLineWidth;
         public float GridLineWidth
         {
-            get => gridLineWidth_;
+            get => gridLineWidth;
             set
             {
-                gridLineWidth_ = value;
+                gridLineWidth = value;
                 UpdateMesh();
             }
         }
 
-        float gridCellSize_;
+        float gridCellSize;
         public float GridCellSize
         {
-            get => gridCellSize_;
+            get => gridCellSize;
             set
             {
-                gridCellSize_ = value;
+                gridCellSize = value;
                 UpdateMesh();
             }
         }
 
-        int numberOfGridCells_;
+        int numberOfGridCells;
         public int NumberOfGridCells
         {
-            get => numberOfGridCells_;
+            get => numberOfGridCells;
             set
             {
-                numberOfGridCells_ = value;
+                numberOfGridCells = value;
                 UpdateMesh();
             }
         }
 
-        bool showInterior_;
+        bool showInterior;
         public bool ShowInterior
         {
-            get => showInterior_;
+            get => showInterior;
             set
             {
-                showInterior_ = value;
+                showInterior = value;
                 interiorObject.SetActive(value);
             }
         }
@@ -148,7 +145,10 @@ namespace Iviz.Displays
         int lastX = 0, lastZ = 0;
         void Update()
         {
-            if (!FollowCamera || TFListener.MainCamera == null) return;
+            if (!FollowCamera || TFListener.MainCamera is null)
+            {
+                return;
+            }
 
             Vector3 cameraPos = TFListener.MainCamera.transform.position;
             switch (Orientation)
@@ -156,17 +156,18 @@ namespace Iviz.Displays
                 case GridOrientation.XY:
                     int x = (int)(cameraPos.x + 0.5f);
                     int z = (int)(cameraPos.z + 0.5f);
+                    float offsetY = transform.localPosition.y;
                     if (x != lastX || z != lastZ)
                     {
-                        UpdatePosition(x, z);
+                        UpdatePosition(x, z, offsetY);
                     }
                     break;
             }
         }
 
-        void UpdatePosition(int x, int z)
+        void UpdatePosition(int x, int z, float offsetY)
         {
-            transform.localPosition = new Vector3(x, 0, z);
+            transform.localPosition = new Vector3(x, offsetY, z);
 
 
             int baseHoriz = Mathf.FloorToInt((z + 5) / 10f) * 10;

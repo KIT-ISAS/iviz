@@ -1,11 +1,6 @@
 ﻿//#define USING_VR
 
 using UnityEngine;
-using Iviz.Msgs.SensorMsgs;
-using Iviz.Msgs.Tf2Msgs;
-using Iviz.App.Listeners;
-using Iviz.Msgs.StdMsgs;
-using Iviz.Resources;
 
 #if USING_VR
 using Iviz.App.Displays;
@@ -19,7 +14,7 @@ using Valve.VR.InteractionSystem;
 namespace Iviz.App
 {
 #if !USING_VR
-    public class VRController : MonoBehaviour
+    public sealed class VRController : MonoBehaviour
     {
         public const bool UsingVR = false;
     }
@@ -27,16 +22,17 @@ namespace Iviz.App
 
 #if USING_VR
     public class VRController : MonoBehaviour
+    {
         public const bool UsingVR = true;
 
-        public GameObject LeftController;
-        public GameObject RightController;
-        public GameObject Head;
-        //public GameObject LeftCollider;
-        //public GameObject RightCollider;
-        public GameObject RightShoulderMarker;
+        public GameObject leftController;
+        public GameObject rightController;
+        public GameObject head;
+        public GameObject rightShoulderMarker;
         bool prevLeftDown;
         bool prevRightDown;
+
+        public GameObject cameraRig;
 
         public SteamVR_Input_Sources LeftInputSource = SteamVR_Input_Sources.LeftHand;
         public SteamVR_Input_Sources RightInputSource = SteamVR_Input_Sources.RightHand;
@@ -58,23 +54,30 @@ namespace Iviz.App
         public InteractiveMarkerListener interactiveMarkerListener;
 
 
+        public TFFrame LockOnto => TFListener.GetOrCreateFrame("base_link");
+        public GameObject lockOnto;
+
+        public float lockOffsetX;
+        public float lockOffsetY = -1;
+        public float lockOffsetAngle;
+
         public void Start()
         {
-            Teleport.instance.CancelTeleportHint();
+            //Teleport.instance.CancelTeleportHint();
             //LeftCollider.GetComponent<MeshRenderer>().enabled = false;
             //RightCollider.GetComponent<MeshRenderer>().enabled = false;
 
-            if (LeftController == null)
+            if (leftController == null)
             {
-                LeftController = GameObject.Find("LeftHand");
+                leftController = GameObject.Find("LeftHand");
             }
-            if (RightController == null)
+            if (rightController == null)
             {
-                RightController = GameObject.Find("RightHand");
+                rightController = GameObject.Find("RightHand");
             }
-            if (Head == null)
+            if (head == null)
             {
-                Head = GameObject.Find("VRCamera");
+                head = GameObject.Find("VRCamera");
             }
 
 
@@ -82,6 +85,7 @@ namespace Iviz.App
             rosSenderRight = new RosSender<Joy>(RightControllerTopic);
             rosSenderHead = new RosSender<Msgs.GeometryMsgs.PoseStamped>(SmhiHeadTopic);
 
+            //LockOnto = TFListener.GetOrCreateFrame("base_link");
             //ConnectionManager.Instance.Advertise<Joy>(LeftControllerTopic);
             //ConnectionManager.Instance.Advertise<Joy>(RightControllerTopic);
             //ConnectionManager.Instance.Advertise<TFMessage>(TfTopic);
@@ -122,11 +126,7 @@ namespace Iviz.App
 
             return new Joy()
             {
-                Header = new Header
-                {
-                    Stamp = RosUtils.GetRosTime(),
-                    FrameId = frameName
-                },
+                Header = RosUtils.CreateHeader(joySeq++, frameName),
                 Buttons = buttons.ToArray(),
                 Axes = new[]
                 {
@@ -144,48 +144,46 @@ namespace Iviz.App
                 {
                     new Msgs.GeometryMsgs.TransformStamped
                     {
-                        Header = RosUtils.CreateHeader(tfSeq++, TFListener.BaseFrame.Id),
+                        Header = RosUtils.CreateHeader(tfSeq++),
                         ChildFrameId = LeftFrameName,
-                        Transform = LeftController.transform.AsPose().Unity2RosTransform(),
+                        Transform = leftController.transform.AsPose().Unity2RosTransform(),
                     },
                     new Msgs.GeometryMsgs.TransformStamped
                     {
-                        Header = RosUtils.CreateHeader(tfSeq++, TFListener.BaseFrame.Id),
+                        Header = RosUtils.CreateHeader(tfSeq++),
                         ChildFrameId = RightFrameName,
-                        Transform = RightController.transform.AsPose().Unity2RosTransform()
+                        Transform = rightController.transform.AsPose().Unity2RosTransform()
                     },
                     new Msgs.GeometryMsgs.TransformStamped
                     {
-                        Header = RosUtils.CreateHeader(tfSeq++, TFListener.BaseFrame.Id),
+                        Header = RosUtils.CreateHeader(tfSeq++),
                         ChildFrameId = HeadFrameName,
-                        Transform = Head.transform.AsPose().Unity2RosTransform()
+                        Transform = head.transform.AsPose().Unity2RosTransform()
                     },
-                    /*
-                    new RosSharp.RosBridgeClient.MessageTypes.Geometry.TransformStamped
+                    new Msgs.GeometryMsgs.TransformStamped
                     {
-                        header = Utils.CreateHeader(0, TFListener.BaseFrame.Id),
-                        child_frame_id = RightShoulderMarkerName,
-                        transform = RightShoulderMarker.transform.AsPose().Unity2RosTransform()
+                        Header = RosUtils.CreateHeader(tfSeq++),
+                        ChildFrameId = RightShoulderMarkerName,
+                        Transform = rightShoulderMarker.transform.AsPose().Unity2RosTransform()
                     }
-                    */
                 }
             };
         }
 
         void CheckForSelectClick()
         {
-            Vector3 center = LeftController.transform.position;
+            Vector3 center = leftController.transform.position;
             float radius = 0.15f;
             Collider[] colliders = Physics.OverlapSphere(center, radius, 1 << Resource.ClickableLayer);
 
             Collider hitCollider = null;
 
-            List<ClickableDisplayNode> hitObjects = new List<ClickableDisplayNode>();
+            List<ClickableNode> hitObjects = new List<ClickableNode>();
             List<Collider> hitColliders = new List<Collider>();
 
             foreach (Collider c in colliders)
             {
-                ClickableDisplayNode obj = c.GetComponentInParent<ClickableDisplayNode>();
+                ClickableNode obj = c.GetComponentInParent<ClickableNode>();
                 if (obj == null)
                 {
                     continue;
@@ -194,7 +192,7 @@ namespace Iviz.App
                 hitColliders.Add(c);
             }
 
-            ClickableDisplayNode hitObject;
+            ClickableNode hitObject;
             if (!hitObjects.Any())
             {
                 hitObject = null;
@@ -279,10 +277,27 @@ namespace Iviz.App
         uint headSeq = 0;
         public void Update()
         {
+            if (!(LockOnto is null))
+            {
+                Pose lockPose = LockOnto.AbsolutePose;
+                Debug.Log(LockOnto.Pose + " -> " + LockOnto.AbsolutePose);
+                lockPose.position += lockPose.rotation * new Vector3(lockOffsetX, 0, lockOffsetY);
+                lockPose.rotation *= Quaternion.AngleAxis(lockOffsetAngle, Vector3.up);
+                //lockPose.rotation *= Quaternion.AngleAxis(lockOffsetAngle, Vector3.up);
+
+                Pose currentPose = cameraRig.transform.AsPose();
+                Pose nextPose = currentPose.Lerp(lockPose, 0.05f);
+
+                //cameraRig.transform.SetPose(nextPose);
+                cameraRig.transform.rotation = LockOnto.transform.rotation;
+                cameraRig.transform.position = LockOnto.transform.position;
+            }
+
             //frame++;
             //if ((frame % 10) == 0)
             //{
 
+            /*
             Joy leftMsg = CreateJoyMessage(LeftInputSource, LeftFrameName);
             leftMsg.Header.Seq = joySeq;
             //ConnectionManager.Instance.Publish(LeftControllerTopic, leftMsg);
@@ -292,22 +307,23 @@ namespace Iviz.App
             rightMsg.Header.Seq = joySeq;
             //ConnectionManager.Instance.Publish(RightControllerTopic, rightMsg);
             rosSenderRight.Publish(rightMsg);
+            */
 
             joySeq++;
 
             TFMessage tFMsg = CreateTfMessage();
-            TFListener.Publisher.Publish(tFMsg);
+            TFListener.Publish(tFMsg);
             //}
 
-            Msgs.GeometryMsgs.PoseStamped pose = new Msgs.GeometryMsgs.PoseStamped
+            Msgs.GeometryMsgs.PoseStamped poseMsg = new Msgs.GeometryMsgs.PoseStamped
             {
                 Header = RosUtils.CreateHeader(headSeq++, TFListener.BaseFrame.Id),
-                Pose = Head.transform.AsPose().Unity2RosPose()
+                Pose = head.transform.AsPose().Unity2RosPose()
             };
-            rosSenderHead.Publish(pose);
+            rosSenderHead.Publish(poseMsg);
 
             CheckForSelectClick();
         }
-}
+    }
 #endif
 }

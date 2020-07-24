@@ -65,7 +65,7 @@ namespace RosSharp.Urdf.Editor
         {
             string newAssetPath = EditorUtility.OpenFolderPanel(
                 "Locate package root folder",
-                Path.Combine(Path.GetDirectoryName(Application.dataPath), "Assets"),
+                Path.Combine(Path.GetDirectoryName(UnityEngine.Application.dataPath), "Assets"),
                 "");
 
             if (UrdfAssetPathHandler.IsValidAssetPath(newAssetPath))

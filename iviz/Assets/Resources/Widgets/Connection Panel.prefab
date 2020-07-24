@@ -378,7 +378,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: {fileID: 44042206}
   content: {fileID: 43897778}
-  vertical: {fileID: 142170014}
 --- !u!1 &770369516
 GameObject:
   m_ObjectHideFlags: 0
@@ -936,13 +935,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b2bb0cdc484f4a1c8ff10c3490fa842, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MasterUri: {fileID: 8479099640316283489}
-  MyUri: {fileID: 8479099639646264784}
-  MyId: {fileID: 5350341408961106179}
-  RefreshMyUri: {fileID: 5178123585947225090}
-  RefreshMyId: {fileID: 5178123584343076132}
-  Close: {fileID: 5178123584380145541}
-  LineLog: {fileID: 593846825}
+  masterUri: {fileID: 8479099640316283489}
+  myUri: {fileID: 8479099639646264784}
+  myId: {fileID: 5350341408961106179}
+  refreshMyUri: {fileID: 5178123585947225090}
+  refreshMyId: {fileID: 5178123584343076132}
+  close: {fileID: 5178123584380145541}
+  lineLog: {fileID: 593846825}
 --- !u!1 &2332931896989038287
 GameObject:
   m_ObjectHideFlags: 0

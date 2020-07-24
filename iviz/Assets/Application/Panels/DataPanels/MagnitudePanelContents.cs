@@ -5,7 +5,7 @@ namespace Iviz.App
     /// <see cref="MagnitudeModuleData"/> 
     /// </summary>
     /// 
-    public class MagnitudePanelContents : ListenerPanelContents
+    public sealed class MagnitudePanelContents : ListenerPanelContents
     {
         public FrameWidget Frame { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
@@ -32,7 +32,7 @@ namespace Iviz.App
             TrailTime = p.AddSlider("Trail Time").SetMinValue(0.5f).SetMaxValue(5.0f).SetNumberOfSteps(45);
             Color = p.AddColorPicker("Color");
             ShowVector = p.AddToggle("Enable Vector");
-            VectorScale = p.AddSlider("Vector Scale").SetMinValue(0.1f).SetMaxValue(10.0f);
+            VectorScale = p.AddSlider("Vector Scale").SetMinValue(0.01f).SetMaxValue(10.0f).SetNumberOfSteps(999);
             p.UpdateSize();
             gameObject.SetActive(false);
         }

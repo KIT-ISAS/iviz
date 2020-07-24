@@ -1,6 +1,5 @@
-﻿using Iviz.App.Listeners;
+﻿using Iviz.Controllers;
 using Iviz.Resources;
-using UnityEngine;
 
 namespace Iviz.App
 {
@@ -8,7 +7,7 @@ namespace Iviz.App
     /// <see cref="PointCloudPanelContents"/> 
     /// </summary>
 
-    public class PointCloudModuleData : ListenerModuleData
+    public sealed class PointCloudModuleData : ListenerModuleData
     {
         readonly PointCloudListener listener;
         readonly PointCloudPanelContents panel;
@@ -25,9 +24,10 @@ namespace Iviz.App
             constructor.GetConfiguration<PointCloudConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.PointCloud) as PointCloudPanelContents;
-            listener = Instantiate<PointCloudListener>();
-            listener.name = "PointCloud:" + Topic;
-            listener.ModuleData = this;
+            //listener = Instantiate<PointCloudListener>();
+            //listener.name = "PointCloud:" + Topic;
+            //listener.ModuleData = this;
+            listener = new PointCloudListener(this);
             if (constructor.Configuration == null)
             {
                 listener.Config.Topic = Topic;
@@ -37,7 +37,7 @@ namespace Iviz.App
                 listener.Config = (PointCloudConfiguration)constructor.Configuration;
             }
             listener.StartListening();
-            UpdateButtonText();
+            UpdateModuleButton();
         }
 
         public override void SetupPanel()
@@ -85,7 +85,7 @@ namespace Iviz.App
             {
                 listener.Visible = !listener.Visible;
                 panel.HideButton.State = listener.Visible;
-                UpdateButtonText();
+                UpdateModuleButton();
             };
             panel.ForceMinMax.ValueChanged += f =>
             {

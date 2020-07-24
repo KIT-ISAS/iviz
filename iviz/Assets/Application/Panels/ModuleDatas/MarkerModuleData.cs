@@ -1,6 +1,5 @@
-﻿using Iviz.App.Listeners;
+﻿using Iviz.Controllers;
 using Iviz.Resources;
-using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 namespace Iviz.App
@@ -8,7 +7,7 @@ namespace Iviz.App
     /// <summary>
     /// <see cref="MarkerPanelContents"/> 
     /// </summary>
-    public class MarkerModuleData : ListenerModuleData
+    public sealed class MarkerModuleData : ListenerModuleData
     {
         readonly MarkerListener listener;
         readonly MarkerPanelContents panel;
@@ -25,9 +24,10 @@ namespace Iviz.App
                 constructor.GetConfiguration<MarkerConfiguration>()?.Type ?? constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Marker) as MarkerPanelContents;
-            listener = Instantiate<MarkerListener>();
-            listener.name = "Marker:" + Topic;
-            listener.ModuleData = this;
+            //listener = Instantiate<MarkerListener>();
+            //listener.name = "Marker:" + Topic;
+            //listener.ModuleData = this;
+            listener = new MarkerListener(this);
             if (constructor.Configuration == null)
             {
                 listener.Config.Topic = Topic;
@@ -38,7 +38,7 @@ namespace Iviz.App
                 listener.Config = (MarkerConfiguration)constructor.Configuration;
             }
             listener.StartListening();
-            UpdateButtonText();
+            UpdateModuleButton();
         }
 
         public override void SetupPanel()
@@ -48,6 +48,7 @@ namespace Iviz.App
             panel.OcclusionOnlyMode.Value = listener.RenderAsOcclusionOnly;
             panel.Tint.Value = listener.Tint;
             panel.Alpha.Value = listener.Tint.a;
+            panel.HideButton.State = listener.Visible;
 
             panel.Tint.ValueChanged += f =>
             {
@@ -70,6 +71,12 @@ namespace Iviz.App
             {
                 DataPanelManager.HideSelectedPanel();
                 ModuleListPanel.RemoveModule(this);
+            };
+            panel.HideButton.Clicked += () =>
+            {
+                listener.Visible = !listener.Visible;
+                panel.HideButton.State = listener.Visible;
+                UpdateModuleButton();
             };
         }
 

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Iviz.RoslibSharp.XmlRpc
+namespace Iviz.Roslib.XmlRpc
 {
     class NodeClient
     {

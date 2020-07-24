@@ -31,12 +31,13 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public Image()
         {
+            Header = new StdMsgs.Header();
             Encoding = "";
             Data = System.Array.Empty<byte>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Image(in StdMsgs.Header Header, uint Height, uint Width, string Encoding, byte IsBigendian, uint Step, byte[] Data)
+        public Image(StdMsgs.Header Header, uint Height, uint Width, string Encoding, byte IsBigendian, uint Step, byte[] Data)
         {
             this.Header = Header;
             this.Height = Height;
@@ -78,6 +79,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
+            if (Header is null) throw new System.NullReferenceException();
             Header.RosValidate();
             if (Encoding is null) throw new System.NullReferenceException();
             if (Data is null) throw new System.NullReferenceException();

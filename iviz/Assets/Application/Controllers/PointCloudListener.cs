@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
-using Iviz.App.Displays;
 using Iviz.Displays;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
-using Iviz.RoslibSharp;
+using Iviz.Roslib;
 using UnityEngine;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     [DataContract]
     public class PointCloudConfiguration : JsonToString, IConfiguration
@@ -19,7 +19,7 @@ namespace Iviz.App.Listeners
         [DataMember] public Resource.Module Module => Resource.Module.PointCloud;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
-        [DataMember] public string IntensityChannel { get; set; } = "x";
+        [DataMember] public string IntensityChannel { get; set; } = "intensity";
         [DataMember] public float PointSize { get; set; } = 0.03f;
         [DataMember] public Resource.ColormapId Colormap { get; set; } = Resource.ColormapId.hsv;
         [DataMember] public bool ForceMinMax { get; set; } = false;
@@ -29,18 +29,16 @@ namespace Iviz.App.Listeners
         [DataMember] public uint MaxQueueSize { get; set; } = 1;
     }
 
-    public class PointCloudListener : ListenerController
+    public sealed class PointCloudListener : ListenerController
     {
-        DisplayNode node;
-        PointListResource pointCloud;
+        readonly DisplayNode node;
+        readonly PointListResource pointCloud;
 
-        public override ModuleData ModuleData { get; set; }
+        public override IModuleData ModuleData { get; }
 
         public Vector2 MeasuredIntensityBounds { get; private set; }
 
         public int Size { get; private set; }
-
-        public bool CalculateMinMax { get; private set; } = true;
 
         public override TFFrame Frame => node.Parent;
 
@@ -76,10 +74,7 @@ namespace Iviz.App.Listeners
         public string IntensityChannel
         {
             get => config.IntensityChannel;
-            set
-            {
-                config.IntensityChannel = value;
-            }
+            set => config.IntensityChannel = value;
         }
 
         public float PointSize
@@ -170,26 +165,29 @@ namespace Iviz.App.Listeners
         }
 
         readonly List<string> fieldNames = new List<string>() { "x", "y", "z" };
-        public IReadOnlyList<string> FieldNames => fieldNames;
+        
+        public ReadOnlyCollection<string> FieldNames { get; }
 
         PointWithColor[] pointBuffer = new PointWithColor[0];
 
-        void Awake()
+        public PointCloudListener(IModuleData moduleData)
         {
-            node = SimpleDisplayNode.Instantiate("PointCloudNode", transform);
+            ModuleData = moduleData;
+
+            FieldNames = new ReadOnlyCollection<string>(fieldNames);
+            
+            node = SimpleDisplayNode.Instantiate("[PointCloudNode]");
             pointCloud = ResourcePool.GetOrCreate<PointListResource>(Resource.Displays.PointList, node.transform);
 
             Config = new PointCloudConfiguration();
-            transform.localRotation = new Msgs.GeometryMsgs.Quaternion(0, 0, 0, 1).Ros2Unity();
+            //transform.localRotation = new Msgs.GeometryMsgs.Quaternion(0, 0, 0, 1).Ros2Unity();
         }
 
         public override void StartListening()
         {
-            base.StartListening();
             Listener = new RosListener<PointCloud2>(config.Topic, Handler);
             Listener.MaxQueueSize = (int)MaxQueueSize;
-            name = "[" + config.Topic + "]";
-            node.name = name;
+            node.name = "[" + config.Topic + "]";
         }
 
         static int FieldSizeFromType(int datatype)
@@ -213,16 +211,22 @@ namespace Iviz.App.Listeners
             }
         }
 
+        bool isProcessing;
         void Handler(PointCloud2 msg)
         {
-            node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
-            //node.AttachTo(msg.Header.FrameId);
+            if (isProcessing)
+            {
+                return;
+            }
+
+            isProcessing = true;
+            node.AttachTo(msg.Header.FrameId, msg.Header.Stamp); 
 
             if (msg.PointStep < 3 * 4 ||
                 msg.RowStep < msg.PointStep * msg.Width ||
                 msg.Data.Length < msg.RowStep * msg.Height)
             {
-                Logger.Info("PointCloudListener: Invalid point cloud dimensions!");
+                Logger.Info($"{this}: Invalid point cloud dimensions!");
                 return;
             }
 
@@ -244,7 +248,7 @@ namespace Iviz.App.Listeners
                     !fieldOffsets.TryGetValue("y", out PointField yField) || yField.Datatype != PointField.FLOAT32 ||
                     !fieldOffsets.TryGetValue("z", out PointField zField) || zField.Datatype != PointField.FLOAT32)
                 {
-                    Logger.Info("PointCloudListener: Unsupported point cloud! Expected XYZ as floats.");
+                    Logger.Info($"{this}: Unsupported point cloud! Expected XYZ as floats.");
                     return;
                 }
                 int xOffset = (int)xField.Offset;
@@ -259,7 +263,7 @@ namespace Iviz.App.Listeners
                 int iSize = FieldSizeFromType(iField.Datatype);
                 if (iSize == -1 || msg.PointStep < iOffset + iSize)
                 {
-                    Logger.Info("PointCloudListener: Invalid or unsupported intensity field type!");
+                    Logger.Info($"{this}: Invalid or unsupported intensity field type!");
                     return;
                 }
 
@@ -269,7 +273,7 @@ namespace Iviz.App.Listeners
 
                 GameThread.RunOnce(() =>
                 {
-                    if (pointCloud == null)
+                    if (pointCloud is null)
                     {
                         return;
                     }
@@ -281,6 +285,8 @@ namespace Iviz.App.Listeners
                     {
                         pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
                     }
+
+                    isProcessing = false;
                 });
             });
         }
@@ -351,23 +357,20 @@ namespace Iviz.App.Listeners
                 }
             }
 
-            if (intensityFn != null)
+            for (int v = (int)msg.Height; v > 0; v--, heightOffset += rowStep)
             {
-                for (int v = (int)msg.Height; v > 0; v--, heightOffset += rowStep)
+                int rowOffset = heightOffset;
+                for (int u = (int)msg.Width; u > 0; u--, rowOffset += pointStep, pointOffset++)
                 {
-                    int rowOffset = heightOffset;
-                    for (int u = (int)msg.Width; u > 0; u--, rowOffset += pointStep, pointOffset++)
-                    {
-                        Vector3 xyz = new Vector3(
-                            BitConverter.ToSingle(msg.Data, rowOffset + xOffset),
-                            BitConverter.ToSingle(msg.Data, rowOffset + yOffset),
-                            BitConverter.ToSingle(msg.Data, rowOffset + zOffset)
-                        );
-                        pointBuffer[pointOffset] = new PointWithColor(
-                            new Vector3(-xyz.y, xyz.z, xyz.x),
-                            intensityFn(msg.Data, rowOffset + iOffset)
-                        );
-                    }
+                    Vector3 xyz = new Vector3(
+                        BitConverter.ToSingle(msg.Data, rowOffset + xOffset),
+                        BitConverter.ToSingle(msg.Data, rowOffset + yOffset),
+                        BitConverter.ToSingle(msg.Data, rowOffset + zOffset)
+                    );
+                    pointBuffer[pointOffset] = new PointWithColor(
+                        new Vector3(-xyz.y, xyz.z, xyz.x),
+                        intensityFn(msg.Data, rowOffset + iOffset)
+                    );
                 }
             }
         }
@@ -461,10 +464,9 @@ namespace Iviz.App.Listeners
             base.Stop();
 
             ResourcePool.Dispose(Resource.Displays.PointList, pointCloud.gameObject);
-            pointCloud = null;
 
             node.Stop();
-            Destroy(node.gameObject);
+            UnityEngine.Object.Destroy(node.gameObject);
         }
     }
 }

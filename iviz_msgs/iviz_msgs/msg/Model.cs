@@ -6,32 +6,40 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class Model : IMessage
     {
         [DataMember (Name = "name")] public string Name { get; set; }
-        [DataMember (Name = "bounds")] public BoundingBox Bounds { get; set; }
+        [DataMember (Name = "filename")] public string Filename { get; set; }
+        [DataMember (Name = "orientation_hint")] public string OrientationHint { get; set; }
         [DataMember (Name = "meshes")] public Mesh[] Meshes { get; set; }
         [DataMember (Name = "materials")] public Material[] Materials { get; set; }
+        [DataMember (Name = "nodes")] public Node[] Nodes { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Model()
         {
             Name = "";
+            Filename = "";
+            OrientationHint = "";
             Meshes = System.Array.Empty<Mesh>();
             Materials = System.Array.Empty<Material>();
+            Nodes = System.Array.Empty<Node>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Model(string Name, in BoundingBox Bounds, Mesh[] Meshes, Material[] Materials)
+        public Model(string Name, string Filename, string OrientationHint, Mesh[] Meshes, Material[] Materials, Node[] Nodes)
         {
             this.Name = Name;
-            this.Bounds = Bounds;
+            this.Filename = Filename;
+            this.OrientationHint = OrientationHint;
             this.Meshes = Meshes;
             this.Materials = Materials;
+            this.Nodes = Nodes;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal Model(Buffer b)
         {
             Name = b.DeserializeString();
-            Bounds = new BoundingBox(b);
+            Filename = b.DeserializeString();
+            OrientationHint = b.DeserializeString();
             Meshes = b.DeserializeArray<Mesh>();
             for (int i = 0; i < this.Meshes.Length; i++)
             {
@@ -41,6 +49,11 @@ namespace Iviz.Msgs.IvizMsgs
             for (int i = 0; i < this.Materials.Length; i++)
             {
                 Materials[i] = new Material(b);
+            }
+            Nodes = b.DeserializeArray<Node>();
+            for (int i = 0; i < this.Nodes.Length; i++)
+            {
+                Nodes[i] = new Node(b);
             }
         }
         
@@ -53,14 +66,18 @@ namespace Iviz.Msgs.IvizMsgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Name);
-            Bounds.RosSerialize(b);
+            b.Serialize(Filename);
+            b.Serialize(OrientationHint);
             b.SerializeArray(Meshes, 0);
             b.SerializeArray(Materials, 0);
+            b.SerializeArray(Nodes, 0);
         }
         
         public void RosValidate()
         {
             if (Name is null) throw new System.NullReferenceException();
+            if (Filename is null) throw new System.NullReferenceException();
+            if (OrientationHint is null) throw new System.NullReferenceException();
             if (Meshes is null) throw new System.NullReferenceException();
             for (int i = 0; i < Meshes.Length; i++)
             {
@@ -73,13 +90,21 @@ namespace Iviz.Msgs.IvizMsgs
                 if (Materials[i] is null) throw new System.NullReferenceException();
                 Materials[i].RosValidate();
             }
+            if (Nodes is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Nodes.Length; i++)
+            {
+                if (Nodes[i] is null) throw new System.NullReferenceException();
+                Nodes[i].RosValidate();
+            }
         }
     
         public int RosMessageLength
         {
             get {
-                int size = 36;
+                int size = 24;
                 size += BuiltIns.UTF8.GetByteCount(Name);
+                size += BuiltIns.UTF8.GetByteCount(Filename);
+                size += BuiltIns.UTF8.GetByteCount(OrientationHint);
                 for (int i = 0; i < Meshes.Length; i++)
                 {
                     size += Meshes[i].RosMessageLength;
@@ -87,6 +112,10 @@ namespace Iviz.Msgs.IvizMsgs
                 for (int i = 0; i < Materials.Length; i++)
                 {
                     size += Materials[i].RosMessageLength;
+                }
+                for (int i = 0; i < Nodes.Length; i++)
+                {
+                    size += Nodes[i].RosMessageLength;
                 }
                 return size;
             }
@@ -98,16 +127,16 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosMessageType = "iviz_msgs/Model";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "b4ed03fcd6a7fe6eff7312eba9a19b89";
+        [Preserve] public const string RosMd5Sum = "53ee204bb5d992b0e9da1a0965685a6b";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE71TwWrDMAy9+yv8B4P2Mga7tIexQ08ru4wxnERJBLFdbCVL8/WTE7t1Yey0NBfpPRFb" +
-                "fk/y5NA00igNYmd7UzHa2VEWIffiAL79+JSaAzBSBA5VF5iYeiGe//kTh7eXJ4kDTl/aN/4ha0vUnVW0" +
-                "3UiNJgNqvKmc88o5r0x5ZVq/9SCf8H9L/A4lWbdlTQdwhCXklLFOB5EXZsMMwbi31vGPe9tZx0wZohdH" +
-                "tsM0HTBTq3BKj2Z56eLUq6lgXP/JsfeL0Fdnrk7cQfko2K9trH757Mys/6NMsYmxiFGt30aaiDQJKiVF" +
-                "Sso7rEAcv5s1mAWSShcIhiKqsK57n2qg0XscQBxhpN5BKkd4B/HiRVGpb6yoTaAFbFq6qHk6LZ7y5lWK" +
-                "2Ngf3qy8mFUFAAA=";
+                "H4sIAAAAAAAAE71UTU/DMAy951dE4gcgNoQQiNMOaIdxYeIyoSlr3daoTarY28p+PU6bdEziyNrL84dU" +
+                "Pz87JvZoS21NA4oGu8AafvvOI1g2jM5uK7SsVkDV5lM3AkBqZRg8mjpEoknqzeUgAStASr3886dW769P" +
+                "Gg942jZU0m0glNj2zD8gY+fnwuAAnjETEueQdb4JHIfITCIM3cI5n5NauNp5iWQBSa2lG1vWoZXChL/s" +
+                "pf/5bGx0aXPort9f5K6K2plQvhut79E6TUVj9ieNqxfvJ9Pr/6gTlhF3Ec31aaSNSJtgkrFLRjbBvsf1" +
+                "u9j5XiBtml14rdHLsSj2lHLQIBEeQK2h472HlI7uBOLFQpF2a7h6TrIdMecqORVgWfEobdsOA5ZnmBue" +
+                "YMrhfF2IOxBpjQ/aivweu3vN3lgq5JoM6fNJnGIBAoP0/jZ3D1Jb32jvjnKbvmTWSv0AJAnW9NoFAAA=";
                 
     }
 }

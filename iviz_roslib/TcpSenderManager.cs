@@ -6,7 +6,7 @@ using System.Net;
 using System.Threading;
 using Iviz.Msgs;
 
-namespace Iviz.RoslibSharp
+namespace Iviz.Roslib
 {
     class TcpSenderManager
     {

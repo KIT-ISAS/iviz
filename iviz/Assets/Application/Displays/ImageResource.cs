@@ -1,5 +1,4 @@
-﻿using Iviz.App.Displays;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Iviz.Displays
 {

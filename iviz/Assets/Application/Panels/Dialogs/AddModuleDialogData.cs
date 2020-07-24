@@ -5,24 +5,25 @@ using Iviz.Resources;
 
 namespace Iviz.App
 {
-    public class AddModuleDialogData : DialogData
+    public sealed class AddModuleDialogData : DialogData
     {
         static readonly List<Tuple<string, Resource.Module>> Modules = new List<Tuple<string, Resource.Module>>()
         {
             Tuple.Create("<b>Robot</b>\nA robot object", Resource.Module.Robot),
+            Tuple.Create("<b>Robot (New)</b>\nA robot object", Resource.Module.SimpleRobot),
             Tuple.Create("<b>Grid</b>\nA reference plane", Resource.Module.Grid),
             Tuple.Create("<b>DepthProjector</b>\nPoint cloud generator for depth images", Resource.Module.DepthImageProjector),
             Tuple.Create("<b>AR</b>\nManager for augmented reality", Resource.Module.AR),
             Tuple.Create("<b>Joystick</b>\nOn-screen joystick", Resource.Module.Joystick),
         };
 
-        DialogItemList itemList;
+        ItemListDialogContents itemList;
         public override IDialogPanelContents Panel => itemList;
 
-        public override void Initialize(DisplayListPanel panel)
+        public override void Initialize(ModuleListPanel panel)
         {
             base.Initialize(panel);
-            itemList = (DialogItemList)DialogPanelManager.GetPanelByType(DialogPanelType.ItemList);
+            itemList = (ItemListDialogContents)DialogPanelManager.GetPanelByType(DialogPanelType.ItemList);
         }
 
         public override void SetupPanel()
@@ -46,13 +47,21 @@ namespace Iviz.App
 
         void OnItemClicked(int index, string _)
         {
-            ModuleListPanel.CreateModule(Modules[index].Item2);
+            var moduleData = ModuleListPanel.CreateModule(Modules[index].Item2);
             Close();
+            moduleData.ShowPanel();
         }
 
         void Close()
         {
             DialogPanelManager.HidePanelFor(this);
+        }
+
+        public override void CleanupPanel()
+        {
+            base.CleanupPanel();
+            itemList[3].Interactable = true;
+            itemList[4].Interactable = true;
         }
 
     }

@@ -1,4 +1,4 @@
-Shader "iviz/TransparentLine"
+Shader "iviz/Line"
 {
 	Properties
 	{
@@ -7,14 +7,15 @@ Shader "iviz/TransparentLine"
 	SubShader
 	{
 		Cull Off
-		Tags { "RenderType"="Opaque"}
+		Tags { "RenderType"="Opaque" "LightMode"="ForwardBase"}
 
 		Pass
 		{
 
 			CGPROGRAM
 			#include "UnityCG.cginc"
-
+            #include "UnityLightingCommon.cginc"
+            
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma multi_compile _ USE_TEXTURE
@@ -28,19 +29,21 @@ Shader "iviz/TransparentLine"
 			float4x4 _WorldToLocal;
 			float4 _Front;
 			float4 _Tint;
+			
+			float _Scale;
 
 			struct Line {
 				float3 A;
 #if USE_TEXTURE
 				float intensityA;
 #else
-				int colorA;
+				uint colorA;
 #endif
 				float3 B;
 #if USE_TEXTURE
 				float intensityB;
 #else
-				int colorB;
+				uint colorB;
 #endif
 			};
 
@@ -51,7 +54,7 @@ Shader "iviz/TransparentLine"
 			struct v2f
 			{
 				float4 position : SV_POSITION;
-				half3 color : COLOR;
+				half4 color : COLOR;
 			};
 
 			v2f vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
@@ -59,7 +62,7 @@ Shader "iviz/TransparentLine"
 				unity_ObjectToWorld = _LocalToWorld;
 				unity_WorldToObject = _WorldToLocal;
 
-				float3 V = _Quad[id];
+				float3 V = _Quad[id] * _Scale;
 				float3 A = _Lines[inst].A;
 				float3 B = _Lines[inst].B;
 				float3 BA = B - A;
@@ -80,27 +83,33 @@ Shader "iviz/TransparentLine"
 				float intensityB = _Lines[inst].intensityB;
 				half4 rgbaB = tex2Dlod(_IntensityTexture, float4(intensityB * _IntensityCoeff + _IntensityAdd, 0, 0, 0));
     #else
-				int cA = _Lines[inst].colorA;
-				half3 rgbaA = half3(
+				uint cA = _Lines[inst].colorA;
+				half4 rgbaA = half4(
 					(cA >>  0) & 0xff,
 					(cA >>  8) & 0xff,
-					(cA >> 16) & 0xff
+					(cA >> 16) & 0xff,
+					255
 					) / 255.0;
-				int cB = _Lines[inst].colorB;
-				half3 rgbaB = half3(
+				uint cB = _Lines[inst].colorB;
+				half4 rgbaB = half4(
 					(cB >>  0) & 0xff,
 					(cB >>  8) & 0xff,
-					(cB >> 16) & 0xff
+					(cB >> 16) & 0xff,
+					255
 					) / 255.0;
 	#endif
-				o.color = (rgbaB - rgbaA) * V.z + rgbaA;
-				o.color *= _Tint;
+				half4 diffuse = (rgbaB - rgbaA) * V.z + rgbaA;
+				diffuse *= _Tint;
+				
+				//float3 normal = normalize(cross(up, right));
+                o.color = diffuse;				
+			    //o.color.rgb += 0.5f * ShadeSH9(half4(normal, 1));
 				return o;
 			}
 
 			half4 frag(v2f i) : SV_Target
 			{
-				return half4(i.color, 1);
+				return i.color;
 			}
 
 			ENDCG

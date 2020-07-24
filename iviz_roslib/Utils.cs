@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Iviz.Msgs;
 using Newtonsoft.Json;
 
-namespace Iviz.RoslibSharp
+namespace Iviz.Roslib
 {
     public abstract class JsonToString
     {

@@ -21,7 +21,7 @@ MonoBehaviour:
     m_SerializedTextureGuid:
       m_GuidLow: 9569264402462020637
       m_GuidHigh: 7024249787912354314
-    m_Size: {x: 0.198, y: 0.198}
+    m_Size: {x: 0.105, y: 0.105}
     m_SpecifySize: 1
     m_Name: marker
     m_Texture: {fileID: 0}

@@ -40,7 +40,7 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8497843833201729871}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
@@ -57,3 +57,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f1a5766e4eb5494b810ab9c05093707, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  material: {fileID: 0}
+  useIntensityTexture: 0
+  colormap: 0
+  intensityBounds: {x: 0, y: 0}
+  flipMinMax: 0
+  tint: {r: 0, g: 0, b: 0, a: 0}
+  perVertexScale_: 0
+  size_: 0
+  scale_: {x: 0, y: 0, z: 0}
+  offset_: {x: 0, y: 0, z: 0}
+  occlussionOnly_: 0

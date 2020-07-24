@@ -7,10 +7,10 @@ namespace Iviz.Displays
     {
         public static unsafe float WhiteAsIntensity()
         {
-            Color white = UnityEngine.Color.white;
-            return *(float*)&white;
+            Color32 tmp = UnityEngine.Color.white;
+            return *(float*)&tmp;
         }
-        static readonly float white = WhiteAsIntensity();
+        static readonly float White = WhiteAsIntensity();
 
         readonly float4 f;
 
@@ -48,7 +48,7 @@ namespace Iviz.Displays
             f.x = position.x;
             f.y = position.y;
             f.z = position.z;
-            f.w = white;
+            f.w = White;
         }
 
         public PointWithColor(in Vector3 position, float intensity)
@@ -72,7 +72,7 @@ namespace Iviz.Displays
             f.x = x;
             f.y = y;
             f.z = z;
-            f.w = white;
+            f.w = White;
         }
 
         public PointWithColor(in float4 f)

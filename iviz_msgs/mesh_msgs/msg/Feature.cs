@@ -25,11 +25,7 @@ namespace Iviz.Msgs.MeshMsgs
         internal Feature(Buffer b)
         {
             Location = new GeometryMsgs.Point(b);
-            Descriptor = b.DeserializeArray<StdMsgs.Float32>();
-            for (int i = 0; i < this.Descriptor.Length; i++)
-            {
-                Descriptor[i] = new StdMsgs.Float32(b);
-            }
+            Descriptor = b.DeserializeStructArray<StdMsgs.Float32>();
         }
         
         public ISerializable RosDeserialize(Buffer b)
@@ -41,17 +37,12 @@ namespace Iviz.Msgs.MeshMsgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             Location.RosSerialize(b);
-            b.SerializeArray(Descriptor, 0);
+            b.SerializeStructArray(Descriptor, 0);
         }
         
         public void RosValidate()
         {
             if (Descriptor is null) throw new System.NullReferenceException();
-            for (int i = 0; i < Descriptor.Length; i++)
-            {
-                if (Descriptor[i] is null) throw new System.NullReferenceException();
-                Descriptor[i].RosValidate();
-            }
         }
     
         public int RosMessageLength

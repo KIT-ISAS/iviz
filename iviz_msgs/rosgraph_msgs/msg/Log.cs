@@ -28,6 +28,7 @@ namespace Iviz.Msgs.RosgraphMsgs
         /// <summary> Constructor for empty message. </summary>
         public Log()
         {
+            Header = new StdMsgs.Header();
             Name = "";
             Msg = "";
             File = "";
@@ -36,7 +37,7 @@ namespace Iviz.Msgs.RosgraphMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Log(in StdMsgs.Header Header, byte Level, string Name, string Msg, string File, string Function, uint Line, string[] Topics)
+        public Log(StdMsgs.Header Header, byte Level, string Name, string Msg, string File, string Function, uint Line, string[] Topics)
         {
             this.Header = Header;
             this.Level = Level;
@@ -81,6 +82,7 @@ namespace Iviz.Msgs.RosgraphMsgs
         
         public void RosValidate()
         {
+            if (Header is null) throw new System.NullReferenceException();
             Header.RosValidate();
             if (Name is null) throw new System.NullReferenceException();
             if (Msg is null) throw new System.NullReferenceException();

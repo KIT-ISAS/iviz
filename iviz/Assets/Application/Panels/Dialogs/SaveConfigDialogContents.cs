@@ -1,11 +1,15 @@
 ﻿
+using UnityEngine;
 
 namespace Iviz.App
 {
-    public sealed class SaveConfigDialogContents : DialogItemList
+    public sealed class SaveConfigDialogContents : ItemListDialogContents
     {
-        public InputFieldWidget input;
-        public TrashButtonWidget saveButton;
+        [SerializeField] InputFieldWidget input = null;
+        [SerializeField] TrashButtonWidget saveButton = null;
+
+        public InputFieldWidget Input => input;
+        public TrashButtonWidget SaveButton => saveButton;
 
         public override void ClearSubscribers()
         {

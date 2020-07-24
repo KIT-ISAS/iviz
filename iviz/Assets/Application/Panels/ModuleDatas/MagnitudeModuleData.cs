@@ -1,4 +1,4 @@
-﻿using Iviz.App.Listeners;
+﻿using Iviz.Controllers;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Resources;
 using UnityEngine;
@@ -9,7 +9,7 @@ namespace Iviz.App
     /// <see cref="MagnitudePanelContents"/> 
     /// </summary>
 
-    public class MagnitudeModuleData : ListenerModuleData
+    public sealed class MagnitudeModuleData : ListenerModuleData
     {
         readonly MagnitudeListener listener;
         readonly MagnitudePanelContents panel;
@@ -28,8 +28,9 @@ namespace Iviz.App
             GameObject listenerObject = new GameObject("Magnitude:" + Topic);
 
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Magnitude) as MagnitudePanelContents;
-            listener = listenerObject.AddComponent<MagnitudeListener>();
-            listener.ModuleData = this;
+            //listener = listenerObject.AddComponent<MagnitudeListener>();
+            //listener.ModuleData = this;
+            listener = new MagnitudeListener(this);
             if (constructor.Configuration == null)
             {
                 listener.Config.Topic = Topic;
@@ -40,7 +41,7 @@ namespace Iviz.App
                 listener.Config = (MagnitudeConfiguration)constructor.Configuration;
             }
             listener.StartListening();
-            UpdateButtonText();
+            UpdateModuleButton();
         }
 
         public override void SetupPanel()
@@ -53,6 +54,7 @@ namespace Iviz.App
             panel.TrailTime.Value = listener.TrailTime;
             panel.Scale.Value = listener.Scale;
             panel.VectorScale.Value = listener.VectorScale;
+            panel.HideButton.State = listener.Visible;
 
             panel.ShowTrail.ValueChanged += f =>
             {
@@ -107,7 +109,7 @@ namespace Iviz.App
             {
                 listener.Visible = !listener.Visible;
                 panel.HideButton.State = listener.Visible;
-                UpdateButtonText();
+                UpdateModuleButton();
             };
         }
 

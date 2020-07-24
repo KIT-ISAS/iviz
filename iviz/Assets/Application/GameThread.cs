@@ -1,9 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System;
-using System.Linq;
 
-namespace Iviz.App
+namespace Iviz.Displays
 {
     public class GameThread : MonoBehaviour
     {
@@ -12,29 +11,41 @@ namespace Iviz.App
         float lastRunTime;
 
         public static event Action EveryFrame;
+        public static event Action LateEveryFrame;
         public static event Action EverySecond;
-
-        static GameThread Instance;
-
-        void Awake()
+        public static event Action LateEverySecond;
+        
+        static GameThread mInstance;
+        static GameThread Instance
         {
-            Instance = this;
-            lastRunTime = Time.time;
+            get
+            {
+                if (!(mInstance is null))
+                {
+                    return mInstance;
+                }
+
+                mInstance = new GameObject("GameThread").AddComponent<GameThread>();
+                mInstance.lastRunTime = Time.time;
+                return mInstance;
+            }
         }
 
         void OnDestroy()
         {
-            Instance = null;
+            mInstance = null;
         }
 
         public static void RunOnce(Action action)
         {
-            if (Instance != null)
+            if (Instance is null)
             {
-                lock (Instance.actionsOnlyOnce)
-                {
-                    Instance.actionsOnlyOnce.Add(action);
-                }
+                return;
+            }
+
+            lock (Instance.actionsOnlyOnce)
+            {
+                Instance.actionsOnlyOnce.Add(action);
             }
         }
 
@@ -47,6 +58,7 @@ namespace Iviz.App
             if (newRunTime - lastRunTime > 1)
             {
                 EverySecond?.Invoke();
+                LateEverySecond?.Invoke();
                 lastRunTime = newRunTime;
             }
 
@@ -58,6 +70,11 @@ namespace Iviz.App
                 actionsOnlyOnce.Clear();
             }
             actionsOnlyOnceTmp.ForEach(x => x());
+        }
+        
+        void LateUpdate()
+        {
+            LateEveryFrame?.Invoke();
         }
 
     }

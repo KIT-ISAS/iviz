@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using Iviz.App.Displays;
+using Iviz.Displays;
 using Iviz.Msgs.VisualizationMsgs;
 using UnityEngine;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     public class MenuObject : MonoBehaviour
     {
@@ -45,7 +45,7 @@ namespace Iviz.App.Listeners
         public void Cleanup()
         {
             children.ForEach(x => x.Cleanup());
-            children.ForEach(Destroy);
+            children.ForEach(x => Destroy(x.gameObject));
             children.Clear();
         }
     }

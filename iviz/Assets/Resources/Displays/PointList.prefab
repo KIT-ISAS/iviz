@@ -44,6 +44,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72ae0e33511a882469b8cc58677cf424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  material: {fileID: 0}
+  useIntensityTexture: 0
+  colormap: 0
+  intensityBounds: {x: 0, y: 0}
+  flipMinMax: 0
+  tint: {r: 0, g: 0, b: 0, a: 0}
+  size_: 0
+  scale_: {x: 0, y: 0}
 --- !u!65 &6472923824794949482
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -52,7 +60,7 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6472923824794949481}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}

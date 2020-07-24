@@ -3,33 +3,38 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(DynamicJoystick))]
-public class DynamicJoystickEditor : JoystickEditor
+namespace External
 {
-    private SerializedProperty moveThreshold;
-
-    protected override void OnEnable()
+    [CustomEditor(typeof(DynamicJoystick))]
+    public class DynamicJoystickEditor : JoystickEditor
     {
-        base.OnEnable();
-        moveThreshold = serializedObject.FindProperty("moveThreshold");
-    }
+        private SerializedProperty moveThreshold;
 
-    public override void OnInspectorGUI()
-    {
-        base.OnInspectorGUI();
-
-        if (background != null)
+        protected override void OnEnable()
         {
-            RectTransform backgroundRect = (RectTransform)background.objectReferenceValue;
-            backgroundRect.anchorMax = Vector2.zero;
-            backgroundRect.anchorMin = Vector2.zero;
-            backgroundRect.pivot = center;
+            base.OnEnable();
+            moveThreshold = serializedObject.FindProperty("moveThreshold");
         }
-    }
 
-    protected override void DrawValues()
-    {
-        base.DrawValues();
-        EditorGUILayout.PropertyField(moveThreshold, new GUIContent("Move Threshold", "The distance away from the center input has to be before the joystick begins to move."));
+        public override void OnInspectorGUI()
+        {
+            base.OnInspectorGUI();
+
+            if (background != null)
+            {
+                RectTransform backgroundRect = (RectTransform) background.objectReferenceValue;
+                backgroundRect.anchorMax = Vector2.zero;
+                backgroundRect.anchorMin = Vector2.zero;
+                backgroundRect.pivot = center;
+            }
+        }
+
+        protected override void DrawValues()
+        {
+            base.DrawValues();
+            EditorGUILayout.PropertyField(moveThreshold,
+                new GUIContent("Move Threshold",
+                    "The distance away from the center input has to be before the joystick begins to move."));
+        }
     }
 }

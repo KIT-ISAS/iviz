@@ -1,24 +1,24 @@
 ﻿using System;
-using Iviz.App.Listeners;
+using Iviz.App;
+using Iviz.Controllers;
 using Iviz.Resources;
-using UnityEngine;
 
 namespace Iviz.App
 {
-    public abstract class ModuleData
+    public abstract class ModuleData : IModuleData
     {
-        protected const int MaxTextRowLength = 200;
-        protected DisplayListPanel ModuleListPanel { get; }
+        protected ModuleListPanel ModuleListPanel { get; }
         protected DataPanelManager DataPanelManager => ModuleListPanel.DataPanelManager;
 
-        string buttonText_;
+        string buttonText;
+
         public string ButtonText
         {
-            get => buttonText_;
+            get => buttonText;
             protected set
             {
-                buttonText_ = value;
-                ModuleListPanel.SetDisplayDataCaption(this, buttonText_);
+                buttonText = value;
+                ModuleListPanel.UpdateModuleButton(this, buttonText);
             }
         }
 
@@ -28,47 +28,67 @@ namespace Iviz.App
         public abstract DataPanelContents Panel { get; }
         public abstract IController Controller { get; }
         public abstract IConfiguration Configuration { get; }
-        protected virtual bool Visible => Configuration?.Visible ?? true;
+        bool Visible => Configuration?.Visible ?? true;
+        bool IsSelected => DataPanelManager.SelectedModuleData == this;
 
-        protected ModuleData(DisplayListPanel displayList, string topic, string type)
+        protected ModuleData(ModuleListPanel moduleList, string topic, string type)
         {
-            ModuleListPanel = displayList;
+            ModuleListPanel = moduleList;
             Topic = topic;
             Type = type;
         }
 
-        protected virtual void UpdateButtonText()
+        protected virtual void UpdateModuleButton()
         {
             string text;
             if (!string.IsNullOrEmpty(Topic))
             {
-                string topicShort = Resource.Font.Split(Topic, DisplayListPanel.DisplayDataCaptionWidth);
-                text = $"{topicShort}\n<b>{Module}</b>";
+                string topicShort = Resource.Font.Split(Topic, ModuleListPanel.ModuleDataCaptionWidth);
+                string typeShort = string.IsNullOrEmpty(Type)
+                    ? Module.ToString()
+                    : Resource.Font.Split(Type, ModuleListPanel.ModuleDataCaptionWidth);
+                text = $"{topicShort}\n<b>{typeShort}</b>";
             }
             else
             {
                 text = $"<b>{Module}</b>";
             }
+
             if (!Visible)
             {
                 text = $"<color=grey>{text}</color>";
             }
+
             ButtonText = text;
         }
 
         public abstract void SetupPanel();
 
-        public virtual void CleanupPanel() { }
+        public void ResetPanel()
+        {
+            if (!IsSelected)
+            {
+                return;
+            }
+            Panel.ClearSubscribers();
+            SetupPanel();
+        }
+        
+        public virtual void CleanupPanel()
+        {
+        }
 
-        public virtual void UpdatePanel() { }
+        public virtual void UpdatePanel()
+        {
+        }
 
-        public void ToggleSelect()
+        public void ToggleShowPanel()
         {
             DataPanelManager.TogglePanel(this);
             ModuleListPanel.AllGuiVisible = true;
         }
 
-        public void Select()
+        public void ShowPanel()
         {
             DataPanelManager.SelectPanelFor(this);
             ModuleListPanel.AllGuiVisible = true;
@@ -76,23 +96,20 @@ namespace Iviz.App
 
         public abstract void AddToState(StateConfiguration config);
 
+        public virtual void OnARModeChanged(bool value)
+        {
+        }
+
         public virtual void Stop()
         {
             DataPanelManager.HidePanelFor(this);
         }
 
-        protected T Instantiate<T>(Transform parent = null) where T : MonoBehaviour
+        public void ResetController()
         {
-            if (!typeof(IController).IsAssignableFrom(typeof(T)))
-            {
-                throw new ArgumentException(nameof(T));
-            }
-            GameObject gameObject = new GameObject();
-            gameObject.transform.parent = parent ?? TFListener.ListenersFrame?.gameObject.transform;
-            gameObject.name = typeof(T).Name;
-            return gameObject.AddComponent<T>();
+            Controller.Reset();
         }
-
+        
         public static ModuleData CreateFromResource(ModuleDataConstructor c)
         {
             switch (c.Module)
@@ -102,6 +119,7 @@ namespace Iviz.App
                 case Resource.Module.Grid: return new GridModuleData(c);
                 case Resource.Module.Image: return new ImageModuleData(c);
                 case Resource.Module.Robot: return new RobotModuleData(c);
+                case Resource.Module.SimpleRobot: return new SimpleRobotModuleData(c);
                 case Resource.Module.Marker: return new MarkerModuleData(c);
                 case Resource.Module.InteractiveMarker: return new InteractiveMarkerModuleData(c);
                 case Resource.Module.JointState: return new JointStateModuleData(c);
@@ -112,7 +130,8 @@ namespace Iviz.App
                 case Resource.Module.OccupancyGrid: return new OccupancyGridModuleData(c);
                 case Resource.Module.Joystick: return new JoystickModuleData(c);
                 case Resource.Module.Path: return new PathModuleData(c);
-                default: throw new ArgumentException(nameof(c));
+                case Resource.Module.GridMap: return new GridMapModuleData(c);
+                default: throw new ArgumentException("Failed to find a module of the given type: " + c.Module);
             }
         }
     }

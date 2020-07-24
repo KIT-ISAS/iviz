@@ -1,17 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
-using Iviz.App.Displays;
 using Iviz.Displays;
 using Iviz.Msgs.NavMsgs;
-using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
-using Iviz.RoslibSharp;
+using Iviz.Roslib;
 using UnityEngine;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     [DataContract]
     public sealed class OccupancyGridConfiguration : JsonToString, IConfiguration
@@ -21,8 +17,8 @@ namespace Iviz.App.Listeners
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public Resource.ColormapId Colormap { get; set; } = Resource.ColormapId.gray;
-        [DataMember] public bool FlipColors { get; set; } = true;
-        [DataMember] public float ScaleZ { get; set; } = 1.0f;
+        [DataMember] public bool FlipMinMax { get; set; } = true;
+        [DataMember] public float ScaleZ { get; set; } = 0.5f;
         [DataMember] public bool RenderAsOcclusionOnly { get; set; } = false;
         [DataMember] public SerializableColor Tint { get; set; } = Color.white;
         [DataMember] public uint MaxQueueSize { get; set; } = 1;
@@ -30,14 +26,16 @@ namespace Iviz.App.Listeners
 
     public sealed class OccupancyGridListener : ListenerController
     {
-        DisplayClickableNode node;
-        OccupancyGridResource[] grid;
+        readonly DisplayClickableNode node;
+        readonly OccupancyGridResource[] grids;
+        float lastCellSize;
 
-        public override ModuleData ModuleData { get; set; }
+        public override IModuleData ModuleData { get; }
 
         public override TFFrame Frame => node.Parent;
 
         readonly OccupancyGridConfiguration config = new OccupancyGridConfiguration();
+
         public OccupancyGridConfiguration Config
         {
             get => config;
@@ -46,10 +44,11 @@ namespace Iviz.App.Listeners
                 config.Topic = value.Topic;
                 Visible = value.Visible;
                 Colormap = value.Colormap;
-                FlipColors = value.FlipColors;
-                MaxQueueSize = value.MaxQueueSize;
-                Tint = value.Tint;
+                FlipMinMax = value.FlipMinMax;
+                ScaleZ = config.ScaleZ;
                 RenderAsOcclusionOnly = value.RenderAsOcclusionOnly;
+                Tint = value.Tint;
+                MaxQueueSize = value.MaxQueueSize;
             }
         }
 
@@ -59,9 +58,9 @@ namespace Iviz.App.Listeners
             set
             {
                 config.Visible = value;
-                for (int i = 0; i < grid.Length; i++)
+                foreach (var grid in grids)
                 {
-                    grid[i].Visible = value;
+                    grid.Visible = value;
                 }
             }
         }
@@ -72,22 +71,22 @@ namespace Iviz.App.Listeners
             set
             {
                 config.Colormap = value;
-                for (int i = 0; i < grid.Length; i++)
+                foreach (var grid in grids)
                 {
-                    grid[i].Colormap = value;
+                    grid.Colormap = value;
                 }
             }
         }
 
-        public bool FlipColors
+        public bool FlipMinMax
         {
-            get => config.FlipColors;
+            get => config.FlipMinMax;
             set
             {
-                config.FlipColors = value;
-                for (int i = 0; i < grid.Length; i++)
+                config.FlipMinMax = value;
+                foreach (var grid in grids)
                 {
-                    grid[i].IntensityBounds = value ? new Vector2(1, 0) : new Vector2(0, 1);
+                    grid.FlipMinMax = value;
                 }
             }
         }
@@ -98,7 +97,9 @@ namespace Iviz.App.Listeners
             set
             {
                 config.ScaleZ = value;
-                node.transform.localScale = new Vector3(1, value, 1);
+
+                float yScale = Mathf.Approximately(lastCellSize, 0) ? 1 : value / lastCellSize;
+                node.transform.localScale = new Vector3(1, yScale, 1);
             }
         }
 
@@ -110,7 +111,7 @@ namespace Iviz.App.Listeners
                 config.MaxQueueSize = value;
                 if (Listener != null)
                 {
-                    Listener.MaxQueueSize = (int)value;
+                    Listener.MaxQueueSize = (int) value;
                 }
             }
         }
@@ -121,9 +122,9 @@ namespace Iviz.App.Listeners
             set
             {
                 config.RenderAsOcclusionOnly = value;
-                for (int i = 0; i < grid.Length; i++)
+                foreach (var grid in grids)
                 {
-                    grid[i].OcclusionOnly = value;
+                    grid.OcclusionOnly = value;
                 }
             }
         }
@@ -134,21 +135,24 @@ namespace Iviz.App.Listeners
             set
             {
                 config.Tint = value;
-                for (int i = 0; i < grid.Length; i++)
+                foreach (var grid in grids)
                 {
-                    grid[i].Tint = value;
+                    grid.Tint = value;
                 }
             }
         }
 
-        void Awake()
+        public OccupancyGridListener(IModuleData moduleData)
         {
+            ModuleData = moduleData;
+            
             node = DisplayClickableNode.Instantiate("Node");
 
-            grid = new OccupancyGridResource[16];
-            for (int i = 0; i < grid.Length; i++)
+            grids = new OccupancyGridResource[16];
+            for (int i = 0; i < grids.Length; i++)
             {
-                grid[i] = ResourcePool.GetOrCreate<OccupancyGridResource>(Resource.Displays.OccupancyGridResource, node.transform);
+                grids[i] = ResourcePool.GetOrCreate<OccupancyGridResource>(Resource.Displays.OccupancyGridResource,
+                    node.transform);
             }
 
             Config = new OccupancyGridConfiguration();
@@ -156,28 +160,35 @@ namespace Iviz.App.Listeners
 
         public override void StartListening()
         {
-            base.StartListening();
             Listener = new RosListener<OccupancyGrid>(config.Topic, Handler);
-            Listener.MaxQueueSize = (int)MaxQueueSize;
-            name = "OccupancyGrid:" + config.Topic;
+            Listener.MaxQueueSize = (int) MaxQueueSize;
+            //name = "OccupancyGrid:" + config.Topic;
             node.SetName($"[{config.Topic}]");
         }
 
         void Handler(OccupancyGrid msg)
         {
+            if (grids.Any(x => x.IsProcessing))
+            {
+                return;
+            }
+            
             if (msg.Data.Length != msg.Info.Width * msg.Info.Height)
             {
-                Logger.Debug($"OccupancyGrid: Size {msg.Info.Width}x{msg.Info.Height} but data length {msg.Data.Length}");
+                Logger.Debug(
+                    $"{this}: Size {msg.Info.Width}x{msg.Info.Height} but data length {msg.Data.Length}");
                 return;
             }
+
             if (float.IsNaN(msg.Info.Resolution))
             {
-                Logger.Debug($"OccupancyGrid: NaN in header!");
+                Logger.Debug($"{this}: NaN in header!");
                 return;
             }
+
             if (msg.Info.Origin.HasNaN())
             {
-                Logger.Debug($"OccupancyGrid: NaN in origin!");
+                Logger.Debug($"{this}: NaN in origin!");
                 return;
             }
 
@@ -185,9 +196,10 @@ namespace Iviz.App.Listeners
 
             Pose origin = msg.Info.Origin.Ros2Unity();
 
-            int numCellsX = (int)msg.Info.Width;
-            int numCellsY = (int)msg.Info.Height;
+            int numCellsX = (int) msg.Info.Width;
+            int numCellsY = (int) msg.Info.Height;
             float cellSize = msg.Info.Resolution;
+            lastCellSize = cellSize;
 
             //float totalWidth = numCellsX * cellSize;
             //float totalHeight = numCellsY * cellSize;
@@ -199,10 +211,10 @@ namespace Iviz.App.Listeners
             {
                 for (int u = 0; u < 4; u++, i++)
                 {
-                    grid[i].NumCellsX = (int)msg.Info.Width;
-                    grid[i].NumCellsY = (int)msg.Info.Height;
-                    grid[i].CellSize = msg.Info.Resolution;
-                    grid[i].transform.SetLocalPose(origin);
+                    grids[i].NumCellsX = numCellsX;
+                    grids[i].NumCellsY = numCellsY;
+                    grids[i].CellSize = cellSize;
+                    grids[i].transform.SetLocalPose(origin);
 
                     var rect = new OccupancyGridResource.Rect
                     (
@@ -211,27 +223,28 @@ namespace Iviz.App.Listeners
                         ymin: v * numCellsY / 4,
                         ymax: (v + 1) * numCellsY / 4
                     );
-                    grid[i].SetOccupancy(msg.Data, rect);
+                    grids[i].SetOccupancy(msg.Data, rect);
                 }
             }
+
+            ScaleZ = ScaleZ;
         }
 
 
         public override void Stop()
         {
             base.Stop();
-            if (grid != null)
+            if (grids != null)
             {
-                for (int i = 0; i < grid.Length; i++)
+                foreach (var grid in grids)
                 {
-                    grid[i].Stop();
-                    ResourcePool.Dispose(Resource.Displays.OccupancyGridResource, grid[i].gameObject);
+                    grid.Stop();
+                    ResourcePool.Dispose(Resource.Displays.OccupancyGridResource, grid.gameObject);
                 }
             }
+
             node.Stop();
-            Destroy(node.gameObject);
+            UnityEngine.Object.Destroy(node.gameObject);
         }
     }
 }
-
-

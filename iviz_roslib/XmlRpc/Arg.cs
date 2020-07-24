@@ -3,7 +3,7 @@
 using System;
 using System.Linq;
 
-namespace Iviz.RoslibSharp.XmlRpc
+namespace Iviz.Roslib.XmlRpc
 {
     public class Arg
     {

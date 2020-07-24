@@ -16,11 +16,12 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarkerPose()
         {
+            Header = new StdMsgs.Header();
             Name = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public InteractiveMarkerPose(in StdMsgs.Header Header, in GeometryMsgs.Pose Pose, string Name)
+        public InteractiveMarkerPose(StdMsgs.Header Header, in GeometryMsgs.Pose Pose, string Name)
         {
             this.Header = Header;
             this.Pose = Pose;
@@ -50,6 +51,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
+            if (Header is null) throw new System.NullReferenceException();
             Header.RosValidate();
             if (Name is null) throw new System.NullReferenceException();
         }

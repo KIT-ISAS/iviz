@@ -2,11 +2,11 @@
 using System;
 using Iviz.Msgs.VisualizationMsgs;
 using System.Runtime.Serialization;
-using Iviz.RoslibSharp;
+using Iviz.Roslib;
 using Iviz.Resources;
 using UnityEngine;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     [DataContract]
     public sealed class MarkerConfiguration : JsonToString, IConfiguration
@@ -20,13 +20,13 @@ namespace Iviz.App.Listeners
         [DataMember] public SerializableColor Tint { get; set; } = Color.white;
     }
 
-    public class MarkerListener : ListenerController
+    public sealed class MarkerListener : ListenerController
     {
         readonly Dictionary<string, MarkerObject> markers = new Dictionary<string, MarkerObject>();
 
-        public override ModuleData ModuleData { get; set; }
+        public override IModuleData ModuleData { get; }
 
-        public override TFFrame Frame => TFListener.BaseFrame;
+        public override TFFrame Frame => TFListener.MapFrame;
 
         readonly MarkerConfiguration config = new MarkerConfiguration();
         public MarkerConfiguration Config
@@ -38,6 +38,7 @@ namespace Iviz.App.Listeners
                 config.Type = value.Type;
                 RenderAsOcclusionOnly = value.RenderAsOcclusionOnly;
                 Tint = value.Tint;
+                Visible = value.Visible;
             }
         }
 
@@ -69,28 +70,58 @@ namespace Iviz.App.Listeners
             }
         }
 
+        public bool Visible
+        {
+            get => config.Visible;
+            set
+            {
+                config.Visible = value;
+
+                foreach (MarkerObject marker in markers.Values)
+                {
+                    marker.Visible = value;
+                }
+            }
+        }
+
+        public MarkerListener(IModuleData moduleData)
+        {
+            ModuleData = moduleData;
+        }
+
         public override void StartListening()
         {
-            base.StartListening();
-            if (config.Type == Marker.RosMessageType)
+            switch (config.Type)
             {
-                Listener = new RosListener<Marker>(config.Topic, Handler);
-            }
-            else if (config.Type == MarkerArray.RosMessageType)
-            {
-                Listener = new RosListener<MarkerArray>(config.Topic, ArrayHandler);
+                case Marker.RosMessageType:
+                    Listener = new RosListener<Marker>(config.Topic, Handler);
+                    break;
+                case MarkerArray.RosMessageType:
+                    Listener = new RosListener<MarkerArray>(config.Topic, Handler);
+                    break;
             }
         }
 
         public override void Stop()
         {
             base.Stop();
+            DestroyAllMarkers();
+        }
 
+        public override void Reset()
+        {
+            base.Reset();
+            DestroyAllMarkers();
+        }
+        
+        void DestroyAllMarkers()
+        {
             foreach (MarkerObject marker in markers.Values)
             {
                 marker.Stop();
-                Destroy(marker.gameObject);
+                UnityEngine.Object.Destroy(marker.gameObject);
             }
+
             markers.Clear();
         }
 
@@ -99,9 +130,12 @@ namespace Iviz.App.Listeners
             return $"{marker.Ns}/{marker.Id}";
         }
 
-        void ArrayHandler(MarkerArray msg)
+        void Handler(MarkerArray msg)
         {
-            msg.Markers.ForEach(Handler);
+            foreach (var marker in msg.Markers)
+            {
+                Handler(marker);
+            }
         }
 
         void Handler(Marker msg)
@@ -123,10 +157,11 @@ namespace Iviz.App.Listeners
                     if (!markers.TryGetValue(id, out MarkerObject markerToAdd))
                     {
                         markerToAdd = CreateMarkerObject();
-                        markerToAdd.DisplayData = ModuleData;
+                        markerToAdd.ModuleData = ModuleData;
                         markerToAdd.Parent = TFListener.ListenersFrame;
                         markerToAdd.OcclusionOnly = RenderAsOcclusionOnly;
                         markerToAdd.Tint = Tint;
+                        markerToAdd.Visible = Visible;
                         markers[id] = markerToAdd;
                     }
                     markerToAdd.Set(msg);
@@ -144,13 +179,12 @@ namespace Iviz.App.Listeners
         static void DeleteMarkerObject(MarkerObject markerToDelete)
         {
             markerToDelete.Stop();
-            Destroy(markerToDelete.gameObject);
+            UnityEngine.Object.Destroy(markerToDelete.gameObject);
         }
 
         static MarkerObject CreateMarkerObject()
         {
-            GameObject gameObject = new GameObject();
-            gameObject.name = "MarkerObject";
+            GameObject gameObject = new GameObject("MarkerObject");
             return gameObject.AddComponent<MarkerObject>();
         }
     }

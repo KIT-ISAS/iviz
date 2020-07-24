@@ -1,13 +1,11 @@
-﻿using System.Collections.Generic;
-using Iviz.Resources;
-using UnityEngine.UI;
+﻿using Iviz.Resources;
 
 namespace Iviz.App
 {
     /// <summary>
     /// <see cref="OccupancyGridModuleData"/> 
     /// </summary>
-    public class OccupancyGridPanelContents : ListenerPanelContents
+    public sealed class OccupancyGridPanelContents : ListenerPanelContents
     {
         public TrashButtonWidget CloseButton { get; private set; }
         public ToggleButtonWidget HideButton { get; private set; }
@@ -20,17 +18,17 @@ namespace Iviz.App
         //public SliderWidget Alpha { get; private set; }
         public ToggleWidget OcclusionOnlyMode { get; private set; }
 
-        void Start()
+        void Awake()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
-            p.AddHeadTitleWidget("OccupGrid");
+            p.AddHeadTitleWidget("Occupancy\nGrid");
             Listener = p.AddListener();
             Frame = p.AddFrame();
             Colormap = p.AddDropdown("Colormap")
                         .SetOptions(Resource.Colormaps.Names)
                         .SetIndex((int)Resource.ColormapId.gray);
             FlipColors = p.AddToggle("Flip Color Bounds");
-            ScaleZ = p.AddNumberInputField("Height Multiplier");
+            ScaleZ = p.AddNumberInputField("Height Mult.");
 
             Tint = p.AddColorPicker("Tint");
             //Alpha = p.AddSlider("Alpha").SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256);

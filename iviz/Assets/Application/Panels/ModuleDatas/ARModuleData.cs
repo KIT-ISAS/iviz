@@ -1,4 +1,5 @@
-﻿using Iviz.App.Listeners;
+﻿using System.Collections.Generic;
+using Iviz.Controllers;
 using Iviz.Resources;
 using UnityEngine;
 
@@ -7,8 +8,10 @@ namespace Iviz.App
     /// <summary>
     /// <see cref="ARPanelContents"/> 
     /// </summary>
-    public class ARModuleData : ModuleData
+    public sealed class ARModuleData : ModuleData
     {
+        const string NoneString = "(none)";
+
         readonly ARController controller;
         readonly ARPanelContents panel;
 
@@ -16,6 +19,8 @@ namespace Iviz.App
         public override DataPanelContents Panel => panel;
         public override IConfiguration Configuration => controller.Config;
         public override IController Controller => controller;
+
+        bool isDraggingControl;
 
         public ARModuleData(ModuleDataConstructor constructor) :
             base(constructor.ModuleList, constructor.Topic, constructor.Type)
@@ -26,10 +31,10 @@ namespace Iviz.App
             controller.ModuleData = this;
             if (constructor.Configuration != null)
             {
-                controller.Config = (ARConfiguration)constructor.Configuration;
+                controller.Config = (ARConfiguration) constructor.Configuration;
             }
 
-            UpdateButtonText();
+            UpdateModuleButton();
         }
 
         public override void Stop()
@@ -42,59 +47,69 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
+            panel.HideButton.State = controller.Visible;
             panel.Frame.Owner = controller;
             panel.WorldScale.Value = controller.WorldScale;
-            panel.Origin.Value = controller.Origin;
+            panel.WorldOffset.Mean = controller.WorldOffset;
+            panel.WorldAngle.Value = controller.WorldAngle;
 
-            panel.SearchMarker.Value = controller.SearchMarker;
-            panel.MarkerSize.Value = controller.MarkerSize;
+            panel.SearchMarker.Value = controller.UseMarker;
+            //panel.MarkerSize.Value = controller.MarkerSize;
             panel.MarkerHorizontal.Value = controller.MarkerHorizontal;
             panel.MarkerAngle.Value = controller.MarkerAngle;
             panel.MarkerFrame.Value = controller.MarkerFrame;
+
+            List<string> frameHints = new List<string> {NoneString};
+            frameHints.AddRange(TFListener.FramesForHints);
+            panel.MarkerFrame.Hints = frameHints;
+
             panel.MarkerOffset.Value = controller.MarkerOffset;
 
+            TFListener.RootControl.PointerUp += RootControlOnPointerUp;
+            TFListener.RootControl.DoubleTap += RootControlOnDoubleTap;
+
+            /*
             panel.HeadSender.Set(controller.RosSenderHead);
             panel.MarkersSender.Set(controller.RosSenderMarkers);
 
             panel.PublishHead.Value = controller.PublishPose;
             panel.PublishPlanes.Value = controller.PublishPlanesAsMarkers;
+            */
 
             CheckInteractable();
 
-            panel.WorldScale.ValueChanged += f =>
-            {
-                controller.WorldScale = f;
-            };
-            panel.Origin.ValueChanged += f =>
-            {
-                controller.Origin = f;
-            };
+            panel.WorldScale.ValueChanged += f => { controller.WorldScale = f; };
+            panel.WorldOffset.ValueChanged += f => { controller.WorldOffset = f; };
+            panel.WorldAngle.ValueChanged += f => { controller.WorldAngle = f; };
             panel.SearchMarker.ValueChanged += f =>
             {
-                controller.SearchMarker = f;
+                controller.UseMarker = f;
                 CheckInteractable();
             };
+            /*
             panel.MarkerSize.ValueChanged += f =>
             {
                 controller.MarkerSize = f;
             };
-            panel.MarkerHorizontal.ValueChanged += f =>
-            {
-                controller.MarkerHorizontal = f;
-            };
-            panel.MarkerAngle.ValueChanged += f =>
-            {
-                controller.MarkerAngle = (int)f;
-            };
+            */
+            panel.MarkerHorizontal.ValueChanged += f => { controller.MarkerHorizontal = f; };
+            panel.MarkerAngle.ValueChanged += f => { controller.MarkerAngle = (int) f; };
             panel.MarkerFrame.EndEdit += f =>
             {
-                controller.MarkerFrame = f;
+                if (f == NoneString)
+                {
+                    panel.MarkerFrame.Value = "";
+                    controller.MarkerFrame = "";
+                }
+                else
+                {
+                    controller.MarkerFrame = f;
+                }
+
                 CheckInteractable();
             };
-            panel.MarkerOffset.ValueChanged += f =>
-            {
-                controller.MarkerOffset = f;
-            };
+            panel.MarkerOffset.ValueChanged += f => { controller.MarkerOffset = f; };
+            /*
             panel.PublishHead.ValueChanged += f =>
             {
                 controller.PublishPose = f;
@@ -105,6 +120,7 @@ namespace Iviz.App
                 controller.PublishPlanesAsMarkers = f;
                 panel.MarkersSender.Set(controller.RosSenderMarkers);
             };
+            */
 
             panel.CloseButton.Clicked += () =>
             {
@@ -115,18 +131,55 @@ namespace Iviz.App
             {
                 controller.Visible = !controller.Visible;
                 panel.HideButton.State = controller.Visible;
-                UpdateButtonText();
+                UpdateModuleButton();
             };
+        }
+
+        void RootControlOnDoubleTap()
+        {
+            TFListener.RootControl.SnapTo(controller);
+            CopyControlPose();
+        }
+
+        void RootControlOnPointerUp()
+        {
+            CopyControlPose();
+        }
+
+        void CopyControlPose()
+        {
+            //Debug.Log("copy pose");
+            var pose = TFListener.RootControl.transform.AsPose();
+            controller.WorldOffset = pose.position.Unity2Ros();
+
+            float angle = pose.rotation.eulerAngles.y;
+            if (angle > 180)
+            {
+                angle -= 360;
+            }
+
+            controller.WorldAngle = angle;
+
+            //Debug.Log("requesting " + controller.WorldOffset.Ros2Unity());
+            panel.WorldOffset.Mean = controller.WorldOffset;
+            panel.WorldAngle.Value = controller.WorldAngle;
+        }
+
+        public override void CleanupPanel()
+        {
+            base.CleanupPanel();
+            TFListener.RootControl.PointerUp -= RootControlOnPointerUp;
+            TFListener.RootControl.DoubleTap -= RootControlOnDoubleTap;
         }
 
         void CheckInteractable()
         {
-            panel.Origin.Interactable = !controller.SearchMarker;
-            panel.MarkerHorizontal.Interactable = controller.SearchMarker;
-            panel.MarkerAngle.Interactable = controller.SearchMarker;
-            panel.MarkerFrame.Interactable = controller.SearchMarker;
-            panel.MarkerOffset.Interactable = controller.SearchMarker && controller.MarkerFrame.Length != 0;
-            panel.MarkerSize.Interactable = controller.SearchMarker;
+            //panel.Origin.Interactable = !controller.SearchMarker;
+            panel.MarkerHorizontal.Interactable = controller.UseMarker;
+            panel.MarkerAngle.Interactable = controller.UseMarker;
+            panel.MarkerFrame.Interactable = controller.UseMarker;
+            panel.MarkerOffset.Interactable = controller.UseMarker && controller.MarkerFrame.Length != 0;
+            //panel.MarkerSize.Interactable = controller.SearchMarker;
         }
 
         public override void AddToState(StateConfiguration config)

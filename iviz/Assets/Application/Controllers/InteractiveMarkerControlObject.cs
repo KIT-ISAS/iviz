@@ -1,22 +1,25 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using System;
-using Iviz.App.Displays;
+using Iviz.Displays;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     public sealed class InteractiveMarkerControlObject : MonoBehaviour
     {
-        public string Description { get; private set; }
-        public string Id { get; private set; }
-        public int InteractionMode { get; private set; }
+        string Description { get; set; }
+        string Id { get; set; }
 
         readonly Dictionary<string, MarkerObject> markers = new Dictionary<string, MarkerObject>();
         readonly HashSet<string> markersToDelete = new HashSet<string>();
 
-        public event Action<Pose, Vector3, int> Clicked;
+        InteractiveControl control;
+
+        public delegate void MouseEventAction(in Pose pose, in Vector3 point, MouseEventType type);
+
+        public event MouseEventAction MouseEvent;
+        public event InteractiveControl.MovedAction Moved;
 
         public void Set(InteractiveMarkerControl msg)
         {
@@ -24,39 +27,97 @@ namespace Iviz.App.Listeners
             name = msg.Name;
             Id = msg.Name;
 
+
             transform.localRotation = msg.Orientation.Ros2Unity();
+            //Debug.Log(transform.localRotation);
 
             UpdateMarkers(msg.Markers);
-
-            InteractionMode = msg.InteractionMode;
-            UpdateInteractionMode();
+            UpdateInteractionMode(msg.InteractionMode, msg.OrientationMode, msg.IndependentMarkerOrientation);
         }
 
-        void UpdateInteractionMode()
+        void EnsureControlDisplayExists()
         {
-            switch (InteractionMode)
+            if (!(control is null))
+            {
+                return;
+            }
+
+            control = ResourcePool.GetOrCreate<InteractiveControl>(Resource.Displays.InteractiveControl, transform);
+            control.TargetTransform = transform.parent;
+            control.Moved += (in Pose pose) => Moved?.Invoke(pose);
+        }
+
+        void UpdateInteractionMode(int interactionMode, int orientationMode, bool independentMarkerOrientation)
+        {
+            switch (interactionMode)
             {
                 case InteractiveMarkerControl.NONE:
-                    markers.Values.ForEach(x => x.ColliderEnabled = false);
+                    markers.Values.ForEach(x => x.Clickable = false);
                     break;
                 case InteractiveMarkerControl.MENU:
                 case InteractiveMarkerControl.BUTTON:
-                    markers.Values.ForEach(x => x.ColliderEnabled = true);
+                    markers.Values.ForEach(x => x.Clickable = true);
                     break;
                 case InteractiveMarkerControl.MOVE_AXIS:
+                    EnsureControlDisplayExists();
+                    control.InteractionMode = InteractiveControl.InteractionModeType.MoveAxisX;
+                    break;
                 case InteractiveMarkerControl.MOVE_PLANE:
+                    EnsureControlDisplayExists();
+                    control.InteractionMode = InteractiveControl.InteractionModeType.MovePlaneYZ;
+                    break;
                 case InteractiveMarkerControl.ROTATE_AXIS:
+                    EnsureControlDisplayExists();
+                    control.InteractionMode = InteractiveControl.InteractionModeType.RotateAxisX;
+                    break;
                 case InteractiveMarkerControl.MOVE_ROTATE:
+                    EnsureControlDisplayExists();
+                    control.InteractionMode = InteractiveControl.InteractionModeType.MovePlaneYZ_RotateAxisX;
+                    break;
                 case InteractiveMarkerControl.MOVE_3D:
+                    EnsureControlDisplayExists();
+                    control.InteractionMode = InteractiveControl.InteractionModeType.Move3D;
+                    break;
                 case InteractiveMarkerControl.ROTATE_3D:
+                    EnsureControlDisplayExists();
+                    control.InteractionMode = InteractiveControl.InteractionModeType.Rotate3D;
+                    break;
+                case InteractiveMarkerControl.MOVE_ROTATE_3D:
+                    EnsureControlDisplayExists();
+                    control.InteractionMode = InteractiveControl.InteractionModeType.MoveRotate3D;
+                    break;
+            }
+
+            if (control is null)
+            {
+                return;
+            }
+
+            switch (orientationMode)
+            {
+                case InteractiveMarkerControl.VIEW_FACING:
+                    control.KeepAbsoluteRotation = false;
+                    control.PointsToCamera = true;
+                    control.CameraPivotIsParent = !independentMarkerOrientation;
+                    break;
+                case InteractiveMarkerControl.INHERIT:
+                    control.PointsToCamera = false;
+                    control.KeepAbsoluteRotation = false;
+                    break;
+                case InteractiveMarkerControl.FIXED:
+                    control.PointsToCamera = false;
+                    control.KeepAbsoluteRotation = true;
                     break;
             }
         }
 
-        public void UpdateMarkers(Marker[] msg)
+        void UpdateMarkers(IEnumerable<Marker> msg)
         {
             markersToDelete.Clear();
-            markers.Keys.ForEach(x => markersToDelete.Add(x));
+            foreach (string id in markers.Keys)
+            {
+                markersToDelete.Add(id);
+            }
 
             foreach (Marker marker in msg)
             {
@@ -67,14 +128,18 @@ namespace Iviz.App.Listeners
                         if (!markers.TryGetValue(id, out MarkerObject markerToAdd))
                         {
                             markerToAdd = CreateMarkerObject();
-                            markerToAdd.Clicked += (point, button) => Clicked?.Invoke(transform.AsPose(), point, button);
+                            markerToAdd.MouseEvent += (in Vector3 point, MouseEventType type) =>
+                            {
+                                MouseEvent?.Invoke(transform.AsPose(), point, type);
+                            };
                             markers[id] = markerToAdd;
                         }
                         markerToAdd.Set(marker);
-                        if (marker.Header.FrameId == "")
+                        if (marker.Header.FrameId.Length == 0)
                         {
                             markerToAdd.transform.SetParentLocal(transform);
                         }
+
                         markersToDelete.Remove(id);
                         break;
                     case Marker.DELETE:
@@ -84,15 +149,17 @@ namespace Iviz.App.Listeners
                             markers.Remove(id);
                             markersToDelete.Remove(id);
                         }
+
                         break;
                 }
             }
-            markersToDelete.ForEach(x =>
+
+            foreach (string id in markersToDelete)
             {
-                MarkerObject markerToDelete = markers[x];
+                MarkerObject markerToDelete = markers[id];
                 DeleteMarkerObject(markerToDelete);
-                markers.Remove(x);
-            });
+                markers.Remove(id);
+            }
         }
 
         public void Stop()
@@ -100,7 +167,15 @@ namespace Iviz.App.Listeners
             markers.Values.ForEach(DeleteMarkerObject);
             markers.Clear();
             markersToDelete.Clear();
-            Clicked = null;
+
+            if (!(control is null))
+            {
+                control.Stop();
+                ResourcePool.Dispose(Resource.Displays.InteractiveControl, control.gameObject);
+            }
+
+            MouseEvent = null;
+            Moved = null;
         }
 
         static void DeleteMarkerObject(MarkerObject marker)
@@ -111,8 +186,7 @@ namespace Iviz.App.Listeners
 
         static MarkerObject CreateMarkerObject()
         {
-            GameObject gameObject = new GameObject();
-            gameObject.name = "MarkerObject";
+            GameObject gameObject = new GameObject("MarkerObject");
             return gameObject.AddComponent<MarkerObject>();
         }
 

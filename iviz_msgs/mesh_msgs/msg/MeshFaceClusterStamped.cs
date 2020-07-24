@@ -17,12 +17,13 @@ namespace Iviz.Msgs.MeshMsgs
         /// <summary> Constructor for empty message. </summary>
         public MeshFaceClusterStamped()
         {
+            Header = new StdMsgs.Header();
             Uuid = "";
             Cluster = new MeshFaceCluster();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MeshFaceClusterStamped(in StdMsgs.Header Header, string Uuid, MeshFaceCluster Cluster, bool @override)
+        public MeshFaceClusterStamped(StdMsgs.Header Header, string Uuid, MeshFaceCluster Cluster, bool @override)
         {
             this.Header = Header;
             this.Uuid = Uuid;
@@ -55,6 +56,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
+            if (Header is null) throw new System.NullReferenceException();
             Header.RosValidate();
             if (Uuid is null) throw new System.NullReferenceException();
             if (Cluster is null) throw new System.NullReferenceException();

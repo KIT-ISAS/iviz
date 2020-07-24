@@ -1,11 +1,12 @@
-﻿using Iviz.App.Listeners;
+﻿using Iviz.Controllers;
 using Iviz.Resources;
-using Newtonsoft.Json.Linq;
-using UnityEngine;
 
 namespace Iviz.App
 {
-    public class InteractiveMarkerModuleData : ListenerModuleData
+    /// <summary>
+    /// <see cref="InteractiveMarkerPanelContents"/> 
+    /// </summary>
+    public sealed class InteractiveMarkerModuleData : ListenerModuleData
     {
         readonly InteractiveMarkerListener listener;
         readonly InteractiveMarkerPanelContents panel;
@@ -24,9 +25,10 @@ namespace Iviz.App
         {
 
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.InteractiveMarker) as InteractiveMarkerPanelContents;
-            listener = Instantiate<InteractiveMarkerListener>();
-            listener.name = "InteractiveMarkers";
-            listener.ModuleData = this;
+            //listener = Instantiate<InteractiveMarkerListener>();
+            //listener.name = "InteractiveMarkers";
+            //listener.ModuleData = this;
+            listener = new InteractiveMarkerListener(this);
             if (constructor.Configuration != null)
             {
                 listener.Config = (InteractiveMarkerConfiguration)constructor.Configuration;
@@ -36,14 +38,15 @@ namespace Iviz.App
                 listener.Config.Topic = Topic;
             }
             listener.StartListening();
-            UpdateButtonText();
+            UpdateModuleButton();
         }
 
         public override void SetupPanel()
         {
             panel.Listener.RosListener = listener.Listener;
             panel.DisableExpiration.Value = listener.DisableExpiration;
-
+            panel.Sender.Set(listener.RosSender);
+            
             panel.DisableExpiration.ValueChanged += f =>
             {
                 listener.DisableExpiration = f;

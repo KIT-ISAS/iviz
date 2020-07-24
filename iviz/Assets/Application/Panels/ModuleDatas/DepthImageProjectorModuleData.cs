@@ -1,16 +1,13 @@
-﻿using Iviz.App.Displays;
-using Iviz.App.Listeners;
-using Iviz.Resources;
-using Newtonsoft.Json.Linq;
+﻿using Iviz.Resources;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
+using Iviz.Controllers;
 
 namespace Iviz.App
 {
-    public class DepthImageProjectorModuleData : ModuleData
+    public sealed class DepthImageProjectorModuleData : ModuleData
     {
-        readonly DepthImageProjector controller;
+        readonly DepthImageProjectorController controller;
         readonly DepthImageProjectorPanelContents panel;
 
         public override DataPanelContents Panel => panel;
@@ -27,26 +24,27 @@ namespace Iviz.App
 
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.DepthImageProjector) as DepthImageProjectorPanelContents;
 
-            controller = Instantiate<DepthImageProjector>();
-            controller.ModuleData = this;
+            controller = new DepthImageProjectorController(this);
             if (constructor.Configuration != null)
             {
                 controller.Config = (DepthImageProjectorConfiguration)constructor.Configuration;
                 controller.ColorImage = GetImageWithName(controller.ColorName);
                 controller.DepthImage = GetImageWithName(controller.DepthName);
             }
-            UpdateButtonText();
+            UpdateModuleButton();
         }
 
         public override void Stop()
         {
             base.Stop();
             controller.Stop();
-            Object.Destroy(controller.gameObject);
         }
 
         public override void SetupPanel()
         {
+            panel.Frame.Owner = controller;
+            panel.HideButton.State = controller.Visible;
+
             depthImageCandidates.Clear();
             depthImageCandidates.Add("<none>");
             depthImageCandidates.AddRange(
@@ -111,7 +109,7 @@ namespace Iviz.App
             {
                 controller.Visible = !controller.Visible;
                 panel.HideButton.State = controller.Visible;
-                UpdateButtonText();
+                UpdateModuleButton();
             };
         }
 

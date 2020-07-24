@@ -1,13 +1,11 @@
 ﻿using UnityEngine;
-using System.Collections;
 using Iviz.Resources;
-using Iviz.App;
 
 namespace Iviz.Displays
 {
     public sealed class AxisFrameResource : MarkerResource, IRecyclable, ISupportsAROcclusion, ISupportsTint
     {
-        static readonly string[] names = { "Axis-X", "Axis-Y", "Axis-Z" };
+        static readonly string[] Names = { "Axis-X", "Axis-Y", "Axis-Z" };
 
         readonly MeshMarkerResource[] axisObjects = new MeshMarkerResource[3];
 
@@ -18,7 +16,7 @@ namespace Iviz.Displays
             set
             {
                 axisLength = value;
-                UpdateFrameMesh(axisLength, axisLength / 20);
+                UpdateFrameMesh(axisLength, axisLength / 10);
             }
         }
 
@@ -52,26 +50,26 @@ namespace Iviz.Displays
             }
         }
 
-        bool occlusionOnly_;
+        bool occlusionOnly;
         public bool OcclusionOnly
         {
-            get => occlusionOnly_;
+            get => occlusionOnly;
             set
             {
-                occlusionOnly_ = value;
+                occlusionOnly = value;
                 axisObjects[0].OcclusionOnly = value;
                 axisObjects[1].OcclusionOnly = value;
                 axisObjects[2].OcclusionOnly = value;
             }
         }
 
-        Color tint_;
+        Color tint;
         public Color Tint
         {
-            get => tint_;
+            get => tint;
             set
             {
-                tint_ = value;
+                tint = value;
                 axisObjects[0].Tint = value;
                 axisObjects[1].Tint = value;
                 axisObjects[2].Tint = value;
@@ -85,7 +83,7 @@ namespace Iviz.Displays
             for (int i = 0; i < 3; i++)
             {
                 axisObjects[i] = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Cube, transform);
-                axisObjects[i].gameObject.name = names[i];
+                axisObjects[i].gameObject.name = Names[i];
                 axisObjects[i].ColliderEnabled = false;
             }
 
@@ -101,16 +99,19 @@ namespace Iviz.Displays
             axisObjects[0].transform.localScale = new Vector3(newFrameAxisLength, newFrameAxisWidth, newFrameAxisWidth);
             axisObjects[0].transform.localPosition = -0.5f * newFrameAxisLength * Vector3.right;
             axisObjects[1].transform.localScale = new Vector3(newFrameAxisWidth, newFrameAxisWidth, newFrameAxisLength);
-            axisObjects[1].transform.localPosition = -0.5f * newFrameAxisLength * Vector3.forward;
+            axisObjects[1].transform.localPosition = newFrameAxisLength * new Vector3(0, 0.001f, -0.5f);
             axisObjects[2].transform.localScale = new Vector3(newFrameAxisWidth, newFrameAxisLength, newFrameAxisWidth);
-            axisObjects[2].transform.localPosition = 0.5f * newFrameAxisLength * Vector3.up;
+            axisObjects[2].transform.localPosition = newFrameAxisLength * new Vector3(0.001f, 0.5f, 0.001f);
 
             Collider.center = 0.5f * (newFrameAxisLength - newFrameAxisWidth / 2) * new Vector3(-1, 1, -1);
             Collider.size = (newFrameAxisLength + newFrameAxisWidth / 2) * Vector3.one;
         }
 
-        public void Recycle()
+        public void SplitForRecycle()
         {
+            axisObjects[0].Stop();
+            axisObjects[1].Stop();
+            axisObjects[2].Stop();
             ResourcePool.Dispose(Resource.Displays.Cube, axisObjects[0].gameObject);
             ResourcePool.Dispose(Resource.Displays.Cube, axisObjects[1].gameObject);
             ResourcePool.Dispose(Resource.Displays.Cube, axisObjects[2].gameObject);

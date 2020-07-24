@@ -9,7 +9,7 @@ using System.Net.Sockets;
 using System.Text;
 using Iviz.Msgs;
 
-namespace Iviz.RoslibSharp
+namespace Iviz.Roslib
 {
     sealed class ServiceReceiver : IDisposable
     {
@@ -180,7 +180,7 @@ namespace Iviz.RoslibSharp
             catch (Exception e)
             {
                 service.ErrorMessage = e.Message;
-                Logger.Log(service.ErrorMessage);
+                Logger.Log("Error during service call:" + e);
                 success = false;
             }
             if (!Persistent)
@@ -190,10 +190,10 @@ namespace Iviz.RoslibSharp
             return success;
         }
 
+        const byte ErrorByte = 0;
+
         bool ExecuteImpl(IService service)
         {
-            const byte ErrorByte = 0;
-
             IRequest requestMsg = service.Request;
             int msgLength = requestMsg.RosMessageLength;
             if (writeBuffer.Length < msgLength)
@@ -211,23 +211,23 @@ namespace Iviz.RoslibSharp
             if (rcvLength == 0)
             {
                 service.ErrorMessage = $"Connection to {Hostname}:{Port} closed remotely.";
-                Logger.Log(service.ErrorMessage);
                 return false;
             }
             BytesReceived++;
+
+            byte statusByte = readBuffer[0];
+            
             rcvLength = ReceivePacket();
             if (rcvLength == 0)
             {
                 service.ErrorMessage = $"Connection to {Hostname}:{Port} closed remotely.";
-                Logger.Log(service.ErrorMessage);
                 return false;
             }
             BytesReceived += 4 + rcvLength;
 
-            if (readBuffer[0] == ErrorByte)
+            if (statusByte == ErrorByte)
             {
                 service.ErrorMessage = BuiltIns.UTF8.GetString(readBuffer, 0, rcvLength);
-                Logger.Log(service.ErrorMessage);
                 return false;
             }
             else 

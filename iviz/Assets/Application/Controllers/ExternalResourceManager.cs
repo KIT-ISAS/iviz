@@ -1,93 +1,188 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
+using System.Runtime.Serialization;
+using System.Security.Cryptography;
 using System.Text;
-using System.Threading;
-using Iviz.App.Listeners;
-using Iviz.Displays;
+using Iviz.Controllers;
+using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
-using Iviz.RoslibSharp;
 using Newtonsoft.Json;
 using UnityEngine;
+using Logger = Iviz.Controllers.Logger;
 
-namespace Iviz.App.Resources
+namespace Iviz.Displays
 {
-
     public class ExternalResourceManager
     {
-        readonly Dictionary<Uri, string> resourceFiles = new Dictionary<Uri, string>();
-        readonly Dictionary<Uri, Resource.Info<GameObject>> loadedObjects = new Dictionary<Uri, Resource.Info<GameObject>>();
-        readonly GameObject node;
-        readonly Msgs.IvizMsgs.Model generator = new Msgs.IvizMsgs.Model();
+        const string ModelServiceName = "/iviz/get_model_resource";
+        const string TextureServiceName = "/iviz/get_model_texture";
 
-        readonly static HashSet<char> InvalidPathCharacters = new HashSet<char>(Path.GetInvalidFileNameChars());
+        [DataContract]
+        public class ResourceFiles
+        {
+            [DataMember] public Dictionary<Uri, string> Models { get; set; }
+            [DataMember] public Dictionary<Uri, string> Textures { get; set; }
+
+            public ResourceFiles()
+            {
+                Models = new Dictionary<Uri, string>();
+                Textures = new Dictionary<Uri, string>();
+            }
+        }
+
+        readonly ResourceFiles resourceFiles = new ResourceFiles();
+
+        readonly Dictionary<Uri, Resource.Info<GameObject>> loadedModels =
+            new Dictionary<Uri, Resource.Info<GameObject>>();
+
+        readonly Dictionary<Uri, Resource.Info<Texture2D>> loadedTextures =
+            new Dictionary<Uri, Resource.Info<Texture2D>>();
+
+        readonly GameObject node;
+        readonly Model generator = new Model();
+
+        string ResourceFolder { get; }
+        string ResourceFile { get; }
 
         public ExternalResourceManager()
         {
-            InvalidPathCharacters.Add(':');
-
+            ResourceFolder = UnityEngine.Application.persistentDataPath + "/resources";
+            ResourceFile = UnityEngine.Application.persistentDataPath + "/resources.json";            
+            
             node = new GameObject("External Resources");
-            node.transform.parent = TFListener.ListenersFrame.transform;
+            node.transform.parent = TFListener.ListenersFrame?.transform;
             node.SetActive(false);
 
-            string path = Application.persistentDataPath + "/resources.json";
-            if (File.Exists(path))
+            if (!File.Exists(ResourceFile))
             {
-                try
-                {
-                    string text = File.ReadAllText(path);
-                    resourceFiles = JsonConvert.DeserializeObject<Dictionary<Uri, string>>(text);
-                }
-                catch (Exception e)
-                {
-                    Logger.Error(e);
-                }
+                return;
             }
 
-            string callerId = ConnectionManager.Connection.MyId;
+            try
+            {
+                string text = File.ReadAllText(ResourceFile);
+                resourceFiles = JsonConvert.DeserializeObject<ResourceFiles>(text);
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e);
+            }
 
-            AdvertiseService<Msgs.IvizMsgs.SetModel>("set_model", SetModelCallback);
+            try
+            {
+                Directory.CreateDirectory(ResourceFolder);
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e);
+            }
         }
 
-        void AdvertiseService<T>(string service, Action<T> callback) where T : Msgs.IService, new()
-        {
-            ConnectionManager.AdvertiseService(service, callback);
-            //Logger.Internal($"Offering <b>{service}</b> <i>[{Msgs.BuiltIns.GetServiceType(typeof(T))}]</i>.");
-        }
 
-        public bool TryGetResource(Uri uri, out Resource.Info<GameObject> resource)
+        public bool TryGet(Uri uri, out Resource.Info<GameObject> resource)
         {
-            if (loadedObjects.TryGetValue(uri, out resource))
+            if (loadedModels.TryGetValue(uri, out resource))
             {
                 return true;
             }
 
-            if (!resourceFiles.TryGetValue(uri, out string path))
+            if (resourceFiles.Models.TryGetValue(uri, out string localPath))
             {
-                resource = null;
+                if (File.Exists($"{ResourceFolder}/{localPath}"))
+                {
+                    resource = LoadLocalModel(uri, localPath);
+                    return resource != null;
+                }
+
+                Debug.LogWarning($"ExternalResourceManager: Missing file '{localPath}'. Removing.");
+                resourceFiles.Models.Remove(uri);
+                WriteResourceFile();
+            }
+
+            GetModelResource msg = new GetModelResource
+            {
+                Request =
+                {
+                    Uri = uri.ToString()
+                }
+            };
+            if (!ConnectionManager.Connection.CallService(ModelServiceName, msg))
+            {
                 return false;
             }
 
-            if (!File.Exists(path))
-            {
-                Debug.LogWarning($"ExternalResourceManager: Missing file '{path}'. Removing.");
-                resourceFiles.Remove(uri);
-                resource = null;
-                return false;
-            }
-            resource = LoadModel(uri, path);
+            resource = ProcessModelResponse(uri, msg.Response);
             return resource != null;
         }
 
-        Resource.Info<GameObject> LoadModel(Uri uri, string path)
+        public bool TryGet(Uri uri, out Resource.Info<Texture2D> resource)
+        {
+            if (loadedTextures.TryGetValue(uri, out resource))
+            {
+                return true;
+            }
+
+            if (resourceFiles.Textures.TryGetValue(uri, out string localPath))
+            {
+                if (File.Exists($"{ResourceFolder}/{localPath}"))
+                {
+                    resource = LoadLocalTexture(uri, localPath);
+                    return resource != null;
+                }
+
+                Debug.LogWarning($"ExternalResourceManager: Missing file '{localPath}'. Removing.");
+                resourceFiles.Textures.Remove(uri);
+                WriteResourceFile();
+            }
+
+            GetModelTexture msg = new GetModelTexture()
+            {
+                Request =
+                {
+                    Uri = uri.ToString()
+                }
+            };
+            if (!ConnectionManager.Connection.CallService(TextureServiceName, msg))
+            {
+                return false;
+            }
+
+            resource = ProcessTextureResponse(uri, msg.Response);
+            return resource != null;
+        }
+
+        Resource.Info<GameObject> LoadLocalModel(Uri uri, string localPath)
         {
             byte[] buffer;
 
             try
             {
-                buffer = File.ReadAllBytes(path);
+                buffer = File.ReadAllBytes($"{ResourceFolder}/{localPath}");
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning("ExternalResourceManager: Loading model " + uri + " failed with error " + e);
+                return null;
+            }
+
+            Model msg = Msgs.Buffer.Deserialize(generator, buffer, buffer.Length);
+            GameObject obj = CreateModelObject(uri, msg);
+            obj.name = uri.ToString();
+
+            Resource.Info<GameObject> resource = new Resource.Info<GameObject>(uri.ToString(), obj);
+            loadedModels[uri] = resource;
+
+            return resource;
+        }
+
+        Resource.Info<Texture2D> LoadLocalTexture(Uri uri, string localPath)
+        {
+            byte[] buffer;
+
+            try
+            {
+                buffer = File.ReadAllBytes($"{ResourceFolder}/{localPath}");
             }
             catch (Exception e)
             {
@@ -95,145 +190,100 @@ namespace Iviz.App.Resources
                 return null;
             }
 
-            Msgs.IvizMsgs.Model msg = Msgs.Buffer.Deserialize(generator, buffer, buffer.Length);
-            GameObject obj = CreateModel(msg);
-            obj.name = uri.ToString();
+            Texture2D texture = new Texture2D(1, 1, TextureFormat.RGB24, false);
+            texture.LoadImage(buffer);
+            texture.Compress(true);
+            texture.name = uri.ToString();
 
-            Resource.Info<GameObject> resource = new Resource.Info<GameObject>(uri.ToString(), obj);
-            loadedObjects[uri] = resource;
+            Resource.Info<Texture2D> resource = new Resource.Info<Texture2D>(uri.ToString(), texture);
+            loadedTextures[uri] = resource;
 
             return resource;
         }
 
-
-        void SetModelCallback(Msgs.IvizMsgs.SetModel srv)
-        {
-            if (!Uri.TryCreate(srv.Request.Uri, UriKind.Absolute, out Uri uri) || uri.Scheme != "package")
-            {
-                srv.Response.Success = false;
-                srv.Response.Message = $"Provided uri '{srv.Request.Uri}' is not a valid resource uri";
-                return;
-            }
-
-            GameThread.RunOnce(() => SaveModel(uri, srv));
-            lock (srv)
-            {
-                Monitor.Wait(srv);
-            }
-        }
-
-        void SaveModel(Uri uri, Msgs.IvizMsgs.SetModel srv)
+        Resource.Info<GameObject> ProcessModelResponse(Uri uri, GetModelResourceResponse msg)
         {
             try
             {
-                GameObject obj = CreateModel(srv.Request.Model);
+                GameObject obj = CreateModelObject(uri, msg.Model);
                 obj.name = uri.ToString();
 
-                loadedObjects[uri] = new Resource.Info<GameObject>(uri.ToString(), obj);
+                Resource.Info<GameObject> info = new Resource.Info<GameObject>(uri.ToString(), obj);
+                loadedModels[uri] = info;
 
-                string path = SanitizePathFile(srv.Request.Uri);
+                string localPath = GetMd5Hash(uri.ToString());
 
-                byte[] buffer = new byte[srv.Request.Model.RosMessageLength];
-                Msgs.Buffer.Serialize(srv.Request.Model, buffer);
+                byte[] buffer = new byte[msg.Model.RosMessageLength];
+                Msgs.Buffer.Serialize(msg.Model, buffer);
+                File.WriteAllBytes($"{ResourceFolder}/{localPath}", buffer);
+                Debug.Log($"Saving to {ResourceFolder}/{localPath}");
+                Logger.Internal($"Added external model <i>{uri}</i>");
 
-                File.WriteAllBytes($"{Application.persistentDataPath}/{path}", buffer);
-                Debug.Log($"ExternalResourceManager: ++ {uri} | {Application.persistentDataPath}/{path} | ({buffer.Length} bytes)");
-                Logger.Internal($"Added external resource <i>{uri}</i>");
+                resourceFiles.Models[uri] = localPath;
+                WriteResourceFile();
 
-                resourceFiles[uri] = path;
-
-                File.WriteAllText(
-                    Application.persistentDataPath + "/resources.json",
-                    JsonConvert.SerializeObject(resourceFiles, Formatting.Indented));
-
-                srv.Response.Success = true;
+                return info;
             }
             catch (Exception e)
             {
-                srv.Response.Success = false;
-                srv.Response.Message = e.Message;
                 Logger.Error(e);
-            }
-            lock (srv)
-            {
-                Monitor.Pulse(srv);
+                return null;
             }
         }
 
-        static string SanitizePathFile(string path)
+        Resource.Info<Texture2D> ProcessTextureResponse(Uri uri, GetModelTextureResponse msg)
         {
-            StringBuilder str = new StringBuilder();
-            for (int i = 0; i < path.Length; i++)
+            try
             {
-                str.Append(InvalidPathCharacters.Contains(path[i]) ? '_' : path[i]);
+                Texture2D texture = new Texture2D(1, 1, TextureFormat.RGB24, false);
+                texture.LoadImage(msg.Image.Data);
+                texture.name = uri.ToString();
+
+                Resource.Info<Texture2D> info = new Resource.Info<Texture2D>(uri.ToString(), texture);
+                loadedTextures[uri] = info;
+
+                string localPath = GetMd5Hash(uri.ToString());
+
+                byte[] buffer = msg.Image.Data;
+                File.WriteAllBytes($"{ResourceFolder}/{localPath}", buffer);
+                Debug.Log($"Saving to {ResourceFolder}/{localPath}");
+                Logger.Internal($"Added external texture <i>{uri}</i>");
+
+                resourceFiles.Textures[uri] = localPath;
+                WriteResourceFile();
+
+                return info;
             }
-            return str.ToString();
+            catch (Exception e)
+            {
+                Logger.Error(e);
+                return null;
+            }
         }
 
-        GameObject CreateModel(Msgs.IvizMsgs.Model msg)
+        void WriteResourceFile()
         {
-            GameObject model = new GameObject();
-            model.transform.parent = node.transform;
+            File.WriteAllText(ResourceFile, JsonConvert.SerializeObject(resourceFiles, Formatting.Indented));
+        }
 
-            BoxCollider c = model.AddComponent<BoxCollider>();
-
-            Vector3 min = new Vector3(msg.Bounds.Minx, msg.Bounds.Miny, msg.Bounds.Minz);
-            Vector3 max = new Vector3(msg.Bounds.Maxx, msg.Bounds.Maxy, msg.Bounds.Maxz);
-            c.center = (min + max) / 2;
-            c.size = max - min;
-
-            List<MeshTrianglesResource> children = new List<MeshTrianglesResource>();
-
-            AggregatedMeshMarker amm = model.AddComponent<AggregatedMeshMarker>();
-            amm.Children = new ReadOnlyCollection<MeshTrianglesResource>(children);
-
-            foreach (var mesh in msg.Meshes)
+        static string GetMd5Hash(string input)
+        {
+            if (string.IsNullOrEmpty(input))
             {
-                GameObject obj = new GameObject();
-                obj.transform.parent = model.transform;
-
-                obj.AddComponent<MeshRenderer>();
-                obj.AddComponent<MeshFilter>();
-                obj.AddComponent<BoxCollider>();
-
-                MeshTrianglesResource r = obj.AddComponent<MeshTrianglesResource>();
-                r.Name = mesh.Name;
-
-                Vector3[] vertices = new Vector3[mesh.Vertices.Length];
-                Memcpy(mesh.Vertices, vertices, vertices.Length * 3 * sizeof(float));
-
-                Vector3[] normals = new Vector3[mesh.Normals.Length];
-                Memcpy(mesh.Normals, normals, normals.Length * 3 * sizeof(float));
-
-                Color32[] colors = new Color32[mesh.Colors.Length];
-                Memcpy(mesh.Colors, colors, colors.Length * 4);
-
-                int[] triangles = new int[mesh.Faces.Length * 3];
-                Memcpy(mesh.Faces, triangles, triangles.Length * 4);
-
-                var material = msg.Materials[mesh.MaterialIndex];
-                r.Color = new Color32(material.Diffuse.R, material.Diffuse.G, material.Diffuse.B, material.Diffuse.A);
-
-                r.Set(vertices, normals, triangles, colors);
-
-                children.Add(r);
+                return string.Empty;
             }
 
+            MD5 md5 = new MD5CryptoServiceProvider();
+            byte[] textToHash = Encoding.Default.GetBytes(input);
+            byte[] result = md5.ComputeHash(textToHash);
+            return BitConverter.ToString(result).Replace("-", "");
+        }
+
+        GameObject CreateModelObject(Uri uri, Model msg)
+        {
+            GameObject model = new SceneModel(uri, msg).Root;
+            model.transform.SetParent(node.transform, false);
             return model;
-        }
-
-        static void Memcpy<A, B>(A[] src, B[] dst, int bytes)
-            where A : unmanaged
-            where B : unmanaged
-        {
-            unsafe
-            {
-                fixed (A* a = src)
-                fixed (B* b = dst)
-                {
-                    Buffer.MemoryCopy(a, b, bytes, bytes);
-                }
-            }
         }
     }
 }

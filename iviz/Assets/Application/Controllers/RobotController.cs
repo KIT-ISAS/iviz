@@ -3,15 +3,14 @@ using RosSharp;
 using System.Linq;
 using System.Collections.Generic;
 using RosSharp.Urdf;
-using Iviz.App.Displays;
 using System.Runtime.Serialization;
-using Iviz.RoslibSharp;
+using Iviz.Roslib;
 using System;
-using Iviz.App.Listeners;
 using Iviz.Resources;
 using System.Collections.ObjectModel;
+using Iviz.Displays;
 
-namespace Iviz.App
+namespace Iviz.Controllers
 {
     class RobotInfo : MonoBehaviour
     {
@@ -33,25 +32,25 @@ namespace Iviz.App
         [DataMember] public SerializableColor Tint { get; set; } = Color.white;
     }
 
-    public sealed class RobotController : MonoBehaviour, IController, IHasFrame
+    public sealed class RobotController : IController, IHasFrame, IJointProvider
     {
-        ObjectClickableNode node;
+        readonly ObjectClickableNode node;
         RobotInfo robotInfo;
 
-        GameObject carrier;
-        BoxCollider carrierCollider;
+        readonly GameObject carrier;
+        readonly BoxCollider carrierCollider;
 
         public TFFrame Frame => node.Parent;
 
-        public GameObject RobotObject { get; private set; }
-        public GameObject BaseLink { get; private set; }
+        GameObject RobotObject { get; set; }
+        GameObject BaseLink { get; set; }
 
         public event Action Stopped;
 
         readonly Dictionary<GameObject, GameObject> originalLinkParents = new Dictionary<GameObject, GameObject>();
         readonly Dictionary<GameObject, Pose> originalLinkPoses = new Dictionary<GameObject, Pose>();
         readonly Dictionary<string, JointInfo> jointWriters = new Dictionary<string, JointInfo>();
-        readonly List<MarkerWrapper> displays = new List<MarkerWrapper>();
+        readonly List<MarkerWrapperResource> displays = new List<MarkerWrapperResource>();
 
         public IReadOnlyDictionary<string, JointInfo> JointWriters => new ReadOnlyDictionary<string, JointInfo>(jointWriters);
 
@@ -62,7 +61,7 @@ namespace Iviz.App
             set
             {
                 RobotResource = value.RobotResource;
-                AttachToTF = value.AttachToTF;
+                AttachToTf = value.AttachToTF;
                 FramePrefix = value.FramePrefix;
                 FrameSuffix = value.FrameSuffix;
                 Visible = value.Visible;
@@ -74,18 +73,7 @@ namespace Iviz.App
         public string Name
         {
             get => config.RobotName;
-            set
-            {
-                if (value == "")
-                {
-                    name = "Robot: " + config.RobotResource;
-                }
-                else
-                {
-                    name = "Robot: " + value;
-                }
-                config.RobotName = value;
-            }
+            private set => config.RobotName = value;
         }
 
         public string LongName => (Name == "") ? config.RobotResource : Name;
@@ -93,10 +81,7 @@ namespace Iviz.App
         public string RobotResource
         {
             get => config.RobotResource;
-            set
-            {
-                LoadRobotFromResource(value);
-            }
+            set => LoadRobotFromResource(value);
         }
 
         public string FramePrefix
@@ -104,17 +89,17 @@ namespace Iviz.App
             get => config.FramePrefix;
             set
             {
-                if (AttachToTF)
+                if (AttachToTf)
                 {
-                    AttachToTF = false;
+                    AttachToTf = false;
                     config.FramePrefix = value;
-                    AttachToTF = true;
+                    AttachToTf = true;
                 }
                 else
                 {
                     config.FramePrefix = value;
                 }
-                if (BaseLink != null)
+                if (!(BaseLink is null))
                 {
                     node.AttachTo(Decorate(BaseLink.name));
                 }
@@ -126,17 +111,17 @@ namespace Iviz.App
             get => config.FrameSuffix;
             set
             {
-                if (AttachToTF)
+                if (AttachToTf)
                 {
-                    AttachToTF = false;
+                    AttachToTf = false;
                     config.FrameSuffix = value;
-                    AttachToTF = true;
+                    AttachToTf = true;
                 }
                 else
                 {
                     config.FrameSuffix = value;
                 }
-                if (BaseLink != null)
+                if (!(BaseLink is null))
                 {
                     node.AttachTo(Decorate(BaseLink.name));
                 }
@@ -150,10 +135,7 @@ namespace Iviz.App
             {
                 config.Visible = value;
                 displays.ForEach(x => x.Visible = value);
-                if (RobotObject != null)
-                {
-                    RobotObject.SetActive(value);
-                }
+                RobotObject?.SetActive(value);
                 node.Selected = false;
                 
             }
@@ -179,61 +161,97 @@ namespace Iviz.App
             }
         }
 
-        public string Decorate(string jointName)
+        string Decorate(string jointName)
         {
             return $"{config.FramePrefix}{jointName}{config.FrameSuffix}";
         }
 
-        public bool AttachToTF
+        public bool TryWriteJoint(string joint, float value)
+        {
+            if (!JointWriters.TryGetValue(joint, out JointInfo writer))
+            {
+                return false;
+            }
+            writer.Write(value);
+            return true;
+        }
+
+        public bool AttachToTf
         {
             get => config.AttachToTF;
             set
             {
                 if (value)
                 {
-                    RobotObject.transform.SetParentLocal(TFListener.BaseFrame.transform);
+                    RobotObject.transform.SetParentLocal(TFListener.MapFrame.transform);
+                    foreach (var link in originalLinkPoses.Keys)
+                    {
+                        TFFrame frame = TFListener.GetOrCreateFrame(Decorate(link.name), node);
+                        link.transform.SetParentLocal(frame.transform);
+                        link.transform.SetLocalPose(Pose.identity);
+                    }
+
+                    // fill in missing frame parents, but only if it hasn't been provided already
+                    foreach (var entry in originalLinkParents)
+                    {
+                        TFFrame frame = TFListener.GetOrCreateFrame(Decorate(entry.Key.name), node);
+                        if (frame.Parent == TFListener.RootFrame)
+                        {
+                            TFFrame parentFrame = TFListener.GetOrCreateFrame(Decorate(entry.Value.name), node);
+                            frame.Parent = parentFrame;
+                        }
+                    }
+
+                    /*
                     originalLinkParents.ForEach(x =>
                     {
                         TFFrame frame = TFListener.GetOrCreateFrame(Decorate(x.Key.name), node);
                         TFFrame parentFrame = TFListener.GetOrCreateFrame(Decorate(x.Value.name), node);
 
-                        frame.Parent = null;
-                        parentFrame.Parent = null;
+                        //Debug.Log(frame.Id + " " + Decorate(x.Key.name));
+                        //frame.Parent = null;
+                        //Debug.Log(parentFrame.Id);
+                        //Debug.Log(parentFrame.Id + " " + Decorate(x.Value.name));
+                        //parentFrame.Parent = null;
 
                         x.Key.transform.SetParentLocal(frame.transform);
                         x.Key.transform.SetLocalPose(Pose.identity);
                     });
+                    **/
+                    /*
                     originalLinkParents.ForEach(x =>
                     {
                         TFFrame frame = TFListener.GetOrCreateFrame(Decorate(x.Key.name), node);
                         TFFrame parentFrame = TFListener.GetOrCreateFrame(Decorate(x.Value.name), node);
                         frame.Parent = parentFrame;
                     });
+                    */
                     //BaseLink.transform.SetParentLocal(node.transform);
                 }
                 else
                 {
-                    originalLinkParents.ForEach(x =>
+                    foreach (var entry in originalLinkParents)
                     {
-                        if (TFListener.TryGetFrame(Decorate(x.Key.name), out TFFrame frame))
+                        if (TFListener.TryGetFrame(Decorate(entry.Key.name), out TFFrame frame))
                         {
                             frame.RemoveListener(node);
                         }
-                        if (TFListener.TryGetFrame(Decorate(x.Value.name), out TFFrame parentFrame))
+                        if (TFListener.TryGetFrame(Decorate(entry.Value.name), out TFFrame parentFrame))
                         {
                             parentFrame.RemoveListener(node);
                         }
 
-                        x.Key.transform.SetParentLocal(x.Value == null ? node.transform : x.Value.transform);
-                        x.Key.transform.SetLocalPose(originalLinkPoses[x.Key]);
-                    });
+                        entry.Key.transform.SetParentLocal(entry.Value.transform);
+                        entry.Key.transform.SetLocalPose(originalLinkPoses[entry.Key]);
+                    }
+
                     node.Parent = null;
                     //RobotObject.transform.SetParentLocal(node.transform);
                     jointWriters.Values.ForEach(x => x.Reset());
                 }
-                if (BaseLink == null)
+                if (BaseLink is null)
                 {
-                    node.Parent = TFListener.BaseFrame;
+                    node.Parent = TFListener.MapFrame;
                 }
                 else
                 {
@@ -244,16 +262,18 @@ namespace Iviz.App
             }
         }
 
-        public ModuleData ModuleData
+        public IModuleData ModuleData
         {
-            get => node.DisplayData;
-            set => node.DisplayData = value;
+            get => node.ModuleData;
+            private set => node.ModuleData = value;
         }
 
-        void Awake()
+        public RobotController(IModuleData moduleData)
         {
             node = ObjectClickableNode.Instantiate("RobotNode");
-
+            node.Selectable = false;
+            ModuleData = moduleData;
+            
             carrier = new GameObject();
             carrierCollider = carrier.AddComponent<BoxCollider>();
             node.Target = carrier;
@@ -263,20 +283,31 @@ namespace Iviz.App
 
         void LoadRobotFromResource(string newResource)
         {
-            if (newResource == config.RobotResource && RobotObject != null)
+            if (newResource == config.RobotResource && !(RobotObject is null))
             {
                 return;
             }
 
-            bool oldAttachToTf = AttachToTF;
+            bool oldAttachToTf = AttachToTf;
 
             DisposeRobot();
             //node.Target = null;
 
             config.RobotResource = newResource;
 
-            RobotObject = ResourcePool.GetOrCreate(Resource.Robots.Objects[newResource], TFListener.BaseFrame.transform);
-            RobotObject.name = newResource;
+            try
+            {
+                RobotObject =
+                    ResourcePool.GetOrCreate(Resource.Robots.Objects[newResource], TFListener.MapFrame.transform);
+            }
+            catch (ResourceNotFoundException)
+            {
+                Debug.LogError("Robot: Resource '" + newResource + "' not found!");
+                
+                node.Target = null;
+            }
+
+            RobotObject.name = newResource + "!";
 
             Name = Name; // update name;
 
@@ -287,7 +318,7 @@ namespace Iviz.App
             }
 
             robotInfo = RobotObject.GetComponent<RobotInfo>(); // check if recycled
-            if (robotInfo == null)
+            if (robotInfo is null)
             {
                 robotInfo = RobotObject.AddComponent<RobotInfo>();
                 robotInfo.owner = this;
@@ -297,12 +328,21 @@ namespace Iviz.App
             originalLinkParents.Clear();
             originalLinkPoses.Clear();
             BaseLink = null;
-            RobotObject.GetComponentsInChildren<UrdfLink>().ForEach(x =>
+            
+            UrdfLink[] links = RobotObject.GetComponentsInChildren<UrdfLink>();
+            
+            links.ForEach(x =>
             {
                 GameObject parentObject = x.transform.parent.gameObject;
-                originalLinkParents.Add(x.gameObject, parentObject);
+                if (parentObject.GetComponent<UrdfLink>() != null)
+                {
+                    //Debug.Log("Original parent: " + x.gameObject + " -> " + parentObject);
+                    originalLinkParents.Add(x.gameObject, parentObject);
+                }
+
                 originalLinkPoses.Add(x.gameObject, x.transform.AsLocalPose());
             });
+            
             RobotObject.GetComponentsInChildren<UrdfJoint>().ForEach(x =>
             {
                 if (x.JointType != UrdfJoint.JointTypes.Fixed)
@@ -313,12 +353,11 @@ namespace Iviz.App
 
             RobotObject.SetActive(Visible);
 
-            BaseLink = RobotObject.
-                GetComponentsInChildren<UrdfLink>().
-                First(x => x.transform.parent.GetComponentInParent<UrdfLink>() == null).
+            BaseLink = links.
+                FirstOrDefault(x => x.transform.parent.GetComponentInParent<UrdfLink>() is null)?.
                 gameObject;
 
-            if (BaseLink == null)
+            if (BaseLink is null)
             {
                 Debug.LogWarning("Robot " + newResource + " has no base link!");
             }
@@ -333,12 +372,12 @@ namespace Iviz.App
                 robotCollider.enabled = false;
 
                 node.name = "Node [" + newResource + "]";
-                carrier.name = "Carrier [" + newResource + "]";
+                carrier.name = "Robot [" + newResource + "]";
             }
 
             if (oldAttachToTf)
             {
-                AttachToTF = true;
+                AttachToTf = true;
             }
         }
 
@@ -349,13 +388,14 @@ namespace Iviz.App
             this.displays.Clear();
             foreach (MeshRenderer meshRenderer in renderers)
             {
-                MarkerWrapper item = meshRenderer.gameObject.AddComponent<MarkerWrapper>();
+                MarkerWrapperResource item = meshRenderer.gameObject.AddComponent<MarkerWrapperResource>();
                 item.Tint = Tint;
                 item.OcclusionOnly = RenderAsOcclusionOnly;
                 displays.Add(item);
             }
         }
 
+        /*
         public void UpdateJoints(IReadOnlyDictionary<string, float> newJointValues, List<string> unmatched)
         {
             unmatched?.Clear();
@@ -371,6 +411,7 @@ namespace Iviz.App
                 }
             });
         }
+        */
 
         public void Stop()
         {
@@ -378,29 +419,31 @@ namespace Iviz.App
             DisposeRobot();
             Stopped?.Invoke();
 
-            Destroy(carrier.gameObject);
-            Destroy(node.gameObject);
+            UnityEngine.Object.Destroy(carrier.gameObject);
+            UnityEngine.Object.Destroy(node.gameObject);
+        }
+
+        public void Reset()
+        {
+            
         }
 
         void DisposeRobot()
         {
-            if (AttachToTF)
+            if (AttachToTf)
             {
-                AttachToTF = false;
+                AttachToTf = false;
             }
 
-            if (RobotObject != null)
+            if (!(RobotObject is null))
             {
-                if (BaseLink != null)
-                {
-                    BaseLink.transform.SetParentLocal(RobotObject.transform);
-                }
+                BaseLink?.transform.SetParentLocal(RobotObject.transform);
                 ResourcePool.Dispose(Resource.Robots.Objects[config.RobotResource], RobotObject);
             }
             config.RobotResource = null;
             RobotObject = null;
 
-            if (robotInfo != null)
+            if (!(robotInfo is null))
             {
                 robotInfo.owner = null;
             }

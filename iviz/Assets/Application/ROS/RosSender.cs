@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using Iviz.Displays;
 using Iviz.Msgs;
-using Iviz.RoslibSharp;
+using Iviz.Roslib;
 using UnityEngine;
 
-namespace Iviz.App
+namespace Iviz.Controllers
 {
     [DataContract]
     public class RosSenderStats : JsonToString
@@ -60,6 +61,8 @@ namespace Iviz.App
             GameThread.EverySecond -= UpdateStats;
         }
 
+        public abstract void Publish(IMessage msg);
+
         void UpdateStats()
         {
             if (LastMsgCounter == 0)
@@ -73,6 +76,9 @@ namespace Iviz.App
                     LastMsgCounter,
                     LastMsgBytes
                 );
+
+                ConnectionManager.ReportUp(LastMsgBytes);
+
                 LastMsgBytes = 0;
                 LastMsgCounter = 0;
             }
@@ -90,6 +96,11 @@ namespace Iviz.App
         public void SetId(int id)
         {
             Id = id;
+        }
+
+        public override void Publish(IMessage msg)
+        {
+            Publish((T)msg);
         }
 
         public void Publish(T msg)

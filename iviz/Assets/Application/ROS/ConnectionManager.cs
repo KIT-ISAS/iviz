@@ -1,14 +1,15 @@
 ﻿using Iviz.Msgs;
 using Iviz.Msgs.RosgraphMsgs;
-using Iviz.RoslibSharp;
+using Iviz.Roslib;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Displays;
 using UnityEngine;
 
-namespace Iviz.App
+namespace Iviz.Controllers
 {
     public enum ConnectionState
     {
@@ -19,9 +20,11 @@ namespace Iviz.App
 
     public class ConnectionManager : MonoBehaviour
     {
-        public static ConnectionManager Instance { get; private set; }
+        static ConnectionManager Instance;
         public static RosConnection Connection { get; private set; }
         RosSender<Log> sender;
+
+        int collectedUp, collectedDown;
 
         void Awake()
         {
@@ -77,19 +80,36 @@ namespace Iviz.App
             => Connection.AdvertiseService(service, callback);
 
         public static ReadOnlyCollection<BriefTopicInfo>  GetSystemPublishedTopics() => Connection.GetSystemPublishedTopics();
+        public static ReadOnlyCollection<string> GetSystemParameterList() => Connection.GetSystemParameterList();
+
+        public static void ReportUp(int size)
+        {
+            Instance.collectedUp += size;
+        }
+
+        public static void ReportDown(int size)
+        {
+            Instance.collectedDown += size;
+        }
+
+        public static (int, int) CollectReported()
+        {
+            (int, int) result = (Instance.collectedDown, Instance.collectedUp);
+            Instance.collectedDown = 0;
+            Instance.collectedUp = 0;
+            return result;
+        }
     }
 
     public abstract class RosConnection
     {
         static readonly TimeSpan TaskWaitTime = TimeSpan.FromMilliseconds(2000);
 
-        readonly Queue<Action> ToDos = new Queue<Action>();
+        readonly Queue<Action> toDos = new Queue<Action>();
         readonly object condVar = new object();
         readonly Task task;
-
-        protected readonly Dictionary<string, HashSet<RosSender>> senders = new Dictionary<string, HashSet<RosSender>>();
-        protected readonly Dictionary<string, HashSet<RosListener>> listeners = new Dictionary<string, HashSet<RosListener>>();
-        protected volatile bool keepRunning;
+        
+        volatile bool keepRunning;
 
         public event Action<ConnectionState> ConnectionStateChanged;
 
@@ -102,7 +122,7 @@ namespace Iviz.App
         public bool KeepReconnecting { get; set; }
 
         protected static readonly ReadOnlyCollection<BriefTopicInfo> EmptyTopics =
-            new ReadOnlyCollection<BriefTopicInfo>(new List<BriefTopicInfo>());
+            new ReadOnlyCollection<BriefTopicInfo>(Array.Empty<BriefTopicInfo>());
 
         public ReadOnlyCollection<BriefTopicInfo> PublishedTopics { get; protected set; } = EmptyTopics;
 
@@ -137,7 +157,7 @@ namespace Iviz.App
         {
             lock (condVar)
             {
-                ToDos.Enqueue(a);
+                toDos.Enqueue(a);
                 Monitor.Pulse(condVar);
             }
         }
@@ -183,11 +203,11 @@ namespace Iviz.App
                 Action action;
                 lock (condVar)
                 {
-                    if (ToDos.Count == 0)
+                    if (toDos.Count == 0)
                     {
                         break;
                     }
-                    action = ToDos.Dequeue();
+                    action = toDos.Dequeue();
                 }
                 try
                 {
@@ -213,9 +233,14 @@ namespace Iviz.App
         public abstract void Unadvertise(RosSender advertiser);
         public abstract void Publish(RosSender advertiser, IMessage msg);
         public abstract void AdvertiseService<T>(string service, Action<T> callback) where T : IService, new();
+        public abstract void CallServiceAsync<T>(string service, T srv, Action<T> callback) where T : IService;
+        public abstract bool CallService<T>(string service, T srv) where T : IService;
         public abstract ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics();
+        public abstract ReadOnlyCollection<string> GetSystemParameterList();
         public abstract int GetNumPublishers(string topic);
         public abstract int GetNumSubscribers(string topic);
+
+        public abstract string GetParameter(string parameter);
 
         protected virtual void Update()
         {

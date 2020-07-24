@@ -7,7 +7,7 @@ Shader "iviz/TransparentLine"
 	SubShader
 	{
 		Cull Off
-		Tags { "Queue" = "Transparent" "RenderType"="Transparent"}
+		Tags { "Queue" = "Transparent" "RenderType"="Transparent" "LightMode"="ForwardBase"}
 		Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass
@@ -35,13 +35,13 @@ Shader "iviz/TransparentLine"
 #if USE_TEXTURE
 				float intensityA;
 #else
-				int colorA;
+				uint colorA;
 #endif
 				float3 B;
 #if USE_TEXTURE
 				float intensityB;
 #else
-				int colorB;
+				uint colorB;
 #endif
 			};
 
@@ -81,14 +81,14 @@ Shader "iviz/TransparentLine"
 				float intensityB = _Lines[inst].intensityB;
 				half4 rgbaB = tex2Dlod(_IntensityTexture, float4(intensityB * _IntensityCoeff + _IntensityAdd, 0, 0, 0));
     #else
-				int cA = _Lines[inst].colorA;
+				uint cA = _Lines[inst].colorA;
 				half4 rgbaA = half4(
 					(cA >>  0) & 0xff,
 					(cA >>  8) & 0xff,
 					(cA >> 16) & 0xff,
 					(cA >> 24) & 0xff
 					) / 255.0;
-				int cB = _Lines[inst].colorB;
+				uint cB = _Lines[inst].colorB;
 				half4 rgbaB = half4(
 					(cB >>  0) & 0xff,
 					(cB >>  8) & 0xff,
@@ -96,8 +96,13 @@ Shader "iviz/TransparentLine"
 					(cB >> 24) & 0xff
 					) / 255.0;
 	#endif
-				o.color = (rgbaB - rgbaA) * V.z + rgbaA;
-				o.color *= _Tint;
+				half4 diffuse = (rgbaB - rgbaA) * V.z + rgbaA;
+				diffuse *= _Tint;
+				
+				//float3 normal = normalize(cross(up, right));
+                o.color = diffuse;				
+			    //o.color.rgb += 0.5f * ShadeSH9(half4(normal, 1));
+
 				return o;
 			}
 

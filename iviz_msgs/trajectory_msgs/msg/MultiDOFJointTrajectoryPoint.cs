@@ -34,16 +34,8 @@ namespace Iviz.Msgs.TrajectoryMsgs
         internal MultiDOFJointTrajectoryPoint(Buffer b)
         {
             Transforms = b.DeserializeStructArray<GeometryMsgs.Transform>();
-            Velocities = b.DeserializeArray<GeometryMsgs.Twist>();
-            for (int i = 0; i < this.Velocities.Length; i++)
-            {
-                Velocities[i] = new GeometryMsgs.Twist(b);
-            }
-            Accelerations = b.DeserializeArray<GeometryMsgs.Twist>();
-            for (int i = 0; i < this.Accelerations.Length; i++)
-            {
-                Accelerations[i] = new GeometryMsgs.Twist(b);
-            }
+            Velocities = b.DeserializeStructArray<GeometryMsgs.Twist>();
+            Accelerations = b.DeserializeStructArray<GeometryMsgs.Twist>();
             TimeFromStart = b.Deserialize<duration>();
         }
         
@@ -56,8 +48,8 @@ namespace Iviz.Msgs.TrajectoryMsgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeStructArray(Transforms, 0);
-            b.SerializeArray(Velocities, 0);
-            b.SerializeArray(Accelerations, 0);
+            b.SerializeStructArray(Velocities, 0);
+            b.SerializeStructArray(Accelerations, 0);
             b.Serialize(TimeFromStart);
         }
         
@@ -65,17 +57,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
         {
             if (Transforms is null) throw new System.NullReferenceException();
             if (Velocities is null) throw new System.NullReferenceException();
-            for (int i = 0; i < Velocities.Length; i++)
-            {
-                if (Velocities[i] is null) throw new System.NullReferenceException();
-                Velocities[i].RosValidate();
-            }
             if (Accelerations is null) throw new System.NullReferenceException();
-            for (int i = 0; i < Accelerations.Length; i++)
-            {
-                if (Accelerations[i] is null) throw new System.NullReferenceException();
-                Accelerations[i].RosValidate();
-            }
         }
     
         public int RosMessageLength

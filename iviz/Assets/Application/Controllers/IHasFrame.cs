@@ -1,4 +1,4 @@
-﻿namespace Iviz.App.Listeners
+﻿namespace Iviz.Controllers
 {
     public interface IHasFrame
     {

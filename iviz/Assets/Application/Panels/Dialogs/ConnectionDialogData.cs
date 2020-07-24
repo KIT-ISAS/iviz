@@ -1,18 +1,16 @@
 ﻿using UnityEngine;
-using System.Collections;
-using Iviz.App;
 using System;
 using System.Net;
-using System.Text;
-using System.IO;
+using Iviz.Displays;
+using Iviz.Roslib;
 
 namespace Iviz.App
 {
-    public class ConnectionDialogData : DialogData
+    public sealed class ConnectionDialogData : DialogData
     {
-        public static Uri DefaultMasterUri { get; } = new Uri("http://localhost:11311/");
-        public static Uri DefaultMyUri => new Uri($"http://{Dns.GetHostName()}:7614/");
-        public static string DefaultMyId { get; } = "/iviz_" + Application.platform.ToString().ToLower();
+        static Uri DefaultMasterUri => RosClient.TryGetMasterUri();
+        static Uri DefaultMyUri => RosClient.TryGetCallerUri();
+        static string DefaultMyId { get; } = "/iviz_" + UnityEngine.Application.platform.ToString().ToLower();
 
         ConnectionDialogContents panel;
         public override IDialogPanelContents Panel => panel;
@@ -52,12 +50,12 @@ namespace Iviz.App
         public event Action<Uri> MyUriChanged;
         public event Action<string> MyIdChanged;
         
-        public override void Initialize(DisplayListPanel panel)
+        public override void Initialize(ModuleListPanel newPanel)
         {
-            base.Initialize(panel);
+            base.Initialize(newPanel);
             this.panel = (ConnectionDialogContents)DialogPanelManager.GetPanelByType(DialogPanelType.Connection);
 
-            Logger.LogInternal += Logger_Log;
+            Controllers.Logger.LogInternal += Logger_Log;
         }
 
         void Logger_Log(string msg)

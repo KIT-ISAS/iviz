@@ -1,4 +1,4 @@
-﻿using Iviz.App.Listeners;
+﻿using Iviz.Controllers;
 using Iviz.Resources;
 using UnityEngine;
 
@@ -8,7 +8,7 @@ namespace Iviz.App
     /// <see cref="OccupancyGridPanelContents"/> 
     /// </summary>
 
-    public class OccupancyGridModuleData : ListenerModuleData
+    public sealed class OccupancyGridModuleData : ListenerModuleData
     {
         readonly OccupancyGridListener listener;
         readonly OccupancyGridPanelContents panel;
@@ -25,9 +25,10 @@ namespace Iviz.App
             constructor.GetConfiguration<OccupancyGridConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.OccupancyGrid) as OccupancyGridPanelContents;
-            listener = Instantiate<OccupancyGridListener>();
-            listener.name = "OccupancyGrid:" + Topic;
-            listener.ModuleData = this;
+            //listener = Instantiate<OccupancyGridListener>();
+            //listener.name = "OccupancyGrid:" + Topic;
+            //listener.ModuleData = this;
+            listener = new OccupancyGridListener(this);
             if (constructor.Configuration == null)
             {
                 listener.Config.Topic = Topic;
@@ -37,7 +38,7 @@ namespace Iviz.App
                 listener.Config = (OccupancyGridConfiguration)constructor.Configuration;
             }
             listener.StartListening();
-            UpdateButtonText();
+            UpdateModuleButton();
         }
 
         public override void SetupPanel()
@@ -47,7 +48,7 @@ namespace Iviz.App
 
             panel.Colormap.Index = (int)listener.Colormap;
             panel.HideButton.State = listener.Visible;
-            panel.FlipColors.Value = listener.FlipColors;
+            panel.FlipColors.Value = listener.FlipMinMax;
             panel.ScaleZ.Value = listener.ScaleZ;
 
             panel.OcclusionOnlyMode.Value = listener.RenderAsOcclusionOnly;
@@ -75,7 +76,7 @@ namespace Iviz.App
 
             panel.FlipColors.ValueChanged += f =>
             {
-                listener.FlipColors = f;
+                listener.FlipMinMax = f;
             };
             panel.ScaleZ.ValueChanged += f =>
             {
@@ -95,7 +96,7 @@ namespace Iviz.App
             {
                 listener.Visible = !listener.Visible;
                 panel.HideButton.State = listener.Visible;
-                UpdateButtonText();
+                UpdateModuleButton();
             };
         }
 

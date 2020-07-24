@@ -1,20 +1,20 @@
 ﻿using UnityEngine;
-using System.Collections;
 using UnityEngine.UI;
-using System;
 
 namespace Iviz.App
 {
-    public class ImageDialogContents : MonoBehaviour, IDialogPanelContents
+    public sealed class ImageDialogContents : MonoBehaviour, IDialogPanelContents
     {
         [SerializeField] Text text = null;
         [SerializeField] RawImage image = null;
         [SerializeField] TrashButtonWidget closeButton = null;
 
+        public Text Text => text;
+        public RawImage Image => image;
+        public TrashButtonWidget CloseButton => closeButton;
+
         float maxWidth;
         float maxHeight;
-
-        public TrashButtonWidget CloseButton => closeButton;
 
         public string Label
         {

@@ -3,7 +3,7 @@ using System.IO;
 using System.Net.Sockets;
 using Iviz.Msgs;
 
-namespace Iviz.RoslibSharp.XmlRpc
+namespace Iviz.Roslib.XmlRpc
 {
     public sealed class HttpListenerContext : IDisposable
     {

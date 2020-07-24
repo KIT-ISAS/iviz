@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using Iviz.Displays;
 using Iviz.Msgs;
-using Iviz.RoslibSharp;
+using Iviz.Roslib;
 using UnityEngine;
 
-namespace Iviz.App
+namespace Iviz.Controllers
 {
     [DataContract]
     public class RosListenerStats : JsonToString
@@ -20,7 +21,9 @@ namespace Iviz.App
         [DataMember] public int MessagesInQueue { get; }
         [DataMember] public int Dropped { get; }
 
-        public RosListenerStats() { }
+        public RosListenerStats()
+        {
+        }
 
         public RosListenerStats(int totalMessages, float jitterMin, float jitterMax,
             float jitterMean, int messagesPerSecond, int bytesPerSecond, int messagesInQueue, int dropped)
@@ -40,15 +43,16 @@ namespace Iviz.App
     {
         public string Topic { get; }
         public string Type { get; }
-        public RosListenerStats Stats { get; protected set; } = new RosListenerStats();
+        public RosListenerStats Stats { get; private set; } = new RosListenerStats();
 
         public int NumPublishers => ConnectionManager.Connection.GetNumPublishers(Topic);
 
-        public int TotalMsgCounter { get; protected set; }
-        public int MsgsInQueue { get; protected set; }
+        protected int TotalMsgCounter { get; set; }
+        protected int MsgsInQueue { get; set; }
         public int MaxQueueSize { get; set; } = 50;
-        public int TotalMsgBytes { get; protected set; }
-        public int Dropped { get; protected set; }
+        protected int LastMsgBytes { get; set; }
+        protected int Dropped { get; set; }
+
         protected readonly List<float> timesOfArrival = new List<float>();
 
         protected RosListener(string topic, string type)
@@ -57,6 +61,7 @@ namespace Iviz.App
             {
                 throw new System.ArgumentException("Invalid topic!", nameof(topic));
             }
+
             if (string.IsNullOrWhiteSpace(type))
             {
                 throw new System.ArgumentException("Invalid type!", nameof(type));
@@ -90,21 +95,33 @@ namespace Iviz.App
                 for (int i = 0; i < timesOfArrival.Count() - 1; i++)
                 {
                     float jitter = timesOfArrival[i + 1] - timesOfArrival[i];
-                    if (jitter < jitterMin) jitterMin = jitter;
-                    if (jitter > jitterMax) jitterMax = jitter;
+                    if (jitter < jitterMin)
+                    {
+                        jitterMin = jitter;
+                    }
+
+                    if (jitter > jitterMax)
+                    {
+                        jitterMax = jitter;
+                    }
                 }
 
                 Stats = new RosListenerStats(
                     TotalMsgCounter,
                     jitterMin,
                     jitterMax,
-                    timesOfArrival.Count == 0 ? 0 : (timesOfArrival.Last() - timesOfArrival.First()) / timesOfArrival.Count(),
+                    timesOfArrival.Count == 0
+                        ? 0
+                        : (timesOfArrival.Last() - timesOfArrival.First()) / timesOfArrival.Count(),
                     timesOfArrival.Count,
-                    TotalMsgBytes,
+                    LastMsgBytes,
                     MsgsInQueue,
                     Dropped
                 );
-                TotalMsgBytes = 0;
+
+                ConnectionManager.ReportDown(LastMsgBytes);
+
+                LastMsgBytes = 0;
                 Dropped = 0;
                 timesOfArrival.Clear();
             }
@@ -120,6 +137,12 @@ namespace Iviz.App
         public abstract void Pause();
 
         public abstract void Unpause();
+
+        public void Reset()
+        {
+            Pause();
+            Unpause();
+        }
     }
 
     public sealed class RosListener<T> : RosListener where T : IMessage, new()
@@ -140,7 +163,7 @@ namespace Iviz.App
 
         public void EnqueueMessage(T t)
         {
-            lock(queue)
+            lock (queue)
             {
                 queue.Enqueue(t);
                 if (queue.Count > MaxQueueSize)
@@ -148,25 +171,28 @@ namespace Iviz.App
                     queue.Dequeue();
                     Dropped++;
                 }
+
                 MsgsInQueue = queue.Count;
             }
         }
 
         void CallHandler()
         {
-            if (queue.Count == 0)
-            {
-                return;
-            }
             lock (queue)
             {
-                foreach(T t in queue)
+                if (queue.Count == 0)
                 {
-                    TotalMsgBytes += t.RosMessageLength;
+                    return;
+                }
+
+                foreach (T t in queue)
+                {
+                    LastMsgBytes += t.RosMessageLength;
                     timesOfArrival.Add(Time.time);
 
                     subscriptionHandler(t);
                 }
+
                 TotalMsgCounter += queue.Count;
                 MsgsInQueue = 0;
                 queue.Clear();
@@ -182,6 +208,7 @@ namespace Iviz.App
                 ConnectionManager.Unsubscribe(this);
                 Subscribed = false;
             }
+
             base.Stop();
         }
 
@@ -204,6 +231,3 @@ namespace Iviz.App
         }
     }
 }
-
-
-

@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
-using Iviz.App.Displays;
 using Iviz.Displays;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
-using Iviz.RoslibSharp;
-using RosSharp;
+using Iviz.Roslib;
 using UnityEngine;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     [DataContract]
     public class LaserScanConfiguration : JsonToString, IConfiguration
@@ -31,12 +27,12 @@ namespace Iviz.App.Listeners
         [DataMember] public uint MaxQueueSize { get; set; } = 1;
     }
 
-    public class LaserScanListener : ListenerController
+    public sealed class LaserScanListener : ListenerController
     {
-        RadialScanResource resource;
-        DisplayNode node;
+        readonly RadialScanResource resource;
+        readonly DisplayNode node;
 
-        public override ModuleData ModuleData { get; set; }
+        public override IModuleData ModuleData { get; }
 
         public override TFFrame Frame => node.Parent;
 
@@ -168,21 +164,21 @@ namespace Iviz.App.Listeners
             }
         }
 
-        void Awake()
+        public LaserScanListener(IModuleData moduleData)
         {
-            transform.parent = TFListener.ListenersFrame.transform;
+            ModuleData = moduleData;
+            //transform.parent = TFListener.ListenersFrame.transform;
 
-            node = SimpleDisplayNode.Instantiate("LaserScanNode", transform);
+            node = SimpleDisplayNode.Instantiate("[LaserScanNode]");
             resource = ResourcePool.GetOrCreate<RadialScanResource>(Resource.Displays.RadialScanResource, node.transform);
             Config = new LaserScanConfiguration();
         }
 
         public override void StartListening()
         {
-            base.StartListening();
             Listener = new RosListener<LaserScan>(config.Topic, Handler);
             Listener.MaxQueueSize = (int)MaxQueueSize;
-            name = "[" + config.Topic + "]";
+            //name = "[" + config.Topic + "]";
             node.name = "[" + config.Topic + "]";
         }
 
@@ -221,7 +217,7 @@ namespace Iviz.App.Listeners
             ResourcePool.Dispose(Resource.Displays.RadialScanResource, resource.gameObject);
 
             node.Stop();
-            Destroy(node.gameObject);
+            UnityEngine.Object.Destroy(node.gameObject);
         }
     }
 }

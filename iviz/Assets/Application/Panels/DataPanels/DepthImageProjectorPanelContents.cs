@@ -1,7 +1,8 @@
 ﻿namespace Iviz.App
 {
-    public class DepthImageProjectorPanelContents : DataPanelContents
+    public sealed class DepthImageProjectorPanelContents : DataPanelContents
     {
+        public FrameWidget Frame { get; private set; }
         public DropdownWidget Depth { get; private set; }
         public DropdownWidget Color { get; private set; }
         public SliderWidget FOV { get; private set; }
@@ -9,10 +10,11 @@
         public TrashButtonWidget CloseButton { get; private set; }
         public ToggleButtonWidget HideButton { get; private set; }
 
-        void Start()
+        void Awake()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("DepthProjector");
+            Frame = p.AddFrame();
             Depth = p.AddDropdown("Depth Image");
             Color = p.AddDropdown("Color Image");
             FOV = p.AddSlider("FOV Angle").SetMinValue(0).SetMaxValue(89);

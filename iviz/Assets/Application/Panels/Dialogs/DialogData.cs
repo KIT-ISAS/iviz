@@ -2,11 +2,11 @@
 {
     public abstract class DialogData
     {
-        protected DisplayListPanel ModuleListPanel { get; private set; }
+        protected ModuleListPanel ModuleListPanel { get; private set; }
         protected DialogPanelManager DialogPanelManager => ModuleListPanel.DialogPanelManager;
         public abstract IDialogPanelContents Panel { get; }
 
-        public virtual void Initialize(DisplayListPanel panel)
+        public virtual void Initialize(ModuleListPanel panel)
         {
             ModuleListPanel = panel;
         }
@@ -15,11 +15,13 @@
         public virtual void CleanupPanel() { }
         public virtual void UpdatePanel() { }
 
+        /*
         public virtual void Cleanup()
         {
             DialogPanelManager.HidePanelFor(this);
             ModuleListPanel = null;
         }
+        */
 
         public void Show()
         {
