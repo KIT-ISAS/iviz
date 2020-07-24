@@ -20,21 +20,29 @@ namespace Iviz.ModelService
     {
         static readonly AssimpContext Importer = new AssimpContext();
         static readonly List<string> PackagePaths = new List<string>();
-
+        
         static void Main()
         {
-            Run();
-        }
+            string masterUri = Environment.GetEnvironmentVariable("ROS_MASTER_URI");
+            if (masterUri is null)
+            {
+                Console.Error.WriteLine("EE Fatal error: Failed to retrieve ROS_MASTER_URI variable");
+                //return;
+            }
+            
+            masterUri ??= "http://192.168.0.220:11311";
 
-        static void Run()
-        {
-            RosClient client = new RosClient(
-                "http://192.168.0.220:11311",
-                //"http://141.3.59.5:11311",
-                null,
-                "http://192.168.0.157:7619"
-                //"http://141.3.59.19:7621"
-            );
+            RosClient client = new RosClient(masterUri, "/iviz_model_loader");
+            
+                /*
+                RosClient client = new RosClient(
+                    "http://192.168.0.220:11311",
+                    //"http://141.3.59.5:11311",
+                    null,
+                    "http://192.168.0.157:7619"
+                    //"http://141.3.59.19:7621"
+                );
+                */
 
             Console.WriteLine("** Searching package paths...");
             string packagePath = Environment.GetEnvironmentVariable("ROS_PACKAGE_PATH");
@@ -52,8 +60,6 @@ namespace Iviz.ModelService
 
                 PackagePaths.AddRange(paths);
             }
-
-            PackagePaths.Add("/Users/akzeac/Documents/iviz/iviz/Assets/Robots");
 
             client.AdvertiseService<GetModelResource>("/iviz/get_model_resource", ModelCallback);
             client.AdvertiseService<GetModelTexture>("/iviz/get_model_texture", TextureCallback);
