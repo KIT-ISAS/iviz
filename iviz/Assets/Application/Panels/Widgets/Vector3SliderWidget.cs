@@ -1,7 +1,6 @@
 ﻿using System;
 using Iviz.Resources;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Iviz.App

@@ -1,13 +1,12 @@
 ﻿using UnityEngine;
 using System;
-using Iviz.App.Displays;
 using Iviz.Msgs.SensorMsgs;
 using System.Runtime.Serialization;
 using Iviz.Roslib;
 using Iviz.Displays;
 using Iviz.Resources;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     [DataContract]
     public sealed class ImageConfiguration : JsonToString, IConfiguration
@@ -47,7 +46,7 @@ namespace Iviz.App.Listeners
 
         public bool IsMono => ImageTexture.IsMono;
 
-        public override ModuleData ModuleData => Node.ModuleData;
+        public override IModuleData ModuleData => Node.ModuleData;
 
         readonly ImageConfiguration config = new ImageConfiguration();
         public ImageConfiguration Config
@@ -173,7 +172,7 @@ namespace Iviz.App.Listeners
             }
         }
 
-        public ImageListener(ModuleData moduleData)
+        public ImageListener(IModuleData moduleData)
         {
             ImageTexture = new ImageTexture();
             Node = DisplayClickableNode.Instantiate("[ImageNode]");

@@ -29,6 +29,8 @@ Shader "iviz/Line"
 			float4x4 _WorldToLocal;
 			float4 _Front;
 			float4 _Tint;
+			
+			float _Scale;
 
 			struct Line {
 				float3 A;
@@ -60,7 +62,7 @@ Shader "iviz/Line"
 				unity_ObjectToWorld = _LocalToWorld;
 				unity_WorldToObject = _WorldToLocal;
 
-				float3 V = _Quad[id];
+				float3 V = _Quad[id] * _Scale;
 				float3 A = _Lines[inst].A;
 				float3 B = _Lines[inst].B;
 				float3 BA = B - A;

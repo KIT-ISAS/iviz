@@ -1,9 +1,9 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
+using Iviz.Controllers;
 using Iviz.Resources;
-using UnityEngine;
 
 namespace Iviz.App
 {
@@ -13,30 +13,35 @@ namespace Iviz.App
 
         AddTopicDialogContents panel;
         public override IDialogPanelContents Panel => panel;
+        bool sortByType = false;
 
         class TopicWithResource
         {
             public string Topic { get; }
             public string Type { get; }
+            public string ShortType { get; }
             public Resource.Module Resource { get; }
 
             public TopicWithResource(string topic, string type, Resource.Module resource)
             {
-                this.Topic = topic;
-                this.Type = type;
-                this.Resource = resource;
+                Topic = topic;
+                Type = type;
+                Resource = resource;
+
+                int lastSlash = Type.LastIndexOf('/');
+                ShortType = (lastSlash == -1) ? Type : Type.Substring(lastSlash + 1);
             }
 
             public override string ToString()
             {
                 return $"{Iviz.Resources.Resource.Font.Split(Topic, MaxLineWidth)}\n" +
-                       $"<b>{Iviz.Resources.Resource.Font.Split(Type, MaxLineWidth)}</b>";
+                       $"<b>{Iviz.Resources.Resource.Font.Split(ShortType, MaxLineWidth)}</b>";
             }
         }
 
         readonly List<TopicWithResource> topics = new List<TopicWithResource>();
 
-        public override void Initialize(DisplayListPanel newPanel)
+        public override void Initialize(ModuleListPanel newPanel)
         {
             base.Initialize(newPanel);
             this.panel = (AddTopicDialogContents)DialogPanelManager.GetPanelByType(DialogPanelType.AddTopic);
@@ -85,7 +90,15 @@ namespace Iviz.App
             base.UpdatePanel();
 
             GetTopics();
+
+            topics.Sort((x, y) => string.CompareOrdinal(x.Topic, y.Topic));
+            if (sortByType)
+            {
+                topics.Sort((x, y) => string.CompareOrdinal(x.ShortType, y.ShortType));
+            }
+            
             panel.Items = topics.Select(x => x.ToString());
+            
             if (panel.ShowAll.Value)
             {
                 for (int i = 0; i < topics.Count; i++)

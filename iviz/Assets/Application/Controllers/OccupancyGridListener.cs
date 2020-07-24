@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Linq;
 using System.Runtime.Serialization;
-using Iviz.App.Displays;
 using Iviz.Displays;
 using Iviz.Msgs.NavMsgs;
 using Iviz.Resources;
 using Iviz.Roslib;
 using UnityEngine;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     [DataContract]
     public sealed class OccupancyGridConfiguration : JsonToString, IConfiguration
@@ -31,7 +30,7 @@ namespace Iviz.App.Listeners
         readonly OccupancyGridResource[] grids;
         float lastCellSize;
 
-        public override ModuleData ModuleData { get; }
+        public override IModuleData ModuleData { get; }
 
         public override TFFrame Frame => node.Parent;
 
@@ -143,7 +142,7 @@ namespace Iviz.App.Listeners
             }
         }
 
-        public OccupancyGridListener(ModuleData moduleData)
+        public OccupancyGridListener(IModuleData moduleData)
         {
             ModuleData = moduleData;
             

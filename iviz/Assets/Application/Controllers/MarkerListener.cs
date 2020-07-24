@@ -1,14 +1,12 @@
 ﻿using System.Collections.Generic;
 using System;
-using System.Diagnostics.Contracts;
-using System.Linq;
 using Iviz.Msgs.VisualizationMsgs;
 using System.Runtime.Serialization;
 using Iviz.Roslib;
 using Iviz.Resources;
 using UnityEngine;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     [DataContract]
     public sealed class MarkerConfiguration : JsonToString, IConfiguration
@@ -26,7 +24,7 @@ namespace Iviz.App.Listeners
     {
         readonly Dictionary<string, MarkerObject> markers = new Dictionary<string, MarkerObject>();
 
-        public override ModuleData ModuleData { get; }
+        public override IModuleData ModuleData { get; }
 
         public override TFFrame Frame => TFListener.MapFrame;
 
@@ -86,7 +84,7 @@ namespace Iviz.App.Listeners
             }
         }
 
-        public MarkerListener(ModuleData moduleData)
+        public MarkerListener(IModuleData moduleData)
         {
             ModuleData = moduleData;
         }

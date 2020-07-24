@@ -1,7 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
 using Iviz.Resources;
-using System;
 
 namespace Iviz.Displays
 {
@@ -10,11 +8,12 @@ namespace Iviz.Displays
         public static readonly int PropIntensityCoeff = Shader.PropertyToID("_IntensityCoeff");
         public static readonly int PropIntensityAdd = Shader.PropertyToID("_IntensityAdd");
         public static readonly int PropIntensity = Shader.PropertyToID("_IntensityTexture");
-        static readonly int PropLocalToWorld = Shader.PropertyToID("_LocalToWorld");
-        static readonly int PropWorldToLocal = Shader.PropertyToID("_WorldToLocal");
+        static readonly int PLocalToWorld = Shader.PropertyToID("_LocalToWorld");
+        static readonly int PWorldToLocal = Shader.PropertyToID("_WorldToLocal");
         protected static readonly int PropBoundaryCenter = Shader.PropertyToID("_BoundaryCenter");
         protected static readonly int PropPoints = Shader.PropertyToID("_Points");
-        static readonly int PropTint = Shader.PropertyToID("_Tint");
+        static readonly int PTint = Shader.PropertyToID("_Tint");
+        static readonly int PScale = Shader.PropertyToID("_Scale");
 
         [SerializeField] protected Material material;
 
@@ -113,13 +112,14 @@ namespace Iviz.Displays
         }
 
         [SerializeField] Color tint;
+
         public Color Tint
         {
             get => tint;
             set
             {
                 tint = value;
-                material.SetColor(PropTint, value);
+                material.SetColor(PTint, value);
             }
         }
 
@@ -131,8 +131,9 @@ namespace Iviz.Displays
 
         protected void UpdateTransform()
         {
-            material.SetMatrix(PropLocalToWorld, transform.localToWorldMatrix);
-            material.SetMatrix(PropWorldToLocal, transform.worldToLocalMatrix);
+            material.SetFloat(PScale, transform.lossyScale.x);
+            material.SetMatrix(PLocalToWorld, transform.localToWorldMatrix);
+            material.SetMatrix(PWorldToLocal, transform.worldToLocalMatrix);
         }
 
         protected abstract void Rebuild();

@@ -1,12 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System;
-using System.Linq;
-using Iviz.App.Displays;
 using Iviz.Msgs.VisualizationMsgs;
-using Iviz.Resources;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     public sealed class InteractiveMarkerObject : DisplayNode
     {
@@ -27,8 +24,8 @@ namespace Iviz.App.Listeners
 
         public event MovedAction Moved;
 
-        MenuObject menuObject = null;
-        public bool HasMenu => menuObject != null;
+        //MenuObject menuObject = null;
+        //public bool HasMenu => menuObject != null;
 
         public DateTime ExpirationTime { get; private set; }
 

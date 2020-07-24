@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Iviz.Resources;
-using UnityEngine;
 
 namespace Iviz.App
 {
@@ -16,7 +14,7 @@ namespace Iviz.App
 
         readonly List<string> files = new List<string>();
 
-        public override void Initialize(DisplayListPanel panel)
+        public override void Initialize(ModuleListPanel panel)
         {
             base.Initialize(panel);
             this.panel = (SaveConfigDialogContents)DialogPanelManager.GetPanelByType(DialogPanelType.SaveAs);

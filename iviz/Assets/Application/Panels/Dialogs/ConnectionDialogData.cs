@@ -1,10 +1,7 @@
 ﻿using UnityEngine;
-using System.Collections;
-using Iviz.App;
 using System;
 using System.Net;
-using System.Text;
-using System.IO;
+using Iviz.Displays;
 
 namespace Iviz.App
 {
@@ -52,12 +49,12 @@ namespace Iviz.App
         public event Action<Uri> MyUriChanged;
         public event Action<string> MyIdChanged;
         
-        public override void Initialize(DisplayListPanel panel)
+        public override void Initialize(ModuleListPanel panel)
         {
             base.Initialize(panel);
             this.panel = (ConnectionDialogContents)DialogPanelManager.GetPanelByType(DialogPanelType.Connection);
 
-            Logger.LogInternal += Logger_Log;
+            Controllers.Logger.LogInternal += Logger_Log;
         }
 
         void Logger_Log(string msg)

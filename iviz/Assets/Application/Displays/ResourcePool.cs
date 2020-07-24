@@ -6,7 +6,7 @@ using Iviz.Resources;
 using Iviz.Displays;
 using JetBrains.Annotations;
 
-namespace Iviz.App
+namespace Iviz.Displays
 {
     public sealed class ResourcePool : MonoBehaviour
     {

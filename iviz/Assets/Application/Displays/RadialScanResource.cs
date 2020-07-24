@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
-using System.Collections;
 using Iviz.Resources;
 using System.Collections.Generic;
-using Iviz.App;
 using System;
 
 namespace Iviz.Displays

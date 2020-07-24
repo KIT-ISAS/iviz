@@ -1,9 +1,8 @@
-﻿using Iviz.App.Listeners;
-using Iviz.Displays;
+﻿using Iviz.Displays;
 using Iviz.Resources;
 using UnityEngine;
 
-namespace Iviz.App.Displays
+namespace Iviz.Controllers
 {
     public sealed class NamedBoundary : MonoBehaviour, IDisplay, IRecyclable
     {

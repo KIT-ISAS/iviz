@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     public abstract class ListenerController : IController, IHasFrame
     {
@@ -9,7 +8,7 @@ namespace Iviz.App.Listeners
 
         public abstract TFFrame Frame { get; }
 
-        public abstract ModuleData ModuleData { get; }
+        public abstract IModuleData ModuleData { get; }
 
         public abstract void StartListening();
 

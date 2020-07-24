@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
-using Iviz.App.Displays;
 using Iviz.Displays;
-using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
 using Iviz.Roslib;
 using UnityEngine;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     [DataContract]
     public sealed class PathConfiguration : JsonToString, IConfiguration
@@ -33,7 +29,7 @@ namespace Iviz.App.Listeners
         readonly DisplayNode node;
         readonly LineResource resource;
 
-        public override ModuleData ModuleData { get; }
+        public override IModuleData ModuleData { get; }
 
         public override TFFrame Frame => node.Parent;
 
@@ -143,7 +139,7 @@ namespace Iviz.App.Listeners
         readonly List<Pose> savedPoses = new List<Pose>();
         readonly List<LineWithColor> lines = new List<LineWithColor>();
 
-        public PathListener(ModuleData moduleData)
+        public PathListener(IModuleData moduleData)
         {
             ModuleData = moduleData;
             

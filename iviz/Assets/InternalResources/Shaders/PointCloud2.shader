@@ -26,7 +26,8 @@ Shader "iviz/PointCloud2"
 			float4x4 _LocalToWorld;
 			float4x4 _WorldToLocal;
 	        float4 _Tint;
-
+            float _Scale;
+            
 			struct Point {
 				float3 position;
 #if USE_TEXTURE
@@ -51,7 +52,7 @@ Shader "iviz/PointCloud2"
 				unity_WorldToObject = _WorldToLocal;
 
 				float2 extent = abs(UNITY_MATRIX_P._11_22);
-				float2 quadVertex = _Quad[id];
+				float2 quadVertex = _Quad[id] * _Scale;
 				Point centerPoint = _Points[inst];
 				float4 centerVertex = float4(centerPoint.position, 1);
 

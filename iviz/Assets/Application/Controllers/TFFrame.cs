@@ -1,16 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine.EventSystems;
 using Iviz.Displays;
-using Iviz.App.Listeners;
 using Iviz.Resources;
-using Iviz.App.Displays;
 using System;
 using System.Collections.ObjectModel;
 using Application.Displays;
+using Iviz.App;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     public sealed class TFFrame : ClickableNode, IRecyclable
     {
@@ -417,7 +415,7 @@ namespace Iviz.App.Listeners
         protected override void OnDoubleClick()
         {
             TFListener.GuiManager.Select(this);
-            DisplayListPanel.Instance.ShowFrame(this);
+            ModuleListPanel.Instance.ShowFrame(this);
         }
     }
 }

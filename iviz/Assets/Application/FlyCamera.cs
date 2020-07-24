@@ -1,12 +1,13 @@
 ﻿using Iviz.App.Displays;
-using Iviz.App.Listeners;
 using Iviz.Resources;
 using System.Collections.Generic;
 using System.Linq;
+using Iviz.Controllers;
+using Iviz.Displays;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UnityEngine.XR.ARFoundation;
+
 // ReSharper disable ConditionIsAlwaysTrueOrFalse
 // ReSharper disable HeuristicUnreachableCode
 
@@ -49,7 +50,7 @@ namespace Iviz.App
                     CameraViewOverride = null;
                 }
 
-                DisplayListPanel.Instance.UnlockButtonVisible = value;
+                ModuleListPanel.Instance.UnlockButtonVisible = value;
             }
         }
 
@@ -66,7 +67,7 @@ namespace Iviz.App
                     OrbitCenterOverride = null;
                 }
 
-                DisplayListPanel.Instance.UnlockButtonVisible = value;
+                ModuleListPanel.Instance.UnlockButtonVisible = value;
             }
         }
 
@@ -124,7 +125,7 @@ namespace Iviz.App
             
             UnityEngine.Application.targetFrameRate = 60;
 
-            DisplayListPanel.Instance.UnlockButton.onClick.AddListener(OnUnlockClick);
+            ModuleListPanel.Instance.UnlockButton.onClick.AddListener(OnUnlockClick);
 
             namedBoundary = ResourcePool.GetOrCreate<NamedBoundary>(Resource.Displays.NamedBoundary);
             StartOrbiting();

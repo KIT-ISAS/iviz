@@ -1,6 +1,5 @@
-﻿using Iviz.App.Listeners;
+﻿using Iviz.Controllers;
 using Iviz.Resources;
-using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 namespace Iviz.App
@@ -105,7 +104,7 @@ namespace Iviz.App
 
         protected override void UpdateModuleButton()
         {
-            ButtonText = $"{Resource.Font.Split(robot.LongName, DisplayListPanel.ModuleDataCaptionWidth)}\n<b>{Module}</b>";
+            ButtonText = $"{Resource.Font.Split(robot.LongName, App.ModuleListPanel.ModuleDataCaptionWidth)}\n<b>{Module}</b>";
         }
 
         public override void AddToState(StateConfiguration config)

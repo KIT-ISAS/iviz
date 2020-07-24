@@ -1,9 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System;
-using System.Linq;
 
-namespace Iviz.App
+namespace Iviz.Displays
 {
     public class GameThread : MonoBehaviour
     {
@@ -15,18 +14,26 @@ namespace Iviz.App
         public static event Action LateEveryFrame;
         public static event Action EverySecond;
         public static event Action LateEverySecond;
-
-        static GameThread Instance;
-
-        void Awake()
+        
+        static GameThread mInstance;
+        static GameThread Instance
         {
-            Instance = this;
-            lastRunTime = Time.time;
+            get
+            {
+                if (!(mInstance is null))
+                {
+                    return mInstance;
+                }
+
+                mInstance = new GameObject("GameThread").AddComponent<GameThread>();
+                mInstance.lastRunTime = Time.time;
+                return mInstance;
+            }
         }
 
         void OnDestroy()
         {
-            Instance = null;
+            mInstance = null;
         }
 
         public static void RunOnce(Action action)

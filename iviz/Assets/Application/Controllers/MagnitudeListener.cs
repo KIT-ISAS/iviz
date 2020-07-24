@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.Serialization;
-using Iviz.App.Displays;
 using Iviz.Displays;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.NavMsgs;
@@ -10,7 +9,7 @@ using UnityEngine;
 using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     [DataContract]
     public sealed class MagnitudeConfiguration : JsonToString, IConfiguration
@@ -39,7 +38,7 @@ namespace Iviz.App.Listeners
         ArrowResource arrow;
         AngleAxisResource angleAxis;
 
-        public override ModuleData ModuleData { get; }
+        public override IModuleData ModuleData { get; }
 
         public override TFFrame Frame => displayNode.Parent;
 
@@ -176,7 +175,7 @@ namespace Iviz.App.Listeners
             }
         }
 
-        public MagnitudeListener(ModuleData moduleData)
+        public MagnitudeListener(IModuleData moduleData)
         {
             ModuleData = moduleData;
             

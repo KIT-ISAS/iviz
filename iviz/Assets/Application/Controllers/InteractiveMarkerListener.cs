@@ -5,10 +5,10 @@ using System;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Roslib;
 using System.Runtime.Serialization;
-using Iviz.App.Displays;
+using Iviz.Displays;
 using Iviz.Resources;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     [DataContract]
     public class InteractiveMarkerConfiguration : JsonToString, IConfiguration
@@ -31,7 +31,7 @@ namespace Iviz.App.Listeners
         readonly Dictionary<string, InteractiveMarkerObject> imarkers =
             new Dictionary<string, InteractiveMarkerObject>();
 
-        public override ModuleData ModuleData { get; }
+        public override IModuleData ModuleData { get; }
 
         public bool DisableExpiration
         {
@@ -51,7 +51,7 @@ namespace Iviz.App.Listeners
             }
         }
 
-        public InteractiveMarkerListener(ModuleData moduleData)
+        public InteractiveMarkerListener(IModuleData moduleData)
         {
             ModuleData = moduleData;
             node = SimpleDisplayNode.Instantiate("[InteractiveMarkerListener]");

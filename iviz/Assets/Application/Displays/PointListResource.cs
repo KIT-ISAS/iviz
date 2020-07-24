@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using Iviz.App;
 using Iviz.Resources;
 using Unity.Collections;
 using Unity.Mathematics;

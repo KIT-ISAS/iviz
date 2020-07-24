@@ -1,9 +1,8 @@
-﻿using Iviz.App.Listeners;
-using Iviz.Displays;
+﻿using Iviz.Displays;
 using Iviz.Resources;
 using UnityEngine;
 
-namespace Iviz.App.Displays
+namespace Iviz.Controllers
 {
     public sealed class DisplayClickableNode : ClickableNode
     {
@@ -34,10 +33,10 @@ namespace Iviz.App.Displays
         string displayName;
         public override string Name => displayName ?? Target?.Name;
 
-        public void SetName(string name)
+        public void SetName(string newName)
         {
-            this.name = name;
-            displayName = name;
+            this.name = newName;
+            displayName = newName;
         }
 
         public override Pose BoundsPose => Target?.WorldPose ?? Pose.identity;

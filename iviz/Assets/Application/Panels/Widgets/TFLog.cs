@@ -1,14 +1,10 @@
 ﻿using UnityEngine;
-using System.Collections;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Text;
-using Iviz.App.Listeners;
-using UnityEngine.EventSystems;
 using TMPro;
 using System;
-using Iviz.App.Displays;
-using Newtonsoft.Json;
+using Iviz.Controllers;
 
 namespace Iviz.App
 {

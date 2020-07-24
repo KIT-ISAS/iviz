@@ -1,19 +1,11 @@
 using UnityEngine;
-using RosSharp;
-using System.Linq;
-using System.Collections.Generic;
-using RosSharp.Urdf;
-using Iviz.App.Displays;
 using System.Runtime.Serialization;
 using Iviz.Roslib;
 using System;
-using Iviz.App.Listeners;
-using Iviz.Resources;
-using System.Collections.ObjectModel;
-using System.Runtime.InteropServices.WindowsRuntime;
 using Iviz.Displays;
+using Iviz.Resources;
 
-namespace Iviz.App
+namespace Iviz.Controllers
 {
     [DataContract]
     public sealed class SimpleRobotConfiguration : JsonToString, IConfiguration
@@ -227,9 +219,9 @@ namespace Iviz.App
             }
         }
 
-        public ModuleData ModuleData { get; private set; }
+        public IModuleData ModuleData { get; private set; }
 
-        public SimpleRobotController(ModuleData moduleData)
+        public SimpleRobotController(IModuleData moduleData)
         {
             node = SimpleDisplayNode.Instantiate("SimpleRobotNode");
             ModuleData = moduleData;

@@ -2,13 +2,11 @@
 using System.Linq;
 using System;
 using UnityEngine.EventSystems;
-using Iviz.App.Displays;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Displays;
-using Iviz.App.Listeners;
 using Iviz.Resources;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     enum MarkerType
     {

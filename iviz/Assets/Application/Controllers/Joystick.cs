@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
-using System.Collections;
-using Iviz.App.Listeners;
+using External;
 
-namespace Iviz.App
+namespace Iviz.Controllers
 {
     public interface IBlocksPointer
     {

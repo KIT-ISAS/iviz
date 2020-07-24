@@ -6,9 +6,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Displays;
 using UnityEngine;
 
-namespace Iviz.App
+namespace Iviz.Controllers
 {
     public enum ConnectionState
     {

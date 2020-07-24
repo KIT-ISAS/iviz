@@ -2,19 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Iviz.App.Displays;
-using Iviz.App.Listeners;
-using Iviz.Displays;
 using Iviz.Resources;
 using Iviz.Urdf;
-using Newtonsoft.Json;
 using UnityEngine;
 using Color = UnityEngine.Color;
 using Joint = Iviz.Urdf.Joint;
 using Material = Iviz.Urdf.Material;
 using Vector3 = UnityEngine.Vector3;
 
-namespace Iviz.App
+namespace Iviz.Displays
 {
     public class RobotModel
     {

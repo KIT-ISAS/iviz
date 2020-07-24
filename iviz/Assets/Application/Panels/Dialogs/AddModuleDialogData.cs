@@ -20,7 +20,7 @@ namespace Iviz.App
         ItemListDialogContents itemList;
         public override IDialogPanelContents Panel => itemList;
 
-        public override void Initialize(DisplayListPanel panel)
+        public override void Initialize(ModuleListPanel panel)
         {
             base.Initialize(panel);
             itemList = (ItemListDialogContents)DialogPanelManager.GetPanelByType(DialogPanelType.ItemList);

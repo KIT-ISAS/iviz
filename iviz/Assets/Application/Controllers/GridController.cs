@@ -3,9 +3,8 @@ using System;
 using System.Runtime.Serialization;
 using Iviz.Resources;
 using Iviz.Displays;
-using Iviz.App.Displays;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     [DataContract]
     public class GridConfiguration : IConfiguration
@@ -31,7 +30,7 @@ namespace Iviz.App.Listeners
         readonly ReflectionProbe reflectionProbe;
         readonly GridResource grid;
 
-        public ModuleData ModuleData
+        public IModuleData ModuleData
         {
             get => node.ModuleData;
             private set => node.ModuleData = value;
@@ -183,7 +182,7 @@ namespace Iviz.App.Listeners
         }
 
         //void Awake()
-        public GridController(ModuleData moduleData)
+        public GridController(IModuleData moduleData)
         {
             //name = "Grid Controller";
 

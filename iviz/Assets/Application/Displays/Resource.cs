@@ -13,10 +13,7 @@ using MaterialInfo = Iviz.Resources.Resource.Info<UnityEngine.Material>;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.NavMsgs;
 using System.Text;
-using Iviz.App;
-using Iviz.App.Listeners;
 using Iviz.Displays;
-//using Iviz.App.Resources;
 using Iviz.Msgs.GridMapMsgs;
 using Transform = UnityEngine.Transform;
 
@@ -460,6 +457,7 @@ namespace Iviz.Resources
                 return true;
             }
         }
+            
 
 
         public class ControllersType
@@ -665,10 +663,10 @@ namespace Iviz.Resources
         static InternalsType internals;
         public static InternalsType Internal => internals ?? (internals = new InternalsType());
 
-        static App.Resources.ExternalResourceManager external;
+        static ExternalResourceManager external;
 
-        public static App.Resources.ExternalResourceManager External =>
-            external ?? (external = new App.Resources.ExternalResourceManager());
+        public static ExternalResourceManager External =>
+            external ?? (external = new ExternalResourceManager());
 
         public static bool TryGetResource(Uri uri, out GameObjectInfo info)
         {

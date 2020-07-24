@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using Iviz.Resources;
-using UnityEngine.UI;
+﻿using Iviz.Resources;
 
 namespace Iviz.App
 {
@@ -13,7 +11,7 @@ namespace Iviz.App
         public FrameWidget Frame { get; private set; }
         public DataLabelWidget MinMax { get; private set; }
         public DropdownWidget Colormap { get; private set; }
-        //public DropdownWidget IntensityChannel { get; private set; }
+        public DropdownWidget IntensityChannel { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
         public ToggleButtonWidget HideButton { get; private set; }
 
@@ -29,6 +27,7 @@ namespace Iviz.App
             p.AddHeadTitleWidget("GridMap");
             Listener = p.AddListener();
             Frame = p.AddFrame();
+            IntensityChannel = p.AddDropdown("Intensity Channel");
             MinMax = p.AddDataLabel("Min/Max");
             Colormap = p.AddDropdown("Colormap")
                         .SetOptions(Resource.Colormaps.Names)

@@ -1,11 +1,6 @@
 ﻿//#define USING_VR
 
 using UnityEngine;
-using Iviz.Msgs.SensorMsgs;
-using Iviz.Msgs.Tf2Msgs;
-using Iviz.App.Listeners;
-using Iviz.Msgs.StdMsgs;
-using Iviz.Resources;
 
 #if USING_VR
 using Iviz.App.Displays;

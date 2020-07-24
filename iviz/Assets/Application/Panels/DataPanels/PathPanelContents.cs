@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using Iviz.Resources;
-using UnityEngine.UI;
-
-namespace Iviz.App
+﻿namespace Iviz.App
 {
     /// <summary>
     /// <see cref="PathModuleData"/> 

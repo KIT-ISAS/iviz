@@ -1,22 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Security.Cryptography;
 using System.Text;
-using Iviz.App.Listeners;
-using Iviz.Displays;
+using Iviz.Controllers;
 using Iviz.Msgs.IvizMsgs;
-using Iviz.Msgs.MeshMsgs;
 using Iviz.Resources;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
-using Texture = UnityEngine.Texture;
-using Vector3 = UnityEngine.Vector3;
+using Logger = Iviz.Controllers.Logger;
 
-namespace Iviz.App.Resources
+namespace Iviz.Displays
 {
     public enum ResourceGetResult
     {

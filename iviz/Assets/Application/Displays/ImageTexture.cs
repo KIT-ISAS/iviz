@@ -2,11 +2,10 @@
 using System.IO;
 using System.Threading.Tasks;
 using BitMiracle.LibJpeg;
-using Iviz.App;
 using Iviz.Resources;
 using Unity.Collections;
 using UnityEngine;
-using Logger = Iviz.App.Logger;
+using Logger = Iviz.Controllers.Logger;
 
 namespace Iviz.Displays
 {

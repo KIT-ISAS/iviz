@@ -1,9 +1,6 @@
-﻿using Iviz.App.Displays;
-using Iviz.App.Listeners;
+﻿using Iviz.Controllers;
 using Iviz.Displays;
 using Iviz.Resources;
-using Newtonsoft.Json.Linq;
-using UnityEngine;
 
 namespace Iviz.App
 {
@@ -49,7 +46,7 @@ namespace Iviz.App
         {
             panel.LineWidth.Value = controller.GridLineWidth;
             panel.NumberOfCells.Value = controller.NumberOfGridCells;
-            panel.CellSize.Value = controller.GridCellSize;
+            //panel.CellSize.Value = controller.GridCellSize;
             panel.Orientation.Index = (int)controller.Orientation;
             panel.ColorPicker.Value = controller.InteriorColor;
             panel.ShowInterior.Value = controller.ShowInterior;
@@ -66,10 +63,12 @@ namespace Iviz.App
             {
                 controller.NumberOfGridCells = (int)f;
             };
+            /*
             panel.CellSize.ValueChanged += f =>
             {
                 controller.GridCellSize = f;
             };
+            */
             panel.Orientation.ValueChanged += (i, _) =>
             {
                 controller.Orientation = (GridOrientation)i;

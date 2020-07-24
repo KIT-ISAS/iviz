@@ -1,7 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
 using Iviz.Resources;
-using Iviz.App;
 
 namespace Iviz.Displays
 {

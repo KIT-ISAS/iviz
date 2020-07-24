@@ -3,15 +3,14 @@ using RosSharp;
 using System.Linq;
 using System.Collections.Generic;
 using RosSharp.Urdf;
-using Iviz.App.Displays;
 using System.Runtime.Serialization;
 using Iviz.Roslib;
 using System;
-using Iviz.App.Listeners;
 using Iviz.Resources;
 using System.Collections.ObjectModel;
+using Iviz.Displays;
 
-namespace Iviz.App
+namespace Iviz.Controllers
 {
     class RobotInfo : MonoBehaviour
     {
@@ -263,13 +262,13 @@ namespace Iviz.App
             }
         }
 
-        public ModuleData ModuleData
+        public IModuleData ModuleData
         {
             get => node.ModuleData;
             private set => node.ModuleData = value;
         }
 
-        public RobotController(ModuleData moduleData)
+        public RobotController(IModuleData moduleData)
         {
             node = ObjectClickableNode.Instantiate("RobotNode");
             node.Selectable = false;

@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
-using Iviz.App.Displays;
 using Iviz.Displays;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
 using Iviz.Roslib;
-using RosSharp;
 using UnityEngine;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     [DataContract]
     public class LaserScanConfiguration : JsonToString, IConfiguration
@@ -36,7 +32,7 @@ namespace Iviz.App.Listeners
         readonly RadialScanResource resource;
         readonly DisplayNode node;
 
-        public override ModuleData ModuleData { get; }
+        public override IModuleData ModuleData { get; }
 
         public override TFFrame Frame => node.Parent;
 
@@ -168,7 +164,7 @@ namespace Iviz.App.Listeners
             }
         }
 
-        public LaserScanListener(ModuleData moduleData)
+        public LaserScanListener(IModuleData moduleData)
         {
             ModuleData = moduleData;
             //transform.parent = TFListener.ListenersFrame.transform;

@@ -1,6 +1,5 @@
-﻿using Iviz.App.Listeners;
+﻿using Iviz.Controllers;
 using Iviz.Resources;
-using UnityEngine;
 
 namespace Iviz.App
 {
@@ -25,9 +24,6 @@ namespace Iviz.App
             constructor.GetConfiguration<GridMapConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.GridMap) as GridMapPanelContents;
-            //listener = Instantiate<GridMapListener>();
-            //listener.name = "PointCloud:" + Topic;
-            //listener.ModuleData = this;
             listener = new GridMapListener(this);
             if (constructor.Configuration == null)
             {
@@ -51,10 +47,13 @@ namespace Iviz.App
             panel.MinMax.Label = $"Min Intensity: {minIntensityStr} Max: {maxIntensityStr}";
 
             panel.Colormap.Index = (int)listener.Colormap;
-            /*
+            
             panel.IntensityChannel.Options = listener.FieldNames;
-            panel.IntensityChannel.Value = listener.IntensityChannel;
-            */
+            if (listener.FieldNames.Count != 0)
+            {
+                panel.IntensityChannel.Value = listener.IntensityChannel;
+            }
+
             panel.HideButton.State = listener.Visible;
 
             panel.ForceMinMax.Value = listener.ForceMinMax;
@@ -64,12 +63,10 @@ namespace Iviz.App
             panel.MaxIntensity.Interactable = listener.ForceMinMax;
             panel.FlipMinMax.Value = listener.FlipMinMax;
 
-            /*
             panel.IntensityChannel.ValueChanged += (_, s) =>
             {
                 listener.IntensityChannel = s;
             };
-            */
             panel.Colormap.ValueChanged += (i, _) =>
             {
                 listener.Colormap = (Resource.ColormapId)i;
@@ -108,9 +105,13 @@ namespace Iviz.App
         public override void UpdatePanel()
         {
             base.UpdatePanel();
-            /*
+            
             panel.IntensityChannel.Options = listener.FieldNames;
-            */
+            if (listener.FieldNames.Count != 0 && listener.IntensityChannel.Length == 0)
+            {
+                listener.IntensityChannel = listener.FieldNames[0];
+                panel.IntensityChannel.Value = listener.IntensityChannel;
+            }
 
             string minIntensityStr = listener.MeasuredIntensityBounds.x.ToString("#,0.##", UnityUtils.Culture);
             string maxIntensityStr = listener.MeasuredIntensityBounds.y.ToString("#,0.##", UnityUtils.Culture);

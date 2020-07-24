@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
-using Iviz.App.Displays;
 using Iviz.Displays;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
 using Iviz.Roslib;
 using UnityEngine;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     [DataContract]
     public class PointCloudConfiguration : JsonToString, IConfiguration
@@ -34,7 +34,7 @@ namespace Iviz.App.Listeners
         readonly DisplayNode node;
         readonly PointListResource pointCloud;
 
-        public override ModuleData ModuleData { get; }
+        public override IModuleData ModuleData { get; }
 
         public Vector2 MeasuredIntensityBounds { get; private set; }
 
@@ -165,13 +165,16 @@ namespace Iviz.App.Listeners
         }
 
         readonly List<string> fieldNames = new List<string>() { "x", "y", "z" };
-        public IReadOnlyList<string> FieldNames => fieldNames;
+        
+        public ReadOnlyCollection<string> FieldNames { get; }
 
         PointWithColor[] pointBuffer = new PointWithColor[0];
 
-        public PointCloudListener(ModuleData moduleData)
+        public PointCloudListener(IModuleData moduleData)
         {
             ModuleData = moduleData;
+
+            FieldNames = new ReadOnlyCollection<string>(fieldNames);
             
             node = SimpleDisplayNode.Instantiate("[PointCloudNode]");
             pointCloud = ResourcePool.GetOrCreate<PointListResource>(Resource.Displays.PointList, node.transform);

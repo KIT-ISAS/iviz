@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Iviz.App.Listeners
+namespace Iviz.Controllers
 {
     public class MenuEntryObject : InteractableObject
     {

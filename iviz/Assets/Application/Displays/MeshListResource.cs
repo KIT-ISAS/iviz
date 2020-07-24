@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 using Iviz.Resources;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Iviz.Displays
 {
@@ -85,6 +85,8 @@ namespace Iviz.Displays
             }
         }
 
+        public bool CastShadows { get; set; } = true;        
+
         public void Reserve(int reqDataSize)
         {
             if (pointBuffer.Length < reqDataSize)
@@ -133,8 +135,8 @@ namespace Iviz.Displays
             }
             pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
             MinMaxJob.CalculateBounds(pointBuffer, Size, out Bounds bounds, out Vector2 span);
-            Collider.center = bounds.center;
             Collider.size = bounds.size + Scale;
+            Collider.center = new Vector3(bounds.center.x, bounds.center.y + Collider.size.y / 2, bounds.center.z);
             IntensityBounds = span;
         }
 
@@ -226,7 +228,16 @@ namespace Iviz.Displays
             UpdateTransform();
             Bounds worldBounds = Collider.bounds;
             material.SetVector(PropBoundaryCenter, worldBounds.center);
-            Graphics.DrawMeshInstancedIndirect(mesh, 0, material, worldBounds, argsComputeBuffer);
+
+            if (CastShadows && !OcclusionOnly)
+            {
+                Graphics.DrawMeshInstancedIndirect(mesh, 0, material, worldBounds, argsComputeBuffer);
+            }
+            else
+            {
+                Graphics.DrawMeshInstancedIndirect(mesh, 0, material, worldBounds, argsComputeBuffer, 
+                    0, null, ShadowCastingMode.Off);
+            }
         }
 
         protected override void OnDestroy()

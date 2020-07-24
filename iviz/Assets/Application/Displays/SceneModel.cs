@@ -7,7 +7,7 @@ using Iviz.Resources;
 using Newtonsoft.Json;
 using UnityEngine;
 
-namespace Iviz.App
+namespace Iviz.Displays
 {
     public class SceneModel
     {
