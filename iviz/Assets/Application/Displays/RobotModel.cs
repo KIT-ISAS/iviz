@@ -242,7 +242,7 @@ namespace Iviz.Displays
 
             if (parent.transform.IsChildOf(child.transform))
             {
-                Stop();
+                Dispose();
                 throw new MalformedUrdfException();
             }
 
@@ -280,11 +280,14 @@ namespace Iviz.Displays
             }
             foreach (var entry in linkParentObjects)
             {
-                entry.Key.transform.parent = entry.Value.transform;
+                Transform mTransform = entry.Key.transform;
+                mTransform.parent = entry.Value.transform;
+                mTransform.localPosition = Vector3.zero;
+                mTransform.localRotation = Quaternion.identity;
             }
         }
 
-        public void Stop()
+        public void Dispose()
         {
             ResetLinkParents();
 
@@ -307,11 +310,11 @@ namespace Iviz.Displays
                 }
                 if (joint.Value.Limit.Lower > 0)
                 {
-                    TryWriteJoint(joint.Key, joint.Value.Limit.Lower, out _, true);
+                    TryWriteJoint(joint.Key, joint.Value.Limit.Lower, out _);
                 }
                 else if (joint.Value.Limit.Upper < 0)
                 {
-                    TryWriteJoint(joint.Key, joint.Value.Limit.Upper, out _, true);
+                    TryWriteJoint(joint.Key, joint.Value.Limit.Upper, out _);
                 }
             }
         }

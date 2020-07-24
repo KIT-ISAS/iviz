@@ -13,13 +13,6 @@ using Logger = Iviz.Controllers.Logger;
 
 namespace Iviz.Displays
 {
-    public enum ResourceGetResult
-    {
-        Success,
-        Failed,
-        Retrieving
-    }
-
     public class ExternalResourceManager
     {
         const string ModelServiceName = "/iviz/get_model_resource";
@@ -37,7 +30,7 @@ namespace Iviz.Displays
                 Textures = new Dictionary<Uri, string>();
             }
         }
-        
+
         readonly ResourceFiles resourceFiles = new ResourceFiles();
 
         readonly Dictionary<Uri, Resource.Info<GameObject>> loadedModels =
@@ -49,22 +42,36 @@ namespace Iviz.Displays
         readonly GameObject node;
         readonly Model generator = new Model();
 
+        string ResourceFolder { get; }
+        string ResourceFile { get; }
+
         public ExternalResourceManager()
         {
+            ResourceFolder = UnityEngine.Application.persistentDataPath + "/resources";
+            ResourceFile = UnityEngine.Application.persistentDataPath + "/resources.json";            
+            
             node = new GameObject("External Resources");
             node.transform.parent = TFListener.ListenersFrame?.transform;
             node.SetActive(false);
 
-            string path = UnityEngine.Application.persistentDataPath + "/resources.json";
-            if (!File.Exists(path))
+            if (!File.Exists(ResourceFile))
             {
                 return;
             }
 
             try
             {
-                string text = File.ReadAllText(path);
+                string text = File.ReadAllText(ResourceFile);
                 resourceFiles = JsonConvert.DeserializeObject<ResourceFiles>(text);
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e);
+            }
+
+            try
+            {
+                Directory.CreateDirectory(ResourceFolder);
             }
             catch (Exception e)
             {
@@ -82,7 +89,7 @@ namespace Iviz.Displays
 
             if (resourceFiles.Models.TryGetValue(uri, out string localPath))
             {
-                if (false && File.Exists($"{UnityEngine.Application.persistentDataPath}/{localPath}"))
+                if (File.Exists($"{ResourceFolder}/{localPath}"))
                 {
                     resource = LoadLocalModel(uri, localPath);
                     return resource != null;
@@ -104,10 +111,11 @@ namespace Iviz.Displays
             {
                 return false;
             }
+
             resource = ProcessModelResponse(uri, msg.Response);
             return resource != null;
         }
-        
+
         public bool TryGet(Uri uri, out Resource.Info<Texture2D> resource)
         {
             if (loadedTextures.TryGetValue(uri, out resource))
@@ -117,7 +125,7 @@ namespace Iviz.Displays
 
             if (resourceFiles.Textures.TryGetValue(uri, out string localPath))
             {
-                if (false && File.Exists($"{UnityEngine.Application.persistentDataPath}/{localPath}"))
+                if (File.Exists($"{ResourceFolder}/{localPath}"))
                 {
                     resource = LoadLocalTexture(uri, localPath);
                     return resource != null;
@@ -139,6 +147,7 @@ namespace Iviz.Displays
             {
                 return false;
             }
+
             resource = ProcessTextureResponse(uri, msg.Response);
             return resource != null;
         }
@@ -149,15 +158,15 @@ namespace Iviz.Displays
 
             try
             {
-                buffer = File.ReadAllBytes($"{UnityEngine.Application.persistentDataPath}/{localPath}");
+                buffer = File.ReadAllBytes($"{ResourceFolder}/{localPath}");
             }
             catch (Exception e)
             {
-                Debug.Log(e);
+                Debug.LogWarning("ExternalResourceManager: Loading model " + uri + " failed with error " + e);
                 return null;
             }
 
-            Msgs.IvizMsgs.Model msg = Msgs.Buffer.Deserialize(generator, buffer, buffer.Length);
+            Model msg = Msgs.Buffer.Deserialize(generator, buffer, buffer.Length);
             GameObject obj = CreateModelObject(uri, msg);
             obj.name = uri.ToString();
 
@@ -166,14 +175,14 @@ namespace Iviz.Displays
 
             return resource;
         }
-        
+
         Resource.Info<Texture2D> LoadLocalTexture(Uri uri, string localPath)
         {
             byte[] buffer;
 
             try
             {
-                buffer = File.ReadAllBytes($"{UnityEngine.Application.persistentDataPath}/{localPath}");
+                buffer = File.ReadAllBytes($"{ResourceFolder}/{localPath}");
             }
             catch (Exception e)
             {
@@ -191,7 +200,7 @@ namespace Iviz.Displays
 
             return resource;
         }
-        
+
         Resource.Info<GameObject> ProcessModelResponse(Uri uri, GetModelResourceResponse msg)
         {
             try
@@ -206,10 +215,9 @@ namespace Iviz.Displays
 
                 byte[] buffer = new byte[msg.Model.RosMessageLength];
                 Msgs.Buffer.Serialize(msg.Model, buffer);
-                File.WriteAllBytes($"{UnityEngine.Application.persistentDataPath}/{localPath}", buffer);
-                Debug.Log($"Saving to {UnityEngine.Application.persistentDataPath}/{localPath}");
-                Logger.Internal($"Added external resource <i>{uri}</i>");
-                //Debug.Log($"Added external resource <i>{uri}</i>");
+                File.WriteAllBytes($"{ResourceFolder}/{localPath}", buffer);
+                Debug.Log($"Saving to {ResourceFolder}/{localPath}");
+                Logger.Internal($"Added external model <i>{uri}</i>");
 
                 resourceFiles.Models[uri] = localPath;
                 WriteResourceFile();
@@ -222,7 +230,7 @@ namespace Iviz.Displays
                 return null;
             }
         }
-        
+
         Resource.Info<Texture2D> ProcessTextureResponse(Uri uri, GetModelTextureResponse msg)
         {
             try
@@ -237,10 +245,9 @@ namespace Iviz.Displays
                 string localPath = GetMd5Hash(uri.ToString());
 
                 byte[] buffer = msg.Image.Data;
-                File.WriteAllBytes($"{UnityEngine.Application.persistentDataPath}/{localPath}", buffer);
-                Debug.Log($"Saving to {UnityEngine.Application.persistentDataPath}/{localPath}");
-                Logger.Internal($"Added external resource <i>{uri}</i>");
-                //Debug.Log($"Added external resource <i>{uri}</i>");
+                File.WriteAllBytes($"{ResourceFolder}/{localPath}", buffer);
+                Debug.Log($"Saving to {ResourceFolder}/{localPath}");
+                Logger.Internal($"Added external texture <i>{uri}</i>");
 
                 resourceFiles.Textures[uri] = localPath;
                 WriteResourceFile();
@@ -256,9 +263,7 @@ namespace Iviz.Displays
 
         void WriteResourceFile()
         {
-            File.WriteAllText(
-                UnityEngine.Application.persistentDataPath + "/resources.json",
-                JsonConvert.SerializeObject(resourceFiles, Formatting.Indented));
+            File.WriteAllText(ResourceFile, JsonConvert.SerializeObject(resourceFiles, Formatting.Indented));
         }
 
         static string GetMd5Hash(string input)
@@ -271,7 +276,7 @@ namespace Iviz.Displays
             MD5 md5 = new MD5CryptoServiceProvider();
             byte[] textToHash = Encoding.Default.GetBytes(input);
             byte[] result = md5.ComputeHash(textToHash);
-            return BitConverter.ToString(result);
+            return BitConverter.ToString(result).Replace("-", "");
         }
 
         GameObject CreateModelObject(Uri uri, Model msg)
@@ -280,6 +285,5 @@ namespace Iviz.Displays
             model.transform.SetParent(node.transform, false);
             return model;
         }
-
     }
 }

@@ -16,33 +16,33 @@ using Node = Assimp.Node;
 
 namespace Iviz.ModelService
 {
-    public static class ModelLoader
+    public static class ModelService
     {
+        const string ModelServiceName = "/iviz/get_model_resource";
+        const string TextureServiceName = "/iviz/get_model_texture"; 
+        
         static readonly AssimpContext Importer = new AssimpContext();
         static readonly List<string> PackagePaths = new List<string>();
         
         static void Main()
         {
-            string masterUri = Environment.GetEnvironmentVariable("ROS_MASTER_URI");
+            Uri masterUri = RosClient.EnvironmentMasterUri;
             if (masterUri is null)
             {
-                Console.Error.WriteLine("EE Fatal error: Failed to retrieve ROS_MASTER_URI variable");
-                //return;
+                Console.Error.WriteLine("EE Fatal error: Failed to determine master uri");
+                return;
             }
             
-            masterUri ??= "http://192.168.0.220:11311";
-
-            RosClient client = new RosClient(masterUri, "/iviz_model_loader");
-            
-                /*
-                RosClient client = new RosClient(
-                    "http://192.168.0.220:11311",
-                    //"http://141.3.59.5:11311",
-                    null,
-                    "http://192.168.0.157:7619"
-                    //"http://141.3.59.19:7621"
-                );
-                */
+            RosClient client;
+            try
+            {
+                client = new RosClient(masterUri, "/iviz_model_loader");
+            }
+            catch (ConnectionException)
+            {
+                Console.Error.WriteLine("EE Fatal error: Failed to connect to the ROS master");
+                return;
+            }
 
             Console.WriteLine("** Searching package paths...");
             string packagePath = Environment.GetEnvironmentVariable("ROS_PACKAGE_PATH");
@@ -61,12 +61,13 @@ namespace Iviz.ModelService
                 PackagePaths.AddRange(paths);
             }
 
-            client.AdvertiseService<GetModelResource>("/iviz/get_model_resource", ModelCallback);
-            client.AdvertiseService<GetModelTexture>("/iviz/get_model_texture", TextureCallback);
+            client.AdvertiseService<GetModelResource>(ModelServiceName, ModelCallback);
+            client.AdvertiseService<GetModelTexture>(TextureServiceName, TextureCallback);
 
             WaitForCancel();
 
-            client.UnadvertiseService("/iviz/load_model");
+            client.UnadvertiseService(ModelServiceName);
+            client.UnadvertiseService(TextureServiceName);
             client.Close();
         }
 
@@ -178,7 +179,7 @@ namespace Iviz.ModelService
         static Model LoadModel(string fileName)
         {
             string orientationHint = "";
-            if (fileName.EndsWith(".dae"))
+            if (fileName.HasSuffix(".dae"))
             { 
                 XmlDocument doc = new XmlDocument();
                 doc.Load(fileName);

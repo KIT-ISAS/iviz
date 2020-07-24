@@ -178,7 +178,7 @@ namespace Iviz.Roslib
         {
             if (masterUri is null)
             {
-                masterUri = TryGetMasterUri();
+                throw new ArgumentException("No valid master uri provided", nameof(masterUri));
             }
 
             if (masterUri.Scheme != "http")
@@ -261,21 +261,55 @@ namespace Iviz.Roslib
             }
         }
 
-        public static Uri TryGetCallerUri()
+        public static Uri EnvironmentCallerUri
         {
-            string hostname =
-                Environment.GetEnvironmentVariable("ROS_HOSTNAME") ??
-                Environment.GetEnvironmentVariable("ROS_IP") ??
-                Dns.GetHostName();
-            return new Uri($"http://{hostname}:7613/");
+            get
+            {
+                string envStr = Environment.GetEnvironmentVariable("ROS_HOSTNAME") ?? 
+                                Environment.GetEnvironmentVariable("ROS_IP");
+                if (envStr is null)
+                {
+                    return null;
+                }
+
+                if (Uri.TryCreate(envStr, UriKind.Absolute, out Uri uri))
+                {
+                    return uri;
+                }
+                
+                Logger.Log("RosClient: Environment variable for caller uri is not a valid uri!");
+                return null;
+            }
         }
 
+        public static Uri TryGetCallerUri()
+        {
+            return EnvironmentCallerUri ?? new Uri($"http://{Dns.GetHostName()}:7613/");
+        }
+
+        public static Uri EnvironmentMasterUri
+        {
+            get
+            {
+                string envStr = Environment.GetEnvironmentVariable("ROS_MASTER_URI");
+                if (envStr is null)
+                {
+                    return null;
+                }
+
+                if (Uri.TryCreate(envStr, UriKind.Absolute, out Uri uri))
+                {
+                    return uri;
+                }
+                
+                Logger.Log("RosClient: Environment variable for master uri is not a valid uri!");
+                return null;
+            }
+        }
+        
         public static Uri TryGetMasterUri()
         {
-            string hostname = 
-                Environment.GetEnvironmentVariable("ROS_MASTER_URI") ?? 
-                Dns.GetHostName();
-            return new Uri($"http://{hostname}:11311/");
+            return EnvironmentMasterUri ?? new Uri($"http://{Dns.GetHostName()}:11311/");
         }
 
         /// <summary>
@@ -285,9 +319,9 @@ namespace Iviz.Roslib
         /// <param name="callerId">The name of this node</param>
         /// <param name="callerUri">URI of this node. Leave empty to generate one automatically</param>
         public RosClient(string masterUri, string callerId = null, string callerUri = null) :
-            this(masterUri is null ? null : new Uri(masterUri), 
+            this(masterUri is null ? EnvironmentMasterUri : new Uri(masterUri), 
                 callerId, 
-                callerUri is null ? null : new Uri(callerUri))
+                callerUri is null ? EnvironmentCallerUri : new Uri(callerUri))
         {
         }
 
@@ -506,10 +540,8 @@ namespace Iviz.Roslib
             {
                 return subscriber;
             }
-            else
-            {
-                throw new KeyNotFoundException($"Cannot find subscriber for topic '{topic}'");
-            }
+
+            throw new KeyNotFoundException($"Cannot find subscriber for topic '{topic}'");
         }
 
         RosPublisher CreatePublisher(string topic, Type type)
@@ -1028,6 +1060,17 @@ namespace Iviz.Roslib
             var response = Parameters.GetParam(key);
             value = response.ParameterValue;
             return response.Code;
+        }
+        
+        public ReadOnlyCollection<string> GetParameterNames()
+        {
+            var response = Parameters.GetParamNames();
+            if (response.IsValid)
+            {
+                return response.ParameterNameList;
+            }
+
+            throw new XmlRpcException("Failed to retrieve parameter names: " + response.StatusMessage);
         }
 
         public XmlRpc.StatusCode DeleteParameter(string key)

@@ -1,5 +1,7 @@
-﻿using Iviz.Controllers;
+﻿using System.Linq;
+using Iviz.Controllers;
 using Iviz.Resources;
+using Iviz.Roslib;
 using UnityEngine;
 
 namespace Iviz.App
@@ -41,6 +43,10 @@ namespace Iviz.App
         {
             panel.Frame.Owner = robot;
             //panel.ResourceType.Value = robot.RobotResource;
+            panel.SourceParam.Value = robot.SourceParameter;
+            panel.SourceParam.Hints =
+                ConnectionManager.GetSystemParameterList().Where(x => x.HasSuffix("_description"));
+            
             panel.FramePrefix.Value = robot.FramePrefix;
             panel.FrameSuffix.Value = robot.FrameSuffix;
             panel.AttachToTf.Value = robot.AttachToTf;
@@ -74,6 +80,10 @@ namespace Iviz.App
                 UpdateModuleButton();
             };
             */
+            panel.SourceParam.EndEdit += f =>
+            {
+                robot.SourceParameter = f;
+            };
             panel.AttachToTf.ValueChanged += f =>
             {
                 robot.AttachToTf = f;
@@ -97,6 +107,13 @@ namespace Iviz.App
                 panel.HideButton.State = robot.Visible;
                 UpdateModuleButton();
             };
+        }
+
+        public override void UpdatePanel()
+        {
+            base.UpdatePanel();
+            panel.SourceParam.Hints =
+                ConnectionManager.GetSystemParameterList().Where(x => x.HasSuffix("_description"));
         }
 
         protected override void UpdateModuleButton()

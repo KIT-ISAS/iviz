@@ -572,7 +572,7 @@ namespace Iviz.Controllers
             {
                 try
                 {
-                    if (client == null)
+                    if (client is null)
                     {
                         cachedTopics = EmptyTopics;
                         return;
@@ -589,6 +589,33 @@ namespace Iviz.Controllers
             return cachedTopics;
         }
 
+        static readonly ReadOnlyCollection<string> EmptyParameters = new ReadOnlyCollection<string>(Array.Empty<string>());
+
+        ReadOnlyCollection<string> cachedParameters = EmptyParameters;
+
+        public override ReadOnlyCollection<string> GetSystemParameterList()
+        {
+            AddTask(() =>
+            {
+                try
+                {
+                    if (client is null)
+                    {
+                        cachedParameters = EmptyParameters;
+                        return;
+                    }
+
+                    cachedParameters = client.GetParameterNames();
+                }
+                catch (Exception e)
+                {
+                    Logger.Error(e);
+                }
+            });
+
+            return cachedParameters;
+        }
+        
         public override string GetParameter(string parameter)
         {
             if (client is null)

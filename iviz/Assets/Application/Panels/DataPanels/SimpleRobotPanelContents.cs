@@ -11,7 +11,7 @@ namespace Iviz.App
         public TrashButtonWidget CloseButton { get; private set; }
         public ToggleButtonWidget HideButton { get; private set; }
         public FrameWidget Frame { get; private set; }
-        public DropdownWidget SourceParam { get; private set; }
+        public InputFieldWithHintsWidget SourceParam { get; private set; }
         public ToggleWidget AttachToTf { get; private set; }
         public InputFieldWidget FramePrefix { get; private set; }
         public InputFieldWidget FrameSuffix { get; private set; }
@@ -25,7 +25,7 @@ namespace Iviz.App
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("Robot");
             Frame = p.AddFrame();
-            SourceParam = p.AddDropdown("Source Parameter");
+            SourceParam = p.AddInputFieldWithHints("Source Parameter").SetPlaceholder("<none>");
             AttachToTf = p.AddToggle("Attach to TF Frames");
             FramePrefix = p.AddInputField("TF Frame Prefix").SetPlaceholder("<none>");
             FrameSuffix = p.AddInputField("TF Frame Suffix").SetPlaceholder("<none>");

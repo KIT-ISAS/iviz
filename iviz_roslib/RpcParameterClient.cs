@@ -88,19 +88,16 @@ namespace Iviz.Roslib.XmlRpc
         {
             Arg[] args = {
                 new Arg(CallerId),
-                new Arg(key),
-                new Arg(CallerUri),
+                new Arg(key)
             };
             object response = Service.MethodCall(MasterUri, CallerUri, "hasParam", args);
             return new HasParamResponse((object[])response);
         }
 
-        public GetParamNamesResponse GetParamNames(string key)
+        public GetParamNamesResponse GetParamNames()
         {
             Arg[] args = {
                 new Arg(CallerId),
-                new Arg(key),
-                new Arg(CallerUri),
             };
             object response = Service.MethodCall(MasterUri, CallerUri, "getParamNames", args);
             return new GetParamNamesResponse((object[])response);

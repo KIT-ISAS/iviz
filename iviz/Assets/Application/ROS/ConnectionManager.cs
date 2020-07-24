@@ -80,6 +80,7 @@ namespace Iviz.Controllers
             => Connection.AdvertiseService(service, callback);
 
         public static ReadOnlyCollection<BriefTopicInfo>  GetSystemPublishedTopics() => Connection.GetSystemPublishedTopics();
+        public static ReadOnlyCollection<string> GetSystemParameterList() => Connection.GetSystemParameterList();
 
         public static void ReportUp(int size)
         {
@@ -121,7 +122,7 @@ namespace Iviz.Controllers
         public bool KeepReconnecting { get; set; }
 
         protected static readonly ReadOnlyCollection<BriefTopicInfo> EmptyTopics =
-            new ReadOnlyCollection<BriefTopicInfo>(new List<BriefTopicInfo>());
+            new ReadOnlyCollection<BriefTopicInfo>(Array.Empty<BriefTopicInfo>());
 
         public ReadOnlyCollection<BriefTopicInfo> PublishedTopics { get; protected set; } = EmptyTopics;
 
@@ -235,6 +236,7 @@ namespace Iviz.Controllers
         public abstract void CallServiceAsync<T>(string service, T srv, Action<T> callback) where T : IService;
         public abstract bool CallService<T>(string service, T srv) where T : IService;
         public abstract ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics();
+        public abstract ReadOnlyCollection<string> GetSystemParameterList();
         public abstract int GetNumPublishers(string topic);
         public abstract int GetNumSubscribers(string topic);
 

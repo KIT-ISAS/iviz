@@ -13,6 +13,7 @@ namespace Iviz.Controllers
         [DataMember] public Guid Id { get; set; }
         [DataMember] public Resource.Module Module => Resource.Module.SimpleRobot;
         [DataMember] public bool Visible { get; set; } = true;
+        [DataMember] public string SourceParameter { get; set; } = "";
         [DataMember] public string FramePrefix { get; set; } = "";
         [DataMember] public string FrameSuffix { get; set; } = "";
         [DataMember] public bool AttachToTf { get; set; } = false;
@@ -46,6 +47,37 @@ namespace Iviz.Controllers
                 Visible = value.Visible;
                 RenderAsOcclusionOnly = value.RenderAsOcclusionOnly;
                 Tint = value.Tint;
+            }
+        }
+
+        public string SourceParameter
+        {
+            get => config.SourceParameter;
+            set
+            {
+                if (value == config.SourceParameter)
+                {
+                    return;
+                }
+
+                config.SourceParameter = value;
+
+                robot?.Dispose();
+                if (value.Length == 0)
+                {
+                    return;
+                }
+                
+                try
+                {
+                    string description = ConnectionManager.Connection.GetParameter(value);
+                    robot = new RobotModel(description);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e);
+                    config.SourceParameter = string.Empty;
+                }
             }
         }
 
@@ -238,13 +270,17 @@ namespace Iviz.Controllers
                 AttachToTf = false;
             }
 
-            robot?.Stop();
+            robot?.Dispose();
             Stopped?.Invoke();
             UnityEngine.Object.Destroy(node.gameObject);
         }
 
         public void Reset()
         {
+            string parameter = SourceParameter;
+            SourceParameter = "";
+            SourceParameter = parameter;
+            
             if (AttachToTf)
             {
                 AttachToTf = false;
