@@ -15,14 +15,14 @@ namespace Iviz.Bridge
         readonly HashSet<SocketConnection> connections = new HashSet<SocketConnection>();
         volatile bool keepGoing;
 
-        public RosBridge(RosClient rosClient, string websocketUrl)
+        public RosBridge(RosClient rosClient, string _)
         {
             SocketConnection.client = this;
             RosClient = rosClient;
             
-            Logger.Log("Bridge: Starting with url '" + websocketUrl + "'");
+            //Logger.Log("Bridge: Starting with url '" + websocketUrl + "'");
 
-            server = new WebSocketServer(websocketUrl);
+            server = new WebSocketServer(System.Net.IPAddress.Any, 9090);
             //server.Log.Output = (_, __) => { };
             server.AddWebSocketService<SocketConnection>("/");
             server.Start();
