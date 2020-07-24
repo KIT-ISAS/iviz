@@ -10,8 +10,6 @@
     <ProjectReference Include="..\iviz_roslib\iviz_roslib.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="AssimpNet, Version=5.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\assimpnet\AssimpNet\bin\Release\netstandard1.3\AssimpNet.dll</HintPath>
-    </Reference>
+    <PackageReference Include="AssimpNet" Version="4.1.0" />
   </ItemGroup>
 </Project>
