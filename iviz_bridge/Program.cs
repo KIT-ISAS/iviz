@@ -1,30 +1,47 @@
-﻿using Iviz.Roslib;
+﻿using System;
+using System.Threading;
+using Iviz.Roslib;
 
 namespace Iviz.Bridge
 {
-
-    class Program
+    static class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
-            /*
-            RosClient rosClient = new RosClient(
-                "http://141.3.59.5:11311",
-                "/Iviz_Rosbridge",
-                $"http://141.3.59.11:7614");
+            Uri masterUri = RosClient.EnvironmentMasterUri;
+            if (masterUri is null)
+            {
+                Console.Error.WriteLine("EE Fatal error: Failed to determine master uri");
+                return;
+            }
 
-            string myWebsocketUrl = "ws://141.3.59.11:8080";
-            */
+            RosClient client = null;
+            RosBridge rosBridge = null;
+            try
+            {
+                client = new RosClient(masterUri, "/iviz_model_loader");
+                rosBridge = new RosBridge(client, 8080);
+                WaitForCancel();
+            }
+            catch (ConnectionException)
+            {
+                Console.Error.WriteLine("EE Fatal error: Failed to connect to the ROS master");
+            }
+            finally
+            {
+                client?.Close();
+                rosBridge?.Close();
+            }
+        }
 
-            using RosClient rosClient = new RosClient(
-                "http://192.168.0.73:11311", 
-                "/Iviz_Rosbridge", 
-                $"http://192.168.0.157:7614");
-
-            string myWebsocketUrl = "ws://192.168.0.157:8080";
-
-            RosBridge rosBridge = new RosBridge(rosClient, myWebsocketUrl);
-            rosBridge.Run();
+        static void WaitForCancel()
+        {
+            object o = new object();
+            Console.CancelKeyPress += delegate
+            {
+                lock (o) Monitor.Pulse(o);
+            };
+            lock (o) Monitor.Wait(o);
         }
     }
 }
