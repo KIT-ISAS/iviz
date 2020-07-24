@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-using System;
-using System.Net;
+﻿using System;
 using Iviz.Displays;
 using Iviz.Roslib;
 

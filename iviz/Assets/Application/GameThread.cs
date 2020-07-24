@@ -31,6 +31,11 @@ namespace Iviz.Displays
             }
         }
 
+        void Awake()
+        {
+            mInstance = this;
+        }
+
         void OnDestroy()
         {
             mInstance = null;

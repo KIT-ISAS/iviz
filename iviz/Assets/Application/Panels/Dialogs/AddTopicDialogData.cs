@@ -1,6 +1,4 @@
-﻿using System;
-using System.CodeDom;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Iviz.Controllers;
 using Iviz.Resources;
@@ -20,13 +18,13 @@ namespace Iviz.App
             public string Topic { get; }
             public string Type { get; }
             public string ShortType { get; }
-            public Resource.Module Resource { get; }
+            public Resource.Module ResourceType { get; }
 
-            public TopicWithResource(string topic, string type, Resource.Module resource)
+            public TopicWithResource(string topic, string type, Resource.Module resourceType)
             {
                 Topic = topic;
                 Type = type;
-                Resource = resource;
+                ResourceType = resourceType;
 
                 int lastSlash = Type.LastIndexOf('/');
                 ShortType = (lastSlash == -1) ? Type : Type.Substring(lastSlash + 1);
@@ -34,8 +32,9 @@ namespace Iviz.App
 
             public override string ToString()
             {
-                return $"{Iviz.Resources.Resource.Font.Split(Topic, MaxLineWidth)}\n" +
-                       $"<b>{Iviz.Resources.Resource.Font.Split(ShortType, MaxLineWidth)}</b>";
+                string type = (ResourceType == Resource.Module.Invalid) ? Type : ShortType;
+                return $"{Resource.Font.Split(Topic, MaxLineWidth)}\n" +
+                       $"<b>{Resource.Font.Split(type, MaxLineWidth)}</b>";
             }
         }
 
@@ -103,7 +102,7 @@ namespace Iviz.App
             {
                 for (int i = 0; i < topics.Count; i++)
                 {
-                    if (topics[i].Resource == Resource.Module.Invalid)
+                    if (topics[i].ResourceType == Resource.Module.Invalid)
                     {
                         panel[i].Interactable = false;
                     }

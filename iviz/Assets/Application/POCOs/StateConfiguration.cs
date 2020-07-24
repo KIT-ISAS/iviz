@@ -17,6 +17,7 @@ namespace Iviz.App
         [DataMember] public TFConfiguration Tf { get; set; } = null;
         [DataMember] public List<GridConfiguration> Grids { get; set; } = new List<GridConfiguration>();
         [DataMember] public List<RobotConfiguration> Robots { get; set; } = new List<RobotConfiguration>();
+        [DataMember] public List<SimpleRobotConfiguration> SimpleRobots { get; set; } = new List<SimpleRobotConfiguration>();
         [DataMember] public List<PointCloudConfiguration> PointClouds { get; set; } = new List<PointCloudConfiguration>();
         [DataMember] public List<LaserScanConfiguration> LaserScans { get; set; } = new List<LaserScanConfiguration>();
         [DataMember] public List<JointStateConfiguration> JointStates { get; set; } = new List<JointStateConfiguration>();
@@ -35,6 +36,7 @@ namespace Iviz.App
         {
             Grids,
             Robots,
+            SimpleRobots,
             PointClouds,
             LaserScans,
             JointStates,

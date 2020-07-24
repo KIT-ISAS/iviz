@@ -1,6 +1,4 @@
-﻿using Iviz.Resources;
-
-namespace Iviz.App
+﻿namespace Iviz.App
 {
     /// <summary>
     /// <see cref="SimpleRobotModuleData"/> 

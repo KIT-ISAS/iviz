@@ -1,9 +1,8 @@
 ﻿using UnityEngine;
 using System.Runtime.InteropServices;
-using Iviz.Displays;
 using Iviz.Resources;
 
-namespace Iviz.App.Displays
+namespace Iviz.Displays
 {
     public sealed class DepthImageResource : MarkerResource
     {

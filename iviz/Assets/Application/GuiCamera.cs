@@ -1,5 +1,4 @@
-﻿using Iviz.App.Displays;
-using Iviz.Resources;
+﻿using Iviz.Resources;
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.Controllers;
@@ -15,8 +14,10 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class FlyCamera : DisplayNode
+    public class GuiCamera : DisplayNode
     {
+        public static GuiCamera Instance { get; private set; }
+        
         Vector2 lastPointer;
         Vector2 lastPointerAlt;
         float lastAltDistance;
@@ -27,7 +28,7 @@ namespace Iviz.App
         bool alreadyMoving;
         bool alreadyScaling;
 
-        static Camera MainCamera => TFListener.MainCamera;
+        public static UnityEngine.Camera MainCamera => TFListener.MainCamera;
         NamedBoundary namedBoundary;
 
         bool PointerOnGui { get; set; }
@@ -119,6 +120,11 @@ namespace Iviz.App
 
         public HashSet<IBlocksPointer> GuiPointerBlockers { get; } = new HashSet<IBlocksPointer>();
 
+        void Awake()
+        {
+            Instance = this;
+        }
+        
         void Start()
         {
             Transform = transform;

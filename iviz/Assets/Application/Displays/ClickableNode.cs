@@ -42,7 +42,7 @@ namespace Iviz.Controllers
 
         static int GetClickCount(PointerEventData eventData)
         {
-            return FlyCamera.IsMobile ? Input.GetTouch(0).tapCount : eventData.clickCount;
+            return GuiCamera.IsMobile ? Input.GetTouch(0).tapCount : eventData.clickCount;
         }
 
         static bool IsRealClick(PointerEventData eventData)
@@ -58,12 +58,12 @@ namespace Iviz.Controllers
         public virtual void OnPointerClick(PointerEventData eventData)
         {
             LastClickCount = 0;
-            if (!FlyCamera.IsMobile && (eventData.button != PointerEventData.InputButton.Right || !IsRealClick(eventData)))
+            if (!GuiCamera.IsMobile && (eventData.button != PointerEventData.InputButton.Right || !IsRealClick(eventData)))
             {
                 return;
             } 
             
-            if (FlyCamera.IsMobile && Input.touchCount != 1)
+            if (GuiCamera.IsMobile && Input.touchCount != 1)
             {
                 return;
             }

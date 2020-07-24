@@ -14,6 +14,7 @@ namespace Iviz.Displays
 {
     public class RobotModel
     {
+        public string Name { get; }
         public string BaseLink { get; }
         public GameObject BaseLinkObject { get; }
 
@@ -76,6 +77,8 @@ namespace Iviz.Displays
         public RobotModel(string robotDescription, bool keepMeshMaterials = true)
         {
             var robot = Robot.Create(robotDescription);
+
+            Name = robot.Name;
 
             Dictionary<string, Material> rootMaterials = new Dictionary<string, Material>();
             foreach (var material in robot.Materials)

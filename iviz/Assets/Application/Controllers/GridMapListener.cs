@@ -7,7 +7,6 @@ using Iviz.Msgs.GridMapMsgs;
 using Iviz.Resources;
 using Iviz.Roslib;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace Iviz.Controllers
 {

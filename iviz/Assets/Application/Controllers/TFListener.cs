@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using tfMessage_v2 = Iviz.Msgs.Tf2Msgs.TFMessage;
 using System.Linq;
 using Iviz.Roslib;
-using Iviz.App.Displays;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.Tf;
 using System.Runtime.Serialization;
@@ -40,7 +39,7 @@ namespace Iviz.Controllers
 
         public static TFListener Instance { get; private set; }
         public static Camera MainCamera { get; set; }
-        public static FlyCamera GuiManager => Instance.guiManager;
+        public static GuiCamera GuiManager => GuiCamera.Instance;
 
         public static Light MainLight { get; set; }
 
@@ -55,7 +54,6 @@ namespace Iviz.Controllers
 
         public override TFFrame Frame => MapFrame;
 
-        readonly FlyCamera guiManager;
         readonly DisplayNode dummyListener;
         readonly DisplayNode staticListener;
 
@@ -202,7 +200,6 @@ namespace Iviz.Controllers
 
             GameObject mainCameraObj = GameObject.Find("MainCamera");
             MainCamera = mainCameraObj.GetComponent<Camera>();
-            guiManager = mainCameraObj.GetComponent<FlyCamera>();
 
             GameObject mainLight = GameObject.Find("MainLight");
             MainLight = mainLight.GetComponent<Light>();
@@ -406,7 +403,7 @@ namespace Iviz.Controllers
 
         public static UnityEngine.Pose RelativePose(in UnityEngine.Pose unityPose)
         {
-            if (FlyCamera.IsMobile)
+            if (GuiCamera.IsMobile)
             {
                 /*
                 Transform rootFrame = RootFrame.transform;
@@ -431,7 +428,7 @@ namespace Iviz.Controllers
 
         public static UnityEngine.Vector3 RelativePosition(in UnityEngine.Vector3 unityPosition)
         {
-            return FlyCamera.IsMobile ? RootFrame.transform.InverseTransformPoint(unityPosition) : unityPosition;
+            return GuiCamera.IsMobile ? RootFrame.transform.InverseTransformPoint(unityPosition) : unityPosition;
         }
 
         static uint tfSeq = 0;

@@ -8,7 +8,6 @@ using Iviz.App;
 using Iviz.Resources;
 using UnityEngine.XR.ARFoundation;
 using Iviz.Displays;
-using Iviz.App.Displays;
 using UnityEngine.Rendering;
 using UnityEngine.XR.ARSubsystems;
 

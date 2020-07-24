@@ -61,7 +61,7 @@ namespace Iviz.Controllers
             set
             {
                 RobotResource = value.RobotResource;
-                AttachToTf = value.AttachToTF;
+                AttachedToTf = value.AttachToTF;
                 FramePrefix = value.FramePrefix;
                 FrameSuffix = value.FrameSuffix;
                 Visible = value.Visible;
@@ -89,11 +89,11 @@ namespace Iviz.Controllers
             get => config.FramePrefix;
             set
             {
-                if (AttachToTf)
+                if (AttachedToTf)
                 {
-                    AttachToTf = false;
+                    AttachedToTf = false;
                     config.FramePrefix = value;
-                    AttachToTf = true;
+                    AttachedToTf = true;
                 }
                 else
                 {
@@ -111,11 +111,11 @@ namespace Iviz.Controllers
             get => config.FrameSuffix;
             set
             {
-                if (AttachToTf)
+                if (AttachedToTf)
                 {
-                    AttachToTf = false;
+                    AttachedToTf = false;
                     config.FrameSuffix = value;
-                    AttachToTf = true;
+                    AttachedToTf = true;
                 }
                 else
                 {
@@ -176,7 +176,7 @@ namespace Iviz.Controllers
             return true;
         }
 
-        public bool AttachToTf
+        public bool AttachedToTf
         {
             get => config.AttachToTF;
             set
@@ -288,7 +288,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            bool oldAttachToTf = AttachToTf;
+            bool oldAttachToTf = AttachedToTf;
 
             DisposeRobot();
             //node.Target = null;
@@ -377,7 +377,7 @@ namespace Iviz.Controllers
 
             if (oldAttachToTf)
             {
-                AttachToTf = true;
+                AttachedToTf = true;
             }
         }
 
@@ -430,9 +430,9 @@ namespace Iviz.Controllers
 
         void DisposeRobot()
         {
-            if (AttachToTf)
+            if (AttachedToTf)
             {
-                AttachToTf = false;
+                AttachedToTf = false;
             }
 
             if (!(RobotObject is null))

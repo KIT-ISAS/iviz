@@ -13,7 +13,7 @@ namespace Iviz.Controllers
         string Name { get; }
         event Action Stopped;
         bool TryWriteJoint(string joint, float value);
-        bool AttachToTf { get; }
+        bool AttachedToTf { get; }
     }
     
     [DataContract]
@@ -124,7 +124,7 @@ namespace Iviz.Controllers
 
         void Handler(JointState msg)
         {
-            if (Robot is null || Robot.AttachToTf)
+            if (Robot is null || Robot.AttachedToTf)
             {
                 return;
             }

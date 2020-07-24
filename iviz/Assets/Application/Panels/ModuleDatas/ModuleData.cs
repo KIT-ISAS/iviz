@@ -1,5 +1,4 @@
 ﻿using System;
-using Iviz.App;
 using Iviz.Controllers;
 using Iviz.Resources;
 

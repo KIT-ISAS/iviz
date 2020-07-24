@@ -59,6 +59,8 @@ namespace Iviz.Displays
                 return;
             }
 
+            Debug.Log("ExternalResourceManager: Using resource file " + ResourceFile);
+            
             try
             {
                 string text = File.ReadAllText(ResourceFile);

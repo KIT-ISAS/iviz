@@ -25,9 +25,6 @@ namespace Iviz.App
         {
 
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.InteractiveMarker) as InteractiveMarkerPanelContents;
-            //listener = Instantiate<InteractiveMarkerListener>();
-            //listener.name = "InteractiveMarkers";
-            //listener.ModuleData = this;
             listener = new InteractiveMarkerListener(this);
             if (constructor.Configuration != null)
             {
@@ -60,7 +57,7 @@ namespace Iviz.App
 
         public override void AddToState(StateConfiguration config)
         {
-            throw new System.NotImplementedException();
+            config.InteractiveMarkers.Add(listener.Config);
         }
     }
 }

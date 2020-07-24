@@ -9,8 +9,8 @@ namespace Iviz.App
     {
         static readonly List<Tuple<string, Resource.Module>> Modules = new List<Tuple<string, Resource.Module>>()
         {
-            Tuple.Create("<b>Robot</b>\nA robot object", Resource.Module.Robot),
-            Tuple.Create("<b>Robot (New)</b>\nA robot object", Resource.Module.SimpleRobot),
+            Tuple.Create("<b>Robot</b>\nRobot from the parameter server", Resource.Module.SimpleRobot),
+            Tuple.Create("<b>Robot (Template)</b>\nRobot from a template", Resource.Module.Robot),
             Tuple.Create("<b>Grid</b>\nA reference plane", Resource.Module.Grid),
             Tuple.Create("<b>DepthProjector</b>\nPoint cloud generator for depth images", Resource.Module.DepthImageProjector),
             Tuple.Create("<b>AR</b>\nManager for augmented reality", Resource.Module.AR),
@@ -34,10 +34,10 @@ namespace Iviz.App
             itemList.CloseClicked += OnCloseClicked;
 
             bool hasAR = ModuleListPanel.ModuleDatas.Any(x => x.Module == Resource.Module.AR);
-            itemList[3].Interactable = !hasAR;
+            itemList[4].Interactable = !hasAR;
 
             bool hasJoystick = ModuleListPanel.ModuleDatas.Any(x => x.Module == Resource.Module.Joystick);
-            itemList[4].Interactable = !hasJoystick;
+            itemList[5].Interactable = !hasJoystick;
         }
 
         void OnCloseClicked()
@@ -60,8 +60,8 @@ namespace Iviz.App
         public override void CleanupPanel()
         {
             base.CleanupPanel();
-            itemList[3].Interactable = true;
             itemList[4].Interactable = true;
+            itemList[5].Interactable = true;
         }
 
     }

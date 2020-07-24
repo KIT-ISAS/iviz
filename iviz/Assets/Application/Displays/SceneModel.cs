@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using Iviz.Displays;
 using Iviz.Resources;
-using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Iviz.Displays

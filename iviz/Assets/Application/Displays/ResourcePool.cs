@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using Iviz.Resources;
-using Iviz.Displays;
 using JetBrains.Annotations;
 
 namespace Iviz.Displays

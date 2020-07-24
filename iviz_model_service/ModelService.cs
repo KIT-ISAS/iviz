@@ -44,7 +44,7 @@ namespace Iviz.ModelService
                 return;
             }
 
-            Console.WriteLine("** Searching package paths...");
+            Console.WriteLine("** Used package paths:");
             string packagePath = Environment.GetEnvironmentVariable("ROS_PACKAGE_PATH");
             if (packagePath is null)
             {

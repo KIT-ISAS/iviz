@@ -12,8 +12,9 @@ namespace Iviz.App
 
     public sealed class SimpleRobotModuleData : ModuleData
     {
+        const string ParamSuffix = "_description";
+        
         readonly SimpleRobotPanelContents panel;
-
         readonly SimpleRobotController robot;
 
         public override DataPanelContents Panel => panel;
@@ -42,14 +43,13 @@ namespace Iviz.App
         public override void SetupPanel()
         {
             panel.Frame.Owner = robot;
-            //panel.ResourceType.Value = robot.RobotResource;
             panel.SourceParam.Value = robot.SourceParameter;
             panel.SourceParam.Hints =
-                ConnectionManager.GetSystemParameterList().Where(x => x.HasSuffix("_description"));
+                ConnectionManager.GetSystemParameterList().Where(x => x.HasSuffix(ParamSuffix));
             
             panel.FramePrefix.Value = robot.FramePrefix;
             panel.FrameSuffix.Value = robot.FrameSuffix;
-            panel.AttachToTf.Value = robot.AttachToTf;
+            panel.AttachToTf.Value = robot.AttachedToTf;
             panel.HideButton.State = robot.Visible;
 
             panel.OcclusionOnlyMode.Value = robot.RenderAsOcclusionOnly;
@@ -86,7 +86,7 @@ namespace Iviz.App
             };
             panel.AttachToTf.ValueChanged += f =>
             {
-                robot.AttachToTf = f;
+                robot.AttachedToTf = f;
             }; 
             panel.CloseButton.Clicked += () =>
             {
@@ -123,7 +123,7 @@ namespace Iviz.App
 
         public override void AddToState(StateConfiguration config)
         {
-            //config.Robots.Add(robot.Config);
+            config.SimpleRobots.Add(robot.Config);
         }
     }
 }

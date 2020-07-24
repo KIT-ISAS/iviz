@@ -4,7 +4,6 @@ using System.Runtime.Serialization;
 using Iviz.Roslib;
 using Iviz.Displays;
 using Iviz.Resources;
-using Iviz.App.Displays;
 
 namespace Iviz.Controllers
 {

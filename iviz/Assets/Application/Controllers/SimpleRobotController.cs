@@ -16,7 +16,7 @@ namespace Iviz.Controllers
         [DataMember] public string SourceParameter { get; set; } = "";
         [DataMember] public string FramePrefix { get; set; } = "";
         [DataMember] public string FrameSuffix { get; set; } = "";
-        [DataMember] public bool AttachToTf { get; set; } = false;
+        [DataMember] public bool AttachedToTf { get; set; } = false;
         [DataMember] public bool RenderAsOcclusionOnly { get; set; } = false;
         [DataMember] public SerializableColor Tint { get; set; } = Color.white;
     }
@@ -30,7 +30,17 @@ namespace Iviz.Controllers
 
         GameObject RobotObject => robot.BaseLinkObject;
 
-        public string Name { get; } = "robot_description";
+        public string Name
+        {
+            get
+            {
+                if (robot is null)
+                {
+                    return "[Empty]";
+                }
+                return robot.Name ?? "[Unnamed]"; 
+            }
+        }
 
         public event Action Stopped;
 
@@ -41,12 +51,13 @@ namespace Iviz.Controllers
             get => config;
             set
             {
-                AttachToTf = value.AttachToTf;
+                AttachedToTf = value.AttachedToTf;
                 FramePrefix = value.FramePrefix;
                 FrameSuffix = value.FrameSuffix;
                 Visible = value.Visible;
                 RenderAsOcclusionOnly = value.RenderAsOcclusionOnly;
                 Tint = value.Tint;
+                SourceParameter = value.SourceParameter;
             }
         }
 
@@ -72,10 +83,15 @@ namespace Iviz.Controllers
                 {
                     string description = ConnectionManager.Connection.GetParameter(value);
                     robot = new RobotModel(description);
+                    node.name = "SimpleRobotNode:" + Name;
+                    AttachedToTf = AttachedToTf;
+                    Visible = Visible;
+                    RenderAsOcclusionOnly = RenderAsOcclusionOnly;
+                    Tint = Tint;
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError(e);
+                    Debug.LogError($"SimpleRobotController: Error while loading parameter '{value}': {e}");
                     robot = null;
                     config.SourceParameter = string.Empty;
                 }
@@ -87,11 +103,11 @@ namespace Iviz.Controllers
             get => config.FramePrefix;
             set
             {
-                if (AttachToTf)
+                if (AttachedToTf)
                 {
-                    AttachToTf = false;
+                    AttachedToTf = false;
                     config.FramePrefix = value;
-                    AttachToTf = true;
+                    AttachedToTf = true;
                 }
                 else
                 {
@@ -112,11 +128,11 @@ namespace Iviz.Controllers
             get => config.FrameSuffix;
             set
             {
-                if (AttachToTf)
+                if (AttachedToTf)
                 {
-                    AttachToTf = false;
+                    AttachedToTf = false;
                     config.FrameSuffix = value;
-                    AttachToTf = true;
+                    AttachedToTf = true;
                 }
                 else
                 {
@@ -187,17 +203,12 @@ namespace Iviz.Controllers
             return robot.TryWriteJoint(joint, value, out _);
         }
 
-        public bool AttachToTf
+        public bool AttachedToTf
         {
-            get => config.AttachToTf;
+            get => config.AttachedToTf;
             set
             {
-                if (value == config.AttachToTf)
-                {
-                    return;
-                }
-
-                config.AttachToTf = value;
+                config.AttachedToTf = value;
 
                 if (robot is null)
                 {
@@ -206,50 +217,63 @@ namespace Iviz.Controllers
 
                 if (value)
                 {
-                    RobotObject.transform.SetParentLocal(TFListener.MapFrame.transform);
-                    foreach (var entry in robot.LinkObjects)
-                    {
-                        string link = entry.Key;
-                        GameObject linkObject = entry.Value;
-                        TFFrame frame = TFListener.GetOrCreateFrame(Decorate(link), node);
-                        linkObject.transform.SetParentLocal(frame.transform);
-                        linkObject.transform.SetLocalPose(Pose.identity);
-                    }
-
-                    // fill in missing frame parents, but only if it hasn't been provided already
-                    foreach (var entry in robot.LinkParents)
-                    {
-                        TFFrame frame = TFListener.GetOrCreateFrame(Decorate(entry.Key), node);
-                        if (frame.Parent == TFListener.RootFrame)
-                        {
-                            TFFrame parentFrame = TFListener.GetOrCreateFrame(Decorate(entry.Value), node);
-                            frame.Parent = parentFrame;
-                        }
-                    }
+                    AttachToTf();
                 }
                 else
                 {
-                    foreach (var entry in robot.LinkParents)
-                    {
-                        if (TFListener.TryGetFrame(Decorate(entry.Key), out TFFrame frame))
-                        {
-                            frame.RemoveListener(node);
-                        }
+                    DetachFromTf();
+                }
+            }
+        }
 
-                        if (TFListener.TryGetFrame(Decorate(entry.Value), out TFFrame parentFrame))
-                        {
-                            parentFrame.RemoveListener(node);
-                        }
-                    }
-
-                    node.Parent = null;
-                    robot.ResetLinkParents();
-                    robot.ApplyAnyValidConfiguration();
+        void DetachFromTf()
+        {
+            foreach (var entry in robot.LinkParents)
+            {
+                if (TFListener.TryGetFrame(Decorate(entry.Key), out TFFrame frame))
+                {
+                    frame.RemoveListener(node);
                 }
 
-                node.AttachTo(Decorate(robot.BaseLink));
-                robot.BaseLinkObject.transform.SetParentLocal(node.transform);
+                if (TFListener.TryGetFrame(Decorate(entry.Value), out TFFrame parentFrame))
+                {
+                    parentFrame.RemoveListener(node);
+                }
             }
+
+            node.Parent = null;
+            robot.ResetLinkParents();
+            robot.ApplyAnyValidConfiguration();
+
+            node.AttachTo(Decorate(robot.BaseLink));
+            robot.BaseLinkObject.transform.SetParentLocal(node.transform);
+        }
+
+        void AttachToTf()
+        {
+            RobotObject.transform.SetParentLocal(TFListener.MapFrame.transform);
+            foreach (var entry in robot.LinkObjects)
+            {
+                string link = entry.Key;
+                GameObject linkObject = entry.Value;
+                TFFrame frame = TFListener.GetOrCreateFrame(Decorate(link), node);
+                linkObject.transform.SetParentLocal(frame.transform);
+                linkObject.transform.SetLocalPose(Pose.identity);
+            }
+
+            // fill in missing frame parents, but only if it hasn't been provided already
+            foreach (var entry in robot.LinkParents)
+            {
+                TFFrame frame = TFListener.GetOrCreateFrame(Decorate(entry.Key), node);
+                if (frame.Parent == TFListener.RootFrame)
+                {
+                    TFFrame parentFrame = TFListener.GetOrCreateFrame(Decorate(entry.Value), node);
+                    frame.Parent = parentFrame;
+                }
+            }
+
+            node.AttachTo(Decorate(robot.BaseLink));
+            robot.BaseLinkObject.transform.SetParentLocal(node.transform);
         }
 
         public IModuleData ModuleData { get; private set; }
@@ -266,9 +290,9 @@ namespace Iviz.Controllers
         {
             node.Stop();
 
-            if (AttachToTf)
+            if (AttachedToTf)
             {
-                AttachToTf = false;
+                AttachedToTf = false;
             }
 
             robot?.Dispose();
@@ -282,10 +306,10 @@ namespace Iviz.Controllers
             SourceParameter = "";
             SourceParameter = parameter;
             
-            if (AttachToTf)
+            if (AttachedToTf)
             {
-                AttachToTf = false;
-                AttachToTf = true;
+                AttachedToTf = false;
+                AttachedToTf = true;
             }
         }
     }
