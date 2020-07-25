@@ -167,7 +167,7 @@ namespace Iviz.Displays
             meshRenderer.sharedMaterials = materials;
         }
 
-        public void Stop()
+        public void Suspend()
         {
             Tint = Color.white;
             OcclusionOnly = false;

@@ -288,9 +288,9 @@ namespace Iviz.Displays
             UpdateMaterialKeywords();
         }
 
-        public override void Stop()
+        public override void Suspend()
         {
-            base.Stop();
+            base.Suspend();
             Size = 0;
             OcclusionOnly = false;
         }

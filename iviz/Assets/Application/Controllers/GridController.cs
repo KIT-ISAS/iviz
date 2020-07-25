@@ -221,7 +221,7 @@ namespace Iviz.Controllers
         public void Stop()
         {
             //ResourcePool.Dispose(Resource.Displays.Grid, grid.gameObject);
-            grid.Stop();
+            grid.Suspend();
             Resource.Displays.Dispose(grid);
             node.Stop();
             UnityEngine.Object.Destroy(node.gameObject);

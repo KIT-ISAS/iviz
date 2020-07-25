@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using Iviz.Resources;
 using Iviz.Urdf;
+using JetBrains.Annotations;
 using UnityEngine;
 using Color = UnityEngine.Color;
 using Joint = Iviz.Urdf.Joint;
@@ -14,6 +15,7 @@ namespace Iviz.Displays
 {
     public class RobotModel
     {
+        public Robot Robot { get; }
         public string Name { get; }
         public string BaseLink { get; }
         public GameObject BaseLinkObject { get; }
@@ -74,10 +76,15 @@ namespace Iviz.Displays
             }
         }
 
-        public RobotModel(string robotDescription, bool keepMeshMaterials = true)
+        public RobotModel([NotNull] string robotDescription, bool keepMeshMaterials = true)
         {
-            var robot = Robot.Create(robotDescription);
+            if (string.IsNullOrEmpty(robotDescription))
+            {
+                throw new ArgumentException("Value cannot be null or empty.", nameof(robotDescription));
+            }
 
+            var robot = Robot.Create(robotDescription);
+            Robot = robot;
             Name = robot.Name;
 
             Dictionary<string, Material> rootMaterials = new Dictionary<string, Material>();
@@ -297,7 +304,7 @@ namespace Iviz.Displays
             foreach (var(gameObject, info) in objectResources)
             {
                 IDisplay display = gameObject.GetComponent<IDisplay>();
-                display?.Stop();
+                display?.Suspend();
                 ResourcePool.Dispose(info, gameObject);
             }
             UnityEngine.Object.Destroy(BaseLinkObject);
@@ -322,8 +329,13 @@ namespace Iviz.Displays
             }
         }
         
-        public bool TryWriteJoint(string jointName, float value, out Pose unityPose, bool onlyCalculatePose = false)
+        public bool TryWriteJoint([NotNull] string jointName, float value, out Pose unityPose, bool onlyCalculatePose = false)
         {
+            if (jointName is null)
+            {
+                throw new ArgumentNullException(nameof(jointName));
+            }
+            
             if (!joints.TryGetValue(jointName, out Joint joint))
             {
                 unityPose = default;

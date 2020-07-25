@@ -68,7 +68,7 @@ namespace Iviz.App
         public Joystick Joystick => joystick;
 
         readonly List<ModuleData> moduleDatas = new List<ModuleData>();
-        public ReadOnlyCollection<ModuleData> ModuleDatas => new ReadOnlyCollection<ModuleData>(moduleDatas);
+        public IReadOnlyCollection<ModuleData> ModuleDatas { get; }
 
         DialogData availableModules;
         DialogData availableTopics;
@@ -101,6 +101,11 @@ namespace Iviz.App
                 ConnectionManager.Connection.KeepReconnecting = value;
                 status.enabled = value;
             }
+        }
+
+        public ModuleListPanel()
+        {
+            ModuleDatas = new ReadOnlyCollection<ModuleData>(moduleDatas);            
         }
 
         void Awake()

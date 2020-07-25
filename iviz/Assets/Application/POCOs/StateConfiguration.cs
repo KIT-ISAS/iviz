@@ -24,7 +24,7 @@ namespace Iviz.App
         [DataMember] public List<ImageConfiguration> Images { get; set; } = new List<ImageConfiguration>();
         [DataMember] public List<MarkerConfiguration> Markers { get; set; } = new List<MarkerConfiguration>();
         [DataMember] public List<InteractiveMarkerConfiguration> InteractiveMarkers { get; set; } = new List<InteractiveMarkerConfiguration>();
-        [DataMember] public List<DepthImageProjectorConfiguration> DepthImageProjectors { get; set; } = new List<DepthImageProjectorConfiguration>();
+        [DataMember] public List<DepthCloudConfiguration> DepthImageProjectors { get; set; } = new List<DepthCloudConfiguration>();
         [DataMember] public List<MagnitudeConfiguration> Odometries { get; set; } = new List<MagnitudeConfiguration>();
         [DataMember] public List<OccupancyGridConfiguration> OccupancyGrids { get; set; } = new List<OccupancyGridConfiguration>();
         [DataMember] public List<PathConfiguration> Paths { get; set; } = new List<PathConfiguration>();

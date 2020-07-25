@@ -1,0 +1,5 @@
+string uri
+---
+bool success
+sensor_msgs/CompressedImage image
+string message

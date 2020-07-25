@@ -127,9 +127,9 @@ namespace Iviz.Displays
             resource.CastShadows = false; // fix weird shadow bug
         }
 
-        public override void Stop()
+        public override void Suspend()
         {
-            base.Stop();
+            base.Suspend();
             pointBuffer.Clear();
         }
 

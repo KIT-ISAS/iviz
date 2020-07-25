@@ -83,9 +83,9 @@ namespace Iviz.Displays
             ColorZ = Color.blue;
         }
 
-        public override void Stop()
+        public override void Suspend()
         {
-            base.Stop();
+            base.Suspend();
             ColorX = Color.red;
             ColorY = Color.green;
             ColorZ = Color.blue;

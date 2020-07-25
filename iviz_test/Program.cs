@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
 using BitMiracle.LibJpeg;
-using Iviz.Bridge.Client;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.SensorMsgs;
@@ -303,47 +302,6 @@ namespace iviz_test
             Console.WriteLine(client.GetSystemState());
             client.Subscribe<TFMessage>("/tf", Callback);
             Console.In.Read();
-        }
-
-        static void Main_Old(string[] args)
-        {
-            BridgeClient client = new BridgeClient("ws://192.168.0.157:8080");
-
-            TransformStamped[] tfs = new TransformStamped[1];
-            tfs[0] = new TransformStamped
-            (
-                Header: new Iviz.Msgs.StdMsgs.Header(),
-                ChildFrameId: "",
-                Transform: new Transform
-                (
-                    Translation: new Vector3
-                    (
-                        X: 0,
-                        Y: 0,
-                        Z: 1
-                    ),
-                    Rotation: new Quaternion
-                    (
-                        X: 0,
-                        Y: 0,
-                        Z: 0,
-                        W: 1
-                    )
-                )
-            );
-            TFMessage tf = new TFMessage
-            {
-                Transforms = tfs
-            };
-
-            BridgePublisher<TFMessage> publisher = client.Advertise<TFMessage>("/tf");
-
-            while (true)
-            {
-                publisher.Publish(tf);
-                //Console.WriteLine(">> " + tf.ToJsonString());
-                Thread.Sleep(1000);
-            }
         }
 
         static void Main_Old_2(string[] args)

@@ -64,7 +64,7 @@ namespace Iviz.Displays
             set => gameObject.layer = value;
         }
 
-        public void Stop()
+        public void Suspend()
         {
         }
     }

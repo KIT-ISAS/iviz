@@ -66,7 +66,7 @@ namespace Iviz.Controllers
             get => config.SourceParameter;
             set
             {
-                if (value == config.SourceParameter)
+                if (robot != null && value == config.SourceParameter)
                 {
                     return;
                 }
@@ -82,6 +82,12 @@ namespace Iviz.Controllers
                 try
                 {
                     string description = ConnectionManager.Connection.GetParameter(value);
+                    if (string.IsNullOrEmpty(description))
+                    {
+                        Debug.Log($"SimpleRobotController: Failed to retrieve parameter '{value}'");
+                        robot = null;
+                        return;
+                    }
                     robot = new RobotModel(description);
                     node.name = "SimpleRobotNode:" + Name;
                     AttachedToTf = AttachedToTf;

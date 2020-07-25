@@ -109,17 +109,17 @@ namespace Iviz.Displays
 
         public void SplitForRecycle()
         {
-            axisObjects[0].Stop();
-            axisObjects[1].Stop();
-            axisObjects[2].Stop();
+            axisObjects[0].Suspend();
+            axisObjects[1].Suspend();
+            axisObjects[2].Suspend();
             ResourcePool.Dispose(Resource.Displays.Cube, axisObjects[0].gameObject);
             ResourcePool.Dispose(Resource.Displays.Cube, axisObjects[1].gameObject);
             ResourcePool.Dispose(Resource.Displays.Cube, axisObjects[2].gameObject);
         }
 
-        public override void Stop()
+        public override void Suspend()
         {
-            base.Stop();
+            base.Suspend();
 
             AxisLength = 0.25f;
             ColorX = Color.red;

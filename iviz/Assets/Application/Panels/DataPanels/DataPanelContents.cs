@@ -51,7 +51,7 @@ namespace Iviz.App
                 case Resource.Module.Marker: return o.AddComponent<MarkerPanelContents>();
                 case Resource.Module.InteractiveMarker: return o.AddComponent<InteractiveMarkerPanelContents>();
                 case Resource.Module.JointState: return o.AddComponent<JointStatePanelContents>();
-                case Resource.Module.DepthImageProjector: return o.AddComponent<DepthImageProjectorPanelContents>();
+                case Resource.Module.DepthCloud: return o.AddComponent<DepthCloudPanelContents>();
                 case Resource.Module.LaserScan: return o.AddComponent<LaserScanPanelContents>();
                 case Resource.Module.AR: return o.AddComponent<ARPanelContents>();
                 case Resource.Module.Magnitude: return o.AddComponent<MagnitudePanelContents>();

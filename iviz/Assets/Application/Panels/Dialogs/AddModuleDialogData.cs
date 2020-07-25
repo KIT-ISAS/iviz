@@ -12,7 +12,7 @@ namespace Iviz.App
             Tuple.Create("<b>Robot</b>\nRobot from the parameter server", Resource.Module.SimpleRobot),
             Tuple.Create("<b>Robot (Template)</b>\nRobot from a template", Resource.Module.Robot),
             Tuple.Create("<b>Grid</b>\nA reference plane", Resource.Module.Grid),
-            Tuple.Create("<b>DepthProjector</b>\nPoint cloud generator for depth images", Resource.Module.DepthImageProjector),
+            Tuple.Create("<b>DepthProjector</b>\nPoint cloud generator for depth images", Resource.Module.DepthCloud),
             Tuple.Create("<b>AR</b>\nManager for augmented reality", Resource.Module.AR),
             Tuple.Create("<b>Joystick</b>\nOn-screen joystick", Resource.Module.Joystick),
         };

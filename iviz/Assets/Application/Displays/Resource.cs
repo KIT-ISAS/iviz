@@ -15,6 +15,7 @@ using Iviz.Msgs.NavMsgs;
 using System.Text;
 using Iviz.Displays;
 using Iviz.Msgs.GridMapMsgs;
+using JetBrains.Annotations;
 using Transform = UnityEngine.Transform;
 
 namespace Iviz.Resources
@@ -40,7 +41,7 @@ namespace Iviz.Resources
             Marker,
             InteractiveMarker,
             JointState,
-            DepthImageProjector,
+            DepthCloud,
             LaserScan,
             AR,
             Magnitude,
@@ -126,7 +127,7 @@ namespace Iviz.Resources
             int id = 0;
             public int Id => (id != 0) ? id : (id = Object.GetInstanceID());
 
-            public Info(string resourceName)
+            public Info([NotNull] string resourceName)
             {
                 this.resourceName = resourceName ?? throw new ArgumentNullException(nameof(resourceName));
             }
@@ -217,8 +218,13 @@ namespace Iviz.Resources
             readonly Dictionary<Texture, Material> materialsByTexture = new Dictionary<Texture, Material>();
             readonly Dictionary<Texture, Material> materialsByTextureAlpha = new Dictionary<Texture, Material>();
 
-            public Material Get(Texture texture)
+            public Material Get([NotNull] Texture texture)
             {
+                if (texture is null)
+                {
+                    throw new ArgumentNullException(nameof(texture));
+                }
+                
                 if (materialsByTexture.TryGetValue(texture, out Material material))
                 {
                     return material;
@@ -231,8 +237,13 @@ namespace Iviz.Resources
                 return material;
             }
 
-            public Material GetAlpha(Texture texture)
+            public Material GetAlpha([NotNull] Texture texture)
             {
+                if (texture is null)
+                {
+                    throw new ArgumentNullException(nameof(texture));
+                }
+                
                 if (materialsByTextureAlpha.TryGetValue(texture, out Material material))
                 {
                     return material;
@@ -408,12 +419,18 @@ namespace Iviz.Resources
                 return ResourcePool.GetOrCreate<T>(info, parent, enabled);
             }
 
-            public void Dispose<T>(T resource) where T : MonoBehaviour
+            public void Dispose<T>([NotNull] T resource) where T : MonoBehaviour
             {
+                if (resource is null)
+                {
+                    throw new ArgumentNullException(nameof(resource));
+                }
+                
                 if (!TryGetResource(typeof(T), out GameObjectInfo info))
                 {
                     throw new ResourceNotFoundException("Cannot find unique display type for resource");
                 }
+                
                 ResourcePool.Dispose(info, resource.gameObject);
             }
         }
@@ -433,8 +450,13 @@ namespace Iviz.Resources
                 };
             }
 
-            public bool TryGet(Uri uri, out GameObjectInfo info)
+            public bool TryGet([NotNull] Uri uri, out GameObjectInfo info)
             {
+                if (uri is null)
+                {
+                    throw new ArgumentNullException(nameof(uri));
+                }
+                
                 if (files.TryGetValue(uri, out info))
                 {
                     return true;

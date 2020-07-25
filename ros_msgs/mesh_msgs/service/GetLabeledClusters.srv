@@ -1,0 +1,3 @@
+string uuid
+---
+MeshFaceCluster[] clusters

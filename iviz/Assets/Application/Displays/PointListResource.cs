@@ -251,9 +251,9 @@ namespace Iviz.Displays
             Colormap = Colormap;
         }
 
-        public override void Stop()
+        public override void Suspend()
         {
-            base.Stop();
+            base.Suspend();
             Size = 0;
         }
     }

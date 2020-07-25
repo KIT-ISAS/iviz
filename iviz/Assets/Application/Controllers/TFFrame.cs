@@ -390,8 +390,8 @@ namespace Iviz.Controllers
             Id = "";
             trail.Name = "[Trail:In Trash]";
             timeline.Clear();
-            axis.Stop();
-            trail.Stop();
+            axis.Suspend();
+            trail.Suspend();
             TrailVisible = false;
             anchor.Visible = false;
             anchor.Name = "[Anchor:In Trash]";

@@ -217,8 +217,10 @@ namespace Iviz.Roslib
             Master = new XmlRpc.Master(masterUri, CallerId, CallerUri);
             Parameters = new XmlRpc.ParameterClient(masterUri, CallerId, CallerUri);
 
-            Logger.Log(
-                $"RosClient: Starting: My id is {CallerId}, my uri is {CallerUri}, and I'm talking to {MasterUri}");
+            Logger.Log($"** RosClient: Starting!" +
+                       $"** My Id is {CallerId}" +
+                       $"** My Uri is {CallerUri}" +
+                       $"** I'm talking to {MasterUri}");
 
             try
             {

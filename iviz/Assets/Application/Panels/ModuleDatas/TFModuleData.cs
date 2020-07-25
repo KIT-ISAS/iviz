@@ -23,9 +23,6 @@ namespace Iviz.App
                 constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.TF) as TFPanelContents;
-            //listener = Instantiate<TFListener>();
-            //listener.name = "TF";
-            //listener.ModuleData = this;
             listener = new TFListener(this);
             if (constructor.Configuration != null)
             {
@@ -49,7 +46,8 @@ namespace Iviz.App
             panel.Frame.Owner = listener;
             panel.Listener.RosListener = listener.Listener;
             panel.ListenerStatic.RosListener = listener.ListenerStatic;
-            panel.ShowAxes.Value = listener.AxisVisible;
+            //panel.ShowAxes.Value = listener.AxisVisible;
+            panel.HideButton.State = listener.AxisVisible;
             panel.FrameSize.Value = listener.AxisSize;
             panel.ShowFrameLabels.Value = listener.AxisLabelVisible;
             panel.FrameLabelSize.Value = listener.AxisLabelSize;
@@ -58,9 +56,16 @@ namespace Iviz.App
             panel.KeepOnlyUsedFrames.Value = !listener.ShowAllFrames;
             panel.Sender.Set(listener.Publisher);
 
+            /*
             panel.ShowAxes.ValueChanged += f =>
             {
                 listener.AxisVisible = f;
+            };
+            */
+            panel.HideButton.Clicked += () =>
+            {
+                listener.AxisVisible = !listener.AxisVisible;
+                panel.HideButton.State = listener.AxisVisible;
             };
             panel.ShowFrameLabels.ValueChanged += f =>
             {

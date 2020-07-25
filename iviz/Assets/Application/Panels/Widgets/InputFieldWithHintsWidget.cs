@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,6 +11,7 @@ namespace Iviz.App
     {
         [SerializeField] InputFieldWidget input = null;
         [SerializeField] Dropdown dropdown = null;   
+        Dropdown reserve = null;   
         
         public string Label
         {
@@ -63,6 +65,8 @@ namespace Iviz.App
         {
             input.EndEdit += OnEndEdit;
             dropdown.onValueChanged.AddListener(OnValueChanged);
+            reserve = Instantiate(dropdown.gameObject, transform).GetComponent<Dropdown>();
+            reserve.gameObject.SetActive(false);
         }
 
         public event Action<string> EndEdit;
@@ -71,6 +75,15 @@ namespace Iviz.App
         {
             input.Value = optionDatas[i].text;
             EndEdit?.Invoke(optionDatas[i].text);
+
+            // awkward workaround for the fact that Unity won't allow the selection to be reset
+            // however, we want the user to be able to select the same item multiple times
+            // so we simply destroy the widget and recreate a saved version with no selection
+            Destroy(dropdown.gameObject);
+            dropdown = Instantiate(reserve.gameObject, transform).GetComponent<Dropdown>();
+            dropdown.gameObject.SetActive(true);
+            dropdown.onValueChanged.AddListener(OnValueChanged);
+            dropdown.options = optionDatas;
         }        
 
         void OnEndEdit(string f)

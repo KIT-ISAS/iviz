@@ -11,10 +11,12 @@ namespace Iviz.Displays
     [JsonConverter(typeof(StringEnumConverter))]
     public enum GridOrientation
     {
-        XY, YZ, XZ
+        XY,
+        YZ,
+        XZ
     }
 
-    public sealed class GridResource : MarkerResource
+    public sealed class GridResource : MarkerResource, IRecyclable
     {
         Mesh mesh;
         MeshRenderer meshRenderer;
@@ -23,14 +25,15 @@ namespace Iviz.Displays
         readonly List<MeshMarkerResource> horizontals = new List<MeshMarkerResource>();
         readonly List<MeshMarkerResource> verticals = new List<MeshMarkerResource>();
 
-        public static readonly List<string> OrientationNames = new List<string> { "XY", "YZ", "XZ" };
+        public static readonly List<string> OrientationNames = new List<string> {"XY", "YZ", "XZ"};
 
-        static readonly Dictionary<GridOrientation, Quaternion> RotationByOrientation = new Dictionary<GridOrientation, Quaternion>
-        {
-            { GridOrientation.XZ, Quaternion.identity },
-            { GridOrientation.XY, Quaternion.Euler(90, 0, 0) },
-            { GridOrientation.YZ, Quaternion.Euler(0, 90, 0) }
-        };
+        static readonly Dictionary<GridOrientation, Quaternion> RotationByOrientation =
+            new Dictionary<GridOrientation, Quaternion>
+            {
+                {GridOrientation.XZ, Quaternion.identity},
+                {GridOrientation.XY, Quaternion.Euler(90, 0, 0)},
+                {GridOrientation.YZ, Quaternion.Euler(0, 90, 0)}
+            };
 
         GridOrientation orientation;
         public GridOrientation Orientation
@@ -72,7 +75,10 @@ namespace Iviz.Displays
             set
             {
                 gridLineWidth = value;
-                UpdateMesh();
+                if (!(mesh is null))
+                {
+                    UpdateMesh();
+                }
             }
         }
 
@@ -83,7 +89,10 @@ namespace Iviz.Displays
             set
             {
                 gridCellSize = value;
-                UpdateMesh();
+                if (!(mesh is null))
+                {
+                    UpdateMesh();
+                }
             }
         }
 
@@ -94,7 +103,10 @@ namespace Iviz.Displays
             set
             {
                 numberOfGridCells = value;
-                UpdateMesh();
+                if (!(mesh is null))
+                {
+                    UpdateMesh();
+                }
             }
         }
 
@@ -122,6 +134,7 @@ namespace Iviz.Displays
             meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             //meshRenderer.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
 
+            Debug.Log("Awake!");
             interiorObject = Resource.Displays.Cube.Instantiate(transform);
             interiorObject.name = "Grid Interior";
             interiorObject.transform.localPosition = new Vector3(0, 0, 0.01f);
@@ -139,10 +152,11 @@ namespace Iviz.Displays
             NumberOfGridCells = 20;
             ShowInterior = true;
 
-            gameObject.layer = Resource.ClickableLayer;
+            UpdateMesh();
         }
 
         int lastX = 0, lastZ = 0;
+
         void Update()
         {
             if (!FollowCamera || TFListener.MainCamera is null)
@@ -154,13 +168,14 @@ namespace Iviz.Displays
             switch (Orientation)
             {
                 case GridOrientation.XY:
-                    int x = (int)(cameraPos.x + 0.5f);
-                    int z = (int)(cameraPos.z + 0.5f);
+                    int x = (int) (cameraPos.x + 0.5f);
+                    int z = (int) (cameraPos.z + 0.5f);
                     float offsetY = transform.localPosition.y;
                     if (x != lastX || z != lastZ)
                     {
                         UpdatePosition(x, z, offsetY);
                     }
+
                     break;
             }
         }
@@ -201,13 +216,10 @@ namespace Iviz.Displays
             List<int> indices = new List<int>();
 
             List<Vector3> squareVertices =
-                squareMesh.vertices.
-                Select(x => new Vector3(x.x, x.z, -x.y) * 0.1f + new Vector3(0.5f, 0.5f, -0.5f)).
-                ToList();
+                squareMesh.vertices.Select(x => new Vector3(x.x, x.z, -x.y) * 0.1f + new Vector3(0.5f, 0.5f, -0.5f))
+                    .ToList();
             List<Vector3> squareNormals =
-                squareMesh.normals.
-                Select(x => new Vector3(x.x, x.z, -x.y)).
-                ToList();
+                squareMesh.normals.Select(x => new Vector3(x.x, x.z, -x.y)).ToList();
 
             float offsetX = -totalSize / 2;
             float offsetY = -totalSize / 2;
@@ -273,11 +285,13 @@ namespace Iviz.Displays
                     verticals.Add(resource);
                 }
             }
+
             foreach (MeshMarkerResource resource in horizontals)
             {
                 resource.transform.localScale = new Vector3(totalSize, 1, 2 * GridLineWidth) / 10;
                 resource.Color = new Color(0, 0.3f, 0);
             }
+
             foreach (MeshMarkerResource resource in verticals)
             {
                 resource.transform.localScale = new Vector3(2 * GridLineWidth, 1, totalSize) / 10;
@@ -288,19 +302,17 @@ namespace Iviz.Displays
             lastZ = int.MaxValue;
         }
 
-        public override void Stop()
+        public void SplitForRecycle()
         {
-            Destroy(interiorObject);
-            interiorObject = null;
-
             foreach (var plane in horizontals)
             {
-                plane.Stop();
+                plane.Suspend();
                 ResourcePool.Dispose(Resource.Displays.Square, plane.gameObject);
             }
+
             foreach (var plane in verticals)
             {
-                plane.Stop();
+                plane.Suspend();
                 ResourcePool.Dispose(Resource.Displays.Square, plane.gameObject);
             }
         }

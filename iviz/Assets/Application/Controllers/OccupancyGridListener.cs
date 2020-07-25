@@ -238,7 +238,7 @@ namespace Iviz.Controllers
             {
                 foreach (var grid in grids)
                 {
-                    grid.Stop();
+                    grid.Suspend();
                     ResourcePool.Dispose(Resource.Displays.OccupancyGridResource, grid.gameObject);
                 }
             }

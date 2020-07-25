@@ -32,14 +32,27 @@ namespace Iviz.App
             }
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.SimpleRobot) as SimpleRobotPanelContents;
             UpdateModuleButton();
+            
+            ConnectionManager.Connection.ConnectionStateChanged += OnConnectionStateChanged;
+        }
+
+        void OnConnectionStateChanged(ConnectionState state)
+        {
+            if (state != ConnectionState.Connected)
+            {
+                return;
+            }
+            robot.SourceParameter = robot.SourceParameter;;
+            UpdateModuleButton();
         }
 
         public override void Stop()
         {
             base.Stop();
             robot.Stop();
+            ConnectionManager.Connection.ConnectionStateChanged -= OnConnectionStateChanged;
         }
-
+        
         public override void SetupPanel()
         {
             panel.Frame.Owner = robot;
@@ -83,6 +96,7 @@ namespace Iviz.App
             panel.SourceParam.EndEdit += f =>
             {
                 robot.SourceParameter = f;
+                UpdateModuleButton();
             };
             panel.AttachToTf.ValueChanged += f =>
             {

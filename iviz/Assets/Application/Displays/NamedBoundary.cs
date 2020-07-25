@@ -207,7 +207,7 @@ namespace Iviz.Controllers
         }
 
 
-        public void Stop()
+        public void Suspend()
         {
         }
     }

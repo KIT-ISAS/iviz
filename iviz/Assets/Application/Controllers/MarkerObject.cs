@@ -115,7 +115,7 @@ namespace Iviz.Controllers
             {
                 if (!(resource is null))
                 {
-                    resource.Stop();
+                    resource.Suspend();
                     ResourcePool.Dispose(resourceType, resource.gameObject);
                     resource = null;
                 }
@@ -391,7 +391,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            resource.Stop();
+            resource.Suspend();
             ResourcePool.Dispose(resourceType, resource.gameObject);
             resource = null;
             resourceType = null;

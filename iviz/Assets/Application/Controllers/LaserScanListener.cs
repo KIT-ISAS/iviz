@@ -213,7 +213,7 @@ namespace Iviz.Controllers
         {
             base.Stop();
 
-            resource.Stop();
+            resource.Suspend();
             ResourcePool.Dispose(Resource.Displays.RadialScanResource, resource.gameObject);
 
             node.Stop();

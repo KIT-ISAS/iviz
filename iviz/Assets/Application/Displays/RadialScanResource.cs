@@ -319,10 +319,10 @@ namespace Iviz.Displays
             }
         }
 
-        public void Stop()
+        public void Suspend()
         {
-            pointCloud.Stop();
-            lines.Stop();
+            pointCloud.Suspend();
+            lines.Suspend();
         }
 
         public void SplitForRecycle()

@@ -216,9 +216,9 @@ namespace Iviz.Displays
 
         }
 
-        public override void Stop()
+        public override void Suspend()
         {
-            base.Stop();
+            base.Suspend();
             mesh?.Clear();
         }
     }

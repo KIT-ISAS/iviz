@@ -110,7 +110,7 @@ namespace Iviz.Displays
             billboardStartPose = billboard.transform.AsLocalPose();
         }
 
-        public void Stop()
+        public void Suspend()
         {
             if (texture != null)
             {

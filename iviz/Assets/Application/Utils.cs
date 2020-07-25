@@ -359,20 +359,6 @@ namespace Iviz
             return false;
         }
 
-        /*
-        public static string SanitizedText(string text, int size)
-        {
-            if (text.Length <= size + 5)
-            {
-                return text;
-            }
-            else
-            {
-                return text.Substring(0, size) + "...\n→ " + text.Substring(size);
-            }
-        }
-        */
-
         public static Pose AsPose(this Transform t)
         {
             return new Pose(t.position, t.rotation);
@@ -471,34 +457,6 @@ namespace Iviz
                 action(t);
             }
         }
-
-        /*
-        public static Bounds TransformBound(Bounds b, Transform T)
-        {
-            return TransformBound(b, T.rotation, T.position);
-        }
-
-        public static Bounds TransformBound(Bounds b, Quaternion q, Vector3 t)
-        {
-            Vector3[] R = {
-                 b.extents.x * Vector3.right,
-                -b.extents.x * Vector3.right,
-                 b.extents.y * Vector3.up,
-                -b.extents.y * Vector3.up,
-                 b.extents.z * Vector3.forward,
-                -b.extents.z * Vector3.forward
-            };
-            Vector3 positionMin = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
-            Vector3 positionMax = new Vector3(float.MinValue, float.MinValue, float.MinValue);
-            for (int i = 0; i < R.Length; i++)
-            {
-                Vector3 position = q * (R[i] + b.center) + t;
-                positionMin = Vector3.Min(positionMin, position);
-                positionMax = Vector3.Max(positionMax, position);
-            }
-            return new Bounds((positionMax + positionMin) / 2, positionMax - positionMin);
-        }
-        */
 
         static MaterialPropertyBlock propBlock;
         static readonly int ColorPropId = Shader.PropertyToID("_Color");

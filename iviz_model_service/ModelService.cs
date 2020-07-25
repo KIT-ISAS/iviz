@@ -22,8 +22,10 @@ namespace Iviz.ModelService
         const string TextureServiceName = "/iviz/get_model_texture"; 
         
         static readonly AssimpContext Importer = new AssimpContext();
-        static readonly List<string> PackagePaths = new List<string>();
         
+        //static readonly List<string> PackagePaths = new List<string>();
+        static readonly Dictionary<string, List<string>> PackagePaths = new Dictionary<string, List<string>>();
+
         static void Main()
         {
             Uri masterUri = RosClient.EnvironmentMasterUri;
@@ -55,10 +57,8 @@ namespace Iviz.ModelService
                 string[] paths = packagePath.Split(new[] {':'}, StringSplitOptions.RemoveEmptyEntries);
                 foreach (var path in paths)
                 {
-                    Console.WriteLine("++ " + path);
+                    CheckPath(null, path);
                 }
-
-                PackagePaths.AddRange(paths);
             }
 
             client.AdvertiseService<GetModelResource>(ModelServiceName, ModelCallback);
@@ -67,6 +67,32 @@ namespace Iviz.ModelService
             WaitForCancel();
 
             client.Close();
+        }
+
+        static void CheckPath(string folderName, string path)
+        {
+            if (File.Exists(path + "/package.xml"))
+            {
+                AddPath(folderName, path);
+                return;
+            }
+
+            foreach (string subFolderPath in Directory.GetDirectories(path))
+            {
+                string subFolder = Path.GetFileName(subFolderPath);
+                CheckPath(subFolder, subFolderPath);
+            }
+        }
+
+        static void AddPath(string package, string path)
+        {
+            if (!PackagePaths.TryGetValue(package, out List<string> paths))
+            {
+                paths = new List<string>();
+                PackagePaths[package] = paths;
+            }
+            paths.Add(path);
+            Console.WriteLine("++ " + package);
         }
 
         static void WaitForCancel()
@@ -81,8 +107,15 @@ namespace Iviz.ModelService
 
         static string ResolvePath(Uri uri)
         {
-            string subPath = uri.Host + uri.AbsolutePath;
-            foreach (string packagePath in PackagePaths)
+            string package = uri.Host;
+            if (!PackagePaths.TryGetValue(package, out List<string> paths))
+            {
+                Console.Error.WriteLine("EE Failed to find package '" + package + "'.");
+                return null;
+            }
+            
+            string subPath = uri.AbsolutePath;
+            foreach (string packagePath in paths)
             {
                 string path = packagePath + "/" + subPath;
                 if (File.Exists(path))
@@ -91,13 +124,7 @@ namespace Iviz.ModelService
                 }
             }
 
-            Console.Error.WriteLine("EE Failed to find resource '" + uri + "'. Searched paths:");
-            foreach (string packagePath in PackagePaths)
-            {
-                string path = packagePath + "/" + subPath;
-                Console.Error.WriteLine("\t" + path);
-            }
-            
+            Console.Error.WriteLine("EE Failed to find resource '" + uri + "'.");
             return null;
         }
         
@@ -325,15 +352,6 @@ namespace Iviz.ModelService
 
         static Matrix4 ToMatrix(in Matrix4x4 v)
         {
-            /*
-            return new Matrix4(new[]
-            {
-                v.A1, v.A2, v.A3, v.A4,
-                v.B1, v.B2, v.B3, v.B4,
-                v.C1, v.C2, v.C3, v.C4,
-                v.D1, v.D2, v.D3, v.D4
-            });
-            */
             return new Matrix4(new[]
             {
                 v.A1, v.B1, v.C1, v.D1,

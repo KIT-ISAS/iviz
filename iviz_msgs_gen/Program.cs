@@ -7,12 +7,12 @@ namespace Iviz.MsgsGen
     {
         static void Main(string[] args)
         {
-            string RosBasePath = args.Length > 0 ? args[0] : @"/Users/akzeac/Downloads/msgs";
-            string IvizMsgPaths = Path.GetFullPath("../../../../iviz_msgs");
+            string rosBasePath = Path.GetFullPath("../../../../ros_msgs");
+            string ivizMsgPaths = Path.GetFullPath("../../../../iviz_msgs");
 
             PackageInfo p = new PackageInfo();
 
-            string[] packages = Directory.GetDirectories(RosBasePath);
+            string[] packages = Directory.GetDirectories(rosBasePath);
             foreach(string packageDir in packages)
             {
                 string package = Path.GetFileName(packageDir);
@@ -27,7 +27,7 @@ namespace Iviz.MsgsGen
                 {
                     continue;
                 }
-                string packageDir = IvizMsgPaths + "/" + classInfo.rosPackage + "/msg/";
+                string packageDir = ivizMsgPaths + "/" + classInfo.rosPackage + "/msg/";
                 Directory.CreateDirectory(packageDir);
                 string text = classInfo.ToCString();
                 File.WriteAllText(packageDir + classInfo.name + ".cs", text);
@@ -35,7 +35,7 @@ namespace Iviz.MsgsGen
 
             foreach (ServiceInfo classInfo in p.services.Values)
             {
-                string packageDir = IvizMsgPaths + "/" + classInfo.rosPackage + "/srv/";
+                string packageDir = ivizMsgPaths + "/" + classInfo.rosPackage + "/srv/";
                 Directory.CreateDirectory(packageDir);
                 string text = classInfo.ToCString();
                 File.WriteAllText(packageDir + classInfo.name + ".cs", text);

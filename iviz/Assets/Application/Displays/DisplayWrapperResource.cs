@@ -35,9 +35,9 @@ namespace Iviz.Displays
             set => Display.ColliderEnabled = value;
         }        
         
-        public virtual void Stop()
+        public virtual void Suspend()
         {
-            Display.Stop();
+            Display.Suspend();
         }
 
         public virtual bool Visible

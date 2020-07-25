@@ -137,7 +137,15 @@ namespace Iviz.App
 
         void UpdateSelected()
         {
-            SelectedModuleData?.UpdatePanel();
+            if (SelectedModuleData?.Panel is null)
+            {
+                return;
+            }
+            if (!SelectedModuleData.Panel.isActiveAndEnabled)
+            {
+                return;
+            }
+            SelectedModuleData.UpdatePanel();
         }
     }
 }

@@ -206,6 +206,9 @@ namespace Iviz.App
         {
             bool prevPointerDown = PointerDown;
 
+            QualitySettings.shadowDistance = Mathf.Max(7, 2 * MainCamera.transform.position.y);
+            //Debug.Log(QualitySettings.shadowDistance);
+            
             if (IsMobile)
             {
                 PointerDown = Input.touchCount == 1;
@@ -528,7 +531,7 @@ namespace Iviz.App
 
         void ProcessFlying()
         {
-            const float mainSpeed = 7.5f; //regular speed
+            const float mainSpeed = 3.75f; //regular speed
             const float shiftAdd = 1.0f; //multiplied by how long shift is held.  Basically running
             const float maxShift = 100.0f; //Maximum speed when holding shift
             //const float camSens = 0.25f; //How sensitive it with mouse

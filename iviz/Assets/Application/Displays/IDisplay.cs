@@ -12,7 +12,7 @@ namespace Iviz.Displays
         int Layer { get; set; }
         Transform Parent { get; set; }
         bool ColliderEnabled { get; set; }
-        void Stop();
+        void Suspend();
         bool Visible { get; set; }
     }
 

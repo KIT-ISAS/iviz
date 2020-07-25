@@ -48,7 +48,7 @@ namespace Iviz.Displays
             Collider = GetComponent<BoxCollider>();
         }
 
-        public virtual void Stop()
+        public virtual void Suspend()
         {
             Layer = 0;
         }

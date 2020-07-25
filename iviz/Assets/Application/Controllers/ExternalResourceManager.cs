@@ -7,6 +7,7 @@ using System.Text;
 using Iviz.Controllers;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
 using Logger = Iviz.Controllers.Logger;
@@ -82,8 +83,15 @@ namespace Iviz.Displays
         }
 
 
-        public bool TryGet(Uri uri, out Resource.Info<GameObject> resource)
+        public bool TryGet([NotNull] Uri uri, out Resource.Info<GameObject> resource)
         {
+            if (uri is null)
+            {
+                throw new ArgumentNullException(nameof(uri));
+            }
+            
+            Debug.Log("ExternalResourceManager: Requesting " + uri);
+            
             if (loadedModels.TryGetValue(uri, out resource))
             {
                 return true;
@@ -118,8 +126,13 @@ namespace Iviz.Displays
             return resource != null;
         }
 
-        public bool TryGet(Uri uri, out Resource.Info<Texture2D> resource)
+        public bool TryGet([NotNull] Uri uri, out Resource.Info<Texture2D> resource)
         {
+            if (uri is null)
+            {
+                throw new ArgumentNullException(nameof(uri));
+            }
+            
             if (loadedTextures.TryGetValue(uri, out resource))
             {
                 return true;

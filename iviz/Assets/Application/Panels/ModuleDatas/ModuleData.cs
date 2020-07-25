@@ -122,7 +122,7 @@ namespace Iviz.App
                 case Resource.Module.Marker: return new MarkerModuleData(c);
                 case Resource.Module.InteractiveMarker: return new InteractiveMarkerModuleData(c);
                 case Resource.Module.JointState: return new JointStateModuleData(c);
-                case Resource.Module.DepthImageProjector: return new DepthImageProjectorModuleData(c);
+                case Resource.Module.DepthCloud: return new DepthCloudModuleData(c);
                 case Resource.Module.LaserScan: return new LaserScanModuleData(c);
                 case Resource.Module.AR: return new ARModuleData(c);
                 case Resource.Module.Magnitude: return new MagnitudeModuleData(c);

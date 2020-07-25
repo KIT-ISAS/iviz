@@ -14,7 +14,7 @@ namespace Iviz.App
             set
             {
                 state = value;
-                Sprite = state ? activeSprite : inactiveSprite;
+                Sprite = state ? inactiveSprite : activeSprite;
             }
         }
     }

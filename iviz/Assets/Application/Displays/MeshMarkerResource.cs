@@ -115,9 +115,9 @@ namespace Iviz.Displays
             MainRenderer.SetPropertyMainTexST(Vector2.zero, Vector2.one, 0);
         }
 
-        public override void Stop()
+        public override void Suspend()
         {
-            base.Stop();
+            base.Suspend();
             Color = Color.white;
             ColliderEnabled = true;
             OcclusionOnly = false;

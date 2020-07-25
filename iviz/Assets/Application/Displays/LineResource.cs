@@ -241,9 +241,9 @@ namespace Iviz.Displays
             Tint = Tint;
         }
 
-        public override void Stop()
+        public override void Suspend()
         {
-            base.Stop();
+            base.Suspend();
             Size = 0;
         }
     }
