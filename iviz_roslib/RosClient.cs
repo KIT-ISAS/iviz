@@ -217,9 +217,9 @@ namespace Iviz.Roslib
             Master = new XmlRpc.Master(masterUri, CallerId, CallerUri);
             Parameters = new XmlRpc.ParameterClient(masterUri, CallerId, CallerUri);
 
-            Logger.Log($"** RosClient: Starting!" +
-                       $"** My Id is {CallerId}" +
-                       $"** My Uri is {CallerUri}" +
+            Logger.Log($"** RosClient: Starting!\n" +
+                       $"** My Id is {CallerId}\n" +
+                       $"** My Uri is {CallerUri}\n" +
                        $"** I'm talking to {MasterUri}");
 
             try
@@ -263,6 +263,10 @@ namespace Iviz.Roslib
             }
         }
 
+        /// <summary>
+        /// Retrieves the environment variable ROS_HOSTNAME as a uri.
+        /// If this fails, retrieves ROS_IP.
+        /// </summary>
         public static Uri EnvironmentCallerUri
         {
             get
@@ -284,11 +288,17 @@ namespace Iviz.Roslib
             }
         }
 
+        /// <summary>
+        /// Try to retrieve a valid caller uri.
+        /// </summary>
         public static Uri TryGetCallerUri()
         {
             return EnvironmentCallerUri ?? new Uri($"http://{Dns.GetHostName()}:7613/");
         }
 
+        /// <summary>
+        /// Retrieves the environment variable ROS_MASTER_URI as a uri.
+        /// </summary>
         public static Uri EnvironmentMasterUri
         {
             get
@@ -309,6 +319,9 @@ namespace Iviz.Roslib
             }
         }
         
+        /// <summary>
+        /// Try to retrieve a valid master uri.
+        /// </summary>        
         public static Uri TryGetMasterUri()
         {
             return EnvironmentMasterUri ?? new Uri($"http://{Dns.GetHostName()}:11311/");
@@ -686,22 +699,19 @@ namespace Iviz.Roslib
             var response = Master.GetPublishedTopics();
             if (response.IsValid)
             {
-                return new ReadOnlyCollection<BriefTopicInfo>(
-                    Master.GetPublishedTopics().Topics.Select(x => new BriefTopicInfo(x.Item1, x.Item2)).ToArray()
-                );
+                return Master.GetPublishedTopics().Topics.
+                    Select(x => new BriefTopicInfo(x.Item1, x.Item2)).
+                    ToArray().AsReadOnly();
             }
-            else
-            {
-                throw new XmlRpcException("Failed to retrieve topics: " + response.StatusMessage);
-            }
+            
+            throw new XmlRpcException("Failed to retrieve topics: " + response.StatusMessage);
         }
 
         /// <summary>
         /// Gets the topics published by this node.
         /// </summary>
         public ReadOnlyCollection<BriefTopicInfo> SubscribedTopics =>
-            new ReadOnlyCollection<BriefTopicInfo>(
-                GetSubscriptionsRcp().Select(x => new BriefTopicInfo(x[0], x[1])).ToArray());
+            GetSubscriptionsRcp().Select(x => new BriefTopicInfo(x[0], x[1])).ToArray().AsReadOnly();
 
 
         /// <summary>
@@ -726,8 +736,7 @@ namespace Iviz.Roslib
         /// Gets the topics published by this node.
         /// </summary>
         public ReadOnlyCollection<BriefTopicInfo> PublishedTopics =>
-            new ReadOnlyCollection<BriefTopicInfo>(
-                GetPublicationsRcp().Select(x => new BriefTopicInfo(x[0], x[1])).ToArray());
+            GetPublicationsRcp().Select(x => new BriefTopicInfo(x[0], x[1])).ToArray().AsReadOnly();
 
 
         internal string[][] GetSubscriptionsRcp()

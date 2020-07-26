@@ -10,7 +10,6 @@ namespace Iviz.Roslib
     {
         /// <summary>
         /// Concatenated dependencies file.
-        /// <seealso cref="IMessage.DependenciesBase64"/>
         /// </summary>
         public string MessageDefinition { get; }
 
@@ -26,19 +25,16 @@ namespace Iviz.Roslib
 
         /// <summary>
         /// MD5 hash of the compact representation of the message.
-        /// <seealso cref="IMessage.Md5Sum"/>
         /// </summary>
         public string Md5Sum { get; }
 
         /// <summary>
         /// Full ROS message type.
-        /// <seealso cref="IMessage.MessageType"/>
         /// </summary>
         public string Type { get; }
 
         /// <summary>
         /// Instance of the message used to generate others of the same type.
-        /// <seealso cref="IMessage.Create"/>
         /// </summary>
         public IMessage Generator { get; }
 

@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 
@@ -80,15 +81,15 @@ namespace Iviz.Roslib
                 $"tcp_nodelay={(RequestNoDelay ? "1" : "0")}",
             };
             int totalLength = 4 * contents.Length;
-            for (int i = 0; i < contents.Length; i++)
+            foreach (string entry in contents)
             {
-                totalLength += contents[i].Length;
+                totalLength += entry.Length;
             }
             writer.Write(totalLength);
-            for (int i = 0; i < contents.Length; i++)
+            foreach (string entry in contents)
             {
-                writer.Write(contents[i].Length);
-                writer.Write(BuiltIns.UTF8.GetBytes(contents[i]));
+                writer.Write(entry.Length);
+                writer.Write(BuiltIns.UTF8.GetBytes(entry));
             }
             return totalLength;
         }
@@ -155,74 +156,86 @@ namespace Iviz.Roslib
 
         void Run(int timeoutInMs)
         {
-            using (tcpClient = new TcpClient())
+            const int numTries = 5;
+
+            for (int round = 0; round < numTries && keepRunning; round++)
             {
-                try
+                using (tcpClient = new TcpClient())
                 {
-                    Task task = tcpClient.ConnectAsync(RemoteHostname, RemotePort);
-                    if (!task.Wait(timeoutInMs) || task.IsCanceled)
+                    Task connectionTask = tcpClient.ConnectAsync(RemoteHostname, RemotePort);
+                    if (!connectionTask.Wait(timeoutInMs) || connectionTask.IsCanceled)
                     {
                         throw new TimeoutException();
                     }
 
-                    IPEndPoint endPoint = ((IPEndPoint)tcpClient.Client.LocalEndPoint);
+                    round = 0; // reset if successful
+
+                    IPEndPoint endPoint = (IPEndPoint) tcpClient.Client.LocalEndPoint;
                     Hostname = endPoint.Address.ToString();
                     Port = endPoint.Port;
 
                     stream = tcpClient.GetStream();
                     writer = new BinaryWriter(stream);
 
-                    List<string> responses = DoHandshake();
-                    if (responses.Count != 0 && responses[0].HasPrefix("error"))
+                    try
                     {
-                        int index = responses[0].IndexOf('=');
-                        if (index != -1)
-                        {
-                            Logger.Log($"{this}: Closing socket! Error:\n{responses[0].Substring(index + 1)}");
-                        }
-                        else
-                        {
-                            Logger.Log($"{this}: Closing socket! Error:\n{responses[0]}");
-                        }
-                        tcpClient.Close();
-                        return;
+                        ProcessLoop();
                     }
-
-                    while (keepRunning)
+                    catch (Exception e) when
+                    (e is ConnectionException || e is IOException || e is AggregateException ||
+                     e is SocketException || e is TimeoutException)
                     {
-                        int rcvLength = ReceivePacket();
-                        if (rcvLength == 0)
-                        {
-                            Logger.Log($"{this}: closed remotely.");
-                            break;
-                        }
-
-                        try
-                        {
-                            IMessage result = Msgs.Buffer.Deserialize(topicInfo.Generator, readBuffer, rcvLength);
-                            callback(result);
-                            NumReceived++;
-                            BytesReceived += rcvLength + 4;
-                        }
-                        catch (Exception e) when (e is ArgumentException || e is IndexOutOfRangeException)
-                        {
-                            Logger.Log($"{this}: {e}");
-                        }
+                        Logger.LogDebug($"{this}: " + e);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Log($"{this}: " + e);
                     }
                 }
-                catch (Exception e) when
-                (e is IOException || e is AggregateException || e is SocketException || e is TimeoutException)
+
+                if (keepRunning)
                 {
-                    Logger.LogDebug($"{this}: " + e);
+                    Thread.Sleep(1000);
                 }
-                catch (Exception e)
-                {
-                    Logger.Log($"{this}: " + e);
-                }
+
+                Logger.LogDebug($"{this}: Connection closed. Retrying... ({round + 1}/{numTries})");
             }
+
             tcpClient = null;
             stream = null;
             Logger.Log($"{this}: Stopped!");
+        }
+
+        void ProcessLoop()
+        {
+            List<string> responses = DoHandshake();
+            if (responses.Count != 0 && responses[0].HasPrefix("error"))
+            {
+                int index = responses[0].IndexOf('=');
+                string errorMsg = (index != -1) ? responses[0].Substring(index + 1) : responses[0];
+                throw new ConnectionException("Partner sent error code: " + errorMsg);
+            }
+
+            while (keepRunning)
+            {
+                int rcvLength = ReceivePacket();
+                if (rcvLength == 0)
+                {
+                    throw new ConnectionException("Partner closed connection.");
+                }
+
+                try
+                {
+                    IMessage result = Msgs.Buffer.Deserialize(topicInfo.Generator, readBuffer, rcvLength);
+                    callback(result);
+                    NumReceived++;
+                    BytesReceived += rcvLength + 4;
+                }
+                catch (Exception e) when (e is ArgumentException || e is IndexOutOfRangeException)
+                {
+                    Logger.Log($"{this}: {e}"); // shouldn't happen
+                }
+            }
         }
 
         public SubscriberReceiverState State => new SubscriberReceiverState(

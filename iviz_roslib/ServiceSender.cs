@@ -118,15 +118,15 @@ namespace Iviz.Roslib
             }
 
             Dictionary<string, string> values = new Dictionary<string, string>();
-            for (int i = 0; i < fields.Count; i++)
+            foreach (var entry in fields)
             {
-                int index = fields[i].IndexOf('=');
+                int index = entry.IndexOf('=');
                 if (index < 0)
                 {
-                    return $"error=Invalid field '{fields[i]}'";
+                    return $"error=Invalid field '{entry}'";
                 }
-                string key = fields[i].Substring(0, index);
-                values[key] = fields[i].Substring(index + 1);
+                string key = entry.Substring(0, index);
+                values[key] = entry.Substring(index + 1);
             }
 
             if (!values.TryGetValue("callerid", out string receivedId))
@@ -187,15 +187,15 @@ namespace Iviz.Roslib
                 };
             }
             int totalLength = 4 * contents.Length;
-            for (int i = 0; i < contents.Length; i++)
+            foreach (string entry in contents)
             {
-                totalLength += contents[i].Length;
+                totalLength += entry.Length;
             }
             writer.Write(totalLength);
-            for (int i = 0; i < contents.Length; i++)
+            foreach (string entry in contents)
             {
-                writer.Write(contents[i].Length);
-                writer.Write(BuiltIns.UTF8.GetBytes(contents[i]));
+                writer.Write(entry.Length);
+                writer.Write(BuiltIns.UTF8.GetBytes(entry));
 #if DEBUG__
                 Logger.Log(">>> " + contents[i]);
 #endif

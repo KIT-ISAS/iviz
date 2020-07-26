@@ -166,7 +166,7 @@ namespace Iviz.Roslib.XmlRpc
             {
                 nameList[i] = (string)tmp[i];
             }
-            ParameterNameList = new ReadOnlyCollection<string>(nameList);
+            ParameterNameList = nameList.AsReadOnly();
         }
     }
 }

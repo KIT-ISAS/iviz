@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Iviz.Msgs;
 using Newtonsoft.Json;
 
@@ -120,6 +121,11 @@ namespace Iviz.Roslib
         public static string ToJsonString(object o)
         {
             return JsonConvert.SerializeObject(o);
+        }
+        
+        public static ReadOnlyCollection<T> AsReadOnly<T>(this IList<T> t)
+        {
+            return new ReadOnlyCollection<T>(t);
         }
     }
 }

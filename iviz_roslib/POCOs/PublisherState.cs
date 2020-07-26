@@ -60,8 +60,8 @@ namespace Iviz.Roslib
         {
             Topic = topic;
             Type = type;
-            TopicIds = new ReadOnlyCollection<string>(topicIds);
-            Senders = new ReadOnlyCollection<PublisherSenderState>(senders);
+            TopicIds = topicIds.AsReadOnly();
+            Senders = senders.AsReadOnly();
         }
     }
 
@@ -71,7 +71,7 @@ namespace Iviz.Roslib
 
         internal PublisherState(IList<PublisherTopicState> topics)
         {
-            Topics = new ReadOnlyCollection<PublisherTopicState>(topics);
+            Topics = topics.AsReadOnly();
         }
     }
 }

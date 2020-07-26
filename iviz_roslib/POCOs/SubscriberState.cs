@@ -45,8 +45,8 @@ namespace Iviz.Roslib
         {
             Topic = topic;
             Type = type;
-            TopicIds = new ReadOnlyCollection<string>(topicIds);
-            Receivers = new ReadOnlyCollection<SubscriberReceiverState>(receivers);
+            TopicIds = topicIds.AsReadOnly();
+            Receivers = receivers.AsReadOnly();
         }
     }
 
@@ -54,9 +54,9 @@ namespace Iviz.Roslib
     {
         public ReadOnlyCollection<SubscriberTopicState> Topics { get; }
 
-        internal SubscriberState(SubscriberTopicState[] topics)
+        internal SubscriberState(IList<SubscriberTopicState> topics)
         {
-            Topics = new ReadOnlyCollection<SubscriberTopicState>(topics);
+            Topics = topics.AsReadOnly();
         }
     }
 }

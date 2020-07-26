@@ -219,14 +219,13 @@ namespace Iviz.Roslib.XmlRpc
         public TopicTuple(string topic, IList<string> members)
         {
             Topic = topic;
-            Members = new ReadOnlyCollection<string>(members);
+            Members = members.AsReadOnly();
         }
     }
 
     public sealed class GetSystemStateResponse : BaseResponse
     {
-        static readonly ReadOnlyCollection<TopicTuple> Empty =
-            new ReadOnlyCollection<TopicTuple>(Array.Empty<TopicTuple>());
+        static readonly ReadOnlyCollection<TopicTuple> Empty = Array.Empty<TopicTuple>().AsReadOnly();
 
         public ReadOnlyCollection<TopicTuple> Publishers { get; } = Empty;
         public ReadOnlyCollection<TopicTuple> Subscribers { get; } = Empty;
@@ -273,7 +272,7 @@ namespace Iviz.Roslib.XmlRpc
                 string[] members = tmp.Cast<string>().ToArray();
                 result[i] = new TopicTuple(topic, members);
             }
-            return new ReadOnlyCollection<TopicTuple>(result);
+            return result.AsReadOnly();
         }
     }
 
@@ -330,8 +329,7 @@ namespace Iviz.Roslib.XmlRpc
 
     public sealed class GetPublishedTopicsResponse : BaseResponse
     {
-        static readonly ReadOnlyCollection<(string, string)> Empty =
-            new ReadOnlyCollection<(string, string)>(Array.Empty<(string, string)>());
+        static readonly ReadOnlyCollection<(string, string)> Empty = Array.Empty<(string, string)>().AsReadOnly();
 
         public ReadOnlyCollection<(string, string)> Topics { get; } = Empty;
 
@@ -353,14 +351,13 @@ namespace Iviz.Roslib.XmlRpc
                 object[] topic = Cast<object[]>(tmp[i]);
                 topics[i] = (Cast<string>(topic[0]), Cast<string>(topic[1]));
             }
-            Topics = new ReadOnlyCollection<(string, string)>(topics);
+            Topics = topics.AsReadOnly();
         }
     }
 
     public sealed class RegisterSubscriberResponse : BaseResponse
     {
-        static readonly ReadOnlyCollection<Uri> Empty =
-            new ReadOnlyCollection<Uri>(Array.Empty<Uri>());
+        static readonly ReadOnlyCollection<Uri> Empty = Array.Empty<Uri>().AsReadOnly();
 
         public ReadOnlyCollection<Uri> Publishers { get; } = Empty;
 
@@ -388,7 +385,7 @@ namespace Iviz.Roslib.XmlRpc
                     publishers.Add(publisher);
                 }
             }
-            Publishers = new ReadOnlyCollection<Uri>(publishers);
+            Publishers = publishers.AsReadOnly();
         }
     }
 
@@ -408,8 +405,7 @@ namespace Iviz.Roslib.XmlRpc
 
     public sealed class RegisterPublisherResponse : BaseResponse
     {
-        static readonly ReadOnlyCollection<string> Empty =
-            new ReadOnlyCollection<string>(Array.Empty<string>());
+        static readonly ReadOnlyCollection<string> Empty = Array.Empty<string>().AsReadOnly();
 
         public ReadOnlyCollection<string> Subscribers { get; } = Empty;
 
@@ -429,7 +425,7 @@ namespace Iviz.Roslib.XmlRpc
             {
                 subscribers[i] = Cast<string>(tmp[i]);
             }
-            Subscribers = new ReadOnlyCollection<string>(subscribers);
+            Subscribers = subscribers.AsReadOnly();
         }
     }
 
