@@ -17,7 +17,7 @@ namespace Iviz.App
         public DropdownWidget Colormap { get; private set; }
         public SliderWidget Min { get; private set; }
         public SliderWidget Max { get; private set; }
-        //public DropdownWidget Anchor { get; private set; }
+        public ToggleWidget FlipMinMax { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
         public ToggleButtonWidget HideButton { get; private set; }
 
@@ -31,8 +31,9 @@ namespace Iviz.App
             Colormap = p.AddDropdown("Colormap")
                 .SetOptions(Resource.Colormaps.Names)
                 .SetIndex((int)Resource.ColormapId.gray);
-            Min = p.AddSlider("Intensity Min").SetMinValue(0).SetMaxValue(1);
-            Max = p.AddSlider("Intensity Max").SetMinValue(0).SetMaxValue(1);
+            Min = p.AddSlider("Colormap Min").SetMinValue(0).SetMaxValue(1);
+            Max = p.AddSlider("Colormap Max").SetMinValue(0).SetMaxValue(1);
+            FlipMinMax = p.AddToggle("Flip Min/Max");
 
             PreviewWidget = p.AddImagePreviewWidget("Preview");
 

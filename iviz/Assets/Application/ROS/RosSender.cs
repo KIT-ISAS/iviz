@@ -1,7 +1,9 @@
+using System;
 using System.Runtime.Serialization;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Roslib;
+using JetBrains.Annotations;
 
 namespace Iviz.Controllers
 {
@@ -29,14 +31,14 @@ namespace Iviz.Controllers
         public string Topic { get; }
         public string Type { get; }
         public int Id { get; protected set; }
-        public RosSenderStats Stats { get; protected set; } = new RosSenderStats();
+        public RosSenderStats Stats { get; private set; } = new RosSenderStats();
 
         public int NumSubscribers => ConnectionManager.Connection.GetNumSubscribers(Topic);
         public int TotalMsgCounter { get; protected set; }
         public int LastMsgBytes { get; protected set; }
         public int LastMsgCounter { get; protected set; }
 
-        protected RosSender(string topic, string type)
+        protected RosSender([NotNull] string topic, [NotNull] string type)
         {
             if (string.IsNullOrWhiteSpace(topic))
             {
@@ -84,7 +86,7 @@ namespace Iviz.Controllers
 
     public sealed class RosSender<T> : RosSender where T : IMessage
     {
-        public RosSender(string topic) :
+        public RosSender([NotNull] string topic) :
             base(topic, BuiltIns.GetMessageType(typeof(T)))
         {
             ConnectionManager.Advertise(this);
@@ -100,8 +102,13 @@ namespace Iviz.Controllers
             Publish((T)msg);
         }
 
-        public void Publish(T msg)
+        public void Publish([NotNull] T msg)
         {
+            if (msg == null)
+            {
+                throw new ArgumentNullException(nameof(msg));
+            }
+            
             TotalMsgCounter++;
             LastMsgCounter++;
             LastMsgBytes += msg.RosMessageLength;

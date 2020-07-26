@@ -1,5 +1,7 @@
-﻿using Iviz.Controllers;
+﻿using System;
+using Iviz.Controllers;
 using Iviz.Resources;
+using JetBrains.Annotations;
 
 namespace Iviz.App
 {
@@ -7,8 +9,8 @@ namespace Iviz.App
     {
         public Resource.Module Module { get; }
         public ModuleListPanel ModuleList { get; }
-        public string Topic { get; }
-        public string Type { get; }
+        [NotNull] public string Topic { get; }
+        [NotNull] public string Type { get; }
         public IConfiguration Configuration { get; }
 
         public T GetConfiguration<T>() where T : class, IConfiguration => Configuration as T;
@@ -21,8 +23,8 @@ namespace Iviz.App
         {
             Module = module;
             ModuleList = moduleList;
-            Topic = topic;
-            Type = type;
+            Topic = topic ?? throw new ArgumentNullException(nameof(topic));
+            Type = type ?? throw new ArgumentNullException(nameof(type));
             Configuration = configuration;
         }
     }

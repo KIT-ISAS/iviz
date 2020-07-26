@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.Security.Cryptography;
 using System.Text;
+using Iviz.App;
 using Iviz.Controllers;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
@@ -48,8 +49,8 @@ namespace Iviz.Displays
 
         public ExternalResourceManager()
         {
-            ResourceFolder = UnityEngine.Application.persistentDataPath + "/resources";
-            ResourceFile = UnityEngine.Application.persistentDataPath + "/resources.json";            
+            ResourceFolder = ModuleListPanel.PersistentDataPath + "/resources";
+            ResourceFile = ModuleListPanel.PersistentDataPath + "/resources.json";            
             
             node = new GameObject("External Resources");
             node.transform.parent = TFListener.ListenersFrame?.transform;
@@ -296,7 +297,7 @@ namespace Iviz.Displays
 
         GameObject CreateModelObject(Uri uri, Model msg)
         {
-            GameObject model = new SceneModel(uri, msg).Root;
+            GameObject model = SceneModel.Create(uri, msg);
             model.transform.SetParent(node.transform, false);
             return model;
         }

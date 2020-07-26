@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -144,8 +145,13 @@ namespace Iviz.Displays
         }
 
 
-        public void Set(IList<Vector3> points, IList<Color> colors = null)
+        public void Set([NotNull] IList<Vector3> points, IList<Color> colors = null)
         {
+            if (points is null)
+            {
+                throw new ArgumentNullException(nameof(points));
+            }
+            
             if (points.Count % 3 != 0)
             {
                 throw new ArgumentException("Invalid triangle list " + points.Count, nameof(points));
@@ -177,12 +183,22 @@ namespace Iviz.Displays
             LocalBounds = mesh.bounds;
         }
 
-        public void Set(IList<Vector3> points,
+        public void Set([NotNull] IList<Vector3> points,
             IList<Vector3> normals,
             IList<Vector2> texCoords,
-            IList<int> triangles,
+            [NotNull] IList<int> triangles,
             IList<Color32> colors = null)
         {
+            if (points is null)
+            {
+                throw new ArgumentNullException(nameof(points));
+            }
+
+            if (triangles is null)
+            {
+                throw new ArgumentNullException(nameof(triangles));
+            }
+
             if (triangles.Count % 3 != 0)
             {
                 throw new ArgumentException("Invalid triangle list " + points.Count, nameof(points));

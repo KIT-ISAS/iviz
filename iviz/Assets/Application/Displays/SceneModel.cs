@@ -3,33 +3,42 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public class SceneModel
+    public static class SceneModel
     {
-        public GameObject Root { get; }
-        
-        public SceneModel(Uri uri, Msgs.IvizMsgs.Model msg)
+        public static GameObject Create([NotNull] Uri uri, [NotNull] Msgs.IvizMsgs.Model msg)
         {
-            Root = new GameObject(uri.ToString());
+            if (uri is null)
+            {
+                throw new ArgumentNullException(nameof(uri));
+            }
+
+            if (msg is null)
+            {
+                throw new ArgumentNullException(nameof(msg));
+            }
+
+            GameObject root = new GameObject(uri.ToString());
 
             switch (msg.OrientationHint)
             {
                 case "Z_UP":
-                    Root.transform.localRotation = Quaternion.Euler(0, -90, 0);
-                    break; 
+                    root.transform.localRotation = Quaternion.Euler(0, -90, 0);
+                    break;
                 default:
-                    Root.transform.localRotation = Quaternion.Euler(90, 0, 90);
+                    root.transform.localRotation = Quaternion.Euler(90, 0, 90);
                     break;
             }
 
             //Debug.Log(JsonConvert.SerializeObject(msg.Nodes, Formatting.Indented));
-            
+
             List<MeshTrianglesResource> children = new List<MeshTrianglesResource>();
 
-            AggregatedMeshMarker amm = Root.AddComponent<AggregatedMeshMarker>();
+            AggregatedMeshMarker amm = root.AddComponent<AggregatedMeshMarker>();
             amm.Children = new ReadOnlyCollection<MeshTrianglesResource>(children);
 
             List<MeshTrianglesResource> templateMeshes = new List<MeshTrianglesResource>();
@@ -42,7 +51,7 @@ namespace Iviz.Displays
                 obj.AddComponent<BoxCollider>();
 
                 MeshTrianglesResource r = obj.AddComponent<MeshTrianglesResource>();
-                
+
                 r.Name = mesh.Name;
 
                 Vector3[] vertices = new Vector3[mesh.Vertices.Length];
@@ -89,20 +98,21 @@ namespace Iviz.Displays
 
             List<GameObject> nodes = new List<GameObject>();
             bool[] used = new bool[templateMeshes.Count];
-            
+
             foreach (var node in msg.Nodes)
             {
                 GameObject nodeObject = new GameObject($"Node:{node.Name}");
                 nodes.Add(nodeObject);
-                
-                nodeObject.transform.SetParent(node.Parent == -1 ? Root.transform : nodes[node.Parent].transform, false);
+
+                nodeObject.transform.SetParent(node.Parent == -1 ? root.transform : nodes[node.Parent].transform,
+                    false);
 
                 Matrix4x4 m = new Matrix4x4();
                 for (int i = 0; i < 16; i++)
                 {
                     m[i] = node.Transform.M[i];
                 }
-                
+
                 nodeObject.transform.localRotation = m.rotation;
                 nodeObject.transform.localPosition = m.GetColumn(3);
                 nodeObject.transform.localScale = m.lossyScale;
@@ -116,17 +126,20 @@ namespace Iviz.Displays
                     }
                     else
                     {
-                        GameObject newMesh = UnityEngine.Object.Instantiate(templateMeshes[meshId].gameObject, nodeObject.transform, false);
+                        GameObject newMesh = UnityEngine.Object.Instantiate(templateMeshes[meshId].gameObject,
+                            nodeObject.transform, false);
                         children.Add(newMesh.GetComponent<MeshTrianglesResource>());
                     }
                 }
             }
-            
-        }
-        
 
-        static Vector3 Assimp2Unity(in Iviz.Msgs.IvizMsgs.Vector3 vector3) => new Vector3(vector3.X, vector3.Y, vector3.Z);
-        
+            return root;
+        }
+
+
+        static Vector3 Assimp2Unity(in Iviz.Msgs.IvizMsgs.Vector3 vector3) =>
+            new Vector3(vector3.X, vector3.Y, vector3.Z);
+
         static void MemCopy<A, B>(A[] src, B[] dst, int bytes)
             where A : unmanaged
             where B : unmanaged
@@ -139,6 +152,6 @@ namespace Iviz.Displays
                     Buffer.MemoryCopy(a, b, bytes, bytes);
                 }
             }
-        }        
+        }
     }
 }

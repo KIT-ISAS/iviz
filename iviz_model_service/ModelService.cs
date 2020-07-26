@@ -23,7 +23,6 @@ namespace Iviz.ModelService
         
         static readonly AssimpContext Importer = new AssimpContext();
         
-        //static readonly List<string> PackagePaths = new List<string>();
         static readonly Dictionary<string, List<string>> PackagePaths = new Dictionary<string, List<string>>();
 
         static void Main()

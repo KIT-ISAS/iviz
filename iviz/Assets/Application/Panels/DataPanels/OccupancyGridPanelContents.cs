@@ -27,7 +27,7 @@ namespace Iviz.App
             Colormap = p.AddDropdown("Colormap")
                         .SetOptions(Resource.Colormaps.Names)
                         .SetIndex((int)Resource.ColormapId.gray);
-            FlipColors = p.AddToggle("Flip Color Bounds");
+            FlipColors = p.AddToggle("Colormap Flip Min/Max");
             ScaleZ = p.AddSlider("Height").SetMinValue(0.01f).SetMaxValue(5.0f).SetNumberOfSteps(49);
 
             Tint = p.AddColorPicker("Tint");

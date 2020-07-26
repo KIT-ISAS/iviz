@@ -24,7 +24,7 @@ namespace Iviz.App
 
         static RosSharp.Urdf.Robot Robot;
 
-        [MenuItem("MyMenu/Do Something")]
+        //[MenuItem("MyMenu/Do Something")]
         static void DoSomething()
         {
             //string projectRoot = packageRoot + "husky_description";

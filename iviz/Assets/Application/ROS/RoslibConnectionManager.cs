@@ -589,7 +589,7 @@ namespace Iviz.Controllers
             return cachedTopics;
         }
 
-        static readonly ReadOnlyCollection<string> EmptyParameters = new ReadOnlyCollection<string>(Array.Empty<string>());
+        static readonly ReadOnlyCollection<string> EmptyParameters = Array.Empty<string>().AsReadOnly();
 
         ReadOnlyCollection<string> cachedParameters = EmptyParameters;
 

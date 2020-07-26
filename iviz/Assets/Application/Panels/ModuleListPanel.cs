@@ -91,7 +91,7 @@ namespace Iviz.App
             set => unlock.gameObject.SetActive(value);
         }
 
-        public string PersistentDataPath => UnityEngine.Application.persistentDataPath;
+        public static string PersistentDataPath => UnityEngine.Application.persistentDataPath;
         
         bool KeepReconnecting
         {
@@ -105,7 +105,7 @@ namespace Iviz.App
 
         public ModuleListPanel()
         {
-            ModuleDatas = new ReadOnlyCollection<ModuleData>(moduleDatas);            
+            ModuleDatas = moduleDatas.AsReadOnly();            
         }
 
         void Awake()

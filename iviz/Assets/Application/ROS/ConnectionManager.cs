@@ -121,8 +121,7 @@ namespace Iviz.Controllers
 
         public bool KeepReconnecting { get; set; }
 
-        protected static readonly ReadOnlyCollection<BriefTopicInfo> EmptyTopics =
-            new ReadOnlyCollection<BriefTopicInfo>(Array.Empty<BriefTopicInfo>());
+        protected static readonly ReadOnlyCollection<BriefTopicInfo> EmptyTopics = Array.Empty<BriefTopicInfo>().AsReadOnly();
 
         public ReadOnlyCollection<BriefTopicInfo> PublishedTopics { get; protected set; } = EmptyTopics;
 

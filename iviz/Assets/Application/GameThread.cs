@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System;
+using JetBrains.Annotations;
 
 namespace Iviz.Displays
 {
@@ -41,8 +42,13 @@ namespace Iviz.Displays
             mInstance = null;
         }
 
-        public static void RunOnce(Action action)
+        public static void RunOnce([NotNull] Action action)
         {
+            if (action is null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+            
             if (Instance is null)
             {
                 return;

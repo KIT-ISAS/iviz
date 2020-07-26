@@ -64,7 +64,7 @@ namespace Iviz.Controllers
                 RosSenderJoy = null;
             }
 
-            if (RosSenderJoy == null)
+            if (RosSenderJoy is null)
             {
                 RosSenderJoy = new RosSender<Msgs.SensorMsgs.Joy>(JoyTopic);
             }
@@ -187,7 +187,7 @@ namespace Iviz.Controllers
         public string AttachToFrame
         {
             get => config.AttachToFrame;
-            set { config.AttachToFrame = value; }
+            set => config.AttachToFrame = value;
         }
 
         public bool XIsFront

@@ -57,12 +57,14 @@ namespace Iviz.App
 
             panel.Min.Value = listener.MinIntensity;
             panel.Max.Value = listener.MaxIntensity;
+            panel.FlipMinMax.Value = listener.FlipMinMax;
 
             panel.Colormap.Index = (int)listener.Colormap;
 
             panel.Colormap.Interactable = listener.IsMono;
             panel.Min.Interactable = listener.IsMono;
             panel.Max.Interactable = listener.IsMono;
+            panel.FlipMinMax.Interactable = listener.IsMono;
 
             panel.ShowBillboard.Value = listener.EnableBillboard;
             panel.BillboardSize.Value = listener.BillboardSize;
@@ -84,6 +86,10 @@ namespace Iviz.App
             panel.Max.ValueChanged += f =>
             {
                 listener.MaxIntensity = f;
+            };
+            panel.FlipMinMax.ValueChanged += f =>
+            {
+                listener.FlipMinMax = f;
             };
             panel.CloseButton.Clicked += () =>
             {
@@ -128,6 +134,7 @@ namespace Iviz.App
             panel.Colormap.Interactable = listener.IsMono;
             panel.Min.Interactable = listener.IsMono;
             panel.Max.Interactable = listener.IsMono;
+            panel.FlipMinMax.Interactable = listener.IsMono;
             panel.Description.Label = listener.Description;
             panel.PreviewWidget.ToggleImageEnabled();
         }

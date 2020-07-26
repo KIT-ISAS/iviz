@@ -211,6 +211,8 @@ namespace Iviz.App
             
             if (IsMobile)
             {
+                prevPointerDown |= PointerAltDown;
+                
                 PointerDown = Input.touchCount == 1;
                 PointerAltDown = Input.touchCount == 2;
                 
@@ -226,13 +228,10 @@ namespace Iviz.App
                 {
                     PointerPosition = Input.GetTouch(0).position;
                     
-                    /*
-                    PointerOnGui = Canvases.Any(IsPointerOnCanvas)
-                                   || GuiPointerBlockers.Any(x => x.IsPointerOnGui(PointerPosition));
-                                   */
                     if (!prevPointerDown)
                     {
-                        PointerOnGui = IsPointerOnGui();
+                        PointerOnGui = IsPointerOnGui(PointerPosition) || 
+                                       (PointerAltDown && IsPointerOnGui(PointerAltPosition));
                     }                    
                 }
             }
@@ -246,14 +245,8 @@ namespace Iviz.App
 
                     if (!prevPointerDown)
                     {
-                        PointerOnGui = IsPointerOnGui();
+                        PointerOnGui = IsPointerOnGui(PointerPosition);
                     }
-
-                    
-                    /*
-                    PointerOnGui = Canvases.Any(IsPointerOnCanvas)
-                                   || GuiPointerBlockers.Any(x => x.IsPointerOnGui(PointerPosition));
-                                   */
                 }
                 else
                 {
@@ -269,11 +262,11 @@ namespace Iviz.App
             DraggedObject?.OnPointerMove(PointerPosition);
         }
 
-        bool IsPointerOnGui()
+        static bool IsPointerOnGui(Vector2 pointerPosition)
         {
             var eventSystem = EventSystem.current;
             List<RaycastResult> results = new List<RaycastResult>();
-            eventSystem.RaycastAll(new PointerEventData(eventSystem) {position = PointerPosition},  results);
+            eventSystem.RaycastAll(new PointerEventData(eventSystem) {position = pointerPosition},  results);
             return results.Any(x => x.gameObject.layer == 5);            
         }
         

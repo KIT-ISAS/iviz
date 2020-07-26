@@ -254,17 +254,6 @@ namespace Iviz
             return new Pose(pose.Position.Ros2Unity(), pose.Orientation.Ros2Unity());
         }
 
-        /*
-        static Msgs.GeometryMsgs.Transform ToRosTransform(this Pose p)
-        {
-            return new Msgs.GeometryMsgs.Transform
-            (
-                Translation: p.position.ToRosVector3(),
-                Rotation: p.rotation.ToRos()
-            );
-        }
-        */
-
         public static Msgs.GeometryMsgs.Transform Unity2RosTransform(this Pose p)
         {
             return new Msgs.GeometryMsgs.Transform
@@ -273,17 +262,6 @@ namespace Iviz
                 Rotation: p.rotation.Unity2RosQuaternion()
             );
         }
-
-        /*
-        static Msgs.GeometryMsgs.Pose ToRosPose(this Pose p)
-        {
-            return new Msgs.GeometryMsgs.Pose
-            (
-                Position: p.position.ToRosPoint(),
-                Orientation: p.rotation.ToRos()
-            );
-        }
-        */
 
         public static Msgs.GeometryMsgs.Pose Unity2RosPose(this Pose p)
         {

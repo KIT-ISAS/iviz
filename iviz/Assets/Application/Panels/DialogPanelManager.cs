@@ -19,17 +19,14 @@ namespace Iviz.App
     {
         readonly Dictionary<DialogPanelType, IDialogPanelContents> PanelByType = new Dictionary<DialogPanelType, IDialogPanelContents>();
 
-        DialogData SelectedDialogData;
+        DialogData selectedDialogData;
         Canvas parentCanvas;
         bool started;
 
         public bool Active
         {
             get => parentCanvas.enabled;
-            set
-            {
-                parentCanvas.enabled = value;
-            }
+            set => parentCanvas.enabled = value;
         }
 
         void Awake()
@@ -59,7 +56,7 @@ namespace Iviz.App
 
         void UpdateSelected()
         {
-            SelectedDialogData?.UpdatePanel();
+            selectedDialogData?.UpdatePanel();
         }
 
         public IDialogPanelContents GetPanelByType(DialogPanelType resource)
@@ -67,13 +64,13 @@ namespace Iviz.App
             return PanelByType.TryGetValue(resource, out IDialogPanelContents cm) ? cm : null;
         }
 
-        public void SelectPanelFor(DialogData newSelected)
+        void SelectPanelFor(DialogData newSelected)
         {
             if (!started)
             {
                 return;
             }
-            if (newSelected == SelectedDialogData)
+            if (newSelected == selectedDialogData)
             {
                 return;
             }
@@ -86,30 +83,30 @@ namespace Iviz.App
 
         void ShowPanel(DialogData newSelected)
         {
-            SelectedDialogData = newSelected;
-            SelectedDialogData.SetupPanel();
-            SelectedDialogData.Panel.Active = true;
+            selectedDialogData = newSelected;
+            selectedDialogData.SetupPanel();
+            selectedDialogData.Panel.Active = true;
             Active = true;
         }
 
-        public void HideSelectedPanel()
+        void HideSelectedPanel()
         {
-            if (SelectedDialogData == null)
+            if (selectedDialogData == null)
             {
                 return;
             }
 
-            SelectedDialogData.Panel.Active = false;
-            SelectedDialogData.CleanupPanel();
-            SelectedDialogData.Panel.ClearSubscribers();
-            SelectedDialogData = null;
+            selectedDialogData.Panel.Active = false;
+            selectedDialogData.CleanupPanel();
+            selectedDialogData.Panel.ClearSubscribers();
+            selectedDialogData = null;
             Active = false;
         }
 
 
         public void HidePanelFor(DialogData deselected)
         {
-            if (SelectedDialogData == deselected)
+            if (selectedDialogData == deselected)
             {
                 HideSelectedPanel();
             }
@@ -117,7 +114,7 @@ namespace Iviz.App
 
         public void TogglePanel(DialogData selected)
         {
-            if (SelectedDialogData == selected)
+            if (selectedDialogData == selected)
             {
                 HideSelectedPanel();
             }

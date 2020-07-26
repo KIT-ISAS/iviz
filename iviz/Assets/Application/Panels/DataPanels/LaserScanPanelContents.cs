@@ -39,9 +39,9 @@ namespace Iviz.App
                         .SetIndex((int)Resource.ColormapId.hsv);
             UseIntensity = p.AddToggle("Use Intensity instead of Range");
 
-            ForceMinMax = p.AddToggle("Force Min/Max");
-            MinIntensity = p.AddNumberInputField("Min");
-            MaxIntensity = p.AddNumberInputField("Max");
+            ForceMinMax = p.AddToggle("Colormap Force Min/Max");
+            MinIntensity = p.AddNumberInputField("Colormap Min");
+            MaxIntensity = p.AddNumberInputField("Colormap Max");
             FlipMinMax = p.AddToggle("Flip Min/Max");
 
             UseLines = p.AddToggle("Use Lines");

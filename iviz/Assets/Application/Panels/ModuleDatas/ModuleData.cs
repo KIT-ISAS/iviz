@@ -1,6 +1,7 @@
 ﻿using System;
 using Iviz.Controllers;
 using Iviz.Resources;
+using JetBrains.Annotations;
 
 namespace Iviz.App
 {
@@ -109,8 +110,13 @@ namespace Iviz.App
             Controller.Reset();
         }
         
-        public static ModuleData CreateFromResource(ModuleDataConstructor c)
+        public static ModuleData CreateFromResource([NotNull] ModuleDataConstructor c)
         {
+            if (c is null)
+            {
+                throw new ArgumentNullException(nameof(c));
+            }
+            
             switch (c.Module)
             {
                 case Resource.Module.TF: return new TFModuleData(c);
