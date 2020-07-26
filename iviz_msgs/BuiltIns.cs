@@ -12,8 +12,6 @@ namespace Iviz.Msgs
 
         public static CultureInfo Culture { get; } = CultureInfo.InvariantCulture;
 
-        public static string InvalidArrayLengthStr { get; } = "Invalid array length.";
-
         public static string GetClassStringConstant(Type type, string name)
         {
             string constant = (string)type?.GetField(name)?.GetRawConstantValue();

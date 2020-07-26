@@ -1,16 +1,19 @@
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract (Name = "mesh_msgs/MeshMaterial")]
-    [StructLayout(LayoutKind.Sequential)]
-    public struct MeshMaterial : IMessage
+    public sealed class MeshMaterial : IMessage
     {
         [DataMember (Name = "texture_index")] public uint TextureIndex { get; set; }
         [DataMember (Name = "color")] public StdMsgs.ColorRGBA Color { get; set; }
         [DataMember (Name = "has_texture")] public bool HasTexture { get; set; }
     
+        /// <summary> Constructor for empty message. </summary>
+        public MeshMaterial()
+        {
+        }
+        
         /// <summary> Explicit constructor. </summary>
         public MeshMaterial(uint TextureIndex, in StdMsgs.ColorRGBA Color, bool HasTexture)
         {
@@ -22,27 +25,31 @@ namespace Iviz.Msgs.MeshMsgs
         /// <summary> Constructor with buffer. </summary>
         internal MeshMaterial(Buffer b)
         {
-            b.Deserialize(out this);
+            TextureIndex = b.Deserialize<uint>();
+            Color = new StdMsgs.ColorRGBA(b);
+            HasTexture = b.Deserialize<bool>();
         }
         
-        public readonly ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new MeshMaterial(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public readonly void RosSerialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this);
+            b.Serialize(TextureIndex);
+            Color.RosSerialize(b);
+            b.Serialize(HasTexture);
         }
         
-        public readonly void RosValidate()
+        public void RosValidate()
         {
         }
     
-        public readonly int RosMessageLength => 21;
+        public int RosMessageLength => 21;
     
-        public readonly string RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "mesh_msgs/MeshMaterial";

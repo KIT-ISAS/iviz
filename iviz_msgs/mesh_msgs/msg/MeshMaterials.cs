@@ -37,7 +37,11 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 Clusters[i] = new MeshMsgs.MeshFaceCluster(b);
             }
-            Materials = b.DeserializeStructArray<MeshMsgs.MeshMaterial>();
+            Materials = b.DeserializeArray<MeshMsgs.MeshMaterial>();
+            for (int i = 0; i < this.Materials.Length; i++)
+            {
+                Materials[i] = new MeshMsgs.MeshMaterial(b);
+            }
             ClusterMaterials = b.DeserializeStructArray<uint>();
             VertexTexCoords = b.DeserializeArray<MeshMsgs.MeshVertexTexCoords>();
             for (int i = 0; i < this.VertexTexCoords.Length; i++)
@@ -55,7 +59,7 @@ namespace Iviz.Msgs.MeshMsgs
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeArray(Clusters, 0);
-            b.SerializeStructArray(Materials, 0);
+            b.SerializeArray(Materials, 0);
             b.SerializeStructArray(ClusterMaterials, 0);
             b.SerializeArray(VertexTexCoords, 0);
         }
@@ -69,6 +73,11 @@ namespace Iviz.Msgs.MeshMsgs
                 Clusters[i].RosValidate();
             }
             if (Materials is null) throw new System.NullReferenceException();
+            for (int i = 0; i < Materials.Length; i++)
+            {
+                if (Materials[i] is null) throw new System.NullReferenceException();
+                Materials[i].RosValidate();
+            }
             if (ClusterMaterials is null) throw new System.NullReferenceException();
             if (VertexTexCoords is null) throw new System.NullReferenceException();
             for (int i = 0; i < VertexTexCoords.Length; i++)

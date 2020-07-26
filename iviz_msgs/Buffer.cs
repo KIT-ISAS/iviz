@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Iviz.Msgs
 {
@@ -29,16 +31,16 @@ namespace Iviz.Msgs
             }
         }
 
-        static void AssertSize(Array array, uint size)
+        static void AssertSize<T>(IList<T> array, uint size)
         {
             if (array is null)
             {
                 throw new ArgumentNullException(nameof(array));
             }
 
-            if (array.Length != size)
+            if (array.Count != size)
             {
-                throw new ArgumentException("Invalid array size. Expected " + size + ", but got " + array.Length + ".",
+                throw new ArgumentException($"Invalid array size. Expected {size}, but got {array.Count}.",
                     nameof(array));
             }
         }
@@ -151,9 +153,9 @@ namespace Iviz.Msgs
             *(uint*) ptr = count;
             ptr += 4;
             if (count == 0) return;
-            fixed (char* b_ptr = val)
+            fixed (char* bPtr = val)
             {
-                BuiltIns.UTF8.GetBytes(b_ptr, val.Length, ptr, (int) count);
+                BuiltIns.UTF8.GetBytes(bPtr, val.Length, ptr, (int) count);
                 ptr += count;
             }
         }
@@ -163,12 +165,12 @@ namespace Iviz.Msgs
             val.RosSerialize(this);
         }
 
-        internal void SerializeArray(string[] val, uint count)
+        internal void SerializeArray(IList<string> val, uint count)
         {
             if (count == 0)
             {
                 AssertInRange(4);
-                *(int*) ptr = val.Length;
+                *(int*) ptr = val.Count;
                 ptr += 4;
             }
             else
@@ -176,9 +178,9 @@ namespace Iviz.Msgs
                 AssertSize(val, count);
             }
 
-            for (int i = 0; i < val.Length; i++)
+            foreach (string str in val)
             {
-                Serialize(val[i]);
+                Serialize(str);
             }
         }
 
@@ -205,12 +207,12 @@ namespace Iviz.Msgs
         }
 
 
-        internal void SerializeArray<T>(T[] val, uint count) where T : IMessage
+        internal void SerializeArray<T>(IList<T> val, uint count) where T : IMessage
         {
             if (count == 0)
             {
                 AssertInRange(4);
-                *(int*) ptr = val.Length;
+                *(int*) ptr = val.Count;
                 ptr += 4;
             }
             else
@@ -228,9 +230,9 @@ namespace Iviz.Msgs
         /// Deserializes a message of the given type from the buffer array.  
         /// </summary>
         /// <param name="generator">
-        /// An arbitrary instance of the type T. Can be anything.
+        /// An arbitrary instance of the type T. Can be anything, for example "new T()".
         /// This is a (rather unclean) workaround to the fact that C# cannot invoke static functions from generics.
-        /// So instead of using T.Deserialize(), we need an instance to do this.
+        /// So instead of using T.Deserialize(), we call the "static" method from the instance.
         /// </param>
         /// <param name="buffer">
         /// The byte array that contains the serialized message. 

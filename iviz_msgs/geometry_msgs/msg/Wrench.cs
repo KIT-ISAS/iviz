@@ -5,7 +5,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Wrench")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Wrench : IMessage
+    public struct Wrench : IMessage, System.IEquatable<Wrench>
     {
         // This represents force in free space, separated into
         // its linear and angular parts.
@@ -29,6 +29,16 @@ namespace Iviz.Msgs.GeometryMsgs
         {
             return new Wrench(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
+        
+        public override readonly int GetHashCode() => (Force, Torque).GetHashCode();
+        
+        public override readonly bool Equals(object o) => o is Wrench s && Equals(s);
+        
+        public readonly bool Equals(Wrench o) => (Force, Torque) == (o.Force, o.Torque);
+        
+        public static bool operator==(in Wrench a, in Wrench b) => a.Equals(b);
+        
+        public static bool operator!=(in Wrench a, in Wrench b) => !a.Equals(b);
     
         public readonly void RosSerialize(Buffer b)
         {

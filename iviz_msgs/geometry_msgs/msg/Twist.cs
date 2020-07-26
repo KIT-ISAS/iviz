@@ -5,7 +5,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Twist")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Twist : IMessage
+    public struct Twist : IMessage, System.IEquatable<Twist>
     {
         // This expresses velocity in free space broken into its linear and angular parts.
         [DataMember (Name = "linear")] public Vector3 Linear { get; set; }
@@ -28,6 +28,16 @@ namespace Iviz.Msgs.GeometryMsgs
         {
             return new Twist(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
+        
+        public override readonly int GetHashCode() => (Linear, Angular).GetHashCode();
+        
+        public override readonly bool Equals(object o) => o is Twist s && Equals(s);
+        
+        public readonly bool Equals(Twist o) => (Linear, Angular) == (o.Linear, o.Angular);
+        
+        public static bool operator==(in Twist a, in Twist b) => a.Equals(b);
+        
+        public static bool operator!=(in Twist a, in Twist b) => !a.Equals(b);
     
         public readonly void RosSerialize(Buffer b)
         {

@@ -5,7 +5,7 @@ namespace Iviz.Msgs.StdMsgs
 {
     [DataContract (Name = "std_msgs/Byte")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Byte : IMessage
+    public struct Byte : IMessage, System.IEquatable<Byte>
     {
         [DataMember (Name = "data")] public byte Data { get; set; }
     
@@ -25,6 +25,16 @@ namespace Iviz.Msgs.StdMsgs
         {
             return new Byte(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
+        
+        public override readonly int GetHashCode() => (Data).GetHashCode();
+        
+        public override readonly bool Equals(object o) => o is Byte s && Equals(s);
+        
+        public readonly bool Equals(Byte o) => (Data) == (o.Data);
+        
+        public static bool operator==(in Byte a, in Byte b) => a.Equals(b);
+        
+        public static bool operator!=(in Byte a, in Byte b) => !a.Equals(b);
     
         public readonly void RosSerialize(Buffer b)
         {

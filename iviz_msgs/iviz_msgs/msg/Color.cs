@@ -5,7 +5,7 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract (Name = "iviz_msgs/Color")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Color : IMessage
+    public struct Color : IMessage, System.IEquatable<Color>
     {
         [DataMember (Name = "r")] public byte R { get; set; }
         [DataMember (Name = "g")] public byte G { get; set; }
@@ -31,6 +31,16 @@ namespace Iviz.Msgs.IvizMsgs
         {
             return new Color(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
+        
+        public override readonly int GetHashCode() => (R, G, B, A).GetHashCode();
+        
+        public override readonly bool Equals(object o) => o is Color s && Equals(s);
+        
+        public readonly bool Equals(Color o) => (R, G, B, A) == (o.R, o.G, o.B, o.A);
+        
+        public static bool operator==(in Color a, in Color b) => a.Equals(b);
+        
+        public static bool operator!=(in Color a, in Color b) => !a.Equals(b);
     
         public readonly void RosSerialize(Buffer b)
         {

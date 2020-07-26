@@ -5,7 +5,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Point")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Point : IMessage
+    public struct Point : IMessage, System.IEquatable<Point>
     {
         // This contains the position of a point in free space
         [DataMember (Name = "x")] public double X { get; set; }
@@ -30,6 +30,16 @@ namespace Iviz.Msgs.GeometryMsgs
         {
             return new Point(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
+        
+        public override readonly int GetHashCode() => (X, Y, Z).GetHashCode();
+        
+        public override readonly bool Equals(object o) => o is Point s && Equals(s);
+        
+        public readonly bool Equals(Point o) => (X, Y, Z) == (o.X, o.Y, o.Z);
+        
+        public static bool operator==(in Point a, in Point b) => a.Equals(b);
+        
+        public static bool operator!=(in Point a, in Point b) => !a.Equals(b);
     
         public readonly void RosSerialize(Buffer b)
         {

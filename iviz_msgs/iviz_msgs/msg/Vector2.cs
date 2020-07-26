@@ -5,7 +5,7 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract (Name = "iviz_msgs/Vector2")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Vector2 : IMessage
+    public struct Vector2 : IMessage, System.IEquatable<Vector2>
     {
         [DataMember (Name = "x")] public float X { get; set; }
         [DataMember (Name = "y")] public float Y { get; set; }
@@ -27,6 +27,16 @@ namespace Iviz.Msgs.IvizMsgs
         {
             return new Vector2(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
+        
+        public override readonly int GetHashCode() => (X, Y).GetHashCode();
+        
+        public override readonly bool Equals(object o) => o is Vector2 s && Equals(s);
+        
+        public readonly bool Equals(Vector2 o) => (X, Y) == (o.X, o.Y);
+        
+        public static bool operator==(in Vector2 a, in Vector2 b) => a.Equals(b);
+        
+        public static bool operator!=(in Vector2 a, in Vector2 b) => !a.Equals(b);
     
         public readonly void RosSerialize(Buffer b)
         {

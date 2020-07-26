@@ -5,7 +5,7 @@ namespace Iviz.Msgs.StdMsgs
 {
     [DataContract (Name = "std_msgs/Int64")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Int64 : IMessage
+    public struct Int64 : IMessage, System.IEquatable<Int64>
     {
         [DataMember (Name = "data")] public long Data { get; set; }
     
@@ -25,6 +25,16 @@ namespace Iviz.Msgs.StdMsgs
         {
             return new Int64(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
+        
+        public override readonly int GetHashCode() => (Data).GetHashCode();
+        
+        public override readonly bool Equals(object o) => o is Int64 s && Equals(s);
+        
+        public readonly bool Equals(Int64 o) => (Data) == (o.Data);
+        
+        public static bool operator==(in Int64 a, in Int64 b) => a.Equals(b);
+        
+        public static bool operator!=(in Int64 a, in Int64 b) => !a.Equals(b);
     
         public readonly void RosSerialize(Buffer b)
         {

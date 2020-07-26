@@ -5,7 +5,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Pose")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Pose : IMessage
+    public struct Pose : IMessage, System.IEquatable<Pose>
     {
         // A representation of pose in free space, composed of position and orientation. 
         [DataMember (Name = "position")] public Point Position { get; set; }
@@ -28,6 +28,16 @@ namespace Iviz.Msgs.GeometryMsgs
         {
             return new Pose(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
+        
+        public override readonly int GetHashCode() => (Position, Orientation).GetHashCode();
+        
+        public override readonly bool Equals(object o) => o is Pose s && Equals(s);
+        
+        public readonly bool Equals(Pose o) => (Position, Orientation) == (o.Position, o.Orientation);
+        
+        public static bool operator==(in Pose a, in Pose b) => a.Equals(b);
+        
+        public static bool operator!=(in Pose a, in Pose b) => !a.Equals(b);
     
         public readonly void RosSerialize(Buffer b)
         {

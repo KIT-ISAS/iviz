@@ -5,7 +5,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Accel")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Accel : IMessage
+    public struct Accel : IMessage, System.IEquatable<Accel>
     {
         // This expresses acceleration in free space broken into its linear and angular parts.
         [DataMember (Name = "linear")] public Vector3 Linear { get; set; }
@@ -28,6 +28,16 @@ namespace Iviz.Msgs.GeometryMsgs
         {
             return new Accel(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
+        
+        public override readonly int GetHashCode() => (Linear, Angular).GetHashCode();
+        
+        public override readonly bool Equals(object o) => o is Accel s && Equals(s);
+        
+        public readonly bool Equals(Accel o) => (Linear, Angular) == (o.Linear, o.Angular);
+        
+        public static bool operator==(in Accel a, in Accel b) => a.Equals(b);
+        
+        public static bool operator!=(in Accel a, in Accel b) => !a.Equals(b);
     
         public readonly void RosSerialize(Buffer b)
         {

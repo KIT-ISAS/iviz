@@ -115,6 +115,10 @@ namespace Iviz.MsgsGen
 
             public readonly int arraySize;
 
+            public bool IsArray => arraySize != -1;
+            public bool IsDynamicSizeArray => arraySize == 0;
+            public bool IsFixedSizeArray => arraySize > 0;
+
             public ClassInfo classInfo;
 
             static readonly HashSet<string> Keywords = new HashSet<string>

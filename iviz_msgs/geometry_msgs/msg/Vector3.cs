@@ -5,7 +5,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Vector3")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Vector3 : IMessage
+    public struct Vector3 : IMessage, System.IEquatable<Vector3>
     {
         // This represents a vector in free space. 
         // It is only meant to represent a direction. Therefore, it does not
@@ -35,6 +35,16 @@ namespace Iviz.Msgs.GeometryMsgs
         {
             return new Vector3(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
+        
+        public override readonly int GetHashCode() => (X, Y, Z).GetHashCode();
+        
+        public override readonly bool Equals(object o) => o is Vector3 s && Equals(s);
+        
+        public readonly bool Equals(Vector3 o) => (X, Y, Z) == (o.X, o.Y, o.Z);
+        
+        public static bool operator==(in Vector3 a, in Vector3 b) => a.Equals(b);
+        
+        public static bool operator!=(in Vector3 a, in Vector3 b) => !a.Equals(b);
     
         public readonly void RosSerialize(Buffer b)
         {

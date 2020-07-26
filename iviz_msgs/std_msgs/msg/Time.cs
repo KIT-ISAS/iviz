@@ -5,7 +5,7 @@ namespace Iviz.Msgs.StdMsgs
 {
     [DataContract (Name = "std_msgs/Time")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Time : IMessage
+    public struct Time : IMessage, System.IEquatable<Time>
     {
         [DataMember (Name = "data")] public time Data { get; set; }
     
@@ -25,6 +25,16 @@ namespace Iviz.Msgs.StdMsgs
         {
             return new Time(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
+        
+        public override readonly int GetHashCode() => (Data).GetHashCode();
+        
+        public override readonly bool Equals(object o) => o is Time s && Equals(s);
+        
+        public readonly bool Equals(Time o) => (Data) == (o.Data);
+        
+        public static bool operator==(in Time a, in Time b) => a.Equals(b);
+        
+        public static bool operator!=(in Time a, in Time b) => !a.Equals(b);
     
         public readonly void RosSerialize(Buffer b)
         {

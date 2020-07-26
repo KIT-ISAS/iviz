@@ -5,7 +5,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Inertia")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Inertia : IMessage
+    public struct Inertia : IMessage, System.IEquatable<Inertia>
     {
         // Mass [kg]
         [DataMember (Name = "m")] public double M { get; set; }
@@ -45,6 +45,16 @@ namespace Iviz.Msgs.GeometryMsgs
         {
             return new Inertia(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
+        
+        public override readonly int GetHashCode() => (M, Com, Ixx, Ixy, Ixz, Iyy, Iyz, Izz).GetHashCode();
+        
+        public override readonly bool Equals(object o) => o is Inertia s && Equals(s);
+        
+        public readonly bool Equals(Inertia o) => (M, Com, Ixx, Ixy, Ixz, Iyy, Iyz, Izz) == (o.M, o.Com, o.Ixx, o.Ixy, o.Ixz, o.Iyy, o.Iyz, o.Izz);
+        
+        public static bool operator==(in Inertia a, in Inertia b) => a.Equals(b);
+        
+        public static bool operator!=(in Inertia a, in Inertia b) => !a.Equals(b);
     
         public readonly void RosSerialize(Buffer b)
         {

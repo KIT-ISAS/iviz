@@ -5,7 +5,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Quaternion")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Quaternion : IMessage
+    public struct Quaternion : IMessage, System.IEquatable<Quaternion>
     {
         // This represents an orientation in free space in quaternion form.
         [DataMember (Name = "x")] public double X { get; set; }
@@ -32,6 +32,16 @@ namespace Iviz.Msgs.GeometryMsgs
         {
             return new Quaternion(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
+        
+        public override readonly int GetHashCode() => (X, Y, Z, W).GetHashCode();
+        
+        public override readonly bool Equals(object o) => o is Quaternion s && Equals(s);
+        
+        public readonly bool Equals(Quaternion o) => (X, Y, Z, W) == (o.X, o.Y, o.Z, o.W);
+        
+        public static bool operator==(in Quaternion a, in Quaternion b) => a.Equals(b);
+        
+        public static bool operator!=(in Quaternion a, in Quaternion b) => !a.Equals(b);
     
         public readonly void RosSerialize(Buffer b)
         {

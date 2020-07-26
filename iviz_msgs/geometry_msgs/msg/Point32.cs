@@ -5,7 +5,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Point32")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Point32 : IMessage
+    public struct Point32 : IMessage, System.IEquatable<Point32>
     {
         // This contains the position of a point in free space(with 32 bits of precision).
         // It is recommeded to use Point wherever possible instead of Point32.  
@@ -36,6 +36,16 @@ namespace Iviz.Msgs.GeometryMsgs
         {
             return new Point32(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
+        
+        public override readonly int GetHashCode() => (X, Y, Z).GetHashCode();
+        
+        public override readonly bool Equals(object o) => o is Point32 s && Equals(s);
+        
+        public readonly bool Equals(Point32 o) => (X, Y, Z) == (o.X, o.Y, o.Z);
+        
+        public static bool operator==(in Point32 a, in Point32 b) => a.Equals(b);
+        
+        public static bool operator!=(in Point32 a, in Point32 b) => !a.Equals(b);
     
         public readonly void RosSerialize(Buffer b)
         {

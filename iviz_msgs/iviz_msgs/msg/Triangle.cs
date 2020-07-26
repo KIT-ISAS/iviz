@@ -5,7 +5,7 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract (Name = "iviz_msgs/Triangle")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Triangle : IMessage
+    public struct Triangle : IMessage, System.IEquatable<Triangle>
     {
         [DataMember (Name = "a")] public uint A { get; set; }
         [DataMember (Name = "b")] public uint B { get; set; }
@@ -29,6 +29,16 @@ namespace Iviz.Msgs.IvizMsgs
         {
             return new Triangle(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
+        
+        public override readonly int GetHashCode() => (A, B, C).GetHashCode();
+        
+        public override readonly bool Equals(object o) => o is Triangle s && Equals(s);
+        
+        public readonly bool Equals(Triangle o) => (A, B, C) == (o.A, o.B, o.C);
+        
+        public static bool operator==(in Triangle a, in Triangle b) => a.Equals(b);
+        
+        public static bool operator!=(in Triangle a, in Triangle b) => !a.Equals(b);
     
         public readonly void RosSerialize(Buffer b)
         {

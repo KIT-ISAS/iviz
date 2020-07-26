@@ -1,64 +1,51 @@
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract (Name = "mesh_msgs/TriangleIndices")]
-    [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct TriangleIndices : IMessage
+    public sealed class TriangleIndices : IMessage
     {
         // Definition of a triangle's vertices
-        [DataMember (Name = "vertex_indices")] fixed uint VertexIndices[3];
-        public uint VertexIndices0
-        {
-            readonly get => VertexIndices[0];
-            set => VertexIndices[0] = value;
-        }
-        public uint VertexIndices1
-        {
-            readonly get => VertexIndices[1];
-            set => VertexIndices[1] = value;
-        }
-        public uint VertexIndices2
-        {
-            readonly get => VertexIndices[2];
-            set => VertexIndices[2] = value;
-        }
+        [DataMember (Name = "vertex_indices")] public uint[/*3*/] VertexIndices { get; set; }
     
+        /// <summary> Constructor for empty message. </summary>
+        public TriangleIndices()
+        {
+            VertexIndices = new uint[3];
+        }
+        
         /// <summary> Explicit constructor. </summary>
         public TriangleIndices(uint[] VertexIndices)
         {
-            if (VertexIndices is null) throw new System.ArgumentNullException(nameof(VertexIndices));
-            for (int i = 0; i < 3; i++)
-            {
-                this.VertexIndices[i] = VertexIndices[i];
-            }
+            this.VertexIndices = VertexIndices;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal TriangleIndices(Buffer b)
         {
-            b.Deserialize(out this);
+            VertexIndices = b.DeserializeStructArray<uint>(3);
         }
         
-        public readonly ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(Buffer b)
         {
             return new TriangleIndices(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
     
-        public readonly void RosSerialize(Buffer b)
+        public void RosSerialize(Buffer b)
         {
             if (b is null) throw new System.ArgumentNullException(nameof(b));
-            b.Serialize(this);
+            b.SerializeStructArray(VertexIndices, 3);
         }
         
-        public readonly void RosValidate()
+        public void RosValidate()
         {
+            if (VertexIndices is null) throw new System.NullReferenceException();
+            if (VertexIndices.Length != 3) throw new System.IndexOutOfRangeException();
         }
     
-        public readonly int RosMessageLength => 12;
+        public int RosMessageLength => 12;
     
-        public readonly string RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "mesh_msgs/TriangleIndices";

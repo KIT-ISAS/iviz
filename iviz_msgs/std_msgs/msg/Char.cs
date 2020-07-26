@@ -5,7 +5,7 @@ namespace Iviz.Msgs.StdMsgs
 {
     [DataContract (Name = "std_msgs/Char")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Char : IMessage
+    public struct Char : IMessage, System.IEquatable<Char>
     {
         [DataMember (Name = "data")] public sbyte Data { get; set; }
     
@@ -25,6 +25,16 @@ namespace Iviz.Msgs.StdMsgs
         {
             return new Char(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
+        
+        public override readonly int GetHashCode() => (Data).GetHashCode();
+        
+        public override readonly bool Equals(object o) => o is Char s && Equals(s);
+        
+        public readonly bool Equals(Char o) => (Data) == (o.Data);
+        
+        public static bool operator==(in Char a, in Char b) => a.Equals(b);
+        
+        public static bool operator!=(in Char a, in Char b) => !a.Equals(b);
     
         public readonly void RosSerialize(Buffer b)
         {

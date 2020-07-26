@@ -5,7 +5,7 @@ namespace Iviz.MsgsGen
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             string rosBasePath = Path.GetFullPath("../../../../ros_msgs");
             string ivizMsgPaths = Path.GetFullPath("../../../../iviz_msgs");

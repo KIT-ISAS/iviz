@@ -5,7 +5,7 @@ namespace Iviz.Msgs.StdMsgs
 {
     [DataContract (Name = "std_msgs/Int16")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Int16 : IMessage
+    public struct Int16 : IMessage, System.IEquatable<Int16>
     {
         [DataMember (Name = "data")] public short Data { get; set; }
     
@@ -25,6 +25,16 @@ namespace Iviz.Msgs.StdMsgs
         {
             return new Int16(b ?? throw new System.ArgumentNullException(nameof(b)));
         }
+        
+        public override readonly int GetHashCode() => (Data).GetHashCode();
+        
+        public override readonly bool Equals(object o) => o is Int16 s && Equals(s);
+        
+        public readonly bool Equals(Int16 o) => (Data) == (o.Data);
+        
+        public static bool operator==(in Int16 a, in Int16 b) => a.Equals(b);
+        
+        public static bool operator!=(in Int16 a, in Int16 b) => !a.Equals(b);
     
         public readonly void RosSerialize(Buffer b)
         {
