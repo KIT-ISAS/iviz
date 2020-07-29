@@ -2,7 +2,8 @@
 
 iviz is a mobile 3D visualization app for ROS based on the Unity Engine.
 You can use it to display 3D information about topics, navigate your virtual environment, or watch your robot in Augmented Reality.
-iviz has been designed primarily for use in mobile devices (iOS, Android smartphones and tablets), but can also be used in a normal PC if you don't mind the big buttons.
+
+iviz has been designed primarily for use in mobile devices (iOS/Android smartphones and tablets), but can also be used in a normal PC if you don't mind the big buttons.
 
 
 ## 1. Installation
@@ -16,7 +17,7 @@ The iviz project has no external dependencies (all required libraries are includ
 ## 2. Getting Started
 
 * On the panel at the top-left, right underneath the "- iviz -" label, tap on the URL with the arrow at the end.
-* You should now see the Connection Dialog.
+* You should now see the **Connection Dialog**.
   - Type in the URL of the master, i.e., where roscore is running. This is the content of the environment variable _ROS_MASTER_URI_.
   - Type in the URL of your device, or leave the default. The hostname should be accessible to other devices, and can be obtained from _ROS_HOSTNAME_ or _ROS_IP_.
   The port (7613) can be set to anything, just make sure it's not being used by another application.
@@ -25,6 +26,14 @@ The iviz project has no external dependencies (all required libraries are includ
 
 The app may refuse to connect if it detects that your URL is not accessible from the outside (in doubt, use the IP address of your device as the hostname). 
 
+## 3. Navigation
+
+To move around:
+* On a PC: Hold down the right mouse button and move the mouse to rotate the camera. While holding the right button down, press W-A-S-D to translate the camera. (This is the same behaviour as in Unity)
+* On a mobile device: Tap with one finger and drag to rotate the camera. Tap with two fingers and move to translate the camera. Pinch to zoom in and out.
+
 ## 3. The Dialogs
+
+You already met the Connection Dialog in Section 2.
 
 ### Getting Started
