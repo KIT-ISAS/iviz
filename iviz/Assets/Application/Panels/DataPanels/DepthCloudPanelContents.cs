@@ -13,7 +13,7 @@
         void Awake()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
-            p.AddHeadTitleWidget("DepthProjector");
+            p.AddHeadTitleWidget("DepthCloud");
             Frame = p.AddFrame();
             Depth = p.AddDropdown("Depth Image");
             Color = p.AddDropdown("Color Image");

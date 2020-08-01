@@ -44,16 +44,12 @@ namespace Iviz.Displays
             PointerUp?.Invoke();
         }
 
-        bool enabed = true;
         public void OnPointerMove(in Vector2 cursorPos)
         {
             Transform mTransform = transform;
             Transform mParent = mTransform.parent;
             Transform mTarget = TargetTransform;
 
-            //Debug.Log(mParent.TransformDirection(normal));
-            //Debug.Log(mParent.rotation);
-            
             //Ray ray = new Ray(mTransform.position, mParent.TransformDirection(normal));/
             Ray ray = new Ray(mParent.position, mParent.TransformDirection(normal));
             Ray other = TFListener.MainCamera.ScreenPointToRay(cursorPos);

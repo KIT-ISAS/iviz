@@ -66,7 +66,7 @@ namespace Iviz.Roslib
             Logger.LogDebug($"{this}: '{remoteCallerId}' is requesting {Topic}");
             TcpSender connection = new TcpSender(CallerUri, remoteCallerId, topicInfo, Latching);
 
-            IPEndPoint endPoint = null;
+            IPEndPoint endPoint;
             lock (connectionsByCallerId)
             {
                 if (connectionsByCallerId.TryGetValue(remoteCallerId, out TcpSender sender))
@@ -85,6 +85,7 @@ namespace Iviz.Roslib
             // while we're here
             Cleanup();
 
+            // ugh
             for (int i = 0; i < 10 && connection.Status == SenderStatus.Inactive; i++)
             {
                 Thread.Sleep(10);
@@ -94,6 +95,7 @@ namespace Iviz.Roslib
             {
                 connection.Publish(LatchedMessage);
             }
+            
             connection.MaxQueueSizeBytes = MaxQueueSize;
             return endPoint;
         }
@@ -123,7 +125,6 @@ namespace Iviz.Roslib
             }
             lock (connectionsByCallerId)
             {
-                //Logger.Log($"{this}: Sending to {connectionsByCallerId.Count} listeners!");
                 foreach (TcpSender connection in connectionsByCallerId.Values)
                 {
                     connection.Publish(msg);

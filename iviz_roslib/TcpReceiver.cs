@@ -10,7 +10,7 @@ using Iviz.Msgs;
 
 namespace Iviz.Roslib
 {
-    sealed class TcpReceiver : IDisposable
+    internal sealed class TcpReceiver : IDisposable
     {
         readonly TopicInfo topicInfo;
         readonly Action<IMessage> callback;
@@ -25,9 +25,9 @@ namespace Iviz.Roslib
         bool keepRunning;
         Task task;
 
-        public readonly Uri RemoteUri;
-        public readonly string RemoteHostname;
-        public readonly int RemotePort;
+        public Uri RemoteUri { get; }
+        public string RemoteHostname { get; }
+        public int RemotePort { get; }
         public string Hostname { get; private set; }
         public int Port { get; private set; }
 
@@ -36,7 +36,7 @@ namespace Iviz.Roslib
         public int NumReceived { get; private set; }
         public int BytesReceived { get; private set; }
 
-        public readonly bool RequestNoDelay;
+        public bool RequestNoDelay { get; }
 
         public TcpReceiver(
             Uri remoteUri,

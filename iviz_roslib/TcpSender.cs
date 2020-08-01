@@ -15,7 +15,6 @@ using Newtonsoft.Json.Converters;
 
 namespace Iviz.Roslib
 {
-
     [JsonConverter(typeof(StringEnumConverter))]
     public enum SenderStatus
     {
@@ -25,8 +24,7 @@ namespace Iviz.Roslib
         Dead
     }
 
-
-    sealed class TcpSender : IDisposable
+    internal sealed class TcpSender : IDisposable
     {
         readonly object condVar = new object();
         readonly List<IMessage> messageQueue = new List<IMessage>();
@@ -42,12 +40,13 @@ namespace Iviz.Roslib
         bool keepRunning;
         Task task;
 
-        public readonly string RemoteCallerId;
-        public readonly Uri CallerUri;
-        public readonly bool Latching;
-        readonly TopicInfo TopicInfo;
+        public string RemoteCallerId { get; }
+        public Uri CallerUri { get; }
+        public bool Latching { get; }
+        
+        readonly TopicInfo topicInfo;
 
-        public string Topic => TopicInfo.Topic;
+        public string Topic => topicInfo.Topic;
         public bool IsAlive => task != null && !task.IsCompleted && !task.IsFaulted;
         public string Hostname { get; private set; }
         public int Port { get; private set; }
@@ -59,7 +58,6 @@ namespace Iviz.Roslib
         public int BytesSent { get; private set; }
         public int NumDropped { get; private set; }
         public int BytesDropped { get; private set; }
-
         public SenderStatus Status { get; private set; }
 
         public TcpSender(
@@ -69,7 +67,7 @@ namespace Iviz.Roslib
             bool latching)
         {
             RemoteCallerId = remoteCallerId;
-            TopicInfo = topicInfo;
+            this.topicInfo = topicInfo;
             CallerUri = callerUri;
             Status = SenderStatus.Inactive;
             Latching = latching;
@@ -77,12 +75,8 @@ namespace Iviz.Roslib
 
         public IPEndPoint Start(int timeoutInMs)
         {
-            string localHostname = CallerUri.Host;
-            //IPAddress localAddress = Dns.GetHostAddresses(localHostname)[0];
             tcpListener = new TcpListener(IPAddress.Any, 0);
             tcpListener.Start();
-
-            //Logger.Log("TcpSender: Listening at " + tcpListener.LocalEndpoint);
 
             keepRunning = true;
             task = Task.Run(() => Run(timeoutInMs));
@@ -160,17 +154,17 @@ namespace Iviz.Roslib
             {
                 contents = new[] {
                     errorMessage,
-                    $"md5sum={TopicInfo.Md5Sum}",
-                    $"type={TopicInfo.Type}",
-                    $"callerid={TopicInfo.CallerId}",
+                    $"md5sum={topicInfo.Md5Sum}",
+                    $"type={topicInfo.Type}",
+                    $"callerid={topicInfo.CallerId}",
                 };
             }
             else
             {
                 contents = new[] {
-                    $"md5sum={TopicInfo.Md5Sum}",
-                    $"type={TopicInfo.Type}",
-                    $"callerid={TopicInfo.CallerId}",
+                    $"md5sum={topicInfo.Md5Sum}",
+                    $"type={topicInfo.Type}",
+                    $"callerid={topicInfo.CallerId}",
                     $"latching={(Latching ? "1" : "0")}",
                 };
             }
@@ -214,30 +208,30 @@ namespace Iviz.Roslib
             {
                 return $"error=Expected callerid '{RemoteCallerId}' but received instead '{receivedId}', closing connection";
             }
-            if (!values.TryGetValue("topic", out string receivedTopic) || receivedTopic != TopicInfo.Topic)
+            if (!values.TryGetValue("topic", out string receivedTopic) || receivedTopic != topicInfo.Topic)
             {
-                return $"error=Expected topic '{TopicInfo.Topic}' but received instead '{receivedTopic}', closing connection";
+                return $"error=Expected topic '{topicInfo.Topic}' but received instead '{receivedTopic}', closing connection";
             }
-            if (!values.TryGetValue("md5sum", out string receivedMd5sum) || receivedMd5sum != TopicInfo.Md5Sum)
+            if (!values.TryGetValue("md5sum", out string receivedMd5sum) || receivedMd5sum != topicInfo.Md5Sum)
             {
                 if (receivedMd5sum == "*")
                 {
-                    Logger.LogDebug($"{this}: Expected md5 '{TopicInfo.Md5Sum}' but received instead '{receivedMd5sum}'. Continuing...");
+                    Logger.LogDebug($"{this}: Expected md5 '{topicInfo.Md5Sum}' but received instead '{receivedMd5sum}'. Continuing...");
                 }
                 else
                 {
-                    return $"error=Expected md5 '{TopicInfo.Md5Sum}' but received instead '{receivedMd5sum}', closing connection";
+                    return $"error=Expected md5 '{topicInfo.Md5Sum}' but received instead '{receivedMd5sum}', closing connection";
                 }
             }
-            if (!values.TryGetValue("type", out string receivedType) || receivedType != TopicInfo.Type)
+            if (!values.TryGetValue("type", out string receivedType) || receivedType != topicInfo.Type)
             {
                 if (receivedType == "*")
                 {
-                    Logger.LogDebug($"{this}: Expected type '{TopicInfo.Type}' but received instead '{receivedType}'. Continuing...");
+                    Logger.LogDebug($"{this}: Expected type '{topicInfo.Type}' but received instead '{receivedType}'. Continuing...");
                 }
                 else
                 {
-                    return $"error=Expected type '{TopicInfo.Type}' but received instead '{receivedType}', closing connection";
+                    return $"error=Expected type '{topicInfo.Type}' but received instead '{receivedType}', closing connection";
                 }
             }
             if (values.TryGetValue("tcp_nodelay", out string receivedNoDelay) && receivedNoDelay == "1")

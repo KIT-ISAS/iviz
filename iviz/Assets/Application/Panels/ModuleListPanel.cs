@@ -190,7 +190,7 @@ namespace Iviz.App
                 Logger.Internal(
                     uri == null ? 
                     "Failed to set caller uri." : 
-                    "Changing caller uri to '{uri}'"
+                    $"Changing caller uri to '{uri}'"
                     );
             };
             StopButton.Clicked += () =>

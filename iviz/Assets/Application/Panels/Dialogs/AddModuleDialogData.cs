@@ -7,15 +7,18 @@ namespace Iviz.App
 {
     public sealed class AddModuleDialogData : DialogData
     {
-        static readonly List<Tuple<string, Resource.Module>> Modules = new List<Tuple<string, Resource.Module>>()
+        static readonly List<(string caption, Resource.Module module)> Modules = new List<(string, Resource.Module)>
         {
-            Tuple.Create("<b>Robot</b>\nRobot from the parameter server", Resource.Module.SimpleRobot),
-            Tuple.Create("<b>Robot (Template)</b>\nRobot from a template", Resource.Module.Robot),
-            Tuple.Create("<b>Grid</b>\nA reference plane", Resource.Module.Grid),
-            Tuple.Create("<b>DepthProjector</b>\nPoint cloud generator for depth images", Resource.Module.DepthCloud),
-            Tuple.Create("<b>AR</b>\nManager for augmented reality", Resource.Module.AR),
-            Tuple.Create("<b>Joystick</b>\nOn-screen joystick", Resource.Module.Joystick),
+            ("<b>Robot</b>\nRobot from the parameter server", Resource.Module.SimpleRobot),
+            ("<b>Grid</b>\nA reference plane", Resource.Module.Grid),
+            ("<b>DepthCloud</b>\nPoint cloud generator for depth images", Resource.Module.DepthCloud),
+            ("<b>AR</b>\nManager for augmented reality", Resource.Module.AR),
+            ("<b>Joystick</b>\nOn-screen joystick", Resource.Module.Joystick),
+            // ("<b>Robot (Template)</b>\nRobot from a template", Resource.Module.Robot),
         };
+
+        const int ARIndex = 3;
+        const int JoystickIndex = 4;
 
         ItemListDialogContents itemList;
         public override IDialogPanelContents Panel => itemList;
@@ -29,15 +32,15 @@ namespace Iviz.App
         public override void SetupPanel()
         {
             itemList.Title = "Available Modules";
-            itemList.Items = Modules.Select(x => x.Item1);
+            itemList.Items = Modules.Select(x => x.caption);
             itemList.ItemClicked += OnItemClicked;
             itemList.CloseClicked += OnCloseClicked;
 
             bool hasAR = ModuleListPanel.ModuleDatas.Any(x => x.Module == Resource.Module.AR);
-            itemList[4].Interactable = !hasAR;
+            itemList[ARIndex].Interactable = !hasAR;
 
             bool hasJoystick = ModuleListPanel.ModuleDatas.Any(x => x.Module == Resource.Module.Joystick);
-            itemList[5].Interactable = !hasJoystick;
+            itemList[JoystickIndex].Interactable = !hasJoystick;
         }
 
         void OnCloseClicked()
@@ -47,7 +50,7 @@ namespace Iviz.App
 
         void OnItemClicked(int index, string _)
         {
-            var moduleData = ModuleListPanel.CreateModule(Modules[index].Item2);
+            var moduleData = ModuleListPanel.CreateModule(Modules[index].module);
             Close();
             moduleData.ShowPanel();
         }
@@ -60,8 +63,8 @@ namespace Iviz.App
         public override void CleanupPanel()
         {
             base.CleanupPanel();
-            itemList[4].Interactable = true;
-            itemList[5].Interactable = true;
+            itemList[ARIndex].Interactable = true;
+            itemList[JoystickIndex].Interactable = true;
         }
 
     }
