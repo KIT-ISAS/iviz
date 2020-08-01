@@ -62,17 +62,17 @@ namespace Iviz.Controllers
         public static ReadOnlyDictionary<string, TFFrame> Frames =>
             new ReadOnlyDictionary<string, TFFrame>(Instance.frames);
 
-        static bool IsUsableByHints(TFFrame frame) => frame != RootFrame && frame != UnityFrame;
+        static bool IsFrameUsableByGui(TFFrame frame) => frame != RootFrame && frame != UnityFrame;
 
-        public static IEnumerable<string> FramesForHints => Instance.frames.Values.Where(IsUsableByHints).Select(frame => frame.Id);
+        public static IEnumerable<string> FramesUsableByGui =>
+            Instance.frames.Values.Where(IsFrameUsableByGui).Select(frame => frame.Id);
 
         public RosSender<tfMessage_v2> Publisher { get; }
 
         public override IModuleData ModuleData { get; }
 
         public RosListener ListenerStatic { get; private set; }
-
-
+        
         readonly TFConfiguration config = new TFConfiguration();
 
         public TFConfiguration Config
@@ -223,7 +223,6 @@ namespace Iviz.Controllers
             rootControl.name = "[InteractiveController for /]";
             rootControl.TargetTransform = RootFrame.transform;
             rootControl.InteractionMode = InteractiveControl.InteractionModeType.Disabled;
-            //rootControl.InteractionMode = InteractiveControl.InteractionModeType.Frame;
             rootControl.transform.localScale = 0.4f * Vector3.one;
 
             Publisher = new RosSender<tfMessage_v2>(DefaultTopic);
@@ -282,9 +281,7 @@ namespace Iviz.Controllers
                     parentId = parentId.Substring(1);
                 }
 
-                //Debug.Log("Id " + childId + " requests parent " + parentId);
                 TFFrame parent = string.IsNullOrEmpty(parentId) ? RootFrame : GetOrCreateFrame(parentId, null);
-                //Debug.Log("Parent has parent " + parent.Parent.Id);
 
                 if (child.SetParent(parent))
                 {
@@ -297,7 +294,7 @@ namespace Iviz.Controllers
         {
             base.Reset();
             ListenerStatic?.Reset();
-            
+
             bool prevShowAllFrames = ShowAllFrames;
             ShowAllFrames = false;
 
@@ -351,7 +348,6 @@ namespace Iviz.Controllers
         TFFrame CreateFrameObject(string id, Transform parent, TFFrame parentFrame)
         {
             TFFrame frame = ResourcePool.GetOrCreate<TFFrame>(Resource.Displays.TFFrame, parent);
-            //Debug.Log(parent + " -> " + frame.transform.parent);
             frame.name = "{" + id + "}";
             frame.Id = id;
             frame.Visible = config.AxisVisible;
@@ -392,7 +388,6 @@ namespace Iviz.Controllers
             frames.Remove(frame.Id);
             GuiManager.Unselect(frame);
             frame.Stop();
-            //Debug.Log("Frame " + frame.gameObject.GetInstanceID() + " with formed id '" + frame.Id + "' is dead!");
             ResourcePool.Dispose(Resource.Displays.TFFrame, frame.gameObject);
         }
 
@@ -420,13 +415,11 @@ namespace Iviz.Controllers
                     UnityEngine.Quaternion.Inverse(rootFrame.rotation) * unityPose.rotation
                 );
             }
-            else
-            {
-                return unityPose;
-            }
+
+            return unityPose;
         }
 
-        public static UnityEngine.Vector3 RelativePosition(in UnityEngine.Vector3 unityPosition)
+        public static Vector3 RelativePosition(in Vector3 unityPosition)
         {
             return GuiCamera.IsMobile ? RootFrame.transform.InverseTransformPoint(unityPosition) : unityPosition;
         }

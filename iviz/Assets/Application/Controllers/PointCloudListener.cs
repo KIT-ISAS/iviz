@@ -19,7 +19,7 @@ namespace Iviz.Controllers
         [DataMember] public Resource.Module Module => Resource.Module.PointCloud;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
-        [DataMember] public string IntensityChannel { get; set; } = "intensity";
+        [DataMember] public string IntensityChannel { get; set; } = "y";
         [DataMember] public float PointSize { get; set; } = 0.03f;
         [DataMember] public Resource.ColormapId Colormap { get; set; } = Resource.ColormapId.hsv;
         [DataMember] public bool ForceMinMax { get; set; } = false;
@@ -180,7 +180,6 @@ namespace Iviz.Controllers
             pointCloud = ResourcePool.GetOrCreate<PointListResource>(Resource.Displays.PointList, node.transform);
 
             Config = new PointCloudConfiguration();
-            //transform.localRotation = new Msgs.GeometryMsgs.Quaternion(0, 0, 0, 1).Ros2Unity();
         }
 
         public override void StartListening()
@@ -222,7 +221,7 @@ namespace Iviz.Controllers
             isProcessing = true;
             node.AttachTo(msg.Header.FrameId, msg.Header.Stamp); 
 
-            if (msg.PointStep < 3 * 4 ||
+            if (msg.PointStep < 3 * sizeof(float) ||
                 msg.RowStep < msg.PointStep * msg.Width ||
                 msg.Data.Length < msg.RowStep * msg.Height)
             {
@@ -296,14 +295,7 @@ namespace Iviz.Controllers
             bool xyzAligned = xOffset == 0 && yOffset == 4 && zOffset == 8;
             if (xyzAligned)
             {
-                if (rgbaHint)
-                {
-                    GeneratePointBufferXYZ(msg, iOffset, PointField.FLOAT32);
-                }
-                else
-                {
-                    GeneratePointBufferXYZ(msg, iOffset, iType);
-                }
+                GeneratePointBufferXYZ(msg, iOffset, rgbaHint ? PointField.FLOAT32 : iType);
             }
             else
             {

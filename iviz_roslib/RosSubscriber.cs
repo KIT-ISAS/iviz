@@ -92,7 +92,7 @@ namespace Iviz.Roslib
                 throw new ArgumentNullException(nameof(type));
             }
 
-            return type.Equals(Manager.TopicInfo.Generator.GetType());
+            return type.Equals(Manager.topicInfo.Generator.GetType());
         }
 
         public string Subscribe(Action<IMessage> callback)

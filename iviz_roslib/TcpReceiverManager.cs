@@ -15,17 +15,17 @@ namespace Iviz.Roslib
 
         internal Action<IMessage> Callback { private get; set; }
 
-        public readonly TopicInfo TopicInfo;
-        public string Topic => TopicInfo.Topic;
-        public string CallerId => TopicInfo.CallerId;
-        public string TopicType => TopicInfo.Type;
+        public readonly TopicInfo topicInfo;
+        public string Topic => topicInfo.Topic;
+        public string CallerId => topicInfo.CallerId;
+        public string TopicType => topicInfo.Type;
         public int NumConnections => connectionsByUri.Count;
         public bool RequestNoDelay { get; }
         public int TimeoutInMs { get; set; } = 5000;
 
         public TcpReceiverManager(TopicInfo topicInfo, bool requestNoDelay)
         {
-            TopicInfo = topicInfo;
+            this.topicInfo = topicInfo;
             RequestNoDelay = requestNoDelay;
         }
 
@@ -62,7 +62,7 @@ namespace Iviz.Roslib
                 remoteUri,
                 response.Protocol.Hostname,
                 response.Protocol.Port,
-                TopicInfo, Callback,
+                topicInfo, Callback,
                 RequestNoDelay);
 
             lock (connectionsByUri)
@@ -135,9 +135,7 @@ namespace Iviz.Roslib
         {
             lock (connectionsByUri)
             {
-                return new ReadOnlyCollection<SubscriberReceiverState>(
-                    connectionsByUri.Values.Select(x => x.State).ToList()
-                    );
+                return connectionsByUri.Values.Select(x => x.State).ToList().AsReadOnly();
             }
         }
 
