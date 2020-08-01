@@ -321,9 +321,9 @@ namespace Iviz.Controllers
             //Debug.Log(timeline.Count + " " + (timeline.LastTime - timeline.FirstTime).Milliseconds);
         }
 
-        public Pose GetPose(in TimeSpan time)
+        public Pose LookupPose(in TimeSpan time)
         {
-            return timeline.Count == 0 ? pose : timeline.Get(time);
+            return timeline.Count == 0 ? pose : timeline.Lookup(time);
         }
 
         bool HasNoListeners => !listeners.Any();

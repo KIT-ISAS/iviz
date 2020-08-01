@@ -142,7 +142,7 @@ namespace Iviz.Displays
             return null;
         }
 
-        public void SetPng(byte[] data)
+        public void SetPng(byte[] data, Action onFinished = null)
         {
             Task.Run(() =>
             {
@@ -172,7 +172,11 @@ namespace Iviz.Displays
                     {
                         newData = png.Data;
                     }
-                    GameThread.RunOnce(() => Set(png.Width, png.Height, EncodingFromPng(png), newData));
+                    GameThread.RunOnce(() =>
+                    {
+                        Set(png.Width, png.Height, EncodingFromPng(png), newData);
+                        onFinished?.Invoke();
+                    });
                 }
                 catch (Exception e)
                 {
@@ -181,7 +185,7 @@ namespace Iviz.Displays
             });
         }
 
-        public void SetJpg(byte[] data)
+        public void SetJpg(byte[] data, Action onFinished = null)
         {
             Task.Run(() =>
             {
@@ -192,34 +196,40 @@ namespace Iviz.Displays
 
                     string encoding = null; ;
                     int reqSize = image.Height * image.Width;
-                    if (image.Colorspace == Colorspace.RGB && image.BitsPerComponent == 8)
+                    switch (image.Colorspace)
                     {
-                        if (image.Width % 4 != 0)
+                        case Colorspace.RGB when image.BitsPerComponent == 8:
                         {
-                            Logger.Debug("ImageListener: Row padding not implemented");
-                            return;
+                            if (image.Width % 4 != 0)
+                            {
+                                Logger.Debug("ImageListener: Row padding not implemented");
+                                return;
+                            }
+                            encoding = "rgb";
+                            reqSize *= 3;
+                            break;
                         }
-                        encoding = "rgb";
-                        reqSize *= 3;
-                    }
-                    else if (image.Colorspace == Colorspace.Grayscale && image.BitsPerComponent == 8)
-                    {
-                        if (image.Width % 4 != 0)
+                        case Colorspace.Grayscale when image.BitsPerComponent == 8:
                         {
-                            Logger.Debug("ImageListener: Row padding not implemented");
-                            return;
+                            if (image.Width % 4 != 0)
+                            {
+                                Logger.Debug("ImageListener: Row padding not implemented");
+                                return;
+                            }
+                            encoding = "mono8";
+                            break;
                         }
-                        encoding = "mono8";
-                    }
-                    else if (image.Colorspace == Colorspace.Grayscale && image.BitsPerComponent == 16)
-                    {
-                        if (image.Width % 2 != 0)
+                        case Colorspace.Grayscale when image.BitsPerComponent == 16:
                         {
-                            Logger.Debug("ImageListener: Row padding not implemented");
-                            return;
+                            if (image.Width % 2 != 0)
+                            {
+                                Logger.Debug("ImageListener: Row padding not implemented");
+                                return;
+                            }
+                            encoding = "mono16";
+                            reqSize *= 2;
+                            break;
                         }
-                        encoding = "mono16";
-                        reqSize *= 2;
                     }
                     if (encoding == null)
                     {
@@ -237,7 +247,11 @@ namespace Iviz.Displays
 
                     Stream outStream = new MemoryStream(pngBuffer);
                     image.WriteBitmap(outStream);
-                    GameThread.RunOnce(() => Set(image.Width, image.Height, encoding, pngBuffer, bmpHeaderLength));
+                    GameThread.RunOnce(() =>
+                    {
+                        Set(image.Width, image.Height, encoding, pngBuffer, bmpHeaderLength);
+                        onFinished?.Invoke();
+                    });
                 }
                 catch (Exception e)
                 {

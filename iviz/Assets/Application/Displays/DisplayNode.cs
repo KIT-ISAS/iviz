@@ -61,7 +61,7 @@ namespace Iviz.Controllers
                     SetParent(frame, false);
                 }
 
-                transform.SetPose(Parent.GetPose(timestamp));
+                transform.SetPose(Parent.LookupPose(timestamp));
             }
         }
 

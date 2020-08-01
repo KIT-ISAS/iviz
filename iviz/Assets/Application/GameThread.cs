@@ -21,13 +21,6 @@ namespace Iviz.Displays
         {
             get
             {
-                if (!(mInstance is null))
-                {
-                    return mInstance;
-                }
-
-                mInstance = new GameObject("GameThread").AddComponent<GameThread>();
-                mInstance.lastRunTime = Time.time;
                 return mInstance;
             }
         }

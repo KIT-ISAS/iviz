@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Iviz.Controllers
 {
@@ -8,12 +9,12 @@ namespace Iviz.Controllers
     {
         readonly struct PoseInfo
         {
-            public TimeSpan Key { get; }
+            public TimeSpan Timestamp { get; }
             public Pose Pose { get; }
 
-            public PoseInfo(in TimeSpan key, in Pose pose)
+            public PoseInfo(in TimeSpan timestamp, in Pose pose)
             {
-                Key = key;
+                Timestamp = timestamp;
                 Pose = pose;
             }
 
@@ -23,7 +24,8 @@ namespace Iviz.Controllers
             }
         }
 
-        int start;
+        int currentPos;
+        int lastPos = -1;
 
         readonly List<PoseInfo> poses = new List<PoseInfo>();
         readonly List<PoseInfo> sortedPoses = new List<PoseInfo>();
@@ -35,29 +37,35 @@ namespace Iviz.Controllers
         {
             var poseInfo = new PoseInfo(t, p);
 
-            if (poses.Count == MaxSize)
+            if (lastPos != -1 && poses[lastPos].Timestamp == t) // updating last value
             {
-                poses[start] = poseInfo;
-                start++;
-                if (start == MaxSize)
+                poses[lastPos] = poseInfo;
+            }
+            else if (poses.Count == MaxSize)
+            {
+                poses[currentPos] = poseInfo;
+                lastPos = currentPos;
+                currentPos++;
+                if (currentPos == MaxSize)
                 {
-                    start = 0;
+                    currentPos = 0;
                 }
             }
             else
             {
                 poses.Add(poseInfo);
             }
+
             needsSorting = true;
         }
 
-        public Pose Get(in TimeSpan ts)
+        public Pose Lookup(in TimeSpan tsNew)
         {
             if (needsSorting)
             {
                 sortedPoses.Clear();
                 sortedPoses.AddRange(poses);
-                sortedPoses.Sort((p1, p2) => p1.Key.CompareTo(p2.Key));
+                sortedPoses.Sort((p1, p2) => p1.Timestamp.CompareTo(p2.Timestamp));
                 needsSorting = false;
             }
 
@@ -67,38 +75,71 @@ namespace Iviz.Controllers
                 return Pose.identity;
             }
 
-            if (ts >= sortedPoses[n - 1].Key)
+            //Debug.Log("1) [" + (sortedPoses[0].Timestamp - ts).TotalMilliseconds + " " +
+            //          (sortedPoses[n - 1].Timestamp - ts).TotalMilliseconds + "]");
+
+            TimeSpan tsLatest = sortedPoses[n - 1].Timestamp;
+            if (tsNew >= tsLatest)
             {
-                return sortedPoses[n - 1].Pose;
+                Pose pLatest = sortedPoses[n - 1].Pose;
+
+                if (sortedPoses.Count < 2)
+                {
+                    return pLatest;
+                }
+                
+                double deltaNew = (tsNew - tsLatest).TotalMilliseconds;
+                double deltaLatest = (tsLatest - sortedPoses[n - 2].Timestamp).TotalMilliseconds;
+
+                if (deltaNew > deltaLatest)
+                {
+                    return pLatest;
+                }
+                
+                double t = deltaNew / deltaLatest;
+                Pose pBeforeLatest = sortedPoses[n - 2].Pose;
+                Pose pExtrapolated = new Pose(
+                    (pLatest.position - pBeforeLatest.position) + pLatest.position,
+                    pLatest.rotation * Quaternion.Inverse(pBeforeLatest.rotation) * pLatest.rotation
+                );
+                return pLatest.Lerp(pExtrapolated, (float) t);
+
             }
 
-            if (ts <= sortedPoses[0].Key)
+            if (tsNew <= sortedPoses[0].Timestamp)
             {
                 return sortedPoses[0].Pose;
             }
 
             for (int i = n - 2; i >= 0; i--) // most likely to be at the end
             {
-                if (ts <= sortedPoses[i].Key)
+                if (tsNew <= sortedPoses[i].Timestamp)
                 {
                     continue;
                 }
-                TimeSpan a = sortedPoses[i].Key;
-                TimeSpan b = sortedPoses[i + 1].Key;
-                double t = (ts - a).TotalMilliseconds / (b - a).TotalMilliseconds;
+
+                TimeSpan a = sortedPoses[i].Timestamp;
+                TimeSpan b = sortedPoses[i + 1].Timestamp;
+                double t = (tsNew - a).TotalMilliseconds / (b - a).TotalMilliseconds;
+
+                //Debug.Log("2) [" + (sortedPoses[i].Timestamp - ts).TotalMilliseconds + " " +
+                //          (sortedPoses[i + 1].Timestamp - ts).TotalMilliseconds + "] -> " + t);
+
 
                 Pose pA = sortedPoses[i].Pose;
                 Pose pB = sortedPoses[i + 1].Pose;
-                return pA.Lerp(pB, (float)t);
+                //return (t > 0.5f) ? pB : pA;
+                return pA.Lerp(pB, (float) t);
             }
+
             //Debug.Log("OUT!");
-            return Pose.identity; // shouldn't happen
+            return sortedPoses[0].Pose; // shouldn't happen
         }
 
         public void Clear()
         {
             poses.Clear();
-            start = 0;
+            currentPos = 0;
         }
 
         public int Count => poses.Count;

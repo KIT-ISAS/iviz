@@ -270,7 +270,7 @@ namespace Iviz.App
             return results.Any(x => x.gameObject.layer == 5);            
         }
         
-        void Update()
+        void LateUpdate()
         {
             UpdateEvenIfInactive();
 
@@ -282,6 +282,7 @@ namespace Iviz.App
             if (!(CameraViewOverride is null))
             {
                 Transform.SetPose(CameraViewOverride.AbsolutePose);
+                //Transform.position += (CameraViewOverride.AbsolutePose.position - Transform.position) * 0.001f;
             }
                 
             if (IsMobile)
@@ -308,10 +309,10 @@ namespace Iviz.App
                 {
                     ProcessOrbiting();
                     Quaternion q = OrbitCenterOverride.AbsolutePose.rotation * Quaternion.Euler(orbitY, orbitX, 0);
+                    orbitCenter = OrbitCenterOverride.AbsolutePose.position;
                     Transform.SetPositionAndRotation(
                         -orbitRadius * (q * Vector3.forward) + orbitCenter,
                         q);
-                    orbitCenter = OrbitCenterOverride.AbsolutePose.position;
                 }
                 else
                 {

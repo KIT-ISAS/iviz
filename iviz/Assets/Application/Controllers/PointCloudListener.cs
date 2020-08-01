@@ -220,7 +220,6 @@ namespace Iviz.Controllers
             }
 
             isProcessing = true;
-            node.AttachTo(msg.Header.FrameId, msg.Header.Stamp); 
 
             if (msg.PointStep < 3 * 4 ||
                 msg.RowStep < msg.PointStep * msg.Width ||
@@ -249,6 +248,7 @@ namespace Iviz.Controllers
                     !fieldOffsets.TryGetValue("z", out PointField zField) || zField.Datatype != PointField.FLOAT32)
                 {
                     Logger.Info($"{this}: Unsupported point cloud! Expected XYZ as floats.");
+                    isProcessing = false;
                     return;
                 }
                 int xOffset = (int)xField.Offset;
@@ -263,7 +263,9 @@ namespace Iviz.Controllers
                 int iSize = FieldSizeFromType(iField.Datatype);
                 if (iSize == -1 || msg.PointStep < iOffset + iSize)
                 {
+                    Debug.Log(iSize + " " + msg.PointStep + " " + iOffset + " " + iSize);
                     Logger.Info($"{this}: Invalid or unsupported intensity field type!");
+                    isProcessing = false;
                     return;
                 }
 
@@ -277,6 +279,7 @@ namespace Iviz.Controllers
                     {
                         return;
                     }
+                    node.AttachTo(msg.Header.FrameId, msg.Header.Stamp); 
                     Size = newSize;
                     pointCloud.UseIntensityTexture = !rgbaHint;
                     pointCloud.PointsWithColor = new ArraySegment<PointWithColor>(pointBuffer, 0, Size);

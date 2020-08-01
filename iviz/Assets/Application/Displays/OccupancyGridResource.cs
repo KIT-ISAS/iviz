@@ -156,7 +156,7 @@ namespace Iviz.Displays
 
         public bool IsProcessing { get; private set; }
         
-        public void SetOccupancy(sbyte[] values, Rect? tbounds = null)
+        public void SetOccupancy(sbyte[] values, Rect? tbounds = null, Action onFinished = null)
         {
             IsProcessing = true;
             Task.Run(() =>
@@ -188,6 +188,7 @@ namespace Iviz.Displays
                         resource.PointsWithColor = pointBuffer;
                         resource.IntensityBounds = new Vector2(0, 1);
                         IsProcessing = false;
+                        onFinished?.Invoke();
                     });
                 }
             );

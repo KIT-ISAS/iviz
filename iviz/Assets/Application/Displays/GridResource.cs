@@ -134,7 +134,6 @@ namespace Iviz.Displays
             meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             //meshRenderer.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
 
-            Debug.Log("Awake!");
             interiorObject = Resource.Displays.Cube.Instantiate(transform);
             interiorObject.name = "Grid Interior";
             interiorObject.transform.localPosition = new Vector3(0, 0, 0.01f);

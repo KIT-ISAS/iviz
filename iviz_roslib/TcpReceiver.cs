@@ -162,23 +162,23 @@ namespace Iviz.Roslib
             {
                 using (tcpClient = new TcpClient())
                 {
-                    Task connectionTask = tcpClient.ConnectAsync(RemoteHostname, RemotePort);
-                    if (!connectionTask.Wait(timeoutInMs) || connectionTask.IsCanceled)
-                    {
-                        throw new TimeoutException();
-                    }
-
-                    round = 0; // reset if successful
-
-                    IPEndPoint endPoint = (IPEndPoint) tcpClient.Client.LocalEndPoint;
-                    Hostname = endPoint.Address.ToString();
-                    Port = endPoint.Port;
-
-                    stream = tcpClient.GetStream();
-                    writer = new BinaryWriter(stream);
-
                     try
                     {
+                        Task connectionTask = tcpClient.ConnectAsync(RemoteHostname, RemotePort);
+                        if (!connectionTask.Wait(timeoutInMs) || connectionTask.IsCanceled)
+                        {
+                            throw new TimeoutException();
+                        }
+
+                        round = 0; // reset if successful
+
+                        IPEndPoint endPoint = (IPEndPoint) tcpClient.Client.LocalEndPoint;
+                        Hostname = endPoint.Address.ToString();
+                        Port = endPoint.Port;
+
+                        stream = tcpClient.GetStream();
+                        writer = new BinaryWriter(stream);
+                        
                         ProcessLoop();
                     }
                     catch (Exception e) when
