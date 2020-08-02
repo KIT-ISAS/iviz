@@ -5,7 +5,7 @@ You can use it to display 3D information about topics, navigate your virtual env
 
 iviz has been designed primarily for use in mobile devices (iOS/Android smartphones and tablets), but can also be used in a normal PC if you don't mind the big buttons.
 
-![image](../wiki_files/iviz_screen.png)
+![image](../wiki_files/iviz_front.png)
 
 ## 1. Installation
 
@@ -38,11 +38,12 @@ To move around:
 ## 4. Working with Transform Frames
 
 ## 5. Working with Robots
+![image](../wiki_files/iviz_screen.png)
 
 ## 6. Working with Augmented Reality
 
 ## 7. Credits
 
-![image](../wiki_files/BMBF_gefoerdert_2017_de_web.svg)
-
 ![image](../wiki_files/robdekon_logo_web.svg)
+
+![image](../wiki_files/BMBF_gefoerdert_2017_de_web.svg)
