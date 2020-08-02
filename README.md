@@ -1,5 +1,9 @@
 # ROS iviz suite
-Utilities for working with ROS and C#. Contains the following modules:
+Utilities for working with ROS and C#. 
+
+If you are interested in the visualization app, you can start [here](iviz)
+
+Contains the following modules:
 
 ## [iviz](iviz)
 Unity application for ROS data visualization on mobile devices.
