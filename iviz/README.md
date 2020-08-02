@@ -35,6 +35,8 @@ To move around:
 * On a PC: Hold down the right mouse button and move the mouse to rotate the camera. While holding the right button down, press W-A-S-D to translate the camera. (This is the same behaviour as in Unity)
 * On a mobile device: Tap with one finger and drag to rotate the camera. Tap with two fingers and move to translate the camera. Pinch to zoom in and out.
 
+## 4. Working with Transform Frames
+
 ## 4. Working with Robots
 
 ## 5. Working with Augmented Reality
