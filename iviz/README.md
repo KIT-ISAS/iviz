@@ -38,3 +38,9 @@ To move around:
 ## 4. Working with Robots
 
 ## 5. Working with Augmented Reality
+
+## 6. Credits
+
+![image](../wiki_files/BMBF_gefoerdert_2017_de_web.svg)
+
+![image](../wiki_files/robdekon_logo_web.svg)
