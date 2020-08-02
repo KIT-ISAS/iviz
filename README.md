@@ -1,7 +1,7 @@
 # ROS iviz suite
 Utilities for working with ROS and C#. 
 
-If you are interested in the visualization app, you can start [here](iviz)
+If you are interested in the visualization app, you can start [here](iviz).
 
 Contains the following modules:
 
