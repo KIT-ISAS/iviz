@@ -1,9 +1,9 @@
 # Welcome to iviz!
 
-iviz is a mobile 3D visualization app for ROS based on the Unity Engine.
+**iviz** is a mobile 3D visualization app for ROS based on the Unity Engine.
 You can use it to display 3D information about topics, navigate your virtual environment, or watch your robot in Augmented Reality.
 
-iviz has been designed primarily for use in mobile devices (iOS/Android smartphones and tablets), but can also be used in a normal PC if you don't mind the big buttons.
+iviz has been designed primarily for use in **mobile devices** (iOS/Android smartphones and tablets), but can also be used in a normal PC if you don't mind the big buttons.
 
 ![image](../wiki_files/iviz_front_2.png)
 
@@ -13,13 +13,13 @@ To run iviz, you need the following:
 * Unity 2019.4 LTS editor on either Windows, Linux, or macOS
 * An iOS or Android device (optional)
 
-The iviz project has no external dependencies (all required libraries are included), so installing it is just a matter of cloning the repository and buiding it for your plaform.
+The iviz project has no external dependencies (all required libraries are included), so installing it is just a matter of cloning the repository and launching Unity.
 
 ## 2. Getting Started
 
 Here are some instructions on how to get started:
 
-* Start Unity 2019.4, and open the project on the iviz/iviz folder. Press Play.
+* Start Unity 2019.4, and open the project on the iviz folder. Press Play.
 * On the panel at the top-left, right underneath the "- iviz -" label, tap on the URL ("http://...") with the arrow at the end.
 * You should now see the **Connection Dialog**.
   - Type in the URL of the master, i.e., where roscore is running. This is the content of the environment variable _ROS_MASTER_URI_.
