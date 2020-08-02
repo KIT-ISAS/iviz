@@ -27,7 +27,7 @@ Here are some instructions on how to get started:
   The port (7613) can be set to anything, just make sure it's not being used by another application.
   - Type in your id, or leave the default. This is the name of your ROS node. It can be anything, but make sure it is unique in your network.
 * Once the data is correct, tap on the _Connect_ button. The application will now try to connect to the ROS master, and keep retrying if it does not work. Tap _Stop_ to cancel the operation. 
-* Once you have connected, a checkmark should appear below the 
+* Once you have connected, a checkmark should appear below the URL. You can now add modules such as topic listeners, robots, watch the TF frames, and so on.
 
 ## 3. Navigation
 
@@ -35,3 +35,6 @@ To move around:
 * On a PC: Hold down the right mouse button and move the mouse to rotate the camera. While holding the right button down, press W-A-S-D to translate the camera. (This is the same behaviour as in Unity)
 * On a mobile device: Tap with one finger and drag to rotate the camera. Tap with two fingers and move to translate the camera. Pinch to zoom in and out.
 
+## 4. Working with Robots
+
+## 5. Working with Augmented Reality
