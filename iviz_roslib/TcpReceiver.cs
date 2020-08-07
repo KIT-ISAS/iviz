@@ -25,30 +25,21 @@ namespace Iviz.Roslib
         bool keepRunning;
         Task task;
 
-        public Uri RemoteUri { get; }
-        public string RemoteHostname { get; }
-        public int RemotePort { get; }
-        public string Hostname { get; private set; }
-        public int Port { get; private set; }
+        Uri RemoteUri { get; }
+        Endpoint RemoteEndpoint { get; }
+        Endpoint Endpoint { get; set; }
 
-        public string Topic => topicInfo.Topic;
+        string Topic => topicInfo.Topic;
         public bool IsAlive => task != null && !task.IsCompleted && !task.IsFaulted;
-        public int NumReceived { get; private set; }
-        public int BytesReceived { get; private set; }
+        int NumReceived { get; set; }
+        int BytesReceived { get; set; }
 
-        public bool RequestNoDelay { get; }
+        bool RequestNoDelay { get; }
 
-        public TcpReceiver(
-            Uri remoteUri,
-            string remoteHostname,
-            int remotePort,
-            TopicInfo topicInfo,
-            Action<IMessage> callback,
-            bool requestNoDelay)
+        public TcpReceiver(Uri remoteUri, Endpoint remoteEndpoint, TopicInfo topicInfo, Action<IMessage> callback, bool requestNoDelay)
         {
             RemoteUri = remoteUri;
-            RemoteHostname = remoteHostname;
-            RemotePort = remotePort;
+            RemoteEndpoint = remoteEndpoint;      
             this.topicInfo = topicInfo;
             this.callback = callback;
             RequestNoDelay = requestNoDelay;
@@ -164,7 +155,7 @@ namespace Iviz.Roslib
                 {
                     try
                     {
-                        Task connectionTask = tcpClient.ConnectAsync(RemoteHostname, RemotePort);
+                        Task connectionTask = tcpClient.ConnectAsync(RemoteEndpoint.Hostname, RemoteEndpoint.Port);
                         if (!connectionTask.Wait(timeoutInMs) || connectionTask.IsCanceled)
                         {
                             throw new TimeoutException();
@@ -173,8 +164,7 @@ namespace Iviz.Roslib
                         round = 0; // reset if successful
 
                         IPEndPoint endPoint = (IPEndPoint) tcpClient.Client.LocalEndPoint;
-                        Hostname = endPoint.Address.ToString();
-                        Port = endPoint.Port;
+                        Endpoint = new Endpoint(endPoint);
 
                         stream = tcpClient.GetStream();
                         writer = new BinaryWriter(stream);
@@ -239,14 +229,14 @@ namespace Iviz.Roslib
         }
 
         public SubscriberReceiverState State => new SubscriberReceiverState(
-                IsAlive, RequestNoDelay, Hostname, Port,
-                RemoteUri, RemoteHostname, RemotePort,
+                IsAlive, RequestNoDelay, Endpoint,
+                RemoteUri, RemoteEndpoint,
                 NumReceived, BytesReceived
             );
 
         public override string ToString()
         {
-            return $"[TcpSender {RemoteHostname}:{RemotePort} '{Topic}']";
+            return $"[TcpSender {RemoteEndpoint.Hostname}:{RemoteEndpoint.Port} '{Topic}']";
         }
 
         public void Dispose()

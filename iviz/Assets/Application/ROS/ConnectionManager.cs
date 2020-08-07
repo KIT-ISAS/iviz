@@ -22,7 +22,7 @@ namespace Iviz.Controllers
     {
         static ConnectionManager Instance;
         public static RosConnection Connection { get; private set; }
-        RosSender<Log> sender;
+        //RosSender<Log> sender;
 
         int collectedUp, collectedDown;
 
@@ -30,9 +30,9 @@ namespace Iviz.Controllers
         {
             Instance = this;
             Connection = new RoslibConnection();
-            Logger.Log += LogMessage;
-
-            sender = new RosSender<Log>("/rosout");
+            
+            //Logger.Log += LogMessage;
+            //sender = new RosSender<Log>("/rosout");
         }
 
         void OnDestroy()
@@ -41,6 +41,7 @@ namespace Iviz.Controllers
             Connection = null;
         }
 
+        /*
         uint logSeq = 0;
         void LogMessage(in LogMessage msg)
         {
@@ -59,6 +60,7 @@ namespace Iviz.Controllers
                 Line = (uint)msg.Line
             });
         }
+        */
 
         public static string MyId => Connection?.MyId;
         public static Uri MyUri => Connection?.MyUri;
@@ -82,17 +84,17 @@ namespace Iviz.Controllers
         public static ReadOnlyCollection<BriefTopicInfo>  GetSystemPublishedTopics() => Connection.GetSystemPublishedTopics();
         public static ReadOnlyCollection<string> GetSystemParameterList() => Connection.GetSystemParameterList();
 
-        public static void ReportUp(int size)
+        public static void BandwidthReportUp(int size)
         {
             Instance.collectedUp += size;
         }
 
-        public static void ReportDown(int size)
+        public static void BandwidthReportDown(int size)
         {
             Instance.collectedDown += size;
         }
 
-        public static (int, int) CollectReported()
+        public static (int, int) BandwidthCollectReported()
         {
             (int, int) result = (Instance.collectedDown, Instance.collectedUp);
             Instance.collectedDown = 0;

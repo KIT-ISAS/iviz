@@ -8,11 +8,9 @@ namespace Iviz.Roslib
         public bool Alive { get; }
         public bool Latching { get; }
         public SenderStatus Status { get; }
-        public string Hostname { get; }
-        public int Port { get; }
+        public Endpoint Endpoint { get; }
         public string RemoteId { get; }
-        public string RemoteHostname { get; }
-        public int RemotePort { get; }
+        public Endpoint RemoteEndpoint { get; }
         public int CurrentQueueSize { get; }
         public int MaxQueueSize { get; }
         public int NumSent { get; }
@@ -22,11 +20,9 @@ namespace Iviz.Roslib
         internal PublisherSenderState(bool alive,
                            bool latching,
                            SenderStatus status,
-                           string hostname,
-                           int port,
+                           Endpoint endpoint,
                            string remoteId,
-                           string remoteHostname,
-                           int remotePort,
+                           Endpoint remoteEndpoint,
                            int currentQueueSize,
                            int maxQueueSize,
                            int numSent,
@@ -36,11 +32,9 @@ namespace Iviz.Roslib
             Alive = alive;
             Latching = latching;
             Status = status;
-            Hostname = hostname;
-            Port = port;
+            Endpoint = endpoint;
             RemoteId = remoteId;
-            RemoteHostname = remoteHostname;
-            RemotePort = remotePort;
+            RemoteEndpoint = remoteEndpoint;
             CurrentQueueSize = currentQueueSize;
             MaxQueueSize = maxQueueSize;
             NumSent = numSent;

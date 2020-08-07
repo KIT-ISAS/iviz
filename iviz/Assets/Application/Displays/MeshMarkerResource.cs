@@ -38,7 +38,7 @@ namespace Iviz.Displays
         }
 
         [SerializeField] bool occlusionOnly;
-        public bool OcclusionOnly
+        public bool OcclusionOnlyActive
         {
             get => occlusionOnly;
             set
@@ -74,7 +74,7 @@ namespace Iviz.Displays
             {
                 return;
             }
-            if (OcclusionOnly)
+            if (OcclusionOnlyActive)
             {
                 return;
             }
@@ -120,7 +120,7 @@ namespace Iviz.Displays
             base.Suspend();
             Color = Color.white;
             ColliderEnabled = true;
-            OcclusionOnly = false;
+            OcclusionOnlyActive = false;
         }
     }
 }

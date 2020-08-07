@@ -19,7 +19,7 @@ namespace Iviz.Bridge
             RosBridge rosBridge = null;
             try
             {
-                client = new RosClient(masterUri, "/iviz_model_loader");
+                client = new RosClient(masterUri, "/iviz_bridge");
                 rosBridge = new RosBridge(client, 8080);
                 WaitForCancel();
             }

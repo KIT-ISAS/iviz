@@ -202,17 +202,17 @@ namespace Iviz.Controllers
 
         void HandlerCompressed(CompressedImage msg)
         {
-            void AttachAction() => Node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
+            void AttachToParent() => Node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
 
             switch (msg.Format)
             {
                 case "png":
                     descriptionOverride = null;
-                    ImageTexture.SetPng(msg.Data, AttachAction);
+                    ImageTexture.SetPng(msg.Data, AttachToParent);
                     break;
                 case "jpeg":
                     descriptionOverride = null;
-                    ImageTexture.SetJpg(msg.Data, AttachAction);
+                    ImageTexture.SetJpg(msg.Data, AttachToParent);
                     break;
                 default:
                     descriptionOverride = msg.Format.Length == 0 ?

@@ -39,6 +39,9 @@ namespace Iviz.Controllers
         }
     }
 
+    /// <summary>
+    /// Wrapper around a ROS subscriber.
+    /// </summary>
     public abstract class RosListener
     {
         public string Topic { get; }
@@ -119,7 +122,7 @@ namespace Iviz.Controllers
                     Dropped
                 );
 
-                ConnectionManager.ReportDown(LastMsgBytes);
+                ConnectionManager.BandwidthReportDown(LastMsgBytes);
 
                 LastMsgBytes = 0;
                 Dropped = 0;

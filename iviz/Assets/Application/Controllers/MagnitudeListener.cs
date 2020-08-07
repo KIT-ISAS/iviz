@@ -19,7 +19,7 @@ namespace Iviz.Controllers
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public string Type { get; set; } = "";
-        [DataMember] public bool ShowTrail { get; set; } = true;
+        [DataMember] public bool ShowTrail { get; set; } = false;
         [DataMember] public bool ShowAxis { get; set; } = true;
         [DataMember] public float Scale { get; set; } = 1.0f;
         [DataMember] public bool ShowVector { get; set; } = true;

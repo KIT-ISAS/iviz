@@ -277,8 +277,10 @@ namespace Iviz.Controllers
                     if (pointCloud is null)
                     {
                         return;
-                    }
+                    } 
+                    
                     node.AttachTo(msg.Header.FrameId, msg.Header.Stamp); 
+
                     Size = newSize;
                     pointCloud.UseIntensityTexture = !rgbaHint;
                     pointCloud.PointsWithColor = new ArraySegment<PointWithColor>(pointBuffer, 0, Size);

@@ -165,7 +165,7 @@ namespace Iviz.Displays
         }
 
         [SerializeField] bool occlusionOnly;
-        public bool OcclusionOnly
+        public bool OcclusionOnlyActive
         {
             get => occlusionOnly;
             set
@@ -213,7 +213,7 @@ namespace Iviz.Displays
             argsComputeBuffer = new ComputeBuffer(1, argsBuffer.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
             argsComputeBuffer.SetData(argsBuffer);
 
-            OcclusionOnly = false;
+            OcclusionOnlyActive = false;
         }
 
         void Update()
@@ -226,7 +226,7 @@ namespace Iviz.Displays
             Bounds worldBounds = Collider.bounds;
             material.SetVector(PropBoundaryCenter, worldBounds.center);
 
-            if (CastShadows && !OcclusionOnly)
+            if (CastShadows && !OcclusionOnlyActive)
             {
                 Graphics.DrawMeshInstancedIndirect(mesh, 0, material, worldBounds, argsComputeBuffer);
             }
@@ -292,7 +292,7 @@ namespace Iviz.Displays
         {
             base.Suspend();
             Size = 0;
-            OcclusionOnly = false;
+            OcclusionOnlyActive = false;
         }
     }
 }

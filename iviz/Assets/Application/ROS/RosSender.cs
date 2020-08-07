@@ -76,7 +76,7 @@ namespace Iviz.Controllers
                     LastMsgBytes
                 );
 
-                ConnectionManager.ReportUp(LastMsgBytes);
+                ConnectionManager.BandwidthReportUp(LastMsgBytes);
 
                 LastMsgBytes = 0;
                 LastMsgCounter = 0;

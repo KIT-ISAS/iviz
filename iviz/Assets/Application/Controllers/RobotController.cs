@@ -147,7 +147,7 @@ namespace Iviz.Controllers
             set
             {
                 config.RenderAsOcclusionOnly = value;
-                displays.ForEach(x => x.OcclusionOnly = value);
+                displays.ForEach(x => x.OcclusionOnlyActive = value);
             }
         }
 
@@ -390,7 +390,7 @@ namespace Iviz.Controllers
             {
                 MarkerWrapperResource item = meshRenderer.gameObject.AddComponent<MarkerWrapperResource>();
                 item.Tint = Tint;
-                item.OcclusionOnly = RenderAsOcclusionOnly;
+                item.OcclusionOnlyActive = RenderAsOcclusionOnly;
                 displays.Add(item);
             }
         }

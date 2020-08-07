@@ -67,12 +67,12 @@ namespace Iviz.Controllers
 
         public bool OcclusionOnly
         {
-            get => (resource as ISupportsAROcclusion)?.OcclusionOnly ?? false;
+            get => (resource as ISupportsAROcclusion)?.OcclusionOnlyActive ?? false;
             set
             {
                 if (resource is ISupportsAROcclusion arResource)
                 {
-                    arResource.OcclusionOnly = value;
+                    arResource.OcclusionOnlyActive = value;
                 }
             }
         }

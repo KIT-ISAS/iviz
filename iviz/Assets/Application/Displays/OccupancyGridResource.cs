@@ -87,8 +87,8 @@ namespace Iviz.Displays
 
         public bool OcclusionOnly
         {
-            get => resource.OcclusionOnly;
-            set => resource.OcclusionOnly = value;
+            get => resource.OcclusionOnlyActive;
+            set => resource.OcclusionOnlyActive = value;
         }
 
         void UpdateSize()

@@ -8,26 +8,22 @@ namespace Iviz.Roslib
     {
         public bool Alive { get; }
         public bool RequestNoDelay { get; }
-        public string Hostname { get; }
-        public int Port { get; }
+        public Endpoint EndPoint { get; }
         public Uri RemoteUri { get; }
-        public string RemoteHostname { get; }
-        public int RemotePort { get; }
+        public Endpoint RemoteEndpoint { get; }
         public int NumReceived { get; }
         public int BytesReceived { get; }
 
         internal SubscriberReceiverState(bool alive, bool requestNoDelay,
-            string hostname, int port,
-            Uri remoteUri, string remoteHostname, int remotePort,
+            Endpoint endPoint,
+            Uri remoteUri, Endpoint remoteEndpoint,
             int numReceived, int bytesReceived)
         {
             Alive = alive;
             RequestNoDelay = requestNoDelay;
-            Hostname = hostname;
-            Port = port;
+            EndPoint = endPoint; 
             RemoteUri = remoteUri;
-            RemoteHostname = remoteHostname;
-            RemotePort = remotePort;
+            RemoteEndpoint = remoteEndpoint;
             NumReceived = numReceived;
             BytesReceived = bytesReceived;
         }

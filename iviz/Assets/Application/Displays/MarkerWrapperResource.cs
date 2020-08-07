@@ -45,7 +45,7 @@ namespace Iviz.Displays
         }
 
         bool occlusionOnly;
-        public bool OcclusionOnly
+        public bool OcclusionOnlyActive
         {
             get => occlusionOnly;
             set
@@ -81,7 +81,7 @@ namespace Iviz.Displays
 
         void UpdateMaterials()
         {
-            if (OcclusionOnly)
+            if (OcclusionOnlyActive)
             {
                 if (occlusionMaterials == null)
                 {
@@ -170,7 +170,7 @@ namespace Iviz.Displays
         public void Suspend()
         {
             Tint = Color.white;
-            OcclusionOnly = false;
+            OcclusionOnlyActive = false;
         }
     }
 

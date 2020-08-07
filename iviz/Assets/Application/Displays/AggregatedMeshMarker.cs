@@ -47,13 +47,13 @@ namespace Iviz.Displays
         }
 
         [SerializeField] bool occlusionOnly;
-        public bool OcclusionOnly
+        public bool OcclusionOnlyActive
         {
             get => occlusionOnly;
             set
             {
                 occlusionOnly = value;
-                Children.ForEach(x => x.OcclusionOnly = value);
+                Children.ForEach(x => x.OcclusionOnlyActive = value);
             }
         }
 

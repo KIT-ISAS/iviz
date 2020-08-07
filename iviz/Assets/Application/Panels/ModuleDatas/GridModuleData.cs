@@ -1,6 +1,7 @@
 ﻿using Iviz.Controllers;
 using Iviz.Displays;
 using Iviz.Resources;
+using UnityEngine;
 
 namespace Iviz.App
 {
@@ -9,6 +10,8 @@ namespace Iviz.App
     /// </summary>
     public sealed class GridModuleData : ModuleData
     {
+        const float InteriorColorFactor = 0.25f;
+        
         readonly GridController controller;
         readonly GridPanelContents panel;
 
@@ -38,7 +41,7 @@ namespace Iviz.App
             controller.Stop();
         }
 
-        const float InteriorColorFactor = 0.5f;
+
 
         public override void SetupPanel()
         {
@@ -75,12 +78,12 @@ namespace Iviz.App
             */
             panel.ColorPicker.ValueChanged += f =>
             {
-                controller.GridColor = f * InteriorColorFactor;
-                controller.InteriorColor = f;
+                UpdateColor();
             };
             panel.ShowInterior.ValueChanged += f =>
             {
                 controller.ShowInterior = f;
+                UpdateColor();
             };
             panel.CloseButton.Clicked += () =>
             {
@@ -105,6 +108,20 @@ namespace Iviz.App
             {
                 controller.HideInARMode = f;
             };
+        }
+
+        void UpdateColor()
+        {
+            Color f = panel.ColorPicker.Value;
+            if (controller.ShowInterior)
+            {
+                controller.GridColor = f * InteriorColorFactor;
+                controller.InteriorColor = f;
+            }
+            else
+            {
+                controller.GridColor = f;
+            }
         }
 
         public override void AddToState(StateConfiguration config)

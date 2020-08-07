@@ -60,8 +60,7 @@ namespace Iviz.Roslib
 
             TcpReceiver connection = new TcpReceiver(
                 remoteUri,
-                response.Protocol.Hostname,
-                response.Protocol.Port,
+                new Endpoint(response.Protocol.Hostname, response.Protocol.Port), 
                 topicInfo, Callback,
                 RequestNoDelay);
 

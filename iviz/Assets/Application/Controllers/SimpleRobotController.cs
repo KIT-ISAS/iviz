@@ -66,15 +66,10 @@ namespace Iviz.Controllers
             get => config.SourceParameter;
             set
             {
-                if (robot != null && value == config.SourceParameter)
-                {
-                    return;
-                }
-
                 config.SourceParameter = value;
 
                 robot?.Dispose();
-                if (value.Length == 0)
+                if (string.IsNullOrEmpty(value))
                 {
                     return;
                 }

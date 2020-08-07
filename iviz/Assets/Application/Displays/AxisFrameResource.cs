@@ -51,15 +51,15 @@ namespace Iviz.Displays
         }
 
         bool occlusionOnly;
-        public bool OcclusionOnly
+        public bool OcclusionOnlyActive
         {
             get => occlusionOnly;
             set
             {
                 occlusionOnly = value;
-                axisObjects[0].OcclusionOnly = value;
-                axisObjects[1].OcclusionOnly = value;
-                axisObjects[2].OcclusionOnly = value;
+                axisObjects[0].OcclusionOnlyActive = value;
+                axisObjects[1].OcclusionOnlyActive = value;
+                axisObjects[2].OcclusionOnlyActive = value;
             }
         }
 
@@ -125,7 +125,7 @@ namespace Iviz.Displays
             ColorX = Color.red;
             ColorY = Color.green;
             ColorZ = Color.blue;
-            OcclusionOnly = false;
+            OcclusionOnlyActive = false;
         }
     }
 }

@@ -49,7 +49,7 @@ namespace Iviz.Roslib
 
     public sealed class RosClient : IDisposable
     {
-        readonly XmlRpc.NodeServer Listener;
+        readonly XmlRpc.NodeServer listener;
 
         readonly Dictionary<string, RosSubscriber> subscribersByTopic = new Dictionary<string, RosSubscriber>();
         readonly Dictionary<string, RosPublisher> publishersByTopic = new Dictionary<string, RosPublisher>();
@@ -155,7 +155,7 @@ namespace Iviz.Roslib
         /// <summary>
         /// Wrapper for XML-RPC calls to the master.
         /// </summary>
-        public XmlRpc.ParameterClient Parameters { get; }
+        XmlRpc.ParameterClient Parameters { get; }
 
         /// <summary>
         /// URI of the master node.
@@ -201,16 +201,16 @@ namespace Iviz.Roslib
 
             try
             {
-                Listener = new XmlRpc.NodeServer(this);
-                Listener.Start();
+                listener = new XmlRpc.NodeServer(this);
+                listener.Start();
                 if (CallerUri.Port == 0 || CallerUri.IsDefaultPort)
                 {
-                    CallerUri = new Uri($"http://{CallerUri.Host}:{Listener.ListenerUri.Port}{CallerUri.AbsolutePath}");
+                    CallerUri = new Uri($"http://{CallerUri.Host}:{listener.ListenerUri.Port}{CallerUri.AbsolutePath}");
                 }
             }
             catch (SocketException e)
             {
-                Listener?.Stop();
+                listener?.Stop();
                 throw new ConnectionException($"Failed to bind to local URI '{callerUri}'", e);
             }
 
@@ -232,7 +232,7 @@ namespace Iviz.Roslib
             catch (Exception e) when
                 (e is SocketException || e is TimeoutException || e is AggregateException || e is IOException)
             {
-                Listener.Stop();
+                listener.Stop();
                 throw new ConnectionException($"Failed to contact the master URI '{masterUri}'", e);
             }
 
@@ -250,7 +250,7 @@ namespace Iviz.Roslib
                 {
                     if (response.Pid != Process.GetCurrentProcess().Id)
                     {
-                        Listener.Stop();
+                        listener.Stop();
                         throw new UnreachableUriException($"My uri '{CallerUri}' appears to belong to someone else!");
                     }
                 }
@@ -258,7 +258,7 @@ namespace Iviz.Roslib
             catch (Exception e) when
                 (e is SocketException || e is TimeoutException || e is AggregateException)
             {
-                Listener.Stop();
+                listener.Stop();
                 throw new UnreachableUriException($"My uri '{CallerUri}' does not appear to be reachable!");
             }
         }
@@ -293,7 +293,7 @@ namespace Iviz.Roslib
         /// </summary>
         public static Uri TryGetCallerUri()
         {
-            return EnvironmentCallerUri ?? new Uri($"http://{Dns.GetHostName()}:7613/");
+            return EnvironmentCallerUri ?? new Uri($"http://{Dns.GetHostName()}:0/");
         }
 
         /// <summary>
@@ -864,7 +864,7 @@ namespace Iviz.Roslib
                 advertisedServicesByName.Clear();
             }
 
-            Listener.Stop();
+            listener.Stop();
         }
 
         public SubscriberState GetSubscriberStatistics()
@@ -1107,7 +1107,7 @@ namespace Iviz.Roslib
         public void Dispose()
         {
             Close();
-            Listener.Dispose();
+            listener.Dispose();
         }
 
         public override string ToString()

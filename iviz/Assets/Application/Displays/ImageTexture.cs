@@ -349,6 +349,7 @@ namespace Iviz.Displays
         }
 
 
+        /*
         void FillRGBABuffer(int width, int height, byte[] data)
         {
             int size = width * height;
@@ -371,6 +372,7 @@ namespace Iviz.Displays
                 }
             }
         }
+        */
 
         void ApplyTexture(int width, int height, byte[] data, string type, int length, int dataStart)
         {

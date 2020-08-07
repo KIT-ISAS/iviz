@@ -40,24 +40,22 @@ namespace Iviz.Roslib
         bool keepRunning;
         Task task;
 
-        public string RemoteCallerId { get; }
-        public Uri CallerUri { get; }
-        public bool Latching { get; }
+        string RemoteCallerId { get; }
+        Uri CallerUri { get; }
+        bool Latching { get; }
         
         readonly TopicInfo topicInfo;
 
-        public string Topic => topicInfo.Topic;
+        string Topic => topicInfo.Topic;
         public bool IsAlive => task != null && !task.IsCompleted && !task.IsFaulted;
-        public string Hostname { get; private set; }
-        public int Port { get; private set; }
-        public string RemoteHostname { get; private set; }
-        public int RemotePort { get; private set; }
+        Endpoint Endpoint { get; set; }
+        Endpoint RemoteEndpoint { get; set; }
         public int MaxQueueSizeBytes { get; set; } = 50000;
-        public int CurrentQueueSize => messageQueue.Count;
-        public int NumSent { get; private set; }
-        public int BytesSent { get; private set; }
-        public int NumDropped { get; private set; }
-        public int BytesDropped { get; private set; }
+        int CurrentQueueSize => messageQueue.Count;
+        int NumSent { get; set; }
+        int BytesSent { get; set; }
+        int NumDropped { get; set; }
+        int BytesDropped { get; set; }
         public SenderStatus Status { get; private set; }
 
         public TcpSender(
@@ -82,8 +80,7 @@ namespace Iviz.Roslib
             task = Task.Run(() => Run(timeoutInMs));
 
             IPEndPoint localEndpoint = (IPEndPoint)tcpListener.LocalEndpoint;
-            Hostname = localEndpoint.Address.ToString();
-            Port = localEndpoint.Port;
+            Endpoint = new Endpoint(localEndpoint);
 
             return localEndpoint;
         }
@@ -277,9 +274,8 @@ namespace Iviz.Roslib
                 using (tcpClient = task.Result)
                 {
                     IPEndPoint remoteEndPoint = (IPEndPoint)tcpClient.Client.RemoteEndPoint;
-                    RemoteHostname = remoteEndPoint.Address.ToString();
-                    RemotePort = remoteEndPoint.Port;
-
+                    RemoteEndpoint = new Endpoint(remoteEndPoint);
+                    
                     Status = SenderStatus.Active;
 
                     Logger.LogDebug($"{this}: started!");
@@ -392,13 +388,13 @@ namespace Iviz.Roslib
         public PublisherSenderState State =>
             new PublisherSenderState(
                 IsAlive, Latching, Status,
-                Hostname, Port, RemoteCallerId, RemoteHostname, RemotePort,
+                Endpoint, RemoteCallerId, RemoteEndpoint,
                 CurrentQueueSize, MaxQueueSizeBytes, NumSent, BytesSent, NumDropped
             );
 
         public override string ToString()
         {
-            return $"[TcpSender :{Port} '{Topic}' >>'{RemoteCallerId}']";
+            return $"[TcpSender :{Endpoint.Port} '{Topic}' >>'{RemoteCallerId}']";
         }
     }
 }

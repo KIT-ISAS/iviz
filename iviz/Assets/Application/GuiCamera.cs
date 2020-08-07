@@ -28,7 +28,7 @@ namespace Iviz.App
         bool alreadyMoving;
         bool alreadyScaling;
 
-        public static UnityEngine.Camera MainCamera => TFListener.MainCamera;
+        static Camera MainCamera => TFListener.MainCamera;
         NamedBoundary namedBoundary;
 
         bool PointerOnGui { get; set; }
@@ -104,7 +104,6 @@ namespace Iviz.App
             get => draggedObject;
             set
             {
-                //Debug.Log(value is null ? "Not draggging!" : "Dragging!");
                 if (draggedObject == value)
                 {
                     return;
@@ -129,7 +128,12 @@ namespace Iviz.App
         {
             Transform = transform;
             
-            UnityEngine.Application.targetFrameRate = 60;
+            //UnityEngine.Application.targetFrameRate = 60;
+            CanvasScaler canvas = GameObject.Find("Canvas").GetComponent<CanvasScaler>();
+            canvas.referenceResolution = IsMobile ? 
+                new Vector2(800, 600) :
+                new Vector2(800, 800);
+            QualitySettings.antiAliasing = IsMobile ? 0 : 2;
 
             ModuleListPanel.Instance.UnlockButton.onClick.AddListener(OnUnlockClick);
 

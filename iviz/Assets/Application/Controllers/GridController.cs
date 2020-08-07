@@ -15,7 +15,7 @@ namespace Iviz.Controllers
         [DataMember] public GridOrientation Orientation { get; set; } = GridOrientation.XY;
         [DataMember] public SerializableColor GridColor { get; set; } = Color.white * 0.25f;
         [DataMember] public SerializableColor InteriorColor { get; set; } = Color.white * 0.5f;
-        [DataMember] public float GridLineWidth { get; set; } = 0.02f;
+        [DataMember] public float GridLineWidth { get; set; } = 0.01f;
         [DataMember] public float GridCellSize { get; set; } = 1;
         [DataMember] public int NumberOfGridCells { get; set; } = 90;
         [DataMember] public bool ShowInterior { get; set; } = true;
@@ -26,15 +26,11 @@ namespace Iviz.Controllers
 
     public sealed class GridController : IController
     {
-        readonly DisplayClickableNode node;
+        readonly DisplayNode node;
         readonly ReflectionProbe reflectionProbe;
         readonly GridResource grid;
 
-        public IModuleData ModuleData
-        {
-            get => node.ModuleData;
-            private set => node.ModuleData = value;
-        }
+        public IModuleData ModuleData { get; set; }
 
         readonly GridConfiguration config = new GridConfiguration();
         public GridConfiguration Config
@@ -77,7 +73,7 @@ namespace Iviz.Controllers
                 {
                     reflectionProbe.transform.parent = TFListener.MapFrame.transform;
                     grid.Visible = false;
-                    node.Selected = false;
+                    //node.Selected = false;
                 }
                 else
                 {
@@ -191,8 +187,9 @@ namespace Iviz.Controllers
             grid.name = "Grid";
 
             node = DisplayClickableNode.Instantiate("GridNode");
-            node.Target = grid;
-            node.SetName("");
+            grid.transform.parent = node.transform;
+            //node.Target = grid;
+            //node.SetName("");
 
             ModuleData = moduleData;
 
@@ -202,7 +199,9 @@ namespace Iviz.Controllers
             reflectionProbe.transform.localPosition = new Vector3(0, 2.0f, 0);
             reflectionProbe.nearClipPlane = 0.5f;
             reflectionProbe.farClipPlane = 100f;
-            reflectionProbe.backgroundColor = new Color32(62, 27, 68, 255);
+            
+            reflectionProbe.backgroundColor = TFListener.MainCamera.backgroundColor;
+            
             reflectionProbe.mode = UnityEngine.Rendering.ReflectionProbeMode.Realtime;
             reflectionProbe.refreshMode = UnityEngine.Rendering.ReflectionProbeRefreshMode.ViaScripting;
             reflectionProbe.clearFlags = UnityEngine.Rendering.ReflectionProbeClearFlags.SolidColor;

@@ -6,6 +6,9 @@ using Newtonsoft.Json;
 
 namespace Iviz.Roslib
 {
+    /// <summary>
+    /// Simple class that overrides the ToString() method to produce a JSON representation. 
+    /// </summary>
     public abstract class JsonToString
     {
         public override string ToString()
@@ -14,13 +17,26 @@ namespace Iviz.Roslib
         }
     }
 
+    /// <summary>
+    /// Class that processes logging information.
+    /// </summary>
     public static class Logger
     {
+        /// <summary>
+        /// Callback function when a log message of level 'debug' is produced. 
+        /// </summary>
+        public static Action<object> LogDebug { get; set; } = _ => { };
+
+        /// <summary>
+        /// Callback function when a log message of level 'default' is produced. 
+        /// </summary>
         public static Action<object> Log { get; set; } = Console.Out.WriteLine;
 
+        /// <summary>
+        /// Callback function when a log message of level 'error' is produced. 
+        /// </summary>
         public static Action<object> LogError { get; set; } = Console.Error.WriteLine;
 
-        public static Action<object> LogDebug { get; set; } = _ => { };
     }
 
     public static class Utils

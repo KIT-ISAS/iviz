@@ -7,7 +7,7 @@ namespace Iviz.Controllers
 {
     public sealed class Timeline
     {
-        readonly struct PoseInfo
+        readonly struct PoseInfo : IEquatable<PoseInfo>
         {
             public TimeSpan Timestamp { get; }
             public Pose Pose { get; }
@@ -21,6 +21,24 @@ namespace Iviz.Controllers
             public override string ToString()
             {
                 return Pose.ToString();
+            }
+
+            public bool Equals(PoseInfo other)
+            {
+                return Timestamp.Equals(other.Timestamp) && Pose.Equals(other.Pose);
+            }
+
+            public override bool Equals(object obj)
+            {
+                return obj is PoseInfo other && Equals(other);
+            }
+
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    return (Timestamp.GetHashCode() * 397) ^ Pose.GetHashCode();
+                }
             }
         }
 
@@ -140,6 +158,7 @@ namespace Iviz.Controllers
         {
             poses.Clear();
             currentPos = 0;
+            lastPos = -1;
         }
 
         public int Count => poses.Count;

@@ -43,7 +43,7 @@ namespace Iviz.Displays
                 occlusionOnly = value;
                 foreach (var display in displays)
                 {
-                    display.OcclusionOnly = value;
+                    display.OcclusionOnlyActive = value;
                 }
             }
         }
