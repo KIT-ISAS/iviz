@@ -7,36 +7,38 @@ namespace Iviz.Roslib
 {
     public class RosPublisher
     {
-        readonly TcpSenderManager Manager;
-        readonly List<string> Ids = new List<string>();
-        readonly RosClient Client;
+        readonly TcpSenderManager manager;
+        readonly List<string> ids = new List<string>();
+        readonly RosClient client;
         int totalPublishers;
 
         public bool IsAlive { get; private set; }
-        public string Topic => Manager.Topic;
-        public string TopicType => Manager.TopicType;
-        public int NumSubscribers => Manager.NumConnections;
-        public int NumIds => Ids.Count;
+        public string Topic => manager.Topic;
+        public string TopicType => manager.TopicType;
+        public int NumSubscribers => manager.NumConnections;
+        public int NumIds => ids.Count;
         public bool LatchingEnabled
         {
-            get => Manager.Latching;
-            set => Manager.Latching = value;
+            get => manager.Latching;
+            set => manager.Latching = value;
         }
         public int MaxQueueSize
         {
-            get => Manager.MaxQueueSize;
-            set => Manager.MaxQueueSize = value;
+            get => manager.MaxQueueSize;
+            set => manager.MaxQueueSize = value;
         }
         public int TimeoutInMs
         {
-            get => Manager.TimeoutInMs;
-            set => Manager.TimeoutInMs = value;
+            get => manager.TimeoutInMs;
+            set => manager.TimeoutInMs = value;
         }
+        
+        public event Action<RosPublisher> NumSubscribersChanged;
 
         internal RosPublisher(RosClient client, TcpSenderManager manager)
         {
-            Client = client;
-            Manager = manager;
+            this.client = client;
+            this.manager = manager;
             MaxQueueSize = 3;
             IsAlive = true;
         }
@@ -60,7 +62,7 @@ namespace Iviz.Roslib
         {
             AssertIsAlive();
             Cleanup();
-            return new PublisherTopicState(Topic, TopicType, Ids.ToArray(), Manager.GetStates());
+            return new PublisherTopicState(Topic, TopicType, ids.ToArray(), manager.GetStates());
         }
 
         public void Publish(IMessage message)
@@ -71,25 +73,30 @@ namespace Iviz.Roslib
             }
             message.RosValidate();
             AssertIsAlive();
-            Manager.Publish(message);
+            manager.Publish(message);
         }
 
         public void Cleanup()
         {
-            Manager.Cleanup();
+            if (manager.Cleanup())
+            {
+                NumSubscribersChanged?.Invoke(this);
+            }
         }
 
         internal void RequestTopicRpc(string remoteCallerId, out string hostname, out int port)
         {
-            IPEndPoint endPoint = Manager.CreateConnection(remoteCallerId);
-            hostname = Manager.CallerUri.Host;
+            IPEndPoint endPoint = manager.CreateConnection(remoteCallerId);
+            hostname = manager.CallerUri.Host;
             port = endPoint.Port;
+
+            NumSubscribersChanged?.Invoke(this);
         }
 
         internal void Stop()
         {
-            Ids.Clear();
-            Manager.Stop();
+            ids.Clear();
+            manager.Stop();
         }
 
         public string Advertise()
@@ -97,7 +104,7 @@ namespace Iviz.Roslib
             AssertIsAlive();
 
             string id = GenerateId();
-            Ids.Add(id);
+            ids.Add(id);
 
 #if DEBUG__
             Logger.LogDebug($"{this}: Advertising '{Topic}' with type {TopicType} and id '{id}'");
@@ -114,21 +121,21 @@ namespace Iviz.Roslib
             }
 
             AssertIsAlive();
-            int index = Ids.IndexOf(topicId);
+            int index = ids.IndexOf(topicId);
             if (index < 0)
             {
                 return false;
             }
-            Ids.RemoveAt(index);
+            ids.RemoveAt(index);
 
 #if DEBUG__
             Logger.LogDebug($"{this}: Unadvertising '{Topic}' with type {TopicType} and id '{topicId}'");
 #endif
 
-            if (Ids.Count == 0)
+            if (ids.Count == 0)
             {
                 Stop();
-                Client.RemovePublisher(this);
+                client.RemovePublisher(this);
 
 #if DEBUG__
                 Logger.LogDebug($"{this}: Removing publisher '{Topic}' with type {TopicType}");
@@ -144,7 +151,7 @@ namespace Iviz.Roslib
                 throw new ArgumentNullException(nameof(id));
             }
 
-            return Ids.Contains(id);
+            return ids.Contains(id);
         }
     }
 }

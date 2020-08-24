@@ -29,7 +29,7 @@ namespace Iviz.Controllers
                 id = value;
                 labelObjectText.text = id;
                 trail.Name = "[Trail:" + id + "]";
-                anchor.Name = "[Anchor:" + id + "]";
+                //anchor.Name = "[Anchor:" + id + "]";
             }
         }
 
@@ -138,7 +138,15 @@ namespace Iviz.Controllers
             set
             {
                 anchorVisible = value;
-                anchor.Visible = value && (Visible || ForceVisible);
+                if (value && anchor is null)
+                {
+                    anchor = ResourcePool.GetOrCreate<AnchorLine>(Resource.Displays.AnchorLine, TFListener.UnityFrame?.transform);
+                }
+
+                if (!(anchor is null))
+                {
+                    anchor.Visible = value && (Visible || ForceVisible);
+                }
             }
         }
 
@@ -367,9 +375,8 @@ namespace Iviz.Controllers
             trail.Color = Color.yellow;
             TrailVisible = false;
 
-            anchor = ResourcePool.GetOrCreate<AnchorLine>(Resource.Displays.AnchorLine,
-                TFListener.UnityFrame?.transform);
-            anchor.Visible = false;
+            //anchor = ResourcePool.GetOrCreate<AnchorLine>(Resource.Displays.AnchorLine, TFListener.UnityFrame?.transform);
+            //anchor.Visible = false;
         }
 
         public void SplitForRecycle()
@@ -393,8 +400,11 @@ namespace Iviz.Controllers
             axis.Suspend();
             trail.Suspend();
             TrailVisible = false;
-            anchor.Visible = false;
-            anchor.Name = "[Anchor:In Trash]";
+            if (!(anchor is null))
+            {
+                anchor.Visible = false;
+                anchor.Name = "[Anchor:In Trash]";
+            }
         }
 
         public void UpdateAnchor(IAnchorProvider anchorProvider, bool forceRebuild = false)
@@ -409,7 +419,11 @@ namespace Iviz.Controllers
             //Debug.Log("was here");
             AnchorVisible = true;
             anchor.AnchorProvider = anchorProvider;
-            anchor.SetPosition(transform.position, forceRebuild);
+            
+            Vector3? anchorPosition = anchor.SetPosition(transform.position, forceRebuild);
+
+            if (anchorPosition.HasValue)
+                transform.position = anchorPosition.Value;
         }
 
         protected override void OnDoubleClick()

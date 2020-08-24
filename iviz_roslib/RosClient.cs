@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using Iviz.Msgs;
 
@@ -293,9 +294,34 @@ namespace Iviz.Roslib
         /// </summary>
         public static Uri TryGetCallerUri()
         {
-            return EnvironmentCallerUri ?? new Uri($"http://{Dns.GetHostName()}:0/");
+            return EnvironmentCallerUri ??
+                   GetUriFromInterface(NetworkInterfaceType.Wireless80211) ??
+                   GetUriFromInterface(NetworkInterfaceType.Ethernet) ??
+                   new Uri($"http://{Dns.GetHostName()}:0/");
         }
 
+        static Uri GetUriFromInterface(NetworkInterfaceType type)
+        {
+            NetworkInterface[] interfaces = NetworkInterface.GetAllNetworkInterfaces();
+            foreach (NetworkInterface item in interfaces)
+            {
+                if (item.NetworkInterfaceType != type || item.OperationalStatus != OperationalStatus.Up)
+                {
+                    continue;
+                }
+
+                foreach (UnicastIPAddressInformation ip in item.GetIPProperties().UnicastAddresses)
+                {
+                    if (ip.Address.AddressFamily == AddressFamily.InterNetwork || 
+                        ip.Address.AddressFamily == AddressFamily.InterNetworkV6)
+                    {
+                        return new Uri($"http://{ip.Address}:0");
+                    }
+                }
+            }
+            return null;
+        }         
+        
         /// <summary>
         /// Retrieves the environment variable ROS_MASTER_URI as a uri.
         /// </summary>

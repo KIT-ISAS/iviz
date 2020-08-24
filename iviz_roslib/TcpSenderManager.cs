@@ -8,12 +8,12 @@ using Iviz.Msgs;
 
 namespace Iviz.Roslib
 {
-    class TcpSenderManager
+    internal class TcpSenderManager
     {
         readonly TopicInfo topicInfo;
         readonly Dictionary<string, TcpSender> connectionsByCallerId = new Dictionary<string, TcpSender>();
 
-        public readonly Uri CallerUri;
+        public Uri CallerUri { get; }
         public string Topic => topicInfo.Topic;
         public string CallerId => topicInfo.CallerId;
         public string TopicType => topicInfo.Type;
@@ -24,6 +24,7 @@ namespace Iviz.Roslib
         public IMessage LatchedMessage { get; private set; }
 
         bool latching;
+
         public bool Latching
         {
             get => latching;
@@ -38,6 +39,7 @@ namespace Iviz.Roslib
         }
 
         int maxQueueSize;
+
         public int MaxQueueSize
         {
             get => maxQueueSize;
@@ -47,6 +49,7 @@ namespace Iviz.Roslib
                 {
                     throw new ArgumentException($"Cannot set max queue size to {value}");
                 }
+
                 maxQueueSize = value;
                 lock (connectionsByCallerId)
                 {
@@ -64,57 +67,57 @@ namespace Iviz.Roslib
         public IPEndPoint CreateConnection(string remoteCallerId)
         {
             Logger.LogDebug($"{this}: '{remoteCallerId}' is requesting {Topic}");
-            TcpSender connection = new TcpSender(CallerUri, remoteCallerId, topicInfo, Latching);
+            TcpSender newSender = new TcpSender(CallerUri, remoteCallerId, topicInfo, Latching);
 
             IPEndPoint endPoint;
             lock (connectionsByCallerId)
             {
-                if (connectionsByCallerId.TryGetValue(remoteCallerId, out TcpSender sender))
+                if (connectionsByCallerId.TryGetValue(remoteCallerId, out TcpSender oldSender) && 
+                    oldSender.IsAlive)
                 {
-                    if (sender.IsAlive)
-                    {
-                        Logger.LogDebug($"{this}: '{remoteCallerId} is requesting {Topic} again?");
-                        sender.Stop();
-                    }
+                    Logger.LogDebug($"{this}: '{remoteCallerId} is requesting {Topic} again?");
+                    oldSender.Stop();
                 }
 
-                endPoint = connection.Start(TimeoutInMs);
-                connectionsByCallerId[remoteCallerId] = connection;
+                endPoint = newSender.Start(TimeoutInMs);
+                connectionsByCallerId[remoteCallerId] = newSender;
             }
 
             // while we're here
             Cleanup();
 
             // ugh
-            for (int i = 0; i < 10 && connection.Status == SenderStatus.Inactive; i++)
+            for (int i = 0; i < 10 && newSender.Status == SenderStatus.Inactive; i++)
             {
                 Thread.Sleep(10);
             }
 
             if (Latching && LatchedMessage != null)
             {
-                connection.Publish(LatchedMessage);
+                newSender.Publish(LatchedMessage);
             }
-            
-            connection.MaxQueueSizeBytes = MaxQueueSize;
+
+            newSender.MaxQueueSizeBytes = MaxQueueSize;
             return endPoint;
         }
 
-        public void Cleanup()
+        public bool Cleanup()
         {
+            bool subscribersChanged = false;
             lock (connectionsByCallerId)
             {
-                string[] toDelete = connectionsByCallerId.
-                    Where(x => !x.Value.IsAlive).
-                    Select(x => x.Key).
-                    ToArray();
+                string[] toDelete = connectionsByCallerId.Where(x => !x.Value.IsAlive).Select(x => x.Key).ToArray();
                 foreach (string callerId in toDelete)
                 {
                     Logger.LogDebug($"{this}: Removing connection with '{callerId}' - dead x_x");
                     connectionsByCallerId[callerId].Stop();
                     connectionsByCallerId.Remove(callerId);
                 }
+
+                subscribersChanged = toDelete.Length != 0;
             }
+
+            return subscribersChanged;
         }
 
         public void Publish(IMessage msg)
@@ -123,6 +126,7 @@ namespace Iviz.Roslib
             {
                 LatchedMessage = msg;
             }
+
             lock (connectionsByCallerId)
             {
                 foreach (TcpSender connection in connectionsByCallerId.Values)
@@ -136,7 +140,10 @@ namespace Iviz.Roslib
         {
             lock (connectionsByCallerId)
             {
-                connectionsByCallerId.Values.ForEach(x => x.Stop());
+                foreach (TcpSender sender in connectionsByCallerId.Values)
+                {
+                    sender.Stop();
+                }
                 connectionsByCallerId.Clear();
             }
         }
@@ -147,7 +154,7 @@ namespace Iviz.Roslib
             {
                 return new ReadOnlyCollection<PublisherSenderState>(
                     connectionsByCallerId.Values.Select(x => x.State).ToArray()
-                    );
+                );
             }
         }
 

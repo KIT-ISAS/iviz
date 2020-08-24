@@ -3,10 +3,10 @@
   <asset>
     <contributor>
       <author>Blender User</author>
-      <authoring_tool>Blender 2.79.0 commit date:2018-03-22, commit time:14:10, hash:f4dc9f9</authoring_tool>
+      <authoring_tool>Blender 2.79.0 commit date:2018-02-21, commit time:10:41, hash:8928d99</authoring_tool>
     </contributor>
-    <created>2020-06-16T23:22:47</created>
-    <modified>2020-06-16T23:22:47</modified>
+    <created>2020-08-24T12:19:50</created>
+    <modified>2020-08-24T12:19:50</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -34,15 +34,24 @@
             </accessor>
           </technique_common>
         </source>
+        <source id="Plane-mesh-map-0">
+          <float_array id="Plane-mesh-map-0-array" count="12">0.9999001 9.998e-5 1.00314e-4 0.9998999 9.998e-5 1.00171e-4 0.9999001 9.998e-5 0.9999001 0.9998999 1.00314e-4 0.9998999</float_array>
+          <technique_common>
+            <accessor source="#Plane-mesh-map-0-array" count="6" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
         <vertices id="Plane-mesh-vertices">
           <input semantic="POSITION" source="#Plane-mesh-positions"/>
         </vertices>
-        <polylist count="1">
+        <triangles count="2">
           <input semantic="VERTEX" source="#Plane-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Plane-mesh-normals" offset="1"/>
-          <vcount>4 </vcount>
-          <p>0 0 1 0 3 0 2 0</p>
-        </polylist>
+          <input semantic="TEXCOORD" source="#Plane-mesh-map-0" offset="2" set="0"/>
+          <p>1 0 0 2 0 1 0 0 2 1 0 3 3 0 4 2 0 5</p>
+        </triangles>
       </mesh>
     </geometry>
   </library_geometries>

@@ -12,6 +12,8 @@ namespace Application.Displays
 
     public sealed class AnchorLine : DisplayWrapperResource, IRecyclable, ISupportsTint
     {
+        [SerializeField] public GameObject anchorPlane;
+        
         readonly List<LineWithColor> lines = new List<LineWithColor>();
         LineResource resource;
 
@@ -51,28 +53,38 @@ namespace Application.Displays
             }
         }
 
-        public void SetPosition(in Vector3 newPosition, bool forceRebuild = false)
+        public Vector3? SetPosition(in Vector3 newPosition, bool forceRebuild = false)
         {
             if (!forceRebuild && Mathf.Approximately((newPosition - lastPosition).sqrMagnitude, 0))
             {
-                return;
+                return null;
             }
 
             lastPosition = newPosition;
 
             if (!Visible || AnchorProvider is null)
             {
-                return;
+                return null;
             }
 
+            bool foundAnchor = AnchorProvider.FindAnchor(lastPosition, out Vector3 anchor, out Vector3 normal);
+            
             lines.Clear();
-            if (AnchorProvider.FindAnchor(lastPosition, out Vector3 anchor, out Vector3 normal))
+            if (foundAnchor)
             {
                 LineUtils.AddLineStipple(lines, anchor, lastPosition, Color);
                 LineUtils.AddCircleStipple(lines, anchor, 0.125f, normal, Color);
+                
+                Vector3 right = (normal == Vector3.right) ? Vector3.forward : Vector3.right;
+                Vector3 forward = Vector3.Cross(right, normal).normalized;
+                anchorPlane.transform.LookAt(anchor + forward, normal);
+                anchorPlane.transform.position = anchor;
             }
 
+            anchorPlane.SetActive(foundAnchor);
             resource.LinesWithColor = lines;
+            
+            return foundAnchor ? anchor : (Vector3?)null;
         }
 
         public Color Tint

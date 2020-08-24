@@ -7,25 +7,25 @@ using Iviz.Msgs;
 
 namespace Iviz.Roslib
 {
-    class TcpReceiverManager
+    internal class TcpReceiverManager
     {
         static readonly string[][] SupportedProtocols = { new[] { "TCPROS" } };
 
         readonly Dictionary<Uri, TcpReceiver> connectionsByUri = new Dictionary<Uri, TcpReceiver>();
 
-        internal Action<IMessage> Callback { private get; set; }
-
-        public readonly TopicInfo topicInfo;
-        public string Topic => topicInfo.Topic;
-        public string CallerId => topicInfo.CallerId;
-        public string TopicType => topicInfo.Type;
+        internal RosSubscriber Subscriber { private get; set; }
+        
+        public TopicInfo TopicInfo { get; }
+        public string Topic => TopicInfo.Topic;
+        public string CallerId => TopicInfo.CallerId;
+        public string TopicType => TopicInfo.Type;
         public int NumConnections => connectionsByUri.Count;
         public bool RequestNoDelay { get; }
         public int TimeoutInMs { get; set; } = 5000;
 
         public TcpReceiverManager(TopicInfo topicInfo, bool requestNoDelay)
         {
-            this.topicInfo = topicInfo;
+            this.TopicInfo = topicInfo;
             RequestNoDelay = requestNoDelay;
         }
 
@@ -61,7 +61,7 @@ namespace Iviz.Roslib
             TcpReceiver connection = new TcpReceiver(
                 remoteUri,
                 new Endpoint(response.Protocol.Hostname, response.Protocol.Port), 
-                topicInfo, Callback,
+                TopicInfo, Subscriber.MessageCallback,
                 RequestNoDelay);
 
             lock (connectionsByUri)
@@ -72,9 +72,10 @@ namespace Iviz.Roslib
             return true;
         }
 
-        public void PublisherUpdateRpc(RosClient caller, IList<Uri> publisherUris)
+        public bool PublisherUpdateRpc(RosClient caller, IList<Uri> publisherUris)
         {
             Uri[] toAdd;
+            bool publishersChanged = false;
             lock (connectionsByUri)
             {
                 toAdd = publisherUris.Where(uri => uri != null && !connectionsByUri.ContainsKey(uri)).ToArray();
@@ -83,21 +84,27 @@ namespace Iviz.Roslib
                 publisherUris.ForEach(uri => toDelete.Remove(uri));
 
                 connectionsByUri.Where(x => !x.Value.IsAlive).ForEach(x => toDelete.Add(x.Key));
+
                 foreach (Uri uri in toDelete)
                 {
                     Logger.Log($"{this}: Removing connection with '{uri}' - dead x_x");
                     connectionsByUri[uri].Stop();
                     connectionsByUri.Remove(uri);
                 }
+                publishersChanged = toDelete.Any();
+                
             }
             foreach (Uri uri in toAdd)
             {
-                AddPublisher(caller.CreateTalker(uri));
+                publishersChanged |= AddPublisher(caller.CreateTalker(uri));
             }
+
+            return publishersChanged;
         }
 
-        public void Cleanup()
+        public bool Cleanup()
         {
+            bool publishersChanged = false;
             lock (connectionsByUri)
             {
                 Uri[] toDelete = connectionsByUri.
@@ -110,7 +117,10 @@ namespace Iviz.Roslib
                     connectionsByUri[uri].Stop();
                     connectionsByUri.Remove(uri);
                 }
+                publishersChanged = toDelete.Length != 0;
             }
+
+            return publishersChanged;
         }
 
         public void Stop()
