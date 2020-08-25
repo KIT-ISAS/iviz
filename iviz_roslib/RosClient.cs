@@ -50,6 +50,8 @@ namespace Iviz.Roslib
 
     public sealed class RosClient : IDisposable
     {
+        const int DefaultCallerPort = 7613;        
+        
         readonly XmlRpc.NodeServer listener;
 
         readonly Dictionary<string, RosSubscriber> subscribersByTopic = new Dictionary<string, RosSubscriber>();
@@ -297,7 +299,7 @@ namespace Iviz.Roslib
             return EnvironmentCallerUri ??
                    GetUriFromInterface(NetworkInterfaceType.Wireless80211) ??
                    GetUriFromInterface(NetworkInterfaceType.Ethernet) ??
-                   new Uri($"http://{Dns.GetHostName()}:0/");
+                   new Uri($"http://{Dns.GetHostName()}:{DefaultCallerPort}/");
         }
 
         static Uri GetUriFromInterface(NetworkInterfaceType type)
@@ -312,10 +314,9 @@ namespace Iviz.Roslib
 
                 foreach (UnicastIPAddressInformation ip in item.GetIPProperties().UnicastAddresses)
                 {
-                    if (ip.Address.AddressFamily == AddressFamily.InterNetwork || 
-                        ip.Address.AddressFamily == AddressFamily.InterNetworkV6)
+                    if (ip.Address.AddressFamily == AddressFamily.InterNetwork)
                     {
-                        return new Uri($"http://{ip.Address}:0");
+                        return new Uri($"http://{ip.Address}:{DefaultCallerPort}/");
                     }
                 }
             }

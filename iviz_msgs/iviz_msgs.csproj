@@ -14,7 +14,4 @@
     <DebugType>full</DebugType>
     <LangVersion>8.0</LangVersion>
   </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="ReSharper.Annotations" Version="7.1.3" />
-  </ItemGroup>
 </Project>

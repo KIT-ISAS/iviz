@@ -8,7 +8,8 @@ namespace Iviz.Bridge
     {
         static void Main()
         {
-            Uri masterUri = RosClient.EnvironmentMasterUri;
+            Uri masterUri = RosClient.TryGetCallerUri();
+            //Uri masterUri = RosClient.EnvironmentMasterUri;
             if (masterUri is null)
             {
                 Console.Error.WriteLine("EE Fatal error: Failed to determine master uri");

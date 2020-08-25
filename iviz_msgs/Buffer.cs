@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using JetBrains.Annotations;
 
 namespace Iviz.Msgs
 {
@@ -23,8 +22,7 @@ namespace Iviz.Msgs
         {
             System.Buffer.MemoryCopy(src, dst, size, size);
         }
-
-        [AssertionMethod]
+        
         void AssertInRange(uint off)
         {
             if (ptr + off > end)
@@ -32,8 +30,7 @@ namespace Iviz.Msgs
                 throw new ArgumentOutOfRangeException(nameof(off));
             }
         }
-
-        [AssertionMethod]
+        
         static void AssertSize<T>(IList<T> array, uint size)
         {
             if (array is null)
