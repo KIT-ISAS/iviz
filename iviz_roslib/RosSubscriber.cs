@@ -6,42 +6,42 @@ namespace Iviz.Roslib
 {
     public class RosSubscriber
     {
-        readonly List<string> Ids = new List<string>();
-
-        readonly List<Action<IMessage>> CallbackList = new List<Action<IMessage>>();
-
-        readonly TcpReceiverManager Manager;
-        readonly RosClient Client;
+        readonly List<string> ids = new List<string>();
+        readonly List<Action<IMessage>> callbackList = new List<Action<IMessage>>();
+        readonly TcpReceiverManager manager;
+        readonly RosClient client;
 
         int totalSubscribers;
 
         public bool IsAlive { get; private set; }
-        public string Topic => Manager.Topic;
-        public string TopicType => Manager.TopicType;
-        public int NumPublishers => Manager.NumConnections;
-        public int NumIds => Ids.Count;
-        public bool RequestNoDelay => Manager.RequestNoDelay;
+        public string Topic => manager.Topic;
+        public string TopicType => manager.TopicType;
+        public int NumPublishers => manager.NumConnections;
+        public int NumIds => ids.Count;
+        public bool RequestNoDelay => manager.RequestNoDelay;
 
+        public event Action<RosSubscriber> NumPublishersChanged;
+        
         public int TimeoutInMs
         {
-            get => Manager.TimeoutInMs;
-            set => Manager.TimeoutInMs = value;
+            get => manager.TimeoutInMs;
+            set => manager.TimeoutInMs = value;
         }
 
         internal RosSubscriber(RosClient client, TcpReceiverManager manager)
         {
-            Client = client;
-            Manager = manager;
+            this.client = client;
+            this.manager = manager;
             IsAlive = true;
 
-            manager.Callback = MessageCallback;
+            manager.Subscriber = this;
         }
 
-        void MessageCallback(IMessage msg)
+        internal void MessageCallback(IMessage msg)
         {
-            lock (CallbackList)
+            lock (callbackList)
             {
-                foreach (Action<IMessage> callback in CallbackList)
+                foreach (Action<IMessage> callback in callbackList)
                 {
                     callback(msg);
                 }
@@ -57,31 +57,39 @@ namespace Iviz.Roslib
 
         void AssertIsAlive()
         {
-            if (!IsAlive) 
+            if (!IsAlive)
+            {
                 throw new ObjectDisposedException("This is not a valid subscriber");
+            }
         }
 
         public void Cleanup()
         {
-            Manager.Cleanup();
+            if (manager.Cleanup())
+            {
+                NumPublishersChanged?.Invoke(this);
+            }
         }
 
         public SubscriberTopicState GetState()
         {
             AssertIsAlive();
             Cleanup();
-            return new SubscriberTopicState(Topic, TopicType, Ids, Manager.GetStates());
+            return new SubscriberTopicState(Topic, TopicType, ids, manager.GetStates());
         }
 
         internal void PublisherUpdateRcp(Uri[] publisherUris)
         {
-            Manager.PublisherUpdateRpc(Client, publisherUris);
+            if (manager.PublisherUpdateRpc(client, publisherUris))
+            {
+                NumPublishersChanged?.Invoke(this);
+            }
         }
 
         internal void Stop()
         {
-            Ids.Clear();
-            Manager.Stop();
+            ids.Clear();
+            manager.Stop();
             IsAlive = false;
         }
 
@@ -92,7 +100,7 @@ namespace Iviz.Roslib
                 throw new ArgumentNullException(nameof(type));
             }
 
-            return type.Equals(Manager.topicInfo.Generator.GetType());
+            return type == manager.TopicInfo.Generator.GetType();
         }
 
         public string Subscribe(Action<IMessage> callback)
@@ -108,11 +116,11 @@ namespace Iviz.Roslib
             Logger.LogDebug($"{this}: Subscribing to '{Topic}' with type '{TopicType}'");
 #endif
 
-            lock (CallbackList)
+            lock (callbackList)
             {
                 string id = GenerateId();
-                Ids.Add(id);
-                CallbackList.Add(callback);
+                ids.Add(id);
+                callbackList.Add(callback);
                 return id;
             }
         }
@@ -124,7 +132,7 @@ namespace Iviz.Roslib
                 throw new ArgumentNullException(nameof(id));
             }
 
-            return Ids.Contains(id);
+            return ids.Contains(id);
         }
 
         public bool Unsubscribe(string id)
@@ -135,25 +143,25 @@ namespace Iviz.Roslib
             }
 
             AssertIsAlive();
-            lock (CallbackList)
+            lock (callbackList)
             {
-                int index = Ids.IndexOf(id);
+                int index = ids.IndexOf(id);
                 if (index < 0)
                 {
                     return false;
                 }
-                Ids.RemoveAt(index);
-                CallbackList.RemoveAt(index);
+                ids.RemoveAt(index);
+                callbackList.RemoveAt(index);
             }
 
 #if DEBUG__
             Logger.LogDebug($"{this}: Unsubscribing to '{Topic}' with type '{TopicType}'");
 #endif
 
-            if (Ids.Count == 0)
+            if (ids.Count == 0)
             {
                 Stop();
-                Client.RemoveSubscriber(this);
+                client.RemoveSubscriber(this);
 
 #if DEBUG__
                 Logger.LogDebug($"{this}: Removing subscription '{Topic}' with type '{TopicType}'");
