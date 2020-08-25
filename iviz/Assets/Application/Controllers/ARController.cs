@@ -27,8 +27,9 @@ namespace Iviz.Controllers
         [DataMember] public int MarkerAngle { get; set; } = 0;
         [DataMember] public string MarkerFrame { get; set; } = "";
         [DataMember] public SerializableVector3 MarkerOffset { get; set; } = Vector3.zero;
-        //[DataMember] public bool PublishPose { get; set; } = false;
-        //[DataMember] public bool PublishMarkers { get; set; } = false;
+
+        /* NonSerializable */ public bool ShowRootMarker { get; set; }
+        /* NonSerializable */ public bool PinRootMarker { get; set; }
     }
     
     [DataContract]
@@ -37,11 +38,15 @@ namespace Iviz.Controllers
         [DataMember] public float WorldScale { get; set; } = 1.0f;
         [DataMember] public SerializableVector3 WorldOffset { get; set; } = Vector3.zero;
         [DataMember] public float WorldAngle { get; set; } = 0;
+        [DataMember] public bool ShowRootMarker { get; set; }
+        [DataMember] public bool PinRootMarker { get; set; }
     }
 
     public sealed class ARController : MonoBehaviour, IController, IHasFrame, IAnchorProvider
     {
         public static readonly Vector3 DefaultWorldOffset = new Vector3(0.5f, 0, -0.2f);
+
+        public static ARController Instance;
         
         static ARSessionInfo savedSessionInfo;
         
@@ -130,11 +135,7 @@ namespace Iviz.Controllers
 
                 TFRoot.SetPose(value ? RootPose : Pose.identity);
 
-                TFListener.RootControl.InteractionMode = value
-                    ? InteractiveControl.InteractionModeType.Frame
-                    : InteractiveControl.InteractionModeType.Disabled;
-                //TFListener.RootControl.InteractionMode = InteractiveControl.InteractionModeType.Frame;
-                
+                ModuleListPanel.Instance.OnARModeChanged(value);
                 foreach (var module in ModuleListPanel.Instance.ModuleDatas)
                 {
                     module.OnARModeChanged(value);
@@ -273,8 +274,22 @@ namespace Iviz.Controllers
             }
         }
 
+        public bool PinRootMarker
+        {
+            get => config.PinRootMarker;
+            set => config.PinRootMarker = value;
+        }
+        
+        public bool ShowRootMarker
+        {
+            get => config.ShowRootMarker;
+            set => config.ShowRootMarker = value;
+        }
+        
         void Awake()
         {
+            Instance = this;
+            
             if (canvas == null)
             {
                 canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
@@ -359,7 +374,12 @@ namespace Iviz.Controllers
             //    frame.UpdateAnchor(FindAnchorFn, forceAnchorRebuild);    
             //}
             
-            TFListener.MapFrame.UpdateAnchor(this, forceAnchorRebuild);
+            Vector3? projection = TFListener.MapFrame.UpdateAnchor(this, forceAnchorRebuild);
+            if (PinRootMarker && projection.HasValue)
+            {
+                TFListener.RootFrame.transform.position = projection.Value;
+                ((ARModuleData)ModuleData).CopyControlMarkerPose();
+            }
             forceAnchorRebuild = false;
         }
 
@@ -409,72 +429,7 @@ namespace Iviz.Controllers
         public void Update()
         {
             UpdateAnchors();
-            /*
-            bool FindAnchorFn(in Vector3 position, out Vector3 anchor, out Vector3 normal)
-            {
-                //Debug.Log("was here");
-                anchor = new Vector3(position.x, -1, position.z);
-                normal = Vector3.up;
-                return true;
-            }
-            */
-            
-
-            /*
-            if (PublishPose && Visible)
-            {
-                TFListener.Publish(null, HeadFrameName, ARCamera.transform.AsPose());
-
-                Msgs.GeometryMsgs.PoseStamped pose = new Msgs.GeometryMsgs.PoseStamped
-                (
-                    Header: RosUtils.CreateHeader(headSeq++),
-                    Pose: ARCamera.transform.AsPose().Unity2RosPose()
-                );
-                RosSenderHead.Publish(pose);
-            }
-            if (PublishPlanesAsMarkers && Visible)
-            {
-                DateTime now = DateTime.Now;
-                if ((now - lastMarkerUpdate).TotalSeconds > 2.5)
-                {
-                    lastMarkerUpdate = now;
-
-                    int i = 0;
-                    var trackables = planeManager.trackables;
-                    Marker[] markers = new Marker[2 * trackables.count + 1];
-                    markers[i++] = helper.CreateDeleteAll();
-                    foreach (var trackable in trackables)
-                    {
-                        Mesh mesh = trackable?.gameObject.GetComponent<MeshFilter>()?.mesh;
-                        if (mesh == null)
-                        {
-                            continue;
-                        }
-                        Marker[] meshMarkers = helper.MeshToMarker(mesh, trackable.transform.AsPose());
-                        if (meshMarkers.Length == 2)
-                        {
-                            markers[i] = meshMarkers[0];
-                            markers[i].Id = i;
-                            i++;
-
-                            markers[i] = meshMarkers[1];
-                            markers[i].Id = i;
-                            i++;
-                        }
-                    }
-                    RosSenderMarkers.Publish(new MarkerArray(markers));
-                }
-            }
-            */
-            /*
-            if (trackedObject != null)
-            {
-                Debug.Log(trackedObject.name + " -> " + trackedObject.transform.AsPose());
-            }
-            */
         }
-
-        //GameObject trackedObject;
 
         void OnTrackedImagesChanged(ARTrackedImagesChangedEventArgs obj)
         {
@@ -482,12 +437,10 @@ namespace Iviz.Controllers
             
             if (obj.added.Count != 0)
             {
-                //Debug.Log("Added " + obj.added.Count + " images!");
                 newPose = obj.added[0].transform.AsPose();
             }
             if (obj.updated.Count != 0)
             {
-                //Debug.Log("Updated " + obj.updated.Count + " images!");
                 newPose = obj.updated[0].transform.AsPose();
             }
             if (newPose == null)
@@ -529,6 +482,8 @@ namespace Iviz.Controllers
 
             WorldScale = 1;
             TFRoot.SetPose(Pose.identity);
+
+            Instance = null;
         }
 
         void IController.Reset()

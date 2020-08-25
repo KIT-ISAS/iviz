@@ -158,7 +158,7 @@ namespace Iviz.Controllers
             set
             {
                 labelVisible = value;
-                labelObject.SetActive((value || Selected) && (ForceVisible || Visible));
+                labelObject.SetActive(!ForceInvisible && (value || Selected) && (ForceVisible || Visible));
             }
         }
 
@@ -407,23 +407,20 @@ namespace Iviz.Controllers
             }
         }
 
-        public void UpdateAnchor(IAnchorProvider anchorProvider, bool forceRebuild = false)
+        public Vector3? UpdateAnchor(IAnchorProvider anchorProvider, bool forceRebuild = false)
         {
             //Debug.Log("lel");
             if (anchorProvider is null)
             {
                 AnchorVisible = forceRebuild;
-                return;
+                return null;
             }
 
             //Debug.Log("was here");
             AnchorVisible = true;
             anchor.AnchorProvider = anchorProvider;
             
-            Vector3? anchorPosition = anchor.SetPosition(transform.position, forceRebuild);
-
-            if (anchorPosition.HasValue)
-                transform.position = anchorPosition.Value;
+            return anchor.SetPosition(transform.position, forceRebuild);
         }
 
         protected override void OnDoubleClick()

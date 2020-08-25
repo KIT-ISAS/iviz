@@ -65,16 +65,7 @@ namespace Iviz.App
 
             panel.MarkerOffset.Value = controller.MarkerOffset;
 
-            TFListener.RootControl.PointerUp += RootControlOnPointerUp;
-            TFListener.RootControl.DoubleTap += RootControlOnDoubleTap;
-
-            /*
-            panel.HeadSender.Set(controller.RosSenderHead);
-            panel.MarkersSender.Set(controller.RosSenderMarkers);
-
-            panel.PublishHead.Value = controller.PublishPose;
-            panel.PublishPlanes.Value = controller.PublishPlanesAsMarkers;
-            */
+            TFListener.RootMarker.PointerUp += CopyControlMarkerPose;
 
             CheckInteractable();
 
@@ -109,18 +100,6 @@ namespace Iviz.App
                 CheckInteractable();
             };
             panel.MarkerOffset.ValueChanged += f => { controller.MarkerOffset = f; };
-            /*
-            panel.PublishHead.ValueChanged += f =>
-            {
-                controller.PublishPose = f;
-                panel.HeadSender.Set(controller.RosSenderHead);
-            };
-            panel.PublishPlanes.ValueChanged += f =>
-            {
-                controller.PublishPlanesAsMarkers = f;
-                panel.MarkersSender.Set(controller.RosSenderMarkers);
-            };
-            */
 
             panel.CloseButton.Clicked += () =>
             {
@@ -135,21 +114,9 @@ namespace Iviz.App
             };
         }
 
-        void RootControlOnDoubleTap()
+        public void CopyControlMarkerPose()
         {
-            TFListener.RootControl.SnapTo(controller);
-            CopyControlPose();
-        }
-
-        void RootControlOnPointerUp()
-        {
-            CopyControlPose();
-        }
-
-        void CopyControlPose()
-        {
-            //Debug.Log("copy pose");
-            var pose = TFListener.RootControl.transform.AsPose();
+            var pose = TFListener.RootMarker.transform.AsPose();
             controller.WorldOffset = pose.position.Unity2Ros();
 
             float angle = pose.rotation.eulerAngles.y;
@@ -168,8 +135,8 @@ namespace Iviz.App
         public override void CleanupPanel()
         {
             base.CleanupPanel();
-            TFListener.RootControl.PointerUp -= RootControlOnPointerUp;
-            TFListener.RootControl.DoubleTap -= RootControlOnDoubleTap;
+            //TFListener.RootMarker.PointerUp -= RootControlOnPointerUp;
+            //TFListener.RootMarker.DoubleTap -= RootControlOnDoubleTap;
         }
 
         void CheckInteractable()

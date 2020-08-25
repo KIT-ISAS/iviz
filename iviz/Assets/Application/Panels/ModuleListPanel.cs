@@ -9,6 +9,7 @@ using Iviz.Controllers;
 using Iviz.Displays;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using Logger = Iviz.Controllers.Logger; 
 
@@ -36,8 +37,11 @@ namespace Iviz.App
 
         [SerializeField] Button save = null;
         [SerializeField] Button load = null;
-        [SerializeField] Button hide = null;
         [SerializeField] Image status = null;
+
+        [SerializeField] AnchorToggleButton hideGuiButton = null;
+        [SerializeField] AnchorToggleButton showControlButton = null;
+        [SerializeField] AnchorToggleButton pinControlButton = null;
 
         [SerializeField] Button unlock = null;
         public Button UnlockButton => unlock;
@@ -142,8 +146,25 @@ namespace Iviz.App
 
             save.onClick.AddListener(() => { saveConfigData.Show(); });
             load.onClick.AddListener(() => { loadConfigData.Show(); });
-            hide.onClick.AddListener(OnHideClick);
+            
+            hideGuiButton.Clicked += OnHideGuiButtonClick;
+            hideGuiButton.State = true;
 
+            pinControlButton.Clicked += () =>
+            {
+                if (ARController.Instance != null)
+                {
+                    ARController.Instance.PinRootMarker = pinControlButton.State;
+                }
+            };
+            showControlButton.Clicked += () =>
+            {
+                if (ARController.Instance != null)
+                {
+                    ARController.Instance.ShowRootMarker = showControlButton.State;
+                    TFListener.UpdateRootMarkerVisibility();
+                }
+            };
 
             addDisplayByTopic.onClick.AddListener(() => { availableTopics.Show(); });
             addDisplay.onClick.AddListener(() => { availableModules.Show(); });
@@ -160,8 +181,6 @@ namespace Iviz.App
             ConnectionManager.Connection.MyId = connectionData.MyId;
             KeepReconnecting = false;
 
-            //ConnectionManager.Instance.KeepReconnecting = keepReconnecting.isOn;
-            //keepReconnecting.onValueChanged.AddListener(x => ConnectionManager.Instance.KeepReconnecting = x);
             connectionData.MasterUriChanged += uri =>
             {
                 ConnectionManager.Connection.MasterUri = uri;
@@ -272,7 +291,7 @@ namespace Iviz.App
             status.rectTransform.Rotate(new Vector3(0, 0, 10.0f), Space.Self);
         }
 
-        void OnHideClick()
+        void OnHideGuiButtonClick()
         {
             AllGuiVisible = !AllGuiVisible;
             EventSystem.current.SetSelectedGameObject(null);
@@ -566,5 +585,11 @@ namespace Iviz.App
         {
             frames++;
         }
+
+        public void OnARModeChanged(bool value)
+        {
+            pinControlButton.Visible = value;
+            showControlButton.Visible = value;
+        } 
     }
 }

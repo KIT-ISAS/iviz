@@ -94,5 +94,10 @@ namespace Iviz.App
         {
             config.Tf = listener.Config;
         }
+
+        public override void OnARModeChanged(bool value)
+        {
+            listener.OnARModeChanged(value);
+        }
     }
 }

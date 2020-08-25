@@ -47,8 +47,8 @@ namespace Iviz.Controllers
         public static TFFrame RootFrame { get; private set; }
         public static TFFrame UnityFrame { get; private set; }
 
-        readonly InteractiveControl rootControl;
-        public static InteractiveControl RootControl => Instance.rootControl;
+        readonly InteractiveControl rootMarker;
+        public static InteractiveControl RootMarker => Instance.rootMarker;
 
         public static TFFrame ListenersFrame => RootFrame;
 
@@ -101,9 +101,9 @@ namespace Iviz.Controllers
                     frame.Visible = value;
                 }
 
-                if (!(rootControl is null))
+                if (!(rootMarker is null))
                 {
-                    rootControl.Visible = value;
+                    rootMarker.Visible = value;
                 }
             }
         }
@@ -217,13 +217,13 @@ namespace Iviz.Controllers
             MapFrame.AcceptsParents = false;
             //BaseFrame.ForceInvisible = true;
 
-            rootControl =
+            rootMarker =
                 ResourcePool.GetOrCreate<InteractiveControl>(Resource.Displays.InteractiveControl,
                     RootFrame.transform);
-            rootControl.name = "[InteractiveController for /]";
-            rootControl.TargetTransform = RootFrame.transform;
-            rootControl.InteractionMode = InteractiveControl.InteractionModeType.Disabled;
-            rootControl.transform.localScale = 0.4f * Vector3.one;
+            rootMarker.name = "[InteractiveController for /]";
+            rootMarker.TargetTransform = RootFrame.transform;
+            rootMarker.InteractionMode = InteractiveControl.InteractionModeType.Disabled;
+            rootMarker.transform.localScale = 0.3f * Vector3.one;
 
             Publisher = new RosSender<tfMessage_v2>(DefaultTopic);
         }
@@ -441,6 +441,20 @@ namespace Iviz.Controllers
                 }
             );
             Publish(msg);
+        }
+
+        public void OnARModeChanged(bool _)
+        {
+            UpdateRootMarkerVisibility();
+        }
+
+        public static void UpdateRootMarkerVisibility()
+        {
+            bool arEnabled = ARController.Instance?.Visible ?? false;
+            bool viewEnabled = ARController.Instance?.ShowRootMarker ?? false;
+            RootMarker.InteractionMode = (arEnabled && viewEnabled)
+                ? InteractiveControl.InteractionModeType.Frame
+                : InteractiveControl.InteractionModeType.Disabled;            
         }
     }
 }

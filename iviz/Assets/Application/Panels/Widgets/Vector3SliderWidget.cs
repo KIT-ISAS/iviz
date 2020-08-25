@@ -57,6 +57,7 @@ namespace Iviz.App
             get => mean;
             set
             {
+                disableUpdates = true;
                 mean = value;
                 inputX.SetMinValue(mean.x - range).SetMaxValue(mean.x + range);
                 inputY.SetMinValue(mean.y - range).SetMaxValue(mean.y + range);
@@ -64,6 +65,7 @@ namespace Iviz.App
                 inputX.Value = mean.x;
                 inputY.Value = mean.y;
                 inputZ.Value = mean.z;
+                disableUpdates = false;
             }
         }
 

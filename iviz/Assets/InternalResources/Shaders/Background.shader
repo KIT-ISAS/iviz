@@ -10,20 +10,14 @@
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" "RenderQueue"="Geometry-1" }
+        Tags { "RenderType"="Opaque" "Queue"="Background" }
         LOD 100
 
         Pass
         {
             CGPROGRAM
-// Upgrade NOTE: excluded shader from DX11; has structs without semantics (struct v2f members u)
-#pragma exclude_renderers d3d11
             #pragma vertex vert
             #pragma fragment frag
-            // make fog work
-            #pragma multi_compile_fog
-
-            #include "UnityCG.cginc"
 
             struct appdata
             {

@@ -73,7 +73,7 @@ namespace Application.Displays
             if (foundAnchor)
             {
                 LineUtils.AddLineStipple(lines, anchor, lastPosition, Color);
-                LineUtils.AddCircleStipple(lines, anchor, 0.125f, normal, Color);
+                //LineUtils.AddCircleStipple(lines, anchor, 0.125f, normal, Color);
                 
                 Vector3 right = (normal == Vector3.right) ? Vector3.forward : Vector3.right;
                 Vector3 forward = Vector3.Cross(right, normal).normalized;
