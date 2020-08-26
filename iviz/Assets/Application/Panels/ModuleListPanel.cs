@@ -57,6 +57,7 @@ namespace Iviz.App
         [SerializeField] Button addDisplayByTopic = null;
         [SerializeField] Button addDisplay = null;
         [SerializeField] Button showTFTree = null;
+        [SerializeField] Button resetAll = null;
         //[SerializeField] Toggle keepReconnecting = null;
 
         [SerializeField] Sprite ConnectedSprite = null;
@@ -169,7 +170,9 @@ namespace Iviz.App
             addDisplayByTopic.onClick.AddListener(() => { availableTopics.Show(); });
             addDisplay.onClick.AddListener(() => { availableModules.Show(); });
             showTFTree.onClick.AddListener(() => { tfTreeData.Show(); });
-
+            resetAll.onClick.AddListener(ResetAllModules);
+    
+            
             MasterUriStr.Label = connectionData.MasterUri + " →";
             MasterUriButton.Clicked += () =>
             {

@@ -27,10 +27,6 @@ namespace Iviz.App
                 TFListener.Instance.ShowAllFrames = !f;
                 TFListener.Instance.ModuleData.ResetPanel();
             };
-            panel.ResetAll.Clicked += () =>
-            {
-                ModuleListPanel.ResetAllModules();
-            };
         }
 
         public override void UpdatePanel()

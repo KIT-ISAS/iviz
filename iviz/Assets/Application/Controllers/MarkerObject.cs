@@ -22,6 +22,8 @@ namespace Iviz.Controllers
         TextViewFacing = Marker.TEXT_VIEW_FACING,
         MeshResource = Marker.MESH_RESOURCE,
         TriangleList = Marker.TRIANGLE_LIST,
+
+        Text = 100,
     }
 
     public enum MouseEventType
@@ -176,11 +178,15 @@ namespace Iviz.Controllers
                     transform.localScale = msg.Scale.Ros2Unity().Abs();
                     break;
                 case MarkerType.TextViewFacing:
-                    TextMarkerResource textResource = (TextMarkerResource)resource;
+                case MarkerType.Text:
+                {
+                    TextMarkerResource textResource = (TextMarkerResource) resource;
                     textResource.Text = msg.Text;
                     textResource.Color = msg.Color.Sanitize().ToUnityColor();
-                    transform.localScale = (float)msg.Scale.Z * Vector3.one;
+                    textResource.EnableBillboard = (msg.Type() != MarkerType.Text);
+                    transform.localScale = (float) msg.Scale.Z * Vector3.one;
                     break;
+                }
                 case MarkerType.CubeList:
                 case MarkerType.SphereList:
                     {
@@ -359,7 +365,9 @@ namespace Iviz.Controllers
                 case MarkerType.Cylinder: return Resource.Displays.Cylinder;
                 case MarkerType.Cube: return Resource.Displays.Cube;
                 case MarkerType.Sphere: return Resource.Displays.Sphere;
-                case MarkerType.TextViewFacing: return Resource.Displays.Text;
+                case MarkerType.TextViewFacing: 
+                case MarkerType.Text:
+                    return Resource.Displays.Text;
                 case MarkerType.LineStrip:
                 case MarkerType.LineList:
                     return Resource.Displays.Line;
