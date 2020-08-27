@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 3616584195209632818}
   - component: {fileID: 1128600323534261624}
   - component: {fileID: 3697026927689715932}
+  - component: {fileID: 9197158199687723488}
   m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
@@ -29,7 +30,7 @@ Transform:
   m_GameObject: {fileID: 3616584195209632817}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -88,7 +89,7 @@ TextMesh:
   m_Anchor: 4
   m_Alignment: 0
   m_TabSize: 4
-  m_FontSize: 20
+  m_FontSize: 40
   m_FontStyle: 0
   m_RichText: 1
   m_Font: {fileID: 12800000, guid: 07aef5eff1792cb478e0d50020d3e011, type: 3}
@@ -106,7 +107,7 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 2, y: 0.65826005, z: 0.01}
+  m_Size: {x: 4, y: 1, z: 0.01}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &3697026927689715932
 MonoBehaviour:
@@ -122,3 +123,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   parent: {fileID: 0}
   offset: {x: 0, y: 0, z: 0}
+--- !u!114 &9197158199687723488
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3616584195209632817}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff47e7a304145d845a14d3aa9746b2e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

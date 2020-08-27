@@ -6,7 +6,7 @@ namespace Iviz.Roslib
     /// <summary>
     /// Full info about a ROS topic and its message type, including dependencies.
     /// </summary>
-    class TopicInfo
+    internal class TopicInfo
     {
         /// <summary>
         /// Concatenated dependencies file.
@@ -38,7 +38,7 @@ namespace Iviz.Roslib
         /// </summary>
         public IMessage Generator { get; }
 
-        public TopicInfo(string messageDefinition, string callerId, string topic, string md5Sum, string type, IMessage generator)
+        TopicInfo(string messageDefinition, string callerId, string topic, string md5Sum, string type, IMessage generator)
         {
             MessageDefinition = messageDefinition;
             CallerId = callerId;

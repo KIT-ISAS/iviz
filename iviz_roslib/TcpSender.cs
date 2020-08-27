@@ -76,11 +76,12 @@ namespace Iviz.Roslib
             tcpListener = new TcpListener(IPAddress.Any, 0);
             tcpListener.Start();
 
+            IPEndPoint localEndpoint = (IPEndPoint)tcpListener.LocalEndpoint;
+            Endpoint = new Endpoint(localEndpoint);
+
             keepRunning = true;
             task = Task.Run(() => Run(timeoutInMs));
 
-            IPEndPoint localEndpoint = (IPEndPoint)tcpListener.LocalEndpoint;
-            Endpoint = new Endpoint(localEndpoint);
 
             return localEndpoint;
         }
@@ -371,6 +372,7 @@ namespace Iviz.Roslib
                         messageQueue.RemoveRange(0, i);
                     }
                 }
+                
                 Monitor.Pulse(condVar);
             }
         }

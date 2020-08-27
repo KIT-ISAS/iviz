@@ -7,12 +7,10 @@ namespace Iviz.App
         [SerializeField] TrashButtonWidget close = null;
         [SerializeField] TFLog tfLog = null;
         [SerializeField] ToggleWidget showOnlyUsed = null;
-        [SerializeField] TrashButtonWidget resetAll = null;
 
         public TrashButtonWidget Close => close;
         public TFLog TFLog => tfLog;
         public ToggleWidget ShowOnlyUsed => showOnlyUsed;
-        public TrashButtonWidget ResetAll => resetAll;
 
         public bool Active
         {
@@ -25,7 +23,6 @@ namespace Iviz.App
             Close.ClearSubscribers();
             TFLog.ClearSubscribers();
             ShowOnlyUsed.ClearSubscribers();
-            ResetAll.ClearSubscribers();
         }
     }
 }

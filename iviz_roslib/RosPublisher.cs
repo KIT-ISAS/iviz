@@ -17,22 +17,25 @@ namespace Iviz.Roslib
         public string TopicType => manager.TopicType;
         public int NumSubscribers => manager.NumConnections;
         public int NumIds => ids.Count;
+
         public bool LatchingEnabled
         {
             get => manager.Latching;
             set => manager.Latching = value;
         }
+
         public int MaxQueueSize
         {
             get => manager.MaxQueueSize;
             set => manager.MaxQueueSize = value;
         }
+
         public int TimeoutInMs
         {
             get => manager.TimeoutInMs;
             set => manager.TimeoutInMs = value;
         }
-        
+
         public event Action<RosPublisher> NumSubscribersChanged;
 
         internal RosPublisher(RosClient client, TcpSenderManager manager)
@@ -71,6 +74,7 @@ namespace Iviz.Roslib
             {
                 throw new ArgumentNullException(nameof(message));
             }
+
             message.RosValidate();
             AssertIsAlive();
             manager.Publish(message);
@@ -97,6 +101,7 @@ namespace Iviz.Roslib
         {
             ids.Clear();
             manager.Stop();
+            IsAlive = false;
         }
 
         public string Advertise()
@@ -126,6 +131,7 @@ namespace Iviz.Roslib
             {
                 return false;
             }
+
             ids.RemoveAt(index);
 
 #if DEBUG__
@@ -141,6 +147,7 @@ namespace Iviz.Roslib
                 Logger.LogDebug($"{this}: Removing publisher '{Topic}' with type {TopicType}");
 #endif
             }
+
             return true;
         }
 

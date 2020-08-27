@@ -531,25 +531,28 @@ namespace Iviz.App
 
         void ProcessFlying()
         {
-            const float mainSpeed = 3.75f; //regular speed
+            const float mainSpeed = 2f; //regular speed
             const float shiftAdd = 1.0f; //multiplied by how long shift is held.  Basically running
             const float maxShift = 100.0f; //Maximum speed when holding shift
             //const float camSens = 0.25f; //How sensitive it with mouse
 
             if (!PointerDown)
             {
-                totalRun = 0;
+                //totalRun = 0;
                 return;
             }
             
             //Mouse  camera angle done.  
             //Keyboard commands
             Vector3 p = GetBaseInput();
-            totalRun += Time.deltaTime;
-            p *= Mathf.Max(totalRun * shiftAdd, mainSpeed);
+            //totalRun += Time.deltaTime;
+            //p *= Mathf.Max(shiftAdd, mainSpeed);
+            p = Vector3.Scale(p, mainSpeed * new Vector3(2,  2, 1));
+            /*
             p.x = Mathf.Clamp(p.x, -maxShift, maxShift);
             p.y = Mathf.Clamp(p.y, -maxShift, maxShift);
             p.z = Mathf.Clamp(p.z, -maxShift, maxShift);
+            */
 
             p *= Time.deltaTime;
 
