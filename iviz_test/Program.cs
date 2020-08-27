@@ -14,8 +14,12 @@ using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.Tf2Msgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Roslib;
+using Iviz.Sdf;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Int64 = System.Int64;
+using Pose = Iviz.Msgs.GeometryMsgs.Pose;
+using Vector3 = Iviz.Msgs.GeometryMsgs.Vector3;
 
 namespace iviz_test
 {
@@ -23,7 +27,16 @@ namespace iviz_test
     {
         static void Main()
         {
-            RosClient client = new RosClient(
+            string data =
+                File.ReadAllText("/Users/akzeac/Downloads/aws-robomaker-hospital-world-master/worlds/hospital.world");
+            Sdf sdf = Sdf.Create(data);
+
+            Console.WriteLine(JsonConvert.SerializeObject(sdf, Formatting.Indented));
+        }
+        
+        static void Main_Q()
+        {
+            using RosClient client = new RosClient(
                 "http://192.168.0.220:11311",
                 //"http://141.3.59.5:11311",
                 null,

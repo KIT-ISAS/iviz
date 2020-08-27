@@ -20,6 +20,7 @@ namespace Iviz.Sdf
     {
         static readonly Vector3 DefaultGravity = new Vector3(0, 0, -9.8);
         
+        public string Name { get; }
         public Wind Wind { get; }
         public ReadOnlyCollection<Include> Includes { get; }
         public Vector3 Gravity { get; } = DefaultGravity;
@@ -29,6 +30,8 @@ namespace Iviz.Sdf
 
         internal World(XmlNode node)
         {
+            Name = node.Attributes?["name"]?.Value;
+            
             List<Include> includes = new List<Include>();
             List<Model> models = new List<Model>();
             List<Frame> frames = new List<Frame>();

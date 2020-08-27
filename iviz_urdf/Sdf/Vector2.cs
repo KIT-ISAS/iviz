@@ -11,7 +11,12 @@ namespace Iviz.Sdf
 
         internal Vector2(XmlNode node)
         {
-            string[] elems = node.Value.Split(Vector3.Separator, StringSplitOptions.RemoveEmptyEntries);
+            if (node.InnerText is null)
+            {
+                throw new MalformedSdfException();
+            }
+            
+            string[] elems = node.InnerText.Split(Vector3.Separator, StringSplitOptions.RemoveEmptyEntries);
             if (elems.Length != 2)
             {
                 throw new MalformedSdfException(node);

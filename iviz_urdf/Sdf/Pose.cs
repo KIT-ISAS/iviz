@@ -16,7 +16,12 @@ namespace Iviz.Sdf
         {
             RelativeTo = node.Attributes?["relative_to"]?.Value;
 
-            string[] elems = node.Value.Split(Vector3.Separator, StringSplitOptions.RemoveEmptyEntries);
+            if (node.InnerText is null)
+            {
+                throw new MalformedSdfException();
+            }            
+            
+            string[] elems = node.InnerText.Split(Vector3.Separator, StringSplitOptions.RemoveEmptyEntries);
             if (elems.Length != 6)
             {
                 throw new MalformedSdfException(node);

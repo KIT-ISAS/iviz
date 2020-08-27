@@ -1,1 +1,0 @@
-controller_joint_names: ['joint_wheel_rear_right', 'joint_wheel_rear_left', 'joint_vehicle_front_wave', 'joint_vehicle_front_steer', 'joint_wheel_front_right', 'joint_wheel_front_left', ]

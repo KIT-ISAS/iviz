@@ -209,17 +209,6 @@ namespace Iviz.Roslib
             {
                 return $"error=Expected topic '{topicInfo.Topic}' but received instead '{receivedTopic}', closing connection";
             }
-            if (!values.TryGetValue("md5sum", out string receivedMd5sum) || receivedMd5sum != topicInfo.Md5Sum)
-            {
-                if (receivedMd5sum == "*")
-                {
-                    Logger.LogDebug($"{this}: Expected md5 '{topicInfo.Md5Sum}' but received instead '{receivedMd5sum}'. Continuing...");
-                }
-                else
-                {
-                    return $"error=Expected md5 '{topicInfo.Md5Sum}' but received instead '{receivedMd5sum}', closing connection";
-                }
-            }
             if (!values.TryGetValue("type", out string receivedType) || receivedType != topicInfo.Type)
             {
                 if (receivedType == "*")
@@ -229,6 +218,17 @@ namespace Iviz.Roslib
                 else
                 {
                     return $"error=Expected type '{topicInfo.Type}' but received instead '{receivedType}', closing connection";
+                }
+            }
+            if (!values.TryGetValue("md5sum", out string receivedMd5sum) || receivedMd5sum != topicInfo.Md5Sum)
+            {
+                if (receivedMd5sum == "*")
+                {
+                    Logger.LogDebug($"{this}: Expected md5 '{topicInfo.Md5Sum}' but received instead '{receivedMd5sum}'. Continuing...");
+                }
+                else
+                {
+                    return $"error=Expected md5 '{topicInfo.Md5Sum}' but received instead '{receivedMd5sum}', closing connection";
                 }
             }
             if (values.TryGetValue("tcp_nodelay", out string receivedNoDelay) && receivedNoDelay == "1")

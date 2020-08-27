@@ -122,7 +122,7 @@ namespace Iviz.Controllers
                     Dropped
                 );
 
-                ConnectionManager.BandwidthReportDown(LastMsgBytes);
+                ConnectionManager.ReportBandwidthDown(LastMsgBytes);
 
                 LastMsgBytes = 0;
                 Dropped = 0;

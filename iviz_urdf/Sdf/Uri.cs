@@ -7,11 +7,11 @@ namespace Iviz.Sdf
     {
         public string Value { get; }
 
-        public System.Uri ToUri => new System.Uri(Value);
+        public System.Uri ToUri() => new System.Uri(Value);
         
         internal Uri(XmlNode node)
         {
-            Value = node.Value;
+            Value = node.InnerText ?? throw new MalformedSdfException();
         }        
     }
 }

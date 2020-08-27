@@ -11,7 +11,7 @@ namespace Iviz.Sdf
         public ReadOnlyCollection<Model> Models { get; }
         public ReadOnlyCollection<Light> Lights { get; }
 
-        public Sdf(XmlNode node)
+        Sdf(XmlNode node)
         {
             if (node == null)
             {
@@ -42,5 +42,29 @@ namespace Iviz.Sdf
                 }
             }            
         }
+        
+        public static Sdf Create(string xmlData)
+        {
+            if (string.IsNullOrEmpty(xmlData))
+            {
+                throw new ArgumentException("Value cannot be null or empty.", nameof(xmlData));
+            }
+
+            XmlDocument document = new XmlDocument();
+            document.LoadXml(xmlData);
+
+            XmlNode root = document.FirstChild;
+            while (root != null && root.Name != "sdf")
+            {
+                root = root.NextSibling;
+            }
+
+            if (root is null)
+            {
+                throw new MalformedSdfException("Sdf has no root node");
+            }
+
+            return new Sdf(root);
+        }        
     }
 }

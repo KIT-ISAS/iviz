@@ -5,6 +5,8 @@ namespace Iviz.Sdf
 {
     public static class DoubleElement
     {
-        internal static double ValueOf(XmlNode node) => double.Parse(node.Value, Utils.Culture);
+        internal static double ValueOf(XmlNode node) => 
+            node is null ? throw new MalformedSdfException() : 
+            double.Parse(node.InnerText, Utils.Culture);
     }
 }

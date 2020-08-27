@@ -304,6 +304,13 @@ namespace Iviz.Roslib
 
         static Uri GetUriFromInterface(NetworkInterfaceType type)
         {
+            UnicastIPAddressInformation ipInfo =
+                NetworkInterface.GetAllNetworkInterfaces()
+                .Where(iface => iface.NetworkInterfaceType == type && iface.OperationalStatus == OperationalStatus.Up)
+                .SelectMany(iface => iface.GetIPProperties().UnicastAddresses)
+                .FirstOrDefault(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork);
+                
+            /*
             NetworkInterface[] interfaces = NetworkInterface.GetAllNetworkInterfaces();
             foreach (NetworkInterface item in interfaces)
             {
@@ -321,6 +328,9 @@ namespace Iviz.Roslib
                 }
             }
             return null;
+            */
+            
+            return ipInfo is null ? null : new Uri($"http://{ipInfo.Address}:{DefaultCallerPort}/");
         }         
         
         /// <summary>

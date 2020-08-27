@@ -19,7 +19,7 @@ namespace Iviz.Sdf
                         Uri = new Uri(child);
                         break;
                     case "name":
-                        Name = child.Value;
+                        Name = child.InnerText;
                         break;
                     case "static":
                         Static = BoolElement.ValueOf(child);

@@ -12,7 +12,7 @@ namespace Iviz.Urdf
         public ReadOnlyCollection<Joint> Joints { get; }
         public ReadOnlyCollection<Material> Materials { get; }
 
-        internal Robot(XmlNode node)
+        Robot(XmlNode node)
         {
             List<Link> links = new List<Link>();
             List<Joint> joints = new List<Joint>();
@@ -42,15 +42,15 @@ namespace Iviz.Urdf
             Materials = new ReadOnlyCollection<Material>(materials);
         }
 
-        public static Robot Create(string inData)
+        public static Robot Create(string xmlData)
         {
-            if (string.IsNullOrEmpty(inData))
+            if (string.IsNullOrEmpty(xmlData))
             {
-                throw new ArgumentException("Value cannot be null or empty.", nameof(inData));
+                throw new ArgumentException("Value cannot be null or empty.", nameof(xmlData));
             }
 
             XmlDocument document = new XmlDocument();
-            document.LoadXml(inData);
+            document.LoadXml(xmlData);
 
             XmlNode root = document.FirstChild;
             while (root != null && root.Name != "robot")
