@@ -31,8 +31,42 @@ namespace iviz_test
                 File.ReadAllText("/Users/akzeac/Downloads/aws-robomaker-hospital-world-master/worlds/hospital.world");
             Sdf sdf = Sdf.Create(data);
 
-            Console.WriteLine(JsonConvert.SerializeObject(sdf, Formatting.Indented));
+            Dictionary<string, List<string>> modelPaths = new Dictionary<string, List<string>>();
+
+            CheckModelPath("", "/Users/akzeac/Downloads/aws-robomaker-hospital-world-master/", modelPaths);
+
+            Sdf newSdf = sdf.ResolveIncludes(modelPaths);
+
+            Console.WriteLine(JsonConvert.SerializeObject(newSdf, Formatting.Indented));
+
         }
+        
+        static void CheckModelPath(string folderName, string path, IDictionary<string, List<string>> modelPaths)
+        {
+            if (File.Exists(path + "/model.config"))
+            {
+                AddModelPath(folderName, path, modelPaths);
+                return;
+            }
+
+            foreach (string subFolderPath in Directory.GetDirectories(path))
+            {
+                string subFolder = Path.GetFileName(subFolderPath);
+                CheckModelPath(subFolder, subFolderPath, modelPaths);
+            }
+        }
+
+        static void AddModelPath(string package, string path, IDictionary<string, List<string>> modelPaths)
+        {
+            if (!modelPaths.TryGetValue(package, out List<string> paths))
+            {
+                paths = new List<string>();
+                modelPaths[package.ToLower()] = paths;
+            }
+            paths.Add(path);
+            //Console.WriteLine("++ " + package);
+        }
+        
         
         static void Main_Q()
         {

@@ -82,7 +82,6 @@ namespace Iviz.Roslib
             keepRunning = true;
             task = Task.Run(() => Run(timeoutInMs));
 
-
             return localEndpoint;
         }
 
@@ -167,15 +166,15 @@ namespace Iviz.Roslib
                 };
             }
             int totalLength = 4 * contents.Length;
-            for (int i = 0; i < contents.Length; i++)
+            foreach (string entry in contents)
             {
-                totalLength += contents[i].Length;
+                totalLength += entry.Length;
             }
             writer.Write(totalLength);
-            for (int i = 0; i < contents.Length; i++)
+            foreach (string entry in contents)
             {
-                writer.Write(contents[i].Length);
-                writer.Write(BuiltIns.UTF8.GetBytes(contents[i]));
+                writer.Write(entry.Length);
+                writer.Write(BuiltIns.UTF8.GetBytes(entry));
 #if DEBUG__
                 Logger.Log(">>> " + contents[i]);
 #endif
@@ -183,7 +182,7 @@ namespace Iviz.Roslib
             return totalLength;
         }
 
-        string ProcessRemoteHeader(List<string> fields)
+        string ProcessRemoteHeader(IReadOnlyCollection<string> fields)
         {
             if (fields.Count < 5)
             {
@@ -191,15 +190,15 @@ namespace Iviz.Roslib
             }
 
             Dictionary<string, string> values = new Dictionary<string, string>();
-            for (int i = 0; i < fields.Count; i++)
+            foreach (string field in fields)
             {
-                int index = fields[i].IndexOf('=');
+                int index = field.IndexOf('=');
                 if (index < 0)
                 {
-                    return $"error=Invalid field '{fields[i]}'";
+                    return $"error=Invalid field '{field}'";
                 }
-                string key = fields[i].Substring(0, index);
-                values[key] = fields[i].Substring(index + 1);
+                string key = field.Substring(0, index);
+                values[key] = field.Substring(index + 1);
             }
 
             if (!values.TryGetValue("callerid", out string receivedId) || receivedId != RemoteCallerId)
@@ -221,15 +220,15 @@ namespace Iviz.Roslib
                     return $"error=Expected type '{topicInfo.Type}' but received instead '{receivedType}', closing connection";
                 }
             }
-            if (!values.TryGetValue("md5sum", out string receivedMd5sum) || receivedMd5sum != topicInfo.Md5Sum)
+            if (!values.TryGetValue("md5sum", out string receivedMd5Sum) || receivedMd5Sum != topicInfo.Md5Sum)
             {
-                if (receivedMd5sum == "*")
+                if (receivedMd5Sum == "*")
                 {
-                    Logger.LogDebug($"{this}: Expected md5 '{topicInfo.Md5Sum}' but received instead '{receivedMd5sum}'. Continuing...");
+                    Logger.LogDebug($"{this}: Expected md5 '{topicInfo.Md5Sum}' but received instead '{receivedMd5Sum}'. Continuing...");
                 }
                 else
                 {
-                    return $"error=Expected md5 '{topicInfo.Md5Sum}' but received instead '{receivedMd5sum}', closing connection";
+                    return $"error=Expected md5 '{topicInfo.Md5Sum}' but received instead '{receivedMd5Sum}', closing connection";
                 }
             }
             if (values.TryGetValue("tcp_nodelay", out string receivedNoDelay) && receivedNoDelay == "1")

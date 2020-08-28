@@ -6,7 +6,7 @@ namespace Iviz.Sdf
     {
         public Uri Uri { get; }
         public string Name { get; }
-        public bool Static { get; }
+        public bool? Static { get; }
         public Pose Pose { get; } = Pose.Identity;
         
         internal Include(XmlNode node)

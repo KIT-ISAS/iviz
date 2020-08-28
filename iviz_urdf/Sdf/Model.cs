@@ -1,5 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Net;
 using System.Xml;
 
 namespace Iviz.Sdf
@@ -16,8 +20,11 @@ namespace Iviz.Sdf
         public bool EnableWind { get; }
         public ReadOnlyCollection<Frame> Frames { get; }
         public Pose Pose { get; } = Pose.Identity;
+        public Pose IncludePose { get; }
         public ReadOnlyCollection<Link> Links { get; }
-        
+
+        internal bool HasIncludes { get; }
+
         internal Model(XmlNode node)
         {
             Name = node.Attributes?["name"]?.Value;
@@ -31,7 +38,7 @@ namespace Iviz.Sdf
             Includes = includes.AsReadOnly();
             Models = models.AsReadOnly();
             Frames = frames.AsReadOnly();
-            Links = links.AsReadOnly(); 
+            Links = links.AsReadOnly();
 
             foreach (XmlNode child in node.ChildNodes)
             {
@@ -65,7 +72,75 @@ namespace Iviz.Sdf
                         links.Add(new Link(child));
                         break;
                 }
-            }            
+            }
+
+            HasIncludes = Includes.Count != 0 || Models.Any(model => model.HasIncludes);
+        }
+
+        Model(Model source, IDictionary<string, List<string>> modelPaths)
+        {
+            Name = source.Name;
+            CanonicalLink = source.CanonicalLink;
+            Static = source.Static;
+            SelfCollide = source.SelfCollide;
+            AllowAutoDisable = source.AllowAutoDisable;
+            EnableWind = source.EnableWind;
+            Frames = source.Frames;
+            Pose = source.Pose;
+            Links = source.Links;
+
+            var resolvedModels = source.Models.Select(model => model.ResolveIncludes(modelPaths));
+            var resolvedIncludes = source.Includes.Select(include => new Model(include, modelPaths));
+
+            Models = resolvedModels.Concat(resolvedIncludes).ToList().AsReadOnly();
+            Includes = new List<Include>().AsReadOnly();
+        }
+
+        internal Model(Include include, IDictionary<string, List<string>> modelPaths)
+        {
+            System.Uri uri = include.Uri.ToUri();
+
+            if (!modelPaths.TryGetValue(uri.Host, out List<string> paths))
+            {
+                Console.Error.WriteLine("Error: Failed to find path '" + uri.Host + "'");
+                return;
+            }
+
+            string sdfPath = paths[0] + "/model.sdf";
+            if (!File.Exists(sdfPath))
+            {
+                throw new FileNotFoundException(sdfPath);
+            }
+
+            string sdfText = File.ReadAllText(sdfPath);
+            Sdf sdf = Sdf.Create(sdfText);
+            if (sdf.Models.Count == 0)
+            {
+                Console.WriteLine("Warning: Included model file " + sdfPath + " with no models!");
+                return;
+            }
+
+            Model source = sdf.Models[0].ResolveIncludes(modelPaths);
+
+            Name = include.Name ?? source.Name;
+            CanonicalLink = source.CanonicalLink;
+            Static = include.Static ?? source.Static;
+            SelfCollide = source.SelfCollide;
+            AllowAutoDisable = source.AllowAutoDisable;
+            EnableWind = source.EnableWind;
+            Frames = source.Frames;
+            Pose = source.Pose;
+            IncludePose = include.Pose;
+            Links = Name is null ? 
+                source.Links : 
+                source.Links.Select(link => new Link(link, Name + "::" + link.Name)).ToList().AsReadOnly();
+            Models = source.Models;
+            Includes = source.Includes; // should be empty
+        }
+
+        internal Model ResolveIncludes(IDictionary<string, List<string>> modelPaths)
+        {
+            return !HasIncludes ? this : new Model(this, modelPaths);
         }
     }
 }

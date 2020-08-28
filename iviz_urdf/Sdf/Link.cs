@@ -6,6 +6,7 @@ namespace Iviz.Sdf
 {
     public sealed class Link
     {
+
         public string Name { get; }
         public bool Gravity { get; } = true;
         public bool EnableWind { get; }
@@ -57,5 +58,16 @@ namespace Iviz.Sdf
                 }
             }            
         }
+        
+        internal Link(Link link, string newName)
+        {
+            Name = newName;
+            EnableWind = link.EnableWind;
+            SelfCollide = link.SelfCollide;
+            Kinematic = link.Kinematic;
+            MustBeBaseLink = link.MustBeBaseLink;
+            Visuals = link.Visuals;
+            Lights = link.Lights;
+        }        
     }
 }

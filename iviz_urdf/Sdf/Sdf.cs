@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Xml;
 
 namespace Iviz.Sdf
@@ -11,6 +12,8 @@ namespace Iviz.Sdf
         public ReadOnlyCollection<Model> Models { get; }
         public ReadOnlyCollection<Light> Lights { get; }
 
+        bool HasIncludes { get; } 
+            
         Sdf(XmlNode node)
         {
             if (node == null)
@@ -40,8 +43,18 @@ namespace Iviz.Sdf
                         lights.Add(new Light(child));
                         break;
                 }
-            }            
+            }
+
+            HasIncludes = Worlds.Any(world => world.HasIncludes) || Models.Any(model => model.HasIncludes);
         }
+
+        Sdf(Sdf source, IDictionary<string, List<string>> modelPaths)
+        {
+            Worlds = source.Worlds.Select(world => world.ResolveIncludes(modelPaths)).ToList().AsReadOnly();
+            Models = source.Models.Select(model => model.ResolveIncludes(modelPaths)).ToList().AsReadOnly();
+            Lights = source.Lights;
+        }
+
         
         public static Sdf Create(string xmlData)
         {
@@ -65,6 +78,11 @@ namespace Iviz.Sdf
             }
 
             return new Sdf(root);
-        }        
+        }
+
+        public Sdf ResolveIncludes(IDictionary<string, List<string>> modelPaths)
+        {
+            return !HasIncludes ? this : new Sdf(this, modelPaths);
+        }
     }
 }

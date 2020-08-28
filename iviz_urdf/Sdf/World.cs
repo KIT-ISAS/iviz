@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Xml;
 
 namespace Iviz.Sdf
@@ -28,6 +29,8 @@ namespace Iviz.Sdf
         public ReadOnlyCollection<Frame> Frames { get; }
         public ReadOnlyCollection<Model> Models { get; }
 
+        internal bool HasIncludes { get; }
+        
         internal World(XmlNode node)
         {
             Name = node.Attributes?["name"]?.Value;
@@ -66,6 +69,28 @@ namespace Iviz.Sdf
                         break;
                 }
             }
+            
+            HasIncludes = Includes.Count != 0 || Models.Any(model => model.HasIncludes);            
         }
+        World(World source, IDictionary<string, List<string>> modelPaths)
+        {
+            Name = source.Name;
+            Wind = source.Wind;
+            Gravity = source.Gravity;
+            Lights = source.Lights;
+            Frames = source.Frames;
+
+
+            var resolvedModels = source.Models.Select(model => model.ResolveIncludes(modelPaths));
+            var resolvedIncludes = source.Includes.Select(include => new Model(include, modelPaths));
+
+            Models = resolvedModels.Concat(resolvedIncludes).ToList().AsReadOnly();
+            Includes = new List<Include>().AsReadOnly();            
+        }
+        
+        internal World ResolveIncludes(IDictionary<string, List<string>> modelPaths)
+        {
+            return !HasIncludes ? this : new World(this, modelPaths);
+        }        
     }
 }
