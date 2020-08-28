@@ -46,8 +46,8 @@ namespace Iviz.App
                 case Resource.Module.PointCloud: return o.AddComponent<PointCloudPanelContents>();
                 case Resource.Module.Grid: return o.AddComponent<GridPanelContents>();
                 case Resource.Module.Image: return o.AddComponent<ImagePanelContents>();
-                case Resource.Module.Robot: return o.AddComponent<RobotPanelContents>();
-                case Resource.Module.SimpleRobot: return o.AddComponent<SimpleRobotPanelContents>();
+                case Resource.Module.LegacyRobot: return o.AddComponent<RobotPanelContents>();
+                case Resource.Module.Robot: return o.AddComponent<SimpleRobotPanelContents>();
                 case Resource.Module.Marker: return o.AddComponent<MarkerPanelContents>();
                 case Resource.Module.InteractiveMarker: return o.AddComponent<InteractiveMarkerPanelContents>();
                 case Resource.Module.JointState: return o.AddComponent<JointStatePanelContents>();

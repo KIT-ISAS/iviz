@@ -40,7 +40,7 @@ namespace Iviz.Resources
             TF,
             PointCloud,
             Image,
-            Robot,
+            LegacyRobot,
             Marker,
             InteractiveMarker,
             JointState,
@@ -52,7 +52,7 @@ namespace Iviz.Resources
             Joystick,
             Path,
             GridMap,
-            SimpleRobot,
+            Robot,
         }
 
         /// <summary>

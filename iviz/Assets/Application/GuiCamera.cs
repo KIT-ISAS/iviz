@@ -288,7 +288,6 @@ namespace Iviz.App
             if (!(CameraViewOverride is null))
             {
                 Transform.SetPose(CameraViewOverride.AbsolutePose);
-                //Transform.position += (CameraViewOverride.AbsolutePose.position - Transform.position) * 0.001f;
             }
                 
             if (IsMobile)
@@ -327,23 +326,7 @@ namespace Iviz.App
                 }
             }
         }
-
-        /*
-        bool IsPointerOnCanvas(Canvas canvas)
-        {
-            return canvas.enabled && canvas.gameObject.activeInHierarchy &&
-                   RectTransformUtility.RectangleContainsScreenPoint(canvas.transform as RectTransform, PointerPosition,
-                       MainCamera);
-        }
         
-        bool IsPointerOnRaycaster(GraphicRaycaster raycaster)
-        {
-            List<RaycastResult> results = new List<RaycastResult>();
-            raycaster.Raycast(new PointerEventData(EventSystem.current) { position = PointerPosition}, results);
-            return results.Count != 0;
-        }
-        */
-
         void StartOrbiting()
         {
             Vector3 diff = orbitCenter - Transform.position;
@@ -428,7 +411,6 @@ namespace Iviz.App
                 alreadyScaling = false;
                 return;
             }
-            //Debug.Log(alreadyMoving);ww
 
             Vector2 pointerAltDiff;
             float altDistanceDiff;
@@ -527,33 +509,17 @@ namespace Iviz.App
             Transform.rotation = Quaternion.Euler(orbitY, orbitX, 0);
         }
 
-        float totalRun = 0;
-
         void ProcessFlying()
         {
             const float mainSpeed = 2f; //regular speed
-            const float shiftAdd = 1.0f; //multiplied by how long shift is held.  Basically running
-            const float maxShift = 100.0f; //Maximum speed when holding shift
-            //const float camSens = 0.25f; //How sensitive it with mouse
 
             if (!PointerDown)
             {
-                //totalRun = 0;
                 return;
             }
             
-            //Mouse  camera angle done.  
-            //Keyboard commands
             Vector3 p = GetBaseInput();
-            //totalRun += Time.deltaTime;
-            //p *= Mathf.Max(shiftAdd, mainSpeed);
             p = Vector3.Scale(p, mainSpeed * new Vector3(2,  2, 1));
-            /*
-            p.x = Mathf.Clamp(p.x, -maxShift, maxShift);
-            p.y = Mathf.Clamp(p.y, -maxShift, maxShift);
-            p.z = Mathf.Clamp(p.z, -maxShift, maxShift);
-            */
-
             p *= Time.deltaTime;
 
             Transform.position += Transform.rotation * p;

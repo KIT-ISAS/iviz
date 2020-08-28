@@ -9,7 +9,7 @@ namespace Iviz.App
     {
         static readonly List<(string caption, Resource.Module module)> Modules = new List<(string, Resource.Module)>
         {
-            ("<b>Robot</b>\nRobot from the parameter server", Resource.Module.SimpleRobot),
+            ("<b>Robot</b>\nRobot from the parameter server", Resource.Module.Robot),
             ("<b>Grid</b>\nA reference plane", Resource.Module.Grid),
             ("<b>DepthCloud</b>\nPoint cloud generator for depth images", Resource.Module.DepthCloud),
             ("<b>AR</b>\nManager for augmented reality", Resource.Module.AR),

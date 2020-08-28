@@ -123,8 +123,8 @@ namespace Iviz.App
                 case Resource.Module.PointCloud: return new PointCloudModuleData(c);
                 case Resource.Module.Grid: return new GridModuleData(c);
                 case Resource.Module.Image: return new ImageModuleData(c);
-                case Resource.Module.Robot: return new RobotModuleData(c);
-                case Resource.Module.SimpleRobot: return new SimpleRobotModuleData(c);
+                case Resource.Module.LegacyRobot: return new RobotModuleData(c);
+                case Resource.Module.Robot: return new SimpleRobotModuleData(c);
                 case Resource.Module.Marker: return new MarkerModuleData(c);
                 case Resource.Module.InteractiveMarker: return new InteractiveMarkerModuleData(c);
                 case Resource.Module.JointState: return new JointStateModuleData(c);

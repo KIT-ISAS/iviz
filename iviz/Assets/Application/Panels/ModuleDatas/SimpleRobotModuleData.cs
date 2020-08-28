@@ -18,7 +18,7 @@ namespace Iviz.App
         readonly SimpleRobotController robot;
 
         public override DataPanelContents Panel => panel;
-        public override Resource.Module Module => Resource.Module.SimpleRobot;
+        public override Resource.Module Module => Resource.Module.Robot;
         public override IConfiguration Configuration => robot.Config;
         public override IController Controller => robot;
 
@@ -30,7 +30,7 @@ namespace Iviz.App
             {
                 robot.Config = (SimpleRobotConfiguration)constructor.Configuration;
             }
-            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.SimpleRobot) as SimpleRobotPanelContents;
+            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Robot) as SimpleRobotPanelContents;
             UpdateModuleButton();
             
             ConnectionManager.Connection.ConnectionStateChanged += OnConnectionStateChanged;

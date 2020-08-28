@@ -11,7 +11,7 @@ namespace Iviz.Controllers
     public sealed class SimpleRobotConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public Guid Id { get; set; }
-        [DataMember] public Resource.Module Module => Resource.Module.SimpleRobot;
+        [DataMember] public Resource.Module Module => Resource.Module.Robot;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string SourceParameter { get; set; } = "";
         [DataMember] public string FramePrefix { get; set; } = "";

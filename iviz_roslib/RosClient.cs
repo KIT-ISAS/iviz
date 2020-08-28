@@ -309,26 +309,6 @@ namespace Iviz.Roslib
                 .Where(iface => iface.NetworkInterfaceType == type && iface.OperationalStatus == OperationalStatus.Up)
                 .SelectMany(iface => iface.GetIPProperties().UnicastAddresses)
                 .FirstOrDefault(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork);
-                
-            /*
-            NetworkInterface[] interfaces = NetworkInterface.GetAllNetworkInterfaces();
-            foreach (NetworkInterface item in interfaces)
-            {
-                if (item.NetworkInterfaceType != type || item.OperationalStatus != OperationalStatus.Up)
-                {
-                    continue;
-                }
-
-                foreach (UnicastIPAddressInformation ip in item.GetIPProperties().UnicastAddresses)
-                {
-                    if (ip.Address.AddressFamily == AddressFamily.InterNetwork)
-                    {
-                        return new Uri($"http://{ip.Address}:{DefaultCallerPort}/");
-                    }
-                }
-            }
-            return null;
-            */
             
             return ipInfo is null ? null : new Uri($"http://{ipInfo.Address}:{DefaultCallerPort}/");
         }         

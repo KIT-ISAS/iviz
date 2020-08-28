@@ -16,7 +16,7 @@ namespace Iviz.App
         public string RobotName => robot.LongName;
 
         public override DataPanelContents Panel => panel;
-        public override Resource.Module Module => Resource.Module.Robot;
+        public override Resource.Module Module => Resource.Module.LegacyRobot;
         public override IConfiguration Configuration => robot.Config;
         public override IController Controller => robot;
 
@@ -30,7 +30,7 @@ namespace Iviz.App
             {
                 robot.Config = (RobotConfiguration)constructor.Configuration;
             }
-            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Robot) as RobotPanelContents;
+            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.LegacyRobot) as RobotPanelContents;
             UpdateModuleButton();
         }
 

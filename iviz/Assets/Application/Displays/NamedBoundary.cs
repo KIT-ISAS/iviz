@@ -6,7 +6,7 @@ namespace Iviz.Controllers
 {
     public sealed class NamedBoundary : MonoBehaviour, IDisplay, IRecyclable
     {
-        const float FrameAxisLength = 0.15f;
+        const float FrameAxisLength = 0.015f;
         const float FrameAxisWidth = FrameAxisLength / 16;
 
         readonly GameObject[] frames = new GameObject[8];
