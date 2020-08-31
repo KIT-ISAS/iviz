@@ -218,7 +218,10 @@ namespace Iviz.Controllers
 
             DateTime now = DateTime.Now;
             string[] deadMarkers =
-                imarkers.Where(x => x.Value.ExpirationTime < now).Select(x => x.Key).ToArray();
+                imarkers.Where(x => x.Value.ExpirationTime < now).
+                    Select(x => x.Key).
+                    ToArray();
+            
             foreach (string key in deadMarkers)
             {
                 DestroyInteractiveMarker(key);

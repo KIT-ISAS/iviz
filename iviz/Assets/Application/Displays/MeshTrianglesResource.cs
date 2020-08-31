@@ -12,7 +12,7 @@ namespace Iviz.Displays
         
         [SerializeField] Bounds localBounds;
 
-        Bounds LocalBounds
+        public Bounds LocalBounds
         {
             get => localBounds;
             set

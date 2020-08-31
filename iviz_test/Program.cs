@@ -28,16 +28,13 @@ namespace iviz_test
         static void Main()
         {
             string data =
-                File.ReadAllText("/Users/akzeac/Downloads/aws-robomaker-hospital-world-master/worlds/hospital.world");
-            Sdf sdf = Sdf.Create(data);
+                File.ReadAllText("/Users/akzeac/Shared/aws-robomaker-hospital-world/worlds/hospital.world");
+            SdfFile sdfFile = SdfFile.Create(data);
 
-            Dictionary<string, List<string>> modelPaths = new Dictionary<string, List<string>>();
+            var modelPaths = SdfFile.CreateModelPaths("/Users/akzeac/Shared/aws-robomaker-hospital-world/");
+            SdfFile newSdfFile = sdfFile.ResolveIncludes(modelPaths);
 
-            CheckModelPath("", "/Users/akzeac/Downloads/aws-robomaker-hospital-world-master/", modelPaths);
-
-            Sdf newSdf = sdf.ResolveIncludes(modelPaths);
-
-            Console.WriteLine(JsonConvert.SerializeObject(newSdf, Formatting.Indented));
+            //Console.WriteLine(JsonConvert.SerializeObject(newSdfFile, Formatting.Indented));
 
         }
         

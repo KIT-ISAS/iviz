@@ -10,7 +10,7 @@ namespace Iviz.Displays
 {
     public static class SceneModel
     {
-        public static GameObject Create([NotNull] Uri uri, [NotNull] Msgs.IvizMsgs.Model msg)
+        public static GameObject Create(Uri uri, Msgs.IvizMsgs.Model msg)
         {
             if (uri is null)
             {
@@ -22,9 +22,9 @@ namespace Iviz.Displays
                 throw new ArgumentNullException(nameof(msg));
             }
 
-            GameObject root = new GameObject(uri.ToString());
+            GameObject root = new GameObject("Root:" + uri + " [" + msg.OrientationHint + "]");
 
-            switch (msg.OrientationHint)
+            switch (msg.OrientationHint.ToUpperInvariant())
             {
                 case "Z_UP":
                     root.transform.localRotation = Quaternion.Euler(0, -90, 0);
@@ -74,6 +74,7 @@ namespace Iviz.Displays
 
                 var material = msg.Materials[mesh.MaterialIndex];
                 r.Color = new Color32(material.Diffuse.R, material.Diffuse.G, material.Diffuse.B, material.Diffuse.A);
+                r.EmissiveColor = new Color32(material.Emissive.R, material.Emissive.G, material.Emissive.B, material.Emissive.A);
 
                 if (material.DiffuseTexture.Path.Length != 0)
                 {
@@ -104,7 +105,8 @@ namespace Iviz.Displays
                 GameObject nodeObject = new GameObject($"Node:{node.Name}");
                 nodes.Add(nodeObject);
 
-                nodeObject.transform.SetParent(node.Parent == -1 ? root.transform : nodes[node.Parent].transform,
+                nodeObject.transform.SetParent(
+                    node.Parent == -1 ? root.transform : nodes[node.Parent].transform,
                     false);
 
                 Matrix4x4 m = new Matrix4x4();

@@ -26,6 +26,18 @@ namespace Iviz.Displays
             }
         }
 
+        [SerializeField] Color emissiveColor = Color.black;
+        public Color EmissiveColor
+        {
+            get => emissiveColor;
+            set
+            {
+                emissiveColor = value;
+                MainRenderer?.SetPropertyEmissiveColor(emissiveColor);
+            }
+        }
+
+        
         [SerializeField] Color color = Color.white;
         public Color Color
         {
@@ -110,6 +122,7 @@ namespace Iviz.Displays
             base.Awake();
             MainRenderer = GetComponent<MeshRenderer>();
             Color = color;
+            EmissiveColor = emissiveColor;
             Tint = tint;
 
             MainRenderer.SetPropertyMainTexST(Vector2.zero, Vector2.one, 0);
@@ -119,6 +132,7 @@ namespace Iviz.Displays
         {
             base.Suspend();
             Color = Color.white;
+            EmissiveColor = Color.black;
             ColliderEnabled = true;
             OcclusionOnlyActive = false;
         }

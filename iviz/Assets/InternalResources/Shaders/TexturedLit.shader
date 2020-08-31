@@ -28,6 +28,7 @@
         UNITY_INSTANCING_BUFFER_START(Props)
         UNITY_DEFINE_INSTANCED_PROP(fixed4, _Color)
         UNITY_DEFINE_INSTANCED_PROP(float4, _MainTex_ST_)
+        UNITY_DEFINE_INSTANCED_PROP(fixed4, _EmissiveColor)
         UNITY_INSTANCING_BUFFER_END(Props)
 
         void surf(Input IN, inout SurfaceOutputStandard o) {
@@ -36,6 +37,7 @@
             o.Albedo *= tex2D(_MainTex, IN.uv_MainTex * st.xy + st.zw).rgb;
             o.Metallic = _Metallic;
             o.Smoothness = _Smoothness;
+			o.Emission = UNITY_ACCESS_INSTANCED_PROP(Props, _EmissiveColor).rgb;
         }
         ENDCG
     }

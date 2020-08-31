@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Security.Cryptography;
 using System.Text;
@@ -41,20 +43,25 @@ namespace Iviz.Displays
         readonly Dictionary<Uri, Resource.Info<Texture2D>> loadedTextures =
             new Dictionary<Uri, Resource.Info<Texture2D>>();
 
-        readonly GameObject node;
+        public GameObject Node { get; }
         readonly Model generator = new Model();
-
+        
         string ResourceFolder { get; }
         string ResourceFile { get; }
 
-        public ExternalResourceManager()
+        public ReadOnlyCollection<Uri> GetListOfModels() => 
+            new ReadOnlyCollection<Uri>(resourceFiles.Models.Keys.ToList()); 
+
+        public ExternalResourceManager(bool createNode = true)
         {
             ResourceFolder = ModuleListPanel.PersistentDataPath + "/resources";
-            ResourceFile = ModuleListPanel.PersistentDataPath + "/resources.json";            
-            
-            node = new GameObject("External Resources");
-            node.transform.parent = TFListener.ListenersFrame?.transform;
-            node.SetActive(false);
+            ResourceFile = ModuleListPanel.PersistentDataPath + "/resources.json";
+
+            if (createNode)
+            {
+                Node = new GameObject("External Resources");
+                Node.SetActive(false);
+            }
 
             if (!File.Exists(ResourceFile))
             {
@@ -84,7 +91,7 @@ namespace Iviz.Displays
         }
 
 
-        public bool TryGet([NotNull] Uri uri, out Resource.Info<GameObject> resource)
+        public bool TryGet(Uri uri, out Resource.Info<GameObject> resource, bool allowServiceCall = true)
         {
             if (uri is null)
             {
@@ -118,16 +125,21 @@ namespace Iviz.Displays
                     Uri = uri.ToString()
                 }
             };
-            if (!ConnectionManager.Connection.CallService(ModelServiceName, msg))
+            if (!allowServiceCall || !ConnectionManager.Connection.CallService(ModelServiceName, msg))
             {
+                Debug.Log("ExternalResourceManager: Call Service failed!");
                 return false;
             }
 
             resource = ProcessModelResponse(uri, msg.Response);
+            if (resource is null)
+            {
+                Debug.Log("ExternalResourceManager: Resource is null!");
+            }
             return resource != null;
         }
 
-        public bool TryGet([NotNull] Uri uri, out Resource.Info<Texture2D> resource)
+        public bool TryGet(Uri uri, out Resource.Info<Texture2D> resource)
         {
             if (uri is null)
             {
@@ -184,7 +196,6 @@ namespace Iviz.Displays
 
             Model msg = Msgs.Buffer.Deserialize(generator, buffer, buffer.Length);
             GameObject obj = CreateModelObject(uri, msg);
-            obj.name = uri.ToString();
 
             Resource.Info<GameObject> resource = new Resource.Info<GameObject>(uri.ToString(), obj);
             loadedModels[uri] = resource;
@@ -222,7 +233,6 @@ namespace Iviz.Displays
             try
             {
                 GameObject obj = CreateModelObject(uri, msg.Model);
-                obj.name = uri.ToString();
 
                 Resource.Info<GameObject> info = new Resource.Info<GameObject>(uri.ToString(), obj);
                 loadedModels[uri] = info;
@@ -298,7 +308,7 @@ namespace Iviz.Displays
         GameObject CreateModelObject(Uri uri, Model msg)
         {
             GameObject model = SceneModel.Create(uri, msg);
-            model.transform.SetParent(node.transform, false);
+            model.transform.SetParent(Node?.transform, false);
             return model;
         }
     }

@@ -728,6 +728,7 @@ namespace Iviz.Resources
 
         public static bool TryGetResource(Uri uri, out GameObjectInfo info)
         {
+            Debug.Log("was called");
             return Internal.TryGet(uri, out info) ||
                    External.TryGet(uri, out info);
         }

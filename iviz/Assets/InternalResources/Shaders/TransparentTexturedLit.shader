@@ -28,6 +28,7 @@
         UNITY_INSTANCING_BUFFER_START(Props)
         UNITY_DEFINE_INSTANCED_PROP(fixed4, _Color)
         UNITY_DEFINE_INSTANCED_PROP(float4, _MainTex_ST_)
+        UNITY_DEFINE_INSTANCED_PROP(fixed4, _EmissiveColor)
         UNITY_INSTANCING_BUFFER_END(Props)
 
         void surf(Input IN, inout SurfaceOutputStandard o) {
@@ -38,6 +39,7 @@
             o.Smoothness = _Smoothness;
             o.Alpha = albedoColor.a * textureColor.a;
             o.Metallic = _Metallic * o.Alpha;
+            o.Emission = UNITY_ACCESS_INSTANCED_PROP(Props, _EmissiveColor).rgb;
         }
         ENDCG
     }

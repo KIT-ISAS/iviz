@@ -70,7 +70,6 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            Name = "AggregatedMeshMarker";
             Collider = GetComponent<BoxCollider>();
         }
 

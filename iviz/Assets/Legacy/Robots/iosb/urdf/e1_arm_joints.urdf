@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+<!-- Copyright (c) 2013-2017 Fraunhofer IOSB, Karlsruhe, Germany. All rights reserved. -->
+<robot name="WackerNeusonET18">
+  <joint name="cabin_rotation" type="continuous">
+    <parent link="chassis"/>
+    <child link="cabin"/>
+    <origin rpy="0  0  0" xyz="0 0 0"/>
+    <axis xyz="0  0  1"/>
+    <limit effort="0" lower="-3.141" upper="3.141" velocity="1.05"/>
+  </joint>
+  <joint name="slewing_revolute" type="revolute">
+    <parent link="cabin"/>
+    <child link="intermediate_cabin_boom"/>
+    <origin rpy="0  0  0" xyz="0.53    -0.044    0.57999"/>
+    <axis xyz="0  0  1"/>
+    <limit effort="0" lower="-0.78" upper="1.36" velocity="0.2"/>
+  </joint>
+  <joint name="boom_revolute" type="revolute">
+    <parent link="intermediate_cabin_boom"/>
+    <child link="boom"/>
+    <origin rpy="0  0  0" xyz="0.095  0     0.18"/>
+    <axis xyz="0  1  0"/>
+    <limit effort="0" lower="0.0" upper="1.5" velocity="0.2"/>
+  </joint>
+  <joint name="stick_revolute" type="revolute">
+    <parent link="boom"/>
+    <child link="stick"/>
+    <origin rpy="0  0  0" xyz="0.7    0     1.655"/>
+    <axis xyz="0  1  0"/>
+    <limit effort="0" lower="-0.02" upper="2" velocity="0.2"/>
+  </joint>
+</robot>

@@ -273,7 +273,7 @@ namespace Iviz.App
             var eventSystem = EventSystem.current;
             List<RaycastResult> results = new List<RaycastResult>();
             eventSystem.RaycastAll(new PointerEventData(eventSystem) {position = pointerPosition},  results);
-            return results.Any(x => x.gameObject.layer == 5);            
+            return results.Any(result => result.gameObject.layer == 5);            
         }
         
         void LateUpdate()
@@ -509,20 +509,45 @@ namespace Iviz.App
             Transform.rotation = Quaternion.Euler(orbitY, orbitX, 0);
         }
 
+        const float MainSpeed = 2f; 
+        const float MainAccel = 5f; 
+        const float BrakeCoeff = 0.9f; 
+        static readonly Vector3 DirectionWeight = new Vector3(1.5f,  0, 1);
+        
+        Vector3 accel;
         void ProcessFlying()
         {
-            const float mainSpeed = 2f; //regular speed
-
             if (!PointerDown)
             {
+                accel = Vector3.zero;
                 return;
             }
             
-            Vector3 p = GetBaseInput();
-            p = Vector3.Scale(p, mainSpeed * new Vector3(2,  2, 1));
-            p *= Time.deltaTime;
+            Vector3 baseInput = GetBaseInput();
+            float deltaTime = Time.deltaTime;
+            
+            Vector3 speed = deltaTime * Vector3.Scale(baseInput, MainSpeed * DirectionWeight);
 
-            Transform.position += Transform.rotation * p;
+            accel += Vector3.Scale(baseInput, MainAccel * DirectionWeight) * deltaTime;
+            if (baseInput.x == 0)
+            {
+                accel.x *= BrakeCoeff;
+                if (Mathf.Abs(accel.x) < 0.001f)
+                {
+                    accel.x = 0;
+                }
+            }
+            if (baseInput.z == 0)
+            {
+                accel.z *= BrakeCoeff;
+                if (Mathf.Abs(accel.z) < 0.001f)
+                {
+                    accel.z = 0;
+                }
+            }
+            speed += deltaTime * accel;  
+
+            Transform.position += Transform.rotation * speed;
         }
 
         public void LookAt(in Vector3 position)

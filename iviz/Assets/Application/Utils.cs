@@ -78,10 +78,10 @@ namespace Iviz
 
         public static Vector3 Ros2Unity(this Vector3 vector3) => new Vector3(-vector3.y, vector3.z, vector3.x);
 
-        public static Quaternion Ros2Unity(this Quaternion quaternion) =>
+        static Quaternion Ros2Unity(this Quaternion quaternion) =>
             new Quaternion(quaternion.y, -quaternion.z, -quaternion.x, quaternion.w);
 
-        public static Quaternion Unity2Ros(this Quaternion quaternion) =>
+        static Quaternion Unity2Ros(this Quaternion quaternion) =>
             new Quaternion(-quaternion.z, quaternion.x, -quaternion.y, quaternion.w);
         //----
 
@@ -229,7 +229,7 @@ namespace Iviz
             );
         }
 
-        public static Msgs.GeometryMsgs.Quaternion Unity2RosQuaternion(this Quaternion p)
+        static Msgs.GeometryMsgs.Quaternion Unity2RosQuaternion(this Quaternion p)
         {
             return ToRos(p.Unity2Ros());
         }
@@ -363,7 +363,6 @@ namespace Iviz
 
         public static void SetPose(this Transform t, in Pose p)
         {
-            //Debug.Log("setting pose");
             t.SetPositionAndRotation(p.position, p.rotation);
         }
 
@@ -465,9 +464,12 @@ namespace Iviz
             meshRenderer.SetPropertyBlock(propBlock, id);
         }
 
-        static readonly int MainTexSTPropId = Shader.PropertyToID("_MainTex_ST_");
+        static readonly int MainTexStPropId = Shader.PropertyToID("_MainTex_ST_");
 
-        public static void SetPropertyMainTexST(this MeshRenderer meshRenderer, in Vector2 xy, in Vector2 wh,
+        public static void SetPropertyMainTexST(
+            this MeshRenderer meshRenderer, 
+            in Vector2 xy, 
+            in Vector2 wh,
             int id = 0)
         {
             if (propBlock == null)
@@ -476,8 +478,60 @@ namespace Iviz
             }
 
             meshRenderer.GetPropertyBlock(propBlock, id);
-            propBlock.SetVector(MainTexSTPropId, new Vector4(wh.x, wh.y, xy.x, xy.y));
+            propBlock.SetVector(MainTexStPropId, new Vector4(wh.x, wh.y, xy.x, xy.y));
             meshRenderer.SetPropertyBlock(propBlock, id);
         }
     }
+    
+    public static class UrdfUtils
+    {
+        public static Vector3 ToVector3(this Urdf.Vector3 v)
+        {
+            return new Vector3(v.X, v.Y, v.Z).Ros2Unity();
+        }
+
+        static Quaternion ToQuaternion(this Urdf.Vector3 v)
+        {
+            return new Vector3(v.X, v.Y, v.Z).RosRpy2Unity();
+        }
+
+        public static Pose ToPose(this Urdf.Origin v)
+        {
+            return new Pose(v.Xyz.ToVector3(), v.Rpy.ToQuaternion());
+        }
+
+        public static Color ToColor(this Urdf.Color v)
+        {
+            return new Color(v.Rgba.R, v.Rgba.G, v.Rgba.B, v.Rgba.A);
+        }
+
+        public static bool IsReference(this Urdf.Material material)
+        {
+            return material.Color is null && material.Texture is null && !(material.Name is null);
+        }
+    }
+    
+    public static class SdfUtils
+    {
+        public static Vector3 ToVector3(this Sdf.Vector3 v)
+        {
+            return new Vector3((float)v.X, (float)v.Y, (float)v.Z).Ros2Unity();
+        }
+
+        static Quaternion ToQuaternion(this Sdf.Vector3 v)
+        {
+            return new Vector3((float)v.X, (float)v.Y, (float)v.Z).RosRpy2Unity();
+        }
+
+        public static Pose ToPose(this Sdf.Pose v)
+        {
+            return new Pose(v.Position.ToVector3(), v.Orientation.ToQuaternion());
+        }
+
+        public static Color ToColor(this Sdf.Color v)
+        {
+            return new Color((float)v.R, (float)v.G, (float)v.B, (float)v.A);
+        }
+    }
+    
 }
