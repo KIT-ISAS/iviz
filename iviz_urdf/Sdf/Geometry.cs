@@ -1,4 +1,7 @@
+using System.Collections.Generic;
+using System.IO;
 using System.Xml;
+using Iviz.Urdf;
 
 namespace Iviz.Sdf
 {
@@ -10,6 +13,8 @@ namespace Iviz.Sdf
         public Mesh Mesh { get; }
         public Plane Plane { get; }
         public Sphere Sphere { get; }
+        
+        internal bool HasUri { get; }
         
         internal Geometry(XmlNode node)
         {
@@ -36,7 +41,45 @@ namespace Iviz.Sdf
                         Sphere = new Sphere(child);
                         break;
                 }
-            }     
+            }
+
+            HasUri = Mesh != null;
         }
+        
+        Geometry(Geometry source, IReadOnlyDictionary<string, string> modelPaths)
+        {
+            Empty = source.Empty;
+            Box = source.Box;
+            Cylinder = source.Cylinder;
+            Plane = source.Plane;
+            Sphere = source.Sphere;
+
+            System.Uri meshUri = source.Mesh.Uri.ToUri();
+            string modelPackage = meshUri.Host;
+            string modelPath = modelPaths[modelPackage];
+            
+            string basePath = modelPaths[""];
+            
+            System.Uri resolvedUri;
+            if (modelPath.StartsWith(basePath))
+            {
+                string packageName = new DirectoryInfo(basePath).Name;
+                string relativePath = "/" + modelPath.Substring(basePath.Length);
+                resolvedUri = new System.Uri($"package://{packageName}{relativePath}{meshUri.AbsolutePath}");
+            }
+            else
+            {
+                // if this happens, then its unfortunate, I cannot tell from here which package this belongs to
+                // file scheme is a security risk and will probably get rejected
+                resolvedUri = new System.Uri($"file://{modelPath}{meshUri.AbsolutePath}");
+            }
+            
+            Mesh = new Mesh(new Uri(resolvedUri), source.Mesh.Scale);
+        }
+        
+        internal Geometry ResolveUris(IReadOnlyDictionary<string, string> modelPaths)
+        {
+            return HasUri ? new Geometry(this, modelPaths) : this;
+        }         
     }
 }

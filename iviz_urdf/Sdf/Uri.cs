@@ -13,5 +13,10 @@ namespace Iviz.Sdf
         {
             Value = node.InnerText ?? throw new MalformedSdfException();
         }        
+
+        internal Uri(System.Uri value)
+        {
+            Value = value.ToString();
+        }        
     }
 }

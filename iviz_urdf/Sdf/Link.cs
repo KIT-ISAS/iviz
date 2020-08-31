@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Xml;
 
 namespace Iviz.Sdf
@@ -17,6 +18,8 @@ namespace Iviz.Sdf
         public ReadOnlyCollection<Visual> Visuals { get; }
         public ReadOnlyCollection<Light> Lights { get; }
 
+        internal bool HasUri { get; }
+        
         internal Link(XmlNode node)
         {
             Name = node.Attributes?["name"]?.Value;
@@ -56,7 +59,9 @@ namespace Iviz.Sdf
                         lights.Add(new Light(child));
                         break;
                 }
-            }            
+            }
+
+            HasUri = Visuals.Any(visual => visual.HasUri);
         }
         
         internal Link(Link link, string newName)
@@ -68,6 +73,22 @@ namespace Iviz.Sdf
             MustBeBaseLink = link.MustBeBaseLink;
             Visuals = link.Visuals;
             Lights = link.Lights;
+        }
+        
+        Link(Link link, IReadOnlyDictionary<string, string> modelPaths)
+        {
+            Name = link.Name;
+            EnableWind = link.EnableWind;
+            SelfCollide = link.SelfCollide;
+            Kinematic = link.Kinematic;
+            MustBeBaseLink = link.MustBeBaseLink;
+            Visuals = link.Visuals.Select(visual => visual.ResolveUris(modelPaths)).ToList().AsReadOnly();
+            Lights = link.Lights;
         }        
+        
+        internal Link ResolveUris(IReadOnlyDictionary<string, string> modelPaths)
+        {
+            return HasUri ? new Link(this, modelPaths) : this;
+        }            
     }
 }

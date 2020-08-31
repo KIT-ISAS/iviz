@@ -1,3 +1,4 @@
+using System.Runtime.Versioning;
 using System.Xml;
 
 namespace Iviz.Sdf
@@ -21,6 +22,12 @@ namespace Iviz.Sdf
                         break;
                 }
             }
+        }
+
+        internal Mesh(Uri uri, Vector3 scale)
+        {
+            Uri = uri;
+            Scale = scale;
         }
     }
 }

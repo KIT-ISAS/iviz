@@ -72,7 +72,7 @@ namespace Iviz.Sdf
             
             HasIncludes = Includes.Count != 0 || Models.Any(model => model.HasIncludes);            
         }
-        World(World source, IDictionary<string, List<string>> modelPaths)
+        World(World source, IReadOnlyDictionary<string, string> modelPaths)
         {
             Name = source.Name;
             Wind = source.Wind;
@@ -88,7 +88,7 @@ namespace Iviz.Sdf
             Includes = new List<Include>().AsReadOnly();            
         }
         
-        internal World ResolveIncludes(IDictionary<string, List<string>> modelPaths)
+        internal World ResolveIncludes(IReadOnlyDictionary<string, string> modelPaths)
         {
             return !HasIncludes ? this : new World(this, modelPaths);
         }        

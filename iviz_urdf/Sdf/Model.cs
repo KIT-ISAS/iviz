@@ -74,10 +74,13 @@ namespace Iviz.Sdf
                 }
             }
 
-            HasIncludes = Includes.Count != 0 || Models.Any(model => model.HasIncludes);
+            HasIncludes = 
+                Includes.Count != 0 || 
+                Models.Any(model => model.HasIncludes) ||
+                Links.Any(link => link.HasUri);
         }
 
-        Model(Model source, IDictionary<string, List<string>> modelPaths)
+        Model(Model source, IReadOnlyDictionary<string, string> modelPaths)
         {
             Name = source.Name;
             CanonicalLink = source.CanonicalLink;
@@ -87,7 +90,7 @@ namespace Iviz.Sdf
             EnableWind = source.EnableWind;
             Frames = source.Frames;
             Pose = source.Pose;
-            Links = source.Links;
+            Links = source.Links.Select(link => link.ResolveUris(modelPaths)).ToList().AsReadOnly();
 
             var resolvedModels = source.Models.Select(model => model.ResolveIncludes(modelPaths));
             var resolvedIncludes = source.Includes.Select(include => new Model(include, modelPaths));
@@ -96,31 +99,31 @@ namespace Iviz.Sdf
             Includes = new List<Include>().AsReadOnly();
         }
 
-        internal Model(Include include, IDictionary<string, List<string>> modelPaths)
+        internal Model(Include include, IReadOnlyDictionary<string, string> modelPaths)
         {
             System.Uri uri = include.Uri.ToUri();
 
-            if (!modelPaths.TryGetValue(uri.Host, out List<string> paths))
+            if (!modelPaths.TryGetValue(uri.Host, out string path))
             {
                 Console.Error.WriteLine("Error: Failed to find path '" + uri.Host + "'");
                 return;
             }
 
-            string sdfPath = paths[0] + "/model.sdf";
+            string sdfPath = path + "/model.sdf";
             if (!File.Exists(sdfPath))
             {
                 throw new FileNotFoundException(sdfPath);
             }
 
             string sdfText = File.ReadAllText(sdfPath);
-            Sdf sdf = Sdf.Create(sdfText);
-            if (sdf.Models.Count == 0)
+            SdfFile sdfFile = SdfFile.Create(sdfText);
+            if (sdfFile.Models.Count == 0)
             {
                 Console.WriteLine("Warning: Included model file " + sdfPath + " with no models!");
                 return;
             }
 
-            Model source = sdf.Models[0].ResolveIncludes(modelPaths);
+            Model source = sdfFile.Models[0].ResolveIncludes(modelPaths);
 
             Name = include.Name ?? source.Name;
             CanonicalLink = source.CanonicalLink;
@@ -138,9 +141,11 @@ namespace Iviz.Sdf
             Includes = source.Includes; // should be empty
         }
 
-        internal Model ResolveIncludes(IDictionary<string, List<string>> modelPaths)
+        internal Model ResolveIncludes(IReadOnlyDictionary<string, string> modelPaths)
         {
-            return !HasIncludes ? this : new Model(this, modelPaths);
+            return HasIncludes ? new Model(this, modelPaths) : this;
         }
+
+        public bool IsInvalid => Models is null || Links is null;
     }
 }

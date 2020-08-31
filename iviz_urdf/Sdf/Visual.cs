@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Xml;
 
 namespace Iviz.Sdf
@@ -11,6 +12,8 @@ namespace Iviz.Sdf
         public Material Material { get; }
         public Geometry Geometry { get; }
 
+        internal bool HasUri { get; }
+    
         internal Visual(XmlNode node)
         {
             Name = node.Attributes?["name"]?.Value;
@@ -36,6 +39,23 @@ namespace Iviz.Sdf
                         break;
                 }
             }
+
+            HasUri = Geometry.HasUri;
         }
+
+        Visual(Visual source, IReadOnlyDictionary<string, string> modelPaths)
+        {
+            Name = source.Name;
+            CastShadows = source.CastShadows;
+            Transparency = source.Transparency;
+            Pose = source.Pose;
+            Material = source.Material;
+            Geometry = source.Geometry.ResolveUris(modelPaths);
+        }
+        
+        internal Visual ResolveUris(IReadOnlyDictionary<string, string> modelPaths)
+        {
+            return HasUri ? new Visual(this, modelPaths) : this;
+        }        
     }
 }
