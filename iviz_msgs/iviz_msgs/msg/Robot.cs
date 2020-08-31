@@ -56,17 +56,17 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Name is null) throw new System.NullReferenceException();
-            if (Links is null) throw new System.NullReferenceException();
+            if (Name is null) throw new System.NullReferenceException(nameof(Name));
+            if (Links is null) throw new System.NullReferenceException(nameof(Links));
             for (int i = 0; i < Links.Length; i++)
             {
-                if (Links[i] is null) throw new System.NullReferenceException();
+                if (Links[i] is null) throw new System.NullReferenceException($"{nameof(Links)}[{i}]");
                 Links[i].RosValidate();
             }
-            if (Joints is null) throw new System.NullReferenceException();
+            if (Joints is null) throw new System.NullReferenceException(nameof(Joints));
             for (int i = 0; i < Joints.Length; i++)
             {
-                if (Joints[i] is null) throw new System.NullReferenceException();
+                if (Joints[i] is null) throw new System.NullReferenceException($"{nameof(Joints)}[{i}]");
                 Joints[i].RosValidate();
             }
         }

@@ -76,16 +76,16 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException(nameof(Header));
             Header.RosValidate();
-            if (Name is null) throw new System.NullReferenceException();
+            if (Name is null) throw new System.NullReferenceException(nameof(Name));
             for (int i = 0; i < Name.Length; i++)
             {
-                if (Name[i] is null) throw new System.NullReferenceException();
+                if (Name[i] is null) throw new System.NullReferenceException($"{nameof(Name)}[{i}]");
             }
-            if (Position is null) throw new System.NullReferenceException();
-            if (Velocity is null) throw new System.NullReferenceException();
-            if (Effort is null) throw new System.NullReferenceException();
+            if (Position is null) throw new System.NullReferenceException(nameof(Position));
+            if (Velocity is null) throw new System.NullReferenceException(nameof(Velocity));
+            if (Effort is null) throw new System.NullReferenceException(nameof(Effort));
         }
     
         public int RosMessageLength

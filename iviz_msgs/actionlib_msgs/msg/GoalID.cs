@@ -48,7 +48,7 @@ namespace Iviz.Msgs.ActionlibMsgs
         
         public void RosValidate()
         {
-            if (Id is null) throw new System.NullReferenceException();
+            if (Id is null) throw new System.NullReferenceException(nameof(Id));
         }
     
         public int RosMessageLength

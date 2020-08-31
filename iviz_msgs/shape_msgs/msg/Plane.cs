@@ -43,7 +43,7 @@ namespace Iviz.Msgs.ShapeMsgs
         
         public void RosValidate()
         {
-            if (Coef is null) throw new System.NullReferenceException();
+            if (Coef is null) throw new System.NullReferenceException(nameof(Coef));
             if (Coef.Length != 4) throw new System.IndexOutOfRangeException();
         }
     

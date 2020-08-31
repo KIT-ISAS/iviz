@@ -43,10 +43,10 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Array is null) throw new System.NullReferenceException();
+            if (Array is null) throw new System.NullReferenceException(nameof(Array));
             for (int i = 0; i < Array.Length; i++)
             {
-                if (Array[i] is null) throw new System.NullReferenceException();
+                if (Array[i] is null) throw new System.NullReferenceException($"{nameof(Array)}[{i}]");
                 Array[i].RosValidate();
             }
         }

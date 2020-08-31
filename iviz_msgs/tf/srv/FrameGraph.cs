@@ -89,7 +89,7 @@ namespace Iviz.Msgs.Tf
         
         public void RosValidate()
         {
-            if (DotGraph is null) throw new System.NullReferenceException();
+            if (DotGraph is null) throw new System.NullReferenceException(nameof(DotGraph));
         }
     
         public int RosMessageLength

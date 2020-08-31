@@ -93,7 +93,7 @@ namespace Iviz.Msgs.StdSrvs
         
         public void RosValidate()
         {
-            if (Message is null) throw new System.NullReferenceException();
+            if (Message is null) throw new System.NullReferenceException(nameof(Message));
         }
     
         public int RosMessageLength

@@ -53,12 +53,12 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Vertices is null) throw new System.NullReferenceException();
-            if (VertexNormals is null) throw new System.NullReferenceException();
-            if (Faces is null) throw new System.NullReferenceException();
+            if (Vertices is null) throw new System.NullReferenceException(nameof(Vertices));
+            if (VertexNormals is null) throw new System.NullReferenceException(nameof(VertexNormals));
+            if (Faces is null) throw new System.NullReferenceException(nameof(Faces));
             for (int i = 0; i < Faces.Length; i++)
             {
-                if (Faces[i] is null) throw new System.NullReferenceException();
+                if (Faces[i] is null) throw new System.NullReferenceException($"{nameof(Faces)}[{i}]");
                 Faces[i].RosValidate();
             }
         }

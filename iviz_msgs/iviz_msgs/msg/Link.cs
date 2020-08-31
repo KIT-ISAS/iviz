@@ -72,9 +72,9 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Name is null) throw new System.NullReferenceException();
-            if (GeometryShape is null) throw new System.NullReferenceException();
-            if (GeometryMesh is null) throw new System.NullReferenceException();
+            if (Name is null) throw new System.NullReferenceException(nameof(Name));
+            if (GeometryShape is null) throw new System.NullReferenceException(nameof(GeometryShape));
+            if (GeometryMesh is null) throw new System.NullReferenceException(nameof(GeometryMesh));
         }
     
         public int RosMessageLength

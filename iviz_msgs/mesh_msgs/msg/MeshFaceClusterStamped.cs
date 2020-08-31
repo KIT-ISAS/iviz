@@ -56,10 +56,10 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException(nameof(Header));
             Header.RosValidate();
-            if (Uuid is null) throw new System.NullReferenceException();
-            if (Cluster is null) throw new System.NullReferenceException();
+            if (Uuid is null) throw new System.NullReferenceException(nameof(Uuid));
+            if (Cluster is null) throw new System.NullReferenceException(nameof(Cluster));
             Cluster.RosValidate();
         }
     

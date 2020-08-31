@@ -56,7 +56,7 @@ namespace Iviz.Msgs.StdMsgs
         
         public void RosValidate()
         {
-            if (FrameId is null) throw new System.NullReferenceException();
+            if (FrameId is null) throw new System.NullReferenceException(nameof(FrameId));
         }
     
         public int RosMessageLength

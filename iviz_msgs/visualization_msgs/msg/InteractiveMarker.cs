@@ -87,20 +87,20 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException(nameof(Header));
             Header.RosValidate();
-            if (Name is null) throw new System.NullReferenceException();
-            if (Description is null) throw new System.NullReferenceException();
-            if (MenuEntries is null) throw new System.NullReferenceException();
+            if (Name is null) throw new System.NullReferenceException(nameof(Name));
+            if (Description is null) throw new System.NullReferenceException(nameof(Description));
+            if (MenuEntries is null) throw new System.NullReferenceException(nameof(MenuEntries));
             for (int i = 0; i < MenuEntries.Length; i++)
             {
-                if (MenuEntries[i] is null) throw new System.NullReferenceException();
+                if (MenuEntries[i] is null) throw new System.NullReferenceException($"{nameof(MenuEntries)}[{i}]");
                 MenuEntries[i].RosValidate();
             }
-            if (Controls is null) throw new System.NullReferenceException();
+            if (Controls is null) throw new System.NullReferenceException(nameof(Controls));
             for (int i = 0; i < Controls.Length; i++)
             {
-                if (Controls[i] is null) throw new System.NullReferenceException();
+                if (Controls[i] is null) throw new System.NullReferenceException($"{nameof(Controls)}[{i}]");
                 Controls[i].RosValidate();
             }
         }

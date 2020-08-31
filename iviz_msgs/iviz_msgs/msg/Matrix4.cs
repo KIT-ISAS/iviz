@@ -38,7 +38,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (M is null) throw new System.NullReferenceException();
+            if (M is null) throw new System.NullReferenceException(nameof(M));
             if (M.Length != 16) throw new System.IndexOutOfRangeException();
         }
     

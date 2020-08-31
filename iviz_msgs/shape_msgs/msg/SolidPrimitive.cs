@@ -70,7 +70,7 @@ namespace Iviz.Msgs.ShapeMsgs
         
         public void RosValidate()
         {
-            if (Dimensions is null) throw new System.NullReferenceException();
+            if (Dimensions is null) throw new System.NullReferenceException(nameof(Dimensions));
         }
     
         public int RosMessageLength

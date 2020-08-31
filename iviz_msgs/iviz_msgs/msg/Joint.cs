@@ -69,10 +69,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Name is null) throw new System.NullReferenceException();
-            if (Type is null) throw new System.NullReferenceException();
-            if (Parent is null) throw new System.NullReferenceException();
-            if (Child is null) throw new System.NullReferenceException();
+            if (Name is null) throw new System.NullReferenceException(nameof(Name));
+            if (Type is null) throw new System.NullReferenceException(nameof(Type));
+            if (Parent is null) throw new System.NullReferenceException(nameof(Parent));
+            if (Child is null) throw new System.NullReferenceException(nameof(Child));
         }
     
         public int RosMessageLength

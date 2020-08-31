@@ -48,12 +48,12 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException(nameof(Header));
             Header.RosValidate();
-            if (Poses is null) throw new System.NullReferenceException();
+            if (Poses is null) throw new System.NullReferenceException(nameof(Poses));
             for (int i = 0; i < Poses.Length; i++)
             {
-                if (Poses[i] is null) throw new System.NullReferenceException();
+                if (Poses[i] is null) throw new System.NullReferenceException($"{nameof(Poses)}[{i}]");
                 Poses[i].RosValidate();
             }
         }

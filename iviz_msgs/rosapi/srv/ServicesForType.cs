@@ -85,7 +85,7 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Type is null) throw new System.NullReferenceException();
+            if (Type is null) throw new System.NullReferenceException(nameof(Type));
         }
     
         public int RosMessageLength
@@ -133,10 +133,10 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Services is null) throw new System.NullReferenceException();
+            if (Services is null) throw new System.NullReferenceException(nameof(Services));
             for (int i = 0; i < Services.Length; i++)
             {
-                if (Services[i] is null) throw new System.NullReferenceException();
+                if (Services[i] is null) throw new System.NullReferenceException($"{nameof(Services)}[{i}]");
             }
         }
     

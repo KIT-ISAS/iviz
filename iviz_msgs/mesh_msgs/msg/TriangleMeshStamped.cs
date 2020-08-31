@@ -43,9 +43,9 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException(nameof(Header));
             Header.RosValidate();
-            if (Mesh is null) throw new System.NullReferenceException();
+            if (Mesh is null) throw new System.NullReferenceException(nameof(Mesh));
             Mesh.RosValidate();
         }
     

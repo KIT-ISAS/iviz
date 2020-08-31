@@ -85,7 +85,7 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Node is null) throw new System.NullReferenceException();
+            if (Node is null) throw new System.NullReferenceException(nameof(Node));
         }
     
         public int RosMessageLength
@@ -143,20 +143,20 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Subscribing is null) throw new System.NullReferenceException();
+            if (Subscribing is null) throw new System.NullReferenceException(nameof(Subscribing));
             for (int i = 0; i < Subscribing.Length; i++)
             {
-                if (Subscribing[i] is null) throw new System.NullReferenceException();
+                if (Subscribing[i] is null) throw new System.NullReferenceException($"{nameof(Subscribing)}[{i}]");
             }
-            if (Publishing is null) throw new System.NullReferenceException();
+            if (Publishing is null) throw new System.NullReferenceException(nameof(Publishing));
             for (int i = 0; i < Publishing.Length; i++)
             {
-                if (Publishing[i] is null) throw new System.NullReferenceException();
+                if (Publishing[i] is null) throw new System.NullReferenceException($"{nameof(Publishing)}[{i}]");
             }
-            if (Services is null) throw new System.NullReferenceException();
+            if (Services is null) throw new System.NullReferenceException(nameof(Services));
             for (int i = 0; i < Services.Length; i++)
             {
-                if (Services[i] is null) throw new System.NullReferenceException();
+                if (Services[i] is null) throw new System.NullReferenceException($"{nameof(Services)}[{i}]");
             }
         }
     

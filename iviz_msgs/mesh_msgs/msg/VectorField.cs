@@ -43,8 +43,8 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Positions is null) throw new System.NullReferenceException();
-            if (Vectors is null) throw new System.NullReferenceException();
+            if (Positions is null) throw new System.NullReferenceException(nameof(Positions));
+            if (Vectors is null) throw new System.NullReferenceException(nameof(Vectors));
         }
     
         public int RosMessageLength

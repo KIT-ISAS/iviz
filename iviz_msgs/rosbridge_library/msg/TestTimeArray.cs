@@ -38,7 +38,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         public void RosValidate()
         {
-            if (Times is null) throw new System.NullReferenceException();
+            if (Times is null) throw new System.NullReferenceException(nameof(Times));
         }
     
         public int RosMessageLength

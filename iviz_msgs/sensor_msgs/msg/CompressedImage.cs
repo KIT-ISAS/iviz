@@ -56,10 +56,10 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException(nameof(Header));
             Header.RosValidate();
-            if (Format is null) throw new System.NullReferenceException();
-            if (Data is null) throw new System.NullReferenceException();
+            if (Format is null) throw new System.NullReferenceException(nameof(Format));
+            if (Data is null) throw new System.NullReferenceException(nameof(Data));
         }
     
         public int RosMessageLength

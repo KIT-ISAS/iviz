@@ -135,16 +135,6 @@ namespace Iviz.MsgsGen
                 Where(x => x.Type == MsgParser.ElementType.Variable).
                 Cast<MsgParser.Variable>().
                 ToList();
-
-            /*
-            foreach (var element in elements)
-            {
-                if (element.Type == MsgParser.ElementType.Variable)
-                {
-                    variables.Add((MsgParser.Variable)element);
-                }
-            }
-            */
         }
 
         public static void DoResolveClasses(PackageInfo packageInfo, string package, List<MsgParser.Variable> variables)
@@ -588,20 +578,21 @@ namespace Iviz.MsgsGen
                 {
                     if (!forceStruct)
                     {
-                        lines.Add("    if (" + variable.fieldName + " is null) throw new System.NullReferenceException();");
-                        lines.Add("    if (" + variable.fieldName + ".Length != " + variable.arraySize + ") throw new System.IndexOutOfRangeException();");
+                        lines.Add($"    if ({variable.fieldName} is null) throw new System.NullReferenceException(nameof({variable.fieldName}));");
+                        lines.Add($"    if ({variable.fieldName}.Length != {variable.arraySize}) throw new System.IndexOutOfRangeException();");
                     }
                 }
                 else if (!variable.IsArray &&
-                  ((BuiltInTypes.Contains(variable.rosClassName) && variable.rosClassName != "string") ||
+                  (BuiltInTypes.Contains(variable.rosClassName) && variable.rosClassName != "string" ||
                   (variable.classInfo?.forceStruct ?? false)))
                 {
+                    // do nothing
                 }
                 else
                 {
                     if (!(variable.classInfo?.fakeStruct ?? false))
                     {
-                        lines.Add("    if (" + variable.fieldName + " is null) throw new System.NullReferenceException();");
+                        lines.Add("    if (" + variable.fieldName + $" is null) throw new System.NullReferenceException(nameof({variable.fieldName}));");
                     }
                     if (!variable.IsArray && variable.rosClassName != "string")
                     {
@@ -612,20 +603,20 @@ namespace Iviz.MsgsGen
                 {
                     if (variable.rosClassName == "string")
                     {
-                        lines.Add("    for (int i = 0; i < " + variable.fieldName + ".Length; i++)");
+                        lines.Add($"    for (int i = 0; i < {variable.fieldName}.Length; i++)");
                         lines.Add("    {");
-                        lines.Add("        if (" + variable.fieldName + "[i] is null) throw new System.NullReferenceException();");
+                        lines.Add($"        if ({variable.fieldName}[i] is null) throw new System.NullReferenceException($\"{{nameof({variable.fieldName})}}[{{i}}]\");");
                         lines.Add("    }");
                     }
                     else if (!BuiltInTypes.Contains(variable.rosClassName) && !(variable.classInfo?.forceStruct ?? false))
                     {
-                        lines.Add("    for (int i = 0; i < " + variable.fieldName + ".Length; i++)");
+                        lines.Add($"    for (int i = 0; i < {variable.fieldName}.Length; i++)");
                         lines.Add("    {");
                         if (!(variable.classInfo?.fakeStruct ?? false))
                         {
-                            lines.Add("        if (" + variable.fieldName + "[i] is null) throw new System.NullReferenceException();");
+                            lines.Add($"        if ({variable.fieldName}[i] is null) throw new System.NullReferenceException($\"{{nameof({variable.fieldName})}}[{{i}}]\");");
                         }
-                        lines.Add("        " + variable.fieldName + "[i].RosValidate();");
+                        lines.Add($"        {variable.fieldName}[i].RosValidate();");
                         lines.Add("    }");
                     }
                 }

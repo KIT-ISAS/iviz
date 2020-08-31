@@ -85,7 +85,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         public void RosValidate()
         {
-            if (@int is null) throw new System.NullReferenceException();
+            if (@int is null) throw new System.NullReferenceException(nameof(@int));
         }
     
         public int RosMessageLength

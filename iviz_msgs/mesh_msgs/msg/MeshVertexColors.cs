@@ -39,7 +39,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (VertexColors is null) throw new System.NullReferenceException();
+            if (VertexColors is null) throw new System.NullReferenceException(nameof(VertexColors));
         }
     
         public int RosMessageLength

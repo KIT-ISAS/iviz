@@ -47,11 +47,11 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (MapUuid is null) throw new System.NullReferenceException();
-            if (Features is null) throw new System.NullReferenceException();
+            if (MapUuid is null) throw new System.NullReferenceException(nameof(MapUuid));
+            if (Features is null) throw new System.NullReferenceException(nameof(Features));
             for (int i = 0; i < Features.Length; i++)
             {
-                if (Features[i] is null) throw new System.NullReferenceException();
+                if (Features[i] is null) throw new System.NullReferenceException($"{nameof(Features)}[{i}]");
                 Features[i].RosValidate();
             }
         }

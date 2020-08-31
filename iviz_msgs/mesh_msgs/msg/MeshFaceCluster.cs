@@ -45,8 +45,8 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (FaceIndices is null) throw new System.NullReferenceException();
-            if (Label is null) throw new System.NullReferenceException();
+            if (FaceIndices is null) throw new System.NullReferenceException(nameof(FaceIndices));
+            if (Label is null) throw new System.NullReferenceException(nameof(Label));
         }
     
         public int RosMessageLength

@@ -85,7 +85,7 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Topic is null) throw new System.NullReferenceException();
+            if (Topic is null) throw new System.NullReferenceException(nameof(Topic));
         }
     
         public int RosMessageLength
@@ -133,7 +133,7 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Type is null) throw new System.NullReferenceException();
+            if (Type is null) throw new System.NullReferenceException(nameof(Type));
         }
     
         public int RosMessageLength

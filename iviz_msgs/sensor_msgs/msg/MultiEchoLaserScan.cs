@@ -100,18 +100,18 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException(nameof(Header));
             Header.RosValidate();
-            if (Ranges is null) throw new System.NullReferenceException();
+            if (Ranges is null) throw new System.NullReferenceException(nameof(Ranges));
             for (int i = 0; i < Ranges.Length; i++)
             {
-                if (Ranges[i] is null) throw new System.NullReferenceException();
+                if (Ranges[i] is null) throw new System.NullReferenceException($"{nameof(Ranges)}[{i}]");
                 Ranges[i].RosValidate();
             }
-            if (Intensities is null) throw new System.NullReferenceException();
+            if (Intensities is null) throw new System.NullReferenceException(nameof(Intensities));
             for (int i = 0; i < Intensities.Length; i++)
             {
-                if (Intensities[i] is null) throw new System.NullReferenceException();
+                if (Intensities[i] is null) throw new System.NullReferenceException($"{nameof(Intensities)}[{i}]");
                 Intensities[i].RosValidate();
             }
         }

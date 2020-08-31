@@ -82,16 +82,16 @@ namespace Iviz.Msgs.RosgraphMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException(nameof(Header));
             Header.RosValidate();
-            if (Name is null) throw new System.NullReferenceException();
-            if (Msg is null) throw new System.NullReferenceException();
-            if (File is null) throw new System.NullReferenceException();
-            if (Function is null) throw new System.NullReferenceException();
-            if (Topics is null) throw new System.NullReferenceException();
+            if (Name is null) throw new System.NullReferenceException(nameof(Name));
+            if (Msg is null) throw new System.NullReferenceException(nameof(Msg));
+            if (File is null) throw new System.NullReferenceException(nameof(File));
+            if (Function is null) throw new System.NullReferenceException(nameof(Function));
+            if (Topics is null) throw new System.NullReferenceException(nameof(Topics));
             for (int i = 0; i < Topics.Length; i++)
             {
-                if (Topics[i] is null) throw new System.NullReferenceException();
+                if (Topics[i] is null) throw new System.NullReferenceException($"{nameof(Topics)}[{i}]");
             }
         }
     

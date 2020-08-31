@@ -41,7 +41,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Echoes is null) throw new System.NullReferenceException();
+            if (Echoes is null) throw new System.NullReferenceException(nameof(Echoes));
         }
     
         public int RosMessageLength

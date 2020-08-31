@@ -55,8 +55,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Path is null) throw new System.NullReferenceException();
-            if (Data is null) throw new System.NullReferenceException();
+            if (Path is null) throw new System.NullReferenceException(nameof(Path));
+            if (Data is null) throw new System.NullReferenceException(nameof(Data));
         }
     
         public int RosMessageLength

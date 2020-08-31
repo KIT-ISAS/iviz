@@ -42,10 +42,10 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public void RosValidate()
         {
-            if (Transforms is null) throw new System.NullReferenceException();
+            if (Transforms is null) throw new System.NullReferenceException(nameof(Transforms));
             for (int i = 0; i < Transforms.Length; i++)
             {
-                if (Transforms[i] is null) throw new System.NullReferenceException();
+                if (Transforms[i] is null) throw new System.NullReferenceException($"{nameof(Transforms)}[{i}]");
                 Transforms[i].RosValidate();
             }
         }

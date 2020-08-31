@@ -53,11 +53,11 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException(nameof(Header));
             Header.RosValidate();
-            if (Info is null) throw new System.NullReferenceException();
+            if (Info is null) throw new System.NullReferenceException(nameof(Info));
             Info.RosValidate();
-            if (Data is null) throw new System.NullReferenceException();
+            if (Data is null) throw new System.NullReferenceException(nameof(Data));
         }
     
         public int RosMessageLength

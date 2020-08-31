@@ -44,9 +44,9 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException(nameof(Header));
             Header.RosValidate();
-            if (Accel is null) throw new System.NullReferenceException();
+            if (Accel is null) throw new System.NullReferenceException(nameof(Accel));
             Accel.RosValidate();
         }
     

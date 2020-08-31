@@ -96,33 +96,33 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Triangles is null) throw new System.NullReferenceException();
+            if (Triangles is null) throw new System.NullReferenceException(nameof(Triangles));
             for (int i = 0; i < Triangles.Length; i++)
             {
-                if (Triangles[i] is null) throw new System.NullReferenceException();
+                if (Triangles[i] is null) throw new System.NullReferenceException($"{nameof(Triangles)}[{i}]");
                 Triangles[i].RosValidate();
             }
-            if (Vertices is null) throw new System.NullReferenceException();
-            if (VertexNormals is null) throw new System.NullReferenceException();
-            if (VertexColors is null) throw new System.NullReferenceException();
-            if (TriangleColors is null) throw new System.NullReferenceException();
-            if (VertexTextureCoords is null) throw new System.NullReferenceException();
-            if (FaceMaterials is null) throw new System.NullReferenceException();
+            if (Vertices is null) throw new System.NullReferenceException(nameof(Vertices));
+            if (VertexNormals is null) throw new System.NullReferenceException(nameof(VertexNormals));
+            if (VertexColors is null) throw new System.NullReferenceException(nameof(VertexColors));
+            if (TriangleColors is null) throw new System.NullReferenceException(nameof(TriangleColors));
+            if (VertexTextureCoords is null) throw new System.NullReferenceException(nameof(VertexTextureCoords));
+            if (FaceMaterials is null) throw new System.NullReferenceException(nameof(FaceMaterials));
             for (int i = 0; i < FaceMaterials.Length; i++)
             {
-                if (FaceMaterials[i] is null) throw new System.NullReferenceException();
+                if (FaceMaterials[i] is null) throw new System.NullReferenceException($"{nameof(FaceMaterials)}[{i}]");
                 FaceMaterials[i].RosValidate();
             }
-            if (Textures is null) throw new System.NullReferenceException();
+            if (Textures is null) throw new System.NullReferenceException(nameof(Textures));
             for (int i = 0; i < Textures.Length; i++)
             {
-                if (Textures[i] is null) throw new System.NullReferenceException();
+                if (Textures[i] is null) throw new System.NullReferenceException($"{nameof(Textures)}[{i}]");
                 Textures[i].RosValidate();
             }
-            if (Clusters is null) throw new System.NullReferenceException();
+            if (Clusters is null) throw new System.NullReferenceException(nameof(Clusters));
             for (int i = 0; i < Clusters.Length; i++)
             {
-                if (Clusters[i] is null) throw new System.NullReferenceException();
+                if (Clusters[i] is null) throw new System.NullReferenceException($"{nameof(Clusters)}[{i}]");
                 Clusters[i].RosValidate();
             }
         }

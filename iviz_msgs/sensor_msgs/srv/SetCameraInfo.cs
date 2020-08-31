@@ -92,7 +92,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (CameraInfo is null) throw new System.NullReferenceException();
+            if (CameraInfo is null) throw new System.NullReferenceException(nameof(CameraInfo));
             CameraInfo.RosValidate();
         }
     
@@ -145,7 +145,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (StatusMessage is null) throw new System.NullReferenceException();
+            if (StatusMessage is null) throw new System.NullReferenceException(nameof(StatusMessage));
         }
     
         public int RosMessageLength

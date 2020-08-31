@@ -52,10 +52,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Name is null) throw new System.NullReferenceException();
-            if (Transform is null) throw new System.NullReferenceException();
+            if (Name is null) throw new System.NullReferenceException(nameof(Name));
+            if (Transform is null) throw new System.NullReferenceException(nameof(Transform));
             Transform.RosValidate();
-            if (Meshes is null) throw new System.NullReferenceException();
+            if (Meshes is null) throw new System.NullReferenceException(nameof(Meshes));
         }
     
         public int RosMessageLength

@@ -43,8 +43,8 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public void RosValidate()
         {
-            if (Key is null) throw new System.NullReferenceException();
-            if (Value is null) throw new System.NullReferenceException();
+            if (Key is null) throw new System.NullReferenceException(nameof(Key));
+            if (Value is null) throw new System.NullReferenceException(nameof(Value));
         }
     
         public int RosMessageLength

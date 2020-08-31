@@ -61,10 +61,10 @@ namespace Iviz.Msgs.OctomapMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException(nameof(Header));
             Header.RosValidate();
-            if (Id is null) throw new System.NullReferenceException();
-            if (Data is null) throw new System.NullReferenceException();
+            if (Id is null) throw new System.NullReferenceException(nameof(Id));
+            if (Data is null) throw new System.NullReferenceException(nameof(Data));
         }
     
         public int RosMessageLength

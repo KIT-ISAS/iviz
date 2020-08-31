@@ -90,8 +90,8 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Name is null) throw new System.NullReferenceException();
-            if (Value is null) throw new System.NullReferenceException();
+            if (Name is null) throw new System.NullReferenceException(nameof(Name));
+            if (Value is null) throw new System.NullReferenceException(nameof(Value));
         }
     
         public int RosMessageLength

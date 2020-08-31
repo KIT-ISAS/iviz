@@ -48,12 +48,12 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException(nameof(Header));
             Header.RosValidate();
-            if (Status is null) throw new System.NullReferenceException();
+            if (Status is null) throw new System.NullReferenceException(nameof(Status));
             for (int i = 0; i < Status.Length; i++)
             {
-                if (Status[i] is null) throw new System.NullReferenceException();
+                if (Status[i] is null) throw new System.NullReferenceException($"{nameof(Status)}[{i}]");
                 Status[i].RosValidate();
             }
         }

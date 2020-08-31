@@ -102,11 +102,11 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public void RosValidate()
         {
-            if (Id is null) throw new System.NullReferenceException();
-            if (Status is null) throw new System.NullReferenceException();
+            if (Id is null) throw new System.NullReferenceException(nameof(Id));
+            if (Status is null) throw new System.NullReferenceException(nameof(Status));
             for (int i = 0; i < Status.Length; i++)
             {
-                if (Status[i] is null) throw new System.NullReferenceException();
+                if (Status[i] is null) throw new System.NullReferenceException($"{nameof(Status)}[{i}]");
                 Status[i].RosValidate();
             }
         }

@@ -88,15 +88,15 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException(nameof(Header));
             Header.RosValidate();
-            if (Fields is null) throw new System.NullReferenceException();
+            if (Fields is null) throw new System.NullReferenceException(nameof(Fields));
             for (int i = 0; i < Fields.Length; i++)
             {
-                if (Fields[i] is null) throw new System.NullReferenceException();
+                if (Fields[i] is null) throw new System.NullReferenceException($"{nameof(Fields)}[{i}]");
                 Fields[i].RosValidate();
             }
-            if (Data is null) throw new System.NullReferenceException();
+            if (Data is null) throw new System.NullReferenceException(nameof(Data));
         }
     
         public int RosMessageLength

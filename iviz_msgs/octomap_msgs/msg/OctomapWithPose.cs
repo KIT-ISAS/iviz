@@ -50,9 +50,9 @@ namespace Iviz.Msgs.OctomapMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException(nameof(Header));
             Header.RosValidate();
-            if (Octomap is null) throw new System.NullReferenceException();
+            if (Octomap is null) throw new System.NullReferenceException(nameof(Octomap));
             Octomap.RosValidate();
         }
     

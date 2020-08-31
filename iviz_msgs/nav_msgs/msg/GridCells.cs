@@ -52,9 +52,9 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException(nameof(Header));
             Header.RosValidate();
-            if (Cells is null) throw new System.NullReferenceException();
+            if (Cells is null) throw new System.NullReferenceException(nameof(Cells));
         }
     
         public int RosMessageLength

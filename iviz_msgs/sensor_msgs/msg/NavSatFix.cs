@@ -93,11 +93,11 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException(nameof(Header));
             Header.RosValidate();
-            if (Status is null) throw new System.NullReferenceException();
+            if (Status is null) throw new System.NullReferenceException(nameof(Status));
             Status.RosValidate();
-            if (PositionCovariance is null) throw new System.NullReferenceException();
+            if (PositionCovariance is null) throw new System.NullReferenceException(nameof(PositionCovariance));
             if (PositionCovariance.Length != 9) throw new System.IndexOutOfRangeException();
         }
     

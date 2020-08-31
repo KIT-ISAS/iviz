@@ -87,23 +87,23 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            if (ServerId is null) throw new System.NullReferenceException();
-            if (Markers is null) throw new System.NullReferenceException();
+            if (ServerId is null) throw new System.NullReferenceException(nameof(ServerId));
+            if (Markers is null) throw new System.NullReferenceException(nameof(Markers));
             for (int i = 0; i < Markers.Length; i++)
             {
-                if (Markers[i] is null) throw new System.NullReferenceException();
+                if (Markers[i] is null) throw new System.NullReferenceException($"{nameof(Markers)}[{i}]");
                 Markers[i].RosValidate();
             }
-            if (Poses is null) throw new System.NullReferenceException();
+            if (Poses is null) throw new System.NullReferenceException(nameof(Poses));
             for (int i = 0; i < Poses.Length; i++)
             {
-                if (Poses[i] is null) throw new System.NullReferenceException();
+                if (Poses[i] is null) throw new System.NullReferenceException($"{nameof(Poses)}[{i}]");
                 Poses[i].RosValidate();
             }
-            if (Erases is null) throw new System.NullReferenceException();
+            if (Erases is null) throw new System.NullReferenceException(nameof(Erases));
             for (int i = 0; i < Erases.Length; i++)
             {
-                if (Erases[i] is null) throw new System.NullReferenceException();
+                if (Erases[i] is null) throw new System.NullReferenceException($"{nameof(Erases)}[{i}]");
             }
         }
     

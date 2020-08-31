@@ -49,10 +49,10 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException(nameof(Header));
             Header.RosValidate();
-            if (Uuid is null) throw new System.NullReferenceException();
-            if (MeshMaterials is null) throw new System.NullReferenceException();
+            if (Uuid is null) throw new System.NullReferenceException(nameof(Uuid));
+            if (MeshMaterials is null) throw new System.NullReferenceException(nameof(MeshMaterials));
             MeshMaterials.RosValidate();
         }
     

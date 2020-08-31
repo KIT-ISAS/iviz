@@ -49,7 +49,7 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public void RosValidate()
         {
-            if (ErrorString is null) throw new System.NullReferenceException();
+            if (ErrorString is null) throw new System.NullReferenceException(nameof(ErrorString));
         }
     
         public int RosMessageLength

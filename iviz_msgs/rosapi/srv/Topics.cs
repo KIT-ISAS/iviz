@@ -120,15 +120,15 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Topics_ is null) throw new System.NullReferenceException();
+            if (Topics_ is null) throw new System.NullReferenceException(nameof(Topics_));
             for (int i = 0; i < Topics_.Length; i++)
             {
-                if (Topics_[i] is null) throw new System.NullReferenceException();
+                if (Topics_[i] is null) throw new System.NullReferenceException($"{nameof(Topics_)}[{i}]");
             }
-            if (Types is null) throw new System.NullReferenceException();
+            if (Types is null) throw new System.NullReferenceException(nameof(Types));
             for (int i = 0; i < Types.Length; i++)
             {
-                if (Types[i] is null) throw new System.NullReferenceException();
+                if (Types[i] is null) throw new System.NullReferenceException($"{nameof(Types)}[{i}]");
             }
         }
     

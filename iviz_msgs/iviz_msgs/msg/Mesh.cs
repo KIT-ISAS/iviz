@@ -67,12 +67,12 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Name is null) throw new System.NullReferenceException();
-            if (Vertices is null) throw new System.NullReferenceException();
-            if (Normals is null) throw new System.NullReferenceException();
-            if (TexCoords is null) throw new System.NullReferenceException();
-            if (Colors is null) throw new System.NullReferenceException();
-            if (Faces is null) throw new System.NullReferenceException();
+            if (Name is null) throw new System.NullReferenceException(nameof(Name));
+            if (Vertices is null) throw new System.NullReferenceException(nameof(Vertices));
+            if (Normals is null) throw new System.NullReferenceException(nameof(Normals));
+            if (TexCoords is null) throw new System.NullReferenceException(nameof(TexCoords));
+            if (Colors is null) throw new System.NullReferenceException(nameof(Colors));
+            if (Faces is null) throw new System.NullReferenceException(nameof(Faces));
         }
     
         public int RosMessageLength

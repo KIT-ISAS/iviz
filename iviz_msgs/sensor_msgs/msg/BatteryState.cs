@@ -132,12 +132,12 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException(nameof(Header));
             Header.RosValidate();
-            if (CellVoltage is null) throw new System.NullReferenceException();
-            if (CellTemperature is null) throw new System.NullReferenceException();
-            if (Location is null) throw new System.NullReferenceException();
-            if (SerialNumber is null) throw new System.NullReferenceException();
+            if (CellVoltage is null) throw new System.NullReferenceException(nameof(CellVoltage));
+            if (CellTemperature is null) throw new System.NullReferenceException(nameof(CellTemperature));
+            if (Location is null) throw new System.NullReferenceException(nameof(Location));
+            if (SerialNumber is null) throw new System.NullReferenceException(nameof(SerialNumber));
         }
     
         public int RosMessageLength

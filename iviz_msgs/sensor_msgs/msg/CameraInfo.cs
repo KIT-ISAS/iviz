@@ -190,17 +190,17 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException();
+            if (Header is null) throw new System.NullReferenceException(nameof(Header));
             Header.RosValidate();
-            if (DistortionModel is null) throw new System.NullReferenceException();
-            if (D is null) throw new System.NullReferenceException();
-            if (K is null) throw new System.NullReferenceException();
+            if (DistortionModel is null) throw new System.NullReferenceException(nameof(DistortionModel));
+            if (D is null) throw new System.NullReferenceException(nameof(D));
+            if (K is null) throw new System.NullReferenceException(nameof(K));
             if (K.Length != 9) throw new System.IndexOutOfRangeException();
-            if (R is null) throw new System.NullReferenceException();
+            if (R is null) throw new System.NullReferenceException(nameof(R));
             if (R.Length != 9) throw new System.IndexOutOfRangeException();
-            if (P is null) throw new System.NullReferenceException();
+            if (P is null) throw new System.NullReferenceException(nameof(P));
             if (P.Length != 12) throw new System.IndexOutOfRangeException();
-            if (Roi is null) throw new System.NullReferenceException();
+            if (Roi is null) throw new System.NullReferenceException(nameof(Roi));
             Roi.RosValidate();
         }
     
