@@ -197,13 +197,13 @@ namespace Iviz.ModelService
             };
 
             Console.WriteLine(">> " + uri);
-        }        
+        }
 
 
         static Model LoadModel(string fileName)
         {
             string orientationHint = "";
-            if (fileName.HasSuffix(".dae"))
+            if (fileName.Length > 4 && fileName[^4..].ToLowerInvariant() == ".dae")
             { 
                 XmlDocument doc = new XmlDocument();
                 doc.Load(fileName);
