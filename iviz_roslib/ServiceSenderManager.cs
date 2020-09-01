@@ -8,14 +8,13 @@ using Iviz.Msgs;
 
 namespace Iviz.Roslib
 {
-    class ServiceSenderManager
+    internal class ServiceSenderManager
     {
         public Uri Uri { get; }
         readonly TcpListener listener;
         readonly ServiceInfo serviceInfo;
-        readonly Task task;
         readonly Action<IService> callback;
-        volatile bool keepGoing;
+        bool keepGoing;
 
         readonly List<ServiceSender> connections = new List<ServiceSender>();
 
@@ -29,14 +28,12 @@ namespace Iviz.Roslib
             listener = new TcpListener(IPAddress.Any, 0);
             listener.Start();
 
-            IPEndPoint localEndpoint = (IPEndPoint)listener.LocalEndpoint;
+            IPEndPoint localEndpoint = (IPEndPoint) listener.LocalEndpoint;
             Uri = new Uri($"rosrpc://{host}:{localEndpoint.Port}/");
-            Logger.Log("RosRpcServer: Starting at " + Uri);
+            Logger.Log("ServiceSenderManager: Starting at " + Uri);
 
-            //task = Task.Run(Run);
             Run();
         }
-
 
         async void Run()
         {
@@ -44,7 +41,6 @@ namespace Iviz.Roslib
             {
                 while (keepGoing)
                 {
-                    //TcpClient client = listener.AcceptTcpClient();
                     TcpClient client = await listener.AcceptTcpClientAsync().ConfigureAwait(false);
                     ServiceSender sender = new ServiceSender(serviceInfo, client, callback);
                     lock (connections)
@@ -55,16 +51,16 @@ namespace Iviz.Roslib
             }
             catch (ObjectDisposedException)
             {
-                Logger.LogDebug("HttpListener: Leaving thread."); // expected
+                Logger.LogDebug("ServiceSenderManager: Leaving thread."); // expected
             }
             catch (ThreadAbortException e)
             {
-                Logger.Log("RosRcpServer: Thread aborted! " + e);
+                Logger.Log("ServiceSenderManager: Thread aborted! " + e);
                 Thread.ResetAbort();
             }
             catch (Exception e)
             {
-                Logger.Log("RosRcpServer: Stopped thread" + e);
+                Logger.Log("ServiceSenderManager: Stopped thread" + e);
             }
         }
 
@@ -80,9 +76,11 @@ namespace Iviz.Roslib
                         toDelete.Add(i);
                     }
                 }
+
                 foreach (int id in toDelete)
                 {
-                    Logger.LogDebug($"{this}: Removing service connection with '{connections[id].Hostname}' - dead x_x");
+                    Logger.LogDebug(
+                        $"{this}: Removing service connection with '{connections[id].Hostname}' - dead x_x");
                     connections[id].Stop();
                     connections.RemoveAt(id);
                 }
@@ -97,20 +95,15 @@ namespace Iviz.Roslib
                 connections.ForEach(x => x.Stop());
                 connections.Clear();
             }
+
             keepGoing = false;
-            /*
-            try
-            {
-                listener.Server.Shutdown(SocketShutdown.Both);
-            }
-            catch (Exception) { }
-            */
             try
             {
                 listener.Stop();
             }
-            catch (Exception) { }
-            //task.Wait();
+            catch (Exception)
+            {
+            }
         }
     }
 }
