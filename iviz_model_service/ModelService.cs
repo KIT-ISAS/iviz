@@ -113,7 +113,7 @@ namespace Iviz.ModelService
                 return null;
             }
             
-            string subPath = uri.AbsolutePath;
+            string subPath = Uri.UnescapeDataString(uri.AbsolutePath);
             foreach (string packagePath in paths)
             {
                 string path = packagePath + "/" + subPath;
@@ -134,6 +134,13 @@ namespace Iviz.ModelService
             {
                 msg.Response.Success = false;
                 msg.Response.Message = "Failed to parse uri from requested string";
+                return;
+            }
+
+            if (uri.Scheme != "package")
+            {
+                msg.Response.Success = false;
+                msg.Response.Message = "Only 'package' scheme is supported";
                 return;
             }
 
@@ -176,6 +183,13 @@ namespace Iviz.ModelService
                 msg.Response.Message = "Failed to parse uri from requested string";
                 return;
             }
+            
+            if (uri.Scheme != "package")
+            {
+                msg.Response.Success = false;
+                msg.Response.Message = "Only 'package' scheme is supported";
+                return;
+            }            
 
             string texturePath = ResolvePath(uri);
             if (texturePath is null)
@@ -190,7 +204,7 @@ namespace Iviz.ModelService
 
             msg.Response.Success = true;
             msg.Response.Message = "";
-            msg.Response.Image = new CompressedImage()
+            msg.Response.Image = new CompressedImage
             {
                 Format = Path.GetExtension(texturePath).Replace(".", ""),
                 Data = data
@@ -221,9 +235,6 @@ namespace Iviz.ModelService
                 Meshes = new Msgs.IvizMsgs.Mesh[scene.Meshes.Count],
                 OrientationHint = orientationHint
             };
-
-            //Console.WriteLine(msg.Filename + " -> " + msg.OrientationHint);
-
             
             List<Triangle> faces = new List<Triangle>();
             for (int i = 0; i < scene.MeshCount; i++)
@@ -288,7 +299,7 @@ namespace Iviz.ModelService
                     Ambient: ToColor(srcMaterial.ColorAmbient),
                     Diffuse: ToColor(srcMaterial.ColorDiffuse),
                     Emissive: ToColor(srcMaterial.ColorEmissive),
-                    DiffuseTexture: new Texture()
+                    DiffuseTexture: new Texture
                     {
                         Path = srcMaterial.TextureDiffuse.FilePath ?? ""
                     }
