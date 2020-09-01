@@ -1,9 +1,0 @@
-string name
-Vector3 origin_xyz
-Vector3 origin_rpy
-Vector3 visual_origin_xyz
-Vector3 visual_origin_rpy
-string geometry_shape
-Vector3 geometry_params
-string geometry_mesh
-Color material_color
