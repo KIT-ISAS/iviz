@@ -17,15 +17,18 @@ namespace Iviz.Editor
         public static void CreateAllAssets()
         {
             ExternalResourceManager manager = Resource.External;
-            IList<Uri> resourceUris = manager.GetListOfModels();
+            IReadOnlyList<Uri> resourceUris = manager.GetListOfModels();
 
+            Debug.Log("SavedAssetLoader: Transferring " + resourceUris.Count + " assets...");
             foreach (Uri uri in resourceUris)
             {
                 CreateAsset(uri, manager);
             }
             
             AssetDatabase.Refresh();
+            Debug.Log("SavedAssetLoader: Done!");
 
+            // ugly workaround
             GameObject managerNode = GameObject.Find("External Resources");
             if (managerNode != null)
             {
@@ -59,7 +62,7 @@ namespace Iviz.Editor
             GameObject obj = resourceInfo.Object; 
 
             const string basePath = "Assets/Resources/Package/";
-            string uriPath = assetUri.Host + assetUri.AbsolutePath;
+            string uriPath = assetUri.Host + Uri.UnescapeDataString(assetUri.AbsolutePath);
 
             string relativePath = Path.GetDirectoryName(uriPath);
             string filename = Path.GetFileNameWithoutExtension(uriPath);
@@ -137,12 +140,14 @@ namespace Iviz.Editor
                 collider.size = resource.LocalBounds.size;
                 collider.enabled = false;
                 
-                DestroyImmediate(resource);
+                //DestroyImmediate(resource);
+                resource.enabled = false;
             }
 
-            foreach (var marker in obj.GetComponentsInChildren<AggregatedMeshMarker>())
+            foreach (var marker in obj.GetComponentsInChildren<AggregatedMeshMarkerResource>())
             {
-                DestroyImmediate(marker);
+                //DestroyImmediate(marker);
+                marker.enabled = false;
             }
 
             PrefabUtility.SaveAsPrefabAssetAndConnect(obj, topPath + "/" + filenameWithExtension + ".prefab", InteractionMode.UserAction);
@@ -235,8 +240,11 @@ namespace Iviz.Editor
                 {
                     Uri uri = geometry.Mesh.Uri.ToUri();
 
-                    string path = "Assets/Resources/Package/" + uri.Host + uri.AbsolutePath + ".prefab";
+                    string path =
+                        $"Assets/Resources/Package/{uri.Host}{Uri.UnescapeDataString(uri.AbsolutePath)}.prefab";
+
                     Debug.Log(path);
+
                     GameObject assetObject = AssetDatabase.LoadAssetAtPath<GameObject>(path);
                     if (assetObject is null)
                     {

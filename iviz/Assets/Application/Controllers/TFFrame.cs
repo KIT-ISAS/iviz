@@ -17,7 +17,7 @@ namespace Iviz.Controllers
 
         readonly Timeline timeline = new Timeline();
         TrailResource trail;
-        AnchorLine anchor;
+        AnchorLineResource anchor;
 
         [SerializeField] string id;
 
@@ -140,7 +140,7 @@ namespace Iviz.Controllers
                 anchorVisible = value;
                 if (value && anchor is null)
                 {
-                    anchor = ResourcePool.GetOrCreate<AnchorLine>(Resource.Displays.AnchorLine, TFListener.UnityFrame?.transform);
+                    anchor = ResourcePool.GetOrCreate<AnchorLineResource>(Resource.Displays.AnchorLine, TFListener.UnityFrame?.transform);
                 }
 
                 if (!(anchor is null))

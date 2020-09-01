@@ -17,7 +17,7 @@ namespace Iviz.Controllers
     public sealed class ARConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
-        [DataMember] public Resource.Module Module => Resource.Module.AR;
+        [DataMember] public Resource.Module Module => Resource.Module.AugmentedReality;
         [DataMember] public bool Visible { get; set; } = true;
         /* NonSerializable */ public float WorldScale { get; set; } = 1.0f;
         /* NonSerializable */ public SerializableVector3 WorldOffset { get; set; } = ARController.DefaultWorldOffset;

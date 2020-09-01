@@ -7,18 +7,20 @@ namespace Iviz.App
 {
     public sealed class AddModuleDialogData : DialogData
     {
-        static readonly List<(string caption, Resource.Module module)> Modules = new List<(string, Resource.Module)>
+        static readonly List<(string Caption, Resource.Module Module)> Modules = new List<(string, Resource.Module)>
         {
             ("<b>Robot</b>\nRobot from the parameter server", Resource.Module.Robot),
             ("<b>Grid</b>\nA reference plane", Resource.Module.Grid),
             ("<b>DepthCloud</b>\nPoint cloud generator for depth images", Resource.Module.DepthCloud),
-            ("<b>AR</b>\nManager for augmented reality", Resource.Module.AR),
+            ("<b>AugmentedReality</b>\nManager for augmented reality", Resource.Module.AugmentedReality),
             ("<b>Joystick</b>\nOn-screen joystick", Resource.Module.Joystick),
-            // ("<b>Robot (Template)</b>\nRobot from a template", Resource.Module.Robot),
         };
 
-        const int ARIndex = 3;
-        const int JoystickIndex = 4;
+        static readonly Resource.Module[] UniqueModules =
+        {
+            Resource.Module.AugmentedReality,
+            Resource.Module.Joystick
+        };
 
         ItemListDialogContents itemList;
         public override IDialogPanelContents Panel => itemList;
@@ -32,15 +34,19 @@ namespace Iviz.App
         public override void SetupPanel()
         {
             itemList.Title = "Available Modules";
-            itemList.Items = Modules.Select(x => x.caption);
+            itemList.Items = Modules.Select(entry => entry.Caption);
             itemList.ItemClicked += OnItemClicked;
             itemList.CloseClicked += OnCloseClicked;
 
-            bool hasAR = ModuleListPanel.ModuleDatas.Any(x => x.Module == Resource.Module.AR);
-            itemList[ARIndex].Interactable = !hasAR;
-
-            bool hasJoystick = ModuleListPanel.ModuleDatas.Any(x => x.Module == Resource.Module.Joystick);
-            itemList[JoystickIndex].Interactable = !hasJoystick;
+            foreach (Resource.Module module in UniqueModules)
+            {
+                bool hasModule = ModuleListPanel.ModuleDatas.Any(moduleData => moduleData.Module == module);
+                if (hasModule)
+                {
+                    int moduleEntry = Modules.FindIndex(entry => entry.Module == module);
+                    itemList[moduleEntry].Interactable = false;
+                }
+            }
         }
 
         void OnCloseClicked()
@@ -50,7 +56,7 @@ namespace Iviz.App
 
         void OnItemClicked(int index, string _)
         {
-            var moduleData = ModuleListPanel.CreateModule(Modules[index].module);
+            var moduleData = ModuleListPanel.CreateModule(Modules[index].Module);
             Close();
             moduleData.ShowPanel();
         }
@@ -63,8 +69,11 @@ namespace Iviz.App
         public override void CleanupPanel()
         {
             base.CleanupPanel();
-            itemList[ARIndex].Interactable = true;
-            itemList[JoystickIndex].Interactable = true;
+
+            foreach (var entry in itemList.ItemEntries)
+            {
+                entry.Interactable = true;
+            }
         }
 
     }

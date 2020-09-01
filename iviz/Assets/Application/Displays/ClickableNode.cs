@@ -16,7 +16,7 @@ namespace Iviz.Controllers
         public abstract string Name { get; }
 
         public IModuleData ModuleData { get; set; }
-        public bool UsesBoundaryBox { get; protected set; } = true;
+        public bool UsesBoundaryBox { get; protected set; } = false;
 
 
         bool selected;
