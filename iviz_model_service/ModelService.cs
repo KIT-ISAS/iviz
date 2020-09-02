@@ -20,6 +20,7 @@ namespace Iviz.ModelService
     {
         const string ModelServiceName = "/iviz/get_model_resource";
         const string TextureServiceName = "/iviz/get_model_texture"; 
+        const string FileServiceName = "/iviz/get_model_file"; 
         
         static readonly AssimpContext Importer = new AssimpContext();
         
@@ -62,6 +63,7 @@ namespace Iviz.ModelService
 
             client.AdvertiseService<GetModelResource>(ModelServiceName, ModelCallback);
             client.AdvertiseService<GetModelTexture>(TextureServiceName, TextureCallback);
+            client.AdvertiseService<GetModelFile>(FileServiceName, FileCallback);
 
             WaitForCancel();
 
@@ -113,7 +115,7 @@ namespace Iviz.ModelService
                 return null;
             }
             
-            string subPath = uri.AbsolutePath;
+            string subPath = Uri.UnescapeDataString(uri.AbsolutePath);
             foreach (string packagePath in paths)
             {
                 string path = packagePath + "/" + subPath;
@@ -169,6 +171,8 @@ namespace Iviz.ModelService
         
         static void TextureCallback(GetModelTexture msg)
         {
+            // TODO: force conversion to either png or jpg
+            
             bool success = Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out Uri uri);
             if (!success)
             {
@@ -190,7 +194,7 @@ namespace Iviz.ModelService
 
             msg.Response.Success = true;
             msg.Response.Message = "";
-            msg.Response.Image = new CompressedImage()
+            msg.Response.Image = new CompressedImage
             {
                 Format = Path.GetExtension(texturePath).Replace(".", ""),
                 Data = data
@@ -222,9 +226,6 @@ namespace Iviz.ModelService
                 OrientationHint = orientationHint
             };
 
-            //Console.WriteLine(msg.Filename + " -> " + msg.OrientationHint);
-
-            
             List<Triangle> faces = new List<Triangle>();
             for (int i = 0; i < scene.MeshCount; i++)
             {
@@ -359,5 +360,35 @@ namespace Iviz.ModelService
                 v.A4, v.B4, v.C4, v.D4,
             });
         }
+        
+        static void FileCallback(GetModelFile msg)
+        {
+            bool success = Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out Uri uri);
+            if (!success)
+            {
+                msg.Response.Success = false;
+                msg.Response.Message = "Failed to parse uri from requested string";
+                return;
+            }
+
+            string texturePath = ResolvePath(uri);
+            if (texturePath is null)
+            {
+                msg.Response.Success = false;
+                msg.Response.Message = "Failed to find resource path";
+                return;
+            }
+
+            byte[] data = File.ReadAllBytes(texturePath);
+         
+
+            msg.Response.Success = true;
+            msg.Response.Message = "";
+            msg.Response.Bytes = data;
+
+            Console.WriteLine(">> " + uri);        
+        }
+
+        
     }
 }
