@@ -14,7 +14,6 @@
   <ItemGroup>
     <ProjectReference Include="..\iviz_msgs\iviz_msgs.csproj" />
     <ProjectReference Include="..\iviz_roslib\iviz_roslib.csproj" />
-    <ProjectReference Include="..\iviz_bridge_client\iviz_bridge_client.csproj" />
     <ProjectReference Include="..\iviz_urdf\iviz_urdf.csproj" />
   </ItemGroup>
   <ItemGroup>

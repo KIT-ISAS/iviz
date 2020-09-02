@@ -34,10 +34,13 @@ namespace iviz_test
             var modelPaths = SdfFile.CreateModelPaths("/Users/akzeac/Shared/aws-robomaker-hospital-world/");
             SdfFile newSdfFile = sdfFile.ResolveIncludes(modelPaths);
 
+
+
             //Console.WriteLine(JsonConvert.SerializeObject(newSdfFile, Formatting.Indented));
 
         }
         
+        /*
         static void CheckModelPath(string folderName, string path, IDictionary<string, List<string>> modelPaths)
         {
             if (File.Exists(path + "/model.config"))
@@ -63,7 +66,7 @@ namespace iviz_test
             paths.Add(path);
             //Console.WriteLine("++ " + package);
         }
-        
+        */
         
         static void Main_Q()
         {
