@@ -57,21 +57,22 @@ namespace Iviz.Sdf
             System.Uri meshUri = source.Mesh.Uri.ToUri();
             string modelPackage = meshUri.Host;
             string modelPath = modelPaths[modelPackage];
+            string modelRelativePath = System.Uri.UnescapeDataString(meshUri.AbsolutePath);
             
             string basePath = modelPaths[""];
             
             System.Uri resolvedUri;
-            if (modelPath.StartsWith(basePath))
+            if (modelPath.StartsWith(basePath, false, Utils.Culture))
             {
                 string packageName = new DirectoryInfo(basePath).Name;
-                string relativePath = "/" + modelPath.Substring(basePath.Length);
-                resolvedUri = new System.Uri($"package://{packageName}{relativePath}{meshUri.AbsolutePath}");
+                string packageToModelPath = "/" + modelPath.Substring(basePath.Length);
+                resolvedUri = new System.Uri($"package://{packageName}{packageToModelPath}{modelRelativePath}");
             }
             else
             {
-                // if this happens, then its unfortunate, I cannot tell from here which package this belongs to
-                // file scheme is a security risk and will probably get rejected
-                resolvedUri = new System.Uri($"file://{modelPath}{meshUri.AbsolutePath}");
+                // if this happens, then its unfortunate, I cannot tell from here which package this belongs to.
+                // the 'file' scheme is a security risk and will probably get rejected
+                resolvedUri = new System.Uri($"file://{modelPath}{modelRelativePath}");
             }
             
             Mesh = new Mesh(new Uri(resolvedUri), source.Mesh.Scale);

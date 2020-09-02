@@ -139,6 +139,13 @@ namespace Iviz.ModelService
                 return;
             }
 
+            if (uri.Scheme != "package")
+            {
+                msg.Response.Success = false;
+                msg.Response.Message = "Only 'package' scheme is supported";
+                return;
+            }
+
             string modelPath = ResolvePath(uri);
             if (modelPath is null)
             {
@@ -180,6 +187,13 @@ namespace Iviz.ModelService
                 msg.Response.Message = "Failed to parse uri from requested string";
                 return;
             }
+            
+            if (uri.Scheme != "package")
+            {
+                msg.Response.Success = false;
+                msg.Response.Message = "Only 'package' scheme is supported";
+                return;
+            }            
 
             string texturePath = ResolvePath(uri);
             if (texturePath is null)
@@ -289,7 +303,7 @@ namespace Iviz.ModelService
                     Ambient: ToColor(srcMaterial.ColorAmbient),
                     Diffuse: ToColor(srcMaterial.ColorDiffuse),
                     Emissive: ToColor(srcMaterial.ColorEmissive),
-                    DiffuseTexture: new Texture()
+                    DiffuseTexture: new Texture
                     {
                         Path = srcMaterial.TextureDiffuse.FilePath ?? ""
                     }

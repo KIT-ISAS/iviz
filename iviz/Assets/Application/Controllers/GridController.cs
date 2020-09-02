@@ -26,11 +26,13 @@ namespace Iviz.Controllers
 
     public sealed class GridController : IController
     {
+        const int ProbeRefreshTime = 10;
+        
         readonly DisplayNode node;
         readonly ReflectionProbe reflectionProbe;
         readonly GridResource grid;
 
-        public IModuleData ModuleData { get; set; }
+        public IModuleData ModuleData { get; }
 
         readonly GridConfiguration config = new GridConfiguration();
         public GridConfiguration Config
@@ -207,6 +209,8 @@ namespace Iviz.Controllers
             reflectionProbe.clearFlags = UnityEngine.Rendering.ReflectionProbeClearFlags.SolidColor;
             UpdateMesh();
 
+            GameThread.EverySecond += CheckProbeUpdate;
+            
             Config = new GridConfiguration();
         }
 
@@ -225,10 +229,25 @@ namespace Iviz.Controllers
             node.Stop();
             UnityEngine.Object.Destroy(node.gameObject);
             UnityEngine.Object.Destroy(reflectionProbe.gameObject);
+
+            GameThread.EverySecond -= CheckProbeUpdate;
         }
 
         public void Reset()
         {
+            reflectionProbe?.RenderProbe();
         }
+
+
+        int ticks = 0;
+        void CheckProbeUpdate()
+        {
+            ticks++;
+            if (ticks == ProbeRefreshTime)
+            {
+                reflectionProbe?.RenderProbe();
+                ticks = 0;
+            }
+        } 
     }
 }

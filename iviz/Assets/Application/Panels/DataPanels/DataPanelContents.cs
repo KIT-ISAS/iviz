@@ -53,7 +53,7 @@ namespace Iviz.App
                 case Resource.Module.JointState: return o.AddComponent<JointStatePanelContents>();
                 case Resource.Module.DepthCloud: return o.AddComponent<DepthCloudPanelContents>();
                 case Resource.Module.LaserScan: return o.AddComponent<LaserScanPanelContents>();
-                case Resource.Module.AR: return o.AddComponent<ARPanelContents>();
+                case Resource.Module.AugmentedReality: return o.AddComponent<ARPanelContents>();
                 case Resource.Module.Magnitude: return o.AddComponent<MagnitudePanelContents>();
                 case Resource.Module.OccupancyGrid: return o.AddComponent<OccupancyGridPanelContents>();
                 case Resource.Module.Joystick: return o.AddComponent<JoystickPanelContents>();

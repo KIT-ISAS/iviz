@@ -43,8 +43,8 @@ namespace Iviz.App
         public override void Initialize(ModuleListPanel newPanel)
         {
             base.Initialize(newPanel);
-            this.panel = (AddTopicDialogContents)DialogPanelManager.GetPanelByType(DialogPanelType.AddTopic);
-            this.panel.ShowAll.Value = false;
+            panel = (AddTopicDialogContents)DialogPanelManager.GetPanelByType(DialogPanelType.AddTopic);
+            panel.ShowAll.Value = false;
         }
 
         void GetTopics()

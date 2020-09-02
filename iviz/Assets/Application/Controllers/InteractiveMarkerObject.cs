@@ -85,17 +85,6 @@ namespace Iviz.Controllers
             }
 
             UpdateExpirationTime();
-            /*
-            if (msg.menu_entries.Length != 0)
-            {
-                GameObject gameObject = Instantiate(Resources.Load<GameObject>("MenuObject"));
-                menuObject = gameObject.GetComponent<MenuObject>();
-                menuObject.transform.SetParentLocal(transform);
-
-                menuObject.Set(msg.menu_entries, this, null);
-                menuObject.Show(false);
-            }
-            */
         }
 
         static void DeleteControlObject(InteractiveMarkerControlObject control)
@@ -123,38 +112,11 @@ namespace Iviz.Controllers
             Moved = null;
 
             Destroy(controlNode.gameObject);
-
-            /*
-            if (menuObject != null)
-            {
-                menuObject.Cleanup();
-                Destroy(menuObject.gameObject);
-                menuObject = null;
-            }
-            */
         }
 
         public void UpdateExpirationTime()
         {
             ExpirationTime = DateTime.Now.AddSeconds(LifetimeInSec);
-        }
-
-        public void ShowMenu(Vector3 hint)
-        {
-            /*
-            menuObject?.Show(true);
-            if (menuObject != null)
-            {
-                menuObject.transform.localPosition = hint;
-            }
-            */
-        }
-
-        public void HideMenu()
-        {
-            /*
-            menuObject?.Show(false);
-            */
         }
     }
 }

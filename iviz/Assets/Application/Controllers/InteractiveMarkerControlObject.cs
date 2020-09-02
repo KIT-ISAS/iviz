@@ -29,7 +29,6 @@ namespace Iviz.Controllers
 
 
             transform.localRotation = msg.Orientation.Ros2Unity();
-            //Debug.Log(transform.localRotation);
 
             UpdateMarkers(msg.Markers);
             UpdateInteractionMode(msg.InteractionMode, msg.OrientationMode, msg.IndependentMarkerOrientation);
@@ -52,11 +51,11 @@ namespace Iviz.Controllers
             switch (interactionMode)
             {
                 case InteractiveMarkerControl.NONE:
-                    markers.Values.ForEach(x => x.Clickable = false);
+                    markers.Values.ForEach(marker => marker.Clickable = false);
                     break;
                 case InteractiveMarkerControl.MENU:
                 case InteractiveMarkerControl.BUTTON:
-                    markers.Values.ForEach(x => x.Clickable = true);
+                    markers.Values.ForEach(marker => marker.Clickable = true);
                     break;
                 case InteractiveMarkerControl.MOVE_AXIS:
                     EnsureControlDisplayExists();
@@ -111,7 +110,7 @@ namespace Iviz.Controllers
             }
         }
 
-        void UpdateMarkers(IEnumerable<Marker> msg)
+        void UpdateMarkers(Marker[] msg)
         {
             markersToDelete.Clear();
             foreach (string id in markers.Keys)
@@ -189,20 +188,5 @@ namespace Iviz.Controllers
             GameObject gameObject = new GameObject("MarkerObject");
             return gameObject.AddComponent<MarkerObject>();
         }
-
-        /*
-        public override void Deselect(InteractableObject newSelection)
-        {
-            if (newSelection == null || newSelection.Parent != Parent)
-            {
-                Parent.HideMenu();
-            }
-            if (selectFrame != null)
-            {
-                Destroy(selectFrame);
-                selectFrame = null;
-            }
-        }
-        */
     }
 }

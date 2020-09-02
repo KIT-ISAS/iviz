@@ -61,7 +61,7 @@ namespace Iviz.Controllers
         {
             Listener = new RosListener<InteractiveMarkerUpdate>(config.Topic, Handler);
             GameThread.EverySecond += CheckForExpiredMarkers;
-            RosSender = new RosSender<InteractiveMarkerFeedback>("/interactive_markers/feedback");
+            RosSender = new RosSender<InteractiveMarkerFeedback>(config.Topic + "/feedback");
         }
 
         public override void Stop()
@@ -69,7 +69,11 @@ namespace Iviz.Controllers
             base.Stop();
             GameThread.EverySecond -= CheckForExpiredMarkers;
 
-            imarkers.Values.ForEach(DeleteMarkerObject);
+            foreach (var markerObject in imarkers.Values)
+            {
+                DeleteMarkerObject(markerObject);
+            }
+            
             imarkers.Clear();
             RosSender.Stop();
             
@@ -80,7 +84,11 @@ namespace Iviz.Controllers
         public override void Reset()
         {
             base.Reset();
-            imarkers.Values.ForEach(DeleteMarkerObject);
+            foreach (var markerObject in imarkers.Values)
+            {
+                DeleteMarkerObject(markerObject);
+            }
+            
             imarkers.Clear();
         }
 
@@ -217,9 +225,9 @@ namespace Iviz.Controllers
             }
 
             DateTime now = DateTime.Now;
-            string[] deadMarkers =
-                imarkers.Where(x => x.Value.ExpirationTime < now).
-                    Select(x => x.Key).
+            string[] deadMarkers = imarkers.
+                    Where(entry => entry.Value.ExpirationTime < now).
+                    Select(entry => entry.Key).
                     ToArray();
             
             foreach (string key in deadMarkers)

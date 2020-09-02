@@ -6,8 +6,8 @@ namespace Iviz.Displays
     {
         protected BoxCollider Collider;
 
-        public Bounds Bounds => new Bounds(Collider.center, Collider.size);
-        public Bounds WorldBounds => Collider.bounds;
+        public Bounds Bounds => Collider is null ? new Bounds() : new Bounds(Collider.center, Collider.size);
+        public Bounds WorldBounds => Collider?.bounds ?? new Bounds();
 
         public virtual string Name
         {
@@ -17,8 +17,14 @@ namespace Iviz.Displays
 
         public bool ColliderEnabled
         {
-            get => Collider.enabled;
-            set => Collider.enabled = value;
+            get => Collider?.enabled ?? false;
+            set
+            {
+                if (!(Collider is null))
+                {
+                    Collider.enabled = value;
+                }
+            }
         }
 
         public Transform Parent

@@ -5,18 +5,6 @@ using System.Xml;
 
 namespace Iviz.Sdf
 {
-    /*
-    public sealed class Joint
-    {
-        public string Name { get; }
-        public JointType Type { get; }
-        public string Parent { get; }
-        public string Child { get; }
-        public Pose Pose { get; } = Pose.Identity;
-    }
-    */
-
-
     public sealed class World
     {
         static readonly Vector3 DefaultGravity = new Vector3(0, 0, -9.8);

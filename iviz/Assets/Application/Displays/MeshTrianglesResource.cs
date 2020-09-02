@@ -45,6 +45,7 @@ namespace Iviz.Displays
 
             mesh = new Mesh();
             mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+            
             GetComponent<MeshFilter>().sharedMesh = mesh;
         }
 
@@ -145,7 +146,7 @@ namespace Iviz.Displays
         }
 
 
-        public void Set([NotNull] IList<Vector3> points, IList<Color> colors = null)
+        public void Set(IReadOnlyCollection<Vector3> points, IReadOnlyCollection<Color> colors = null)
         {
             if (points is null)
             {
@@ -183,11 +184,12 @@ namespace Iviz.Displays
             LocalBounds = mesh.bounds;
         }
 
-        public void Set([NotNull] IList<Vector3> points,
-            IList<Vector3> normals,
-            IList<Vector2> texCoords,
-            [NotNull] IList<int> triangles,
-            IList<Color32> colors = null)
+        public void Set(
+            IReadOnlyCollection<Vector3> points,
+            IReadOnlyCollection<Vector3> normals,
+            IReadOnlyCollection<Vector2> texCoords,
+            IReadOnlyCollection<int> triangles,
+            IReadOnlyCollection<Color32> colors = null)
         {
             if (points is null)
             {
@@ -225,7 +227,7 @@ namespace Iviz.Displays
             }
 
             SetTriangles(triangles, 0);
-            //mesh.RecalculateNormals();
+
             mesh.Optimize();
 
             LocalBounds = mesh.bounds;

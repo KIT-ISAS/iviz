@@ -122,7 +122,7 @@ namespace Iviz.Controllers
                     resource = null;
                 }
                 resourceType = newResourceType;
-                if (resourceType == null)
+                if (resourceType is null)
                 {
                     if (msg.Type() == MarkerType.MeshResource)
                     {
@@ -130,16 +130,24 @@ namespace Iviz.Controllers
                     }
                     else
                     {
-                        Logger.Error($"MarkerObject: Marker type '{msg.Type()}'");
+                        Logger.Error($"MarkerObject: Marker type '{msg.Type}' has no resource assigned!");
                     }
                     return;
                 }
-                resource = ResourcePool.GetOrCreate<MarkerResource>(resourceType, transform);
-                Clickable = Clickable;
+                
+                GameObject newGameObject = ResourcePool.GetOrCreate(resourceType, transform);
+                resource = newGameObject.GetComponent<MarkerResource>();
                 if (resource is null)
                 {
-                    Debug.LogError("Resource " + resourceType + " has no MarkerResource!");
+                    if (msg.Type() != MarkerType.MeshResource)
+                    {
+                        Debug.LogWarning("Resource '" + resourceType + "' has no MarkerResource!");
+                    }
+
+                    resource = newGameObject.AddComponent<AssetWrapperResource>();
                 }
+                
+                Clickable = Clickable; // reset value
             }
             if (resource is null)
             {
@@ -173,8 +181,11 @@ namespace Iviz.Controllers
                 case MarkerType.Sphere:
                 case MarkerType.Cylinder:
                 case MarkerType.MeshResource:
-                    MeshMarkerResource meshMarker = (MeshMarkerResource)resource;
-                    meshMarker.Color = msg.Color.Sanitize().ToUnityColor();
+                    if (resource is MeshMarkerResource meshMarker)
+                    {
+                        meshMarker.Color = msg.Color.Sanitize().ToUnityColor();
+                    }
+
                     transform.localScale = msg.Scale.Ros2Unity().Abs();
                     break;
                 case MarkerType.TextViewFacing:
@@ -376,6 +387,7 @@ namespace Iviz.Controllers
                     {
                         return null;
                     }
+                    
                     return Resource.TryGetResource(uri, out Resource.Info<GameObject> info) ? info : null;
                 case MarkerType.CubeList:
                 case MarkerType.SphereList:

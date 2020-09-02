@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Iviz.Displays;
 using Iviz.Resources;
@@ -12,7 +13,9 @@ namespace Iviz.App
     {
         const float yOffset = 5;
 
-        readonly List<ItemEntry> items = new List<ItemEntry>();
+        readonly List<ItemEntry> itemEntries = new List<ItemEntry>();
+        
+        public ReadOnlyCollection<ItemEntry> ItemEntries { get; }
 
         [SerializeField] GameObject contentObject = null;
         [SerializeField] Text emptyText = null;
@@ -110,30 +113,30 @@ namespace Iviz.App
 
         public IEnumerable<string> Items
         {
-            get => items.Select(x => x.Text);
+            get => itemEntries.Select(x => x.Text);
             set
             {
-                if (value.Count() == items.Count)
+                if (value.Count() == itemEntries.Count)
                 {
                     int i = 0;
                     foreach (string str in value)
                     {
-                        items[i++].Text = str;
+                        itemEntries[i++].Text = str;
                     }
                 }
-                else if (value.Count() < items.Count)
+                else if (value.Count() < itemEntries.Count)
                 {
                     canvas.enabled = false;
                     int i = 0;
                     foreach (string str in value)
                     {
-                        items[i++].Text = str;
+                        itemEntries[i++].Text = str;
                     }
-                    for (int j = i; j < items.Count; j++)
+                    for (int j = i; j < itemEntries.Count; j++)
                     {
-                        items[j].Invalidate();
+                        itemEntries[j].Invalidate();
                     }
-                    items.RemoveRange(i, items.Count - i);
+                    itemEntries.RemoveRange(i, itemEntries.Count - i);
                     UpdateSize();
                     canvas.enabled = true;
                 }
@@ -143,11 +146,11 @@ namespace Iviz.App
                     int i = 0;
                     foreach (string str in value)
                     {
-                        if (i >= items.Count)
+                        if (i >= itemEntries.Count)
                         {
-                            items.Add(new ItemEntry(i, contentObject, RaiseClicked));
+                            itemEntries.Add(new ItemEntry(i, contentObject, RaiseClicked));
                         }
-                        items[i++].Text = str;
+                        itemEntries[i++].Text = str;
                     }
                     UpdateSize();
                     canvas.enabled = true;
@@ -155,19 +158,21 @@ namespace Iviz.App
             }
         }
 
-        public ItemEntry this[int i]
-        {
-            get => items[i];
-        }
+        public ItemEntry this[int i] => itemEntries[i];
 
-        public bool Empty => items.Count == 0;
+        public bool Empty => itemEntries.Count == 0;
 
-        public int Count => items.Count;
+        public int Count => itemEntries.Count;
 
         public bool Active
         {
             get => gameObject.activeSelf;
             set => gameObject.SetActive(value);
+        }
+
+        public ItemListDialogContents()
+        {
+            ItemEntries = itemEntries.AsReadOnly();              
         }
 
         // Use this for initialization
@@ -188,9 +193,9 @@ namespace Iviz.App
 
         public int Add(string str)
         {
-            int i = items.Count;
-            items.Add(new ItemEntry(i, contentObject, RaiseClicked));
-            items[i].Text = str;
+            int i = itemEntries.Count;
+            itemEntries.Add(new ItemEntry(i, contentObject, RaiseClicked));
+            itemEntries[i].Text = str;
             return i;
         }
 
@@ -200,17 +205,17 @@ namespace Iviz.App
             {
                 throw new ArgumentOutOfRangeException(nameof(index));
             }
-            if (index >= items.Count)
+            if (index >= itemEntries.Count)
             {
                 return false;
             }
 
             canvas.enabled = false;
-            items[index].Invalidate();
-            items.RemoveAt(index);
-            for (int i = index; i < items.Count; i++)
+            itemEntries[index].Invalidate();
+            itemEntries.RemoveAt(index);
+            for (int i = index; i < itemEntries.Count; i++)
             {
-                items[i].Index = i;
+                itemEntries[i].Index = i;
             }
             UpdateSize();
             canvas.enabled = true;
@@ -221,12 +226,12 @@ namespace Iviz.App
         {
             RectTransform rectTransform = ((RectTransform)contentObject.transform);
             rectTransform.sizeDelta =
-                (items.Count == 0) ?
+                (itemEntries.Count == 0) ?
                 new Vector2(0, 2 * yOffset) :
-                new Vector2(0, 2 * yOffset + items.Count * (items[0].ButtonHeight + yOffset));
+                new Vector2(0, 2 * yOffset + itemEntries.Count * (itemEntries[0].ButtonHeight + yOffset));
 
-            emptyText.gameObject.SetActive(items.Count == 0);
-            items.ForEach(x => x.Interactable = true);
+            emptyText.gameObject.SetActive(itemEntries.Count == 0);
+            itemEntries.ForEach(x => x.Interactable = true);
         }
 
         public virtual void ClearSubscribers()

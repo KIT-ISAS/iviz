@@ -67,6 +67,7 @@ namespace Iviz.Displays
             set
             {
                 interiorColor = value;
+                interiorColor.a = 0.1f;
                 interiorRenderer.SetPropertyColor(value);
             }
         }
@@ -141,13 +142,13 @@ namespace Iviz.Displays
             interiorObject.name = "Grid Interior";
             interiorObject.transform.localPosition = new Vector3(0, 0, 0.01f);
             interiorRenderer = interiorObject.GetComponent<MeshRenderer>();
-            interiorRenderer.sharedMaterial = meshRenderer.sharedMaterial;
+            interiorRenderer.sharedMaterial = Resource.Materials.GridInterior.Object;
             interiorRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             interiorRenderer.receiveShadows = true;
             //interiorRenderer.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
 
             Orientation = GridOrientation.XY;
-            GridColor = Color.white * 0.25f;
+            GridColor = new Color(1, 1, 1,0.25f);
             InteriorColor = Color.white * 0.5f;
             GridLineWidth = 0.02f;
             GridCellSize = 1;

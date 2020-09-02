@@ -15,7 +15,7 @@ namespace Iviz.App
         readonly ARController controller;
         readonly ARPanelContents panel;
 
-        public override Resource.Module Module => Resource.Module.AR;
+        public override Resource.Module Module => Resource.Module.AugmentedReality;
         public override DataPanelContents Panel => panel;
         public override IConfiguration Configuration => controller.Config;
         public override IController Controller => controller;
@@ -25,7 +25,7 @@ namespace Iviz.App
         public ARModuleData(ModuleDataConstructor constructor) :
             base(constructor.ModuleList, constructor.Topic, constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.AR) as ARPanelContents;
+            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.AugmentedReality) as ARPanelContents;
 
             controller = Resource.Controllers.AR.Instantiate().GetComponent<ARController>();
             controller.ModuleData = this;

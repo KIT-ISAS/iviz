@@ -28,7 +28,7 @@ namespace Iviz.Controllers
         [DataMember] public bool AxisLabelVisible { get; set; } = false;
         [DataMember] public float AxisLabelSize { get; set; } = 0.1f;
         [DataMember] public bool ParentConnectorVisible { get; set; } = false;
-        [DataMember] public bool ShowAllFrames { get; set; } = false;
+        [DataMember] public bool ShowAllFrames { get; set; } = true;
     }
 
     public sealed class TFListener : ListenerController
