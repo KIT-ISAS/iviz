@@ -25,7 +25,9 @@ namespace Iviz.Displays
         readonly Dictionary<string, string> linkParents = new Dictionary<string, string>();
         readonly Dictionary<GameObject, GameObject> linkParentObjects = new Dictionary<GameObject, GameObject>();
         readonly Dictionary<string, Joint> joints = new Dictionary<string, Joint>();
-        readonly List<(GameObject, Resource.Info<GameObject>)> objectResources = new List<(GameObject, Resource.Info<GameObject>)>() ;
+
+        readonly List<(GameObject, Resource.Info<GameObject>)> objectResources =
+            new List<(GameObject, Resource.Info<GameObject>)>();
 
         readonly List<ISupportsTintAndAROcclusion> displays = new List<ISupportsTintAndAROcclusion>();
 
@@ -33,8 +35,9 @@ namespace Iviz.Displays
         public ReadOnlyDictionary<string, GameObject> LinkObjects { get; }
         public ReadOnlyDictionary<GameObject, GameObject> LinkParentObjects { get; }
 
-        
+
         bool occlusionOnly;
+
         public bool OcclusionOnly
         {
             get => occlusionOnly;
@@ -49,6 +52,7 @@ namespace Iviz.Displays
         }
 
         Color tint = Color.white;
+
         public Color Tint
         {
             get => tint;
@@ -63,6 +67,7 @@ namespace Iviz.Displays
         }
 
         bool visible = true;
+
         public bool Visible
         {
             get => visible;
@@ -119,7 +124,7 @@ namespace Iviz.Displays
 
             BaseLink = unparentedKeys.FirstOrDefault();
             BaseLinkObject = BaseLink is null ? null : linkObjects[BaseLink];
-            
+
             LinkParents = new ReadOnlyDictionary<string, string>(linkParents);
             LinkObjects = new ReadOnlyDictionary<string, GameObject>(linkObjects);
             LinkParentObjects = new ReadOnlyDictionary<GameObject, GameObject>(linkParentObjects);
@@ -214,29 +219,22 @@ namespace Iviz.Displays
                 {
                     Material material = GetMaterialForVisual(visual, keepMeshMaterials ? null : rootMaterials);
                     Color color = material?.Color?.ToColor() ?? Color.white;
-                    
+
                     MeshRenderer[] renderers = resourceObject.GetComponentsInChildren<MeshRenderer>();
-                    
                     List<ISupportsTintAndAROcclusion> resources = new List<ISupportsTintAndAROcclusion>();
 
                     foreach (MeshRenderer renderer in renderers)
                     {
                         var trianglesResource = renderer.gameObject.GetComponent<MeshTrianglesResource>();
-                        //if (!(trianglesResource is null))
-                        //{
-                            trianglesResource.Color *= color;
-                            resources.Add(trianglesResource);
-                        //}
-                        /*
-                        else
+                        if (trianglesResource is null)
                         {
-                            var wrapperResource = renderer.gameObject.AddComponent<MarkerWrapperResource>();
-                            wrapperResource.Color = wrapperResource.Color * color;
-                            resources.Add(wrapperResource);
+                            continue;
                         }
-                        */
+
+                        trianglesResource.Color *= color;
+                        resources.Add(trianglesResource);
                     }
-                    
+
                     displays.AddRange(resources);
                 }
             }
@@ -290,6 +288,7 @@ namespace Iviz.Displays
             {
                 linkObject.transform.parent = null;
             }
+
             foreach (var entry in linkParentObjects)
             {
                 Transform mTransform = entry.Key.transform;
@@ -303,12 +302,13 @@ namespace Iviz.Displays
         {
             ResetLinkParents();
 
-            foreach (var(gameObject, info) in objectResources)
+            foreach (var (gameObject, info) in objectResources)
             {
                 IDisplay display = gameObject.GetComponent<IDisplay>();
                 display?.Suspend();
                 ResourcePool.Dispose(info, gameObject);
             }
+
             UnityEngine.Object.Destroy(BaseLinkObject);
         }
 
@@ -320,6 +320,7 @@ namespace Iviz.Displays
                 {
                     continue;
                 }
+
                 if (joint.Value.Limit.Lower > 0)
                 {
                     TryWriteJoint(joint.Key, joint.Value.Limit.Lower, out _);
@@ -330,14 +331,15 @@ namespace Iviz.Displays
                 }
             }
         }
-        
-        public bool TryWriteJoint([NotNull] string jointName, float value, out Pose unityPose, bool onlyCalculatePose = false)
+
+        public bool TryWriteJoint([NotNull] string jointName, float value, out Pose unityPose,
+            bool onlyCalculatePose = false)
         {
             if (jointName is null)
             {
                 throw new ArgumentNullException(nameof(jointName));
             }
-            
+
             if (!joints.TryGetValue(jointName, out Joint joint))
             {
                 unityPose = default;
@@ -363,12 +365,11 @@ namespace Iviz.Displays
             {
                 return true;
             }
-            
+
             GameObject jointObject = jointObjects[jointName];
             jointObject.transform.SetLocalPose(unityPose);
 
             return true;
         }
     }
-
 }

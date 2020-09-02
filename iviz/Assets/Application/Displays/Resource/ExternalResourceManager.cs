@@ -21,10 +21,12 @@ namespace Iviz.Displays
     {
         const string ModelServiceName = "/iviz/get_model_resource";
         const string TextureServiceName = "/iviz/get_model_texture";
+        const string FileServiceName = "/iviz/get_model_file";
 
         [DataContract]
         public class ResourceFiles
         {
+            [DataMember] int Version { get; set; } 
             [DataMember] public Dictionary<Uri, string> Models { get; set; }
             [DataMember] public Dictionary<Uri, string> Textures { get; set; }
 
@@ -125,9 +127,18 @@ namespace Iviz.Displays
                     Uri = uri.ToString()
                 }
             };
-            if (!allowServiceCall || !ConnectionManager.Connection.CallService(ModelServiceName, msg))
+            if (!allowServiceCall || 
+                !ConnectionManager.Connection.CallService(ModelServiceName, msg) ||
+                !msg.Response.Success)
             {
-                Debug.Log("ExternalResourceManager: Call Service failed!");
+                if (!string.IsNullOrWhiteSpace(msg.Response.Message))
+                {
+                    Debug.LogWarning("ExternalResourceManager: Call Service failed with message '" + msg.Response.Message + "'");
+                }
+                else
+                {
+                    Debug.Log("ExternalResourceManager: Call Service failed! Are you sure the iviz_model_service program is running?");
+                }
                 return false;
             }
 
@@ -307,7 +318,7 @@ namespace Iviz.Displays
 
         GameObject CreateModelObject(Uri uri, Model msg)
         {
-            GameObject model = SceneModel.Create(uri, msg);
+            GameObject model = SceneModel.Create(uri, msg).gameObject;
             model.transform.SetParent(Node?.transform, false);
             return model;
         }

@@ -6,36 +6,47 @@ namespace Iviz.Resources
 {
     public class InternalResourceManager
     {
-        readonly Dictionary<Uri, Resource.Info<GameObject>> files = new Dictionary<Uri, Resource.Info<GameObject>>
+        readonly Dictionary<Uri, Resource.Info<GameObject>> gameObjects = new Dictionary<Uri, Resource.Info<GameObject>>
         {
             [new Uri("package://iviz/cube")] = Resource.Displays.Cube,
             [new Uri("package://iviz/cylinder")] = Resource.Displays.Cylinder,
             [new Uri("package://iviz/sphere")] = Resource.Displays.Sphere,
-            [new Uri("package://iviz/rightHand")] = new Resource.Info<GameObject>("Markers/RightHand")
         };
 
+        readonly Dictionary<Uri, Resource.Info<Texture2D>> textures = new Dictionary<Uri, Resource.Info<Texture2D>>();
+
         public bool TryGet(Uri uri, out Resource.Info<GameObject> info)
+        {
+            return TryGet(uri, gameObjects, out info);
+        }
+        
+        public bool TryGet(Uri uri, out Resource.Info<Texture2D> info)
+        {
+            return TryGet(uri, textures, out info);
+        } 
+        
+        static bool TryGet<T>(Uri uri, Dictionary<Uri, Resource.Info<T>> repository, out Resource.Info<T> info) where T : UnityEngine.Object
         {
             if (uri is null)
             {
                 throw new ArgumentNullException(nameof(uri));
             }
                 
-            if (files.TryGetValue(uri, out info))
+            if (repository.TryGetValue(uri, out info))
             {
                 return true;
             }
 
             string path = "Package/" + uri.Host + Uri.UnescapeDataString(uri.AbsolutePath);
-            GameObject resource = UnityEngine.Resources.Load<GameObject>(path);
+            T resource = UnityEngine.Resources.Load<T>(path);
             if (resource is null)
             {
                 return false;
             }
 
-            info = new Resource.Info<GameObject>(path, resource);
-            files[uri] = info;
+            info = new Resource.Info<T>(path, resource);
+            repository[uri] = info;
             return true;
-        }
+        }        
     }
 }

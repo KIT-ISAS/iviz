@@ -698,5 +698,11 @@ namespace Iviz.Resources
             return Internal.TryGet(uri, out info) ||
                    External.TryGet(uri, out info);
         }
+        
+        public static bool TryGetResource(Uri uri, out Info<Texture2D> info)
+        {
+            return Internal.TryGet(uri, out info) ||
+                   External.TryGet(uri, out info);
+        }        
     }
 }

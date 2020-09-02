@@ -10,7 +10,7 @@ namespace Iviz.Displays
 {
     public static class SceneModel
     {
-        public static GameObject Create(Uri uri, Msgs.IvizMsgs.Model msg)
+        public static AggregatedMeshMarkerResource Create(Uri uri, Msgs.IvizMsgs.Model msg)
         {
             if (uri is null)
             {
@@ -79,7 +79,7 @@ namespace Iviz.Displays
                     string uriPath = Uri.UnescapeDataString(uri.AbsolutePath);
                     string texturePath = $"{Path.GetDirectoryName(uriPath)}/{material.DiffuseTexture.Path}";
                     Uri textureUri = new Uri($"{uri.Scheme}://{uri.Host}{texturePath}");
-                    if (Resource.External.TryGet(textureUri, out Resource.Info<Texture2D> info))
+                    if (Resource.TryGetResource(textureUri, out Resource.Info<Texture2D> info))
                     {
                         r.Texture = info.Object;
                     }
@@ -136,7 +136,7 @@ namespace Iviz.Displays
 
             amm.Children = children;
 
-            return root;
+            return amm;
         }
 
 

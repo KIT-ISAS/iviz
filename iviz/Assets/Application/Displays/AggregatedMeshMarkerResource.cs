@@ -21,7 +21,7 @@ namespace Iviz.Displays
             get => children;
             set => children = value.ToArray();
         } 
-
+        
         public string Name
         {
             get => gameObject.name;
@@ -31,7 +31,18 @@ namespace Iviz.Displays
         public int Layer
         {
             get => gameObject.layer;
-            set => gameObject.layer = value;
+            set
+            {
+                gameObject.layer = value;
+
+                foreach (var child in children)
+                {
+                    if (child != null)
+                    {
+                        child.Layer = value;
+                    }
+                }
+            }
         }
 
         public Transform Parent
@@ -49,7 +60,18 @@ namespace Iviz.Displays
         public bool ColliderEnabled
         {
             get => markerCollider.enabled;
-            set => markerCollider.enabled = value;
+            set
+            {
+                markerCollider.enabled = value;
+
+                foreach (var child in children)
+                {
+                    if (child != null)
+                    {
+                        child.ColliderEnabled = value;
+                    }
+                }
+            }
         }
 
         [SerializeField] bool occlusionOnly;
