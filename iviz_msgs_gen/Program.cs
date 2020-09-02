@@ -23,10 +23,6 @@ namespace Iviz.MsgsGen
 
             foreach(ClassInfo classInfo in p.messages.Values)
             {
-                if (classInfo.ForceSkip)
-                {
-                    continue;
-                }
                 string packageDir = ivizMsgPaths + "/" + classInfo.rosPackage + "/msg/";
                 Directory.CreateDirectory(packageDir);
                 string text = classInfo.ToCString();

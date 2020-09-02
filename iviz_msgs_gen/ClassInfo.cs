@@ -22,7 +22,6 @@ namespace Iviz.MsgsGen
         string md5;
 
         readonly bool forceStruct;
-        readonly bool fakeStruct;
         readonly bool hasStrings;
 
         readonly List<MsgParser.Variable> variables = new List<MsgParser.Variable>();
@@ -101,18 +100,6 @@ namespace Iviz.MsgsGen
             "iviz_msgs/BoundingBox",
         };
 
-        static readonly HashSet<string> FakeStructs = new HashSet<string>
-        {
-            //"std_msgs/Header",
-        };
-
-        static readonly HashSet<string> forceSkip = new HashSet<string>
-        {
-            //"mesh_msgs/TriangleIndices",
-        };
-
-        public bool ForceSkip => forceSkip.Contains(rosPackage + "/" + name);
-
         public ClassInfo(string package, string path)
         {
             Console.WriteLine("-- Parsing '" + path + "'");
@@ -125,7 +112,6 @@ namespace Iviz.MsgsGen
             elements = MsgParser.ParseFile(lines, name);
 
             forceStruct = ForceStructs.Contains(package + "/" + name);
-            fakeStruct = FakeStructs.Contains(package + "/" + name);
             hasStrings = elements.Any(x =>
                 ((x is MsgParser.Variable xv) && xv.className == "string") ||
                 ((x is MsgParser.Constant xc) && xc.className == "string")
@@ -199,9 +185,9 @@ namespace Iviz.MsgsGen
         }
 
 
-        internal static List<string> CreateLengthProperty(List<MsgParser.Variable> variables, int fixedSize, bool forceStruct, bool fakeStruct)
+        internal static List<string> CreateLengthProperty(List<MsgParser.Variable> variables, int fixedSize, bool forceStruct)
         {
-            string readOnlyId = (forceStruct || fakeStruct) ? "readonly " : "";
+            string readOnlyId = forceStruct ? "readonly " : "";
             if (fixedSize != UnknownSizeAtCompileTime)
             {
                 return new List<string> {
@@ -305,11 +291,11 @@ namespace Iviz.MsgsGen
             return lines;
         }
 
-        internal static List<string> CreateConstructors(List<MsgParser.Variable> variables, string name, bool forceStruct, bool fakeStruct)
+        internal static List<string> CreateConstructors(List<MsgParser.Variable> variables, string name, bool forceStruct)
         {
             List<string> lines = new List<string>();
 
-            if (!forceStruct && !fakeStruct)
+            if (!forceStruct)
             {
                 lines.Add("/// <summary> Constructor for empty message. </summary>");
                 lines.Add("public " + name + "()");
@@ -341,7 +327,7 @@ namespace Iviz.MsgsGen
                         {
                             lines.Add("    " + variable.fieldName + " = new " + variable.className + "[" + variable.arraySize + "];");
                         }
-                        else if (variable.classInfo == null || !(variable.classInfo.forceStruct || variable.classInfo.fakeStruct))
+                        else if (variable.classInfo == null || !variable.classInfo.forceStruct)
                         {
                             lines.Add("    " + variable.fieldName + " = new " + variable.className + "();");
                         }
@@ -362,7 +348,7 @@ namespace Iviz.MsgsGen
                         return v.className + "[] " + v.fieldName;
                     }
 
-                    if (v.classInfo != null && (v.classInfo.forceStruct || v.classInfo.fakeStruct))
+                    if (v.classInfo != null && v.classInfo.forceStruct)
                     {
                         return "in " + v.className + " " + v.fieldName;
                     }
@@ -397,7 +383,6 @@ namespace Iviz.MsgsGen
             lines.Add("{");
             if (forceStruct)
             {
-                //lines.Add("    this = b.Deserialize<" + name + ">();");
                 lines.Add("    b.Deserialize(out this);");
             }
             else
@@ -482,7 +467,7 @@ namespace Iviz.MsgsGen
             lines.Add("}");
             lines.Add("");
 
-            string readOnlyId = (forceStruct || fakeStruct) ? "readonly " : "";
+            string readOnlyId = forceStruct ? "readonly " : "";
             lines.Add("public " + readOnlyId + "ISerializable RosDeserialize(Buffer b)");
             lines.Add("{");
             lines.Add("    return new " + name + "(b ?? throw new System.ArgumentNullException(nameof(b)));");
@@ -512,11 +497,11 @@ namespace Iviz.MsgsGen
             return lines;
         }
 
-        public static List<string> CreateSerializers(List<MsgParser.Variable> variables, bool forceStruct, bool fakeStruct)
+        public static List<string> CreateSerializers(List<MsgParser.Variable> variables, bool forceStruct)
         {
             List<string> lines = new List<string>();
 
-            string readOnlyId = (forceStruct || fakeStruct) ? "readonly " : "";
+            string readOnlyId = forceStruct ? "readonly " : "";
 
             lines.Add("public " + readOnlyId + "void RosSerialize(Buffer b)");
             lines.Add("{");
@@ -590,15 +575,13 @@ namespace Iviz.MsgsGen
                 }
                 else
                 {
-                    if (!(variable.classInfo?.fakeStruct ?? false))
-                    {
-                        lines.Add("    if (" + variable.fieldName + $" is null) throw new System.NullReferenceException(nameof({variable.fieldName}));");
-                    }
+                    lines.Add("    if (" + variable.fieldName + $" is null) throw new System.NullReferenceException(nameof({variable.fieldName}));");
                     if (!variable.IsArray && variable.rosClassName != "string")
                     {
                         lines.Add("    " + variable.fieldName + ".RosValidate();");
                     }
                 }
+                
                 if (variable.IsArray)
                 {
                     if (variable.rosClassName == "string")
@@ -612,10 +595,7 @@ namespace Iviz.MsgsGen
                     {
                         lines.Add($"    for (int i = 0; i < {variable.fieldName}.Length; i++)");
                         lines.Add("    {");
-                        if (!(variable.classInfo?.fakeStruct ?? false))
-                        {
-                            lines.Add($"        if ({variable.fieldName}[i] is null) throw new System.NullReferenceException($\"{{nameof({variable.fieldName})}}[{{i}}]\");");
-                        }
+                        lines.Add($"        if ({variable.fieldName}[i] is null) throw new System.NullReferenceException($\"{{nameof({variable.fieldName})}}[{{i}}]\");");
                         lines.Add($"        {variable.fieldName}[i].RosValidate();");
                         lines.Add("    }");
                     }
@@ -632,10 +612,9 @@ namespace Iviz.MsgsGen
         {
             StringBuilder str = new StringBuilder();
 
-            if (hasStrings)
-            {
-                //str.AppendLine("using System.Text;");
-            }
+            str.AppendLine("/* This file was created automatically, do not edit! */");
+            str.AppendLine();
+
             if (forceStruct)
             {
                 str.AppendLine("using System.Runtime.InteropServices;");
@@ -671,14 +650,15 @@ namespace Iviz.MsgsGen
                 }
                 string base64 = Convert.ToBase64String(outputStream.ToArray());
 
-                for (int i = 0; i < base64.Length; i += 80)
+                const int lineWidth = 80;
+                for (int i = 0; i < base64.Length; i += lineWidth)
                 {
                     bool last;
                     int end;
-                    if (i + 80 < base64.Length)
+                    if (i + lineWidth < base64.Length)
                     {
                         last = false;
-                        end = i + 80;
+                        end = i + lineWidth;
                     }
                     else
                     {
@@ -716,10 +696,6 @@ namespace Iviz.MsgsGen
                     lines.Add("public struct " + name + " : IMessage, System.IEquatable<" + name + ">");
                 }
             }
-            else if (fakeStruct)
-            {
-                lines.Add("public struct " + name + " : IMessage, System.IEquatable<" + name + ">");
-            }
             else
             {
                 lines.Add("public sealed class " + name + " : IMessage");
@@ -737,31 +713,28 @@ namespace Iviz.MsgsGen
             {
                 lines.Add("");
             }
-            List<string> deserializer = CreateConstructors(variables, name, forceStruct, fakeStruct);
+            List<string> deserializer = CreateConstructors(variables, name, forceStruct);
             foreach (var entry in deserializer)
             {
                 lines.Add("    " + entry);
             }
 
             lines.Add("");
-            List<string> serializer = CreateSerializers(variables, forceStruct, fakeStruct);
+            List<string> serializer = CreateSerializers(variables, forceStruct);
             foreach (var entry in serializer)
             {
                 lines.Add("    " + entry);
             }
 
             lines.Add("");
-            List<string> lengthProperty = CreateLengthProperty(variables, fixedSize, forceStruct, fakeStruct);
+            List<string> lengthProperty = CreateLengthProperty(variables, fixedSize, forceStruct);
             foreach (var entry in lengthProperty)
             {
                 lines.Add("    " + entry);
             }
 
-            //lines.Add("");
-            //lines.Add("    IMessage IMessage.Create() => new " + name + "();");
-
             lines.Add("");
-            string readOnlyId = (forceStruct || fakeStruct) ? "readonly " : "";
+            string readOnlyId = forceStruct ? "readonly " : "";
             lines.Add("    public " + readOnlyId + "string RosType => RosMessageType;");
 
             lines.Add("");
@@ -779,44 +752,6 @@ namespace Iviz.MsgsGen
             lines.Add("    /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>");
             lines.Add("    [Preserve] public const string RosDependenciesBase64 =");
 
-            /*
-            byte[] inputBytes = Encoding.UTF8.GetBytes(catDependencies);
-            using (var outputStream = new MemoryStream())
-            {
-                using (var gZipStream = new GZipStream(outputStream, CompressionMode.Compress))
-                {
-                    gZipStream.Write(inputBytes, 0, inputBytes.Length);
-                }
-                string base64 = Convert.ToBase64String(outputStream.ToArray());
-
-                for (int i = 0; i < base64.Length; i += 80)
-                {
-                    bool last;
-                    int end;
-                    if (i + 80 < base64.Length)
-                    {
-                        last = false;
-                        end = i + 80;
-                    }
-                    else
-                    {
-                        last = true;
-                        end = base64.Length;
-                    }
-                    string sub = base64.Substring(i, end - i);
-                    if (!last)
-                    {
-                        lines.Add("            \"" + sub + "\" +");
-                    }
-                    else
-                    {
-                        lines.Add("            \"" + sub + "\";");
-                    }
-                }
-                lines.Add("");
-            }
-            */
-
             string catDependencies = GetCatDependencies();
             List<string> compressedDeps = Compress(catDependencies);
             foreach (var entry in compressedDeps)
@@ -827,110 +762,6 @@ namespace Iviz.MsgsGen
             lines.Add("}");
 
             return lines;
-
-
-
-            /*
-            StringBuilder str = new StringBuilder();
-            str.AppendLine();
-
-            str.AppendLine("namespace Iviz.Msgs." + package);
-            str.AppendLine("{");
-            if (forceStruct)
-            {
-                str.AppendLine("    public struct " + name + " : IMessage ");
-            }
-            else
-            {
-                str.AppendLine("    public sealed class " + name + " : IMessage ");
-            }
-            str.AppendLine("    {");
-            foreach (var element in elements)
-            {
-                str.Append("        ").Append(element.ToCString()).AppendLine();
-            }
-
-            str.AppendLine();
-            str.AppendLine("        /// <summary> Full ROS name of this message. </summary>");
-            str.AppendLine("        public const string MessageType = \"" + package + "/" + name + "\";");
-
-            str.AppendLine();
-            str.AppendLine("        public IMessage Create() => new " + name + "();");
-
-            str.AppendLine();
-            List<string> lengthProperty = CreateLengthProperty();
-            foreach (var entry in lengthProperty)
-            {
-                str.Append("        ").Append(entry).AppendLine();
-            }
-
-            str.AppendLine();
-            List<string> deserializer = CreateConstructors();
-            foreach (var entry in deserializer)
-            {
-                str.Append("        ").Append(entry).AppendLine();
-            }
-
-            str.AppendLine();
-            List<string> serializer = CreateSerializers();
-            foreach (var entry in serializer)
-            {
-                str.Append("        ").Append(entry).AppendLine();
-            }
-
-            str.AppendLine();
-            string md5 = GetMd5Property();
-            str.AppendLine("        /// <summary> MD5 hash of a compact representation of the message. </summary>");
-            str.AppendLine("        public const string Md5Sum = \"" + md5 + "\";");
-
-            str.AppendLine("");
-
-            string catDependencies = GetCatDependencies();
-            byte[] inputBytes = Encoding.UTF8.GetBytes(catDependencies);
-            using (var outputStream = new MemoryStream())
-            {
-                using (var gZipStream = new GZipStream(outputStream, CompressionMode.Compress))
-                {
-                    gZipStream.Write(inputBytes, 0, inputBytes.Length);
-                }
-                string base64 = Convert.ToBase64String(outputStream.ToArray());
-
-                str.AppendLine("        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>");
-                str.AppendLine("        public const string DependenciesBase64 =");
-                for (int i = 0; i < base64.Length; i += 80)
-                {
-                    bool last;
-                    int end;
-                    if (i + 80 < base64.Length)
-                    {
-                        last = false;
-                        end = i + 80;
-                    }
-                    else
-                    {
-                        last = true;
-                        end = base64.Length;
-                    }
-                    string sub = base64.Substring(i, end - i);
-                    str.Append("            \"" + sub + "\"");
-                    if (!last)
-                    {
-                        str.AppendLine(" +");
-                    }
-                    else
-                    {
-                        str.AppendLine(";");
-                    }
-                }
-                str.AppendLine();
-            }
-
-            str.AppendLine("    }");
-            str.AppendLine("}");
-
-
-            return str.ToString();
-            */
         }
 
         public void AddDependencies(List<ClassInfo> dependencies)
@@ -972,13 +803,19 @@ namespace Iviz.MsgsGen
 
         public string GetMd5()
         {
-            if (md5 != null) return md5;
+            if (md5 != null)
+            {
+                return md5;
+            }
 
             StringBuilder str = new StringBuilder();
 
-            var constants = elements.Where(x => x.Type == MsgParser.ElementType.Constant).
+            string[] constants = elements.
+                Where(x => x.Type == MsgParser.ElementType.Constant).
                 Cast<MsgParser.Constant>().
-                Select(x => x.ToMd5String());
+                Select(x => x.ToMd5String()).
+                ToArray();
+            
             if (constants.Any())
             {
                 str.AppendJoin("\n", constants);
@@ -989,28 +826,9 @@ namespace Iviz.MsgsGen
             }
             str.AppendJoin("\n", variables.Select(x => x.GetMd5Entry()));
 
-            /*
-            StringBuilder str = new StringBuilder();
-            var constants = elements.Where(x => x.Type == MsgParser.ElementType.Constant).
-                Cast<MsgParser.Constant>().
-                Select(x => x.ToMd5String());
-
-            str.Append(string.Join("\n", constants));
-            if (str.Length != 0)
-            {
-                str.Append("\n");
-            }
-            str.Append(string.Join("\n", variables.Select(x => x.GetMd5Entry())));
-            */
-
             md5File = str.ToString();
 
-            //Console.WriteLine("------" + package + "/" + name);
-            //Console.WriteLine(md5File);
-
-
             md5 = GetMd5Hash(MD5.Create(), md5File);
-            //Console.WriteLine(">>>" + md5);
 
             return md5;
         }
@@ -1019,9 +837,9 @@ namespace Iviz.MsgsGen
         {
             byte[] data = md5Hash.ComputeHash(UTF8.GetBytes(input));
             StringBuilder sBuilder = new StringBuilder();
-            for (int i = 0; i < data.Length; i++)
+            foreach (byte b in data)
             {
-                sBuilder.Append(data[i].ToString("x2"));
+                sBuilder.Append(b.ToString("x2"));
             }
             return sBuilder.ToString();
         }

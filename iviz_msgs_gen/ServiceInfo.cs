@@ -12,7 +12,6 @@ namespace Iviz.MsgsGen
         public readonly string rosPackage;
         public readonly string package;
         public readonly string name;
-        //public readonly string[] lines;
         public readonly string fullMessage;
 
         public readonly List<MsgParser.IElement> elementsReq;
@@ -108,40 +107,26 @@ namespace Iviz.MsgsGen
 
             lines.Add("");
 
-            //string type = (isRequest ? "IRequest" : "IResponse");
-
-            List<string> deserializer = ClassInfo.CreateConstructors(variables, name, forceStruct, false);
+            List<string> deserializer = ClassInfo.CreateConstructors(variables, name, forceStruct);
             foreach (var entry in deserializer)
             {
                 lines.Add("    " + entry);
             }
 
             lines.Add("");
-            List<string> serializer = ClassInfo.CreateSerializers(variables, forceStruct, false);
+            List<string> serializer = ClassInfo.CreateSerializers(variables, forceStruct);
             foreach (var entry in serializer)
             {
                 lines.Add("    " + entry);
             }
 
             lines.Add("");
-            List<string> lengthProperty = ClassInfo.CreateLengthProperty(variables, fixedSize, false, false);
+            List<string> lengthProperty = ClassInfo.CreateLengthProperty(variables, fixedSize, false);
             foreach (var entry in lengthProperty)
             {
                 lines.Add("    " + entry);
             }
 
-            /*
-            if (isRequest)
-            {
-                lines.Add("");
-                lines.Add("    public Response Call(IServiceCaller caller)");
-                lines.Add("    {");
-                lines.Add("        " + service + " s = new " + service + "(this);");
-                lines.Add("        caller.Call(s);");
-                lines.Add("        return s.response;");
-                lines.Add("    }");
-            }
-            */
             lines.Add("}");
 
             return lines;
@@ -160,33 +145,15 @@ namespace Iviz.MsgsGen
             }
         }
 
-        /*
-        string GetCatDependencies()
-        {
-            List<ClassInfo> dependencies = new List<ClassInfo>();
-            AddDependencies(dependencies, variablesReq);
-            AddDependencies(dependencies, variablesResp);
-
-            StringBuilder builder = new StringBuilder();
-            builder.AppendLine(fullMessage);
-
-            foreach (ClassInfo classInfo in dependencies)
-            {
-                builder.AppendLine("================================================================================");
-                builder.AppendLine("MSG: " + classInfo.package + "/" + classInfo.name);
-                builder.AppendLine(classInfo.fullMessage);
-            }
-            return builder.ToString();
-        }
-        */
-
-        public string GetMd5()
+        string GetMd5()
         {
             StringBuilder str = new StringBuilder();
 
-            var constantsReq = elementsReq.Where(x => x.Type == MsgParser.ElementType.Constant).
+            string[] constantsReq = elementsReq.
+                Where(x => x.Type == MsgParser.ElementType.Constant).
                 Cast<MsgParser.Constant>().
-                Select(x => x.ToMd5String());
+                Select(x => x.ToMd5String()).
+                ToArray();
             if (constantsReq.Any())
             {
                 str.AppendJoin("\n", constantsReq);
@@ -197,9 +164,11 @@ namespace Iviz.MsgsGen
             }
             str.AppendJoin("\n", variablesReq.Select(x => x.GetMd5Entry()));
 
-            var constantsResp = elementsResp.Where(x => x.Type == MsgParser.ElementType.Constant).
+            var constantsResp = elementsResp.
+                Where(x => x.Type == MsgParser.ElementType.Constant).
                 Cast<MsgParser.Constant>().
-                Select(x => x.ToMd5String());
+                Select(x => x.ToMd5String()).
+                ToArray();
             if (constantsResp.Any())
             {
                 str.AppendJoin("\n", constantsResp);
@@ -212,11 +181,7 @@ namespace Iviz.MsgsGen
 
             string md5File = str.ToString();
 
-            //Console.WriteLine("------" + package + "/" + name);
-            //Console.WriteLine(md5File);
-
             string md5 = ClassInfo.GetMd5Hash(MD5.Create(), md5File);
-            //Console.WriteLine(">>>" + md5);
 
             return md5;
         }
@@ -224,39 +189,6 @@ namespace Iviz.MsgsGen
         List<string> CreateServiceContent()
         {
             List<string> lines = new List<string>();
-
-            /*
-            {
-                lines.Add("");
-                lines.Add("    /// <summary> Full ROS name of the parent service. </summary>");
-                lines.Add("    public const string MessageType = " + service + ".MessageType;");
-                lines.Add("");
-                lines.Add("    /// <summary> MD5 hash of a compact representation of the parent service. </summary>");
-                lines.Add("    public const string Md5Sum = " + service + ".Md5Sum;");
-                lines.Add("");
-                lines.Add("    /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>");
-                lines.Add("    public const string DependenciesBase64 = " + service + ".DependenciesBase64;");
-                lines.Add("");
-                lines.Add("    public IResponse CreateResponse() => new Response();");
-                lines.Add("");
-                lines.Add("    public bool IsResponseType<T>()");
-                lines.Add("    {");
-                lines.Add("        return typeof(T).Equals(typeof(Response));");
-                lines.Add("    }");
-                lines.Add("");
-                */
-
-            /*
-            lines.Add("");
-            lines.Add("/// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>");
-            lines.Add("public const string DependenciesBase64 =");
-            string catDependencies = GetCatDependencies();
-            List<string> compressedDeps = ClassInfo.Compress(catDependencies);
-            foreach (var entry in compressedDeps)
-            {
-                lines.Add("    " + entry);
-            }
-            */
 
             lines.Add("/// <summary> Request message. </summary>");
             lines.Add("[DataMember] public " + name + "Request Request { get; set; }");
@@ -321,10 +253,7 @@ namespace Iviz.MsgsGen
         public string ToCString()
         {
             StringBuilder str = new StringBuilder();
-            if (hasStrings)
-            {
-                //str.AppendLine("using System.Text;");
-            }
+
             str.AppendLine("using System.Runtime.Serialization;");
             str.AppendLine("");
             str.AppendLine("namespace Iviz.Msgs." + package);
@@ -338,12 +267,6 @@ namespace Iviz.MsgsGen
             {
                 str.Append("        ").AppendLine(entry);
             }
-
-            /*
-            str.AppendLine("        public static readonly System.Type RequestType = typeof(Request);");
-            str.AppendLine();
-            str.AppendLine("        public static readonly System.Type ResponseType = typeof(Response);");
-            */
 
             str.AppendLine("    }");
             str.AppendLine();

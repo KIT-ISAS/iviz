@@ -151,7 +151,7 @@ namespace Iviz.MsgsGen
                 this.fieldName = Sanitize(fieldName);
                 if (this.fieldName == parentClassName)
                 {
-                    this.fieldName += "_";
+                    this.fieldName += "_"; // C# forbids fields with the same name as the class
                 }
 
                 if (Keywords.Contains(fieldName))
@@ -212,7 +212,6 @@ namespace Iviz.MsgsGen
                 List<string> list = new List<string>();
 
                 string attrStr = (fieldName != rosFieldName) ? $"[DataMember (Name = \"{rosFieldName}\")]" : "[DataMember]";
-                //list.Add(attrStr);
 
                 string result;
                 if (arraySize == -1)
@@ -234,11 +233,12 @@ namespace Iviz.MsgsGen
                         result = "public " + className + "[/*" + arraySize + "*/] " + fieldName + " { get; set; }";
                     }
                 }
+                
+                
                 if (comment != "")
                 {
                     result += " //" + comment;
                 }
-                //list.Add(result);
 
                 list.Add(attrStr + " " + result);
 
@@ -262,22 +262,18 @@ namespace Iviz.MsgsGen
                 {
                     return classInfo.GetMd5() + " " + rosFieldName;
                 }
-                else
+
+                if (arraySize == -1)
                 {
-                    if (arraySize == -1)
-                    {
-                        return rosClassName + " " + rosFieldName;
-                    }
-                    else if (arraySize == 0)
-                    {
-                        return rosClassName + "[] " + rosFieldName;
-                    }
-                    else
-                    {
-                        return rosClassName + "[" + arraySize + "] " + rosFieldName;
-                        //return rosClassName + "[] " + rosFieldName;
-                    }
+                    return rosClassName + " " + rosFieldName;
                 }
+
+                if (arraySize == 0)
+                {
+                    return rosClassName + "[] " + rosFieldName;
+                }
+
+                return rosClassName + "[" + arraySize + "] " + rosFieldName;
             }
         }
 
