@@ -13,13 +13,13 @@ To run iviz, you need the following:
 * Unity 2019.4 LTS editor on either Windows, Linux, or macOS
 * An iOS or Android device (optional)
 
-The iviz project has no external dependencies (all required libraries are included), so installing it is just a matter of cloning the repository and launching Unity. Make sure that the **Scenes/UI AR** scene is active.
+The iviz project has no external dependencies (all required libraries are included), so installing it is just a matter of cloning the repository and launching Unity.
 
 ## 2. Getting Started
 
 Here are some instructions on how to get started:
 
-* Start Unity 2019.4, and open the project on the iviz folder. Press Play.
+* Start Unity 2019.4, and open the project on the iviz folder. Make sure that the scene **Scenes/UI AR** is active. Press Play.
 * On the panel at the top-left, right underneath the "- iviz -" label, tap on the URL ("http://...") with the arrow at the end.
 * You should now see the **Connection Dialog**.
   - Type in the URL of the master, i.e., where roscore is running. This is the content of the environment variable _ROS_MASTER_URI_.
