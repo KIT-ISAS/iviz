@@ -13,7 +13,7 @@ To run iviz, you need the following:
 * Unity 2019.4 LTS editor on either Windows, Linux, or macOS
 * An iOS or Android device (optional)
 
-The iviz project has no external dependencies (all required libraries are included), so installing it is just a matter of cloning the repository and launching Unity.
+The iviz project has no external dependencies (all required libraries are included), so installing it is just a matter of cloning the repository and launching Unity. Make sure that the **Scenes/UI AR** scene is active.
 
 ## 2. Getting Started
 
@@ -36,11 +36,14 @@ To move around:
 * On a mobile device: Tap with one finger and drag to rotate the camera. Tap with two fingers and move to translate the camera. Pinch to zoom in and out.
 
 ## 4. Working with Transform Frames
+TBW...
 
 ## 5. Working with Robots
 ![image](../wiki_files/iviz_screen.png)
+TBW...
 
 ## 6. Working with Augmented Reality
+TBW...
 
 ## 7. Credits
 
