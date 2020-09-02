@@ -22,7 +22,7 @@ Here are some instructions on how to get started:
 * Start Unity 2019.4, and open the project on the iviz folder. Make sure that the scene **Scenes/UI AR** is active. Press Play.
 * On the panel at the top-left, right underneath the "- iviz -" label, tap on the URL ("http://...") with the arrow at the end.
 * You should now see the **Connection Dialog**.
-  - Type in the URL of the master, i.e., where roscore is running. This is the content of the environment variable _ROS_MASTER_URI_.
+  - Type in the URL of the master, i.e., where roscore is running. This is the content of the environment variable _ROS_MASTER_URI_, but you can write any other address.
   - Type in the URL of your device, or leave the default. The hostname should be accessible to other devices, and can be obtained from _ROS_HOSTNAME_ or _ROS_IP_.
   The port (7613) can be set to anything, just make sure it's not being used by another application.
   - Type in your id, or leave the default. This is the name of your ROS node. It can be anything, but make sure it is unique in your network.
