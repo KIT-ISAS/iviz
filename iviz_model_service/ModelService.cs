@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Xml;
 using Assimp;
+using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Roslib;
@@ -55,7 +56,7 @@ namespace Iviz.ModelService
             else
             {
                 string[] paths = packagePath.Split(new[] {':'}, StringSplitOptions.RemoveEmptyEntries);
-                foreach (var path in paths)
+                foreach (string path in paths)
                 {
                     CheckPath(null, path);
                 }
@@ -116,13 +117,23 @@ namespace Iviz.ModelService
             }
             
             string subPath = Uri.UnescapeDataString(uri.AbsolutePath);
+
             foreach (string packagePath in paths)
             {
                 string path = packagePath + "/" + subPath;
-                if (File.Exists(path))
+                
+                if (!File.Exists(path))
+                {
+                    continue;
+                }
+
+                if (Path.GetFullPath(path).StartsWith(packagePath))
                 {
                     return path;
                 }
+
+                Console.Error.WriteLine("EE Rejecting resource request '" + uri + "' for path traversal.");
+                return null;
             }
 
             Console.Error.WriteLine("EE Failed to find resource '" + uri + "'.");
@@ -221,7 +232,7 @@ namespace Iviz.ModelService
         static Model LoadModel(string fileName)
         {
             string orientationHint = "";
-            if (fileName.Length > 4 && fileName[^4..].ToLowerInvariant() == ".dae")
+            if (fileName.EndsWith(".dae", true, BuiltIns.Culture))
             { 
                 XmlDocument doc = new XmlDocument();
                 doc.Load(fileName);
@@ -232,7 +243,7 @@ namespace Iviz.ModelService
                 }
             }
 
-            Scene scene = Importer.ImportFile(fileName, PostProcessPreset.TargetRealTimeMaximumQuality | PostProcessPreset.ConvertToLeftHanded);
+            Assimp.Scene scene = Importer.ImportFile(fileName, PostProcessPreset.TargetRealTimeMaximumQuality | PostProcessPreset.ConvertToLeftHanded);
             Model msg = new Model
             {
                 Filename = Path.GetFileName(fileName),
