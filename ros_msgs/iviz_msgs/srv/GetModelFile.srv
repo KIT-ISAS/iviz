@@ -1,5 +1,7 @@
-string uri
+# Retrieves a file
+
+string uri		# Uri of the file. Example: package://some_package/file.dae
 ---
-bool success
-uint8[] bytes 
-string message
+bool success		# Whether the retrieval succeeded
+uint8[] bytes 		# The content of the file as byte array
+string message		# An error message if success is false

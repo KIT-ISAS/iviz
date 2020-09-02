@@ -1,0 +1,7 @@
+# Retrieves a scene, which can contain one or multiple 3D models and lights
+
+string uri		# Uri of the file. Example: package://some_package/file.world
+---
+bool success		# Whether the retrieval succeeded
+Scene scene		# The scene
+string message		# An error message if success is false
