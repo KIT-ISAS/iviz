@@ -30,7 +30,7 @@ namespace Iviz.Msgs
 
         public override bool Equals(object obj)
         {
-            return (obj is duration d) ? (this == d) : false;
+            return (obj is duration d) && (this == d);
         }
 
         public override int GetHashCode()

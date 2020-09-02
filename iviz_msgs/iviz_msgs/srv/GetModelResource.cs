@@ -52,7 +52,8 @@ namespace Iviz.Msgs.IvizMsgs
 
     public sealed class GetModelResourceRequest : IRequest
     {
-        [DataMember (Name = "uri")] public string Uri { get; set; }
+        // Retrieves a 3D model, and converts it into a format that can be used in iviz
+        [DataMember (Name = "uri")] public string Uri { get; set; } // Uri of the file. Example: package://some_package/file.dae
     
         /// <summary> Constructor for empty message. </summary>
         public GetModelResourceRequest()
@@ -100,9 +101,9 @@ namespace Iviz.Msgs.IvizMsgs
 
     public sealed class GetModelResourceResponse : IResponse
     {
-        [DataMember (Name = "success")] public bool Success { get; set; }
-        [DataMember (Name = "model")] public Model Model { get; set; }
-        [DataMember (Name = "message")] public string Message { get; set; }
+        [DataMember (Name = "success")] public bool Success { get; set; } // Whether the retrieval succeeded
+        [DataMember (Name = "model")] public Model Model { get; set; } // The 3D model
+        [DataMember (Name = "message")] public string Message { get; set; } // An error message if success is false
     
         /// <summary> Constructor for empty message. </summary>
         public GetModelResourceResponse()

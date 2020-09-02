@@ -1,3 +1,5 @@
+/* This file was created automatically, do not edit! */
+
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
