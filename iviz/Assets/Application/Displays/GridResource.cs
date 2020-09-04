@@ -259,9 +259,11 @@ namespace Iviz.Displays
             mesh.SetIndices(indices.ToArray(), squareMesh.GetTopology(0), 0);
             mesh.Optimize();
 
-            interiorObject.transform.localScale = new Vector3(totalSize, totalSize, GridLineWidth / 8.1f);
+            float interiorHeight = GridLineWidth / 8f;
+            interiorObject.transform.localScale = new Vector3(totalSize, totalSize, interiorHeight);
+            interiorObject.transform.localPosition = new Vector3(0, 0, interiorHeight / 2);
 
-            Collider.size = new Vector3(totalSize, totalSize, GridLineWidth / 8);
+            Collider.size = new Vector3(totalSize, totalSize, interiorHeight);
 
 
             int size = NumberOfGridCells / 10;

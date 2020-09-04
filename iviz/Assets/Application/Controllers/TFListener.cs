@@ -452,9 +452,19 @@ namespace Iviz.Controllers
         {
             bool arEnabled = ARController.Instance?.Visible ?? false;
             bool viewEnabled = ARController.Instance?.ShowRootMarker ?? false;
-            RootMarker.InteractionMode = (arEnabled && viewEnabled)
-                ? InteractiveControl.InteractionModeType.Frame
-                : InteractiveControl.InteractionModeType.Disabled;            
+            if (arEnabled && viewEnabled)
+            {
+                RootMarker.InteractionMode = InteractiveControl.InteractionModeType.Frame;
+                MapFrame.ColliderEnabled = false;
+                MapFrame.Selected = false;
+                MapFrame.Alpha = 0.1f;
+            }
+            else
+            {
+                RootMarker.InteractionMode = InteractiveControl.InteractionModeType.Disabled;
+                MapFrame.ColliderEnabled = true;
+                MapFrame.Alpha = 1;
+            }
         }
     }
 }

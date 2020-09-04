@@ -19,6 +19,17 @@ namespace Iviz.Controllers
         TrailResource trail;
         AnchorLineResource anchor;
 
+        GameObject labelObject;
+        TextMesh labelObjectText;
+        LineConnector parentConnector;
+        AxisFrameResource axis;
+
+        readonly HashSet<DisplayNode> listeners = new HashSet<DisplayNode>();
+        readonly Dictionary<string, TFFrame> children = new Dictionary<string, TFFrame>();
+
+        public ReadOnlyDictionary<string, TFFrame> Children =>
+            new ReadOnlyDictionary<string, TFFrame>(children);
+        
         [SerializeField] string id;
 
         public string Id
@@ -43,25 +54,32 @@ namespace Iviz.Controllers
             }
         }
 
-        GameObject labelObject;
-        TextMesh labelObjectText;
-        LineConnector parentConnector;
-        BoxCollider boxCollider;
-        AxisFrameResource axis;
+        float alpha = 1;
+        public float Alpha
+        {
+            get => alpha;
+            set
+            {
+                alpha = value;
+                axis.ColorX = new Color(axis.ColorX.r, axis.ColorX.g, axis.ColorX.b, alpha);
+                axis.ColorY = new Color(axis.ColorY.r, axis.ColorY.g, axis.ColorY.b, alpha);
+                axis.ColorZ = new Color(axis.ColorZ.r, axis.ColorZ.g, axis.ColorZ.b, alpha);
+            }
+        }
 
-        readonly HashSet<DisplayNode> listeners = new HashSet<DisplayNode>();
-        readonly Dictionary<string, TFFrame> children = new Dictionary<string, TFFrame>();
-
-        public ReadOnlyDictionary<string, TFFrame> Children =>
-            new ReadOnlyDictionary<string, TFFrame>(children);
-
-        public override Bounds Bounds => new Bounds(boxCollider.center, boxCollider.size);
-        public override Bounds WorldBounds => boxCollider.bounds;
-        public override Vector3 BoundsScale => Vector3.one;
+        public override Bounds Bounds => axis.Bounds;
+        public override Bounds WorldBounds => axis.WorldBounds;
+        public override Vector3 BoundsScale => axis.WorldScale;
 
         public void AddListener(DisplayNode display)
         {
             listeners.Add(display);
+        }
+
+        public bool ColliderEnabled
+        {
+            get => axis.ColliderEnabled;
+            set => axis.ColliderEnabled = value;
         }
 
         public void RemoveListener(DisplayNode display)
@@ -344,8 +362,6 @@ namespace Iviz.Controllers
 
         void Awake()
         {
-            boxCollider = GetComponent<BoxCollider>();
-
             labelObject = ResourcePool.GetOrCreate(Resource.Displays.Text, transform);
             labelObject.gameObject.SetActive(false);
             labelObjectText = labelObject.GetComponent<TextMesh>();
