@@ -41,7 +41,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             ServerId = b.DeserializeString();
             SeqNum = b.Deserialize<ulong>();
             Markers = b.DeserializeArray<InteractiveMarker>();
-            for (int i = 0; i < this.Markers.Length; i++)
+            for (int i = 0; i < Markers.Length; i++)
             {
                 Markers[i] = new InteractiveMarker(b);
             }
@@ -76,9 +76,9 @@ namespace Iviz.Msgs.VisualizationMsgs
             get {
                 int size = 16;
                 size += BuiltIns.UTF8.GetByteCount(ServerId);
-                for (int i = 0; i < Markers.Length; i++)
+                foreach (var i in Markers)
                 {
-                    size += Markers[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
                 return size;
             }

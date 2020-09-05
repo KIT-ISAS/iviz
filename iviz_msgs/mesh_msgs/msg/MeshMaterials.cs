@@ -35,18 +35,18 @@ namespace Iviz.Msgs.MeshMsgs
         internal MeshMaterials(Buffer b)
         {
             Clusters = b.DeserializeArray<MeshMsgs.MeshFaceCluster>();
-            for (int i = 0; i < this.Clusters.Length; i++)
+            for (int i = 0; i < Clusters.Length; i++)
             {
                 Clusters[i] = new MeshMsgs.MeshFaceCluster(b);
             }
             Materials = b.DeserializeArray<MeshMsgs.MeshMaterial>();
-            for (int i = 0; i < this.Materials.Length; i++)
+            for (int i = 0; i < Materials.Length; i++)
             {
                 Materials[i] = new MeshMsgs.MeshMaterial(b);
             }
             ClusterMaterials = b.DeserializeStructArray<uint>();
             VertexTexCoords = b.DeserializeArray<MeshMsgs.MeshVertexTexCoords>();
-            for (int i = 0; i < this.VertexTexCoords.Length; i++)
+            for (int i = 0; i < VertexTexCoords.Length; i++)
             {
                 VertexTexCoords[i] = new MeshMsgs.MeshVertexTexCoords(b);
             }
@@ -93,9 +93,9 @@ namespace Iviz.Msgs.MeshMsgs
         {
             get {
                 int size = 16;
-                for (int i = 0; i < Clusters.Length; i++)
+                foreach (var i in Clusters)
                 {
-                    size += Clusters[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
                 size += 21 * Materials.Length;
                 size += 4 * ClusterMaterials.Length;

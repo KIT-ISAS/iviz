@@ -49,7 +49,7 @@ namespace Iviz.Msgs.GridMapMsgs
             Layers = b.DeserializeStringArray();
             BasicLayers = b.DeserializeStringArray();
             Data = b.DeserializeArray<StdMsgs.Float32MultiArray>();
-            for (int i = 0; i < this.Data.Length; i++)
+            for (int i = 0; i < Data.Length; i++)
             {
                 Data[i] = new StdMsgs.Float32MultiArray(b);
             }
@@ -101,18 +101,18 @@ namespace Iviz.Msgs.GridMapMsgs
                 int size = 16;
                 size += Info.RosMessageLength;
                 size += 4 * Layers.Length;
-                for (int i = 0; i < Layers.Length; i++)
+                foreach (string s in Layers)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(Layers[i]);
+                    size += BuiltIns.UTF8.GetByteCount(s);
                 }
                 size += 4 * BasicLayers.Length;
-                for (int i = 0; i < BasicLayers.Length; i++)
+                foreach (string s in BasicLayers)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(BasicLayers[i]);
+                    size += BuiltIns.UTF8.GetByteCount(s);
                 }
-                for (int i = 0; i < Data.Length; i++)
+                foreach (var i in Data)
                 {
-                    size += Data[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
                 return size;
             }

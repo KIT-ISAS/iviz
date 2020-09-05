@@ -47,7 +47,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             Message = b.DeserializeString();
             HardwareId = b.DeserializeString();
             Values = b.DeserializeArray<KeyValue>();
-            for (int i = 0; i < this.Values.Length; i++)
+            for (int i = 0; i < Values.Length; i++)
             {
                 Values[i] = new KeyValue(b);
             }
@@ -88,9 +88,9 @@ namespace Iviz.Msgs.DiagnosticMsgs
                 size += BuiltIns.UTF8.GetByteCount(Name);
                 size += BuiltIns.UTF8.GetByteCount(Message);
                 size += BuiltIns.UTF8.GetByteCount(HardwareId);
-                for (int i = 0; i < Values.Length; i++)
+                foreach (var i in Values)
                 {
-                    size += Values[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
                 return size;
             }

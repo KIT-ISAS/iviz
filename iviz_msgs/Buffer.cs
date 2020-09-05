@@ -31,7 +31,7 @@ namespace Iviz.Msgs
             }
         }
         
-        static void AssertSize<T>(IList<T> array, uint size)
+        static void AssertSize<T>(ICollection<T> array, uint size)
         {
             if (array is null)
             {

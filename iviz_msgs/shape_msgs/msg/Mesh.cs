@@ -31,7 +31,7 @@ namespace Iviz.Msgs.ShapeMsgs
         internal Mesh(Buffer b)
         {
             Triangles = b.DeserializeArray<MeshTriangle>();
-            for (int i = 0; i < this.Triangles.Length; i++)
+            for (int i = 0; i < Triangles.Length; i++)
             {
                 Triangles[i] = new MeshTriangle(b);
             }

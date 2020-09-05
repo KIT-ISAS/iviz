@@ -2,5 +2,6 @@
 
 string uri 		# Uri of the asset
 Matrix4 pose		# Pose of the asset
+Material material
 string package		# If uri has a model scheme, this indicates the package to search
  

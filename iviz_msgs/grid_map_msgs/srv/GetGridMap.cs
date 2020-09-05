@@ -126,9 +126,9 @@ namespace Iviz.Msgs.GridMapMsgs
                 int size = 40;
                 size += BuiltIns.UTF8.GetByteCount(FrameId);
                 size += 4 * Layers.Length;
-                for (int i = 0; i < Layers.Length; i++)
+                foreach (string s in Layers)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(Layers[i]);
+                    size += BuiltIns.UTF8.GetByteCount(s);
                 }
                 return size;
             }

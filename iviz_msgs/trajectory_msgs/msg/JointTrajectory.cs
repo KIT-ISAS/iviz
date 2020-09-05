@@ -33,7 +33,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
             Header = new StdMsgs.Header(b);
             JointNames = b.DeserializeStringArray();
             Points = b.DeserializeArray<JointTrajectoryPoint>();
-            for (int i = 0; i < this.Points.Length; i++)
+            for (int i = 0; i < Points.Length; i++)
             {
                 Points[i] = new JointTrajectoryPoint(b);
             }
@@ -75,13 +75,13 @@ namespace Iviz.Msgs.TrajectoryMsgs
                 int size = 8;
                 size += Header.RosMessageLength;
                 size += 4 * JointNames.Length;
-                for (int i = 0; i < JointNames.Length; i++)
+                foreach (string s in JointNames)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(JointNames[i]);
+                    size += BuiltIns.UTF8.GetByteCount(s);
                 }
-                for (int i = 0; i < Points.Length; i++)
+                foreach (var i in Points)
                 {
-                    size += Points[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
                 return size;
             }

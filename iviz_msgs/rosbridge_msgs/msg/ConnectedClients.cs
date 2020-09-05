@@ -25,7 +25,7 @@ namespace Iviz.Msgs.RosbridgeMsgs
         internal ConnectedClients(Buffer b)
         {
             Clients = b.DeserializeArray<ConnectedClient>();
-            for (int i = 0; i < this.Clients.Length; i++)
+            for (int i = 0; i < Clients.Length; i++)
             {
                 Clients[i] = new ConnectedClient(b);
             }
@@ -56,9 +56,9 @@ namespace Iviz.Msgs.RosbridgeMsgs
         {
             get {
                 int size = 4;
-                for (int i = 0; i < Clients.Length; i++)
+                foreach (var i in Clients)
                 {
-                    size += Clients[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
                 return size;
             }

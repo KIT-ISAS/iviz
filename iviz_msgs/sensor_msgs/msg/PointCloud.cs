@@ -41,7 +41,7 @@ namespace Iviz.Msgs.SensorMsgs
             Header = new StdMsgs.Header(b);
             Points = b.DeserializeStructArray<GeometryMsgs.Point32>();
             Channels = b.DeserializeArray<ChannelFloat32>();
-            for (int i = 0; i < this.Channels.Length; i++)
+            for (int i = 0; i < Channels.Length; i++)
             {
                 Channels[i] = new ChannelFloat32(b);
             }
@@ -79,9 +79,9 @@ namespace Iviz.Msgs.SensorMsgs
                 int size = 8;
                 size += Header.RosMessageLength;
                 size += 12 * Points.Length;
-                for (int i = 0; i < Channels.Length; i++)
+                foreach (var i in Channels)
                 {
-                    size += Channels[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
                 return size;
             }

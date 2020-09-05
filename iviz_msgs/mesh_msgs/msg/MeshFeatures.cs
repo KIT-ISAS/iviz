@@ -29,7 +29,7 @@ namespace Iviz.Msgs.MeshMsgs
         {
             MapUuid = b.DeserializeString();
             Features = b.DeserializeArray<MeshMsgs.Feature>();
-            for (int i = 0; i < this.Features.Length; i++)
+            for (int i = 0; i < Features.Length; i++)
             {
                 Features[i] = new MeshMsgs.Feature(b);
             }
@@ -63,9 +63,9 @@ namespace Iviz.Msgs.MeshMsgs
             get {
                 int size = 8;
                 size += BuiltIns.UTF8.GetByteCount(MapUuid);
-                for (int i = 0; i < Features.Length; i++)
+                foreach (var i in Features)
                 {
-                    size += Features[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
                 return size;
             }

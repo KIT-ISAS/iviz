@@ -25,7 +25,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         internal TestHeaderArray(Buffer b)
         {
             Header = b.DeserializeArray<StdMsgs.Header>();
-            for (int i = 0; i < this.Header.Length; i++)
+            for (int i = 0; i < Header.Length; i++)
             {
                 Header[i] = new StdMsgs.Header(b);
             }
@@ -56,9 +56,9 @@ namespace Iviz.Msgs.RosbridgeLibrary
         {
             get {
                 int size = 4;
-                for (int i = 0; i < Header.Length; i++)
+                foreach (var i in Header)
                 {
-                    size += Header[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
                 return size;
             }

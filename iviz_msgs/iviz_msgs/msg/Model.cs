@@ -43,17 +43,17 @@ namespace Iviz.Msgs.IvizMsgs
             Filename = b.DeserializeString();
             OrientationHint = b.DeserializeString();
             Meshes = b.DeserializeArray<Mesh>();
-            for (int i = 0; i < this.Meshes.Length; i++)
+            for (int i = 0; i < Meshes.Length; i++)
             {
                 Meshes[i] = new Mesh(b);
             }
             Materials = b.DeserializeArray<Material>();
-            for (int i = 0; i < this.Materials.Length; i++)
+            for (int i = 0; i < Materials.Length; i++)
             {
                 Materials[i] = new Material(b);
             }
             Nodes = b.DeserializeArray<Node>();
-            for (int i = 0; i < this.Nodes.Length; i++)
+            for (int i = 0; i < Nodes.Length; i++)
             {
                 Nodes[i] = new Node(b);
             }
@@ -107,17 +107,17 @@ namespace Iviz.Msgs.IvizMsgs
                 size += BuiltIns.UTF8.GetByteCount(Name);
                 size += BuiltIns.UTF8.GetByteCount(Filename);
                 size += BuiltIns.UTF8.GetByteCount(OrientationHint);
-                for (int i = 0; i < Meshes.Length; i++)
+                foreach (var i in Meshes)
                 {
-                    size += Meshes[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
-                for (int i = 0; i < Materials.Length; i++)
+                foreach (var i in Materials)
                 {
-                    size += Materials[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
-                for (int i = 0; i < Nodes.Length; i++)
+                foreach (var i in Nodes)
                 {
-                    size += Nodes[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
                 return size;
             }

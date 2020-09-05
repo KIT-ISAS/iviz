@@ -34,7 +34,7 @@ namespace Iviz.Msgs.MeshMsgs
             Vertices = b.DeserializeStructArray<GeometryMsgs.Point>();
             VertexNormals = b.DeserializeStructArray<GeometryMsgs.Point>();
             Faces = b.DeserializeArray<MeshMsgs.TriangleIndices>();
-            for (int i = 0; i < this.Faces.Length; i++)
+            for (int i = 0; i < Faces.Length; i++)
             {
                 Faces[i] = new MeshMsgs.TriangleIndices(b);
             }

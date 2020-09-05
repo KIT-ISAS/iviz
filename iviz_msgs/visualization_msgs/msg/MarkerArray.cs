@@ -25,7 +25,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         internal MarkerArray(Buffer b)
         {
             Markers = b.DeserializeArray<Marker>();
-            for (int i = 0; i < this.Markers.Length; i++)
+            for (int i = 0; i < Markers.Length; i++)
             {
                 Markers[i] = new Marker(b);
             }
@@ -56,9 +56,9 @@ namespace Iviz.Msgs.VisualizationMsgs
         {
             get {
                 int size = 4;
-                for (int i = 0; i < Markers.Length; i++)
+                foreach (var i in Markers)
                 {
-                    size += Markers[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
                 return size;
             }

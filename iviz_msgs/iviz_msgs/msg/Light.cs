@@ -15,30 +15,29 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "cast_shadows")] public bool CastShadows { get; set; }
         [DataMember (Name = "diffuse")] public Color Diffuse { get; set; }
         [DataMember (Name = "range")] public float Range { get; set; }
+        [DataMember (Name = "position")] public Vector3 Position { get; set; }
         [DataMember (Name = "direction")] public Vector3 Direction { get; set; }
         [DataMember (Name = "inner_angle")] public float InnerAngle { get; set; }
         [DataMember (Name = "outer_angle")] public float OuterAngle { get; set; }
-        [DataMember (Name = "pose")] public Matrix4 Pose { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Light()
         {
             Name = "";
-            Pose = new Matrix4();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Light(string Name, byte Type, bool CastShadows, in Color Diffuse, float Range, in Vector3 Direction, float InnerAngle, float OuterAngle, Matrix4 Pose)
+        public Light(string Name, byte Type, bool CastShadows, in Color Diffuse, float Range, in Vector3 Position, in Vector3 Direction, float InnerAngle, float OuterAngle)
         {
             this.Name = Name;
             this.Type = Type;
             this.CastShadows = CastShadows;
             this.Diffuse = Diffuse;
             this.Range = Range;
+            this.Position = Position;
             this.Direction = Direction;
             this.InnerAngle = InnerAngle;
             this.OuterAngle = OuterAngle;
-            this.Pose = Pose;
         }
         
         /// <summary> Constructor with buffer. </summary>
@@ -49,10 +48,10 @@ namespace Iviz.Msgs.IvizMsgs
             CastShadows = b.Deserialize<bool>();
             Diffuse = new Color(b);
             Range = b.Deserialize<float>();
+            Position = new Vector3(b);
             Direction = new Vector3(b);
             InnerAngle = b.Deserialize<float>();
             OuterAngle = b.Deserialize<float>();
-            Pose = new Matrix4(b);
         }
         
         public ISerializable RosDeserialize(Buffer b)
@@ -68,23 +67,21 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(CastShadows);
             Diffuse.RosSerialize(b);
             b.Serialize(Range);
+            Position.RosSerialize(b);
             Direction.RosSerialize(b);
             b.Serialize(InnerAngle);
             b.Serialize(OuterAngle);
-            Pose.RosSerialize(b);
         }
         
         public void RosValidate()
         {
             if (Name is null) throw new System.NullReferenceException(nameof(Name));
-            if (Pose is null) throw new System.NullReferenceException(nameof(Pose));
-            Pose.RosValidate();
         }
     
         public int RosMessageLength
         {
             get {
-                int size = 98;
+                int size = 46;
                 size += BuiltIns.UTF8.GetByteCount(Name);
                 return size;
             }
@@ -96,14 +93,14 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosMessageType = "iviz_msgs/Light";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "5160c230ff0932d45a06d2998b92b7aa";
+        [Preserve] public const string RosMd5Sum = "c08cec0d4c9fe9b11d0596f99987e126";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE7VRSwrCMBDdzykGPIBfRAQXoiIFbUXFjUhJNa2RNlOS1N/pjRrjBXQ27+W9SeYTqIQ0" +
-                "PVxEQbjGATbgfR4Hy8loHUThcGbVplNXi+iZ1ALQRgmZoWQFd565lRwSohz3TJtYH9mBLhpGlJPCg0jT" +
-                "SnNIc2Km3ULFZMZhw/eGVNu6yjJB0vtCSq5im5R/71BlvDZntv61gyXZR20MfhwwX037KM7iHhc60/XX" +
-                "FG7QD2YOE4fs/224hfmVXD27eXb/fxtu+5+S22Z3hwXWUNEFC3ay/w3wAP2elUxYAgAA";
+                "H4sIAAAAAAAAE7WQSw6CMBCG93OKuYGvjTFhYdQYEgUixC2pUnAS6JC2+Dq9qLVeQGfz//3mkc5AR8pO" +
+                "MYnDKMMAh/B+L8PdapGFcTTf9HTkaJrEz6IxgLGaVIVKNNLl7K2VcGCu8SiMzc1JFHwxsOCaNRZUlp2R" +
+                "UNYs7GSMWqhKwl4eLesJtmzIEisPCtK9e5JPAykldd531d8h3FnP+gh+HLBN1zOkM93zxlRm8NrELfvR" +
+                "yunBqfj/N9yN/BWu3t28uwM8ACr8e23YAQAA";
                 
     }
 }

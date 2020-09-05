@@ -59,12 +59,12 @@ namespace Iviz.Msgs.VisualizationMsgs
             Description = b.DeserializeString();
             Scale = b.Deserialize<float>();
             MenuEntries = b.DeserializeArray<MenuEntry>();
-            for (int i = 0; i < this.MenuEntries.Length; i++)
+            for (int i = 0; i < MenuEntries.Length; i++)
             {
                 MenuEntries[i] = new MenuEntry(b);
             }
             Controls = b.DeserializeArray<InteractiveMarkerControl>();
-            for (int i = 0; i < this.Controls.Length; i++)
+            for (int i = 0; i < Controls.Length; i++)
             {
                 Controls[i] = new InteractiveMarkerControl(b);
             }
@@ -114,13 +114,13 @@ namespace Iviz.Msgs.VisualizationMsgs
                 size += Header.RosMessageLength;
                 size += BuiltIns.UTF8.GetByteCount(Name);
                 size += BuiltIns.UTF8.GetByteCount(Description);
-                for (int i = 0; i < MenuEntries.Length; i++)
+                foreach (var i in MenuEntries)
                 {
-                    size += MenuEntries[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
-                for (int i = 0; i < Controls.Length; i++)
+                foreach (var i in Controls)
                 {
-                    size += Controls[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
                 return size;
             }

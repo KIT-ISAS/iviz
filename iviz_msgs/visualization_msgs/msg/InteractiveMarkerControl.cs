@@ -99,7 +99,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             InteractionMode = b.Deserialize<byte>();
             AlwaysVisible = b.Deserialize<bool>();
             Markers = b.DeserializeArray<Marker>();
-            for (int i = 0; i < this.Markers.Length; i++)
+            for (int i = 0; i < Markers.Length; i++)
             {
                 Markers[i] = new Marker(b);
             }
@@ -142,9 +142,9 @@ namespace Iviz.Msgs.VisualizationMsgs
             get {
                 int size = 48;
                 size += BuiltIns.UTF8.GetByteCount(Name);
-                for (int i = 0; i < Markers.Length; i++)
+                foreach (var i in Markers)
                 {
-                    size += Markers[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
                 size += BuiltIns.UTF8.GetByteCount(Description);
                 return size;

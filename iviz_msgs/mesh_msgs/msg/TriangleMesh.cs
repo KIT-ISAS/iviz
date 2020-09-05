@@ -51,7 +51,7 @@ namespace Iviz.Msgs.MeshMsgs
         internal TriangleMesh(Buffer b)
         {
             Triangles = b.DeserializeArray<TriangleIndices>();
-            for (int i = 0; i < this.Triangles.Length; i++)
+            for (int i = 0; i < Triangles.Length; i++)
             {
                 Triangles[i] = new TriangleIndices(b);
             }
@@ -61,17 +61,17 @@ namespace Iviz.Msgs.MeshMsgs
             TriangleColors = b.DeserializeStructArray<StdMsgs.ColorRGBA>();
             VertexTextureCoords = b.DeserializeStructArray<GeometryMsgs.Point>();
             FaceMaterials = b.DeserializeArray<MeshMsgs.MeshMaterial>();
-            for (int i = 0; i < this.FaceMaterials.Length; i++)
+            for (int i = 0; i < FaceMaterials.Length; i++)
             {
                 FaceMaterials[i] = new MeshMsgs.MeshMaterial(b);
             }
             Textures = b.DeserializeArray<SensorMsgs.Image>();
-            for (int i = 0; i < this.Textures.Length; i++)
+            for (int i = 0; i < Textures.Length; i++)
             {
                 Textures[i] = new SensorMsgs.Image(b);
             }
             Clusters = b.DeserializeArray<MeshMsgs.MeshFaceCluster>();
-            for (int i = 0; i < this.Clusters.Length; i++)
+            for (int i = 0; i < Clusters.Length; i++)
             {
                 Clusters[i] = new MeshMsgs.MeshFaceCluster(b);
             }
@@ -140,13 +140,13 @@ namespace Iviz.Msgs.MeshMsgs
                 size += 16 * TriangleColors.Length;
                 size += 24 * VertexTextureCoords.Length;
                 size += 21 * FaceMaterials.Length;
-                for (int i = 0; i < Textures.Length; i++)
+                foreach (var i in Textures)
                 {
-                    size += Textures[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
-                for (int i = 0; i < Clusters.Length; i++)
+                foreach (var i in Clusters)
                 {
-                    size += Clusters[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
                 return size;
             }

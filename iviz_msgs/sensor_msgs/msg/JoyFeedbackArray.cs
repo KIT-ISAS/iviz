@@ -26,7 +26,7 @@ namespace Iviz.Msgs.SensorMsgs
         internal JoyFeedbackArray(Buffer b)
         {
             Array = b.DeserializeArray<JoyFeedback>();
-            for (int i = 0; i < this.Array.Length; i++)
+            for (int i = 0; i < Array.Length; i++)
             {
                 Array[i] = new JoyFeedback(b);
             }

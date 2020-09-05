@@ -118,7 +118,7 @@ namespace Iviz.Msgs.Rosapi
         internal ServiceResponseDetailsResponse(Buffer b)
         {
             Typedefs = b.DeserializeArray<TypeDef>();
-            for (int i = 0; i < this.Typedefs.Length; i++)
+            for (int i = 0; i < Typedefs.Length; i++)
             {
                 Typedefs[i] = new TypeDef(b);
             }
@@ -149,9 +149,9 @@ namespace Iviz.Msgs.Rosapi
         {
             get {
                 int size = 4;
-                for (int i = 0; i < Typedefs.Length; i++)
+                foreach (var i in Typedefs)
                 {
-                    size += Typedefs[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
                 return size;
             }

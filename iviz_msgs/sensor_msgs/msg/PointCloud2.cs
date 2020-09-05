@@ -58,7 +58,7 @@ namespace Iviz.Msgs.SensorMsgs
             Height = b.Deserialize<uint>();
             Width = b.Deserialize<uint>();
             Fields = b.DeserializeArray<PointField>();
-            for (int i = 0; i < this.Fields.Length; i++)
+            for (int i = 0; i < Fields.Length; i++)
             {
                 Fields[i] = new PointField(b);
             }
@@ -106,9 +106,9 @@ namespace Iviz.Msgs.SensorMsgs
             get {
                 int size = 26;
                 size += Header.RosMessageLength;
-                for (int i = 0; i < Fields.Length; i++)
+                foreach (var i in Fields)
                 {
-                    size += Fields[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
                 size += 1 * Data.Length;
                 return size;

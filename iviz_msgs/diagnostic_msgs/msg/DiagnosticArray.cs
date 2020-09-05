@@ -30,7 +30,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         {
             Header = new StdMsgs.Header(b);
             Status = b.DeserializeArray<DiagnosticStatus>();
-            for (int i = 0; i < this.Status.Length; i++)
+            for (int i = 0; i < Status.Length; i++)
             {
                 Status[i] = new DiagnosticStatus(b);
             }
@@ -65,9 +65,9 @@ namespace Iviz.Msgs.DiagnosticMsgs
             get {
                 int size = 4;
                 size += Header.RosMessageLength;
-                for (int i = 0; i < Status.Length; i++)
+                foreach (var i in Status)
                 {
-                    size += Status[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
                 return size;
             }

@@ -147,19 +147,19 @@ namespace Iviz.Msgs.Rosapi
             get {
                 int size = 12;
                 size += 4 * Topics.Length;
-                for (int i = 0; i < Topics.Length; i++)
+                foreach (string s in Topics)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(Topics[i]);
+                    size += BuiltIns.UTF8.GetByteCount(s);
                 }
                 size += 4 * Types.Length;
-                for (int i = 0; i < Types.Length; i++)
+                foreach (string s in Types)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(Types[i]);
+                    size += BuiltIns.UTF8.GetByteCount(s);
                 }
                 size += 4 * TypedefsFullText.Length;
-                for (int i = 0; i < TypedefsFullText.Length; i++)
+                foreach (string s in TypedefsFullText)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(TypedefsFullText[i]);
+                    size += BuiltIns.UTF8.GetByteCount(s);
                 }
                 return size;
             }

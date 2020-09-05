@@ -31,7 +31,7 @@ namespace Iviz.Msgs.ActionlibMsgs
         {
             Header = new StdMsgs.Header(b);
             StatusList = b.DeserializeArray<GoalStatus>();
-            for (int i = 0; i < this.StatusList.Length; i++)
+            for (int i = 0; i < StatusList.Length; i++)
             {
                 StatusList[i] = new GoalStatus(b);
             }
@@ -66,9 +66,9 @@ namespace Iviz.Msgs.ActionlibMsgs
             get {
                 int size = 4;
                 size += Header.RosMessageLength;
-                for (int i = 0; i < StatusList.Length; i++)
+                foreach (var i in StatusList)
                 {
-                    size += StatusList[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
                 return size;
             }

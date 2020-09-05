@@ -30,7 +30,7 @@ namespace Iviz.Msgs.NavMsgs
         {
             Header = new StdMsgs.Header(b);
             Poses = b.DeserializeArray<GeometryMsgs.PoseStamped>();
-            for (int i = 0; i < this.Poses.Length; i++)
+            for (int i = 0; i < Poses.Length; i++)
             {
                 Poses[i] = new GeometryMsgs.PoseStamped(b);
             }
@@ -65,9 +65,9 @@ namespace Iviz.Msgs.NavMsgs
             get {
                 int size = 4;
                 size += Header.RosMessageLength;
-                for (int i = 0; i < Poses.Length; i++)
+                foreach (var i in Poses)
                 {
-                    size += Poses[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
                 return size;
             }

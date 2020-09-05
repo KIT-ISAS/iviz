@@ -105,30 +105,30 @@ namespace Iviz.Msgs.Rosapi
                 int size = 28;
                 size += BuiltIns.UTF8.GetByteCount(Type);
                 size += 4 * Fieldnames.Length;
-                for (int i = 0; i < Fieldnames.Length; i++)
+                foreach (string s in Fieldnames)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(Fieldnames[i]);
+                    size += BuiltIns.UTF8.GetByteCount(s);
                 }
                 size += 4 * Fieldtypes.Length;
-                for (int i = 0; i < Fieldtypes.Length; i++)
+                foreach (string s in Fieldtypes)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(Fieldtypes[i]);
+                    size += BuiltIns.UTF8.GetByteCount(s);
                 }
                 size += 4 * Fieldarraylen.Length;
                 size += 4 * Examples.Length;
-                for (int i = 0; i < Examples.Length; i++)
+                foreach (string s in Examples)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(Examples[i]);
+                    size += BuiltIns.UTF8.GetByteCount(s);
                 }
                 size += 4 * Constnames.Length;
-                for (int i = 0; i < Constnames.Length; i++)
+                foreach (string s in Constnames)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(Constnames[i]);
+                    size += BuiltIns.UTF8.GetByteCount(s);
                 }
                 size += 4 * Constvalues.Length;
-                for (int i = 0; i < Constvalues.Length; i++)
+                foreach (string s in Constvalues)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(Constvalues[i]);
+                    size += BuiltIns.UTF8.GetByteCount(s);
                 }
                 return size;
             }

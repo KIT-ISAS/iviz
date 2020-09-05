@@ -118,7 +118,7 @@ namespace Iviz.Msgs.MeshMsgs
         internal GetLabeledClustersResponse(Buffer b)
         {
             Clusters = b.DeserializeArray<MeshFaceCluster>();
-            for (int i = 0; i < this.Clusters.Length; i++)
+            for (int i = 0; i < Clusters.Length; i++)
             {
                 Clusters[i] = new MeshFaceCluster(b);
             }
@@ -149,9 +149,9 @@ namespace Iviz.Msgs.MeshMsgs
         {
             get {
                 int size = 4;
-                for (int i = 0; i < Clusters.Length; i++)
+                foreach (var i in Clusters)
                 {
-                    size += Clusters[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
                 return size;
             }

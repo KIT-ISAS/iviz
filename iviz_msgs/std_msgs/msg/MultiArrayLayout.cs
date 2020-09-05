@@ -49,7 +49,7 @@ namespace Iviz.Msgs.StdMsgs
         internal MultiArrayLayout(Buffer b)
         {
             Dim = b.DeserializeArray<MultiArrayDimension>();
-            for (int i = 0; i < this.Dim.Length; i++)
+            for (int i = 0; i < Dim.Length; i++)
             {
                 Dim[i] = new MultiArrayDimension(b);
             }
@@ -82,9 +82,9 @@ namespace Iviz.Msgs.StdMsgs
         {
             get {
                 int size = 8;
-                for (int i = 0; i < Dim.Length; i++)
+                foreach (var i in Dim)
                 {
-                    size += Dim[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
                 return size;
             }

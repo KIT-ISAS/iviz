@@ -69,12 +69,12 @@ namespace Iviz.Msgs.SensorMsgs
             RangeMin = b.Deserialize<float>();
             RangeMax = b.Deserialize<float>();
             Ranges = b.DeserializeArray<LaserEcho>();
-            for (int i = 0; i < this.Ranges.Length; i++)
+            for (int i = 0; i < Ranges.Length; i++)
             {
                 Ranges[i] = new LaserEcho(b);
             }
             Intensities = b.DeserializeArray<LaserEcho>();
-            for (int i = 0; i < this.Intensities.Length; i++)
+            for (int i = 0; i < Intensities.Length; i++)
             {
                 Intensities[i] = new LaserEcho(b);
             }
@@ -123,13 +123,13 @@ namespace Iviz.Msgs.SensorMsgs
             get {
                 int size = 36;
                 size += Header.RosMessageLength;
-                for (int i = 0; i < Ranges.Length; i++)
+                foreach (var i in Ranges)
                 {
-                    size += Ranges[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
-                for (int i = 0; i < Intensities.Length; i++)
+                foreach (var i in Intensities)
                 {
-                    size += Intensities[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
                 return size;
             }

@@ -81,7 +81,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             Id = b.DeserializeString();
             Passed = b.Deserialize<byte>();
             Status = b.DeserializeArray<DiagnosticStatus>();
-            for (int i = 0; i < this.Status.Length; i++)
+            for (int i = 0; i < Status.Length; i++)
             {
                 Status[i] = new DiagnosticStatus(b);
             }
@@ -116,9 +116,9 @@ namespace Iviz.Msgs.DiagnosticMsgs
             get {
                 int size = 9;
                 size += BuiltIns.UTF8.GetByteCount(Id);
-                for (int i = 0; i < Status.Length; i++)
+                foreach (var i in Status)
                 {
-                    size += Status[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
                 return size;
             }

@@ -145,9 +145,9 @@ namespace Iviz.Msgs.Rosapi
             get {
                 int size = 4;
                 size += 4 * Providers.Length;
-                for (int i = 0; i < Providers.Length; i++)
+                foreach (string s in Providers)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(Providers[i]);
+                    size += BuiltIns.UTF8.GetByteCount(s);
                 }
                 return size;
             }

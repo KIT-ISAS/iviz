@@ -97,9 +97,9 @@ namespace Iviz.Msgs.SensorMsgs
                 int size = 16;
                 size += Header.RosMessageLength;
                 size += 4 * JointNames.Length;
-                for (int i = 0; i < JointNames.Length; i++)
+                foreach (string s in JointNames)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(JointNames[i]);
+                    size += BuiltIns.UTF8.GetByteCount(s);
                 }
                 size += 56 * Transforms.Length;
                 size += 48 * Twist.Length;

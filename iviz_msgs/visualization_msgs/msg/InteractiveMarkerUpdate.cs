@@ -59,12 +59,12 @@ namespace Iviz.Msgs.VisualizationMsgs
             SeqNum = b.Deserialize<ulong>();
             Type = b.Deserialize<byte>();
             Markers = b.DeserializeArray<InteractiveMarker>();
-            for (int i = 0; i < this.Markers.Length; i++)
+            for (int i = 0; i < Markers.Length; i++)
             {
                 Markers[i] = new InteractiveMarker(b);
             }
             Poses = b.DeserializeArray<InteractiveMarkerPose>();
-            for (int i = 0; i < this.Poses.Length; i++)
+            for (int i = 0; i < Poses.Length; i++)
             {
                 Poses[i] = new InteractiveMarkerPose(b);
             }
@@ -114,18 +114,18 @@ namespace Iviz.Msgs.VisualizationMsgs
             get {
                 int size = 25;
                 size += BuiltIns.UTF8.GetByteCount(ServerId);
-                for (int i = 0; i < Markers.Length; i++)
+                foreach (var i in Markers)
                 {
-                    size += Markers[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
-                for (int i = 0; i < Poses.Length; i++)
+                foreach (var i in Poses)
                 {
-                    size += Poses[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
                 size += 4 * Erases.Length;
-                for (int i = 0; i < Erases.Length; i++)
+                foreach (string s in Erases)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(Erases[i]);
+                    size += BuiltIns.UTF8.GetByteCount(s);
                 }
                 return size;
             }

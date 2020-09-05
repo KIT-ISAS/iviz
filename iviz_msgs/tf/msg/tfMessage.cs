@@ -25,7 +25,7 @@ namespace Iviz.Msgs.Tf
         internal tfMessage(Buffer b)
         {
             Transforms = b.DeserializeArray<GeometryMsgs.TransformStamped>();
-            for (int i = 0; i < this.Transforms.Length; i++)
+            for (int i = 0; i < Transforms.Length; i++)
             {
                 Transforms[i] = new GeometryMsgs.TransformStamped(b);
             }
@@ -56,9 +56,9 @@ namespace Iviz.Msgs.Tf
         {
             get {
                 int size = 4;
-                for (int i = 0; i < Transforms.Length; i++)
+                foreach (var i in Transforms)
                 {
-                    size += Transforms[i].RosMessageLength;
+                    size += i.RosMessageLength;
                 }
                 return size;
             }
