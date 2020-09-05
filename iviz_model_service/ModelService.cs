@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Xml;
 using Assimp;
@@ -11,20 +12,29 @@ using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Roslib;
+using Iviz.Sdf;
+using Color = Iviz.Msgs.IvizMsgs.Color;
+using Include = Iviz.Msgs.IvizMsgs.Include;
 using Material = Assimp.Material;
 using Mesh = Assimp.Mesh;
+using Model = Iviz.Msgs.IvizMsgs.Model;
 using Node = Assimp.Node;
+using Texture = Iviz.Msgs.IvizMsgs.Texture;
+using Uri = System.Uri;
+using Vector2 = Iviz.Msgs.IvizMsgs.Vector2;
+using Vector3 = Iviz.Msgs.IvizMsgs.Vector3;
 
 namespace Iviz.ModelService
 {
     public static class ModelService
     {
         const string ModelServiceName = "/iviz/get_model_resource";
-        const string TextureServiceName = "/iviz/get_model_texture"; 
-        const string FileServiceName = "/iviz/get_model_file"; 
-        
+        const string TextureServiceName = "/iviz/get_model_texture";
+        const string FileServiceName = "/iviz/get_file";
+        const string SdfServiceName = "/iviz/get_sdf";
+
         static readonly AssimpContext Importer = new AssimpContext();
-        
+
         static readonly Dictionary<string, List<string>> PackagePaths = new Dictionary<string, List<string>>();
 
         static void Main()
@@ -35,17 +45,8 @@ namespace Iviz.ModelService
                 Console.Error.WriteLine("EE Fatal error: Failed to determine master uri");
                 return;
             }
-            
-            RosClient client;
-            try
-            {
-                client = new RosClient(masterUri, "/iviz_model_loader");
-            }
-            catch (ConnectionException)
-            {
-                Console.Error.WriteLine("EE Fatal error: Failed to connect to the ROS master");
-                return;
-            }
+
+            using RosClient client = new RosClient(masterUri, "/iviz_model_loader");
 
             Console.WriteLine("** Used package paths:");
             string packagePath = Environment.GetEnvironmentVariable("ROS_PACKAGE_PATH");
@@ -64,7 +65,7 @@ namespace Iviz.ModelService
 
             client.AdvertiseService<GetModelResource>(ModelServiceName, ModelCallback);
             client.AdvertiseService<GetModelTexture>(TextureServiceName, TextureCallback);
-            client.AdvertiseService<GetModelFile>(FileServiceName, FileCallback);
+            client.AdvertiseService<GetFile>(FileServiceName, FileCallback);
 
             WaitForCancel();
 
@@ -93,6 +94,7 @@ namespace Iviz.ModelService
                 paths = new List<string>();
                 PackagePaths[package] = paths;
             }
+
             paths.Add(path);
             Console.WriteLine("++ " + package);
         }
@@ -109,26 +111,34 @@ namespace Iviz.ModelService
 
         static string ResolvePath(Uri uri)
         {
+            return ResolvePath(uri, out string _);
+        }
+
+        static string ResolvePath(Uri uri, out string outPackagePath)
+        {
+            outPackagePath = null;
+
             string package = uri.Host;
             if (!PackagePaths.TryGetValue(package, out List<string> paths))
             {
                 Console.Error.WriteLine("EE Failed to find package '" + package + "'.");
                 return null;
             }
-            
+
             string subPath = Uri.UnescapeDataString(uri.AbsolutePath);
 
             foreach (string packagePath in paths)
             {
                 string path = packagePath + "/" + subPath;
-                
+
                 if (!File.Exists(path))
                 {
                     continue;
                 }
 
-                if (Path.GetFullPath(path).StartsWith(packagePath))
+                if (Path.GetFullPath(path).StartsWith(packagePath, false, BuiltIns.Culture))
                 {
+                    outPackagePath = packagePath;
                     return path;
                 }
 
@@ -139,7 +149,7 @@ namespace Iviz.ModelService
             Console.Error.WriteLine("EE Failed to find resource '" + uri + "'.");
             return null;
         }
-        
+
         static void ModelCallback(GetModelResource msg)
         {
             bool success = Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out Uri uri);
@@ -178,7 +188,7 @@ namespace Iviz.ModelService
                 msg.Response.Success = false;
                 msg.Response.Message = "Failed to load model";
                 return;
-            }            
+            }
 
             msg.Response.Success = true;
             msg.Response.Message = "";
@@ -186,11 +196,11 @@ namespace Iviz.ModelService
 
             Console.WriteLine(">> " + uri);
         }
-        
+
         static void TextureCallback(GetModelTexture msg)
         {
             // TODO: force conversion to either png or jpg
-            
+
             bool success = Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out Uri uri);
             if (!success)
             {
@@ -198,24 +208,36 @@ namespace Iviz.ModelService
                 msg.Response.Message = "Failed to parse uri from requested string";
                 return;
             }
-            
+
             if (uri.Scheme != "package")
             {
                 msg.Response.Success = false;
                 msg.Response.Message = "Only 'package' scheme is supported";
                 return;
-            }            
+            }
 
             string texturePath = ResolvePath(uri);
-            if (texturePath is null)
+            if (string.IsNullOrWhiteSpace(texturePath))
             {
                 msg.Response.Success = false;
                 msg.Response.Message = "Failed to find resource path";
                 return;
             }
 
-            byte[] data = File.ReadAllBytes(texturePath);
-         
+            byte[] data;
+
+            try
+            {
+                data = File.ReadAllBytes(texturePath);
+            }
+            catch (IOException e)
+            {
+                Console.Error.WriteLine("EE Failed to read '" + texturePath + "': " + e.Message);
+                msg.Response.Success = false;
+                msg.Response.Message = e.Message;
+                return;
+            }
+
 
             msg.Response.Success = true;
             msg.Response.Message = "";
@@ -232,8 +254,8 @@ namespace Iviz.ModelService
         static Model LoadModel(string fileName)
         {
             string orientationHint = "";
-            if (fileName.EndsWith(".dae", true, BuiltIns.Culture))
-            { 
+            if (fileName.EndsWith(".DAE", true, BuiltIns.Culture))
+            {
                 XmlDocument doc = new XmlDocument();
                 doc.Load(fileName);
                 var nodeList = doc.GetElementsByTagName("up_axis");
@@ -243,7 +265,8 @@ namespace Iviz.ModelService
                 }
             }
 
-            Assimp.Scene scene = Importer.ImportFile(fileName, PostProcessPreset.TargetRealTimeMaximumQuality | PostProcessPreset.ConvertToLeftHanded);
+            Assimp.Scene scene = Importer.ImportFile(fileName,
+                PostProcessPreset.TargetRealTimeMaximumQuality | PostProcessPreset.ConvertToLeftHanded);
             Model msg = new Model
             {
                 Filename = Path.GetFileName(fileName),
@@ -298,7 +321,7 @@ namespace Iviz.ModelService
                     Faces: faces.ToArray(),
                     MaterialIndex: (uint) srcMesh.MaterialIndex
                 );
-                
+
                 //Console.WriteLine(srcMesh.HasTextureCoords(0));
 
                 msg.Meshes[i] = dstMesh;
@@ -335,9 +358,7 @@ namespace Iviz.ModelService
             {
                 return;
             }
-            
-            //Console.WriteLine(string.Join("\n", node.Metadata));
-            
+
             ids[node] = ids.Count;
             int parentId = node.Parent is null ? -1 : ids[node.Parent];
 
@@ -347,12 +368,11 @@ namespace Iviz.ModelService
                 ToMatrix(node.Transform),
                 node.MeshIndices.ToArray()
             ));
-            
+
             foreach (Node child in node.Children)
             {
                 ProcessNode(child, nodes, ids);
             }
-
         }
 
         static Vector3 ToVector3(in Vector3D v)
@@ -385,35 +405,245 @@ namespace Iviz.ModelService
                 v.A4, v.B4, v.C4, v.D4,
             });
         }
-        
-        static void FileCallback(GetModelFile msg)
+
+        static void FileCallback(GetFile msg)
         {
             bool success = Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out Uri uri);
             if (!success)
             {
-                msg.Response.Success = false;
                 msg.Response.Message = "Failed to parse uri from requested string";
                 return;
             }
 
-            string texturePath = ResolvePath(uri);
-            if (texturePath is null)
+            string filePath = ResolvePath(uri);
+            if (string.IsNullOrWhiteSpace(filePath))
             {
-                msg.Response.Success = false;
                 msg.Response.Message = "Failed to find resource path";
                 return;
             }
 
-            byte[] data = File.ReadAllBytes(texturePath);
-         
+            byte[] data;
+            try
+            {
+                data = File.ReadAllBytes(filePath);
+            }
+            catch (IOException e)
+            {
+                Console.Error.WriteLine("EE Failed to read '" + filePath + "': " + e.Message);
+                msg.Response.Message = e.Message;
+                return;
+            }
 
             msg.Response.Success = true;
             msg.Response.Message = "";
             msg.Response.Bytes = data;
 
-            Console.WriteLine(">> " + uri);        
+            Console.WriteLine(">> " + uri);
         }
 
-        
+        static void SdfCallback(GetSdf msg)
+        {
+            bool success = Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out Uri uri);
+            if (!success)
+            {
+                msg.Response.Message = "Failed to parse uri from requested string";
+                return;
+            }
+
+            if (uri.Scheme != "package")
+            {
+                msg.Response.Message = "Only 'package' scheme is supported";
+                return;
+            }
+
+            string modelPath = ResolvePath(uri, out string packagePath);
+            if (string.IsNullOrWhiteSpace(modelPath))
+            {
+                msg.Response.Message = "Failed to find resource path";
+                return;
+            }
+
+            string data;
+            try
+            {
+                data = File.ReadAllText(modelPath);
+            }
+            catch (IOException e)
+            {
+                Console.Error.WriteLine("EE Failed to read '" + modelPath + "': " + e.Message);
+                msg.Response.Message = e.Message;
+                return;
+            }
+
+            Dictionary<string, string> modelPaths = SdfFile.CreateModelPaths(packagePath);
+
+            SdfFile file;
+            try
+            {
+                file = SdfFile.Create(data).ResolveIncludes(modelPaths);
+            }
+            catch (Exception e) when (e is IOException || e is MalformedSdfException)
+            {
+                Console.Error.WriteLine("EE Failed to parse '" + modelPath + "': " + e.Message);
+                msg.Response.Message = e.Message;
+                return;
+            }
+
+            List<Include> includes = new List<Include>();
+            ResolveIncludes(file, includes);
+        }
+
+        static void ResolveIncludes(SdfFile file, ICollection<Include> includes)
+        {
+            if (file.Worlds.Count != 0)
+            {
+                ResolveIncludes(file.Worlds[0], includes);
+                return;
+            }
+
+            foreach (Sdf.Model model in file.Models)
+            {
+                ResolveIncludes(model, includes, Matrix4x4.Identity);
+            }
+        }
+
+        static void ResolveIncludes(World world, ICollection<Include> includes)
+        {
+            foreach (Sdf.Model model in world.Models)
+            {
+                ResolveIncludes(model, includes, Matrix4x4.Identity);
+            }
+        }
+
+        static void ResolveIncludes(Sdf.Model model, ICollection<Include> includes, in Matrix4x4 inPose)
+        {
+            Matrix4x4 pose = inPose * ToLeftHandPose(model.IncludePose) * ToLeftHandPose(model.Pose);
+
+            foreach (Link link in model.Links)
+            {
+                Matrix4x4 linkPose = inPose * ToLeftHandPose(link.Pose);
+                foreach (Visual visual in link.Visuals)
+                {
+                    ResolveIncludes(visual, includes, linkPose);
+                }
+            }
+            
+            foreach (Sdf.Model innerModel in model.Models)
+            {
+                ResolveIncludes(innerModel, includes, pose);
+            }
+        }
+
+        static void ResolveIncludes(Visual visual, ICollection<Include> includes, in Matrix4x4 inPose)
+        {
+            if (visual.Geometry.Empty != null)
+            {
+                return;
+            }
+
+            Matrix4x4 pose = inPose * ToLeftHandPose(visual.Pose);
+            var includeMaterial = new Msgs.IvizMsgs.Material
+            {
+                Name = visual.Name + "_material",
+                Diffuse = ToColor(visual.Material.Diffuse),
+                Emissive = ToColor(visual.Material.Emissive),
+            };            
+            
+            if (visual.Geometry.Box != null)
+            {
+                Vector3D diag = new Vector3D(
+                    (float) visual.Geometry.Box.Scale.X,
+                    (float) visual.Geometry.Box.Scale.Y,
+                    (float) visual.Geometry.Box.Scale.Z
+                );
+                pose *= Matrix4x4.FromScaling(diag);
+
+                includes.Add(new Msgs.IvizMsgs.Include
+                {
+                    Uri = "package://iviz_internal/cube",
+                    Pose = ToMatrix(pose),
+                    Material = includeMaterial
+                });
+            }
+            else if (visual.Geometry.Cylinder != null)
+            {
+                Vector3D diag = new Vector3D(
+                    (float) visual.Geometry.Cylinder.Radius,
+                    (float) visual.Geometry.Cylinder.Radius,
+                    (float) visual.Geometry.Cylinder.Length
+                );
+                pose *= Matrix4x4.FromScaling(diag);
+
+                includes.Add(new Include
+                {
+                    Uri = "package://iviz_internal/cylinder",
+                    Pose = ToMatrix(pose),
+                    Material = includeMaterial
+                });
+            }
+            else if (visual.Geometry.Sphere != null)
+            {
+                Vector3D diag = new Vector3D((float) visual.Geometry.Sphere.Radius);
+                pose *= Matrix4x4.FromScaling(diag);
+
+                includes.Add(new Include
+                {
+                    Uri = "package://iviz_internal/cylinder",
+                    Pose = ToMatrix(pose),
+
+                });
+            } else if (visual.Geometry.Mesh != null)
+            {
+                Vector3D diag = new Vector3D(
+                    (float) visual.Geometry.Mesh.Scale.X,
+                    (float) visual.Geometry.Mesh.Scale.Y,
+                    (float) visual.Geometry.Mesh.Scale.Z
+                );
+                pose *= Matrix4x4.FromScaling(diag);
+
+                includes.Add(new Include
+                {
+                    Uri = visual.Geometry.Mesh.Uri.Value,
+                    Pose = ToMatrix(pose),
+                    Material = includeMaterial
+                });                
+            }
+        }
+
+        static Matrix4x4 ToLeftHandPose(Pose pose)
+        {
+            if (pose is null)
+            {
+                return Matrix4x4.Identity;
+            }
+
+            Matrix4x4 result = Matrix4x4.FromEulerAnglesXYZ(
+                (float) pose.Orientation.X,
+                (float) pose.Orientation.Y,
+                (float) pose.Orientation.Z
+            );
+
+            result.A4 = (float) pose.Position.X;
+            result.B4 = (float) pose.Position.Y;
+            result.C4 = (float) pose.Position.Z;
+
+            result.A2 *= -1;
+            result.C2 *= -1;
+            result.B1 *= -1;
+            result.B3 *= -1;
+            result.B4 *= -1;
+            
+            return result;
+        }
+
+        static Color ToColor(Sdf.Color color)
+        {
+            int r = (int) (Math.Max(Math.Min(color.R, 1), 0) * 255);
+            int g = (int) (Math.Max(Math.Min(color.G, 1), 0) * 255);
+            int b = (int) (Math.Max(Math.Min(color.B, 1), 0) * 255);
+
+            int a = (int) (Math.Max(Math.Min(color.A, 1), 0) * 255);
+            return new Color((byte) r, (byte) g, (byte) b, (byte) a);
+        }
     }
 }
