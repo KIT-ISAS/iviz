@@ -66,6 +66,7 @@ namespace Iviz.ModelService
             client.AdvertiseService<GetModelResource>(ModelServiceName, ModelCallback);
             client.AdvertiseService<GetModelTexture>(TextureServiceName, TextureCallback);
             client.AdvertiseService<GetFile>(FileServiceName, FileCallback);
+            client.AdvertiseService<GetSdf>(SdfServiceName, SdfCallback);
 
             WaitForCancel();
 
@@ -179,6 +180,7 @@ namespace Iviz.ModelService
             try
             {
                 model = LoadModel(modelPath);
+                model.Filename = uri.ToString();
             }
             catch (AssimpException e)
             {
@@ -269,7 +271,6 @@ namespace Iviz.ModelService
                 PostProcessPreset.TargetRealTimeMaximumQuality | PostProcessPreset.ConvertToLeftHanded);
             Model msg = new Model
             {
-                Filename = Path.GetFileName(fileName),
                 Meshes = new Msgs.IvizMsgs.Mesh[scene.Meshes.Count],
                 OrientationHint = orientationHint
             };
@@ -491,6 +492,14 @@ namespace Iviz.ModelService
 
             List<Include> includes = new List<Include>();
             ResolveIncludes(file, includes);
+
+            msg.Response.Success = true;
+            msg.Response.Scene = new Msgs.IvizMsgs.Scene
+            {
+                Name = file.Worlds.Count != 0 ? file.Worlds[0].Name : "sdf",
+                Filename = uri.ToString(),
+                Includes = includes.ToArray()
+            };
         }
 
         static void ResolveIncludes(SdfFile file, ICollection<Include> includes)
