@@ -5,10 +5,10 @@ namespace Iviz.Sdf
     public sealed class Material
     {
         bool Lighting { get; } = true;
-        Color Ambient { get; } = Color.Black;
-        Color Diffuse { get; } = Color.Black;
-        Color Specular { get; } = Color.Black;
-        Color Emissive { get; } = Color.Black;
+        public Color Ambient { get; } = Color.Black;
+        public Color Diffuse { get; } = Color.Black;
+        public Color Specular { get; } = Color.Black;
+        public Color Emissive { get; } = Color.Black;
 
         internal Material(XmlNode node)
         {

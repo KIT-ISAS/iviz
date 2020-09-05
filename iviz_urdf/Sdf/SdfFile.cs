@@ -111,9 +111,7 @@ namespace Iviz.Sdf
                 Console.WriteLine("\t" + path);
             }
             
-            //Console.WriteLine("++ " + path + " -> " + package);
-
-            modelPaths[package.ToLower()] = path;
+            modelPaths[package.ToUpperInvariant()] = path;
         }
 
         public static Dictionary<string, string> CreateModelPaths(string packagePath)
