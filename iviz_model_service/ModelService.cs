@@ -533,11 +533,11 @@ namespace Iviz.ModelService
                 return;
             }
             
-            Matrix4x4 pose = inPose * ToLeftHandPose(model.IncludePose) * ToLeftHandPose(model.Pose);
+            Matrix4x4 pose = Multiply(inPose, Multiply(ToPose(model.IncludePose), ToPose(model.Pose)));
 
             foreach (Link link in model.Links)
             {
-                Matrix4x4 linkPose = inPose * ToLeftHandPose(link.Pose);
+                Matrix4x4 linkPose = Multiply(pose, ToPose(link.Pose));
                 foreach (Visual visual in link.Visuals)
                 {
                     ResolveIncludes(visual, includes, linkPose);
@@ -557,7 +557,7 @@ namespace Iviz.ModelService
                 return;
             }
 
-            Matrix4x4 pose = inPose * ToLeftHandPose(visual.Pose);
+            Matrix4x4 pose = Multiply(inPose, ToPose(visual.Pose));
 
             Msgs.IvizMsgs.Material includeMaterial;
             if (visual.Material != null)
@@ -581,7 +581,7 @@ namespace Iviz.ModelService
                     (float) visual.Geometry.Box.Scale.Y,
                     (float) visual.Geometry.Box.Scale.Z
                 );
-                pose *= Matrix4x4.FromScaling(diag);
+                pose = Multiply(pose, Matrix4x4.FromScaling(diag));
 
                 includes.Add(new Include
                 {
@@ -597,7 +597,7 @@ namespace Iviz.ModelService
                     (float) visual.Geometry.Cylinder.Radius,
                     (float) visual.Geometry.Cylinder.Length
                 );
-                pose *= Matrix4x4.FromScaling(diag);
+                pose = Multiply(pose, Matrix4x4.FromScaling(diag));
 
                 includes.Add(new Include
                 {
@@ -609,7 +609,7 @@ namespace Iviz.ModelService
             else if (visual.Geometry.Sphere != null)
             {
                 Vector3D diag = new Vector3D((float) visual.Geometry.Sphere.Radius);
-                pose *= Matrix4x4.FromScaling(diag);
+                pose = Multiply(pose, Matrix4x4.FromScaling(diag));
 
                 includes.Add(new Include
                 {
@@ -624,7 +624,7 @@ namespace Iviz.ModelService
                     (float) visual.Geometry.Mesh.Scale.Y,
                     (float) visual.Geometry.Mesh.Scale.Z
                 );
-                pose *= Matrix4x4.FromScaling(diag);
+                pose = Multiply(pose, Matrix4x4.FromScaling(diag));
 
                 includes.Add(new Include
                 {
@@ -635,7 +635,7 @@ namespace Iviz.ModelService
             }
         }
 
-        static Matrix4x4 ToLeftHandPose(Pose pose)
+        static Matrix4x4 ToPose(Pose pose)
         {
             if (pose is null)
             {
@@ -652,14 +652,21 @@ namespace Iviz.ModelService
             result.B4 = (float) pose.Position.Y;
             result.C4 = (float) pose.Position.Z;
 
+            /*
             result.A2 *= -1;
             result.C2 *= -1;
             result.B1 *= -1;
             result.B3 *= -1;
             result.B4 *= -1;
-            
+            */
             return result;
         }
+
+        static Matrix4x4 Multiply(in Matrix4x4 a, in Matrix4x4 b)
+        {
+            return b * a; // assimp inverts natural order of multiplication!
+        }
+
 
         static Color ToColor(Sdf.Color color)
         {
