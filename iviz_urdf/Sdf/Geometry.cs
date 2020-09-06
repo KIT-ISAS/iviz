@@ -56,7 +56,7 @@ namespace Iviz.Sdf
 
             System.Uri meshUri = source.Mesh.Uri.ToUri();
             string modelPackage = meshUri.Host;
-            string modelPath = modelPaths[modelPackage];
+            string modelPath = modelPaths[modelPackage.ToUpperInvariant()];
             string modelRelativePath = System.Uri.UnescapeDataString(meshUri.AbsolutePath);
             
             string basePath = modelPaths[""];

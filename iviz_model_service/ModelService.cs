@@ -460,6 +460,7 @@ namespace Iviz.ModelService
             string modelPath = ResolvePath(uri, out string packagePath);
             if (string.IsNullOrWhiteSpace(modelPath))
             {
+                Console.Error.WriteLine("EE Failed to find resource path for '" + modelPath + "'");
                 msg.Response.Message = "Failed to find resource path";
                 return;
             }
@@ -476,6 +477,7 @@ namespace Iviz.ModelService
                 return;
             }
 
+            Console.WriteLine("package path: " + packagePath);
             Dictionary<string, string> modelPaths = SdfFile.CreateModelPaths(packagePath);
 
             SdfFile file;
@@ -526,6 +528,11 @@ namespace Iviz.ModelService
 
         static void ResolveIncludes(Sdf.Model model, ICollection<Include> includes, in Matrix4x4 inPose)
         {
+            if (model.IsInvalid)
+            {
+                return;
+            }
+            
             Matrix4x4 pose = inPose * ToLeftHandPose(model.IncludePose) * ToLeftHandPose(model.Pose);
 
             foreach (Link link in model.Links)
@@ -551,13 +558,22 @@ namespace Iviz.ModelService
             }
 
             Matrix4x4 pose = inPose * ToLeftHandPose(visual.Pose);
-            var includeMaterial = new Msgs.IvizMsgs.Material
+
+            Msgs.IvizMsgs.Material includeMaterial;
+            if (visual.Material != null)
             {
-                Name = visual.Name + "_material",
-                Diffuse = ToColor(visual.Material.Diffuse),
-                Emissive = ToColor(visual.Material.Emissive),
-            };            
-            
+                includeMaterial = new Msgs.IvizMsgs.Material
+                {
+                    Name = visual.Name + "_material",
+                    Diffuse = ToColor(visual.Material.Diffuse),
+                    Emissive = ToColor(visual.Material.Emissive),
+                };
+            }
+            else
+            {
+                includeMaterial = new Msgs.IvizMsgs.Material();
+            }
+
             if (visual.Geometry.Box != null)
             {
                 Vector3D diag = new Vector3D(
@@ -567,7 +583,7 @@ namespace Iviz.ModelService
                 );
                 pose *= Matrix4x4.FromScaling(diag);
 
-                includes.Add(new Msgs.IvizMsgs.Include
+                includes.Add(new Include
                 {
                     Uri = "package://iviz_internal/cube",
                     Pose = ToMatrix(pose),

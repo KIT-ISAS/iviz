@@ -103,9 +103,9 @@ namespace Iviz.Sdf
         {
             System.Uri uri = include.Uri.ToUri();
 
-            if (!modelPaths.TryGetValue(uri.Host, out string path))
+            if (!modelPaths.TryGetValue(uri.Host.ToUpperInvariant(), out string path))
             {
-                Console.Error.WriteLine("Error: Failed to find path '" + uri.Host + "'");
+                Console.Error.WriteLine("Model: Failed to find path '" + uri.Host + "'");
                 return;
             }
 
