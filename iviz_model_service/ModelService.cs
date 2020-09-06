@@ -406,6 +406,17 @@ namespace Iviz.ModelService
                 v.A4, v.B4, v.C4, v.D4,
             });
         }
+        
+        static Matrix4 ToMatrixLH(in Matrix4x4 v)
+        {
+            return new Matrix4(new[]
+            {
+                v.A1, -v.B1, -v.C1, -v.D1,
+                -v.A2, v.B2, v.C2, v.D2,
+                -v.A3, v.B3, v.C3, v.D3,
+                -v.A4, v.B4, v.C4, v.D4,
+            });
+        }
 
         static void FileCallback(GetFile msg)
         {
@@ -586,7 +597,7 @@ namespace Iviz.ModelService
                 includes.Add(new Include
                 {
                     Uri = "package://iviz_internal/cube",
-                    Pose = ToMatrix(pose),
+                    Pose = ToMatrixLH(pose),
                     Material = includeMaterial
                 });
             }
@@ -602,7 +613,7 @@ namespace Iviz.ModelService
                 includes.Add(new Include
                 {
                     Uri = "package://iviz_internal/cylinder",
-                    Pose = ToMatrix(pose),
+                    Pose = ToMatrixLH(pose),
                     Material = includeMaterial
                 });
             }
@@ -614,7 +625,7 @@ namespace Iviz.ModelService
                 includes.Add(new Include
                 {
                     Uri = "package://iviz_internal/cylinder",
-                    Pose = ToMatrix(pose),
+                    Pose = ToMatrixLH(pose),
 
                 });
             } else if (visual.Geometry.Mesh != null)
@@ -629,7 +640,7 @@ namespace Iviz.ModelService
                 includes.Add(new Include
                 {
                     Uri = visual.Geometry.Mesh.Uri.Value,
-                    Pose = ToMatrix(pose),
+                    Pose = ToMatrixLH(pose),
                     Material = includeMaterial
                 });                
             }
@@ -651,14 +662,7 @@ namespace Iviz.ModelService
             result.A4 = (float) pose.Position.X;
             result.B4 = (float) pose.Position.Y;
             result.C4 = (float) pose.Position.Z;
-
-            /*
-            result.A2 *= -1;
-            result.C2 *= -1;
-            result.B1 *= -1;
-            result.B3 *= -1;
-            result.B4 *= -1;
-            */
+            
             return result;
         }
 
