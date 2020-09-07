@@ -59,7 +59,13 @@ namespace Iviz.ModelService
                 string[] paths = packagePath.Split(new[] {':'}, StringSplitOptions.RemoveEmptyEntries);
                 foreach (string path in paths)
                 {
-                    CheckPath(null, path);
+                    if (!Directory.Exists(path))
+                    {
+                        Console.WriteLine("** Ignoring '" + path + "'");
+                        continue;
+                    }
+                    
+                    CheckPath("", path);
                 }
             }
 
@@ -175,6 +181,8 @@ namespace Iviz.ModelService
                 msg.Response.Message = "Failed to find resource path";
                 return;
             }
+ 
+            Console.WriteLine("** Requesting " + modelPath);
 
             Model model;
             try
