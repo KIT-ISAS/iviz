@@ -64,9 +64,19 @@ namespace Iviz.Displays
                 Node = new GameObject("External Resources");
                 Node.SetActive(false);
             }
+            
+            try
+            {
+                Directory.CreateDirectory(ResourceFolder);
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e);
+            }
 
             if (!File.Exists(ResourceFile))
             {
+                Debug.Log("ExternalResourceManager: Failed to find file " + ResourceFile);
                 return;
             }
 
@@ -76,15 +86,6 @@ namespace Iviz.Displays
             {
                 string text = File.ReadAllText(ResourceFile);
                 resourceFiles = JsonConvert.DeserializeObject<ResourceFiles>(text);
-            }
-            catch (Exception e)
-            {
-                Logger.Error(e);
-            }
-
-            try
-            {
-                Directory.CreateDirectory(ResourceFolder);
             }
             catch (Exception e)
             {

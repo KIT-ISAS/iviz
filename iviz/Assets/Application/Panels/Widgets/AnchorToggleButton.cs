@@ -6,9 +6,14 @@ namespace Iviz.App
 {
     public class AnchorToggleButton : MonoBehaviour
     {
-        static readonly Color EnabledColor = new Color(0, 0, 0.4f, 0.75f); 
-        static readonly Color DisabledColor = new Color(0.75f, 0.75f, 0.75f, 0.25f); 
+        static readonly Color EnabledColor = GuiCamera.IsHololens
+            ? new Color(0.45f, 0.75f, 0.75f, 1.0f)
+            : new Color(0, 0, 0, 0.5f);
 
+        static readonly Color DisabledColor = GuiCamera.IsHololens
+            ? new Color(0.75f, 0.75f, 0.75f, 1.0f)
+            : new Color(0.75f, 0.75f, 0.75f, 0.75f);
+        
         [SerializeField] bool state;
         Image image;
 
