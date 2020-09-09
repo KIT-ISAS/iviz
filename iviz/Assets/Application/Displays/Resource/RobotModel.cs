@@ -81,7 +81,7 @@ namespace Iviz.Displays
             }
         }
 
-        public RobotModel([NotNull] string robotDescription, bool keepMeshMaterials = true)
+        public RobotModel(string robotDescription, bool keepMeshMaterials = true)
         {
             if (string.IsNullOrEmpty(robotDescription))
             {
@@ -208,7 +208,8 @@ namespace Iviz.Displays
                     {
                         resource.Color = material.Color.ToColor();
                     }
-                    else
+
+                    if (material.Texture != null)
                     {
                         // TODO
                     }
@@ -271,6 +272,7 @@ namespace Iviz.Displays
         static Material GetMaterialForVisual(Visual visual, IReadOnlyDictionary<string, Material> rootMaterials)
         {
             Material material = visual.Material;
+            
             if (material != null &&
                 visual.Material.IsReference() &&
                 rootMaterials != null &&

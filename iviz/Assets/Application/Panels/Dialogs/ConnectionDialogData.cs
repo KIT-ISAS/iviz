@@ -6,8 +6,9 @@ namespace Iviz.App
 {
     public sealed class ConnectionDialogData : DialogData
     {
+        const int IvizDefaultPort = 7613;
         static Uri DefaultMasterUri => RosClient.TryGetMasterUri();
-        static Uri DefaultMyUri => RosClient.TryGetCallerUri();
+        static Uri DefaultMyUri => new Uri($"http://{RosClient.TryGetCallerUri().Host}:{IvizDefaultPort}");
         static string DefaultMyId { get; } = "/iviz_" + UnityEngine.Application.platform.ToString().ToLower();
 
         ConnectionDialogContents panel;

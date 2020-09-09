@@ -375,6 +375,7 @@ namespace Iviz.App
             alreadyMoving = true;
 
             const float orbitCoeff = 0.1f;
+            const float orbitRadiusAdvance = 0.1f;
 
             orbitX += pointerDiff.x * orbitCoeff;
             orbitY -= pointerDiff.y * orbitCoeff;
@@ -391,17 +392,15 @@ namespace Iviz.App
 
             if (Input.GetKey(KeyCode.W))
             {
-                orbitRadius = Mathf.Max(0, orbitRadius - 0.1f);
+                orbitRadius = Mathf.Max(0, orbitRadius - orbitRadiusAdvance);
             }
             else if (Input.GetKey(KeyCode.S))
             {
-                orbitRadius += 0.1f;
+                orbitRadius += orbitRadiusAdvance; // TODO: time scaling
             }
 
             Quaternion q = Quaternion.Euler(orbitY, orbitX, 0);
-            Transform.SetPositionAndRotation(
-                -orbitRadius * (q * Vector3.forward) + orbitCenter,
-                q);
+            Transform.SetPositionAndRotation(-orbitRadius * (q * Vector3.forward) + orbitCenter, q);
         }
 
         void ProcessScaling(bool allowPivotMotion)
@@ -433,6 +432,7 @@ namespace Iviz.App
 
             const float radiusCoeff = -0.0025f;
             const float tangentCoeff = 0.001f;
+            const float minOrbitRadius = 0.1f;
 
             orbitRadius += altDistanceDiff * radiusCoeff;
 
@@ -441,9 +441,9 @@ namespace Iviz.App
 
             if (!allowPivotMotion)
             {
-                if (orbitRadius < 0.1f)
+                if (orbitRadius < minOrbitRadius)
                 {
-                    orbitRadius = 0.1f;
+                    orbitRadius = minOrbitRadius;
                 }
             }
             else
@@ -523,7 +523,7 @@ namespace Iviz.App
                 return;
             }
             
-            Vector3 baseInput = GetBaseInput();
+            Vector3Int baseInput = GetBaseInput();
             float deltaTime = Time.deltaTime;
             
             Vector3 speed = deltaTime * Vector3.Scale(baseInput, MainSpeed * DirectionWeight);
@@ -558,33 +558,35 @@ namespace Iviz.App
             }
             else
             {
+                const float maxOrbitRadiusLookAt = 3.0f;
+                    
                 orbitCenter = position;
-                orbitRadius = Mathf.Min(orbitRadius, 3.0f);
+                orbitRadius = Mathf.Min(orbitRadius, maxOrbitRadiusLookAt);
                 Transform.position = -orbitRadius * (Transform.rotation * Vector3.forward) + orbitCenter;
             }
         }
 
-        static Vector3 GetBaseInput()
+        static Vector3Int GetBaseInput()
         {
-            Vector3 pVelocity = new Vector3();
+            Vector3Int pVelocity = new Vector3Int();
             if (Input.GetKey(KeyCode.W))
             {
-                pVelocity += new Vector3(0, 0, 1);
+                pVelocity += new Vector3Int(0, 0, 1);
             }
 
             if (Input.GetKey(KeyCode.S))
             {
-                pVelocity += new Vector3(0, 0, -1);
+                pVelocity += new Vector3Int(0, 0, -1);
             }
 
             if (Input.GetKey(KeyCode.A))
             {
-                pVelocity += new Vector3(-1, 0, 0);
+                pVelocity += new Vector3Int(-1, 0, 0);
             }
 
             if (Input.GetKey(KeyCode.D))
             {
-                pVelocity += new Vector3(1, 0, 0);
+                pVelocity += new Vector3Int(1, 0, 0);
             }
 
             return pVelocity;

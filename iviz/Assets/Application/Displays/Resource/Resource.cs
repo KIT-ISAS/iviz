@@ -107,7 +107,7 @@ namespace Iviz.Resources
 
         /// <summary>
         /// Unique identifier for the type of a Unity resource.
-        /// Basically a wrapper around the instance id of the resource.
+        /// Basically a wrapper around the instance id of the resource that only gets loaded when the asset is needed.
         /// Required by the Resource Pool.
         /// </summary>
         /// <typeparam name="T">Unity object type, such as a GameObject or a Texture.</typeparam>

@@ -142,7 +142,7 @@ namespace Iviz.Displays
 
         static Vector3 Assimp2Unity(in Iviz.Msgs.IvizMsgs.Vector3 vector3) =>
             new Vector3(vector3.X, vector3.Y, vector3.Z);
-
+        
         static void MemCopy<A, B>(A[] src, B[] dst, int bytes)
             where A : unmanaged
             where B : unmanaged

@@ -8,9 +8,9 @@ namespace Iviz.Resources
     {
         readonly Dictionary<Uri, Resource.Info<GameObject>> gameObjects = new Dictionary<Uri, Resource.Info<GameObject>>
         {
-            [new Uri("package://iviz/cube")] = Resource.Displays.Cube,
-            [new Uri("package://iviz/cylinder")] = Resource.Displays.Cylinder,
-            [new Uri("package://iviz/sphere")] = Resource.Displays.Sphere,
+            [new Uri("package://iviz_internal/cube")] = Resource.Displays.Cube,
+            [new Uri("package://iviz_internal/cylinder")] = Resource.Displays.Cylinder,
+            [new Uri("package://iviz_internal/sphere")] = Resource.Displays.Sphere,
         };
 
         readonly Dictionary<Uri, Resource.Info<Texture2D>> textures = new Dictionary<Uri, Resource.Info<Texture2D>>();

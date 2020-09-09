@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using Iviz.Displays;
 using Iviz.Resources;
@@ -13,16 +14,7 @@ namespace Iviz.App
     {
         void OnEnable()
         {
-            //string robotDescription = File.ReadAllText("/Users/akzeac/Documents/iviz/iviz/Assets/Robots/neo_mp_500/robot_model/mp_500.urdf.xml");            
-            //string robotDescription = File.ReadAllText("/Users/akzeac/Documents/iviz/iviz/Assets/Robots/pr2_description/robots/robot.urdf.xml");            
-            //string robotDescription = File.ReadAllText("/Users/akzeac/Documents/iviz/iviz/Assets/Robots/crayler/urdf/crayler_high_res.urdf.xml");            
-            //string robotDescription = File.ReadAllText("/Users/akzeac/Documents/iviz/iviz/Assets/Robots/iosb/urdf/iosb.urdf.xml");            
-            //RobotModel robot = new RobotModel(robotDescription);
-            //robot.BaseLinkObject.transform.position = new Vector3(-2, 0, 0);
-
-            //robot.TryApplyJoint("boom_revolute", 0.5f, out Pose _, true);
-            //robot.ApplyCosmeticConfiguration();
-
+            
             string packagePath = "/Users/akzeac/Shared/aws-robomaker-hospital-world";
             string localPath = "/worlds/hospital.world";
             
@@ -33,6 +25,12 @@ namespace Iviz.App
             SdfFile newSdf = sdf.ResolveIncludes(modelPaths);
             
             CreateWorld(newSdf.Worlds[0]);
+            
+            
+            /*
+            Resource.TryGetResource(new System.Uri("package://aws-robomaker-hospital-world/worlds/hospital.world"), 
+                out Resource.Info<GameObject> resource);
+                */
         }
 
         void CreateWorld(World world)

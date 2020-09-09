@@ -26,7 +26,7 @@ using Vector3 = Iviz.Msgs.IvizMsgs.Vector3;
 
 namespace Iviz.ModelService
 {
-    public static class ModelService
+    public static class Program
     {
         const string ModelServiceName = "/iviz/get_model_resource";
         const string TextureServiceName = "/iviz/get_model_texture";
@@ -245,7 +245,7 @@ namespace Iviz.ModelService
             msg.Response.Message = "";
             msg.Response.Image = new CompressedImage
             {
-                Format = Path.GetExtension(texturePath).Replace(".", ""),
+                Format = Path.GetExtension(texturePath).Replace(".", "", false, BuiltIns.Culture),
                 Data = data
             };
 
