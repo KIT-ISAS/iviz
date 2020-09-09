@@ -4,7 +4,7 @@ namespace Iviz.Sdf
 {
     public sealed class Material
     {
-        bool Lighting { get; } = true;
+        public bool Lighting { get; } = true;
         public Color Ambient { get; } = Color.Black;
         public Color Diffuse { get; } = Color.Black;
         public Color Specular { get; } = Color.Black;
