@@ -69,14 +69,18 @@ namespace Iviz.ModelService
                 }
             }
 
+            if (PackagePaths.Count == 0)
+            {
+                Console.WriteLine("EE Empty list of package paths. Nothing to do.");
+                return;
+            }
+
             client.AdvertiseService<GetModelResource>(ModelServiceName, ModelCallback);
             client.AdvertiseService<GetModelTexture>(TextureServiceName, TextureCallback);
             client.AdvertiseService<GetFile>(FileServiceName, FileCallback);
             client.AdvertiseService<GetSdf>(SdfServiceName, SdfCallback);
 
             WaitForCancel();
-
-            client.Close();
         }
 
         static void CheckPath(string folderName, string path)
