@@ -407,6 +407,7 @@ namespace Iviz.ModelService
             int a = (int) (Math.Max(Math.Min(color.A, 1), 0) * 255);
             return new Color((byte) r, (byte) g, (byte) b, (byte) a);
         }
+        
 
         static Matrix4 ToMatrix(in Matrix4x4 v)
         {

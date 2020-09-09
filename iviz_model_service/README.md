@@ -11,4 +11,4 @@ You can either:
 ```bash
 dotnet run -c Release
 ```
-Make sure that ROS_MASTER_URI is set.
+Make sure that ROS_MASTER_URI and ROS_PACKAGE_PATH are both set.
