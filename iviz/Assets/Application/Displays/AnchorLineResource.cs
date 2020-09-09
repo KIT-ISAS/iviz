@@ -1,9 +1,8 @@
 using System.Collections.Generic;
-using Iviz.Displays;
 using Iviz.Resources;
 using UnityEngine;
 
-namespace Application.Displays
+namespace Iviz.Displays
 {
     public interface IAnchorProvider
     {

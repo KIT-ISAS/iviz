@@ -398,7 +398,7 @@ namespace Iviz.Controllers
 
         public static UnityEngine.Pose RelativePose(in UnityEngine.Pose unityPose)
         {
-            if (GuiCamera.IsMobile)
+            if (Settings.IsMobile)
             {
                 /*
                 Transform rootFrame = RootFrame.transform;
@@ -421,7 +421,7 @@ namespace Iviz.Controllers
 
         public static Vector3 RelativePosition(in Vector3 unityPosition)
         {
-            return GuiCamera.IsMobile ? RootFrame.transform.InverseTransformPoint(unityPosition) : unityPosition;
+            return Settings.IsMobile ? RootFrame.transform.InverseTransformPoint(unityPosition) : unityPosition;
         }
 
         static uint tfSeq = 0;

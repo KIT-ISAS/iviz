@@ -75,37 +75,6 @@ namespace Iviz.App
             }
         }
 
-        /// <summary>
-        /// Is this being run on an Android, IOS, or Hololens device?
-        /// </summary>
-        public const bool IsMobile =
-#if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID || UNITY_WSA)
-            true;
-#else
-            false;
-#endif
-
-        /// <summary>
-        /// Is thids being run on an Android or IOS device? (smartphone or tablet)
-        /// </summary>
-        public const bool IsPhone =
-#if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
-            true;
-#else
-            false;
-#endif        
-        
-        /// <summary>
-        /// Is this being run in a Hololens?
-        /// </summary>
-        public const bool IsHololens =
-#if !UNITY_EDITOR && UNITY_WSA
-            // bug: this will activate with any UWP device, not only Hololens! but what else? 
-            true;
-#else
-            false;
-#endif        
-
         void OnUnlockClick()
         {
             CameraViewOverride = null;
@@ -157,10 +126,10 @@ namespace Iviz.App
             
             //UnityEngine.Application.targetFrameRate = 60;
             CanvasScaler canvas = GameObject.Find("Canvas").GetComponent<CanvasScaler>();
-            canvas.referenceResolution = IsMobile ? 
+            canvas.referenceResolution = Settings.IsMobile ? 
                 new Vector2(800, 600) :
                 new Vector2(800, 800);
-            QualitySettings.antiAliasing = IsMobile ? 0 : 2;
+            QualitySettings.antiAliasing = Settings.IsMobile ? 0 : 2;
 
             ModuleListPanel.Instance.UnlockButton.onClick.AddListener(OnUnlockClick);
 
@@ -240,7 +209,7 @@ namespace Iviz.App
             QualitySettings.shadowDistance = Mathf.Max(7, 2 * MainCamera.transform.position.y);
             //Debug.Log(QualitySettings.shadowDistance);
             
-            if (IsMobile)
+            if (Settings.IsMobile)
             {
                 prevPointerDown |= PointerAltDown;
                 
@@ -315,7 +284,7 @@ namespace Iviz.App
                 Transform.SetPose(CameraViewOverride.AbsolutePose);
             }
                 
-            if (IsMobile)
+            if (Settings.IsMobile)
             {
                 if (!(OrbitCenterOverride is null))
                 {
@@ -577,7 +546,7 @@ namespace Iviz.App
 
         public void LookAt(in Vector3 position)
         {
-            if (!IsMobile)
+            if (!Settings.IsMobile)
             {
                 Transform.position = position - Transform.forward * 3;
             }

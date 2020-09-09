@@ -5,7 +5,6 @@ using Iviz.Displays;
 using Iviz.Resources;
 using System;
 using System.Collections.ObjectModel;
-using Application.Displays;
 using Iviz.App;
 
 namespace Iviz.Controllers

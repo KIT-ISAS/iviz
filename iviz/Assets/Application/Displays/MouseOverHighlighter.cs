@@ -3,11 +3,10 @@ using Iviz.Displays;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace Application.Displays
+namespace Iviz.Displays
 {
     /// <summary>
     /// Simple node that makes a resource brighter if the pointer is on top of it.
-    /// Self-disables in smartphones and tablets because they have no concept of pointer 'hover'.
     /// </summary>
     public sealed class MouseOverHighlighter : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
@@ -26,8 +25,9 @@ namespace Application.Displays
         
         void Start()
         {
-            if (GuiCamera.IsPhone)
+            if (Settings.IsPhone)
             {
+                // smartphones and tablets because they have no concept of pointer 'hover'.
                 enabled = false;
                 return;
             }
@@ -37,12 +37,23 @@ namespace Application.Displays
         
         public void OnPointerEnter(PointerEventData eventData)
         {
+            if (Settings.IsHololens)
+            {
+                // hololens uses gaze, not pointer                
+                return;
+            }
+            
             color = resource.EmissiveColor;
             resource.EmissiveColor = GetHighlightColor(color);
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
+            if (Settings.IsHololens)
+            {
+                // hololens uses gaze, not pointer                
+                return;
+            }
             resource.EmissiveColor = color;
         }
     }

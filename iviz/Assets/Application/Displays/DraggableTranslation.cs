@@ -89,7 +89,7 @@ namespace Iviz.Displays
 
         static int GetClickCount(PointerEventData eventData)
         {
-            return GuiCamera.IsMobile ? Input.GetTouch(0).tapCount : eventData.clickCount;
+            return Settings.IsMobile ? Input.GetTouch(0).tapCount : eventData.clickCount;
         }
         
         public void OnPointerClick(PointerEventData eventData)
