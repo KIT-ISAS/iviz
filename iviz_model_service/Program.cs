@@ -252,7 +252,6 @@ namespace Iviz.ModelService
                 return;
             }
 
-
             msg.Response.Success = true;
             msg.Response.Message = "";
             msg.Response.Image = new CompressedImage
@@ -334,8 +333,6 @@ namespace Iviz.ModelService
                     Faces: faces.ToArray(),
                     MaterialIndex: (uint) srcMesh.MaterialIndex
                 );
-
-                //Console.WriteLine(srcMesh.HasTextureCoords(0));
 
                 msg.Meshes[i] = dstMesh;
             }
