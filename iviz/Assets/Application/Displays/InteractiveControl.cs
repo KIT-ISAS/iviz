@@ -192,7 +192,7 @@ namespace Iviz.Displays
                         arrowPY.Visible = true;
                         arrowMY.Visible = true;
                         arrowPZ.Visible = true;
-                        arrowMZ.Visible = true;
+                        //arrowMZ.Visible = true;
                         ringZ.Visible = true;
                         ringZPlane.Visible = true;
                         break;

@@ -96,9 +96,9 @@ namespace Application.Displays
         void Awake()
         {
             resource = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, transform);
-            resource.UseAlpha = false;
+            resource.UseAlpha = true;
             resource.LineScale = 0.003f;
-            Color = Color.yellow;
+            Color = new Color(1, 1, 0, 0.25f);
         }
 
         public void SplitForRecycle()
