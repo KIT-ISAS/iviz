@@ -415,23 +415,24 @@ namespace Iviz.Controllers
             axis.Suspend();
             trail.Suspend();
             TrailVisible = false;
-            if (!(anchor is null))
+            
+            if (anchor is null)
             {
-                anchor.Visible = false;
-                anchor.Name = "[Anchor:In Trash]";
+                return;
             }
+            
+            anchor.Visible = false;
+            anchor.Name = "[Anchor:In Trash]";
         }
 
         public Vector3? UpdateAnchor(IAnchorProvider anchorProvider, bool forceRebuild = false)
         {
-            //Debug.Log("lel");
             if (anchorProvider is null)
             {
                 AnchorVisible = forceRebuild;
                 return null;
             }
 
-            //Debug.Log("was here");
             AnchorVisible = true;
             anchor.AnchorProvider = anchorProvider;
             

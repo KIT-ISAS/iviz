@@ -65,7 +65,7 @@ namespace Iviz.App
 
             panel.MarkerOffset.Value = controller.MarkerOffset;
 
-            TFListener.RootMarker.PointerUp += CopyControlMarkerPose;
+            TFListener.RootMarker.PointerUp += CopyControlMarkerPoseToPanel;
 
             CheckInteractable();
 
@@ -114,7 +114,7 @@ namespace Iviz.App
             };
         }
 
-        public void CopyControlMarkerPose()
+        public void CopyControlMarkerPoseToPanel()
         {
             var pose = TFListener.RootMarker.transform.AsPose();
             controller.WorldOffset = pose.position.Unity2Ros();
@@ -127,26 +127,16 @@ namespace Iviz.App
 
             controller.WorldAngle = angle;
 
-            //Debug.Log("requesting " + controller.WorldOffset.Ros2Unity());
             panel.WorldOffset.Mean = controller.WorldOffset;
             panel.WorldAngle.Value = controller.WorldAngle;
         }
 
-        public override void CleanupPanel()
-        {
-            base.CleanupPanel();
-            //TFListener.RootMarker.PointerUp -= RootControlOnPointerUp;
-            //TFListener.RootMarker.DoubleTap -= RootControlOnDoubleTap;
-        }
-
         void CheckInteractable()
         {
-            //panel.Origin.Interactable = !controller.SearchMarker;
             panel.MarkerHorizontal.Interactable = controller.UseMarker;
             panel.MarkerAngle.Interactable = controller.UseMarker;
             panel.MarkerFrame.Interactable = controller.UseMarker;
             panel.MarkerOffset.Interactable = controller.UseMarker && controller.MarkerFrame.Length != 0;
-            //panel.MarkerSize.Interactable = controller.SearchMarker;
         }
 
         public override void AddToState(StateConfiguration config)

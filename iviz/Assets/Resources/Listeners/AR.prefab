@@ -42,14 +42,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 906031459955196090}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5e7dc2e58335d49cbab0e29cd439b2d4, type: 3}
+  m_Script: {fileID: 11500000, guid: 0f63c1fa141842a789230c803d57daff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ARCamera: {fileID: 6019251948242916433}
-  ARSessionOrigin: {fileID: 6019251946659006209}
-  ARLight: {fileID: 978464836206565950}
-  canvas: {fileID: 0}
-  mainCamera: {fileID: 0}
+  arCamera: {fileID: 6019251948242916433}
+  arSessionOrigin: {fileID: 6019251946659006209}
+  arLight: {fileID: 978464836206565950}
 --- !u!1 &2024736478269814889
 GameObject:
   m_ObjectHideFlags: 0

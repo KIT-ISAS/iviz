@@ -97,6 +97,7 @@ namespace Iviz.App
         }
 
         public static string PersistentDataPath => UnityEngine.Application.persistentDataPath;
+        public static string SavedFolder => PersistentDataPath + "/saved";
         
         bool KeepReconnecting
         {
@@ -133,6 +134,8 @@ namespace Iviz.App
             saveConfigData = CreateDialog<SaveConfigDialogData>();
 
             connectionData = CreateDialog<ConnectionDialogData>();
+            
+            Directory.CreateDirectory(SavedFolder);
             LoadSimpleConfiguration();
 
             Logger.Internal("<b>Welcome to iviz</b>");
@@ -145,8 +148,8 @@ namespace Iviz.App
                 Debug.LogError("Failed to load external manager!");
             }
 
-            save.onClick.AddListener(() => { saveConfigData.Show(); });
-            load.onClick.AddListener(() => { loadConfigData.Show(); });
+            save.onClick.AddListener(saveConfigData.Show);
+            load.onClick.AddListener(loadConfigData.Show);
             
             hideGuiButton.Clicked += OnHideGuiButtonClick;
             hideGuiButton.State = true;
@@ -167,9 +170,9 @@ namespace Iviz.App
                 }
             };
 
-            addDisplayByTopic.onClick.AddListener(() => { availableTopics.Show(); });
-            addDisplay.onClick.AddListener(() => { availableModules.Show(); });
-            showTFTree.onClick.AddListener(() => { tfTreeData.Show(); });
+            addDisplayByTopic.onClick.AddListener(availableTopics.Show);
+            addDisplay.onClick.AddListener(availableModules.Show);
+            showTFTree.onClick.AddListener(tfTreeData.Show);
             resetAll.onClick.AddListener(ResetAllModules);
     
             
@@ -315,7 +318,7 @@ namespace Iviz.App
             {
                 Logger.Internal("Saving config file...");
                 string text = JsonConvert.SerializeObject(config, Formatting.Indented);
-                File.WriteAllText(PersistentDataPath + "/" + file, text);
+                File.WriteAllText(SavedFolder + "/" + file, text);
                 Logger.Internal("Done.");
             }
             catch (Exception e) when
@@ -325,18 +328,18 @@ namespace Iviz.App
                 Logger.Internal("Error:", e);
                 return;
             }
-            Logger.Debug("DisplayListPanel: Writing config to " + PersistentDataPath + "/" + file);
+            Logger.Debug("DisplayListPanel: Writing config to " + SavedFolder + "/" + file);
 
         }
 
         public void LoadStateConfiguration(string file)
         {
-            Logger.Debug("DisplayListPanel: Reading config from " + PersistentDataPath + "/" + file);
+            Logger.Debug("DisplayListPanel: Reading config from " + SavedFolder + "/" + file);
             string text;
             try
             {
                 Logger.Internal("Loading config file...");
-                text = File.ReadAllText(PersistentDataPath + "/" + file);
+                text = File.ReadAllText(SavedFolder + "/" + file);
                 Logger.Internal("Done.");
             }
             catch (FileNotFoundException)

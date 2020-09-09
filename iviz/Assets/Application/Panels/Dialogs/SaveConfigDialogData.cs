@@ -23,7 +23,7 @@ namespace Iviz.App
         public override void SetupPanel()
         {
             files.Clear();
-            files.AddRange(Directory.GetFiles(ModuleListPanel.PersistentDataPath).
+            files.AddRange(Directory.GetFiles(ModuleListPanel.SavedFolder).
                 Where(x => Roslib.Utils.HasSuffix(x, Suffix)).
                 Select(GetFileName));
             panel.Items = files;

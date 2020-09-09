@@ -87,7 +87,7 @@ namespace Iviz.Displays
             {
                 IRecyclable recyclable = deadObject.GetComponent<IRecyclable>();
                 recyclable?.SplitForRecycle();
-                Debug.Log("ResourcePool: Destroying object of type '" + deadObject.name + "'");
+                //Debug.Log("ResourcePool: Destroying object of type '" + deadObject.name + "'");
                 Destroy(deadObject);
             }
         }
