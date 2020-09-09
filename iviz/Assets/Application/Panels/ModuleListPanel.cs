@@ -142,6 +142,12 @@ namespace Iviz.App
 
             CreateModule(Resource.Module.TF, TFListener.DefaultTopic);
             CreateModule(Resource.Module.Grid);
+            
+            if (Settings.IsHololens)
+            {
+                ARController controller = (ARController) CreateModule(Resource.Module.AugmentedReality).Controller;
+                controller.Visible = true;
+            }            
 
             if (Resource.External == null)
             {

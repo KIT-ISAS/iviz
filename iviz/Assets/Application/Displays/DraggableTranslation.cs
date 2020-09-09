@@ -4,11 +4,19 @@ using Iviz.Controllers;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+#if UNITY_WSA
+using Microsoft.MixedReality.Toolkit.Input;
+#endif
+
 namespace Iviz.Displays
 {
-    public sealed class DraggableTranslation : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDraggable, IPointerClickHandler
+    public sealed class DraggableTranslation : MonoBehaviour, 
+        IPointerDownHandler, IPointerUpHandler, IDraggable, IPointerClickHandler
+#if UNITY_WSA
+        , IMixedRealityPointerHandler
+#endif
     {
-        public Vector3 line;
+        [SerializeField] Vector3 line;
         public Transform TargetTransform { get; set; }
         
         bool needsStart;
@@ -52,20 +60,25 @@ namespace Iviz.Displays
 
         public void OnPointerMove(in Vector2 cursorPos)
         {
+            Ray pointerRay = TFListener.MainCamera.ScreenPointToRay(cursorPos);
+            OnPointerMove(pointerRay);
+        }
+
+        void OnPointerMove(in Ray pointerRay)
+        {
             Transform mTransform = transform;
             Transform mParent = mTransform.parent;
             Transform mTarget = TargetTransform;
-            Ray ray = new Ray(mTransform.position, mParent.TransformDirection(line));
-            Ray other = TFListener.MainCamera.ScreenPointToRay(cursorPos);
+            Ray forwardRay = new Ray(mTransform.position, mParent.TransformDirection(line));
 
-            (float deltaDistance, float cameraDistance) = ClosestPointDelta(ray, other);
+            (float deltaDistance, float cameraDistance) = ClosestPointDelta(forwardRay, pointerRay);
             //Debug.Log((deltaDistance, cameraDistance));
             if (cameraDistance < 0)
             {
                 return;
             }
             deltaDistance = Mathf.Max(Mathf.Min(deltaDistance, 0.5f), -0.5f);
-            Vector3 deltaPosition = deltaDistance * ray.direction;
+            Vector3 deltaPosition = deltaDistance * forwardRay.direction;
             if (needsStart)
             {
                 startOffset = deltaPosition;
@@ -91,13 +104,43 @@ namespace Iviz.Displays
         {
             return Settings.IsMobile ? Input.GetTouch(0).tapCount : eventData.clickCount;
         }
-        
+
         public void OnPointerClick(PointerEventData eventData)
         {
             if (GetClickCount(eventData) == 2)
             {
-                DoubleTap?.Invoke();    
+                DoubleTap?.Invoke();
             }
         }
+
+#if UNITY_WSA
+        public void OnPointerDown(MixedRealityPointerEventData _)
+        {
+            TFListener.GuiManager.DraggedObject = this;
+            PointerDown?.Invoke();
+        }
+
+        public void OnPointerDragged(MixedRealityPointerEventData eventData)
+        {
+            Vector3 cameraPosition = TFListener.MainCamera.transform.position;
+            Vector3 pointerPosition = ((GGVPointer)eventData.Pointer).Position;
+
+            Ray pointerRay = new Ray(cameraPosition, pointerPosition - cameraPosition);
+            OnPointerMove(pointerRay);
+        }
+
+        public void OnPointerUp(MixedRealityPointerEventData _)
+        {
+            PointerUp?.Invoke();
+        }
+
+        public void OnPointerClicked(MixedRealityPointerEventData eventData)
+        {
+            if (eventData.Count == 2)
+            {
+                DoubleTap?.Invoke();
+            }
+        }
+#endif
     }
 }

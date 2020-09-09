@@ -1,10 +1,17 @@
-﻿using Iviz.App;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
+
+#if UNITY_WSA
+using Microsoft.MixedReality.Toolkit.Input;
+#endif
 
 namespace Iviz.Controllers
 {
-    public abstract class ClickableNode : DisplayNode, IPointerClickHandler
+    public abstract class ClickableNode : 
+        DisplayNode, IPointerClickHandler
+#if UNITY_WSA
+        , IMixedRealityPointerHandler
+#endif
     {
         const float MovingThreshold = 100;
         const float MaxClickTime = 0.5f;
@@ -28,13 +35,11 @@ namespace Iviz.Controllers
                 if (value && !selected)
                 {
                     selected = true;
-                    //TFListener.GuiManager.ShowBoundary(this);
                     TFListener.GuiManager.Select(this);
                 }
                 else if (!value && selected)
                 {
                     selected = false;
-                    //TFListener.GuiManager.ShowBoundary(null);
                     TFListener.GuiManager.Unselect(this);
                 }
             }
@@ -53,11 +58,8 @@ namespace Iviz.Controllers
                 (Time.realtimeSinceStartup - eventData.clickTime) < MaxClickTime;
         }
 
-        int LastClickCount { get; set; }
-
         public virtual void OnPointerClick(PointerEventData eventData)
         {
-            LastClickCount = 0;
             if (!Settings.IsMobile && (eventData.button != PointerEventData.InputButton.Right || !IsRealClick(eventData)))
             {
                 return;
@@ -69,7 +71,6 @@ namespace Iviz.Controllers
             }
 
             int clickCount = GetClickCount(eventData);
-            LastClickCount = clickCount;
 
             switch (clickCount)
             {
@@ -99,6 +100,35 @@ namespace Iviz.Controllers
             ModuleData = null;
             TFListener.GuiManager.Unselect(this);
         }
+
+#if UNITY_WSA
+        public void OnPointerDown(MixedRealityPointerEventData eventData)
+        {
+        }
+
+        public void OnPointerDragged(MixedRealityPointerEventData eventData)
+        {
+        }
+
+        public void OnPointerUp(MixedRealityPointerEventData eventData)
+        {
+        }
+
+        public void OnPointerClicked(MixedRealityPointerEventData eventData)
+        {
+            int clickCount = eventData.Count;
+
+            switch (clickCount)
+            {
+                case 1:
+                    OnSingleClick();
+                    break;
+                case 2:
+                    OnDoubleClick();
+                    break;
+            }
+        }
+#endif
     }
 
 }

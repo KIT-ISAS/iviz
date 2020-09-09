@@ -20,18 +20,19 @@ namespace Iviz.App
         public override IConfiguration Configuration => controller.Config;
         public override IController Controller => controller;
 
-        bool isDraggingControl;
-
         public ARModuleData(ModuleDataConstructor constructor) :
             base(constructor.ModuleList, constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.AugmentedReality) as ARPanelContents;
 
-            controller = Resource.Controllers.AR.Instantiate().GetComponent<ARController>();
+            controller = Settings.IsHololens ?
+                new GameObject("AR Hololens Controller").AddComponent<ARHololensController>() :
+                Resource.Controllers.AR.Instantiate().GetComponent<ARController>();
+
             controller.ModuleData = this;
             if (constructor.Configuration != null)
             {
-                controller.Config = (ARConfiguration) constructor.Configuration;
+                controller.Config = (ARConfiguration)constructor.Configuration;
             }
 
             UpdateModuleButton();
@@ -59,7 +60,7 @@ namespace Iviz.App
             panel.MarkerAngle.Value = controller.MarkerAngle;
             panel.MarkerFrame.Value = controller.MarkerFrame;
 
-            List<string> frameHints = new List<string> {NoneString};
+            List<string> frameHints = new List<string> { NoneString };
             frameHints.AddRange(TFListener.FramesUsableByGui);
             panel.MarkerFrame.Hints = frameHints;
 
@@ -84,7 +85,7 @@ namespace Iviz.App
             };
             */
             panel.MarkerHorizontal.ValueChanged += f => { controller.MarkerHorizontal = f; };
-            panel.MarkerAngle.ValueChanged += f => { controller.MarkerAngle = (int) f; };
+            panel.MarkerAngle.ValueChanged += f => { controller.MarkerAngle = (int)f; };
             panel.MarkerFrame.EndEdit += f =>
             {
                 if (f == NoneString)

@@ -4,9 +4,17 @@ using Iviz.Controllers;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+#if UNITY_WSA
+using Microsoft.MixedReality.Toolkit.Input;
+#endif
+
 namespace Iviz.Displays
 {
-    public sealed class DraggableRotation : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDraggable
+    public sealed class DraggableRotation : MonoBehaviour, 
+        IPointerDownHandler, IPointerUpHandler, IDraggable
+#if UNITY_WSA
+        , IMixedRealityPointerHandler
+#endif
     {
         public Vector3 normal;
         public Transform TargetTransform { get; set; }
@@ -42,15 +50,20 @@ namespace Iviz.Displays
 
         public bool DoesRotationReset { get; set; }
         
-        public void OnPointerMove(in Vector2 cursorPos)
+        public void OnPointerMove(in Vector2 cursorPos) 
+        {
+            Ray pointerRay = TFListener.MainCamera.ScreenPointToRay(cursorPos);
+            OnPointerMove(pointerRay);
+        }
+
+        void OnPointerMove(in Ray pointerRay)
         {
             Transform mTransform = transform;
             Transform mTarget = TargetTransform;
             Transform mParent = mTransform.parent;
-            Ray ray = new Ray(mTransform.position, mParent.TransformDirection(normal));
-            Ray other = TFListener.MainCamera.ScreenPointToRay(cursorPos);
+            Ray normalRay = new Ray(mTransform.position, mParent.TransformDirection(normal));
 
-            (Vector3 intersection, float cameraDistance) = PlaneIntersection(ray, other);
+            (Vector3 intersection, float cameraDistance) = PlaneIntersection(normalRay, pointerRay);
             if (cameraDistance < 0)
             {
                 return;
@@ -72,7 +85,7 @@ namespace Iviz.Displays
                 float angle = Mathf.Asin(m.determinant) * Mathf.Rad2Deg; 
 
                 //Debug.Log(startIntersection.normalized + " " + localIntersection.normalized + " " + angle);
-                Quaternion q = Quaternion.AngleAxis(angle, mTarget.InverseTransformDirection(ray.direction));
+                Quaternion q = Quaternion.AngleAxis(angle, mTarget.InverseTransformDirection(normalRay.direction));
                 mTarget.localRotation *= q;
                 Moved?.Invoke(mTarget.AsPose());
                 
@@ -98,5 +111,35 @@ namespace Iviz.Displays
         {
             PointerUp?.Invoke();
         }
+
+#if UNITY_WSA
+        public void OnPointerDown(MixedRealityPointerEventData _)
+        {
+            TFListener.GuiManager.DraggedObject = this;
+            PointerDown?.Invoke();
+        }
+
+        public void OnPointerDragged(MixedRealityPointerEventData eventData)
+        {
+            Vector3 cameraPosition = TFListener.MainCamera.transform.position;
+            Vector3 pointerPosition = ((GGVPointer)eventData.Pointer).Position;
+
+            Ray pointerRay = new Ray(cameraPosition, pointerPosition - cameraPosition);
+            OnPointerMove(pointerRay);
+        }
+
+        public void OnPointerUp(MixedRealityPointerEventData _)
+        {
+            PointerUp?.Invoke();
+        }
+
+        public void OnPointerClicked(MixedRealityPointerEventData eventData)
+        {
+            if (eventData.Count == 2)
+            {
+                DoubleTap?.Invoke();
+            }
+        }
+#endif
     }
 }

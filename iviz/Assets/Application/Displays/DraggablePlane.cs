@@ -4,11 +4,19 @@ using Iviz.Controllers;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+#if UNITY_WSA
+using Microsoft.MixedReality.Toolkit.Input;
+#endif
+
 namespace Iviz.Displays
 {
-    public sealed class DraggablePlane : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDraggable
+    public sealed class DraggablePlane : MonoBehaviour, 
+        IPointerDownHandler, IPointerUpHandler, IDraggable
+#if UNITY_WSA
+        , IMixedRealityPointerHandler
+#endif
     {
-        public Vector3 normal;
+        [SerializeField] Vector3 normal;
         public Transform TargetTransform { get; set; }
         
         bool needsStart;
@@ -46,15 +54,20 @@ namespace Iviz.Displays
 
         public void OnPointerMove(in Vector2 cursorPos)
         {
+            Ray pointerRay = TFListener.MainCamera.ScreenPointToRay(cursorPos);
+            OnPointerMove(pointerRay);
+        }
+
+        void OnPointerMove(in Ray pointerRay)
+        { 
             Transform mTransform = transform;
             Transform mParent = mTransform.parent;
             Transform mTarget = TargetTransform;
 
             //Ray ray = new Ray(mTransform.position, mParent.TransformDirection(normal));/
-            Ray ray = new Ray(mParent.position, mParent.TransformDirection(normal));
-            Ray other = TFListener.MainCamera.ScreenPointToRay(cursorPos);
+            Ray normalRay = new Ray(mParent.position, mParent.TransformDirection(normal));
 
-            (Vector3 intersection, float cameraDistance) = PlaneIntersection(ray, other);
+            (Vector3 intersection, float cameraDistance) = PlaneIntersection(normalRay, pointerRay);
             if (cameraDistance < 0)
             {
                 return;
@@ -68,37 +81,16 @@ namespace Iviz.Displays
             }
             else
             {
-                /*
-                Debug.Log("Parent: " + mParent.gameObject + " -> " + mParent.position + " " + mParent.rotation);
-                //Debug.Log("Position was: " + mParent.position.x + " " + mParent.position.y + " " + mParent.position.z);
-                Debug.Log("intersection: " + intersection.x + " " + intersection.y + " " + intersection.z);
-                Debug.Log("localIntersection: " + localIntersection.x + " " + localIntersection.y + " " + localIntersection.z);
-                Debug.Log("startIntersection: " + startIntersection.x + " " + startIntersection.y + " " + startIntersection.z);
-                */
                 Vector3 deltaPosition = localIntersection - startIntersection;
                 float deltaDistance = deltaPosition.magnitude;
                 if (deltaDistance > 0.5f)
                 {
                     deltaPosition *= 0.5f / deltaDistance;
                 }
-                //Debug.Log("Moving by: " + deltaPosition.x + " " + deltaPosition.y + " " + deltaPosition.z);
 
                 var vec3 = mParent.TransformVector(deltaPosition);
-                //Debug.Log("Which transformed is: " + vec3.x + " " + vec3.y + " " + vec3.z);
                 mTarget.position += vec3;
 
-                //Debug.Log("New Position is: " + mParent.position.x + " " + mParent.position.y + " " + mParent.position.z);
-
-                
-                /*
-                Ray newRay = new Ray(mParent.position, mParent.TransformDirection(normal));
-                (Vector3 newIntersection, float _) = PlaneIntersection(newRay, other);
-                Vector3 newlLocalIntersection = mParent.InverseTransformPoint(newIntersection);
-
-                
-                Debug.Log("New: Intersection: " + newIntersection.x + " " + newIntersection.y + " " + newIntersection.z);
-                Debug.Log("New: LocalIntersection: " + newlLocalIntersection.x + " " + newlLocalIntersection.y + " " + newlLocalIntersection.z);
-                */
                 Moved?.Invoke(mTarget.AsPose());
                 //startIntersection = localIntersection;
             }
@@ -112,5 +104,35 @@ namespace Iviz.Displays
         public void OnEndDragging()
         {
         }
+
+#if UNITY_WSA
+        public void OnPointerDown(MixedRealityPointerEventData _)
+        {
+            TFListener.GuiManager.DraggedObject = this;
+            PointerDown?.Invoke();
+        }
+
+        public void OnPointerDragged(MixedRealityPointerEventData eventData)
+        {
+            Vector3 cameraPosition = TFListener.MainCamera.transform.position;
+            Vector3 pointerPosition = ((GGVPointer)eventData.Pointer).Position;
+
+            Ray pointerRay = new Ray(cameraPosition, pointerPosition - cameraPosition);
+            OnPointerMove(pointerRay);
+        }
+
+        public void OnPointerUp(MixedRealityPointerEventData _)
+        {
+            PointerUp?.Invoke();
+        }
+
+        public void OnPointerClicked(MixedRealityPointerEventData eventData)
+        {
+            if (eventData.Count == 2)
+            {
+                DoubleTap?.Invoke();
+            }
+        }
+#endif
     }
 }

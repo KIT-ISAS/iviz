@@ -1,7 +1,9 @@
-using Iviz.App;
-using Iviz.Displays;
 using UnityEngine;
 using UnityEngine.EventSystems;
+
+#if UNITY_WSA
+using Microsoft.MixedReality.Toolkit.Input;
+#endif
 
 namespace Iviz.Displays
 {
@@ -9,6 +11,9 @@ namespace Iviz.Displays
     /// Simple node that makes a resource brighter if the pointer is on top of it.
     /// </summary>
     public sealed class MouseOverHighlighter : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+#if UNITY_WSA
+        , IMixedRealityFocusHandler
+#endif
     {
         Color color;   
         MeshMarkerResource resource;
@@ -56,5 +61,18 @@ namespace Iviz.Displays
             }
             resource.EmissiveColor = color;
         }
+
+#if UNITY_WSA
+        public void OnFocusEnter(FocusEventData eventData)
+        {
+            color = resource.EmissiveColor;
+            resource.EmissiveColor = GetHighlightColor(color);
+        }
+
+        public void OnFocusExit(FocusEventData eventData)
+        {
+            resource.EmissiveColor = color;
+        }
+#endif
     }
 }

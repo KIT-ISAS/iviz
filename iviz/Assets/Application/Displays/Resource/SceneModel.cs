@@ -77,7 +77,13 @@ namespace Iviz.Displays
                 if (material.DiffuseTexture.Path.Length != 0)
                 {
                     string uriPath = Uri.UnescapeDataString(uri.AbsolutePath);
-                    string texturePath = $"{Path.GetDirectoryName(uriPath)}/{material.DiffuseTexture.Path}";
+                    string directoryName = Path.GetDirectoryName(uriPath);
+                    if (!string.IsNullOrEmpty(directoryName) && Path.DirectorySeparatorChar == '\\')
+                    {
+                        directoryName = directoryName.Replace('\\', '/'); // windows!
+                    }
+                    
+                    string texturePath = $"{directoryName}/{material.DiffuseTexture.Path}";
                     Uri textureUri = new Uri($"{uri.Scheme}://{uri.Host}{texturePath}");
                     if (Resource.TryGetResource(textureUri, out Resource.Info<Texture2D> info))
                     {
