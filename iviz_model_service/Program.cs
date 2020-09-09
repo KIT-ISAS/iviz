@@ -407,17 +407,6 @@ namespace Iviz.ModelService
             });
         }
         
-        static Matrix4 ToMatrixLH(in Matrix4x4 v)
-        {
-            return new Matrix4(new[]
-            {
-                v.A1, -v.B1, -v.C1, -v.D1,
-                -v.A2, v.B2, v.C2, v.D2,
-                -v.A3, v.B3, v.C3, v.D3,
-                -v.A4, v.B4, v.C4, v.D4,
-            });
-        }
-
         static void FileCallback(GetFile msg)
         {
             bool success = Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out Uri uri);
@@ -597,7 +586,7 @@ namespace Iviz.ModelService
                 includes.Add(new Include
                 {
                     Uri = "package://iviz_internal/cube",
-                    Pose = ToMatrixLH(pose),
+                    Pose = ToMatrix(pose),
                     Material = includeMaterial
                 });
             }
@@ -613,7 +602,7 @@ namespace Iviz.ModelService
                 includes.Add(new Include
                 {
                     Uri = "package://iviz_internal/cylinder",
-                    Pose = ToMatrixLH(pose),
+                    Pose = ToMatrix(pose),
                     Material = includeMaterial
                 });
             }
@@ -625,7 +614,7 @@ namespace Iviz.ModelService
                 includes.Add(new Include
                 {
                     Uri = "package://iviz_internal/cylinder",
-                    Pose = ToMatrixLH(pose),
+                    Pose = ToMatrix(pose),
 
                 });
             } else if (visual.Geometry.Mesh != null)
@@ -640,7 +629,7 @@ namespace Iviz.ModelService
                 includes.Add(new Include
                 {
                     Uri = visual.Geometry.Mesh.Uri.Value,
-                    Pose = ToMatrixLH(pose),
+                    Pose = ToMatrix(pose),
                     Material = includeMaterial
                 });                
             }
@@ -654,9 +643,9 @@ namespace Iviz.ModelService
             }
 
             Matrix4x4 result = Matrix4x4.FromEulerAnglesXYZ(
-                (float) pose.Orientation.X,
-                (float) pose.Orientation.Y,
-                (float) pose.Orientation.Z
+                (float) -pose.Orientation.X,
+                (float) -pose.Orientation.Y,
+                (float) -pose.Orientation.Z
             );
 
             result.A4 = (float) pose.Position.X;
