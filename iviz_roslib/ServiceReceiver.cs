@@ -11,7 +11,7 @@ using Iviz.Msgs;
 
 namespace Iviz.Roslib
 {
-    sealed class ServiceReceiver : IDisposable
+    internal sealed class ServiceReceiver : IDisposable
     {
         const int BufferSizeIncrease = 512;
 
@@ -180,7 +180,7 @@ namespace Iviz.Roslib
             catch (Exception e)
             {
                 service.ErrorMessage = e.Message;
-                Logger.Log("Error during service call:" + e);
+                Logger.Log("ServiceReceiver: Error during service call:" + e);
                 success = false;
             }
             if (!Persistent)
@@ -230,13 +230,11 @@ namespace Iviz.Roslib
                 service.ErrorMessage = BuiltIns.UTF8.GetString(readBuffer, 0, rcvLength);
                 return false;
             }
-            else 
-            {
-                service.ErrorMessage = null;
-                service.Response = Msgs.Buffer.Deserialize(service.Response, readBuffer, rcvLength);
-                NumReceived++;
-                return true;
-            }
+
+            service.ErrorMessage = null;
+            service.Response = Msgs.Buffer.Deserialize(service.Response, readBuffer, rcvLength);
+            NumReceived++;
+            return true;
         }
 
         public void Dispose()

@@ -8,7 +8,7 @@ using Iviz.Msgs;
 
 namespace Iviz.Roslib
 {
-    internal class ServiceSenderManager
+    internal sealed class ServiceSenderManager
     {
         public Uri Uri { get; }
         readonly TcpListener listener;
@@ -30,7 +30,7 @@ namespace Iviz.Roslib
 
             IPEndPoint localEndpoint = (IPEndPoint) listener.LocalEndpoint;
             Uri = new Uri($"rosrpc://{host}:{localEndpoint.Port}/");
-            Logger.Log("ServiceSenderManager: Starting at " + Uri);
+            Logger.LogDebug($"ServiceSenderManager: Starting {serviceInfo.Service} [{serviceInfo.Type}] at {Uri}");
 
             Run();
         }

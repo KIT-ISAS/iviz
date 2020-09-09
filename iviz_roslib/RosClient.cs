@@ -49,8 +49,8 @@ namespace Iviz.Roslib
     }
 
     public sealed class RosClient : IDisposable
-    {
-        const int DefaultCallerPort = 7613;        
+    { 
+        public const int AnyPort = 0;        
         
         readonly XmlRpc.NodeServer listener;
 
@@ -299,7 +299,7 @@ namespace Iviz.Roslib
             return EnvironmentCallerUri ??
                    GetUriFromInterface(NetworkInterfaceType.Wireless80211) ??
                    GetUriFromInterface(NetworkInterfaceType.Ethernet) ??
-                   new Uri($"http://{Dns.GetHostName()}:{DefaultCallerPort}/");
+                   new Uri($"http://{Dns.GetHostName()}:{AnyPort}/");
         }
 
         static Uri GetUriFromInterface(NetworkInterfaceType type)
@@ -310,7 +310,7 @@ namespace Iviz.Roslib
                 .SelectMany(iface => iface.GetIPProperties().UnicastAddresses)
                 .FirstOrDefault(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork);
             
-            return ipInfo is null ? null : new Uri($"http://{ipInfo.Address}:{DefaultCallerPort}/");
+            return ipInfo is null ? null : new Uri($"http://{ipInfo.Address}:{AnyPort}/");
         }         
         
         /// <summary>
@@ -341,7 +341,7 @@ namespace Iviz.Roslib
         /// </summary>        
         public static Uri TryGetMasterUri()
         {
-            return EnvironmentMasterUri ?? new Uri($"http://{Dns.GetHostName()}:11311/");
+            return EnvironmentMasterUri ?? new Uri("http://localhost:11311/");
         }
 
         /// <summary>
@@ -973,11 +973,13 @@ namespace Iviz.Roslib
                 }
             }
 
+            // is there a persistent connection? use it
             if (serviceReceiver != null)
             {
                 return serviceReceiver.Execute(service);
             }
 
+            // otherwise, create a new transient one
             XmlRpc.LookupServiceResponse response = Master.LookupService(serviceName);
             if (!response.IsValid)
             {

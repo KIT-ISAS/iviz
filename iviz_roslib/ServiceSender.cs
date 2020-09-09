@@ -11,7 +11,7 @@ using Iviz.Msgs;
 
 namespace Iviz.Roslib
 {
-    class ServiceSender
+    internal sealed class ServiceSender
     {
         const int BufferSizeIncrease = 1024;
 
@@ -261,7 +261,7 @@ namespace Iviz.Roslib
                     }
                     catch (Exception e)
                     {
-                        Logger.LogError("Inner exception in service callback: " + e);
+                        Logger.LogError($"{this}: Inner exception in service callback: " + e);
                         serviceMsg.Response = null;
                     }
 
