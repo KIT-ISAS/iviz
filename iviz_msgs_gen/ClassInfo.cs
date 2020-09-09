@@ -21,10 +21,10 @@ namespace Iviz.MsgsGen
         public string md5File;
         string md5;
 
-        readonly bool forceStruct;
+        public readonly bool forceStruct;
         readonly bool hasStrings;
 
-        readonly List<MsgParser.Variable> variables = new List<MsgParser.Variable>();
+        readonly List<MsgParser.Variable> variables;
 
         static readonly Dictionary<string, int> BuiltInsSizes = new Dictionary<string, int>
             {
@@ -46,7 +46,7 @@ namespace Iviz.MsgsGen
             };
 
 
-        static readonly HashSet<string> BuiltInTypes = new HashSet<string>
+        public static readonly HashSet<string> BuiltInTypes = new HashSet<string>
             {
                  "bool" ,
                  "int8",
@@ -248,26 +248,27 @@ namespace Iviz.MsgsGen
                         {
                             fieldSize += 4;
                         }
+                        
                         if (variable.classInfo != null && variable.classInfo.fixedSize != UnknownSizeAtCompileTime)
                         {
-                            fieldsWithSize.Add("size += " + variable.classInfo.fixedSize + " * " + variable.fieldName + ".Length;");
+                            fieldsWithSize.Add( 
+                                "size += " + variable.classInfo.fixedSize + " * " + variable.fieldName + ".Length;");
                         }
                         else
                         {
                             if (variable.className == "string")
                             {
                                 fieldsWithSize.Add("size += 4 * " + variable.fieldName + ".Length;");
-                                fieldsWithSize.Add("for (int i = 0; i < " + variable.fieldName + ".Length; i++)");
+                                fieldsWithSize.Add("foreach (string s in " + variable.fieldName + ")");
                                 fieldsWithSize.Add("{");
-                                fieldsWithSize.Add("    size += BuiltIns.UTF8.GetByteCount(" + variable.fieldName + "[i]);");
+                                fieldsWithSize.Add("    size += BuiltIns.UTF8.GetByteCount(s);");
                                 fieldsWithSize.Add("}");
                             }
                             else
                             {
-
-                                fieldsWithSize.Add("for (int i = 0; i < " + variable.fieldName + ".Length; i++)");
+                                fieldsWithSize.Add("foreach (var i in " + variable.fieldName + ")");
                                 fieldsWithSize.Add("{");
-                                fieldsWithSize.Add("    size += " + variable.fieldName + "[i].RosMessageLength;");
+                                fieldsWithSize.Add("    size += i.RosMessageLength;");
                                 fieldsWithSize.Add("}");
                             }
                         }
@@ -440,7 +441,7 @@ namespace Iviz.MsgsGen
                             else
                             {
                                 lines.Add("    " + variable.fieldName + " = b.DeserializeArray<" + variable.className + ">();");
-                                lines.Add("    for (int i = 0; i < this." + variable.fieldName + ".Length; i++)");
+                                lines.Add("    for (int i = 0; i < " + variable.fieldName + ".Length; i++)");
                                 lines.Add("    {");
                                 lines.Add("        " + variable.fieldName + "[i] = new " + variable.className + "(b);");
                                 lines.Add("    }");
@@ -619,6 +620,7 @@ namespace Iviz.MsgsGen
             {
                 str.AppendLine("using System.Runtime.InteropServices;");
             }
+
             str.AppendLine("using System.Runtime.Serialization;");
             str.AppendLine();
 

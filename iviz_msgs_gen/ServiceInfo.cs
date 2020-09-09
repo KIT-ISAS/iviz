@@ -48,6 +48,7 @@ namespace Iviz.MsgsGen
                 Where(x => x.Type == MsgParser.ElementType.Variable).
                 Cast<MsgParser.Variable>().
                 ToList();
+            
             variablesResp = elementsResp.
                 Where(x => x.Type == MsgParser.ElementType.Variable).
                 Cast<MsgParser.Variable>().
@@ -154,6 +155,7 @@ namespace Iviz.MsgsGen
                 Cast<MsgParser.Constant>().
                 Select(x => x.ToMd5String()).
                 ToArray();
+            
             if (constantsReq.Any())
             {
                 str.AppendJoin("\n", constantsReq);
@@ -169,6 +171,7 @@ namespace Iviz.MsgsGen
                 Cast<MsgParser.Constant>().
                 Select(x => x.ToMd5String()).
                 ToArray();
+            
             if (constantsResp.Any())
             {
                 str.AppendJoin("\n", constantsResp);
@@ -231,6 +234,10 @@ namespace Iviz.MsgsGen
             lines.Add("}");
 
             lines.Add("");
+            lines.Add("/// <summary>");
+            lines.Add("/// An error message in case the call fails.");
+            lines.Add("/// If the provider sets this to non-null, the ok byte is set to false, and the error message is sent instead of the response.");
+            lines.Add("/// </summary>");
             lines.Add("public string ErrorMessage { get; set; }");
 
             lines.Add("");
@@ -255,6 +262,7 @@ namespace Iviz.MsgsGen
             StringBuilder str = new StringBuilder();
 
             str.AppendLine("using System.Runtime.Serialization;");
+            
             str.AppendLine("");
             str.AppendLine("namespace Iviz.Msgs." + package);
             str.AppendLine("{");

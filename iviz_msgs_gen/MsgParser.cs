@@ -220,7 +220,8 @@ namespace Iviz.MsgsGen
                 }
                 else if (arraySize == 0)
                 {
-                    result = "public " + className + "[] " + fieldName + " { get; set; }";
+                    result =  
+                        "public " + className + "[] " + fieldName + " { get; set; }";
                 }
                 else
                 {
