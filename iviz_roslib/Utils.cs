@@ -37,11 +37,19 @@ namespace Iviz.Roslib
         /// </summary>
         public static Action<object> LogError { get; set; } = Console.Error.WriteLine;
 
+        /// <summary>
+        /// Supresses all printing of log text. 
+        /// </summary>
+        public static void SuppressAll()
+        {
+            LogDebug = _ => { };
+            Log = _ => { };
+            LogError = _ => { };
+        }
     }
 
     public static class Utils
     {
-
         public static void ForEach<T>(this IEnumerable<T> ts, Action<T> action)
         {
             if (ts is null)
@@ -79,6 +87,7 @@ namespace Iviz.Roslib
             {
                 return false;
             }
+            
             for (int i = 0; i < prefix.Length; i++)
             {
                 if (check[i] != prefix[i])

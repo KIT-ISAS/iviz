@@ -26,8 +26,8 @@ namespace Iviz.Roslib
         readonly bool RequestNoDelay;
         readonly bool Persistent;
 
-        public readonly string RemoteHostname;
-        public readonly int RemotePort;
+        public string RemoteHostname { get; }
+        public int RemotePort { get; }
 
         public int NumReceived { get; private set; }
         public int BytesReceived { get; private set; }

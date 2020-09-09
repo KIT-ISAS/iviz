@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Roslib
 {
     [DataContract]
-    public class Endpoint
+    public sealed class Endpoint
     {
         internal Endpoint(string Hostname, int Port)
         {
