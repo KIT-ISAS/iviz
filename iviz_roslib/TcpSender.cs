@@ -50,7 +50,7 @@ namespace Iviz.Roslib
         public bool IsAlive => task != null && !task.IsCompleted && !task.IsFaulted;
         Endpoint Endpoint { get; set; }
         Endpoint RemoteEndpoint { get; set; }
-        public int MaxQueueSizeBytes { get; set; } = 50000;
+        public int MaxQueueSizeInBytes { get; set; } = 50000;
         int CurrentQueueSize => messageQueue.Count;
         int NumSent { get; set; }
         int BytesSent { get; set; }
@@ -357,17 +357,18 @@ namespace Iviz.Roslib
 
                 if (messageQueue.Count > minQueueSize)
                 {
+                    // start discarding old messages
                     int totalQueueSize = messageQueue.Sum(x => x.RosMessageLength);
-                    if (totalQueueSize > MaxQueueSizeBytes)
+                    if (totalQueueSize > MaxQueueSizeInBytes)
                     {
-                        int overflow = totalQueueSize - MaxQueueSizeBytes;
+                        int overflow = totalQueueSize - MaxQueueSizeInBytes;
                         int i;
                         for (i = 0; i < messageQueue.Count - minQueueSize && overflow > 0; i++)
                         {
                             overflow -= messageQueue[i].RosMessageLength;
                         }
                         NumDropped += i;
-                        BytesDropped = totalQueueSize - MaxQueueSizeBytes - overflow;
+                        BytesDropped = totalQueueSize - MaxQueueSizeInBytes - overflow;
                         messageQueue.RemoveRange(0, i);
                     }
                 }
@@ -390,7 +391,7 @@ namespace Iviz.Roslib
             new PublisherSenderState(
                 IsAlive, Latching, Status,
                 Endpoint, RemoteCallerId, RemoteEndpoint,
-                CurrentQueueSize, MaxQueueSizeBytes, NumSent, BytesSent, NumDropped
+                CurrentQueueSize, MaxQueueSizeInBytes, NumSent, BytesSent, NumDropped
             );
 
         public override string ToString()

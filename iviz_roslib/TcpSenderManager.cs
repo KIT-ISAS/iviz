@@ -24,7 +24,6 @@ namespace Iviz.Roslib
         public IMessage LatchedMessage { get; private set; }
 
         bool latching;
-
         public bool Latching
         {
             get => latching;
@@ -38,11 +37,10 @@ namespace Iviz.Roslib
             }
         }
 
-        int maxQueueSize;
-
-        public int MaxQueueSize
+        int maxQueueSizeInBytes;
+        public int MaxQueueSizeInBytes
         {
-            get => maxQueueSize;
+            get => maxQueueSizeInBytes;
             set
             {
                 if (value < 1)
@@ -50,10 +48,10 @@ namespace Iviz.Roslib
                     throw new ArgumentException($"Cannot set max queue size to {value}");
                 }
 
-                maxQueueSize = value;
+                maxQueueSizeInBytes = value;
                 lock (connectionsByCallerId)
                 {
-                    connectionsByCallerId.Values.ForEach(x => x.MaxQueueSizeBytes = value);
+                    connectionsByCallerId.Values.ForEach(x => x.MaxQueueSizeInBytes = value);
                 }
             }
         }
@@ -97,7 +95,7 @@ namespace Iviz.Roslib
                 newSender.Publish(LatchedMessage);
             }
 
-            newSender.MaxQueueSizeBytes = MaxQueueSize;
+            newSender.MaxQueueSizeInBytes = MaxQueueSizeInBytes;
             return endPoint;
         }
 

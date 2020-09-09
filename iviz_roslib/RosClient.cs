@@ -48,6 +48,9 @@ namespace Iviz.Roslib
         public XmlRpcException() { }
     }
 
+    /// <summary>
+    /// Class that manages a client connection to a ROS master. 
+    /// </summary>
     public sealed class RosClient : IDisposable
     { 
         public const int AnyPort = 0;        
