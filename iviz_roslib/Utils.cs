@@ -23,9 +23,14 @@ namespace Iviz.Roslib
     public static class Logger
     {
         /// <summary>
+        /// Shorthand for a logging function that does nothing.  
+        /// </summary>
+        public static readonly Action<object> None = _ => { };
+        
+        /// <summary>
         /// Callback function when a log message of level 'debug' is produced. 
         /// </summary>
-        public static Action<object> LogDebug { get; set; } = _ => { };
+        public static Action<object> LogDebug { get; set; } = None;
 
         /// <summary>
         /// Callback function when a log message of level 'default' is produced. 
@@ -38,13 +43,13 @@ namespace Iviz.Roslib
         public static Action<object> LogError { get; set; } = Console.Error.WriteLine;
 
         /// <summary>
-        /// Supresses all printing of log text. 
+        /// Suppresses all printing of log text. 
         /// </summary>
         public static void SuppressAll()
         {
-            LogDebug = _ => { };
-            Log = _ => { };
-            LogError = _ => { };
+            LogDebug = None;
+            Log = None;
+            LogError = None;
         }
     }
 
