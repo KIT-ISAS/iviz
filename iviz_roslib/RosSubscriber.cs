@@ -90,6 +90,7 @@ namespace Iviz.Roslib
         {
             ids.Clear();
             manager.Stop();
+            NumPublishersChanged = null;
             IsAlive = false;
         }
 

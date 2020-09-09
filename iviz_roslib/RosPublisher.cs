@@ -101,6 +101,7 @@ namespace Iviz.Roslib
         {
             ids.Clear();
             manager.Stop();
+            NumSubscribersChanged = null;
             IsAlive = false;
         }
 
