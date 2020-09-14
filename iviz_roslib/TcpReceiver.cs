@@ -236,15 +236,16 @@ namespace Iviz.Roslib
 
         public override string ToString()
         {
-            return $"[TcpSender {RemoteEndpoint.Hostname}:{RemoteEndpoint.Port} '{Topic}']";
+            return $"[TcpReceiver {RemoteEndpoint.Hostname}:{RemoteEndpoint.Port} '{Topic}']";
         }
 
         public void Dispose()
         {
+            keepRunning = false;
+
             tcpClient.Dispose();
             stream.Dispose();
 
-            keepRunning = false;
             task?.Wait();
             task?.Dispose();
         }
