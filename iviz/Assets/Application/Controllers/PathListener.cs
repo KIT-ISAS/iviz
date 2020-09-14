@@ -147,7 +147,6 @@ namespace Iviz.Controllers
             resource = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, node.transform);
             resource.LineScale = 0.005f;
             resource.Tint = Color.white;
-            resource.UseAlpha = false;
             Config = new PathConfiguration();
         }
 

@@ -72,7 +72,7 @@ namespace Iviz.Controllers
         public override IModuleData ModuleData { get; }
 
         public RosListener ListenerStatic { get; private set; }
-        
+
         readonly TFConfiguration config = new TFConfiguration();
 
         public TFConfiguration Config
@@ -101,7 +101,7 @@ namespace Iviz.Controllers
                     frame.Visible = value;
                 }
 
-                if (!(rootMarker is null))
+                if (rootMarker != null)
                 {
                     rootMarker.Visible = value;
                 }
@@ -293,6 +293,7 @@ namespace Iviz.Controllers
         public override void Reset()
         {
             base.Reset();
+
             ListenerStatic?.Reset();
 
             bool prevShowAllFrames = ShowAllFrames;
@@ -332,7 +333,7 @@ namespace Iviz.Controllers
                 Debug.LogWarning("Error: Broken resource pool! Requested " + id + ", received " + frame.Id);
             }
 
-            if (!(listener is null))
+            if (listener != null)
             {
                 frame.AddListener(listener);
             }
@@ -355,7 +356,7 @@ namespace Iviz.Controllers
             frame.LabelSize = config.AxisLabelSize;
             frame.LabelVisible = config.AxisLabelVisible;
             frame.ConnectorVisible = config.ParentConnectorVisible;
-            if (!(parentFrame is null))
+            if (parentFrame != null)
             {
                 frame.Parent = parentFrame;
             }
@@ -398,30 +399,23 @@ namespace Iviz.Controllers
 
         public static UnityEngine.Pose RelativePose(in UnityEngine.Pose unityPose)
         {
-            if (Settings.IsMobile)
+            if (!Settings.IsMobile)
             {
-                /*
-                Transform rootFrame = RootFrame.transform;
-                UnityEngine.Pose rootFrameInverse = RootFrame.transform.AsPose().Inverse();
-                UnityEngine.Pose relative = rootFrameInverse.Multiply(unityPose);
-                var localScale = RootFrame.transform.localScale;
-                relative.position.x /= localScale.x;
-                relative.position.y /= localScale.y;
-                relative.position.z /= localScale.z;
-                */
-                Transform rootFrame = RootFrame.transform;
-                return new UnityEngine.Pose(
-                    rootFrame.InverseTransformPoint(unityPose.position),
-                    UnityEngine.Quaternion.Inverse(rootFrame.rotation) * unityPose.rotation
-                );
+                return unityPose;
             }
 
-            return unityPose;
+            Transform rootFrame = RootFrame.transform;
+            return new UnityEngine.Pose(
+                rootFrame.InverseTransformPoint(unityPose.position),
+                UnityEngine.Quaternion.Inverse(rootFrame.rotation) * unityPose.rotation
+            );
         }
 
         public static Vector3 RelativePosition(in Vector3 unityPosition)
         {
-            return Settings.IsMobile ? RootFrame.transform.InverseTransformPoint(unityPosition) : unityPosition;
+            return Settings.IsMobile ? 
+                RootFrame.transform.InverseTransformPoint(unityPosition) : 
+                unityPosition;
         }
 
         static uint tfSeq = 0;
@@ -462,7 +456,7 @@ namespace Iviz.Controllers
             else
             {
                 RootMarker.InteractionMode = InteractiveControl.InteractionModeType.Disabled;
-                MapFrame.ColliderEnabled = true;
+                MapFrame.ColliderEnabled = !Settings.IsHololens;
                 MapFrame.Alpha = 1;
             }
         }

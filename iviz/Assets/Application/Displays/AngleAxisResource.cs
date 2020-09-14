@@ -14,7 +14,6 @@ namespace Iviz.Displays
         void Awake()
         {
             resource = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, transform);
-            resource.UseAlpha = false;
             resource.LineScale = 0.01f;
             Color = Color.yellow;
         }

@@ -19,7 +19,7 @@ namespace Iviz.Controllers
             public RosPublisher Publisher { get; protected set; }
             public virtual int Id { get; set; }
 
-            public AdvertisedTopic(string topic)
+            protected AdvertisedTopic(string topic)
             {
                 Topic = topic;
             }
@@ -90,7 +90,7 @@ namespace Iviz.Controllers
             public RosSubscriber Subscriber { get; protected set; }
             public abstract int Count { get; }
 
-            public SubscribedTopic(string topic)
+            protected SubscribedTopic(string topic)
             {
                 Topic = topic;
             }
@@ -129,7 +129,7 @@ namespace Iviz.Controllers
                 listeners.Remove((RosListener<T>) subscriber);
             }
 
-            public void Callback(T msg)
+            void Callback(T msg)
             {
                 foreach (RosListener<T> listener in listeners)
                 {
@@ -150,9 +150,9 @@ namespace Iviz.Controllers
 
         abstract class AdvertisedService
         {
-            public string Service { get; }
+            protected string Service { get; }
 
-            public AdvertisedService(string service)
+            protected AdvertisedService(string service)
             {
                 Service = service;
             }
@@ -190,8 +190,7 @@ namespace Iviz.Controllers
                 Disconnect();
             }
         }
-
-        //public override string Id => "/Iviz";
+        
         public override string MyId
         {
             get => base.MyId;
@@ -224,7 +223,12 @@ namespace Iviz.Controllers
                 return false;
             }
 
-            //Debug.Log("Valid");
+            if (client != null)
+            {
+                Debug.LogWarning("Warning: New client requested, but old client still running!");
+                client.Close();
+                client = null;
+            }
 
             try
             {
@@ -236,7 +240,6 @@ namespace Iviz.Controllers
 
                 foreach (var entry in publishersByTopic)
                 {
-                    //Logger.Debug("Late advertisement for " + entry.Key);
                     entry.Value.Advertise(client);
                     entry.Value.Id = publishers.Count;
                     publishers.Add(entry.Value.Publisher);
@@ -244,13 +247,11 @@ namespace Iviz.Controllers
 
                 foreach (var entry in subscribersByTopic)
                 {
-                    //Logger.Debug("Late subscription for " + entry.Key);
                     entry.Value.Subscribe(client);
                 }
 
                 foreach (var entry in servicesByTopic)
                 {
-                    //Logger.Debug("Late subscription for " + entry.Key);
                     entry.Value.Advertise(client);
                 }
 
@@ -261,31 +262,19 @@ namespace Iviz.Controllers
             {
                 Logger.Debug(e);
                 Logger.Internal("Error:", e);
-                client = null;
-                return false;
-            }
-            catch (Exception e) when
-                (e is IOException)
-            {
-                Logger.Debug(e);
-                Logger.Internal("Error:", e);
-                client.Close();
-                client = null;
-                return false;
             }
             catch (Exception e)
             {
-                Logger.Error(e);
-                client?.Close();
-                client = null;
-                return false;
+                Logger.Warn(e);
             }
+
+            client?.Close();
+            client = null;
+            return false;
         }
 
         public override void Disconnect()
-        {
-            base.Disconnect();
-
+        { 
             if (client == null)
             {
                 return;
@@ -293,7 +282,7 @@ namespace Iviz.Controllers
 
             AddTask(() =>
                 {
-                    Debug.Log("RosLibConnection: Disconnecting...");
+                    Logger.Debug("RosLibConnection: Disconnecting...");
                     client?.Close();
                     client = null;
                     foreach (var entry in publishersByTopic)
@@ -307,7 +296,8 @@ namespace Iviz.Controllers
                     }
 
                     publishers.Clear();
-                    Debug.Log("RosLibConnection: Disconnection finished.");
+                    base.Disconnect();
+                    Logger.Debug("RosLibConnection: Disconnection finished.");
                 }
             );
         }
@@ -332,7 +322,6 @@ namespace Iviz.Controllers
         {
             if (!publishersByTopic.TryGetValue(advertiser.Topic, out AdvertisedTopic advertisedTopic))
             {
-                RosPublisher publisher = null;
                 AdvertisedTopic<T> newAdvertisedTopic = new AdvertisedTopic<T>(advertiser.Topic);
 
                 int id;
@@ -340,7 +329,7 @@ namespace Iviz.Controllers
                 {
                     newAdvertisedTopic.Advertise(client);
 
-                    publisher = newAdvertisedTopic.Publisher;
+                    var publisher = newAdvertisedTopic.Publisher;
                     //Logger.Debug("Direct advertisement for " + advertiser.Topic);
 
                     //client?.Advertise<T>(advertiser.Topic, out publisher);
@@ -391,17 +380,19 @@ namespace Iviz.Controllers
 
         void AdvertiseServiceImpl<T>(string service, Action<T> callback) where T : IService, new()
         {
-            if (!servicesByTopic.ContainsKey(service))
+            if (servicesByTopic.ContainsKey(service))
             {
-                AdvertisedService<T> newAdvertisedService = new AdvertisedService<T>(service, callback);
-
-                if (client != null)
-                {
-                    newAdvertisedService.Advertise(client);
-                }
-
-                servicesByTopic.Add(service, newAdvertisedService);
+                return;
             }
+
+            AdvertisedService<T> newAdvertisedService = new AdvertisedService<T>(service, callback);
+
+            if (client != null)
+            {
+                newAdvertisedService.Advertise(client);
+            }
+
+            servicesByTopic.Add(service, newAdvertisedService);
         }
 
         public override void CallServiceAsync<T>(string service, T srv, Action<T> callback)
@@ -514,23 +505,27 @@ namespace Iviz.Controllers
 
         void UnadvertiseImpl(RosSender advertiser)
         {
-            if (publishersByTopic.TryGetValue(advertiser.Topic, out AdvertisedTopic advertisedTopic))
+            if (!publishersByTopic.TryGetValue(advertiser.Topic, out AdvertisedTopic advertisedTopic))
             {
-                advertisedTopic.Remove(advertiser);
-                if (advertisedTopic.Count == 0)
-                {
-                    publishersByTopic.Remove(advertiser.Topic);
-                    if (advertiser.Id != -1)
-                    {
-                        publishers[advertiser.Id] = null;
-                    }
+                return;
+            }
 
-                    if (client != null)
-                    {
-                        advertisedTopic.Unadvertise(client);
-                        PublishedTopics = client.PublishedTopics;
-                    }
-                }
+            advertisedTopic.Remove(advertiser);
+            if (advertisedTopic.Count != 0)
+            {
+                return;
+            }
+
+            publishersByTopic.Remove(advertiser.Topic);
+            if (advertiser.Id != -1)
+            {
+                publishers[advertiser.Id] = null;
+            }
+
+            if (client != null)
+            {
+                advertisedTopic.Unadvertise(client);
+                PublishedTopics = client.PublishedTopics;
             }
         }
 
@@ -629,8 +624,10 @@ namespace Iviz.Controllers
 
         protected override void Update()
         {
-            AddTask(() => { client?.Cleanup(); }
-            );
+            if (client != null)
+            {
+                AddTask(client.Cleanup);
+            }
         }
 
         public override int GetNumPublishers(string topic)

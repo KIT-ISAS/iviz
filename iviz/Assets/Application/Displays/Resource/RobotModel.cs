@@ -95,7 +95,7 @@ namespace Iviz.Displays
             Dictionary<string, Material> rootMaterials = new Dictionary<string, Material>();
             foreach (var material in robot.Materials)
             {
-                if (material.Name is null)
+                if (material.Name == null)
                 {
                     continue;
                 }
@@ -123,7 +123,7 @@ namespace Iviz.Displays
             unparentedKeys.RemoveWhere(linkParents.Keys.Contains);
 
             BaseLink = unparentedKeys.FirstOrDefault();
-            BaseLinkObject = BaseLink is null ? null : linkObjects[BaseLink];
+            BaseLinkObject = BaseLink == null ? null : linkObjects[BaseLink];
 
             LinkParents = new ReadOnlyDictionary<string, string>(linkParents);
             LinkObjects = new ReadOnlyDictionary<string, GameObject>(linkObjects);
@@ -189,7 +189,7 @@ namespace Iviz.Displays
                     visualObject.transform.localScale = geometry.Sphere.Radius * Vector3.one;
                 }
 
-                if (resourceObject is null)
+                if (resourceObject == null)
                 {
                     continue; //?
                 }
@@ -199,7 +199,7 @@ namespace Iviz.Displays
                     MeshMarkerResource resource = resourceObject.AddComponent<MeshMarkerResource>();
 
                     Material material = GetMaterialForVisual(visual, rootMaterials);
-                    if (material is null)
+                    if (material == null)
                     {
                         continue;
                     }
@@ -227,7 +227,7 @@ namespace Iviz.Displays
                     foreach (MeshRenderer renderer in renderers)
                     {
                         var trianglesResource = renderer.gameObject.GetComponent<MeshTrianglesResource>();
-                        if (trianglesResource is null)
+                        if (trianglesResource == null)
                         {
                             continue;
                         }
@@ -318,7 +318,7 @@ namespace Iviz.Displays
         {
             foreach (var joint in joints)
             {
-                if (joint.Value.Limit is null)
+                if (joint.Value.Limit == null)
                 {
                     continue;
                 }
@@ -337,7 +337,7 @@ namespace Iviz.Displays
         public bool TryWriteJoint([NotNull] string jointName, float value, out Pose unityPose,
             bool onlyCalculatePose = false)
         {
-            if (jointName is null)
+            if (jointName == null)
             {
                 throw new ArgumentNullException(nameof(jointName));
             }

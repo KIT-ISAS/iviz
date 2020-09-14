@@ -28,7 +28,7 @@ namespace Iviz.Controllers
 
         public ReadOnlyDictionary<string, TFFrame> Children =>
             new ReadOnlyDictionary<string, TFFrame>(children);
-        
+
         [SerializeField] string id;
 
         public string Id
@@ -54,6 +54,7 @@ namespace Iviz.Controllers
         }
 
         float alpha = 1;
+
         public float Alpha
         {
             get => alpha;
@@ -155,12 +156,14 @@ namespace Iviz.Controllers
             set
             {
                 anchorVisible = value;
-                if (value && anchor is null)
+                if (value && anchor == null)
                 {
-                    anchor = ResourcePool.GetOrCreate<AnchorLineResource>(Resource.Displays.AnchorLine, TFListener.UnityFrame?.transform);
+                    anchor = ResourcePool.GetOrCreate<AnchorLineResource>(
+                        Resource.Displays.AnchorLine,
+                        TFListener.UnityFrame?.transform);
                 }
 
-                if (!(anchor is null))
+                if (anchor != null)
                 {
                     anchor.Visible = value && (Visible || ForceVisible);
                 }
@@ -253,54 +256,47 @@ namespace Iviz.Controllers
             if (!AcceptsParents &&
                 newParent != TFListener.RootFrame &&
                 newParent != TFListener.UnityFrame &&
-                !(newParent is null))
+                newParent != null)
             {
                 return false;
             }
 
-            //Debug.Log("a child " + Id + " parent " + newParent?.Id);
             if (newParent == Parent)
             {
                 return true;
             }
 
-            //Debug.Log("b child " + Id + " parent " + newParent?.Id);
             if (newParent == this)
             {
-                //Logger.Error($"TFFrame: Cannot set '{newParent.Id}' as a parent to itself!");
                 return false;
             }
 
-            //Debug.Log("c child " + Id + " parent " + newParent?.Id);
-            if (!(newParent is null) && newParent.IsChildOf(this))
+            if (newParent != null && newParent.IsChildOf(this))
             {
-                //Logger.Error($"TFFrame: Cannot set '{newParent.Id}' as parent to '{Id}' because it causes a cycle!");
                 newParent.CheckIfDead();
                 return false;
             }
 
-            /*
-            if (!timeline.Empty && time < timeline.LastTime)
+            if (Parent != null)
             {
-                return true; //??
+                Parent.RemoveChild(this);
             }
-            */
-            //Debug.Log("d child " + Id + " parent " + newParent?.Id);
-            Parent?.RemoveChild(this);
-            //Debug.Log("3 child " + Id + " parent " + newParent?.Id);
-            base.Parent = newParent;
-            //Debug.Log("2 child " + Id + " parent " + newParent?.Id);
-            Parent?.AddChild(this);
-            //Debug.Log("1 child " + Id + " parent " + newParent?.Id);
 
-            parentConnector.B = transform.parent ?? TFListener.RootFrame.transform;
+            base.Parent = newParent;
+            if (Parent != null)
+            {
+                Parent.AddChild(this);
+            }
+
+            Transform parent = transform.parent;            
+            parentConnector.B = parent != null ? parent : TFListener.RootFrame.transform;
 
             return true;
         }
 
         bool IsChildOf(TFFrame frame)
         {
-            if (Parent is null)
+            if (Parent == null)
             {
                 return false;
             }
@@ -342,8 +338,6 @@ namespace Iviz.Controllers
             {
                 child.LogPose(time);
             }
-
-            //Debug.Log(timeline.Count + " " + (timeline.LastTime - timeline.FirstTime).Milliseconds);
         }
 
         public Pose LookupPose(in TimeSpan time)
@@ -369,14 +363,26 @@ namespace Iviz.Controllers
             parentConnector = ResourcePool.GetOrCreate(Resource.Displays.LineConnector, transform)
                 .GetComponent<LineConnector>();
             parentConnector.A = transform;
-            parentConnector.B =
-                transform.parent != null
-                    ? transform.parent
-                    : TFListener.RootFrame?.transform; // TFListener.BaseFrame may not exist yet
+
+
+            // TFListener.BaseFrame may not exist yet
+            Transform parent = transform.parent;
+            parentConnector.B = parent != null ? parent : TFListener.RootFrame?.transform; 
+
             parentConnector.name = "[Connector]";
 
             axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Displays.AxisFrame, transform);
-            axis.Layer = Layer;
+            
+            if (Settings.IsHololens)
+            {
+                axis.ColliderEnabled = false;
+            }
+            else
+            {
+                axis.ColliderEnabled = true;
+                axis.Layer = Layer;
+            }
+
             axis.name = "[Axis]";
 
             AxisLength = 0.125f;
@@ -415,12 +421,12 @@ namespace Iviz.Controllers
             axis.Suspend();
             trail.Suspend();
             TrailVisible = false;
-            
-            if (anchor is null)
+
+            if (anchor == null)
             {
                 return;
             }
-            
+
             anchor.Visible = false;
             anchor.Name = "[Anchor:In Trash]";
         }
@@ -435,7 +441,7 @@ namespace Iviz.Controllers
 
             AnchorVisible = true;
             anchor.AnchorProvider = anchorProvider;
-            
+
             return anchor.SetPosition(transform.position, forceRebuild);
         }
 

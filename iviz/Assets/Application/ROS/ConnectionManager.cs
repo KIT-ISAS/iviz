@@ -187,14 +187,20 @@ namespace Iviz.Controllers
                     {
                         SetConnectionState(ConnectionState.Connecting);
 
-                        if (Connect())
+                        bool connectionResult;
+                        try
                         {
-                            SetConnectionState(ConnectionState.Connected);
+                            connectionResult = Connect();
                         }
-                        else
+                        catch (Exception e)
                         {
-                            SetConnectionState(ConnectionState.Disconnected);
+                            Debug.Log("Left connection:" + e);
+                            connectionResult = false;
                         }
+
+                        SetConnectionState(connectionResult ? 
+                            ConnectionState.Connected : 
+                            ConnectionState.Disconnected);
                     }
 
                     lock (condVar)
@@ -209,7 +215,9 @@ namespace Iviz.Controllers
             }
             catch (Exception e)
             {
-                Debug.Log("Left connection thread: " + e);
+                // shouldn't happen
+                Logger.Internal("Left connection thread!");
+                Debug.LogError("XXX Left connection thread: " + e);
             }
         }
 

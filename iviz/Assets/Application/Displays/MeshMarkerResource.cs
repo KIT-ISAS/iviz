@@ -10,6 +10,7 @@ namespace Iviz.Displays
         Material textureMaterialAlpha;
 
         [SerializeField] Texture2D texture;
+
         public Texture2D Texture
         {
             get => texture;
@@ -19,6 +20,7 @@ namespace Iviz.Displays
                 {
                     return;
                 }
+
                 textureMaterial = null;
                 textureMaterialAlpha = null;
                 texture = value;
@@ -33,11 +35,14 @@ namespace Iviz.Displays
             set
             {
                 emissiveColor = value;
-                MainRenderer?.SetPropertyEmissiveColor(emissiveColor);
+                if (MainRenderer != null)
+                {
+                    MainRenderer.SetPropertyEmissiveColor(emissiveColor);
+                }
             }
         }
 
-        
+
         [SerializeField] Color color = Color.white;
         public Color Color
         {
@@ -68,6 +73,7 @@ namespace Iviz.Displays
         }
 
         [SerializeField] Color tint = Color.white;
+
         public Color Tint
         {
             get => tint;
@@ -82,38 +88,43 @@ namespace Iviz.Displays
 
         void SetEffectiveColor()
         {
-            if (MainRenderer is null)
+            if (MainRenderer == null)
             {
                 return;
             }
+
             if (OcclusionOnlyActive)
             {
                 return;
             }
+
             Color effectiveColor = EffectiveColor;
             if (Texture == null) // do not use 'is' here
             {
-                Material material = effectiveColor.a > 254f / 255f ?
-                    Resource.Materials.Lit.Object :
-                    Resource.Materials.TransparentLit.Object;
+                Material material = effectiveColor.a > 254f / 255f
+                    ? Resource.Materials.Lit.Object
+                    : Resource.Materials.TransparentLit.Object;
                 MainRenderer.sharedMaterial = material;
             }
             else if (effectiveColor.a > 254f / 255f)
             {
-                if (textureMaterial is null)
+                if (textureMaterial == null)
                 {
                     textureMaterial = Resource.TexturedMaterials.Get(Texture);
                 }
+
                 MainRenderer.material = textureMaterial;
             }
             else
             {
-                if (textureMaterialAlpha is null)
+                if (textureMaterialAlpha == null)
                 {
                     textureMaterialAlpha = Resource.TexturedMaterials.GetAlpha(Texture);
                 }
+
                 MainRenderer.sharedMaterial = textureMaterial;
             }
+
             MainRenderer.SetPropertyColor(effectiveColor);
         }
 

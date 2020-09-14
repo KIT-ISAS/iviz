@@ -21,16 +21,16 @@ namespace Iviz.Displays
 
         Material materialAlpha;
         Material materialNoAlpha;
-        
         public bool UseAlpha
         {
             get => material == materialAlpha;
-            set
+            private set
             {
                 if (UseAlpha == value)
                 {
                     return;
                 }
+
                 if (value)
                 {
                     material = materialAlpha;
@@ -45,11 +45,13 @@ namespace Iviz.Displays
 
                     material = materialNoAlpha;
                 }
+
                 Rebuild();
             }
-        } 
-        
+        }
+
         int size;
+
         public int Size
         {
             get => size;
@@ -59,6 +61,7 @@ namespace Iviz.Displays
                 {
                     return;
                 }
+
                 size = value;
                 Reserve(size * 11 / 10);
             }
@@ -75,6 +78,7 @@ namespace Iviz.Displays
             {
                 lineBuffer.Dispose();
             }
+
             lineBuffer = new NativeArray<float4x2>(reqDataSize, Allocator.Persistent);
 
             lineComputeBuffer?.Release();
@@ -88,6 +92,7 @@ namespace Iviz.Displays
             {
                 Size = value.Count;
 
+                bool needsAlpha = false;
                 int realSize = 0;
                 foreach (var t in value)
                 {
@@ -95,9 +100,13 @@ namespace Iviz.Displays
                     {
                         continue;
                     }
+
                     lineBuffer[realSize++] = t;
+                    needsAlpha |= t.ColorA.a < 255 || t.ColorB.a < 255;
                 }
+
                 Size = realSize;
+                UseAlpha = needsAlpha; 
                 UpdateBuffer();
             }
         }
@@ -115,6 +124,7 @@ namespace Iviz.Displays
             {
                 return;
             }
+
             lineComputeBuffer.SetData(lineBuffer, 0, 0, Size);
             MinMaxJob.CalculateBounds(lineBuffer, Size, out Bounds bounds, out Vector2 span);
             Collider.center = bounds.center;
@@ -141,7 +151,7 @@ namespace Iviz.Displays
         protected override void Awake()
         {
             materialAlpha = Resource.Materials.TransparentLine.Instantiate();
-            
+
             material = materialAlpha;
             material.DisableKeyword("USE_TEXTURE");
 
@@ -154,17 +164,19 @@ namespace Iviz.Displays
 
         void UpdateQuadComputeBuffer()
         {
-            Vector3[] quad = {
-                    new Vector3( 0.1f * LineScale,  0.5f * LineScale, 1),
-                    new Vector3( 0.1f * LineScale, -0.5f * LineScale, 1),
-                    new Vector3(-0.1f * LineScale, -0.5f * LineScale, 0),
-                    new Vector3(-0.1f * LineScale,  0.5f * LineScale, 0),
+            Vector3[] quad =
+            {
+                new Vector3(0.1f * LineScale, 0.5f * LineScale, 1),
+                new Vector3(0.1f * LineScale, -0.5f * LineScale, 1),
+                new Vector3(-0.1f * LineScale, -0.5f * LineScale, 0),
+                new Vector3(-0.1f * LineScale, 0.5f * LineScale, 0),
             };
             if (quadComputeBuffer == null)
             {
                 quadComputeBuffer = new ComputeBuffer(4, Marshal.SizeOf<Vector3>());
                 material.SetBuffer(PropQuad, quadComputeBuffer);
             }
+
             quadComputeBuffer.SetData(quad, 0, 0, 4);
         }
 
@@ -174,6 +186,7 @@ namespace Iviz.Displays
             {
                 return;
             }
+
             UpdateTransform();
 
             Camera mainCamera = TFListener.MainCamera;
@@ -194,24 +207,27 @@ namespace Iviz.Displays
                 lineComputeBuffer.Release();
                 lineComputeBuffer = null;
             }
+
             if (quadComputeBuffer != null)
             {
                 quadComputeBuffer.Release();
                 quadComputeBuffer = null;
             }
+
             if (lineBuffer.Length > 0)
             {
                 lineBuffer.Dispose();
             }
-            if (!(materialAlpha is null))
+
+            if (materialAlpha != null)
             {
                 Destroy(materialAlpha);
             }
-            if (!(materialNoAlpha is null))
+
+            if (materialNoAlpha != null)
             {
                 Destroy(materialNoAlpha);
             }
-            
         }
 
         protected override void Rebuild()
@@ -221,6 +237,7 @@ namespace Iviz.Displays
                 lineComputeBuffer.Release();
                 lineComputeBuffer = null;
             }
+
             if (lineBuffer.Length != 0)
             {
                 lineComputeBuffer = new ComputeBuffer(lineBuffer.Length, Marshal.SizeOf<LineWithColor>());
@@ -233,6 +250,7 @@ namespace Iviz.Displays
                 quadComputeBuffer.Release();
                 quadComputeBuffer = null;
             }
+
             UpdateQuadComputeBuffer();
 
             UpdateMaterialKeywords();

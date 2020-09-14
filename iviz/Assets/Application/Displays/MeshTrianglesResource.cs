@@ -6,6 +6,9 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
+    /// <summary>
+    /// Resource that constructs a mesh from vertices, triangles, normals, etc.
+    /// </summary>
     public sealed class MeshTrianglesResource : MeshMarkerResource
     {
         Mesh mesh;
@@ -15,10 +18,10 @@ namespace Iviz.Displays
         public Bounds LocalBounds
         {
             get => localBounds;
-            set
+            private set
             {
                 localBounds = value;
-                if (Collider is null)
+                if (Collider == null)
                 {
                     return;
                 }
@@ -36,16 +39,21 @@ namespace Iviz.Displays
             LocalBounds = LocalBounds;
         }
 
-        void EnsureOwnMesh()
+        void EnsureOwnMesh(int pointsCount)
         {
-            if (!(mesh is null))
+            if (mesh != null)
             {
                 return;
             }
 
-            mesh = new Mesh();
-            mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-            
+            mesh = new Mesh
+            {
+                indexFormat = pointsCount > ushort.MaxValue
+                    ? UnityEngine.Rendering.IndexFormat.UInt32
+                    : UnityEngine.Rendering.IndexFormat.UInt16
+            };
+
+
             GetComponent<MeshFilter>().sharedMesh = mesh;
         }
 
@@ -169,7 +177,7 @@ namespace Iviz.Displays
                 triangles[i] = i;
             }
 
-            EnsureOwnMesh();
+            EnsureOwnMesh(points.Count);
 
             mesh.Clear();
             SetVertices(points);
@@ -211,7 +219,7 @@ namespace Iviz.Displays
                 throw new ArgumentException("Inconsistent color size!");
             }
 
-            EnsureOwnMesh();
+            EnsureOwnMesh(points.Count);
 
             mesh.Clear();
             SetVertices(points);

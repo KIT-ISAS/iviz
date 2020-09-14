@@ -133,8 +133,10 @@ namespace Iviz.Displays
                     }
                     else
                     {
-                        GameObject newMesh = UnityEngine.Object.Instantiate(templateMeshes[meshId].gameObject,
-                            nodeObject.transform, false);
+                        GameObject newMesh = UnityEngine.Object.Instantiate(
+                            templateMeshes[meshId].gameObject,
+                            nodeObject.transform, 
+                            false);
                         children.Add(newMesh.GetComponent<MeshTrianglesResource>());
                     }
                 }

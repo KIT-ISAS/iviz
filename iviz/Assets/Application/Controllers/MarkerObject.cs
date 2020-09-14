@@ -6,6 +6,10 @@ using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Displays;
 using Iviz.Resources;
 
+#if UNITY_WSA
+using Microsoft.MixedReality.Toolkit.Input;
+#endif
+
 namespace Iviz.Controllers
 {
     enum MarkerType
@@ -31,7 +35,11 @@ namespace Iviz.Controllers
         Click, Down, Up
     }
 
-    public sealed class MarkerObject : ClickableNode, IPointerDownHandler, IPointerUpHandler
+    public sealed class MarkerObject : ClickableNode, 
+        IPointerDownHandler, IPointerUpHandler
+#if UNITY_WSA
+        , IMixedRealityPointerHandler
+#endif    
     {
         static Mesh CachedCube => Resource.Displays.Cube.Object.GetComponent<MeshFilter>().sharedMesh;
         static Mesh CachedSphere => Resource.Displays.SphereSimple.Object.GetComponent<MeshFilter>().sharedMesh;
@@ -59,7 +67,7 @@ namespace Iviz.Controllers
             set
             {
                 clickable = value;
-                if (resource is null)
+                if (resource == null)
                 {
                     return;
                 }
@@ -115,14 +123,14 @@ namespace Iviz.Controllers
             Resource.Info<GameObject> newResourceType = GetRequestedResource(msg);
             if (newResourceType != resourceType)
             {
-                if (!(resource is null))
+                if (resource != null)
                 {
                     resource.Suspend();
                     ResourcePool.Dispose(resourceType, resource.gameObject);
                     resource = null;
                 }
                 resourceType = newResourceType;
-                if (resourceType is null)
+                if (resourceType == null)
                 {
                     if (msg.Type() == MarkerType.MeshResource)
                     {
@@ -137,7 +145,7 @@ namespace Iviz.Controllers
                 
                 GameObject newGameObject = ResourcePool.GetOrCreate(resourceType, transform);
                 resource = newGameObject.GetComponent<MarkerResource>();
-                if (resource is null)
+                if (resource == null)
                 {
                     if (msg.Type() != MarkerType.MeshResource)
                     {
@@ -149,7 +157,7 @@ namespace Iviz.Controllers
                 
                 Clickable = Clickable; // reset value
             }
-            if (resource is null)
+            if (resource == null)
             {
                 return;
             }
@@ -406,7 +414,7 @@ namespace Iviz.Controllers
             base.Stop();
             MouseEvent = null;
 
-            if (resource is null)
+            if (resource == null)
             {
                 return;
             }
@@ -432,9 +440,37 @@ namespace Iviz.Controllers
         {
             MouseEvent?.Invoke(eventData.pointerCurrentRaycast.worldPosition, MouseEventType.Up);
         }
+        
+#if UNITY_WSA
+        public override void OnPointerDown(MixedRealityPointerEventData eventData)
+        {
+            base.OnPointerClicked(eventData);
+            Vector3 pointerPosition = ((GGVPointer)eventData.Pointer).Position;
+            MouseEvent?.Invoke(pointerPosition, MouseEventType.Down);
+        }
+
+        public override void OnPointerDragged(MixedRealityPointerEventData eventData)
+        {
+            base.OnPointerClicked(eventData);
+        }
+
+        public override void OnPointerUp(MixedRealityPointerEventData eventData)
+        {
+            base.OnPointerClicked(eventData);
+            Vector3 pointerPosition = ((GGVPointer)eventData.Pointer).Position;
+            MouseEvent?.Invoke(pointerPosition, MouseEventType.Up);
+        }
+
+        public override void OnPointerClicked(MixedRealityPointerEventData eventData)
+        {
+            base.OnPointerClicked(eventData);
+            Vector3 pointerPosition = ((GGVPointer)eventData.Pointer).Position;
+            MouseEvent?.Invoke(pointerPosition, MouseEventType.Click);
+        }
+#endif        
     }
 
-    static class MarkerTypeHelper
+    internal static class MarkerTypeHelper
     {
         public static MarkerType Type(this Marker marker)
         {

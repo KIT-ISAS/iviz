@@ -65,6 +65,11 @@ namespace Iviz.Editor
             string uriPath = assetUri.Host + Uri.UnescapeDataString(assetUri.AbsolutePath);
 
             string relativePath = Path.GetDirectoryName(uriPath);
+            if (!string.IsNullOrEmpty(relativePath) && Path.DirectorySeparatorChar == '\\')
+            {
+                relativePath = relativePath.Replace('\\', '/');
+            }            
+            
             string filename = Path.GetFileNameWithoutExtension(uriPath);
             string filenameWithExtension = Path.GetFileName(uriPath);
 

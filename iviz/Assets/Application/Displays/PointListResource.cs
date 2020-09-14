@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
+    /*
     class NativeArrayList<T> where T : struct
     {
         NativeArray<T> pointBuffer = new NativeArray<T>();
@@ -40,6 +41,7 @@ namespace Iviz.Displays
 
         public NativeArray<T> Buffer => pointBuffer;
     }
+    */
 
     public sealed class PointListResource : MarkerResourceWithColormap
     {
@@ -47,35 +49,37 @@ namespace Iviz.Displays
         ComputeBuffer pointComputeBuffer;
         ComputeBuffer quadComputeBuffer;
 
-        [SerializeField] int size_;
+        [SerializeField] int size;
         public int Size
         {
-            get => size_;
+            get => size;
             private set
             {
-                if (value == size_)
+                if (value == size)
                 {
                     return;
                 }
-                size_ = value;
-                Reserve(size_ * 11 / 10);
+                size = value;
+                Reserve(size * 11 / 10);
             }
         }
 
-        public void Reserve(int reqDataSize)
+        void Reserve(int reqDataSize)
         {
-            if (pointBuffer.Length < reqDataSize)
+            if (pointBuffer.Length >= reqDataSize)
             {
-                if (pointBuffer.Length != 0)
-                {
-                    pointBuffer.Dispose();
-                }
-                pointBuffer = new NativeArray<float4>(reqDataSize, Allocator.Persistent);
-
-                pointComputeBuffer?.Release();
-                pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithColor>());
-                material.SetBuffer(PropPoints, pointComputeBuffer);
+                return;
             }
+
+            if (pointBuffer.Length != 0)
+            {
+                pointBuffer.Dispose();
+            }
+            pointBuffer = new NativeArray<float4>(reqDataSize, Allocator.Persistent);
+
+            pointComputeBuffer?.Release();
+            pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithColor>());
+            material.SetBuffer(PropPoints, pointComputeBuffer);
         }
 
         public IList<PointWithColor> PointsWithColor

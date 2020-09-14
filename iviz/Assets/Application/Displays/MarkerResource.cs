@@ -6,8 +6,8 @@ namespace Iviz.Displays
     {
         protected BoxCollider Collider;
 
-        public Bounds Bounds => Collider is null ? new Bounds() : new Bounds(Collider.center, Collider.size);
-        public Bounds WorldBounds => Collider?.bounds ?? new Bounds();
+        public Bounds Bounds => Collider == null ? new Bounds() : new Bounds(Collider.center, Collider.size);
+        public Bounds WorldBounds => Collider == null ? new Bounds() : Collider.bounds;
 
         public virtual string Name
         {
@@ -15,12 +15,14 @@ namespace Iviz.Displays
             set => gameObject.name = value;
         }
 
+        bool colliderEnabled = true;
         public bool ColliderEnabled
         {
-            get => Collider?.enabled ?? false;
+            get => colliderEnabled;
             set
             {
-                if (!(Collider is null))
+                colliderEnabled = value;
+                if (Collider != null)
                 {
                     Collider.enabled = value;
                 }
@@ -52,6 +54,7 @@ namespace Iviz.Displays
         protected virtual void Awake()
         {
             Collider = GetComponent<BoxCollider>();
+            ColliderEnabled = ColliderEnabled;
         }
 
         public virtual void Suspend()

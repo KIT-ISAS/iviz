@@ -102,19 +102,19 @@ namespace Iviz.Controllers
         }
 
 #if UNITY_WSA
-        public void OnPointerDown(MixedRealityPointerEventData eventData)
+        public virtual void OnPointerDown(MixedRealityPointerEventData eventData)
         {
         }
 
-        public void OnPointerDragged(MixedRealityPointerEventData eventData)
+        public virtual void OnPointerDragged(MixedRealityPointerEventData eventData)
         {
         }
 
-        public void OnPointerUp(MixedRealityPointerEventData eventData)
+        public virtual void OnPointerUp(MixedRealityPointerEventData eventData)
         {
         }
 
-        public void OnPointerClicked(MixedRealityPointerEventData eventData)
+        public virtual void OnPointerClicked(MixedRealityPointerEventData eventData)
         {
             int clickCount = eventData.Count;
 
