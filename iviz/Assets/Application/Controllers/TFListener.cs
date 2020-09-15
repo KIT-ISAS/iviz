@@ -295,6 +295,7 @@ namespace Iviz.Controllers
             base.Reset();
 
             ListenerStatic?.Reset();
+            Publisher?.Reset();
 
             bool prevShowAllFrames = ShowAllFrames;
             ShowAllFrames = false;

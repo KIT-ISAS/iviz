@@ -42,7 +42,7 @@ namespace Iviz.App
         {
             panel.Listener.RosListener = listener.Listener;
             panel.DisableExpiration.Value = listener.DisableExpiration;
-            panel.Sender.Set(listener.RosSender);
+            panel.Sender.Set(listener.Publisher);
             
             panel.DisableExpiration.ValueChanged += f =>
             {

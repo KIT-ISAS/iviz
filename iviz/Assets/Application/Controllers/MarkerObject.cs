@@ -72,6 +72,7 @@ namespace Iviz.Controllers
                     return;
                 }
                 resource.Layer = value ? Resource.ClickableLayer : 0;
+                resource.ColliderEnabled = value;
             }
         }
 

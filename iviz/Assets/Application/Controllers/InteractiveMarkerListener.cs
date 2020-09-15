@@ -24,7 +24,7 @@ namespace Iviz.Controllers
     {
         readonly SimpleDisplayNode node;
         
-        public RosSender<InteractiveMarkerFeedback> RosSender { get; private set; }
+        public RosSender<InteractiveMarkerFeedback> Publisher { get; private set; }
 
         public override TFFrame Frame => TFListener.MapFrame;
 
@@ -61,7 +61,7 @@ namespace Iviz.Controllers
         {
             Listener = new RosListener<InteractiveMarkerUpdate>(config.Topic, Handler);
             GameThread.EverySecond += CheckForExpiredMarkers;
-            RosSender = new RosSender<InteractiveMarkerFeedback>(config.Topic + "/feedback");
+            Publisher = new RosSender<InteractiveMarkerFeedback>(config.Topic + "/feedback");
         }
 
         public override void Stop()
@@ -75,7 +75,7 @@ namespace Iviz.Controllers
             }
             
             imarkers.Clear();
-            RosSender.Stop();
+            Publisher.Stop();
             
             node.Stop();
             UnityEngine.Object.Destroy(node.gameObject);
@@ -90,6 +90,8 @@ namespace Iviz.Controllers
             }
             
             imarkers.Clear();
+            
+            Publisher?.Reset();
         }
 
         void Handler(InteractiveMarkerUpdate msg)
@@ -197,7 +199,7 @@ namespace Iviz.Controllers
                 MousePoint: position.Unity2RosPoint(),
                 MousePointValid: true
             );
-            RosSender.Publish(msg);
+            Publisher.Publish(msg);
         }
 
         void OnInteractiveControlObjectMoved(string imarkerId, in Pose controlPose, string controlId)
@@ -214,7 +216,7 @@ namespace Iviz.Controllers
                 MousePoint: Vector3.zero.Unity2RosPoint(),
                 MousePointValid: false
             );
-            RosSender.Publish(msg);
+            Publisher.Publish(msg);
         }
 
         void CheckForExpiredMarkers()

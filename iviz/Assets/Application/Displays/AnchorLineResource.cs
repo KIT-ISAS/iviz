@@ -97,6 +97,7 @@ namespace Iviz.Displays
             resource = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, transform);
             resource.LineScale = 0.003f;
             Color = new Color(1, 1, 0, 0.25f);
+            ColliderEnabled = false;
         }
 
         public void SplitForRecycle()
