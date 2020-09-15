@@ -264,7 +264,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_PlanePrefab: {fileID: 666795433288981299, guid: 75a5cdd81f9844f6b9d69890de63b125,
     type: 3}
-  m_DetectionMode: -1
+  m_DetectionMode: 1
 --- !u!114 &4123752780789567426
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -336,7 +336,6 @@ GameObject:
   - component: {fileID: 6019251948242916435}
   - component: {fileID: 6019251948242916432}
   - component: {fileID: 851342195858701130}
-  - component: {fileID: 7404689011173654653}
   - component: {fileID: 3395489962138412187}
   - component: {fileID: 6350551399145372016}
   m_Layer: 0
@@ -450,19 +449,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 768
   m_MaxRayIntersections: 0
---- !u!114 &7404689011173654653
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6019251948242916430}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 520bb47c46cf8624fafb307b7d1b862a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Camera: {fileID: 0}
 --- !u!114 &3395489962138412187
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -482,7 +468,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6019251948242916430}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b15f82cc229284894964d2d30806969d, type: 3}
   m_Name: 

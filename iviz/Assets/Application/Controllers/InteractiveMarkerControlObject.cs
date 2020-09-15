@@ -8,12 +8,13 @@ namespace Iviz.Controllers
 {
     public sealed class InteractiveMarkerControlObject : MonoBehaviour
     {
-        string Description { get; set; }
-        string Id { get; set; }
+        //string Description { get; set; }
+        //string Id { get; set; }
 
         readonly Dictionary<string, MarkerObject> markers = new Dictionary<string, MarkerObject>();
         readonly HashSet<string> markersToDelete = new HashSet<string>();
 
+        bool markerIsInteractive;
         InteractiveControl control;
 
         public delegate void MouseEventAction(in Pose pose, in Vector3 point, MouseEventType type);
@@ -23,9 +24,9 @@ namespace Iviz.Controllers
 
         public void Set(InteractiveMarkerControl msg)
         {
-            Description = msg.Description;
+            //Description = msg.Description;
             name = msg.Name;
-            Id = msg.Name;
+            //Id = msg.Name;
 
 
             transform.localRotation = msg.Orientation.Ros2Unity();
@@ -51,10 +52,12 @@ namespace Iviz.Controllers
             switch (interactionMode)
             {
                 case InteractiveMarkerControl.NONE:
+                    markerIsInteractive = false;
                     markers.Values.ForEach(marker => marker.Clickable = false);
                     break;
                 case InteractiveMarkerControl.MENU:
                 case InteractiveMarkerControl.BUTTON:
+                    markerIsInteractive = true;
                     markers.Values.ForEach(marker => marker.Clickable = true);
                     break;
                 case InteractiveMarkerControl.MOVE_AXIS:
@@ -127,10 +130,7 @@ namespace Iviz.Controllers
                         if (!markers.TryGetValue(id, out MarkerObject markerToAdd))
                         {
                             markerToAdd = CreateMarkerObject();
-                            markerToAdd.MouseEvent += (in Vector3 point, MouseEventType type) =>
-                            {
-                                MouseEvent?.Invoke(transform.AsPose(), point, type);
-                            };
+                            markerToAdd.MouseEvent += OnMarkerClicked;
                             markers[id] = markerToAdd;
                         }
                         markerToAdd.Set(marker);
@@ -161,6 +161,16 @@ namespace Iviz.Controllers
             }
         }
 
+        void OnMarkerClicked(in Vector3 point, MouseEventType type)
+        {
+            if (!markerIsInteractive)
+            {
+                return;
+            }
+
+            MouseEvent?.Invoke(transform.AsPose(), point, type);
+        }        
+        
         public void Stop()
         {
             markers.Values.ForEach(DeleteMarkerObject);

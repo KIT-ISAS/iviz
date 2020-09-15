@@ -82,6 +82,8 @@ namespace Iviz.Controllers
                 LastMsgCounter = 0;
             }
         }
+
+        public abstract void Reset();
     }
 
     public sealed class RosSender<T> : RosSender where T : IMessage
@@ -121,6 +123,12 @@ namespace Iviz.Controllers
             base.Stop();
             Logger.Internal($"Unadvertising {Topic}.");
             ConnectionManager.Unadvertise(this);
+        }
+
+        public override void Reset()
+        {
+            ConnectionManager.Unadvertise(this);
+            ConnectionManager.Advertise(this);
         }
     }
 }
