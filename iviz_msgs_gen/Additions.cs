@@ -48,6 +48,18 @@ namespace Iviz.MsgsGen
                 "        a.W * b.W - a.X * b.X - a.Y * b.Y - a.Z * b.Z",
                 "    );"
             },
+            
+            ["geometry_msgs/Transform"] = new[]
+            {
+                "public static readonly Transform Identity = new Transform(Point.Zero, Quaternion.Identity);", 
+                "public static implicit operator Pose(in Transform p) => new Pose(p.Translation, p.Rotation);"
+            },    
+            
+            ["geometry_msgs/Pose"] = new[]
+            {
+                "public static readonly Pose Identity = new Pose(Point.Zero, Quaternion.Identity);", 
+                "public static implicit operator Transform(in Pose p) => new Transform(p.Position, p.Orientation);"  
+            },             
         };
     }
 }

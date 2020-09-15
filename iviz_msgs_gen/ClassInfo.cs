@@ -631,7 +631,7 @@ namespace Iviz.MsgsGen
             {
                 str.Append("    ").AppendLine(entry);
             }
-
+            
             str.AppendLine("}");
 
             return str.ToString();
@@ -761,6 +761,15 @@ namespace Iviz.MsgsGen
                 lines.Add("            " + entry);
             }
 
+            if (Additions.Contents.TryGetValue(rosPackage + "/" + name, out string[] extraLines))
+            {
+                lines.Add("    /// Custom iviz code");
+                foreach (var entry in extraLines)
+                {
+                    lines.Add("    " + entry);
+                }
+            }            
+            
             lines.Add("}");
 
             return lines;
