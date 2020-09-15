@@ -12,7 +12,7 @@
 		LOD 200
 
 		CGPROGRAM
-		#pragma surface surf Standard addshadow fullforwardshadows alpha
+		#pragma surface surf Standard addshadow fullforwardshadows alpha:fade
 		#pragma target 3.0
 
 		struct Input {
