@@ -7,12 +7,11 @@ Shader "iviz/TransparentLine"
 	SubShader
 	{
 		Cull Off
-		Tags { "Queue" = "Transparent" "RenderType"="Transparent" "LightMode"="ForwardBase"}
+		Tags { "Queue" = "Transparent" "RenderType"="Transparent"}
 		Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass
 		{
-
 			CGPROGRAM
 			#include "UnityCG.cginc"
 
@@ -29,6 +28,21 @@ Shader "iviz/TransparentLine"
 			float4x4 _WorldToLocal;
 			float4 _Front;
 			float4 _Tint;
+			
+			float _Scale;			
+
+            static const float3 Quads[8] =
+            {
+                float3(0.5, 0, 1),
+                float3(0, 0.5, 1),
+                float3(0, 0.5, 0),
+                float3(-0.5, 0 , 0),
+
+                float3(0.5, 0, 1),
+                float3(-0.5, 0 , 0),
+                float3(0, -0.5, 0),
+                float3(0, -0.5, 1),
+            };
 
 			struct Line {
 				float3 A;
@@ -45,9 +59,7 @@ Shader "iviz/TransparentLine"
 #endif
 			};
 
-			StructuredBuffer<float3> _Quad;
 			StructuredBuffer<Line> _Lines;
-
 
 			struct v2f
 			{
@@ -60,7 +72,9 @@ Shader "iviz/TransparentLine"
 				unity_ObjectToWorld = _LocalToWorld;
 				unity_WorldToObject = _WorldToLocal;
 
-				float3 V = _Quad[id];
+				float3 V = Quads[id];
+				V.xy *= _Scale;
+				
 				float3 A = _Lines[inst].A;
 				float3 B = _Lines[inst].B;
 				float3 BA = B - A;
@@ -99,9 +113,7 @@ Shader "iviz/TransparentLine"
 				half4 diffuse = (rgbaB - rgbaA) * V.z + rgbaA;
 				diffuse *= _Tint;
 				
-				//float3 normal = normalize(cross(up, right));
                 o.color = diffuse;				
-			    //o.color.rgb += 0.5f * ShadeSH9(half4(normal, 1));
 
 				return o;
 			}

@@ -13,18 +13,17 @@ namespace Iviz.Displays
     {
         static readonly int PropLines = Shader.PropertyToID("_Lines");
         static readonly int PropFront = Shader.PropertyToID("_Front");
-        static readonly int PropQuad = Shader.PropertyToID("_Quad");
 
         NativeArray<float4x2> lineBuffer;
         ComputeBuffer lineComputeBuffer;
-        ComputeBuffer quadComputeBuffer;
 
         Material materialAlpha;
         Material materialNoAlpha;
-        public bool UseAlpha
+
+        bool UseAlpha
         {
             get => material == materialAlpha;
-            private set
+            set
             {
                 if (UseAlpha == value)
                 {
@@ -50,8 +49,7 @@ namespace Iviz.Displays
             }
         }
 
-        int size;
-
+        [SerializeField] int size;
         public int Size
         {
             get => size;
@@ -86,13 +84,14 @@ namespace Iviz.Displays
             material.SetBuffer(PropLines, lineComputeBuffer);
         }
 
+        bool linesNeedAlpha;
         public IList<LineWithColor> LinesWithColor
         {
             set
             {
                 Size = value.Count;
 
-                bool needsAlpha = false;
+                linesNeedAlpha = false;
                 int realSize = 0;
                 foreach (var t in value)
                 {
@@ -102,14 +101,25 @@ namespace Iviz.Displays
                     }
 
                     lineBuffer[realSize++] = t;
-                    needsAlpha |= t.ColorA.a < 255 || t.ColorB.a < 255;
+                    linesNeedAlpha |= t.ColorA.a < 255 || t.ColorB.a < 255;
                 }
 
                 Size = realSize;
-                UseAlpha = needsAlpha; 
+                UseAlpha = linesNeedAlpha || Tint.a <= 254f / 255f;
                 UpdateBuffer();
             }
         }
+
+        public override Color Tint
+        {
+            get => base.Tint;
+            set
+            {
+                base.Tint = value;
+                UseAlpha = linesNeedAlpha || Tint.a <= 254f / 255f;
+            }
+        }
+
 
         public void Set(int newSize, Action<NativeArray<float4x2>> func)
         {
@@ -128,24 +138,8 @@ namespace Iviz.Displays
             lineComputeBuffer.SetData(lineBuffer, 0, 0, Size);
             MinMaxJob.CalculateBounds(lineBuffer, Size, out Bounds bounds, out Vector2 span);
             Collider.center = bounds.center;
-            Collider.size = bounds.size + LineScale * Vector3.one;
+            Collider.size = bounds.size + ElementSize * Vector3.one;
             IntensityBounds = span;
-        }
-
-        [SerializeField] float lineScale;
-        public float LineScale
-        {
-            get => lineScale;
-            set
-            {
-                if (Mathf.Approximately(lineScale, value))
-                {
-                    return;
-                }
-
-                lineScale = value;
-                UpdateQuadComputeBuffer();
-            }
         }
 
         protected override void Awake()
@@ -157,27 +151,9 @@ namespace Iviz.Displays
 
             base.Awake();
 
-            LineScale = 0.1f;
+            ElementSize = 0.1f;
             UseIntensityTexture = false;
             IntensityBounds = new Vector2(0, 1);
-        }
-
-        void UpdateQuadComputeBuffer()
-        {
-            Vector3[] quad =
-            {
-                new Vector3(0.1f * LineScale, 0.5f * LineScale, 1),
-                new Vector3(0.1f * LineScale, -0.5f * LineScale, 1),
-                new Vector3(-0.1f * LineScale, -0.5f * LineScale, 0),
-                new Vector3(-0.1f * LineScale, 0.5f * LineScale, 0),
-            };
-            if (quadComputeBuffer == null)
-            {
-                quadComputeBuffer = new ComputeBuffer(4, Marshal.SizeOf<Vector3>());
-                material.SetBuffer(PropQuad, quadComputeBuffer);
-            }
-
-            quadComputeBuffer.SetData(quad, 0, 0, 4);
         }
 
         void Update()
@@ -190,11 +166,10 @@ namespace Iviz.Displays
             UpdateTransform();
 
             Camera mainCamera = TFListener.MainCamera;
-            //material.SetVector(PropFront, transform.InverseTransformDirection(camera.transform.forward));
             material.SetVector(PropFront, transform.InverseTransformPoint(mainCamera.transform.position));
 
             Bounds worldBounds = Collider.bounds;
-            Graphics.DrawProcedural(material, worldBounds, MeshTopology.Quads, 4, Size);
+            Graphics.DrawProcedural(material, worldBounds, MeshTopology.Quads, 2 * 4, Size);
         }
 
         protected override void OnDestroy()
@@ -206,12 +181,6 @@ namespace Iviz.Displays
             {
                 lineComputeBuffer.Release();
                 lineComputeBuffer = null;
-            }
-
-            if (quadComputeBuffer != null)
-            {
-                quadComputeBuffer.Release();
-                quadComputeBuffer = null;
             }
 
             if (lineBuffer.Length > 0)
@@ -244,14 +213,6 @@ namespace Iviz.Displays
                 lineComputeBuffer.SetData(lineBuffer, 0, 0, Size);
                 material.SetBuffer(PropLines, lineComputeBuffer);
             }
-
-            if (quadComputeBuffer != null)
-            {
-                quadComputeBuffer.Release();
-                quadComputeBuffer = null;
-            }
-
-            UpdateQuadComputeBuffer();
 
             UpdateMaterialKeywords();
             IntensityBounds = IntensityBounds;

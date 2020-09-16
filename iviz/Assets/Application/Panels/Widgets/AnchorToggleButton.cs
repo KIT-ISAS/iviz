@@ -8,11 +8,11 @@ namespace Iviz.App
     {
         static readonly Color EnabledColor = Settings.IsHololens
             ? new Color(0.45f, 0.75f, 0.75f, 1.0f)
-            : new Color(0, 0, 0, 0.5f);
+            : new Color(0, 0, 0, 1f);
 
         static readonly Color DisabledColor = Settings.IsHololens
             ? new Color(0.75f, 0.75f, 0.75f, 1.0f)
-            : new Color(0.75f, 0.75f, 0.75f, 0.75f);
+            : new Color(0.75f, 0.75f, 0.75f, 0.25f);
         
         [SerializeField] bool state;
         Image image;

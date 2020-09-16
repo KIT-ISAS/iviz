@@ -83,7 +83,7 @@ namespace Iviz.Controllers
             set
             {
                 config.PointSize = value;
-                pointCloud.Scale = value * Vector2.one;
+                pointCloud.ElementSize = value;
             }
         }
 

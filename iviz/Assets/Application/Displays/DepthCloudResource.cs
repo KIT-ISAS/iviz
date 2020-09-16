@@ -9,13 +9,17 @@ namespace Iviz.Displays
     {
         [SerializeField] Material material;
 
-        [SerializeField] float pointSize = 1;
-        public float PointSize
+        [SerializeField] float elementSize = 1;
+        
+        /// <summary>
+        /// Size multiplier for points
+        /// </summary>
+        public float ElementSize
         {
-            get => pointSize;
+            get => elementSize;
             set
             {
-                pointSize = value;
+                elementSize = value;
                 UpdateQuadComputeBuffer();
             }
         }
@@ -196,7 +200,7 @@ namespace Iviz.Displays
             float posAddX = -0.5f * posCoeffX;
             float posAddY = -0.5f * posCoeffY;
 
-            material.SetFloat(PropPointSize, posCoeffX / texture.width * PointSize);
+            material.SetFloat(PropPointSize, posCoeffX / texture.width * ElementSize);
             material.SetVector(PropPosST, new Vector4(posCoeffX, posCoeffY, posAddX, posAddY));
 
             const float maxDepth = 5.0f;

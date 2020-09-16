@@ -279,14 +279,16 @@ namespace Iviz.Displays
             transform.rotation = TFListener.RootFrame.transform.rotation;
         }
 
-        public void SnapTo(IAnchorProvider anchorProvider)
+        /*
+        public void SnapTo()
         {
             Vector3 myPosition = transform.position;
-            anchorProvider.FindAnchor(myPosition, out Vector3 newPosition, out Vector3 _);
+            anchorProvider.FindClosest(myPosition, out Vector3 newPosition, out Vector3 _);
             Debug.Log("Snapping to " + newPosition);
 
             TargetTransform.position += newPosition - myPosition ;
             Moved?.Invoke(TargetTransform.AsPose());
         }
+        */
     }
 }

@@ -148,10 +148,11 @@ namespace Iviz.Displays
             pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
             MinMaxJob.CalculateBounds(pointBuffer, Size, out Bounds bounds, out Vector2 span);
             Collider.center = bounds.center;
-            Collider.size = bounds.size + Scale.x * Vector3.one;
+            Collider.size = bounds.size + ElementSize * Vector3.one;
             IntensityBounds = span;
         }
 
+        /*
         [SerializeField] Vector2 scale;
         public Vector2 Scale
         {
@@ -166,6 +167,7 @@ namespace Iviz.Displays
                 UpdateQuadComputeBuffer();
             }
         }
+        */
 
         protected override void Awake()
         {
@@ -184,10 +186,10 @@ namespace Iviz.Displays
         void UpdateQuadComputeBuffer()
         {
             Vector2[] quad = {
-                    Vector2.Scale(new Vector2( 0.5f,  0.5f), Scale),
-                    Vector2.Scale(new Vector2( 0.5f, -0.5f), Scale),
-                    Vector2.Scale(new Vector2(-0.5f, -0.5f), Scale),
-                    Vector2.Scale(new Vector2(-0.5f,  0.5f), Scale),
+                    new Vector2( 0.5f,  0.5f),
+                    new Vector2( 0.5f, -0.5f),
+                    new Vector2(-0.5f, -0.5f),
+                    new Vector2(-0.5f,  0.5f),
             };
             if (quadComputeBuffer == null)
             {

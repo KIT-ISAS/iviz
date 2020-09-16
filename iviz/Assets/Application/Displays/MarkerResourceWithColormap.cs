@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using Iviz.Resources;
+using UnityEngine.UIElements.Experimental;
 
 namespace Iviz.Displays
 {
@@ -113,7 +114,7 @@ namespace Iviz.Displays
 
         [SerializeField] Color tint;
 
-        public Color Tint
+        public virtual Color Tint
         {
             get => tint;
             set
@@ -122,6 +123,17 @@ namespace Iviz.Displays
                 material.SetColor(PTint, value);
             }
         }
+        
+        [SerializeField] float elementSize = 1.0f;
+
+        /// <summary>
+        /// Size multiplier for internal/instantiated elements. Example: Line width in LineResource, point size in PointList.
+        /// </summary>
+        public float ElementSize
+        {
+            get => elementSize;
+            set => elementSize = value;
+        }        
 
         protected override void Awake()
         {
@@ -131,7 +143,7 @@ namespace Iviz.Displays
 
         protected void UpdateTransform()
         {
-            material.SetFloat(PScale, transform.lossyScale.x);
+            material.SetFloat(PScale, transform.lossyScale.x * ElementSize);
             material.SetMatrix(PLocalToWorld, transform.localToWorldMatrix);
             material.SetMatrix(PWorldToLocal, transform.worldToLocalMatrix);
         }

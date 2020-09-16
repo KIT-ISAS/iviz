@@ -50,14 +50,14 @@ namespace Iviz.Displays
 
         public float Scale
         {
-            get => lines.LineScale;
-            set => lines.LineScale = value;
+            get => lines.ElementSize;
+            set => lines.ElementSize = value;
         }
 
         void Awake()
         {
             lines = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, transform);
-            lines.LineScale = 0.01f;
+            lines.ElementSize = 0.01f;
             TimeWindowInMs = TimeWindowInMs;
 
             transform.parent = TFListener.UnityFrame?.transform;
