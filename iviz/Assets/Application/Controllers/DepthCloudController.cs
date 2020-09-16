@@ -70,7 +70,7 @@ namespace Iviz.Controllers
             set
             {
                 config.PointSize = value;
-                resource.PointSize = value;
+                resource.ElementSize = value;
             }
         }
 

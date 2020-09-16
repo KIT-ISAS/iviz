@@ -7,11 +7,10 @@ Shader "iviz/Line"
 	SubShader
 	{
 		Cull Off
-		Tags { "RenderType"="Opaque" "LightMode"="ForwardBase"}
+		Tags { "RenderType"="Opaque" }
 
 		Pass
 		{
-
 			CGPROGRAM
 			#include "UnityCG.cginc"
             #include "UnityLightingCommon.cginc"
@@ -32,6 +31,19 @@ Shader "iviz/Line"
 			
 			float _Scale;
 
+            static const float3 Quads[8] =
+            {
+                float3(0.5, 0, 1),
+                float3(0, 0.5, 1),
+                float3(0, 0.5, 0),
+                float3(-0.5, 0 , 0),
+
+                float3(-0.5, 0 , 0),
+                float3(0, -0.5, 0),
+                float3(0, -0.5, 1),
+                float3(0.5, 0, 1),
+            };
+
 			struct Line {
 				float3 A;
 #if USE_TEXTURE
@@ -47,14 +59,12 @@ Shader "iviz/Line"
 #endif
 			};
 
-			StructuredBuffer<float3> _Quad;
 			StructuredBuffer<Line> _Lines;
-
 
 			struct v2f
 			{
 				float4 position : SV_POSITION;
-				half4 color : COLOR;
+				half3 color : COLOR;
 			};
 
 			v2f vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
@@ -62,7 +72,9 @@ Shader "iviz/Line"
 				unity_ObjectToWorld = _LocalToWorld;
 				unity_WorldToObject = _WorldToLocal;
 
-				float3 V = _Quad[id] * _Scale;
+				float3 V = Quads[id];
+				V.xy *= _Scale;
+				
 				float3 A = _Lines[inst].A;
 				float3 B = _Lines[inst].B;
 				float3 BA = B - A;
@@ -101,15 +113,13 @@ Shader "iviz/Line"
 				half4 diffuse = (rgbaB - rgbaA) * V.z + rgbaA;
 				diffuse *= _Tint;
 				
-				//float3 normal = normalize(cross(up, right));
                 o.color = diffuse;				
-			    //o.color.rgb += 0.5f * ShadeSH9(half4(normal, 1));
 				return o;
 			}
 
 			half4 frag(v2f i) : SV_Target
 			{
-				return i.color;
+				return half4(i.color, 1);
 			}
 
 			ENDCG

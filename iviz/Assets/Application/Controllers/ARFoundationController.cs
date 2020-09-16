@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Iviz.Displays;
 using Iviz.Resources;
 using UnityEngine;
@@ -142,24 +143,25 @@ namespace Iviz.Controllers
             forceAnchorRebuild = true;
         }
 
-        public override bool FindAnchor(in Vector3 position, out Vector3 anchor, out Vector3 normal)
+        public override bool FindRayHit(in Ray ray, out Vector3 anchor, out Vector3 normal)
         {
             List<ARRaycastHit> results = new List<ARRaycastHit>();
-            Vector3 origin = position + 0.25f * Vector3.up;
-            raycaster.Raycast(new Ray(origin, Vector3.down), results, TrackableType.PlaneWithinBounds);
+            raycaster.Raycast(ray, results, TrackableType.PlaneWithinBounds);
             if (results.Count == 0)
             {
-                anchor = position;
+                anchor = ray.origin;
                 normal = Vector3.zero;
                 return false;
             }
 
-            var hit = results[0];
-            var plane = planeManager.GetPlane(hit.trackableId);
-            anchor = hit.pose.position;
+            Vector3 origin = ray.origin;
+            var minHit = results.Select(hit => ((hit.pose.position - origin).sqrMagnitude, hit)).Min().hit;
+            var plane = planeManager.GetPlane(minHit.trackableId);
+            anchor = minHit.pose.position;
             normal = plane.normal;
             return true;
         }
+
 
         void UpdateLights(ARLightEstimationData lightEstimation)
         {

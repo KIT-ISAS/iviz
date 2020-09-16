@@ -37,7 +37,7 @@ namespace Iviz.Controllers
         [DataMember] public bool PinRootMarker { get; set; }
     }
 
-    public abstract class ARController : MonoBehaviour, IController, IHasFrame, IAnchorProvider
+    public abstract class ARController : MonoBehaviour, IController, IHasFrame
     {
         public static readonly Vector3 DefaultWorldOffset = new Vector3(0.5f, 0, -0.2f);
 
@@ -112,7 +112,7 @@ namespace Iviz.Controllers
                     module.OnARModeChanged(value);
                 }
                 
-                TFListener.MapFrame.UpdateAnchor(null, value);
+                TFListener.MapFrame.UpdateAnchor(value);
             }
         }
 
@@ -194,11 +194,20 @@ namespace Iviz.Controllers
         }
         
         protected bool forceAnchorRebuild;
-        public abstract bool FindAnchor(in Vector3 position, out Vector3 anchor, out Vector3 normal);
+
+
+        public virtual bool FindClosest(in Vector3 position, out Vector3 anchor, out Vector3 normal)
+        {
+            Vector3 origin = position + 0.25f * Vector3.up;
+            Ray ray = new Ray(origin, Vector3.down);
+            return FindRayHit(ray, out anchor, out normal);
+        }
+
+        public abstract bool FindRayHit(in Ray ray, out Vector3 anchor, out Vector3 normal);
         
         void UpdateAnchors()
         {
-            Vector3? projection = TFListener.MapFrame.UpdateAnchor(this, forceAnchorRebuild);
+            Vector3? projection = TFListener.MapFrame.UpdateAnchor(forceAnchorRebuild);
             if (PinRootMarker && projection.HasValue)
             {
                 TFListener.RootFrame.transform.position = projection.Value;

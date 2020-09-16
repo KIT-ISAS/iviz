@@ -10,12 +10,12 @@ namespace Iviz.Displays
     /// <summary>
     /// Simple node that makes a resource brighter if the pointer is on top of it.
     /// </summary>
-    public sealed class MouseOverHighlighter : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+    public sealed class MouseOverHighlighter : MonoBehaviour,
+        IPointerEnterHandler, IPointerExitHandler, IPointerUpHandler, IPointerDownHandler
 #if UNITY_WSA
         , IMixedRealityFocusHandler
 #endif
     {
-        Color color;   
         MeshMarkerResource resource;
 
         static Color GetHighlightColor(Color c)
@@ -27,19 +27,12 @@ namespace Iviz.Displays
             float a = Mathf.Min(c.a + factor, 1);
             return new Color(r, g, b, a);
         }
-        
+
         void Start()
         {
-            if (Settings.IsPhone)
-            {
-                // smartphones and tablets because they have no concept of pointer 'hover'.
-                enabled = false;
-                return;
-            }
-
             resource = GetComponent<MeshMarkerResource>();
         }
-        
+
         public void OnPointerEnter(PointerEventData eventData)
         {
             if (Settings.IsHololens)
@@ -47,9 +40,8 @@ namespace Iviz.Displays
                 // hololens uses gaze, not pointer                
                 return;
             }
-            
-            color = resource.EmissiveColor;
-            resource.EmissiveColor = GetHighlightColor(color);
+
+            resource.EmissiveColor = GetHighlightColor(Color.black);
         }
 
         public void OnPointerExit(PointerEventData eventData)
@@ -59,14 +51,15 @@ namespace Iviz.Displays
                 // hololens uses gaze, not pointer                
                 return;
             }
-            resource.EmissiveColor = color;
+
+            resource.EmissiveColor = Color.black;
         }
 
 #if UNITY_WSA
         public void OnFocusEnter(FocusEventData eventData)
         {
             color = resource.EmissiveColor;
-            resource.EmissiveColor = GetHighlightColor(color);
+            resource.EmissiveColor = GetHighlightColor(Color.black);
         }
 
         public void OnFocusExit(FocusEventData eventData)
@@ -74,5 +67,27 @@ namespace Iviz.Displays
             resource.EmissiveColor = color;
         }
 #endif
+
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            if (!Settings.IsPhone)
+            {
+                return;
+            }
+
+            resource.EmissiveColor = GetHighlightColor(Color.black);
+        }
+        
+        public void OnPointerUp(PointerEventData eventData)
+        {
+            if (!Settings.IsPhone)
+            {
+                return;
+            }
+
+            resource.EmissiveColor = Color.black;
+        }
+
+
     }
 }

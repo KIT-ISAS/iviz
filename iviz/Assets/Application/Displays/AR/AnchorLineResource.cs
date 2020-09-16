@@ -1,14 +1,12 @@
+using System;
 using System.Collections.Generic;
+using Iviz.Controllers;
 using Iviz.Resources;
 using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public interface IAnchorProvider
-    {
-        bool FindAnchor(in Vector3 position, out Vector3 anchor, out Vector3 normal);
-    }
-
+    [Obsolete]
     public sealed class AnchorLineResource : DisplayWrapperResource, IRecyclable, ISupportsTint
     {
         [SerializeField] public GameObject anchorPlane;
@@ -17,8 +15,6 @@ namespace Iviz.Displays
         LineResource resource;
 
         Vector3 lastPosition = Vector3.one * float.PositiveInfinity;
-
-        public IAnchorProvider AnchorProvider { get; set; }
 
         protected override IDisplay Display => resource;
 
@@ -61,12 +57,12 @@ namespace Iviz.Displays
 
             lastPosition = newPosition;
 
-            if (!Visible || AnchorProvider is null)
+            if (!Visible || ARController.Instance == null)
             {
                 return null;
             }
 
-            bool foundAnchor = AnchorProvider.FindAnchor(lastPosition, out Vector3 anchor, out Vector3 normal);
+            bool foundAnchor = ARController.Instance.FindClosest(lastPosition, out Vector3 anchor, out Vector3 normal);
             
             lines.Clear();
             if (foundAnchor)
@@ -95,7 +91,7 @@ namespace Iviz.Displays
         void Awake()
         {
             resource = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, transform);
-            resource.LineScale = 0.003f;
+            resource.ElementSize = 0.003f;
             Color = new Color(1, 1, 0, 0.25f);
             ColliderEnabled = false;
         }

@@ -44,15 +44,15 @@ namespace Iviz.Displays
 
         public float4 PB => f.c1;
 
-        public LineWithColor(in Vector3 a, Color32 colorA, in Vector3 b, Color32 colorB)
+        public LineWithColor(in Vector3 start, Color32 colorA, in Vector3 end, Color32 colorB)
         {
-            f.c0.x = a.x;
-            f.c0.y = a.y;
-            f.c0.z = a.z;
+            f.c0.x = start.x;
+            f.c0.y = start.y;
+            f.c0.z = start.z;
 
-            f.c1.x = b.x;
-            f.c1.y = b.y;
-            f.c1.z = b.z;
+            f.c1.x = end.x;
+            f.c1.y = end.y;
+            f.c1.z = end.z;
 
             unsafe
             {
@@ -61,27 +61,27 @@ namespace Iviz.Displays
             }
         }
 
-        public LineWithColor(in Vector3 a, in Vector3 b, Color32 color) : this(a, color, b, color)
+        public LineWithColor(in Vector3 start, in Vector3 end, Color32 color) : this(start, color, end, color)
         {
         }
 
-        public LineWithColor(in Vector3 a, in Vector3 b)
+        public LineWithColor(in Vector3 start, in Vector3 end)
         {
-            f.c0.x = a.x;
-            f.c0.y = a.y;
-            f.c0.z = a.z;
+            f.c0.x = start.x;
+            f.c0.y = start.y;
+            f.c0.z = start.z;
             f.c0.w = white;
 
-            f.c1.x = b.x;
-            f.c1.y = b.y;
-            f.c1.z = b.z;
+            f.c1.x = end.x;
+            f.c1.y = end.y;
+            f.c1.z = end.z;
             f.c1.w = white;
         }
 
-        public LineWithColor(in PointWithColor A, in PointWithColor B)
+        public LineWithColor(in PointWithColor start, in PointWithColor end)
         {
-            f.c0 = A;
-            f.c1 = B;
+            f.c0 = start;
+            f.c1 = end;
         }
 
         public static implicit operator float4x2(in LineWithColor c) => c.f;

@@ -16,7 +16,6 @@ namespace Iviz.Controllers
 
         readonly Timeline timeline = new Timeline();
         TrailResource trail;
-        AnchorLineResource anchor;
 
         GameObject labelObject;
         TextMesh labelObjectText;
@@ -127,7 +126,7 @@ namespace Iviz.Controllers
             {
                 forceVisible = value;
                 Visible = Visible;
-                AnchorVisible = AnchorVisible;
+                //AnchorVisible = AnchorVisible;
                 TrailVisible = TrailVisible;
             }
         }
@@ -144,10 +143,11 @@ namespace Iviz.Controllers
                 visible = value;
                 axis.Visible = (value || ForceVisible) && !ForceInvisible;
                 TrailVisible = TrailVisible;
-                AnchorVisible = AnchorVisible;
+                //AnchorVisible = AnchorVisible;
             }
         }
 
+        /*
         bool anchorVisible;
 
         bool AnchorVisible
@@ -169,6 +169,7 @@ namespace Iviz.Controllers
                 }
             }
         }
+        */
 
         bool labelVisible;
 
@@ -422,6 +423,7 @@ namespace Iviz.Controllers
             trail.Suspend();
             TrailVisible = false;
 
+            /*
             if (anchor == null)
             {
                 return;
@@ -429,20 +431,25 @@ namespace Iviz.Controllers
 
             anchor.Visible = false;
             anchor.Name = "[Anchor:In Trash]";
+            */
         }
 
-        public Vector3? UpdateAnchor(IAnchorProvider anchorProvider, bool forceRebuild = false)
+        public Vector3? UpdateAnchor(bool forceRebuild = false)
         {
-            if (anchorProvider is null)
+            if (ARController.Instance is null || !Visible)
             {
-                AnchorVisible = forceRebuild;
                 return null;
             }
 
-            AnchorVisible = true;
-            anchor.AnchorProvider = anchorProvider;
+            Transform mTransform = transform;
+            if (!mTransform.hasChanged && !forceRebuild)
+            {
+                return null;
+            }
 
-            return anchor.SetPosition(transform.position, forceRebuild);
+            mTransform.hasChanged = false;
+            bool foundAnchor = ARController.Instance.FindClosest(mTransform.position, out Vector3 anchor, out Vector3 _);
+            return foundAnchor ? anchor : (Vector3?)null;
         }
 
         protected override void OnDoubleClick()

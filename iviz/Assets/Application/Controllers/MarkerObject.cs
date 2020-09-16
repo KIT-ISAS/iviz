@@ -247,7 +247,7 @@ namespace Iviz.Controllers
                 case MarkerType.LineList:
                     {
                         LineResource lineResource = (LineResource)resource;
-                        lineResource.LineScale = (float)msg.Scale.X;
+                        lineResource.ElementSize = (float)msg.Scale.X;
                         LineWithColor[] lines = new LineWithColor[msg.Points.Length / 2];
                         if (msg.Colors.Length == 0)
                         {
@@ -277,7 +277,7 @@ namespace Iviz.Controllers
                 case MarkerType.LineStrip:
                     {
                         LineResource lineResource = (LineResource)resource;
-                        lineResource.LineScale = (float)msg.Scale.X;
+                        lineResource.ElementSize = (float)msg.Scale.X;
                         LineWithColor[] lines = new LineWithColor[msg.Points.Length - 1];
                         if (msg.Colors.Length == 0)
                         {
@@ -307,7 +307,7 @@ namespace Iviz.Controllers
                 case MarkerType.Points:
                     {
                         PointListResource pointList = (PointListResource)resource;
-                        pointList.Scale = msg.Scale.Ros2Unity().Abs();
+                        pointList.ElementSize = Mathf.Abs((float)msg.Scale.X);
                         PointWithColor[] points = new PointWithColor[msg.Points.Length];
                         Color color = msg.Color.Sanitize().ToUnityColor();
                         if (msg.Colors.Length == 0 || color == Color.black)

@@ -430,8 +430,15 @@ namespace Iviz.Displays
 
         public void Destroy()
         {
-            if (Texture != null) UnityEngine.Object.Destroy(Texture);
-            if (Material != null) UnityEngine.Object.Destroy(Material);
+            if (Texture != null)
+            {
+                UnityEngine.Object.Destroy(Texture);
+            }
+
+            if (Material != null)
+            {
+                UnityEngine.Object.Destroy(Material);
+            }
         }
     }
 

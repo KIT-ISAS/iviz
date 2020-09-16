@@ -76,8 +76,8 @@ namespace Iviz.Displays
             set
             {
                 pointSize = value;
-                pointCloud.Scale = value * Vector2.one;
-                lines.LineScale = value;
+                pointCloud.ElementSize = value;
+                lines.ElementSize = value;
             }
         }
 

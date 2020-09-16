@@ -73,7 +73,7 @@ namespace Iviz.Displays
                 }
 
                 cellSize = value;
-                resource.Scale = value * Vector3.one;
+                resource.Scale3 = value * Vector3.one;
                 resource.Offset = new Vector3(0, cellSize / 2, 0);
                 UpdateSize();
             }

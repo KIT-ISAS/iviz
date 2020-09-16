@@ -132,7 +132,7 @@ namespace Iviz.Displays
             }
             pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
             MinMaxJob.CalculateBounds(pointBuffer, Size, out Bounds bounds, out Vector2 span);
-            Collider.size = bounds.size + Scale;
+            Collider.size = bounds.size + Scale3;
             Collider.center = new Vector3(bounds.center.x, bounds.center.y + Collider.size.y / 2, bounds.center.z);
             IntensityBounds = span;
         }
@@ -140,14 +140,14 @@ namespace Iviz.Displays
 
         static readonly int PropLocalScale = Shader.PropertyToID("_LocalScale");
 
-        [SerializeField] Vector3 scale;
-        public Vector3 Scale
+        [SerializeField] Vector3 scale3;
+        public Vector3 Scale3
         {
-            get => scale;
+            get => scale3;
             set
             {
-                scale = value;
-                material.SetVector(PropLocalScale, new Vector4(scale.x, scale.y, scale.z, 1));
+                scale3 = value;
+                material.SetVector(PropLocalScale, new Vector4(scale3.x, scale3.y, scale3.z, 1));
             }
         }
 
@@ -205,7 +205,7 @@ namespace Iviz.Displays
             UpdateMaterialKeywords();
 
             Mesh = Resource.Displays.SphereSimple.Object.GetComponent<MeshFilter>().sharedMesh;
-            Scale = Vector3.one;
+            Scale3 = Vector3.one;
             Offset = Vector3.zero;
             IntensityBounds = new Vector2(0, 1);
             Colormap = Resource.ColormapId.gray;
@@ -282,7 +282,7 @@ namespace Iviz.Displays
                 //Debug.Log(string.Join(",", pointBuffer));
             }
             IntensityBounds = IntensityBounds;
-            Scale = Scale;
+            Scale3 = Scale3;
             Offset = Offset;
             Colormap = Colormap;
             UpdateMaterialKeywords();

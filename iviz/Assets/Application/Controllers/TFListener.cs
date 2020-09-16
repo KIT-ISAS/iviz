@@ -452,7 +452,7 @@ namespace Iviz.Controllers
                 RootMarker.InteractionMode = InteractiveControl.InteractionModeType.Frame;
                 MapFrame.ColliderEnabled = false;
                 MapFrame.Selected = false;
-                MapFrame.Alpha = 0.1f;
+                MapFrame.Alpha = 0.75f;
             }
             else
             {
