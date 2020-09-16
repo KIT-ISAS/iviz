@@ -93,7 +93,7 @@ namespace Iviz.Displays
                 foreach (MeshMarkerResource resource in allResources)
                 {
                     var draggable = resource.GetComponent<DraggableRotation>();
-                    if (!(draggable is null))
+                    if (draggable != null)
                     {
                         draggable.DoesRotationReset = value;
                     }
@@ -122,7 +122,7 @@ namespace Iviz.Displays
                 foreach (MeshMarkerResource resource in allResources)
                 {
                     var draggable = resource.GetComponent<DraggableRotation>();
-                    if (!(draggable is null))
+                    if (draggable != null)
                     {
                         draggable.DoesRotationReset = value;
                     }
@@ -253,8 +253,8 @@ namespace Iviz.Displays
                 draggable.DoubleTap += OnDoubleTap;
             }
 
-            InteractionMode = InteractionModeType.MovePlaneYZ;
-            if (TargetTransform is null)
+            InteractionMode = InteractionModeType.Frame;
+            if (TargetTransform == null)
             {
                 TargetTransform = transform.parent ?? transform;
             }
@@ -263,13 +263,14 @@ namespace Iviz.Displays
         void RotateToCamera()
         {
             Vector3 cameraForward = TFListener.MainCamera.transform.forward;
+            Transform mTransform = transform;
             if (CameraPivotIsParent)
             {
-                transform.parent.LookAt(transform.parent.position + cameraForward);
+                mTransform.parent.LookAt(mTransform.parent.position + cameraForward);
             }
             else
             {
-                transform.LookAt(transform.position + cameraForward);
+                mTransform.LookAt(mTransform.position + cameraForward);
             }
         }
 
