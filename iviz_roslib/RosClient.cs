@@ -297,15 +297,15 @@ namespace Iviz.Roslib
         /// <summary>
         /// Try to retrieve a valid caller uri.
         /// </summary>
-        public static Uri TryGetCallerUri()
+        public static Uri TryGetCallerUri(int usingPort = AnyPort)
         {
             return EnvironmentCallerUri ??
-                   GetUriFromInterface(NetworkInterfaceType.Wireless80211) ??
-                   GetUriFromInterface(NetworkInterfaceType.Ethernet) ??
-                   new Uri($"http://{Dns.GetHostName()}:{AnyPort}/");
+                   GetUriFromInterface(NetworkInterfaceType.Wireless80211, usingPort) ??
+                   GetUriFromInterface(NetworkInterfaceType.Ethernet, usingPort) ??
+                   new Uri($"http://{Dns.GetHostName()}:{usingPort}/");
         }
 
-        static Uri GetUriFromInterface(NetworkInterfaceType type)
+        static Uri GetUriFromInterface(NetworkInterfaceType type, int usingPort)
         {
             UnicastIPAddressInformation ipInfo =
                 NetworkInterface.GetAllNetworkInterfaces()
@@ -313,7 +313,7 @@ namespace Iviz.Roslib
                 .SelectMany(iface => iface.GetIPProperties().UnicastAddresses)
                 .FirstOrDefault(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork);
             
-            return ipInfo is null ? null : new Uri($"http://{ipInfo.Address}:{AnyPort}/");
+            return ipInfo is null ? null : new Uri($"http://{ipInfo.Address}:{usingPort}/");
         }         
         
         /// <summary>
