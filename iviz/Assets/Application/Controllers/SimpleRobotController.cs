@@ -38,7 +38,8 @@ namespace Iviz.Controllers
                 {
                     return "[Empty]";
                 }
-                return robot.Name ?? "[Unnamed]"; 
+
+                return robot.Name ?? "[Unnamed]";
             }
         }
 
@@ -61,41 +62,69 @@ namespace Iviz.Controllers
             }
         }
 
+        public string Description { get; private set; } = "<b>No Robot Loaded</b>";
+
         public string SourceParameter
         {
             get => config.SourceParameter;
             set
             {
-                config.SourceParameter = value;
-
+                config.SourceParameter = "";
                 robot?.Dispose();
+                robot = null;
+                
                 if (string.IsNullOrEmpty(value))
                 {
+                    Description = "[No Robot Selected]";
                     return;
                 }
-                
+
+                object parameterValue;
                 try
                 {
-                    string description = ConnectionManager.Connection.GetParameter(value);
-                    if (string.IsNullOrEmpty(description))
-                    {
-                        Debug.Log($"SimpleRobotController: Failed to retrieve parameter '{value}'");
-                        robot = null;
-                        return;
-                    }
-                    robot = new RobotModel(description);
-                    node.name = "SimpleRobotNode:" + Name;
-                    AttachedToTf = AttachedToTf;
-                    Visible = Visible;
-                    RenderAsOcclusionOnly = RenderAsOcclusionOnly;
-                    Tint = Tint;
+                    parameterValue = ConnectionManager.Connection.GetParameter(value);
                 }
                 catch (Exception e)
                 {
                     Debug.LogError($"SimpleRobotController: Error while loading parameter '{value}': {e}");
-                    robot = null;
-                    config.SourceParameter = string.Empty;
+                    Description = "[Failed to Retrieve Parameter]";
+                    return;
                 }
+
+                if (parameterValue == null || !(parameterValue is string robotSpecification))
+                {
+                    Debug.Log($"SimpleRobotController: Failed to retrieve parameter '{value}'");
+                    Description = "[Invalid Parameter Type]";
+                    return;
+                }
+
+                if (robotSpecification.Length == 0)
+                {
+                    Debug.Log($"SimpleRobotController: Empty parameter '{value}'");
+                    Description = "[Robot Specification is Empty]";
+                    return;
+                }
+
+                try
+                {
+                    robot = new RobotModel(robotSpecification);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"SimpleRobotController: Error while loading parameter '{value}': {e}");
+                    Description = "[Failed to Parse Specification]";
+                    robot = null;
+                    return;
+                }
+                
+                config.SourceParameter = value;
+                node.name = "SimpleRobotNode:" + Name;
+                Description = string.IsNullOrEmpty(robot.Name) ? "<b>[No Name]</b>" : $"<b>{Name}</b>";
+                AttachedToTf = AttachedToTf;
+                Visible = Visible;
+                RenderAsOcclusionOnly = RenderAsOcclusionOnly;
+                Tint = Tint;
+                
             }
         }
 
@@ -306,7 +335,7 @@ namespace Iviz.Controllers
             string parameter = SourceParameter;
             SourceParameter = "";
             SourceParameter = parameter;
-            
+
             if (AttachedToTf)
             {
                 AttachedToTf = false;

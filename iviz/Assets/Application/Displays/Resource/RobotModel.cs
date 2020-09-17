@@ -334,8 +334,7 @@ namespace Iviz.Displays
             }
         }
 
-        public bool TryWriteJoint([NotNull] string jointName, float value, out Pose unityPose,
-            bool onlyCalculatePose = false)
+        public bool TryWriteJoint(string jointName, float value, out Pose unityPose, bool onlyCalculatePose = false)
         {
             if (jointName == null)
             {

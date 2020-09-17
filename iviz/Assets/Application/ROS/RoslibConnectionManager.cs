@@ -611,7 +611,7 @@ namespace Iviz.Controllers
             return cachedParameters;
         }
         
-        public override string GetParameter(string parameter)
+        public override object GetParameter(string parameter)
         {
             if (client is null)
             {
@@ -619,7 +619,7 @@ namespace Iviz.Controllers
             }
 
             client.GetParameter(parameter, out object obj);
-            return obj as string;
+            return obj;
         }
 
         protected override void Update()

@@ -48,24 +48,25 @@ namespace Iviz.Displays
 
         void OnBoundaryChanged(in NativeArray<Vector2> boundary)
         {
-            if (!ARPlaneMeshGenerators.GenerateMesh(mesh, new Pose(transform.localPosition, transform.localRotation),
-                boundary))
+            if (!ARPlaneMeshGenerators.GenerateMesh(mesh, transform.AsLocalPose(), boundary))
             {
                 return;
             }
 
+            Vector3 Project(in Vector2 v) => new Vector3(v.x, 0, v.y);
+            
             Vector3 a, b;
             List<LineWithColor> lineArray = new List<LineWithColor>();
             for (int i = 0; i < boundary.Length - 1; ++i)
             {
                 a = boundary[i];
                 b = boundary[i + 1];
-                lineArray.Add(new LineWithColor(new Vector3(a.x, 0, a.y), new Vector3(b.x, 0, b.y)));
+                lineArray.Add(new LineWithColor(Project(a), Project(b)));
             }
 
             a = boundary[boundary.Length - 1];
             b = boundary[0];
-            lineArray.Add(new LineWithColor(new Vector3(a.x, 0, a.y), new Vector3(b.x, 0, b.y)));
+            lineArray.Add(new LineWithColor(Project(a), Project(b)));
 
             lines.LinesWithColor = lineArray;
             lines.Visible = true;
@@ -73,7 +74,7 @@ namespace Iviz.Displays
         }
 
         float? pulseStart;
-        const float pulseLength = 0.25f;
+        const float PulseLength = 0.25f;
 
         void Update()
         {
@@ -91,20 +92,22 @@ namespace Iviz.Displays
                 return;
             }
 
-            if (pulseStart != null)
+            if (pulseStart == null)
             {
-                float delta = Time.time - pulseStart.Value;
-                if (delta > pulseLength)
-                {
-                    pulseStart = null;
-                    lines.Visible = false;
-                    return;
-                }
-
-                float alpha = 1 - delta / pulseLength;
-                Color color = new Color(boundaryColor.r, boundaryColor.g, boundaryColor.b, alpha);
-                lines.Tint = color;
+                return;
             }
+            
+            float delta = Time.time - pulseStart.Value;
+            if (delta > PulseLength)
+            {
+                pulseStart = null;
+                lines.Visible = false;
+                return;
+            }
+
+            float alpha = 1 - delta / PulseLength;
+            Color color = new Color(boundaryColor.r, boundaryColor.g, boundaryColor.b, alpha);
+            lines.Tint = color;
         }
     }
 }

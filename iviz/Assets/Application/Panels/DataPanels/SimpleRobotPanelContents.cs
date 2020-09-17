@@ -1,4 +1,6 @@
-﻿namespace Iviz.App
+﻿using UnityEngine;
+
+namespace Iviz.App
 {
     /// <summary>
     /// <see cref="SimpleRobotModuleData"/> 
@@ -9,6 +11,7 @@
         public TrashButtonWidget CloseButton { get; private set; }
         public ToggleButtonWidget HideButton { get; private set; }
         public FrameWidget Frame { get; private set; }
+        public DataLabelWidget Description { get; private set; }
         public InputFieldWithHintsWidget SourceParam { get; private set; }
         public ToggleWidget AttachToTf { get; private set; }
         public InputFieldWidget FramePrefix { get; private set; }
@@ -23,6 +26,7 @@
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("Robot");
             Frame = p.AddFrame();
+            Description = p.AddDataLabel("<b>No Robot Loaded</b>").SetAlignment(TextAnchor.MiddleCenter).SetHasRichText(true);
             SourceParam = p.AddInputFieldWithHints("Source Parameter").SetPlaceholder("<none>");
             AttachToTf = p.AddToggle("Attach to TF Frames");
             FramePrefix = p.AddInputField("TF Frame Prefix").SetPlaceholder("<none>");

@@ -6,7 +6,7 @@ namespace Iviz.App
 {
     public class DataLabelWidget : MonoBehaviour, IWidget
     {
-        public Text label;
+        [SerializeField] Text label = null;
         bool interactable = true;
 
         public string Label
@@ -36,6 +36,11 @@ namespace Iviz.App
             }
         }
 
+        public TextAnchor Alignment
+        {
+            get => label.alignment;
+            set => label.alignment = value;
+        }
 
         public DataLabelWidget SetLabel(string f)
         {
@@ -50,6 +55,12 @@ namespace Iviz.App
         public DataLabelWidget SetHasRichText(bool b)
         {
             HasRichText = b;
+            return this;
+        }
+        
+        public DataLabelWidget SetAlignment(TextAnchor t)
+        {
+            Alignment = t;
             return this;
         }
     }
