@@ -1,79 +1,38 @@
 ﻿using System;
-using System.Threading;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Xml;
+using Assimp;
+using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
-using Iviz.Roslib;
+using Iviz.Msgs.SensorMsgs;
+
 
 namespace Iviz.ModelService
 {
-    public static class Program
+    public class Service
     {
-        static void Main()
-        {
-            Uri masterUri = RosClient.EnvironmentMasterUri;
-            if (masterUri is null)
-            {
-                Console.Error.WriteLine("EE Fatal error: Failed to determine master uri");
-                return;
-            }
+        public const string ModelServiceName = "/iviz/get_model_resource";
+        public const string TextureServiceName = "/iviz/get_model_texture";
+        public const string FileServiceName = "/iviz/get_file";
+        public const string SdfServiceName = "/iviz/get_sdf";
 
-            using RosClient client = new RosClient(masterUri, "/iviz_model_loader");
-            
-            Service service = new Service();
-            
-            if (service.NumPackages == 0)
-            {
-                Console.WriteLine("EE Empty list of package paths. Nothing to do.");
-                return;
-            }
+        readonly AssimpContext importer = new AssimpContext();
+        readonly Dictionary<string, List<string>> packagePaths = new Dictionary<string, List<string>>();
 
-            client.AdvertiseService<GetModelResource>(Service.ModelServiceName, service.ModelCallback);
-            client.AdvertiseService<GetModelTexture>(Service.TextureServiceName, service.TextureCallback);
-            client.AdvertiseService<GetFile>(Service.FileServiceName, service.FileCallback);
-            client.AdvertiseService<GetSdf>(Service.SdfServiceName, service.SdfCallback);
+        public int NumPackages => packagePaths.Count;
 
-            WaitForCancel();
-        }
-
-        static void WaitForCancel()
-        {
-            object o = new object();
-            Console.CancelKeyPress += delegate
-            {
-                lock (o) Monitor.Pulse(o);
-            };
-            lock (o) Monitor.Wait(o);
-        }        
+        public Action<object> Log { get; set; } = Console.WriteLine;
+        public Action<object> LogError { get; set; } = Console.Error.WriteLine;
         
-    }
-
-    /*
-    public static class Program
-    {
-        const string ModelServiceName = "/iviz/get_model_resource";
-        const string TextureServiceName = "/iviz/get_model_texture";
-        const string FileServiceName = "/iviz/get_file";
-        const string SdfServiceName = "/iviz/get_sdf";
-
-        static readonly AssimpContext Importer = new AssimpContext();
-
-        static readonly Dictionary<string, List<string>> PackagePaths = new Dictionary<string, List<string>>();
-
-        static void Main()
+        public Service()
         {
-            Uri masterUri = RosClient.EnvironmentMasterUri;
-            if (masterUri is null)
-            {
-                Console.Error.WriteLine("EE Fatal error: Failed to determine master uri");
-                return;
-            }
-
-            using RosClient client = new RosClient(masterUri, "/iviz_model_loader");
-
-            Console.WriteLine("** Used package paths:");
+            Log("** Used package paths:");
             string packagePath = Environment.GetEnvironmentVariable("ROS_PACKAGE_PATH");
             if (packagePath is null)
             {
-                Console.Error.WriteLine("EE Cannot retrieve environment variable ROS_PACKAGE_PATH");
+                LogError("EE Cannot retrieve environment variable ROS_PACKAGE_PATH");
             }
             else
             {
@@ -82,7 +41,7 @@ namespace Iviz.ModelService
                 {
                     if (!Directory.Exists(path))
                     {
-                        Console.WriteLine("** Ignoring '" + path + "'");
+                        Log("** Ignoring '" + path + "'");
                         continue;
                     }
                     
@@ -90,21 +49,13 @@ namespace Iviz.ModelService
                 }
             }
 
-            if (PackagePaths.Count == 0)
+            if (packagePaths.Count == 0)
             {
-                Console.WriteLine("EE Empty list of package paths. Nothing to do.");
-                return;
+                Log("EE Empty list of package paths. Nothing to do.");
             }
-
-            client.AdvertiseService<GetModelResource>(ModelServiceName, ModelCallback);
-            client.AdvertiseService<GetModelTexture>(TextureServiceName, TextureCallback);
-            client.AdvertiseService<GetFile>(FileServiceName, FileCallback);
-            client.AdvertiseService<GetSdf>(SdfServiceName, SdfCallback);
-
-            WaitForCancel();
         }
 
-        static void CheckPath(string folderName, string path)
+        void CheckPath(string folderName, string path)
         {
             if (File.Exists(path + "/package.xml"))
             {
@@ -119,41 +70,31 @@ namespace Iviz.ModelService
             }
         }
 
-        static void AddPath(string package, string path)
+        void AddPath(string package, string path)
         {
-            if (!PackagePaths.TryGetValue(package, out List<string> paths))
+            if (!packagePaths.TryGetValue(package, out List<string> paths))
             {
                 paths = new List<string>();
-                PackagePaths[package] = paths;
+                packagePaths[package] = paths;
             }
 
             paths.Add(path);
-            Console.WriteLine("++ " + package);
+            Log("++ " + package);
         }
 
-        static void WaitForCancel()
-        {
-            object o = new object();
-            Console.CancelKeyPress += delegate
-            {
-                lock (o) Monitor.Pulse(o);
-            };
-            lock (o) Monitor.Wait(o);
-        }
-
-        static string ResolvePath(Uri uri)
+        string ResolvePath(Uri uri)
         {
             return ResolvePath(uri, out string _);
         }
 
-        static string ResolvePath(Uri uri, out string outPackagePath)
+        string ResolvePath(Uri uri, out string outPackagePath)
         {
             outPackagePath = null;
 
             string package = uri.Host;
-            if (!PackagePaths.TryGetValue(package, out List<string> paths))
+            if (!packagePaths.TryGetValue(package, out List<string> paths))
             {
-                Console.Error.WriteLine("EE Failed to find package '" + package + "'.");
+                LogError("EE Failed to find package '" + package + "'.");
                 return null;
             }
 
@@ -174,16 +115,21 @@ namespace Iviz.ModelService
                     return path;
                 }
 
-                Console.Error.WriteLine("EE Rejecting resource request '" + uri + "' for path traversal.");
+                LogError("EE Rejecting resource request '" + uri + "' for path traversal.");
                 return null;
             }
 
-            Console.Error.WriteLine("EE Failed to find resource '" + uri + "'.");
+            LogError("EE Failed to find resource '" + uri + "'.");
             return null;
         }
 
-        static void ModelCallback(GetModelResource msg)
+        public void ModelCallback(GetModelResource msg)
         {
+            if (msg == null)
+            {
+                throw new ArgumentNullException(nameof(msg));
+            }
+            
             bool success = Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out Uri uri);
             if (!success)
             {
@@ -207,7 +153,7 @@ namespace Iviz.ModelService
                 return;
             }
  
-            Console.WriteLine("** Requesting " + modelPath);
+            Log("** Requesting " + modelPath);
 
             Model model;
             try
@@ -217,8 +163,8 @@ namespace Iviz.ModelService
             }
             catch (AssimpException e)
             {
-                Console.Error.WriteLine("EE Assimp exception loading '" + modelPath + "':");
-                Console.Error.WriteLine(e);
+                LogError("EE Assimp exception loading '" + modelPath + "':");
+                LogError(e);
 
                 msg.Response.Success = false;
                 msg.Response.Message = "Failed to load model";
@@ -229,11 +175,16 @@ namespace Iviz.ModelService
             msg.Response.Message = "";
             msg.Response.Model = model;
 
-            Console.WriteLine(">> " + uri);
+            Log(">> " + uri);
         }
 
-        static void TextureCallback(GetModelTexture msg)
+        public void TextureCallback(GetModelTexture msg)
         {
+            if (msg == null)
+            {
+                throw new ArgumentNullException(nameof(msg));
+            }
+            
             // TODO: force conversion to either png or jpg
 
             bool success = Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out Uri uri);
@@ -267,7 +218,7 @@ namespace Iviz.ModelService
             }
             catch (IOException e)
             {
-                Console.Error.WriteLine("EE Failed to read '" + texturePath + "': " + e.Message);
+                LogError("EE Failed to read '" + texturePath + "': " + e.Message);
                 msg.Response.Success = false;
                 msg.Response.Message = e.Message;
                 return;
@@ -277,15 +228,14 @@ namespace Iviz.ModelService
             msg.Response.Message = "";
             msg.Response.Image = new CompressedImage
             {
-                Format = Path.GetExtension(texturePath).Replace(".", "", false, BuiltIns.Culture),
+                Format = Path.GetExtension(texturePath).Replace(".", ""),
                 Data = data
             };
 
-            Console.WriteLine(">> " + uri);
+            Log(">> " + uri);
         }
 
-
-        static Model LoadModel(string fileName)
+        Model LoadModel(string fileName)
         {
             string orientationHint = "";
             if (fileName.EndsWith(".DAE", true, BuiltIns.Culture))
@@ -299,7 +249,7 @@ namespace Iviz.ModelService
                 }
             }
 
-            Assimp.Scene scene = Importer.ImportFile(fileName,
+            Assimp.Scene scene = importer.ImportFile(fileName,
                 PostProcessPreset.TargetRealTimeMaximumQuality | PostProcessPreset.ConvertToLeftHanded);
             Model msg = new Model
             {
@@ -310,7 +260,7 @@ namespace Iviz.ModelService
             List<Triangle> faces = new List<Triangle>();
             for (int i = 0; i < scene.MeshCount; i++)
             {
-                Mesh srcMesh = scene.Meshes[i];
+                Assimp.Mesh srcMesh = scene.Meshes[i];
 
                 faces.Clear();
                 for (int j = 0; j < srcMesh.FaceCount; j++)
@@ -361,7 +311,7 @@ namespace Iviz.ModelService
             msg.Materials = new Msgs.IvizMsgs.Material[scene.MaterialCount];
             for (int i = 0; i < scene.MaterialCount; i++)
             {
-                Material srcMaterial = scene.Materials[i];
+                Assimp.Material srcMaterial = scene.Materials[i];
                 msg.Materials[i] = new Msgs.IvizMsgs.Material
                 (
                     Name: srcMaterial.Name ?? "[material]",
@@ -376,14 +326,14 @@ namespace Iviz.ModelService
             }
 
             List<Msgs.IvizMsgs.Node> nodes = new List<Msgs.IvizMsgs.Node>();
-            ProcessNode(scene.RootNode, nodes, new Dictionary<Node, int>());
+            ProcessNode(scene.RootNode, nodes, new Dictionary<Assimp.Node, int>());
 
             msg.Nodes = nodes.ToArray();
 
             return msg;
         }
 
-        static void ProcessNode(Node node, List<Msgs.IvizMsgs.Node> nodes, Dictionary<Node, int> ids)
+        static void ProcessNode(Assimp.Node node, List<Msgs.IvizMsgs.Node> nodes, Dictionary<Assimp.Node, int> ids)
         {
             if (node.Children.Count == 0 && node.MeshIndices.Count == 0)
             {
@@ -400,7 +350,7 @@ namespace Iviz.ModelService
                 node.MeshIndices.ToArray()
             ));
 
-            foreach (Node child in node.Children)
+            foreach (Assimp.Node child in node.Children)
             {
                 ProcessNode(child, nodes, ids);
             }
@@ -438,8 +388,13 @@ namespace Iviz.ModelService
             });
         }
         
-        static void FileCallback(GetFile msg)
+        public void FileCallback(GetFile msg)
         {
+            if (msg == null)
+            {
+                throw new ArgumentNullException(nameof(msg));
+            }
+            
             bool success = Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out Uri uri);
             if (!success)
             {
@@ -461,7 +416,7 @@ namespace Iviz.ModelService
             }
             catch (IOException e)
             {
-                Console.Error.WriteLine("EE Failed to read '" + filePath + "': " + e.Message);
+                LogError("EE Failed to read '" + filePath + "': " + e.Message);
                 msg.Response.Message = e.Message;
                 return;
             }
@@ -470,11 +425,16 @@ namespace Iviz.ModelService
             msg.Response.Message = "";
             msg.Response.Bytes = data;
 
-            Console.WriteLine(">> " + uri);
+            Log(">> " + uri);
         }
 
-        static void SdfCallback(GetSdf msg)
+        public void SdfCallback(GetSdf msg)
         {
+            if (msg == null)
+            {
+                throw new ArgumentNullException(nameof(msg));
+            }
+            
             bool success = Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out Uri uri);
             if (!success)
             {
@@ -491,7 +451,7 @@ namespace Iviz.ModelService
             string modelPath = ResolvePath(uri, out string packagePath);
             if (string.IsNullOrWhiteSpace(modelPath))
             {
-                Console.Error.WriteLine("EE Failed to find resource path for '" + modelPath + "'");
+                LogError("EE Failed to find resource path for '" + modelPath + "'");
                 msg.Response.Message = "Failed to find resource path";
                 return;
             }
@@ -503,22 +463,21 @@ namespace Iviz.ModelService
             }
             catch (IOException e)
             {
-                Console.Error.WriteLine("EE Failed to read '" + modelPath + "': " + e.Message);
+                LogError("EE Failed to read '" + modelPath + "': " + e.Message);
                 msg.Response.Message = e.Message;
                 return;
             }
 
-            Console.WriteLine("package path: " + packagePath);
-            Dictionary<string, string> modelPaths = SdfFile.CreateModelPaths(packagePath);
+            Dictionary<string, string> modelPaths = Sdf.SdfFile.CreateModelPaths(packagePath);
 
-            SdfFile file;
+            Sdf.SdfFile file;
             try
             {
-                file = SdfFile.Create(data).ResolveIncludes(modelPaths);
+                file = Sdf.SdfFile.Create(data).ResolveIncludes(modelPaths);
             }
-            catch (Exception e) when (e is IOException || e is MalformedSdfException)
+            catch (Exception e) when (e is IOException || e is Sdf.MalformedSdfException)
             {
-                Console.Error.WriteLine("EE Failed to parse '" + modelPath + "': " + e.Message);
+                LogError("EE Failed to parse '" + modelPath + "': " + e.Message);
                 msg.Response.Message = e.Message;
                 return;
             }
@@ -535,7 +494,7 @@ namespace Iviz.ModelService
             };
         }
 
-        static void ResolveIncludes(SdfFile file, ICollection<Include> includes)
+        static void ResolveIncludes(Sdf.SdfFile file, ICollection<Include> includes)
         {
             if (file.Worlds.Count != 0)
             {
@@ -549,7 +508,7 @@ namespace Iviz.ModelService
             }
         }
 
-        static void ResolveIncludes(World world, ICollection<Include> includes)
+        static void ResolveIncludes(Sdf.World world, ICollection<Include> includes)
         {
             foreach (Sdf.Model model in world.Models)
             {
@@ -566,10 +525,10 @@ namespace Iviz.ModelService
             
             Matrix4x4 pose = Multiply(inPose, Multiply(ToPose(model.IncludePose), ToPose(model.Pose)));
 
-            foreach (Link link in model.Links)
+            foreach (Sdf.Link link in model.Links)
             {
                 Matrix4x4 linkPose = Multiply(pose, ToPose(link.Pose));
-                foreach (Visual visual in link.Visuals)
+                foreach (Sdf.Visual visual in link.Visuals)
                 {
                     ResolveIncludes(visual, includes, linkPose);
                 }
@@ -581,7 +540,7 @@ namespace Iviz.ModelService
             }
         }
 
-        static void ResolveIncludes(Visual visual, ICollection<Include> includes, in Matrix4x4 inPose)
+        static void ResolveIncludes(Sdf.Visual visual, ICollection<Include> includes, in Matrix4x4 inPose)
         {
             if (visual.Geometry.Empty != null)
             {
@@ -666,7 +625,7 @@ namespace Iviz.ModelService
             }
         }
 
-        static Matrix4x4 ToPose(Pose pose)
+        static Matrix4x4 ToPose(Sdf.Pose pose)
         {
             if (pose is null)
             {
@@ -702,5 +661,4 @@ namespace Iviz.ModelService
             return new Color((byte) r, (byte) g, (byte) b, (byte) a);
         }
     }
-    */
 }
