@@ -12,7 +12,7 @@ namespace Iviz.ModelService
             Uri masterUri = RosClient.EnvironmentMasterUri;
             if (masterUri is null)
             {
-                Console.Error.WriteLine("EE Fatal error: Failed to determine master uri");
+                Console.Error.WriteLine("EE Fatal error: Failed to determine master uri. Is ROS_MASTER_URI set?");
                 return;
             }
 
