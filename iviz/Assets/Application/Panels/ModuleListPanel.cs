@@ -470,14 +470,14 @@ namespace Iviz.App
             return dialogData;
         }
 
-        const float yOffset = 5;
+        const float yOffset = 2;
 
         void CreateButtonObject(ModuleData moduleData)
         {
             GameObject buttonObject = ResourcePool.GetOrCreate(Resource.Widgets.DisplayButton, contentObject.transform, false);
 
             int size = buttons.Count();
-            float y = yOffset + size * buttonHeight;
+            float y = yOffset + size * (buttonHeight + yOffset);
 
             ((RectTransform)buttonObject.transform).anchoredPosition = new Vector2(0, -y);
 
@@ -533,7 +533,7 @@ namespace Iviz.App
                 float y = yOffset + i * buttonHeight;
                 ((RectTransform)buttonObject.transform).anchoredPosition = new Vector3(0, -y);
             }
-            ((RectTransform)contentObject.transform).sizeDelta = new Vector2(0, 2 * yOffset + i * buttonHeight);
+            ((RectTransform)contentObject.transform).sizeDelta = new Vector2(0, 2 * yOffset + (i + yOffset) * buttonHeight);
         }
 
         public const int ModuleDataCaptionWidth = 200;

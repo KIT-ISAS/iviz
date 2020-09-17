@@ -223,7 +223,7 @@ namespace Iviz.Controllers
             rootMarker.name = "[InteractiveController for /]";
             rootMarker.TargetTransform = RootFrame.transform;
             rootMarker.InteractionMode = InteractiveControl.InteractionModeType.Disabled;
-            rootMarker.transform.localScale = 0.3f * Vector3.one;
+            rootMarker.BaseScale = 0.3f;
 
             Publisher = new RosSender<tfMessage_v2>(DefaultTopic);
         }
@@ -450,15 +450,15 @@ namespace Iviz.Controllers
             if (arEnabled && viewEnabled)
             {
                 RootMarker.InteractionMode = InteractiveControl.InteractionModeType.Frame;
-                MapFrame.ColliderEnabled = false;
+                //MapFrame.ColliderEnabled = false;
                 MapFrame.Selected = false;
-                MapFrame.Alpha = 0.75f;
+                //MapFrame.Alpha = 0.75f;
             }
             else
             {
                 RootMarker.InteractionMode = InteractiveControl.InteractionModeType.Disabled;
-                MapFrame.ColliderEnabled = !Settings.IsHololens;
-                MapFrame.Alpha = 1;
+                //MapFrame.ColliderEnabled = !Settings.IsHololens;
+                //MapFrame.Alpha = 1;
             }
         }
     }

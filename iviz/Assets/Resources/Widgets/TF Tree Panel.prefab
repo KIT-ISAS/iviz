@@ -1602,7 +1602,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: c7aee36b57c73924db63395f7f086121, type: 3}
+    m_Font: {fileID: 12800000, guid: f14f6aaae776743cfab890a5b6af14ca, type: 3}
     m_FontSize: 12
     m_FontStyle: 0
     m_BestFit: 0
@@ -1865,7 +1865,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 07aef5eff1792cb478e0d50020d3e011, type: 3}
+    m_Font: {fileID: 12800000, guid: ef36bb8981aae42299b70d71c2f27488, type: 3}
     m_FontSize: 12
     m_FontStyle: 0
     m_BestFit: 0
@@ -2070,7 +2070,6 @@ MonoBehaviour:
   close: {fileID: 183655255588486700}
   tfLog: {fileID: 1936497682224437971}
   showOnlyUsed: {fileID: 7323267495905071521}
-  resetAll: {fileID: 6318847587917542908}
 --- !u!1 &7291371499636950886
 GameObject:
   m_ObjectHideFlags: 0
@@ -2136,7 +2135,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 07aef5eff1792cb478e0d50020d3e011, type: 3}
+    m_Font: {fileID: 12800000, guid: ef36bb8981aae42299b70d71c2f27488, type: 3}
     m_FontSize: 18
     m_FontStyle: 1
     m_BestFit: 0
@@ -2214,7 +2213,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 07aef5eff1792cb478e0d50020d3e011, type: 3}
+    m_Font: {fileID: 12800000, guid: ef36bb8981aae42299b70d71c2f27488, type: 3}
     m_FontSize: 12
     m_FontStyle: 0
     m_BestFit: 0
@@ -2294,7 +2293,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 07aef5eff1792cb478e0d50020d3e011, type: 3}
+    m_Font: {fileID: 12800000, guid: ef36bb8981aae42299b70d71c2f27488, type: 3}
     m_FontSize: 12
     m_FontStyle: 0
     m_BestFit: 0
@@ -2318,7 +2317,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_FontData.m_Font
       value: 
-      objectReference: {fileID: 12800000, guid: 07aef5eff1792cb478e0d50020d3e011,
+      objectReference: {fileID: 12800000, guid: ef36bb8981aae42299b70d71c2f27488,
         type: 3}
     - target: {fileID: 3835117570909620686, guid: ee3c7e16ede041b4887621df43318a22,
         type: 3}
@@ -2610,18 +2609,6 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 7229438402585058924}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &6318847587917542908 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3739414356648979344, guid: d249c7241f2b5f54fbfc9489a73c5455,
-    type: 3}
-  m_PrefabInstance: {fileID: 7229438402585058924}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2d948a05eda04e46bedb11eec1aa15e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &7291371499217446496
 PrefabInstance:
   m_ObjectHideFlags: 0

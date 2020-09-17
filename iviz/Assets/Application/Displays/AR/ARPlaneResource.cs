@@ -26,6 +26,7 @@ namespace Iviz.Displays
             lines = Resource.Displays.GetOrCreate<LineResource>(transform);
             lines.Visible = false;
             lines.ElementSize = 0.005f;
+            lines.Layer = gameObject.layer;
 
             MeshFilter meshFilter = GetComponent<MeshFilter>();
             meshFilter.sharedMesh = mesh;

@@ -1,6 +1,7 @@
 ﻿using System;
 using Unity.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Iviz.Displays
 {
@@ -85,21 +86,21 @@ namespace Iviz.Displays
 
         public void Set(int width, int height, int bpp, in ArraySegment<byte> data)
         {
-            if (texture == null)
+            if (Texture == null)
             {
-                texture = new ImageTexture();
+                Texture = new ImageTexture();
             }
 
             switch (bpp)
             {
                 case 1:
-                    texture.Set(width, height, "mono8", data);
+                    Texture.Set(width, height, "mono8", data);
                     break;
                 case 3:
-                    texture.Set(width, height, "rgb8", data);
+                    Texture.Set(width, height, "rgb8", data);
                     break;
                 case 4:
-                    texture.Set(width, height, "rgba8", data);
+                    Texture.Set(width, height, "rgba8", data);
                     break;
                 default:
                     Debug.LogWarning("ImageResource: Set function could not find encoding!");
@@ -110,12 +111,8 @@ namespace Iviz.Displays
         public override void Suspend()
         {
             base.Suspend();
-            
-            if (texture != null)
-            {
-                texture.TextureChanged -= OnTextureChanged;
-                texture = null;
-            }
+
+            Texture = null;
             Offset = Vector3.zero;
             BillboardEnabled = false;
             Scale = 1;
@@ -126,9 +123,14 @@ namespace Iviz.Displays
             billboard.transform.localScale = new Vector3(Width, Height, 1);
         }
 
-        void OnTextureChanged(Texture2D obj)
+        void OnTextureChanged(Texture2D newTexture)
         {
             UpdateSides();
+            if (newTexture != null)
+            {
+                newTexture.wrapMode = TextureWrapMode.Clamp;
+            }
+
             front.GetComponent<MeshRenderer>().sharedMaterial = Texture.Material;
         }
     }
