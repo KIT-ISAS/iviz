@@ -22,7 +22,7 @@ namespace Iviz.Displays
         {
             GameObject mainCamera = TFListener.MainCamera.gameObject;
             transform.LookAt(2 * transform.position - mainCamera.transform.position, Vector3.up);
-            if (UseAbsoluteOffset)
+            if (UseAbsoluteOffset && parent != null)
             {
                 transform.position = parent.position + offset;
             } 

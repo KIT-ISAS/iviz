@@ -436,6 +436,21 @@ namespace Iviz
             }
         }
 
+        public static ArraySegment<T> AsSlice<T>(this T[] ts)
+        {
+            return new ArraySegment<T>(ts);
+        }
+
+        public static ArraySegment<T> AsSlice<T>(this T[] ts, int offset)
+        {
+            return new ArraySegment<T>(ts, offset, ts.Length - offset);
+        }        
+        
+        public static ArraySegment<T> AsSlice<T>(this T[] ts, int offset, int count)
+        {
+            return new ArraySegment<T>(ts, offset, count);
+        }        
+
         static MaterialPropertyBlock propBlock;
         static readonly int ColorPropId = Shader.PropertyToID("_Color");
 

@@ -63,8 +63,8 @@ namespace Iviz.Displays
                 }
             }
 
-            Collider.center = new Vector3(0.5f, 0.5f, (max + min) / 2).Ros2Unity();
-            Collider.size = new Vector3(1, 1, max - min).Ros2Unity().Abs();
+            boxCollider.center = new Vector3(0.5f, 0.5f, (max + min) / 2).Ros2Unity();
+            boxCollider.size = new Vector3(1, 1, max - min).Ros2Unity().Abs();
             IntensityBounds = new Vector2(min, max);
         }
 

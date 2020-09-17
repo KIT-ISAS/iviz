@@ -145,7 +145,7 @@ namespace Iviz.Controllers
             set
             {
                 config.BillboardFollowCamera = value;
-                marker.EnableBillboard = value;
+                marker.BillboardEnabled = value;
             }
         }
 

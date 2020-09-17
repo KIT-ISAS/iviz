@@ -207,8 +207,8 @@ namespace Iviz.Displays
             Vector3 size = new Vector3(posCoeffX, 1, posCoeffY) * maxDepth;
             Vector3 center = new Vector3(0, maxDepth / 2, 0);
 
-            Collider.center = center;
-            Collider.size = size;
+            boxCollider.center = center;
+            boxCollider.size = size;
         }
 
 

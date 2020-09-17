@@ -132,8 +132,8 @@ namespace Iviz.Displays
             }
             pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
             MinMaxJob.CalculateBounds(pointBuffer, Size, out Bounds bounds, out Vector2 span);
-            Collider.size = bounds.size + Scale3;
-            Collider.center = new Vector3(bounds.center.x, bounds.center.y + Collider.size.y / 2, bounds.center.z);
+            boxCollider.size = bounds.size + Scale3;
+            boxCollider.center = new Vector3(bounds.center.x, bounds.center.y + boxCollider.size.y / 2, bounds.center.z);
             IntensityBounds = span;
         }
 
@@ -223,7 +223,7 @@ namespace Iviz.Displays
                 return;
             }
             UpdateTransform();
-            Bounds worldBounds = Collider.bounds;
+            Bounds worldBounds = boxCollider.bounds;
             material.SetVector(PropBoundaryCenter, worldBounds.center);
 
             if (CastShadows && !OcclusionOnlyActive)

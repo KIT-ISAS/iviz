@@ -283,7 +283,7 @@ namespace Iviz.Controllers
 
                     Size = newSize;
                     pointCloud.UseIntensityTexture = !rgbaHint;
-                    pointCloud.PointsWithColor = new ArraySegment<PointWithColor>(pointBuffer, 0, Size);
+                    pointCloud.PointsWithColor = pointBuffer.AsSlice(0, Size);
                     MeasuredIntensityBounds = pointCloud.IntensityBounds;
                     if (ForceMinMax)
                     {

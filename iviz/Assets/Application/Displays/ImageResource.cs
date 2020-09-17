@@ -1,15 +1,18 @@
-﻿using UnityEngine;
+﻿using System;
+using Unity.Collections;
+using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public sealed class ImageResource : MonoBehaviour, IDisplay
+    public sealed class ImageResource : MarkerResource
     {
         [SerializeField] GameObject front = null;
-        //[SerializeField] GameObject back = null;
         [SerializeField] Billboard billboard = null;
         Pose billboardStartPose;
-        BoxCollider Collider;
 
+        public override Vector3 WorldScale => billboard.transform.lossyScale;
+        public override Pose WorldPose => billboard.transform.AsPose();
+        
         ImageTexture texture;
         public ImageTexture Texture
         {
@@ -29,13 +32,13 @@ namespace Iviz.Displays
             }
         }
 
-        public int Layer
+        public override int Layer
         {
             get => billboard.gameObject.layer;
             set => billboard.gameObject.layer = value;
         }
 
-        public bool EnableBillboard
+        public bool BillboardEnabled
         {
             get => billboard.enabled;
             set
@@ -51,20 +54,16 @@ namespace Iviz.Displays
         public Vector3 Offset
         {
             get => billboard.transform.localPosition;
-            set
-            {
-                //Vector3 v = new Vector3(-value.x, value.y, -value.z);
-                billboard.transform.localPosition = value;
-            }
+            set => billboard.transform.localPosition = value;
         }
 
-        [SerializeField] float scale_ = 1;
+        [SerializeField] float scale = 1;
         public float Scale
         {
-            get => scale_;
+            get => scale;
             set
             {
-                scale_ = value;
+                scale = value;
                 UpdateSides();
             }
         }
@@ -75,50 +74,50 @@ namespace Iviz.Displays
 
         public float Height => Width * AspectRatio;
 
-        public string Name => "ImageResource";
-
-        public Bounds Bounds => new Bounds(Collider.center, Collider.size);
-
-        public Bounds WorldBounds => Collider.bounds;
-
-        public Pose WorldPose => billboard.transform.AsPose();
-
-        public Vector3 WorldScale => billboard.transform.lossyScale;
-
-        public bool ColliderEnabled
+        protected override void Awake()
         {
-            get => Collider.enabled;
-            set => Collider.enabled = value;
-        }
-
-        public Transform Parent
-        {
-            get => transform.parent;
-            set => transform.parent = value;
-        }
-
-        public bool Visible
-        {
-            get => gameObject.activeSelf;
-            set => gameObject.SetActive(value);
-        }
-
-        void Awake()
-        {
-            Collider = billboard.GetComponent<BoxCollider>();
+            boxCollider = billboard.GetComponent<BoxCollider>();
+            base.Awake();
+            
             billboard.UseAbsoluteOffset = false;
             billboardStartPose = billboard.transform.AsLocalPose();
         }
 
-        public void Suspend()
+        public void Set(int width, int height, int bpp, in ArraySegment<byte> data)
         {
+            if (texture == null)
+            {
+                texture = new ImageTexture();
+            }
+
+            switch (bpp)
+            {
+                case 1:
+                    texture.Set(width, height, "mono8", data);
+                    break;
+                case 3:
+                    texture.Set(width, height, "rgb8", data);
+                    break;
+                case 4:
+                    texture.Set(width, height, "rgba8", data);
+                    break;
+                default:
+                    Debug.LogWarning("ImageResource: Set function could not find encoding!");
+                    break;
+            }
+        }
+
+        public override void Suspend()
+        {
+            base.Suspend();
+            
             if (texture != null)
             {
                 texture.TextureChanged -= OnTextureChanged;
                 texture = null;
             }
             Offset = Vector3.zero;
-            EnableBillboard = false;
+            BillboardEnabled = false;
             Scale = 1;
         }
 

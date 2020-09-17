@@ -21,12 +21,12 @@ namespace Iviz.Displays
             private set
             {
                 localBounds = value;
-                if (Collider == null)
+                if (boxCollider == null)
                 {
                     return;
                 }
-                Collider.center = localBounds.center;
-                Collider.size = localBounds.size;
+                boxCollider.center = localBounds.center;
+                boxCollider.size = localBounds.size;
             }
         }
 

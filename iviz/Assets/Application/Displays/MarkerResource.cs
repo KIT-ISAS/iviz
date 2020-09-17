@@ -4,10 +4,10 @@ namespace Iviz.Displays
 {
     public abstract class MarkerResource : MonoBehaviour, IDisplay
     {
-        protected BoxCollider Collider;
+        protected BoxCollider boxCollider;
 
-        public Bounds Bounds => Collider == null ? new Bounds() : new Bounds(Collider.center, Collider.size);
-        public Bounds WorldBounds => Collider == null ? new Bounds() : Collider.bounds;
+        public Bounds Bounds => boxCollider == null ? new Bounds() : new Bounds(boxCollider.center, boxCollider.size);
+        public Bounds WorldBounds => boxCollider == null ? new Bounds() : boxCollider.bounds;
 
         public virtual string Name
         {
@@ -22,9 +22,9 @@ namespace Iviz.Displays
             set
             {
                 colliderEnabled = value;
-                if (Collider != null)
+                if (boxCollider != null)
                 {
-                    Collider.enabled = value;
+                    boxCollider.enabled = value;
                 }
             }
         }
@@ -41,9 +41,9 @@ namespace Iviz.Displays
             set => gameObject.SetActive(value);
         }
 
-        public Vector3 WorldScale => transform.lossyScale;
+        public virtual Vector3 WorldScale => transform.lossyScale;
 
-        public Pose WorldPose => transform.AsPose();
+        public virtual Pose WorldPose => transform.AsPose();
 
         public virtual int Layer
         {
@@ -53,7 +53,11 @@ namespace Iviz.Displays
 
         protected virtual void Awake()
         {
-            Collider = GetComponent<BoxCollider>();
+            if (boxCollider == null)
+            {
+                boxCollider = GetComponent<BoxCollider>();
+            }
+
             ColliderEnabled = ColliderEnabled;
         }
 

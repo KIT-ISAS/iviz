@@ -137,8 +137,8 @@ namespace Iviz.Displays
 
             lineComputeBuffer.SetData(lineBuffer, 0, 0, Size);
             MinMaxJob.CalculateBounds(lineBuffer, Size, out Bounds bounds, out Vector2 span);
-            Collider.center = bounds.center;
-            Collider.size = bounds.size + ElementSize * Vector3.one;
+            boxCollider.center = bounds.center;
+            boxCollider.size = bounds.size + ElementSize * Vector3.one;
             IntensityBounds = span;
         }
 
@@ -168,7 +168,7 @@ namespace Iviz.Displays
             Camera mainCamera = TFListener.MainCamera;
             material.SetVector(PropFront, transform.InverseTransformPoint(mainCamera.transform.position));
 
-            Bounds worldBounds = Collider.bounds;
+            Bounds worldBounds = boxCollider.bounds;
             Graphics.DrawProcedural(material, worldBounds, MeshTopology.Quads, 2 * 4, Size);
         }
 

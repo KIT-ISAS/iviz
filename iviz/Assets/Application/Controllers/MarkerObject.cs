@@ -4,6 +4,7 @@ using System;
 using UnityEngine.EventSystems;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Displays;
+using Iviz.Msgs.StdMsgs;
 using Iviz.Resources;
 
 #if UNITY_WSA
@@ -28,6 +29,7 @@ namespace Iviz.Controllers
         TriangleList = Marker.TRIANGLE_LIST,
 
         Text = 100,
+        Image = 101,
     }
 
     public enum MouseEventType
@@ -355,6 +357,47 @@ namespace Iviz.Controllers
                     }
                     transform.localScale = msg.Scale.Ros2Unity().Abs();
                     break;
+                case MarkerType.Image:
+                    ImageResource image = (ImageResource)resource;
+                    int count = msg.Colors.Length;
+                    int width = (int)msg.Scale.Z;
+                    int height = count / width;
+                    if (width <= 0 || height <= 0 ||  width * height != count)
+                    {
+                        Debug.LogWarning("MarkerObject: Invalid image dimensions");
+                    }
+                    else
+                    {
+                        bool hasAlpha = msg.Colors.Any(color => color.A < 1);
+                        int j = 0;
+                        if (hasAlpha)
+                        {
+                            byte[] data = new byte[count * 3];
+                            foreach (ColorRGBA color in msg.Colors)
+                            {
+                                Color32 color32 = new Color(color.R, color.G, color.B);
+                                data[j++] = color32.r;
+                                data[j++] = color32.g;
+                                data[j++] = color32.b;
+                            }
+                            image.Set(width, height, 3, data.AsSlice());
+                        }
+                        else
+                        {
+                            byte[] data = new byte[count * 4];
+                            foreach (ColorRGBA color in msg.Colors)
+                            {
+                                Color32 color32 = new Color(color.R, color.G, color.B);
+                                data[j++] = color32.r;
+                                data[j++] = color32.g;
+                                data[j++] = color32.b;                                
+                                data[j++] = color32.a;                                
+                            }
+                            image.Set(width, height, 4, data.AsSlice());
+                        }
+                    }
+                    transform.localScale = msg.Scale.Ros2Unity().Abs();
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -405,6 +448,8 @@ namespace Iviz.Controllers
                     return Resource.Displays.PointList;
                 case MarkerType.TriangleList:
                     return Resource.Displays.MeshTriangles;
+                case MarkerType.Image:
+                    return Resource.Displays.Image;
                 default:
                     return null;
             }

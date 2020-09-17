@@ -263,7 +263,7 @@ namespace Iviz.Displays
             interiorObject.transform.localScale = new Vector3(totalSize, totalSize, interiorHeight);
             interiorObject.transform.localPosition = new Vector3(0, 0, interiorHeight / 2);
 
-            Collider.size = new Vector3(totalSize, totalSize, interiorHeight);
+            boxCollider.size = new Vector3(totalSize, totalSize, interiorHeight);
 
 
             int size = NumberOfGridCells / 10;
