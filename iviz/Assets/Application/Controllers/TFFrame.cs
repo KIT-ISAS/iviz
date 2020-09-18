@@ -19,6 +19,7 @@ namespace Iviz.Controllers
 
         GameObject labelObject;
         TextMesh labelObjectText;
+        Billboard labelObjectBillboard;
         LineConnector parentConnector;
         AxisFrameResource axis;
 
@@ -143,33 +144,8 @@ namespace Iviz.Controllers
                 visible = value;
                 axis.Visible = (value || ForceVisible) && !ForceInvisible;
                 TrailVisible = TrailVisible;
-                //AnchorVisible = AnchorVisible;
             }
         }
-
-        /*
-        bool anchorVisible;
-
-        bool AnchorVisible
-        {
-            get => anchorVisible;
-            set
-            {
-                anchorVisible = value;
-                if (value && anchor == null)
-                {
-                    anchor = ResourcePool.GetOrCreate<AnchorLineResource>(
-                        Resource.Displays.AnchorLine,
-                        TFListener.UnityFrame?.transform);
-                }
-
-                if (anchor != null)
-                {
-                    anchor.Visible = value && (Visible || ForceVisible);
-                }
-            }
-        }
-        */
 
         bool labelVisible;
 
@@ -202,6 +178,7 @@ namespace Iviz.Controllers
             {
                 axis.AxisLength = value;
                 parentConnector.LineWidth = AxisLength / 20;
+                labelObjectBillboard.offset = 2 * AxisLength * Vector3.up;
             }
         }
 
@@ -360,6 +337,8 @@ namespace Iviz.Controllers
             labelObject.gameObject.SetActive(false);
             labelObjectText = labelObject.GetComponent<TextMesh>();
             labelObject.name = "[Label]";
+            labelObject.transform.localScale = 0.5f * Vector3.one;
+            labelObjectBillboard = labelObject.GetComponent<Billboard>();
 
             parentConnector = ResourcePool.GetOrCreate(Resource.Displays.LineConnector, transform)
                 .GetComponent<LineConnector>();
@@ -396,9 +375,6 @@ namespace Iviz.Controllers
             trail.TimeWindowInMs = 5000;
             trail.Color = Color.yellow;
             TrailVisible = false;
-
-            //anchor = ResourcePool.GetOrCreate<AnchorLine>(Resource.Displays.AnchorLine, TFListener.UnityFrame?.transform);
-            //anchor.Visible = false;
         }
 
         public void SplitForRecycle()
@@ -422,16 +398,6 @@ namespace Iviz.Controllers
             axis.Suspend();
             trail.Suspend();
             TrailVisible = false;
-
-            /*
-            if (anchor == null)
-            {
-                return;
-            }
-
-            anchor.Visible = false;
-            anchor.Name = "[Anchor:In Trash]";
-            */
         }
 
         public Vector3? UpdateAnchor(bool forceRebuild = false)

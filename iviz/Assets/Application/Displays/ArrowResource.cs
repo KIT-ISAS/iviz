@@ -14,11 +14,11 @@ namespace Iviz.Displays
             Set(Vector3.zero, Vector3.zero);
         }
 
-        public void Set(in Vector3 a, in Vector3 b)
+        public void Set(in Vector3 a, in Vector3 b, float? overrideScaleYZ = null)
         {
             Vector3 diff = (a - b) * Scale; // arrow model is flipped
             float scaleX = diff.magnitude;
-            float scaleYZ = Mathf.Min(diff.magnitude, MaxArrowWidth);
+            float scaleYZ = overrideScaleYZ ?? Mathf.Min(diff.magnitude, MaxArrowWidth);
 
             Transform mTransform = transform;
             mTransform.localScale = new Vector3(scaleX, scaleYZ, scaleYZ);

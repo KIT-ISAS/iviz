@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="RobotPanelContents"/> 
+    /// <see cref="SimpleRobotPanelContents"/> 
     /// </summary>
 
     public sealed class SimpleRobotModuleData : ModuleData
@@ -42,7 +42,8 @@ namespace Iviz.App
             {
                 return;
             }
-            robot.SourceParameter = robot.SourceParameter;;
+            robot.SourceParameter = robot.SourceParameter;
+            panel.Description.Label = robot.Description;
             UpdateModuleButton();
         }
 
@@ -57,6 +58,7 @@ namespace Iviz.App
         {
             panel.Frame.Owner = robot;
             panel.SourceParam.Value = robot.SourceParameter;
+            panel.Description.Label = robot.Description;
             panel.SourceParam.Hints =
                 ConnectionManager.GetSystemParameterList().Where(x => x.HasSuffix(ParamSuffix));
             
@@ -96,6 +98,7 @@ namespace Iviz.App
             panel.SourceParam.EndEdit += f =>
             {
                 robot.SourceParameter = f;
+                panel.Description.Label = robot.Description;
                 UpdateModuleButton();
             };
             panel.AttachToTf.ValueChanged += f =>
@@ -127,7 +130,7 @@ namespace Iviz.App
         {
             base.UpdatePanel();
             panel.SourceParam.Hints =
-                ConnectionManager.GetSystemParameterList().Where(x => x.HasSuffix("_description"));
+                ConnectionManager.GetSystemParameterList().Where(x => x.HasSuffix(ParamSuffix));
         }
 
         protected override void UpdateModuleButton()

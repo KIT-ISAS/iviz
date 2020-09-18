@@ -26,7 +26,7 @@ namespace Iviz.Displays
             set => textMesh.color = value;
         }
         
-        public bool EnableBillboard
+        public bool BillboardEnabled
         {
             get => billboard.enabled;
             set => billboard.enabled = value;

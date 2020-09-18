@@ -22,21 +22,21 @@ namespace Iviz.Displays
             MoveRotate3D
         }
 
-        [SerializeField] MeshMarkerResource arrowPX = null;
-        [SerializeField] MeshMarkerResource arrowMX = null;
-        [SerializeField] MeshMarkerResource arrowPY = null;
-        [SerializeField] MeshMarkerResource arrowMY = null;
-        [SerializeField] MeshMarkerResource arrowPZ = null;
-        [SerializeField] MeshMarkerResource arrowMZ = null;
+        [SerializeField] GameObject arrowPx = null;
+        [SerializeField] GameObject arrowMx = null;
+        [SerializeField] GameObject arrowPy = null;
+        [SerializeField] GameObject arrowMy = null;
+        [SerializeField] GameObject arrowPz = null;
+        [SerializeField] GameObject arrowMz = null;
 
-        [SerializeField] MeshMarkerResource ringX = null;
-        [SerializeField] MeshMarkerResource ringY = null;
-        [SerializeField] MeshMarkerResource ringZ = null;
+        [SerializeField] GameObject ringX = null;
+        [SerializeField] GameObject ringY = null;
+        [SerializeField] GameObject ringZ = null;
 
-        [SerializeField] MeshMarkerResource ringXPlane = null;
-        [SerializeField] MeshMarkerResource ringZPlane = null;
+        [SerializeField] GameObject ringXPlane = null;
+        [SerializeField] GameObject ringZPlane = null;
 
-        MeshMarkerResource[] allResources;
+        GameObject[] allResources;
 
         public delegate void MovedAction(in Pose pose);
 
@@ -53,7 +53,7 @@ namespace Iviz.Displays
             set
             {
                 targetTransform = value;
-                foreach (MeshMarkerResource resource in allResources)
+                foreach (GameObject resource in allResources)
                 {
                     resource.GetComponent<IDraggable>().TargetTransform = value;
                 }
@@ -65,6 +65,8 @@ namespace Iviz.Displays
             get => gameObject.activeSelf;
             set => gameObject.SetActive(value);
         }
+
+        public float BaseScale { get; set; } = 1.0f;
 
         bool pointsToCamera;
 
@@ -79,18 +81,13 @@ namespace Iviz.Displays
                 }
 
                 pointsToCamera = value;
-                if (value)
+                if (!value) 
                 {
-                    GameThread.LateEveryFrame += RotateToCamera;
-                }
-                else
-                {
-                    GameThread.LateEveryFrame -= RotateToCamera;
                     CameraPivotIsParent = false;
                     transform.localRotation = Quaternion.identity;
                 }
 
-                foreach (MeshMarkerResource resource in allResources)
+                foreach (GameObject resource in allResources)
                 {
                     var draggable = resource.GetComponent<DraggableRotation>();
                     if (draggable != null)
@@ -119,7 +116,7 @@ namespace Iviz.Displays
                     transform.localRotation = Quaternion.identity;
                 }
 
-                foreach (MeshMarkerResource resource in allResources)
+                foreach (GameObject resource in allResources)
                 {
                     var draggable = resource.GetComponent<DraggableRotation>();
                     if (draggable != null)
@@ -154,9 +151,9 @@ namespace Iviz.Displays
             {
                 interactionMode = value;
 
-                foreach (MeshMarkerResource resource in allResources)
+                foreach (GameObject resource in allResources)
                 {
-                    resource.Visible = false;
+                    resource.SetActive(false);
                 }
 
                 switch (InteractionMode)
@@ -164,61 +161,61 @@ namespace Iviz.Displays
                     case InteractionModeType.Disabled:
                         break;
                     case InteractionModeType.MoveAxisX:
-                        arrowPX.Visible = true;
-                        arrowMX.Visible = true;
+                        arrowPx.SetActive(true);
+                        arrowMx.SetActive(true);
                         break;
                     case InteractionModeType.MovePlaneYZ:
-                        arrowPY.Visible = true;
-                        arrowMY.Visible = true;
-                        arrowPZ.Visible = true;
-                        arrowMZ.Visible = true;
-                        ringXPlane.Visible = true;
+                        arrowPy.SetActive(true);
+                        arrowMy.SetActive(true);
+                        arrowPz.SetActive(true);
+                        arrowMz.SetActive(true);
+                        ringXPlane.SetActive(true);
                         break;
                     case InteractionModeType.RotateAxisX:
-                        ringX.Visible = true;
+                        ringX.SetActive(true);
                         break;
                     case InteractionModeType.MovePlaneYZ_RotateAxisX:
-                        arrowPY.Visible = true;
-                        arrowMY.Visible = true;
-                        arrowPZ.Visible = true;
-                        arrowMZ.Visible = true;
-                        ringX.Visible = true;
-                        ringXPlane.Visible = true;
+                        arrowPy.SetActive(true);
+                        arrowMy.SetActive(true);
+                        arrowPz.SetActive(true);
+                        arrowMz.SetActive(true);
+                        ringX.SetActive(true);
+                        ringXPlane.SetActive(true);
                         break;
                     case InteractionModeType.Frame:
-                        arrowPX.Visible = true;
-                        arrowMX.Visible = true;
-                        arrowPY.Visible = true;
-                        arrowMY.Visible = true;
-                        arrowPZ.Visible = true;
-                        //arrowMZ.Visible = true;
-                        ringZ.Visible = true;
-                        ringZPlane.Visible = true;
+                        arrowPx.SetActive(true);
+                        arrowMx.SetActive(true);
+                        arrowPy.SetActive(true);
+                        arrowMy.SetActive(true);
+                        arrowPz.SetActive(true);
+                        //arrowMZ.SetActive(true);
+                        ringZ.SetActive(true);
+                        ringZPlane.SetActive(true);
                         break;
                     case InteractionModeType.Move3D:
-                        arrowPX.Visible = true;
-                        arrowMX.Visible = true;
-                        arrowPY.Visible = true;
-                        arrowMY.Visible = true;
-                        arrowPZ.Visible = true;
-                        arrowMZ.Visible = true;
-                        ringZPlane.Visible = true;
+                        arrowPx.SetActive(true);
+                        arrowMx.SetActive(true);
+                        arrowPy.SetActive(true);
+                        arrowMy.SetActive(true);
+                        arrowPz.SetActive(true);
+                        arrowMz.SetActive(true);
+                        ringZPlane.SetActive(true);
                         break;
                     case InteractionModeType.Rotate3D:
-                        ringX.Visible = true;
-                        ringY.Visible = true;
-                        ringZ.Visible = true;
+                        ringX.SetActive(true);
+                        ringY.SetActive(true);
+                        ringZ.SetActive(true);
                         break;
                     case InteractionModeType.MoveRotate3D:
-                        arrowPX.Visible = true;
-                        arrowMX.Visible = true;
-                        arrowPY.Visible = true;
-                        arrowMY.Visible = true;
-                        arrowPZ.Visible = true;
-                        arrowMZ.Visible = true;
-                        ringX.Visible = true;
-                        ringY.Visible = true;
-                        ringZ.Visible = true;
+                        arrowPx.SetActive(true);
+                        arrowMx.SetActive(true);
+                        arrowPy.SetActive(true);
+                        arrowMy.SetActive(true);
+                        arrowPz.SetActive(true);
+                        arrowMz.SetActive(true);
+                        ringX.SetActive(true);
+                        ringY.SetActive(true);
+                        ringZ.SetActive(true);
                         break;
                 }
             }
@@ -234,7 +231,7 @@ namespace Iviz.Displays
         void Awake()
         {
             allResources = new[]
-                {arrowPX, arrowMX, arrowPY, arrowMY, arrowPZ, arrowMZ, ringX, ringY, ringZ, ringXPlane, ringZPlane};
+                {arrowPx, arrowMx, arrowPy, arrowMy, arrowPz, arrowMz, ringX, ringY, ringZ, ringXPlane, ringZPlane};
 
 
             //void OnMoved(in Pose pose) => Moved?.Invoke(pose);
@@ -244,7 +241,7 @@ namespace Iviz.Displays
             void OnDoubleTap() => DoubleTap?.Invoke();
 
 
-            foreach (MeshMarkerResource resource in allResources)
+            foreach (GameObject resource in allResources)
             {
                 var draggable = resource.GetComponent<IDraggable>();
                 draggable.Moved += OnMoved;
@@ -260,6 +257,22 @@ namespace Iviz.Displays
             }
         }
 
+        void LateUpdate()
+        {
+            if (PointsToCamera)
+            {
+                RotateToCamera();
+            }
+
+            const float referenceDistance = 2.0f;
+            Transform cameraTransform = TFListener.MainCamera.transform;
+            float distanceToCamera = Vector3.Dot(cameraTransform.forward, transform.position - cameraTransform.position);
+            if (distanceToCamera > referenceDistance)
+            {
+                transform.localScale = BaseScale * distanceToCamera / referenceDistance * Vector3.one;
+            }
+        }
+        
         void RotateToCamera()
         {
             Vector3 cameraForward = TFListener.MainCamera.transform.forward;
@@ -278,17 +291,6 @@ namespace Iviz.Displays
         {
             transform.rotation = TFListener.RootFrame.transform.rotation;
         }
-
-        /*
-        public void SnapTo()
-        {
-            Vector3 myPosition = transform.position;
-            anchorProvider.FindClosest(myPosition, out Vector3 newPosition, out Vector3 _);
-            Debug.Log("Snapping to " + newPosition);
-
-            TargetTransform.position += newPosition - myPosition ;
-            Moved?.Invoke(TargetTransform.AsPose());
-        }
-        */
+        
     }
 }

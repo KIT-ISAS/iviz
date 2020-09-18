@@ -74,7 +74,6 @@ namespace Iviz.Controllers
                     return;
                 }
                 resource.Layer = value ? Resource.ClickableLayer : 0;
-                resource.ColliderEnabled = value;
             }
         }
 
@@ -174,10 +173,8 @@ namespace Iviz.Controllers
                     arrowMarker.Color = msg.Color.Sanitize().ToUnityColor();
                     if (msg.Points.Length == 2)
                     {
-                        arrowMarker.Set(msg.Points[0].Ros2Unity(), msg.Points[1].Ros2Unity());
                         float sx = (float)msg.Scale.X;
-                        Vector3 scale = new Vector3(1, sx, sx);
-                        transform.localScale = scale.Ros2Unity().Abs();
+                        arrowMarker.Set(msg.Points[0].Ros2Unity(), msg.Points[1].Ros2Unity(), sx);
                     }
                     else if (msg.Points.Length == 0)
                     {
@@ -205,7 +202,7 @@ namespace Iviz.Controllers
                     TextMarkerResource textResource = (TextMarkerResource) resource;
                     textResource.Text = msg.Text;
                     textResource.Color = msg.Color.Sanitize().ToUnityColor();
-                    textResource.EnableBillboard = (msg.Type() != MarkerType.Text);
+                    textResource.BillboardEnabled = (msg.Type() != MarkerType.Text);
                     transform.localScale = (float) msg.Scale.Z * Vector3.one;
                     break;
                 }
@@ -361,7 +358,7 @@ namespace Iviz.Controllers
                     ImageResource image = (ImageResource)resource;
                     int count = msg.Colors.Length;
                     int width = (int)msg.Scale.Z;
-                    int height = count / width;
+                    int height = width == 0 ? 0 : count / width;
                     if (width <= 0 || height <= 0 ||  width * height != count)
                     {
                         Debug.LogWarning("MarkerObject: Invalid image dimensions");

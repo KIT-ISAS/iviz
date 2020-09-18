@@ -470,14 +470,14 @@ namespace Iviz.App
             return dialogData;
         }
 
-        const float yOffset = 5;
+        const float YOffset = 2;
 
         void CreateButtonObject(ModuleData moduleData)
         {
             GameObject buttonObject = ResourcePool.GetOrCreate(Resource.Widgets.DisplayButton, contentObject.transform, false);
 
             int size = buttons.Count();
-            float y = yOffset + size * buttonHeight;
+            float y = 2 * YOffset + size * (buttonHeight + YOffset);
 
             ((RectTransform)buttonObject.transform).anchoredPosition = new Vector2(0, -y);
 
@@ -489,7 +489,7 @@ namespace Iviz.App
 
             Button button = buttonObject.GetComponent<Button>();
             button.onClick.AddListener(moduleData.ToggleShowPanel);
-            ((RectTransform)contentObject.transform).sizeDelta = new Vector2(0, y + buttonHeight + yOffset);
+            ((RectTransform)contentObject.transform).sizeDelta = new Vector2(0, y + buttonHeight + YOffset);
 
             //return buttonObject;
         }
@@ -527,13 +527,13 @@ namespace Iviz.App
             ResourcePool.Dispose(Resource.Widgets.DisplayButton, displayButton);
 
             int i;
-            for (i = index; i < buttons.Count(); i++)
+            for (i = index; i < buttons.Count; i++)
             {
                 GameObject buttonObject = buttons[i];
-                float y = yOffset + i * buttonHeight;
+                float y = 2 * YOffset + i * (buttonHeight + YOffset);
                 ((RectTransform)buttonObject.transform).anchoredPosition = new Vector3(0, -y);
             }
-            ((RectTransform)contentObject.transform).sizeDelta = new Vector2(0, 2 * yOffset + i * buttonHeight);
+            ((RectTransform)contentObject.transform).sizeDelta = new Vector2(0, 2 * YOffset + i * (buttonHeight + YOffset));
         }
 
         public const int ModuleDataCaptionWidth = 200;

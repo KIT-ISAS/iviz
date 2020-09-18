@@ -267,7 +267,7 @@ namespace Iviz.Controllers
         public abstract int GetNumPublishers(string topic);
         public abstract int GetNumSubscribers(string topic);
 
-        public abstract string GetParameter(string parameter);
+        public abstract object GetParameter(string parameter);
 
         protected virtual void Update()
         {

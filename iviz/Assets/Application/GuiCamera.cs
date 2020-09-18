@@ -124,7 +124,8 @@ namespace Iviz.App
         {
             Transform = transform;
             
-            //UnityEngine.Application.targetFrameRate = 60;
+            UnityEngine.Application.targetFrameRate = 60;
+            
             CanvasScaler canvas = GameObject.Find("Canvas").GetComponent<CanvasScaler>();
             canvas.referenceResolution = Settings.IsMobile ? 
                 new Vector2(800, 600) :
