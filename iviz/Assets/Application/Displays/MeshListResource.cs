@@ -99,7 +99,7 @@ namespace Iviz.Displays
 
                 pointComputeBuffer?.Release();
                 pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithColor>());
-                material.SetBuffer(PropPoints, pointComputeBuffer);
+                material.SetBuffer(PointsID, pointComputeBuffer);
             }
         }
 
@@ -224,7 +224,7 @@ namespace Iviz.Displays
             }
             UpdateTransform();
             Bounds worldBounds = boxCollider.bounds;
-            material.SetVector(PropBoundaryCenter, worldBounds.center);
+            material.SetVector(BoundaryCenterID, worldBounds.center);
 
             if (CastShadows && !OcclusionOnlyActive)
             {
@@ -269,7 +269,7 @@ namespace Iviz.Displays
             {
                 pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithColor>());
                 pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
-                material.SetBuffer(PropPoints, pointComputeBuffer);
+                material.SetBuffer(PointsID, pointComputeBuffer);
             }
             if (argsComputeBuffer != null)
             {

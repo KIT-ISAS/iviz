@@ -164,12 +164,14 @@ namespace Iviz
 
         static float SanitizeColor(float f)
         {
+            //return float.IsNaN(f) ? 0 : Mathf.Max(Mathf.Min(f, 1), 0);
             return float.IsNaN(f) ? 0 : Mathf.Max(Mathf.Min(f, 1), 0);
         }
 
         public static Color32 ToUnityColor32(this ColorRGBA p)
         {
-            return p.ToUnityColor();
+            return p.ToUnityColor(); // ColorRGBA -> Color -> Color32
+            // note: Color -> Color32 sanitizes implicitly 
         }
 
         public static ColorRGBA ToRos(this Color p)

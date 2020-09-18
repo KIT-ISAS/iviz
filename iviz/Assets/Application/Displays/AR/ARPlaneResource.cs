@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Iviz.Resources;
 using Unity.Collections;
 using UnityEngine;
@@ -78,7 +79,7 @@ namespace Iviz.Displays
 
         void Update()
         {
-            bool shouldBeEnabled = plane.subsumedBy != null && plane.trackingState != TrackingState.None;
+            bool shouldBeEnabled = plane != null && plane.subsumedBy == null && plane.trackingState != TrackingState.None;
             if (isEnabled != shouldBeEnabled)
             {
                 isEnabled = shouldBeEnabled;
@@ -87,6 +88,7 @@ namespace Iviz.Displays
                 meshCollider.enabled = isEnabled;
             }
 
+            //Debug.Log("isEnabled: " + isEnabled);
             if (!isEnabled)
             {
                 return;

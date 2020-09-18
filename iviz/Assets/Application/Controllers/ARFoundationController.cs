@@ -34,8 +34,8 @@ namespace Iviz.Controllers
                 mainCamera.gameObject.SetActive(!value);
                 arCamera.gameObject.SetActive(value);
                 arLight.gameObject.SetActive(value);
-                canvas.worldCamera = value ? arCamera : mainCamera;
                 TFListener.MainCamera = value ? arCamera : mainCamera;
+                canvas.worldCamera = TFListener.MainCamera;
             }
         }
 
@@ -145,6 +145,14 @@ namespace Iviz.Controllers
 
         public override bool FindRayHit(in Ray ray, out Vector3 anchor, out Vector3 normal)
         {
+            if (arSessionOrigin?.trackablesParent == null)
+            {
+                // not initialized yet!
+                anchor = ray.origin;
+                normal = Vector3.zero;
+                return false;
+            }
+            
             List<ARRaycastHit> results = new List<ARRaycastHit>();
             raycaster.Raycast(ray, results, TrackableType.PlaneWithinBounds);
             if (results.Count == 0)
@@ -152,10 +160,11 @@ namespace Iviz.Controllers
                 anchor = ray.origin;
                 normal = Vector3.zero;
                 return false;
-            }
+            } 
 
             Vector3 origin = ray.origin;
-            var minHit = results.Select(hit => ((hit.pose.position - origin).sqrMagnitude, hit)).Min().hit;
+            var minHit = results.Count == 1 ? results[0] : 
+                results.Select(hit => ((hit.pose.position - origin).sqrMagnitude, hit)).Min().hit;
             var plane = planeManager.GetPlane(minHit.trackableId);
             anchor = minHit.pose.position;
             normal = plane.normal;
@@ -163,7 +172,7 @@ namespace Iviz.Controllers
         }
 
 
-        void UpdateLights(ARLightEstimationData lightEstimation)
+        void UpdateLights(in ARLightEstimationData lightEstimation)
         {
             arLight.intensity = 1;
 

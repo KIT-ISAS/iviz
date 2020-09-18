@@ -119,7 +119,7 @@ namespace Iviz.Controllers
                 
                 config.SourceParameter = value;
                 node.name = "SimpleRobotNode:" + Name;
-                Description = string.IsNullOrEmpty(robot.Name) ? "<b>[No Name]</b>" : $"<b>{Name}</b>";
+                Description = string.IsNullOrEmpty(robot.Name) ? "<b>[No Name]</b>" : $"<b>- {Name} -</b>";
                 AttachedToTf = AttachedToTf;
                 Visible = Visible;
                 RenderAsOcclusionOnly = RenderAsOcclusionOnly;

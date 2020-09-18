@@ -11,9 +11,10 @@ namespace Iviz.Displays
 {
     public sealed class ImageTexture
     {
-        static readonly int PropIntensityCoeff = MarkerResourceWithColormap.PropIntensityCoeff;
-        static readonly int PropIntensityAdd = MarkerResourceWithColormap.PropIntensityAdd;
-        static readonly int PropIntensity = MarkerResourceWithColormap.PropIntensity;
+        static readonly int IntensityCoeffID = MarkerResourceWithColormap.IntensityCoeffID;
+        static readonly int IntensityAddID = MarkerResourceWithColormap.IntensityAddID;
+        static readonly int IntensityID = MarkerResourceWithColormap.IntensityID;
+        static readonly int MainTexID = Shader.PropertyToID("_MainTex");
 
 
         byte[] rgbaBuffer;
@@ -34,20 +35,20 @@ namespace Iviz.Displays
 
                 if (intensitySpan == 0)
                 {
-                    Material.SetFloat(PropIntensityCoeff, 1);
-                    Material.SetFloat(PropIntensityAdd, 0);
+                    Material.SetFloat(IntensityCoeffID, 1);
+                    Material.SetFloat(IntensityAddID, 0);
                 }
                 else
                 {
                     if (!FlipMinMax)
                     {
-                        Material.SetFloat(PropIntensityCoeff, 1 / intensitySpan);
-                        Material.SetFloat(PropIntensityAdd, -intensityBounds.x / intensitySpan);
+                        Material.SetFloat(IntensityCoeffID, 1 / intensitySpan);
+                        Material.SetFloat(IntensityAddID, -intensityBounds.x / intensitySpan);
                     }
                     else
                     {
-                        Material.SetFloat(PropIntensityCoeff, -1 / intensitySpan);
-                        Material.SetFloat(PropIntensityAdd, intensityBounds.y / intensitySpan);
+                        Material.SetFloat(IntensityCoeffID, -1 / intensitySpan);
+                        Material.SetFloat(IntensityAddID, intensityBounds.y / intensitySpan);
                     }
                 }
             }
@@ -81,7 +82,7 @@ namespace Iviz.Displays
             {
                 colormap = value;
 
-                Material.SetTexture(PropIntensity, ColormapTexture);
+                Material.SetTexture(IntensityID, ColormapTexture);
                 ColormapChanged?.Invoke(ColormapTexture);
             }
         }
@@ -275,12 +276,13 @@ namespace Iviz.Displays
             });
         }
 
-        public void Set(int width, int height, string encoding, byte[] data)
+        public void Set(int width, int height, string encoding, byte[] data, bool generateMipmaps = false)
         {
             Set(width, height, encoding, data.AsSlice());
         }
 
-        public void Set(int width, int height, string encoding, in ArraySegment<byte> data)
+        public void Set(int width, int height, string encoding, in ArraySegment<byte> data,
+            bool generateMipmaps = false)
         {
             int size = width * height;
             int bpp = FieldSizeFromEncoding(encoding);
@@ -304,46 +306,37 @@ namespace Iviz.Displays
             {
                 case "rgba8":
                 case "8SC4":
-                    IsMono = false;
-                    Material.DisableKeyword("USE_INTENSITY");
-                    Material.DisableKeyword("FLIP_RB");
-                    ApplyTexture(width, height, data, encoding, size * 4);
-                    break;
-                case "bgra8":
-                    IsMono = false;
-                    Material.DisableKeyword("USE_INTENSITY");
-                    Material.EnableKeyword("FLIP_RB");
-                    ApplyTexture(width, height, data, encoding, size * 4);
-                    break;
                 case "rgb8":
                 case "8SC3":
                     IsMono = false;
                     Material.DisableKeyword("USE_INTENSITY");
                     Material.DisableKeyword("FLIP_RB");
-                    ApplyTexture(width, height, data, encoding, size * 3);
                     break;
+                case "bgra8":
                 case "bgr8":
                     IsMono = false;
                     Material.DisableKeyword("USE_INTENSITY");
                     Material.EnableKeyword("FLIP_RB");
-                    ApplyTexture(width, height, data, encoding, size * 3);
                     break;
                 case "mono16":
                 case "16UC1":
                     IsMono = true;
                     Material.EnableKeyword("USE_INTENSITY");
-                    ApplyTexture(width, height, data, encoding, size * 2);
                     break;
                 case "mono8":
                 case "8UC1":
                     IsMono = true;
                     Material.EnableKeyword("USE_INTENSITY");
-                    ApplyTexture(width, height, data, encoding, size);
                     break;
+                default:
+                    return;
             }
+
+            ApplyTexture(width, height, data, encoding, size * bpp, generateMipmaps);
         }
 
-        void ApplyTexture(int width, int height, in ArraySegment<byte> data, string type, int length)
+        void ApplyTexture(int width, int height, in ArraySegment<byte> data, string type, int length,
+            bool generateMipmaps)
         {
             switch (type)
             {
@@ -370,7 +363,7 @@ namespace Iviz.Displays
             }
 
             NativeArray<byte>.Copy(data.Array, data.Offset, Texture.GetRawTextureData<byte>(), 0, length);
-            Texture.Apply(false, false);
+            Texture.Apply(generateMipmaps, false);
         }
 
         void EnsureSize(int width, int height, TextureFormat format)
@@ -389,7 +382,7 @@ namespace Iviz.Displays
             }
 
             Texture = new Texture2D(width, height, format, false);
-            Material.SetTexture("_MainTex", Texture);
+            Material.SetTexture(MainTexID, Texture);
             TextureChanged?.Invoke(Texture);
         }
 

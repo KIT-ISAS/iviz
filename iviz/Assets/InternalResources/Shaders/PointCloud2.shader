@@ -9,7 +9,8 @@ Shader "iviz/PointCloud2"
 	SubShader
 	{
 		Cull Off
-
+		Tags { "RenderType"="Opaque" }
+		
 		Pass
 		{
 			CGPROGRAM
@@ -37,7 +38,15 @@ Shader "iviz/PointCloud2"
 #endif
 			};
 
-			StructuredBuffer<float2> _Quad;
+            static const float4 Quad[4] =
+            {
+                float4(-0.5, -0.5, 0, 0),
+                float4(0.5, -0.5, 0, 0),
+                float4(0.5, 0.5, 0, 0),
+                float4(-0.5, 0.5, 0, 0),
+            };
+			
+			//StructuredBuffer<float2> _Quad;
 			StructuredBuffer<Point> _Points;
 
 			struct v2f
@@ -51,13 +60,15 @@ Shader "iviz/PointCloud2"
 				unity_ObjectToWorld = _LocalToWorld;
 				unity_WorldToObject = _WorldToLocal;
 
-				float2 extent = abs(UNITY_MATRIX_P._11_22);
-				float2 quadVertex = _Quad[id] * _Scale;
+				//float2 extent = abs(UNITY_MATRIX_P._11_22);
+				//float2 quadVertex = _Quad[id] * _Scale;
+				float extent = abs(UNITY_MATRIX_P._11) * _Scale;
+				float4 quadVertex = Quad[id] * extent;
 				Point centerPoint = _Points[inst];
 				float4 centerVertex = float4(centerPoint.position, 1);
 
 				v2f o;
-				o.position = UnityObjectToClipPos(centerVertex) + float4(quadVertex * extent, 0, 0);
+				o.position = UnityObjectToClipPos(centerVertex) + quadVertex;
 	#if USE_TEXTURE
 				float centerIntensity = centerPoint.intensity;
 				o.color = tex2Dlod(_IntensityTexture, float4(centerIntensity * _IntensityCoeff + _IntensityAdd, 0, 0, 0));

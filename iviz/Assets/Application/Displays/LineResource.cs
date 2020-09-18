@@ -11,8 +11,8 @@ namespace Iviz.Displays
 {
     public sealed class LineResource : MarkerResourceWithColormap
     {
-        static readonly int PropLines = Shader.PropertyToID("_Lines");
-        static readonly int PropFront = Shader.PropertyToID("_Front");
+        static readonly int LinesID = Shader.PropertyToID("_Lines");
+        static readonly int FrontID = Shader.PropertyToID("_Front");
 
         NativeArray<float4x2> lineBuffer;
         ComputeBuffer lineComputeBuffer;
@@ -81,7 +81,7 @@ namespace Iviz.Displays
 
             lineComputeBuffer?.Release();
             lineComputeBuffer = new ComputeBuffer(lineBuffer.Length, Marshal.SizeOf<LineWithColor>());
-            material.SetBuffer(PropLines, lineComputeBuffer);
+            material.SetBuffer(LinesID, lineComputeBuffer);
         }
 
         bool linesNeedAlpha;
@@ -166,7 +166,7 @@ namespace Iviz.Displays
             UpdateTransform();
 
             Camera mainCamera = TFListener.MainCamera;
-            material.SetVector(PropFront, transform.InverseTransformPoint(mainCamera.transform.position));
+            material.SetVector(FrontID, transform.InverseTransformPoint(mainCamera.transform.position));
 
             Bounds worldBounds = boxCollider.bounds;
             Graphics.DrawProcedural(material, worldBounds, MeshTopology.Quads, 2 * 4, Size);
@@ -211,7 +211,7 @@ namespace Iviz.Displays
             {
                 lineComputeBuffer = new ComputeBuffer(lineBuffer.Length, Marshal.SizeOf<LineWithColor>());
                 lineComputeBuffer.SetData(lineBuffer, 0, 0, Size);
-                material.SetBuffer(PropLines, lineComputeBuffer);
+                material.SetBuffer(LinesID, lineComputeBuffer);
             }
 
             UpdateMaterialKeywords();

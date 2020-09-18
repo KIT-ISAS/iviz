@@ -28,20 +28,29 @@ namespace Iviz.Controllers
         MeshResource = Marker.MESH_RESOURCE,
         TriangleList = Marker.TRIANGLE_LIST,
 
+        /// <summary>
+        /// New: Text marker that does not face the camera
+        /// </summary>
         Text = 100,
+        
+        /// <summary>
+        /// New: Image marker. Pixels in Colors field, image width in Scale.z
+        /// </summary>
         Image = 101,
     }
 
     public enum MouseEventType
     {
-        Click, Down, Up
+        Click,
+        Down,
+        Up
     }
 
-    public sealed class MarkerObject : ClickableNode, 
+    public sealed class MarkerObject : ClickableNode,
         IPointerDownHandler, IPointerUpHandler
 #if UNITY_WSA
         , IMixedRealityPointerHandler
-#endif    
+#endif
     {
         static Mesh CachedCube => Resource.Displays.Cube.Object.GetComponent<MeshFilter>().sharedMesh;
         static Mesh CachedSphere => Resource.Displays.SphereSimple.Object.GetComponent<MeshFilter>().sharedMesh;
@@ -50,6 +59,7 @@ namespace Iviz.Controllers
         Resource.Info<GameObject> resourceType;
 
         public delegate void MouseEventAction(in Vector3 point, MouseEventType type);
+
         public event MouseEventAction MouseEvent;
 
         public string Id { get; private set; }
@@ -63,6 +73,7 @@ namespace Iviz.Controllers
         DateTime expirationTime;
 
         bool clickable;
+
         public bool Clickable
         {
             get => clickable;
@@ -73,6 +84,7 @@ namespace Iviz.Controllers
                 {
                     return;
                 }
+
                 resource.Layer = value ? Resource.ClickableLayer : 0;
             }
         }
@@ -118,9 +130,7 @@ namespace Iviz.Controllers
             Id = MarkerListener.IdFromMessage(msg);
             name = Id;
 
-            expirationTime = msg.Lifetime.IsZero ?
-                DateTime.MaxValue :
-                DateTime.Now + msg.Lifetime.ToTimeSpan();
+            expirationTime = msg.Lifetime.IsZero ? DateTime.MaxValue : DateTime.Now + msg.Lifetime.ToTimeSpan();
 
             Resource.Info<GameObject> newResourceType = GetRequestedResource(msg);
             if (newResourceType != resourceType)
@@ -131,6 +141,7 @@ namespace Iviz.Controllers
                     ResourcePool.Dispose(resourceType, resource.gameObject);
                     resource = null;
                 }
+
                 resourceType = newResourceType;
                 if (resourceType == null)
                 {
@@ -142,9 +153,10 @@ namespace Iviz.Controllers
                     {
                         Logger.Error($"MarkerObject: Marker type '{msg.Type}' has no resource assigned!");
                     }
+
                     return;
                 }
-                
+
                 GameObject newGameObject = ResourcePool.GetOrCreate(resourceType, transform);
                 resource = newGameObject.GetComponent<MarkerResource>();
                 if (resource == null)
@@ -156,9 +168,10 @@ namespace Iviz.Controllers
 
                     resource = newGameObject.AddComponent<AssetWrapperResource>();
                 }
-                
+
                 Clickable = Clickable; // reset value
             }
+
             if (resource == null)
             {
                 return;
@@ -169,11 +182,11 @@ namespace Iviz.Controllers
             switch (msg.Type())
             {
                 case MarkerType.Arrow:
-                    ArrowResource arrowMarker = (ArrowResource)resource;
+                    ArrowResource arrowMarker = (ArrowResource) resource;
                     arrowMarker.Color = msg.Color.Sanitize().ToUnityColor();
                     if (msg.Points.Length == 2)
                     {
-                        float sx = (float)msg.Scale.X;
+                        float sx = (float) msg.Scale.X;
                         arrowMarker.Set(msg.Points[0].Ros2Unity(), msg.Points[1].Ros2Unity(), sx);
                     }
                     else if (msg.Points.Length == 0)
@@ -184,6 +197,7 @@ namespace Iviz.Controllers
                     {
                         Logger.Debug("MarkerObject: Cannot understand marker message.");
                     }
+
                     break;
                 case MarkerType.Cube:
                 case MarkerType.Sphere:
@@ -208,168 +222,175 @@ namespace Iviz.Controllers
                 }
                 case MarkerType.CubeList:
                 case MarkerType.SphereList:
+                {
+                    MeshListResource meshList = (MeshListResource) resource;
+                    meshList.UseIntensityTexture = false;
+                    meshList.UsePerVertexScale = false;
+                    meshList.Mesh = (msg.Type() == MarkerType.CubeList) ? CachedCube : CachedSphere;
+                    PointWithColor[] points = new PointWithColor[msg.Points.Length];
+                    Color color = msg.Color.Sanitize().ToUnityColor();
+                    if (msg.Colors.Length == 0 || color == Color.black)
                     {
-                        MeshListResource meshList = (MeshListResource)resource;
-                        meshList.UseIntensityTexture = false;
-                        meshList.UsePerVertexScale = false;
-                        meshList.Mesh = (msg.Type() == MarkerType.CubeList) ? CachedCube : CachedSphere;
-                        PointWithColor[] points = new PointWithColor[msg.Points.Length];
-                        Color color = msg.Color.Sanitize().ToUnityColor();
-                        if (msg.Colors.Length == 0 || color == Color.black)
+                        for (int i = 0; i < points.Length; i++)
                         {
-                            for (int i = 0; i < points.Length; i++)
-                            {
-                                points[i] = new PointWithColor(msg.Points[i].Ros2Unity(), color);
-                            }
+                            points[i] = new PointWithColor(msg.Points[i].Ros2Unity(), color);
                         }
-                        else if (color == Color.white)
-                        {
-                            for (int i = 0; i < points.Length; i++)
-                            {
-                                points[i] = new PointWithColor(
-                                    msg.Points[i].Ros2Unity(),
-                                    msg.Colors[i].ToUnityColor32());
-                            }
-                        }
-                        else
-                        {
-                            for (int i = 0; i < points.Length; i++)
-                            {
-                                points[i] = new PointWithColor(
-                                    msg.Points[i].Ros2Unity(),
-                                    color * msg.Colors[i].ToUnityColor());
-                            }
-                        }
-                        meshList.PointsWithColor = points;
-                        break;
                     }
+                    else if (color == Color.white)
+                    {
+                        for (int i = 0; i < points.Length; i++)
+                        {
+                            points[i] = new PointWithColor(
+                                msg.Points[i].Ros2Unity(),
+                                msg.Colors[i].ToUnityColor32());
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < points.Length; i++)
+                        {
+                            points[i] = new PointWithColor(
+                                msg.Points[i].Ros2Unity(),
+                                color * msg.Colors[i].ToUnityColor());
+                        }
+                    }
+
+                    meshList.PointsWithColor = points;
+                    break;
+                }
                 case MarkerType.LineList:
+                {
+                    LineResource lineResource = (LineResource) resource;
+                    lineResource.ElementSize = (float) msg.Scale.X;
+                    LineWithColor[] lines = new LineWithColor[msg.Points.Length / 2];
+                    if (msg.Colors.Length == 0)
                     {
-                        LineResource lineResource = (LineResource)resource;
-                        lineResource.ElementSize = (float)msg.Scale.X;
-                        LineWithColor[] lines = new LineWithColor[msg.Points.Length / 2];
-                        if (msg.Colors.Length == 0)
+                        Color32 color = msg.Color.ToUnityColor32();
+                        for (int i = 0; i < lines.Length; i++)
                         {
-                            Color32 color = msg.Color.Sanitize().ToUnityColor32();
-                            for (int i = 0; i < lines.Length; i++)
-                            {
-                                lines[i] = new LineWithColor(
-                                    msg.Points[2 * i + 0].Ros2Unity(), color,
-                                    msg.Points[2 * i + 1].Ros2Unity(), color
-                                    );
-                            }
+                            lines[i] = new LineWithColor(
+                                msg.Points[2 * i + 0].Ros2Unity(), color,
+                                msg.Points[2 * i + 1].Ros2Unity(), color
+                            );
                         }
-                        else
-                        {
-                            Color color = msg.Color.Sanitize().ToUnityColor();
-                            for (int i = 0; i < lines.Length; i++)
-                            {
-                                lines[i] = new LineWithColor(
-                                    msg.Points[2 * i + 0].Ros2Unity(), color * msg.Colors[2 * i + 0].ToUnityColor(),
-                                    msg.Points[2 * i + 1].Ros2Unity(), color * msg.Colors[2 * i + 1].ToUnityColor()
-                                    );
-                            }
-                        }
-                        lineResource.LinesWithColor = lines;
-                        break;
                     }
-                case MarkerType.LineStrip:
+                    else
                     {
-                        LineResource lineResource = (LineResource)resource;
-                        lineResource.ElementSize = (float)msg.Scale.X;
-                        LineWithColor[] lines = new LineWithColor[msg.Points.Length - 1];
-                        if (msg.Colors.Length == 0)
-                        {
-                            Color32 color = msg.Color.Sanitize().ToUnityColor32();
-                            for (int i = 0; i < lines.Length; i++)
-                            {
-                                lines[i] = new LineWithColor(
-                                    msg.Points[i + 0].Ros2Unity(), color,
-                                    msg.Points[i + 1].Ros2Unity(), color
-                                    );
-                            }
-                        }
-                        else
-                        {
-                            Color color = msg.Color.Sanitize().ToUnityColor();
-                            for (int i = 0; i < lines.Length; i++)
-                            {
-                                lines[i] = new LineWithColor(
-                                    msg.Points[i + 0].Ros2Unity(), color * msg.Colors[i + 0].ToUnityColor(),
-                                    msg.Points[i + 1].Ros2Unity(), color * msg.Colors[i + 1].ToUnityColor()
-                                    );
-                            }
-                        }
-                        lineResource.LinesWithColor = lines;
-                        break;
-                    }
-                case MarkerType.Points:
-                    {
-                        PointListResource pointList = (PointListResource)resource;
-                        pointList.ElementSize = Mathf.Abs((float)msg.Scale.X);
-                        PointWithColor[] points = new PointWithColor[msg.Points.Length];
                         Color color = msg.Color.Sanitize().ToUnityColor();
-                        if (msg.Colors.Length == 0 || color == Color.black)
+                        for (int i = 0; i < lines.Length; i++)
                         {
-                            for (int i = 0; i < points.Length; i++)
-                            {
-                                points[i] = new PointWithColor(msg.Points[i].Ros2Unity(), color);
-                            }
+                            lines[i] = new LineWithColor(
+                                msg.Points[2 * i + 0].Ros2Unity(), color * msg.Colors[2 * i + 0].ToUnityColor(),
+                                msg.Points[2 * i + 1].Ros2Unity(), color * msg.Colors[2 * i + 1].ToUnityColor()
+                            );
                         }
-                        else if (color == Color.white)
-                        {
-                            for (int i = 0; i < points.Length; i++)
-                            {
-                                points[i] = new PointWithColor(
-                                    msg.Points[i].Ros2Unity(),
-                                    msg.Colors[i].ToUnityColor32());
-                            }
-                        }
-                        else
-                        {
-                            for (int i = 0; i < points.Length; i++)
-                            {
-                                points[i] = new PointWithColor(
-                                    msg.Points[i].Ros2Unity(),
-                                    color * msg.Colors[i].ToUnityColor());
-                            }
-                        }
-                        pointList.PointsWithColor = points;
-                        pointList.UseIntensityTexture = false;
-                        break;
                     }
+
+                    lineResource.LinesWithColor = lines;
+                    break;
+                }
+                case MarkerType.LineStrip:
+                {
+                    LineResource lineResource = (LineResource) resource;
+                    lineResource.ElementSize = (float) msg.Scale.X;
+                    LineWithColor[] lines = new LineWithColor[msg.Points.Length - 1];
+                    if (msg.Colors.Length == 0)
+                    {
+                        Color32 color = msg.Color.ToUnityColor32();
+                        for (int i = 0; i < lines.Length; i++)
+                        {
+                            lines[i] = new LineWithColor(
+                                msg.Points[i + 0].Ros2Unity(), color,
+                                msg.Points[i + 1].Ros2Unity(), color
+                            );
+                        }
+                    }
+                    else
+                    {
+                        Color color = msg.Color.Sanitize().ToUnityColor();
+                        for (int i = 0; i < lines.Length; i++)
+                        {
+                            lines[i] = new LineWithColor(
+                                msg.Points[i + 0].Ros2Unity(), color * msg.Colors[i + 0].ToUnityColor(),
+                                msg.Points[i + 1].Ros2Unity(), color * msg.Colors[i + 1].ToUnityColor()
+                            );
+                        }
+                    }
+
+                    lineResource.LinesWithColor = lines;
+                    break;
+                }
+                case MarkerType.Points:
+                {
+                    PointListResource pointList = (PointListResource) resource;
+                    pointList.ElementSize = Mathf.Abs((float) msg.Scale.X);
+                    PointWithColor[] points = new PointWithColor[msg.Points.Length];
+                    Color color = msg.Color.Sanitize().ToUnityColor();
+                    if (msg.Colors.Length == 0 || color == Color.black)
+                    {
+                        for (int i = 0; i < points.Length; i++)
+                        {
+                            points[i] = new PointWithColor(msg.Points[i].Ros2Unity(), color);
+                        }
+                    }
+                    else if (color == Color.white)
+                    {
+                        for (int i = 0; i < points.Length; i++)
+                        {
+                            points[i] = new PointWithColor(
+                                msg.Points[i].Ros2Unity(),
+                                msg.Colors[i].ToUnityColor32());
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < points.Length; i++)
+                        {
+                            points[i] = new PointWithColor(
+                                msg.Points[i].Ros2Unity(),
+                                color * msg.Colors[i].ToUnityColor());
+                        }
+                    }
+
+                    pointList.PointsWithColor = points;
+                    pointList.UseIntensityTexture = false;
+                    break;
+                }
                 case MarkerType.TriangleList:
-                    MeshTrianglesResource meshTriangles = (MeshTrianglesResource)resource;
+                    MeshTrianglesResource meshTriangles = (MeshTrianglesResource) resource;
                     meshTriangles.Color = msg.Color.Sanitize().ToUnityColor();
                     if (msg.Colors.Length != 0)
                     {
                         meshTriangles.Set(
                             msg.Points.Select(x => x.Ros2Unity()).ToArray(),
                             msg.Colors.Select(x => x.ToUnityColor()).ToArray()
-                            );
+                        );
                     }
                     else
                     {
                         meshTriangles.Set(msg.Points.Select(x => x.Ros2Unity()).ToArray());
                     }
+
                     transform.localScale = msg.Scale.Ros2Unity().Abs();
                     break;
                 case MarkerType.Image:
-                    ImageResource image = (ImageResource)resource;
+                    ImageResource image = (ImageResource) resource;
                     int count = msg.Colors.Length;
-                    int width = (int)msg.Scale.Z;
+                    int width = (int) msg.Scale.Z;
                     int height = width == 0 ? 0 : count / width;
-                    if (width <= 0 || height <= 0 ||  width * height != count)
+                    if (width <= 0 || height <= 0 || width * height != count)
                     {
                         Debug.LogWarning("MarkerObject: Invalid image dimensions");
                     }
                     else
                     {
                         bool hasAlpha = msg.Colors.Any(color => color.A < 1);
-                        int j = 0;
+                        byte[] data;
+                        int bpp, j = 0;
                         if (hasAlpha)
                         {
-                            byte[] data = new byte[count * 3];
+                            bpp = 3;
+                            data = new byte[count * 3];
                             foreach (ColorRGBA color in msg.Colors)
                             {
                                 Color32 color32 = new Color(color.R, color.G, color.B);
@@ -377,23 +398,26 @@ namespace Iviz.Controllers
                                 data[j++] = color32.g;
                                 data[j++] = color32.b;
                             }
-                            image.Set(width, height, 3, data.AsSlice());
                         }
                         else
                         {
-                            byte[] data = new byte[count * 4];
+                            bpp = 4;
+                            data = new byte[count * 4];
                             foreach (ColorRGBA color in msg.Colors)
                             {
                                 Color32 color32 = new Color(color.R, color.G, color.B);
                                 data[j++] = color32.r;
                                 data[j++] = color32.g;
-                                data[j++] = color32.b;                                
-                                data[j++] = color32.a;                                
+                                data[j++] = color32.b;
+                                data[j++] = color32.a;
                             }
-                            image.Set(width, height, 4, data.AsSlice());
                         }
+
+                        image.Set(width, height, bpp, data.AsSlice(), true);
                     }
-                    transform.localScale = msg.Scale.Ros2Unity().Abs();
+
+                    Vector3 imageScale = new Msgs.GeometryMsgs.Vector3(msg.Scale.X, msg.Scale.Y, 1).Ros2Unity().Abs();
+                    transform.localScale = imageScale;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -425,7 +449,7 @@ namespace Iviz.Controllers
                 case MarkerType.Cylinder: return Resource.Displays.Cylinder;
                 case MarkerType.Cube: return Resource.Displays.Cube;
                 case MarkerType.Sphere: return Resource.Displays.Sphere;
-                case MarkerType.TextViewFacing: 
+                case MarkerType.TextViewFacing:
                 case MarkerType.Text:
                     return Resource.Displays.Text;
                 case MarkerType.LineStrip:
@@ -436,7 +460,7 @@ namespace Iviz.Controllers
                     {
                         return null;
                     }
-                    
+
                     return Resource.TryGetResource(uri, out Resource.Info<GameObject> info) ? info : null;
                 case MarkerType.CubeList:
                 case MarkerType.SphereList:
@@ -483,7 +507,7 @@ namespace Iviz.Controllers
         {
             MouseEvent?.Invoke(eventData.pointerCurrentRaycast.worldPosition, MouseEventType.Up);
         }
-        
+
 #if UNITY_WSA
         public override void OnPointerDown(MixedRealityPointerEventData eventData)
         {
@@ -510,14 +534,14 @@ namespace Iviz.Controllers
             Vector3 pointerPosition = ((GGVPointer)eventData.Pointer).Position;
             MouseEvent?.Invoke(pointerPosition, MouseEventType.Click);
         }
-#endif        
+#endif
     }
 
     internal static class MarkerTypeHelper
     {
         public static MarkerType Type(this Marker marker)
         {
-            return (MarkerType)marker.Type;
+            return (MarkerType) marker.Type;
         }
     }
 }

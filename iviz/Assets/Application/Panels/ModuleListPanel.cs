@@ -34,6 +34,7 @@ namespace Iviz.App
         [SerializeField] TrashButtonWidget ConnectButton = null;
         [SerializeField] TrashButtonWidget StopButton = null;
 
+        [SerializeField] Image topPanel = null;
 
         [SerializeField] Button save = null;
         [SerializeField] Button load = null;
@@ -89,6 +90,9 @@ namespace Iviz.App
 
         readonly HashSet<string> topicsWithModule = new HashSet<string>();
         public IReadOnlyCollection<string> DisplayedTopics => topicsWithModule;
+
+        static readonly Color ConnectedColor = new Color(0.6f, 1f, 0.5f, 0.4f);
+        static readonly Color DisconnectedColor = new Color(0.9f, 0.95f, 1f, 0.4f);
 
         public bool UnlockButtonVisible
         {
@@ -283,12 +287,14 @@ namespace Iviz.App
                     Logger.Internal("Connected!");
                     GameThread.EverySecond -= RotateSprite;
                     status.sprite = ConnectedSprite;
+                    topPanel.color = ConnectedColor;
                     SaveSimpleConfiguration();
                     break;
                 case ConnectionState.Disconnected:
                     Logger.Internal("Disconnected.");
                     GameThread.EverySecond -= RotateSprite;
                     status.sprite = DisconnectedSprite;
+                    topPanel.color = DisconnectedColor;
                     break;
                 case ConnectionState.Connecting:
                     Logger.Internal("Connecting...");

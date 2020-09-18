@@ -117,9 +117,9 @@ Shader "iviz/Line"
 				return o;
 			}
 
-			half4 frag(v2f i) : SV_Target
+			half4 frag(half3 color : COLOR) : SV_Target
 			{
-				return half4(i.color, 1);
+				return half4(color, 1);
 			}
 
 			ENDCG

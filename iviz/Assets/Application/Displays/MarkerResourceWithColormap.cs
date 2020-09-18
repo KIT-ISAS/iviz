@@ -6,15 +6,15 @@ namespace Iviz.Displays
 {
     public abstract class MarkerResourceWithColormap : MarkerResource, ISupportsTint
     {
-        public static readonly int PropIntensityCoeff = Shader.PropertyToID("_IntensityCoeff");
-        public static readonly int PropIntensityAdd = Shader.PropertyToID("_IntensityAdd");
-        public static readonly int PropIntensity = Shader.PropertyToID("_IntensityTexture");
-        static readonly int PLocalToWorld = Shader.PropertyToID("_LocalToWorld");
-        static readonly int PWorldToLocal = Shader.PropertyToID("_WorldToLocal");
-        protected static readonly int PropBoundaryCenter = Shader.PropertyToID("_BoundaryCenter");
-        protected static readonly int PropPoints = Shader.PropertyToID("_Points");
-        static readonly int PTint = Shader.PropertyToID("_Tint");
-        static readonly int PScale = Shader.PropertyToID("_Scale");
+        public static readonly int IntensityCoeffID = Shader.PropertyToID("_IntensityCoeff");
+        public static readonly int IntensityAddID = Shader.PropertyToID("_IntensityAdd");
+        public static readonly int IntensityID = Shader.PropertyToID("_IntensityTexture");
+        static readonly int LocalToWorldID = Shader.PropertyToID("_LocalToWorld");
+        static readonly int WorldToLocalID = Shader.PropertyToID("_WorldToLocal");
+        protected static readonly int BoundaryCenterID = Shader.PropertyToID("_BoundaryCenter");
+        protected static readonly int PointsID = Shader.PropertyToID("_Points");
+        static readonly int TintID = Shader.PropertyToID("_Tint");
+        static readonly int ScaleID = Shader.PropertyToID("_Scale");
 
         [SerializeField] protected Material material;
 
@@ -55,7 +55,7 @@ namespace Iviz.Displays
                 colormap = value;
 
                 Texture2D texture = Resource.Colormaps.Textures[Colormap];
-                material.SetTexture(PropIntensity, texture);
+                material.SetTexture(IntensityID, texture);
             }
         }
 
@@ -70,20 +70,20 @@ namespace Iviz.Displays
                 
                 if (Mathf.Approximately(intensitySpan,0))
                 {
-                    material.SetFloat(PropIntensityCoeff, 1);
-                    material.SetFloat(PropIntensityAdd, 0);
+                    material.SetFloat(IntensityCoeffID, 1);
+                    material.SetFloat(IntensityAddID, 0);
                     return;
                 }
 
                 if (!FlipMinMax)
                 {
-                    material.SetFloat(PropIntensityCoeff, 1 / intensitySpan);
-                    material.SetFloat(PropIntensityAdd, -intensityBounds.x / intensitySpan);
+                    material.SetFloat(IntensityCoeffID, 1 / intensitySpan);
+                    material.SetFloat(IntensityAddID, -intensityBounds.x / intensitySpan);
                 }
                 else
                 {
-                    material.SetFloat(PropIntensityCoeff, -1 / intensitySpan);
-                    material.SetFloat(PropIntensityAdd, intensityBounds.y / intensitySpan);
+                    material.SetFloat(IntensityCoeffID, -1 / intensitySpan);
+                    material.SetFloat(IntensityAddID, intensityBounds.y / intensitySpan);
                 }
             }
         }
@@ -120,7 +120,7 @@ namespace Iviz.Displays
             set
             {
                 tint = value;
-                material.SetColor(PTint, value);
+                material.SetColor(TintID, value);
             }
         }
         
@@ -143,9 +143,9 @@ namespace Iviz.Displays
 
         protected void UpdateTransform()
         {
-            material.SetFloat(PScale, transform.lossyScale.x * ElementSize);
-            material.SetMatrix(PLocalToWorld, transform.localToWorldMatrix);
-            material.SetMatrix(PWorldToLocal, transform.worldToLocalMatrix);
+            material.SetFloat(ScaleID, transform.lossyScale.x * ElementSize);
+            material.SetMatrix(LocalToWorldID, transform.localToWorldMatrix);
+            material.SetMatrix(WorldToLocalID, transform.worldToLocalMatrix);
         }
 
         protected abstract void Rebuild();
