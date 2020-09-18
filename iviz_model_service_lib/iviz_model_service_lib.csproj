@@ -2,6 +2,8 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
+        <AssemblyName>Iviz.ModelService</AssemblyName>
+        <RootNamespace>Iviz.ModelService</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

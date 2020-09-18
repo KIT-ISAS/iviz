@@ -39,13 +39,15 @@ namespace Iviz.ModelService
                 string[] paths = packagePath.Split(new[] {':'}, StringSplitOptions.RemoveEmptyEntries);
                 foreach (string path in paths)
                 {
-                    if (!Directory.Exists(path))
+                    string pathNormalized = path.Trim();
+                    if (!Directory.Exists(pathNormalized))
                     {
-                        Log("** Ignoring '" + path + "'");
+                        Log("** Ignoring '" + pathNormalized + "'");
                         continue;
                     }
-                    
-                    CheckPath("", path);
+
+                    string folderName = new DirectoryInfo(pathNormalized).Name;
+                    CheckPath(folderName, pathNormalized);
                 }
             }
 
