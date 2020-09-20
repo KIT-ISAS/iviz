@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>8</LangVersion>
+        <AssemblyName>Iviz.XmlRpc</AssemblyName>
+        <RootNamespace>Iviz.XmlRpc</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\iviz_msgs\iviz_msgs.csproj" />
+    </ItemGroup>
+
+</Project>
