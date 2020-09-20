@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 using Iviz.App;
 using Iviz.Displays;
 using Iviz.Resources;
+using Iviz.Urdf;
 using Transform = UnityEngine.Transform;
 using Vector3 = UnityEngine.Vector3;
 
@@ -26,7 +27,6 @@ namespace Iviz.Controllers
         [DataMember] public bool AxisVisible { get; set; } = true;
         [DataMember] public float AxisSize { get; set; } = 0.125f;
         [DataMember] public bool AxisLabelVisible { get; set; } = false;
-        [DataMember] public float AxisLabelSize { get; set; } = 0.1f;
         [DataMember] public bool ParentConnectorVisible { get; set; } = false;
         [DataMember] public bool ShowAllFrames { get; set; } = true;
     }
@@ -82,8 +82,7 @@ namespace Iviz.Controllers
             {
                 config.Topic = value.Topic;
                 AxisVisible = value.AxisVisible;
-                AxisSize = value.AxisSize;
-                AxisLabelSize = value.AxisLabelSize;
+                FrameSize = value.AxisSize;
                 AxisLabelVisible = value.AxisLabelVisible;
                 ParentConnectorVisible = value.ParentConnectorVisible;
                 ShowAllFrames = value.ShowAllFrames;
@@ -121,20 +120,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public float AxisLabelSize
-        {
-            get => config.AxisLabelSize;
-            set
-            {
-                config.AxisLabelSize = value;
-                foreach (var frame in frames.Values)
-                {
-                    frame.LabelSize = value;
-                }
-            }
-        }
-
-        public float AxisSize
+        public float FrameSize
         {
             get => config.AxisSize;
             set
@@ -142,10 +128,17 @@ namespace Iviz.Controllers
                 config.AxisSize = value;
                 foreach (var frame in frames.Values)
                 {
-                    frame.AxisLength = value;
+                    frame.FrameSize = value;
+                }
+
+                if (rootMarker != null)
+                {
+                    rootMarker.BaseScale = 2.5f * FrameSize;
                 }
             }
         }
+
+        public float FrameLabelSize => 0.5f * FrameSize;
 
         public bool ParentConnectorVisible
         {
@@ -217,13 +210,13 @@ namespace Iviz.Controllers
             MapFrame.AcceptsParents = false;
             //BaseFrame.ForceInvisible = true;
 
-            rootMarker =
-                ResourcePool.GetOrCreate<InteractiveControl>(Resource.Displays.InteractiveControl,
-                    RootFrame.transform);
+            rootMarker = ResourcePool.GetOrCreate<InteractiveControl>(
+                Resource.Displays.InteractiveControl, 
+                RootFrame.transform);
             rootMarker.name = "[InteractiveController for /]";
             rootMarker.TargetTransform = RootFrame.transform;
             rootMarker.InteractionMode = InteractiveControl.InteractionModeType.Disabled;
-            rootMarker.BaseScale = 0.3f;
+            rootMarker.BaseScale = 2.5f * FrameSize;
 
             Publisher = new RosSender<tfMessage_v2>(DefaultTopic);
         }
@@ -353,8 +346,7 @@ namespace Iviz.Controllers
             frame.name = "{" + id + "}";
             frame.Id = id;
             frame.Visible = config.AxisVisible;
-            frame.AxisLength = config.AxisSize;
-            frame.LabelSize = config.AxisLabelSize;
+            frame.FrameSize = config.AxisSize;
             frame.LabelVisible = config.AxisLabelVisible;
             frame.ConnectorVisible = config.ParentConnectorVisible;
             if (parentFrame != null)

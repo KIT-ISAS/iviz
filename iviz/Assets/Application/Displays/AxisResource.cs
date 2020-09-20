@@ -1,8 +1,10 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using Iviz.Resources;
 
 namespace Iviz.Displays
 {
+    [Obsolete]
     public sealed class AxisResource : MarkerResource
     {
         MeshRenderer Renderer;

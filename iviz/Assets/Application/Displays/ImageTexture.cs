@@ -300,7 +300,7 @@ namespace Iviz.Displays
                 return;
             }
 
-            Description = $"<b>Desc:</b>: {width}x{height} {encoding}";
+            Description = $"<b>{width}x{height} {encoding}</b>";
 
             switch (encoding)
             {

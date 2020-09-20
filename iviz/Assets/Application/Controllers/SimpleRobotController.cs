@@ -24,24 +24,16 @@ namespace Iviz.Controllers
     public sealed class SimpleRobotController : IController, IHasFrame, IJointProvider
     {
         readonly SimpleDisplayNode node;
-        RobotModel robot;
+
+        public const string LocalPrefix = "↓ ";
+
+        public RobotModel Robot { get; private set; }
 
         public TFFrame Frame => node.Parent;
 
-        GameObject RobotObject => robot.BaseLinkObject;
+        GameObject RobotObject => Robot.BaseLinkObject;
 
-        public string Name
-        {
-            get
-            {
-                if (robot is null)
-                {
-                    return "[Empty]";
-                }
-
-                return robot.Name ?? "[Unnamed]";
-            }
-        }
+        public string Name => Robot == null ? "[Empty]" : Robot.Name ?? "[No Name]";
 
         public event Action Stopped;
 
@@ -62,7 +54,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public string Description { get; private set; } = "<b>No Robot Loaded</b>";
+        public string HelpText { get; private set; } = "<b>No Robot Loaded</b>";
 
         public string SourceParameter
         {
@@ -70,12 +62,22 @@ namespace Iviz.Controllers
             set
             {
                 config.SourceParameter = "";
-                robot?.Dispose();
-                robot = null;
-                
+                Robot?.Dispose();
+                Robot = null;
+
                 if (string.IsNullOrEmpty(value))
                 {
-                    Description = "[No Robot Selected]";
+                    HelpText = "[No Robot Selected]";
+                    return;
+                }
+
+                if (value.StartsWith(LocalPrefix))
+                {
+                    if (TryLoadSavedRobot(value.Substring(LocalPrefix.Length)))
+                    {
+                        config.SourceParameter = value;
+                    }
+
                     return;
                 }
 
@@ -87,45 +89,65 @@ namespace Iviz.Controllers
                 catch (Exception e)
                 {
                     Debug.LogError($"SimpleRobotController: Error while loading parameter '{value}': {e}");
-                    Description = "[Failed to Retrieve Parameter]";
+                    HelpText = "[Failed to Retrieve Parameter]";
                     return;
                 }
 
-                if (parameterValue == null || !(parameterValue is string robotSpecification))
+                if (parameterValue == null || !(parameterValue is string robotDescription))
                 {
                     Debug.Log($"SimpleRobotController: Failed to retrieve parameter '{value}'");
-                    Description = "[Invalid Parameter Type]";
+                    HelpText = "[Invalid Parameter Type]";
                     return;
                 }
 
-                if (robotSpecification.Length == 0)
+                if (LoadRobotFromDescription(robotDescription))
                 {
-                    Debug.Log($"SimpleRobotController: Empty parameter '{value}'");
-                    Description = "[Robot Specification is Empty]";
-                    return;
+                    config.SourceParameter = value;
                 }
-
-                try
-                {
-                    robot = new RobotModel(robotSpecification);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError($"SimpleRobotController: Error while loading parameter '{value}': {e}");
-                    Description = "[Failed to Parse Specification]";
-                    robot = null;
-                    return;
-                }
-                
-                config.SourceParameter = value;
-                node.name = "SimpleRobotNode:" + Name;
-                Description = string.IsNullOrEmpty(robot.Name) ? "<b>[No Name]</b>" : $"<b>- {Name} -</b>";
-                AttachedToTf = AttachedToTf;
-                Visible = Visible;
-                RenderAsOcclusionOnly = RenderAsOcclusionOnly;
-                Tint = Tint;
-                
             }
+        }
+
+        bool TryLoadSavedRobot(string robotName)
+        {
+            if (!Resource.External.TryGetRobot(robotName, out string robotDescription))
+            {
+                // shouldn't happen!
+                Debug.Log($"SimpleRobotController: Failed to load robot!");
+                HelpText = "[Failed to Load Saved Robot]";
+                return false;
+            }
+
+            return LoadRobotFromDescription(robotDescription);
+        }
+
+        bool LoadRobotFromDescription(string description)
+        {
+            if (string.IsNullOrEmpty(description))
+            {
+                Debug.Log($"SimpleRobotController: Empty parameter '{description}'");
+                HelpText = "[Robot Specification is Empty]";
+                return false;
+            }
+
+            try
+            {
+                Robot = new RobotModel(description);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"SimpleRobotController: Error parsing description': {e}");
+                HelpText = "[Failed to Parse Specification]";
+                Robot = null;
+                return false;
+            }
+
+            node.name = "SimpleRobotNode:" + Name;
+            HelpText = string.IsNullOrEmpty(Robot.Name) ? "<b>[No Name]</b>" : $"<b>- {Name} -</b>";
+            AttachedToTf = AttachedToTf;
+            Visible = Visible;
+            RenderAsOcclusionOnly = RenderAsOcclusionOnly;
+            Tint = Tint;
+            return true;
         }
 
         public string FramePrefix
@@ -144,12 +166,12 @@ namespace Iviz.Controllers
                     config.FramePrefix = value;
                 }
 
-                if (robot is null)
+                if (Robot is null)
                 {
                     return;
                 }
 
-                node.AttachTo(Decorate(robot.BaseLink));
+                node.AttachTo(Decorate(Robot.BaseLink));
             }
         }
 
@@ -169,12 +191,12 @@ namespace Iviz.Controllers
                     config.FrameSuffix = value;
                 }
 
-                if (robot is null)
+                if (Robot is null)
                 {
                     return;
                 }
 
-                node.AttachTo(Decorate(robot.BaseLink));
+                node.AttachTo(Decorate(Robot.BaseLink));
             }
         }
 
@@ -184,12 +206,12 @@ namespace Iviz.Controllers
             set
             {
                 config.Visible = value;
-                if (robot is null)
+                if (Robot is null)
                 {
                     return;
                 }
 
-                robot.Visible = value;
+                Robot.Visible = value;
             }
         }
 
@@ -199,12 +221,12 @@ namespace Iviz.Controllers
             set
             {
                 config.RenderAsOcclusionOnly = value;
-                if (robot is null)
+                if (Robot is null)
                 {
                     return;
                 }
 
-                robot.OcclusionOnly = value;
+                Robot.OcclusionOnly = value;
             }
         }
 
@@ -214,12 +236,12 @@ namespace Iviz.Controllers
             set
             {
                 config.Tint = value;
-                if (robot is null)
+                if (Robot is null)
                 {
                     return;
                 }
 
-                robot.Tint = value;
+                Robot.Tint = value;
             }
         }
 
@@ -230,7 +252,7 @@ namespace Iviz.Controllers
 
         public bool TryWriteJoint(string joint, float value)
         {
-            return robot.TryWriteJoint(joint, value, out _);
+            return Robot.TryWriteJoint(joint, value, out _);
         }
 
         public bool AttachedToTf
@@ -240,7 +262,7 @@ namespace Iviz.Controllers
             {
                 config.AttachedToTf = value;
 
-                if (robot is null)
+                if (Robot is null)
                 {
                     return;
                 }
@@ -258,7 +280,7 @@ namespace Iviz.Controllers
 
         void DetachFromTf()
         {
-            foreach (var entry in robot.LinkParents)
+            foreach (var entry in Robot.LinkParents)
             {
                 if (TFListener.TryGetFrame(Decorate(entry.Key), out TFFrame frame))
                 {
@@ -272,17 +294,17 @@ namespace Iviz.Controllers
             }
 
             node.Parent = null;
-            robot.ResetLinkParents();
-            robot.ApplyAnyValidConfiguration();
+            Robot.ResetLinkParents();
+            Robot.ApplyAnyValidConfiguration();
 
-            node.AttachTo(Decorate(robot.BaseLink));
-            robot.BaseLinkObject.transform.SetParentLocal(node.transform);
+            node.AttachTo(Decorate(Robot.BaseLink));
+            Robot.BaseLinkObject.transform.SetParentLocal(node.transform);
         }
 
         void AttachToTf()
         {
             RobotObject.transform.SetParentLocal(TFListener.MapFrame.transform);
-            foreach (var entry in robot.LinkObjects)
+            foreach (var entry in Robot.LinkObjects)
             {
                 string link = entry.Key;
                 GameObject linkObject = entry.Value;
@@ -292,7 +314,7 @@ namespace Iviz.Controllers
             }
 
             // fill in missing frame parents, but only if it hasn't been provided already
-            foreach (var entry in robot.LinkParents)
+            foreach (var entry in Robot.LinkParents)
             {
                 TFFrame frame = TFListener.GetOrCreateFrame(Decorate(entry.Key), node);
                 if (frame.Parent == TFListener.RootFrame)
@@ -302,8 +324,8 @@ namespace Iviz.Controllers
                 }
             }
 
-            node.AttachTo(Decorate(robot.BaseLink));
-            robot.BaseLinkObject.transform.SetParentLocal(node.transform);
+            node.AttachTo(Decorate(Robot.BaseLink));
+            Robot.BaseLinkObject.transform.SetParentLocal(node.transform);
         }
 
         public IModuleData ModuleData { get; private set; }
@@ -325,7 +347,7 @@ namespace Iviz.Controllers
                 AttachedToTf = false;
             }
 
-            robot?.Dispose();
+            Robot?.Dispose();
             Stopped?.Invoke();
             UnityEngine.Object.Destroy(node.gameObject);
         }

@@ -58,7 +58,7 @@
             UNITY_DEFINE_INSTANCED_PROP(fixed4, _EmissiveColor)
             UNITY_INSTANCING_BUFFER_END(Props)
     
-            fixed4 LightingNoLighting(SurfaceOutput s, fixed3 _, fixed __)
+            fixed4 lightingNoLighting(SurfaceOutput s)
             {
                 fixed4 c;
                 c.rgb = s.Albedo; 

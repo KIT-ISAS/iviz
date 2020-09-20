@@ -11,6 +11,7 @@ using Iviz.Controllers;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using Iviz.Roslib;
+using Iviz.Urdf;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -25,6 +26,11 @@ namespace Iviz.Displays
         const string FileServiceName = "/iviz/get_file";
         const string SceneServiceName = "/iviz/get_sdf";
 
+        const string StrMissingFileRemoving = "ExternalResourceManager: Missing file '{0}'. Removing.";
+        const string StrServiceFailedWithMessage = "ExternalResourceManager: Call Service failed with message '{0}'";
+        const string StrCallServiceFailed = "ExternalResourceManager: Call Service failed! Are you sure iviz is connected and the iviz_model_service program is running?";
+        const string StrResourceFailedWithError = "ExternalResourceManager: Loading resource {0} failed with error {1}";
+
         [DataContract]
         public class ResourceFiles
         {
@@ -32,12 +38,14 @@ namespace Iviz.Displays
             [DataMember] public Dictionary<Uri, string> Models { get; set; }
             [DataMember] public Dictionary<Uri, string> Textures { get; set; }
             [DataMember] public Dictionary<Uri, string> Scenes { get; set; }
+            [DataMember] public Dictionary<string, string> RobotDescriptions { get; set; }
 
             public ResourceFiles()
             {
                 Models = new Dictionary<Uri, string>();
                 Textures = new Dictionary<Uri, string>();
                 Scenes = new Dictionary<Uri, string>();
+                RobotDescriptions = new Dictionary<string, string>();
             }
         }
 
@@ -59,6 +67,7 @@ namespace Iviz.Displays
 
         string ResourceFolder { get; }
         string ResourceFile { get; }
+        string RobotsFolder { get; }
 
         public ReadOnlyCollection<Uri> GetListOfModels() =>
             new ReadOnlyCollection<Uri>(resourceFiles.Models.Keys.ToList());
@@ -66,6 +75,7 @@ namespace Iviz.Displays
         public ExternalResourceManager(bool createNode = true)
         {
             ResourceFolder = ModuleListPanel.PersistentDataPath + "/resources";
+            RobotsFolder = ModuleListPanel.PersistentDataPath + "/robots";
             ResourceFile = ModuleListPanel.PersistentDataPath + "/resources.json";
 
             if (createNode)
@@ -73,10 +83,11 @@ namespace Iviz.Displays
                 Node = new GameObject("External Resources");
                 Node.SetActive(false);
             }
-            
+
             try
             {
                 Directory.CreateDirectory(ResourceFolder);
+                Directory.CreateDirectory(RobotsFolder);
             }
             catch (Exception e)
             {
@@ -102,6 +113,119 @@ namespace Iviz.Displays
             }
         }
 
+        void WriteResourceFile()
+        {
+            try
+            {
+                File.WriteAllText(ResourceFile, JsonConvert.SerializeObject(resourceFiles, Formatting.Indented));
+            }
+            catch (IOException e)
+            {
+                Logger.Warn("ExternalResourceManager: Failed to write resource file! " + e);
+            }
+        }
+
+        static readonly MD5 MD5 = new MD5CryptoServiceProvider();
+        static string GetMd5Hash(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return string.Empty;
+            }
+
+            byte[] textToHash = Encoding.Default.GetBytes(input);
+            byte[] result = MD5.ComputeHash(textToHash);
+            return BitConverter.ToString(result).Replace("-", "");
+        }
+
+        public ReadOnlyCollection<string> GetRobotNames() => 
+            new ReadOnlyCollection<string>(resourceFiles.RobotDescriptions.Keys.ToArray());
+
+        public bool ContainsRobot(string robotName) => resourceFiles.RobotDescriptions.ContainsKey(robotName); 
+
+        public bool TryGetRobot(string robotName, out string robotDescription)
+        {
+            if (string.IsNullOrEmpty(robotName))
+            {
+                throw new ArgumentException("Value cannot be null or empty.", nameof(robotName));
+            }
+
+            robotDescription = null;
+            if (!resourceFiles.RobotDescriptions.TryGetValue(robotName, out string localPath))
+            {
+                return false;
+            }
+
+            string absolutePath = $"{RobotsFolder}/{localPath}";
+            if (!File.Exists(absolutePath))
+            {
+                Debug.LogWarningFormat(StrMissingFileRemoving, localPath);
+                resourceFiles.RobotDescriptions.Remove(robotName);
+                WriteResourceFile();
+                return false;
+            }
+
+            try
+            {
+                robotDescription = File.ReadAllText(absolutePath);
+                return true;
+            }
+            catch (IOException e)
+            {
+                Debug.Log("ExternalResourceManager: Failed to read robot '" + robotName + "' : " + e);
+                return false;
+            }
+        }
+
+        public void AddRobot(string robotName, string robotDescription)
+        {
+            if (string.IsNullOrEmpty(robotName))
+            {
+                throw new ArgumentException("Value cannot be null or empty.", nameof(robotName));
+            }
+
+            if (string.IsNullOrEmpty(robotDescription))
+            {
+                throw new ArgumentException("Value cannot be null or empty.", nameof(robotDescription));
+            }
+
+            string localPath = GetMd5Hash(robotName);
+            
+            File.WriteAllText($"{RobotsFolder}/{localPath}", robotDescription);
+            Debug.Log($"Saving to {RobotsFolder}/{localPath}");
+            Logger.Internal($"Added robot <i>{robotName}</i> to cache");
+
+            resourceFiles.RobotDescriptions[robotName] = localPath;
+            WriteResourceFile();
+        }
+        
+        public void RemoveRobot(string robotName)
+        {
+            if (string.IsNullOrEmpty(robotName))
+            {
+                throw new ArgumentException("Value cannot be null or empty.", nameof(robotName));
+            }
+
+            if (!resourceFiles.RobotDescriptions.TryGetValue(robotName, out string localPath))
+            {
+                return;
+            }
+
+            string absolutePath = $"{ResourceFolder}/{localPath}";
+            try
+            {
+                File.Delete(absolutePath);
+                Logger.Debug("Removing '" + localPath + "'");
+            }
+            catch (IOException e)
+            {
+                Logger.Warn("ExternalResourceManager: Failed to delete robot file '" + localPath + "'");
+            }
+
+            Logger.Internal($"Removed robot <i>{robotName}</i> from cache");
+            resourceFiles.RobotDescriptions.Remove(robotName);
+            WriteResourceFile();
+        }        
 
         public bool TryGet(Uri uri, out Resource.Info<GameObject> resource, bool allowServiceCall = true)
         {
@@ -114,7 +238,7 @@ namespace Iviz.Displays
 
             string uriPath = Uri.UnescapeDataString(uri.AbsolutePath);
             string fileType = Path.GetExtension(uriPath).ToUpperInvariant();
-            
+
             if (fileType == ".SDF" || fileType == ".WORLD")
             {
                 resource = TryGetScene(uri, allowServiceCall);
@@ -146,7 +270,7 @@ namespace Iviz.Displays
                     return LoadLocalModel(uri, localPath);
                 }
 
-                Debug.LogWarning($"ExternalResourceManager: Missing file '{localPath}'. Removing.");
+                Debug.LogWarningFormat(StrMissingFileRemoving, localPath);
                 resourceFiles.Models.Remove(uri);
                 WriteResourceFile();
             }
@@ -158,29 +282,27 @@ namespace Iviz.Displays
                     Uri = uri.ToString()
                 }
             };
-            
-            if (allowServiceCall && 
+
+            if (allowServiceCall &&
                 ConnectionManager.Connection != null &&
                 ConnectionManager.Connection.CallService(ModelServiceName, msg) &&
                 msg.Response.Success)
             {
                 return ProcessModelResponse(uri, msg.Response);
             }
-            
+
             if (!string.IsNullOrWhiteSpace(msg.Response.Message))
             {
-                Debug.LogWarning("ExternalResourceManager: Call Service failed with message '" +
-                                 msg.Response.Message + "'");
+                Debug.LogWarningFormat(StrServiceFailedWithMessage, msg.Response.Message);
             }
             else
             {
-                Debug.Log(
-                    "ExternalResourceManager: Call Service failed! Are you sure the iviz_model_service program is running?");
+                Debug.Log(StrCallServiceFailed);
             }
 
             return null;
         }
-        
+
         Resource.Info<GameObject> TryGetScene(Uri uri, bool allowServiceCall)
         {
             if (loadedScenes.TryGetValue(uri, out Resource.Info<GameObject> resource))
@@ -195,7 +317,7 @@ namespace Iviz.Displays
                     return LoadLocalScene(uri, localPath);
                 }
 
-                Debug.LogWarning($"ExternalResourceManager: Missing file '{localPath}'. Removing.");
+                Debug.LogWarningFormat(StrMissingFileRemoving, localPath);
                 resourceFiles.Scenes.Remove(uri);
                 WriteResourceFile();
             }
@@ -207,24 +329,22 @@ namespace Iviz.Displays
                     Uri = uri.ToString()
                 }
             };
-            
-            if (allowServiceCall && 
+
+            if (allowServiceCall &&
                 ConnectionManager.Connection != null &&
                 ConnectionManager.Connection.CallService(SceneServiceName, msg) &&
                 msg.Response.Success)
             {
                 return ProcessSceneResponse(uri, msg.Response);
             }
-            
+
             if (!string.IsNullOrWhiteSpace(msg.Response.Message))
             {
-                Debug.LogWarning("ExternalResourceManager: Call Service failed with message '" +
-                                 msg.Response.Message + "'");
+                Debug.LogWarningFormat(StrServiceFailedWithMessage, msg.Response.Message);
             }
             else
             {
-                Debug.Log("ExternalResourceManager: Call Service failed! Are you sure iviz is connected " +
-                          "and the iviz_model_service program is running?");
+                Debug.Log(StrCallServiceFailed);
             }
 
             return null;
@@ -250,7 +370,7 @@ namespace Iviz.Displays
                     return resource != null;
                 }
 
-                Debug.LogWarning($"ExternalResourceManager: Missing file '{localPath}'. Removing.");
+                Debug.LogWarningFormat(StrMissingFileRemoving, localPath);
                 resourceFiles.Textures.Remove(uri);
                 WriteResourceFile();
             }
@@ -263,7 +383,7 @@ namespace Iviz.Displays
                 }
             };
 
-            if (allowServiceCall && 
+            if (allowServiceCall &&
                 ConnectionManager.Connection != null &&
                 ConnectionManager.Connection.CallService(TextureServiceName, msg) &&
                 msg.Response.Success)
@@ -274,13 +394,11 @@ namespace Iviz.Displays
 
             if (!string.IsNullOrWhiteSpace(msg.Response.Message))
             {
-                Debug.LogWarning("ExternalResourceManager: Call Service failed with message '" +
-                                 msg.Response.Message + "'");
+                Debug.LogWarningFormat(StrServiceFailedWithMessage, msg.Response.Message);
             }
             else
             {
-                Debug.Log("ExternalResourceManager: Call Service failed! Are you sure iviz is connected " +
-                          "and the iviz_model_service program is running?");
+                Debug.Log(StrCallServiceFailed);
             }
 
             return false;
@@ -296,7 +414,7 @@ namespace Iviz.Displays
             }
             catch (Exception e)
             {
-                Debug.LogWarning("ExternalResourceManager: Loading model " + uri + " failed with error " + e);
+                Debug.LogWarningFormat(StrResourceFailedWithError, uri, e);
                 return null;
             }
 
@@ -344,7 +462,7 @@ namespace Iviz.Displays
             }
             catch (Exception e)
             {
-                Debug.LogWarning("ExternalResourceManager: Loading model " + uri + " failed with error " + e);
+                Debug.LogWarningFormat(StrResourceFailedWithError, uri, e);
                 return null;
             }
 
@@ -446,24 +564,6 @@ namespace Iviz.Displays
             }
         }
 
-        void WriteResourceFile()
-        {
-            File.WriteAllText(ResourceFile, JsonConvert.SerializeObject(resourceFiles, Formatting.Indented));
-        }
-
-        static string GetMd5Hash(string input)
-        {
-            if (string.IsNullOrEmpty(input))
-            {
-                return string.Empty;
-            }
-
-            MD5 md5 = new MD5CryptoServiceProvider();
-            byte[] textToHash = Encoding.Default.GetBytes(input);
-            byte[] result = md5.ComputeHash(textToHash);
-            return BitConverter.ToString(result).Replace("-", "");
-        }
-
         GameObject CreateModelObject(Uri uri, Model msg)
         {
             GameObject model = SceneModel.Create(uri, msg).gameObject;
@@ -497,7 +597,7 @@ namespace Iviz.Displays
 
                 child.transform.SetParent(node.transform, false);
                 child.transform.localRotation = m.rotation.Ros2Unity();
-                child.transform.localPosition = ((UnityEngine.Vector3)m.GetColumn(3)).Ros2Unity();
+                child.transform.localPosition = ((UnityEngine.Vector3) m.GetColumn(3)).Ros2Unity();
                 child.transform.localScale = m.lossyScale;
 
                 Uri includeUri = new Uri(include.Uri);

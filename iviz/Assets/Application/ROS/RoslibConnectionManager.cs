@@ -408,7 +408,7 @@ namespace Iviz.Controllers
                 }
                 catch (Exception e)
                 {
-                    Logger.Error(e);
+                    Logger.Warn(e);
                     Disconnect();
                 }
             });
@@ -422,7 +422,7 @@ namespace Iviz.Controllers
             }
             catch (Exception e)
             {
-                Logger.Error(e);
+                Logger.Warn(e);
                 return false;
             }
         }

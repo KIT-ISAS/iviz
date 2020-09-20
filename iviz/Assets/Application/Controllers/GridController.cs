@@ -185,7 +185,7 @@ namespace Iviz.Controllers
             //name = "Grid Controller";
 
             //grid = ResourcePool.GetOrCreate<GridResource>(Resource.Displays.Grid);
-            grid = Resource.Displays.GetOrCreate<GridResource>();
+            grid = ResourcePool.GetOrCreateDisplay<GridResource>();
             grid.name = "Grid";
 
             node = DisplayClickableNode.Instantiate("GridNode");
@@ -223,9 +223,8 @@ namespace Iviz.Controllers
 
         public void Stop()
         {
-            //ResourcePool.Dispose(Resource.Displays.Grid, grid.gameObject);
             grid.Suspend();
-            Resource.Displays.Dispose(grid);
+            ResourcePool.DisposeDisplay(grid);
             node.Stop();
             UnityEngine.Object.Destroy(node.gameObject);
             UnityEngine.Object.Destroy(reflectionProbe.gameObject);

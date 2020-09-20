@@ -46,7 +46,6 @@ Shader "iviz/PointCloud2"
                 float4(-0.5, 0.5, 0, 0),
             };
 			
-			//StructuredBuffer<float2> _Quad;
 			StructuredBuffer<Point> _Points;
 
 			struct v2f
@@ -60,8 +59,6 @@ Shader "iviz/PointCloud2"
 				unity_ObjectToWorld = _LocalToWorld;
 				unity_WorldToObject = _WorldToLocal;
 
-				//float2 extent = abs(UNITY_MATRIX_P._11_22);
-				//float2 quadVertex = _Quad[id] * _Scale;
 				float extent = abs(UNITY_MATRIX_P._11) * _Scale;
 				float4 quadVertex = Quad[id] * extent;
 				Point centerPoint = _Points[inst];

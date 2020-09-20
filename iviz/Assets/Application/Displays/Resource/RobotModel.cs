@@ -20,6 +20,8 @@ namespace Iviz.Displays
         public string BaseLink { get; }
         public GameObject BaseLinkObject { get; }
 
+        public string Description { get; }
+        
         readonly Dictionary<string, GameObject> linkObjects = new Dictionary<string, GameObject>();
         readonly Dictionary<string, GameObject> jointObjects = new Dictionary<string, GameObject>();
         readonly Dictionary<string, string> linkParents = new Dictionary<string, string>();
@@ -91,6 +93,7 @@ namespace Iviz.Displays
             var robot = Robot.Create(robotDescription);
             Robot = robot;
             Name = robot.Name;
+            Description = robotDescription;
 
             Dictionary<string, Material> rootMaterials = new Dictionary<string, Material>();
             foreach (var material in robot.Materials)

@@ -151,6 +151,8 @@ namespace Iviz.Controllers
             }
         }
 
+        public bool IsIntensityUsed => pointCloud != null && pointCloud.UseIntensityTexture; 
+
         public uint MaxQueueSize
         {
             get => config.MaxQueueSize;

@@ -11,7 +11,7 @@ namespace Iviz.App
         public TrashButtonWidget CloseButton { get; private set; }
         public ToggleButtonWidget HideButton { get; private set; }
         public FrameWidget Frame { get; private set; }
-        public DataLabelWidget Description { get; private set; }
+        public DataLabelWidget HelpText { get; private set; }
         public InputFieldWithHintsWidget SourceParam { get; private set; }
         public ToggleWidget AttachToTf { get; private set; }
         public InputFieldWidget FramePrefix { get; private set; }
@@ -19,6 +19,7 @@ namespace Iviz.App
         public ColorPickerWidget Tint { get; private set; }
         public SliderWidget Alpha { get; private set; }
         public ToggleWidget OcclusionOnlyMode { get; private set; }
+        public ToggleWidget Save { get; private set; }
 
 
         void Awake()
@@ -26,7 +27,7 @@ namespace Iviz.App
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("Robot");
             Frame = p.AddFrame();
-            Description = p.AddDataLabel("<b>No Robot Loaded</b>").SetAlignment(TextAnchor.MiddleCenter).SetHasRichText(true);
+            HelpText = p.AddDataLabel("<b>No Robot Loaded</b>").SetAlignment(TextAnchor.MiddleCenter).SetHasRichText(true);
             SourceParam = p.AddInputFieldWithHints("Source Parameter").SetPlaceholder("<none>");
             AttachToTf = p.AddToggle("Attach to TF Frames");
             FramePrefix = p.AddInputField("TF Frame Prefix").SetPlaceholder("<none>");
@@ -34,6 +35,7 @@ namespace Iviz.App
             Tint = p.AddColorPicker("Tint");
             Alpha = p.AddSlider("Alpha").SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256);
             OcclusionOnlyMode = p.AddToggle("AR Occlusion Only Mode");
+            Save = p.AddToggle("Save this Robot Locally");
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();
             p.UpdateSize();

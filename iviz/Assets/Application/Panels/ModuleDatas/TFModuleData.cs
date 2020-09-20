@@ -48,20 +48,12 @@ namespace Iviz.App
             panel.ListenerStatic.RosListener = listener.ListenerStatic;
             //panel.ShowAxes.Value = listener.AxisVisible;
             panel.HideButton.State = listener.AxisVisible;
-            panel.FrameSize.Value = listener.AxisSize;
+            panel.FrameSize.Value = listener.FrameSize;
             panel.ShowFrameLabels.Value = listener.AxisLabelVisible;
-            panel.FrameLabelSize.Value = listener.AxisLabelSize;
-            panel.FrameLabelSize.Interactable = listener.AxisLabelVisible;
             panel.ConnectToParent.Value = listener.ParentConnectorVisible;
             panel.KeepOnlyUsedFrames.Value = !listener.ShowAllFrames;
             panel.Sender.Set(listener.Publisher);
-
-            /*
-            panel.ShowAxes.ValueChanged += f =>
-            {
-                listener.AxisVisible = f;
-            };
-            */
+            
             panel.HideButton.Clicked += () =>
             {
                 listener.AxisVisible = !listener.AxisVisible;
@@ -70,15 +62,10 @@ namespace Iviz.App
             panel.ShowFrameLabels.ValueChanged += f =>
             {
                 listener.AxisLabelVisible = f;
-                panel.FrameLabelSize.Interactable = f;
             };
             panel.FrameSize.ValueChanged += f =>
             {
-                listener.AxisSize = f;
-            };
-            panel.FrameLabelSize.ValueChanged += f =>
-            {
-                listener.AxisLabelSize = f;
+                listener.FrameSize = f;
             };
             panel.ConnectToParent.ValueChanged += f =>
             {

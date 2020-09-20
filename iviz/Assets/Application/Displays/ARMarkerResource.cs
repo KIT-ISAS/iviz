@@ -66,7 +66,7 @@ namespace Iviz.Displays
         {
             Scale = 0.105f;
 
-            resource = Resource.Displays.GetOrCreate<LineResource>(transform);
+            resource = ResourcePool.GetOrCreateDisplay<LineResource>(transform);
             resource.ElementSize = 0.5f; 
             
             Vector3 a = new Vector3(1, 0, 1) / 2;

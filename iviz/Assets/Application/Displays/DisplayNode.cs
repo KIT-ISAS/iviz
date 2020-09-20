@@ -33,7 +33,7 @@ namespace Iviz.Controllers
 
         public void AttachTo(string parentId)
         {
-            if (Parent is null || parentId != Parent.Id)
+            if (Parent == null || parentId != Parent.Id)
             {
                 Parent = string.IsNullOrEmpty(parentId) ? 
                     TFListener.MapFrame : 
@@ -55,7 +55,7 @@ namespace Iviz.Controllers
             }
             else
             {
-                if (Parent is null || parentId != Parent.Id)
+                if (Parent == null || parentId != Parent.Id)
                 {
                     TFFrame frame = TFListener.GetOrCreateFrame(parentId, this);
                     SetParent(frame, false);

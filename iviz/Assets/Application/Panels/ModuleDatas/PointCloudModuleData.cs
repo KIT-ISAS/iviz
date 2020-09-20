@@ -24,9 +24,6 @@ namespace Iviz.App
             constructor.GetConfiguration<PointCloudConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.PointCloud) as PointCloudPanelContents;
-            //listener = Instantiate<PointCloudListener>();
-            //listener.name = "PointCloud:" + Topic;
-            //listener.ModuleData = this;
             listener = new PointCloudListener(this);
             if (constructor.Configuration == null)
             {
@@ -45,11 +42,13 @@ namespace Iviz.App
             panel.Listener.RosListener = listener.Listener;
             panel.Frame.Owner = listener;
 
-            panel.NumPoints.Label = $"Number of Points: {listener.Size}";
-
             string minIntensityStr = listener.MeasuredIntensityBounds.x.ToString("#,0.##", UnityUtils.Culture);
             string maxIntensityStr = listener.MeasuredIntensityBounds.y.ToString("#,0.##", UnityUtils.Culture);
-            panel.MinMax.Label = $"Min Intensity: {minIntensityStr} Max: {maxIntensityStr}";
+            panel.NumPoints.Label = 
+                $"<b>{listener.Size} Points</b>\n" +
+                (listener.Size == 0 ? "Empty" :
+                    listener.IsIntensityUsed ? $"[{minIntensityStr} .. {maxIntensityStr}]" :
+                    "Color");
 
             panel.Colormap.Index = (int)listener.Colormap;
             panel.PointSize.Value = listener.PointSize;
@@ -111,11 +110,14 @@ namespace Iviz.App
         {
             base.UpdatePanel();
             panel.IntensityChannel.Options = listener.FieldNames;
-            panel.NumPoints.Label = $"Number of Points: {listener.Size}";
 
             string minIntensityStr = listener.MeasuredIntensityBounds.x.ToString("#,0.##", UnityUtils.Culture);
             string maxIntensityStr = listener.MeasuredIntensityBounds.y.ToString("#,0.##", UnityUtils.Culture);
-            panel.MinMax.Label = $"Min Intensity: {minIntensityStr} Max: {maxIntensityStr}";
+            panel.NumPoints.Label = 
+                $"<b>{listener.Size} Points</b>\n" +
+                (listener.Size == 0 ? "Empty" :
+                listener.IsIntensityUsed ? $"[{minIntensityStr} .. {maxIntensityStr}]" :
+                "Color");
         }
 
         public override void AddToState(StateConfiguration config)

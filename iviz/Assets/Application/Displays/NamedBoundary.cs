@@ -57,7 +57,7 @@ namespace Iviz.Controllers
                 else
                 {
                     gameObject.SetActive(true);
-                    labelObject.transform.localScale = TFListener.Instance.AxisLabelSize * Vector3.one;
+                    labelObject.transform.localScale = TFListener.Instance.FrameLabelSize * Vector3.one;
                 }
             }
         }

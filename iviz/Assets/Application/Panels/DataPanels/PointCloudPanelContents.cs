@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Iviz.Resources;
+using UnityEngine;
 
 namespace Iviz.App
 {
@@ -12,7 +13,6 @@ namespace Iviz.App
         static readonly List<string> DefaultChannels = new List<string> { "x", "y", "z" };
         public FrameWidget Frame { get; private set; }
         public DataLabelWidget NumPoints { get; private set; }
-        public DataLabelWidget MinMax { get; private set; }
         public SliderWidget PointSize { get; private set; }
         public DropdownWidget Colormap { get; private set; }
         public DropdownWidget IntensityChannel { get; private set; }
@@ -31,8 +31,7 @@ namespace Iviz.App
             p.AddHeadTitleWidget("PointCloud");
             Listener = p.AddListener();
             Frame = p.AddFrame();
-            NumPoints = p.AddDataLabel("Number of Points");
-            MinMax = p.AddDataLabel("Min/Max");
+            NumPoints = p.AddDataLabel("Number of Points").SetHasRichText(true).SetAlignment(TextAnchor.MiddleCenter);
             PointSize = p.AddSlider("Point Size").SetMinValue(0.01f).SetMaxValue(0.1f);
             //p.AddToggle("Calculate Min/Max");
             IntensityChannel = p.AddDropdown("Intensity Channel")

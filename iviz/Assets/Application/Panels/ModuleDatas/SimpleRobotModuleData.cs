@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Iviz.Controllers;
 using Iviz.Resources;
 using Iviz.Roslib;
@@ -9,11 +10,10 @@ namespace Iviz.App
     /// <summary>
     /// <see cref="SimpleRobotPanelContents"/> 
     /// </summary>
-
     public sealed class SimpleRobotModuleData : ModuleData
     {
         const string ParamSuffix = "_description";
-        
+
         readonly SimpleRobotPanelContents panel;
         readonly SimpleRobotController robot;
 
@@ -23,16 +23,17 @@ namespace Iviz.App
         public override IController Controller => robot;
 
         public SimpleRobotModuleData(ModuleDataConstructor constructor) :
-        base(constructor.ModuleList, constructor.Topic, constructor.Type)
+            base(constructor.ModuleList, constructor.Topic, constructor.Type)
         {
             robot = new SimpleRobotController(this);
             if (constructor.Configuration != null)
             {
-                robot.Config = (SimpleRobotConfiguration)constructor.Configuration;
+                robot.Config = (SimpleRobotConfiguration) constructor.Configuration;
             }
+
             panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Robot) as SimpleRobotPanelContents;
             UpdateModuleButton();
-            
+
             ConnectionManager.Connection.ConnectionStateChanged += OnConnectionStateChanged;
         }
 
@@ -42,8 +43,9 @@ namespace Iviz.App
             {
                 return;
             }
+
             robot.SourceParameter = robot.SourceParameter;
-            panel.Description.Label = robot.Description;
+            panel.HelpText.Label = robot.HelpText;
             UpdateModuleButton();
         }
 
@@ -53,15 +55,15 @@ namespace Iviz.App
             robot.Stop();
             ConnectionManager.Connection.ConnectionStateChanged -= OnConnectionStateChanged;
         }
-        
+
         public override void SetupPanel()
         {
             panel.Frame.Owner = robot;
             panel.SourceParam.Value = robot.SourceParameter;
-            panel.Description.Label = robot.Description;
-            panel.SourceParam.Hints =
-                ConnectionManager.GetSystemParameterList().Where(x => x.HasSuffix(ParamSuffix));
+            panel.HelpText.Label = robot.HelpText;
             
+            panel.SourceParam.Hints = GetParameterHints();
+
             panel.FramePrefix.Value = robot.FramePrefix;
             panel.FrameSuffix.Value = robot.FrameSuffix;
             panel.AttachToTf.Value = robot.AttachedToTf;
@@ -70,6 +72,9 @@ namespace Iviz.App
             panel.OcclusionOnlyMode.Value = robot.RenderAsOcclusionOnly;
             panel.Tint.Value = robot.Tint;
             panel.Alpha.Value = robot.Tint.a;
+
+            panel.Save.Value = IsRobotSaved();
+            panel.Save.Interactable = !string.IsNullOrEmpty(robot.Robot?.Name);
 
             panel.Tint.ValueChanged += f =>
             {
@@ -87,24 +92,20 @@ namespace Iviz.App
             {
                 robot.RenderAsOcclusionOnly = f;
             };
-
-            /*
-            panel.ResourceType.ValueChanged += (_, f) =>
-            {
-                robot.RobotResource = f;
-                UpdateModuleButton();
-            };
-            */
             panel.SourceParam.EndEdit += f =>
             {
                 robot.SourceParameter = f;
-                panel.Description.Label = robot.Description;
+                panel.Save.Value = IsRobotSaved();
+
+                panel.HelpText.Label = robot.HelpText;
                 UpdateModuleButton();
+
+                panel.Save.Interactable = !string.IsNullOrEmpty(robot.Robot?.Name);
             };
             panel.AttachToTf.ValueChanged += f =>
             {
                 robot.AttachedToTf = f;
-            }; 
+            };
             panel.CloseButton.Clicked += () =>
             {
                 DataPanelManager.HideSelectedPanel();
@@ -124,15 +125,40 @@ namespace Iviz.App
                 panel.HideButton.State = robot.Visible;
                 UpdateModuleButton();
             };
+            panel.Save.ValueChanged += f =>
+            {
+                if (string.IsNullOrEmpty(robot?.Robot?.Name) || string.IsNullOrEmpty(robot.Robot.Description))
+                {
+                    return;
+                }
+
+                if (f)
+                {
+                    Resource.External.AddRobot(robot.Robot.Name, robot.Robot.Description);
+                }
+                else
+                {
+                    Resource.External.RemoveRobot(robot.Robot.Name);
+                }
+            };
         }
 
         public override void UpdatePanel()
         {
             base.UpdatePanel();
-            panel.SourceParam.Hints =
-                ConnectionManager.GetSystemParameterList().Where(x => x.HasSuffix(ParamSuffix));
+            panel.SourceParam.Hints = GetParameterHints();
         }
 
+        static IEnumerable<string> GetParameterCandidates() =>
+            ConnectionManager.GetSystemParameterList().Where(x => x.HasSuffix(ParamSuffix));
+
+        static IEnumerable<string> GetSavedRobotsCandidates() =>
+            Resource.External.GetRobotNames().Select(name => $"{SimpleRobotController.LocalPrefix}{name}");
+        
+        static IEnumerable<string> GetParameterHints() => GetParameterCandidates().Concat(GetSavedRobotsCandidates());
+        
+        bool IsRobotSaved() => robot.Robot?.Name != null && Resource.External.ContainsRobot(robot.Robot.Name);
+        
         protected override void UpdateModuleButton()
         {
             ButtonText = $"{Resource.Font.Split(robot.Name, ModuleListPanel.ModuleDataCaptionWidth)}\n<b>{Module}</b>";

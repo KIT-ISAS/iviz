@@ -22,9 +22,13 @@ namespace Iviz.Resources
 {
     public class ResourceNotFoundException : Exception
     {
-        public ResourceNotFoundException() {}
-        public ResourceNotFoundException(string message) : base(message) {}
+        public ResourceNotFoundException()
+        {
+        }
 
+        public ResourceNotFoundException(string message) : base(message)
+        {
+        }
     }
 
 
@@ -141,7 +145,7 @@ namespace Iviz.Resources
             }
 
             int id = 0;
-            
+
             /// <summary>
             /// Returns the instance id of the resource.
             /// </summary>
@@ -184,7 +188,7 @@ namespace Iviz.Resources
             /// <returns>An instantiated clone.</returns>
             public T Instantiate(Transform parent = null)
             {
-                if (Object is null)
+                if (Object == null)
                 {
                     throw new ResourceNotFoundException();
                 }
@@ -192,7 +196,7 @@ namespace Iviz.Resources
                 return UnityEngine.Object.Instantiate(Object, parent);
             }
 
-            public bool Equals(Info<T> other)    
+            public bool Equals(Info<T> other)
             {
                 return !(other is null) && Id == other.Id;
             }
@@ -273,7 +277,7 @@ namespace Iviz.Resources
                 {
                     throw new ArgumentNullException(nameof(texture));
                 }
-                
+
                 if (materialsByTexture.TryGetValue(texture, out Material material))
                 {
                     return material;
@@ -292,7 +296,7 @@ namespace Iviz.Resources
                 {
                     throw new ArgumentNullException(nameof(texture));
                 }
-                
+
                 if (materialsByTextureAlpha.TryGetValue(texture, out Material material))
                 {
                     return material;
@@ -448,40 +452,49 @@ namespace Iviz.Resources
                         continue;
                     }
 
+                    if (resourceByType.ContainsKey(type))
+                    {
+                        resourceByType[type] = null; // not unique! invalidate
+                        continue;
+                    }
+
                     resourceByType[type] = info;
                 }
 
                 return resourceByType;
             }
 
-            bool TryGetResource(Type type, out GameObjectInfo info)
+            public bool TryGetResource(Type type, out GameObjectInfo info)
             {
-                return ResourceByType.TryGetValue(type, out info);
+                return ResourceByType.TryGetValue(type, out info) && info != null;
             }
 
-            public T GetOrCreate<T>(Transform parent = null, bool enabled = true) where T : MonoBehaviour
+            /*
+            public T ValidateAndGetOrCreate<T>(Transform parent = null, bool enabled = true) where T : MonoBehaviour, IDisplay
             {
                 if (!TryGetResource(typeof(T), out GameObjectInfo info))
                 {
                     throw new ResourceNotFoundException("Cannot find unique display type for type " + nameof(T));
                 }
+
                 return ResourcePool.GetOrCreate<T>(info, parent, enabled);
             }
 
-            public void Dispose<T>([NotNull] T resource) where T : MonoBehaviour
+            public void ValidateAndDispose<T>(T resource) where T : MonoBehaviour, IDisplay
             {
-                if (resource is null)
+                if (resource == null)
                 {
                     throw new ArgumentNullException(nameof(resource));
                 }
-                
+
                 if (!TryGetResource(typeof(T), out GameObjectInfo info))
                 {
                     throw new ResourceNotFoundException("Cannot find unique display type for resource");
                 }
-                
+
                 ResourcePool.Dispose(info, resource.gameObject);
             }
+            */
         }
 
         public class ControllersType
@@ -685,7 +698,8 @@ namespace Iviz.Resources
         public static FontInfo Font => fontInfo ?? (fontInfo = new FontInfo());
 
         static InternalResourceManager internals;
-        static InternalResourceManager Internal => 
+
+        static InternalResourceManager Internal =>
             internals ?? (internals = new InternalResourceManager());
 
         static ExternalResourceManager external;
@@ -698,11 +712,11 @@ namespace Iviz.Resources
             return Internal.TryGet(uri, out info) ||
                    External.TryGet(uri, out info);
         }
-        
+
         public static bool TryGetResource(Uri uri, out Info<Texture2D> info)
         {
             return Internal.TryGet(uri, out info) ||
                    External.TryGet(uri, out info);
-        }        
+        }
     }
 }

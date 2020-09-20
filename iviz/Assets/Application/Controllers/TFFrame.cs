@@ -1,11 +1,11 @@
-﻿using UnityEngine;
+﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using Iviz.App;
 using Iviz.Displays;
 using Iviz.Resources;
-using System;
-using System.Collections.ObjectModel;
-using Iviz.App;
+using UnityEngine;
 
 namespace Iviz.Controllers
 {
@@ -14,22 +14,33 @@ namespace Iviz.Controllers
         const int MaxPoseMagnitude = 1000;
         const int Layer = 9;
 
-        readonly Timeline timeline = new Timeline();
-        TrailResource trail;
+        [SerializeField] string id;
+        [SerializeField] Vector3 rosPosition;
 
-        GameObject labelObject;
-        TextMesh labelObjectText;
-        Billboard labelObjectBillboard;
-        LineConnector parentConnector;
-        AxisFrameResource axis;
-
-        readonly HashSet<DisplayNode> listeners = new HashSet<DisplayNode>();
         readonly Dictionary<string, TFFrame> children = new Dictionary<string, TFFrame>();
+        readonly HashSet<DisplayNode> listeners = new HashSet<DisplayNode>();
+        readonly Timeline timeline = new Timeline();
+
+        Pose pose;
+
+        bool acceptsParents = true;
+        float alpha = 1;
+        float labelSize = 1.0f;
+        bool labelVisible;
+        bool trailVisible;
+
+        bool visible;
+        bool forceVisible;
+
+        AxisFrameResource axis;
+        GameObject labelObject;
+        Billboard labelObjectBillboard;
+        TextMarkerResource labelObjectText;
+        LineConnector parentConnector;
+        TrailResource trail;
 
         public ReadOnlyDictionary<string, TFFrame> Children =>
             new ReadOnlyDictionary<string, TFFrame>(children);
-
-        [SerializeField] string id;
 
         public string Id
         {
@@ -37,7 +48,7 @@ namespace Iviz.Controllers
             set
             {
                 id = value;
-                labelObjectText.text = id;
+                labelObjectText.Text = id;
                 trail.Name = "[Trail:" + id + "]";
                 //anchor.Name = "[Anchor:" + id + "]";
             }
@@ -52,8 +63,6 @@ namespace Iviz.Controllers
                 labelObject.SetActive(value || LabelVisible);
             }
         }
-
-        float alpha = 1;
 
         public float Alpha
         {
@@ -71,15 +80,190 @@ namespace Iviz.Controllers
         public override Bounds WorldBounds => axis.WorldBounds;
         public override Vector3 BoundsScale => axis.WorldScale;
 
-        public void AddListener(DisplayNode display)
-        {
-            listeners.Add(display);
-        }
-
         public bool ColliderEnabled
         {
             get => axis.ColliderEnabled;
             set => axis.ColliderEnabled = value;
+        }
+
+        bool ForceVisible
+        {
+            get => forceVisible;
+            set
+            {
+                forceVisible = value;
+                Visible = Visible;
+                //AnchorVisible = AnchorVisible;
+                TrailVisible = TrailVisible;
+            }
+        }
+
+        public bool ForceInvisible { get; set; }
+
+        public bool Visible
+        {
+            get => visible;
+            set
+            {
+                visible = value;
+                axis.Visible = (value || ForceVisible) && !ForceInvisible;
+                TrailVisible = TrailVisible;
+            }
+        }
+
+        public bool LabelVisible
+        {
+            get => labelVisible;
+            set
+            {
+                labelVisible = value;
+                labelObject.SetActive(!ForceInvisible && (value || Selected) && (ForceVisible || Visible));
+            }
+        }
+
+        public float LabelSize
+        {
+            get => labelSize;
+            set
+            {
+                labelSize = value;
+                labelObject.transform.localScale = 0.5f * value * FrameSize * Vector3.one;
+            }
+        }
+
+        public bool ConnectorVisible
+        {
+            get => parentConnector.gameObject.activeSelf;
+            set => parentConnector.gameObject.SetActive(value);
+        }
+
+        public float FrameSize
+        {
+            get => axis.AxisLength;
+            set
+            {
+                axis.AxisLength = value;
+                parentConnector.LineWidth = FrameSize / 20;
+                labelObjectBillboard.offset = 1.5f * FrameSize * Vector3.up;
+                LabelSize = LabelSize;
+            }
+        }
+
+        public bool TrailVisible
+        {
+            get => trailVisible;
+            set
+            {
+                trailVisible = value;
+                trail.Visible = value && (Visible || ForceVisible);
+                if (value)
+                {
+                    trail.DataSource = () => transform.position;
+                }
+                else
+                {
+                    trail.DataSource = null;
+                }
+            }
+        }
+
+        public bool AcceptsParents
+        {
+            get => acceptsParents;
+            set
+            {
+                acceptsParents = value;
+                if (!acceptsParents)
+                {
+                    Parent = TFListener.RootFrame;
+                }
+            }
+        }
+
+        public override TFFrame Parent
+        {
+            get => base.Parent;
+            set
+            {
+                if (!SetParent(value))
+                {
+                    Logger.Error($"TFFrame: Failed to set '{value.Id}' as a parent to {Id}");
+                }
+            }
+        }
+
+        public Pose WorldPose => TFListener.RelativePose(transform.AsPose());
+
+        public Pose AbsolutePose => transform.AsPose();
+
+        bool HasNoListeners => !listeners.Any();
+
+        bool IsChildless => !children.Any();
+
+        public override string Name => Id;
+
+        public override Pose BoundsPose => transform.AsPose();
+
+        void Awake()
+        {
+            labelObjectText = ResourcePool.GetOrCreateDisplay<TextMarkerResource>(transform);
+            labelObject = labelObjectText.gameObject;
+            labelObject.SetActive(false);
+            labelObject.name = "[Label]";
+            labelObject.transform.localScale = 0.5f * Vector3.one;
+            labelObjectBillboard = labelObject.GetComponent<Billboard>();
+
+            parentConnector = ResourcePool.GetOrCreate(Resource.Displays.LineConnector, transform)
+                .GetComponent<LineConnector>();
+            parentConnector.A = transform;
+
+
+            // TFListener.BaseFrame may not exist yet
+            var parent = transform.parent;
+            parentConnector.B = parent != null ? parent : TFListener.RootFrame?.transform;
+
+            parentConnector.name = "[Connector]";
+
+            axis = ResourcePool.GetOrCreateDisplay<AxisFrameResource>(transform);
+
+            if (Settings.IsHololens)
+            {
+                axis.ColliderEnabled = false;
+            }
+
+            axis.ColliderEnabled = true;
+            axis.Layer = Layer;
+
+            axis.name = "[Axis]";
+
+            FrameSize = 0.125f;
+
+            parentConnector.gameObject.SetActive(false);
+
+            UsesBoundaryBox = false;
+
+            trail = ResourcePool.GetOrCreateDisplay<TrailResource>();
+            trail.TimeWindowInMs = 5000;
+            trail.Color = Color.yellow;
+            TrailVisible = false;
+        }
+
+        public void SplitForRecycle()
+        {
+            ResourcePool.DisposeDisplay(axis);
+            ResourcePool.DisposeDisplay(labelObjectText);
+            ResourcePool.Dispose(Resource.Displays.LineConnector, parentConnector.gameObject);
+            ResourcePool.DisposeDisplay(trail);
+
+            axis = null;
+            labelObject = null;
+            parentConnector = null;
+            trail = null;
+        }
+
+        public void AddListener(DisplayNode display)
+        {
+            listeners.Add(display);
         }
 
         public void RemoveListener(DisplayNode display)
@@ -115,117 +299,6 @@ namespace Iviz.Controllers
             if (HasNoListeners && IsChildless)
             {
                 TFListener.Instance.MarkAsDead(this);
-            }
-        }
-
-        bool forceVisible;
-
-        public bool ForceVisible
-        {
-            get => forceVisible;
-            set
-            {
-                forceVisible = value;
-                Visible = Visible;
-                //AnchorVisible = AnchorVisible;
-                TrailVisible = TrailVisible;
-            }
-        }
-
-        public bool ForceInvisible { get; set; }
-
-        bool visible;
-
-        public bool Visible
-        {
-            get => visible;
-            set
-            {
-                visible = value;
-                axis.Visible = (value || ForceVisible) && !ForceInvisible;
-                TrailVisible = TrailVisible;
-            }
-        }
-
-        bool labelVisible;
-
-        public bool LabelVisible
-        {
-            get => labelVisible;
-            set
-            {
-                labelVisible = value;
-                labelObject.SetActive(!ForceInvisible && (value || Selected) && (ForceVisible || Visible));
-            }
-        }
-
-        public float LabelSize
-        {
-            get => labelObject.transform.localScale.x;
-            set => labelObject.transform.localScale = value * Vector3.one;
-        }
-
-        public bool ConnectorVisible
-        {
-            get => parentConnector.gameObject.activeSelf;
-            set => parentConnector.gameObject.SetActive(value);
-        }
-
-        public float AxisLength
-        {
-            get => axis.AxisLength;
-            set
-            {
-                axis.AxisLength = value;
-                parentConnector.LineWidth = AxisLength / 20;
-                labelObjectBillboard.offset = 2 * AxisLength * Vector3.up;
-            }
-        }
-
-        bool trailVisible;
-
-        public bool TrailVisible
-        {
-            get => trailVisible;
-            set
-            {
-                trailVisible = value;
-                trail.Visible = value && (Visible || ForceVisible);
-                if (value)
-                {
-                    trail.DataSource = () => transform.position;
-                }
-                else
-                {
-                    trail.DataSource = null;
-                }
-            }
-        }
-
-        bool acceptsParents = true;
-
-        public bool AcceptsParents
-        {
-            get => acceptsParents;
-            set
-            {
-                acceptsParents = value;
-                if (!acceptsParents)
-                {
-                    Parent = TFListener.RootFrame;
-                }
-            }
-        }
-
-        public override TFFrame Parent
-        {
-            get => base.Parent;
-            set
-            {
-                if (!SetParent(value))
-                {
-                    Logger.Error($"TFFrame: Failed to set '{value.Id}' as a parent to {Id}");
-                }
             }
         }
 
@@ -266,7 +339,7 @@ namespace Iviz.Controllers
                 Parent.AddChild(this);
             }
 
-            Transform parent = transform.parent;            
+            var parent = transform.parent;
             parentConnector.B = parent != null ? parent : TFListener.RootFrame.transform;
 
             return true;
@@ -282,19 +355,10 @@ namespace Iviz.Controllers
             return Parent == frame || Parent.IsChildOf(frame);
         }
 
-
-        Pose pose;
-
-        public Pose WorldPose => TFListener.RelativePose(transform.AsPose());
-
-        public Pose AbsolutePose => transform.AsPose();
-
-        [SerializeField] Vector3 debugRosPosition;
-
         public void SetPose(in TimeSpan time, in Pose newPose)
         {
             pose = newPose;
-            debugRosPosition = pose.position.Unity2Ros();
+            rosPosition = pose.position.Unity2Ros();
 
             if (newPose.position.sqrMagnitude > MaxPoseMagnitude * MaxPoseMagnitude)
             {
@@ -312,81 +376,13 @@ namespace Iviz.Controllers
                 timeline.Add(time, transform.AsPose());
             }
 
-            foreach (TFFrame child in children.Values)
-            {
+            foreach (var child in children.Values)
                 child.LogPose(time);
-            }
         }
 
         public Pose LookupPose(in TimeSpan time)
         {
             return timeline.Count == 0 ? pose : timeline.Lookup(time);
-        }
-
-        bool HasNoListeners => !listeners.Any();
-
-        bool IsChildless => !children.Any();
-
-        public override string Name => Id;
-
-        public override Pose BoundsPose => transform.AsPose();
-
-        void Awake()
-        {
-            labelObject = ResourcePool.GetOrCreate(Resource.Displays.Text, transform);
-            labelObject.gameObject.SetActive(false);
-            labelObjectText = labelObject.GetComponent<TextMesh>();
-            labelObject.name = "[Label]";
-            labelObject.transform.localScale = 0.5f * Vector3.one;
-            labelObjectBillboard = labelObject.GetComponent<Billboard>();
-
-            parentConnector = ResourcePool.GetOrCreate(Resource.Displays.LineConnector, transform)
-                .GetComponent<LineConnector>();
-            parentConnector.A = transform;
-
-
-            // TFListener.BaseFrame may not exist yet
-            Transform parent = transform.parent;
-            parentConnector.B = parent != null ? parent : TFListener.RootFrame?.transform; 
-
-            parentConnector.name = "[Connector]";
-
-            axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Displays.AxisFrame, transform);
-            
-            if (Settings.IsHololens)
-            {
-                axis.ColliderEnabled = false;
-            }
-            else
-            {
-                axis.ColliderEnabled = true;
-                axis.Layer = Layer;
-            }
-
-            axis.name = "[Axis]";
-
-            AxisLength = 0.125f;
-
-            parentConnector.gameObject.SetActive(false);
-
-            UsesBoundaryBox = false;
-
-            trail = ResourcePool.GetOrCreate<TrailResource>(Resource.Displays.Trail);
-            trail.TimeWindowInMs = 5000;
-            trail.Color = Color.yellow;
-            TrailVisible = false;
-        }
-
-        public void SplitForRecycle()
-        {
-            ResourcePool.Dispose(Resource.Displays.AxisFrame, axis.gameObject);
-            ResourcePool.Dispose(Resource.Displays.Text, labelObject);
-            ResourcePool.Dispose(Resource.Displays.LineConnector, parentConnector.gameObject);
-            ResourcePool.Dispose(Resource.Displays.Trail, trail.gameObject);
-            axis = null;
-            labelObject = null;
-            parentConnector = null;
-            trail = null;
         }
 
         public override void Stop()
@@ -407,15 +403,15 @@ namespace Iviz.Controllers
                 return null;
             }
 
-            Transform mTransform = transform;
+            var mTransform = transform;
             if (!mTransform.hasChanged && !forceRebuild)
             {
                 return null;
             }
 
             mTransform.hasChanged = false;
-            bool foundAnchor = ARController.Instance.FindClosest(mTransform.position, out Vector3 anchor, out Vector3 _);
-            return foundAnchor ? anchor : (Vector3?)null;
+            var foundAnchor = ARController.Instance.FindClosest(mTransform.position, out var anchor, out var _);
+            return foundAnchor ? anchor : (Vector3?) null;
         }
 
         protected override void OnDoubleClick()

@@ -13,21 +13,32 @@ namespace Iviz.Displays
 
         static ResourcePool Instance;
 
-        public static GameObject GetOrCreate([NotNull] Resource.Info<GameObject> resource, Transform parent = null, bool enable = true)
+        public static GameObject GetOrCreate(
+            Resource.Info<GameObject> resource,
+            Transform parent = null,
+            bool enable = true)
         {
-            if (resource is null)
+            if (resource == null)
             {
                 throw new ArgumentNullException(nameof(resource));
             }
-            
-            return Instance is null ? 
-                resource.Instantiate(parent) : 
-                Instance.Get(resource, parent, enable);
+
+            if (Instance != null)
+            {
+                return Instance.Get(resource, parent, enable);
+            }
+
+            GameObject obj = resource.Instantiate(parent);
+            obj.SetActive(enable);
+            return obj;
         }
 
-        public static T GetOrCreate<T>([NotNull] Resource.Info<GameObject> resource, Transform parent = null, bool enable = true) where T : MonoBehaviour
+        public static T GetOrCreate<T>(
+            Resource.Info<GameObject> resource,
+            Transform parent = null,
+            bool enable = true) where T : MonoBehaviour
         {
-            if (resource is null)
+            if (resource == null)
             {
                 throw new ArgumentNullException(nameof(resource));
             }
@@ -38,14 +49,40 @@ namespace Iviz.Displays
 
         public static void Dispose(Resource.Info<GameObject> resource, GameObject instance)
         {
-            if (Instance is null)
+            if (Instance == null)
             {
                 Destroy(instance);
             }
             else
             {
-                Instance?.Add(resource, instance);
+                Instance.Add(resource, instance);
             }
+        }
+
+        public static T GetOrCreateDisplay<T>(Transform parent = null) where T : MonoBehaviour, IDisplay
+        {
+            if (!Resource.Displays.TryGetResource(typeof(T), out Resource.Info<GameObject> info))
+            {
+                throw new ResourceNotFoundException("Cannot find unique display type for type " + nameof(T));
+            }
+
+            return GetOrCreate<T>(info, parent);
+            
+        }
+
+        public static void DisposeDisplay<T>(T resource) where T : MonoBehaviour, IDisplay
+        {
+            if (resource == null)
+            {
+                throw new ArgumentNullException(nameof(resource));
+            }
+
+            if (!Resource.Displays.TryGetResource(typeof(T), out Resource.Info<GameObject> info))
+            {
+                throw new ResourceNotFoundException("Cannot find unique display type for resource");
+            }
+
+            Dispose(info, resource.gameObject);
         }
 
         class ObjectWithDeadline
@@ -63,7 +100,7 @@ namespace Iviz.Displays
         readonly Dictionary<int, Queue<ObjectWithDeadline>> pool = new Dictionary<int, Queue<ObjectWithDeadline>>();
         readonly List<GameObject> objectsToDestroy = new List<GameObject>();
         readonly HashSet<int> destroyedObjects = new HashSet<int>();
-        
+
         void Awake()
         {
             Instance = this;
@@ -105,6 +142,7 @@ namespace Iviz.Displays
             {
                 obj.SetActive(true);
             }
+
             destroyedObjects.Remove(obj.GetInstanceID());
             //Debug.Log("State: " + string.Join(",", destroyedObjects));
             return obj;
@@ -123,7 +161,7 @@ namespace Iviz.Displays
             if (destroyedObjects.Contains(obj.GetInstanceID()))
             {
                 Debug.LogWarning($"ResourcePool: Attempting to dispose of object {obj} " +
-                    $"[ type={resource.Object.name} id {obj.GetInstanceID()} ] multiple times!");
+                                 $"[ type={resource.Object.name} id {obj.GetInstanceID()} ] multiple times!");
                 //Debug.Log("** State: " + string.Join(",", destroyedObjects));
                 return;
             }
@@ -138,6 +176,7 @@ namespace Iviz.Displays
                 queue.Enqueue(new ObjectWithDeadline(obj));
                 pool[resource.Id] = queue;
             }
+
             obj.SetActive(false);
             obj.name = resource.Name;
             obj.transform.SetParentLocal(transform);
@@ -147,10 +186,10 @@ namespace Iviz.Displays
             destroyedObjects.Add(obj.GetInstanceID());
             //Debug.Log("State: " + string.Join(",", destroyedObjects));
         }
-        
+
         void OnDestroy()
         {
             Instance = null;
-        }        
+        }
     }
 }

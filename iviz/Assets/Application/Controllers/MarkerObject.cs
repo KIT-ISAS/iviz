@@ -64,11 +64,11 @@ namespace Iviz.Controllers
 
         public string Id { get; private set; }
 
-        public override Bounds Bounds => resource?.Bounds ?? new Bounds();
-        public override Bounds WorldBounds => resource?.WorldBounds ?? new Bounds();
+        public override Bounds Bounds => resource != null ? resource.Bounds : new Bounds();
+        public override Bounds WorldBounds => resource != null ? resource.WorldBounds : new Bounds();
         public override string Name => name;
-        public override Pose BoundsPose => resource?.WorldPose ?? Pose.identity;
-        public override Vector3 BoundsScale => resource?.WorldScale ?? Vector3.one;
+        public override Pose BoundsPose => resource != null ? resource.WorldPose : Pose.identity;
+        public override Vector3 BoundsScale => resource != null ? resource.WorldScale : Vector3.one;
 
         DateTime expirationTime;
 
@@ -91,7 +91,7 @@ namespace Iviz.Controllers
 
         public bool OcclusionOnly
         {
-            get => (resource as ISupportsAROcclusion)?.OcclusionOnlyActive ?? false;
+            get => resource is ISupportsAROcclusion r && r.OcclusionOnlyActive;
             set
             {
                 if (resource is ISupportsAROcclusion arResource)
@@ -103,7 +103,7 @@ namespace Iviz.Controllers
 
         public Color Tint
         {
-            get => (resource as ISupportsTint)?.Tint ?? Color.white;
+            get => resource is ISupportsTint r ? r.Tint : Color.white;
             set
             {
                 if (resource is ISupportsTint tintResource)
@@ -115,7 +115,7 @@ namespace Iviz.Controllers
 
         public bool Visible
         {
-            get => resource?.Visible ?? true;
+            get => resource == null || resource.Visible;
             set
             {
                 if (!(resource is null))

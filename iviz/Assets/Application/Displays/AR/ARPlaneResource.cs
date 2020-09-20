@@ -1,5 +1,5 @@
+using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using Iviz.Resources;
 using Unity.Collections;
 using UnityEngine;
@@ -10,6 +10,8 @@ namespace Iviz.Displays
 {
     public class ARPlaneResource : MonoBehaviour
     {
+        [SerializeField] Color boundaryColor = Color.white;
+
         Mesh mesh;
         MeshRenderer meshRenderer;
         MeshCollider meshCollider;
@@ -17,14 +19,12 @@ namespace Iviz.Displays
         LineResource lines;
         bool isEnabled;
 
-        public Color boundaryColor = Color.white;
-
         void Awake()
         {
             mesh = new Mesh();
             plane = GetComponent<ARPlane>();
 
-            lines = Resource.Displays.GetOrCreate<LineResource>(transform);
+            lines = ResourcePool.GetOrCreateDisplay<LineResource>(transform);
             lines.Visible = false;
             lines.ElementSize = 0.005f;
             lines.Layer = gameObject.layer;
@@ -110,6 +110,12 @@ namespace Iviz.Displays
             float alpha = 1 - delta / PulseLength;
             Color color = new Color(boundaryColor.r, boundaryColor.g, boundaryColor.b, alpha);
             lines.Tint = color;
+        }
+
+        void OnDestroy()
+        {
+            ResourcePool.DisposeDisplay(lines);
+            lines = null;
         }
     }
 }
