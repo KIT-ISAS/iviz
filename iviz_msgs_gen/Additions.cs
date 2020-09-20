@@ -59,7 +59,21 @@ namespace Iviz.MsgsGen
             {
                 "public static readonly Pose Identity = new Pose(Point.Zero, Quaternion.Identity);", 
                 "public static implicit operator Transform(in Pose p) => new Transform(p.Position, p.Orientation);"  
-            },             
+            },          
+            
+            ["std_msgs/ColorRGBA"] = new[]
+            {
+                "public static readonly ColorRGBA White = new ColorRGBA(1, 1, 1, 1);", 
+                "public static readonly ColorRGBA Black = new ColorRGBA(0, 0, 0, 1);", 
+                "public static readonly ColorRGBA Red = new ColorRGBA(1, 0, 0, 1);", 
+                "public static readonly ColorRGBA Green = new ColorRGBA(0, 1, 0, 1);", 
+                "public static readonly ColorRGBA Blue = new ColorRGBA(0, 0, 1, 1);", 
+                "public static readonly ColorRGBA Yellow = new ColorRGBA(1, 1, 0, 1);", 
+                "public static readonly ColorRGBA Cyan = new ColorRGBA(0, 1, 1, 1);", 
+                "public static readonly ColorRGBA Magenta = new ColorRGBA(1, 0, 1, 1);", 
+                "public static readonly ColorRGBA Grey = new ColorRGBA(0.5f, 0.5f, 0.5f, 1);", 
+                "public static ColorRGBA operator *(in ColorRGBA v, in ColorRGBA w) => new ColorRGBA(v.R * w.R, v.G * w.G, v.B * w.B, v.A * w.A);",
+            },                 
         };
     }
 }

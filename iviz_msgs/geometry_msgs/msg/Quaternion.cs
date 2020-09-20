@@ -70,5 +70,14 @@ namespace Iviz.Msgs.GeometryMsgs
                 "H4sIAAAAAAAAEz3JTQqAQAhA4b2nENq3ik7SBSQcEkonNfo5fbWZ3fd4HU6LBDpX52DNQFI0l4+UYoqi" +
                 "WJwZo9LMf+0HJbv+r5hvPUBZjXIc8Gq6m56mE+AFLI5yL20AAAA=";
                 
+        /// Custom iviz code
+        public static readonly Quaternion Identity = new Quaternion(0, 0, 0, 1);
+        public static Quaternion operator *(in Quaternion a, in Quaternion b) =>
+            new Quaternion(
+                a.W * b.X + a.X * b.W + a.Y * b.Z - a.Z * b.Y,
+                a.W * b.Y - a.X * b.Z + a.Y * b.W + a.Z * b.X,
+                a.W * b.Z + a.X * b.Y - a.Y * b.X + a.Z * b.W,
+                a.W * b.W - a.X * b.X - a.Y * b.Y - a.Z * b.Z
+            );
     }
 }

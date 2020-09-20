@@ -76,5 +76,20 @@ namespace Iviz.Msgs.GeometryMsgs
                 "DXjscB6xyh1LPciDYiCjKrry0YuuqfaVFvdafFMElolN18+phPL0LtH5iUuhwP53xZiGrmnGJGRvr/g5" +
                 "0nqk3+YP1MrAiH8BAAA=";
                 
+        /// Custom iviz code
+        public static readonly Vector3 Zero = new Vector3(0, 0, 0);
+        public static readonly Vector3 One = new Vector3(1, 1, 1);
+        public static implicit operator Point(in Vector3 p) => new Point(p.X, p.Y, p.Z);
+        public static Vector3 operator +(in Vector3 v, in Vector3 w) => new Vector3(v.X + w.X, v.Y + w.Y, v.Z + w.Z);
+        public static Vector3 operator -(in Vector3 v, in Vector3 w) => new Vector3(v.X - w.X, v.Y - w.Y, v.Z - w.Z);
+        public static Vector3 operator *(double f, in Vector3 v) => new Vector3(f * v.X, f * v.Y, f * v.Z);
+        public static Vector3 operator *(in Vector3 v, double f) => new Vector3(f * v.X, f * v.Y, f * v.Z);
+        public static Vector3 operator /(in Vector3 v, double f) => new Vector3(v.X / f, v.Y / f, v.Z / f);
+        public static Vector3 operator -(in Vector3 v) => new Vector3(-v.X, -v.Y, -v.Z);
+        public readonly double Dot(in Vector3 v) => X * v.X + Y * v.Y + Z * v.Z;
+        public readonly double SquaredNorm => Dot(this);
+        public readonly double Norm => System.Math.Sqrt(SquaredNorm);
+        public readonly Vector3 Normalized => this / Norm;
+        public readonly Vector3 Cross(in Vector3 v) => new Vector3(Y * v.Z - Z * v.Y, Z * v.X - X * v.Z, X * v.Y - Y * v.X);
     }
 }

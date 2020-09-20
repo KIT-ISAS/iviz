@@ -68,5 +68,15 @@ namespace Iviz.Msgs.GeometryMsgs
                 "H4sIAAAAAAAAEz3HwQmAMAwF0Hum+OAK4iQuEEpCA5KUJgd1ej319t6Gs1uihRebJ6oLRqSVhSMU/M+8" +
                 "YA6dIsjBTUiv4Dp23EvP0kv0AQQdt/JVAAAA";
                 
+        /// Custom iviz code
+        public static readonly Point Zero = new Point(0, 0, 0);
+        public static readonly Point One = new Point(1, 1, 1);
+        public static implicit operator Vector3(in Point p) => new Vector3(p.X, p.Y, p.Z);
+        public static Point operator +(in Point v, in Point w) => new Point(v.X + w.X, v.Y + w.Y, v.Z + w.Z);
+        public static Point operator -(in Point v, in Point w) => new Point(v.X - w.X, v.Y - w.Y, v.Z - w.Z);
+        public static Point operator *(double f, in Point v) => new Point(f * v.X, f * v.Y, f * v.Z);
+        public static Point operator *(in Point v, double f) => new Point(f * v.X, f * v.Y, f * v.Z);
+        public static Point operator /(in Point v, double f) => new Point(v.X / f, v.Y / f, v.Z / f);
+        public static Point operator -(in Point v) => new Point(-v.X, -v.Y, -v.Z);
     }
 }

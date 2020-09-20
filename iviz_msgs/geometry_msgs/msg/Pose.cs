@@ -68,5 +68,8 @@ namespace Iviz.Msgs.GeometryMsgs
                 "bCn49mSlkllvBSZ4rI1E+/Ft4wRDTdl/zKIi6yyP4oK+sAqLOT4SahN6/sd+rm7IkD5KYvGffY7Nd+ya" +
                 "e9fsbQFfEg3oDvACaqg09xMCAAA=";
                 
+        /// Custom iviz code
+        public static readonly Pose Identity = new Pose(Point.Zero, Quaternion.Identity);
+        public static implicit operator Transform(in Pose p) => new Transform(p.Position, p.Orientation);
     }
 }
