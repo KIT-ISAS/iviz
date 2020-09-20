@@ -1,8 +1,10 @@
 ﻿using System;
+using Iviz.Msgs;
+using Iviz.XmlRpc;
 
 namespace Iviz.Roslib.XmlRpc
 {
-    class NodeClient
+    internal class NodeClient
     {
         public class ProtocolResponse
         {
@@ -112,9 +114,9 @@ namespace Iviz.Roslib.XmlRpc
         public RequestTopicResponse RequestTopic(string topic, string[][] protocols)
         {
             Arg[] args = {
-                new Arg(CallerId),
-                new Arg(topic),
-                new Arg(protocols),
+                CallerId,
+                topic,
+                protocols,
             };
             object[] response = MethodCall("requestTopic", args);
             return new RequestTopicResponse(response);
@@ -123,7 +125,7 @@ namespace Iviz.Roslib.XmlRpc
         public GetMasterUriResponse GetMasterUri()
         {
             Arg[] args = {
-                new Arg(CallerId)
+                CallerId
             };
             object[] response = MethodCall("getMasterUri", args);
             return new GetMasterUriResponse(response);
@@ -132,7 +134,7 @@ namespace Iviz.Roslib.XmlRpc
         public GetPidResponse GetPid()
         {
             Arg[] args = {
-                new Arg(CallerId)
+                CallerId
             };
             object[] response = MethodCall("getPid", args);
             return new GetPidResponse(response);
@@ -141,12 +143,13 @@ namespace Iviz.Roslib.XmlRpc
         object[] MethodCall(string function, Arg[] args)
         {
             object tmp = Service.MethodCall(Uri, CallerUri, function, args, TimeoutInMs);
-            if (!(tmp is object[] result))
+            if (tmp is object[] result)
             {
-                Logger.Log($"Rpc Response: Expected type object[], got {tmp?.GetType().Name}");
-                return null;
+                return result;
             }
-            return result;
+
+            Logger.Log($"Rpc Response: Expected type object[], got {tmp?.GetType().Name}");
+            return null;
         }
     }
 }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-
+using Iviz.XmlRpc;
 using TopicTuple = System.Tuple<string, string>;
 using TopicTuples = System.Tuple<string, string[]>;
 

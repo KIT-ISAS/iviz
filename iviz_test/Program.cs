@@ -14,7 +14,6 @@ using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.Tf2Msgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Roslib;
-using Iviz.Sdf;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Int64 = System.Int64;
@@ -27,12 +26,40 @@ namespace iviz_test
     {
         static void Main()
         {
+            Uri masterUri = RosClient.EnvironmentMasterUri ?? 
+                            new Uri("http://192.168.0.220:11311");
+            string callerId = "/iviz_test";
+
+            RosClient client = new RosClient(masterUri, callerId);
+
+            client.Advertise<PoseStamped>("/test_topic", out RosPublisher publisher);
+
+            PoseStamped msg = new PoseStamped
+            {
+                Header = new Header { FrameId = "/map", Stamp = time.Now() },
+                Pose = new Pose
+                {
+                    Orientation = new Quaternion(0, 0, 0, 1),
+                    Position = new Point(0, 0, 2)
+                }
+            };
+
+            for (int i = 0; i < 20; i++)
+            {
+                publisher.Publish(msg);
+                Thread.Sleep(1000);
+            }
+
+            client.Close();
+            
+            /*
             string data =
                 File.ReadAllText("/Users/akzeac/Shared/aws-robomaker-hospital-world/worlds/hospital.world");
             SdfFile sdfFile = SdfFile.Create(data);
 
             var modelPaths = SdfFile.CreateModelPaths("/Users/akzeac/Shared/aws-robomaker-hospital-world/");
             SdfFile newSdfFile = sdfFile.ResolveIncludes(modelPaths);
+            */
 
 
 

@@ -3,11 +3,14 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Msgs;
 
-namespace Iviz.Roslib.XmlRpc
+namespace Iviz.XmlRpc
 {
-    class HttpListener : IDisposable
+    public sealed class HttpListener : IDisposable
     {
+        const int AnyPort = 0;
+        
         readonly TcpListener listener;
         bool keepGoing = true;
 
@@ -20,11 +23,7 @@ namespace Iviz.Roslib.XmlRpc
                 throw new ArgumentNullException(nameof(uri));
             }
 
-            int port = uri.Port;
-            if (uri.IsDefaultPort)
-            {
-                port = 0;
-            }
+            int port = uri.IsDefaultPort ? AnyPort : uri.Port;
             listener = new TcpListener(IPAddress.Any, port);
             listener.Start();
 
@@ -32,32 +31,21 @@ namespace Iviz.Roslib.XmlRpc
             LocalEndpoint = new Uri($"http://{endpoint.Address}:{endpoint.Port}/");
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability",
-            "CA2000:Objekte verwerfen, bevor Bereich verloren geht",
-            Justification = "Wird später in 'callback' verworfen")]
-        public async void Start(Action<HttpListenerContext> callback)
+        public async Task Start(Action<HttpListenerContext> callback)
         {
+            if (callback is null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
             while (keepGoing)
             {
                 try
                 {
                     //Logger.Log("Entering");
-                    //TcpClient client = listener.AcceptTcpClient();
-
                     TcpClient client = await listener.AcceptTcpClientAsync().ConfigureAwait(false);
                     //Logger.Log("Out");
                     callback(new HttpListenerContext(client));
-                }
-                catch (ObjectDisposedException)
-                {
-                    Logger.LogDebug("HttpListener: Leaving thread."); // expected
-                    break;
-                }
-                catch (ThreadAbortException e)
-                {
-                    Logger.Log("RosRcpServer: Thread aborted! " + e);
-                    Thread.ResetAbort();
-                    break;
                 }
                 catch (Exception e)
                 {
@@ -66,30 +54,37 @@ namespace Iviz.Roslib.XmlRpc
                 }
             }
         }
-
-        public void Stop()
+        
+        public async Task Start(Func<HttpListenerContext, Task> callback)
         {
-            //Logger.Log("HttpListener: Requesting stop 2.");
+            if (callback is null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
+            while (keepGoing)
+            {
+                try
+                {
+                    TcpClient client = await listener.AcceptTcpClientAsync().ConfigureAwait(false);
+                    await callback(new HttpListenerContext(client));
+                }
+                catch (Exception e)
+                {
+                    Logger.Log("HttpListener: Leaving thread! " + e);
+                    break;
+                }
+            }
+        }        
+
+        void Stop()
+        {
             keepGoing = false;
-            /*
             try
             {
-                Logger.Log("HttpListener: Shutdown.");
-                //listener.Server.Shutdown(SocketShutdown.Both);
-                listener.Server.Dispose();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-            */
-            try
-            {
-                //Logger.Log("HttpListener: Stop.");
                 listener.Stop();
             }
             catch (Exception) { }
-            //Logger.Log("HttpListener: Stopped.");
         }
 
         public void Dispose()

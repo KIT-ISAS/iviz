@@ -20,5 +20,10 @@
             Topic = topic;
             Type = type;
         }
+
+        public override string ToString()
+        {
+            return $"[Topic={Topic} Type={Type}]";
+        }
     }
 }

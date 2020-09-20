@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-
+using Iviz.Msgs;
+using Iviz.XmlRpc;
 using TopicTuple = System.Tuple<string, string>;
 using TopicTuples = System.Tuple<string, string[]>;
 
@@ -31,16 +32,17 @@ namespace Iviz.Roslib.XmlRpc
 
         public GetUriResponse GetUri()
         {
-            Arg[] args = { new Arg(CallerId) };
+            Arg[] args = {CallerId};
             object[] response = MethodCall("getUri", args);
             return new GetUriResponse(response);
         }
 
         public LookupNodeResponse LookupNode(string nodeId)
         {
-            Arg[] args = {
-                new Arg(CallerId),
-                new Arg(nodeId),
+            Arg[] args =
+            {
+                CallerId,
+                nodeId,
             };
             object[] response = MethodCall("lookupNode", args);
             return new LookupNodeResponse(response);
@@ -48,9 +50,10 @@ namespace Iviz.Roslib.XmlRpc
 
         public GetPublishedTopicsResponse GetPublishedTopics(string subgraph = "")
         {
-            Arg[] args = {
-                new Arg(CallerId),
-                new Arg(subgraph),
+            Arg[] args =
+            {
+                CallerId,
+                subgraph,
             };
             object[] response = MethodCall("getPublishedTopics", args);
             return new GetPublishedTopicsResponse(response);
@@ -58,11 +61,12 @@ namespace Iviz.Roslib.XmlRpc
 
         public RegisterSubscriberResponse RegisterSubscriber(string topic, string topicType)
         {
-            Arg[] args = {
-                new Arg(CallerId),
-                new Arg(topic),
-                new Arg(topicType),
-                new Arg(CallerUri.ToString()),
+            Arg[] args =
+            {
+                CallerId,
+                topic,
+                topicType,
+                CallerUri
             };
             object[] response = MethodCall("registerSubscriber", args);
             return new RegisterSubscriberResponse(response);
@@ -70,10 +74,11 @@ namespace Iviz.Roslib.XmlRpc
 
         public UnregisterSubscriberResponse UnregisterSubscriber(string topic)
         {
-            Arg[] args = {
-                new Arg(CallerId),
-                new Arg(topic),
-                new Arg(CallerUri.ToString()),
+            Arg[] args =
+            {
+                CallerId,
+                topic,
+                CallerUri
             };
             object[] response = MethodCall("unregisterSubscriber", args);
             return new UnregisterSubscriberResponse(response);
@@ -81,11 +86,12 @@ namespace Iviz.Roslib.XmlRpc
 
         public RegisterPublisherResponse RegisterPublisher(string topic, string topicType)
         {
-            Arg[] args = {
-                new Arg(CallerId),
-                new Arg(topic),
-                new Arg(topicType),
-                new Arg(CallerUri),
+            Arg[] args =
+            {
+                CallerId,
+                topic,
+                topicType,
+                CallerUri
             };
             object[] response = MethodCall("registerPublisher", args);
             return new RegisterPublisherResponse(response);
@@ -93,10 +99,11 @@ namespace Iviz.Roslib.XmlRpc
 
         public UnregisterPublisherResponse UnregisterPublisher(string topic)
         {
-            Arg[] args = {
-                new Arg(CallerId),
-                new Arg(topic),
-                new Arg(CallerUri),
+            Arg[] args =
+            {
+                CallerId,
+                topic,
+                CallerUri
             };
             object[] response = MethodCall("unregisterPublisher", args);
             return new UnregisterPublisherResponse(response);
@@ -104,8 +111,9 @@ namespace Iviz.Roslib.XmlRpc
 
         public GetSystemStateResponse GetSystemState()
         {
-            Arg[] args = {
-                new Arg(CallerId),
+            Arg[] args =
+            {
+                CallerId
             };
             object[] response = MethodCall("getSystemState", args);
             return new GetSystemStateResponse(response);
@@ -113,9 +121,10 @@ namespace Iviz.Roslib.XmlRpc
 
         public LookupServiceResponse LookupService(string service)
         {
-            Arg[] args = {
-                new Arg(CallerId),
-                new Arg(service),
+            Arg[] args =
+            {
+                CallerId,
+                service
             };
             object[] response = MethodCall("lookupService", args);
             return new LookupServiceResponse(response);
@@ -123,11 +132,12 @@ namespace Iviz.Roslib.XmlRpc
 
         public DefaultResponse RegisterService(string service, Uri rosRpcUri)
         {
-            Arg[] args = {
-                new Arg(CallerId),
-                new Arg(service),
-                new Arg(rosRpcUri),
-                new Arg(CallerUri),
+            Arg[] args =
+            {
+                CallerId,
+                service,
+                rosRpcUri,
+                CallerUri
             };
             object[] response = MethodCall("registerService", args);
             return new DefaultResponse(response);
@@ -135,10 +145,11 @@ namespace Iviz.Roslib.XmlRpc
 
         public UnregisterServiceResponse UnregisterService(string service, Uri rosRpcUri)
         {
-            Arg[] args = {
-                new Arg(CallerId),
-                new Arg(service),
-                new Arg(rosRpcUri),
+            Arg[] args =
+            {
+                CallerId,
+                service,
+                rosRpcUri,
             };
             object[] response = MethodCall("unregisterService", args);
             return new UnregisterServiceResponse(response);
@@ -147,12 +158,13 @@ namespace Iviz.Roslib.XmlRpc
         object[] MethodCall(string function, Arg[] args)
         {
             object tmp = Service.MethodCall(MasterUri, CallerUri, function, args, TimeoutInMs);
-            if (!(tmp is object[] result))
+            if (tmp is object[] result)
             {
-                Logger.Log($"Rpc Response: Expected type object[], got {tmp.GetType().Name}");
-                return null;
+                return result;
             }
-            return result;
+
+            Logger.Log($"Rpc Response: Expected type object[], got {tmp.GetType().Name}");
+            return null;
         }
     }
 
@@ -173,7 +185,8 @@ namespace Iviz.Roslib.XmlRpc
                 StatusMessage = "Parse error for input.";
                 return;
             }
-            Code = (StatusCode)Cast<int>(a[0]);
+
+            Code = (StatusCode) Cast<int>(a[0]);
             StatusMessage = Cast<string>(a[1]);
             if (!IsValid)
             {
@@ -183,13 +196,14 @@ namespace Iviz.Roslib.XmlRpc
 
         private protected T Cast<T>(object a)
         {
-            if (!(a is T t))
+            if (a is T t)
             {
-                Logger.LogDebug($"Rpc Response: Expected type '{typeof(T).Name}, got {a.GetType().Name}");
-                hasParseError = true;
-                return default;
+                return t;
             }
-            return t;
+
+            Logger.LogDebug($"Rpc Response: Expected type '{typeof(T).Name}, got {a.GetType().Name}");
+            hasParseError = true;
+            return default;
         }
 
         protected bool EnsureSize<T>(IList<T> a, int size = 1)
@@ -200,15 +214,16 @@ namespace Iviz.Roslib.XmlRpc
                 hasParseError = true;
                 return false;
             }
-            if (a.Count < size)
-            {
-                Logger.Log($"Rpc Response: Expected size '{size}, got {a.Count}");
-                hasParseError = true;
-                return false;
-            }
-            return true;
-        }
 
+            if (a.Count >= size)
+            {
+                return true;
+            }
+
+            Logger.Log($"Rpc Response: Expected size '{size}, got {a.Count}");
+            hasParseError = true;
+            return false;
+        }
     }
 
     public class TopicTuple
@@ -237,11 +252,13 @@ namespace Iviz.Roslib.XmlRpc
             {
                 return;
             }
+
             object[] root = Cast<object[]>(a[2]);
             if (!EnsureSize(root, 3))
             {
                 return;
             }
+
             Publishers = CreateTuple(root[0]);
             Subscribers = CreateTuple(root[1]);
             Services = CreateTuple(root[2]);
@@ -263,22 +280,27 @@ namespace Iviz.Roslib.XmlRpc
                 {
                     return Empty;
                 }
+
                 string topic = Cast<string>(tuple[0]);
                 object[] tmp = Cast<object[]>(tuple[1]);
                 if (tmp == null)
                 {
                     return Empty;
                 }
+
                 string[] members = tmp.Cast<string>().ToArray();
                 result[i] = new TopicTuple(topic, members);
             }
+
             return result.AsReadOnly();
         }
     }
 
     public sealed class DefaultResponse : BaseResponse
     {
-        internal DefaultResponse(object[] a) : base(a) { }
+        internal DefaultResponse(object[] a) : base(a)
+        {
+        }
     }
 
     public sealed class GetUriResponse : BaseResponse
@@ -291,6 +313,7 @@ namespace Iviz.Roslib.XmlRpc
             {
                 return;
             }
+
             if (Uri.TryCreate(Cast<string>(a[2]) ?? "", UriKind.Absolute, out Uri uri))
             {
                 Uri = uri;
@@ -314,6 +337,7 @@ namespace Iviz.Roslib.XmlRpc
             {
                 return;
             }
+
             if (Uri.TryCreate(Cast<string>(a[2]) ?? "", UriKind.Absolute, out Uri uri))
             {
                 Uri = uri;
@@ -331,7 +355,7 @@ namespace Iviz.Roslib.XmlRpc
     {
         static readonly ReadOnlyCollection<(string, string)> Empty = Array.Empty<(string, string)>().AsReadOnly();
 
-        public ReadOnlyCollection<(string, string)> Topics { get; } = Empty;
+        public ReadOnlyCollection<(string name, string type)> Topics { get; } = Empty;
 
         internal GetPublishedTopicsResponse(object[] a) : base(a)
         {
@@ -339,6 +363,7 @@ namespace Iviz.Roslib.XmlRpc
             {
                 return;
             }
+
             object[] tmp = Cast<object[]>(a[2]);
             if (tmp == null)
             {
@@ -351,6 +376,7 @@ namespace Iviz.Roslib.XmlRpc
                 object[] topic = Cast<object[]>(tmp[i]);
                 topics[i] = (Cast<string>(topic[0]), Cast<string>(topic[1]));
             }
+
             Topics = topics.AsReadOnly();
         }
     }
@@ -367,12 +393,14 @@ namespace Iviz.Roslib.XmlRpc
             {
                 return;
             }
+
             object[] tmp = Cast<object[]>(a[2]);
             if (tmp == null)
             {
                 hasParseError = true;
                 return;
             }
+
             List<Uri> publishers = new List<Uri>();
             for (int i = 0; i < tmp.Length; i++)
             {
@@ -385,6 +413,7 @@ namespace Iviz.Roslib.XmlRpc
                     publishers.Add(publisher);
                 }
             }
+
             Publishers = publishers.AsReadOnly();
         }
     }
@@ -399,6 +428,7 @@ namespace Iviz.Roslib.XmlRpc
             {
                 return;
             }
+
             NumUnsubscribed = Cast<int>(a[2]);
         }
     }
@@ -415,16 +445,19 @@ namespace Iviz.Roslib.XmlRpc
             {
                 return;
             }
+
             object[] tmp = Cast<object[]>(a[2]);
             if (tmp == null)
             {
                 return;
             }
+
             string[] subscribers = new string[tmp.Length];
             for (int i = 0; i < subscribers.Length; i++)
             {
                 subscribers[i] = Cast<string>(tmp[i]);
             }
+
             Subscribers = subscribers.AsReadOnly();
         }
     }
@@ -439,6 +472,7 @@ namespace Iviz.Roslib.XmlRpc
             {
                 return;
             }
+
             NumUnregistered = Cast<int>(a[2]);
         }
     }
@@ -453,6 +487,7 @@ namespace Iviz.Roslib.XmlRpc
             {
                 return;
             }
+
             ServiceUrl = new Uri(Cast<string>(a[2]));
         }
     }
@@ -467,9 +502,8 @@ namespace Iviz.Roslib.XmlRpc
             {
                 return;
             }
+
             NumUnregistered = Cast<int>(a[2]);
         }
     }
-
-
 }

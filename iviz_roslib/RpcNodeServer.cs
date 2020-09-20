@@ -2,15 +2,17 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
+using System.Net;
 using System.Threading.Tasks;
+using Iviz.Msgs;
+using Iviz.XmlRpc;
 
 namespace Iviz.Roslib.XmlRpc
 {
-    sealed class NodeServer : IDisposable
+    internal sealed class NodeServer : IDisposable
     {
         readonly Dictionary<string, Func<object[], Arg[]>> methods;
-        readonly HttpListener listener;
+        readonly Iviz.XmlRpc.HttpListener listener;
         readonly RosClient client;
 
         public Uri ListenerUri => listener.LocalEndpoint;
@@ -20,7 +22,7 @@ namespace Iviz.Roslib.XmlRpc
         {
             this.client = client;
 
-            listener = new HttpListener(client.CallerUri);
+            listener = new Iviz.XmlRpc.HttpListener(client.CallerUri);
 
             methods = new Dictionary<string, Func<object[], Arg[]>>
             {
@@ -78,11 +80,11 @@ namespace Iviz.Roslib.XmlRpc
         Arg[] GetBusStats(object[] _)
         {
             Logger.Log("Was called: getBusStats");
-            return new[]
+            return new Arg[]
             {
-                new Arg((int) StatusCode.Error),
-                new Arg("error=NYI"),
-                new Arg(Array.Empty<Arg>())
+                (int) StatusCode.Error,
+                "error=NYI",
+                Array.Empty<Arg>()
             };
         }
 
@@ -92,29 +94,29 @@ namespace Iviz.Roslib.XmlRpc
             Arg[][] response = busInfo.Select(
                 x => new Arg[]
                 {
-                    new Arg(x.ConnectionId),
-                    new Arg(x.DestinationId),
-                    new Arg(x.Direction),
-                    new Arg(x.Transport),
-                    new Arg(x.Topic),
-                    new Arg(x.Connected),
+                    x.ConnectionId,
+                    x.DestinationId,
+                    x.Direction,
+                    x.Transport,
+                    x.Topic,
+                    x.Connected,
                 }).ToArray();
 
-            return new[]
+            return new Arg[]
             {
-                new Arg((int) StatusCode.Success),
-                new Arg("ok"),
-                new Arg(response)
+                (int) StatusCode.Success,
+                "ok",
+                response
             };
         }
 
         Arg[] GetMasterUri(object[] _)
         {
-            return new[]
+            return new Arg[]
             {
-                new Arg((int) StatusCode.Success),
-                new Arg("ok"),
-                new Arg(client.MasterUri)
+                (int) StatusCode.Success,
+                "ok",
+                client.MasterUri
             };
         }
 
@@ -122,54 +124,56 @@ namespace Iviz.Roslib.XmlRpc
         {
             if (client.ShutdownAction == null)
             {
-                return new[]
+                return new Arg[]
                 {
-                    new Arg((int) StatusCode.Failure),
-                    new Arg("error=no shutdown handler set"),
-                    new Arg(0)
+                    (int) StatusCode.Failure,
+                    "error=no shutdown handler set",
+                    0
                 };
             }
 
             string callerId = (string) args[0];
             string reason = args.Length > 1 ? (string) args[1] : "";
             client.ShutdownAction(callerId, reason, out StatusCode status, out string response);
-            return new[]
+            return new Arg[]
             {
-                new Arg((int) status),
-                new Arg(response),
-                new Arg(0)
+                (int) status,
+                response,
+                0
             };
         }
 
-        Arg[] GetPid(object[] _)
+        static Arg[] GetPid(object[] _)
         {
             int id = Process.GetCurrentProcess().Id;
 
-            return new[]
+            return new Arg[]
             {
-                new Arg((int) StatusCode.Success),
-                new Arg("ok"),
-                new Arg(id)
+                (int) StatusCode.Success,
+                "ok",
+                id
             };
         }
 
         Arg[] GetSubscriptions(object[] _)
         {
-            return new[]
+            var subscriptions = client.GetSubscriptionsRcp();
+            return new Arg[]
             {
-                new Arg((int) StatusCode.Success),
-                new Arg(""),
-                new Arg(client.GetSubscriptionsRcp())
+                (int) StatusCode.Success,
+                "",
+                new Arg(subscriptions.Select(info => (info.Topic, info.Type)))
             };
         }
 
         Arg[] GetPublications(object[] _)
         {
-            return new[]
+            var publications = client.GetPublicationsRcp();
+            return new Arg[]
             {
-                new Arg((int) StatusCode.Success),
-                new Arg("ok"),
-                new Arg(client.GetPublicationsRcp())
+                (int) StatusCode.Success,
+                "ok",
+                new Arg(publications.Select(info => (info.Topic, info.Type)))
             };
         }
 
@@ -177,11 +181,11 @@ namespace Iviz.Roslib.XmlRpc
         {
             if (client.ParamUpdateAction == null)
             {
-                return new[]
+                return new Arg[]
                 {
-                    new Arg((int) StatusCode.Failure),
-                    new Arg("error=no paramUpdate handler set"),
-                    new Arg(0)
+                    (int) StatusCode.Success,
+                    "ok",
+                    0
                 };
             }
 
@@ -190,132 +194,128 @@ namespace Iviz.Roslib.XmlRpc
             object parameterValue = args[2];
             client.ParamUpdateAction(callerId, parameterKey, parameterValue, out StatusCode status,
                 out string response);
-            return new[]
+            return new Arg[]
             {
-                new Arg((int) status),
-                new Arg(response),
-                new Arg(0)
+                (int) status,
+                response,
+                0
             };
         }
 
         Arg[] PublisherUpdate(object[] args)
         {
-            string topic = (string) args[1];
-            object[] publishers = (object[]) args[2];
+            if (args.Length < 3 ||
+                !(args[1] is string topic) ||
+                !(args[2] is object[] publishers))
+            {
+                return new Arg[]
+                {
+                    (int) StatusCode.Error,
+                    "error=failed to parse arguments",
+                    0
+                };
+            }
+
+            Uri[] publisherUris = new Uri[publishers.Length];
+            for (int i = 0; i < publishers.Length; i++)
+            {
+                if (!Uri.TryCreate((string) publishers[i], UriKind.Absolute, out publisherUris[i]))
+                {
+                    Logger.Log($"RcpNodeServer: Invalid uri '{publishers[i]}'");
+                }
+            }
+
             try
             {
-                Uri[] publisherUris = new Uri[publishers.Length];
-                for (int i = 0; i < publishers.Length; i++)
-                {
-                    if (!Uri.TryCreate((string) publishers[i], UriKind.Absolute, out publisherUris[i]))
-                    {
-                        Logger.Log($"RcpNodeServer: Invalid uri '{publishers[i]}'");
-                    }
-                }
-
                 client.PublisherUpdateRcp(topic, publisherUris);
-                return new[]
+                return new Arg[]
                 {
-                    new Arg((int) StatusCode.Success),
-                    new Arg("ok"),
-                    new Arg(0)
+                    (int) StatusCode.Success,
+                    "ok",
+                    0
                 };
             }
             catch (Exception e)
             {
                 Logger.Log(e);
-                return new[]
+                return new Arg[]
                 {
-                    new Arg((int) StatusCode.Failure),
-                    new Arg("error=Unknown error: " + e.Message),
-                    new Arg(0)
+                    (int) StatusCode.Failure,
+                    "error=Unknown error: " + e.Message,
+                    0
                 };
             }
         }
 
         Arg[] RequestTopic(object[] args)
         {
+            if (args.Length < 3 ||
+                !(args[0] is string callerId) ||
+                !(args[1] is string topic) ||
+                !(args[2] is object[] protocols))
+            {
+                return new Arg[]
+                {
+                    (int) StatusCode.Error,
+                    "error=failed to parse arguments",
+                    0
+                };
+            }
+
+            if (protocols.Length == 0)
+            {
+                return new Arg[]
+                {
+                    (int) StatusCode.Failure,
+                    $"error=no compatible protocols found",
+                    Array.Empty<string[]>()
+                };
+            }
+
+            bool success = protocols.Any(entry =>
+                entry is object[] protocol &&
+                protocol.Length != 0 &&
+                protocol[0] is string protocolName &&
+                protocolName == "TCPROS"
+            );
+
+            if (!success)
+            {
+                return new Arg[]
+                {
+                    (int) StatusCode.Failure,
+                    "error=client only supports TCPROS",
+                    Array.Empty<string[]>()
+                };
+            }
+
             try
             {
-                string caller_id = (string) args[0];
-                string topic = (string) args[1];
-                object[] protocols = (object[]) args[2];
-
-                if (protocols.Length == 0)
+                if (!client.RequestTopicRpc(callerId, topic, out string hostname, out int port))
                 {
-                    return new[]
+                    return new Arg[]
                     {
-                        new Arg((int) StatusCode.Failure),
-                        new Arg($"error=no compatible protocols found"),
-                        new Arg(Array.Empty<string[]>())
+                        (int) StatusCode.Failure,
+                        $"error=client is not publishing topic '{topic}'",
+                        Array.Empty<string[]>()
                     };
                 }
 
-                bool success = false;
-                foreach (var entry in protocols)
+                return new Arg[]
                 {
-                    object[] protocol = (object[]) entry;
-                    if (protocol.Length == 0)
-                    {
-                        continue;
-                    }
-
-                    string protocolName = protocol[0] as string;
-                    if (protocolName == null)
-                    {
-                        continue;
-                    }
-
-                    if (protocolName == "TCPROS")
-                    {
-                        success = true;
-                        break;
-                    }
-                }
-
-                if (!success)
-                {
-                    return new[]
-                    {
-                        new Arg((int) StatusCode.Failure),
-                        new Arg("error=client only supports TCPROS"),
-                        new Arg(Array.Empty<string[]>())
-                    };
-                }
-
-
-                if (!client.RequestTopicRpc(caller_id, topic, out string hostname, out int port))
-                {
-                    return new[]
-                    {
-                        new Arg((int) StatusCode.Failure),
-                        new Arg($"error=client is not publishing topic '{topic}'"),
-                        new Arg(Array.Empty<string[]>())
-                    };
-                }
-
-                return new[]
-                {
-                    new Arg((int) StatusCode.Success),
-                    new Arg(""),
-                    new Arg(
-                        new Arg[]
-                        {
-                            new Arg("TCPROS"),
-                            new Arg(hostname),
-                            new Arg(port),
-                        }
-                    ),
+                    (int) StatusCode.Success,
+                    "ok",
+                    new Arg[] {"TCPROS", hostname, port}
                 };
             }
             catch (Exception e)
             {
                 Logger.Log(e);
-                return new[]
+                return new Arg[]
                 {
-                    new Arg((int) StatusCode.Error),
-                    new Arg("error=Unknown error: " + e.Message),
-                    new Arg(Array.Empty<string[]>())
+                    (int) StatusCode.Error,
+                    "error=Unknown error: " + e.Message,
+                    Array.Empty<string[]>()
                 };
             }
         }

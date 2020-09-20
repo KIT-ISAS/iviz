@@ -3,9 +3,12 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>netcoreapp3.1</TargetFramework>
+        <AssemblyName>Iviz.Rosmaster</AssemblyName>
+        <RootNamespace>Iviz.Rosmaster</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\iviz_roslib\iviz_roslib.csproj" />
       <ProjectReference Include="..\iviz_xmlrpc\iviz_xmlrpc.csproj" />
     </ItemGroup>
 

@@ -4,6 +4,7 @@ using System.Threading;
 using Iviz.Roslib;
 using Iviz.Roslib.XmlRpc;
 using WebSocketSharp.Server;
+using Iviz.Msgs;
 
 namespace Iviz.Bridge
 {
@@ -13,7 +14,6 @@ namespace Iviz.Bridge
         public TypeDictionary Types { get; } = new TypeDictionary();
         readonly WebSocketServer server;
         readonly HashSet<SocketConnection> connections = new HashSet<SocketConnection>();
-        volatile bool keepGoing;
 
         public RosBridge(RosClient rosClient, int port)
         {
@@ -34,12 +34,10 @@ namespace Iviz.Bridge
         {
             status = StatusCode.Success;
             response = "ok";
-            keepGoing = false;
         }
 
         void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
         {
-            keepGoing = false;
             e.Cancel = true;
         }
 

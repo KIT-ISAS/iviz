@@ -720,7 +720,7 @@ namespace Iviz.Roslib
             if (response.IsValid)
             {
                 return Master.GetPublishedTopics().Topics.
-                    Select(x => new BriefTopicInfo(x.Item1, x.Item2)).
+                    Select(x => new BriefTopicInfo(x.name, x.type)).
                     ToArray().AsReadOnly();
             }
             
@@ -730,8 +730,7 @@ namespace Iviz.Roslib
         /// <summary>
         /// Gets the topics published by this node.
         /// </summary>
-        public ReadOnlyCollection<BriefTopicInfo> SubscribedTopics =>
-            GetSubscriptionsRcp().Select(x => new BriefTopicInfo(x[0], x[1])).ToArray().AsReadOnly();
+        public ReadOnlyCollection<BriefTopicInfo> SubscribedTopics => GetSubscriptionsRcp().AsReadOnly();
 
 
         /// <summary>
@@ -755,21 +754,20 @@ namespace Iviz.Roslib
         /// <summary>
         /// Gets the topics published by this node.
         /// </summary>
-        public ReadOnlyCollection<BriefTopicInfo> PublishedTopics =>
-            GetPublicationsRcp().Select(x => new BriefTopicInfo(x[0], x[1])).ToArray().AsReadOnly();
+        public ReadOnlyCollection<BriefTopicInfo> PublishedTopics => GetPublicationsRcp().AsReadOnly();
 
 
-        internal string[][] GetSubscriptionsRcp()
+        internal BriefTopicInfo[] GetSubscriptionsRcp()
         {
             try
             {
                 lock (subscribersByTopic)
                 {
-                    string[][] result = new string[subscribersByTopic.Count][];
+                    BriefTopicInfo[] result = new BriefTopicInfo[subscribersByTopic.Count];
                     int i = 0;
                     foreach (var entry in subscribersByTopic)
                     {
-                        result[i++] = new[] {entry.Key, entry.Value.TopicType};
+                        result[i++] = new BriefTopicInfo(entry.Key, entry.Value.TopicType);
                     }
 
                     return result;
@@ -778,22 +776,22 @@ namespace Iviz.Roslib
             catch (Exception e)
             {
                 Logger.Log($"{this}: GetSubscriptionsRcp failed: " + e);
-                return Array.Empty<string[]>();
+                return Array.Empty<BriefTopicInfo>();
             }
         }
 
 
-        internal string[][] GetPublicationsRcp()
+        internal BriefTopicInfo[] GetPublicationsRcp()
         {
             try
             {
                 lock (publishersByTopic)
                 {
-                    string[][] result = new string[publishersByTopic.Count][];
+                    BriefTopicInfo[] result = new BriefTopicInfo[publishersByTopic.Count];
                     int i = 0;
                     foreach (var entry in publishersByTopic)
                     {
-                        result[i++] = new[] {entry.Key, entry.Value.TopicType};
+                        result[i++] = new BriefTopicInfo(entry.Key, entry.Value.TopicType);
                     }
 
                     return result;
@@ -802,7 +800,7 @@ namespace Iviz.Roslib
             catch (Exception e)
             {
                 Logger.Log($"{this}: GetPublicationsRcp failed: " + e);
-                return Array.Empty<string[]>();
+                return Array.Empty<BriefTopicInfo>();
             }
         }
 
@@ -1063,29 +1061,9 @@ namespace Iviz.Roslib
             Master.UnregisterService(name, advertisedService.Uri);
         }
 
-        public XmlRpc.StatusCode SetParameter(string key, string value)
+        public XmlRpc.StatusCode SetParameter(string key, Iviz.XmlRpc.Arg value)
         {
-            return Parameters.SetParam(key, new XmlRpc.Arg(value)).Code;
-        }
-
-        public XmlRpc.StatusCode SetParameter(string key, int value)
-        {
-            return Parameters.SetParam(key, new XmlRpc.Arg(value)).Code;
-        }
-
-        public XmlRpc.StatusCode SetParameter(string key, bool value)
-        {
-            return Parameters.SetParam(key, new XmlRpc.Arg(value)).Code;
-        }
-
-        public XmlRpc.StatusCode SetParameter(string key, double value)
-        {
-            return Parameters.SetParam(key, new XmlRpc.Arg(value)).Code;
-        }
-
-        public XmlRpc.StatusCode SetParameter(string key, string[] value)
-        {
-            return Parameters.SetParam(key, new XmlRpc.Arg(value)).Code;
+            return Parameters.SetParam(key, value).Code;
         }
 
         public XmlRpc.StatusCode GetParameter(string key, out object value)

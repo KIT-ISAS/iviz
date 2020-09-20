@@ -4,16 +4,17 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 
-namespace Iviz.Roslib.XmlRpc
+namespace Iviz.XmlRpc
 {
-    public sealed class HttpRequest : IDisposable
+    internal sealed class HttpRequest : IDisposable
     {
-        const int TimeoutInMs = 2000;
+        const int DefaultTimeoutInMs = 2000;
+        
         readonly Uri callerUri;
         readonly Uri uri;
         readonly TcpClient client;
 
-        public HttpRequest(Uri callerUri, Uri uri)
+        public HttpRequest(Uri callerUri, Uri uri, int timeoutInMs = DefaultTimeoutInMs)
         {
             this.callerUri = callerUri ?? throw new ArgumentNullException(nameof(callerUri));
             this.uri = uri ?? throw new ArgumentNullException(nameof(uri));
@@ -22,7 +23,7 @@ namespace Iviz.Roslib.XmlRpc
 
             client = new TcpClient();
             Task task = client.ConnectAsync(hostname, port);
-            if (!task.Wait(TimeoutInMs) || task.IsCanceled)
+            if (!task.Wait(timeoutInMs) || task.IsCanceled)
             {
                 throw new TimeoutException($"HttpRequest: Host '{hostname}' timed out");
             }
@@ -32,7 +33,7 @@ namespace Iviz.Roslib.XmlRpc
             }
         }
 
-        public string Request(string msgIn, int timeoutInMs = TimeoutInMs)
+        public async Task<string> Request(string msgIn, int timeoutInMs = DefaultTimeoutInMs)
         {
             if (msgIn is null)
             {
@@ -45,14 +46,14 @@ namespace Iviz.Roslib.XmlRpc
             };
 
             string path = uri.AbsolutePath;
-            writer.WriteLine($"POST {path} HTTP/1.0");
-            writer.WriteLine($"User-Agent: iviz XML-RPC");
-            writer.WriteLine($"Host: {callerUri.Host}");
-            writer.WriteLine($"Content-Length: {BuiltIns.UTF8.GetByteCount(msgIn)}");
-            writer.WriteLine($"Content-Type: text/xml; charset=utf-8");
-            writer.WriteLine();
-            writer.Write(msgIn);
-            writer.Flush();
+            await writer.WriteLineAsync($"POST {path} HTTP/1.0");
+            await writer.WriteLineAsync($"User-Agent: iviz XML-RPC");
+            await writer.WriteLineAsync($"Host: {callerUri.Host}");
+            await writer.WriteLineAsync($"Content-Length: {BuiltIns.UTF8.GetByteCount(msgIn)}");
+            await writer.WriteLineAsync($"Content-Type: text/xml; charset=utf-8");
+            await writer.WriteLineAsync();
+            await writer.WriteAsync(msgIn);
+            await writer.FlushAsync();
 
             StreamReader reader = new StreamReader(client.GetStream(), BuiltIns.UTF8);
             reader.BaseStream.ReadTimeout = timeoutInMs;
@@ -62,7 +63,7 @@ namespace Iviz.Roslib.XmlRpc
             //Logger.Log("Start: " + DateTime.Now);
             try
             {
-                response = reader.ReadToEnd();
+                response = await reader.ReadToEndAsync();
             }
             catch (IOException e)
             {

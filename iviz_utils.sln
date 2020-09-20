@@ -20,6 +20,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "biggustave", "biggustave\bi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_model_service_lib", "iviz_model_service_lib\iviz_model_service_lib.csproj", "{2AC879B0-EF05-4FCF-A0F3-651E87E61CC9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_xmlrpc", "iviz_xmlrpc\iviz_xmlrpc.csproj", "{835F78F3-CF95-437D-A9F9-C83225DF8C60}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_rosmaster", "iviz_rosmaster\iviz_rosmaster.csproj", "{ED2B9AAC-A533-4157-AE6A-74702EBB76DF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +66,14 @@ Global
 		{2AC879B0-EF05-4FCF-A0F3-651E87E61CC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2AC879B0-EF05-4FCF-A0F3-651E87E61CC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2AC879B0-EF05-4FCF-A0F3-651E87E61CC9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{835F78F3-CF95-437D-A9F9-C83225DF8C60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{835F78F3-CF95-437D-A9F9-C83225DF8C60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{835F78F3-CF95-437D-A9F9-C83225DF8C60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{835F78F3-CF95-437D-A9F9-C83225DF8C60}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED2B9AAC-A533-4157-AE6A-74702EBB76DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED2B9AAC-A533-4157-AE6A-74702EBB76DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED2B9AAC-A533-4157-AE6A-74702EBB76DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED2B9AAC-A533-4157-AE6A-74702EBB76DF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
