@@ -31,6 +31,8 @@ namespace Iviz.ModelService
             client.AdvertiseService<GetFile>(Service.FileServiceName, service.FileCallback);
             client.AdvertiseService<GetSdf>(Service.SdfServiceName, service.SdfCallback);
 
+            Console.WriteLine("** Done. Waiting for requests...");
+
             WaitForCancel();
         }
 
