@@ -30,7 +30,7 @@ namespace Iviz.Bridge
             Logger.Log("** Started!");
         }
 
-        void OnShutdownActionCall(string callerId, string reason, out StatusCode status, out string response)
+        void OnShutdownActionCall(string callerId, string reason, out int status, out string response)
         {
             status = StatusCode.Success;
             response = "ok";

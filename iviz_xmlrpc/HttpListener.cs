@@ -10,9 +10,8 @@ namespace Iviz.XmlRpc
     public sealed class HttpListener : IDisposable
     {
         const int AnyPort = 0;
-        
+
         readonly TcpListener listener;
-        bool keepGoing = true;
 
         public Uri LocalEndpoint { get; }
 
@@ -27,34 +26,10 @@ namespace Iviz.XmlRpc
             listener = new TcpListener(IPAddress.Any, port);
             listener.Start();
 
-            IPEndPoint endpoint = (IPEndPoint)listener.LocalEndpoint;
+            IPEndPoint endpoint = (IPEndPoint) listener.LocalEndpoint;
             LocalEndpoint = new Uri($"http://{endpoint.Address}:{endpoint.Port}/");
         }
 
-        public async Task Start(Action<HttpListenerContext> callback)
-        {
-            if (callback is null)
-            {
-                throw new ArgumentNullException(nameof(callback));
-            }
-
-            while (keepGoing)
-            {
-                try
-                {
-                    //Logger.Log("Entering");
-                    TcpClient client = await listener.AcceptTcpClientAsync().ConfigureAwait(false);
-                    //Logger.Log("Out");
-                    callback(new HttpListenerContext(client));
-                }
-                catch (Exception e)
-                {
-                    Logger.Log("HttpListener: Leaving thread! " + e);
-                    break;
-                }
-            }
-        }
-        
         public async Task Start(Func<HttpListenerContext, Task> callback)
         {
             if (callback is null)
@@ -62,37 +37,41 @@ namespace Iviz.XmlRpc
                 throw new ArgumentNullException(nameof(callback));
             }
 
-            while (keepGoing)
+            while (true)
             {
                 try
                 {
                     TcpClient client = await listener.AcceptTcpClientAsync().ConfigureAwait(false);
                     await callback(new HttpListenerContext(client));
                 }
+                catch (ObjectDisposedException)
+                {
+                    Logger.LogDebug($"{this}: Leaving thread");
+                    break;
+                }
                 catch (Exception e)
                 {
-                    Logger.Log("HttpListener: Leaving thread! " + e);
+                    Logger.Log($"{this}: Leaving thread " + e);
                     break;
                 }
             }
-        }        
-
-        void Stop()
-        {
-            keepGoing = false;
-            try
-            {
-                listener.Stop();
-            }
-            catch (Exception) { }
         }
 
+        bool disposed;
         public void Dispose()
         {
-            if (keepGoing)
+            if (disposed)
             {
-                Stop();
+                return;
             }
+
+            disposed = true;
+            listener.Stop();
+        }
+
+        public override string ToString()
+        {
+            return "[HttpListener]";
         }
     }
 }

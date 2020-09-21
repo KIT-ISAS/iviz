@@ -9,11 +9,11 @@ using TopicTuples = System.Tuple<string, string[]>;
 
 namespace Iviz.Roslib.XmlRpc
 {
-    public enum StatusCode
+    public static class StatusCode
     {
-        Error = -1,
-        Failure = 0,
-        Success = 1,
+        public const int Error = -1;
+        public const int Failure = 0;
+        public const int Success = 1;
     }
 
     public sealed class Master
@@ -170,7 +170,7 @@ namespace Iviz.Roslib.XmlRpc
 
     public abstract class BaseResponse
     {
-        public StatusCode Code { get; }
+        public int Code { get; }
         public string StatusMessage { get; }
         private protected bool hasParseError;
 
@@ -186,7 +186,7 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            Code = (StatusCode) Cast<int>(a[0]);
+            Code = Cast<int>(a[0]);
             StatusMessage = Cast<string>(a[1]);
             if (!IsValid)
             {

@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
+using HttpListenerContext = Iviz.XmlRpc.HttpListenerContext;
 
 namespace Iviz.Roslib.XmlRpc
 {
@@ -14,6 +16,9 @@ namespace Iviz.Roslib.XmlRpc
         readonly Dictionary<string, Func<object[], Arg[]>> methods;
         readonly Iviz.XmlRpc.HttpListener listener;
         readonly RosClient client;
+
+        readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
+        Task task;
 
         public Uri ListenerUri => listener.LocalEndpoint;
         public Uri Uri => client.CallerUri;
@@ -41,40 +46,61 @@ namespace Iviz.Roslib.XmlRpc
 
         public void Start()
         {
-            //task = Task.Run(() =>
-            //{
-            Logger.LogDebug("RcpNodeServer: Starting!");
-            listener.Start(context =>
-            {
-                Task.Run(() =>
-                {
-                    using (context)
-                    {
-                        try
-                        {
-                            Service.MethodResponse(context, methods);
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.LogError(e);
-                        }
-                    }
-                });
-            });
-
-            Logger.LogDebug("RcpNodeServer: Leaving thread.");
-            //});
+            task = Task.Run(async () => await Run());
         }
 
-        public void Stop()
+        public override string ToString()
         {
+            return "[RcpNodeServer]";
+        }        
+        
+        async Task Run()
+        {
+            Logger.LogDebug($"{this}: Starting!");
+            
+            Task listenerTask = listener.Start(StartContext);
+
+            await signal.WaitAsync();
+
+            Logger.LogDebug($"{this}: Leaving thread");
+            
             listener.Dispose();
-            //task.Wait();
+            await listenerTask;
         }
 
+        async Task StartContext(HttpListenerContext context)
+        {
+            using (context)
+            {
+                try
+                {
+                    await Service.MethodResponseAsync(context, methods);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogError(e);
+                }
+            }
+        }
+
+        bool disposed;
         public void Dispose()
         {
-            Stop();
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+            try
+            {
+                signal.Release();
+            }
+            catch (SemaphoreFullException)
+            {
+            }
+
+            task?.Wait();
         }
 
         Arg[] GetBusStats(object[] _)
@@ -82,7 +108,7 @@ namespace Iviz.Roslib.XmlRpc
             Logger.Log("Was called: getBusStats");
             return new Arg[]
             {
-                (int) StatusCode.Error,
+                StatusCode.Error,
                 "error=NYI",
                 Array.Empty<Arg>()
             };
@@ -104,7 +130,7 @@ namespace Iviz.Roslib.XmlRpc
 
             return new Arg[]
             {
-                (int) StatusCode.Success,
+                StatusCode.Success,
                 "ok",
                 response
             };
@@ -112,35 +138,21 @@ namespace Iviz.Roslib.XmlRpc
 
         Arg[] GetMasterUri(object[] _)
         {
-            return new Arg[]
-            {
-                (int) StatusCode.Success,
-                "ok",
-                client.MasterUri
-            };
+            return new Arg[] {StatusCode.Success, "ok", client.MasterUri};
         }
 
         Arg[] Shutdown(object[] args)
         {
             if (client.ShutdownAction == null)
             {
-                return new Arg[]
-                {
-                    (int) StatusCode.Failure,
-                    "error=no shutdown handler set",
-                    0
-                };
+                return new Arg[] {StatusCode.Success, "error=no shutdown handler set", 0};
             }
 
             string callerId = (string) args[0];
             string reason = args.Length > 1 ? (string) args[1] : "";
-            client.ShutdownAction(callerId, reason, out StatusCode status, out string response);
-            return new Arg[]
-            {
-                (int) status,
-                response,
-                0
-            };
+            client.ShutdownAction(callerId, reason, out int status, out string response);
+            
+            return new Arg[] {status, response, 0};
         }
 
         static Arg[] GetPid(object[] _)
@@ -149,7 +161,7 @@ namespace Iviz.Roslib.XmlRpc
 
             return new Arg[]
             {
-                (int) StatusCode.Success,
+                StatusCode.Success,
                 "ok",
                 id
             };
@@ -160,7 +172,7 @@ namespace Iviz.Roslib.XmlRpc
             var subscriptions = client.GetSubscriptionsRcp();
             return new Arg[]
             {
-                (int) StatusCode.Success,
+                StatusCode.Success,
                 "",
                 new Arg(subscriptions.Select(info => (info.Topic, info.Type)))
             };
@@ -171,9 +183,7 @@ namespace Iviz.Roslib.XmlRpc
             var publications = client.GetPublicationsRcp();
             return new Arg[]
             {
-                (int) StatusCode.Success,
-                "ok",
-                new Arg(publications.Select(info => (info.Topic, info.Type)))
+                StatusCode.Success, "ok", new Arg(publications.Select(info => (info.Topic, info.Type)))
             };
         }
 
@@ -181,39 +191,25 @@ namespace Iviz.Roslib.XmlRpc
         {
             if (client.ParamUpdateAction == null)
             {
-                return new Arg[]
-                {
-                    (int) StatusCode.Success,
-                    "ok",
-                    0
-                };
+                return new Arg[] {StatusCode.Success, "ok", 0};
             }
 
             string callerId = (string) args[0];
             string parameterKey = (string) args[1];
             object parameterValue = args[2];
-            client.ParamUpdateAction(callerId, parameterKey, parameterValue, out StatusCode status,
-                out string response);
-            return new Arg[]
-            {
-                (int) status,
-                response,
-                0
-            };
+            client.ParamUpdateAction(callerId, parameterKey, parameterValue, out int status, out string response);
+            
+            return new Arg[] {status, response, 0};
         }
 
         Arg[] PublisherUpdate(object[] args)
         {
             if (args.Length < 3 ||
+                !(args[0] is string callerId) ||
                 !(args[1] is string topic) ||
                 !(args[2] is object[] publishers))
             {
-                return new Arg[]
-                {
-                    (int) StatusCode.Error,
-                    "error=failed to parse arguments",
-                    0
-                };
+                return new Arg[] {StatusCode.Error, "error=failed to parse arguments", 0};
             }
 
             Uri[] publisherUris = new Uri[publishers.Length];
@@ -228,22 +224,12 @@ namespace Iviz.Roslib.XmlRpc
             try
             {
                 client.PublisherUpdateRcp(topic, publisherUris);
-                return new Arg[]
-                {
-                    (int) StatusCode.Success,
-                    "ok",
-                    0
-                };
+                return new Arg[] {StatusCode.Success, "ok", 0};
             }
             catch (Exception e)
             {
                 Logger.Log(e);
-                return new Arg[]
-                {
-                    (int) StatusCode.Failure,
-                    "error=Unknown error: " + e.Message,
-                    0
-                };
+                return new Arg[] {StatusCode.Failure, "error=Unknown error: " + e.Message, 0};
             }
         }
 
@@ -254,19 +240,14 @@ namespace Iviz.Roslib.XmlRpc
                 !(args[1] is string topic) ||
                 !(args[2] is object[] protocols))
             {
-                return new Arg[]
-                {
-                    (int) StatusCode.Error,
-                    "error=failed to parse arguments",
-                    0
-                };
+                return new Arg[] {StatusCode.Error, "error=failed to parse arguments", 0};
             }
 
             if (protocols.Length == 0)
             {
                 return new Arg[]
                 {
-                    (int) StatusCode.Failure,
+                    StatusCode.Failure,
                     $"error=no compatible protocols found",
                     Array.Empty<string[]>()
                 };
@@ -283,7 +264,7 @@ namespace Iviz.Roslib.XmlRpc
             {
                 return new Arg[]
                 {
-                    (int) StatusCode.Failure,
+                    StatusCode.Failure,
                     "error=client only supports TCPROS",
                     Array.Empty<string[]>()
                 };
@@ -295,7 +276,7 @@ namespace Iviz.Roslib.XmlRpc
                 {
                     return new Arg[]
                     {
-                        (int) StatusCode.Failure,
+                        StatusCode.Failure,
                         $"error=client is not publishing topic '{topic}'",
                         Array.Empty<string[]>()
                     };
@@ -303,7 +284,7 @@ namespace Iviz.Roslib.XmlRpc
 
                 return new Arg[]
                 {
-                    (int) StatusCode.Success,
+                    StatusCode.Success,
                     "ok",
                     new Arg[] {"TCPROS", hostname, port}
                 };
@@ -313,7 +294,7 @@ namespace Iviz.Roslib.XmlRpc
                 Logger.Log(e);
                 return new Arg[]
                 {
-                    (int) StatusCode.Error,
+                    StatusCode.Error,
                     "error=Unknown error: " + e.Message,
                     Array.Empty<string[]>()
                 };

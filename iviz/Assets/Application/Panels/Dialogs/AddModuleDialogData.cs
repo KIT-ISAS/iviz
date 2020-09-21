@@ -9,11 +9,11 @@ namespace Iviz.App
     {
         static readonly List<(string Caption, Resource.Module Module)> Modules = new List<(string, Resource.Module)>
         {
-            ("<b>Robot</b>\nRobot from the parameter server", Resource.Module.Robot),
-            ("<b>Grid</b>\nA reference plane", Resource.Module.Grid),
-            ("<b>DepthCloud</b>\nPoint cloud generator for depth images", Resource.Module.DepthCloud),
             ("<b>AugmentedReality</b>\nManager for augmented reality", Resource.Module.AugmentedReality),
+            ("<b>Robot</b>\nRobot from the parameter server", Resource.Module.Robot),
+            ("<b>DepthCloud</b>\nPoint cloud generator for depth images", Resource.Module.DepthCloud),
             ("<b>Joystick</b>\nOn-screen joystick", Resource.Module.Joystick),
+            ("<b>Grid</b>\nA reference plane", Resource.Module.Grid),
         };
 
         static readonly Resource.Module[] UniqueModules =

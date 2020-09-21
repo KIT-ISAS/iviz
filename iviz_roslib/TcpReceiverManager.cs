@@ -9,12 +9,12 @@ namespace Iviz.Roslib
 {
     internal class TcpReceiverManager
     {
-        static readonly string[][] SupportedProtocols = { new[] { "TCPROS" } };
+        static readonly string[][] SupportedProtocols = {new[] {"TCPROS"}};
 
-        readonly Dictionary<Uri, TcpReceiver> connectionsByUri = new Dictionary<Uri, TcpReceiver>();
+        readonly Dictionary<Uri, TcpReceiverAsync> connectionsByUri = new Dictionary<Uri, TcpReceiverAsync>();
 
         internal RosSubscriber Subscriber { private get; set; }
-        
+
         public TopicInfo TopicInfo { get; }
         public string Topic => TopicInfo.Topic;
         public string CallerId => TopicInfo.CallerId;
@@ -47,20 +47,23 @@ namespace Iviz.Roslib
                 Logger.LogError($"{this}: Failed to add publisher {remoteUri}: {e}");
                 return false;
             }
+
             if (!response.IsValid)
             {
-                Logger.LogDebug($"{this}: Topic request to {response.Protocol.Hostname}:{response.Protocol.Port} failed");
-                return false;
-            }
-            if (response.Protocol.Type == null)
-            {
-                Logger.LogDebug($"{this}: {response.Protocol.Hostname}:{response.Protocol.Port} has no suitable protocols");
+                Logger.LogDebug($"{this}: Request for topic failed - [{response.Code}]");
                 return false;
             }
 
-            TcpReceiver connection = new TcpReceiver(
+            if (response.Protocol.Type == null)
+            {
+                Logger.LogDebug(
+                    $"{this}: {response.Protocol.Hostname}:{response.Protocol.Port} has no suitable protocols");
+                return false;
+            }
+
+            TcpReceiverAsync connection = new TcpReceiverAsync(
                 remoteUri,
-                new Endpoint(response.Protocol.Hostname, response.Protocol.Port), 
+                new Endpoint(response.Protocol.Hostname, response.Protocol.Port),
                 TopicInfo, Subscriber.MessageCallback,
                 RequestNoDelay);
 
@@ -68,11 +71,12 @@ namespace Iviz.Roslib
             {
                 connectionsByUri[remoteUri] = connection;
             }
+
             connection.Start(TimeoutInMs);
             return true;
         }
 
-        public bool PublisherUpdateRpc(RosClient caller, IList<Uri> publisherUris)
+        public bool PublisherUpdateRpc(RosClient caller, IEnumerable<Uri> publisherUris)
         {
             Uri[] toAdd;
             bool publishersChanged = false;
@@ -80,6 +84,7 @@ namespace Iviz.Roslib
             {
                 toAdd = publisherUris.Where(uri => uri != null && !connectionsByUri.ContainsKey(uri)).ToArray();
 
+                /*
                 HashSet<Uri> toDelete = new HashSet<Uri>(connectionsByUri.Keys);
                 publisherUris.ForEach(uri => toDelete.Remove(uri));
 
@@ -91,14 +96,18 @@ namespace Iviz.Roslib
                     connectionsByUri[uri].Stop();
                     connectionsByUri.Remove(uri);
                 }
+
                 publishersChanged = toDelete.Any();
-                
+                */
             }
+
             foreach (Uri uri in toAdd)
             {
                 publishersChanged |= AddPublisher(caller.CreateTalker(uri));
             }
 
+            publishersChanged |= Cleanup();
+            
             return publishersChanged;
         }
 
@@ -107,16 +116,14 @@ namespace Iviz.Roslib
             bool publishersChanged = false;
             lock (connectionsByUri)
             {
-                Uri[] toDelete = connectionsByUri.
-                    Where(x => !x.Value.IsAlive).
-                    Select(x => x.Key).
-                    ToArray();
+                Uri[] toDelete = connectionsByUri.Where(pair => !pair.Value.IsAlive).Select(pair => pair.Key).ToArray();
                 foreach (Uri uri in toDelete)
                 {
                     Logger.Log($"{this}: Removing connection with '{uri}' - dead x_x");
-                    connectionsByUri[uri].Stop();
+                    connectionsByUri[uri].Dispose();
                     connectionsByUri.Remove(uri);
                 }
+
                 publishersChanged = toDelete.Length != 0;
             }
 
@@ -127,16 +134,16 @@ namespace Iviz.Roslib
         {
             lock (connectionsByUri)
             {
-                connectionsByUri.Values.ForEach(x => x.Stop());
+                connectionsByUri.Values.ForEach(x => x.Dispose());
                 connectionsByUri.Clear();
             }
         }
 
-        public ReadOnlyDictionary<Uri, TcpReceiver> GetConnections()
+        public ReadOnlyDictionary<Uri, TcpReceiverAsync> GetConnections()
         {
             lock (connectionsByUri)
             {
-                return new ReadOnlyDictionary<Uri, TcpReceiver>(connectionsByUri);
+                return new ReadOnlyDictionary<Uri, TcpReceiverAsync>(connectionsByUri);
             }
         }
 
@@ -150,7 +157,7 @@ namespace Iviz.Roslib
 
         public override string ToString()
         {
-            return $"[SubscriberConnectionManager '{Topic}']";
+            return $"[TcpReceiverManager '{Topic}']";
         }
     }
 }

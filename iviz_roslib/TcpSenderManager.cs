@@ -11,19 +11,27 @@ namespace Iviz.Roslib
     internal class TcpSenderManager
     {
         readonly TopicInfo topicInfo;
-        readonly Dictionary<string, TcpSender> connectionsByCallerId = new Dictionary<string, TcpSender>();
+        readonly Dictionary<string, TcpSenderAsync> connectionsByCallerId = new Dictionary<string, TcpSenderAsync>();
 
         public Uri CallerUri { get; }
         public string Topic => topicInfo.Topic;
         public string CallerId => topicInfo.CallerId;
         public string TopicType => topicInfo.Type;
-        public int NumConnections => connectionsByCallerId.Count;
+
+        public int NumConnections
+        {
+            get
+            {
+                lock (connectionsByCallerId) return connectionsByCallerId.Count;
+            }
+        }
 
         public int TimeoutInMs { get; set; } = 5000;
 
         public IMessage LatchedMessage { get; private set; }
 
         bool latching;
+
         public bool Latching
         {
             get => latching;
@@ -38,6 +46,7 @@ namespace Iviz.Roslib
         }
 
         int maxQueueSizeInBytes;
+
         public int MaxQueueSizeInBytes
         {
             get => maxQueueSizeInBytes;
@@ -65,16 +74,16 @@ namespace Iviz.Roslib
         public IPEndPoint CreateConnection(string remoteCallerId)
         {
             Logger.LogDebug($"{this}: '{remoteCallerId}' is requesting {Topic}");
-            TcpSender newSender = new TcpSender(CallerUri, remoteCallerId, topicInfo, Latching);
+            TcpSenderAsync newSender = new TcpSenderAsync(CallerUri, remoteCallerId, topicInfo, Latching);
 
             IPEndPoint endPoint;
             lock (connectionsByCallerId)
             {
-                if (connectionsByCallerId.TryGetValue(remoteCallerId, out TcpSender oldSender) && 
+                if (connectionsByCallerId.TryGetValue(remoteCallerId, out TcpSenderAsync oldSender) &&
                     oldSender.IsAlive)
                 {
                     Logger.LogDebug($"{this}: '{remoteCallerId} is requesting {Topic} again?");
-                    oldSender.Stop();
+                    oldSender.Dispose();
                 }
 
                 endPoint = newSender.Start(TimeoutInMs);
@@ -108,7 +117,7 @@ namespace Iviz.Roslib
                 foreach (string callerId in toDelete)
                 {
                     Logger.LogDebug($"{this}: Removing connection with '{callerId}' - dead x_x");
-                    connectionsByCallerId[callerId].Stop();
+                    connectionsByCallerId[callerId].Dispose();
                     connectionsByCallerId.Remove(callerId);
                 }
 
@@ -127,7 +136,7 @@ namespace Iviz.Roslib
 
             lock (connectionsByCallerId)
             {
-                foreach (TcpSender connection in connectionsByCallerId.Values)
+                foreach (var connection in connectionsByCallerId.Values)
                 {
                     connection.Publish(msg);
                 }
@@ -138,10 +147,11 @@ namespace Iviz.Roslib
         {
             lock (connectionsByCallerId)
             {
-                foreach (TcpSender sender in connectionsByCallerId.Values)
+                foreach (var sender in connectionsByCallerId.Values)
                 {
-                    sender.Stop();
+                    sender.Dispose();
                 }
+
                 connectionsByCallerId.Clear();
             }
         }
@@ -156,11 +166,11 @@ namespace Iviz.Roslib
             }
         }
 
-        public ReadOnlyDictionary<string, TcpSender> GetConnections()
+        public ReadOnlyDictionary<string, TcpSenderAsync> GetConnections()
         {
             lock (connectionsByCallerId)
             {
-                return new ReadOnlyDictionary<string, TcpSender>(connectionsByCallerId);
+                return new ReadOnlyDictionary<string, TcpSenderAsync>(connectionsByCallerId);
             }
         }
 

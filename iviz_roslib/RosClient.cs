@@ -16,9 +16,17 @@ namespace Iviz.Roslib
     /// </summary>
     public class InvalidMessageTypeException : Exception
     {
-        public InvalidMessageTypeException(string message) : base(message) { }
-        public InvalidMessageTypeException(string message, Exception innerException) : base(message, innerException) { }
-        public InvalidMessageTypeException() { }
+        public InvalidMessageTypeException(string message) : base(message)
+        {
+        }
+
+        public InvalidMessageTypeException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        public InvalidMessageTypeException()
+        {
+        }
     }
 
     /// <summary>
@@ -26,9 +34,17 @@ namespace Iviz.Roslib
     /// </summary>
     public class ConnectionException : Exception
     {
-        public ConnectionException(string message) : base(message) { }
-        public ConnectionException(string message, Exception innerException) : base(message, innerException) { }
-        public ConnectionException() { }
+        public ConnectionException(string message) : base(message)
+        {
+        }
+
+        public ConnectionException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        public ConnectionException()
+        {
+        }
     }
 
     /// <summary>
@@ -36,36 +52,55 @@ namespace Iviz.Roslib
     /// </summary>
     public class UnreachableUriException : Exception
     {
-        public UnreachableUriException(string message) : base(message) { }
-        public UnreachableUriException(string message, Exception innerException) : base(message, innerException) { }
-        public UnreachableUriException() { }
+        public UnreachableUriException(string message) : base(message)
+        {
+        }
+
+        public UnreachableUriException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        public UnreachableUriException()
+        {
+        }
     }
 
     public class XmlRpcException : Exception
     {
-        public XmlRpcException(string message) : base(message) { }
-        public XmlRpcException(string message, Exception innerException) : base(message, innerException) { }
-        public XmlRpcException() { }
+        public XmlRpcException(string message) : base(message)
+        {
+        }
+
+        public XmlRpcException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        public XmlRpcException()
+        {
+        }
     }
 
     /// <summary>
     /// Class that manages a client connection to a ROS master. 
     /// </summary>
     public sealed class RosClient : IDisposable
-    { 
-        public const int AnyPort = 0;        
-        
+    {
+        public const int AnyPort = 0;
+
         readonly XmlRpc.NodeServer listener;
 
         readonly Dictionary<string, RosSubscriber> subscribersByTopic = new Dictionary<string, RosSubscriber>();
         readonly Dictionary<string, RosPublisher> publishersByTopic = new Dictionary<string, RosPublisher>();
 
-        readonly Dictionary<string, ServiceReceiver> subscribedServicesByName = new Dictionary<string, ServiceReceiver>();
-        readonly Dictionary<string, ServiceSenderManager> advertisedServicesByName = new Dictionary<string, ServiceSenderManager>();
+        readonly Dictionary<string, ServiceReceiver> subscribedServicesByName =
+            new Dictionary<string, ServiceReceiver>();
+
+        readonly Dictionary<string, ServiceSenderManager> advertisedServicesByName =
+            new Dictionary<string, ServiceSenderManager>();
 
         public delegate void ShutdownActionCall(
             string callerId, string reason,
-            out XmlRpc.StatusCode status, out string response);
+            out int status, out string response);
 
         /// <summary>
         /// Handler of 'shutdown' XMLRPC calls from the slave API
@@ -74,7 +109,7 @@ namespace Iviz.Roslib
 
         public delegate void ParamUpdateActionCall(
             string callerId, string parameterKey, object parametervalue,
-            out XmlRpc.StatusCode status, out string response);
+            out int status, out string response);
 
         /// <summary>
         /// Handler of 'paramUpdate' XMLRPC calls from the slave API
@@ -216,7 +251,7 @@ namespace Iviz.Roslib
             }
             catch (SocketException e)
             {
-                listener?.Stop();
+                listener?.Dispose();
                 throw new ConnectionException($"Failed to bind to local URI '{callerUri}'", e);
             }
 
@@ -238,7 +273,7 @@ namespace Iviz.Roslib
             catch (Exception e) when
                 (e is SocketException || e is TimeoutException || e is AggregateException || e is IOException)
             {
-                listener.Stop();
+                listener.Dispose();
                 throw new ConnectionException($"Failed to contact the master URI '{masterUri}'", e);
             }
 
@@ -252,20 +287,17 @@ namespace Iviz.Roslib
                 {
                     Logger.LogError("RosClient: Failed to validate reachability response.");
                 }
-                else
+                else if (response.Pid != Process.GetCurrentProcess().Id)
                 {
-                    if (response.Pid != Process.GetCurrentProcess().Id)
-                    {
-                        listener.Stop();
-                        throw new UnreachableUriException($"My uri '{CallerUri}' appears to belong to someone else!");
-                    }
+                    listener.Dispose();
+                    throw new UnreachableUriException($"My uri '{CallerUri}' appears to belong to someone else!");
                 }
             }
             catch (Exception e) when
                 (e is SocketException || e is TimeoutException || e is AggregateException)
             {
-                listener.Stop();
-                throw new UnreachableUriException($"My uri '{CallerUri}' does not appear to be reachable!");
+                listener.Dispose();
+                throw new UnreachableUriException($"My own uri '{CallerUri}' does not appear to be reachable!");
             }
         }
 
@@ -277,7 +309,7 @@ namespace Iviz.Roslib
         {
             get
             {
-                string envStr = Environment.GetEnvironmentVariable("ROS_HOSTNAME") ?? 
+                string envStr = Environment.GetEnvironmentVariable("ROS_HOSTNAME") ??
                                 Environment.GetEnvironmentVariable("ROS_IP");
                 if (envStr is null)
                 {
@@ -288,7 +320,7 @@ namespace Iviz.Roslib
                 {
                     return uri;
                 }
-                
+
                 Logger.Log("RosClient: Environment variable for caller uri is not a valid uri!");
                 return null;
             }
@@ -309,13 +341,14 @@ namespace Iviz.Roslib
         {
             UnicastIPAddressInformation ipInfo =
                 NetworkInterface.GetAllNetworkInterfaces()
-                .Where(iface => iface.NetworkInterfaceType == type && iface.OperationalStatus == OperationalStatus.Up)
-                .SelectMany(iface => iface.GetIPProperties().UnicastAddresses)
-                .FirstOrDefault(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork);
-            
+                    .Where(iface =>
+                        iface.NetworkInterfaceType == type && iface.OperationalStatus == OperationalStatus.Up)
+                    .SelectMany(iface => iface.GetIPProperties().UnicastAddresses)
+                    .FirstOrDefault(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork);
+
             return ipInfo is null ? null : new Uri($"http://{ipInfo.Address}:{usingPort}/");
-        }         
-        
+        }
+
         /// <summary>
         /// Retrieves the environment variable ROS_MASTER_URI as a uri.
         /// </summary>
@@ -333,12 +366,12 @@ namespace Iviz.Roslib
                 {
                     return uri;
                 }
-                
+
                 Logger.Log("RosClient: Environment variable for master uri is not a valid uri!");
                 return null;
             }
         }
-        
+
         /// <summary>
         /// Try to retrieve a valid master uri.
         /// </summary>        
@@ -354,8 +387,8 @@ namespace Iviz.Roslib
         /// <param name="callerId">The name of this node</param>
         /// <param name="callerUri">URI of this node. Leave empty to generate one automatically</param>
         public RosClient(string masterUri, string callerId = null, string callerUri = null) :
-            this(masterUri is null ? EnvironmentMasterUri : new Uri(masterUri), 
-                callerId, 
+            this(masterUri is null ? EnvironmentMasterUri : new Uri(masterUri),
+                callerId,
                 callerUri is null ? EnvironmentCallerUri : new Uri(callerUri))
         {
         }
@@ -719,11 +752,10 @@ namespace Iviz.Roslib
             var response = Master.GetPublishedTopics();
             if (response.IsValid)
             {
-                return Master.GetPublishedTopics().Topics.
-                    Select(x => new BriefTopicInfo(x.name, x.type)).
-                    ToArray().AsReadOnly();
+                return Master.GetPublishedTopics().Topics.Select(x => new BriefTopicInfo(x.name, x.type)).ToArray()
+                    .AsReadOnly();
             }
-            
+
             throw new XmlRpcException("Failed to retrieve topics: " + response.StatusMessage);
         }
 
@@ -882,7 +914,7 @@ namespace Iviz.Roslib
                 advertisedServicesByName.Clear();
             }
 
-            listener.Stop();
+            listener.Dispose();
         }
 
         public SubscriberState GetSubscriberStatistics()
@@ -1030,7 +1062,10 @@ namespace Iviz.Roslib
                     throw new ArgumentException("Service already exists", nameof(serviceName));
                 }
 
-                void Wrapper(IService x) { callback((T)x); }
+                void Wrapper(IService x)
+                {
+                    callback((T) x);
+                }
 
                 ServiceInfo serviceInfo = new ServiceInfo(CallerId, serviceName, typeof(T), new T());
                 advertisedService = new ServiceSenderManager(serviceInfo, CallerUri.Host, Wrapper);
@@ -1061,18 +1096,18 @@ namespace Iviz.Roslib
             Master.UnregisterService(name, advertisedService.Uri);
         }
 
-        public XmlRpc.StatusCode SetParameter(string key, Iviz.XmlRpc.Arg value)
+        public bool SetParameter(string key, Iviz.XmlRpc.Arg value)
         {
-            return Parameters.SetParam(key, value).Code;
+            return Parameters.SetParam(key, value).Code == XmlRpc.StatusCode.Success;
         }
 
-        public XmlRpc.StatusCode GetParameter(string key, out object value)
+        public bool GetParameter(string key, out object value)
         {
             var response = Parameters.GetParam(key);
             value = response.ParameterValue;
-            return response.Code;
+            return response.Code == XmlRpc.StatusCode.Success;
         }
-        
+
         public ReadOnlyCollection<string> GetParameterNames()
         {
             var response = Parameters.GetParamNames();
@@ -1084,9 +1119,9 @@ namespace Iviz.Roslib
             throw new XmlRpcException("Failed to retrieve parameter names: " + response.StatusMessage);
         }
 
-        public XmlRpc.StatusCode DeleteParameter(string key)
+        public bool DeleteParameter(string key)
         {
-            return Parameters.DeleteParam(key).Code;
+            return Parameters.DeleteParam(key).Code == XmlRpc.StatusCode.Success;
         }
 
         public bool HasParameter(string key)
@@ -1094,14 +1129,14 @@ namespace Iviz.Roslib
             return Parameters.HasParam(key).HasParam;
         }
 
-        public XmlRpc.StatusCode SubscribeParameter(string key)
+        public bool SubscribeParameter(string key)
         {
-            return Parameters.SubscribeParam(key).Code;
+            return Parameters.SubscribeParam(key).Code == XmlRpc.StatusCode.Success;
         }
 
-        public XmlRpc.StatusCode UnsubscribeParameter(string key)
+        public bool UnsubscribeParameter(string key)
         {
-            return Parameters.UnsubscribeParam(key).Code;
+            return Parameters.UnsubscribeParam(key).Code == XmlRpc.StatusCode.Success;
         }
 
         public void Dispose()

@@ -15,16 +15,23 @@ using Newtonsoft.Json.Converters;
 
 namespace Iviz.Roslib
 {
-    [Obsolete]
-    internal sealed class TcpSender : IDisposable
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum SenderStatus
     {
-        readonly object condVar = new object();
+        Inactive,
+        Waiting,
+        Active,
+        Dead
+    }
+    
+    internal sealed class TcpSenderAsync : IDisposable
+    {
+        readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
         readonly List<IMessage> messageQueue = new List<IMessage>();
 
         TcpListener tcpListener;
         TcpClient tcpClient;
         NetworkStream stream;
-        BinaryWriter writer;
 
         const int BufferSizeIncrease = 1024;
         byte[] writeBuffer = new byte[BufferSizeIncrease];
@@ -35,7 +42,7 @@ namespace Iviz.Roslib
         string RemoteCallerId { get; }
         Uri CallerUri { get; }
         bool Latching { get; }
-        
+
         readonly TopicInfo topicInfo;
 
         string Topic => topicInfo.Topic;
@@ -43,14 +50,22 @@ namespace Iviz.Roslib
         Endpoint Endpoint { get; set; }
         Endpoint RemoteEndpoint { get; set; }
         public int MaxQueueSizeInBytes { get; set; } = 50000;
-        int CurrentQueueSize => messageQueue.Count;
+
+        int CurrentQueueSize
+        {
+            get
+            {
+                lock (messageQueue) return messageQueue.Count;
+            }
+        }
+
         int NumSent { get; set; }
         int BytesSent { get; set; }
         int NumDropped { get; set; }
         int BytesDropped { get; set; }
         public SenderStatus Status { get; private set; }
 
-        public TcpSender(
+        public TcpSenderAsync(
             Uri callerUri,
             string remoteCallerId,
             TopicInfo topicInfo,
@@ -68,24 +83,13 @@ namespace Iviz.Roslib
             tcpListener = new TcpListener(IPAddress.Any, 0);
             tcpListener.Start();
 
-            IPEndPoint localEndpoint = (IPEndPoint)tcpListener.LocalEndpoint;
+            IPEndPoint localEndpoint = (IPEndPoint) tcpListener.LocalEndpoint;
             Endpoint = new Endpoint(localEndpoint);
 
             keepRunning = true;
-            task = Task.Run(() => Run(timeoutInMs));
+            task = Task.Run(async () => await Run(timeoutInMs).ConfigureAwait(false));
 
             return localEndpoint;
-        }
-
-        public void Stop()
-        {
-            keepRunning = false;
-            tcpClient?.Close();
-            tcpListener?.Stop();
-            task?.Wait();
-            tcpClient = null;
-            tcpListener = null;
-            task = null;
         }
 
         static List<string> ParseHeader(byte[] readBuffer)
@@ -104,20 +108,22 @@ namespace Iviz.Roslib
 #endif
                 contents.Add(entry);
             }
+
             return contents;
         }
 
-        byte[] ReceiveHeader()
+        async Task<byte[]> ReceiveHeader()
         {
             byte[] lengthBuffer = new byte[4];
             int numRead = 0;
             while (numRead < 4)
             {
-                int readNow = stream.Read(lengthBuffer, numRead, 4 - numRead);
+                int readNow = await stream.ReadAsync(lengthBuffer, numRead, 4 - numRead);
                 if (readNow == 0)
                 {
                     return null;
                 }
+
                 numRead += readNow;
             }
 
@@ -126,22 +132,25 @@ namespace Iviz.Roslib
             numRead = 0;
             while (numRead < length)
             {
-                int readNow = stream.Read(readBuffer, numRead, length - numRead);
+                int readNow = await stream.ReadAsync(readBuffer, numRead, length - numRead);
                 if (readNow == 0)
                 {
                     return null;
                 }
+
                 numRead += readNow;
             }
+
             return readBuffer;
         }
 
-        int SendResponseHeader(string errorMessage)
+        async Task SendResponseHeader(string errorMessage)
         {
             string[] contents;
             if (errorMessage != null)
             {
-                contents = new[] {
+                contents = new[]
+                {
                     errorMessage,
                     $"md5sum={topicInfo.Md5Sum}",
                     $"type={topicInfo.Type}",
@@ -150,31 +159,39 @@ namespace Iviz.Roslib
             }
             else
             {
-                contents = new[] {
+                contents = new[]
+                {
                     $"md5sum={topicInfo.Md5Sum}",
                     $"type={topicInfo.Type}",
                     $"callerid={topicInfo.CallerId}",
                     $"latching={(Latching ? "1" : "0")}",
                 };
             }
+
             int totalLength = 4 * contents.Length;
             foreach (string entry in contents)
             {
                 totalLength += entry.Length;
             }
-            writer.Write(totalLength);
-            foreach (string entry in contents)
+
+            byte[] array = new byte[4 + totalLength];
+            using (BinaryWriter writer = new BinaryWriter(new MemoryStream(array)))
             {
-                writer.Write(entry.Length);
-                writer.Write(BuiltIns.UTF8.GetBytes(entry));
+                writer.Write(totalLength);
+                foreach (string entry in contents)
+                {
+                    writer.Write(entry.Length);
+                    writer.Write(BuiltIns.UTF8.GetBytes(entry));
 #if DEBUG__
                 Logger.Log(">>> " + contents[i]);
 #endif
+                }
             }
-            return totalLength;
+
+            await stream.WriteAsync(array, 0, array.Length);
         }
 
-        string ProcessRemoteHeader(IReadOnlyCollection<string> fields)
+        string ProcessRemoteHeader(ICollection<string> fields)
         {
             if (fields.Count < 5)
             {
@@ -189,56 +206,68 @@ namespace Iviz.Roslib
                 {
                     return $"error=Invalid field '{field}'";
                 }
+
                 string key = field.Substring(0, index);
                 values[key] = field.Substring(index + 1);
             }
 
             if (!values.TryGetValue("callerid", out string receivedId) || receivedId != RemoteCallerId)
             {
-                return $"error=Expected callerid '{RemoteCallerId}' but received instead '{receivedId}', closing connection";
+                return
+                    $"error=Expected callerid '{RemoteCallerId}' but received instead '{receivedId}', closing connection";
             }
+
             if (!values.TryGetValue("topic", out string receivedTopic) || receivedTopic != topicInfo.Topic)
             {
-                return $"error=Expected topic '{topicInfo.Topic}' but received instead '{receivedTopic}', closing connection";
+                return
+                    $"error=Expected topic '{topicInfo.Topic}' but received instead '{receivedTopic}', closing connection";
             }
+
             if (!values.TryGetValue("type", out string receivedType) || receivedType != topicInfo.Type)
             {
                 if (receivedType == "*")
                 {
-                    Logger.LogDebug($"{this}: Expected type '{topicInfo.Type}' but received instead '{receivedType}'. Continuing...");
+                    Logger.LogDebug(
+                        $"{this}: Expected type '{topicInfo.Type}' but received instead '{receivedType}'. Continuing...");
                 }
                 else
                 {
-                    return $"error=Expected type '{topicInfo.Type}' but received instead '{receivedType}', closing connection";
+                    return
+                        $"error=Expected type '{topicInfo.Type}' but received instead '{receivedType}', closing connection";
                 }
             }
+
             if (!values.TryGetValue("md5sum", out string receivedMd5Sum) || receivedMd5Sum != topicInfo.Md5Sum)
             {
                 if (receivedMd5Sum == "*")
                 {
-                    Logger.LogDebug($"{this}: Expected md5 '{topicInfo.Md5Sum}' but received instead '{receivedMd5Sum}'. Continuing...");
+                    Logger.LogDebug(
+                        $"{this}: Expected md5 '{topicInfo.Md5Sum}' but received instead '{receivedMd5Sum}'. Continuing...");
                 }
                 else
                 {
-                    return $"error=Expected md5 '{topicInfo.Md5Sum}' but received instead '{receivedMd5Sum}', closing connection";
+                    return
+                        $"error=Expected md5 '{topicInfo.Md5Sum}' but received instead '{receivedMd5Sum}', closing connection";
                 }
             }
+
             if (values.TryGetValue("tcp_nodelay", out string receivedNoDelay) && receivedNoDelay == "1")
             {
                 tcpClient.NoDelay = true;
                 Logger.LogDebug($"{this}: requested tcp_nodelay");
-
             }
+
             return null;
         }
 
-        bool DoHandshake()
+        async Task<bool> DoHandshake()
         {
-            byte[] readBuffer = ReceiveHeader();
+            byte[] readBuffer = await ReceiveHeader();
             if (readBuffer == null)
             {
                 throw new TimeoutException("Connection closed during handshake.");
             }
+
             List<string> fields = ParseHeader(readBuffer);
             string errorMessage = ProcessRemoteHeader(fields);
 
@@ -246,50 +275,60 @@ namespace Iviz.Roslib
             {
                 Logger.Log($"{this}: Failed handshake\n{errorMessage}");
             }
-            SendResponseHeader(errorMessage);
+
+            await SendResponseHeader(errorMessage);
 
             return errorMessage == null;
         }
 
-        void Run(int timeoutInMs)
+        static async Task<TcpClient> TimeoutTask(int timeoutInMs)
+        {
+            await Task.Delay(timeoutInMs);
+            return null;
+        }
+        
+        async Task Run(int timeoutInMs)
         {
             try
             {
-                Logger.LogDebug($"{this}: initialized! " + tcpListener.LocalEndpoint);
+                Logger.LogDebug($"{this}: initialized!");
                 Status = SenderStatus.Waiting;
 
-                Task<TcpClient> task = tcpListener.AcceptTcpClientAsync();
-                if (!task.Wait(timeoutInMs) || task.IsCanceled || task.IsFaulted || !keepRunning)
+                Task<TcpClient> connectionTask = tcpListener.AcceptTcpClientAsync();
+                Task<TcpClient> completedTask = await Task.WhenAny(connectionTask, TimeoutTask(timeoutInMs));
+                if (completedTask != connectionTask || connectionTask.IsFaulted || !keepRunning)
                 {
                     throw new TimeoutException();
                 }
-                using (tcpClient = task.Result)
+
+                using (tcpClient = await completedTask)
                 {
-                    IPEndPoint remoteEndPoint = (IPEndPoint)tcpClient.Client.RemoteEndPoint;
+                    IPEndPoint remoteEndPoint = (IPEndPoint) tcpClient.Client.RemoteEndPoint;
                     RemoteEndpoint = new Endpoint(remoteEndPoint);
-                    
+
                     Status = SenderStatus.Active;
 
                     Logger.LogDebug($"{this}: started!");
                     stream = tcpClient.GetStream();
-                    writer = new BinaryWriter(stream);
-
-                    if (!DoHandshake())
+                    
+                    if (!await DoHandshake())
                     {
                         keepRunning = false;
                     }
 
                     List<IMessage> tmpQueue = new List<IMessage>();
+
                     while (keepRunning)
                     {
-                        lock (condVar)
+                        await signal.WaitAsync(1000);
+                        if (!keepRunning)
                         {
-                            Monitor.Wait(condVar, 1000);
-                            if (!keepRunning)
-                            {
-                                break;
-                            }
-                            tmpQueue.Clear();
+                            break;
+                        }
+
+                        tmpQueue.Clear();
+                        lock (messageQueue)
+                        {
                             tmpQueue.AddRange(messageQueue);
                             messageQueue.Clear();
                         }
@@ -305,15 +344,16 @@ namespace Iviz.Roslib
                             try
                             {
                                 uint sendLength = Msgs.Buffer.Serialize(message, writeBuffer);
+                                byte[] sendLengthAsArray = BitConverter.GetBytes(sendLength);
 
-                                //Debug.Log($"{this}: sending {sendLength}");
-                                writer.Write(sendLength);
-                                writer.Write(writeBuffer, 0, (int)sendLength);
+                                await stream.WriteAsync(sendLengthAsArray, 0, 4);
+                                await stream.WriteAsync(writeBuffer, 0, (int) sendLength);
+
                                 NumSent++;
-                                BytesSent += (int)sendLength + 4;
+                                BytesSent += (int) sendLength + 4;
                             }
                             catch (Exception e) when
-                            (e is ArgumentException || e is IndexOutOfRangeException)
+                                (e is ArgumentException || e is IndexOutOfRangeException)
                             {
                                 Logger.LogDebug($"{this}: {e}");
                             }
@@ -322,7 +362,7 @@ namespace Iviz.Roslib
                 }
             }
             catch (Exception e) when
-            (e is IOException || e is TimeoutException || e is AggregateException || e is SocketException)
+                (e is IOException || e is TimeoutException || e is AggregateException || e is SocketException)
             {
                 Logger.LogDebug($"{this}: {e}");
             }
@@ -330,6 +370,7 @@ namespace Iviz.Roslib
             {
                 Logger.Log($"{this}: {e}");
             }
+
             Status = SenderStatus.Dead;
             tcpClient = null;
             stream = null;
@@ -342,7 +383,8 @@ namespace Iviz.Roslib
                 NumDropped++;
                 return;
             }
-            lock (condVar)
+
+            lock (messageQueue)
             {
                 const int minQueueSize = 2;
                 messageQueue.Add(message);
@@ -359,24 +401,43 @@ namespace Iviz.Roslib
                         {
                             overflow -= messageQueue[i].RosMessageLength;
                         }
+
                         NumDropped += i;
                         BytesDropped = totalQueueSize - MaxQueueSizeInBytes - overflow;
                         messageQueue.RemoveRange(0, i);
                     }
                 }
-                
-                Monitor.Pulse(condVar);
+            }
+
+            try
+            {
+                signal.Release();
+            }
+            catch (SemaphoreFullException)
+            {
             }
         }
 
+        bool disposed;
         public void Dispose()
         {
-            tcpClient.Dispose();
-            stream.Dispose();
-
+            if (disposed)
+            {
+                return;
+            }
+            
+            disposed = true;
             keepRunning = false;
+
+            try
+            {
+                signal.Release();
+            }
+            catch (SemaphoreFullException)
+            {
+            }
+
             task?.Wait();
-            task?.Dispose();
         }
 
         public PublisherSenderState State =>

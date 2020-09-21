@@ -233,8 +233,8 @@ namespace Iviz.Controllers
             try
             {
                 //RoslibSharp.Logger.LogDebug = x => Logger.Debug(x);
-                Roslib.Logger.LogError = x => Logger.Error(x);
-                Roslib.Logger.Log = x => Logger.Info(x);
+                Msgs.Logger.LogError = x => Logger.Error(x);
+                Msgs.Logger.Log = x => Logger.Info(x);
 
                 client = new RosClient(MasterUri, MyId, MyUri);
 

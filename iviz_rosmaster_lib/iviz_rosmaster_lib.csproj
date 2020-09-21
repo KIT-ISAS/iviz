@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <AssemblyName>Iviz.Rosmaster.Lib</AssemblyName>
+        <RootNamespace>Iviz.Rosmaster</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\iviz_xmlrpc\iviz_xmlrpc.csproj" />
+    </ItemGroup>
+
+</Project>
