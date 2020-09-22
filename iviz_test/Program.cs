@@ -27,6 +27,20 @@ namespace iviz_test
         static void Main()
         {
             Uri masterUri = RosClient.EnvironmentMasterUri ?? 
+                            new Uri("http://141.3.59.19:11311");
+
+            string callerId = "/iviz_test";
+            RosClient client = new RosClient(masterUri, callerId);
+            
+            for (int i = 0; i < 20; i++)
+            {
+                Thread.Sleep(1000);
+            }
+        }
+        
+        static void Main222()
+        {
+            Uri masterUri = RosClient.EnvironmentMasterUri ?? 
                             new Uri("http://192.168.0.220:11311");
             string callerId = "/iviz_test";
 

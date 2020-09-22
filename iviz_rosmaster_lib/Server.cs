@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using Iviz.Msgs;
 using Iviz.XmlRpc;
 using HttpListenerContext = Iviz.XmlRpc.HttpListenerContext;
+using Logger = Iviz.Msgs.Logger;
 
 namespace Iviz.RosMaster
 {
-    public class Server : IDisposable
+    public sealed class Server : IDisposable
     {
         public const int DefaultPort = 11311;
 
@@ -78,7 +79,6 @@ namespace Iviz.RosMaster
         }
 
         bool disposed;
-
         public void Dispose()
         {
             if (disposed)
@@ -86,7 +86,9 @@ namespace Iviz.RosMaster
                 return;
             }
 
+            //Debug.Log(Thread.CurrentThread.Name + " " + Thread.CurrentContext.ContextID +  "ros: listener: dispose");
             listener.Dispose();
+            //Debug.Log(Thread.CurrentThread.Name + " " + Thread.CurrentContext.ContextID +  "ros: out");
             disposed = true;
         }
 
@@ -98,7 +100,7 @@ namespace Iviz.RosMaster
 
         public async Task Start()
         {
-            Logger.Log("** Starting at " + MasterUri);
+            Logger.Log( "** Starting at " + MasterUri);
             await listener.Start(StartContext);
             Logger.Log("** Leaving thread.");
         }
@@ -109,7 +111,9 @@ namespace Iviz.RosMaster
             {
                 try
                 {
+                    //Debug.Log("got request");
                     await Service.MethodResponseAsync(context, methods, lateCallbacks);
+                    //Debug.Log("finished request");
                 }
                 catch (Exception e)
                 {
@@ -156,7 +160,7 @@ namespace Iviz.RosMaster
             IEnumerable<Uri> currentSubscribers =
                 subscribersByTopic.TryGetValue(topic, out var subscribers)
                     ? subscribers.Select(tuple => tuple.callerUri)
-                    : ArraySegment<Uri>.Empty;
+                    : Array.Empty<Uri>();
 
             return new Arg[] {StatusCode.Success, "ok", new Arg(currentSubscribers)};
         }
@@ -176,12 +180,15 @@ namespace Iviz.RosMaster
                     : Array.Empty<Uri>();
             Arg[] methodArgs = {MasterCallerId, topic, new Arg(publisherUris)};
 
-            Task[] tasks = subscribers.Select(tuple => NotifySubscriber(tuple.callerUri, methodArgs)).ToArray();
-
-            await Task.WhenAll(tasks);
+            // fire and forget!
+            Task.Run(async() =>
+            {
+                Task[] tasks = subscribers.Select(tuple => NotifySubscriber(tuple.callerUri, methodArgs)).ToArray();
+                await Task.WhenAll(tasks);
+            });
         }
 
-        async Task NotifySubscriber(Uri remoteUri, Arg[] methodArgs)
+        async Task NotifySubscriber(Uri remoteUri, IEnumerable<Arg> methodArgs)
         {
             try
             {
@@ -189,7 +196,7 @@ namespace Iviz.RosMaster
             }
             catch (Exception e)
             {
-                Logger.LogError(e);
+                Logger.LogDebug(e);
             }
         }
 
@@ -220,7 +227,7 @@ namespace Iviz.RosMaster
             IEnumerable<Uri> currentPublishers =
                 publishersByTopic.TryGetValue(topic, out var publishers)
                     ? publishers.Select(tuple => tuple.callerUri)
-                    : ArraySegment<Uri>.Empty;
+                    : Array.Empty<Uri>();
 
             return new Arg[] {StatusCode.Success, "ok", new Arg(currentPublishers)};
         }
@@ -275,7 +282,7 @@ namespace Iviz.RosMaster
                 return new Arg[] {StatusCode.Success, "ok", 0};
             }
             
-            Logger.Log($"++ Publisher: {callerId}@{callerUri} -> {topic}");
+            Logger.Log($"-- Publisher: {callerId}@{callerUri} -> {topic}");
             
             if (!publishers.Any())
             {
@@ -459,7 +466,7 @@ namespace Iviz.RosMaster
             }
 
             string keyAsNamespace = key;
-            if (keyAsNamespace[^1] != '/')
+            if (keyAsNamespace[keyAsNamespace.Length - 1] != '/')
             {
                 keyAsNamespace += "/";
             }

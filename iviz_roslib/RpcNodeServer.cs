@@ -62,10 +62,16 @@ namespace Iviz.Roslib.XmlRpc
 
             await signal.WaitAsync();
 
-            Logger.LogDebug($"{this}: Leaving thread");
-            
+            // tell the listener in every possible way to stop listening
             listener.Dispose();
-            await listenerTask;
+            
+            // and that is usually not enough. so we bail out
+            if (!listenerTask.Wait(2000))
+            {
+                Logger.LogDebug($"{this}: Listener stuck. Abandoning.");
+            }
+
+            Logger.LogDebug($"{this}: Leaving thread");
         }
 
         async Task StartContext(HttpListenerContext context)

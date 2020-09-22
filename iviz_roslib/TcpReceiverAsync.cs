@@ -175,11 +175,18 @@ namespace Iviz.Roslib
                 {
                     try
                     {
+                        /*
                         Task connectionTask = tcpClient.ConnectAsync(RemoteEndpoint.Hostname, RemoteEndpoint.Port);
                         Task completedTask = await Task.WhenAny(connectionTask, Task.Delay(timeoutInMs));                        
                         if (completedTask != connectionTask || connectionTask.IsFaulted)
                         {
                             throw new TimeoutException();
+                        }
+                        */
+                        Task connectionTask = tcpClient.ConnectAsync(RemoteEndpoint.Hostname, RemoteEndpoint.Port);
+                        if (!connectionTask.Wait(timeoutInMs) || !connectionTask.IsCompleted)
+                        {
+                            throw new TimeoutException("Connection timed out!", connectionTask.Exception);
                         }
 
                         IPEndPoint endPoint = (IPEndPoint) tcpClient.Client.LocalEndPoint;

@@ -109,7 +109,7 @@ namespace Iviz.Controllers
 
         bool TryLoadSavedRobot(string robotName)
         {
-            if (!Resource.External.TryGetRobot(robotName, out string robotDescription))
+            if (!Resource.TryGetRobot(robotName, out string robotDescription))
             {
                 // shouldn't happen!
                 Debug.Log($"SimpleRobotController: Failed to load robot!");

@@ -192,7 +192,7 @@ namespace Iviz.App
 
         public void OnGotoClicked()
         {
-            TFListener.GuiManager.LookAt(SelectedFrame.AbsolutePose.position);
+            TFListener.GuiCamera.LookAt(SelectedFrame.AbsolutePose.position);
             Close?.Invoke();
         }
 
@@ -204,13 +204,13 @@ namespace Iviz.App
 
         public void OnLockPivotClicked()
         {
-            if (TFListener.GuiManager.OrbitCenterOverride == SelectedFrame)
+            if (TFListener.GuiCamera.OrbitCenterOverride == SelectedFrame)
             {
-                TFListener.GuiManager.OrbitCenterOverride = null;
+                TFListener.GuiCamera.OrbitCenterOverride = null;
             }
             else
             {
-                TFListener.GuiManager.OrbitCenterOverride = SelectedFrame;
+                TFListener.GuiCamera.OrbitCenterOverride = SelectedFrame;
             }
 
             UpdateFrameTexts();
@@ -236,7 +236,7 @@ namespace Iviz.App
                     trailText.text = "Trail:\nOff";
                 }
 
-                if (TFListener.GuiManager.OrbitCenterOverride == SelectedFrame)
+                if (TFListener.GuiCamera.OrbitCenterOverride == SelectedFrame)
                 {
                     lockPivotText.text = "Lock Pivot\n<b>On</b>";
                 }
@@ -260,13 +260,13 @@ namespace Iviz.App
 
         public void OnLock1PVClicked()
         {
-            if (TFListener.GuiManager.CameraViewOverride == SelectedFrame)
+            if (TFListener.GuiCamera.CameraViewOverride == SelectedFrame)
             {
-                TFListener.GuiManager.CameraViewOverride = null;
+                TFListener.GuiCamera.CameraViewOverride = null;
             }
             else
             {
-                TFListener.GuiManager.CameraViewOverride = SelectedFrame;
+                TFListener.GuiCamera.CameraViewOverride = SelectedFrame;
             }
 
             UpdateFrameTexts();

@@ -43,7 +43,7 @@ namespace Iviz.Displays
 
         public void OnPointerDown(PointerEventData eventData)
         {
-            TFListener.GuiManager.DraggedObject = this;
+            TFListener.GuiCamera.DraggedObject = this;
             PointerDown?.Invoke();
         }
         

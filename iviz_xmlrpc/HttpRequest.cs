@@ -23,11 +23,7 @@ namespace Iviz.XmlRpc
 
             client = new TcpClient();
             Task task = client.ConnectAsync(hostname, port);
-            if (!task.Wait(timeoutInMs) || task.IsCanceled)
-            {
-                throw new TimeoutException($"HttpRequest: Host '{hostname}' timed out");
-            }
-            if (task.IsFaulted)
+            if (!task.Wait(timeoutInMs) || !task.IsCompleted)
             {
                 throw new TimeoutException($"HttpRequest: Host '{hostname}' timed out", task.Exception);
             }
@@ -56,20 +52,19 @@ namespace Iviz.XmlRpc
             await writer.FlushAsync();
 
             StreamReader reader = new StreamReader(client.GetStream(), BuiltIns.UTF8);
-            reader.BaseStream.ReadTimeout = timeoutInMs;
 
-            string response;
+            Task<string> readTask = reader.ReadToEndAsync();
+            
+            async Task<string> TimeoutTask() {  await Task.Delay(timeoutInMs); return null; };
+            Task<string> firstTask = await Task.WhenAny(readTask, TimeoutTask());
+            
+            if (!readTask.Wait(timeoutInMs) || !readTask.IsCompleted)
+            {
+                reader.Close();
+                throw new TimeoutException("HttpRequest: Request response timed out!", readTask.Exception);
+            }
 
-            //Logger.Log("Start: " + DateTime.Now);
-            try
-            {
-                response = await reader.ReadToEndAsync();
-            }
-            catch (IOException e)
-            {
-                //Logger.Log("End: " + DateTime.Now);
-                throw new TimeoutException("HttpRequest: Request response timed out!", e);
-            }
+            string response = readTask.Result;
 
             int index = response.IndexOf("\r\n\r\n", StringComparison.InvariantCulture);
             if (index == -1)
@@ -95,11 +90,13 @@ namespace Iviz.XmlRpc
         bool disposed;
         public void Dispose()
         {
-            if (!disposed)
+            if (disposed)
             {
-                client.Close();
-                disposed = true;
+                return;
             }
+
+            disposed = true;
+            client.Close();
         }
     }
 }

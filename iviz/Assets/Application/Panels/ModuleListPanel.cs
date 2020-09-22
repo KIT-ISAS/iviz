@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using Iviz.Controllers;
 using Iviz.Displays;
+using Iviz.Roslib.XmlRpc;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
@@ -59,7 +60,6 @@ namespace Iviz.App
         [SerializeField] Button addDisplay = null;
         [SerializeField] Button showTFTree = null;
         [SerializeField] Button resetAll = null;
-        //[SerializeField] Toggle keepReconnecting = null;
 
         [SerializeField] Sprite ConnectedSprite = null;
         [SerializeField] Sprite ConnectingSprite = null;
@@ -89,9 +89,10 @@ namespace Iviz.App
         TFModuleData TFData => (TFModuleData)moduleDatas[0];
 
         readonly HashSet<string> topicsWithModule = new HashSet<string>();
-        public IReadOnlyCollection<string> DisplayedTopics => topicsWithModule;
+        public IEnumerable<string> DisplayedTopics => topicsWithModule;
 
         static readonly Color ConnectedColor = new Color(0.6f, 1f, 0.5f, 0.4f);
+        static readonly Color ConnectedOwnMasterColor = new Color(0.4f, 0.95f, 1f, 0.4f);
         static readonly Color DisconnectedColor = new Color(0.9f, 0.95f, 1f, 0.4f);
 
         public bool UnlockButtonVisible
@@ -100,9 +101,6 @@ namespace Iviz.App
             set => unlock.gameObject.SetActive(value);
         }
 
-        public static string PersistentDataPath => UnityEngine.Application.persistentDataPath;
-        public static string SavedFolder => PersistentDataPath + "/saved";
-        
         bool KeepReconnecting
         {
             get => ConnectionManager.Connection.KeepReconnecting;
@@ -139,7 +137,7 @@ namespace Iviz.App
 
             connectionData = CreateDialog<ConnectionDialogData>();
             
-            Directory.CreateDirectory(SavedFolder);
+            Directory.CreateDirectory(Settings.SavedFolder);
             LoadSimpleConfiguration();
 
             Logger.Internal("<b>Welcome to iviz</b>");
@@ -206,6 +204,11 @@ namespace Iviz.App
                     Logger.Internal($"Failed to set master uri.");
                     MasterUriStr.Label = "(?) →";
                 }
+                else if (RosServer.IsActive)
+                {
+                    Logger.Internal($"Changing master uri to local master '{uri}'");
+                    MasterUriStr.Label = "Master Mode\n" + uri + " →";
+                }
                 else
                 {
                     Logger.Internal($"Changing master uri to '{uri}'");
@@ -231,7 +234,7 @@ namespace Iviz.App
             StopButton.Clicked += () =>
             {
                 Logger.Internal(
-                    ConnectionManager.Connected ?
+                    ConnectionManager.IsConnected ?
                     "Disconnection requested." :
                     "Disconnection requested (but already disconnected)."
                     );
@@ -241,7 +244,7 @@ namespace Iviz.App
             ConnectButton.Clicked += () =>
             {
                 Logger.Internal(
-                    ConnectionManager.Connected ? 
+                    ConnectionManager.IsConnected ? 
                     "Reconnection requested." : 
                     "Connection requested."
                 );
@@ -249,24 +252,29 @@ namespace Iviz.App
                 KeepReconnecting = true;
             };
 
+            connectionData.MasterActiveChanged += _ =>
+            {
+                ConnectionManager.Connection.Disconnect();
+            };
+
 
             //address.onEndEdit.AddListener(OnAddressChanged);
 
             ConnectionManager.Connection.ConnectionStateChanged += OnConnectionStateChanged;
 
-            TFListener.GuiManager.Canvases.Add(GetComponentInParent<Canvas>());
-            TFListener.GuiManager.Canvases.Add(dataPanelManager.GetComponentInParent<Canvas>());
-            TFListener.GuiManager.Canvases.Add(dialogPanelManager.GetComponentInParent<Canvas>());
-            TFListener.GuiManager.GuiPointerBlockers.Add(Joystick);
+            TFListener.GuiCamera.Canvases.Add(GetComponentInParent<Canvas>());
+            TFListener.GuiCamera.Canvases.Add(dataPanelManager.GetComponentInParent<Canvas>());
+            TFListener.GuiCamera.Canvases.Add(dialogPanelManager.GetComponentInParent<Canvas>());
+            TFListener.GuiCamera.GuiPointerBlockers.Add(Joystick);
 
-            TFListener.GuiManager.Raycasters.Add(GetComponentInParent<GraphicRaycaster>());
-            TFListener.GuiManager.Raycasters.Add(dataPanelManager.GetComponentInParent<GraphicRaycaster>());
-            TFListener.GuiManager.Raycasters.Add(dialogPanelManager.GetComponentInParent<GraphicRaycaster>());
+            TFListener.GuiCamera.Raycasters.Add(GetComponentInParent<GraphicRaycaster>());
+            TFListener.GuiCamera.Raycasters.Add(dataPanelManager.GetComponentInParent<GraphicRaycaster>());
+            TFListener.GuiCamera.Raycasters.Add(dialogPanelManager.GetComponentInParent<GraphicRaycaster>());
 
             
-            GameThread.LateEverySecond += UpdateBottomText;
+            GameThread.LateEverySecond += UpdateFpsStats;
             GameThread.EveryFrame += UpdateFpsCounter;
-            UpdateBottomText();
+            UpdateFpsStats();
         }
 
         void OnConnectionStateChanged(ConnectionState state)
@@ -284,20 +292,20 @@ namespace Iviz.App
             switch (state)
             {
                 case ConnectionState.Connected:
-                    Logger.Internal("Connected!");
+                    //Logger.Internal("Connected!");
                     GameThread.EverySecond -= RotateSprite;
                     status.sprite = ConnectedSprite;
-                    topPanel.color = ConnectedColor;
+                    topPanel.color = RosServer.IsActive ? ConnectedOwnMasterColor : ConnectedColor;
                     SaveSimpleConfiguration();
                     break;
                 case ConnectionState.Disconnected:
-                    Logger.Internal("Disconnected.");
+                    //Logger.Internal("Disconnected.");
                     GameThread.EverySecond -= RotateSprite;
                     status.sprite = DisconnectedSprite;
                     topPanel.color = DisconnectedColor;
                     break;
                 case ConnectionState.Connecting:
-                    Logger.Internal("Connecting...");
+                    //Logger.Internal("Connecting...");
                     status.sprite = ConnectingSprite;
                     GameThread.EverySecond += RotateSprite;
                     break;
@@ -330,7 +338,7 @@ namespace Iviz.App
             {
                 Logger.Internal("Saving config file...");
                 string text = JsonConvert.SerializeObject(config, Formatting.Indented);
-                File.WriteAllText(SavedFolder + "/" + file, text);
+                File.WriteAllText($"{Settings.SavedFolder}/{file}", text);
                 Logger.Internal("Done.");
             }
             catch (Exception e) when
@@ -340,18 +348,18 @@ namespace Iviz.App
                 Logger.Internal("Error:", e);
                 return;
             }
-            Logger.Debug("DisplayListPanel: Writing config to " + SavedFolder + "/" + file);
+            Logger.Debug("DisplayListPanel: Writing config to " + Settings.SavedFolder + "/" + file);
 
         }
 
         public void LoadStateConfiguration(string file)
         {
-            Logger.Debug("DisplayListPanel: Reading config from " + SavedFolder + "/" + file);
+            Logger.Debug("DisplayListPanel: Reading config from " + Settings.SavedFolder + "/" + file);
             string text;
             try
             {
                 Logger.Internal("Loading config file...");
-                text = File.ReadAllText(SavedFolder + "/" + file);
+                text = File.ReadAllText(Settings.SavedFolder + "/" + file);
                 Logger.Internal("Done.");
             }
             catch (FileNotFoundException)
@@ -400,7 +408,7 @@ namespace Iviz.App
 
         void LoadSimpleConfiguration()
         {
-            string path = PersistentDataPath + "/connection.json";
+            string path = Settings.SimpleConfigurationPath;
             if (!File.Exists(path))
             {
                 return;
@@ -432,7 +440,7 @@ namespace Iviz.App
                 };
 
                 string text = JsonConvert.SerializeObject(config, Formatting.Indented);
-                File.WriteAllText(PersistentDataPath + "/connection.json", text);
+                File.WriteAllText(Settings.SimpleConfigurationPath, text);
             }
             catch (Exception e) when
             (e is IOException || e is System.Security.SecurityException || e is JsonException)
@@ -587,7 +595,7 @@ namespace Iviz.App
         
         int frames = 0;
 
-        void UpdateBottomText()
+        void UpdateFpsStats()
         {
             bottomTime.text = $"<b>{DateTime.Now:HH:mm:ss}</b>";
             bottomFps.text = $"<b>{frames} FPS</b>";

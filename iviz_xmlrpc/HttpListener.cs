@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -11,7 +12,8 @@ namespace Iviz.XmlRpc
     {
         const int AnyPort = 0;
 
-        readonly TcpListener listener;
+        TcpListener listener;
+        bool keepGoing = true;
 
         public Uri LocalEndpoint { get; }
 
@@ -37,11 +39,18 @@ namespace Iviz.XmlRpc
                 throw new ArgumentNullException(nameof(callback));
             }
 
-            while (true)
+            while (keepGoing)
             {
                 try
                 {
-                    TcpClient client = await listener.AcceptTcpClientAsync().ConfigureAwait(false);
+                    Logger.LogDebug($"{this}: Accepting request...");
+                    TcpClient client = await listener.AcceptTcpClientAsync();
+                    Logger.LogDebug($"{this}: Accept Out!");
+                    if (!keepGoing)
+                    {
+                        client.Dispose();
+                        break;
+                    }
                     await callback(new HttpListenerContext(client));
                 }
                 catch (ObjectDisposedException)
@@ -55,6 +64,7 @@ namespace Iviz.XmlRpc
                     break;
                 }
             }
+            Logger.Log($"{this}: Leaving thread normally");
         }
 
         bool disposed;
@@ -66,12 +76,34 @@ namespace Iviz.XmlRpc
             }
 
             disposed = true;
+            keepGoing = false;
+
+            // now we throw everything at the listener to try to leave AcceptTcpClientAsync()
+            
+            // first we enqueue a connection
+            using (TcpClient client = new TcpClient())
+            {
+                Logger.LogDebug($"{this}: Using fake client");
+                client.Connect(IPAddress.Loopback, LocalEndpoint.Port);
+            }
+            
+            // now we close the listener
+            Logger.LogDebug($"{this}: Stopping listener");
             listener.Stop();
+            
+            // now we close the underlying socket
+            listener.Server.Close();
+            
+            // set listener to null to maybe trigger a null reference exception
+            listener = null;
+            
+            // and hope that this is enough to leave AcceptTcpClientAsync()
+            Logger.LogDebug($"{this}: Dispose out");
         }
 
         public override string ToString()
         {
-            return "[HttpListener]";
+            return $"[HttpListener :{LocalEndpoint?.Port ?? -1}]";
         }
     }
 }

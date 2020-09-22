@@ -281,11 +281,13 @@ namespace Iviz.Roslib
             return errorMessage == null;
         }
 
+        /*
         static async Task<TcpClient> TimeoutTask(int timeoutInMs)
         {
             await Task.Delay(timeoutInMs);
             return null;
         }
+        */
         
         async Task Run(int timeoutInMs)
         {
@@ -294,14 +296,21 @@ namespace Iviz.Roslib
                 Logger.LogDebug($"{this}: initialized!");
                 Status = SenderStatus.Waiting;
 
+                /*
                 Task<TcpClient> connectionTask = tcpListener.AcceptTcpClientAsync();
                 Task<TcpClient> completedTask = await Task.WhenAny(connectionTask, TimeoutTask(timeoutInMs));
                 if (completedTask != connectionTask || connectionTask.IsFaulted || !keepRunning)
                 {
                     throw new TimeoutException();
                 }
+                */
+                Task<TcpClient> connectionTask = tcpListener.AcceptTcpClientAsync();
+                if (!connectionTask.Wait(timeoutInMs) || !connectionTask.IsCompleted)
+                {
+                    throw new TimeoutException("Connection timed out!", connectionTask.Exception);
+                } 
 
-                using (tcpClient = await completedTask)
+                using (tcpClient = await connectionTask)
                 {
                     IPEndPoint remoteEndPoint = (IPEndPoint) tcpClient.Client.RemoteEndPoint;
                     RemoteEndpoint = new Endpoint(remoteEndPoint);

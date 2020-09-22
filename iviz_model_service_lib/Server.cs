@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using Assimp;
+using Assimp.Configs;
 using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.SensorMsgs;
@@ -11,7 +12,7 @@ using Iviz.Msgs.SensorMsgs;
 
 namespace Iviz.ModelService
 {
-    public class Service
+    public sealed class Server : IDisposable
     {
         public const string ModelServiceName = "/iviz/get_model_resource";
         public const string TextureServiceName = "/iviz/get_model_texture";
@@ -26,7 +27,7 @@ namespace Iviz.ModelService
         public Action<object> Log { get; set; } = Console.WriteLine;
         public Action<object> LogError { get; set; } = Console.Error.WriteLine;
         
-        public Service()
+        public Server()
         {
             Log("** Used package paths:");
             string packagePath = Environment.GetEnvironmentVariable("ROS_PACKAGE_PATH");
@@ -661,6 +662,18 @@ namespace Iviz.ModelService
 
             int a = (int) (Math.Max(Math.Min(color.A, 1), 0) * 255);
             return new Color((byte) r, (byte) g, (byte) b, (byte) a);
+        }
+
+        bool disposed;
+        public void Dispose()
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+            importer.Dispose();
         }
     }
 }

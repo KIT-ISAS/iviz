@@ -72,7 +72,7 @@ namespace Iviz.App
         {
             if (Frame != null)
             {
-                TFListener.GuiManager.LookAt(Frame.WorldPose.position);
+                TFListener.GuiCamera.LookAt(Frame.WorldPose.position);
             }
         }
 

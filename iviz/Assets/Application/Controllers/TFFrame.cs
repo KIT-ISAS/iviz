@@ -377,7 +377,9 @@ namespace Iviz.Controllers
             }
 
             foreach (var child in children.Values)
+            {
                 child.LogPose(time);
+            }
         }
 
         public Pose LookupPose(in TimeSpan time)
@@ -410,13 +412,13 @@ namespace Iviz.Controllers
             }
 
             mTransform.hasChanged = false;
-            var foundAnchor = ARController.Instance.FindClosest(mTransform.position, out var anchor, out var _);
+            var foundAnchor = ARController.Instance.FindClosest(mTransform.position, out var anchor, out _);
             return foundAnchor ? anchor : (Vector3?) null;
         }
 
         protected override void OnDoubleClick()
         {
-            TFListener.GuiManager.Select(this);
+            TFListener.GuiCamera.Select(this);
             ModuleListPanel.Instance.ShowFrame(this);
         }
     }

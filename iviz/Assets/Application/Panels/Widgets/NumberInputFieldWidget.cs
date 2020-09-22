@@ -30,19 +30,13 @@ namespace Iviz.App
                 UnityUtils.TryParse(text.text, out float f);
                 return f;
             }
-            set
-            {
-                text.text = value.ToString(UnityUtils.Culture);
-            }
+            set => text.text = value.ToString(UnityUtils.Culture);
         }
 
         public string Placeholder
         {
             get => placeholder.text;
-            set
-            {
-                placeholder.text = value;
-            }
+            set => placeholder.text = value;
         }
 
         public bool Interactable
@@ -65,15 +59,15 @@ namespace Iviz.App
             Value = Value;
         }
 
-        public void OnValueChanged(string text)
+        public void OnValueChanged(string newText)
         {
-            UnityUtils.TryParse(text, out float f);
+            UnityUtils.TryParse(newText, out float f);
             ValueChanged?.Invoke(f);
         }
 
-        public void OnEndEdit(string text)
+        public void OnEndEdit(string newText)
         {
-            UnityUtils.TryParse(text, out float f);
+            UnityUtils.TryParse(newText, out float f);
             EndEdit?.Invoke(f);
         }
 

@@ -61,7 +61,7 @@ namespace Iviz.App
             panel.MarkerFrame.Value = controller.MarkerFrame;
 
             List<string> frameHints = new List<string> { NoneString };
-            frameHints.AddRange(TFListener.FramesUsableByGui);
+            frameHints.AddRange(TFListener.FramesUsableAsHints);
             panel.MarkerFrame.Hints = frameHints;
 
             panel.MarkerOffset.Value = controller.MarkerOffset;

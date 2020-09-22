@@ -10,6 +10,7 @@ using System;
 using System.Collections.ObjectModel;
 using Iviz.App;
 using Iviz.Displays;
+using Iviz.Msgs;
 using Iviz.Resources;
 using Iviz.Urdf;
 using Transform = UnityEngine.Transform;
@@ -34,13 +35,16 @@ namespace Iviz.Controllers
     public sealed class TFListener : ListenerController
     {
         public const string DefaultTopic = "/tf";
-        public const string DefaultTopicStatic = "/tf_static";
+        const string DefaultTopicStatic = "/tf_static";
+
         public const string BaseFrameId = "map";
 
         public static TFListener Instance { get; private set; }
-        public static Camera MainCamera { get; set; }
-        public static GuiCamera GuiManager => GuiCamera.Instance;
+        public RosSender<tfMessage_v2> Publisher { get; }
+        public RosListener ListenerStatic { get; private set; }
 
+        public static Camera MainCamera { get; set; }
+        public static GuiCamera GuiCamera => GuiCamera.Instance;
         public static Light MainLight { get; set; }
 
         public static TFFrame MapFrame { get; private set; }
@@ -54,24 +58,17 @@ namespace Iviz.Controllers
 
         public override TFFrame Frame => MapFrame;
 
-        readonly DisplayNode dummyListener;
+        readonly DisplayNode showAllListener;
         readonly DisplayNode staticListener;
 
         readonly Dictionary<string, TFFrame> frames = new Dictionary<string, TFFrame>();
 
-        public static ReadOnlyDictionary<string, TFFrame> Frames =>
-            new ReadOnlyDictionary<string, TFFrame>(Instance.frames);
+        public static IEnumerable<string> FramesUsableAsHints =>
+            Instance.frames.Values.Where(IsFrameUsableAsHint).Select(frame => frame.Id);
 
-        static bool IsFrameUsableByGui(TFFrame frame) => frame != RootFrame && frame != UnityFrame;
-
-        public static IEnumerable<string> FramesUsableByGui =>
-            Instance.frames.Values.Where(IsFrameUsableByGui).Select(frame => frame.Id);
-
-        public RosSender<tfMessage_v2> Publisher { get; }
+        static bool IsFrameUsableAsHint(TFFrame frame) => frame != RootFrame && frame != UnityFrame;
 
         public override IModuleData ModuleData { get; }
-
-        public RosListener ListenerStatic { get; private set; }
 
         readonly TFConfiguration config = new TFConfiguration();
 
@@ -163,7 +160,7 @@ namespace Iviz.Controllers
                 {
                     foreach (var frame in frames.Values)
                     {
-                        frame.AddListener(dummyListener);
+                        frame.AddListener(showAllListener);
                     }
                 }
                 else
@@ -172,7 +169,7 @@ namespace Iviz.Controllers
                     var framesCopy = frames.Values.ToList();
                     foreach (var frame in framesCopy)
                     {
-                        frame.RemoveListener(dummyListener);
+                        frame.RemoveListener(showAllListener);
                     }
                 }
             }
@@ -188,7 +185,7 @@ namespace Iviz.Controllers
             UnityFrame.Visible = false;
             UnityFrame.AddListener(null);
 
-            dummyListener = SimpleDisplayNode.Instantiate("[TFNode]", UnityFrame.transform);
+            showAllListener = SimpleDisplayNode.Instantiate("[TFNode]", UnityFrame.transform);
             staticListener = SimpleDisplayNode.Instantiate("[TFStatic]", UnityFrame.transform);
 
             GameObject mainCameraObj = GameObject.Find("MainCamera");
@@ -211,7 +208,7 @@ namespace Iviz.Controllers
             //BaseFrame.ForceInvisible = true;
 
             rootMarker = ResourcePool.GetOrCreate<InteractiveControl>(
-                Resource.Displays.InteractiveControl, 
+                Resource.Displays.InteractiveControl,
                 RootFrame.transform);
             rootMarker.name = "[InteractiveController for /]";
             rootMarker.TargetTransform = RootFrame.transform;
@@ -238,11 +235,7 @@ namespace Iviz.Controllers
                     continue;
                 }
 
-                TimeSpan timestamp = t.Header.Stamp.ToTimeSpan();
-                if (t.Header.Stamp.Nsecs == 0 && t.Header.Stamp.Secs == 0)
-                {
-                    timestamp = TimeSpan.MaxValue;
-                }
+                TimeSpan timestamp = t.Header.Stamp == default ? TimeSpan.MaxValue : t.Header.Stamp.ToTimeSpan();
 
                 string childId = t.ChildFrameId;
                 if (childId.Length != 0 && childId[0] == '/')
@@ -256,12 +249,12 @@ namespace Iviz.Controllers
                     child = GetOrCreateFrame(childId, staticListener);
                     if (config.ShowAllFrames)
                     {
-                        child.AddListener(dummyListener);
+                        child.AddListener(showAllListener);
                     }
                 }
                 else if (config.ShowAllFrames)
                 {
-                    child = GetOrCreateFrame(childId, dummyListener);
+                    child = GetOrCreateFrame(childId, showAllListener);
                 }
                 else if (!TryGetFrameImpl(childId, out child))
                 {
@@ -269,12 +262,12 @@ namespace Iviz.Controllers
                 }
 
                 string parentId = t.Header.FrameId;
-                if (parentId.Length != 0 && parentId[0] == '/')
+                if (parentId.Length != 0 && parentId[0] == '/') // remove starting '/' from tf v1
                 {
                     parentId = parentId.Substring(1);
                 }
 
-                TFFrame parent = string.IsNullOrEmpty(parentId) ? RootFrame : GetOrCreateFrame(parentId, null);
+                TFFrame parent = string.IsNullOrEmpty(parentId) ? RootFrame : GetOrCreateFrame(parentId);
 
                 if (child.SetParent(parent))
                 {
@@ -380,7 +373,7 @@ namespace Iviz.Controllers
         public void MarkAsDead(TFFrame frame)
         {
             frames.Remove(frame.Id);
-            GuiManager.Unselect(frame);
+            GuiCamera.Unselect(frame);
             frame.Stop();
             ResourcePool.Dispose(Resource.Displays.TFFrame, frame.gameObject);
         }
@@ -406,9 +399,7 @@ namespace Iviz.Controllers
 
         public static Vector3 RelativePosition(in Vector3 unityPosition)
         {
-            return Settings.IsMobile ? 
-                RootFrame.transform.InverseTransformPoint(unityPosition) : 
-                unityPosition;
+            return Settings.IsMobile ? RootFrame.transform.InverseTransformPoint(unityPosition) : unityPosition;
         }
 
         static uint tfSeq = 0;

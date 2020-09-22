@@ -64,20 +64,12 @@ namespace Iviz.Displays
 
         readonly Model modelGenerator = new Model();
         readonly Scene sceneGenerator = new Scene();
-
-        string ResourceFolder { get; }
-        string ResourceFile { get; }
-        string RobotsFolder { get; }
-
+        
         public ReadOnlyCollection<Uri> GetListOfModels() =>
             new ReadOnlyCollection<Uri>(resourceFiles.Models.Keys.ToList());
 
         public ExternalResourceManager(bool createNode = true)
         {
-            ResourceFolder = ModuleListPanel.PersistentDataPath + "/resources";
-            RobotsFolder = ModuleListPanel.PersistentDataPath + "/robots";
-            ResourceFile = ModuleListPanel.PersistentDataPath + "/resources.json";
-
             if (createNode)
             {
                 Node = new GameObject("External Resources");
@@ -86,25 +78,25 @@ namespace Iviz.Displays
 
             try
             {
-                Directory.CreateDirectory(ResourceFolder);
-                Directory.CreateDirectory(RobotsFolder);
+                Directory.CreateDirectory(Settings.ResourcesPath);
+                Directory.CreateDirectory(Settings.SavedRobotsPath);
             }
             catch (Exception e)
             {
                 Logger.Error(e);
             }
 
-            if (!File.Exists(ResourceFile))
+            if (!File.Exists(Settings.ResourcesFilePath))
             {
-                Debug.Log("ExternalResourceManager: Failed to find file " + ResourceFile);
+                Debug.Log("ExternalResourceManager: Failed to find file " + Settings.ResourcesFilePath);
                 return;
             }
 
-            Debug.Log("ExternalResourceManager: Using resource file " + ResourceFile);
+            Debug.Log("ExternalResourceManager: Using resource file " + Settings.ResourcesFilePath);
 
             try
             {
-                string text = File.ReadAllText(ResourceFile);
+                string text = File.ReadAllText(Settings.ResourcesFilePath);
                 resourceFiles = JsonConvert.DeserializeObject<ResourceFiles>(text);
             }
             catch (Exception e)
@@ -117,7 +109,7 @@ namespace Iviz.Displays
         {
             try
             {
-                File.WriteAllText(ResourceFile, JsonConvert.SerializeObject(resourceFiles, Formatting.Indented));
+                File.WriteAllText(Settings.ResourcesFilePath, JsonConvert.SerializeObject(resourceFiles, Formatting.Indented));
             }
             catch (IOException e)
             {
@@ -138,8 +130,7 @@ namespace Iviz.Displays
             return BitConverter.ToString(result).Replace("-", "");
         }
 
-        public ReadOnlyCollection<string> GetRobotNames() => 
-            new ReadOnlyCollection<string>(resourceFiles.RobotDescriptions.Keys.ToArray());
+        public IEnumerable<string> GetRobotNames() => resourceFiles.RobotDescriptions.Keys.ToArray();
 
         public bool ContainsRobot(string robotName) => resourceFiles.RobotDescriptions.ContainsKey(robotName); 
 
@@ -156,7 +147,7 @@ namespace Iviz.Displays
                 return false;
             }
 
-            string absolutePath = $"{RobotsFolder}/{localPath}";
+            string absolutePath = $"{Settings.SavedRobotsPath}/{localPath}";
             if (!File.Exists(absolutePath))
             {
                 Debug.LogWarningFormat(StrMissingFileRemoving, localPath);
@@ -191,8 +182,8 @@ namespace Iviz.Displays
 
             string localPath = GetMd5Hash(robotName);
             
-            File.WriteAllText($"{RobotsFolder}/{localPath}", robotDescription);
-            Debug.Log($"Saving to {RobotsFolder}/{localPath}");
+            File.WriteAllText($"{Settings.SavedRobotsPath}/{localPath}", robotDescription);
+            Debug.Log($"Saving to {Settings.SavedRobotsPath}/{localPath}");
             Logger.Internal($"Added robot <i>{robotName}</i> to cache");
 
             resourceFiles.RobotDescriptions[robotName] = localPath;
@@ -211,7 +202,7 @@ namespace Iviz.Displays
                 return;
             }
 
-            string absolutePath = $"{ResourceFolder}/{localPath}";
+            string absolutePath = $"{Settings.ResourcesPath}/{localPath}";
             try
             {
                 File.Delete(absolutePath);
@@ -265,7 +256,7 @@ namespace Iviz.Displays
 
             if (resourceFiles.Models.TryGetValue(uri, out string localPath))
             {
-                if (File.Exists($"{ResourceFolder}/{localPath}"))
+                if (File.Exists($"{Settings.ResourcesPath}/{localPath}"))
                 {
                     return LoadLocalModel(uri, localPath);
                 }
@@ -312,7 +303,7 @@ namespace Iviz.Displays
 
             if (resourceFiles.Scenes.TryGetValue(uri, out string localPath))
             {
-                if (File.Exists($"{ResourceFolder}/{localPath}"))
+                if (File.Exists($"{Settings.ResourcesPath}/{localPath}"))
                 {
                     return LoadLocalScene(uri, localPath);
                 }
@@ -364,7 +355,7 @@ namespace Iviz.Displays
 
             if (resourceFiles.Textures.TryGetValue(uri, out string localPath))
             {
-                if (File.Exists($"{ResourceFolder}/{localPath}"))
+                if (File.Exists($"{Settings.ResourcesPath}/{localPath}"))
                 {
                     resource = LoadLocalTexture(uri, localPath);
                     return resource != null;
@@ -410,7 +401,7 @@ namespace Iviz.Displays
 
             try
             {
-                buffer = File.ReadAllBytes($"{ResourceFolder}/{localPath}");
+                buffer = File.ReadAllBytes($"{Settings.ResourcesPath}/{localPath}");
             }
             catch (Exception e)
             {
@@ -433,7 +424,7 @@ namespace Iviz.Displays
 
             try
             {
-                buffer = File.ReadAllBytes($"{ResourceFolder}/{localPath}");
+                buffer = File.ReadAllBytes($"{Settings.ResourcesPath}/{localPath}");
             }
             catch (Exception e)
             {
@@ -458,7 +449,7 @@ namespace Iviz.Displays
 
             try
             {
-                buffer = File.ReadAllBytes($"{ResourceFolder}/{localPath}");
+                buffer = File.ReadAllBytes($"{Settings.ResourcesPath}/{localPath}");
             }
             catch (Exception e)
             {
@@ -488,8 +479,8 @@ namespace Iviz.Displays
 
                 byte[] buffer = new byte[msg.Model.RosMessageLength];
                 Msgs.Buffer.Serialize(msg.Model, buffer);
-                File.WriteAllBytes($"{ResourceFolder}/{localPath}", buffer);
-                Debug.Log($"Saving to {ResourceFolder}/{localPath}");
+                File.WriteAllBytes($"{Settings.ResourcesPath}/{localPath}", buffer);
+                Debug.Log($"Saving to {Settings.ResourcesPath}/{localPath}");
                 Logger.Internal($"Added external model <i>{uri}</i>");
 
                 resourceFiles.Models[uri] = localPath;
@@ -518,8 +509,8 @@ namespace Iviz.Displays
                 string localPath = GetMd5Hash(uri.ToString());
 
                 byte[] buffer = msg.Image.Data;
-                File.WriteAllBytes($"{ResourceFolder}/{localPath}", buffer);
-                Debug.Log($"Saving to {ResourceFolder}/{localPath}");
+                File.WriteAllBytes($"{Settings.ResourcesPath}/{localPath}", buffer);
+                Debug.Log($"Saving to {Settings.ResourcesPath}/{localPath}");
                 Logger.Internal($"Added external texture <i>{uri}</i>");
 
                 resourceFiles.Textures[uri] = localPath;
@@ -548,8 +539,8 @@ namespace Iviz.Displays
 
                 byte[] buffer = new byte[msg.Scene.RosMessageLength];
                 Msgs.Buffer.Serialize(msg.Scene, buffer);
-                File.WriteAllBytes($"{ResourceFolder}/{localPath}", buffer);
-                Debug.Log($"Saving to {ResourceFolder}/{localPath}");
+                File.WriteAllBytes($"{Settings.ResourcesPath}/{localPath}", buffer);
+                Debug.Log($"Saving to {Settings.ResourcesPath}/{localPath}");
                 Logger.Internal($"Added external scene <i>{uri}</i>");
 
                 resourceFiles.Scenes[uri] = localPath;

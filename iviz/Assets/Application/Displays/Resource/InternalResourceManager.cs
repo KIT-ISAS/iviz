@@ -15,6 +15,19 @@ namespace Iviz.Resources
 
         readonly Dictionary<Uri, Resource.Info<Texture2D>> textures = new Dictionary<Uri, Resource.Info<Texture2D>>();
 
+        public IEnumerable<string> GetRobotNames() => Array.Empty<string>();
+        
+        public bool ContainsRobot(string robotName)
+        {
+            return false;
+        }
+
+        public bool TryGetRobot(string robotName, out string robotDescription)
+        {
+            robotDescription = null;
+            return false;
+        }
+        
         public bool TryGet(Uri uri, out Resource.Info<GameObject> info)
         {
             return TryGet(uri, gameObjects, out info);
@@ -47,6 +60,6 @@ namespace Iviz.Resources
             info = new Resource.Info<T>(path, resource);
             repository[uri] = info;
             return true;
-        }        
+        } 
     }
 }

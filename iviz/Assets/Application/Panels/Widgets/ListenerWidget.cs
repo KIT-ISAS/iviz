@@ -37,7 +37,7 @@ namespace Iviz.App
         }
 
         public string Topic => RosListener?.Topic;
-        public int NumPublishers => (!ConnectionManager.Connected || RosListener == null) ? -1 : RosListener.NumPublishers;
+        public int NumPublishers => (!ConnectionManager.IsConnected || RosListener == null) ? -1 : RosListener.NumPublishers;
         public int MessagesPerSecond => RosListener?.Stats.MessagesPerSecond ?? 0;
         public int BytesPerSecond => RosListener?.Stats.BytesPerSecond ?? 0;
         public int Dropped => RosListener?.Stats.Dropped ?? 0;

@@ -38,7 +38,7 @@ namespace Iviz.App
         string Topic => RosSender?.Topic;
 
         int NumSubscribers =>
-            (!ConnectionManager.Connected || RosSender == null) ? -1 : RosSender.NumSubscribers;
+            (!ConnectionManager.IsConnected || RosSender == null) ? -1 : RosSender.NumSubscribers;
 
         int MessagesPerSecond => RosSender?.Stats.MessagesPerSecond ?? 0;
         int BytesPerSecond => RosSender?.Stats.BytesPerSecond ?? 0;

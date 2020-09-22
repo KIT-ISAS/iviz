@@ -232,11 +232,17 @@ namespace Iviz.Controllers
 
             try
             {
-                //RoslibSharp.Logger.LogDebug = x => Logger.Debug(x);
+                Msgs.Logger.LogDebug = x => Logger.Debug(x);
                 Msgs.Logger.LogError = x => Logger.Error(x);
                 Msgs.Logger.Log = x => Logger.Info(x);
 
+                Logger.Internal("Connecting...");
                 client = new RosClient(MasterUri, MyId, MyUri);
+
+                if (publishersByTopic.Count != 0 || subscribersByTopic.Count != 0)
+                {
+                    Logger.Internal("Connected. Resubscribing and republishing...");
+                }
 
                 foreach (var entry in publishersByTopic)
                 {
@@ -244,16 +250,21 @@ namespace Iviz.Controllers
                     entry.Value.Id = publishers.Count;
                     publishers.Add(entry.Value.Publisher);
                 }
-
+                
                 foreach (var entry in subscribersByTopic)
                 {
+                    //Logger.Debug("Subscribing to " + entry.Key);
                     entry.Value.Subscribe(client);
+                    //Logger.Debug("Done");
                 }
 
                 foreach (var entry in servicesByTopic)
                 {
+                    //Logger.Debug("Advertising to " + entry.Key);
                     entry.Value.Advertise(client);
+                    //Logger.Debug("Done");
                 }
+                Logger.Internal("Connected.");
 
                 return true;
             }
@@ -282,9 +293,10 @@ namespace Iviz.Controllers
 
             AddTask(() =>
                 {
-                    Logger.Debug("RosLibConnection: Disconnecting...");
+                    Logger.Internal("Disconnecting...");
                     client?.Close();
                     client = null;
+                    Logger.Internal("Disconnection finished.");
                     foreach (var entry in publishersByTopic)
                     {
                         entry.Value.Invalidate();
@@ -297,7 +309,6 @@ namespace Iviz.Controllers
 
                     publishers.Clear();
                     base.Disconnect();
-                    Logger.Debug("RosLibConnection: Disconnection finished.");
                 }
             );
         }

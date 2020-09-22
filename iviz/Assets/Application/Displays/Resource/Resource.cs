@@ -468,33 +468,6 @@ namespace Iviz.Resources
             {
                 return ResourceByType.TryGetValue(type, out info) && info != null;
             }
-
-            /*
-            public T ValidateAndGetOrCreate<T>(Transform parent = null, bool enabled = true) where T : MonoBehaviour, IDisplay
-            {
-                if (!TryGetResource(typeof(T), out GameObjectInfo info))
-                {
-                    throw new ResourceNotFoundException("Cannot find unique display type for type " + nameof(T));
-                }
-
-                return ResourcePool.GetOrCreate<T>(info, parent, enabled);
-            }
-
-            public void ValidateAndDispose<T>(T resource) where T : MonoBehaviour, IDisplay
-            {
-                if (resource == null)
-                {
-                    throw new ArgumentNullException(nameof(resource));
-                }
-
-                if (!TryGetResource(typeof(T), out GameObjectInfo info))
-                {
-                    throw new ResourceNotFoundException("Cannot find unique display type for resource");
-                }
-
-                ResourcePool.Dispose(info, resource.gameObject);
-            }
-            */
         }
 
         public class ControllersType
@@ -531,7 +504,7 @@ namespace Iviz.Resources
             public GameObjectInfo CloseButton { get; }
             public GameObjectInfo TrashButton { get; }
             public GameObjectInfo DataLabel { get; }
-            public GameObjectInfo HideButton { get; }
+            public GameObjectInfo ToggleButton { get; }
             public GameObjectInfo Vector3 { get; }
             public GameObjectInfo Sender { get; }
             public GameObjectInfo Listener { get; }
@@ -563,7 +536,7 @@ namespace Iviz.Resources
                 CloseButton = new GameObjectInfo("Widgets/Close Button");
                 TrashButton = new GameObjectInfo("Widgets/Trash Button");
                 DataLabel = new GameObjectInfo("Widgets/Data Label");
-                HideButton = new GameObjectInfo("Widgets/Hide Button");
+                ToggleButton = new GameObjectInfo("Widgets/Toggle Button");
                 Vector3 = new GameObjectInfo("Widgets/Vector3");
                 Sender = new GameObjectInfo("Widgets/Sender");
                 Listener = new GameObjectInfo("Widgets/Listener");
@@ -707,6 +680,23 @@ namespace Iviz.Resources
         public static ExternalResourceManager External =>
             external ?? (external = new ExternalResourceManager());
 
+        public static bool ContainsRobot(string robotName)
+        {
+            return Internal.ContainsRobot(robotName) ||
+                   External.ContainsRobot(robotName);
+        }
+        
+        public static IEnumerable<string> GetRobotNames()
+        {
+            return Internal.GetRobotNames().Concat(External.GetRobotNames());
+        }
+
+        public static bool TryGetRobot(string robotName, out string robotDescription)
+        {
+            return Internal.TryGetRobot(robotName, out robotDescription) ||
+                   External.TryGetRobot(robotName, out robotDescription);
+        }
+        
         public static bool TryGetResource(Uri uri, out GameObjectInfo info)
         {
             return Internal.TryGet(uri, out info) ||

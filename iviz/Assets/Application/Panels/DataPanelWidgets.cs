@@ -34,7 +34,7 @@ namespace Iviz.App
 
         public ToggleButtonWidget AddHideButton()
         {
-            GameObject o = Resource.Widgets.HideButton.Instantiate(nonstatics.transform);
+            GameObject o = Resource.Widgets.ToggleButton.Instantiate(nonstatics.transform);
             RectTransform transform = (RectTransform)o.transform;
             transform.anchoredPosition = new Vector2(transform.anchoredPosition.x, yCloseButton);
             o.SetActive(true);

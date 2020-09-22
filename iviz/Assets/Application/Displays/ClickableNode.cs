@@ -35,12 +35,12 @@ namespace Iviz.Controllers
                 if (value && !selected)
                 {
                     selected = true;
-                    TFListener.GuiManager.Select(this);
+                    TFListener.GuiCamera.Select(this);
                 }
                 else if (!value && selected)
                 {
                     selected = false;
-                    TFListener.GuiManager.Unselect(this);
+                    TFListener.GuiCamera.Unselect(this);
                 }
             }
         }
@@ -85,12 +85,12 @@ namespace Iviz.Controllers
 
         protected virtual void OnSingleClick()
         {
-            TFListener.GuiManager.ToggleSelect(this);
+            TFListener.GuiCamera.ToggleSelect(this);
         }
 
         protected virtual void OnDoubleClick()
         {
-            TFListener.GuiManager.Select(this);
+            TFListener.GuiCamera.Select(this);
             ModuleData?.ShowPanel();
         }
         
@@ -98,7 +98,7 @@ namespace Iviz.Controllers
         {
             base.Stop();
             ModuleData = null;
-            TFListener.GuiManager.Unselect(this);
+            TFListener.GuiCamera.Unselect(this);
         }
 
 #if UNITY_WSA

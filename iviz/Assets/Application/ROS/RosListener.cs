@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Roslib;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Controllers
@@ -47,27 +48,26 @@ namespace Iviz.Controllers
         public string Topic { get; }
         public string Type { get; }
         public RosListenerStats Stats { get; private set; } = new RosListenerStats();
-
         public int NumPublishers => ConnectionManager.Connection.GetNumPublishers(Topic);
-
-        protected int TotalMsgCounter { get; set; }
-        protected int MsgsInQueue { get; set; }
         public int MaxQueueSize { get; set; } = 50;
-        protected int LastMsgBytes { get; set; }
-        protected int Dropped { get; set; }
 
+        protected int totalMsgCounter;
+        protected int msgsInQueue;
+        protected int lastMsgBytes;
+        protected int dropped;
+        
         protected readonly List<float> timesOfArrival = new List<float>();
 
         protected RosListener(string topic, string type)
         {
             if (string.IsNullOrWhiteSpace(topic))
             {
-                throw new System.ArgumentException("Invalid topic!", nameof(topic));
+                throw new ArgumentException("Invalid topic!", nameof(topic));
             }
 
             if (string.IsNullOrWhiteSpace(type))
             {
-                throw new System.ArgumentException("Invalid type!", nameof(type));
+                throw new ArgumentException("Invalid type!", nameof(type));
             }
 
             Logger.Internal($"Subscribing to <b>{topic}</b> <i>[{type}]</i>.");
@@ -90,44 +90,42 @@ namespace Iviz.Controllers
                 Stats = new RosListenerStats();
                 return;
             }
-            else
+
+            float jitterMin = float.MaxValue;
+            float jitterMax = float.MinValue;
+
+            for (int i = 0; i < timesOfArrival.Count - 1; i++)
             {
-                float jitterMin = float.MaxValue;
-                float jitterMax = float.MinValue;
-
-                for (int i = 0; i < timesOfArrival.Count() - 1; i++)
+                float jitter = timesOfArrival[i + 1] - timesOfArrival[i];
+                if (jitter < jitterMin)
                 {
-                    float jitter = timesOfArrival[i + 1] - timesOfArrival[i];
-                    if (jitter < jitterMin)
-                    {
-                        jitterMin = jitter;
-                    }
-
-                    if (jitter > jitterMax)
-                    {
-                        jitterMax = jitter;
-                    }
+                    jitterMin = jitter;
                 }
 
-                Stats = new RosListenerStats(
-                    TotalMsgCounter,
-                    jitterMin,
-                    jitterMax,
-                    timesOfArrival.Count == 0
-                        ? 0
-                        : (timesOfArrival.Last() - timesOfArrival.First()) / timesOfArrival.Count(),
-                    timesOfArrival.Count,
-                    LastMsgBytes,
-                    MsgsInQueue,
-                    Dropped
-                );
-
-                ConnectionManager.ReportBandwidthDown(LastMsgBytes);
-
-                LastMsgBytes = 0;
-                Dropped = 0;
-                timesOfArrival.Clear();
+                if (jitter > jitterMax)
+                {
+                    jitterMax = jitter;
+                }
             }
+
+            Stats = new RosListenerStats(
+                totalMsgCounter,
+                jitterMin,
+                jitterMax,
+                timesOfArrival.Count == 0
+                    ? 0
+                    : (timesOfArrival.Last() - timesOfArrival.First()) / timesOfArrival.Count,
+                timesOfArrival.Count,
+                lastMsgBytes,
+                msgsInQueue,
+                dropped
+            );
+
+            ConnectionManager.ReportBandwidthDown(lastMsgBytes);
+
+            lastMsgBytes = 0;
+            dropped = 0;
+            timesOfArrival.Clear();
         }
 
         public override string ToString()
@@ -166,16 +164,21 @@ namespace Iviz.Controllers
 
         public void EnqueueMessage(T t)
         {
+            if (t == null)
+            {
+                throw new ArgumentNullException(nameof(t));
+            }
+
             lock (queue)
             {
                 queue.Enqueue(t);
                 if (queue.Count > MaxQueueSize)
                 {
                     queue.Dequeue();
-                    Dropped++;
+                    dropped++;
                 }
 
-                MsgsInQueue = queue.Count;
+                msgsInQueue = queue.Count;
             }
         }
 
@@ -190,14 +193,14 @@ namespace Iviz.Controllers
 
                 foreach (T t in queue)
                 {
-                    LastMsgBytes += t.RosMessageLength;
+                    lastMsgBytes += t.RosMessageLength;
                     timesOfArrival.Add(Time.time);
 
                     subscriptionHandler(t);
                 }
 
-                TotalMsgCounter += queue.Count;
-                MsgsInQueue = 0;
+                totalMsgCounter += queue.Count;
+                msgsInQueue = 0;
                 queue.Clear();
             }
         }
@@ -217,20 +220,24 @@ namespace Iviz.Controllers
 
         public override void Pause()
         {
-            if (Subscribed)
+            if (!Subscribed)
             {
-                ConnectionManager.Unsubscribe(this);
-                Subscribed = false;
+                return;
             }
+
+            ConnectionManager.Unsubscribe(this);
+            Subscribed = false;
         }
 
         public override void Unpause()
         {
-            if (!Subscribed)
+            if (Subscribed)
             {
-                ConnectionManager.Subscribe(this);
-                Subscribed = true;
+                return;
             }
+
+            ConnectionManager.Subscribe(this);
+            Subscribed = true;
         }
     }
 }

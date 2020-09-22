@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 
@@ -18,11 +19,21 @@ namespace Iviz.XmlRpc
         public async Task<string> GetRequest(int timeoutInMs = 2000)
         {
             StreamReader stream = new StreamReader(client.GetStream(), BuiltIns.UTF8);
-            stream.BaseStream.ReadTimeout = timeoutInMs;
+            //stream.BaseStream.ReadTimeout = timeoutInMs;
+            
+            //async Task<string> TimeoutTask() {  await Task.Delay(timeoutInMs); return null; };
+
             int length = -1;
             while (true)
             {
-                string line = await stream.ReadLineAsync();
+                Task<string> readTask = stream.ReadLineAsync();
+                if (!readTask.Wait(timeoutInMs) || !readTask.IsCompleted)
+                {
+                    throw new TimeoutException("Read line timed out!", readTask.Exception);
+                }
+
+                string line = await readTask;
+                
                 if (CheckHeaderLine(line, "Content-Length", out string lengthStr))
                 {
                     if (!int.TryParse(lengthStr, out length))
@@ -45,7 +56,14 @@ namespace Iviz.XmlRpc
             int numRead = 0;
             while (BuiltIns.UTF8.GetByteCount(buffer, 0, numRead) < length)
             {
-                numRead += await stream.ReadAsync(buffer, 0, length - numRead);
+                Task<int> readTask = stream.ReadAsync(buffer, 0, length - numRead);
+                if (!readTask.Wait(timeoutInMs) || !readTask.IsCompleted)
+                {
+                    throw new TimeoutException("Read line timed out!", readTask.Exception);
+                }
+
+                numRead += await readTask;
+                //numRead += await stream.ReadAsync(buffer, 0, length - numRead);
             }
 
             return new string(buffer, 0, numRead);

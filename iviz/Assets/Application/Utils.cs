@@ -87,9 +87,7 @@ namespace Iviz
 
         public static float4 Ros2Unity(this float4 v) => new float4(-v.y, v.z, v.x, v.w);
 
-        public static Quaternion RosRpy2Unity(this Vector3 v) =>
-            //Quaternion.Euler(v.y * Mathf.Rad2Deg, -v.z * Mathf.Rad2Deg, -v.x * Mathf.Rad2Deg);
-            Quaternion.Euler(-v.Ros2Unity() * Mathf.Rad2Deg);
+        public static Quaternion RosRpy2Unity(this Vector3 v) => Quaternion.Euler(v.Ros2Unity() * -Mathf.Rad2Deg);
 
         static Vector3 ToUnity(this Msgs.GeometryMsgs.Vector3 p)
         {
@@ -123,12 +121,7 @@ namespace Iviz
 
         static Msgs.GeometryMsgs.Vector3 ToRosVector3(this Vector3 p)
         {
-            return new Msgs.GeometryMsgs.Vector3
-            (
-                X: p.x,
-                Y: p.y,
-                Z: p.z
-            );
+            return new Msgs.GeometryMsgs.Vector3(p.x, p.y, p.z);
         }
 
         public static Msgs.GeometryMsgs.Vector3 Unity2RosVector3(this Vector3 p)
@@ -164,7 +157,6 @@ namespace Iviz
 
         static float SanitizeColor(float f)
         {
-            //return float.IsNaN(f) ? 0 : Mathf.Max(Mathf.Min(f, 1), 0);
             return float.IsNaN(f) ? 0 : Mathf.Max(Mathf.Min(f, 1), 0);
         }
 
@@ -176,13 +168,7 @@ namespace Iviz
 
         public static ColorRGBA ToRos(this Color p)
         {
-            return new ColorRGBA
-            (
-                R: p.r,
-                G: p.g,
-                B: p.b,
-                A: p.a
-            );
+            return new ColorRGBA(p.r, p.g, p.b, p.a);
         }
 
         public static ColorRGBA ToRos(this Color32 p)
@@ -259,35 +245,17 @@ namespace Iviz
 
         public static Msgs.GeometryMsgs.Transform Unity2RosTransform(this Pose p)
         {
-            return new Msgs.GeometryMsgs.Transform
-            (
-                Translation: p.position.Unity2RosVector3(),
-                Rotation: p.rotation.Unity2RosQuaternion()
-            );
+            return new Msgs.GeometryMsgs.Transform(p.position.Unity2RosVector3(), p.rotation.Unity2RosQuaternion());
         }
 
         public static Msgs.GeometryMsgs.Pose Unity2RosPose(this Pose p)
         {
-            return new Msgs.GeometryMsgs.Pose
-            (
-                Position: p.position.Unity2RosPoint(),
-                Orientation: p.rotation.Unity2RosQuaternion()
-            );
-        }
-
-        public static TimeSpan ToTimeSpan(this duration duration)
-        {
-            return TimeSpan.FromSeconds(duration.Secs) + TimeSpan.FromTicks(duration.Nsecs / 100);
+            return new Msgs.GeometryMsgs.Pose(p.position.Unity2RosPoint(), p.rotation.Unity2RosQuaternion());
         }
 
         public static Header CreateHeader(uint seq = 0, string frameId = null)
         {
-            return new Header
-            (
-                Seq: seq,
-                FrameId: frameId ?? TFListener.BaseFrameId,
-                Stamp: new time(DateTime.Now)
-            );
+            return new Header(seq, new time(DateTime.Now), frameId ?? TFListener.BaseFrameId);
         }
 
         public static bool HasNaN(this float4 v) => float.IsNaN(v.x) || float.IsNaN(v.y) || float.IsNaN(v.z);
@@ -551,40 +519,4 @@ namespace Iviz
             return new Color((float)v.R, (float)v.G, (float)v.B, (float)v.A);
         }
     }
-
-    public static class Settings
-    {
-
-        /// <summary>
-        /// Is this being run on an Android, IOS, or Hololens device?
-        /// </summary>
-        public const bool IsMobile =
-#if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID || UNITY_WSA)
-            true;
-#else
-            false;
-#endif
-
-        /// <summary>
-        /// Is thids being run on an Android or IOS device? (smartphone or tablet)
-        /// </summary>
-        public const bool IsPhone =
-#if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
-            true;
-#else
-            false;
-#endif        
-        
-        /// <summary>
-        /// Is this being run in a Hololens?
-        /// </summary>
-        public const bool IsHololens =
-#if !UNITY_EDITOR && UNITY_WSA
-            // bug: this will activate with any UWP device, not only Hololens! but what else? 
-            true;
-#else
-            false;
-#endif                
-    }
-    
 }

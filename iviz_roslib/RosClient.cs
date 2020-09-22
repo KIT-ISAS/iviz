@@ -143,7 +143,7 @@ namespace Iviz.Roslib
             }
         }
 
-        TimeSpan rpcNodeTimeout = TimeSpan.FromSeconds(5);
+        TimeSpan rpcNodeTimeout = TimeSpan.FromSeconds(2);
 
         /// <summary>
         /// Timeout in milliseconds for XML-RPC communications with another node.
@@ -162,7 +162,7 @@ namespace Iviz.Roslib
             }
         }
 
-        TimeSpan tcpRosTimeout = TimeSpan.FromSeconds(5);
+        TimeSpan tcpRosTimeout = TimeSpan.FromSeconds(2);
 
         /// <summary>
         /// Timeout in milliseconds for TCP-ROS communications (topics, services).
@@ -891,7 +891,11 @@ namespace Iviz.Roslib
                 publishersByTopic.Clear();
             }
 
-            publishers.ForEach(x => x.Stop());
+            publishers.ForEach(x =>
+            {
+                x.Stop();
+                RemovePublisher(x);
+            });
 
             RosSubscriber[] subscribers;
             lock (subscribersByTopic)
@@ -900,7 +904,11 @@ namespace Iviz.Roslib
                 subscribersByTopic.Clear();
             }
 
-            subscribers.ForEach(x => x.Stop());
+            subscribers.ForEach(x =>
+            {
+                x.Stop();
+                RemoveSubscriber(x);
+            });
 
             lock (subscribedServicesByName)
             {

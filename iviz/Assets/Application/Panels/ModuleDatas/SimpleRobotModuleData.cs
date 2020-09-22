@@ -153,11 +153,11 @@ namespace Iviz.App
             ConnectionManager.GetSystemParameterList().Where(x => x.HasSuffix(ParamSuffix));
 
         static IEnumerable<string> GetSavedRobotsCandidates() =>
-            Resource.External.GetRobotNames().Select(name => $"{SimpleRobotController.LocalPrefix}{name}");
+            Resource.GetRobotNames().Select(name => $"{SimpleRobotController.LocalPrefix}{name}");
         
         static IEnumerable<string> GetParameterHints() => GetParameterCandidates().Concat(GetSavedRobotsCandidates());
         
-        bool IsRobotSaved() => robot.Robot?.Name != null && Resource.External.ContainsRobot(robot.Robot.Name);
+        bool IsRobotSaved() => robot.Robot?.Name != null && Resource.ContainsRobot(robot.Robot.Name);
         
         protected override void UpdateModuleButton()
         {

@@ -22,7 +22,7 @@ namespace Iviz.App
         public override void SetupPanel()
         {
             files.Clear();
-            files.AddRange(Directory.GetFiles(ModuleListPanel.SavedFolder).
+            files.AddRange(Directory.GetFiles(Settings.SavedFolder).
                 Where(x => Roslib.Utils.HasSuffix(x, Suffix)).
                 Select(GetFileName));
             itemList.Title = "Load Config File";

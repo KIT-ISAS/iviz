@@ -108,7 +108,7 @@ namespace Iviz.App
                     }
                 }
             }
-            panel.EmptyText = ConnectionManager.Connected ?
+            panel.EmptyText = ConnectionManager.IsConnected ?
                 "No Topics Available" :
                 "(Not Connected)";
         }

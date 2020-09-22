@@ -17,9 +17,9 @@ namespace Iviz.App
         {
             panel.Active = true;
             panel.Close.Clicked += Close;
-            panel.TFLog.Close += Close;
-            panel.TFLog.Flush();
-            panel.TFLog.UpdateFrameTexts();
+            panel.TfLog.Close += Close;
+            panel.TfLog.Flush();
+            panel.TfLog.UpdateFrameTexts();
 
             panel.ShowOnlyUsed.Value = !TFListener.Instance.ShowAllFrames;
             panel.ShowOnlyUsed.ValueChanged += f =>
@@ -32,7 +32,7 @@ namespace Iviz.App
         public override void UpdatePanel()
         {
             base.UpdatePanel();
-            panel.TFLog.Flush();
+            panel.TfLog.Flush();
         }
 
         void Close()
@@ -43,7 +43,7 @@ namespace Iviz.App
         public void Show(TFFrame frame)
         {
             Show();
-            panel.TFLog.SelectedFrame = frame;
+            panel.TfLog.SelectedFrame = frame;
         }        
     }
 }

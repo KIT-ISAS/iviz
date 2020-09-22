@@ -47,6 +47,8 @@ namespace Iviz.Controllers
         {
             Connection?.Stop();
             Connection = null;
+            
+            RosServer.Dispose();
         }
 
 #if PUBLISH_LOG
@@ -75,7 +77,7 @@ namespace Iviz.Controllers
         public static Uri MasterUri => Connection?.MasterUri;
 
         public static ConnectionState ConnectionState => Connection?.ConnectionState ?? ConnectionState.Disconnected;
-        public static bool Connected => ConnectionState == ConnectionState.Connected;
+        public static bool IsConnected => ConnectionState == ConnectionState.Connected;
 
         public static void Subscribe<T>(RosListener<T> listener) where T : IMessage, new()
             => Connection.Subscribe(listener);
@@ -249,7 +251,7 @@ namespace Iviz.Controllers
 
         protected abstract bool Connect();
 
-        public virtual void Disconnect()
+        public virtual void Disconnect() 
         {
             SetConnectionState(ConnectionState.Disconnected);
         }
