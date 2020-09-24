@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 
@@ -9,19 +10,23 @@ namespace Iviz.XmlRpc
     internal sealed class HttpRequest : IDisposable
     {
         const int DefaultTimeoutInMs = 2000;
-        
+
         readonly Uri callerUri;
         readonly Uri uri;
         readonly TcpClient client;
 
-        public HttpRequest(Uri callerUri, Uri uri, int timeoutInMs = DefaultTimeoutInMs)
+        public HttpRequest(Uri callerUri, Uri uri)
         {
             this.callerUri = callerUri ?? throw new ArgumentNullException(nameof(callerUri));
             this.uri = uri ?? throw new ArgumentNullException(nameof(uri));
+            client = new TcpClient();
+        }
+
+        public void Start(int timeoutInMs = DefaultTimeoutInMs)
+        {
             string hostname = uri.Host;
             int port = uri.Port;
 
-            client = new TcpClient();
             Task task = client.ConnectAsync(hostname, port);
             if (!task.Wait(timeoutInMs) || !task.IsCompleted)
             {
@@ -29,51 +34,44 @@ namespace Iviz.XmlRpc
             }
         }
 
-        public async Task<string> Request(string msgIn, int timeoutInMs = DefaultTimeoutInMs)
+        public async Task StartAsync(int timeoutInMs = DefaultTimeoutInMs)
         {
-            if (msgIn is null)
+            string hostname = uri.Host;
+            int port = uri.Port;
+
+            Task task = client.ConnectAsync(hostname, port);
+            if (!task.Wait(timeoutInMs) || !task.IsCompleted)
             {
-                throw new ArgumentNullException(nameof(msgIn));
+                throw new TimeoutException($"HttpRequest: Host '{hostname}' timed out", task.Exception);
             }
+        }
 
-            StreamWriter writer = new StreamWriter(client.GetStream(), BuiltIns.UTF8)
-            {
-                NewLine = "\r\n"
-            };
+        string CreateRequest(string msgIn)
+        {
+            StringBuilder str = new StringBuilder();
+            string path = Uri.UnescapeDataString(uri.AbsolutePath);
+            str.Append($"POST {path} HTTP/1.0").Append("\r\n");
+            str.Append($"User-Agent: iviz XML-RPC").Append("\r\n");
+            str.Append($"Host: {callerUri.Host}").Append("\r\n");
+            str.Append($"Content-Length: {BuiltIns.UTF8.GetByteCount(msgIn)}").Append("\r\n");
+            str.Append($"Content-Type: text/xml; charset=utf-8").Append("\r\n");
+            str.Append("\r\n");
+            str.Append(msgIn).Append("\r\n");
+            return str.ToString();
+        }
 
-            string path = uri.AbsolutePath;
-            await writer.WriteLineAsync($"POST {path} HTTP/1.0");
-            await writer.WriteLineAsync($"User-Agent: iviz XML-RPC");
-            await writer.WriteLineAsync($"Host: {callerUri.Host}");
-            await writer.WriteLineAsync($"Content-Length: {BuiltIns.UTF8.GetByteCount(msgIn)}");
-            await writer.WriteLineAsync($"Content-Type: text/xml; charset=utf-8");
-            await writer.WriteLineAsync();
-            await writer.WriteAsync(msgIn);
-            await writer.FlushAsync();
-
-            StreamReader reader = new StreamReader(client.GetStream(), BuiltIns.UTF8);
-
-            Task<string> readTask = reader.ReadToEndAsync();
-            
-            async Task<string> TimeoutTask() {  await Task.Delay(timeoutInMs); return null; };
-            Task<string> firstTask = await Task.WhenAny(readTask, TimeoutTask());
-            
-            if (!readTask.Wait(timeoutInMs) || !readTask.IsCompleted)
-            {
-                reader.Close();
-                throw new TimeoutException("HttpRequest: Request response timed out!", readTask.Exception);
-            }
-
-            string response = readTask.Result;
-
+        static string ProcessResponse(string response)
+        {
             int index = response.IndexOf("\r\n\r\n", StringComparison.InvariantCulture);
             if (index == -1)
             {
                 index = response.IndexOf("\n\n", StringComparison.InvariantCulture);
                 if (index == -1)
                 {
-                    throw new ParseException($"Cannot find double line-end in HTTP header (received {response.Length} bytes)");
+                    throw new ParseException(
+                        $"Cannot find double line-end in HTTP header (received {response.Length} bytes)");
                 }
+
                 index += 2;
             }
             else
@@ -81,10 +79,49 @@ namespace Iviz.XmlRpc
                 index += 4;
             }
 
-            reader.Close();
-            writer.Close();
-
             return response.Substring(index);
+        }
+
+        internal string Request(string msgIn, int timeoutInMs = DefaultTimeoutInMs)
+        {
+            string response;
+            using (Stream stream = client.GetStream())
+            {
+                stream.ReadTimeout = timeoutInMs;
+                stream.WriteTimeout = timeoutInMs;
+
+                StreamWriter writer = new StreamWriter(stream, BuiltIns.UTF8);
+                writer.Write(CreateRequest(msgIn));
+                writer.Flush();
+
+                StreamReader reader = new StreamReader(stream, BuiltIns.UTF8);
+                response = reader.ReadToEnd();
+            }
+
+            return ProcessResponse(response);
+        }
+        
+        internal async Task<string> RequestAsync(string msgIn, int timeoutInMs = DefaultTimeoutInMs)
+        {
+            string response;
+            using (Stream stream = client.GetStream())
+            {
+                StreamWriter writer = new StreamWriter(stream, BuiltIns.UTF8);
+                await writer.WriteAsync(CreateRequest(msgIn));
+                await writer.FlushAsync();
+
+                StreamReader reader = new StreamReader(stream, BuiltIns.UTF8);
+                Task<string> readTask = reader.ReadToEndAsync();
+                if (!readTask.Wait(timeoutInMs) || !readTask.IsCompleted)
+                {
+                    reader.Close();
+                    throw new TimeoutException("HttpRequest: Request response timed out!", readTask.Exception);
+                }
+
+                response = readTask.Result;
+            }
+
+            return ProcessResponse(response);
         }
 
         bool disposed;
@@ -96,7 +133,7 @@ namespace Iviz.XmlRpc
             }
 
             disposed = true;
-            client.Close();
+            client?.Close();
         }
     }
 }

@@ -19,10 +19,10 @@ namespace Iviz.XmlRpc
         public async Task<string> GetRequest(int timeoutInMs = 2000)
         {
             StreamReader stream = new StreamReader(client.GetStream(), BuiltIns.UTF8);
+            
+            // async operations ignore timeout fields
             //stream.BaseStream.ReadTimeout = timeoutInMs;
             
-            //async Task<string> TimeoutTask() {  await Task.Delay(timeoutInMs); return null; };
-
             int length = -1;
             while (true)
             {
@@ -63,7 +63,6 @@ namespace Iviz.XmlRpc
                 }
 
                 numRead += await readTask;
-                //numRead += await stream.ReadAsync(buffer, 0, length - numRead);
             }
 
             return new string(buffer, 0, numRead);

@@ -14,30 +14,14 @@ namespace Iviz.XmlRpc
 {
     public class FaultException : Exception
     {
-        public FaultException()
-        {
-        }
-
         public FaultException(string message) : base(message)
-        {
-        }
-
-        public FaultException(string message, Exception innerException) : base(message, innerException)
         {
         }
     }
 
     public class ParseException : Exception
     {
-        public ParseException()
-        {
-        }
-
         public ParseException(string message) : base(message)
-        {
-        }
-
-        public ParseException(string message, Exception innerException) : base(message, innerException)
         {
         }
     }
@@ -70,11 +54,15 @@ namespace Iviz.XmlRpc
             switch (primitive.Name)
             {
                 case "double":
-                    return double.Parse(primitive.InnerText, BuiltIns.Culture);
+                    return double.TryParse(primitive.InnerText, NumberStyles.Number, BuiltIns.Culture,
+                        out double @double)
+                        ? (object) @double
+                        : null;
                 case "i4":
-                    return int.Parse(primitive.InnerText, BuiltIns.Culture);
                 case "int":
-                    return int.Parse(primitive.InnerText, BuiltIns.Culture);
+                    return int.TryParse(primitive.InnerText, NumberStyles.Number, BuiltIns.Culture, out int @int)
+                        ? (object) @int
+                        : null;
                 case "boolean":
                     return primitive.InnerText == "1";
                 case "string":
@@ -150,12 +138,64 @@ namespace Iviz.XmlRpc
             }
         }
 
-        public static object MethodCall(Uri remoteUri, Uri callerUri, string method, IEnumerable<Arg> args,
-            int timeoutInMs = 2000)
+        static string CreateRequest(string method, IEnumerable<Arg> args)
         {
-            return MethodCallAsync(remoteUri, callerUri, method, args, timeoutInMs).Result;
+            StringBuilder buffer = new StringBuilder();
+            buffer.AppendLine("<?xml version=\"1.0\"?>");
+            buffer.AppendLine("<methodCall>");
+            buffer.Append("<methodName>").Append(method).AppendLine("</methodName>");
+            buffer.AppendLine("<params>");
+            foreach (Arg arg in args)
+            {
+                buffer.AppendLine("<param>");
+                buffer.AppendLine(arg);
+                buffer.AppendLine("</param>");
+            }
+
+            buffer.AppendLine("</params>");
+            buffer.AppendLine("</methodCall>");
+
+            return buffer.ToString();
         }
 
+        static object ProcessResponse(string inData)
+        {
+            XmlDocument document = new XmlDocument();
+            document.LoadXml(inData);
+            XmlNode root = document.FirstChild;
+            while (root != null && root.Name != "methodResponse")
+            {
+                root = root.NextSibling;
+            }
+
+            if (root is null)
+            {
+                throw new ParseException("Response has no 'methodResponse' tag");
+            }
+
+            XmlNode child = root.FirstChild;
+
+            switch (child?.Name)
+            {
+                case null: 
+                    throw new ParseException("MethodResponse has no children");
+                case "params" when child.ChildNodes.Count == 0:
+                    throw new ParseException("Empty response");
+                case "params" when child.ChildNodes.Count > 1:
+                    throw new ParseException("Function call returned too many arguments");
+                case "params":
+                {
+                    XmlNode param = child.FirstChild;
+                    Assert(param.Name, "param");
+                    return Parse(param.FirstChild);
+                }
+                case "fault":
+                    throw new FaultException(child.FirstChild.InnerXml);
+                default:
+                    throw new ParseException($"Expected 'params' or 'fault', but got '{child.Name}'");
+            }            
+        }
+        
         public static async Task<object> MethodCallAsync(Uri remoteUri, Uri callerUri, string method,
             IEnumerable<Arg> args, int timeoutInMs = 2000)
         {
@@ -174,87 +214,46 @@ namespace Iviz.XmlRpc
                 throw new ArgumentNullException(nameof(args));
             }
 
-            StringBuilder buffer = new StringBuilder();
-            buffer.AppendLine("<?xml version=\"1.0\"?>");
-            buffer.AppendLine("<methodCall>");
-            buffer.Append("<methodName>").Append(method).AppendLine("</methodName>");
-            buffer.AppendLine("<params>");
-            foreach (Arg arg in args)
-            {
-                buffer.AppendLine("<param>");
-                buffer.AppendLine(arg);
-                buffer.AppendLine("</param>");
-            }
-
-            buffer.AppendLine("</params>");
-            buffer.AppendLine("</methodCall>");
-
-#if DEBUG__
-            Logger.Log("--- MethodCall ---");
-            Logger.Log(">> " + buffer);
-#endif
+            string outData = CreateRequest(method, args);
+            
             string inData;
             using (HttpRequest request = new HttpRequest(callerUri, remoteUri))
             {
-                inData = await request.Request(buffer.ToString(), timeoutInMs);
+                await request.StartAsync(timeoutInMs);
+                inData = await request.RequestAsync(outData, timeoutInMs);
             }
 
-#if DEBUG__
-            Logger.Log("<< " + inData);
-            Logger.Log("--- End MethodCall ---");
-#endif
-
-            XmlDocument document = new XmlDocument();
-            document.LoadXml(inData);
-            XmlNode root = document.FirstChild;
-            while (root != null && root.Name != "methodResponse")
-            {
-                root = root.NextSibling;
-            }
-
-            if (root is null)
-            {
-                throw new ParseException("Response has no 'methodResponse' tag");
-            }
-
-            XmlNode child = root.FirstChild;
-            if (child is null)
-            {
-                throw new ParseException("MethodResponse has no children");
-            }
-
-            if (child.Name == "params")
-            {
-                if (child.ChildNodes.Count == 0)
-                {
-                    throw new ParseException("Empty response");
-                }
-
-                if (child.ChildNodes.Count > 1)
-                {
-                    throw new ParseException("Function call returned too many arguments");
-                }
-
-                XmlNode param = child.FirstChild;
-                Assert(param.Name, "param");
-                return Parse(param.FirstChild);
-            }
-
-            if (child.Name == "fault")
-            {
-                throw new FaultException(child.FirstChild.InnerXml);
-            }
-
-            throw new ParseException($"Expected 'params' or 'fault', but got '{child.Name}'");
+            return ProcessResponse(inData);
         }
-
-        public static void MethodResponse(
-            HttpListenerContext httpContext,
-            IReadOnlyDictionary<string, Func<object[], Arg[]>> methods,
-            IReadOnlyDictionary<string, Func<object[], Task>> lateCallbacks = null)
+        
+        public static object MethodCall(Uri remoteUri, Uri callerUri, string method, IEnumerable<Arg> args, int timeoutInMs = 2000)
         {
-            MethodResponseAsync(httpContext, methods, lateCallbacks).Wait();
-        }
+            if (remoteUri is null)
+            {
+                throw new ArgumentNullException(nameof(remoteUri));
+            }
+
+            if (callerUri is null)
+            {
+                throw new ArgumentNullException(nameof(callerUri));
+            }
+
+            if (args is null)
+            {
+                throw new ArgumentNullException(nameof(args));
+            }
+
+            string outData = CreateRequest(method, args);
+            
+            string inData;
+            using (HttpRequest request = new HttpRequest(callerUri, remoteUri))
+            {
+                request.Start(timeoutInMs);
+                inData = request.Request(outData, timeoutInMs);
+            }
+
+            return ProcessResponse(inData);
+        }        
 
         public static async Task MethodResponseAsync(
             HttpListenerContext httpContext,
@@ -350,11 +349,11 @@ namespace Iviz.XmlRpc
 #endif
 
                 await httpContext.Respond(buffer.ToString());
-                
+
                 if (lateCallbacks != null && lateCallbacks.TryGetValue(methodName, out var lateCallback))
                 {
                     await lateCallback(args);
-                }                
+                }
             }
             catch (ParseException e)
             {
