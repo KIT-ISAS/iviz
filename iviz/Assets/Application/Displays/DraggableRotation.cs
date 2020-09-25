@@ -27,6 +27,8 @@ namespace Iviz.Displays
         public event Action PointerDown;
         public event Action PointerUp;
 
+        public Action<Pose> SetTargetPose { get; set; }
+
         static (Vector3, float) PlaneIntersection(in Ray ray, in Ray other)
         {
             float t = Vector3.Dot(other.origin - ray.origin, ray.direction) / Vector3.Dot(-other.direction, ray.direction);
@@ -35,6 +37,10 @@ namespace Iviz.Displays
             return (p, t);
         }
 
+        void Awake()
+        {
+            SetTargetPose = pose => TargetTransform.SetPose(pose);            
+        }
         
         public void OnPointerDown(PointerEventData eventData)
         {
@@ -86,7 +92,8 @@ namespace Iviz.Displays
 
                 //Debug.Log(startIntersection.normalized + " " + localIntersection.normalized + " " + angle);
                 Quaternion q = Quaternion.AngleAxis(angle, mTarget.InverseTransformDirection(normalRay.direction));
-                mTarget.localRotation *= q;
+                //mTarget.localRotation *= q;
+                SetTargetPose(new Pose(mTarget.position, mTarget.rotation * q));
                 Moved?.Invoke(mTarget.AsPose());
                 
                 //startIntersection = mTarget.transform.position + Quaternion.Inverse(q) * (localIntersection - mTarget.transform.position));

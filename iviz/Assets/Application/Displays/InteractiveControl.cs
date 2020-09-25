@@ -292,5 +292,16 @@ namespace Iviz.Displays
             transform.rotation = TFListener.RootFrame.transform.rotation;
         }
         
+        public void SetTargetPoseUpdater(Action<Pose> setTargetPose) 
+        {
+            foreach (GameObject resource in allResources)
+            {
+                var draggable = resource.GetComponent<IDraggable>();
+                if (draggable != null)
+                {
+                    draggable.SetTargetPose = setTargetPose;
+                }
+            }            
+        }
     }
 }

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Threading;
 using Iviz.Displays;
 using UnityEngine;
 
@@ -190,7 +191,7 @@ namespace Iviz.Controllers
                 Disconnect();
             }
         }
-        
+
         public override string MyId
         {
             get => base.MyId;
@@ -213,7 +214,6 @@ namespace Iviz.Controllers
 
         protected override bool Connect()
         {
-            //Debug.Log("Connecting! '" + Uri + "'");
             if (MasterUri == null ||
                 MasterUri.Scheme != "http" ||
                 MyId == null ||
@@ -241,7 +241,7 @@ namespace Iviz.Controllers
 
                 if (publishersByTopic.Count != 0 || subscribersByTopic.Count != 0)
                 {
-                    Logger.Internal("Connected. Resubscribing and republishing...");
+                    Logger.Internal("Resubscribing and republishing...");
                 }
 
                 foreach (var entry in publishersByTopic)
@@ -250,20 +250,17 @@ namespace Iviz.Controllers
                     entry.Value.Id = publishers.Count;
                     publishers.Add(entry.Value.Publisher);
                 }
-                
+
                 foreach (var entry in subscribersByTopic)
                 {
-                    //Logger.Debug("Subscribing to " + entry.Key);
                     entry.Value.Subscribe(client);
-                    //Logger.Debug("Done");
                 }
 
                 foreach (var entry in servicesByTopic)
                 {
-                    //Logger.Debug("Advertising to " + entry.Key);
                     entry.Value.Advertise(client);
-                    //Logger.Debug("Done");
                 }
+
                 Logger.Internal("Connected.");
 
                 return true;
@@ -285,7 +282,12 @@ namespace Iviz.Controllers
         }
 
         public override void Disconnect()
-        { 
+        {
+            Disconnect(true);
+        }
+
+        void Disconnect(bool waitForUnregister)
+        {
             if (client == null)
             {
                 return;
@@ -294,9 +296,10 @@ namespace Iviz.Controllers
             AddTask(() =>
                 {
                     Logger.Internal("Disconnecting...");
-                    client?.Close();
+                    client?.Close(waitForUnregister);
                     client = null;
                     Logger.Internal("Disconnection finished.");
+
                     foreach (var entry in publishersByTopic)
                     {
                         entry.Value.Invalidate();
@@ -420,22 +423,32 @@ namespace Iviz.Controllers
                 catch (Exception e)
                 {
                     Logger.Warn(e);
-                    Disconnect();
                 }
             });
         }
 
+        readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
+
         public override bool CallService<T>(string service, T srv)
         {
-            try
+            bool[] result = {false};
+            
+            AddTask(() =>
             {
-                return !(client is null) && client.CallService(service, srv);
-            }
-            catch (Exception e)
-            {
-                Logger.Warn(e);
-                return false;
-            }
+                try
+                {
+                    result[0] = client != null && client.CallService(service, srv);
+                }
+                catch (Exception e)
+                {
+                    Logger.Warn(e);
+                }
+
+                signal.Release();
+            });
+
+            signal.Wait();
+            return result[0];
         }
 
         public override void Publish(RosSender advertiser, IMessage msg)
@@ -462,7 +475,6 @@ namespace Iviz.Controllers
                 return;
             }
 
-            //Debug.Log("Trying to publish: " + advertiser.Id + " -> " + publishers[advertiser.Id]);
             publishers[advertiser.Id]?.Publish(msg);
         }
 
@@ -559,14 +571,16 @@ namespace Iviz.Controllers
 
         void UnsubscribeImpl(RosListener subscriber)
         {
-            if (subscribersByTopic.TryGetValue(subscriber.Topic, out SubscribedTopic subscribedTopic))
+            if (!subscribersByTopic.TryGetValue(subscriber.Topic, out SubscribedTopic subscribedTopic))
             {
-                subscribedTopic.Remove(subscriber);
-                if (subscribedTopic.Count == 0)
-                {
-                    subscribersByTopic.Remove(subscriber.Topic);
-                    subscribedTopic.Unsubscribe(client);
-                }
+                return;
+            }
+
+            subscribedTopic.Remove(subscriber);
+            if (subscribedTopic.Count == 0)
+            {
+                subscribersByTopic.Remove(subscriber.Topic);
+                subscribedTopic.Unsubscribe(client);
             }
         }
 
@@ -601,17 +615,17 @@ namespace Iviz.Controllers
 
         public override ReadOnlyCollection<string> GetSystemParameterList()
         {
-            AddTask(() =>
+            AddTask(async() =>
             {
                 try
                 {
-                    if (client is null)
+                    if (client?.Parameters is null)
                     {
                         cachedParameters = EmptyParameters;
                         return;
                     }
 
-                    cachedParameters = client.GetParameterNames();
+                    cachedParameters = await client.Parameters.GetParameterNamesAsync();
                 }
                 catch (Exception e)
                 {
@@ -621,20 +635,37 @@ namespace Iviz.Controllers
 
             return cachedParameters;
         }
-        
+
         public override object GetParameter(string parameter)
         {
-            if (client is null)
+            object[] result = {null};
+            
+            AddTask(async() =>
             {
-                return null;
-            }
+                try
+                {
+                    if (client?.Parameters != null)
+                    {
+                        var tuple = await client.Parameters.GetParameterAsync(parameter);
+                        result[0] = tuple.value;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.Warn(e);
+                }
 
-            client.GetParameter(parameter, out object obj);
-            return obj;
+                signal.Release();
+            });
+
+            signal.Wait();
+            return result[0];
+            
         }
 
         protected override void Update()
         {
+            // TODO: get rid of RosClient.Cleanup()! 
             if (client != null)
             {
                 AddTask(client.Cleanup);
@@ -647,6 +678,7 @@ namespace Iviz.Controllers
             return subscribedTopic?.Subscriber?.NumPublishers ?? 0;
         }
 
+
         public override int GetNumSubscribers(string topic)
         {
             publishersByTopic.TryGetValue(topic, out AdvertisedTopic advertisedTopic);
@@ -655,9 +687,8 @@ namespace Iviz.Controllers
 
         public override void Stop()
         {
+            Disconnect(false); // do not wait for topic, services unregistering
             base.Stop();
-            client?.Close();
-            client = null;
         }
     }
 }

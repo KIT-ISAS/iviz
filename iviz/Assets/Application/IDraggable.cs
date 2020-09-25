@@ -15,5 +15,6 @@ namespace Iviz.App
         void OnStartDragging();
         void OnEndDragging();
         Transform TargetTransform { get; set; }
+        Action<Pose> SetTargetPose { get; set; }
     }
 }

@@ -393,7 +393,6 @@ namespace Iviz.Resources
             public GameObjectInfo AxisFrame { get; }
             public GameObjectInfo AngleAxis { get; }
             public GameObjectInfo Trail { get; }
-            public GameObjectInfo AnchorLine { get; }
             public GameObjectInfo InteractiveControl { get; }
             public GameObjectInfo GridMap { get; }
 
@@ -425,7 +424,6 @@ namespace Iviz.Resources
                 AxisFrame = new GameObjectInfo("Displays/AxisFrameResource");
                 AngleAxis = new GameObjectInfo("Displays/AngleAxis");
                 Trail = new GameObjectInfo("Displays/Trail");
-                AnchorLine = new GameObjectInfo("Displays/AnchorLine");
                 InteractiveControl = new GameObjectInfo("Displays/InteractiveControl");
                 GridMap = new GameObjectInfo("Displays/GridMap");
 

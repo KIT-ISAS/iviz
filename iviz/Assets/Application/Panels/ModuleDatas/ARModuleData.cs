@@ -51,7 +51,7 @@ namespace Iviz.App
             panel.HideButton.State = controller.Visible;
             panel.Frame.Owner = controller;
             panel.WorldScale.Value = controller.WorldScale;
-            panel.WorldOffset.Mean = controller.WorldOffset;
+            panel.WorldOffset.Mean = controller.WorldPosition;
             panel.WorldAngle.Value = controller.WorldAngle;
 
             panel.SearchMarker.Value = controller.UseMarker;
@@ -66,24 +66,26 @@ namespace Iviz.App
 
             panel.MarkerOffset.Value = controller.MarkerOffset;
 
-            TFListener.RootMarker.PointerUp += CopyControlMarkerPoseToPanel;
+            //TFListener.RootMarker.PointerUp += CopyControlMarkerPoseToPanel;
+            controller.WorldPoseChanged += OnWorldPoseChanged;
 
+            
             CheckInteractable();
 
             panel.WorldScale.ValueChanged += f => { controller.WorldScale = f; };
-            panel.WorldOffset.ValueChanged += f => { controller.WorldOffset = f; };
-            panel.WorldAngle.ValueChanged += f => { controller.WorldAngle = f; };
+            panel.WorldOffset.ValueChanged += f =>
+            {
+                controller.SetWorldPosition(f.Ros2Unity(), ARController.RootMover.ModuleData);
+            };
+            panel.WorldAngle.ValueChanged += f =>
+            {
+                controller.SetWorldAngle(f, ARController.RootMover.ModuleData);
+            };
             panel.SearchMarker.ValueChanged += f =>
             {
                 controller.UseMarker = f;
                 CheckInteractable();
             };
-            /*
-            panel.MarkerSize.ValueChanged += f =>
-            {
-                controller.MarkerSize = f;
-            };
-            */
             panel.MarkerHorizontal.ValueChanged += f => { controller.MarkerHorizontal = f; };
             panel.MarkerAngle.ValueChanged += f => { controller.MarkerAngle = (int)f; };
             panel.MarkerFrame.EndEdit += f =>
@@ -115,10 +117,29 @@ namespace Iviz.App
             };
         }
 
+        void OnWorldPoseChanged(ARController.RootMover mover)
+        {
+            if (mover == ARController.RootMover.ModuleData)
+            {
+                return;
+            }
+            
+            panel.WorldOffset.Mean = controller.WorldPosition.Unity2Ros();
+            panel.WorldAngle.Value = controller.WorldAngle;
+        }
+
+        public override void CleanupPanel()
+        {
+            base.CleanupPanel();
+            controller.WorldPoseChanged -= OnWorldPoseChanged;            
+        }
+
+
+        /*
         public void CopyControlMarkerPoseToPanel()
         {
-            var pose = TFListener.RootMarker.transform.AsPose();
-            controller.WorldOffset = pose.position.Unity2Ros();
+            var pose = TFListener.RootFrame.transform.AsPose();
+            controller.WorldPosition = pose.position.Unity2Ros();
 
             float angle = pose.rotation.eulerAngles.y;
             if (angle > 180)
@@ -127,10 +148,8 @@ namespace Iviz.App
             }
 
             controller.WorldAngle = angle;
-
-            panel.WorldOffset.Mean = controller.WorldOffset;
-            panel.WorldAngle.Value = controller.WorldAngle;
         }
+        */
 
         void CheckInteractable()
         {

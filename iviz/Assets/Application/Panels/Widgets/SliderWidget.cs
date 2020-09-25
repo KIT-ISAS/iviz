@@ -28,18 +28,14 @@ namespace Iviz.App
             set
             {
                 ValueInternal = (value - Min) / (Max - Min) * NumberOfSteps;
-                //Debug.Log("val: " + Label + " " + Min + " " + Max + " " + NumberOfSteps + " " + ValueInternal + " " + value);
+                UpdateLabel(value);                
             }
         }
 
         float ValueInternal
         {
             get => slider.value;
-            set
-            {
-                //Debug.Log("val: " + Label + " " + value);
-                slider.value = Math.Max((int)value, 0);
-            }
+            set => slider.SetValueWithoutNotify(Math.Max((int) value, 0));
         }
 
         public bool Interactable
@@ -54,6 +50,7 @@ namespace Iviz.App
         }
 
         float max = 1;
+
         public float Max
         {
             get => max;
@@ -66,6 +63,7 @@ namespace Iviz.App
         }
 
         float min = 0;
+
         public float Min
         {
             get => min;
@@ -78,6 +76,7 @@ namespace Iviz.App
         }
 
         int numberOfSteps = 99;
+
         public int NumberOfSteps
         {
             get => numberOfSteps;
@@ -94,15 +93,16 @@ namespace Iviz.App
         }
 
         bool integerOnly;
+
         public bool IntegerOnly
         {
             get => integerOnly;
             set
             {
                 integerOnly = value;
-                Max = (int)Max;
-                Min = (int)Min;
-                NumberOfSteps = (int)(Max - Min);
+                Max = (int) Max;
+                Min = (int) Min;
+                NumberOfSteps = (int) (Max - Min);
             }
         }
 
@@ -111,18 +111,14 @@ namespace Iviz.App
         void Awake()
         {
             slider.wholeNumbers = true;
-            //ValueInternal = 0;
             NumberOfSteps = NumberOfSteps;
             Min = Min;
             Max = Max;
-            //Value = Value;
         }
 
         public void OnValueChanged(float f)
         {
             float v = Min + (Max - Min) * f / NumberOfSteps;
-            //Debug.Log("vc: " + Label + " " + Min + " " + Max + " " + NumberOfSteps + " " + f + " " + v);
-            //Debug.Log("vc: " + Label + " " + f);
             UpdateLabel(v);
             ValueChanged?.Invoke(v);
         }
@@ -160,7 +156,7 @@ namespace Iviz.App
             Max = f;
             return this;
         }
-        
+
         public SliderWidget UpdateValue()
         {
             OnValueChanged(ValueInternal);

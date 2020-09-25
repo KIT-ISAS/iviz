@@ -42,9 +42,17 @@ namespace Iviz.Controllers
         public static readonly Vector3 DefaultWorldOffset = new Vector3(0.5f, 0, -0.2f);
 
         public static ARController Instance { get; private set; }
-        
-        protected static Transform TfRoot => TFListener.RootFrame.transform;
 
+        public enum RootMover
+        {
+            ModuleData,
+            Anchor,
+            ImageMarker,
+            ControlMarker,
+            Configuration,
+        }
+        
+        
         static ARSessionInfo savedSessionInfo;
         
         protected Canvas canvas;
@@ -67,25 +75,68 @@ namespace Iviz.Controllers
                 MarkerOffset = value.MarkerOffset;
             }
         }
-
-        public Vector3 WorldOffset
+        
+        public Vector3 WorldPosition
         {
             get => config.WorldOffset;
-            set
-            {
-                config.WorldOffset = value;
-                TfRoot.SetPose(RootPose);
-            }
+            private set => config.WorldOffset = value;
         }
         
         public float WorldAngle
         {
             get => config.WorldAngle;
-            set
+            private set => config.WorldAngle = value;
+        }
+
+        public Pose WorldPose { get; private set; }
+    
+        public event Action<RootMover> WorldPoseChanged;
+
+        void UpdateWorldPose(in Pose pose, RootMover mover)
+        {
+            WorldPose = pose;
+            if (Visible)
             {
-                config.WorldAngle = value;
-                TfRoot.SetPose(RootPose);
+                TFListener.RootFrame.transform.SetPose(pose);
             }
+
+            WorldPoseChanged?.Invoke(mover);
+            
+            //RePin();
+        }
+        
+        public void SetWorldPose(in Pose unityPose, RootMover mover)
+        {
+            float angle = unityPose.rotation.eulerAngles.y;
+            if (angle > 180)
+            {
+                angle -= 360;
+            }
+            
+            WorldPosition = unityPose.position;
+            WorldAngle = angle;
+            UpdateWorldPose(unityPose, mover);
+        }
+
+        public void SetWorldPose(in Vector3 unityPosition, float angle, RootMover mover)
+        {
+            WorldPosition = unityPosition;
+            WorldAngle = angle;
+            Quaternion rotation = Quaternion.AngleAxis(angle, Vector3.up);
+            UpdateWorldPose(new Pose(unityPosition, rotation), mover);
+        }
+        
+        public void SetWorldPosition(in Vector3 unityPosition, RootMover mover)
+        {
+            WorldPosition = unityPosition;
+            UpdateWorldPose(new Pose(unityPosition, WorldPose.rotation), mover);
+        }
+
+        public void SetWorldAngle(float angle, RootMover mover)
+        {
+            WorldAngle = angle;
+            Quaternion rotation = Quaternion.AngleAxis(angle, Vector3.up);
+            UpdateWorldPose(new Pose(WorldPosition, rotation), mover);
         }
 
         public float WorldScale
@@ -94,7 +145,7 @@ namespace Iviz.Controllers
             set
             {
                 config.WorldScale = value;
-                TfRoot.localScale = value * Vector3.one;
+                TfRootScale = value;
             }
         }
 
@@ -104,15 +155,15 @@ namespace Iviz.Controllers
             set
             {
                 config.Visible = value;
-
-                TfRoot.SetPose(value ? RootPose : Pose.identity);
+                TFListener.RootFrame.transform.SetPose(value ? WorldPose : Pose.identity);
+                
                 ModuleListPanel.Instance.OnARModeChanged(value);
                 foreach (var module in ModuleListPanel.Instance.ModuleDatas)
                 {
                     module.OnARModeChanged(value);
                 }
                 
-                TFListener.MapFrame.UpdateAnchor(value);
+                //TFListener.MapFrame.UpdateAnchor(value);
             }
         }
 
@@ -148,21 +199,12 @@ namespace Iviz.Controllers
         
         public TFFrame Frame => node.Parent;
 
-        protected Pose RegisteredPose { get; set; } = Pose.identity;
-
-        protected Pose RootPose
+        static float TfRootScale
         {
-            get
-            {
-                Pose offsetPose = new Pose(
-                    WorldOffset.Ros2Unity(),
-                    Quaternion.AngleAxis(WorldAngle, Vector3.up)
-                    );
-                return RegisteredPose.Multiply(offsetPose);
-            }
-        }
-
-        public bool PinRootMarker
+            set => TFListener.RootFrame.transform.localScale = value * Vector3.one;
+        }          
+        
+        public virtual bool PinRootMarker
         {
             get => config.PinRootMarker;
             set => config.PinRootMarker = value;
@@ -187,54 +229,36 @@ namespace Iviz.Controllers
             
             if (savedSessionInfo != null)
             {
-                WorldAngle = savedSessionInfo.WorldAngle;
-                WorldOffset = savedSessionInfo.WorldOffset;
+                SetWorldPose(savedSessionInfo.WorldOffset, savedSessionInfo.WorldAngle, RootMover.Configuration);
                 WorldScale = savedSessionInfo.WorldScale;
             }
+            
+            TFListener.RootMarker.SetTargetPoseUpdater(pose => SetWorldPose(pose, RootMover.ControlMarker));
         }
         
-        protected bool forceAnchorRebuild;
-
-
         public virtual bool FindClosest(in Vector3 position, out Vector3 anchor, out Vector3 normal)
         {
-            Vector3 origin = position + 0.25f * Vector3.up;
+            Vector3 origin = position + 0.05f * Vector3.up;
             Ray ray = new Ray(origin, Vector3.down);
             return FindRayHit(ray, out anchor, out normal);
         }
 
-        public abstract bool FindRayHit(in Ray ray, out Vector3 anchor, out Vector3 normal);
-        
-        void UpdateAnchors()
-        {
-            Vector3? projection = TFListener.MapFrame.UpdateAnchor(forceAnchorRebuild);
-            if (PinRootMarker && projection.HasValue)
-            {
-                TFListener.RootFrame.transform.position = projection.Value;
-                ((ARModuleData)ModuleData).CopyControlMarkerPoseToPanel();
-            }
-            forceAnchorRebuild = false;
-        }
-        
-        public void Update()
-        {
-            UpdateAnchors();
-        }
-        
+        protected abstract bool FindRayHit(in Ray ray, out Vector3 anchor, out Vector3 normal);
+
         public void Stop()
         {
             savedSessionInfo = new ARSessionInfo()
             {
                 WorldAngle = WorldAngle,
-                WorldOffset = WorldOffset,
+                WorldOffset = WorldPosition,
                 WorldScale = WorldScale
             };
             
             Visible = false;
-
             WorldScale = 1;
-            TfRoot.SetPose(Pose.identity);
 
+            TFListener.RootMarker.SetTargetPoseUpdater(pose => TFListener.RootFrame.transform.SetPose(pose));
+            
             Instance = null;
         }
 

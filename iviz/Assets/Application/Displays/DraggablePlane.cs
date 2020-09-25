@@ -27,6 +27,13 @@ namespace Iviz.Displays
         public event Action PointerDown;
         public event Action PointerUp;
 
+        public Action<Pose> SetTargetPose { get; set; }
+
+        void Awake()
+        {
+            SetTargetPose = pose => TargetTransform.SetPose(pose);            
+        }
+        
         public bool Visible
         {
             get => gameObject.activeSelf;
@@ -88,8 +95,9 @@ namespace Iviz.Displays
                     deltaPosition *= 0.5f / deltaDistance;
                 }
 
-                var vec3 = mParent.TransformVector(deltaPosition);
-                mTarget.position += vec3;
+                Vector3 deltaPositionWorld = mParent.TransformVector(deltaPosition);
+                SetTargetPose(new Pose(mTarget.position + deltaPositionWorld, mTarget.rotation));
+                //mTarget.position += deltaPositionWorld;
 
                 Moved?.Invoke(mTarget.AsPose());
                 //startIntersection = localIntersection;

@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Iviz.Controllers
 {
-    public class RosServer
+    public class RosServerManager
     {
         public const int DefaultPort = Server.DefaultPort;
 
@@ -16,26 +16,36 @@ namespace Iviz.Controllers
             ("/rosdistro", "noetic"),
             ("/rosversion", "1.15.8")
         };
-        
-        static RosServer instance;
-        static RosServer Instance => instance ?? (instance = new RosServer());
+
+        static RosServerManager instance;
+        static RosServerManager Instance => instance ?? (instance = new RosServerManager());
         public static bool IsActive => Instance.server != null;
 
-        public static bool Create(Uri masterUri) => Instance.TryCreate(masterUri);
+        public static bool Create(Uri masterUri) =>
+            Instance.TryCreate(masterUri ?? throw new ArgumentNullException(nameof(masterUri)));
+
         public static void Dispose() => Instance.Reset();
 
-        Task task;
+        // ---
+
         readonly SemaphoreSlim signal1 = new SemaphoreSlim(0, 1);
         readonly SemaphoreSlim signal2 = new SemaphoreSlim(0, 1);
 
+        Task task;
         Server server;
-        
+
         bool TryCreate(Uri masterUri)
         {
-            if (masterUri == null)
+            if (server != null)
             {
-                throw new ArgumentNullException(nameof(masterUri));
+                if (server.MasterUri == masterUri)
+                {
+                    return true;
+                }
+
+                Reset();
             }
+
 
             task = Task.Run(async () => await TryCreateAsync(masterUri));
             signal1.Wait();
@@ -54,7 +64,7 @@ namespace Iviz.Controllers
                 {
                     server.AddKey(key, value);
                 }
-                
+
                 serverTask = server.Start();
             }
             catch (Exception e)
@@ -70,14 +80,11 @@ namespace Iviz.Controllers
                 return;
             }
 
-            //Debug.Log(Thread.CurrentThread.Name + " " + Thread.CurrentContext.ContextID +  "In: signal2: wait!");
             await signal2.WaitAsync();
 
-            //Debug.Log(Thread.CurrentThread.Name + " " + Thread.CurrentContext.ContextID +  "In: server: dispose!");
             server.Dispose();
-            //Debug.Log(Thread.CurrentThread.Name + " " + Thread.CurrentContext.ContextID +  "In: wait: serverTask!");
             await serverTask;
-            //Debug.Log(Thread.CurrentThread.Name + " " + Thread.CurrentContext.ContextID +  "In: out!");
+
             server = null;
         }
 
@@ -88,9 +95,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            //Debug.Log(Thread.CurrentThread.Name + " " + Thread.CurrentContext.ContextID +  "Out: signal2: release!");
             signal2.Release();
-            //Debug.Log(Thread.CurrentThread.Name + " " + Thread.CurrentContext.ContextID +  "Out: task: wait^!");
             task.Wait();
         }
     }
