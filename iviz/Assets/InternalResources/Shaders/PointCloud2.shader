@@ -26,7 +26,7 @@ Shader "iviz/PointCloud2"
 			float _IntensityAdd;
 			float4x4 _LocalToWorld;
 			float4x4 _WorldToLocal;
-	        float4 _Tint;
+	        fixed4 _Tint;
             float _Scale;
             
 			struct Point {
@@ -51,7 +51,7 @@ Shader "iviz/PointCloud2"
 			struct v2f
 			{
 				float4 position : SV_POSITION;
-				half3 color : COLOR;
+				fixed3 color : COLOR;
 			};
 
 			v2f vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
@@ -71,7 +71,7 @@ Shader "iviz/PointCloud2"
 				o.color = tex2Dlod(_IntensityTexture, float4(centerIntensity * _IntensityCoeff + _IntensityAdd, 0, 0, 0));
 	#else
 				int centerIntensity = centerPoint.intensity;
-				half3 rgb = half3(
+				fixed3 rgb = fixed3(
 					(centerIntensity >>  0) & 0xff,
 					(centerIntensity >>  8) & 0xff,
 					(centerIntensity >> 16) & 0xff
@@ -82,9 +82,9 @@ Shader "iviz/PointCloud2"
 				return o;
 			}
 
-			half4 frag(v2f i) : SV_Target
+			fixed4 frag(v2f i) : SV_Target
 			{
-				return half4(i.color, 1);
+				return fixed4(i.color, 1);
 			}
 
 			ENDCG

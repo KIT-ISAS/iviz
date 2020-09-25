@@ -27,7 +27,7 @@ Shader "iviz/TransparentLine"
 			float4x4 _LocalToWorld;
 			float4x4 _WorldToLocal;
 			float4 _Front;
-			float4 _Tint;
+			fixed4 _Tint;
 			
 			float _Scale;			
 
@@ -64,7 +64,7 @@ Shader "iviz/TransparentLine"
 			struct v2f
 			{
 				float4 position : SV_POSITION;
-				half4 color : COLOR;
+				fixed4 color : COLOR;
 			};
 
 			v2f vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
@@ -91,26 +91,26 @@ Shader "iviz/TransparentLine"
 
 	#if USE_TEXTURE
 				float intensityA = _Lines[inst].intensityA;
-				half4 rgbaA = tex2Dlod(_IntensityTexture, float4(intensityA * _IntensityCoeff + _IntensityAdd, 0, 0, 0));
+				fixed4 rgbaA = tex2Dlod(_IntensityTexture, float4(intensityA * _IntensityCoeff + _IntensityAdd, 0, 0, 0));
 				float intensityB = _Lines[inst].intensityB;
-				half4 rgbaB = tex2Dlod(_IntensityTexture, float4(intensityB * _IntensityCoeff + _IntensityAdd, 0, 0, 0));
+				fixed4 rgbaB = tex2Dlod(_IntensityTexture, float4(intensityB * _IntensityCoeff + _IntensityAdd, 0, 0, 0));
     #else
 				uint cA = _Lines[inst].colorA;
-				half4 rgbaA = half4(
+				fixed4 rgbaA = fixed4(
 					(cA >>  0) & 0xff,
 					(cA >>  8) & 0xff,
 					(cA >> 16) & 0xff,
 					(cA >> 24) & 0xff
 					) / 255.0;
 				uint cB = _Lines[inst].colorB;
-				half4 rgbaB = half4(
+				fixed4 rgbaB = fixed4(
 					(cB >>  0) & 0xff,
 					(cB >>  8) & 0xff,
 					(cB >> 16) & 0xff,
 					(cB >> 24) & 0xff
 					) / 255.0;
 	#endif
-				half4 diffuse = (rgbaB - rgbaA) * V.z + rgbaA;
+				fixed4 diffuse = (rgbaB - rgbaA) * V.z + rgbaA;
 				diffuse *= _Tint;
 				
                 o.color = diffuse;				
@@ -118,7 +118,7 @@ Shader "iviz/TransparentLine"
 				return o;
 			}
 
-			half4 frag(v2f i) : SV_Target
+			fixed4 frag(v2f i) : SV_Target
 			{
 				return i.color;
 			}

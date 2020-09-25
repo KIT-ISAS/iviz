@@ -27,7 +27,7 @@ Shader "iviz/Line"
 			float4x4 _LocalToWorld;
 			float4x4 _WorldToLocal;
 			float4 _Front;
-			float4 _Tint;
+			fixed4 _Tint;
 			
 			float _Scale;
 
@@ -64,7 +64,7 @@ Shader "iviz/Line"
 			struct v2f
 			{
 				float4 position : SV_POSITION;
-				half3 color : COLOR;
+				fixed3 color : COLOR;
 			};
 
 			v2f vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
@@ -87,39 +87,37 @@ Shader "iviz/Line"
                 float3 p = right * V.x + up * V.y + BA * V.z + A;
 
 				v2f o;
-				o.position = UnityObjectToClipPos(float4(p, 1));
+				o.position = UnityObjectToClipPos(p);
 
 	#if USE_TEXTURE
 				float intensityA = _Lines[inst].intensityA;
-				half4 rgbaA = tex2Dlod(_IntensityTexture, float4(intensityA * _IntensityCoeff + _IntensityAdd, 0, 0, 0));
+				fixed3 rgbaA = tex2Dlod(_IntensityTexture, float4(intensityA * _IntensityCoeff + _IntensityAdd, 0, 0, 0)).xyz;
 				float intensityB = _Lines[inst].intensityB;
-				half4 rgbaB = tex2Dlod(_IntensityTexture, float4(intensityB * _IntensityCoeff + _IntensityAdd, 0, 0, 0));
+				fixed3 rgbaB = tex2Dlod(_IntensityTexture, float4(intensityB * _IntensityCoeff + _IntensityAdd, 0, 0, 0)).xyz;
     #else
 				uint cA = _Lines[inst].colorA;
-				half4 rgbaA = half4(
+				fixed3 rgbaA = fixed3(
 					(cA >>  0) & 0xff,
 					(cA >>  8) & 0xff,
-					(cA >> 16) & 0xff,
-					255
+					(cA >> 16) & 0xff
 					) / 255.0;
 				uint cB = _Lines[inst].colorB;
-				half4 rgbaB = half4(
+				fixed3 rgbaB = fixed3(
 					(cB >>  0) & 0xff,
 					(cB >>  8) & 0xff,
-					(cB >> 16) & 0xff,
-					255
+					(cB >> 16) & 0xff
 					) / 255.0;
 	#endif
-				half4 diffuse = (rgbaB - rgbaA) * V.z + rgbaA;
+				fixed3 diffuse = (rgbaB - rgbaA) * V.z + rgbaA;
 				diffuse *= _Tint;
 				
                 o.color = diffuse;				
 				return o;
 			}
 
-			half4 frag(half3 color : COLOR) : SV_Target
+			fixed4 frag(fixed3 color : COLOR) : SV_Target
 			{
-				return half4(color, 1);
+				return fixed4(color, 1);
 			}
 
 			ENDCG
