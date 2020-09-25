@@ -40,7 +40,7 @@ namespace Iviz.Roslib
         bool keepRunning;
         Task task;
 
-        string RemoteCallerId { get; }
+        public string RemoteCallerId { get; }
         Uri CallerUri { get; }
         bool Latching { get; }
 
@@ -79,7 +79,7 @@ namespace Iviz.Roslib
             Latching = latching;
         }
 
-        public IPEndPoint Start(int timeoutInMs)
+        public IPEndPoint Start(int timeoutInMs, SemaphoreSlim managerSignal)
         {
             tcpListener = new TcpListener(IPAddress.Any, 0);
             tcpListener.Start();
@@ -88,7 +88,7 @@ namespace Iviz.Roslib
             Endpoint = new Endpoint(localEndpoint);
 
             keepRunning = true;
-            task = Task.Run(async () => await Run(timeoutInMs));
+            task = Task.Run(async () => await Run(timeoutInMs, managerSignal));
 
             return localEndpoint;
         }
@@ -290,7 +290,7 @@ namespace Iviz.Roslib
         }
         */
         
-        async Task Run(int timeoutInMs)
+        async Task Run(int timeoutInMs, SemaphoreSlim managerSignal)
         {
             try
             {
@@ -305,7 +305,11 @@ namespace Iviz.Roslib
                     throw new TimeoutException();
                 }
                 */
+
                 Task<TcpClient> connectionTask = tcpListener.AcceptTcpClientAsync();
+                
+                managerSignal.Release();
+
                 if (!await connectionTask.WaitFor(timeoutInMs) || !connectionTask.IsCompleted)
                 {
                     throw new TimeoutException("Connection timed out!", connectionTask.Exception);

@@ -25,7 +25,7 @@ namespace Iviz.Roslib
         bool keepRunning;
         Task task;
 
-        Uri RemoteUri { get; }
+        public Uri RemoteUri { get; }
         Endpoint RemoteEndpoint { get; }
         Endpoint Endpoint { get; set; }
 
@@ -151,18 +151,19 @@ namespace Iviz.Roslib
 
 
         readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
+
         async Task Run(int timeoutInMs)
         {
             Task runLoopTask = RunLoop(timeoutInMs);
-            
+
             while (keepRunning)
             {
                 await signal.WaitAsync(1000);
             }
-            
+
             tcpClient.Dispose();
             stream.Dispose();
-            
+
             await runLoopTask;
         }
 
@@ -264,6 +265,7 @@ namespace Iviz.Roslib
         }
 
         bool disposed;
+
         public void Dispose()
         {
             if (disposed)
@@ -273,17 +275,10 @@ namespace Iviz.Roslib
 
             disposed = true;
             keepRunning = false;
-            
-            try
-            {
-                signal.Release();
-            }
-            catch (SemaphoreFullException)
-            {
-            }
+
+            signal.Release();
 
             task?.Wait();
-            task?.Dispose();
         }
     }
 }

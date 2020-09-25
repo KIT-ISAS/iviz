@@ -32,7 +32,7 @@ namespace Iviz.XmlRpc
             LocalEndpoint = new Uri($"http://{endpoint.Address}:{endpoint.Port}/");
         }
 
-        public async Task Start(Func<HttpListenerContext, Task> callback)
+        public async Task StartAsync(Func<HttpListenerContext, Task> callback)
         {
             if (callback is null)
             {
@@ -45,7 +45,7 @@ namespace Iviz.XmlRpc
                 try
                 {
                     Logger.LogDebug($"{this}: Accepting request...");
-                    TcpClient client = await listener.AcceptTcpClientAsync();
+                    TcpClient client = await listener.AcceptTcpClientAsync().Caf();
                     Logger.LogDebug($"{this}: Accept Out!");
                     
                     if (!keepGoing)
@@ -54,7 +54,7 @@ namespace Iviz.XmlRpc
                         break;
                     }
 
-                    await callback(new HttpListenerContext(client));
+                    await callback(new HttpListenerContext(client)).Caf();
                 }
                 catch (ObjectDisposedException)
                 {

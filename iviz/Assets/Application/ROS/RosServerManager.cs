@@ -14,17 +14,19 @@ namespace Iviz.Controllers
         static readonly List<(string key, string value)> DefaultKeys = new List<(string, string)>
         {
             ("/rosdistro", "noetic"),
-            ("/rosversion", "1.15.8")
+            ("/rosversion", "1.15.8"),
+            ("/ivizversion", "1.0.0")
         };
 
         static RosServerManager instance;
         static RosServerManager Instance => instance ?? (instance = new RosServerManager());
-        public static bool IsActive => Instance.server != null;
+        public static bool IsActive => instance?.server != null;
+        public static Uri MasterUri => instance?.server?.MasterUri;
 
         public static bool Create(Uri masterUri) =>
             Instance.TryCreate(masterUri ?? throw new ArgumentNullException(nameof(masterUri)));
 
-        public static void Dispose() => Instance.Reset();
+        public static void Dispose() => instance?.Reset();
 
         // ---
 
@@ -46,8 +48,9 @@ namespace Iviz.Controllers
                 Reset();
             }
 
-
             task = Task.Run(async () => await TryCreateAsync(masterUri));
+            
+            // wait for TryCreateAsync()
             signal1.Wait();
 
             return server != null;
@@ -65,6 +68,7 @@ namespace Iviz.Controllers
                     server.AddKey(key, value);
                 }
 
+                // start in background
                 serverTask = server.Start();
             }
             catch (Exception e)
@@ -73,6 +77,7 @@ namespace Iviz.Controllers
                 server = null;
             }
 
+            // tell TryCreate() to continue
             signal1.Release();
 
             if (server == null || serverTask == null)
@@ -80,6 +85,7 @@ namespace Iviz.Controllers
                 return;
             }
 
+            // wait for Reset()
             await signal2.WaitAsync();
 
             server.Dispose();
@@ -95,7 +101,9 @@ namespace Iviz.Controllers
                 return;
             }
 
+            // tell TryCreate() to stop waiting
             signal2.Release();
+            
             task.Wait();
         }
     }

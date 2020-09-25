@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -19,21 +20,21 @@ namespace Iviz.RosMaster
 
         readonly Dictionary<string, Func<object[], Task>> lateCallbacks;
 
-        readonly Dictionary<string, HashSet<(string callerId, Uri callerUri)>> publishersByTopic =
-            new Dictionary<string, HashSet<(string, Uri)>>();
+        readonly ConcurrentDictionary<string, ConcurrentDictionary<string, Uri>> publishersByTopic =
+            new ConcurrentDictionary<string, ConcurrentDictionary<string, Uri>>();
 
-        readonly Dictionary<string, HashSet<(string callerId, Uri callerUri)>> subscribersByTopic =
-            new Dictionary<string, HashSet<(string, Uri)>>();
+        readonly ConcurrentDictionary<string, ConcurrentDictionary<string, Uri>> subscribersByTopic =
+            new ConcurrentDictionary<string, ConcurrentDictionary<string, Uri>>();
 
-        readonly Dictionary<string, Uri> serviceProviders = new Dictionary<string, Uri>();
+        readonly ConcurrentDictionary<string, Uri> serviceProviders = new ConcurrentDictionary<string, Uri>();
 
-        readonly Dictionary<string, string> topicTypes = new Dictionary<string, string>();
+        readonly ConcurrentDictionary<string, string> topicTypes = new ConcurrentDictionary<string, string>();
 
-        readonly Dictionary<string, Arg> parameters = new Dictionary<string, Arg>();
+        readonly ConcurrentDictionary<string, Arg> parameters = new ConcurrentDictionary<string, Arg>();
 
         public Uri MasterUri { get; }
         public string MasterCallerId { get; }
-        
+
         static class StatusCode
         {
             public const int Error = -1;
@@ -70,7 +71,7 @@ namespace Iviz.RosMaster
                 ["unregisterPublisher"] = UnregisterPublisher,
                 ["unregisterSubscriber"] = UnregisterSubscriber,
             };
-            
+
             lateCallbacks = new Dictionary<string, Func<object[], Task>>
             {
                 ["registerPublisher"] = RegisterPublisherLateCallback,
@@ -79,6 +80,7 @@ namespace Iviz.RosMaster
         }
 
         bool disposed;
+
         public void Dispose()
         {
             if (disposed)
@@ -98,8 +100,8 @@ namespace Iviz.RosMaster
 
         public async Task Start()
         {
-            Logger.Log( "** Starting at " + MasterUri);
-            await listener.Start(StartContext);
+            Logger.Log("** Starting at " + MasterUri);
+            await listener.StartAsync(StartContext);
             Logger.Log("** Leaving thread.");
         }
 
@@ -115,12 +117,12 @@ namespace Iviz.RosMaster
                 {
                     Logger.LogError(e);
                 }
-            }            
+            }
         }
 
         static Arg[] OkResponse(Arg arg)
         {
-            return new[] {StatusCode.Success, "ok", arg};
+            return new Arg[] {StatusCode.Success, "ok", arg};
         }
 
         static Arg[] ErrorResponse(string msg)
@@ -151,27 +153,27 @@ namespace Iviz.RosMaster
 
             if (!publishersByTopic.TryGetValue(topic, out var publishers))
             {
-                publishers = new HashSet<(string, Uri)>();
+                publishers = new ConcurrentDictionary<string, Uri>();
                 publishersByTopic[topic] = publishers;
                 topicTypes[topic] = topicType;
 
                 Logger.Log($"++ Topic: {topic} [{topicType}]");
             }
 
-            if (publishers.Add((callerId, callerUri)))
+            if (publishers.TryAdd(callerId, callerUri))
             {
                 Logger.Log($"++ Publisher: {callerId}@{callerUri} -> {topic}");
             }
 
             IEnumerable<Uri> currentSubscribers =
                 subscribersByTopic.TryGetValue(topic, out var subscribers)
-                    ? subscribers.Select(tuple => tuple.callerUri)
+                    ? subscribers.Values
                     : Array.Empty<Uri>();
 
             return OkResponse(new Arg(currentSubscribers));
         }
-        
-        
+
+
         async Task RegisterPublisherLateCallback(object[] args)
         {
             if (!(args[1] is string topic) ||
@@ -180,19 +182,19 @@ namespace Iviz.RosMaster
                 return;
             }
 
+            using (new Semaphore(0, 1))
+            {
+                
+            }
+
             IEnumerable<Uri> publisherUris =
                 publishersByTopic.TryGetValue(topic, out var publishers)
-                    ? publishers.Select(tuple => tuple.callerUri)
+                    ? publishers.Values
                     : Array.Empty<Uri>();
             Arg[] methodArgs = {MasterCallerId, topic, new Arg(publisherUris)};
 
-            // fire and forget!
-            // we don't await here because some subscribers may not be reachable anymore
-            Task.Run(async() =>
-            {
-                Task[] tasks = subscribers.Select(tuple => NotifySubscriber(tuple.callerUri, methodArgs)).ToArray();
-                await Task.WhenAll(tasks);
-            });
+            Task[] tasks = subscribers.Values.Select(uri => NotifySubscriber(uri, methodArgs)).ToArray();
+            await Task.WhenAll(tasks);
         }
 
         async Task NotifySubscriber(Uri remoteUri, IEnumerable<Arg> methodArgs)
@@ -200,6 +202,7 @@ namespace Iviz.RosMaster
             try
             {
                 await Service.MethodCallAsync(remoteUri, MasterUri, "publisherUpdate", methodArgs);
+                //Task.Run(async () => await Service.MethodCallAsync(remoteUri, MasterUri, "publisherUpdate", methodArgs));
             }
             catch (Exception e)
             {
@@ -225,15 +228,15 @@ namespace Iviz.RosMaster
 
             if (!subscribersByTopic.TryGetValue(topic, out var subscribers))
             {
-                subscribers = new HashSet<(string, Uri)>();
+                subscribers = new ConcurrentDictionary<string, Uri>();
                 subscribersByTopic[topic] = subscribers;
             }
 
-            subscribers.Add((callerId, callerUri));
+            subscribers.TryAdd(callerId, callerUri);
 
             IEnumerable<Uri> currentPublishers =
                 publishersByTopic.TryGetValue(topic, out var publishers)
-                    ? publishers.Select(tuple => tuple.callerUri)
+                    ? publishers.Values
                     : Array.Empty<Uri>();
 
             return OkResponse(new Arg(currentPublishers));
@@ -254,20 +257,21 @@ namespace Iviz.RosMaster
                 return ErrorResponse("Caller api is not an uri");
             }
 
-            if (!subscribersByTopic.TryGetValue(topic, out var subscribers) || 
-                !subscribers.Remove((callerId, callerUri)))
+            if (!subscribersByTopic.TryGetValue(topic, out var subscribers) ||
+                !(subscribers.TryGetValue(callerId, out Uri tmpUri) && tmpUri == callerUri) ||
+                !subscribers.TryRemove(callerId, out _))
             {
                 return OkResponse(0);
             }
 
             if (!subscribers.Any())
             {
-                subscribersByTopic.Remove(topic);
+                subscribersByTopic.TryRemove(topic, out _);
             }
-            
+
             return OkResponse(1);
         }
-        
+
         Arg[] UnregisterPublisher(object[] args)
         {
             if (args.Length != 3 ||
@@ -283,22 +287,23 @@ namespace Iviz.RosMaster
                 return ErrorResponse("Caller api is not an uri");
             }
 
-            if (!publishersByTopic.TryGetValue(topic, out var publishers) || 
-                !publishers.Remove((callerId, callerUri)))
+            if (!publishersByTopic.TryGetValue(topic, out var publishers) ||
+                !(publishers.TryGetValue(callerId, out Uri tmpUri) && tmpUri == callerUri) ||
+                !publishers.TryRemove(callerId, out _))
             {
                 return OkResponse(0);
             }
-            
+
             Logger.Log($"-- Publisher: {callerId}@{callerUri} -> {topic}");
-            
+
             if (!publishers.Any())
             {
-                publishersByTopic.Remove(topic);
-                topicTypes.Remove(topic);
-                
+                publishersByTopic.TryRemove(topic, out _);
+                topicTypes.TryRemove(topic, out _);
+
                 Logger.Log($"-- Topic: {topic}");
             }
-            
+
             return OkResponse(1);
         }
 
@@ -343,7 +348,7 @@ namespace Iviz.RosMaster
                 return OkResponse(0);
             }
 
-            serviceProviders.Remove(service);
+            serviceProviders.TryRemove(service, out _);
             return OkResponse(1);
         }
 
@@ -360,9 +365,9 @@ namespace Iviz.RosMaster
 
             Uri uri = publishersLookup
                 .Concat(subscribersLookup)
-                .FirstOrDefault(tuple => tuple.callerId == node)
-                .callerUri;
-            
+                .FirstOrDefault(tuple => tuple.Key == node)
+                .Value;
+
             return uri is null
                 ? ErrorResponse($"No node with id '{node}'")
                 : OkResponse(uri);
@@ -398,9 +403,9 @@ namespace Iviz.RosMaster
         Arg[] GetSystemState(object[] _)
         {
             var publishers = publishersByTopic.Select(
-                pair => new Arg[] {pair.Key, new Arg(pair.Value.Select(tuple => tuple.callerUri))});
+                pair => new Arg[] {pair.Key, new Arg(pair.Value.Select(tuple => tuple.Value))});
             var subscribers = subscribersByTopic.Select(
-                pair => new Arg[] {pair.Key, new Arg(pair.Value.Select(tuple => tuple.callerUri))});
+                pair => new Arg[] {pair.Key, new Arg(pair.Value.Select(tuple => tuple.Value))});
             var providers = serviceProviders.Select(
                 pair => new Arg[] {pair.Key, new Arg(Yield(pair.Value))});
 
@@ -417,7 +422,7 @@ namespace Iviz.RosMaster
                 return ErrorResponse("Failed to parse arguments");
             }
 
-            parameters.Remove(key);
+            parameters.TryRemove(key, out _);
             return OkResponse(0);
         }
 
@@ -515,7 +520,7 @@ namespace Iviz.RosMaster
         {
             return ErrorResponse("Not implemented yet");
         }
-        
+
         static IEnumerable<T> Yield<T>(T element)
         {
             yield return element;

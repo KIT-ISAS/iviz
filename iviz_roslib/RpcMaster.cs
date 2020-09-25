@@ -24,7 +24,7 @@ namespace Iviz.Roslib.XmlRpc
         public string CallerId { get; }
         public int TimeoutInMs { get; set; } = 2000;
 
-        internal Master(Uri masterUri, string callerId, Uri callerUri)
+        public Master(Uri masterUri, string callerId, Uri callerUri)
         {
             MasterUri = masterUri;
             CallerUri = callerUri;
@@ -41,7 +41,7 @@ namespace Iviz.Roslib.XmlRpc
         public async Task<GetUriResponse> GetUriAsync()
         {
             Arg[] args = {CallerId};
-            object[] response = await MethodCallAsync("getUri", args);
+            object[] response = await MethodCallAsync("getUri", args).Caf();
             return new GetUriResponse(response);
         }
 
@@ -55,7 +55,7 @@ namespace Iviz.Roslib.XmlRpc
         public async Task<LookupNodeResponse> LookupNodeAsync(string nodeId)
         {
             Arg[] args = {CallerId, nodeId};
-            object[] response = await MethodCallAsync("lookupNode", args);
+            object[] response = await MethodCallAsync("lookupNode", args).Caf();
             return new LookupNodeResponse(response);
         }
 
@@ -69,7 +69,7 @@ namespace Iviz.Roslib.XmlRpc
         public async Task<GetPublishedTopicsResponse> GetPublishedTopicsAsync(string subgraph = "")
         {
             Arg[] args = {CallerId, subgraph};
-            object[] response = await MethodCallAsync("getPublishedTopics", args);
+            object[] response = await MethodCallAsync("getPublishedTopics", args).Caf();
             return new GetPublishedTopicsResponse(response);
         }        
         
@@ -83,7 +83,7 @@ namespace Iviz.Roslib.XmlRpc
         public async Task<RegisterSubscriberResponse> RegisterSubscriberAsync(string topic, string topicType)
         {
             Arg[] args = {CallerId, topic, topicType, CallerUri};
-            object[] response = await MethodCallAsync("registerSubscriber", args);
+            object[] response = await MethodCallAsync("registerSubscriber", args).Caf();
             return new RegisterSubscriberResponse(response);
         }        
 
@@ -97,7 +97,7 @@ namespace Iviz.Roslib.XmlRpc
         public async Task<UnregisterSubscriberResponse> UnregisterSubscriberAsync(string topic)
         {
             Arg[] args = {CallerId, topic, CallerUri};
-            object[] response = await MethodCallAsync("unregisterSubscriber", args);
+            object[] response = await MethodCallAsync("unregisterSubscriber", args).Caf();
             return new UnregisterSubscriberResponse(response);
         }
 
@@ -111,7 +111,7 @@ namespace Iviz.Roslib.XmlRpc
         public async Task<RegisterPublisherResponse> RegisterPublisherAsync(string topic, string topicType)
         {
             Arg[] args = {CallerId, topic, topicType, CallerUri};
-            object[] response = await MethodCallAsync("registerPublisher", args);
+            object[] response = await MethodCallAsync("registerPublisher", args).Caf();
             return new RegisterPublisherResponse(response);
         }
 
@@ -125,7 +125,7 @@ namespace Iviz.Roslib.XmlRpc
         public async Task<UnregisterPublisherResponse> UnregisterPublisherAsync(string topic)
         {
             Arg[] args = {CallerId, topic, CallerUri};
-            object[] response = await MethodCallAsync("unregisterPublisher", args);
+            object[] response = await MethodCallAsync("unregisterPublisher", args).Caf();
             return new UnregisterPublisherResponse(response);
         }
 
@@ -139,7 +139,7 @@ namespace Iviz.Roslib.XmlRpc
         public async Task<GetSystemStateResponse> GetSystemStateAsync()
         {
             Arg[] args = {CallerId};
-            object[] response = await MethodCallAsync("getSystemState", args);
+            object[] response = await MethodCallAsync("getSystemState", args).Caf();
             return new GetSystemStateResponse(response);
         }        
 
@@ -153,7 +153,7 @@ namespace Iviz.Roslib.XmlRpc
         public async Task<LookupServiceResponse> LookupServiceAsync(string service)
         {
             Arg[] args = {CallerId, service};
-            object[] response = await MethodCallAsync("lookupService", args);
+            object[] response = await MethodCallAsync("lookupService", args).Caf();
             return new LookupServiceResponse(response);
         }        
 
@@ -167,7 +167,7 @@ namespace Iviz.Roslib.XmlRpc
         public async Task<DefaultResponse> RegisterServiceAsync(string service, Uri rosRpcUri)
         {
             Arg[] args = {CallerId, service, rosRpcUri, CallerUri};
-            object[] response = await MethodCallAsync("registerService", args);
+            object[] response = await MethodCallAsync("registerService", args).Caf();
             return new DefaultResponse(response);
         }        
 
@@ -181,7 +181,7 @@ namespace Iviz.Roslib.XmlRpc
         public async Task<UnregisterServiceResponse> UnregisterServiceAsync(string service, Uri rosRpcUri)
         {
             Arg[] args = {CallerId, service, rosRpcUri};
-            object[] response = await MethodCallAsync("unregisterService", args);
+            object[] response = await MethodCallAsync("unregisterService", args).Caf();
             return new UnregisterServiceResponse(response);
         }        
 
@@ -199,7 +199,7 @@ namespace Iviz.Roslib.XmlRpc
 
         async Task<object[]> MethodCallAsync(string function, IEnumerable<Arg> args)
         {
-            object tmp = await Service.MethodCallAsync(MasterUri, CallerUri, function, args, TimeoutInMs);
+            object tmp = await Service.MethodCallAsync(MasterUri, CallerUri, function, args, TimeoutInMs).Caf();
             if (tmp is object[] result)
             {
                 return result;

@@ -14,6 +14,7 @@ namespace Iviz.Roslib.XmlRpc
     internal sealed class NodeServer : IDisposable
     {
         readonly Dictionary<string, Func<object[], Arg[]>> methods;
+        readonly Dictionary<string, Func<object[], Task>> lateCallbacks;
         readonly Iviz.XmlRpc.HttpListener listener;
         readonly RosClient client;
 
@@ -42,6 +43,11 @@ namespace Iviz.Roslib.XmlRpc
                 ["requestTopic"] = RequestTopic,
                 ["getPid"] = GetPid,
             };
+
+            lateCallbacks = new Dictionary<string, Func<object[], Task>>
+            {
+                ["publisherUpdate"] = PublisherUpdateLateCallback,
+            };
         }
 
         public void Start()
@@ -58,7 +64,7 @@ namespace Iviz.Roslib.XmlRpc
         {
             Logger.LogDebug($"{this}: Starting!");
 
-            Task listenerTask = listener.Start(StartContext);
+            Task listenerTask = listener.StartAsync(StartContext);
 
             // wait until we're disposed
             await signal.WaitAsync();
@@ -67,7 +73,7 @@ namespace Iviz.Roslib.XmlRpc
             listener.Dispose();
 
             // and that is usually not enough. so we bail out
-            if (!listenerTask.Wait(2000))
+            if (!await listenerTask.WaitFor(2000))
             {
                 Logger.LogDebug($"{this}: Listener stuck. Abandoning.");
             }
@@ -81,7 +87,7 @@ namespace Iviz.Roslib.XmlRpc
             {
                 try
                 {
-                    await Service.MethodResponseAsync(context, methods);
+                    await Service.MethodResponseAsync(context, methods, lateCallbacks).Caf();
                 }
                 catch (Exception e)
                 {
@@ -91,7 +97,6 @@ namespace Iviz.Roslib.XmlRpc
         }
 
         bool disposed;
-
         public void Dispose()
         {
             if (disposed)
@@ -109,23 +114,17 @@ namespace Iviz.Roslib.XmlRpc
             }
 
             // tell task thread to dispose
-            try
-            {
-                signal.Release();
-            }
-            catch (SemaphoreFullException)
-            {
-            }
+            signal.Release();
 
             task.Wait();
         }
 
-       
+
         static Arg[] OkResponse(Arg arg)
         {
             return new Arg[] {StatusCode.Success, "ok", arg};
-        } 
-        
+        }
+
         Arg[] GetBusStats(object[] _)
         {
             Logger.Log("Was called: getBusStats");
@@ -202,39 +201,45 @@ namespace Iviz.Roslib.XmlRpc
             string callerId = (string) args[0];
             string parameterKey = (string) args[1];
             object parameterValue = args[2];
-            client.ParamUpdateAction(callerId, parameterKey, parameterValue, out int status, out string response);
+            client.ParamUpdateAction(callerId, parameterKey, parameterValue, out _, out _);
 
             return OkResponse(0);
         }
 
-        Arg[] PublisherUpdate(object[] args)
+        static Arg[] PublisherUpdate(object[] args)
+        {
+            return OkResponse(0);
+        }
+
+        async Task PublisherUpdateLateCallback(object[] args)
         {
             if (args.Length < 3 ||
-                !(args[0] is string callerId) ||
                 !(args[1] is string topic) ||
                 !(args[2] is object[] publishers))
             {
-                return new Arg[] {StatusCode.Error, "Failed to parse arguments", 0};
+                return;
             }
 
-            Uri[] publisherUris = new Uri[publishers.Length];
-            for (int i = 0; i < publishers.Length; i++)
+            List<Uri> publisherUris = new List<Uri>();
+            foreach (object publisherObj in publishers)
             {
-                if (!Uri.TryCreate((string) publishers[i], UriKind.Absolute, out publisherUris[i]))
+                if (!(publisherObj is string publisherStr) ||
+                    !Uri.TryCreate(publisherStr, UriKind.Absolute, out Uri publisherUri))
                 {
-                    Logger.Log($"{this}: Invalid uri '{publishers[i]}'");
+                    Logger.Log($"{this}: Invalid uri '{publisherObj}'");
+                    continue;
                 }
+                
+                publisherUris.Add(publisherUri);
             }
 
             try
             {
-                client.PublisherUpdateRcp(topic, publisherUris);
-                return OkResponse(0);
+                await client.PublisherUpdateRcpAsync(topic, publisherUris);
             }
             catch (Exception e)
             {
                 Logger.Log(e);
-                return new Arg[] {StatusCode.Failure, "Unknown error: " + e.Message, 0};
             }
         }
 
@@ -245,16 +250,17 @@ namespace Iviz.Roslib.XmlRpc
                 !(args[1] is string topic) ||
                 !(args[2] is object[] protocols))
             {
-                return new Arg[] {StatusCode.Error, "Failed to parse arguments", 0};
+                return new Arg[]
+                {
+                    StatusCode.Error, "Failed to parse arguments", 0
+                };
             }
 
             if (protocols.Length == 0)
             {
                 return new Arg[]
                 {
-                    StatusCode.Failure,
-                    $"No compatible protocols found",
-                    Array.Empty<string[]>()
+                    StatusCode.Failure, "No compatible protocols found", Array.Empty<string[]>()
                 };
             }
 

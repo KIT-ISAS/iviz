@@ -177,7 +177,7 @@ namespace Iviz.XmlRpc
 
             switch (child?.Name)
             {
-                case null: 
+                case null:
                     throw new ParseException("MethodResponse has no children");
                 case "params" when child.ChildNodes.Count == 0:
                     throw new ParseException("Empty response");
@@ -193,9 +193,9 @@ namespace Iviz.XmlRpc
                     throw new FaultException(child.FirstChild.InnerXml);
                 default:
                     throw new ParseException($"Expected 'params' or 'fault', but got '{child.Name}'");
-            }            
+            }
         }
-        
+
         public static async Task<object> MethodCallAsync(Uri remoteUri, Uri callerUri, string method,
             IEnumerable<Arg> args, int timeoutInMs = 2000)
         {
@@ -215,7 +215,7 @@ namespace Iviz.XmlRpc
             }
 
             string outData = CreateRequest(method, args);
-            
+
             string inData;
             using (HttpRequest request = new HttpRequest(callerUri, remoteUri))
             {
@@ -225,8 +225,9 @@ namespace Iviz.XmlRpc
 
             return ProcessResponse(inData);
         }
-        
-        public static object MethodCall(Uri remoteUri, Uri callerUri, string method, IEnumerable<Arg> args, int timeoutInMs = 2000)
+
+        public static object MethodCall(Uri remoteUri, Uri callerUri, string method, IEnumerable<Arg> args,
+            int timeoutInMs = 2000)
         {
             if (remoteUri is null)
             {
@@ -244,7 +245,7 @@ namespace Iviz.XmlRpc
             }
 
             string outData = CreateRequest(method, args);
-            
+
             string inData;
             using (HttpRequest request = new HttpRequest(callerUri, remoteUri))
             {
@@ -253,7 +254,7 @@ namespace Iviz.XmlRpc
             }
 
             return ProcessResponse(inData);
-        }        
+        }
 
         public static async Task MethodResponseAsync(
             HttpListenerContext httpContext,
@@ -277,62 +278,24 @@ namespace Iviz.XmlRpc
             Logger.Log("<< " + inData);
 #endif
 
-            XmlDocument document = new XmlDocument();
-            document.LoadXml(inData);
-
             try
             {
-                XmlNode root = document.FirstChild;
-                while (root != null && root.Name != "methodCall")
-                {
-                    root = root.NextSibling;
-                }
+#if DEBUG__
+                Logger.Log(">> " + buffer);
+                Logger.Log("--- End MethodResponse ---");
+#endif
+                var (methodName, args) = ParseResponseXml(inData);
 
-                if (root == null)
-                {
-                    throw new ParseException("Malformed request: no 'methodCall' found");
-                }
-
-                string methodName = null;
-                object[] args = null;
-                XmlNode child = root.FirstChild;
-                do
-                {
-                    switch (child.Name)
-                    {
-                        case "params":
-                        {
-                            args = new object[child.ChildNodes.Count];
-                            for (int i = 0; i < child.ChildNodes.Count; i++)
-                            {
-                                XmlNode param = child.ChildNodes[i];
-                                Assert(param.Name, "param");
-                                args[i] = Parse(param.FirstChild);
-                            }
-
-                            break;
-                        }
-                        case "fault":
-                            throw new FaultException(child.FirstChild.InnerXml);
-                        case "methodName":
-                            methodName = child.InnerText;
-                            break;
-                        default:
-                            throw new ParseException(
-                                $"Expected 'params', 'fault', or 'methodName', got '{child.Name}'");
-                    }
-                } while ((child = child.NextSibling) != null);
-
-                StringBuilder buffer = new StringBuilder();
                 if (methodName == null ||
-                    !methods.TryGetValue(methodName, out Func<object[], Arg[]> method) ||
+                    !methods.TryGetValue(methodName, out var method) ||
                     args == null)
                 {
                     throw new ParseException($"Unknown function '{methodName}' or invalid arguments");
                 }
 
-                Arg response = new Arg(method(args));
+                Arg response = (Arg) method(args);
 
+                StringBuilder buffer = new StringBuilder();
                 buffer.AppendLine("<?xml version=\"1.0\"?>");
                 buffer.AppendLine("<methodResponse>");
                 buffer.AppendLine("<params>");
@@ -343,14 +306,12 @@ namespace Iviz.XmlRpc
                 buffer.AppendLine("</methodResponse>");
                 buffer.AppendLine();
 
-#if DEBUG__
-                Logger.Log(">> " + buffer);
-                Logger.Log("--- End MethodResponse ---");
-#endif
+                string outData = buffer.ToString();
 
-                await httpContext.Respond(buffer.ToString());
+                await httpContext.Respond(outData);
 
-                if (lateCallbacks != null && lateCallbacks.TryGetValue(methodName, out var lateCallback))
+                if (lateCallbacks != null &&
+                    lateCallbacks.TryGetValue(methodName, out var lateCallback))
                 {
                     await lateCallback(args);
                 }
@@ -367,6 +328,55 @@ namespace Iviz.XmlRpc
 
                 await httpContext.Respond(buffer.ToString());
             }
+        }
+
+        static (string methodName, object[] args) ParseResponseXml(string inData)
+        {
+            XmlDocument document = new XmlDocument();
+            document.LoadXml(inData);
+
+            XmlNode root = document.FirstChild;
+            while (root != null && root.Name != "methodCall")
+            {
+                root = root.NextSibling;
+            }
+
+            if (root == null)
+            {
+                throw new ParseException("Malformed request: no 'methodCall' found");
+            }
+
+            string methodName = null;
+            object[] args = null;
+            XmlNode child = root.FirstChild;
+            do
+            {
+                switch (child.Name)
+                {
+                    case "params":
+                    {
+                        args = new object[child.ChildNodes.Count];
+                        for (int i = 0; i < child.ChildNodes.Count; i++)
+                        {
+                            XmlNode param = child.ChildNodes[i];
+                            Assert(param.Name, "param");
+                            args[i] = Parse(param.FirstChild);
+                        }
+
+                        break;
+                    }
+                    case "fault":
+                        throw new FaultException(child.FirstChild.InnerXml);
+                    case "methodName":
+                        methodName = child.InnerText;
+                        break;
+                    default:
+                        throw new ParseException(
+                            $"Expected 'params', 'fault', or 'methodName', got '{child.Name}'");
+                }
+            } while ((child = child.NextSibling) != null);
+
+            return (methodName, args);
         }
     }
 }

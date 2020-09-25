@@ -11,14 +11,14 @@ namespace Iviz.Roslib
         public string Topic { get; }
         public int Connected { get; }
 
-        public BusInfo(int id, Uri destinationId, string direction, string topic, string transport = "TCPROS", int status = 1)
+        public BusInfo(int id, Uri destinationId, string direction, string topic, string transport = "TCPROS", bool status = true)
         {
             ConnectionId = id;
             DestinationId = destinationId;
             Direction = direction;
             Transport = transport;
             Topic = topic;
-            Connected = status;
+            Connected = status ? 1 : 0;
         }
     }
 }

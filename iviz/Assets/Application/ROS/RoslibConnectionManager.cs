@@ -4,7 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Iviz.Displays;
 using UnityEngine;
 
@@ -28,7 +30,7 @@ namespace Iviz.Controllers
             public abstract void Add(RosSender subscriber);
             public abstract void Remove(RosSender subscriber);
             public abstract int Count { get; }
-            public abstract void Advertise(RosClient client);
+            public abstract Task Advertise(RosClient client);
 
             public void Unadvertise(RosClient client)
             {
@@ -76,11 +78,15 @@ namespace Iviz.Controllers
 
             public override int Count => senders.Count;
 
-            public override void Advertise(RosClient client)
+            public override async Task Advertise(RosClient client)
             {
                 string topic = (Topic[0] == '/') ? Topic : $"{client.CallerId}/{Topic}";
                 RosPublisher publisher = null;
-                client?.Advertise<T>(topic, out publisher);
+                if (client != null)
+                {
+                    (_, publisher) = await client.AdvertiseAsync<T>(topic);
+                }
+
                 Publisher = publisher;
             }
         }
@@ -98,7 +104,7 @@ namespace Iviz.Controllers
 
             public abstract void Add(RosListener subscriber);
             public abstract void Remove(RosListener subscriber);
-            public abstract void Subscribe(RosClient client);
+            public abstract Task Subscribe(RosClient client);
 
             public void Unsubscribe(RosClient client)
             {
@@ -138,11 +144,15 @@ namespace Iviz.Controllers
                 }
             }
 
-            public override void Subscribe(RosClient client)
+            public override async Task Subscribe(RosClient client)
             {
                 string topic = (Topic[0] == '/') ? Topic : $"{client.CallerId}/{Topic}";
                 RosSubscriber subscriber = null;
-                client?.Subscribe<T>(topic, Callback, out subscriber);
+                if (client != null)
+                {
+                    (_, subscriber) = await client.SubscribeAsync<T>(topic, Callback);
+                }
+
                 Subscriber = subscriber;
             }
 
@@ -212,7 +222,7 @@ namespace Iviz.Controllers
             }
         }
 
-        protected override bool Connect()
+        protected override async Task<bool> Connect()
         {
             if (MasterUri == null ||
                 MasterUri.Scheme != "http" ||
@@ -226,7 +236,7 @@ namespace Iviz.Controllers
             if (client != null)
             {
                 Debug.LogWarning("Warning: New client requested, but old client still running!");
-                client.Close();
+                await client.CloseAsync();
                 client = null;
             }
 
@@ -238,27 +248,19 @@ namespace Iviz.Controllers
 
                 Logger.Internal("Connecting...");
                 client = new RosClient(MasterUri, MyId, MyUri);
+                await client.EnsureCleanSlateAsync();
 
                 if (publishersByTopic.Count != 0 || subscribersByTopic.Count != 0)
                 {
                     Logger.Internal("Resubscribing and republishing...");
                 }
 
-                foreach (var entry in publishersByTopic)
-                {
-                    entry.Value.Advertise(client);
-                    entry.Value.Id = publishers.Count;
-                    publishers.Add(entry.Value.Publisher);
-                }
+                await Task.WhenAll(publishersByTopic.Values.Select(Readvertise));
+                await Task.WhenAll(subscribersByTopic.Values.Select(Resubscribe));
 
-                foreach (var entry in subscribersByTopic)
+                foreach (var entry in servicesByTopic.Values)
                 {
-                    entry.Value.Subscribe(client);
-                }
-
-                foreach (var entry in servicesByTopic)
-                {
-                    entry.Value.Advertise(client);
+                    entry.Advertise(client);
                 }
 
                 Logger.Internal("Connected.");
@@ -270,15 +272,36 @@ namespace Iviz.Controllers
             {
                 Logger.Debug(e);
                 Logger.Internal("Error:", e);
+                if (RosServerManager.IsActive && RosServerManager.MasterUri == MasterUri)
+                {
+                    Logger.Internal(
+                        "Note: This appears to be my own master. Are you sure the uri network is reachable?");
+                }
             }
             catch (Exception e)
             {
                 Logger.Warn(e);
             }
 
-            client?.Close();
+            if (client != null)
+            {
+                await client.CloseAsync();
+            }
+
             client = null;
             return false;
+        }
+
+        async Task Readvertise(AdvertisedTopic topic)
+        {
+            await topic.Advertise(client);
+            topic.Id = publishers.Count;
+            publishers.Add(topic.Publisher);
+        }
+
+        async Task Resubscribe(SubscribedTopic topic)
+        {
+            await topic.Subscribe(client);
         }
 
         public override void Disconnect()
@@ -293,10 +316,10 @@ namespace Iviz.Controllers
                 return;
             }
 
-            AddTask(() =>
+            AddTask(async () =>
                 {
                     Logger.Internal("Disconnecting...");
-                    client?.Close(waitForUnregister);
+                    await client?.CloseAsync();
                     client = null;
                     Logger.Internal("Disconnection finished.");
 
@@ -318,11 +341,11 @@ namespace Iviz.Controllers
 
         public override void Advertise<T>(RosSender<T> advertiser)
         {
-            AddTask(() =>
+            AddTask(async () =>
             {
                 try
                 {
-                    AdvertiseImpl(advertiser);
+                    await AdvertiseImpl(advertiser);
                 }
                 catch (Exception e)
                 {
@@ -332,7 +355,7 @@ namespace Iviz.Controllers
             });
         }
 
-        void AdvertiseImpl<T>(RosSender<T> advertiser) where T : IMessage
+        async Task AdvertiseImpl<T>(RosSender<T> advertiser) where T : IMessage
         {
             if (!publishersByTopic.TryGetValue(advertiser.Topic, out AdvertisedTopic advertisedTopic))
             {
@@ -341,7 +364,7 @@ namespace Iviz.Controllers
                 int id;
                 if (client != null)
                 {
-                    newAdvertisedTopic.Advertise(client);
+                    await newAdvertisedTopic.Advertise(client);
 
                     var publisher = newAdvertisedTopic.Publisher;
                     //Logger.Debug("Direct advertisement for " + advertiser.Topic);
@@ -409,6 +432,7 @@ namespace Iviz.Controllers
             servicesByTopic.Add(service, newAdvertisedService);
         }
 
+        /*
         public override void CallServiceAsync<T>(string service, T srv, Action<T> callback)
         {
             AddTask(() =>
@@ -426,18 +450,19 @@ namespace Iviz.Controllers
                 }
             });
         }
+        */
 
         readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
 
         public override bool CallService<T>(string service, T srv)
         {
             bool[] result = {false};
-            
-            AddTask(() =>
+
+            AddTask(async () =>
             {
                 try
                 {
-                    result[0] = client != null && client.CallService(service, srv);
+                    result[0] = client != null && await client.CallServiceAsync(service, srv);
                 }
                 catch (Exception e)
                 {
@@ -480,11 +505,11 @@ namespace Iviz.Controllers
 
         public override void Subscribe<T>(RosListener<T> listener)
         {
-            AddTask(() =>
+            AddTask(async () =>
             {
                 try
                 {
-                    SubscribeImpl(listener);
+                    await SubscribeImpl<T>(listener);
                 }
                 catch (Exception e)
                 {
@@ -494,14 +519,13 @@ namespace Iviz.Controllers
             });
         }
 
-        void SubscribeImpl<T>(RosListener<T> listener) where T : IMessage, new()
+        async Task SubscribeImpl<T>(RosListener listener) where T : IMessage, new()
         {
             if (!subscribersByTopic.TryGetValue(listener.Topic, out SubscribedTopic subscribedTopic))
             {
                 SubscribedTopic<T> newSubscribedTopic = new SubscribedTopic<T>(listener.Topic);
 
-                newSubscribedTopic.Subscribe(client);
-                //client?.Subscribe<T>(listener.Topic, newSubscribedTopic.Callback, out subscriber);
+                await newSubscribedTopic.Subscribe(client);
 
                 subscribedTopic = newSubscribedTopic;
                 subscribersByTopic.Add(listener.Topic, subscribedTopic);
@@ -588,7 +612,7 @@ namespace Iviz.Controllers
 
         public override ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics()
         {
-            AddTask(() =>
+            AddTask(async () =>
             {
                 try
                 {
@@ -598,7 +622,7 @@ namespace Iviz.Controllers
                         return;
                     }
 
-                    cachedTopics = client.GetSystemPublishedTopics();
+                    cachedTopics = await client.GetSystemPublishedTopicsAsync();
                 }
                 catch (Exception e)
                 {
@@ -615,7 +639,7 @@ namespace Iviz.Controllers
 
         public override ReadOnlyCollection<string> GetSystemParameterList()
         {
-            AddTask(async() =>
+            AddTask(async () =>
             {
                 try
                 {
@@ -639,8 +663,8 @@ namespace Iviz.Controllers
         public override object GetParameter(string parameter)
         {
             object[] result = {null};
-            
-            AddTask(async() =>
+
+            AddTask(async () =>
             {
                 try
                 {
@@ -660,7 +684,6 @@ namespace Iviz.Controllers
 
             signal.Wait();
             return result[0];
-            
         }
 
         protected override void Update()

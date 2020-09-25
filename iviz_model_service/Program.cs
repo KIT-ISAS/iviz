@@ -18,7 +18,7 @@ namespace Iviz.ModelService
 
             using RosClient client = new RosClient(masterUri, "/iviz_model_loader");
             
-            Server server = new Server();
+            using Server server = new Server();
             
             if (server.NumPackages == 0)
             {

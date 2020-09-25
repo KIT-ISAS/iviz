@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading.Tasks;
 using Iviz.XmlRpc;
 using TopicTuple = System.Tuple<string, string>;
@@ -15,34 +13,34 @@ namespace Iviz.Roslib.XmlRpc
         public Uri CallerUri { get; }
         public string CallerId { get; }
 
-        internal ParameterClient(Uri masterUri, string callerId, Uri callerUri)
+        public ParameterClient(Uri masterUri, string callerId, Uri callerUri)
         {
             MasterUri = masterUri;
             CallerUri = callerUri;
             CallerId = callerId;
         }
         
-        public bool SetParameter(string key, Iviz.XmlRpc.Arg value)
+        public bool SetParameter(string key, Arg value)
         {
-            return SetParam(key, value).Code == XmlRpc.StatusCode.Success;
+            return SetParam(key, value).Code == StatusCode.Success;
         }
 
-        public async Task<bool> SetParameterAsync(string key, Iviz.XmlRpc.Arg value)
+        public async Task<bool> SetParameterAsync(string key, Arg value)
         {
-            return (await SetParamAsync(key, value)).Code == XmlRpc.StatusCode.Success;
+            return (await SetParamAsync(key, value).Caf()).Code == StatusCode.Success;
         }
 
         public bool GetParameter(string key, out object value)
         {
             var response = GetParam(key);
             value = response.ParameterValue;
-            return response.Code == XmlRpc.StatusCode.Success;
+            return response.Code == StatusCode.Success;
         }
 
         public async Task<(bool success, object value)> GetParameterAsync(string key)
         {
-            var response = await GetParamAsync(key);
-            bool success = response.Code == XmlRpc.StatusCode.Success;
+            var response = await GetParamAsync(key).Caf();
+            bool success = response.Code == StatusCode.Success;
             return (success, success ? response.ParameterValue : null);
         }
 
@@ -59,7 +57,7 @@ namespace Iviz.Roslib.XmlRpc
 
         public async Task<ReadOnlyCollection<string>> GetParameterNamesAsync()
         {
-            var response = await GetParamNamesAsync();
+            var response = await GetParamNamesAsync().Caf();
             if (response.IsValid)
             {
                 return response.ParameterNameList;
@@ -71,12 +69,12 @@ namespace Iviz.Roslib.XmlRpc
 
         public bool DeleteParameter(string key)
         {
-            return DeleteParam(key).Code == XmlRpc.StatusCode.Success;
+            return DeleteParam(key).Code == StatusCode.Success;
         }
 
         public async Task<bool> DeleteParameterAsync(string key)
         {
-            return (await DeleteParamAsync(key)).Code == XmlRpc.StatusCode.Success;
+            return (await DeleteParamAsync(key).Caf()).Code == StatusCode.Success;
         }
 
         public bool HasParameter(string key)
@@ -86,17 +84,27 @@ namespace Iviz.Roslib.XmlRpc
 
         public async Task<bool> HasParameterAsync(string key)
         {
-            return (await HasParamAsync(key)).HasParam;
+            return (await HasParamAsync(key).Caf()).HasParam;
         }
 
         public bool SubscribeParameter(string key)
         {
-            return SubscribeParam(key).Code == XmlRpc.StatusCode.Success;
+            return SubscribeParam(key).Code == StatusCode.Success;
         }
 
+        public async Task<bool> SubscribeParameterAsync(string key)
+        {
+            return (await SubscribeParamAsync(key).Caf()).Code == StatusCode.Success;
+        }        
+        
         public bool UnsubscribeParameter(string key)
         {
-            return UnsubscribeParam(key).Code == XmlRpc.StatusCode.Success;
+            return UnsubscribeParam(key).Code == StatusCode.Success;
+        }
+        
+        public async Task<bool> UnsubscribeParameterAsync(string key)
+        {
+            return (await UnsubscribeParamAsync(key).Caf()).Code == StatusCode.Success;
         }
 
         DefaultResponse DeleteParam(string key)
@@ -109,7 +117,7 @@ namespace Iviz.Roslib.XmlRpc
         async Task<DefaultResponse> DeleteParamAsync(string key)
         {
             Arg[] args = {CallerId, key};
-            object response = await Service.MethodCallAsync(MasterUri, CallerUri, "deleteParam", args);
+            object response = await Service.MethodCallAsync(MasterUri, CallerUri, "deleteParam", args).Caf();
             return new DefaultResponse((object[]) response);
         }
 
@@ -123,7 +131,7 @@ namespace Iviz.Roslib.XmlRpc
         async Task<DefaultResponse> SetParamAsync(string key, Arg value)
         {
             Arg[] args = {CallerId, key, value};
-            object response = await Service.MethodCallAsync(MasterUri, CallerUri, "setParam", args);
+            object response = await Service.MethodCallAsync(MasterUri, CallerUri, "setParam", args).Caf();
             return new DefaultResponse((object[]) response);
         }
 
@@ -137,7 +145,7 @@ namespace Iviz.Roslib.XmlRpc
         async Task<GetParamResponse> GetParamAsync(string key)
         {
             Arg[] args = {CallerId, key};
-            object response = await Service.MethodCallAsync(MasterUri, CallerUri, "getParam", args);
+            object response = await Service.MethodCallAsync(MasterUri, CallerUri, "getParam", args).Caf();
             return new GetParamResponse((object[]) response);
         }
 
@@ -151,7 +159,7 @@ namespace Iviz.Roslib.XmlRpc
         async Task<SearchParamResponse> SearchParamAsync(string key)
         {
             Arg[] args = {CallerId, key};
-            object response = await Service.MethodCallAsync(MasterUri, CallerUri, "searchParam", args);
+            object response = await Service.MethodCallAsync(MasterUri, CallerUri, "searchParam", args).Caf();
             return new SearchParamResponse((object[]) response);
         }
 
@@ -166,7 +174,7 @@ namespace Iviz.Roslib.XmlRpc
         async Task<SubscribeParamResponse> SubscribeParamAsync(string key)
         {
             Arg[] args = {CallerId, key, CallerUri};
-            object response = await Service.MethodCallAsync(MasterUri, CallerUri, "subscribeParam", args);
+            object response = await Service.MethodCallAsync(MasterUri, CallerUri, "subscribeParam", args).Caf();
             return new SubscribeParamResponse((object[]) response);
         }
 
@@ -180,7 +188,7 @@ namespace Iviz.Roslib.XmlRpc
         async Task<UnsubscribeParamResponse> UnsubscribeParamAsync(string key)
         {
             Arg[] args = {CallerId, key, CallerUri};
-            object response = await Service.MethodCallAsync(MasterUri, CallerUri, "unsubscribeParam", args);
+            object response = await Service.MethodCallAsync(MasterUri, CallerUri, "unsubscribeParam", args).Caf();
             return new UnsubscribeParamResponse((object[]) response);
         }
 
@@ -194,7 +202,7 @@ namespace Iviz.Roslib.XmlRpc
         async Task<HasParamResponse> HasParamAsync(string key)
         {
             Arg[] args = {CallerId, key};
-            object response = await Service.MethodCallAsync(MasterUri, CallerUri, "hasParam", args);
+            object response = await Service.MethodCallAsync(MasterUri, CallerUri, "hasParam", args).Caf();
             return new HasParamResponse((object[]) response);
         }
 
@@ -208,7 +216,7 @@ namespace Iviz.Roslib.XmlRpc
         async Task<GetParamNamesResponse> GetParamNamesAsync()
         {
             Arg[] args = {CallerId};
-            object response = await Service.MethodCallAsync(MasterUri, CallerUri, "getParamNames", args);
+            object response = await Service.MethodCallAsync(MasterUri, CallerUri, "getParamNames", args).Caf();
             return new GetParamNamesResponse((object[]) response);
         }
     }

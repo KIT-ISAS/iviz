@@ -199,7 +199,7 @@ namespace Iviz.Controllers
                         bool connectionResult;
                         try
                         {
-                            connectionResult = Connect();
+                            connectionResult = await Connect();
                         }
                         catch (Exception e)
                         {
@@ -250,7 +250,7 @@ namespace Iviz.Controllers
             }
         }
 
-        protected abstract bool Connect();
+        protected abstract Task<bool> Connect();
 
         public virtual void Disconnect()
         {
@@ -263,7 +263,7 @@ namespace Iviz.Controllers
         public abstract void Unadvertise(RosSender advertiser);
         public abstract void Publish(RosSender advertiser, IMessage msg);
         public abstract void AdvertiseService<T>(string service, Action<T> callback) where T : IService, new();
-        public abstract void CallServiceAsync<T>(string service, T srv, Action<T> callback) where T : IService;
+        //public abstract void CallServiceAsync<T>(string service, T srv, Action<T> callback) where T : IService;
         public abstract bool CallService<T>(string service, T srv) where T : IService;
         public abstract ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics();
         public abstract ReadOnlyCollection<string> GetSystemParameterList();

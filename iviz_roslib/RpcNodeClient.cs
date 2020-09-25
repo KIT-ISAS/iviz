@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
 
@@ -6,6 +8,86 @@ namespace Iviz.Roslib.XmlRpc
 {
     internal class NodeClient
     {
+        public string CallerId { get; }
+        public Uri CallerUri { get; }
+        public int TimeoutInMs { get; }
+        public Uri Uri { get; }
+
+        public NodeClient(string callerId, Uri callerUri, Uri otherUri, int timeoutInMs = 2000)
+        {
+            CallerId = callerId;
+            CallerUri = callerUri;
+            Uri = otherUri;
+            TimeoutInMs = timeoutInMs;
+        }
+
+        public RequestTopicResponse RequestTopic(string topic, string[][] protocols)
+        {
+            Arg[] args = {CallerId, topic, protocols};
+            object[] response = MethodCall("requestTopic", args);
+            return new RequestTopicResponse(response);
+        }
+        
+        public async Task<RequestTopicResponse> RequestTopicAsync(string topic, string[][] protocols)
+        {
+            Arg[] args = {CallerId, topic, protocols};
+            object[] response = await MethodCallAsync("requestTopic", args).Caf();
+            return new RequestTopicResponse(response);
+        }        
+
+        public GetMasterUriResponse GetMasterUri()
+        {
+            Arg[] args = {CallerId};
+            object[] response = MethodCall("getMasterUri", args);
+            return new GetMasterUriResponse(response);
+        }
+
+        public async Task<GetMasterUriResponse> GetMasterUriAsync()
+        {
+            Arg[] args = {CallerId};
+            object[] response = await MethodCallAsync("getMasterUri", args).Caf();
+            return new GetMasterUriResponse(response);
+        }
+
+        public GetPidResponse GetPid()
+        {
+            Arg[] args = {CallerId};
+            object[] response = MethodCall("getPid", args);
+            return new GetPidResponse(response);
+        }
+
+        public async Task<GetPidResponse> GetPidAsync()
+        {
+            Arg[] args = {CallerId};
+            object[] response = await MethodCallAsync("getPid", args).Caf();
+            return new GetPidResponse(response);
+        }
+
+        object[] MethodCall(string function, IEnumerable<Arg> args)
+        {
+            object tmp = Service.MethodCall(Uri, CallerUri, function, args, TimeoutInMs);
+            if (tmp is object[] result)
+            {
+                return result;
+            }
+
+            Logger.Log($"Rpc Response: Expected type object[], got {tmp?.GetType().Name}");
+            return null;
+        }
+        
+        async Task<object[]> MethodCallAsync(string function, IEnumerable<Arg> args)
+        {
+            object tmp = await Service.MethodCallAsync(Uri, CallerUri, function, args, TimeoutInMs).Caf();
+            if (tmp is object[] result)
+            {
+                return result;
+            }
+
+            Logger.Log($"Rpc Response: Expected type object[], got {tmp?.GetType().Name}");
+            return null;
+        }        
+        
+        
         public class ProtocolResponse
         {
             public string Type { get; } = "";
@@ -97,59 +179,6 @@ namespace Iviz.Roslib.XmlRpc
                 Pid = Cast<int>(a[2]);
             }
         }
-
-        public string CallerId { get; }
-        public Uri CallerUri { get; }
-        public int TimeoutInMs { get; }
-        public Uri Uri { get; }
-
-        public NodeClient(string callerId, Uri callerUri, Uri otherUri, int timeoutInMs = 2000)
-        {
-            CallerId = callerId;
-            CallerUri = callerUri;
-            Uri = otherUri;
-            TimeoutInMs = timeoutInMs;
-        }
-
-        public RequestTopicResponse RequestTopic(string topic, string[][] protocols)
-        {
-            Arg[] args = {
-                CallerId,
-                topic,
-                protocols,
-            };
-            object[] response = MethodCall("requestTopic", args);
-            return new RequestTopicResponse(response);
-        }
-
-        public GetMasterUriResponse GetMasterUri()
-        {
-            Arg[] args = {
-                CallerId
-            };
-            object[] response = MethodCall("getMasterUri", args);
-            return new GetMasterUriResponse(response);
-        }
-
-        public GetPidResponse GetPid()
-        {
-            Arg[] args = {
-                CallerId
-            };
-            object[] response = MethodCall("getPid", args);
-            return new GetPidResponse(response);
-        }
-
-        object[] MethodCall(string function, Arg[] args)
-        {
-            object tmp = Service.MethodCall(Uri, CallerUri, function, args, TimeoutInMs);
-            if (tmp is object[] result)
-            {
-                return result;
-            }
-
-            Logger.Log($"Rpc Response: Expected type object[], got {tmp?.GetType().Name}");
-            return null;
-        }
+        
     }
 }

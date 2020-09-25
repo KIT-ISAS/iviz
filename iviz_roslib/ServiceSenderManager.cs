@@ -1,11 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.XmlRpc;
 
 namespace Iviz.Roslib
 {
@@ -16,12 +17,17 @@ namespace Iviz.Roslib
         public string ServiceType => serviceInfo.Type;
         readonly TcpListener listener;
         readonly ServiceInfo serviceInfo;
-        readonly Action<IService> callback;
+        readonly Func<IService, Task> callback;
+
+        readonly Task task;
+        readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
+
         bool keepGoing;
 
-        readonly List<ServiceSender> connections = new List<ServiceSender>();
+        readonly ConcurrentDictionary<ServiceSenderAsync, object> connections =
+            new ConcurrentDictionary<ServiceSenderAsync, object>();
 
-        public ServiceSenderManager(ServiceInfo serviceInfo, string host, Action<IService> callback)
+        public ServiceSenderManager(ServiceInfo serviceInfo, string host, Func<IService, Task> callback)
         {
             this.serviceInfo = serviceInfo;
             this.callback = callback;
@@ -35,84 +41,72 @@ namespace Iviz.Roslib
             Uri = new Uri($"rosrpc://{host}:{localEndpoint.Port}/");
             Logger.LogDebug($"{this}: Starting {serviceInfo.Service} [{serviceInfo.Type}] at {Uri}");
 
-            Run();
+            task = Task.Run(async () => await StartAsync());
         }
 
-        async void Run()
+        async Task StartAsync()
+        {
+            Task loopTask = RunLoop();
+            await signal.WaitAsync();
+            keepGoing = false;
+            listener.Stop();
+            if (!await loopTask.WaitFor(2000))
+            {
+                Logger.LogDebug($"{this}: Listener stuck. Abandoning.");
+            }
+        }
+
+        async Task RunLoop()
         {
             try
             {
                 while (keepGoing)
                 {
-                    TcpClient client = await listener.AcceptTcpClientAsync().ConfigureAwait(false);
+                    TcpClient client = await listener.AcceptTcpClientAsync().Caf();
                     if (!keepGoing)
                     {
                         break;
                     }
-                    ServiceSender sender = new ServiceSender(serviceInfo, client, callback);
-                    lock (connections)
-                    {
-                        connections.Add(sender);
-                    }
+
+                    ServiceSenderAsync sender = new ServiceSenderAsync(serviceInfo, client, callback);
+                    connections[sender] = null;
+                    
+                    Cleanup();
                 }
             }
             catch (ObjectDisposedException)
             {
                 Logger.LogDebug($"{this}: Leaving thread."); // expected
-            }
-            catch (ThreadAbortException e)
-            {
-                Logger.Log($"{this}: Thread aborted! " + e);
-                Thread.ResetAbort();
+                return;
             }
             catch (Exception e)
             {
                 Logger.Log($"{this}: Stopped thread" + e);
+                return;
             }
 
             Logger.LogDebug($"{this}: Leaving thread (normally)"); // also expected
         }
 
-        public void Cleanup()
+        void Cleanup()
         {
-            lock (connections)
+            var toRemove = connections.Keys.Where(connection => !connection.IsAlive).ToArray();
+            foreach (var connection in toRemove)
             {
-                List<int> toDelete = new List<int>();
-                for (int i = connections.Count - 1; i >= 0; i--)
-                {
-                    if (!connections[i].IsAlive)
-                    {
-                        toDelete.Add(i);
-                    }
-                }
-
-                foreach (int id in toDelete)
-                {
-                    Logger.LogDebug(
-                        $"{this}: Removing service connection with '{connections[id].Hostname}' - dead x_x");
-                    connections[id].Stop();
-                    connections.RemoveAt(id);
-                }
+                Logger.LogDebug(
+                    $"{this}: Removing service connection with '{connection.Hostname}' - dead x_x");
+                connection.Stop();
+                connections.TryRemove(connection, out _);
             }
         }
 
 
         public void Stop()
         {
-            lock (connections)
-            {
-                connections.ForEach(x => x.Stop());
-                connections.Clear();
-            }
-
-            keepGoing = false;
-            try
-            {
-                listener.Stop();
-            }
-            catch (Exception)
-            {
-            }
+            connections.Keys.ForEach(sender => sender.Stop());
+            connections.Clear();
+            signal.Release();
+            task?.Wait();
         }
 
         public override string ToString()

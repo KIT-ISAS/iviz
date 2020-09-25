@@ -90,7 +90,6 @@ namespace Iviz.Roslib
         public PublisherTopicState GetState()
         {
             AssertIsAlive();
-            Cleanup();
             return new PublisherTopicState(Topic, TopicType, ids.ToArray(), manager.GetStates());
         }
 
@@ -109,14 +108,6 @@ namespace Iviz.Roslib
             message.RosValidate();
             AssertIsAlive();
             manager.Publish(message);
-        }
-
-        public void Cleanup()
-        {
-            if (manager.Cleanup())
-            {
-                NumSubscribersChanged?.Invoke(this);
-            }
         }
 
         internal void RequestTopicRpc(string remoteCallerId, out string hostname, out int port)
@@ -166,18 +157,10 @@ namespace Iviz.Roslib
 
             ids.RemoveAt(index);
 
-#if DEBUG__
-            Logger.LogDebug($"{this}: Unadvertising '{Topic}' with type {TopicType} and id '{topicId}'");
-#endif
-
             if (ids.Count == 0)
             {
                 Stop();
                 client.RemovePublisher(this);
-
-#if DEBUG__
-                Logger.LogDebug($"{this}: Removing publisher '{Topic}' with type {TopicType}");
-#endif
             }
 
             return true;
