@@ -10,6 +10,7 @@ namespace Iviz.Roslib
         readonly TcpSenderManager manager;
         readonly List<string> ids = new List<string>();
         readonly RosClient client;
+        readonly Type topicClassType;
         int totalPublishers;
 
         /// <summary>
@@ -63,10 +64,11 @@ namespace Iviz.Roslib
 
         public event Action<RosPublisher> NumSubscribersChanged;
 
-        internal RosPublisher(RosClient client, TcpSenderManager manager)
+        internal RosPublisher(RosClient client, TcpSenderManager manager, Type topicClassType)
         {
             this.client = client;
             this.manager = manager;
+            this.topicClassType = topicClassType;
             IsAlive = true;
         }
 
@@ -88,7 +90,6 @@ namespace Iviz.Roslib
         public PublisherTopicState GetState()
         {
             AssertIsAlive();
-            Cleanup();
             return new PublisherTopicState(Topic, TopicType, ids.ToArray(), manager.GetStates());
         }
 
@@ -99,17 +100,14 @@ namespace Iviz.Roslib
                 throw new ArgumentNullException(nameof(message));
             }
 
+            if (!MessageTypeMatches(message.GetType())) 
+            {
+                throw new InvalidMessageTypeException("Type does not match publisher.");
+            }
+
             message.RosValidate();
             AssertIsAlive();
             manager.Publish(message);
-        }
-
-        public void Cleanup()
-        {
-            if (manager.Cleanup())
-            {
-                NumSubscribersChanged?.Invoke(this);
-            }
         }
 
         internal void RequestTopicRpc(string remoteCallerId, out string hostname, out int port)
@@ -159,18 +157,10 @@ namespace Iviz.Roslib
 
             ids.RemoveAt(index);
 
-#if DEBUG__
-            Logger.LogDebug($"{this}: Unadvertising '{Topic}' with type {TopicType} and id '{topicId}'");
-#endif
-
             if (ids.Count == 0)
             {
                 Stop();
                 client.RemovePublisher(this);
-
-#if DEBUG__
-                Logger.LogDebug($"{this}: Removing publisher '{Topic}' with type {TopicType}");
-#endif
             }
 
             return true;
@@ -185,5 +175,15 @@ namespace Iviz.Roslib
 
             return ids.Contains(id);
         }
+        
+        public bool MessageTypeMatches(Type type)
+        {
+            return type == topicClassType;
+        }        
+        
+        public override string ToString()
+        {
+            return $"[Publisher {Topic} [{TopicType}] ]";
+        }        
     }
 }

@@ -76,7 +76,7 @@ namespace Iviz.App
             panel.MyUri.Value = MyUri.ToString();
             panel.MyId.Value = MyId;
             panel.MasterUri.Value = MasterUri.ToString();
-            panel.MasterUri.Interactable = !RosServer.IsActive;
+            panel.MasterUri.Interactable = !RosServerManager.IsActive;
             panel.LineLog.Active = true;
 
             panel.Close.Clicked += Close;
@@ -113,10 +113,16 @@ namespace Iviz.App
                         Logger.Internal("Cannot create master node while connected!");
                         return;
                     }
-                    
-                    Uri newUri = RosClient.TryGetCallerUri(RosServer.DefaultPort);
 
-                    if (RosServer.Create(newUri))
+                    if (MyUri.Port == RosServerManager.DefaultPort)
+                    {
+                        Logger.Internal($"Master port {RosServerManager.DefaultPort} is already being used by the caller!");
+                        return;
+                    }
+                    
+                    Uri newUri = new Uri($"http://{MyUri.Host}:{RosServerManager.DefaultPort}/");
+
+                    if (RosServerManager.Create(newUri))
                     {
                         if (MasterUri != newUri)
                         {
@@ -137,13 +143,13 @@ namespace Iviz.App
                         return;
                     }
                     
-                    RosServer.Dispose();
+                    RosServerManager.Dispose();
                     Logger.Internal("Master node removed.");
                     panel.ServerMode.State = false;
                     MasterActiveChanged?.Invoke(false);
                 }
 
-                panel.MasterUri.Interactable = !RosServer.IsActive;
+                panel.MasterUri.Interactable = !RosServerManager.IsActive;
             };
         }
 

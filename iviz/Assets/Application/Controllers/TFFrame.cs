@@ -50,7 +50,6 @@ namespace Iviz.Controllers
                 id = value;
                 labelObjectText.Text = id;
                 trail.Name = "[Trail:" + id + "]";
-                //anchor.Name = "[Anchor:" + id + "]";
             }
         }
 
@@ -93,7 +92,6 @@ namespace Iviz.Controllers
             {
                 forceVisible = value;
                 Visible = Visible;
-                //AnchorVisible = AnchorVisible;
                 TrailVisible = TrailVisible;
             }
         }
@@ -396,24 +394,6 @@ namespace Iviz.Controllers
             axis.Suspend();
             trail.Suspend();
             TrailVisible = false;
-        }
-
-        public Vector3? UpdateAnchor(bool forceRebuild = false)
-        {
-            if (ARController.Instance is null || !Visible)
-            {
-                return null;
-            }
-
-            var mTransform = transform;
-            if (!mTransform.hasChanged && !forceRebuild)
-            {
-                return null;
-            }
-
-            mTransform.hasChanged = false;
-            var foundAnchor = ARController.Instance.FindClosest(mTransform.position, out var anchor, out _);
-            return foundAnchor ? anchor : (Vector3?) null;
         }
 
         protected override void OnDoubleClick()

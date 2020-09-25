@@ -27,6 +27,13 @@ namespace Iviz.Displays
         public event Action PointerDown;
         public event Action PointerUp;
 
+        public Action<Pose> SetTargetPose { get; set; }
+        
+        void Awake()
+        {
+            SetTargetPose = pose => TargetTransform.SetPose(pose);            
+        }
+        
         public bool Visible
         {
             get => gameObject.activeSelf;
@@ -86,7 +93,8 @@ namespace Iviz.Displays
             }
             else
             {
-                mTarget.position += deltaPosition - startOffset;
+                //mTarget.position += deltaPosition - startOffset;
+                SetTargetPose(new Pose(mTarget.position + deltaPosition - startOffset, mTarget.rotation));
                 Moved?.Invoke(mTarget.AsPose());
             }
         }

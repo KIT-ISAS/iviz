@@ -435,13 +435,11 @@ namespace Iviz.Controllers
                 RootMarker.InteractionMode = InteractiveControl.InteractionModeType.Frame;
                 //MapFrame.ColliderEnabled = false;
                 MapFrame.Selected = false;
-                //MapFrame.Alpha = 0.75f;
             }
             else
             {
                 RootMarker.InteractionMode = InteractiveControl.InteractionModeType.Disabled;
                 //MapFrame.ColliderEnabled = !Settings.IsHololens;
-                //MapFrame.Alpha = 1;
             }
         }
     }

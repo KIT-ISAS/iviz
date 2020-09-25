@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.Msgs.StdMsgs;
 
 namespace Iviz.XmlRpc
 {
@@ -40,7 +41,7 @@ namespace Iviz.XmlRpc
             int port = uri.Port;
 
             Task task = client.ConnectAsync(hostname, port);
-            if (!task.Wait(timeoutInMs) || !task.IsCompleted)
+            if (!await task.WaitFor(timeoutInMs) || !task.IsCompleted)
             {
                 throw new TimeoutException($"HttpRequest: Host '{hostname}' timed out", task.Exception);
             }
@@ -112,7 +113,7 @@ namespace Iviz.XmlRpc
 
                 StreamReader reader = new StreamReader(stream, BuiltIns.UTF8);
                 Task<string> readTask = reader.ReadToEndAsync();
-                if (!readTask.Wait(timeoutInMs) || !readTask.IsCompleted)
+                if (!await readTask.WaitFor(timeoutInMs) || !readTask.IsCompleted)
                 {
                     reader.Close();
                     throw new TimeoutException("HttpRequest: Request response timed out!", readTask.Exception);

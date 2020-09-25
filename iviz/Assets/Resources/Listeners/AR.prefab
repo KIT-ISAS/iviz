@@ -309,7 +309,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 728ad7fae8e460a4ba41265c7308d757, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_AnchorPrefab: {fileID: 0}
+  m_AnchorPrefab: {fileID: 53648500630536859, guid: 800464953d75b43ee8d07aac65e6e0c8,
+    type: 3}
 --- !u!114 &8591553869344813422
 MonoBehaviour:
   m_ObjectHideFlags: 0

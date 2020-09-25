@@ -7,19 +7,19 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
 using Iviz.Msgs;
 
 namespace Iviz.Roslib
 {
-    internal sealed class ServiceReceiver : IDisposable
+    internal sealed class ServiceReceiverAsync : IDisposable
     {
         const int BufferSizeIncrease = 512;
 
         byte[] readBuffer = new byte[16];
         byte[] writeBuffer = new byte[16];
 
-        readonly BinaryReader reader;
-        readonly BinaryWriter writer;
+        readonly NetworkStream stream;
         readonly TcpClient tcpClient = new TcpClient();
         readonly IPEndPoint remoteEndPoint;
         readonly ServiceInfo serviceInfo;
@@ -38,7 +38,7 @@ namespace Iviz.Roslib
         public int Port => remoteEndPoint.Port;
         public string Hostname => remoteEndPoint.Address.ToString();
 
-        public ServiceReceiver(
+        public ServiceReceiverAsync(
             ServiceInfo serviceInfo,
             Uri remoteUri,
             bool requestNoDelay,
@@ -55,15 +55,14 @@ namespace Iviz.Roslib
             tcpClient.SendTimeout = 5000;
 
             tcpClient.Connect(RemoteHostname, RemotePort);
-            NetworkStream stream = tcpClient.GetStream();
-            reader = new BinaryReader(stream);
-            writer = new BinaryWriter(stream);
-            remoteEndPoint = (IPEndPoint)tcpClient.Client.RemoteEndPoint;
+            stream = tcpClient.GetStream();
+            remoteEndPoint = (IPEndPoint) tcpClient.Client.RemoteEndPoint;
         }
 
-        int SerializeHeader(BinaryWriter writer)
+        async Task<int> SerializeHeader()
         {
-            string[] contents = {
+            string[] contents =
+            {
                 $"callerid={serviceInfo.CallerId}",
                 $"service={serviceInfo.Service}",
                 $"md5sum={serviceInfo.Md5Sum}",
@@ -72,21 +71,27 @@ namespace Iviz.Roslib
                 $"persistent={(persistent ? "1" : "0")}",
             };
             int totalLength = 4 * contents.Length;
-            for (int i = 0; i < contents.Length; i++)
+            foreach (var entry in contents)
             {
-                totalLength += contents[i].Length;
+                totalLength += entry.Length;
             }
-            writer.Write(totalLength);
-            for (int i = 0; i < contents.Length; i++)
+
+            byte[] array = new byte[totalLength + 4];
+            using (BinaryWriter writer = new BinaryWriter(new MemoryStream(array)))
             {
-                writer.Write(contents[i].Length);
-                writer.Write(BuiltIns.UTF8.GetBytes(contents[i]));
+                writer.Write(totalLength);
+                foreach (var t in contents)
+                {
+                    writer.Write(t.Length);
+                    writer.Write(BuiltIns.UTF8.GetBytes(t));
 
 #if DEBUG__
                 Logger.Log(">>> " + contents[i]);
 #endif
-
+                }
             }
+
+            await stream.WriteAsync(array, 0, array.Length);
             return totalLength;
         }
 
@@ -107,48 +112,48 @@ namespace Iviz.Roslib
                 Logger.Log("<<< " + contents.Last());
 #endif
             }
+
             return contents;
         }
 
-        public bool Start()
+        public async Task<bool> Start()
         {
-            SerializeHeader(writer);
+            await SerializeHeader();
 
-            int totalLength = ReceivePacket();
+            int totalLength = await ReceivePacket();
             List<string> responses = ParseHeader(totalLength);
 
-            if (responses.Count != 0 && responses[0].HasPrefix("error"))
+            if (responses.Count == 0 || !responses[0].HasPrefix("error"))
             {
-                int index = responses[0].IndexOf('=');
-                if (index != -1)
-                {
-                    Logger.Log($"{this}: Closing socket! Error:\n{responses[0].Substring(index + 1)}");
-                }
-                else
-                {
-                    Logger.Log($"{this}: Closing socket! Error:\n{responses[0]}");
-                }
-                tcpClient.Close();
-                return false;
+                return true;
             }
-            return true;
-        }
 
-        public void Stop()
-        {
+            int index = responses[0].IndexOf('=');
+            if (index != -1)
+            {
+                Logger.Log($"{this}: Closing socket! Error:\n{responses[0].Substring(index + 1)}");
+            }
+            else
+            {
+                Logger.Log($"{this}: Closing socket! Error:\n{responses[0]}");
+            }
+
             tcpClient.Close();
+            return false;
+
         }
 
-        int ReceivePacket()
+        async Task<int> ReceivePacket()
         {
             int numRead = 0;
             while (numRead < 4)
             {
-                int readNow = reader.Read(readBuffer, numRead, 4 - numRead);
+                int readNow = await stream.ReadAsync(readBuffer, numRead, 4 - numRead);
                 if (readNow == 0)
                 {
                     return 0;
                 }
+
                 numRead += readNow;
             }
 
@@ -157,25 +162,28 @@ namespace Iviz.Roslib
             {
                 readBuffer = new byte[length + BufferSizeIncrease];
             }
+
             numRead = 0;
             while (numRead < length)
             {
-                int readNow = reader.Read(readBuffer, numRead, length - numRead);
+                int readNow = await stream.ReadAsync(readBuffer, numRead, length - numRead);
                 if (readNow == 0)
                 {
                     return 0;
                 }
+
                 numRead += readNow;
             }
+
             return length;
         }
 
-        public bool Execute(IService service)
+        public async Task<bool> Execute(IService service)
         {
             bool success;
             try
             {
-                success = ExecuteImpl(service);
+                success = await ExecuteImpl(service);
             }
             catch (Exception e)
             {
@@ -183,16 +191,18 @@ namespace Iviz.Roslib
                 Logger.Log("ServiceReceiver: Error during service call:" + e);
                 success = false;
             }
+
             if (!persistent)
             {
-                Stop();
+                Dispose();
             }
+
             return success;
         }
 
         const byte ErrorByte = 0;
 
-        bool ExecuteImpl(IService service)
+        async Task<bool> ExecuteImpl(IService service)
         {
             IRequest requestMsg = service.Request;
             int msgLength = requestMsg.RosMessageLength;
@@ -200,29 +210,30 @@ namespace Iviz.Roslib
             {
                 writeBuffer = new byte[msgLength + BufferSizeIncrease];
             }
+
             uint sendLength = Msgs.Buffer.Serialize(requestMsg, writeBuffer);
-            writer.Write(sendLength);
+            await stream.WriteAsync(BitConverter.GetBytes(sendLength), 0, 4);
+            await stream.WriteAsync(writeBuffer, 0, (int) sendLength);
+            BytesSent += (int) sendLength + 5;
 
-            writer.Write(writeBuffer, 0, (int)sendLength);
-            BytesSent += (int)sendLength + 5;
-
-
-            int rcvLength = reader.Read(readBuffer, 0, 1);
+            int rcvLength = await stream.ReadAsync(readBuffer, 0, 1);
             if (rcvLength == 0)
             {
                 service.ErrorMessage = $"Connection to {Hostname}:{Port} closed remotely.";
                 return false;
             }
+
             BytesReceived++;
 
             byte statusByte = readBuffer[0];
-            
-            rcvLength = ReceivePacket();
+
+            rcvLength = await ReceivePacket();
             if (rcvLength == 0)
             {
                 service.ErrorMessage = $"Connection to {Hostname}:{Port} closed remotely.";
                 return false;
             }
+
             BytesReceived += 4 + rcvLength;
 
             if (statusByte == ErrorByte)
@@ -237,11 +248,15 @@ namespace Iviz.Roslib
             return true;
         }
 
+        bool disposed;
         public void Dispose()
         {
-            Stop();
-            reader.Dispose();
-            writer.Dispose();
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
             tcpClient.Dispose();
         }
     }

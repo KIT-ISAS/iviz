@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.XmlRpc;
 
 namespace Iviz.Roslib
 {
@@ -24,7 +25,7 @@ namespace Iviz.Roslib
         bool keepRunning;
         Task task;
 
-        Uri RemoteUri { get; }
+        public Uri RemoteUri { get; }
         Endpoint RemoteEndpoint { get; }
         Endpoint Endpoint { get; set; }
 
@@ -150,18 +151,19 @@ namespace Iviz.Roslib
 
 
         readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
+
         async Task Run(int timeoutInMs)
         {
             Task runLoopTask = RunLoop(timeoutInMs);
-            
+
             while (keepRunning)
             {
                 await signal.WaitAsync(1000);
             }
-            
+
             tcpClient.Dispose();
             stream.Dispose();
-            
+
             await runLoopTask;
         }
 
@@ -175,16 +177,8 @@ namespace Iviz.Roslib
                 {
                     try
                     {
-                        /*
                         Task connectionTask = tcpClient.ConnectAsync(RemoteEndpoint.Hostname, RemoteEndpoint.Port);
-                        Task completedTask = await Task.WhenAny(connectionTask, Task.Delay(timeoutInMs));                        
-                        if (completedTask != connectionTask || connectionTask.IsFaulted)
-                        {
-                            throw new TimeoutException();
-                        }
-                        */
-                        Task connectionTask = tcpClient.ConnectAsync(RemoteEndpoint.Hostname, RemoteEndpoint.Port);
-                        if (!connectionTask.Wait(timeoutInMs) || !connectionTask.IsCompleted)
+                        if (!await connectionTask.WaitFor(timeoutInMs) || !connectionTask.IsCompleted)
                         {
                             throw new TimeoutException("Connection timed out!", connectionTask.Exception);
                         }
@@ -197,6 +191,10 @@ namespace Iviz.Roslib
                         round = 0; // reset if successful
 
                         await ProcessLoop();
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        Logger.LogDebug($"{this}: Leaving thread"); // expected
                     }
                     catch (Exception e) when
                     (e is ConnectionException || e is IOException || e is AggregateException ||
@@ -267,6 +265,7 @@ namespace Iviz.Roslib
         }
 
         bool disposed;
+
         public void Dispose()
         {
             if (disposed)
@@ -276,17 +275,10 @@ namespace Iviz.Roslib
 
             disposed = true;
             keepRunning = false;
-            
-            try
-            {
-                signal.Release();
-            }
-            catch (SemaphoreFullException)
-            {
-            }
+
+            signal.Release();
 
             task?.Wait();
-            task?.Dispose();
         }
     }
 }

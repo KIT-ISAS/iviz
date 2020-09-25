@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -11,20 +12,16 @@ namespace Iviz.Roslib
     internal class TcpSenderManager
     {
         readonly TopicInfo topicInfo;
-        readonly Dictionary<string, TcpSenderAsync> connectionsByCallerId = new Dictionary<string, TcpSenderAsync>();
+
+        readonly ConcurrentDictionary<string, TcpSenderAsync> connectionsByCallerId =
+            new ConcurrentDictionary<string, TcpSenderAsync>();
 
         public Uri CallerUri { get; }
         public string Topic => topicInfo.Topic;
         public string CallerId => topicInfo.CallerId;
         public string TopicType => topicInfo.Type;
 
-        public int NumConnections
-        {
-            get
-            {
-                lock (connectionsByCallerId) return connectionsByCallerId.Count;
-            }
-        }
+        public int NumConnections => connectionsByCallerId.Count;
 
         public int TimeoutInMs { get; set; } = 5000;
 
@@ -58,10 +55,7 @@ namespace Iviz.Roslib
                 }
 
                 maxQueueSizeInBytes = value;
-                lock (connectionsByCallerId)
-                {
-                    connectionsByCallerId.Values.ForEach(x => x.MaxQueueSizeInBytes = value);
-                }
+                connectionsByCallerId.Values.ForEach(x => x.MaxQueueSizeInBytes = value);
             }
         }
 
@@ -76,27 +70,24 @@ namespace Iviz.Roslib
             Logger.LogDebug($"{this}: '{remoteCallerId}' is requesting {Topic}");
             TcpSenderAsync newSender = new TcpSenderAsync(CallerUri, remoteCallerId, topicInfo, Latching);
 
-            IPEndPoint endPoint;
-            lock (connectionsByCallerId)
+            if (connectionsByCallerId.TryGetValue(remoteCallerId, out TcpSenderAsync oldSender) &&
+                oldSender.IsAlive)
             {
-                if (connectionsByCallerId.TryGetValue(remoteCallerId, out TcpSenderAsync oldSender) &&
-                    oldSender.IsAlive)
-                {
-                    Logger.LogDebug($"{this}: '{remoteCallerId} is requesting {Topic} again?");
-                    oldSender.Dispose();
-                }
-
-                endPoint = newSender.Start(TimeoutInMs);
-                connectionsByCallerId[remoteCallerId] = newSender;
+                Logger.LogDebug($"{this}: '{remoteCallerId} is requesting {Topic} again?");
+                oldSender.Dispose();
             }
+
+            SemaphoreSlim managerSignal = new SemaphoreSlim(0, 1);
+            var endPoint = newSender.Start(TimeoutInMs, managerSignal);
+            connectionsByCallerId[remoteCallerId] = newSender;
 
             // while we're here
             Cleanup();
 
-            // ugh
-            for (int i = 0; i < 10 && newSender.Status == SenderStatus.Inactive; i++)
+            // wait until newSender is ready to accept
+            if (!managerSignal.Wait(100))
             {
-                Thread.Sleep(10);
+                Logger.Log($"{this}: Sender start timeout?");
             }
 
             if (Latching && LatchedMessage != null)
@@ -108,21 +99,18 @@ namespace Iviz.Roslib
             return endPoint;
         }
 
-        public bool Cleanup()
+        bool Cleanup()
         {
-            bool subscribersChanged = false;
-            lock (connectionsByCallerId)
+            bool subscribersChanged;
+            TcpSenderAsync[] toDelete = connectionsByCallerId.Values.Where(sender => !sender.IsAlive).ToArray();
+            foreach (TcpSenderAsync sender in toDelete)
             {
-                string[] toDelete = connectionsByCallerId.Where(x => !x.Value.IsAlive).Select(x => x.Key).ToArray();
-                foreach (string callerId in toDelete)
-                {
-                    Logger.LogDebug($"{this}: Removing connection with '{callerId}' - dead x_x");
-                    connectionsByCallerId[callerId].Dispose();
-                    connectionsByCallerId.Remove(callerId);
-                }
-
-                subscribersChanged = toDelete.Length != 0;
+                Logger.LogDebug($"{this}: Removing connection with '{sender}' - dead x_x");
+                sender.Dispose();
+                connectionsByCallerId.TryRemove(sender.RemoteCallerId, out _);
             }
+
+            subscribersChanged = toDelete.Length != 0;
 
             return subscribersChanged;
         }
@@ -134,44 +122,27 @@ namespace Iviz.Roslib
                 LatchedMessage = msg;
             }
 
-            lock (connectionsByCallerId)
+            foreach (var connection in connectionsByCallerId.Values)
             {
-                foreach (var connection in connectionsByCallerId.Values)
-                {
-                    connection.Publish(msg);
-                }
+                connection.Publish(msg);
             }
         }
 
         public void Stop()
         {
-            lock (connectionsByCallerId)
+            foreach (var sender in connectionsByCallerId.Values)
             {
-                foreach (var sender in connectionsByCallerId.Values)
-                {
-                    sender.Dispose();
-                }
-
-                connectionsByCallerId.Clear();
+                sender.Dispose();
             }
+
+            connectionsByCallerId.Clear();
         }
 
         public ReadOnlyCollection<PublisherSenderState> GetStates()
         {
-            lock (connectionsByCallerId)
-            {
-                return new ReadOnlyCollection<PublisherSenderState>(
-                    connectionsByCallerId.Values.Select(x => x.State).ToArray()
-                );
-            }
-        }
-
-        public ReadOnlyDictionary<string, TcpSenderAsync> GetConnections()
-        {
-            lock (connectionsByCallerId)
-            {
-                return new ReadOnlyDictionary<string, TcpSenderAsync>(connectionsByCallerId);
-            }
+            return new ReadOnlyCollection<PublisherSenderState>(
+                connectionsByCallerId.Values.Select(x => x.State).ToArray()
+            );
         }
 
         public override string ToString()

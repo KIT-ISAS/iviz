@@ -47,8 +47,8 @@ namespace Iviz.Controllers
         {
             Connection?.Stop();
             Connection = null;
-            
-            RosServer.Dispose();
+
+            RosServerManager.Dispose();
         }
 
 #if PUBLISH_LOG
@@ -121,8 +121,8 @@ namespace Iviz.Controllers
     {
         static readonly TimeSpan TaskWaitTime = TimeSpan.FromMilliseconds(2000);
 
-        readonly Queue<Action> toDos = new Queue<Action>();
-        readonly object condVar = new object();
+        readonly Queue<Func<Task>> toDos = new Queue<Func<Task>>();
+        readonly SemaphoreSlim signal = new SemaphoreSlim(0, 100);
         readonly Task task;
 
         volatile bool keepRunning;
@@ -145,18 +145,14 @@ namespace Iviz.Controllers
         protected RosConnection()
         {
             keepRunning = true;
-            task = Task.Run(Run);
+            task = Task.Run(async () => await Run());
             GameThread.EverySecond += Update;
         }
 
         public virtual void Stop()
         {
             keepRunning = false;
-            lock (condVar)
-            {
-                Monitor.Pulse(condVar);
-            }
-
+            signal.Release();
             task?.Wait();
             GameThread.EverySecond -= Update;
         }
@@ -170,16 +166,27 @@ namespace Iviz.Controllers
             }
         }
 
-        protected void AddTask(Action a)
+        protected void AddTask(Func<Task> a)
         {
-            lock (condVar)
+            lock (toDos)
             {
                 toDos.Enqueue(a);
-                Monitor.Pulse(condVar);
             }
+
+            signal.Release();
         }
 
-        void Run()
+        protected void AddTask(Action a)
+        {
+            lock (toDos)
+            {
+                toDos.Enqueue(async () => a());
+            }
+
+            signal.Release();
+        }
+
+        async Task Run()
         {
             try
             {
@@ -192,7 +199,7 @@ namespace Iviz.Controllers
                         bool connectionResult;
                         try
                         {
-                            connectionResult = Connect();
+                            connectionResult = await Connect();
                         }
                         catch (Exception e)
                         {
@@ -200,17 +207,11 @@ namespace Iviz.Controllers
                             connectionResult = false;
                         }
 
-                        SetConnectionState(connectionResult ? 
-                            ConnectionState.Connected : 
-                            ConnectionState.Disconnected);
+                        SetConnectionState(connectionResult ? ConnectionState.Connected : ConnectionState.Disconnected);
                     }
 
-                    lock (condVar)
-                    {
-                        Monitor.Wait(condVar, TaskWaitTime);
-                    }
-
-                    ExecuteTasks();
+                    await signal.WaitAsync(TaskWaitTime);
+                    await ExecuteTasks();
                 }
 
                 SetConnectionState(ConnectionState.Disconnected);
@@ -223,12 +224,12 @@ namespace Iviz.Controllers
             }
         }
 
-        void ExecuteTasks()
+        async Task ExecuteTasks()
         {
             while (true)
             {
-                Action action;
-                lock (condVar)
+                Func<Task> action;
+                lock (toDos)
                 {
                     if (toDos.Count == 0)
                     {
@@ -240,7 +241,7 @@ namespace Iviz.Controllers
 
                 try
                 {
-                    action();
+                    await action();
                 }
                 catch (Exception e)
                 {
@@ -249,9 +250,9 @@ namespace Iviz.Controllers
             }
         }
 
-        protected abstract bool Connect();
+        protected abstract Task<bool> Connect();
 
-        public virtual void Disconnect() 
+        public virtual void Disconnect()
         {
             SetConnectionState(ConnectionState.Disconnected);
         }
@@ -262,7 +263,7 @@ namespace Iviz.Controllers
         public abstract void Unadvertise(RosSender advertiser);
         public abstract void Publish(RosSender advertiser, IMessage msg);
         public abstract void AdvertiseService<T>(string service, Action<T> callback) where T : IService, new();
-        public abstract void CallServiceAsync<T>(string service, T srv, Action<T> callback) where T : IService;
+        //public abstract void CallServiceAsync<T>(string service, T srv, Action<T> callback) where T : IService;
         public abstract bool CallService<T>(string service, T srv) where T : IService;
         public abstract ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics();
         public abstract ReadOnlyCollection<string> GetSystemParameterList();

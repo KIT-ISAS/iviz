@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.XmlRpc;
 
 namespace Iviz.Roslib
 {
@@ -13,7 +15,8 @@ namespace Iviz.Roslib
         readonly List<Action<IMessage>> callbackList = new List<Action<IMessage>>();
         readonly TcpReceiverManager manager;
         readonly RosClient client;
-
+        readonly Type topicClassType;
+        
         int totalSubscribers;
 
         /// <summary>
@@ -59,6 +62,7 @@ namespace Iviz.Roslib
         {
             this.client = client;
             this.manager = manager;
+            topicClassType = manager.TopicInfo.Generator.GetType();
             IsAlive = true;
 
             manager.Subscriber = this;
@@ -89,25 +93,16 @@ namespace Iviz.Roslib
                 throw new ObjectDisposedException("This is not a valid subscriber");
             }
         }
-
-        public void Cleanup()
-        {
-            if (manager.Cleanup())
-            {
-                NumPublishersChanged?.Invoke(this);
-            }
-        }
-
+        
         public SubscriberTopicState GetState()
         {
             AssertIsAlive();
-            Cleanup();
             return new SubscriberTopicState(Topic, TopicType, ids, manager.GetStates());
         }
 
-        internal void PublisherUpdateRcp(Uri[] publisherUris)
+        internal async Task PublisherUpdateRcpAsync(IEnumerable<Uri> publisherUris)
         {
-            if (manager.PublisherUpdateRpc(client, publisherUris))
+            if (await manager.PublisherUpdateRpcAsync(client, publisherUris).Caf())
             {
                 NumPublishersChanged?.Invoke(this);
             }
@@ -123,12 +118,7 @@ namespace Iviz.Roslib
 
         public bool MessageTypeMatches(Type type)
         {
-            if (type is null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
-
-            return type == manager.TopicInfo.Generator.GetType();
+            return type == topicClassType;
         }
 
         public string Subscribe(Action<IMessage> callback)
@@ -197,5 +187,11 @@ namespace Iviz.Roslib
             }
             return true;
         }
+        
+        public override string ToString()
+        {
+            return $"[Subscriber {Topic} [{TopicType}] ]";
+        }        
+        
     }
 }

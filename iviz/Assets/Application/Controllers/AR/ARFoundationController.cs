@@ -3,6 +3,7 @@ using System.Linq;
 using Iviz.Displays;
 using Iviz.Resources;
 using UnityEngine;
+using UnityEngine.Analytics;
 using UnityEngine.Rendering;
 using UnityEngine.Serialization;
 using UnityEngine.XR.ARFoundation;
@@ -13,16 +14,19 @@ namespace Iviz.Controllers
     public sealed class ARFoundationController : ARController
     {
         static ARSessionInfo savedSessionInfo;
-        
+
         [SerializeField] Camera arCamera = null;
         [SerializeField] ARSessionOrigin arSessionOrigin = null;
         [SerializeField] Light arLight = null;
-        
+
         Camera mainCamera;
         ARPlaneManager planeManager;
         ARTrackedImageManager tracker;
         ARRaycastManager raycaster;
         ARMarkerResource resource;
+
+        ARAnchorManager anchorManager;
+        ARAnchorResource worldAnchor;
 
         public override bool Visible
         {
@@ -51,12 +55,10 @@ namespace Iviz.Controllers
                 resource.Visible = Visible && value;
                 if (value)
                 {
-                    TfRoot.SetPose(RegisteredPose);
                     tracker.trackedImagesChanged += OnTrackedImagesChanged;
                 }
                 else
                 {
-                    WorldOffset = WorldOffset;
                     tracker.trackedImagesChanged -= OnTrackedImagesChanged;
                 }
             }
@@ -102,72 +104,169 @@ namespace Iviz.Controllers
             }
         }
 
+        public override bool PinRootMarker
+        {
+            get => base.PinRootMarker;
+            set
+            {
+                Debug.Log("pin changed");
+                if (value && !base.PinRootMarker)
+                {
+                    Debug.Log("pin changed to true!");
+                    ResetAnchor(true);
+                }
+
+                base.PinRootMarker = value;
+            }
+        }
+
         protected override void Awake()
         {
             base.Awake();
-            
+
             if (mainCamera == null)
             {
                 mainCamera = GameObject.Find("MainCamera").GetComponent<Camera>();
             }
+
             if (arCamera == null)
             {
                 arCamera = GameObject.Find("AR Camera").GetComponent<Camera>();
             }
+
             if (arSessionOrigin == null)
             {
                 arSessionOrigin = GameObject.Find("AR Session Origin").GetComponent<ARSessionOrigin>();
             }
 
             planeManager = arSessionOrigin.GetComponent<ARPlaneManager>();
-            planeManager.planesChanged += OnPlanesChanged;
-            
+
             tracker = arSessionOrigin.GetComponent<ARTrackedImageManager>();
             raycaster = arSessionOrigin.GetComponent<ARRaycastManager>();
 
+            anchorManager = arSessionOrigin.GetComponent<ARAnchorManager>();
+            lastAnchorMoved = Time.time;
+
             var cameraManager = arCamera.GetComponent<ARCameraManager>();
-            cameraManager.frameReceived += args =>
-            {
-                UpdateLights(args.lightEstimation);
-            };
-            
+            cameraManager.frameReceived += args => { UpdateLights(args.lightEstimation); };
+
             resource = ResourcePool.GetOrCreate<ARMarkerResource>(Resource.Displays.ARMarkerResource);
             node.Target = resource;
+
             MarkerFound = false;
 
             Config = new ARConfiguration();
-        }
-        
-        void OnPlanesChanged(ARPlanesChangedEventArgs obj)
-        {
-            forceAnchorRebuild = true;
+
+            WorldPoseChanged += OnWorldPoseChanged;
         }
 
-        public override bool FindRayHit(in Ray ray, out Vector3 anchor, out Vector3 normal)
+        void OnWorldPoseChanged(RootMover mover)
         {
-            if (arSessionOrigin?.trackablesParent == null)
+            if (mover == RootMover.Anchor||
+                worldAnchor == null ||
+                Vector3.Distance(WorldPosition, worldAnchor.Pose.position) < 0.001f)
             {
-                // not initialized yet!
+                return;
+            }
+
+            ResetAnchor(false);
+        }
+
+        void ResetAnchor(bool recreateNow)
+        {
+            if (worldAnchor != null)
+            {
+                anchorManager.RemoveAnchor(worldAnchor.Anchor);
+                worldAnchor = null;
+            }
+
+            lastAnchorMoved = recreateNow ? Time.time - 2 : Time.time;
+            Debug.Log("destroying anchor! " + recreateNow);
+        }
+
+        float? lastAnchorMoved;
+
+        void Update()
+        {
+            if (lastAnchorMoved == null || Time.time - lastAnchorMoved.Value < 2)
+            {
+                return;
+            }
+
+            lastAnchorMoved = null;
+
+            if (PinRootMarker)
+            {
+                Debug.Log("pinrootmarker!");
+
+                Vector3 origin = WorldPosition + 0.05f * Vector3.up;
+                Ray ray = new Ray(origin, Vector3.down);
+                if (FindClosestPlane(ray, out ARRaycastHit hit, out ARPlane plane))
+                {
+                    Pose pose = new Pose(hit.pose.position, WorldPose.rotation);
+                    worldAnchor = anchorManager.AttachAnchor(plane, pose).GetComponent<ARAnchorResource>();
+                    worldAnchor.Moved += OnWorldAnchorMoved;
+                    Debug.Log("recreating anchor with plane!");
+
+                    SetWorldPose(pose, RootMover.Anchor);
+                }
+                else
+                {
+                    Debug.Log("not yet...!");
+                    lastAnchorMoved = Time.time + 2;
+                }
+            }
+            else
+            {
+                worldAnchor = anchorManager.AddAnchor(WorldPose).GetComponent<ARAnchorResource>();
+                worldAnchor.Moved += OnWorldAnchorMoved;
+                Debug.Log("recreating anchor!");
+            }
+        }
+
+        void OnWorldAnchorMoved(Pose newPose)
+        {
+            SetWorldPose(newPose, RootMover.Anchor);
+        }
+
+        protected override bool FindRayHit(in Ray ray, out Vector3 anchor, out Vector3 normal)
+        {
+            if (!FindClosestPlane(ray, out ARRaycastHit hit, out ARPlane plane))
+            {
                 anchor = ray.origin;
                 normal = Vector3.zero;
                 return false;
             }
-            
+
+            anchor = hit.pose.position;
+            normal = plane.normal;
+            return true;
+        }
+
+        bool FindClosestPlane(in Ray ray, out ARRaycastHit hit, out ARPlane plane)
+        {
+            if (arSessionOrigin == null || arSessionOrigin.trackablesParent == null)
+            {
+                // not initialized yet!
+                plane = null;
+                hit = default;
+                return false;
+            }
+
             List<ARRaycastHit> results = new List<ARRaycastHit>();
             raycaster.Raycast(ray, results, TrackableType.PlaneWithinBounds);
             if (results.Count == 0)
             {
-                anchor = ray.origin;
-                normal = Vector3.zero;
+                plane = null;
+                hit = default;
                 return false;
-            } 
+            }
 
             Vector3 origin = ray.origin;
-            var minHit = results.Count == 1 ? results[0] : 
-                results.Select(hit => ((hit.pose.position - origin).sqrMagnitude, hit)).Min().hit;
-            var plane = planeManager.GetPlane(minHit.trackableId);
-            anchor = minHit.pose.position;
-            normal = plane.normal;
+            hit = results.Count == 1
+                ? results[0]
+                : results.Select(rayHit => ((rayHit.pose.position - origin).sqrMagnitude, rayHit)).Min().rayHit;
+            plane = planeManager.GetPlane(hit.trackableId);
             return true;
         }
 
@@ -191,43 +290,38 @@ namespace Iviz.Controllers
                 var sphericalHarmonics = lightEstimation.ambientSphericalHarmonics;
                 RenderSettings.ambientMode = AmbientMode.Skybox;
                 RenderSettings.ambientProbe = sphericalHarmonics.Value;
-            }            
+            }
         }
 
         void OnTrackedImagesChanged(ARTrackedImagesChangedEventArgs obj)
         {
             Pose? newPose = null;
-            
+
             if (obj.added.Count != 0)
             {
                 newPose = obj.added[0].transform.AsPose();
             }
+
             if (obj.updated.Count != 0)
             {
                 newPose = obj.updated[0].transform.AsPose();
             }
+
             if (newPose == null)
             {
                 return;
             }
-            
-            WorldOffset = Vector3.zero;
-            WorldAngle = 0;
 
             Pose expectedPose = TFListener.RelativePose(resource.transform.AsPose());
             Pose registeredPose = newPose.Value.Multiply(expectedPose.Inverse());
-            Quaternion corrected = new Quaternion(0, registeredPose.rotation.y, 0, registeredPose.rotation.w).normalized;
 
-            //Debug.Log("Registration! " + registeredPose.rotation + " -> " + corrected);
-
+            Quaternion corrected =
+                new Quaternion(0, registeredPose.rotation.y, 0, registeredPose.rotation.w).normalized;
             registeredPose.rotation = corrected;
-            
-            RegisteredPose = registeredPose;
-            
+
+            SetWorldPose(registeredPose, RootMover.ImageMarker);
+
             MarkerFound = true;
-            TfRoot.SetPose(RootPose);
-            
-            ModuleData.ResetPanel();
         }
     }
 }

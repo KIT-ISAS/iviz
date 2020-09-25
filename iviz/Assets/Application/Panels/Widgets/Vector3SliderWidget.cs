@@ -12,7 +12,7 @@ namespace Iviz.App
         [SerializeField] SliderWidget inputZ = null;
         [SerializeField] Text label = null;
         [SerializeField] Image panel = null;
-        bool disableUpdates;
+        //bool disableUpdates;
 
         public string Label
         {
@@ -57,7 +57,7 @@ namespace Iviz.App
             get => mean;
             set
             {
-                disableUpdates = true;
+                //disableUpdates = true;
                 mean = value;
                 inputX.SetMinValue(mean.x - range).SetMaxValue(mean.x + range);
                 inputY.SetMinValue(mean.y - range).SetMaxValue(mean.y + range);
@@ -65,7 +65,7 @@ namespace Iviz.App
                 inputX.Value = mean.x;
                 inputY.Value = mean.y;
                 inputZ.Value = mean.z;
-                disableUpdates = false;
+                //disableUpdates = false;
             }
         }
 
@@ -86,10 +86,12 @@ namespace Iviz.App
 
         void OnValueChanged()
         {
+            /*
             if (disableUpdates)
             {
                 return;
             }
+            */
 
             value = new Vector3(
                 inputX.Value,
@@ -102,11 +104,11 @@ namespace Iviz.App
 
         void UpdateInputLabels()
         {
-            disableUpdates = true;
+            //disableUpdates = true;
             inputX.Value = value.x;
             inputY.Value = value.y;
             inputZ.Value = value.z;
-            disableUpdates = false;
+            //disableUpdates = false;
         }
 
         public void ClearSubscribers()

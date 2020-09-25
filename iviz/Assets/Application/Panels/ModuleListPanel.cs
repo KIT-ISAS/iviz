@@ -204,7 +204,7 @@ namespace Iviz.App
                     Logger.Internal($"Failed to set master uri.");
                     MasterUriStr.Label = "(?) →";
                 }
-                else if (RosServer.IsActive)
+                else if (RosServerManager.IsActive)
                 {
                     Logger.Internal($"Changing master uri to local master '{uri}'");
                     MasterUriStr.Label = "Master Mode\n" + uri + " →";
@@ -292,20 +292,17 @@ namespace Iviz.App
             switch (state)
             {
                 case ConnectionState.Connected:
-                    //Logger.Internal("Connected!");
                     GameThread.EverySecond -= RotateSprite;
                     status.sprite = ConnectedSprite;
-                    topPanel.color = RosServer.IsActive ? ConnectedOwnMasterColor : ConnectedColor;
+                    topPanel.color = RosServerManager.IsActive ? ConnectedOwnMasterColor : ConnectedColor;
                     SaveSimpleConfiguration();
                     break;
                 case ConnectionState.Disconnected:
-                    //Logger.Internal("Disconnected.");
                     GameThread.EverySecond -= RotateSprite;
                     status.sprite = DisconnectedSprite;
                     topPanel.color = DisconnectedColor;
                     break;
                 case ConnectionState.Connecting:
-                    //Logger.Internal("Connecting...");
                     status.sprite = ConnectingSprite;
                     GameThread.EverySecond += RotateSprite;
                     break;
