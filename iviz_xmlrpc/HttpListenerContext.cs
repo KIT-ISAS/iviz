@@ -60,7 +60,6 @@ namespace Iviz.XmlRpc
                 }
 
                 numRead += await readTask;
-                //numRead += await stream.ReadAsync(buffer, 0, length - numRead);
             }
 
             return new string(buffer, 0, numRead);
