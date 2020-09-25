@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
@@ -11,6 +12,8 @@ namespace Iviz.Roslib
     internal sealed class ServiceSenderManager
     {
         public Uri Uri { get; }
+        public string Service => serviceInfo.Service;
+        public string ServiceType => serviceInfo.Type;
         readonly TcpListener listener;
         readonly ServiceInfo serviceInfo;
         readonly Action<IService> callback;
@@ -30,7 +33,7 @@ namespace Iviz.Roslib
 
             IPEndPoint localEndpoint = (IPEndPoint) listener.LocalEndpoint;
             Uri = new Uri($"rosrpc://{host}:{localEndpoint.Port}/");
-            Logger.LogDebug($"ServiceSenderManager: Starting {serviceInfo.Service} [{serviceInfo.Type}] at {Uri}");
+            Logger.LogDebug($"{this}: Starting {serviceInfo.Service} [{serviceInfo.Type}] at {Uri}");
 
             Run();
         }
@@ -42,6 +45,10 @@ namespace Iviz.Roslib
                 while (keepGoing)
                 {
                     TcpClient client = await listener.AcceptTcpClientAsync().ConfigureAwait(false);
+                    if (!keepGoing)
+                    {
+                        break;
+                    }
                     ServiceSender sender = new ServiceSender(serviceInfo, client, callback);
                     lock (connections)
                     {
@@ -51,17 +58,19 @@ namespace Iviz.Roslib
             }
             catch (ObjectDisposedException)
             {
-                Logger.LogDebug("ServiceSenderManager: Leaving thread."); // expected
+                Logger.LogDebug($"{this}: Leaving thread."); // expected
             }
             catch (ThreadAbortException e)
             {
-                Logger.Log("ServiceSenderManager: Thread aborted! " + e);
+                Logger.Log($"{this}: Thread aborted! " + e);
                 Thread.ResetAbort();
             }
             catch (Exception e)
             {
-                Logger.Log("ServiceSenderManager: Stopped thread" + e);
+                Logger.Log($"{this}: Stopped thread" + e);
             }
+
+            Logger.LogDebug($"{this}: Leaving thread (normally)"); // also expected
         }
 
         public void Cleanup()
@@ -104,6 +113,11 @@ namespace Iviz.Roslib
             catch (Exception)
             {
             }
+        }
+
+        public override string ToString()
+        {
+            return $"[ServiceSenderManager {Service} [{ServiceType}] at {Uri}]";
         }
     }
 }

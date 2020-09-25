@@ -86,9 +86,7 @@ namespace Iviz.RosMaster
                 return;
             }
 
-            //Debug.Log(Thread.CurrentThread.Name + " " + Thread.CurrentContext.ContextID +  "ros: listener: dispose");
             listener.Dispose();
-            //Debug.Log(Thread.CurrentThread.Name + " " + Thread.CurrentContext.ContextID +  "ros: out");
             disposed = true;
         }
 
@@ -111,9 +109,7 @@ namespace Iviz.RosMaster
             {
                 try
                 {
-                    //Debug.Log("got request");
                     await Service.MethodResponseAsync(context, methods, lateCallbacks);
-                    //Debug.Log("finished request");
                 }
                 catch (Exception e)
                 {
@@ -121,10 +117,20 @@ namespace Iviz.RosMaster
                 }
             }            
         }
-        
+
+        static Arg[] OkResponse(Arg arg)
+        {
+            return new[] {StatusCode.Success, "ok", arg};
+        }
+
+        static Arg[] ErrorResponse(string msg)
+        {
+            return new Arg[] {StatusCode.Error, msg, 0};
+        }
+
         Arg[] GetUri(object[] _)
         {
-            return new Arg[] {StatusCode.Success, "ok", MasterUri};
+            return OkResponse(MasterUri);
         }
 
         Arg[] RegisterPublisher(object[] args)
@@ -135,12 +141,12 @@ namespace Iviz.RosMaster
                 !(args[2] is string topicType) ||
                 !(args[3] is string callerApi))
             {
-                return new Arg[] {StatusCode.Error, "Failed to parse arguments", 0};
+                return ErrorResponse("Failed to parse arguments");
             }
 
             if (!Uri.TryCreate(callerApi, UriKind.Absolute, out Uri callerUri))
             {
-                return new Arg[] {StatusCode.Error, "Caller api is not an uri", 0};
+                return ErrorResponse("Caller api is not an uri");
             }
 
             if (!publishersByTopic.TryGetValue(topic, out var publishers))
@@ -162,7 +168,7 @@ namespace Iviz.RosMaster
                     ? subscribers.Select(tuple => tuple.callerUri)
                     : Array.Empty<Uri>();
 
-            return new Arg[] {StatusCode.Success, "ok", new Arg(currentSubscribers)};
+            return OkResponse(new Arg(currentSubscribers));
         }
         
         
@@ -181,6 +187,7 @@ namespace Iviz.RosMaster
             Arg[] methodArgs = {MasterCallerId, topic, new Arg(publisherUris)};
 
             // fire and forget!
+            // we don't await here because some subscribers may not be reachable anymore
             Task.Run(async() =>
             {
                 Task[] tasks = subscribers.Select(tuple => NotifySubscriber(tuple.callerUri, methodArgs)).ToArray();
@@ -208,12 +215,12 @@ namespace Iviz.RosMaster
                 !(args[2] is string topicType) ||
                 !(args[3] is string callerApi))
             {
-                return new Arg[] {StatusCode.Error, "Failed to parse arguments", 0};
+                return ErrorResponse("Failed to parse arguments");
             }
 
             if (!Uri.TryCreate(callerApi, UriKind.Absolute, out Uri callerUri))
             {
-                return new Arg[] {StatusCode.Error, "Caller api is not an uri", 0};
+                return ErrorResponse("Caller api is not an uri");
             }
 
             if (!subscribersByTopic.TryGetValue(topic, out var subscribers))
@@ -229,7 +236,7 @@ namespace Iviz.RosMaster
                     ? publishers.Select(tuple => tuple.callerUri)
                     : Array.Empty<Uri>();
 
-            return new Arg[] {StatusCode.Success, "ok", new Arg(currentPublishers)};
+            return OkResponse(new Arg(currentPublishers));
         }
 
         Arg[] UnregisterSubscriber(object[] args)
@@ -239,18 +246,18 @@ namespace Iviz.RosMaster
                 !(args[1] is string topic) ||
                 !(args[2] is string callerApi))
             {
-                return new Arg[] {StatusCode.Error, "Failed to parse arguments", 0};
+                return ErrorResponse("Failed to parse arguments");
             }
 
             if (!Uri.TryCreate(callerApi, UriKind.Absolute, out Uri callerUri))
             {
-                return new Arg[] {StatusCode.Error, "Caller api is not an uri", 0};
+                return ErrorResponse("Caller api is not an uri");
             }
 
             if (!subscribersByTopic.TryGetValue(topic, out var subscribers) || 
                 !subscribers.Remove((callerId, callerUri)))
             {
-                return new Arg[] {StatusCode.Success, "ok", 0};
+                return OkResponse(0);
             }
 
             if (!subscribers.Any())
@@ -258,7 +265,7 @@ namespace Iviz.RosMaster
                 subscribersByTopic.Remove(topic);
             }
             
-            return new Arg[] {StatusCode.Success, "ok", 1};
+            return OkResponse(1);
         }
         
         Arg[] UnregisterPublisher(object[] args)
@@ -268,18 +275,18 @@ namespace Iviz.RosMaster
                 !(args[1] is string topic) ||
                 !(args[2] is string callerApi))
             {
-                return new Arg[] {StatusCode.Error, "Failed to parse arguments", 0};
+                return ErrorResponse("Failed to parse arguments");
             }
 
             if (!Uri.TryCreate(callerApi, UriKind.Absolute, out Uri callerUri))
             {
-                return new Arg[] {StatusCode.Error, "Caller api is not an uri", 0};
+                return ErrorResponse("Caller api is not an uri");
             }
 
             if (!publishersByTopic.TryGetValue(topic, out var publishers) || 
                 !publishers.Remove((callerId, callerUri)))
             {
-                return new Arg[] {StatusCode.Success, "ok", 0};
+                return OkResponse(0);
             }
             
             Logger.Log($"-- Publisher: {callerId}@{callerUri} -> {topic}");
@@ -292,7 +299,7 @@ namespace Iviz.RosMaster
                 Logger.Log($"-- Topic: {topic}");
             }
             
-            return new Arg[] {StatusCode.Success, "ok", 1};
+            return OkResponse(1);
         }
 
         Arg[] RegisterService(object[] args)
@@ -302,19 +309,19 @@ namespace Iviz.RosMaster
                 !(args[2] is string serviceApi) ||
                 !(args[3] is string callerApi))
             {
-                return new Arg[] {StatusCode.Error, "Failed to parse arguments", 0};
+                return ErrorResponse("Failed to parse arguments");
             }
 
             if (!Uri.TryCreate(serviceApi, UriKind.Absolute, out Uri serviceUri))
             {
-                return new Arg[] {StatusCode.Error, "Service api is not an uri", 0};
+                return ErrorResponse("Service api is not an uri");
             }
 
             Logger.Log($"++ Service: {service}");
 
             serviceProviders[service] = serviceUri;
 
-            return new Arg[] {StatusCode.Success, "ok", 0};
+            return OkResponse(0);
         }
 
         Arg[] UnregisterService(object[] args)
@@ -323,21 +330,21 @@ namespace Iviz.RosMaster
                 !(args[1] is string service) ||
                 !(args[2] is string serviceApi))
             {
-                return new Arg[] {StatusCode.Error, "Failed to parse arguments", 0};
+                return ErrorResponse("Failed to parse arguments");
             }
 
             if (!Uri.TryCreate(serviceApi, UriKind.Absolute, out Uri serviceUri))
             {
-                return new Arg[] {StatusCode.Error, "Service api is not an uri", 0};
+                return ErrorResponse("Service api is not an uri");
             }
 
             if (!serviceProviders.TryGetValue(service, out Uri currentServiceUri) || serviceUri != currentServiceUri)
             {
-                return new Arg[] {StatusCode.Success, "ok", 0};
+                return OkResponse(0);
             }
 
             serviceProviders.Remove(service);
-            return new Arg[] {StatusCode.Success, "ok", 1};
+            return OkResponse(1);
         }
 
         Arg[] LookupNode(object[] args)
@@ -345,7 +352,7 @@ namespace Iviz.RosMaster
             if (args.Length != 2 ||
                 !(args[1] is string node))
             {
-                return new Arg[] {StatusCode.Error, "Failed to parse arguments", 0};
+                return ErrorResponse("Failed to parse arguments");
             }
 
             var publishersLookup = publishersByTopic.SelectMany(pair => pair.Value);
@@ -357,8 +364,8 @@ namespace Iviz.RosMaster
                 .callerUri;
             
             return uri is null
-                ? new Arg[] {StatusCode.Error, $"No node with id '{node}'", 0}
-                : new Arg[] {StatusCode.Success, "ok", uri};
+                ? ErrorResponse($"No node with id '{node}'")
+                : OkResponse(uri);
         }
 
         Arg[] LookupService(object[] args)
@@ -366,26 +373,26 @@ namespace Iviz.RosMaster
             if (args.Length != 2 ||
                 !(args[1] is string service))
             {
-                return new Arg[] {StatusCode.Error, "Failed to parse arguments", 0};
+                return ErrorResponse("Failed to parse arguments");
             }
 
             return serviceProviders.TryGetValue(service, out Uri providerUri)
-                ? new Arg[] {StatusCode.Success, "ok", providerUri}
-                : new Arg[] {StatusCode.Error, $"No service with name '{service}'", 0};
+                ? OkResponse(providerUri)
+                : ErrorResponse($"No service with name '{service}'");
         }
 
         Arg[] GetPublishedTopics(object[] _)
         {
             var topics = topicTypes.Select(pair => (pair.Key, pair.Value));
 
-            return new Arg[] {StatusCode.Success, "ok", new Arg(topics)};
+            return OkResponse(new Arg(topics));
         }
 
         Arg[] GetTopicTypes(object[] _)
         {
             var topics = topicTypes.Select(pair => (pair.Key, pair.Value));
 
-            return new Arg[] {StatusCode.Success, "ok", new Arg(topics)};
+            return OkResponse(new Arg(topics));
         }
 
         Arg[] GetSystemState(object[] _)
@@ -397,12 +404,9 @@ namespace Iviz.RosMaster
             var providers = serviceProviders.Select(
                 pair => new Arg[] {pair.Key, new Arg(Yield(pair.Value))});
 
-            return new Arg[]
-            {
-                StatusCode.Success,
-                "ok",
+            return OkResponse(
                 new[] {new Arg(publishers), new Arg(subscribers), new Arg(providers)}
-            };
+            );
         }
 
         Arg[] DeleteParam(object[] args)
@@ -410,11 +414,11 @@ namespace Iviz.RosMaster
             if (args.Length != 2 ||
                 !(args[1] is string key))
             {
-                return new Arg[] {StatusCode.Error, "Failed to parse arguments", 0};
+                return ErrorResponse("Failed to parse arguments");
             }
 
             parameters.Remove(key);
-            return new Arg[] {StatusCode.Success, "ok", 0};
+            return OkResponse(0);
         }
 
         Arg[] SetParam(object[] args)
@@ -425,12 +429,12 @@ namespace Iviz.RosMaster
                 !(args[1] is string key) ||
                 (arg = Arg.Create(args[2])) is null)
             {
-                return new Arg[] {StatusCode.Error, "Failed to parse arguments", 0};
+                return ErrorResponse("Failed to parse arguments");
             }
 
             if (key.Length == 0)
             {
-                return new Arg[] {StatusCode.Error, "Empty key", 0};
+                return ErrorResponse("Empty key");
             }
 
             if (key[0] != '/')
@@ -439,7 +443,7 @@ namespace Iviz.RosMaster
             }
 
             parameters[key] = arg;
-            return new Arg[] {StatusCode.Success, "ok", 0};
+            return OkResponse(0);
         }
 
         Arg[] GetParam(object[] args)
@@ -447,12 +451,12 @@ namespace Iviz.RosMaster
             if (args.Length != 2 ||
                 !(args[1] is string key))
             {
-                return new Arg[] {StatusCode.Error, "Failed to parse arguments", 0};
+                return ErrorResponse("Failed to parse arguments");
             }
 
             if (key.Length == 0)
             {
-                return new Arg[] {StatusCode.Error, "Empty key", 0};
+                return ErrorResponse("Empty key");
             }
 
             if (key[0] != '/')
@@ -462,7 +466,7 @@ namespace Iviz.RosMaster
 
             if (parameters.TryGetValue(key, out Arg arg))
             {
-                return new Arg[] {StatusCode.Success, "ok", arg};
+                return OkResponse(arg);
             }
 
             string keyAsNamespace = key;
@@ -474,16 +478,16 @@ namespace Iviz.RosMaster
             var candidates = parameters.Where(pair => pair.Key.StartsWith(keyAsNamespace)).ToArray();
             if (candidates.Length == 0)
             {
-                return new Arg[] {StatusCode.Error, $"Parameter '{key}' is not set", 0};
+                return ErrorResponse($"Parameter '{key}' is not set");
             }
 
             arg = new Arg(candidates.Select(pair => (pair.Key, pair.Value)));
-            return new Arg[] {StatusCode.Success, "ok", arg};
+            return OkResponse(arg);
         }
 
         Arg[] GetParamNames(object[] args)
         {
-            return new Arg[] {StatusCode.Success, "ok", new Arg(parameters.Keys)};
+            return OkResponse(new Arg(parameters.Keys));
         }
 
         Arg[] HasParam(object[] args)
@@ -491,25 +495,25 @@ namespace Iviz.RosMaster
             if (args.Length != 2 ||
                 !(args[1] is string key))
             {
-                return new Arg[] {StatusCode.Error, "Failed to parse arguments", 0};
+                return ErrorResponse("Failed to parse arguments");
             }
 
-            return new Arg[] {StatusCode.Success, "ok", parameters.ContainsKey(key)};
+            return OkResponse(parameters.ContainsKey(key));
         }
 
-        Arg[] SubscribeParam(object[] _)
+        static Arg[] SubscribeParam(object[] _)
         {
-            return new Arg[] {StatusCode.Error, "Not implemented yet", 0};
+            return ErrorResponse("Not implemented yet");
         }
 
-        Arg[] UnsubscribeParam(object[] _)
+        static Arg[] UnsubscribeParam(object[] _)
         {
-            return new Arg[] {StatusCode.Error, "Not implemented yet", 0};
+            return ErrorResponse("Not implemented yet");
         }
 
-        Arg[] SearchParam(object[] _)
+        static Arg[] SearchParam(object[] _)
         {
-            return new Arg[] {StatusCode.Error, "Not implemented yet", 0};
+            return ErrorResponse("Not implemented yet");
         }
         
         static IEnumerable<T> Yield<T>(T element)

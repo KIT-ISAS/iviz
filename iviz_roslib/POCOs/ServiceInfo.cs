@@ -34,7 +34,7 @@ namespace Iviz.Roslib
         /// </summary>
         public IService Generator { get; }
 
-        public ServiceInfo(string callerId, string topic, string md5Sum, string type, IService generator)
+        ServiceInfo(string callerId, string topic, string md5Sum, string type, IService generator)
         {
             CallerId = callerId;
             Service = topic;

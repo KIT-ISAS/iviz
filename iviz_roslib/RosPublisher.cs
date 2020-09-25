@@ -10,6 +10,7 @@ namespace Iviz.Roslib
         readonly TcpSenderManager manager;
         readonly List<string> ids = new List<string>();
         readonly RosClient client;
+        readonly Type topicClassType;
         int totalPublishers;
 
         /// <summary>
@@ -63,10 +64,11 @@ namespace Iviz.Roslib
 
         public event Action<RosPublisher> NumSubscribersChanged;
 
-        internal RosPublisher(RosClient client, TcpSenderManager manager)
+        internal RosPublisher(RosClient client, TcpSenderManager manager, Type topicClassType)
         {
             this.client = client;
             this.manager = manager;
+            this.topicClassType = topicClassType;
             IsAlive = true;
         }
 
@@ -97,6 +99,11 @@ namespace Iviz.Roslib
             if (message is null)
             {
                 throw new ArgumentNullException(nameof(message));
+            }
+
+            if (!MessageTypeMatches(message.GetType())) 
+            {
+                throw new InvalidMessageTypeException("Type does not match publisher.");
             }
 
             message.RosValidate();
@@ -185,5 +192,15 @@ namespace Iviz.Roslib
 
             return ids.Contains(id);
         }
+        
+        public bool MessageTypeMatches(Type type)
+        {
+            return type == topicClassType;
+        }        
+        
+        public override string ToString()
+        {
+            return $"[Publisher {Topic} [{TopicType}] ]";
+        }        
     }
 }

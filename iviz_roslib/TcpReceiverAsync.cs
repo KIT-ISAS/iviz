@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.XmlRpc;
 
 namespace Iviz.Roslib
 {
@@ -175,16 +176,8 @@ namespace Iviz.Roslib
                 {
                     try
                     {
-                        /*
                         Task connectionTask = tcpClient.ConnectAsync(RemoteEndpoint.Hostname, RemoteEndpoint.Port);
-                        Task completedTask = await Task.WhenAny(connectionTask, Task.Delay(timeoutInMs));                        
-                        if (completedTask != connectionTask || connectionTask.IsFaulted)
-                        {
-                            throw new TimeoutException();
-                        }
-                        */
-                        Task connectionTask = tcpClient.ConnectAsync(RemoteEndpoint.Hostname, RemoteEndpoint.Port);
-                        if (!connectionTask.Wait(timeoutInMs) || !connectionTask.IsCompleted)
+                        if (!await connectionTask.WaitFor(timeoutInMs) || !connectionTask.IsCompleted)
                         {
                             throw new TimeoutException("Connection timed out!", connectionTask.Exception);
                         }
@@ -197,6 +190,10 @@ namespace Iviz.Roslib
                         round = 0; // reset if successful
 
                         await ProcessLoop();
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        Logger.LogDebug($"{this}: Leaving thread"); // expected
                     }
                     catch (Exception e) when
                     (e is ConnectionException || e is IOException || e is AggregateException ||

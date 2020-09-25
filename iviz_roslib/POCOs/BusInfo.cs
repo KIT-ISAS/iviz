@@ -11,7 +11,7 @@ namespace Iviz.Roslib
         public string Topic { get; }
         public int Connected { get; }
 
-        public BusInfo(int id, Uri destinationId, string direction, string transport, string topic, int status)
+        public BusInfo(int id, Uri destinationId, string direction, string topic, string transport = "TCPROS", int status = 1)
         {
             ConnectionId = id;
             DestinationId = destinationId;

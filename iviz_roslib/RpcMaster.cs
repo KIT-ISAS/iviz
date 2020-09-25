@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
 using TopicTuple = System.Tuple<string, string>;
@@ -37,127 +38,168 @@ namespace Iviz.Roslib.XmlRpc
             return new GetUriResponse(response);
         }
 
+        public async Task<GetUriResponse> GetUriAsync()
+        {
+            Arg[] args = {CallerId};
+            object[] response = await MethodCallAsync("getUri", args);
+            return new GetUriResponse(response);
+        }
+
         public LookupNodeResponse LookupNode(string nodeId)
         {
-            Arg[] args =
-            {
-                CallerId,
-                nodeId,
-            };
+            Arg[] args = {CallerId, nodeId};
             object[] response = MethodCall("lookupNode", args);
+            return new LookupNodeResponse(response);
+        }
+
+        public async Task<LookupNodeResponse> LookupNodeAsync(string nodeId)
+        {
+            Arg[] args = {CallerId, nodeId};
+            object[] response = await MethodCallAsync("lookupNode", args);
             return new LookupNodeResponse(response);
         }
 
         public GetPublishedTopicsResponse GetPublishedTopics(string subgraph = "")
         {
-            Arg[] args =
-            {
-                CallerId,
-                subgraph,
-            };
+            Arg[] args = {CallerId, subgraph};
             object[] response = MethodCall("getPublishedTopics", args);
             return new GetPublishedTopicsResponse(response);
         }
 
+        public async Task<GetPublishedTopicsResponse> GetPublishedTopicsAsync(string subgraph = "")
+        {
+            Arg[] args = {CallerId, subgraph};
+            object[] response = await MethodCallAsync("getPublishedTopics", args);
+            return new GetPublishedTopicsResponse(response);
+        }        
+        
         public RegisterSubscriberResponse RegisterSubscriber(string topic, string topicType)
         {
-            Arg[] args =
-            {
-                CallerId,
-                topic,
-                topicType,
-                CallerUri
-            };
+            Arg[] args = {CallerId, topic, topicType, CallerUri};
             object[] response = MethodCall("registerSubscriber", args);
             return new RegisterSubscriberResponse(response);
         }
+        
+        public async Task<RegisterSubscriberResponse> RegisterSubscriberAsync(string topic, string topicType)
+        {
+            Arg[] args = {CallerId, topic, topicType, CallerUri};
+            object[] response = await MethodCallAsync("registerSubscriber", args);
+            return new RegisterSubscriberResponse(response);
+        }        
 
         public UnregisterSubscriberResponse UnregisterSubscriber(string topic)
         {
-            Arg[] args =
-            {
-                CallerId,
-                topic,
-                CallerUri
-            };
+            Arg[] args = {CallerId, topic, CallerUri};
             object[] response = MethodCall("unregisterSubscriber", args);
+            return new UnregisterSubscriberResponse(response);
+        }
+
+        public async Task<UnregisterSubscriberResponse> UnregisterSubscriberAsync(string topic)
+        {
+            Arg[] args = {CallerId, topic, CallerUri};
+            object[] response = await MethodCallAsync("unregisterSubscriber", args);
             return new UnregisterSubscriberResponse(response);
         }
 
         public RegisterPublisherResponse RegisterPublisher(string topic, string topicType)
         {
-            Arg[] args =
-            {
-                CallerId,
-                topic,
-                topicType,
-                CallerUri
-            };
+            Arg[] args = {CallerId, topic, topicType, CallerUri};
             object[] response = MethodCall("registerPublisher", args);
+            return new RegisterPublisherResponse(response);
+        }
+
+        public async Task<RegisterPublisherResponse> RegisterPublisherAsync(string topic, string topicType)
+        {
+            Arg[] args = {CallerId, topic, topicType, CallerUri};
+            object[] response = await MethodCallAsync("registerPublisher", args);
             return new RegisterPublisherResponse(response);
         }
 
         public UnregisterPublisherResponse UnregisterPublisher(string topic)
         {
-            Arg[] args =
-            {
-                CallerId,
-                topic,
-                CallerUri
-            };
+            Arg[] args = {CallerId, topic, CallerUri};
             object[] response = MethodCall("unregisterPublisher", args);
+            return new UnregisterPublisherResponse(response);
+        }
+
+        public async Task<UnregisterPublisherResponse> UnregisterPublisherAsync(string topic)
+        {
+            Arg[] args = {CallerId, topic, CallerUri};
+            object[] response = await MethodCallAsync("unregisterPublisher", args);
             return new UnregisterPublisherResponse(response);
         }
 
         public GetSystemStateResponse GetSystemState()
         {
-            Arg[] args =
-            {
-                CallerId
-            };
+            Arg[] args = {CallerId};
             object[] response = MethodCall("getSystemState", args);
             return new GetSystemStateResponse(response);
         }
+        
+        public async Task<GetSystemStateResponse> GetSystemStateAsync()
+        {
+            Arg[] args = {CallerId};
+            object[] response = await MethodCallAsync("getSystemState", args);
+            return new GetSystemStateResponse(response);
+        }        
 
         public LookupServiceResponse LookupService(string service)
         {
-            Arg[] args =
-            {
-                CallerId,
-                service
-            };
+            Arg[] args = {CallerId, service};
             object[] response = MethodCall("lookupService", args);
             return new LookupServiceResponse(response);
         }
+        
+        public async Task<LookupServiceResponse> LookupServiceAsync(string service)
+        {
+            Arg[] args = {CallerId, service};
+            object[] response = await MethodCallAsync("lookupService", args);
+            return new LookupServiceResponse(response);
+        }        
 
         public DefaultResponse RegisterService(string service, Uri rosRpcUri)
         {
-            Arg[] args =
-            {
-                CallerId,
-                service,
-                rosRpcUri,
-                CallerUri
-            };
+            Arg[] args = {CallerId, service, rosRpcUri, CallerUri};
             object[] response = MethodCall("registerService", args);
             return new DefaultResponse(response);
         }
+        
+        public async Task<DefaultResponse> RegisterServiceAsync(string service, Uri rosRpcUri)
+        {
+            Arg[] args = {CallerId, service, rosRpcUri, CallerUri};
+            object[] response = await MethodCallAsync("registerService", args);
+            return new DefaultResponse(response);
+        }        
 
         public UnregisterServiceResponse UnregisterService(string service, Uri rosRpcUri)
         {
-            Arg[] args =
-            {
-                CallerId,
-                service,
-                rosRpcUri,
-            };
+            Arg[] args = {CallerId, service, rosRpcUri};
             object[] response = MethodCall("unregisterService", args);
             return new UnregisterServiceResponse(response);
         }
+        
+        public async Task<UnregisterServiceResponse> UnregisterServiceAsync(string service, Uri rosRpcUri)
+        {
+            Arg[] args = {CallerId, service, rosRpcUri};
+            object[] response = await MethodCallAsync("unregisterService", args);
+            return new UnregisterServiceResponse(response);
+        }        
 
-        object[] MethodCall(string function, Arg[] args)
+        object[] MethodCall(string function, IEnumerable<Arg> args)
         {
             object tmp = Service.MethodCall(MasterUri, CallerUri, function, args, TimeoutInMs);
+            if (tmp is object[] result)
+            {
+                return result;
+            }
+
+            Logger.Log($"Rpc Response: Expected type object[], got {tmp.GetType().Name}");
+            return null;
+        }
+
+        async Task<object[]> MethodCallAsync(string function, IEnumerable<Arg> args)
+        {
+            object tmp = await Service.MethodCallAsync(MasterUri, CallerUri, function, args, TimeoutInMs);
             if (tmp is object[] result)
             {
                 return result;

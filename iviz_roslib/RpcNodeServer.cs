@@ -51,20 +51,21 @@ namespace Iviz.Roslib.XmlRpc
 
         public override string ToString()
         {
-            return "[RcpNodeServer]";
-        }        
-        
+            return $"[RcpNodeServer {Uri}]";
+        }
+
         async Task Run()
         {
             Logger.LogDebug($"{this}: Starting!");
-            
+
             Task listenerTask = listener.Start(StartContext);
 
+            // wait until we're disposed
             await signal.WaitAsync();
 
             // tell the listener in every possible way to stop listening
             listener.Dispose();
-            
+
             // and that is usually not enough. so we bail out
             if (!listenerTask.Wait(2000))
             {
@@ -90,6 +91,7 @@ namespace Iviz.Roslib.XmlRpc
         }
 
         bool disposed;
+
         public void Dispose()
         {
             if (disposed)
@@ -98,6 +100,15 @@ namespace Iviz.Roslib.XmlRpc
             }
 
             disposed = true;
+
+            if (task == null)
+            {
+                // not initialized, dispose directly
+                listener.Dispose();
+                return;
+            }
+
+            // tell task thread to dispose
             try
             {
                 signal.Release();
@@ -106,9 +117,15 @@ namespace Iviz.Roslib.XmlRpc
             {
             }
 
-            task?.Wait();
+            task.Wait();
         }
 
+       
+        static Arg[] OkResponse(Arg arg)
+        {
+            return new Arg[] {StatusCode.Success, "ok", arg};
+        } 
+        
         Arg[] GetBusStats(object[] _)
         {
             Logger.Log("Was called: getBusStats");
@@ -134,78 +151,60 @@ namespace Iviz.Roslib.XmlRpc
                     x.Connected,
                 }).ToArray();
 
-            return new Arg[]
-            {
-                StatusCode.Success,
-                "ok",
-                response
-            };
+            return OkResponse(response);
         }
 
         Arg[] GetMasterUri(object[] _)
         {
-            return new Arg[] {StatusCode.Success, "ok", client.MasterUri};
+            return OkResponse(client.MasterUri);
         }
 
         Arg[] Shutdown(object[] args)
         {
             if (client.ShutdownAction == null)
             {
-                return new Arg[] {StatusCode.Success, "error=no shutdown handler set", 0};
+                return new Arg[] {StatusCode.Failure, "No shutdown handler set", 0};
             }
 
             string callerId = (string) args[0];
             string reason = args.Length > 1 ? (string) args[1] : "";
             client.ShutdownAction(callerId, reason, out int status, out string response);
-            
-            return new Arg[] {status, response, 0};
+
+            return OkResponse(0);
         }
 
         static Arg[] GetPid(object[] _)
         {
             int id = Process.GetCurrentProcess().Id;
 
-            return new Arg[]
-            {
-                StatusCode.Success,
-                "ok",
-                id
-            };
+            return OkResponse(id);
         }
 
         Arg[] GetSubscriptions(object[] _)
         {
             var subscriptions = client.GetSubscriptionsRcp();
-            return new Arg[]
-            {
-                StatusCode.Success,
-                "",
-                new Arg(subscriptions.Select(info => (info.Topic, info.Type)))
-            };
+            return OkResponse(new Arg(subscriptions.Select(info => (info.Topic, info.Type))));
         }
 
         Arg[] GetPublications(object[] _)
         {
             var publications = client.GetPublicationsRcp();
-            return new Arg[]
-            {
-                StatusCode.Success, "ok", new Arg(publications.Select(info => (info.Topic, info.Type)))
-            };
+            return OkResponse(new Arg(publications.Select(info => (info.Topic, info.Type))));
         }
 
         Arg[] ParamUpdate(object[] args)
         {
             if (client.ParamUpdateAction == null)
             {
-                return new Arg[] {StatusCode.Success, "ok", 0};
+                return OkResponse(0);
             }
 
             string callerId = (string) args[0];
             string parameterKey = (string) args[1];
             object parameterValue = args[2];
             client.ParamUpdateAction(callerId, parameterKey, parameterValue, out int status, out string response);
-            
-            return new Arg[] {status, response, 0};
+
+            return OkResponse(0);
         }
 
         Arg[] PublisherUpdate(object[] args)
@@ -215,7 +214,7 @@ namespace Iviz.Roslib.XmlRpc
                 !(args[1] is string topic) ||
                 !(args[2] is object[] publishers))
             {
-                return new Arg[] {StatusCode.Error, "error=failed to parse arguments", 0};
+                return new Arg[] {StatusCode.Error, "Failed to parse arguments", 0};
             }
 
             Uri[] publisherUris = new Uri[publishers.Length];
@@ -223,19 +222,19 @@ namespace Iviz.Roslib.XmlRpc
             {
                 if (!Uri.TryCreate((string) publishers[i], UriKind.Absolute, out publisherUris[i]))
                 {
-                    Logger.Log($"RcpNodeServer: Invalid uri '{publishers[i]}'");
+                    Logger.Log($"{this}: Invalid uri '{publishers[i]}'");
                 }
             }
 
             try
             {
                 client.PublisherUpdateRcp(topic, publisherUris);
-                return new Arg[] {StatusCode.Success, "ok", 0};
+                return OkResponse(0);
             }
             catch (Exception e)
             {
                 Logger.Log(e);
-                return new Arg[] {StatusCode.Failure, "error=Unknown error: " + e.Message, 0};
+                return new Arg[] {StatusCode.Failure, "Unknown error: " + e.Message, 0};
             }
         }
 
@@ -246,7 +245,7 @@ namespace Iviz.Roslib.XmlRpc
                 !(args[1] is string topic) ||
                 !(args[2] is object[] protocols))
             {
-                return new Arg[] {StatusCode.Error, "error=failed to parse arguments", 0};
+                return new Arg[] {StatusCode.Error, "Failed to parse arguments", 0};
             }
 
             if (protocols.Length == 0)
@@ -254,7 +253,7 @@ namespace Iviz.Roslib.XmlRpc
                 return new Arg[]
                 {
                     StatusCode.Failure,
-                    $"error=no compatible protocols found",
+                    $"No compatible protocols found",
                     Array.Empty<string[]>()
                 };
             }
@@ -270,9 +269,7 @@ namespace Iviz.Roslib.XmlRpc
             {
                 return new Arg[]
                 {
-                    StatusCode.Failure,
-                    "error=client only supports TCPROS",
-                    Array.Empty<string[]>()
+                    StatusCode.Failure, "Client only supports TCPROS", Array.Empty<string[]>()
                 };
             }
 
@@ -282,27 +279,18 @@ namespace Iviz.Roslib.XmlRpc
                 {
                     return new Arg[]
                     {
-                        StatusCode.Failure,
-                        $"error=client is not publishing topic '{topic}'",
-                        Array.Empty<string[]>()
+                        StatusCode.Failure, $"Client is not publishing topic '{topic}'", Array.Empty<string[]>()
                     };
                 }
 
-                return new Arg[]
-                {
-                    StatusCode.Success,
-                    "ok",
-                    new Arg[] {"TCPROS", hostname, port}
-                };
+                return OkResponse(new Arg[] {"TCPROS", hostname, port});
             }
             catch (Exception e)
             {
                 Logger.Log(e);
                 return new Arg[]
                 {
-                    StatusCode.Error,
-                    "error=Unknown error: " + e.Message,
-                    Array.Empty<string[]>()
+                    StatusCode.Error, "Unknown error: " + e.Message, Array.Empty<string[]>()
                 };
             }
         }

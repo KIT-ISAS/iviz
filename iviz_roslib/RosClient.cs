@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using Iviz.Msgs;
 
 namespace Iviz.Roslib
@@ -181,13 +182,13 @@ namespace Iviz.Roslib
                 lock (subscribersByTopic)
                 {
                     subscribersByTopic.Values.ForEach(
-                        x => x.TimeoutInMs = (int) value.TotalMilliseconds);
+                        subscriber => subscriber.TimeoutInMs = (int) value.TotalMilliseconds);
                 }
 
                 lock (publishersByTopic)
                 {
                     publishersByTopic.Values.ForEach(
-                        x => x.TimeoutInMs = (int) value.TotalMilliseconds);
+                        publisher => publisher.TimeoutInMs = (int) value.TotalMilliseconds);
                 }
             }
         }
@@ -196,7 +197,7 @@ namespace Iviz.Roslib
         /// <summary>
         /// Wrapper for XML-RPC calls to the master.
         /// </summary>
-        XmlRpc.ParameterClient Parameters { get; }
+        public XmlRpc.ParameterClient Parameters { get; }
 
         /// <summary>
         /// URI of the master node.
@@ -242,11 +243,12 @@ namespace Iviz.Roslib
 
             try
             {
+                // Create an XmlRpc server. This will tell us fast whether the port is taken.
                 listener = new XmlRpc.NodeServer(this);
-                listener.Start();
-                if (CallerUri.Port == 0 || CallerUri.IsDefaultPort)
+                if (CallerUri.Port == AnyPort || CallerUri.IsDefaultPort)
                 {
-                    CallerUri = new Uri($"http://{CallerUri.Host}:{listener.ListenerUri.Port}{CallerUri.AbsolutePath}");
+                    string absolutePath = Uri.UnescapeDataString(callerUri.AbsolutePath);
+                    CallerUri = new Uri($"http://{CallerUri.Host}:{listener.ListenerUri.Port}{absolutePath}");
                 }
             }
             catch (SocketException e)
@@ -258,17 +260,10 @@ namespace Iviz.Roslib
             Master = new XmlRpc.Master(masterUri, CallerId, CallerUri);
             Parameters = new XmlRpc.ParameterClient(masterUri, CallerId, CallerUri);
 
-            Logger.Log($"** RosClient: Starting!\n" +
-                       $"** My Id is {CallerId}\n" +
-                       $"** My Uri is {CallerUri}\n" +
-                       $"** I'm talking to {MasterUri}");
-
             try
             {
-                // check if the system thinks we are subscribed to or advertise topic,
-                // possibly from a previous session. if so, remove them.
-                // this also doubles as a reachability test for the master
-                EnsureCleanSlate();
+                // Do a simple ping to the master. This will tell us whether the master is reachable.
+                Master.GetUri();
             }
             catch (Exception e) when
                 (e is SocketException || e is TimeoutException || e is AggregateException || e is IOException)
@@ -277,8 +272,8 @@ namespace Iviz.Roslib
                 throw new ConnectionException($"Failed to contact the master URI '{masterUri}'", e);
             }
 
-            Logger.Log("RosClient: Initialized.");
-
+            // Start the XmlRpc server.
+            listener.Start();
 
             try
             {
@@ -294,11 +289,26 @@ namespace Iviz.Roslib
                 }
             }
             catch (Exception e) when
-                (e is SocketException || e is TimeoutException || e is AggregateException)
+                (e is SocketException || e is TimeoutException || e is AggregateException || e is IOException)
             {
                 listener.Dispose();
                 throw new UnreachableUriException($"My own uri '{CallerUri}' does not appear to be reachable!");
             }
+
+            try
+            {
+                // check if the system thinks we are subscribed to or advertise topic,
+                // possibly from a previous session. if so, remove them.
+                EnsureCleanSlate();
+            }
+            catch (Exception e) when
+                (e is SocketException || e is TimeoutException || e is AggregateException || e is IOException)
+            {
+                listener.Dispose();
+                throw new ConnectionException($"Failed to contact the master URI '{masterUri}'", e);
+            }
+
+            Logger.Log("RosClient: Initialized.");
         }
 
         /// <summary>
@@ -619,7 +629,7 @@ namespace Iviz.Roslib
             {
                 TimeoutInMs = (int) TcpRosTimeout.TotalMilliseconds
             };
-            RosPublisher publisher = new RosPublisher(this, manager);
+            RosPublisher publisher = new RosPublisher(this, manager, type);
 
             lock (publishersByTopic)
             {
@@ -627,17 +637,17 @@ namespace Iviz.Roslib
             }
 
             var response = Master.RegisterPublisher(topic, topicInfo.Type);
-            if (!response.IsValid)
+            if (response.IsValid)
             {
-                lock (publishersByTopic)
-                {
-                    publishersByTopic.Remove(topic);
-                }
-
-                throw new ArgumentException("Error registering publisher: " + response.StatusMessage, nameof(topic));
+                return publisher;
             }
 
-            return publisher;
+            lock (publishersByTopic)
+            {
+                publishersByTopic.Remove(topic);
+            }
+
+            throw new ArgumentException($"Error registering publisher: {response.StatusMessage}", nameof(topic));
         }
 
         /// <summary>
@@ -672,6 +682,11 @@ namespace Iviz.Roslib
                 publisher = CreatePublisher(topic, type);
             }
 
+            if (!publisher.MessageTypeMatches(type))
+            {
+                throw new InvalidMessageTypeException("Type does not match existing publisher.");
+            }
+
             return publisher.Advertise();
         }
 
@@ -690,7 +705,7 @@ namespace Iviz.Roslib
             RosPublisher publisher;
             lock (publishersByTopic)
             {
-                publisher = publishersByTopic.Values.FirstOrDefault(x => x.ContainsId(topicId));
+                publisher = publishersByTopic.Values.FirstOrDefault(p => p.ContainsId(topicId));
             }
 
             return publisher != null && publisher.Unadvertise(topicId);
@@ -736,10 +751,8 @@ namespace Iviz.Roslib
             {
                 return publisher;
             }
-            else
-            {
-                throw new KeyNotFoundException($"Cannot find publisher for topic '{topic}'");
-            }
+
+            throw new KeyNotFoundException($"Cannot find publisher for topic '{topic}'");
         }
 
         /// <summary>
@@ -752,8 +765,9 @@ namespace Iviz.Roslib
             var response = Master.GetPublishedTopics();
             if (response.IsValid)
             {
-                return Master.GetPublishedTopics().Topics.Select(x => new BriefTopicInfo(x.name, x.type)).ToArray()
-                    .AsReadOnly();
+                return Master.GetPublishedTopics().Topics
+                    .Select(tuple => new BriefTopicInfo(tuple.name, tuple.type))
+                    .ToArray().AsReadOnly();
             }
 
             throw new XmlRpcException("Failed to retrieve topics: " + response.StatusMessage);
@@ -777,10 +791,8 @@ namespace Iviz.Roslib
             {
                 return new SystemState(response.Publishers, response.Subscribers, response.Services);
             }
-            else
-            {
-                throw new XmlRpcException("Failed to retrieve system state: " + response.StatusMessage);
-            }
+
+            throw new XmlRpcException("Failed to retrieve system state: " + response.StatusMessage);
         }
 
         /// <summary>
@@ -815,6 +827,14 @@ namespace Iviz.Roslib
 
         internal BriefTopicInfo[] GetPublicationsRcp()
         {
+            lock (publishersByTopic)
+            {
+                return publishersByTopic
+                    .Select(pair => new BriefTopicInfo(pair.Key, pair.Value.TopicType))
+                    .ToArray();
+            }
+
+            /*
             try
             {
                 lock (publishersByTopic)
@@ -825,7 +845,6 @@ namespace Iviz.Roslib
                     {
                         result[i++] = new BriefTopicInfo(entry.Key, entry.Value.TopicType);
                     }
-
                     return result;
                 }
             }
@@ -834,19 +853,20 @@ namespace Iviz.Roslib
                 Logger.Log($"{this}: GetPublicationsRcp failed: " + e);
                 return Array.Empty<BriefTopicInfo>();
             }
+            */
         }
 
 
         internal void PublisherUpdateRcp(string topic, Uri[] publishers)
         {
+            if (!TryGetSubscriber(topic, out RosSubscriber subscriber))
+            {
+                Logger.Log($"{this}: PublisherUpdate called for nonexisting topic '{topic}'");
+                return;
+            }
+
             try
             {
-                if (!TryGetSubscriber(topic, out RosSubscriber subscriber))
-                {
-                    Logger.Log($"{this}: PublisherUpdate called for nonexisting topic '{topic}'");
-                    return;
-                }
-
                 subscriber.PublisherUpdateRcp(publishers);
             }
             catch (Exception e)
@@ -857,16 +877,16 @@ namespace Iviz.Roslib
 
         internal bool RequestTopicRpc(string remoteCallerId, string topic, out string hostname, out int port)
         {
+            if (!TryGetPublisher(topic, out RosPublisher publisher))
+            {
+                Logger.Log($"{this}: '{remoteCallerId} is requesting nonexisting topic '{topic}'");
+                hostname = null;
+                port = 0;
+                return false;
+            }
+
             try
             {
-                if (!TryGetPublisher(topic, out RosPublisher publisher))
-                {
-                    Logger.Log($"{this}: '{remoteCallerId} is requesting nonexisting topic '{topic}'");
-                    hostname = null;
-                    port = 0;
-                    return false;
-                }
-
                 publisher.RequestTopicRpc(remoteCallerId, out hostname, out port);
                 return true;
             }
@@ -881,8 +901,9 @@ namespace Iviz.Roslib
 
         /// <summary>
         /// Close this connection. Unsubscribes and unadvertises all topics.
+        /// <param name="waitForUnregister">Unregisters the topics and services of the clients. Blocks until finished.</param>
         /// </summary>
-        public void Close()
+        public void Close(bool waitForUnregister = true)
         {
             RosPublisher[] publishers;
             lock (publishersByTopic)
@@ -891,10 +912,22 @@ namespace Iviz.Roslib
                 publishersByTopic.Clear();
             }
 
-            publishers.ForEach(x =>
+            publishers.ForEach(publisher =>
             {
-                x.Stop();
-                RemovePublisher(x);
+                publisher.Stop();
+                if (!waitForUnregister)
+                {
+                    return;
+                }
+
+                try
+                {
+                    RemovePublisher(publisher);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogDebug($"Error closing publisher {publisher}: {e}");
+                }
             });
 
             RosSubscriber[] subscribers;
@@ -904,10 +937,22 @@ namespace Iviz.Roslib
                 subscribersByTopic.Clear();
             }
 
-            subscribers.ForEach(x =>
+            subscribers.ForEach(subscriber =>
             {
-                x.Stop();
-                RemoveSubscriber(x);
+                subscriber.Stop();
+                if (!waitForUnregister)
+                {
+                    return;
+                }
+
+                try
+                {
+                    RemoveSubscriber(subscriber);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogDebug($"Error closing subscriber {subscriber}: {e}");
+                }
             });
 
             lock (subscribedServicesByName)
@@ -916,11 +961,31 @@ namespace Iviz.Roslib
                 subscribedServicesByName.Clear();
             }
 
+            ServiceSenderManager[] serviceManagers;
             lock (advertisedServicesByName)
             {
-                advertisedServicesByName.ForEach(x => x.Value.Stop());
+                serviceManagers = advertisedServicesByName.Values.ToArray();
                 advertisedServicesByName.Clear();
             }
+
+            serviceManagers.ForEach(serviceSender =>
+            {
+                serviceSender.Stop();
+                if (!waitForUnregister)
+                {
+                    return;
+                }
+
+                try
+                {
+                    Master.UnregisterService(serviceSender.Service, serviceSender.Uri);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogDebug($"Error closing subscriber {serviceSender}: {e}");
+                }
+            });
+
 
             listener.Dispose();
         }
@@ -928,13 +993,17 @@ namespace Iviz.Roslib
         public SubscriberState GetSubscriberStatistics()
         {
             lock (subscribersByTopic)
+            {
                 return new SubscriberState(subscribersByTopic.Values.Select(x => x.GetState()).ToArray());
+            }
         }
 
         public PublisherState GetPublisherStatistics()
         {
             lock (publishersByTopic)
+            {
                 return new PublisherState(publishersByTopic.Values.Select(x => x.GetState()).ToArray());
+            }
         }
 
         internal List<BusInfo> GetBusInfoRcp()
@@ -942,17 +1011,12 @@ namespace Iviz.Roslib
             List<BusInfo> busInfos = new List<BusInfo>();
             try
             {
-                SubscriberState sstate = GetSubscriberStatistics();
-                foreach (var topic in sstate.Topics)
+                SubscriberState state = GetSubscriberStatistics();
+                foreach (var topic in state.Topics)
                 {
                     foreach (var receiver in topic.Receivers)
                     {
-                        busInfos.Add(new BusInfo(
-                            busInfos.Count,
-                            receiver.RemoteUri,
-                            "i", "TCPROS",
-                            topic.Topic,
-                            1));
+                        busInfos.Add(new BusInfo(busInfos.Count, receiver.RemoteUri, "i", topic.Topic));
                     }
                 }
 
@@ -973,12 +1037,7 @@ namespace Iviz.Roslib
                             remoteUri = null;
                         }
 
-                        busInfos.Add(new BusInfo(
-                            busInfos.Count,
-                            remoteUri,
-                            "o", "TCPROS",
-                            topic.Topic,
-                            1));
+                        busInfos.Add(new BusInfo(busInfos.Count, remoteUri, "o", topic.Topic));
                     }
                 }
             }
@@ -1028,7 +1087,7 @@ namespace Iviz.Roslib
             }
 
             Uri serviceUri = response.ServiceUrl;
-            ServiceInfo serviceInfo = new ServiceInfo(CallerId, serviceName, typeof(T), null);
+            ServiceInfo serviceInfo = new ServiceInfo(CallerId, serviceName, typeof(T));
             try
             {
                 using (serviceReceiver = new ServiceReceiver(serviceInfo, serviceUri, true, persistent))
@@ -1104,53 +1163,9 @@ namespace Iviz.Roslib
             Master.UnregisterService(name, advertisedService.Uri);
         }
 
-        public bool SetParameter(string key, Iviz.XmlRpc.Arg value)
-        {
-            return Parameters.SetParam(key, value).Code == XmlRpc.StatusCode.Success;
-        }
-
-        public bool GetParameter(string key, out object value)
-        {
-            var response = Parameters.GetParam(key);
-            value = response.ParameterValue;
-            return response.Code == XmlRpc.StatusCode.Success;
-        }
-
-        public ReadOnlyCollection<string> GetParameterNames()
-        {
-            var response = Parameters.GetParamNames();
-            if (response.IsValid)
-            {
-                return response.ParameterNameList;
-            }
-
-            throw new XmlRpcException("Failed to retrieve parameter names: " + response.StatusMessage);
-        }
-
-        public bool DeleteParameter(string key)
-        {
-            return Parameters.DeleteParam(key).Code == XmlRpc.StatusCode.Success;
-        }
-
-        public bool HasParameter(string key)
-        {
-            return Parameters.HasParam(key).HasParam;
-        }
-
-        public bool SubscribeParameter(string key)
-        {
-            return Parameters.SubscribeParam(key).Code == XmlRpc.StatusCode.Success;
-        }
-
-        public bool UnsubscribeParameter(string key)
-        {
-            return Parameters.UnsubscribeParam(key).Code == XmlRpc.StatusCode.Success;
-        }
-
         public void Dispose()
         {
             Close();
-            listener.Dispose();
         }
 
         public override string ToString()

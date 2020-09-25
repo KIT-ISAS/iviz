@@ -13,7 +13,8 @@ namespace Iviz.Roslib
         readonly List<Action<IMessage>> callbackList = new List<Action<IMessage>>();
         readonly TcpReceiverManager manager;
         readonly RosClient client;
-
+        readonly Type topicClassType;
+        
         int totalSubscribers;
 
         /// <summary>
@@ -59,6 +60,7 @@ namespace Iviz.Roslib
         {
             this.client = client;
             this.manager = manager;
+            topicClassType = manager.TopicInfo.Generator.GetType();
             IsAlive = true;
 
             manager.Subscriber = this;
@@ -123,12 +125,7 @@ namespace Iviz.Roslib
 
         public bool MessageTypeMatches(Type type)
         {
-            if (type is null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
-
-            return type == manager.TopicInfo.Generator.GetType();
+            return type == topicClassType;
         }
 
         public string Subscribe(Action<IMessage> callback)
@@ -197,5 +194,11 @@ namespace Iviz.Roslib
             }
             return true;
         }
+        
+        public override string ToString()
+        {
+            return $"[Subscriber {Topic} [{TopicType}] ]";
+        }        
+        
     }
 }

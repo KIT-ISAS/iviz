@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.XmlRpc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -87,7 +88,7 @@ namespace Iviz.Roslib
             Endpoint = new Endpoint(localEndpoint);
 
             keepRunning = true;
-            task = Task.Run(async () => await Run(timeoutInMs).ConfigureAwait(false));
+            task = Task.Run(async () => await Run(timeoutInMs));
 
             return localEndpoint;
         }
@@ -305,7 +306,7 @@ namespace Iviz.Roslib
                 }
                 */
                 Task<TcpClient> connectionTask = tcpListener.AcceptTcpClientAsync();
-                if (!connectionTask.Wait(timeoutInMs) || !connectionTask.IsCompleted)
+                if (!await connectionTask.WaitFor(timeoutInMs) || !connectionTask.IsCompleted)
                 {
                     throw new TimeoutException("Connection timed out!", connectionTask.Exception);
                 } 

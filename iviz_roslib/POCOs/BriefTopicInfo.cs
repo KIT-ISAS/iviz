@@ -23,7 +23,7 @@
 
         public override string ToString()
         {
-            return $"[Topic={Topic} Type={Type}]";
+            return $"[Topic='{Topic}' Type='{Type}']";
         }
     }
 }
