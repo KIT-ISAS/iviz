@@ -19,15 +19,12 @@ namespace Iviz.XmlRpc
         public async Task<string> GetRequest(int timeoutInMs = 2000)
         {
             StreamReader stream = new StreamReader(client.GetStream(), BuiltIns.UTF8);
-            //stream.BaseStream.ReadTimeout = timeoutInMs;
-            
-            //async Task<string> TimeoutTask() {  await Task.Delay(timeoutInMs); return null; };
 
             int length = -1;
             while (true)
             {
                 Task<string> readTask = stream.ReadLineAsync();
-                if (!readTask.Wait(timeoutInMs) || !readTask.IsCompleted)
+                if (!await readTask.WaitFor(timeoutInMs) || !readTask.IsCompleted)
                 {
                     throw new TimeoutException("Read line timed out!", readTask.Exception);
                 }
@@ -57,7 +54,7 @@ namespace Iviz.XmlRpc
             while (BuiltIns.UTF8.GetByteCount(buffer, 0, numRead) < length)
             {
                 Task<int> readTask = stream.ReadAsync(buffer, 0, length - numRead);
-                if (!readTask.Wait(timeoutInMs) || !readTask.IsCompleted)
+                if (!await readTask.WaitFor(timeoutInMs) || !readTask.IsCompleted)
                 {
                     throw new TimeoutException("Read line timed out!", readTask.Exception);
                 }

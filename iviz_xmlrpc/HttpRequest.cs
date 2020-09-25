@@ -3,6 +3,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.Msgs.StdMsgs;
 
 namespace Iviz.XmlRpc
 {
@@ -55,10 +56,7 @@ namespace Iviz.XmlRpc
 
             Task<string> readTask = reader.ReadToEndAsync();
             
-            async Task<string> TimeoutTask() {  await Task.Delay(timeoutInMs); return null; };
-            Task<string> firstTask = await Task.WhenAny(readTask, TimeoutTask());
-            
-            if (!readTask.Wait(timeoutInMs) || !readTask.IsCompleted)
+            if (!await readTask.WaitFor(timeoutInMs) || !readTask.IsCompleted)
             {
                 reader.Close();
                 throw new TimeoutException("HttpRequest: Request response timed out!", readTask.Exception);

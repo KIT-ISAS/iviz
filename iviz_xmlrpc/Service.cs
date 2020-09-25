@@ -153,7 +153,14 @@ namespace Iviz.XmlRpc
         public static object MethodCall(Uri remoteUri, Uri callerUri, string method, IEnumerable<Arg> args,
             int timeoutInMs = 2000)
         {
-            return MethodCallAsync(remoteUri, callerUri, method, args, timeoutInMs).Result;
+            Task<object> task = MethodCallAsync(remoteUri, callerUri, method, args, timeoutInMs);
+            if (!task.Wait(2 * timeoutInMs))
+            {
+                // shouldn't happen
+                throw new TimeoutException("MethodCallAsync timed out!");
+            }
+
+            return task.Result;
         }
 
         public static async Task<object> MethodCallAsync(Uri remoteUri, Uri callerUri, string method,
@@ -253,7 +260,10 @@ namespace Iviz.XmlRpc
             IReadOnlyDictionary<string, Func<object[], Arg[]>> methods,
             IReadOnlyDictionary<string, Func<object[], Task>> lateCallbacks = null)
         {
-            MethodResponseAsync(httpContext, methods, lateCallbacks).Wait();
+            if (!MethodResponseAsync(httpContext, methods, lateCallbacks).Wait(2000))
+            {
+                throw new TimeoutException("MethodResponse timed out!");
+            }
         }
 
         public static async Task MethodResponseAsync(
