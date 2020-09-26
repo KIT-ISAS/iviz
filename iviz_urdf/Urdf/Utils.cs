@@ -15,19 +15,34 @@ namespace Iviz.Urdf
                 throw new MalformedUrdfException("Expected a float, got null");
             }
 
-            return float.Parse(attr.Value, Culture);
+            if (float.TryParse(attr.Value, NumberStyles.Any, Culture, out float f))
+            {
+                return f;
+            } 
+
+            throw new MalformedUrdfException("Expected float at ", attr);
         }
 
         public static float ParseFloat(XmlAttribute attr, float @default)
         {
-            return attr is null ? @default : float.Parse(attr.Value, Culture);
+            if (attr is null)
+            {
+                return @default;
+            }
+
+            if (float.TryParse(attr.Value, NumberStyles.Any, Culture, out float f))
+            {
+                return f;
+            } 
+                
+            throw new MalformedUrdfException("Expected float at ", attr);
         }
 
         public static string ParseString(XmlAttribute attr)
         {
-            if (attr is null)
+            if (attr?.Value is null)
             {
-                throw new MalformedUrdfException("Expected a string, got null");
+                throw new MalformedUrdfException("Expected a string attribute, got null");
             }
 
             return attr.Value;

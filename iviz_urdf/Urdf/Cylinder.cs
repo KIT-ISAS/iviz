@@ -9,8 +9,8 @@ namespace Iviz.Urdf
 
         internal Cylinder(XmlNode node)
         {
-            Radius = Utils.ParseFloat(node.Attributes["radius"]);
-            Length = Utils.ParseFloat(node.Attributes["length"]);
+            Radius = Utils.ParseFloat(node?.Attributes?["radius"]);
+            Length = Utils.ParseFloat(node?.Attributes?["length"]);
         }
     }
 }

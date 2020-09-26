@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Xml;
 
 namespace Iviz.Urdf
@@ -26,11 +27,19 @@ namespace Iviz.Urdf
             {
                 throw new MalformedUrdfException(attr);
             }
+            
+            if (!float.TryParse(elems[0], NumberStyles.Any, Utils.Culture, out float r) ||
+                !float.TryParse(elems[1], NumberStyles.Any, Utils.Culture, out float g) ||
+                !float.TryParse(elems[2], NumberStyles.Any, Utils.Culture, out float b) || 
+                !float.TryParse(elems[3], NumberStyles.Any, Utils.Culture, out float a))
+            {
+                throw new MalformedUrdfException("Expected RGBA at ", attr);
+            }            
 
-            R = float.Parse(elems[0], Utils.Culture);
-            G = float.Parse(elems[1], Utils.Culture);
-            B = float.Parse(elems[2], Utils.Culture);
-            A = float.Parse(elems[3], Utils.Culture);
+            R = r;
+            G = g;
+            B = b;
+            A = a;
         }
     }
 }

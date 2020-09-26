@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Xml;
 
 namespace Iviz.Urdf
@@ -28,9 +29,16 @@ namespace Iviz.Urdf
                 throw new MalformedUrdfException(attr);
             }
 
-            X = float.Parse(elems[0], Utils.Culture);
-            Y = float.Parse(elems[1], Utils.Culture);
-            Z = float.Parse(elems[2], Utils.Culture);
+            if (!float.TryParse(elems[0], NumberStyles.Any, Utils.Culture, out float x) ||
+                !float.TryParse(elems[1], NumberStyles.Any, Utils.Culture, out float y) ||
+                !float.TryParse(elems[2], NumberStyles.Any, Utils.Culture, out float z))
+            {
+                throw new MalformedUrdfException(attr);
+            }
+                
+            X = x;
+            Y = y;
+            Z = z;
         }
 
         public static Vector3 Parse(XmlAttribute attr, Vector3 @default)

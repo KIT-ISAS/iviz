@@ -7,7 +7,12 @@ namespace Iviz.Urdf
     {
         public XmlNode Node { get; }
 
-        public MalformedUrdfException(XmlNode node) : base("Error at or around node " + node)
+        public MalformedUrdfException(XmlNode node) : base($"Error at node '{node}'")
+        {
+            Node = node;
+        }
+
+        public MalformedUrdfException(string message, XmlNode node) : base($"{message}'{node}'")
         {
             Node = node;
         }
