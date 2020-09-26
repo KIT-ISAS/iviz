@@ -10,7 +10,7 @@ using Logger = Iviz.Msgs.Logger;
 
 namespace Iviz.RosMaster
 {
-    public sealed class Server : IDisposable
+    public sealed class RosMasterServer : IDisposable
     {
         public const int DefaultPort = 11311;
 
@@ -42,7 +42,7 @@ namespace Iviz.RosMaster
             public const int Success = 1;
         }
 
-        public Server(Uri masterUri, string callerId = "/iviz_master")
+        public RosMasterServer(Uri masterUri, string callerId = "/iviz_master")
         {
             MasterUri = masterUri;
             MasterCallerId = callerId;
@@ -89,6 +89,7 @@ namespace Iviz.RosMaster
             }
 
             listener.Dispose();
+
             disposed = true;
         }
 
@@ -102,6 +103,7 @@ namespace Iviz.RosMaster
         {
             Logger.Log("** Starting at " + MasterUri);
             await listener.StartAsync(StartContext);
+            await listener.AwaitRunningTasks();
             Logger.Log("** Leaving thread.");
         }
 
@@ -111,7 +113,7 @@ namespace Iviz.RosMaster
             {
                 try
                 {
-                    await Service.MethodResponseAsync(context, methods, lateCallbacks);
+                    await XmlRpcService.MethodResponseAsync(context, methods, lateCallbacks);
                 }
                 catch (Exception e)
                 {
@@ -173,18 +175,12 @@ namespace Iviz.RosMaster
             return OkResponse(new Arg(currentSubscribers));
         }
 
-
         async Task RegisterPublisherLateCallback(object[] args)
         {
             if (!(args[1] is string topic) ||
                 !subscribersByTopic.TryGetValue(topic, out var subscribers))
             {
                 return;
-            }
-
-            using (new Semaphore(0, 1))
-            {
-                
             }
 
             IEnumerable<Uri> publisherUris =
@@ -201,8 +197,8 @@ namespace Iviz.RosMaster
         {
             try
             {
-                await Service.MethodCallAsync(remoteUri, MasterUri, "publisherUpdate", methodArgs);
-                //Task.Run(async () => await Service.MethodCallAsync(remoteUri, MasterUri, "publisherUpdate", methodArgs));
+                // note! will block until timeout if node is not reachable
+                await XmlRpcService.MethodCallAsync(remoteUri, MasterUri, "publisherUpdate", methodArgs);
             }
             catch (Exception e)
             {
@@ -215,7 +211,6 @@ namespace Iviz.RosMaster
             if (args.Length != 4 ||
                 !(args[0] is string callerId) ||
                 !(args[1] is string topic) ||
-                !(args[2] is string topicType) ||
                 !(args[3] is string callerApi))
             {
                 return ErrorResponse("Failed to parse arguments");
@@ -311,8 +306,7 @@ namespace Iviz.RosMaster
         {
             if (args.Length != 4 ||
                 !(args[1] is string service) ||
-                !(args[2] is string serviceApi) ||
-                !(args[3] is string callerApi))
+                !(args[2] is string serviceApi))
             {
                 return ErrorResponse("Failed to parse arguments");
             }

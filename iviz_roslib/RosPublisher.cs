@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using Iviz.Msgs;
 
 namespace Iviz.Roslib
@@ -8,7 +11,7 @@ namespace Iviz.Roslib
     public class RosPublisher
     {
         readonly TcpSenderManager manager;
-        readonly List<string> ids = new List<string>();
+        readonly ConcurrentDictionary<string, object> ids = new ConcurrentDictionary<string, object>();
         readonly RosClient client;
         readonly Type topicClassType;
         int totalPublishers;
@@ -90,7 +93,7 @@ namespace Iviz.Roslib
         public PublisherTopicState GetState()
         {
             AssertIsAlive();
-            return new PublisherTopicState(Topic, TopicType, ids.ToArray(), manager.GetStates());
+            return new PublisherTopicState(Topic, TopicType, ids.Keys.ToArray(), manager.GetStates());
         }
 
         public void Publish(IMessage message)
@@ -110,13 +113,11 @@ namespace Iviz.Roslib
             manager.Publish(message);
         }
 
-        internal void RequestTopicRpc(string remoteCallerId, out string hostname, out int port)
+        internal (string hostname, int port) RequestTopicRpc(string remoteCallerId)
         {
             IPEndPoint endPoint = manager.CreateConnection(remoteCallerId);
-            hostname = manager.CallerUri.Host;
-            port = endPoint.Port;
-
             NumSubscribersChanged?.Invoke(this);
+            return (manager.CallerUri.Host, endPoint.Port);
         }
 
         internal void Stop()
@@ -132,7 +133,7 @@ namespace Iviz.Roslib
             AssertIsAlive();
 
             string id = GenerateId();
-            ids.Add(id);
+            ids.TryAdd(id, null);
 
 #if DEBUG__
             Logger.LogDebug($"{this}: Advertising '{Topic}' with type {TopicType} and id '{id}'");
@@ -141,21 +142,15 @@ namespace Iviz.Roslib
             return id;
         }
 
+        bool RemoveId(string topicId)
+        {
+            if (topicId is null) { throw new ArgumentNullException(nameof(topicId)); }
+            return ids.TryRemove(topicId, out _);
+        }
+        
         public bool Unadvertise(string topicId)
         {
-            if (topicId is null)
-            {
-                throw new ArgumentNullException(nameof(topicId));
-            }
-
-            AssertIsAlive();
-            int index = ids.IndexOf(topicId);
-            if (index < 0)
-            {
-                return false;
-            }
-
-            ids.RemoveAt(index);
+            bool removed = RemoveId(topicId);
 
             if (ids.Count == 0)
             {
@@ -163,8 +158,21 @@ namespace Iviz.Roslib
                 client.RemovePublisher(this);
             }
 
-            return true;
+            return removed;
         }
+        
+        public async Task<bool> UnadvertiseAsync(string topicId)
+        {
+            bool removed = RemoveId(topicId);
+
+            if (ids.Count == 0)
+            {
+                Stop();
+                await client.RemovePublisherAsync(this);
+            }
+
+            return removed;
+        }        
 
         public bool ContainsId(string id)
         {
@@ -173,7 +181,7 @@ namespace Iviz.Roslib
                 throw new ArgumentNullException(nameof(id));
             }
 
-            return ids.Contains(id);
+            return ids.ContainsKey(id);
         }
         
         public bool MessageTypeMatches(Type type)

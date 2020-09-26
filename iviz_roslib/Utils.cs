@@ -21,10 +21,7 @@ namespace Iviz.Roslib
     {
         public static void ForEach<T>(this IEnumerable<T> ts, Action<T> action)
         {
-            if (ts is null)
-            {
-                throw new ArgumentNullException(nameof(ts));
-            }
+            if (ts is null) { throw new ArgumentNullException(nameof(ts)); }
 
             foreach (T t in ts)
             {
@@ -42,21 +39,15 @@ namespace Iviz.Roslib
 
         public static bool HasPrefix(this string check, string prefix)
         {
-            if (check is null)
-            {
-                throw new ArgumentNullException(nameof(check));
-            }
+            if (check is null) { throw new ArgumentNullException(nameof(check)); }
 
-            if (prefix is null)
-            {
-                throw new ArgumentNullException(nameof(prefix));
-            }
+            if (prefix is null) { throw new ArgumentNullException(nameof(prefix)); }
 
             if (check.Length < prefix.Length)
             {
                 return false;
             }
-            
+
             for (int i = 0; i < prefix.Length; i++)
             {
                 if (check[i] != prefix[i])
@@ -64,25 +55,21 @@ namespace Iviz.Roslib
                     return false;
                 }
             }
+
             return true;
         }
 
         public static bool HasSuffix(this string check, string suffix)
         {
-            if (check is null)
-            {
-                throw new ArgumentNullException(nameof(check));
-            }
+            if (check is null) { throw new ArgumentNullException(nameof(check)); }
 
-            if (suffix is null)
-            {
-                throw new ArgumentNullException(nameof(suffix));
-            }
+            if (suffix is null) { throw new ArgumentNullException(nameof(suffix)); }
 
             if (check.Length < suffix.Length)
             {
                 return false;
             }
+
             int offset = check.Length - suffix.Length;
             for (int i = 0; i < suffix.Length; i++)
             {
@@ -91,6 +78,7 @@ namespace Iviz.Roslib
                     return false;
                 }
             }
+
             return true;
         }
 
@@ -98,25 +86,25 @@ namespace Iviz.Roslib
         {
             for (int i = 0; i < size; i++)
             {
-                Logger.Log($"[{i}]: {(int)bytes[start + i]} --> {(char)bytes[start + i]}");
+                Logger.Log($"[{i}]: {(int) bytes[start + i]} --> {(char) bytes[start + i]}");
             }
         }
 
         public static string ToJsonString(this ISerializable o)
         {
-            return ToJsonString((object)o);
+            return ToJsonString((object) o);
         }
 
         public static string ToJsonString(this IService o)
         {
-            return ToJsonString((object)o);
+            return ToJsonString((object) o);
         }
 
         public static string ToJsonString(object o)
         {
             return JsonConvert.SerializeObject(o);
         }
-        
+
         public static ReadOnlyCollection<T> AsReadOnly<T>(this IList<T> t)
         {
             return new ReadOnlyCollection<T>(t);

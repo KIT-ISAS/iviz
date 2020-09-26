@@ -18,18 +18,18 @@ namespace Iviz.ModelService
 
             using RosClient client = new RosClient(masterUri, "/iviz_model_loader");
             
-            using Server server = new Server();
+            using ModelServer modelServer = new ModelServer();
             
-            if (server.NumPackages == 0)
+            if (modelServer.NumPackages == 0)
             {
                 Console.WriteLine("EE Empty list of package paths. Nothing to do.");
                 return;
             }
 
-            client.AdvertiseService<GetModelResource>(Server.ModelServiceName, server.ModelCallback);
-            client.AdvertiseService<GetModelTexture>(Server.TextureServiceName, server.TextureCallback);
-            client.AdvertiseService<GetFile>(Server.FileServiceName, server.FileCallback);
-            client.AdvertiseService<GetSdf>(Server.SdfServiceName, server.SdfCallback);
+            client.AdvertiseService<GetModelResource>(ModelServer.ModelServiceName, modelServer.ModelCallback);
+            client.AdvertiseService<GetModelTexture>(ModelServer.TextureServiceName, modelServer.TextureCallback);
+            client.AdvertiseService<GetFile>(ModelServer.FileServiceName, modelServer.FileCallback);
+            client.AdvertiseService<GetSdf>(ModelServer.SdfServiceName, modelServer.SdfCallback);
 
             Console.WriteLine("** Done. Waiting for requests...");
 

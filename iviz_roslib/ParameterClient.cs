@@ -110,56 +110,56 @@ namespace Iviz.Roslib.XmlRpc
         DefaultResponse DeleteParam(string key)
         {
             Arg[] args = {CallerId, key};
-            object response = Service.MethodCall(MasterUri, CallerUri, "deleteParam", args);
+            object response = XmlRpcService.MethodCall(MasterUri, CallerUri, "deleteParam", args);
             return new DefaultResponse((object[]) response);
         }
 
         async Task<DefaultResponse> DeleteParamAsync(string key)
         {
             Arg[] args = {CallerId, key};
-            object response = await Service.MethodCallAsync(MasterUri, CallerUri, "deleteParam", args).Caf();
+            object response = await XmlRpcService.MethodCallAsync(MasterUri, CallerUri, "deleteParam", args).Caf();
             return new DefaultResponse((object[]) response);
         }
 
         DefaultResponse SetParam(string key, Arg value)
         {
             Arg[] args = {CallerId, key, value};
-            object response = Service.MethodCall(MasterUri, CallerUri, "setParam", args);
+            object response = XmlRpcService.MethodCall(MasterUri, CallerUri, "setParam", args);
             return new DefaultResponse((object[]) response);
         }
 
         async Task<DefaultResponse> SetParamAsync(string key, Arg value)
         {
             Arg[] args = {CallerId, key, value};
-            object response = await Service.MethodCallAsync(MasterUri, CallerUri, "setParam", args).Caf();
+            object response = await XmlRpcService.MethodCallAsync(MasterUri, CallerUri, "setParam", args).Caf();
             return new DefaultResponse((object[]) response);
         }
 
         GetParamResponse GetParam(string key)
         {
             Arg[] args = {CallerId, key};
-            object response = Service.MethodCall(MasterUri, CallerUri, "getParam", args);
+            object response = XmlRpcService.MethodCall(MasterUri, CallerUri, "getParam", args);
             return new GetParamResponse((object[]) response);
         }
 
         async Task<GetParamResponse> GetParamAsync(string key)
         {
             Arg[] args = {CallerId, key};
-            object response = await Service.MethodCallAsync(MasterUri, CallerUri, "getParam", args).Caf();
+            object response = await XmlRpcService.MethodCallAsync(MasterUri, CallerUri, "getParam", args).Caf();
             return new GetParamResponse((object[]) response);
         }
 
         SearchParamResponse SearchParam(string key)
         {
             Arg[] args = {CallerId, key};
-            object response = Service.MethodCall(MasterUri, CallerUri, "searchParam", args);
+            object response = XmlRpcService.MethodCall(MasterUri, CallerUri, "searchParam", args);
             return new SearchParamResponse((object[]) response);
         }
 
         async Task<SearchParamResponse> SearchParamAsync(string key)
         {
             Arg[] args = {CallerId, key};
-            object response = await Service.MethodCallAsync(MasterUri, CallerUri, "searchParam", args).Caf();
+            object response = await XmlRpcService.MethodCallAsync(MasterUri, CallerUri, "searchParam", args).Caf();
             return new SearchParamResponse((object[]) response);
         }
 
@@ -167,56 +167,56 @@ namespace Iviz.Roslib.XmlRpc
         SubscribeParamResponse SubscribeParam(string key)
         {
             Arg[] args = {CallerId, key, CallerUri};
-            object response = Service.MethodCall(MasterUri, CallerUri, "subscribeParam", args);
+            object response = XmlRpcService.MethodCall(MasterUri, CallerUri, "subscribeParam", args);
             return new SubscribeParamResponse((object[]) response);
         }
 
         async Task<SubscribeParamResponse> SubscribeParamAsync(string key)
         {
             Arg[] args = {CallerId, key, CallerUri};
-            object response = await Service.MethodCallAsync(MasterUri, CallerUri, "subscribeParam", args).Caf();
+            object response = await XmlRpcService.MethodCallAsync(MasterUri, CallerUri, "subscribeParam", args).Caf();
             return new SubscribeParamResponse((object[]) response);
         }
 
         UnsubscribeParamResponse UnsubscribeParam(string key)
         {
             Arg[] args = {CallerId, key, CallerUri};
-            object response = Service.MethodCall(MasterUri, CallerUri, "unsubscribeParam", args);
+            object response = XmlRpcService.MethodCall(MasterUri, CallerUri, "unsubscribeParam", args);
             return new UnsubscribeParamResponse((object[]) response);
         }
 
         async Task<UnsubscribeParamResponse> UnsubscribeParamAsync(string key)
         {
             Arg[] args = {CallerId, key, CallerUri};
-            object response = await Service.MethodCallAsync(MasterUri, CallerUri, "unsubscribeParam", args).Caf();
+            object response = await XmlRpcService.MethodCallAsync(MasterUri, CallerUri, "unsubscribeParam", args).Caf();
             return new UnsubscribeParamResponse((object[]) response);
         }
 
         HasParamResponse HasParam(string key)
         {
             Arg[] args = {CallerId, key};
-            object response = Service.MethodCall(MasterUri, CallerUri, "hasParam", args);
+            object response = XmlRpcService.MethodCall(MasterUri, CallerUri, "hasParam", args);
             return new HasParamResponse((object[]) response);
         }
 
         async Task<HasParamResponse> HasParamAsync(string key)
         {
             Arg[] args = {CallerId, key};
-            object response = await Service.MethodCallAsync(MasterUri, CallerUri, "hasParam", args).Caf();
+            object response = await XmlRpcService.MethodCallAsync(MasterUri, CallerUri, "hasParam", args).Caf();
             return new HasParamResponse((object[]) response);
         }
 
         GetParamNamesResponse GetParamNames()
         {
             Arg[] args = {CallerId};
-            object response = Service.MethodCall(MasterUri, CallerUri, "getParamNames", args);
+            object response = XmlRpcService.MethodCall(MasterUri, CallerUri, "getParamNames", args);
             return new GetParamNamesResponse((object[]) response);
         }
 
         async Task<GetParamNamesResponse> GetParamNamesAsync()
         {
             Arg[] args = {CallerId};
-            object response = await Service.MethodCallAsync(MasterUri, CallerUri, "getParamNames", args).Caf();
+            object response = await XmlRpcService.MethodCallAsync(MasterUri, CallerUri, "getParamNames", args).Caf();
             return new GetParamNamesResponse((object[]) response);
         }
     }

@@ -187,7 +187,7 @@ namespace Iviz.Roslib.XmlRpc
 
         object[] MethodCall(string function, IEnumerable<Arg> args)
         {
-            object tmp = Service.MethodCall(MasterUri, CallerUri, function, args, TimeoutInMs);
+            object tmp = XmlRpcService.MethodCall(MasterUri, CallerUri, function, args, TimeoutInMs);
             if (tmp is object[] result)
             {
                 return result;
@@ -199,7 +199,7 @@ namespace Iviz.Roslib.XmlRpc
 
         async Task<object[]> MethodCallAsync(string function, IEnumerable<Arg> args)
         {
-            object tmp = await Service.MethodCallAsync(MasterUri, CallerUri, function, args, TimeoutInMs).Caf();
+            object tmp = await XmlRpcService.MethodCallAsync(MasterUri, CallerUri, function, args, TimeoutInMs).Caf();
             if (tmp is object[] result)
             {
                 return result;
@@ -273,7 +273,7 @@ namespace Iviz.Roslib.XmlRpc
         public string Topic { get; }
         public ReadOnlyCollection<string> Members { get; }
 
-        public TopicTuple(string topic, IList<string> members)
+        internal TopicTuple(string topic, IList<string> members)
         {
             Topic = topic;
             Members = members.AsReadOnly();

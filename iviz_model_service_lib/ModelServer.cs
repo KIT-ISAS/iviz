@@ -12,7 +12,7 @@ using Iviz.Msgs.SensorMsgs;
 
 namespace Iviz.ModelService
 {
-    public sealed class Server : IDisposable
+    public sealed class ModelServer : IDisposable
     {
         public const string ModelServiceName = "/iviz/get_model_resource";
         public const string TextureServiceName = "/iviz/get_model_texture";
@@ -24,16 +24,13 @@ namespace Iviz.ModelService
 
         public int NumPackages => packagePaths.Count;
 
-        public Action<object> Log { get; set; } = Console.WriteLine;
-        public Action<object> LogError { get; set; } = Console.Error.WriteLine;
-        
-        public Server()
+        public ModelServer()
         {
-            Log("** Used package paths:");
+            Logger.Log("** Used package paths:");
             string packagePath = Environment.GetEnvironmentVariable("ROS_PACKAGE_PATH");
             if (packagePath is null)
             {
-                LogError("EE Cannot retrieve environment variable ROS_PACKAGE_PATH");
+                Logger.LogError("EE Cannot retrieve environment variable ROS_PACKAGE_PATH");
             }
             else
             {
@@ -43,7 +40,7 @@ namespace Iviz.ModelService
                     string pathNormalized = path.Trim();
                     if (!Directory.Exists(pathNormalized))
                     {
-                        Log("** Ignoring '" + pathNormalized + "'");
+                        Logger.Log("** Ignoring '" + pathNormalized + "'");
                         continue;
                     }
 
@@ -54,7 +51,7 @@ namespace Iviz.ModelService
 
             if (packagePaths.Count == 0)
             {
-                Log("EE Empty list of package paths. Nothing to do.");
+                Logger.Log("EE Empty list of package paths. Nothing to do.");
             }
         }
 
@@ -82,7 +79,7 @@ namespace Iviz.ModelService
             }
 
             paths.Add(path);
-            Log("++ " + package);
+            Logger.Log("++ " + package);
         }
 
         string ResolvePath(Uri uri)
@@ -97,7 +94,7 @@ namespace Iviz.ModelService
             string package = uri.Host;
             if (!packagePaths.TryGetValue(package, out List<string> paths))
             {
-                LogError("EE Failed to find package '" + package + "'.");
+                Logger.LogError("EE Failed to find package '" + package + "'.");
                 return null;
             }
 
@@ -118,11 +115,11 @@ namespace Iviz.ModelService
                     return path;
                 }
 
-                LogError("EE Rejecting resource request '" + uri + "' for path traversal.");
+                Logger.LogError("EE Rejecting resource request '" + uri + "' for path traversal.");
                 return null;
             }
 
-            LogError("EE Failed to find resource '" + uri + "'.");
+            Logger.LogError("EE Failed to find resource '" + uri + "'.");
             return null;
         }
 
@@ -156,7 +153,7 @@ namespace Iviz.ModelService
                 return;
             }
  
-            Log("** Requesting " + modelPath);
+            Logger.Log("** Requesting " + modelPath);
 
             Model model;
             try
@@ -166,8 +163,8 @@ namespace Iviz.ModelService
             }
             catch (AssimpException e)
             {
-                LogError("EE Assimp exception loading '" + modelPath + "':");
-                LogError(e);
+                Logger.LogError("EE Assimp exception loading '" + modelPath + "':");
+                Logger.LogError(e);
 
                 msg.Response.Success = false;
                 msg.Response.Message = "Failed to load model";
@@ -178,7 +175,7 @@ namespace Iviz.ModelService
             msg.Response.Message = "";
             msg.Response.Model = model;
 
-            Log(">> " + uri);
+            Logger.Log(">> " + uri);
         }
 
         public void TextureCallback(GetModelTexture msg)
@@ -221,7 +218,7 @@ namespace Iviz.ModelService
             }
             catch (IOException e)
             {
-                LogError("EE Failed to read '" + texturePath + "': " + e.Message);
+                Logger.LogError("EE Failed to read '" + texturePath + "': " + e.Message);
                 msg.Response.Success = false;
                 msg.Response.Message = e.Message;
                 return;
@@ -235,7 +232,7 @@ namespace Iviz.ModelService
                 Data = data
             };
 
-            Log(">> " + uri);
+            Logger.Log(">> " + uri);
         }
 
         Model LoadModel(string fileName)
@@ -289,6 +286,9 @@ namespace Iviz.ModelService
                                 (uint) face.Indices[2],
                                 (uint) face.Indices[3]
                             ));
+                            break;
+                        default:
+                            Logger.LogDebug("ModelService: Got mesh face with " + face.IndexCount + " vertices!");
                             break;
                     }
                 }
@@ -419,7 +419,7 @@ namespace Iviz.ModelService
             }
             catch (IOException e)
             {
-                LogError("EE Failed to read '" + filePath + "': " + e.Message);
+                Logger.LogError("EE Failed to read '" + filePath + "': " + e.Message);
                 msg.Response.Message = e.Message;
                 return;
             }
@@ -428,7 +428,7 @@ namespace Iviz.ModelService
             msg.Response.Message = "";
             msg.Response.Bytes = data;
 
-            Log(">> " + uri);
+            Logger.Log(">> " + uri);
         }
 
         public void SdfCallback(GetSdf msg)
@@ -454,7 +454,7 @@ namespace Iviz.ModelService
             string modelPath = ResolvePath(uri, out string packagePath);
             if (string.IsNullOrWhiteSpace(modelPath))
             {
-                LogError("EE Failed to find resource path for '" + modelPath + "'");
+                Logger.LogError("EE Failed to find resource path for '" + modelPath + "'");
                 msg.Response.Message = "Failed to find resource path";
                 return;
             }
@@ -466,7 +466,7 @@ namespace Iviz.ModelService
             }
             catch (IOException e)
             {
-                LogError("EE Failed to read '" + modelPath + "': " + e.Message);
+                Logger.LogError("EE Failed to read '" + modelPath + "': " + e.Message);
                 msg.Response.Message = e.Message;
                 return;
             }
@@ -480,7 +480,7 @@ namespace Iviz.ModelService
             }
             catch (Exception e) when (e is IOException || e is Sdf.MalformedSdfException)
             {
-                LogError("EE Failed to parse '" + modelPath + "': " + e.Message);
+                Logger.LogError("EE Failed to parse '" + modelPath + "': " + e.Message);
                 msg.Response.Message = e.Message;
                 return;
             }

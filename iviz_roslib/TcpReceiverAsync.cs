@@ -161,8 +161,8 @@ namespace Iviz.Roslib
                 await signal.WaitAsync(1000);
             }
 
-            tcpClient.Dispose();
-            stream.Dispose();
+            tcpClient?.Dispose();
+            stream?.Dispose();
 
             await runLoopTask;
         }

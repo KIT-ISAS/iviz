@@ -41,7 +41,7 @@ namespace Iviz.Roslib
             Uri = new Uri($"rosrpc://{host}:{localEndpoint.Port}/");
             Logger.LogDebug($"{this}: Starting {serviceInfo.Service} [{serviceInfo.Type}] at {Uri}");
 
-            task = Task.Run(async () => await StartAsync());
+            task = Task.Run(StartAsync);
         }
 
         async Task StartAsync()
@@ -66,7 +66,7 @@ namespace Iviz.Roslib
                     if (!keepGoing)
                     {
                         break;
-                    }
+                    }    
 
                     ServiceSenderAsync sender = new ServiceSenderAsync(serviceInfo, client, callback);
                     connections[sender] = null;

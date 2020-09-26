@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 using System.Threading;
@@ -13,6 +14,7 @@ namespace Iviz.XmlRpc
 
         public HttpListenerContext(TcpClient client)
         {
+            Logger.Log("-- In callback!");
             this.client = client ?? throw new ArgumentNullException(nameof(client));
         }
 

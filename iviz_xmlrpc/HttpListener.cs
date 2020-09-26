@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -14,15 +15,14 @@ namespace Iviz.XmlRpc
 
         TcpListener listener;
         bool keepGoing;
+        readonly List<(DateTime start, Task task)> backgroundTasks = new List<(DateTime, Task)>();
+
 
         public Uri LocalEndpoint { get; }
 
         public HttpListener(Uri uri)
         {
-            if (uri is null)
-            {
-                throw new ArgumentNullException(nameof(uri));
-            }
+            if (uri is null) { throw new ArgumentNullException(nameof(uri)); }
 
             int port = uri.IsDefaultPort ? AnyPort : uri.Port;
             listener = new TcpListener(IPAddress.Any, port);
@@ -34,10 +34,7 @@ namespace Iviz.XmlRpc
 
         public async Task StartAsync(Func<HttpListenerContext, Task> callback)
         {
-            if (callback is null)
-            {
-                throw new ArgumentNullException(nameof(callback));
-            }
+            if (callback is null) { throw new ArgumentNullException(nameof(callback)); }
 
             keepGoing = true;
             while (keepGoing)
@@ -47,14 +44,14 @@ namespace Iviz.XmlRpc
                     Logger.LogDebug($"{this}: Accepting request...");
                     TcpClient client = await listener.AcceptTcpClientAsync().Caf();
                     Logger.LogDebug($"{this}: Accept Out!");
-                    
+
                     if (!keepGoing)
                     {
                         client.Dispose();
                         break;
                     }
 
-                    await callback(new HttpListenerContext(client)).Caf();
+                    AddToBackgroundTask(callback(new HttpListenerContext(client)));
                 }
                 catch (ObjectDisposedException)
                 {
@@ -69,6 +66,30 @@ namespace Iviz.XmlRpc
             }
 
             Logger.LogDebug($"{this}: Leaving thread normally");
+        }
+
+        void AddToBackgroundTask(Task task)
+        {
+            backgroundTasks.RemoveAll(tuple => tuple.task.IsCompleted);
+            backgroundTasks.Add((DateTime.Now, task));
+        }
+
+        public async Task AwaitRunningTasks(int timeoutInMs = 2000)
+        {
+            backgroundTasks.RemoveAll(tuple => tuple.task.IsCompleted);
+
+            DateTime now = DateTime.Now;
+            int count = backgroundTasks.Count(tuple => (tuple.start - now).TotalSeconds > 5);
+            if (count > 0)
+            {
+                Logger.Log($"{this}: There appear to be {count} tasks deadlocked!");
+            }
+
+            try
+            {
+                await Task.WhenAll(backgroundTasks.Select(tuple => tuple.task)).WaitFor(timeoutInMs);
+            }
+            catch (Exception) { }
         }
 
         bool disposed;
@@ -89,7 +110,7 @@ namespace Iviz.XmlRpc
                 listener = null;
                 return;
             }
-            
+
             keepGoing = false;
 
             // now we throw everything at the listener to try to leave AcceptTcpClientAsync()

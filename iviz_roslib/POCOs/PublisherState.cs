@@ -5,7 +5,7 @@ namespace Iviz.Roslib
 {
     public class PublisherSenderState : JsonToString
     {
-        public bool Alive { get; }
+        public bool IsAlive { get; }
         public bool Latching { get; }
         public SenderStatus Status { get; }
         public Endpoint Endpoint { get; }
@@ -17,7 +17,7 @@ namespace Iviz.Roslib
         public int BytesSent { get; }
         public int NumDropped { get; }
 
-        internal PublisherSenderState(bool alive,
+        internal PublisherSenderState(bool isAlive,
                            bool latching,
                            SenderStatus status,
                            Endpoint endpoint,
@@ -29,7 +29,7 @@ namespace Iviz.Roslib
                            int bytesSent,
                            int numDropped)
         {
-            Alive = alive;
+            IsAlive = isAlive;
             Latching = latching;
             Status = status;
             Endpoint = endpoint;

@@ -103,7 +103,7 @@ namespace Iviz.Bridge
 
         public override void Cleanup()
         {
-            publisher?.Cleanup();
+            //publisher?.Cleanup();
             lock (publishers)
             {
                 var deadSockets = publishers.Where(x => !x.IsAlive);

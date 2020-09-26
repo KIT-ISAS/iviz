@@ -65,7 +65,7 @@ namespace Iviz.Roslib.XmlRpc
 
         object[] MethodCall(string function, IEnumerable<Arg> args)
         {
-            object tmp = Service.MethodCall(Uri, CallerUri, function, args, TimeoutInMs);
+            object tmp = XmlRpcService.MethodCall(Uri, CallerUri, function, args, TimeoutInMs);
             if (tmp is object[] result)
             {
                 return result;
@@ -77,7 +77,7 @@ namespace Iviz.Roslib.XmlRpc
         
         async Task<object[]> MethodCallAsync(string function, IEnumerable<Arg> args)
         {
-            object tmp = await Service.MethodCallAsync(Uri, CallerUri, function, args, TimeoutInMs).Caf();
+            object tmp = await XmlRpcService.MethodCallAsync(Uri, CallerUri, function, args, TimeoutInMs).Caf();
             if (tmp is object[] result)
             {
                 return result;

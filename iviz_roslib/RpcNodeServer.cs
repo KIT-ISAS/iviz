@@ -14,7 +14,7 @@ namespace Iviz.Roslib.XmlRpc
     internal sealed class NodeServer : IDisposable
     {
         readonly Dictionary<string, Func<object[], Arg[]>> methods;
-        readonly Dictionary<string, Func<object[], Task>> lateCallbacks;
+        readonly Dictionary<string, Func<object[], Task>> lateCallbacks; // gets called after response to method callback is sent 
         readonly Iviz.XmlRpc.HttpListener listener;
         readonly RosClient client;
 
@@ -52,12 +52,12 @@ namespace Iviz.Roslib.XmlRpc
 
         public void Start()
         {
-            task = Task.Run(async () => await Run());
+            task = Task.Run(Run);
         }
 
         public override string ToString()
         {
-            return $"[RcpNodeServer {Uri}]";
+            return $"[NodeServer {Uri}]";
         }
 
         async Task Run()
@@ -71,6 +71,9 @@ namespace Iviz.Roslib.XmlRpc
 
             // tell the listener in every possible way to stop listening
             listener.Dispose();
+            
+            // wait for any remaining rpc calls
+            await listener.AwaitRunningTasks();
 
             // and that is usually not enough. so we bail out
             if (!await listenerTask.WaitFor(2000))
@@ -87,7 +90,7 @@ namespace Iviz.Roslib.XmlRpc
             {
                 try
                 {
-                    await Service.MethodResponseAsync(context, methods, lateCallbacks).Caf();
+                    await XmlRpcService.MethodResponseAsync(context, methods, lateCallbacks).Caf();
                 }
                 catch (Exception e)
                 {
@@ -97,6 +100,7 @@ namespace Iviz.Roslib.XmlRpc
         }
 
         bool disposed;
+
         public void Dispose()
         {
             if (disposed)
@@ -140,14 +144,14 @@ namespace Iviz.Roslib.XmlRpc
         {
             var busInfo = client.GetBusInfoRcp();
             Arg[][] response = busInfo.Select(
-                x => new Arg[]
+                info => new Arg[]
                 {
-                    x.ConnectionId,
-                    x.DestinationId,
-                    x.Direction,
-                    x.Transport,
-                    x.Topic,
-                    x.Connected,
+                    info.ConnectionId,
+                    info.DestinationId,
+                    info.Direction,
+                    info.Transport,
+                    info.Topic,
+                    info.Connected,
                 }).ToArray();
 
             return OkResponse(response);
@@ -208,6 +212,7 @@ namespace Iviz.Roslib.XmlRpc
 
         static Arg[] PublisherUpdate(object[] args)
         {
+            // processing happens in PublisherUpdateLateCallback
             return OkResponse(0);
         }
 
@@ -229,7 +234,7 @@ namespace Iviz.Roslib.XmlRpc
                     Logger.Log($"{this}: Invalid uri '{publisherObj}'");
                     continue;
                 }
-                
+
                 publisherUris.Add(publisherUri);
             }
 
@@ -250,18 +255,12 @@ namespace Iviz.Roslib.XmlRpc
                 !(args[1] is string topic) ||
                 !(args[2] is object[] protocols))
             {
-                return new Arg[]
-                {
-                    StatusCode.Error, "Failed to parse arguments", 0
-                };
+                return new Arg[] {StatusCode.Error, "Failed to parse arguments", 0};
             }
 
             if (protocols.Length == 0)
             {
-                return new Arg[]
-                {
-                    StatusCode.Failure, "No compatible protocols found", Array.Empty<string[]>()
-                };
+                return new Arg[] {StatusCode.Failure, "No compatible protocols found", 0};
             }
 
             bool success = protocols.Any(entry =>
@@ -273,32 +272,28 @@ namespace Iviz.Roslib.XmlRpc
 
             if (!success)
             {
-                return new Arg[]
-                {
-                    StatusCode.Failure, "Client only supports TCPROS", Array.Empty<string[]>()
-                };
+                return new Arg[] {StatusCode.Failure, "Client only supports TCPROS", 0};
             }
+
+            string hostname;
+            int port;
 
             try
             {
-                if (!client.RequestTopicRpc(callerId, topic, out string hostname, out int port))
-                {
-                    return new Arg[]
-                    {
-                        StatusCode.Failure, $"Client is not publishing topic '{topic}'", Array.Empty<string[]>()
-                    };
-                }
-
-                return OkResponse(new Arg[] {"TCPROS", hostname, port});
+                (hostname, port) = client.RequestTopicRpc(callerId, topic);
             }
             catch (Exception e)
             {
                 Logger.Log(e);
-                return new Arg[]
-                {
-                    StatusCode.Error, "Unknown error: " + e.Message, Array.Empty<string[]>()
-                };
+                return new Arg[] {StatusCode.Error, $"Unknown error: {e.Message}", 0};
             }
+
+            if (hostname == null)
+            {
+                return new Arg[] {StatusCode.Failure, $"Client is not publishing topic '{topic}'", 0};
+            }
+
+            return OkResponse(new Arg[] {"TCPROS", hostname, port});
         }
     }
 }

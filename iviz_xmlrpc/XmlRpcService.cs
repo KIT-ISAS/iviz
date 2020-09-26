@@ -26,7 +26,7 @@ namespace Iviz.XmlRpc
         }
     }
 
-    public static class Service
+    public static class XmlRpcService
     {
         static void Assert(string received, string expected)
         {
@@ -199,28 +199,19 @@ namespace Iviz.XmlRpc
         public static async Task<object> MethodCallAsync(Uri remoteUri, Uri callerUri, string method,
             IEnumerable<Arg> args, int timeoutInMs = 2000)
         {
-            if (remoteUri is null)
-            {
-                throw new ArgumentNullException(nameof(remoteUri));
-            }
+            if (remoteUri is null) { throw new ArgumentNullException(nameof(remoteUri)); }
 
-            if (callerUri is null)
-            {
-                throw new ArgumentNullException(nameof(callerUri));
-            }
+            if (callerUri is null) { throw new ArgumentNullException(nameof(callerUri)); }
 
-            if (args is null)
-            {
-                throw new ArgumentNullException(nameof(args));
-            }
+            if (args is null) { throw new ArgumentNullException(nameof(args)); }
 
             string outData = CreateRequest(method, args);
 
             string inData;
             using (HttpRequest request = new HttpRequest(callerUri, remoteUri))
             {
-                await request.StartAsync(timeoutInMs);
-                inData = await request.RequestAsync(outData, timeoutInMs);
+                await request.StartAsync(timeoutInMs).Caf();
+                inData = await request.RequestAsync(outData, timeoutInMs).Caf();
             }
 
             return ProcessResponse(inData);
@@ -229,20 +220,11 @@ namespace Iviz.XmlRpc
         public static object MethodCall(Uri remoteUri, Uri callerUri, string method, IEnumerable<Arg> args,
             int timeoutInMs = 2000)
         {
-            if (remoteUri is null)
-            {
-                throw new ArgumentNullException(nameof(remoteUri));
-            }
+            if (remoteUri is null) { throw new ArgumentNullException(nameof(remoteUri)); }
 
-            if (callerUri is null)
-            {
-                throw new ArgumentNullException(nameof(callerUri));
-            }
+            if (callerUri is null) { throw new ArgumentNullException(nameof(callerUri)); }
 
-            if (args is null)
-            {
-                throw new ArgumentNullException(nameof(args));
-            }
+            if (args is null) { throw new ArgumentNullException(nameof(args)); }
 
             string outData = CreateRequest(method, args);
 
@@ -261,17 +243,11 @@ namespace Iviz.XmlRpc
             IReadOnlyDictionary<string, Func<object[], Arg[]>> methods,
             IReadOnlyDictionary<string, Func<object[], Task>> lateCallbacks = null)
         {
-            if (httpContext is null)
-            {
-                throw new ArgumentNullException(nameof(httpContext));
-            }
+            if (httpContext is null) { throw new ArgumentNullException(nameof(httpContext)); }
 
-            if (methods is null)
-            {
-                throw new ArgumentNullException(nameof(methods));
-            }
+            if (methods is null) { throw new ArgumentNullException(nameof(methods)); }
 
-            string inData = await httpContext.GetRequest();
+            string inData = await httpContext.GetRequest().Caf();
 
 #if DEBUG__
             Logger.Log("--- MethodResponse ---");
@@ -308,12 +284,12 @@ namespace Iviz.XmlRpc
 
                 string outData = buffer.ToString();
 
-                await httpContext.Respond(outData);
+                await httpContext.Respond(outData).Caf();
 
                 if (lateCallbacks != null &&
                     lateCallbacks.TryGetValue(methodName, out var lateCallback))
                 {
-                    await lateCallback(args);
+                    await lateCallback(args).Caf();
                 }
             }
             catch (ParseException e)
@@ -326,7 +302,7 @@ namespace Iviz.XmlRpc
                 buffer.AppendLine("</fault>");
                 buffer.AppendLine("</methodResponse>");
 
-                await httpContext.Respond(buffer.ToString());
+                await httpContext.Respond(buffer.ToString()).Caf();
             }
         }
 

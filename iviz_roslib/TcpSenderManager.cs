@@ -73,7 +73,7 @@ namespace Iviz.Roslib
             if (connectionsByCallerId.TryGetValue(remoteCallerId, out TcpSenderAsync oldSender) &&
                 oldSender.IsAlive)
             {
-                Logger.LogDebug($"{this}: '{remoteCallerId} is requesting {Topic} again?");
+                Logger.LogDebug($"{this}: '{remoteCallerId}' is requesting {Topic} again? Closing old connection.");
                 oldSender.Dispose();
             }
 
@@ -85,7 +85,8 @@ namespace Iviz.Roslib
             Cleanup();
 
             // wait until newSender is ready to accept
-            if (!managerSignal.Wait(100))
+            const int waitInMs = 100;
+            if (!managerSignal.Wait(waitInMs))
             {
                 Logger.Log($"{this}: Sender start timeout?");
             }

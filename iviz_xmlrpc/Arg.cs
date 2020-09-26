@@ -27,11 +27,11 @@ namespace Iviz.XmlRpc
             value = $"<value><i4>{f}</i4></value>\n";
         }
 
-        public Arg(Uri f) : this(f?.ToString() ?? "(unknown)")
+        public Arg(Uri f) : this(ThrowIfNull(f).ToString())
         {
         }
 
-        public Arg(IEnumerable<Uri> f) : this(f?.Select(x => new Arg(x)))
+        public Arg(IEnumerable<Uri> f) : this(ThrowIfNull(f).Select(x => new Arg(x)))
         {
         }
         
@@ -42,66 +42,51 @@ namespace Iviz.XmlRpc
         
         public Arg(string f)
         {
+            ThrowIfNull(f);
             value = $"<value>{f}</value>\n";
         }
 
-        public Arg(IEnumerable<string> f) : this(f?.Select(x => new Arg(x)))
+        public Arg(IEnumerable<string> f) : this(ThrowIfNull(f).Select(x => new Arg(x)))
         {
         }
 
-        public Arg(IEnumerable<string[]> f) : this(f?.Select(x => new Arg(x)))
+        public Arg(IEnumerable<string[]> f) : this(ThrowIfNull(f).Select(x => new Arg(x)))
         {
         }
 
-        public Arg((string, string) f) : this(new Arg[] { f.Item1, f.Item2 })
+        public Arg((string, string) f) : this(new Arg[] { ThrowIfNull(f.Item1), ThrowIfNull(f.Item2) })
         {
         }
         
-        public Arg(IEnumerable<(string, string)> f) : this(f?.Select(x => new Arg(x)))
+        public Arg(IEnumerable<(string, string)> f) : this(ThrowIfNull(f).Select(x => new Arg(x)))
         {
         }
 
         public Arg(IEnumerable<Arg> f)
         {
-            if (f is null)
-            {
-                throw new ArgumentNullException(nameof(f));
-            }
-
+            ThrowIfNull(f);
             value = $"<value><array><data>{string.Join("", f)}</data></array></value>";
         }
 
-        public Arg(IEnumerable<Arg[]> f) : this(f?.Select(x => new Arg(x)))
+        public Arg(IEnumerable<Arg[]> f) : this(ThrowIfNull(f).Select(x => new Arg(x)))
         {
         }
         
         public Arg(byte[] f)
         {
-            if (f is null)
-            {
-                throw new ArgumentNullException(nameof(f));
-            }
-
+            ThrowIfNull(f);
             value = $"<value><base64>{Convert.ToBase64String(f)}</base64></value>\n";
         }
 
         public Arg(in ArraySegment<byte> f)
         {
-            if (f.Array is null)
-            {
-                throw new NullReferenceException(nameof(f.Array));
-            }
-            
+            ThrowIfNull(f.Array);
             value = $"<value><base64>{Convert.ToBase64String(f.Array, f.Offset, f.Count)}</base64></value>\n";
         }
         
         public Arg(IEnumerable<(string name, Arg value)> f)
         {
-            if (f is null)
-            {
-                throw new NullReferenceException(nameof(f));
-            }
-            
+            ThrowIfNull(f);
             value = $"<value><struct>" +
                     string.Join("", f.Select(tuple => $"<member><name>{tuple.name}</name>{tuple.value}</member>")) +
                     $"</struct></value>\n";
@@ -109,15 +94,13 @@ namespace Iviz.XmlRpc
         
         public Arg(IEnumerable<(string name, object value)> f)
         {
-            if (f is null)
-            {
-                throw new NullReferenceException(nameof(f));
-            }
-            
-            value = $"<value><struct>" +
+            ThrowIfNull(f);
+            value = "<value><struct>" +
                     string.Join("", f.Select(tuple => $"<member><name>{tuple.name}</name>{Create(tuple.value)}</member>")) +
-                    $"</struct></value>\n";
+                    "</struct></value>\n";
         }
+
+        static T ThrowIfNull<T>(T t)  => t ?? throw new NullReferenceException(nameof(t));
 
         public override string ToString()
         {
