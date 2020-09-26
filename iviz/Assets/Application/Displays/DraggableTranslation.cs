@@ -16,7 +16,7 @@ namespace Iviz.Displays
         , IMixedRealityPointerHandler
 #endif
     {
-        [SerializeField] Vector3 line;
+        [SerializeField] Vector3 line = default;
         public Transform TargetTransform { get; set; }
         
         bool needsStart;

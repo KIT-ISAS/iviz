@@ -208,7 +208,7 @@ namespace Iviz.Displays
                 File.Delete(absolutePath);
                 Logger.Debug("Removing '" + localPath + "'");
             }
-            catch (IOException e)
+            catch (IOException)
             {
                 Logger.Warn("ExternalResourceManager: Failed to delete robot file '" + localPath + "'");
             }
