@@ -2,6 +2,8 @@
 using Iviz.Controllers;
 using Iviz.Displays;
 using Iviz.Roslib;
+using UnityEngine;
+using Logger = Iviz.Controllers.Logger;
 
 namespace Iviz.App
 {
@@ -90,7 +92,7 @@ namespace Iviz.App
             };
             panel.MyId.EndEdit += text =>
             {
-                MyId = text;
+                MyId = IsValidResourceName(text) ? text : null;
                 MyIdChanged?.Invoke(MyId);
             };
             panel.RefreshMyId.Clicked += () =>
@@ -120,19 +122,21 @@ namespace Iviz.App
                         return;
                     }
                     
-                    Uri newUri = new Uri($"http://{MyUri.Host}:{RosServerManager.DefaultPort}/");
+                    Uri ownMasterUri = new Uri($"http://{MyUri.Host}:{RosServerManager.DefaultPort}/");
+                    string ownMasterId = "/iviz_master";
 
-                    if (RosServerManager.Create(newUri))
+                    if (RosServerManager.Create(ownMasterUri, ownMasterId))
                     {
-                        if (MasterUri != newUri)
+                        if (MasterUri != ownMasterUri)
                         {
-                            panel.MasterUri.Value = newUri.ToString();
-                            MasterUri = newUri;
+                            panel.MasterUri.Value = ownMasterUri.ToString();
+                            MasterUri = ownMasterUri;
                         }
 
                         panel.ServerMode.State = true;
                         Logger.Internal("Created <b>master node</b>. You can connect now!");
                         MasterActiveChanged?.Invoke(true);
+                        MasterUriChanged?.Invoke(MasterUri);
                     }
                 }
                 else
@@ -147,10 +151,32 @@ namespace Iviz.App
                     Logger.Internal("Master node removed.");
                     panel.ServerMode.State = false;
                     MasterActiveChanged?.Invoke(false);
+                    MasterUriChanged?.Invoke(MasterUri);
                 }
 
                 panel.MasterUri.Interactable = !RosServerManager.IsActive;
             };
+        }
+
+        static bool IsValidResourceName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name) || name.Length < 2)
+            {
+                return false;
+            }
+
+            bool IsAlpha(char c) => ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
+
+            if (name[0] != '/') { return false; }
+
+            if (!IsAlpha(name[1])) { return false; }
+
+            for (int i = 2; i < name.Length; i++)
+            {
+                if (!IsAlpha(name[i]) && !char.IsDigit(name[i]) && name[i] != '_'  && name[i] != '/') { return false; }
+            }
+
+            return true;
         }
 
         void Close()

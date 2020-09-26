@@ -30,12 +30,15 @@ namespace Iviz.Controllers
             public abstract void Add(RosSender subscriber);
             public abstract void Remove(RosSender subscriber);
             public abstract int Count { get; }
-            public abstract Task Advertise(RosClient client);
+            public abstract Task AdvertiseAsync(RosClient client);
 
-            public void Unadvertise(RosClient client)
+            public async Task UnadvertiseAsync(RosClient client)
             {
                 string topic = (Topic[0] == '/') ? Topic : $"{client.CallerId}/{Topic}";
-                Publisher?.Unadvertise(topic);
+                if (Publisher != null)
+                {
+                    await Publisher.UnadvertiseAsync(topic);
+                }
             }
 
             public void Invalidate()
@@ -78,7 +81,7 @@ namespace Iviz.Controllers
 
             public override int Count => senders.Count;
 
-            public override async Task Advertise(RosClient client)
+            public override async Task AdvertiseAsync(RosClient client)
             {
                 string topic = (Topic[0] == '/') ? Topic : $"{client.CallerId}/{Topic}";
                 RosPublisher publisher = null;
@@ -104,12 +107,15 @@ namespace Iviz.Controllers
 
             public abstract void Add(RosListener subscriber);
             public abstract void Remove(RosListener subscriber);
-            public abstract Task Subscribe(RosClient client);
+            public abstract Task SubscribeAsync(RosClient client);
 
-            public void Unsubscribe(RosClient client)
+            public async Task UnsubscribeAsync(RosClient client)
             {
                 string topic = (Topic[0] == '/') ? Topic : $"{client.CallerId}/{Topic}";
-                Subscriber?.Unsubscribe(topic);
+                if (Subscriber != null)
+                {
+                    await Subscriber.UnsubscribeAsync(topic);
+                }
             }
 
             public void Invalidate()
@@ -144,7 +150,7 @@ namespace Iviz.Controllers
                 }
             }
 
-            public override async Task Subscribe(RosClient client)
+            public override async Task SubscribeAsync(RosClient client)
             {
                 string topic = (Topic[0] == '/') ? Topic : $"{client.CallerId}/{Topic}";
                 RosSubscriber subscriber = null;
@@ -247,7 +253,9 @@ namespace Iviz.Controllers
                 Msgs.Logger.Log = x => Logger.Info(x);
 
                 Logger.Internal("Connecting...");
+                
                 client = new RosClient(MasterUri, MyId, MyUri);
+                
                 await client.EnsureCleanSlateAsync();
 
                 if (publishersByTopic.Count != 0 || subscribersByTopic.Count != 0)
@@ -262,15 +270,16 @@ namespace Iviz.Controllers
                 {
                     entry.Advertise(client);
                 }
+                //Debug.Log("5: " + (DateTime.Now - time).TotalMilliseconds);
 
-                Logger.Internal("Connected.");
+                Logger.Internal("<b>Connected.</b>");
 
                 return true;
             }
             catch (Exception e) when
                 (e is UnreachableUriException || e is ConnectionException || e is XmlRpcException)
             {
-                Logger.Debug(e);
+                //Logger.Debug(e);
                 Logger.Internal("Error:", e);
                 if (RosServerManager.IsActive && RosServerManager.MasterUri == MasterUri)
                 {
@@ -294,34 +303,34 @@ namespace Iviz.Controllers
 
         async Task Readvertise(AdvertisedTopic topic)
         {
-            await topic.Advertise(client);
+            await topic.AdvertiseAsync(client);
             topic.Id = publishers.Count;
             publishers.Add(topic.Publisher);
         }
 
         async Task Resubscribe(SubscribedTopic topic)
         {
-            await topic.Subscribe(client);
+            await topic.SubscribeAsync(client);
         }
 
         public override void Disconnect()
         {
-            Disconnect(true);
-        }
-
-        void Disconnect(bool waitForUnregister)
-        {
             if (client == null)
             {
+                Signal();
                 return;
             }
 
             AddTask(async () =>
                 {
                     Logger.Internal("Disconnecting...");
-                    await client?.CloseAsync();
+                    if (client != null)
+                    {
+                        await client.CloseAsync();
+                    }
+
                     client = null;
-                    Logger.Internal("Disconnection finished.");
+                    Logger.Internal("<b>Disconnected.</b>");
 
                     foreach (var entry in publishersByTopic)
                     {
@@ -364,7 +373,7 @@ namespace Iviz.Controllers
                 int id;
                 if (client != null)
                 {
-                    await newAdvertisedTopic.Advertise(client);
+                    await newAdvertisedTopic.AdvertiseAsync(client);
 
                     var publisher = newAdvertisedTopic.Publisher;
                     //Logger.Debug("Direct advertisement for " + advertiser.Topic);
@@ -525,7 +534,7 @@ namespace Iviz.Controllers
             {
                 SubscribedTopic<T> newSubscribedTopic = new SubscribedTopic<T>(listener.Topic);
 
-                await newSubscribedTopic.Subscribe(client);
+                await newSubscribedTopic.SubscribeAsync(client);
 
                 subscribedTopic = newSubscribedTopic;
                 subscribersByTopic.Add(listener.Topic, subscribedTopic);
@@ -536,11 +545,11 @@ namespace Iviz.Controllers
 
         public override void Unadvertise(RosSender advertiser)
         {
-            AddTask(() =>
+            AddTask(async () =>
             {
                 try
                 {
-                    UnadvertiseImpl(advertiser);
+                    await UnadvertiseImpl(advertiser);
                 }
                 catch (Exception e)
                 {
@@ -550,7 +559,7 @@ namespace Iviz.Controllers
             });
         }
 
-        void UnadvertiseImpl(RosSender advertiser)
+        async Task UnadvertiseImpl(RosSender advertiser)
         {
             if (!publishersByTopic.TryGetValue(advertiser.Topic, out AdvertisedTopic advertisedTopic))
             {
@@ -571,18 +580,18 @@ namespace Iviz.Controllers
 
             if (client != null)
             {
-                advertisedTopic.Unadvertise(client);
+                await advertisedTopic.UnadvertiseAsync(client);
                 PublishedTopics = client.PublishedTopics;
             }
         }
 
         public override void Unsubscribe(RosListener subscriber)
         {
-            AddTask(() =>
+            AddTask(async () =>
             {
                 try
                 {
-                    UnsubscribeImpl(subscriber);
+                    await UnsubscribeImpl(subscriber);
                 }
                 catch (Exception e)
                 {
@@ -593,7 +602,7 @@ namespace Iviz.Controllers
         }
 
 
-        void UnsubscribeImpl(RosListener subscriber)
+        async Task UnsubscribeImpl(RosListener subscriber)
         {
             if (!subscribersByTopic.TryGetValue(subscriber.Topic, out SubscribedTopic subscribedTopic))
             {
@@ -604,7 +613,7 @@ namespace Iviz.Controllers
             if (subscribedTopic.Count == 0)
             {
                 subscribersByTopic.Remove(subscriber.Topic);
-                subscribedTopic.Unsubscribe(client);
+                await subscribedTopic.UnsubscribeAsync(client);
             }
         }
 
@@ -710,7 +719,7 @@ namespace Iviz.Controllers
 
         public override void Stop()
         {
-            Disconnect(false); // do not wait for topic, services unregistering
+            Disconnect(); // do not wait for topic, services unregistering
             base.Stop();
         }
     }

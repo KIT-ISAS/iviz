@@ -4,6 +4,7 @@ using Iviz.Msgs;
 using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Roslib;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;
@@ -121,8 +122,8 @@ namespace Iviz.Controllers
     {
         static readonly TimeSpan TaskWaitTime = TimeSpan.FromMilliseconds(2000);
 
-        readonly Queue<Func<Task>> toDos = new Queue<Func<Task>>();
-        readonly SemaphoreSlim signal = new SemaphoreSlim(0, 100);
+        readonly ConcurrentQueue<Func<Task>> toDos = new ConcurrentQueue<Func<Task>>();
+        readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
         readonly Task task;
 
         volatile bool keepRunning;
@@ -152,38 +153,41 @@ namespace Iviz.Controllers
         public virtual void Stop()
         {
             keepRunning = false;
-            signal.Release();
+            Signal();
+
             task?.Wait();
             GameThread.EverySecond -= Update;
         }
 
         void SetConnectionState(ConnectionState newState)
         {
-            if (ConnectionState != newState)
+            if (ConnectionState == newState)
             {
-                ConnectionState = newState;
-                GameThread.RunOnce(() => ConnectionStateChanged?.Invoke(newState));
+                return;
             }
+
+            ConnectionState = newState;
+            GameThread.RunOnce(() => ConnectionStateChanged?.Invoke(newState));
         }
 
         protected void AddTask(Func<Task> a)
         {
-            lock (toDos)
-            {
-                toDos.Enqueue(a);
-            }
-
-            signal.Release();
+            toDos.Enqueue(a);
+            Signal();
         }
 
         protected void AddTask(Action a)
         {
-            lock (toDos)
-            {
-                toDos.Enqueue(async () => a());
-            }
-
-            signal.Release();
+#pragma warning disable 1998
+            toDos.Enqueue(async () => a());
+#pragma warning restore 1998
+            Signal();
+        }
+        
+        protected void Signal()
+        {
+            try { signal.Release(); }
+            catch (SemaphoreFullException) { }
         }
 
         async Task Run()
@@ -196,16 +200,7 @@ namespace Iviz.Controllers
                     {
                         SetConnectionState(ConnectionState.Connecting);
 
-                        bool connectionResult;
-                        try
-                        {
-                            connectionResult = await Connect();
-                        }
-                        catch (Exception e)
-                        {
-                            Debug.Log("Left connection:" + e);
-                            connectionResult = false;
-                        }
+                        bool connectionResult = await Connect();
 
                         SetConnectionState(connectionResult ? ConnectionState.Connected : ConnectionState.Disconnected);
                     }
@@ -228,15 +223,10 @@ namespace Iviz.Controllers
         {
             while (true)
             {
-                Func<Task> action;
-                lock (toDos)
+                if (toDos.Count == 0 || 
+                    !toDos.TryDequeue(out Func<Task> action))
                 {
-                    if (toDos.Count == 0)
-                    {
-                        break;
-                    }
-
-                    action = toDos.Dequeue();
+                    break;
                 }
 
                 try
@@ -262,7 +252,9 @@ namespace Iviz.Controllers
         public abstract void Advertise<T>(RosSender<T> advertiser) where T : IMessage;
         public abstract void Unadvertise(RosSender advertiser);
         public abstract void Publish(RosSender advertiser, IMessage msg);
+
         public abstract void AdvertiseService<T>(string service, Action<T> callback) where T : IService, new();
+
         //public abstract void CallServiceAsync<T>(string service, T srv, Action<T> callback) where T : IService;
         public abstract bool CallService<T>(string service, T srv) where T : IService;
         public abstract ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics();

@@ -9,7 +9,7 @@ namespace Iviz.Controllers
 {
     public class RosServerManager
     {
-        public const int DefaultPort = Server.DefaultPort;
+        public const int DefaultPort = RosMasterServer.DefaultPort;
 
         static readonly List<(string key, string value)> DefaultKeys = new List<(string, string)>
         {
@@ -23,8 +23,10 @@ namespace Iviz.Controllers
         public static bool IsActive => instance?.server != null;
         public static Uri MasterUri => instance?.server?.MasterUri;
 
-        public static bool Create(Uri masterUri) =>
-            Instance.TryCreate(masterUri ?? throw new ArgumentNullException(nameof(masterUri)));
+        public static bool Create(Uri masterUri, string masterId) =>
+            Instance.TryCreate(
+                masterUri ?? throw new ArgumentNullException(nameof(masterUri)), 
+                masterId ?? throw new ArgumentNullException(nameof(masterId)));
 
         public static void Dispose() => instance?.Reset();
 
@@ -34,9 +36,9 @@ namespace Iviz.Controllers
         readonly SemaphoreSlim signal2 = new SemaphoreSlim(0, 1);
 
         Task task;
-        Server server;
+        RosMasterServer server;
 
-        bool TryCreate(Uri masterUri)
+        bool TryCreate(Uri masterUri, string masterId)
         {
             if (server != null)
             {
@@ -48,7 +50,7 @@ namespace Iviz.Controllers
                 Reset();
             }
 
-            task = Task.Run(async () => await TryCreateAsync(masterUri));
+            task = Task.Run(async () => await TryCreateAsync(masterUri, masterId));
             
             // wait for TryCreateAsync()
             signal1.Wait();
@@ -56,12 +58,12 @@ namespace Iviz.Controllers
             return server != null;
         }
 
-        async Task TryCreateAsync(Uri masterUri)
+        async Task TryCreateAsync(Uri masterUri, string masterId)
         {
             Task serverTask = null;
             try
             {
-                server = new Server(masterUri);
+                server = new RosMasterServer(masterUri, masterId);
 
                 foreach (var (key, value) in DefaultKeys)
                 {

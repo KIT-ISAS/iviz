@@ -217,6 +217,15 @@ namespace Iviz.App
             };
             connectionData.MyIdChanged += id =>
             {
+                if (id == null)
+                {
+                    Logger.Internal("Failed to set caller id.");
+                    Logger.Internal("* First character must be /");
+                    Logger.Internal("* Second character must be alpha [a-z A-Z]");
+                    Logger.Internal("* Remaining characters must be alpha, digits, _ or /");
+                    return;
+                }
+                
                 ConnectionManager.Connection.MyId = id;
                 KeepReconnecting = false;
                 Logger.Internal($"Changing caller id to '{id}'");

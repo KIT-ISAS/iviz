@@ -10,7 +10,7 @@ namespace Iviz.App
 
         [SerializeField] string activeText = ""; 
         [SerializeField] string inactiveText = "";
-        [SerializeField] Text text;
+        [SerializeField] Text text = null;
 
         public Sprite ActiveSprite
         {
