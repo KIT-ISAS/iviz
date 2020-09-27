@@ -116,7 +116,7 @@ namespace Iviz.Roslib
             return contents;
         }
 
-        public async Task<bool> Start()
+        public async Task<bool> StartAsync()
         {
             await SerializeHeader();
 
@@ -178,7 +178,7 @@ namespace Iviz.Roslib
             return length;
         }
 
-        public async Task<bool> Execute(IService service)
+        public async Task<bool> ExecuteAsync(IService service)
         {
             bool success;
             try

@@ -217,7 +217,7 @@ namespace Iviz.Roslib
         public RosClient(Uri masterUri = null, string callerId = null, Uri callerUri = null)
         {
             masterUri ??= EnvironmentMasterUri;
-            
+
             if (masterUri is null) { throw new ArgumentException("No valid master uri provided", nameof(masterUri)); }
 
             if (masterUri.Scheme != "http")
@@ -302,6 +302,20 @@ namespace Iviz.Roslib
             Logger.Log("RosClient: Initialized.");
         }
 
+
+        /// <summary>
+        /// Constructs and connects a ROS client.
+        /// </summary>
+        /// <param name="masterUri">URI to the master node. Example: "http://localhost:11311"</param>
+        /// <param name="callerId">The name of this node</param>
+        /// <param name="callerUri">URI of this node. Leave empty to generate one automatically</param>
+        public RosClient(string masterUri, string callerId = null, string callerUri = null) :
+            this(masterUri is null ? EnvironmentMasterUri : new Uri(masterUri),
+                callerId,
+                callerUri is null ? EnvironmentCallerUri : new Uri(callerUri))
+        {
+        }
+        
         /// <summary>
         /// Retrieves the environment variable ROS_HOSTNAME as a uri.
         /// If this fails, retrieves ROS_IP.
@@ -393,7 +407,7 @@ namespace Iviz.Roslib
 
             return true;
         }
-        
+
         /// <summary>
         /// Checks if the given name is a valid global ROS resource name
         /// </summary>         
@@ -408,19 +422,6 @@ namespace Iviz.Roslib
         public static Uri TryGetMasterUri()
         {
             return EnvironmentMasterUri ?? new Uri("http://localhost:11311/");
-        }
-
-        /// <summary>
-        /// Constructs and connects a ROS client.
-        /// </summary>
-        /// <param name="masterUri">URI to the master node. Example: "http://localhost:11311"</param>
-        /// <param name="callerId">The name of this node</param>
-        /// <param name="callerUri">URI of this node. Leave empty to generate one automatically</param>
-        public RosClient(string masterUri, string callerId = null, string callerUri = null) :
-            this(masterUri is null ? EnvironmentMasterUri : new Uri(masterUri),
-                callerId,
-                callerUri is null ? EnvironmentCallerUri : new Uri(callerUri))
-        {
         }
 
         /// <summary>
@@ -1146,9 +1147,8 @@ namespace Iviz.Roslib
             SubscriberState state = GetSubscriberStatistics();
             foreach (var topic in state.Topics)
             {
-                busInfos.AddRange(topic.Receivers.Select(receiver =>
-                    new BusInfo(busInfos.Count, receiver.RemoteUri, "i", topic.Topic,
-                        status: receiver.IsAlive)));
+                busInfos.AddRange(topic.Receivers.Select(
+                    receiver => new BusInfo(busInfos.Count, topic.Topic, receiver)));
             }
 
             try
@@ -1158,11 +1158,10 @@ namespace Iviz.Roslib
                 {
                     foreach (var sender in topic.Senders)
                     {
-                        Uri remoteUri;
+                        LookupNodeResponse response;
                         try
                         {
-                            var response = Master.LookupNode(sender.RemoteId);
-                            remoteUri = response.IsValid ? response.Uri : null;
+                            response = Master.LookupNode(sender.RemoteId);
                         }
                         catch (Exception e)
                         {
@@ -1170,7 +1169,14 @@ namespace Iviz.Roslib
                             continue;
                         }
 
-                        busInfos.Add(new BusInfo(busInfos.Count, remoteUri, "o", topic.Topic, status: sender.IsAlive));
+                        if (!response.IsValid)
+                        {
+                            continue;
+                        }
+
+                        BusInfo busInfo = new BusInfo(busInfos.Count, response.Uri, "o", topic.Topic,
+                            status: sender.IsAlive);
+                        busInfos.Add(busInfo);
                     }
                 }
             }
@@ -1266,8 +1272,8 @@ namespace Iviz.Roslib
             {
                 using ServiceReceiverAsync serviceReceiver =
                     new ServiceReceiverAsync(serviceInfo, serviceUri, true, false);
-                await serviceReceiver.Start();
-                return await serviceReceiver.Execute(service);
+                await serviceReceiver.StartAsync();
+                return await serviceReceiver.ExecuteAsync(service);
             }
             catch (Exception e) when (e is SocketException)
             {

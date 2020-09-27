@@ -20,5 +20,9 @@ namespace Iviz.Roslib
             Topic = topic;
             Connected = status ? 1 : 0;
         }
+        
+        public BusInfo(int id, string topic, SubscriberReceiverState receiver) : 
+            this(id, receiver.RemoteUri, "i", topic, status: receiver.IsAlive) {}
+        
     }
 }
