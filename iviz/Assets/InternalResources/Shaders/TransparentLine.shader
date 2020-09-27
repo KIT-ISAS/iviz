@@ -2,6 +2,9 @@ Shader "iviz/TransparentLine"
 {
 	Properties
 	{
+		[Toggle(USE_TEXTURE)]
+		_UseTexture("Use Texture", Int) = 1		
+		_AtlasTexture ("Atlas Texture", 2D) = "defaulttexture" {}
 	}
 
 	SubShader
@@ -17,10 +20,9 @@ Shader "iviz/TransparentLine"
 
 			#pragma vertex vert
 			#pragma fragment frag
-			#pragma multi_compile _ USE_TEXTURE
+			#pragma shader_feature USE_TEXTURE
 			#pragma multi_compile_instancing
-
-			sampler2D _IntensityTexture;
+			
 			float _IntensityCoeff;
 			float _IntensityAdd;
 
@@ -28,7 +30,6 @@ Shader "iviz/TransparentLine"
 			float4x4 _WorldToLocal;
 			float4 _Front;
 			fixed4 _Tint;
-			
 			float _Scale;			
 
             static const float3 Quads[8] =
@@ -60,7 +61,8 @@ Shader "iviz/TransparentLine"
 			};
 
 			StructuredBuffer<Line> _Lines;
-
+			float _AtlasRow;
+			
 			struct v2f
 			{
 				float4 position : SV_POSITION;
@@ -91,9 +93,9 @@ Shader "iviz/TransparentLine"
 
 	#if USE_TEXTURE
 				float intensityA = _Lines[inst].intensityA;
-				fixed4 rgbaA = tex2Dlod(_IntensityTexture, float4(intensityA * _IntensityCoeff + _IntensityAdd, 0, 0, 0));
+				fixed4 rgbaA = tex2Dlod(_AtlasTexture, float4(intensityA * _IntensityCoeff + _IntensityAdd, _AtlasRow, 0, 0));
 				float intensityB = _Lines[inst].intensityB;
-				fixed4 rgbaB = tex2Dlod(_IntensityTexture, float4(intensityB * _IntensityCoeff + _IntensityAdd, 0, 0, 0));
+				fixed4 rgbaB = tex2Dlod(_AtlasTexture, float4(intensityB * _IntensityCoeff + _IntensityAdd, _AtlasRow, 0, 0));
     #else
 				uint cA = _Lines[inst].colorA;
 				fixed4 rgbaA = fixed4(

@@ -4,6 +4,7 @@ using Iviz.Resources;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Iviz.Displays
 {
@@ -13,6 +14,7 @@ namespace Iviz.Displays
         ComputeBuffer pointComputeBuffer;
 
         [SerializeField] int size;
+
         public int Size
         {
             get => size;
@@ -44,7 +46,7 @@ namespace Iviz.Displays
 
             pointComputeBuffer?.Release();
             pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithColor>());
-            material.SetBuffer(PointsID, pointComputeBuffer);
+            properties.SetBuffer(PointsID, pointComputeBuffer);
         }
 
         public IList<PointWithColor> PointsWithColor
@@ -85,12 +87,9 @@ namespace Iviz.Displays
 
         protected override void Awake()
         {
-            material = Resource.Materials.PointCloud.Instantiate();
-            material.DisableKeyword("USE_TEXTURE");
-
             base.Awake();
 
-            UseIntensityTexture = false;
+            UseColormap = false;
             IntensityBounds = new Vector2(0, 1);
         }
 
@@ -103,13 +102,17 @@ namespace Iviz.Displays
 
             UpdateTransform();
 
+            Material material = UseColormap
+                ? Resource.Materials.PointCloudWithColormap.Object
+                : Resource.Materials.PointCloud.Object;
+
             Bounds worldBounds = boxCollider.bounds;
-            Graphics.DrawProcedural(material, worldBounds, MeshTopology.Quads, 4, Size);
+            Graphics.DrawProcedural(material, worldBounds, MeshTopology.Quads, 4, Size,
+                castShadows: ShadowCastingMode.Off, receiveShadows: false, layer: gameObject.layer);
         }
 
-        protected override void OnDestroy()
+        void OnDestroy()
         {
-            base.OnDestroy();
             if (pointComputeBuffer != null)
             {
                 pointComputeBuffer.Release();
@@ -134,7 +137,7 @@ namespace Iviz.Displays
             {
                 pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithColor>());
                 pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
-                material.SetBuffer(PointsID, pointComputeBuffer);
+                properties.SetBuffer(PointsID, pointComputeBuffer);
             }
 
             IntensityBounds = IntensityBounds;

@@ -3,7 +3,9 @@ Shader "iviz/PointCloud2"
 {
 	Properties
 	{
-		_IntensityTexture("Color Texture", 2D) = "white"
+		[Toggle(USE_TEXTURE)]
+		_UseTexture("Use Texture", Int) = 1		
+		_AtlasTexture ("Atlas Texture", 2D) = "defaulttexture" {}
 	}
 
 	SubShader
@@ -18,10 +20,9 @@ Shader "iviz/PointCloud2"
 
 			#pragma vertex vert
 			#pragma fragment frag
-			#pragma multi_compile _ USE_TEXTURE
+			#pragma shader_feature USE_TEXTURE
 			#pragma multi_compile_instancing
 
-			sampler2D _IntensityTexture;
 			float _IntensityCoeff;
 			float _IntensityAdd;
 			float4x4 _LocalToWorld;
@@ -47,6 +48,7 @@ Shader "iviz/PointCloud2"
             };
 			
 			StructuredBuffer<Point> _Points;
+			float _AtlasRow;
 
 			struct v2f
 			{
@@ -68,7 +70,7 @@ Shader "iviz/PointCloud2"
 				o.position = UnityObjectToClipPos(centerVertex) + quadVertex;
 	#if USE_TEXTURE
 				float centerIntensity = centerPoint.intensity;
-				o.color = tex2Dlod(_IntensityTexture, float4(centerIntensity * _IntensityCoeff + _IntensityAdd, 0, 0, 0));
+				o.color = tex2Dlod(_AtlasTexture, float4(centerIntensity * _IntensityCoeff + _IntensityAdd, _AtlasRow, 0, 0));
 	#else
 				int centerIntensity = centerPoint.intensity;
 				fixed3 rgb = fixed3(

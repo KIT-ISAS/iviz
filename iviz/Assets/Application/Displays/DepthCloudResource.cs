@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Runtime.InteropServices;
 using Iviz.Resources;
+using UnityEngine.Rendering;
 
 namespace Iviz.Displays
 {
@@ -227,7 +228,8 @@ namespace Iviz.Displays
             material.SetMatrix(PLocalToWorld, transform.localToWorldMatrix);
             material.SetMatrix(PWorldToLocal, transform.worldToLocalMatrix);
 
-            Graphics.DrawProcedural(material, WorldBounds, MeshTopology.Quads, 4, uvs.Length);
+            Graphics.DrawProcedural(material, WorldBounds, MeshTopology.Quads, 4, uvs.Length,
+                castShadows: ShadowCastingMode.Off, receiveShadows: false, layer: gameObject.layer);
         }
 
         public override void Suspend()

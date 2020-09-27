@@ -11,6 +11,7 @@ namespace Iviz.Displays
 
         [SerializeField] Texture squareTexture = null;
         Texture2D inputTexture;
+        [SerializeField] Material material;
 
         Mesh mesh;
         public int CellsX { get; private set; }
@@ -132,12 +133,16 @@ namespace Iviz.Displays
             */
         }
 
-        protected override void OnDestroy()
+        void OnDestroy()
         {
-            base.OnDestroy();
             if (inputTexture != null)
             {
                 Destroy(inputTexture);
+            }
+
+            if (material != null)
+            {
+                Destroy(material);
             }
 
             Destroy(mesh);

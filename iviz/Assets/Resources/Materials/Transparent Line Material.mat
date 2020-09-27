@@ -34,5 +34,6 @@ Material:
     m_Floats:
     - _Distance: 1
     - _PointSize: 0.003
+    - _UseTexture: 0
     m_Colors:
     - _Tint: {r: 0.5, g: 0.5, b: 0.5, a: 1}

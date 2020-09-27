@@ -122,7 +122,7 @@ namespace Iviz.Displays
 
             GameObject cubeObject = Resource.Displays.Cube.Object;
             resource.Mesh = cubeObject.GetComponent<MeshFilter>().sharedMesh;
-            resource.UseIntensityTexture = true;
+            resource.UseColormap = true;
             resource.UsePerVertexScale = true;
             resource.CastShadows = false; // fix weird shadow bug
         }

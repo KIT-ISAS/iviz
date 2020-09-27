@@ -151,7 +151,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public bool IsIntensityUsed => pointCloud != null && pointCloud.UseIntensityTexture; 
+        public bool IsIntensityUsed => pointCloud != null && pointCloud.UseColormap; 
 
         public uint MaxQueueSize
         {
@@ -284,7 +284,7 @@ namespace Iviz.Controllers
                     node.AttachTo(msg.Header.FrameId, msg.Header.Stamp); 
 
                     Size = newSize;
-                    pointCloud.UseIntensityTexture = !rgbaHint;
+                    pointCloud.UseColormap = !rgbaHint;
                     pointCloud.PointsWithColor = pointBuffer.AsSlice(0, Size);
                     MeasuredIntensityBounds = pointCloud.IntensityBounds;
                     if (ForceMinMax)

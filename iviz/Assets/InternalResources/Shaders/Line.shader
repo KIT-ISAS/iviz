@@ -2,6 +2,9 @@ Shader "iviz/Line"
 {
 	Properties
 	{
+		[Toggle(USE_TEXTURE)]
+		_UseTexture("Use Texture", Int) = 1
+		_AtlasTexture ("Atlas Texture", 2D) = "defaulttexture" {}
 	}
 
 	SubShader
@@ -13,14 +16,12 @@ Shader "iviz/Line"
 		{
 			CGPROGRAM
 			#include "UnityCG.cginc"
-            #include "UnityLightingCommon.cginc"
             
 			#pragma vertex vert
 			#pragma fragment frag
-			#pragma multi_compile _ USE_TEXTURE
+			#pragma shader_feature USE_TEXTURE
 			#pragma multi_compile_instancing
-
-			sampler2D _IntensityTexture;
+			
 			float _IntensityCoeff;
 			float _IntensityAdd;
 
@@ -58,8 +59,9 @@ Shader "iviz/Line"
 				uint colorB;
 #endif
 			};
-
+			
 			StructuredBuffer<Line> _Lines;
+			float _AtlasRow;
 
 			struct v2f
 			{
@@ -91,24 +93,24 @@ Shader "iviz/Line"
 
 	#if USE_TEXTURE
 				float intensityA = _Lines[inst].intensityA;
-				fixed3 rgbaA = tex2Dlod(_IntensityTexture, float4(intensityA * _IntensityCoeff + _IntensityAdd, 0, 0, 0)).xyz;
+				fixed3 rgbaA = tex2Dlod(_AtlasTexture, float4(intensityA * _IntensityCoeff + _IntensityAdd, _AtlasRow, 0, 0)).xyz;
 				float intensityB = _Lines[inst].intensityB;
-				fixed3 rgbaB = tex2Dlod(_IntensityTexture, float4(intensityB * _IntensityCoeff + _IntensityAdd, 0, 0, 0)).xyz;
+				fixed3 rgbaB = tex2Dlod(_AtlasTexture, float4(intensityB * _IntensityCoeff + _IntensityAdd, _AtlasRow, 0, 0)).xyz;
     #else
 				uint cA = _Lines[inst].colorA;
-				fixed3 rgbaA = fixed3(
+				fixed3 rgbA = fixed3(
 					(cA >>  0) & 0xff,
 					(cA >>  8) & 0xff,
 					(cA >> 16) & 0xff
 					) / 255.0;
 				uint cB = _Lines[inst].colorB;
-				fixed3 rgbaB = fixed3(
+				fixed3 rgbB = fixed3(
 					(cB >>  0) & 0xff,
 					(cB >>  8) & 0xff,
 					(cB >> 16) & 0xff
 					) / 255.0;
 	#endif
-				fixed3 diffuse = (rgbaB - rgbaA) * V.z + rgbaA;
+				fixed3 diffuse = (rgbB - rgbA) * V.z + rgbA;
 				diffuse *= _Tint;
 				
                 o.color = diffuse;				

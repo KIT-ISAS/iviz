@@ -1,12 +1,7 @@
-using System;
-using System.IO;
-using Iviz.Displays;
 using Iviz.Resources;
-using Iviz.Roslib;
-using Iviz.Sdf;
 using UnityEngine;
-using Pose = Iviz.Sdf.Pose;
-using Vector3 = UnityEngine.Vector3;
+using UnityEngine.Windows;
+using Color = UnityEngine.Color;
 
 namespace Iviz.App
 {
@@ -14,138 +9,29 @@ namespace Iviz.App
     {
         void OnEnable()
         {
-            
-            string packagePath = "/Users/akzeac/Shared/aws-robomaker-hospital-world";
-            string localPath = "/worlds/hospital.world";
-            
-            string xmlData = File.ReadAllText(packagePath + localPath);
-            SdfFile sdf = SdfFile.Create(xmlData);
-            
-            var modelPaths = SdfFile.CreateModelPaths(packagePath);
-            SdfFile newSdf = sdf.ResolveIncludes(modelPaths);
-            
-            CreateWorld(newSdf.Worlds[0]);
-            
-            
             /*
-            Resource.TryGetResource(new System.Uri("package://aws-robomaker-hospital-world/worlds/hospital.world"), 
-                out Resource.Info<GameObject> resource);
-                */
+            Texture2D t = null;
+
+            Color[] atlasColors = new Color[16 * 16];
+            
+            for (int i = 0; i < Resource.Colormaps.Names.Count; i++)
+            {
+                Texture2D tex = Resource.Colormaps.Textures[(Resource.ColormapId) i];
+                Color[] colors = tex.GetPixels();
+                for (int j = 0; j < 16; j++)
+                {
+                    atlasColors[16 * (15 - i) + j] = colors[j];
+                }
+
+            }
+            
+            Texture2D newTexture = new Texture2D(16, 16);
+            newTexture.SetPixels(atlasColors);
+            newTexture.Apply();
+            byte[] bytes = newTexture.EncodeToPNG();
+            File.WriteAllBytes("/Users/akzeac/atlas.png", bytes);
+            */
         }
-
-        void CreateWorld(World world)
-        {
-            GameObject worldObject = new GameObject("World:" + world.Name);
-            
-            foreach (Model model in world.Models)
-            {
-                CreateModel(model)?.transform.SetParent(worldObject.transform, false);
-            }
-            
-        }
-        GameObject CreateModel(Model model)
-        {
-            GameObject modelObject = new GameObject("Model:" + model.Name);
-            UnityEngine.Pose pose = model.Pose?.ToPose() ?? UnityEngine.Pose.identity;
-            UnityEngine.Pose includePose = model.IncludePose?.ToPose() ?? UnityEngine.Pose.identity;
-            modelObject.transform.SetLocalPose(includePose.Multiply(pose));
-
-            if (model.Models is null || model.Links is null)
-            {
-                // invalid
-                return modelObject;
-            }
-            
-            foreach (Model innerModel in model.Models)
-            {
-                CreateModel(innerModel)?.transform.SetParent(modelObject.transform, false);
-            }
-
-            foreach (Link link in model.Links)
-            {
-                CreateLink(link)?.transform.SetParent(modelObject.transform, false);
-            }
-            
-            return modelObject;
-        }
-        
-        GameObject CreateLink(Link link)
-        {
-            GameObject linkObject = new GameObject("Link:" + link.Name);
-            linkObject.transform.SetLocalPose(link.Pose?.ToPose() ?? UnityEngine.Pose.identity);
-
-            foreach (Visual visual in link.Visuals)
-            {
-                Geometry geometry = visual.Geometry;
-
-                GameObject visualObject = new GameObject
-                (
-                    name: visual.Name != null ? $"[Visual:{visual.Name}]" : "[Visual]"
-                );
-                visualObject.transform.SetParent(linkObject.transform, false);
-
-                GameObject resourceObject = null;
-                bool isSynthetic = false;
-                if (geometry.Mesh != null)
-                {
-                    System.Uri uri = geometry.Mesh.Uri.ToUri();
-                    if (!Resource.TryGetResource(uri, out Resource.Info<GameObject> info))
-                    {
-                        Debug.Log("Robot: Failed to retrieve " + uri);
-                        continue;
-                    }
-
-                    resourceObject = ResourcePool.GetOrCreate(info);
-                    resourceObject.transform.SetParent(visualObject.transform, false);
-                    visualObject.transform.localScale = geometry.Mesh.Scale?.ToVector3().Abs() ?? Vector3.one;
-                    isSynthetic = true;
-                }
-                else if (geometry.Cylinder != null)
-                {
-                    resourceObject = ResourcePool.GetOrCreate(Resource.Displays.Cylinder);
-                    resourceObject.transform.SetParent(visualObject.transform, false);
-                    visualObject.transform.localScale = new Vector3(
-                        (float)geometry.Cylinder.Radius * 2,
-                        (float)geometry.Cylinder.Length,
-                        (float)geometry.Cylinder.Radius * 2);
-                }
-                else if (geometry.Box != null)
-                {
-                    resourceObject = ResourcePool.GetOrCreate(Resource.Displays.Cube);
-                    resourceObject.transform.SetParent(visualObject.transform, false);
-                    visualObject.transform.localScale = geometry.Box.Scale?.ToVector3().Abs() ?? Vector3.one;
-                }
-                else if (geometry.Sphere != null)
-                {
-                    resourceObject = ResourcePool.GetOrCreate(Resource.Displays.Sphere);
-                    resourceObject.transform.SetParent(visualObject.transform, false);
-                    visualObject.transform.localScale = (float)geometry.Sphere.Radius * Vector3.one;
-                }
-
-                if (resourceObject is null)
-                {
-                    continue; //?
-                }
-            }
-
-            return linkObject;
-        }
-
-        
-        
-        static UnityEngine.Pose ToPose(Sdf.Pose pose)
-        {
-            if (pose is null)
-            {
-                return UnityEngine.Pose.identity;
-            }
-            
-            Msgs.GeometryMsgs.Point xyz = new Msgs.GeometryMsgs.Point(pose.Position.X, pose.Position.Y, pose.Position.Z);
-            Vector3 rpy = new Vector3((float)pose.Orientation.X, (float)pose.Orientation.Y, (float)pose.Orientation.Z);
-            
-            return new UnityEngine.Pose(xyz.Ros2Unity(), rpy.RosRpy2Unity());
-        } 
-
     }
 
 

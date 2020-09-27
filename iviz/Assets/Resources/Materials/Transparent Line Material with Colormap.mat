@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Line Material
-  m_Shader: {fileID: 4800000, guid: 34f645d361e6d4c8cb7d4be53d134a9e, type: 3}
+  m_Name: Transparent Line Material with Colormap
+  m_Shader: {fileID: 4800000, guid: 8fbc2ee92af7646fc8ec5e60d6c0d44a, type: 3}
   m_ShaderKeywords: _DISTANCE_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 1
@@ -34,6 +34,6 @@ Material:
     m_Floats:
     - _Distance: 1
     - _PointSize: 0.003
-    - _UseTexture: 0
+    - _UseTexture: 1
     m_Colors:
     - _Tint: {r: 0.5, g: 0.5, b: 0.5, a: 1}

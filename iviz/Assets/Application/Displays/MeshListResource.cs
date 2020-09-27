@@ -13,13 +13,15 @@ namespace Iviz.Displays
         NativeArray<float4> pointBuffer;
         ComputeBuffer pointComputeBuffer;
 
-        readonly uint[] argsBuffer = new uint[5] { 0, 0, 0, 0, 0 };
+        readonly uint[] argsBuffer = new uint[5] {0, 0, 0, 0, 0};
         ComputeBuffer argsComputeBuffer;
 
         Material normalMaterial;
         Material occlusionMaterial;
+        Material material;
 
         Mesh mesh;
+
         public Mesh Mesh
         {
             get => mesh;
@@ -33,6 +35,7 @@ namespace Iviz.Displays
         }
 
         [SerializeField] bool perVertexScale;
+
         public bool UsePerVertexScale
         {
             get => perVertexScale;
@@ -42,19 +45,20 @@ namespace Iviz.Displays
                 {
                     return;
                 }
+
                 perVertexScale = value;
                 UpdateMaterialKeywords();
             }
         }
 
-        protected override void UpdateMaterialKeywords()
+        void UpdateMaterialKeywords()
         {
-            if (UsePerVertexScale && UseIntensityTexture)
+            if (UsePerVertexScale && UseColormap)
             {
                 material.DisableKeyword("USE_TEXTURE");
                 material.EnableKeyword("USE_TEXTURE_SCALE");
             }
-            else if (UseIntensityTexture)
+            else if (UseColormap)
             {
                 material.DisableKeyword("USE_TEXTURE_SCALE");
                 material.EnableKeyword("USE_TEXTURE");
@@ -67,6 +71,7 @@ namespace Iviz.Displays
         }
 
         [SerializeField] int size;
+
         public int Size
         {
             get => size;
@@ -76,16 +81,17 @@ namespace Iviz.Displays
                 {
                     return;
                 }
+
                 size = value;
 
                 Reserve(size * 11 / 10);
 
-                argsBuffer[1] = (uint)size;
+                argsBuffer[1] = (uint) size;
                 argsComputeBuffer.SetData(argsBuffer);
             }
         }
 
-        public bool CastShadows { get; set; } = true;        
+        public bool CastShadows { get; set; } = true;
 
         public void Reserve(int reqDataSize)
         {
@@ -95,11 +101,12 @@ namespace Iviz.Displays
                 {
                     pointBuffer.Dispose();
                 }
+
                 pointBuffer = new NativeArray<float4>(reqDataSize, Allocator.Persistent);
 
                 pointComputeBuffer?.Release();
                 pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithColor>());
-                material.SetBuffer(PointsID, pointComputeBuffer);
+                properties.SetBuffer(PointsID, pointComputeBuffer);
             }
         }
 
@@ -116,9 +123,11 @@ namespace Iviz.Displays
                     {
                         continue;
                     }
+
                     pointBuffer[realSize] = point;
                     realSize++;
                 }
+
                 Size = realSize;
                 UpdateBuffer();
             }
@@ -130,10 +139,12 @@ namespace Iviz.Displays
             {
                 return;
             }
+
             pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
             MinMaxJob.CalculateBounds(pointBuffer, Size, out Bounds bounds, out Vector2 span);
             boxCollider.size = bounds.size + Scale3;
-            boxCollider.center = new Vector3(bounds.center.x, bounds.center.y + boxCollider.size.y / 2, bounds.center.z);
+            boxCollider.center =
+                new Vector3(bounds.center.x, bounds.center.y + boxCollider.size.y / 2, bounds.center.z);
             IntensityBounds = span;
         }
 
@@ -141,30 +152,33 @@ namespace Iviz.Displays
         static readonly int PropLocalScale = Shader.PropertyToID("_LocalScale");
 
         [SerializeField] Vector3 scale3;
+
         public Vector3 Scale3
         {
             get => scale3;
             set
             {
                 scale3 = value;
-                material.SetVector(PropLocalScale, new Vector4(scale3.x, scale3.y, scale3.z, 1));
+                properties.SetVector(PropLocalScale, new Vector4(scale3.x, scale3.y, scale3.z, 1));
             }
         }
 
         static readonly int PropLocalOffset = Shader.PropertyToID("_LocalOffset");
 
         [SerializeField] Vector3 offset;
+
         public Vector3 Offset
         {
             get => offset;
             set
             {
                 offset = value;
-                material.SetVector(PropLocalOffset, offset);
+                properties.SetVector(PropLocalOffset, offset);
             }
         }
 
         [SerializeField] bool occlusionOnly;
+
         public bool OcclusionOnlyActive
         {
             get => occlusionOnly;
@@ -174,6 +188,7 @@ namespace Iviz.Displays
                 {
                     return;
                 }
+
                 occlusionOnly = value;
 
                 if (value)
@@ -183,12 +198,14 @@ namespace Iviz.Displays
                         occlusionMaterial = Resource.Materials.MeshListOcclusionOnly.Instantiate();
                         occlusionMaterial.enableInstancing = true;
                     }
+
                     material = occlusionMaterial;
                 }
                 else
                 {
                     material = normalMaterial;
                 }
+
                 Rebuild();
             }
         }
@@ -201,7 +218,7 @@ namespace Iviz.Displays
 
             base.Awake();
 
-            UseIntensityTexture = true;
+            UseColormap = true;
             UpdateMaterialKeywords();
 
             Mesh = Resource.Displays.SphereSimple.Object.GetComponent<MeshFilter>().sharedMesh;
@@ -210,7 +227,8 @@ namespace Iviz.Displays
             IntensityBounds = new Vector2(0, 1);
             Colormap = Resource.ColormapId.gray;
 
-            argsComputeBuffer = new ComputeBuffer(1, argsBuffer.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
+            argsComputeBuffer =
+                new ComputeBuffer(1, argsBuffer.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
             argsComputeBuffer.SetData(argsBuffer);
 
             OcclusionOnlyActive = false;
@@ -222,9 +240,10 @@ namespace Iviz.Displays
             {
                 return;
             }
+
             UpdateTransform();
             Bounds worldBounds = boxCollider.bounds;
-            material.SetVector(BoundaryCenterID, worldBounds.center);
+            properties.SetVector(BoundaryCenterID, worldBounds.center);
 
             if (CastShadows && !OcclusionOnlyActive)
             {
@@ -232,15 +251,14 @@ namespace Iviz.Displays
             }
             else
             {
-                Graphics.DrawMeshInstancedIndirect(mesh, 0, material, worldBounds, argsComputeBuffer, 
+                Graphics.DrawMeshInstancedIndirect(mesh, 0, material, worldBounds, argsComputeBuffer,
                     0, null, ShadowCastingMode.Off);
             }
         }
 
-        protected override void OnDestroy()
+        void OnDestroy()
         {
             material = null;
-            base.OnDestroy();
 
             pointComputeBuffer?.Release();
             argsComputeBuffer?.Release();
@@ -248,10 +266,12 @@ namespace Iviz.Displays
             {
                 pointBuffer.Dispose();
             }
+
             if (occlusionMaterial != null)
             {
                 Destroy(occlusionMaterial);
             }
+
             if (normalMaterial != null)
             {
                 Destroy(normalMaterial);
@@ -265,22 +285,26 @@ namespace Iviz.Displays
                 pointComputeBuffer.Release();
                 pointComputeBuffer = null;
             }
+
             if (pointBuffer.Length != 0)
             {
                 pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithColor>());
                 pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
-                material.SetBuffer(PointsID, pointComputeBuffer);
+                properties.SetBuffer(PointsID, pointComputeBuffer);
             }
+
             if (argsComputeBuffer != null)
             {
                 argsComputeBuffer.Release();
                 argsComputeBuffer = null;
 
-                argsComputeBuffer = new ComputeBuffer(1, argsBuffer.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
+                argsComputeBuffer = new ComputeBuffer(1, argsBuffer.Length * sizeof(uint),
+                    ComputeBufferType.IndirectArguments);
                 argsComputeBuffer.SetData(argsBuffer);
 
                 //Debug.Log(string.Join(",", pointBuffer));
             }
+
             IntensityBounds = IntensityBounds;
             Scale3 = Scale3;
             Offset = Offset;

@@ -1,6 +1,5 @@
-﻿using UnityEngine;
-using Iviz.Resources;
-using UnityEngine.UIElements.Experimental;
+﻿using Iviz.Resources;
+using UnityEngine;
 
 namespace Iviz.Displays
 {
@@ -15,80 +14,62 @@ namespace Iviz.Displays
         protected static readonly int PointsID = Shader.PropertyToID("_Points");
         static readonly int TintID = Shader.PropertyToID("_Tint");
         static readonly int ScaleID = Shader.PropertyToID("_Scale");
-
-        [SerializeField] protected Material material;
-
-        [SerializeField] bool useIntensityTexture;
-        public bool UseIntensityTexture
-        {
-            get => useIntensityTexture;
-            set
-            {
-                if (useIntensityTexture == value)
-                {
-                    return;
-                }
-                useIntensityTexture = value;
-                UpdateMaterialKeywords();
-            }
-        }
-
-        protected virtual void UpdateMaterialKeywords()
-        {
-            if (UseIntensityTexture)
-            {
-                material.EnableKeyword("USE_TEXTURE");
-            }
-            else
-            {
-                material.DisableKeyword("USE_TEXTURE");
-            }
-        }
-
+        static readonly int AtlasRowID = Shader.PropertyToID("_AtlasRow");
 
         [SerializeField] Resource.ColormapId colormap;
+
+        [SerializeField] Vector2 intensityBounds;
+
+        [SerializeField] bool flipMinMax;
+
+        [SerializeField] Color tint;
+
+        [SerializeField] float elementSize = 1.0f;
+
+        protected MaterialPropertyBlock properties;
+
+        public bool UseColormap { get; set; }
+
         public Resource.ColormapId Colormap
         {
             get => colormap;
             set
             {
                 colormap = value;
-
-                Texture2D texture = Resource.Colormaps.Textures[Colormap];
-                material.SetTexture(IntensityID, texture);
+                properties.SetFloat(AtlasRowID, (float) value + 0.5f);
             }
         }
 
-        [SerializeField] Vector2 intensityBounds;
         public Vector2 IntensityBounds
         {
             get => intensityBounds;
             set
             {
                 intensityBounds = value;
-                float intensitySpan = intensityBounds.y - intensityBounds.x;
-                
-                if (Mathf.Approximately(intensitySpan,0))
-                {
-                    material.SetFloat(IntensityCoeffID, 1);
-                    material.SetFloat(IntensityAddID, 0);
-                    return;
-                }
+                var intensitySpan = intensityBounds.y - intensityBounds.x;
 
-                if (!FlipMinMax)
+                float coeff, add;
+                if (Mathf.Approximately(intensitySpan, 0))
                 {
-                    material.SetFloat(IntensityCoeffID, 1 / intensitySpan);
-                    material.SetFloat(IntensityAddID, -intensityBounds.x / intensitySpan);
+                    coeff = 1;
+                    add = 0;
+                }
+                else if (!FlipMinMax)
+                {
+                    coeff = 1 / intensitySpan;
+                    add = -intensityBounds.x / intensitySpan;
                 }
                 else
                 {
-                    material.SetFloat(IntensityCoeffID, -1 / intensitySpan);
-                    material.SetFloat(IntensityAddID, intensityBounds.y / intensitySpan);
+                    coeff = -1 / intensitySpan;
+                    add = intensityBounds.y / intensitySpan;
                 }
+
+                properties.SetFloat(IntensityCoeffID, coeff);
+                properties.SetFloat(IntensityAddID, add);
             }
         }
 
-        [SerializeField] bool flipMinMax;
         public bool FlipMinMax
         {
             get => flipMinMax;
@@ -97,6 +78,32 @@ namespace Iviz.Displays
                 flipMinMax = value;
                 IntensityBounds = IntensityBounds;
             }
+        }
+
+        /// <summary>
+        ///     Size multiplier for internal/instantiated elements. Example: Line width in LineResource, point size in PointList.
+        /// </summary>
+        public float ElementSize
+        {
+            get => elementSize;
+            set => elementSize = value;
+        }
+
+        protected override void Awake()
+        {
+            base.Awake();
+            properties = new MaterialPropertyBlock();
+            Tint = Color.white;
+        }
+
+        protected virtual void OnApplicationFocus(bool hasFocus)
+        {
+            if (!hasFocus)
+            {
+                return;
+            }
+
+            Rebuild();
         }
 
         public override bool Visible
@@ -108,11 +115,10 @@ namespace Iviz.Displays
                 {
                     Rebuild();
                 }
+
                 base.Visible = value;
             }
         }
-
-        [SerializeField] Color tint;
 
         public virtual Color Tint
         {
@@ -120,51 +126,17 @@ namespace Iviz.Displays
             set
             {
                 tint = value;
-                material.SetColor(TintID, value);
+                properties.SetColor(TintID, value);
             }
-        }
-        
-        [SerializeField] float elementSize = 1.0f;
-
-        /// <summary>
-        /// Size multiplier for internal/instantiated elements. Example: Line width in LineResource, point size in PointList.
-        /// </summary>
-        public float ElementSize
-        {
-            get => elementSize;
-            set => elementSize = value;
-        }        
-
-        protected override void Awake()
-        {
-            base.Awake();
-            Tint = Color.white;
         }
 
         protected void UpdateTransform()
         {
-            material.SetFloat(ScaleID, transform.lossyScale.x * ElementSize);
-            material.SetMatrix(LocalToWorldID, transform.localToWorldMatrix);
-            material.SetMatrix(WorldToLocalID, transform.worldToLocalMatrix);
+            properties.SetFloat(ScaleID, transform.lossyScale.x * ElementSize);
+            properties.SetMatrix(LocalToWorldID, transform.localToWorldMatrix);
+            properties.SetMatrix(WorldToLocalID, transform.worldToLocalMatrix);
         }
 
         protected abstract void Rebuild();
-
-        protected virtual void OnApplicationFocus(bool hasFocus)
-        {
-            if (!hasFocus)
-            {
-                return;
-            }
-            Rebuild();
-        }
-
-        protected virtual void OnDestroy()
-        {
-            if (material != null)
-            {
-                Destroy(material);
-            }
-        }
     }
 }

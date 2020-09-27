@@ -231,6 +231,7 @@ namespace Iviz.Resources
             public MaterialInfo TransparentTexturedLit { get; }
             public MaterialInfo ImagePreview { get; }
             public MaterialInfo PointCloud { get; }
+            public MaterialInfo PointCloudWithColormap { get; }
             public MaterialInfo MeshList { get; }
             public MaterialInfo DepthImageProjector { get; }
             public MaterialInfo Grid { get; }
@@ -239,6 +240,8 @@ namespace Iviz.Resources
 
             public MaterialInfo Line { get; }
             public MaterialInfo TransparentLine { get; }
+            public MaterialInfo LineWithColormap { get; }
+            public MaterialInfo TransparentLineWithColormap { get; }
 
             public MaterialInfo LitOcclusionOnly { get; }
             public MaterialInfo MeshListOcclusionOnly { get; }
@@ -251,15 +254,19 @@ namespace Iviz.Resources
                 TransparentLit = new MaterialInfo("Materials/Transparent Lit");
                 TransparentTexturedLit = new MaterialInfo("Materials/Transparent Textured Lit");
                 ImagePreview = new MaterialInfo("Materials/ImagePreview");
-                PointCloud = new MaterialInfo("Materials/PointCloud Material");
                 MeshList = new MaterialInfo("Materials/MeshList Material");
                 Grid = new MaterialInfo("Materials/Grid");
                 GridInterior = new MaterialInfo("Materials/Grid Interior");
                 GridMap = new MaterialInfo("Materials/GridMap");
                 DepthImageProjector = new MaterialInfo("Materials/DepthImage Material");
 
+                PointCloud = new MaterialInfo("Materials/PointCloud Material");
+                PointCloudWithColormap = new MaterialInfo("Materials/PointCloud Material with Colormap");
+
                 Line = new MaterialInfo("Materials/Line Material");
                 TransparentLine = new MaterialInfo("Materials/Transparent Line Material");
+                LineWithColormap = new MaterialInfo("Materials/Line Material with Colormap");
+                TransparentLineWithColormap = new MaterialInfo("Materials/Transparent Line Material with Colormap");
 
                 LitOcclusionOnly = new MaterialInfo("Materials/White OcclusionOnly");
                 MeshListOcclusionOnly = new MaterialInfo("Materials/MeshList OcclusionOnly");

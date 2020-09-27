@@ -224,7 +224,7 @@ namespace Iviz.Controllers
                 case MarkerType.SphereList:
                 {
                     MeshListResource meshList = (MeshListResource) resource;
-                    meshList.UseIntensityTexture = false;
+                    meshList.UseColormap = false;
                     meshList.UsePerVertexScale = false;
                     meshList.Mesh = (msg.Type() == MarkerType.CubeList) ? CachedCube : CachedSphere;
                     PointWithColor[] points = new PointWithColor[msg.Points.Length];
@@ -353,7 +353,7 @@ namespace Iviz.Controllers
                     }
 
                     pointList.PointsWithColor = points;
-                    pointList.UseIntensityTexture = false;
+                    pointList.UseColormap = false;
                     break;
                 }
                 case MarkerType.TriangleList:

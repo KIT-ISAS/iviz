@@ -184,14 +184,14 @@ namespace Iviz.Displays
             }
         }
 
-        [SerializeField] float maxLineDistance_;
+        [SerializeField] float maxLineDistance;
         public float MaxLineDistance
         {
-            get => maxLineDistance_;
+            get => maxLineDistance;
             set
             {
-                bool changed = value != maxLineDistance_;
-                maxLineDistance_ = value;
+                bool changed = !Mathf.Approximately(value, maxLineDistance);
+                maxLineDistance = value;
                 if (changed)
                 {
                     SetLines();
@@ -204,8 +204,8 @@ namespace Iviz.Displays
             pointCloud = ResourcePool.GetOrCreate<PointListResource>(Resource.Displays.PointList, transform);
             lines = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, transform);
 
-            pointCloud.UseIntensityTexture = true;
-            lines.UseIntensityTexture = true;
+            pointCloud.UseColormap = true;
+            lines.UseColormap = true;
 
             MinIntensity = 0;
             MaxIntensity = 1;
@@ -225,12 +225,6 @@ namespace Iviz.Displays
             {
                 throw new ArgumentException(nameof(ranges));
             }
-
-            //float x = Mathf.Cos(angleMin);
-            //float y = Mathf.Sin(angleMin);
-
-            //float dx = Mathf.Cos(angleIncrement);
-            //float dy = Mathf.Sin(angleIncrement);
 
             pointBuffer.Clear();
             if (!UseIntensityNotRange)
@@ -295,7 +289,7 @@ namespace Iviz.Displays
         void SetLines()
         {
             int n = pointBuffer.Count;
-            float maxLineDistanceSq = maxLineDistance_ * maxLineDistance_;
+            float maxLineDistanceSq = maxLineDistance * maxLineDistance;
 
             lineBuffer.Clear();
             for (int i = 0; i < pointBuffer.Count; i++)
