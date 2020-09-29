@@ -263,6 +263,16 @@ namespace Iviz.Roslib
             {
                 Logger.Log($"{this}: {e}");
             }
+            
+            byte[] lengthArray = new byte[4];
+            byte[] ToLengthArray(uint i)
+            {
+                lengthArray[0] = (byte) i;
+                lengthArray[1] = (byte) (i >> 8);
+                lengthArray[2] = (byte) (i >> 0x10);
+                lengthArray[3] = (byte) (i >> 0x18);
+                return lengthArray;
+            }            
 
             while (keepRunning)
             {
@@ -324,7 +334,7 @@ namespace Iviz.Roslib
                         uint sendLength = Msgs.Buffer.Serialize(responseMsg, writeBuffer);
 
                         await stream.WriteAsync(statusByte, 0, 1);
-                        await stream.WriteAsync(BitConverter.GetBytes(sendLength), 0, 4);
+                        await stream.WriteAsync(ToLengthArray(sendLength), 0, 4);
                         await stream.WriteAsync(writeBuffer, 0, (int) sendLength);
                         BytesSent += (int) sendLength + 5;
                     }
