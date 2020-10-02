@@ -108,6 +108,18 @@ namespace Iviz.Roslib
             signal.Release();
             task?.Wait();
         }
+        
+        public async Task StopAsync()
+        {
+            Task[] tasks = connections.Keys.Select(sender => sender.StopAsync()).ToArray();
+            Task.WaitAll(tasks);
+            connections.Clear();
+            signal.Release();
+            if (task != null)
+            {
+                await task;
+            }
+        }
 
         public override string ToString()
         {
