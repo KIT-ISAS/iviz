@@ -95,10 +95,5 @@ namespace Iviz.Displays
             Color = new Color(1, 1, 0, 0.25f);
             ColliderEnabled = false;
         }
-
-        public void SplitForRecycle()
-        {
-            ResourcePool.Dispose(Resource.Displays.Line, resource.gameObject);
-        }
     }
 }

@@ -6,7 +6,7 @@ using Iviz.Controllers;
 
 namespace Iviz.Displays
 {
-    public sealed class TrailResource : DisplayWrapperResource, IRecyclable
+    public sealed class TrailResource : DisplayWrapperResource
     {
         LineResource lines;
 
@@ -62,11 +62,6 @@ namespace Iviz.Displays
 
             transform.parent = TFListener.UnityFrame?.transform;
         }
-        
-        public void SplitForRecycle()
-        {
-            ResourcePool.Dispose(Resource.Displays.Line, lines.gameObject);
-        }
 
         public override void Suspend()
         {
@@ -82,7 +77,7 @@ namespace Iviz.Displays
             lines?.Reserve(totalMeasurements);
         }
 
-        float lastTick = 0;
+        float lastTick;
         void Update()
         {
             float tick = Time.time;

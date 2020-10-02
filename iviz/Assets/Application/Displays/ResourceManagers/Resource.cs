@@ -469,9 +469,11 @@ namespace Iviz.Resources
                 return resourceByType;
             }
 
-            public bool TryGetResource(Type type, out GameObjectInfo info)
+            public bool TryGetResource<T>(out GameObjectInfo info) => TryGetResource(typeof(T), out info);
+            
+            public bool TryGetResource(Type t, out GameObjectInfo info)
             {
-                return ResourceByType.TryGetValue(type, out info) && info != null;
+                return ResourceByType.TryGetValue(t, out info) && info != null;
             }
         }
 

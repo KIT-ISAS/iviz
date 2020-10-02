@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Iviz.Displays
 {
-    public sealed class OccupancyGridResource : DisplayWrapperResource, IRecyclable, ISupportsTint
+    public sealed class OccupancyGridResource : DisplayWrapperResource, ISupportsTint
     {
         const int MaxSize = 10000;
 
@@ -131,11 +131,6 @@ namespace Iviz.Displays
         {
             base.Suspend();
             pointBuffer.Clear();
-        }
-
-        public void SplitForRecycle()
-        {
-            ResourcePool.Dispose(Resource.Displays.MeshList, resource.gameObject);
         }
 
         public readonly struct Rect

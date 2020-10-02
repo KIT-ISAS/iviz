@@ -190,7 +190,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public Pose WorldPose => TFListener.RelativePose(transform.AsPose());
+        public Pose WorldPose => TFListener.RelativePoseToRoot(transform.AsPose());
 
         public Pose AbsolutePose => transform.AsPose();
 

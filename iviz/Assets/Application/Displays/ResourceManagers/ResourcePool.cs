@@ -11,21 +11,18 @@ namespace Iviz.Displays
     {
         const int TimeToDestroy = 60; // sec
 
-        static ResourcePool Instance;
+        static ResourcePool instance;
 
-        public static GameObject GetOrCreate(
-            Resource.Info<GameObject> resource,
-            Transform parent = null,
-            bool enable = true)
+        public static GameObject GetOrCreate(Resource.Info<GameObject> resource, Transform parent = null, bool enable = true)
         {
             if (resource == null)
             {
                 throw new ArgumentNullException(nameof(resource));
             }
 
-            if (Instance != null)
+            if (instance != null)
             {
-                return Instance.Get(resource, parent, enable);
+                return instance.Get(resource, parent, enable);
             }
 
             GameObject obj = resource.Instantiate(parent);
@@ -33,41 +30,37 @@ namespace Iviz.Displays
             return obj;
         }
 
-        public static T GetOrCreate<T>(
-            Resource.Info<GameObject> resource,
-            Transform parent = null,
-            bool enable = true) where T : MonoBehaviour
+        public static T GetOrCreate<T>(Resource.Info<GameObject> resource, Transform parent = null, bool enable = true)
+            where T : MonoBehaviour
         {
             if (resource == null)
             {
                 throw new ArgumentNullException(nameof(resource));
             }
 
-            T t = GetOrCreate(resource, parent, enable).GetComponent<T>();
-            return t;
+            return GetOrCreate(resource, parent, enable).GetComponent<T>();
         }
 
-        public static void Dispose(Resource.Info<GameObject> resource, GameObject instance)
+        public static void Dispose(Resource.Info<GameObject> resource, GameObject gameObject)
         {
-            if (Instance == null)
+            if (instance == null)
             {
-                Destroy(instance);
+                Destroy(gameObject);
             }
             else
             {
-                Instance.Add(resource, instance);
+                instance.Add(resource, gameObject);
             }
         }
 
         public static T GetOrCreateDisplay<T>(Transform parent = null) where T : MonoBehaviour, IDisplay
         {
-            if (!Resource.Displays.TryGetResource(typeof(T), out Resource.Info<GameObject> info))
+            if (!Resource.Displays.TryGetResource<T>(out Resource.Info<GameObject> info))
             {
                 throw new ResourceNotFoundException("Cannot find unique display type for type " + nameof(T));
             }
 
             return GetOrCreate<T>(info, parent);
-            
         }
 
         public static void DisposeDisplay<T>(T resource) where T : MonoBehaviour, IDisplay
@@ -77,12 +70,33 @@ namespace Iviz.Displays
                 throw new ArgumentNullException(nameof(resource));
             }
 
-            if (!Resource.Displays.TryGetResource(typeof(T), out Resource.Info<GameObject> info))
+            if (!Resource.Displays.TryGetResource<T>(out Resource.Info<GameObject> info))
             {
                 throw new ResourceNotFoundException("Cannot find unique display type for resource");
             }
 
             Dispose(info, resource.gameObject);
+        }
+
+        public static bool TryDisposeDisplay(IDisplay resource)
+        {
+            if (resource == null)
+            {
+                throw new ArgumentNullException(nameof(resource));
+            }
+
+            if (!(resource is MonoBehaviour behaviour))
+            {
+                throw new ArgumentException("Invalid resource type");
+            }
+
+            if (!Resource.Displays.TryGetResource(resource.GetType(), out Resource.Info<GameObject> info))
+            {
+                return false;
+            }
+
+            Dispose(info, behaviour.gameObject);
+            return true;
         }
 
         class ObjectWithDeadline
@@ -103,7 +117,7 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            Instance = this;
+            instance = this;
             GameThread.EverySecond += CheckForDead;
         }
 
@@ -152,7 +166,7 @@ namespace Iviz.Displays
         void Add(Resource.Info<GameObject> resource, GameObject obj)
         {
             //Debug.Log("Adding " + resource.GameObject.name + " " + gameObject.GetInstanceID());
-            if (obj is null)
+            if (obj == null)
             {
                 Debug.LogWarning("ResourcePool: Attempted to dispose null object of type '" + resource + "'");
                 return;
@@ -189,7 +203,8 @@ namespace Iviz.Displays
 
         void OnDestroy()
         {
-            Instance = null;
+            instance = null;
+            GameThread.EverySecond -= CheckForDead;
         }
     }
 }

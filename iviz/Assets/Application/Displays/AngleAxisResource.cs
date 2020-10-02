@@ -4,7 +4,7 @@ using Iviz.Resources;
 
 namespace Iviz.Displays
 {
-    public sealed class AngleAxisResource : DisplayWrapperResource, IRecyclable, ISupportsTint
+    public sealed class AngleAxisResource : DisplayWrapperResource, ISupportsTint
     {
         LineResource resource;
         readonly List<LineWithColor> lines = new List<LineWithColor>();
@@ -119,11 +119,6 @@ namespace Iviz.Displays
 
             lines.Add(new LineWithColor(Vector3.zero, 1.2f * v1, Color));
             resource.LinesWithColor = lines;
-        }
-        
-        public void SplitForRecycle()
-        {
-            ResourcePool.Dispose(Resource.Displays.Line, resource.gameObject);
         }
     }
 }

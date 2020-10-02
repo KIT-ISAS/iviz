@@ -3,12 +3,15 @@ using Iviz.App;
 using Iviz.Controllers;
 using Iviz.Displays;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Application.Displays
 {
-    public class CameraFrameWidget : MonoBehaviour
+    public class CameraOverlayDisplay : MonoBehaviour
     {
         AxisFrameResource resource;
+        [SerializeField] Camera parentCamera;
+        [SerializeField] Camera grandparentCamera;
 
         void Start()
         {
@@ -20,19 +23,29 @@ namespace Application.Displays
             resource.AxisLength = 0.001f;
             resource.Layer = gameObject.layer;
 
-            Camera ownCamera = transform.parent.GetComponent<Camera>();
+            parentCamera = transform.parent.GetComponent<Camera>();
             Vector3 point = new Vector3(
-                0.9f * ownCamera.pixelWidth,
-                0.9f * ownCamera.pixelHeight,
-                ownCamera.nearClipPlane + resource.AxisLength);
-            Vector3 widgetWorldPos = ownCamera.ScreenToWorldPoint(point);
+                0.9f * parentCamera.pixelWidth,
+                0.9f * parentCamera.pixelHeight,
+                parentCamera.nearClipPlane + resource.AxisLength);
+            Vector3 widgetWorldPos = parentCamera.ScreenToWorldPoint(point);
             transform.position = widgetWorldPos;
+
+            grandparentCamera = parentCamera.transform.parent.GetComponent<Camera>();
         }
 
         static readonly Quaternion BaseTransform = Quaternion.AngleAxis(90, Vector3.up);
 
         void LateUpdate()
         {
+            var isParentEnabled = grandparentCamera.enabled;
+            if (resource.Visible != isParentEnabled)
+            {
+                parentCamera.enabled = isParentEnabled;
+                resource.Visible = isParentEnabled;
+                return;
+            }
+
             transform.rotation = TFListener.RootFrame.transform.rotation * BaseTransform;
         }
     }

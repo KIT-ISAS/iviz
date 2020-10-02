@@ -42,6 +42,9 @@ namespace Iviz.Controllers
         public static readonly Vector3 DefaultWorldOffset = new Vector3(0.5f, 0, -0.2f);
 
         public static ARController Instance { get; private set; }
+        public static bool ARModeEnabled => Instance != null && Instance.Visible;
+
+        public static event Action<bool> ARModeChanged;
 
         public enum RootMover
         {
@@ -88,7 +91,7 @@ namespace Iviz.Controllers
             private set => config.WorldAngle = value;
         }
 
-        public Pose WorldPose { get; private set; }
+        public Pose WorldPose { get; private set; } = Pose.identity;
     
         public event Action<RootMover> WorldPoseChanged;
 
@@ -101,11 +104,9 @@ namespace Iviz.Controllers
             }
 
             WorldPoseChanged?.Invoke(mover);
-            
-            //RePin();
         }
-        
-        public void SetWorldPose(in Pose unityPose, RootMover mover)
+
+        protected void SetWorldPose(in Pose unityPose, RootMover mover)
         {
             float angle = unityPose.rotation.eulerAngles.y;
             if (angle > 180)
@@ -118,7 +119,7 @@ namespace Iviz.Controllers
             UpdateWorldPose(unityPose, mover);
         }
 
-        public void SetWorldPose(in Vector3 unityPosition, float angle, RootMover mover)
+        void SetWorldPose(in Vector3 unityPosition, float angle, RootMover mover)
         {
             WorldPosition = unityPosition;
             WorldAngle = angle;
@@ -156,14 +157,7 @@ namespace Iviz.Controllers
             {
                 config.Visible = value;
                 TFListener.RootFrame.transform.SetPose(value ? WorldPose : Pose.identity);
-                
-                ModuleListPanel.Instance.OnARModeChanged(value);
-                foreach (var module in ModuleListPanel.Instance.ModuleDatas)
-                {
-                    module.OnARModeChanged(value);
-                }
-                
-                //TFListener.MapFrame.UpdateAnchor(value);
+                ARModeChanged?.Invoke(value);
             }
         }
 
@@ -245,7 +239,7 @@ namespace Iviz.Controllers
 
         protected abstract bool FindRayHit(in Ray ray, out Vector3 anchor, out Vector3 normal);
 
-        public void Stop()
+        public virtual void Stop()
         {
             savedSessionInfo = new ARSessionInfo()
             {
@@ -260,6 +254,12 @@ namespace Iviz.Controllers
             TFListener.RootMarker.SetTargetPoseUpdater(pose => TFListener.RootFrame.transform.SetPose(pose));
             
             Instance = null;
+        }
+        
+        public static Pose RelativePoseToWorld(in Pose unityPose)
+        {
+            //Debug.Log(Instance.WorldPose);
+            return Instance == null ? unityPose : Instance.WorldPose.Inverse().Multiply(unityPose);
         }
 
         public virtual void Reset()

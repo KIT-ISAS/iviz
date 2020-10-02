@@ -174,22 +174,30 @@ namespace Iviz.Controllers
                 Service = service;
             }
 
-            public abstract void Advertise(RosClient client);
+            public abstract Task AdvertiseAsync(RosClient client);
         }
 
         class AdvertisedService<T> : AdvertisedService where T : IService, new()
         {
-            readonly Action<T> callback;
+            readonly Func<T, Task> callback;
 
             public AdvertisedService(string service, Action<T> callback) : base(service)
+            {
+                this.callback = async t => await Task.Run(() => callback(t));
+            }
+
+            public AdvertisedService(string service, Func<T, Task> callback) : base(service)
             {
                 this.callback = callback;
             }
 
-            public override void Advertise(RosClient client)
+            public override async Task AdvertiseAsync(RosClient client)
             {
                 string service = (Service[0] == '/') ? Service : $"{client.CallerId}/{Service}";
-                client?.AdvertiseService(service, callback);
+                if (client != null)
+                {
+                    await client.AdvertiseServiceAsync(service, callback);
+                }
             }
         }
 
@@ -248,7 +256,7 @@ namespace Iviz.Controllers
 
             try
             {
-                Msgs.Logger.LogDebug = x => Logger.Debug(x);
+                //Msgs.Logger.LogDebug = x => Logger.Debug(x);
                 Msgs.Logger.LogError = x => Logger.Error(x);
                 Msgs.Logger.Log = x => Logger.Info(x);
 
@@ -268,9 +276,8 @@ namespace Iviz.Controllers
 
                 foreach (var entry in servicesByTopic.Values)
                 {
-                    entry.Advertise(client);
+                    await entry.AdvertiseAsync(client);
                 }
-                //Debug.Log("5: " + (DateTime.Now - time).TotalMilliseconds);
 
                 Logger.Internal("<b>Connected.</b>");
 
@@ -410,11 +417,11 @@ namespace Iviz.Controllers
 
         public override void AdvertiseService<T>(string service, Action<T> callback)
         {
-            AddTask(() =>
+            AddTask(async () =>
             {
                 try
                 {
-                    AdvertiseServiceImpl(service, callback);
+                    await AdvertiseServiceImpl(service, callback);
                 }
                 catch (Exception e)
                 {
@@ -424,7 +431,7 @@ namespace Iviz.Controllers
             });
         }
 
-        void AdvertiseServiceImpl<T>(string service, Action<T> callback) where T : IService, new()
+        async Task AdvertiseServiceImpl<T>(string service, Action<T> callback) where T : IService, new()
         {
             if (servicesByTopic.ContainsKey(service))
             {
@@ -435,31 +442,11 @@ namespace Iviz.Controllers
 
             if (client != null)
             {
-                newAdvertisedService.Advertise(client);
+                await newAdvertisedService.AdvertiseAsync(client);
             }
 
             servicesByTopic.Add(service, newAdvertisedService);
         }
-
-        /*
-        public override void CallServiceAsync<T>(string service, T srv, Action<T> callback)
-        {
-            AddTask(() =>
-            {
-                try
-                {
-                    if (client != null && client.CallService(service, srv))
-                    {
-                        GameThread.RunOnce(() => callback(srv));
-                    }
-                }
-                catch (Exception e)
-                {
-                    Logger.Warn(e);
-                }
-            });
-        }
-        */
 
         readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
 
@@ -487,7 +474,7 @@ namespace Iviz.Controllers
 
         public override void Publish(RosSender advertiser, IMessage msg)
         {
-            AddTask(() =>
+            AddTask(async () =>
             {
                 try
                 {
@@ -679,8 +666,7 @@ namespace Iviz.Controllers
                 {
                     if (client?.Parameters != null)
                     {
-                        var tuple = await client.Parameters.GetParameterAsync(parameter);
-                        result[0] = tuple.value;
+                        (_, result[0]) = await client.Parameters.GetParameterAsync(parameter);
                     }
                 }
                 catch (Exception e)
@@ -697,11 +683,13 @@ namespace Iviz.Controllers
 
         protected override void Update()
         {
-            // TODO: get rid of RosClient.Cleanup()! 
+            // TODO: get rid of RosClient.Cleanup()!
+            /*
             if (client != null)
             {
                 AddTask(client.Cleanup);
             }
+            */
         }
 
         public override int GetNumPublishers(string topic)
@@ -719,7 +707,7 @@ namespace Iviz.Controllers
 
         public override void Stop()
         {
-            Disconnect(); // do not wait for topic, services unregistering
+            Disconnect(); 
             base.Stop();
         }
     }

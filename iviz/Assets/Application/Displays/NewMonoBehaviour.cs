@@ -1,6 +1,5 @@
 using Iviz.Resources;
 using UnityEngine;
-using UnityEngine.Windows;
 using Color = UnityEngine.Color;
 
 namespace Iviz.App
