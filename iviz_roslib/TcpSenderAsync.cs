@@ -24,7 +24,7 @@ namespace Iviz.Roslib
         Active,
         Dead
     }
-    
+
     internal sealed class TcpSenderAsync : IDisposable
     {
         readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
@@ -56,7 +56,8 @@ namespace Iviz.Roslib
         {
             get
             {
-                lock (messageQueue) return messageQueue.Count;
+                lock (messageQueue)
+                    return messageQueue.Count;
             }
         }
 
@@ -289,7 +290,7 @@ namespace Iviz.Roslib
             return null;
         }
         */
-        
+
         async Task Run(int timeoutInMs, SemaphoreSlim managerSignal)
         {
             try
@@ -297,23 +298,14 @@ namespace Iviz.Roslib
                 Logger.LogDebug($"{this}: initialized!");
                 Status = SenderStatus.Waiting;
 
-                /*
                 Task<TcpClient> connectionTask = tcpListener.AcceptTcpClientAsync();
-                Task<TcpClient> completedTask = await Task.WhenAny(connectionTask, TimeoutTask(timeoutInMs));
-                if (completedTask != connectionTask || connectionTask.IsFaulted || !keepRunning)
-                {
-                    throw new TimeoutException();
-                }
-                */
 
-                Task<TcpClient> connectionTask = tcpListener.AcceptTcpClientAsync();
-                
                 managerSignal.Release();
 
                 if (!await connectionTask.WaitFor(timeoutInMs) || !connectionTask.IsCompleted)
                 {
                     throw new TimeoutException("Connection timed out!", connectionTask.Exception);
-                } 
+                }
 
                 using (tcpClient = await connectionTask)
                 {
@@ -324,13 +316,23 @@ namespace Iviz.Roslib
 
                     Logger.LogDebug($"{this}: started!");
                     stream = tcpClient.GetStream();
-                    
+
                     if (!await DoHandshake())
                     {
                         keepRunning = false;
                     }
 
                     List<IMessage> tmpQueue = new List<IMessage>();
+
+                    byte[] lengthArray = new byte[4];
+                    byte[] ToLengthArray(uint i)
+                    {
+                        lengthArray[0] = (byte) i;
+                        lengthArray[1] = (byte) (i >> 8);
+                        lengthArray[2] = (byte) (i >> 0x10);
+                        lengthArray[3] = (byte) (i >> 0x18);
+                        return lengthArray;
+                    }
 
                     while (keepRunning)
                     {
@@ -358,9 +360,7 @@ namespace Iviz.Roslib
                             try
                             {
                                 uint sendLength = Msgs.Buffer.Serialize(message, writeBuffer);
-                                byte[] sendLengthAsArray = BitConverter.GetBytes(sendLength);
-
-                                await stream.WriteAsync(sendLengthAsArray, 0, 4);
+                                await stream.WriteAsync(ToLengthArray(sendLength), 0, 4);
                                 await stream.WriteAsync(writeBuffer, 0, (int) sendLength);
 
                                 NumSent++;
@@ -398,58 +398,55 @@ namespace Iviz.Roslib
                 return;
             }
 
+            const int minQueueSize = 2;
             lock (messageQueue)
             {
-                const int minQueueSize = 2;
                 messageQueue.Add(message);
-
                 if (messageQueue.Count > minQueueSize)
                 {
-                    // start discarding old messages
-                    int totalQueueSize = messageQueue.Sum(x => x.RosMessageLength);
-                    if (totalQueueSize > MaxQueueSizeInBytes)
-                    {
-                        int overflow = totalQueueSize - MaxQueueSizeInBytes;
-                        int i;
-                        for (i = 0; i < messageQueue.Count - minQueueSize && overflow > 0; i++)
-                        {
-                            overflow -= messageQueue[i].RosMessageLength;
-                        }
-
-                        NumDropped += i;
-                        BytesDropped = totalQueueSize - MaxQueueSizeInBytes - overflow;
-                        messageQueue.RemoveRange(0, i);
-                    }
+                    ApplyQueueSizeConstraint(minQueueSize);
                 }
             }
 
-            try
+            try { signal.Release(); }
+            catch (SemaphoreFullException) { }
+        }
+
+        void ApplyQueueSizeConstraint(int minQueueSize)
+        {
+            // start discarding old messages
+            int totalQueueSizeInBytes = messageQueue.Sum(message => message.RosMessageLength);
+            if (totalQueueSizeInBytes <= MaxQueueSizeInBytes)
             {
-                signal.Release();
+                return;
             }
-            catch (SemaphoreFullException)
+
+            int overflowInBytes = totalQueueSizeInBytes - MaxQueueSizeInBytes;
+            int toDrop;
+            for (toDrop = 0; toDrop < messageQueue.Count - minQueueSize && overflowInBytes > 0; toDrop++)
             {
+                overflowInBytes -= messageQueue[toDrop].RosMessageLength;
             }
+
+            NumDropped += toDrop;
+            BytesDropped = totalQueueSizeInBytes - MaxQueueSizeInBytes - overflowInBytes;
+            messageQueue.RemoveRange(0, toDrop);
         }
 
         bool disposed;
+
         public void Dispose()
         {
             if (disposed)
             {
                 return;
             }
-            
+
             disposed = true;
             keepRunning = false;
 
-            try
-            {
-                signal.Release();
-            }
-            catch (SemaphoreFullException)
-            {
-            }
+            try { signal.Release(); }
+            catch (SemaphoreFullException) { }
 
             task?.Wait();
         }
