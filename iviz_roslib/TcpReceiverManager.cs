@@ -23,7 +23,15 @@ namespace Iviz.Roslib
         public string Topic => TopicInfo.Topic;
         public string CallerId => TopicInfo.CallerId;
         public string TopicType => TopicInfo.Type;
-        public int NumConnections => connectionsByUri.Count;
+
+        public int NumConnections
+        {
+            get
+            {
+                Cleanup();
+                return connectionsByUri.Count;
+            }
+        }
         public bool RequestNoDelay { get; }
         public int TimeoutInMs { get; set; } = 5000;
 

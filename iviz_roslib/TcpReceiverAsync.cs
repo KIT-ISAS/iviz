@@ -180,10 +180,18 @@ namespace Iviz.Roslib
                         Task connectionTask = tcpClient.ConnectAsync(RemoteEndpoint.Hostname, RemoteEndpoint.Port);
                         if (!await connectionTask.WaitFor(timeoutInMs) || !connectionTask.IsCompleted)
                         {
-                            throw new TimeoutException("Connection timed out!", connectionTask.Exception);
+                            Logger.LogDebug($"{this}: Connection timed out! Retrying... ({round + 1}/{numTries})");
+                            continue;
                         }
 
+                        if (tcpClient.Client?.LocalEndPoint == null)
+                        {
+                            Logger.LogDebug($"{this}: Connection failed! Retrying... ({round + 1}/{numTries})");
+                            continue;
+                        }
+                        
                         IPEndPoint endPoint = (IPEndPoint) tcpClient.Client.LocalEndPoint;
+                        
                         Endpoint = new Endpoint(endPoint);
 
                         stream = tcpClient.GetStream();
@@ -218,6 +226,11 @@ namespace Iviz.Roslib
 
             tcpClient = null;
             stream = null;
+
+            keepRunning = false;
+            try { signal.Release(); }
+            catch(SemaphoreFullException) {}
+            
             Logger.Log($"{this}: Stopped!");
         }
 
@@ -276,7 +289,9 @@ namespace Iviz.Roslib
             disposed = true;
             keepRunning = false;
 
-            signal.Release();
+            try { signal.Release(); }
+            catch(SemaphoreFullException) {}
+
 
             task?.Wait();
         }
