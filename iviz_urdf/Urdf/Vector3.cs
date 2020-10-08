@@ -45,5 +45,10 @@ namespace Iviz.Urdf
         {
             return attr is null ? @default : new Vector3(attr);
         }
+
+        public override string ToString()
+        {
+            return $"[{X} {Y} {Z}]";
+        }
     }
 }

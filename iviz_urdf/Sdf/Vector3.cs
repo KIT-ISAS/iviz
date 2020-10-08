@@ -37,6 +37,11 @@ namespace Iviz.Sdf
             this.Z = Z;
         }
         
+        public override string ToString()
+        {
+            return $"[{X} {Y} {Z}]";
+        }        
+        
         public static readonly Vector3 One = new Vector3(1, 1, 1);
 
         public static readonly Vector3 Zero = new Vector3(0, 0, 0);

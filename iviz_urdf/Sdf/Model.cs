@@ -115,8 +115,7 @@ namespace Iviz.Sdf
                 throw new FileNotFoundException(sdfPath);
             }
 
-            string sdfText = File.ReadAllText(sdfPath);
-            SdfFile sdfFile = SdfFile.Create(sdfText);
+            SdfFile sdfFile = SdfFile.CreateFromFile(sdfPath);
             if (sdfFile.Models.Count == 0)
             {
                 Console.WriteLine("Warning: Included model file " + sdfPath + " with no models!");

@@ -52,17 +52,8 @@ namespace Iviz.Sdf
             Lights = source.Lights;
         }
 
-        
-        public static SdfFile Create(string xmlData)
+        static SdfFile Create(XmlDocument document)
         {
-            if (string.IsNullOrEmpty(xmlData))
-            {
-                throw new ArgumentException("Value cannot be null or empty.", nameof(xmlData));
-            }
-
-            XmlDocument document = new XmlDocument();
-            document.LoadXml(xmlData);
-
             XmlNode root = document.FirstChild;
             while (root != null && root.Name != "sdf")
             {
@@ -75,8 +66,48 @@ namespace Iviz.Sdf
             }
 
             return new SdfFile(root);
+        }        
+        
+        
+        public static SdfFile CreateFromXml(string xmlData)
+        {
+            if (string.IsNullOrEmpty(xmlData))
+            {
+                throw new ArgumentException("Value cannot be null or empty.", nameof(xmlData));
+            }
+
+            XmlDocument document = new XmlDocument();
+            document.LoadXml(xmlData);
+
+            return Create(document);
         }
 
+        public static SdfFile CreateFromFile(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new ArgumentException("Value cannot be null or empty.", nameof(path));
+            }
+
+            XmlDocument document = new XmlDocument();
+            document.Load(path);
+
+            return Create(document);
+        }
+        
+        public static SdfFile CreateFromStream(Stream stream)
+        {
+            if (stream == null)
+            {
+                throw new ArgumentNullException(nameof(stream));
+            }
+
+            XmlDocument document = new XmlDocument();
+            document.Load(stream);
+            
+            return Create(document);
+        }        
+        
         public SdfFile ResolveIncludes(IReadOnlyDictionary<string, string> modelPaths)
         {
             if (modelPaths is null)
@@ -123,7 +154,7 @@ namespace Iviz.Sdf
 
             Dictionary<string, string> modelPaths = new Dictionary<string, string>
             {
-                {"", packagePath},
+                [""] = packagePath,
             };
             
             CheckModelPath("", packagePath, modelPaths);

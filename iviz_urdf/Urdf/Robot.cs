@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Xml;
 
 namespace Iviz.Urdf
@@ -42,16 +43,8 @@ namespace Iviz.Urdf
             Materials = new ReadOnlyCollection<Material>(materials);
         }
 
-        public static Robot Create(string xmlData)
+        internal static Robot Create(XmlDocument document)
         {
-            if (string.IsNullOrEmpty(xmlData))
-            {
-                throw new ArgumentException("Value cannot be null or empty.", nameof(xmlData));
-            }
-
-            XmlDocument document = new XmlDocument();
-            document.LoadXml(xmlData);
-
             XmlNode root = document.FirstChild;
             while (root != null && root.Name != "robot")
             {

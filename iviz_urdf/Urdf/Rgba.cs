@@ -41,5 +41,10 @@ namespace Iviz.Urdf
             B = b;
             A = a;
         }
+        
+        public override string ToString()
+        {
+            return $"[{R} {G} {B} {A}]";
+        }
     }
 }

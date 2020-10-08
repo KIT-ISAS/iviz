@@ -18,5 +18,10 @@ namespace Iviz.Sdf
         {
             Value = value.ToString();
         }        
+        
+        public override string ToString()
+        {
+            return $"[{Value}]";
+        }
     }
 }
