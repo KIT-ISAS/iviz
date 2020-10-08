@@ -104,35 +104,13 @@ namespace Iviz.Displays
                 throw new ArgumentException("Invalid resource type");
             }
 
-            if (!Resource.Displays.TryGetResource(resource.GetType(), out Resource.Info<GameObject> info))
+            if (!Resource.Displays.TryGetResource(resource.GetType(), out Info<GameObject> info))
             {
                 return false;
             }
 
             Dispose(info, behaviour.gameObject);
             return true;
-        }
-
-        class ObjectWithDeadline
-        {
-            public float ExpirationTime { get; }
-            public GameObject GameObject { get; }
-
-            public ObjectWithDeadline(GameObject o)
-            {
-                GameObject = o;
-                ExpirationTime = Time.time + TimeToDestroy;
-            }
-        }
-
-        readonly Dictionary<int, Queue<ObjectWithDeadline>> pool = new Dictionary<int, Queue<ObjectWithDeadline>>();
-        readonly List<GameObject> objectsToDestroy = new List<GameObject>();
-        readonly HashSet<int> destroyedObjects = new HashSet<int>();
-
-        void Awake()
-        {
-            instance = this;
-            GameThread.EverySecond += CheckForDead;
         }
 
         void CheckForDead()
