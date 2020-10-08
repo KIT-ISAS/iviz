@@ -476,7 +476,7 @@ namespace Iviz.ModelService
             Sdf.SdfFile file;
             try
             {
-                file = Sdf.SdfFile.Create(data).ResolveIncludes(modelPaths);
+                file = Sdf.SdfFile.CreateFromXml(data).ResolveIncludes(modelPaths);
             }
             catch (Exception e) when (e is IOException || e is Sdf.MalformedSdfException)
             {
