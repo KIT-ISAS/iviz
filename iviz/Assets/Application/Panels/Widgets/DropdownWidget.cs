@@ -34,10 +34,7 @@ namespace Iviz.App
         public int Index
         {
             get => dropdown.value;
-            set
-            {
-                dropdown.value = value;
-            }
+            set => dropdown.value = value;
         }
 
         public bool Interactable

@@ -26,7 +26,7 @@ namespace Iviz.Displays
 
             lines = ResourcePool.GetOrCreateDisplay<LineResource>(transform);
             lines.Visible = false;
-            lines.ElementSize = 0.005f;
+            lines.ElementScale = 0.005f;
             lines.Layer = gameObject.layer;
 
             MeshFilter meshFilter = GetComponent<MeshFilter>();

@@ -1,6 +1,11 @@
 ﻿
 Shader "iviz/MultiplyMeshOcclusionOnly"
 {
+	Properties
+	{
+		[Toggle(USE_TEXTURE_SCALE)] _UseTextureScale("Use Texture ScaleY", Float) = 1
+	}    
+    
     SubShader
     {
         Tags { "RenderType"="Opaque" }

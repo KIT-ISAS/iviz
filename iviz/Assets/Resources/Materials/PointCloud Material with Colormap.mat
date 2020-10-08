@@ -9,7 +9,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: PointCloud Material with Colormap
   m_Shader: {fileID: 4800000, guid: 51c0de3611b9fb74aaf7bcdaf749c65b, type: 3}
-  m_ShaderKeywords: _DISTANCE_ON
+  m_ShaderKeywords: USE_TEXTURE _DISTANCE_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0

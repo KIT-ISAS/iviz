@@ -7,7 +7,6 @@
 
         CGPROGRAM
         #pragma surface surf Standard addshadow noforwardadd vertex:vert
-        #pragma target 3.0
 
         sampler2D _SquareTexture;
 		sampler2D _InputTexture;

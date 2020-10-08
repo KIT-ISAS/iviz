@@ -1,46 +1,50 @@
-﻿using UnityEngine;
-using Iviz.Resources;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Iviz.Controllers;
+using UnityEngine;
 
 namespace Iviz.Displays
 {
     public sealed class TrailResource : DisplayWrapperResource, IRecyclable
     {
-        LineResource lines;
+        const int MeasurementsPerSecond = 32;
 
-        protected override IDisplay Display => lines;
+        [SerializeField] int timeWindowInMs = 5000;
+        [SerializeField] Color color = UnityEngine.Color.red;
+
+        readonly Queue<LineWithColor> measurements = new Queue<LineWithColor>(5 * MeasurementsPerSecond);
+        Vector3? lastMeasurement;
+        float lastTick;
+        int maxMeasurements = 160;
+        
+        LineResource resource;
+
+        protected override IDisplay Display => resource;
 
         public Func<Vector3> DataSource { get; set; }
 
-        readonly List<Vector3> measurements = new List<Vector3>();
-        int startOffset = 0;
-
-        int totalMeasurements = 10 * 2;
-
-        const int MeasurementsPerSecond = 32;
-
-        [SerializeField] int timeWindowInMs = 2000;
 
         public int TimeWindowInMs
         {
             get => timeWindowInMs;
             set
             {
+                if (value <= 0)
+                {
+                    throw new ArgumentException("Invalid value " + value, nameof(value));    
+                }
+                
                 if (timeWindowInMs == value)
                 {
                     return;
                 }
 
                 timeWindowInMs = value;
-                totalMeasurements = timeWindowInMs * MeasurementsPerSecond / 1000;
+                maxMeasurements = timeWindowInMs * MeasurementsPerSecond / 1000;
                 Reset();
-                
             }
         }
-
-        [SerializeField] Color color = UnityEngine.Color.red;
 
         public Color32 Color
         {
@@ -48,24 +52,76 @@ namespace Iviz.Displays
             set => color = value;
         }
 
-        public float Scale
+        public float ElementScale
         {
-            get => lines.ElementSize;
-            set => lines.ElementSize = value;
+            get => resource.ElementScale;
+            set => resource.ElementScale = value;
         }
 
         void Awake()
         {
-            lines = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, transform);
-            lines.ElementSize = 0.01f;
+            resource = ResourcePool.GetOrCreateDisplay<LineResource>(transform);
+            resource.Name = "[Line for Trail]";
+            resource.ElementScale = 0.01f;
             TimeWindowInMs = TimeWindowInMs;
 
             transform.parent = TFListener.UnityFrame?.transform;
         }
-        
+
+        public void Reset()
+        {
+            measurements.Clear();
+            lastMeasurement = null;
+        }
+
+        void Update()
+        {
+            if (DataSource == null)
+            {
+                return;
+            }
+
+            var tick = Time.time;
+            if (tick - lastTick < 0.1f)
+            {
+                return;
+            }
+
+            lastTick = tick;
+
+            var newMeasurement = DataSource();
+            if (lastMeasurement == null)
+            {
+                lastMeasurement = newMeasurement;
+                return;
+            }
+
+            measurements.Enqueue(new LineWithColor(lastMeasurement.Value, newMeasurement));
+            if (measurements.Count > maxMeasurements)
+            {
+                measurements.Dequeue();
+            }
+
+            lastMeasurement = newMeasurement;
+
+            float scale = 255f / measurements.Count;
+
+            Color32 AdjustColor(int index)
+            {
+                return new Color32(Color.r, Color.g, Color.b, (byte) (255 - index * scale));
+            }
+
+            LineWithColor AdjustLineColor(LineWithColor line, int i)
+            {
+                return new LineWithColor(line.A, AdjustColor(i), line.B, AdjustColor(i + 1));
+            }
+
+            resource.Set(measurements.Count, measurements.Zip(Enumerable.Range(0, measurements.Count), AdjustLineColor));
+        }
+
         public void SplitForRecycle()
         {
-            ResourcePool.Dispose(Resource.Displays.Line, lines.gameObject);
+            ResourcePool.DisposeDisplay(resource);
         }
 
         public override void Suspend()
@@ -73,64 +129,6 @@ namespace Iviz.Displays
             base.Suspend();
             measurements.Clear();
             DataSource = null;
-        }
-
-        public void Reset()
-        {
-            measurements.Clear();
-            startOffset = 0;            
-            lines?.Reserve(totalMeasurements);
-        }
-
-        float lastTick = 0;
-        void Update()
-        {
-            float tick = Time.time;
-            if (tick - lastTick < 0.1f)
-            {
-                return;
-            }
-            lastTick = tick;
-
-            if (DataSource == null)
-            {
-                return;
-            }
-            Vector3 newMeasurement = DataSource();
-            //Debug.Log(newMeasurement);
-            if (measurements.Count != totalMeasurements)
-            {
-                measurements.Add(newMeasurement);
-            }
-            else
-            {
-                measurements[startOffset] = newMeasurement;
-                startOffset++;
-                if (startOffset == measurements.Count)
-                {
-                    startOffset = 0;
-                }
-            }
-
-            //Debug.Log("post: " + measurements.Count + " " + totalMeasurements);
-            lines.Set(measurements.Count, lineColors =>
-            {
-                int count = measurements.Count;
-                for (int i = 0; i < count - 1; i++)
-                {
-                    int indexA = (startOffset + i) % count;
-                    int indexB = (indexA + 1) % count;
-                    int alphaA = i * 255 / count;
-                    int alphaB = (i + 1) * 255 / count;
-                    lineColors[i] = new LineWithColor(
-                        measurements[indexA],
-                        new Color32(Color.r, Color.g, Color.b, (byte) alphaA),
-                        measurements[indexB],
-                        new Color32(Color.r, Color.g, Color.b, (byte) alphaB)
-                    );
-                    //Debug.Log(lineColors[i]);
-                }
-            });
         }
     }
 }

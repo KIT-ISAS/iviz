@@ -148,7 +148,7 @@ namespace Iviz.Controllers
             {
                 config.Scale = value;
                 displayNode.transform.localScale = value * Vector3.one;
-                trail.Scale = 0.02f * value;
+                trail.ElementScale = 0.02f * value;
             }
         }
 

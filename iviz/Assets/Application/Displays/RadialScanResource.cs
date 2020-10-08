@@ -1,54 +1,37 @@
-﻿using UnityEngine;
-using Iviz.Resources;
+﻿using System;
 using System.Collections.Generic;
-using System;
+using Iviz.Resources;
+using JetBrains.Annotations;
+using Unity.Mathematics;
+using UnityEngine;
 
 namespace Iviz.Displays
 {
+    /// <summary>
+    /// Visualization of a radial/laser scan.
+    /// </summary>
     public sealed class RadialScanResource : MonoBehaviour, IDisplay, IRecyclable
     {
-        PointListResource pointCloud;
-        LineResource lines;
-
-        readonly List<PointWithColor> pointBuffer = new List<PointWithColor>();
-        readonly List<LineWithColor> lineBuffer = new List<LineWithColor>();
-
-        public string Name => "RadialScanResource";
-        public Bounds Bounds => UseLines ? lines.Bounds : pointCloud.Bounds;
-        public Bounds WorldBounds => UseLines ? lines.WorldBounds : pointCloud.WorldBounds;
-        public Pose WorldPose => UseLines ? lines.WorldPose : pointCloud.WorldPose;
-        public Vector3 WorldScale => UseLines ? lines.WorldScale : pointCloud.WorldScale;
-
-        int layer;
-        public int Layer
-        {
-            get => layer;
-            set
-            {
-                layer = value;
-                pointCloud.Layer = layer;
-                lines.Layer = layer;
-            }
-        }
-        public Transform Parent
-        {
-            get => transform.parent;
-            set => transform.parent = value;
-        }
-
-        bool colliderEnabled;
-        public bool ColliderEnabled
-        {
-            get => colliderEnabled;
-            set
-            {
-                colliderEnabled = value;
-                lines.ColliderEnabled = value;
-                pointCloud.ColliderEnabled = value;
-            }
-        }
-
         [SerializeField] int size;
+        [SerializeField] float pointSize;
+        [SerializeField] Resource.ColormapId colormap;
+        [SerializeField] bool useIntensityNotRange;
+        [SerializeField] bool forceMinMax;
+        [SerializeField] bool flipMinMax;
+        [SerializeField] float minIntensity;
+        [SerializeField] float maxIntensity;
+        [SerializeField] bool useLines;
+        [SerializeField] float maxLineDistance;
+
+        readonly List<LineWithColor> lineBuffer = new List<LineWithColor>();
+        readonly List<PointWithColor> pointBuffer = new List<PointWithColor>();
+
+        LineResource lines;
+        PointListResource pointCloud;
+        bool colliderEnabled;
+        bool visible = true;
+        int layer;
+
         public int Size
         {
             get => size;
@@ -57,31 +40,17 @@ namespace Iviz.Displays
 
         public Vector2 MeasuredIntensityBounds { get; private set; }
 
-        bool visible = true;
-        public bool Visible
-        {
-            get => visible;
-            set
-            {
-                visible = value;
-                pointCloud.Visible = value && !UseLines;
-                lines.Visible = value && UseLines;
-            }
-        }
-
-        [SerializeField] float pointSize;
         public float PointSize
         {
             get => pointSize;
             set
             {
                 pointSize = value;
-                pointCloud.ElementSize = value;
-                lines.ElementSize = value;
+                pointCloud.ElementScale = value;
+                lines.ElementScale = value;
             }
         }
 
-        [SerializeField] Resource.ColormapId colormap;
         public Resource.ColormapId Colormap
         {
             get => colormap;
@@ -93,14 +62,12 @@ namespace Iviz.Displays
             }
         }
 
-        [SerializeField] bool useIntensityNotRange;
         public bool UseIntensityNotRange
         {
             get => useIntensityNotRange;
             set => useIntensityNotRange = value;
         }
 
-        [SerializeField] bool forceMinMax;
         public bool ForceMinMax
         {
             get => forceMinMax;
@@ -120,25 +87,23 @@ namespace Iviz.Displays
             }
         }
 
-        [SerializeField] bool flipMinMax_;
         public bool FlipMinMax
         {
-            get => flipMinMax_;
+            get => flipMinMax;
             set
             {
-                flipMinMax_ = value;
+                flipMinMax = value;
                 pointCloud.FlipMinMax = value;
                 lines.FlipMinMax = value;
             }
         }
 
-        [SerializeField] float minIntensity_;
         public float MinIntensity
         {
-            get => minIntensity_;
+            get => minIntensity;
             set
             {
-                minIntensity_ = value;
+                minIntensity = value;
                 if (ForceMinMax)
                 {
                     pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
@@ -147,13 +112,12 @@ namespace Iviz.Displays
             }
         }
 
-        [SerializeField] float maxIntensity_;
         public float MaxIntensity
         {
-            get => maxIntensity_;
+            get => maxIntensity;
             set
             {
-                maxIntensity_ = value;
+                maxIntensity = value;
                 if (ForceMinMax)
                 {
                     pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
@@ -162,14 +126,13 @@ namespace Iviz.Displays
             }
         }
 
-        [SerializeField] bool useLines_;
         public bool UseLines
         {
-            get => useLines_;
+            get => useLines;
             set
             {
-                useLines_ = value;
-                if (useLines_)
+                useLines = value;
+                if (useLines)
                 {
                     lines.Visible = Visible;
                     pointCloud.Visible = !Visible;
@@ -184,7 +147,6 @@ namespace Iviz.Displays
             }
         }
 
-        [SerializeField] float maxLineDistance;
         public float MaxLineDistance
         {
             get => maxLineDistance;
@@ -201,8 +163,8 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            pointCloud = ResourcePool.GetOrCreate<PointListResource>(Resource.Displays.PointList, transform);
-            lines = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, transform);
+            pointCloud = ResourcePool.GetOrCreateDisplay<PointListResource>(transform);
+            lines = ResourcePool.GetOrCreateDisplay<LineResource>(transform);
 
             pointCloud.UseColormap = true;
             lines.UseColormap = true;
@@ -215,15 +177,89 @@ namespace Iviz.Displays
             MaxLineDistance = 0.3f;
         }
 
-        public void Set(float angleMin, float angleIncrement, float rangeMin, float rangeMax, float[] ranges, float[] intensities)
+        public string Name => "RadialScanResource";
+        public Bounds Bounds => UseLines ? lines.Bounds : pointCloud.Bounds;
+        public Bounds WorldBounds => UseLines ? lines.WorldBounds : pointCloud.WorldBounds;
+        public Pose WorldPose => UseLines ? lines.WorldPose : pointCloud.WorldPose;
+        public Vector3 WorldScale => UseLines ? lines.WorldScale : pointCloud.WorldScale;
+
+        public int Layer
         {
-            if (rangeMin > rangeMax)
+            get => layer;
+            set
             {
-                throw new ArgumentException(nameof(rangeMin));
+                layer = value;
+                pointCloud.Layer = layer;
+                lines.Layer = layer;
             }
+        }
+
+        public Transform Parent
+        {
+            get => transform.parent;
+            set => transform.parent = value;
+        }
+
+        public bool ColliderEnabled
+        {
+            get => colliderEnabled;
+            set
+            {
+                colliderEnabled = value;
+                lines.ColliderEnabled = value;
+                pointCloud.ColliderEnabled = value;
+            }
+        }
+
+        public bool Visible
+        {
+            get => visible;
+            set
+            {
+                visible = value;
+                pointCloud.Visible = value && !UseLines;
+                lines.Visible = value && UseLines;
+            }
+        }
+
+        public void Suspend()
+        {
+            pointCloud.Suspend();
+            lines.Suspend();
+        }
+
+        public void SplitForRecycle()
+        {
+            ResourcePool.DisposeDisplay(pointCloud);
+            ResourcePool.DisposeDisplay(lines);
+        }
+
+        public void Set(float angleMin, float angleIncrement, float rangeMin, float rangeMax, float[] ranges,
+            float[] intensities)
+        {
+            if (ranges == null)
+            {
+                throw new ArgumentNullException(nameof(ranges));
+            }
+
+            if (intensities == null)
+            {
+                throw new ArgumentNullException(nameof(intensities));
+            }
+
+            if (float.IsNaN(rangeMin) || rangeMin > rangeMax)
+            {
+                throw new ArgumentException("rangeMin is nan or invalid!", nameof(rangeMin));
+            }
+
+            if (float.IsNaN(rangeMax))
+            {
+                throw new ArgumentException("rangeMax is nan!", nameof(rangeMax));
+            }
+
             if (intensities.Length != 0 && intensities.Length != ranges.Length)
             {
-                throw new ArgumentException(nameof(ranges));
+                throw new ArgumentException("Invalid intensity size", nameof(ranges));
             }
 
             pointBuffer.Clear();
@@ -238,11 +274,9 @@ namespace Iviz.Displays
                     }
 
                     float a = angleMin + angleIncrement * i;
-                    float x = Mathf.Cos(a); 
-                    float y = Mathf.Sin(a); 
-                    pointBuffer.Add(new PointWithColor(new Unity.Mathematics.float4(-y, 0, x, 1) * range));
-                    //x = dx * x - dy * y;
-                    //y = dy * x + dx * y;
+                    float x = Mathf.Cos(a);
+                    float y = Mathf.Sin(a);
+                    pointBuffer.Add(new PointWithColor(new float4(-y, 0, x, 1) * range));
                 }
             }
             else
@@ -254,13 +288,11 @@ namespace Iviz.Displays
                     {
                         continue;
                     }
-                    
+
                     float a = angleMin + angleIncrement * i;
-                    float x = Mathf.Cos(a); 
-                    float y = Mathf.Sin(a); 
+                    float x = Mathf.Cos(a);
+                    float y = Mathf.Sin(a);
                     pointBuffer.Add(new PointWithColor(-y * range, 0, x * range, intensities[i]));
-                    //x = dx * x - dy * y;
-                    //y = dy * x + dx * y;
                 }
             }
 
@@ -300,29 +332,14 @@ namespace Iviz.Displays
                 {
                     lineBuffer.Add(new LineWithColor(pA, pB));
                 }
-                else
-                {
-                    lineBuffer.Add(new LineWithColor(pA, pA));
-                }
             }
+
             lines.LinesWithColor = lineBuffer;
             MeasuredIntensityBounds = lines.IntensityBounds;
             if (ForceMinMax)
             {
                 lines.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
             }
-        }
-
-        public void Suspend()
-        {
-            pointCloud.Suspend();
-            lines.Suspend();
-        }
-
-        public void SplitForRecycle()
-        {
-            ResourcePool.Dispose(Resource.Displays.PointList, pointCloud.gameObject);
-            ResourcePool.Dispose(Resource.Displays.Line, lines.gameObject);
         }
     }
 }

@@ -41,7 +41,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4602828156360642986}
-  m_Mesh: {fileID: -5742075573831470199, guid: d453514ca61490b47a6560eb80ff92aa, type: 3}
+  m_Mesh: {fileID: -5742075573831470199, guid: e75b78ac41d65416dbe4a25e568561a2, type: 3}
 --- !u!23 &2536785221666715636
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -109,5 +109,5 @@ MonoBehaviour:
   texture: {fileID: 0}
   emissiveColor: {r: 0, g: 0, b: 0, a: 1}
   color: {r: 1, g: 1, b: 1, a: 1}
-  occlusionOnly: 0
   tint: {r: 1, g: 1, b: 1, a: 1}
+  occlusionOnly: 0

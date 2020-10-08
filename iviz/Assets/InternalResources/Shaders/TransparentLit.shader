@@ -13,7 +13,6 @@
 
 		CGPROGRAM
 		#pragma surface surf Standard addshadow fullforwardshadows alpha:fade
-		#pragma target 3.0
 
 		struct Input {
 			float dummy;
@@ -33,7 +32,7 @@
 			o.Albedo = color.rgb;
 			o.Smoothness = _Smoothness;
 			o.Alpha = color.a;
-            o.Metallic = _Metallic * o.Alpha;
+            o.Metallic = _Metallic;
             o.Emission = UNITY_ACCESS_INSTANCED_PROP(Props, _EmissiveColor).rgb;
 		}
 		ENDCG

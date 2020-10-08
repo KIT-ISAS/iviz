@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using Iviz.Resources;
 
 namespace Iviz.Displays
@@ -51,15 +52,15 @@ namespace Iviz.Displays
         }
 
         bool occlusionOnly;
-        public bool OcclusionOnlyActive
+        public bool OcclusionOnly
         {
             get => occlusionOnly;
             set
             {
                 occlusionOnly = value;
-                axisObjects[0].OcclusionOnlyActive = value;
-                axisObjects[1].OcclusionOnlyActive = value;
-                axisObjects[2].OcclusionOnlyActive = value;
+                axisObjects[0].OcclusionOnly = value;
+                axisObjects[1].OcclusionOnly = value;
+                axisObjects[2].OcclusionOnly = value;
             }
         }
 
@@ -103,8 +104,8 @@ namespace Iviz.Displays
             axisObjects[2].transform.localScale = new Vector3(newFrameAxisWidth, newFrameAxisLength, newFrameAxisWidth);
             axisObjects[2].transform.localPosition = newFrameAxisLength * new Vector3(0.001f, 0.5f, 0.001f);
 
-            boxCollider.center = 0.5f * (newFrameAxisLength - newFrameAxisWidth / 2) * new Vector3(-1, 1, -1);
-            boxCollider.size = (newFrameAxisLength + newFrameAxisWidth / 2) * Vector3.one;
+            BoxCollider.center = 0.5f * (newFrameAxisLength - newFrameAxisWidth / 2) * new Vector3(-1, 1, -1);
+            BoxCollider.size = (newFrameAxisLength + newFrameAxisWidth / 2) * Vector3.one;
         }
 
         public void SplitForRecycle()
@@ -125,7 +126,7 @@ namespace Iviz.Displays
             ColorX = Color.red;
             ColorY = Color.green;
             ColorZ = Color.blue;
-            OcclusionOnlyActive = false;
+            OcclusionOnly = false;
         }
     }
 }

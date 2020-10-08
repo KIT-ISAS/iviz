@@ -1,0 +1,5 @@
+{
+  "[KIT-IPR] Gammabot": "mp_500",
+  "[Franka Emika] Panda": "panda",
+  "[Fraunhofer IOSB] Bob": "e1_oilquick_bucket_raedlinger"
+}

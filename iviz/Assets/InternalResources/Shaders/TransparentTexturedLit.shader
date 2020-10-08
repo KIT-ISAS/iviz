@@ -14,7 +14,6 @@
 
         CGPROGRAM
         #pragma surface surf Standard fullforwardshadows addshadow alpha
-        #pragma target 3.0
 
         sampler2D _MainTex;
 

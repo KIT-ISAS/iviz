@@ -1,9 +1,9 @@
-﻿using UnityEngine;
-using Iviz.Resources;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using Unity.Mathematics;
 using System.Threading.Tasks;
+using Iviz.Resources;
+using Unity.Mathematics;
+using UnityEngine;
 
 namespace Iviz.Displays
 {
@@ -11,12 +11,14 @@ namespace Iviz.Displays
     {
         const int MaxSize = 10000;
 
-        MeshListResource resource;
+        [SerializeField] int numCellsX;
+        [SerializeField] int numCellsY;
+        [SerializeField] float cellSize;
+        
         readonly List<PointWithColor> pointBuffer = new List<PointWithColor>();
+        MeshListResource resource;
 
         protected override IDisplay Display => resource;
-
-        [SerializeField] int numCellsX;
 
         public int NumCellsX
         {
@@ -38,8 +40,6 @@ namespace Iviz.Displays
             }
         }
 
-        [SerializeField] int numCellsY;
-
         public int NumCellsY
         {
             get => numCellsY;
@@ -60,8 +60,6 @@ namespace Iviz.Displays
             }
         }
 
-        [SerializeField] float cellSize;
-
         public float CellSize
         {
             get => cellSize;
@@ -73,26 +71,16 @@ namespace Iviz.Displays
                 }
 
                 cellSize = value;
-                resource.Scale3 = value * Vector3.one;
-                resource.Offset = new Vector3(0, cellSize / 2, 0);
+                resource.ElementScale = value;
+                resource.PreTranslation = new Vector3(0, cellSize / 2, 0);
                 UpdateSize();
             }
         }
 
-        public Color Tint
-        {
-            get => resource.Tint;
-            set => resource.Tint = value;
-        }
-
         public bool OcclusionOnly
         {
-            get => resource.OcclusionOnlyActive;
-            set => resource.OcclusionOnlyActive = value;
-        }
-
-        void UpdateSize()
-        {
+            get => resource.OcclusionOnly;
+            set => resource.OcclusionOnly = value;
         }
 
         public Resource.ColormapId Colormap
@@ -107,10 +95,12 @@ namespace Iviz.Displays
             set => resource.FlipMinMax = value;
         }
 
+        public bool IsProcessing { get; private set; }
+
 
         void Awake()
         {
-            resource = ResourcePool.GetOrCreate<MeshListResource>(Resource.Displays.MeshList, transform);
+            resource = ResourcePool.GetOrCreateDisplay<MeshListResource>(transform);
 
             NumCellsX = 10;
             NumCellsY = 10;
@@ -120,11 +110,21 @@ namespace Iviz.Displays
 
             Colormap = Resource.ColormapId.gray;
 
-            GameObject cubeObject = Resource.Displays.Cube.Object;
-            resource.Mesh = cubeObject.GetComponent<MeshFilter>().sharedMesh;
+            resource.MeshResource = Resource.Displays.Cube;
             resource.UseColormap = true;
-            resource.UsePerVertexScale = true;
+            resource.UseIntensityForScaleY = true;
             resource.CastShadows = false; // fix weird shadow bug
+        }
+
+        public void SplitForRecycle()
+        {
+            ResourcePool.DisposeDisplay(resource);
+        }
+
+        public Color Tint
+        {
+            get => resource.Tint;
+            set => resource.Tint = value;
         }
 
         public override void Suspend()
@@ -133,29 +133,10 @@ namespace Iviz.Displays
             pointBuffer.Clear();
         }
 
-        public void SplitForRecycle()
+        void UpdateSize()
         {
-            ResourcePool.Dispose(Resource.Displays.MeshList, resource.gameObject);
         }
 
-        public readonly struct Rect
-        {
-            public readonly int xmin;
-            public readonly int xmax;
-            public readonly int ymin;
-            public readonly int ymax;
-
-            public Rect(int xmin, int xmax, int ymin, int ymax)
-            {
-                this.xmin = xmin;
-                this.xmax = xmax;
-                this.ymin = ymin;
-                this.ymax = ymax;
-            }
-        }
-
-        public bool IsProcessing { get; private set; }
-        
         public void SetOccupancy(sbyte[] values, Rect? tbounds = null, Action onFinished = null)
         {
             IsProcessing = true;
@@ -167,10 +148,10 @@ namespace Iviz.Displays
 
                     float4 mul = new float4(cellSize, cellSize, 0, 0.01f);
 
-                    for (int v = bounds.ymin; v < bounds.ymax; v++)
+                    for (int v = bounds.Ymin; v < bounds.Ymax; v++)
                     {
-                        int i = v * numCellsX + bounds.xmin;
-                        for (int u = bounds.xmin; u < bounds.xmax; u++, i++)
+                        int i = v * numCellsX + bounds.Xmin;
+                        for (int u = bounds.Xmin; u < bounds.Xmax; u++, i++)
                         {
                             sbyte val = values[i];
                             if (val <= 0)
@@ -183,6 +164,7 @@ namespace Iviz.Displays
                             pointBuffer.Add(new PointWithColor(pc.Ros2Unity()));
                         }
                     }
+
                     GameThread.RunOnce(() =>
                     {
                         resource.PointsWithColor = pointBuffer;
@@ -193,7 +175,21 @@ namespace Iviz.Displays
                 }
             );
         }
-    }
 
-//}
+        public readonly struct Rect
+        {
+            public int Xmin { get; }
+            public int Xmax { get; }
+            public int Ymin { get; }
+            public int Ymax { get; }
+
+            public Rect(int xmin, int xmax, int ymin, int ymax)
+            {
+                Xmin = xmin;
+                Xmax = xmax;
+                Ymin = ymin;
+                Ymax = ymax;
+            }
+        }
+    }
 }

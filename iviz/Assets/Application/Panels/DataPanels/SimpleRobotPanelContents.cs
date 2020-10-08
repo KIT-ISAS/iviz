@@ -13,6 +13,7 @@ namespace Iviz.App
         public FrameWidget Frame { get; private set; }
         public DataLabelWidget HelpText { get; private set; }
         public InputFieldWithHintsWidget SourceParam { get; private set; }
+        public DropdownWidget SavedRobotName { get; private set; }
         public ToggleWidget AttachToTf { get; private set; }
         public InputFieldWidget FramePrefix { get; private set; }
         public InputFieldWidget FrameSuffix { get; private set; }
@@ -28,7 +29,8 @@ namespace Iviz.App
             p.AddHeadTitleWidget("Robot");
             Frame = p.AddFrame();
             HelpText = p.AddDataLabel("<b>No Robot Loaded</b>").SetAlignment(TextAnchor.MiddleCenter).SetHasRichText(true);
-            SourceParam = p.AddInputFieldWithHints("Source Parameter").SetPlaceholder("<none>");
+            SourceParam = p.AddInputFieldWithHints("Load From Source Parameter").SetPlaceholder("<none>");
+            SavedRobotName = p.AddDropdown("Load From Saved");
             AttachToTf = p.AddToggle("Attach to TF Frames");
             FramePrefix = p.AddInputField("TF Frame Prefix").SetPlaceholder("<none>");
             FrameSuffix = p.AddInputField("TF Frame Suffix").SetPlaceholder("<none>");

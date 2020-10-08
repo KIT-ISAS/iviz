@@ -1,16 +1,39 @@
-﻿using Unity.Mathematics;
+﻿using System.Runtime.CompilerServices;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Iviz.Displays
 {
+    /// <summary>
+    /// Struct for position and color/intensity.
+    /// The same field is read either as a Color32 or a float depending on whether UseColormap is enabled in the display.
+    /// Internally a wrapper around <see cref="float4"/>. 
+    /// </summary>
     public readonly struct PointWithColor
     {
-        public static unsafe float WhiteAsIntensity()
+        /// <summary>
+        /// Color representation from the bits of a float.
+        /// </summary>
+        public static Color32 ColorFromFloatBits(float f)
         {
-            Color32 tmp = UnityEngine.Color.white;
-            return *(float*)&tmp;
+            unsafe
+            {
+                return *(Color32*) &f;
+            }
         }
-        static readonly float White = WhiteAsIntensity();
+
+        /// <summary>
+        /// Float representation from the bits of a Color32.
+        /// </summary>
+        public static float FloatFromColorBits(Color32 f)
+        {
+            unsafe
+            {
+                return *(float*) &f;
+            }
+        }
+
+        static readonly float WhiteBits = FloatFromColorBits(UnityEngine.Color.white);
 
         readonly float4 f;
 
@@ -18,45 +41,22 @@ namespace Iviz.Displays
         public float Y => f.y;
         public float Z => f.z;
         public Vector3 Position => new Vector3(f.x, f.y, f.z);
-        public Color32 Color
-        {
-            get
-            {
-                unsafe
-                {
-                    float w = f.w;
-                    return *(Color32*)&w;
-                }
-            }
-
-        }
+        public Color32 Color => ColorFromFloatBits(f.w);
         public float Intensity => f.w;
 
-        public PointWithColor(in Vector3 position, Color32 color)
+        public PointWithColor(in Vector3 position, Color32 color) :
+            this(position.x, position.y, position.z, FloatFromColorBits(color))
         {
-            f.x = position.x;
-            f.y = position.y;
-            f.z = position.z;
-            unsafe
-            {
-                f.w = *(float*)&color;
-            }
         }
 
-        public PointWithColor(in Vector3 position)
+        public PointWithColor(in Vector3 position) :
+            this(position.x, position.y, position.z, WhiteBits)
         {
-            f.x = position.x;
-            f.y = position.y;
-            f.z = position.z;
-            f.w = White;
         }
 
-        public PointWithColor(in Vector3 position, float intensity)
+        public PointWithColor(in Vector3 position, float intensity) :
+            this(position.x, position.y, position.z, intensity)
         {
-            f.x = position.x;
-            f.y = position.y;
-            f.z = position.z;
-            f.w = intensity;
         }
 
         public PointWithColor(float x, float y, float z, float w)
@@ -67,27 +67,31 @@ namespace Iviz.Displays
             f.w = w;
         }
 
-        public PointWithColor(float x, float y, float z)
+        public PointWithColor(float x, float y, float z) :
+            this(x, y, z, WhiteBits)
         {
-            f.x = x;
-            f.y = y;
-            f.z = z;
-            f.w = White;
         }
 
         public PointWithColor(in float4 f)
         {
             this.f = f;
         }
+        
+        /// <summary>
+        /// Do the positions have a Nan? (ignores intensity) 
+        /// </summary>        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]        
+        public bool HasNaN() => f.HasNaN();
 
-        public bool HasNaN => f.HasNaN();
-
-        public static implicit operator float4(in PointWithColor c) => c.f;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]        
+        public static implicit operator float4(in PointWithColor c)
+        {
+            return c.f;
+        }
 
         public override string ToString()
         {
             return $"[x={X} y={Y} z={Z} i={Intensity} c={Color}]";
         }
-    };
-
+    }
 }

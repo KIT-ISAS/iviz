@@ -72,7 +72,7 @@ namespace Iviz.Controllers
             set
             {
                 config.Width = value;
-                resource.ElementSize = value;
+                resource.ElementScale = value;
             }
         }
 
@@ -145,7 +145,7 @@ namespace Iviz.Controllers
             
             node = SimpleDisplayNode.Instantiate("PathNode");
             resource = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, node.transform);
-            resource.ElementSize = 0.005f;
+            resource.ElementScale = 0.005f;
             resource.Tint = Color.white;
             Config = new PathConfiguration();
         }

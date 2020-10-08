@@ -2,9 +2,8 @@ Shader "iviz/Line"
 {
 	Properties
 	{
-		[Toggle(USE_TEXTURE)]
-		_UseTexture("Use Texture", Int) = 1
-		_AtlasTexture ("Atlas Texture", 2D) = "defaulttexture" {}
+		[Toggle(USE_TEXTURE)] _UseTexture("Use Texture", Float) = 1
+		_MainTex("Atlas Texture", 2D) = "defaulttexture" {}
 	}
 
 	SubShader
@@ -19,8 +18,7 @@ Shader "iviz/Line"
             
 			#pragma vertex vert
 			#pragma fragment frag
-			#pragma shader_feature USE_TEXTURE
-			#pragma multi_compile_instancing
+			#pragma multi_compile _ USE_TEXTURE
 			
 			float _IntensityCoeff;
 			float _IntensityAdd;
@@ -62,11 +60,16 @@ Shader "iviz/Line"
 			
 			StructuredBuffer<Line> _Lines;
 			float _AtlasRow;
+			sampler2D _MainTex;
 
 			struct v2f
 			{
 				float4 position : SV_POSITION;
+#if USE_TEXTURE
+				float intensity : TEXCOORD0;
+#else
 				fixed3 color : COLOR;
+#endif
 			};
 
 			v2f vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
@@ -93,9 +96,9 @@ Shader "iviz/Line"
 
 	#if USE_TEXTURE
 				float intensityA = _Lines[inst].intensityA;
-				fixed3 rgbaA = tex2Dlod(_AtlasTexture, float4(intensityA * _IntensityCoeff + _IntensityAdd, _AtlasRow, 0, 0)).xyz;
 				float intensityB = _Lines[inst].intensityB;
-				fixed3 rgbaB = tex2Dlod(_AtlasTexture, float4(intensityB * _IntensityCoeff + _IntensityAdd, _AtlasRow, 0, 0)).xyz;
+				o.intensity = (intensityB - intensityA) * V.z + intensityA;
+				o.intensity = o.intensity * _IntensityCoeff + _IntensityAdd;
     #else
 				uint cA = _Lines[inst].colorA;
 				fixed3 rgbA = fixed3(
@@ -109,17 +112,20 @@ Shader "iviz/Line"
 					(cB >>  8) & 0xff,
 					(cB >> 16) & 0xff
 					) / 255.0;
-	#endif
+
 				fixed3 diffuse = (rgbB - rgbA) * V.z + rgbA;
-				diffuse *= _Tint;
-				
-                o.color = diffuse;				
+                o.color = diffuse * _Tint;				
+#endif
 				return o;
 			}
 
-			fixed4 frag(fixed3 color : COLOR) : SV_Target
+			fixed4 frag(v2f o) : SV_Target
 			{
-				return fixed4(color, 1);
+	#if USE_TEXTURE
+				return tex2D(_MainTex, float2(o.intensity, _AtlasRow)) * _Tint;
+    #else
+				return fixed4(o.color, 1);
+	#endif
 			}
 
 			ENDCG

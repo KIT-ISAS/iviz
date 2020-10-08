@@ -22,6 +22,8 @@ namespace Iviz.App
         public override IConfiguration Configuration => robot.Config;
         public override IController Controller => robot;
 
+        static readonly string[] NoneStr = {"<color=#b0b0b0ff><i><none></i></color>"};
+
         public SimpleRobotModuleData(ModuleDataConstructor constructor) :
             base(constructor.ModuleList, constructor.Topic, constructor.Type)
         {
@@ -44,7 +46,11 @@ namespace Iviz.App
                 return;
             }
 
-            robot.SourceParameter = robot.SourceParameter;
+            if (!string.IsNullOrEmpty(robot.SourceParameter))
+            {
+                robot.TryLoadFromSourceParameter(robot.SourceParameter);
+            }
+
             panel.HelpText.Label = robot.HelpText;
             UpdateModuleButton();
         }
@@ -61,8 +67,9 @@ namespace Iviz.App
             panel.Frame.Owner = robot;
             panel.SourceParam.Value = robot.SourceParameter;
             panel.HelpText.Label = robot.HelpText;
-            
+
             panel.SourceParam.Hints = GetParameterHints();
+            panel.SavedRobotName.Options = GetSavedRobots();
 
             panel.FramePrefix.Value = robot.FramePrefix;
             panel.FrameSuffix.Value = robot.FrameSuffix;
@@ -73,7 +80,7 @@ namespace Iviz.App
             panel.Tint.Value = robot.Tint;
             panel.Alpha.Value = robot.Tint.a;
 
-            panel.Save.Value = IsRobotSaved();
+            panel.Save.Value = IsRobotSaved;
             panel.Save.Interactable = !string.IsNullOrEmpty(robot.Robot?.Name);
 
             panel.Tint.ValueChanged += f =>
@@ -92,10 +99,24 @@ namespace Iviz.App
             {
                 robot.RenderAsOcclusionOnly = f;
             };
+            panel.SavedRobotName.ValueChanged += (i, name) =>
+            {
+                robot.TryLoadSavedRobot(i == 0 ? null : name);
+                panel.SourceParam.Value = "";
+                panel.Save.Value = IsRobotSaved;
+
+                panel.HelpText.Label = robot.HelpText;
+                UpdateModuleButton();
+
+                panel.Save.Interactable =
+                    !string.IsNullOrEmpty(robot.Robot?.Name) &&
+                    !Resource.Internal.ContainsRobot(name);
+            };
             panel.SourceParam.EndEdit += f =>
             {
-                robot.SourceParameter = f;
-                panel.Save.Value = IsRobotSaved();
+                robot.TryLoadFromSourceParameter(f);
+                panel.SavedRobotName.Index = 0;
+                panel.Save.Value = IsRobotSaved;
 
                 panel.HelpText.Label = robot.HelpText;
                 UpdateModuleButton();
@@ -152,13 +173,12 @@ namespace Iviz.App
         static IEnumerable<string> GetParameterCandidates() =>
             ConnectionManager.GetSystemParameterList().Where(x => x.HasSuffix(ParamSuffix));
 
-        static IEnumerable<string> GetSavedRobotsCandidates() =>
-            Resource.GetRobotNames().Select(name => $"{SimpleRobotController.LocalPrefix}{name}");
-        
-        static IEnumerable<string> GetParameterHints() => GetParameterCandidates().Concat(GetSavedRobotsCandidates());
-        
-        bool IsRobotSaved() => robot.Robot?.Name != null && Resource.ContainsRobot(robot.Robot.Name);
-        
+        static IEnumerable<string> GetSavedRobots() => NoneStr.Concat(Resource.GetRobotNames());
+
+        static IEnumerable<string> GetParameterHints() => GetParameterCandidates();
+
+        bool IsRobotSaved => robot.Robot?.Name != null && Resource.ContainsRobot(robot.Robot.Name);
+
         protected override void UpdateModuleButton()
         {
             ButtonText = $"{Resource.Font.Split(robot.Name, ModuleListPanel.ModuleDataCaptionWidth)}\n<b>{Module}</b>";

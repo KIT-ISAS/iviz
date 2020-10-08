@@ -44,10 +44,12 @@ namespace Iviz.Controllers
             {
                 throw new System.ArgumentException("Invalid topic!", nameof(topic));
             }
+
             if (string.IsNullOrWhiteSpace(type))
             {
                 throw new System.ArgumentException("Invalid type!", nameof(type));
             }
+
             Logger.Internal($"Advertising <b>{topic}</b> <i>[{type}]</i>.");
             Topic = topic;
             Type = type;
@@ -67,20 +69,15 @@ namespace Iviz.Controllers
             if (LastMsgCounter == 0)
             {
                 Stats = new RosSenderStats();
+                return;
             }
-            else
-            {
-                Stats = new RosSenderStats(
-                    TotalMsgCounter,
-                    LastMsgCounter,
-                    LastMsgBytes
-                );
 
-                ConnectionManager.ReportBandwidthUp(LastMsgBytes);
+            Stats = new RosSenderStats(TotalMsgCounter, LastMsgCounter, LastMsgBytes);
 
-                LastMsgBytes = 0;
-                LastMsgCounter = 0;
-            }
+            ConnectionManager.ReportBandwidthUp(LastMsgBytes);
+
+            LastMsgBytes = 0;
+            LastMsgCounter = 0;
         }
 
         public abstract void Reset();
@@ -101,7 +98,7 @@ namespace Iviz.Controllers
 
         public override void Publish(IMessage msg)
         {
-            Publish((T)msg);
+            Publish((T) msg);
         }
 
         public void Publish([NotNull] T msg)
@@ -110,7 +107,7 @@ namespace Iviz.Controllers
             {
                 throw new ArgumentNullException(nameof(msg));
             }
-            
+
             TotalMsgCounter++;
             LastMsgCounter++;
             LastMsgBytes += msg.RosMessageLength;
@@ -132,5 +129,3 @@ namespace Iviz.Controllers
         }
     }
 }
-
-

@@ -240,7 +240,7 @@ namespace Iviz.Controllers
 
             UsesBoundaryBox = false;
 
-            trail = ResourcePool.GetOrCreateDisplay<TrailResource>();
+            trail = ResourcePool.GetOrCreateDisplay<TrailResource>(transform);
             trail.TimeWindowInMs = 5000;
             trail.Color = Color.yellow;
             TrailVisible = false;

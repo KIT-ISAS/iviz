@@ -5,17 +5,16 @@ Shader "iviz/MultiplyMesh"
     {
         _Glossiness ("Smoothness", Range(0,1)) = 0.5
         _Metallic ("Metallic", Range(0,1)) = 0.0
+		[Toggle(USE_TEXTURE)] _UseTexture("Use Texture", Float) = 1
+		[Toggle(USE_TEXTURE_SCALE)] _UseTextureScale("Use Texture ScaleY", Float) = 1
+		_MainTex("Atlas Texture", 2D) = "defaulttexture" {}    	
     }
     SubShader
     {
         Tags {"RenderType"="Opaque" }
-        //Tags {"Queue" = "Transparent" "RenderType"="Transparent"  }
-		//Blend SrcAlpha OneMinusSrcAlpha
-		LOD 200
 
         CGPROGRAM
         #pragma surface surf Standard addshadow fullforwardshadows vertex:vert
-        //#pragma surface surf Standard vertex:vert alpha
         #pragma instancing_options procedural:setup 
 		#pragma multi_compile _ USE_TEXTURE USE_TEXTURE_SCALE
         #pragma multi_compile_instancing
@@ -32,23 +31,25 @@ Shader "iviz/MultiplyMesh"
 
         struct Input
         {
-            half3 color;
+            fixed3 color;
         };
 
 #ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED
         StructuredBuffer<PointWithColor> _Points;
 #endif
-
+		float _AtlasRow;
+		sampler2D _MainTex;
+        
         half _Glossiness;
         half _Metallic;
         float4 _LocalOffset;
         float4 _LocalScale;
 
-		sampler2D _IntensityTexture;
 		float _IntensityCoeff;
 		float _IntensityAdd;
 
         float4x4 _LocalToWorld;
+        float4x4 _WorldToLocal;
         float4 _BoundaryCenter;
         float4 _Tint;
 
@@ -76,7 +77,7 @@ Shader "iviz/MultiplyMesh"
             v.vertex -= _BoundaryCenter;
 
 	#if USE_TEXTURE || USE_TEXTURE_SCALE
-			o.color = tex2Dlod(_IntensityTexture, float4(intensity * _IntensityCoeff + _IntensityAdd, 0, 0, 0));
+			o.color = tex2Dlod(_MainTex, float4(intensity * _IntensityCoeff + _IntensityAdd, _AtlasRow, 0, 0));
     #else
             int color = _Points[v.instanceID].intensity;
             o.color = float3(
@@ -94,9 +95,8 @@ Shader "iviz/MultiplyMesh"
             o.Albedo = IN.color;
             o.Metallic = _Metallic;
             o.Smoothness = _Glossiness;
-            //o.Alpha = 0.4f;
         }
         ENDCG
+    	
     }
-    FallBack "Diffuse"
 }

@@ -263,7 +263,7 @@ namespace Iviz.Displays
             interiorObject.transform.localScale = new Vector3(totalSize, totalSize, interiorHeight);
             interiorObject.transform.localPosition = new Vector3(0, 0, interiorHeight / 2);
 
-            boxCollider.size = new Vector3(totalSize, totalSize, interiorHeight);
+            BoxCollider.size = new Vector3(totalSize, totalSize, interiorHeight);
 
 
             int size = NumberOfGridCells / 10;
@@ -281,13 +281,13 @@ namespace Iviz.Displays
             {
                 for (int i = horizontals.Count; i < size; i++)
                 {
-                    var resource = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Square, transform);
-                    resource.transform.localRotation = Quaternion.AngleAxis(-90, Vector3.right);
-                    horizontals.Add(resource);
+                    var hResource = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Square, transform);
+                    hResource.transform.localRotation = Quaternion.AngleAxis(-90, Vector3.right);
+                    horizontals.Add(hResource);
 
-                    resource = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Square, transform);
-                    resource.transform.localRotation = Quaternion.AngleAxis(-90, Vector3.right);
-                    verticals.Add(resource);
+                    var vResource = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Square, transform);
+                    vResource.transform.localRotation = Quaternion.AngleAxis(-90, Vector3.right);
+                    verticals.Add(vResource);
                 }
             }
 

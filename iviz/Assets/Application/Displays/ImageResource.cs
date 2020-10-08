@@ -77,7 +77,7 @@ namespace Iviz.Displays
 
         protected override void Awake()
         {
-            boxCollider = billboard.GetComponent<BoxCollider>();
+            BoxCollider = billboard.GetComponent<BoxCollider>();
             base.Awake();
             
             billboard.UseAbsoluteOffset = false;

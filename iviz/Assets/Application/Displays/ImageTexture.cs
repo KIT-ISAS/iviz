@@ -11,9 +11,9 @@ namespace Iviz.Displays
 {
     public sealed class ImageTexture
     {
-        static readonly int IntensityCoeffID = MarkerResourceWithColormap.IntensityCoeffID;
-        static readonly int IntensityAddID = MarkerResourceWithColormap.IntensityAddID;
-        static readonly int IntensityID = MarkerResourceWithColormap.IntensityID;
+        static readonly int IntensityCoeffID = Shader.PropertyToID("_IntensityCoeff");
+        static readonly int IntensityAddID = Shader.PropertyToID("_IntensityAdd");
+        static readonly int IntensityID = Shader.PropertyToID("_IntensityTexture");
         static readonly int MainTexID = Shader.PropertyToID("_MainTex");
 
 

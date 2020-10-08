@@ -32,7 +32,7 @@ namespace Iviz.Controllers
         /// New: Text marker that does not face the camera
         /// </summary>
         Text = 100,
-        
+
         /// <summary>
         /// New: Image marker. Pixels in Colors field, image width in Scale.z
         /// </summary>
@@ -52,11 +52,8 @@ namespace Iviz.Controllers
         , IMixedRealityPointerHandler
 #endif
     {
-        static Mesh CachedCube => Resource.Displays.Cube.Object.GetComponent<MeshFilter>().sharedMesh;
-        static Mesh CachedSphere => Resource.Displays.SphereSimple.Object.GetComponent<MeshFilter>().sharedMesh;
-
         MarkerResource resource;
-        Resource.Info<GameObject> resourceType;
+        Info<GameObject> resourceType;
 
         public delegate void MouseEventAction(in Vector3 point, MouseEventType type);
 
@@ -91,12 +88,12 @@ namespace Iviz.Controllers
 
         public bool OcclusionOnly
         {
-            get => resource is ISupportsAROcclusion r && r.OcclusionOnlyActive;
+            get => resource is ISupportsAROcclusion r && r.OcclusionOnly;
             set
             {
                 if (resource is ISupportsAROcclusion arResource)
                 {
-                    arResource.OcclusionOnlyActive = value;
+                    arResource.OcclusionOnly = value;
                 }
             }
         }
@@ -118,7 +115,7 @@ namespace Iviz.Controllers
             get => resource == null || resource.Visible;
             set
             {
-                if (!(resource is null))
+                if (resource != null)
                 {
                     resource.Visible = value;
                 }
@@ -132,7 +129,7 @@ namespace Iviz.Controllers
 
             expirationTime = msg.Lifetime.IsZero ? DateTime.MaxValue : DateTime.Now + msg.Lifetime.ToTimeSpan();
 
-            Resource.Info<GameObject> newResourceType = GetRequestedResource(msg);
+            Info<GameObject> newResourceType = GetRequestedResource(msg);
             if (newResourceType != resourceType)
             {
                 if (resource != null)
@@ -186,7 +183,7 @@ namespace Iviz.Controllers
                     arrowMarker.Color = msg.Color.Sanitize().ToUnityColor();
                     if (msg.Points.Length == 2)
                     {
-                        float sx = (float) msg.Scale.X;
+                        float sx = Mathf.Abs((float) msg.Scale.X);
                         arrowMarker.Set(msg.Points[0].Ros2Unity(), msg.Points[1].Ros2Unity(), sx);
                     }
                     else if (msg.Points.Length == 0)
@@ -225,10 +222,19 @@ namespace Iviz.Controllers
                 {
                     MeshListResource meshList = (MeshListResource) resource;
                     meshList.UseColormap = false;
-                    meshList.UsePerVertexScale = false;
-                    meshList.Mesh = (msg.Type() == MarkerType.CubeList) ? CachedCube : CachedSphere;
-                    PointWithColor[] points = new PointWithColor[msg.Points.Length];
+                    meshList.UseIntensityForScaleY = false;
+                    meshList.MeshResource = msg.Type() == MarkerType.CubeList
+                        ? Resource.Displays.Cube
+                        : Resource.Displays.Sphere;
+                    if ((msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length) || msg.Color.A == 0)
+                    {
+                        Debug.Log("MarkerObject: Received list marker with unset or incorrect colors!");
+                        meshList.PointsWithColor = Array.Empty<PointWithColor>();
+                        break;
+                    }
+
                     Color color = msg.Color.Sanitize().ToUnityColor();
+                    PointWithColor[] points = new PointWithColor[msg.Points.Length];
                     if (msg.Colors.Length == 0 || color == Color.black)
                     {
                         for (int i = 0; i < points.Length; i++)
@@ -238,6 +244,7 @@ namespace Iviz.Controllers
                     }
                     else if (color == Color.white)
                     {
+                        points = new PointWithColor[msg.Points.Length];
                         for (int i = 0; i < points.Length; i++)
                         {
                             points[i] = new PointWithColor(
@@ -247,6 +254,7 @@ namespace Iviz.Controllers
                     }
                     else
                     {
+                        points = new PointWithColor[msg.Points.Length];
                         for (int i = 0; i < points.Length; i++)
                         {
                             points[i] = new PointWithColor(
@@ -261,7 +269,14 @@ namespace Iviz.Controllers
                 case MarkerType.LineList:
                 {
                     LineResource lineResource = (LineResource) resource;
-                    lineResource.ElementSize = (float) msg.Scale.X;
+                    lineResource.ElementScale = Mathf.Abs((float) msg.Scale.X);
+                    if ((msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length) || msg.Color.A == 0)
+                    {
+                        Debug.Log("MarkerObject: Received linelist marker with unset or incorrect colors!");
+                        lineResource.LinesWithColor = Array.Empty<LineWithColor>();
+                        break;
+                    }
+
                     LineWithColor[] lines = new LineWithColor[msg.Points.Length / 2];
                     if (msg.Colors.Length == 0)
                     {
@@ -292,7 +307,14 @@ namespace Iviz.Controllers
                 case MarkerType.LineStrip:
                 {
                     LineResource lineResource = (LineResource) resource;
-                    lineResource.ElementSize = (float) msg.Scale.X;
+                    lineResource.ElementScale = Mathf.Abs((float) msg.Scale.X);
+                    if ((msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length) || msg.Color.A == 0)
+                    {
+                        Debug.Log("MarkerObject: Received linelist marker with unset or incorrect colors!");
+                        lineResource.LinesWithColor = Array.Empty<LineWithColor>();
+                        break;
+                    }
+
                     LineWithColor[] lines = new LineWithColor[msg.Points.Length - 1];
                     if (msg.Colors.Length == 0)
                     {
@@ -323,7 +345,14 @@ namespace Iviz.Controllers
                 case MarkerType.Points:
                 {
                     PointListResource pointList = (PointListResource) resource;
-                    pointList.ElementSize = Mathf.Abs((float) msg.Scale.X);
+                    pointList.ElementScale = Mathf.Abs((float) msg.Scale.X);
+                    if ((msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length) || msg.Color.A == 0)
+                    {
+                        Debug.Log("MarkerObject: Received pointlist marker with unset or incorrect colors!");
+                        pointList.PointsWithColor = Array.Empty<PointWithColor>();
+                        break;
+                    }
+
                     PointWithColor[] points = new PointWithColor[msg.Points.Length];
                     Color color = msg.Color.Sanitize().ToUnityColor();
                     if (msg.Colors.Length == 0 || color == Color.black)
@@ -358,6 +387,13 @@ namespace Iviz.Controllers
                 }
                 case MarkerType.TriangleList:
                     MeshTrianglesResource meshTriangles = (MeshTrianglesResource) resource;
+                    if ((msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length) || msg.Color.A == 0)
+                    {
+                        Debug.Log("MarkerObject: Received trianglelist marker with unset or incorrect colors!");
+                        meshTriangles.Set(Array.Empty<Vector3>());
+                        break;
+                    }
+
                     meshTriangles.Color = msg.Color.Sanitize().ToUnityColor();
                     if (msg.Colors.Length != 0)
                     {
@@ -381,6 +417,7 @@ namespace Iviz.Controllers
                     if (width <= 0 || height <= 0 || width * height != count)
                     {
                         Debug.LogWarning("MarkerObject: Invalid image dimensions");
+                        break;
                     }
                     else
                     {
@@ -441,14 +478,18 @@ namespace Iviz.Controllers
             }
         }
 
-        static Resource.Info<GameObject> GetRequestedResource(Marker msg)
+        static Info<GameObject> GetRequestedResource(Marker msg)
         {
             switch (msg.Type())
             {
-                case MarkerType.Arrow: return Resource.Displays.Arrow;
-                case MarkerType.Cylinder: return Resource.Displays.Cylinder;
-                case MarkerType.Cube: return Resource.Displays.Cube;
-                case MarkerType.Sphere: return Resource.Displays.Sphere;
+                case MarkerType.Arrow:
+                    return Resource.Displays.Arrow;
+                case MarkerType.Cylinder:
+                    return Resource.Displays.Cylinder;
+                case MarkerType.Cube:
+                    return Resource.Displays.Cube;
+                case MarkerType.Sphere:
+                    return Resource.Displays.Sphere;
                 case MarkerType.TextViewFacing:
                 case MarkerType.Text:
                     return Resource.Displays.Text;
@@ -461,7 +502,7 @@ namespace Iviz.Controllers
                         return null;
                     }
 
-                    return Resource.TryGetResource(uri, out Resource.Info<GameObject> info) ? info : null;
+                    return Resource.TryGetResource(uri, out Info<GameObject> info) ? info : null;
                 case MarkerType.CubeList:
                 case MarkerType.SphereList:
                     return Resource.Displays.MeshList;

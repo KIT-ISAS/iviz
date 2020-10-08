@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Iviz.Displays;
 using Iviz.Resources;
+using Newtonsoft.Json;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -25,7 +26,9 @@ namespace Iviz.Editor
                 CreateAsset(uri, manager);
             }
             
+            CreateRobots(manager);
             AssetDatabase.Refresh();
+            
             Debug.Log("SavedAssetLoader: Done!");
 
             // ugly workaround
@@ -49,18 +52,35 @@ namespace Iviz.Editor
             */
 
         }
-        
-        
+
+
+        static void CreateRobots(ExternalResourceManager manager)
+        {
+            string unityDirectory = "Resources/Package/iviz/robots";
+            string absolutePath = UnityEngine.Application.dataPath + "/" + unityDirectory;
+            Directory.CreateDirectory(absolutePath);
+
+            Dictionary<string, string> resourceFile = new Dictionary<string, string>();
+            foreach (string robotName in manager.GetRobotNames())
+            {
+                string filename = ExternalResourceManager.SanitizeForFilename(robotName).Replace(".", "_");
+                resourceFile[robotName] = filename;
+            }
+
+            string text = JsonConvert.SerializeObject(resourceFile, Formatting.Indented);
+            File.WriteAllText(absolutePath + "/../resources.txt", text);
+            
+            foreach (string robotName in manager.GetRobotNames())
+            {
+                manager.TryGetRobot(robotName, out string robotDescription);
+                string filename = ExternalResourceManager.SanitizeForFilename(robotName).Replace(".", "_");
+                File.WriteAllText(absolutePath + "/" + filename + ".txt", robotDescription);
+            }
+        }
+
 
         static void CreateAsset(Uri assetUri, ExternalResourceManager manager)
         {
-            if (!manager.TryGet(assetUri, out Resource.Info<GameObject> resourceInfo, false))
-            {
-                throw new FileNotFoundException(assetUri.ToString());
-            }
-            
-            GameObject obj = resourceInfo.Object; 
-
             const string basePath = "Assets/Resources/Package/";
             string uriPath = assetUri.Host + Uri.UnescapeDataString(assetUri.AbsolutePath);
 
@@ -75,9 +95,24 @@ namespace Iviz.Editor
 
             string topPath = basePath + relativePath;
             string innerPath = topPath + "/" + filename;
-            string absoluteDirectory = "Resources/Package/" + relativePath + "/" + filename;
+            string unityDirectory = "Resources/Package/" + relativePath + "/" + filename;
 
-            Directory.CreateDirectory(UnityEngine.Application.dataPath + "/" + absoluteDirectory);
+            string absolutePath = UnityEngine.Application.dataPath + "/" + unityDirectory;
+
+            if (Directory.Exists(absolutePath))
+            {
+                Debug.Log("SavedAssetLoader: Skipping " + assetUri + "...");
+                return;
+            }
+            
+            Directory.CreateDirectory(absolutePath);
+            
+            if (!manager.TryGet(assetUri, out Info<GameObject> resourceInfo, false))
+            {
+                throw new FileNotFoundException(assetUri.ToString());
+            }
+            
+            GameObject obj = resourceInfo.Object;             
 
             MeshTrianglesResource[] resources = obj.GetComponentsInChildren<MeshTrianglesResource>();
 
@@ -125,11 +160,18 @@ namespace Iviz.Editor
                 string materialPath = AssetDatabase.GenerateUniqueAssetPath(innerPath + "/material.mat");
                 AssetDatabase.CreateAsset(material, materialPath);
 
-                if (texture is null)
+                if (texture == null)
                 {
                     continue;
                 }
-                
+
+                if (AssetDatabase.Contains(texture))
+                {
+                    material.mainTexture = texture;
+                    continue;
+
+                }
+
                 string texturePath = AssetDatabase.GenerateUniqueAssetPath(innerPath + "/texture.asset");
                 AssetDatabase.CreateAsset(texture, texturePath);
 
@@ -157,7 +199,7 @@ namespace Iviz.Editor
 
             PrefabUtility.SaveAsPrefabAssetAndConnect(obj, topPath + "/" + filenameWithExtension + ".prefab", InteractionMode.UserAction);
 
-            DestroyImmediate(obj);
+            //DestroyImmediate(obj);
         }
 
         
@@ -205,7 +247,7 @@ namespace Iviz.Editor
             Pose includePose = model.IncludePose?.ToPose() ?? UnityEngine.Pose.identity;
             modelObject.transform.SetLocalPose(includePose.Multiply(pose));
 
-            if (model.Models is null || model.Links is null)
+            if (model.Models == null || model.Links == null)
             {
                 // invalid
                 return modelObject;
@@ -251,7 +293,7 @@ namespace Iviz.Editor
                     Debug.Log(path);
 
                     GameObject assetObject = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                    if (assetObject is null)
+                    if (assetObject == null)
                     {
                         throw new Exception();
                     }
@@ -279,7 +321,7 @@ namespace Iviz.Editor
                     visualObject.transform.localScale = (float)geometry.Sphere.Radius * Vector3.one;
                 }
 
-                if (resourceObject is null)
+                if (resourceObject == null)
                 {
                     continue; //?
                 }

@@ -13,7 +13,6 @@
 
 		CGPROGRAM
 		#pragma surface surf Standard addshadow fullforwardshadows
-		#pragma target 3.0
 
 		struct Input {
 			float4 color : COLOR;
