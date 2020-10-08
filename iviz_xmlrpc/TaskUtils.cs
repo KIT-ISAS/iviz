@@ -5,11 +5,11 @@ namespace Iviz.XmlRpc
 {
     public static class TaskUtils
     {
-        public static async Task<bool> WaitFor<T>(this Task<T> task, int timeout) where T : class
+        public static async Task<bool> WaitFor<T>(this Task<T> task, int timeoutInMs) where T : class
         {
             async Task<T> Timeout()
             {
-                await Task.Delay(timeout).Caf();
+                await Task.Delay(timeoutInMs).Caf();
                 return null;
             }
 
@@ -17,9 +17,9 @@ namespace Iviz.XmlRpc
             return result == task;
         }
         
-        public static async Task<bool> WaitFor(this Task task, int timeout)
+        public static async Task<bool> WaitFor(this Task task, int timeoutInMs)
         {
-            Task result = await Task.WhenAny(task, Task.Delay(timeout)).Caf();
+            Task result = await Task.WhenAny(task, Task.Delay(timeoutInMs)).Caf();
             return result == task;
         }
 
