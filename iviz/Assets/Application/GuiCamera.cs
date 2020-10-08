@@ -110,10 +110,9 @@ namespace Iviz.App
             }
         }
         
-        public HashSet<Canvas> Canvases { get; } = new HashSet<Canvas>();
-        public HashSet<GraphicRaycaster> Raycasters { get; } = new HashSet<GraphicRaycaster>();
-
-        public HashSet<IBlocksPointer> GuiPointerBlockers { get; } = new HashSet<IBlocksPointer>();
+        //public HashSet<Canvas> Canvases { get; } = new HashSet<Canvas>();
+        //public HashSet<GraphicRaycaster> Raycasters { get; } = new HashSet<GraphicRaycaster>();
+        //public HashSet<IBlocksPointer> GuiPointerBlockers { get; } = new HashSet<IBlocksPointer>();
 
         void Awake()
         {

@@ -383,7 +383,7 @@ namespace Iviz.Controllers
             Instance.Publisher.Publish(msg);
         }
 
-        public static UnityEngine.Pose RelativePose(in UnityEngine.Pose unityPose)
+        public static UnityEngine.Pose RelativePoseToRoot(in UnityEngine.Pose unityPose)
         {
             if (!Settings.IsMobile)
             {
@@ -414,7 +414,7 @@ namespace Iviz.Controllers
                     (
                         Header: RosUtils.CreateHeader(tfSeq++, parentFrame ?? BaseFrameId),
                         ChildFrameId: childFrame ?? "",
-                        Transform: RelativePose(unityPose).Unity2RosTransform()
+                        Transform: RelativePoseToRoot(unityPose).Unity2RosTransform()
                     )
                 }
             );

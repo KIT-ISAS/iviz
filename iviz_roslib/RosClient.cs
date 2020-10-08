@@ -315,7 +315,7 @@ namespace Iviz.Roslib
                 callerUri is null ? EnvironmentCallerUri : new Uri(callerUri))
         {
         }
-        
+
         /// <summary>
         /// Retrieves the environment variable ROS_HOSTNAME as a uri.
         /// If this fails, retrieves ROS_IP.
@@ -568,18 +568,12 @@ namespace Iviz.Roslib
                 subscriber = CreateSubscriber(topic, requestNoDelay, typeof(T), new T());
             }
 
-            if (!subscriber.MessageTypeMatches(typeof(T)))
+            if (!subscriber.MessageTypeMatches<T>())
             {
                 throw new InvalidMessageTypeException("Type does not match subscriber.");
             }
 
-            // local lambda wrapper for casting
-            void wrapper(IMessage x)
-            {
-                callback((T) x);
-            }
-
-            return subscriber.Subscribe(wrapper);
+            return subscriber.Subscribe(callback);
         }
 
         public string Subscribe(string topic, Action<IMessage> callback, Type type, out RosSubscriber subscriber,
@@ -628,7 +622,7 @@ namespace Iviz.Roslib
                 subscriber = await CreateSubscriberAsync(topic, requestNoDelay, typeof(T), new T()).Caf();
             }
 
-            if (!subscriber.MessageTypeMatches(typeof(T)))
+            if (!subscriber.MessageTypeMatches<T>())
             {
                 throw new InvalidMessageTypeException("Type does not match subscriber.");
             }
@@ -1082,6 +1076,9 @@ namespace Iviz.Roslib
             listener.Dispose();
         }
 
+        /// <summary>
+        /// Close this connection. Unsubscribes and unadvertises all topics.
+        /// </summary>
         public async Task CloseAsync()
         {
             var publishers = publishersByTopic.Values.ToArray();
@@ -1103,7 +1100,7 @@ namespace Iviz.Roslib
                 return Master.UnregisterSubscriberAsync(subscriber.Topic);
             }));
 
-            ServiceReceiver[] receivers;
+            ServiceReceiver[] receivers; // TODO: make async!
             lock (subscribedServicesByName)
             {
                 receivers = subscribedServicesByName.Values.ToArray();

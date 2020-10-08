@@ -271,6 +271,7 @@ namespace Iviz.App
 
             ConnectionManager.Connection.ConnectionStateChanged += OnConnectionStateChanged;
 
+            /*
             TFListener.GuiCamera.Canvases.Add(GetComponentInParent<Canvas>());
             TFListener.GuiCamera.Canvases.Add(dataPanelManager.GetComponentInParent<Canvas>());
             TFListener.GuiCamera.Canvases.Add(dialogPanelManager.GetComponentInParent<Canvas>());
@@ -279,8 +280,10 @@ namespace Iviz.App
             TFListener.GuiCamera.Raycasters.Add(GetComponentInParent<GraphicRaycaster>());
             TFListener.GuiCamera.Raycasters.Add(dataPanelManager.GetComponentInParent<GraphicRaycaster>());
             TFListener.GuiCamera.Raycasters.Add(dialogPanelManager.GetComponentInParent<GraphicRaycaster>());
+            */
 
-            
+            ARController.ARModeChanged += OnARModeChanged;
+
             GameThread.LateEverySecond += UpdateFpsStats;
             GameThread.EveryFrame += UpdateFpsCounter;
             UpdateFpsStats();
@@ -618,10 +621,15 @@ namespace Iviz.App
             frames++;
         }
 
-        public void OnARModeChanged(bool value)
+        void OnARModeChanged(bool value)
         {
             pinControlButton.Visible = value;
             showControlButton.Visible = value;
+            
+            foreach (var module in ModuleDatas)
+            {
+                module.OnARModeChanged(value);
+            }
         } 
     }
 }

@@ -146,7 +146,7 @@ namespace Iviz.Controllers
         protected RosConnection()
         {
             keepRunning = true;
-            task = Task.Run(async () => await Run());
+            task = Task.Run(Run);
             GameThread.EverySecond += Update;
         }
 
@@ -176,14 +176,6 @@ namespace Iviz.Controllers
             Signal();
         }
 
-        protected void AddTask(Action a)
-        {
-#pragma warning disable 1998
-            toDos.Enqueue(async () => a());
-#pragma warning restore 1998
-            Signal();
-        }
-        
         protected void Signal()
         {
             try { signal.Release(); }

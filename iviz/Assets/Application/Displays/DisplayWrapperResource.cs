@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public abstract class DisplayWrapperResource : MonoBehaviour, IDisplay
+    public abstract class DisplayWrapperResource : MonoBehaviour, IDisplay, IRecyclable
     {
         protected abstract IDisplay Display { get; }
 
@@ -44,6 +44,14 @@ namespace Iviz.Displays
         {
             get => gameObject.activeSelf;
             set => gameObject.SetActive(value);
+        }
+
+        public virtual void SplitForRecycle()
+        {
+            if (Display != null)
+            {
+                ResourcePool.TryDisposeDisplay(Display);
+            }
         }
     }
 }

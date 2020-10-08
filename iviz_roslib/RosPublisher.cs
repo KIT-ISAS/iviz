@@ -65,6 +65,9 @@ namespace Iviz.Roslib
             set => manager.TimeoutInMs = value;
         }
 
+        /// <summary>
+        /// Called when the number of subscribers has changed.
+        /// </summary>        
         public event Action<RosPublisher> NumSubscribersChanged;
 
         internal RosPublisher(RosClient client, TcpSenderManager manager, Type topicClassType)
@@ -89,13 +92,23 @@ namespace Iviz.Roslib
             totalPublishers++;
             return newId;
         }
-
+        
+        /// <summary>
+        /// Returns a structure that represents the internal state of the publisher. 
+        /// </summary>        
         public PublisherTopicState GetState()
         {
             AssertIsAlive();
             return new PublisherTopicState(Topic, TopicType, ids.Keys.ToArray(), manager.GetStates());
         }
 
+        
+        /// <summary>
+        /// Publishes the given message into the topic. 
+        /// </summary>
+        /// <param name="message">The message to be published.</param>
+        /// <exception cref="ArgumentNullException">The message is null</exception>
+        /// <exception cref="InvalidMessageTypeException">The message type does not match.</exception>        
         public void Publish(IMessage message)
         {
             if (message is null)
@@ -128,6 +141,11 @@ namespace Iviz.Roslib
             IsAlive = false;
         }
 
+        
+        /// <summary>
+        /// Generates a new advertisement id. Use this string for Unadvertise().
+        /// </summary>
+        /// <returns>The advertisement id.</returns>        
         public string Advertise()
         {
             AssertIsAlive();
@@ -148,9 +166,14 @@ namespace Iviz.Roslib
             return ids.TryRemove(topicId, out _);
         }
         
-        public bool Unadvertise(string topicId)
+        /// <summary>
+        /// Unregisters the given id from the publisher. If the publisher has no ids left, the topic will be unadvertised from the master.
+        /// </summary>
+        /// <param name="id">The id to be unregistered.</param>
+        /// <returns>Whether the id belonged to the publisher.</returns>
+        public bool Unadvertise(string id)
         {
-            bool removed = RemoveId(topicId);
+            bool removed = RemoveId(id);
 
             if (ids.Count == 0)
             {
@@ -161,9 +184,14 @@ namespace Iviz.Roslib
             return removed;
         }
         
-        public async Task<bool> UnadvertiseAsync(string topicId)
+        /// <summary>
+        /// Unregisters the given id from the publisher. If the publisher has no ids left, the topic will be unadvertised from the master.
+        /// </summary>
+        /// <param name="id">The id to be unregistered.</param>
+        /// <returns>Whether the id belonged to the publisher.</returns>
+        public async Task<bool> UnadvertiseAsync(string id)
         {
-            bool removed = RemoveId(topicId);
+            bool removed = RemoveId(id);
 
             if (ids.Count == 0)
             {
@@ -174,19 +202,36 @@ namespace Iviz.Roslib
             return removed;
         }        
 
+        /// <summary>
+        /// Checks whether this publisher has provided the given id from an Advertise() call.
+        /// </summary>
+        /// <param name="id">Identifier to check.</param>
+        /// <returns>Whether the id was provided by this publisher.</returns>        
         public bool ContainsId(string id)
         {
-            if (id is null)
-            {
-                throw new ArgumentNullException(nameof(id));
-            }
+            if (id is null) { throw new ArgumentNullException(nameof(id)); }
 
             return ids.ContainsKey(id);
         }
         
+        /// <summary>
+        /// Checks whether the class of the publisher message type corresponds to the given type
+        /// </summary>
+        /// <param name="type">The type to check.</param>
+        /// <returns>Whether the class type matches.</returns>
         public bool MessageTypeMatches(Type type)
         {
             return type == topicClassType;
+        }        
+        
+        /// <summary>
+        /// Checks whether the class of the subscriber message type corresponds to the given type.
+        /// </summary>
+        /// <typeparam name="T">The type to check.</typeparam>
+        /// <returns>Whether the class type matches.</returns>
+        public bool MessageTypeMatches<T>()
+        {
+            return MessageTypeMatches(typeof(T));
         }        
         
         public override string ToString()

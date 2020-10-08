@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.Displays;
@@ -18,6 +19,7 @@ namespace Iviz.Controllers
         [SerializeField] Camera arCamera = null;
         [SerializeField] ARSessionOrigin arSessionOrigin = null;
         [SerializeField] Light arLight = null;
+        [SerializeField] ARCameraFovDisplay fovDisplay = null;
 
         Camera mainCamera;
         ARPlaneManager planeManager;
@@ -36,7 +38,7 @@ namespace Iviz.Controllers
                 base.Visible = value;
                 resource.Visible = value && UseMarker;
                 mainCamera.gameObject.SetActive(!value);
-                arCamera.gameObject.SetActive(value);
+                arCamera.enabled = value;
                 arLight.gameObject.SetActive(value);
                 TFListener.MainCamera = value ? arCamera : mainCamera;
                 canvas.worldCamera = TFListener.MainCamera;
@@ -109,10 +111,10 @@ namespace Iviz.Controllers
             get => base.PinRootMarker;
             set
             {
-                Debug.Log("pin changed");
+                //Debug.Log("pin changed");
                 if (value && !base.PinRootMarker)
                 {
-                    Debug.Log("pin changed to true!");
+                    //Debug.Log("pin changed to true!");
                     ResetAnchor(true);
                 }
 
@@ -181,7 +183,7 @@ namespace Iviz.Controllers
             }
 
             lastAnchorMoved = recreateNow ? Time.time - 2 : Time.time;
-            Debug.Log("destroying anchor! " + recreateNow);
+            //Debug.Log("destroying anchor! " + recreateNow);
         }
 
         float? lastAnchorMoved;
@@ -197,7 +199,7 @@ namespace Iviz.Controllers
 
             if (PinRootMarker)
             {
-                Debug.Log("pinrootmarker!");
+                //Debug.Log("pinrootmarker!");
 
                 Vector3 origin = WorldPosition + 0.05f * Vector3.up;
                 Ray ray = new Ray(origin, Vector3.down);
@@ -206,13 +208,13 @@ namespace Iviz.Controllers
                     Pose pose = new Pose(hit.pose.position, WorldPose.rotation);
                     worldAnchor = anchorManager.AttachAnchor(plane, pose).GetComponent<ARAnchorResource>();
                     worldAnchor.Moved += OnWorldAnchorMoved;
-                    Debug.Log("recreating anchor with plane!");
+                    //Debug.Log("recreating anchor with plane!");
 
                     SetWorldPose(pose, RootMover.Anchor);
                 }
                 else
                 {
-                    Debug.Log("not yet...!");
+                    //Debug.Log("not yet...!");
                     lastAnchorMoved = Time.time + 2;
                 }
             }
@@ -220,7 +222,7 @@ namespace Iviz.Controllers
             {
                 worldAnchor = anchorManager.AddAnchor(WorldPose).GetComponent<ARAnchorResource>();
                 worldAnchor.Moved += OnWorldAnchorMoved;
-                Debug.Log("recreating anchor!");
+                //Debug.Log("recreating anchor!");
             }
         }
 
@@ -312,7 +314,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            Pose expectedPose = TFListener.RelativePose(resource.transform.AsPose());
+            Pose expectedPose = TFListener.RelativePoseToRoot(resource.transform.AsPose());
             Pose registeredPose = newPose.Value.Multiply(expectedPose.Inverse());
 
             Quaternion corrected =
@@ -322,6 +324,12 @@ namespace Iviz.Controllers
             SetWorldPose(registeredPose, RootMover.ImageMarker);
 
             MarkerFound = true;
+        }
+
+        public override void Stop()
+        {
+            base.Stop();
+            Destroy(fovDisplay.gameObject);
         }
     }
 }

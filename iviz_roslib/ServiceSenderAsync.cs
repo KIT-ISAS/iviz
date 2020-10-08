@@ -5,11 +5,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading.Tasks;
 using Iviz.Msgs;
-using Iviz.Msgs.RosbridgeLibrary;
-using Iviz.XmlRpc;
 
 namespace Iviz.Roslib
 {
@@ -20,8 +17,6 @@ namespace Iviz.Roslib
         byte[] readBuffer = new byte[1024];
         byte[] writeBuffer = new byte[1024];
 
-        //readonly BinaryReader reader;
-        //readonly BinaryWriter writer;
         readonly NetworkStream stream;
         readonly TcpClient tcpClient;
         readonly IPEndPoint remoteEndPoint;
@@ -59,6 +54,13 @@ namespace Iviz.Roslib
             keepRunning = false;
             tcpClient.Close();
             task.Wait();
+        }
+        
+        public async Task StopAsync()
+        {
+            keepRunning = false;
+            tcpClient.Close();
+            await task;
         }
 
         async Task<int> ReceivePacket()

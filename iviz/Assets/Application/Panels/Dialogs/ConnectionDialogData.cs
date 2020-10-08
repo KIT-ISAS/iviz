@@ -92,7 +92,7 @@ namespace Iviz.App
             };
             panel.MyId.EndEdit += text =>
             {
-                MyId = IsValidResourceName(text) ? text : null;
+                MyId = RosClient.IsValidGlobalResourceName(text) ? text : null;
                 MyIdChanged?.Invoke(MyId);
             };
             panel.RefreshMyId.Clicked += () =>
@@ -156,27 +156,6 @@ namespace Iviz.App
 
                 panel.MasterUri.Interactable = !RosServerManager.IsActive;
             };
-        }
-
-        static bool IsValidResourceName(string name)
-        {
-            if (string.IsNullOrWhiteSpace(name) || name.Length < 2)
-            {
-                return false;
-            }
-
-            bool IsAlpha(char c) => ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
-
-            if (name[0] != '/') { return false; }
-
-            if (!IsAlpha(name[1])) { return false; }
-
-            for (int i = 2; i < name.Length; i++)
-            {
-                if (!IsAlpha(name[i]) && !char.IsDigit(name[i]) && name[i] != '_'  && name[i] != '/') { return false; }
-            }
-
-            return true;
         }
 
         void Close()

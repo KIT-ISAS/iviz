@@ -194,7 +194,7 @@ namespace Iviz.Controllers
                 MarkerName: imarkerId,
                 ControlName: controlId,
                 EventType: eventType,
-                Pose: TFListener.RelativePose(controlPose).Unity2RosPose(),
+                Pose: TFListener.RelativePoseToRoot(controlPose).Unity2RosPose(),
                 MenuEntryId: 0,
                 MousePoint: position.Unity2RosPoint(),
                 MousePointValid: true
@@ -211,7 +211,7 @@ namespace Iviz.Controllers
                 MarkerName: imarkerId,
                 ControlName: controlId,
                 EventType: InteractiveMarkerFeedback.POSE_UPDATE,
-                Pose: TFListener.RelativePose(controlPose).Unity2RosPose(),
+                Pose: TFListener.RelativePoseToRoot(controlPose).Unity2RosPose(),
                 MenuEntryId: 0,
                 MousePoint: Vector3.zero.Unity2RosPoint(),
                 MousePointValid: false

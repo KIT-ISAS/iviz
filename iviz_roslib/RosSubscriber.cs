@@ -99,6 +99,9 @@ namespace Iviz.Roslib
             }
         }
 
+        /// <summary>
+        /// Returns a structure that represents the internal state of the subscriber. 
+        /// </summary>   
         public SubscriberTopicState GetState()
         {
             AssertIsAlive();
@@ -121,17 +124,35 @@ namespace Iviz.Roslib
             IsAlive = false;
         }
 
+        /// <summary>
+        /// Checks whether the class of the subscriber message type corresponds to the given type.
+        /// </summary>
+        /// <param name="type">The type to check.</param>
+        /// <returns>Whether the class type matches.</returns>
         public bool MessageTypeMatches(Type type)
         {
             return type == topicClassType;
         }
 
+        /// <summary>
+        /// Checks whether the class of the subscriber message type corresponds to the given type.
+        /// </summary>
+        /// <typeparam name="T">The type to check.</typeparam>
+        /// <returns></returns>
+        public bool MessageTypeMatches<T>()
+        {
+            return MessageTypeMatches(typeof(T));
+        }
+
+        /// <summary>
+        /// Generates a new subscriber id with the given callback function.
+        /// </summary>
+        /// <param name="callback">The function to call when a message arrives.</param>
+        /// <returns>The subscribed id.</returns>
+        /// <exception cref="ArgumentNullException">The callback is null.</exception>
         public string Subscribe(Action<IMessage> callback)
         {
-            if (callback is null)
-            {
-                throw new ArgumentNullException(nameof(callback));
-            }
+            if (callback is null) { throw new ArgumentNullException(nameof(callback)); }
 
             AssertIsAlive();
 
@@ -144,16 +165,49 @@ namespace Iviz.Roslib
             return id;
         }
 
+        /// <summary>
+        /// Generates a new subscriber id with the given callback function.
+        /// </summary>
+        /// <param name="callback">The function to call when a message arrives.</param>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <returns>The subscribed id.</returns>
+        /// <exception cref="ArgumentNullException">The callback is null.</exception>
+        /// <exception cref="InvalidMessageTypeException">The argument type of the callback does not match.</exception>
+        public string Subscribe<T>(Action<T> callback) where T : IMessage
+        {
+            if (callback is null) { throw new ArgumentNullException(nameof(callback)); }
+            
+            if (!MessageTypeMatches<T>()) 
+            {
+                throw new InvalidMessageTypeException("Type does not match publisher.");
+            }            
+            
+            // local lambda wrapper for casting
+            void Wrapper(IMessage x)
+            {
+                callback((T) x);
+            }
+
+            return Subscribe(Wrapper);
+        }
+
+        /// <summary>
+        /// Checks whether this subscriber has provided the given id from a Subscribe() call.
+        /// </summary>
+        /// <param name="id">Identifier to check.</param>
+        /// <returns>Whether the id was provided by this subscriber.</returns>   
         public bool ContainsId(string id)
         {
-            if (id is null)
-            {
-                throw new ArgumentNullException(nameof(id));
-            }
+            if (id is null) { throw new ArgumentNullException(nameof(id)); }
 
             return callbacksById.ContainsKey(id);
         }
 
+        /// <summary>
+        /// Unregisters the given id from the subscriber. If the subscriber has no ids left, the topic will be unsubscribed from the master.
+        /// </summary>
+        /// <param name="id">The id to be unregistered.</param>
+        /// <returns>Whether the id belonged to the subscriber.</returns>
         public bool Unsubscribe(string id)
         {
             if (id is null) { throw new ArgumentNullException(nameof(id)); }
@@ -170,6 +224,11 @@ namespace Iviz.Roslib
             return removed;
         }
 
+        /// <summary>
+        /// Unregisters the given id from the subscriber. If the subscriber has no ids left, the topic will be unsubscribed from the master.
+        /// </summary>
+        /// <param name="id">The id to be unregistered.</param>
+        /// <returns>Whether the id belonged to the subscriber.</returns>
         public async Task<bool> UnsubscribeAsync(string id)
         {
             if (id is null) { throw new ArgumentNullException(nameof(id)); }

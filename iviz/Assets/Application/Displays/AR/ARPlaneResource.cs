@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Iviz.Controllers;
 using Iviz.Resources;
 using Unity.Collections;
 using UnityEngine;
@@ -18,6 +19,7 @@ namespace Iviz.Displays
         ARPlane plane;
         LineResource lines;
         bool isEnabled;
+        bool isAREnabled;
 
         void Awake()
         {
@@ -36,10 +38,25 @@ namespace Iviz.Displays
             meshCollider.sharedMesh = mesh;
 
             meshRenderer = GetComponent<MeshRenderer>();
+            
+            isEnabled = true;
 
             plane.boundaryChanged += OnBoundaryChanged;
+            ARController.ARModeChanged += OnARModeChanged;
+        }
 
-            isEnabled = true;
+        void OnARModeChanged(bool value)
+        {
+            isAREnabled = value;
+            if (isAREnabled)
+            {
+                lines.transform.parent = transform;
+                lines.transform.SetLocalPose(Pose.identity);
+            }
+            else
+            {
+                lines.transform.parent = TFListener.RootFrame.transform;
+            }
         }
 
         void OnBoundaryChanged(ARPlaneBoundaryChangedEventArgs _)
@@ -55,7 +72,7 @@ namespace Iviz.Displays
             }
 
             Vector3 Project(in Vector2 v) => new Vector3(v.x, 0, v.y);
-            
+
             Vector3 a, b;
             List<LineWithColor> lineArray = new List<LineWithColor>();
             for (int i = 0; i < boundary.Length - 1; ++i)
@@ -79,7 +96,13 @@ namespace Iviz.Displays
 
         void Update()
         {
-            bool shouldBeEnabled = plane != null && plane.subsumedBy == null && plane.trackingState != TrackingState.None;
+            if (!isAREnabled)
+            {
+                lines.transform.SetLocalPose( ARController.RelativePoseToWorld(transform.AsPose()));
+            }
+
+            bool shouldBeEnabled =
+                plane != null && plane.subsumedBy == null && plane.trackingState != TrackingState.None;
             if (isEnabled != shouldBeEnabled)
             {
                 isEnabled = shouldBeEnabled;
@@ -98,7 +121,7 @@ namespace Iviz.Displays
             {
                 return;
             }
-            
+
             float delta = Time.time - pulseStart.Value;
             if (delta > PulseLength)
             {
@@ -116,6 +139,7 @@ namespace Iviz.Displays
         {
             ResourcePool.DisposeDisplay(lines);
             lines = null;
+            ARController.ARModeChanged -= OnARModeChanged;
         }
     }
 }
