@@ -3,9 +3,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.Roslib.XmlRpc;
 using Iviz.XmlRpc;
 
 namespace Iviz.Roslib
@@ -17,8 +17,13 @@ namespace Iviz.Roslib
         readonly ConcurrentDictionary<Uri, TcpReceiverAsync> connectionsByUri =
             new ConcurrentDictionary<Uri, TcpReceiverAsync>();
 
-        internal RosSubscriber Subscriber { private get; set; }
+        public TcpReceiverManager(TopicInfo topicInfo, bool requestNoDelay)
+        {
+            TopicInfo = topicInfo;
+            RequestNoDelay = requestNoDelay;
+        }
 
+        internal RosSubscriber Subscriber { private get; set; }
         public TopicInfo TopicInfo { get; }
         public string Topic => TopicInfo.Topic;
         public string CallerId => TopicInfo.CallerId;
@@ -32,19 +37,16 @@ namespace Iviz.Roslib
                 return connectionsByUri.Count;
             }
         }
+
         public bool RequestNoDelay { get; }
         public int TimeoutInMs { get; set; } = 5000;
 
-        public TcpReceiverManager(TopicInfo topicInfo, bool requestNoDelay)
-        {
-            this.TopicInfo = topicInfo;
-            RequestNoDelay = requestNoDelay;
-        }
+        public event Action NumConnectionsChanged;
 
-        async Task<bool> AddPublisherAsync(XmlRpc.NodeClient talker)
+        async Task<bool> AddPublisherAsync(NodeClient talker)
         {
             Uri remoteUri = talker.Uri;
-            XmlRpc.NodeClient.RequestTopicResponse response;
+            NodeClient.RequestTopicResponse response;
             try
             {
                 response = await talker.RequestTopicAsync(Topic, SupportedProtocols).Caf();
@@ -71,10 +73,10 @@ namespace Iviz.Roslib
             return true;
         }
 
-        bool AddPublisher(XmlRpc.NodeClient talker)
+        bool AddPublisher(NodeClient talker)
         {
             Uri remoteUri = talker.Uri;
-            XmlRpc.NodeClient.RequestTopicResponse response;
+            NodeClient.RequestTopicResponse response;
             try
             {
                 response = talker.RequestTopic(Topic, SupportedProtocols);
@@ -102,7 +104,7 @@ namespace Iviz.Roslib
             return true;
         }
 
-        void CreateConnection(XmlRpc.NodeClient.RequestTopicResponse response, Uri remoteUri)
+        void CreateConnection(NodeClient.RequestTopicResponse response, Uri remoteUri)
         {
             Endpoint remoteEndpoint = new Endpoint(response.Protocol.Hostname, response.Protocol.Port);
             TcpReceiverAsync connection = new TcpReceiverAsync(remoteUri, remoteEndpoint, TopicInfo,
@@ -113,29 +115,35 @@ namespace Iviz.Roslib
             connection.Start(TimeoutInMs);
         }
 
-        public async Task<bool> PublisherUpdateRpcAsync(RosClient caller, IEnumerable<Uri> publisherUris)
+        public async Task PublisherUpdateRpcAsync(RosClient caller, IEnumerable<Uri> publisherUris)
         {
             HashSet<Uri> keys = new HashSet<Uri>(connectionsByUri.Keys);
             Uri[] toAdd = publisherUris.Where(uri => uri != null && !keys.Contains(uri)).ToArray();
             bool[] results = await Task.WhenAll(toAdd.Select(uri => AddPublisherAsync(caller.CreateTalker(uri)))).Caf();
 
-            bool publishersChanged = Cleanup() || results.Any();
+            if (results.Any())
+            {
+                NumConnectionsChanged?.Invoke();
+            }
 
-            return publishersChanged;
+            Cleanup();
         }
 
-        public bool PublisherUpdateRpc(RosClient caller, IEnumerable<Uri> publisherUris)
+        public void PublisherUpdateRpc(RosClient caller, IEnumerable<Uri> publisherUris)
         {
             HashSet<Uri> keys = new HashSet<Uri>(connectionsByUri.Keys);
             IEnumerable<Uri> toAdd = publisherUris.Where(uri => uri != null && !keys.Contains(uri));
             IEnumerable<bool> results = toAdd.Select(uri => AddPublisher(caller.CreateTalker(uri)));
 
-            bool publishersChanged = Cleanup() || results.Any();
+            if (results.Any())
+            {
+                NumConnectionsChanged?.Invoke();
+            }
 
-            return publishersChanged;
+            Cleanup();
         }
 
-        bool Cleanup()
+        void Cleanup()
         {
             bool publishersChanged;
             TcpReceiverAsync[] toDelete = connectionsByUri.Values.Where(receiver => !receiver.IsAlive).ToArray();
@@ -147,14 +155,17 @@ namespace Iviz.Roslib
             }
 
             publishersChanged = toDelete.Length != 0;
-
-            return publishersChanged;
+            if (publishersChanged)
+            {
+                NumConnectionsChanged?.Invoke();
+            }
         }
 
         public void Stop()
         {
             connectionsByUri.Values.ForEach(x => x.Dispose());
             connectionsByUri.Clear();
+            NumConnectionsChanged = null;
         }
 
         public ReadOnlyCollection<SubscriberReceiverState> GetStates()

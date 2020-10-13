@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
@@ -11,23 +10,37 @@ namespace Iviz.Roslib
 {
     internal class TcpSenderManager
     {
-        readonly TopicInfo topicInfo;
-
         readonly ConcurrentDictionary<string, TcpSenderAsync> connectionsByCallerId =
             new ConcurrentDictionary<string, TcpSenderAsync>();
+
+        readonly TopicInfo topicInfo;
+        bool latching;
+        int maxQueueSizeInBytes;
+
+        public event Action NumConnectionsChanged;
+
+        public TcpSenderManager(TopicInfo topicInfo, Uri callerUri)
+        {
+            this.topicInfo = topicInfo;
+            CallerUri = callerUri;
+        }
 
         public Uri CallerUri { get; }
         public string Topic => topicInfo.Topic;
         public string CallerId => topicInfo.CallerId;
         public string TopicType => topicInfo.Type;
 
-        public int NumConnections => connectionsByCallerId.Count;
+        public int NumConnections
+        {
+            get
+            {
+                Cleanup();
+                return connectionsByCallerId.Count;
+            }
+        }
 
         public int TimeoutInMs { get; set; } = 5000;
-
-        public IMessage LatchedMessage { get; private set; }
-
-        bool latching;
+        IMessage LatchedMessage { get; set; }
 
         public bool Latching
         {
@@ -41,8 +54,6 @@ namespace Iviz.Roslib
                 }
             }
         }
-
-        int maxQueueSizeInBytes;
 
         public int MaxQueueSizeInBytes
         {
@@ -59,12 +70,6 @@ namespace Iviz.Roslib
             }
         }
 
-        public TcpSenderManager(TopicInfo topicInfo, Uri callerUri)
-        {
-            this.topicInfo = topicInfo;
-            CallerUri = callerUri;
-        }
-
         public IPEndPoint CreateConnection(string remoteCallerId)
         {
             Logger.LogDebug($"{this}: '{remoteCallerId}' is requesting {Topic}");
@@ -78,7 +83,7 @@ namespace Iviz.Roslib
             }
 
             SemaphoreSlim managerSignal = new SemaphoreSlim(0, 1);
-            var endPoint = newSender.Start(TimeoutInMs, managerSignal);
+            IPEndPoint endPoint = newSender.Start(TimeoutInMs, managerSignal);
             connectionsByCallerId[remoteCallerId] = newSender;
 
             // while we're here
@@ -97,10 +102,12 @@ namespace Iviz.Roslib
             }
 
             newSender.MaxQueueSizeInBytes = MaxQueueSizeInBytes;
+            NumConnectionsChanged?.Invoke();
+            
             return endPoint;
         }
 
-        bool Cleanup()
+        void Cleanup()
         {
             bool subscribersChanged;
             TcpSenderAsync[] toDelete = connectionsByCallerId.Values.Where(sender => !sender.IsAlive).ToArray();
@@ -112,8 +119,10 @@ namespace Iviz.Roslib
             }
 
             subscribersChanged = toDelete.Length != 0;
-
-            return subscribersChanged;
+            if (subscribersChanged)
+            {
+                NumConnectionsChanged?.Invoke();
+            }
         }
 
         public void Publish(IMessage msg)
@@ -123,7 +132,7 @@ namespace Iviz.Roslib
                 LatchedMessage = msg;
             }
 
-            foreach (var connection in connectionsByCallerId.Values)
+            foreach (TcpSenderAsync connection in connectionsByCallerId.Values)
             {
                 connection.Publish(msg);
             }
@@ -131,12 +140,13 @@ namespace Iviz.Roslib
 
         public void Stop()
         {
-            foreach (var sender in connectionsByCallerId.Values)
+            foreach (TcpSenderAsync sender in connectionsByCallerId.Values)
             {
                 sender.Dispose();
             }
 
             connectionsByCallerId.Clear();
+            NumConnectionsChanged = null;
         }
 
         public ReadOnlyCollection<PublisherSenderState> GetStates()

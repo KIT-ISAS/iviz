@@ -76,6 +76,8 @@ namespace Iviz.Roslib
             this.manager = manager;
             this.topicClassType = topicClassType;
             IsAlive = true;
+
+            manager.NumConnectionsChanged += () => NumSubscribersChanged?.Invoke(this);
         }
 
         void AssertIsAlive()
@@ -129,7 +131,6 @@ namespace Iviz.Roslib
         internal (string hostname, int port) RequestTopicRpc(string remoteCallerId)
         {
             IPEndPoint endPoint = manager.CreateConnection(remoteCallerId);
-            NumSubscribersChanged?.Invoke(this);
             return (manager.CallerUri.Host, endPoint.Port);
         }
 
