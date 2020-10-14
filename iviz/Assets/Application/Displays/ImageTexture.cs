@@ -182,7 +182,7 @@ namespace Iviz.Displays
                         newData = png.Data;
                     }
 
-                    GameThread.RunOnce(() =>
+                    GameThread.Post(() =>
                     {
                         Set(png.Width, png.Height, EncodingFromPng(png), newData);
                         onFinished?.Invoke();
@@ -263,7 +263,7 @@ namespace Iviz.Displays
 
                     Stream outStream = new MemoryStream(pngBuffer);
                     image.WriteBitmap(outStream);
-                    GameThread.RunOnce(() =>
+                    GameThread.Post(() =>
                     {
                         Set(image.Width, image.Height, encoding, pngBuffer.AsSlice(bmpHeaderLength));
                         onFinished?.Invoke();

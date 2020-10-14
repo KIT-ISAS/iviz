@@ -73,6 +73,7 @@ namespace Iviz.Roslib
             topicClassType = manager.TopicInfo.Generator.GetType();
             IsAlive = true;
 
+            manager.NumConnectionsChanged += () => NumPublishersChanged?.Invoke(this);
             manager.Subscriber = this;
         }
 
@@ -110,10 +111,7 @@ namespace Iviz.Roslib
 
         internal async Task PublisherUpdateRcpAsync(IEnumerable<Uri> publisherUris)
         {
-            if (await manager.PublisherUpdateRpcAsync(client, publisherUris).Caf())
-            {
-                NumPublishersChanged?.Invoke(this);
-            }
+            await manager.PublisherUpdateRpcAsync(client, publisherUris).Caf();
         }
 
         internal void Stop()
@@ -176,12 +174,12 @@ namespace Iviz.Roslib
         public string Subscribe<T>(Action<T> callback) where T : IMessage
         {
             if (callback is null) { throw new ArgumentNullException(nameof(callback)); }
-            
-            if (!MessageTypeMatches<T>()) 
+
+            if (!MessageTypeMatches<T>())
             {
                 throw new InvalidMessageTypeException("Type does not match publisher.");
-            }            
-            
+            }
+
             // local lambda wrapper for casting
             void Wrapper(IMessage x)
             {

@@ -169,12 +169,13 @@ namespace Iviz.Editor
                 {
                     material.mainTexture = texture;
                     continue;
-
                 }
 
-                string texturePath = AssetDatabase.GenerateUniqueAssetPath(innerPath + "/texture.asset");
-                AssetDatabase.CreateAsset(texture, texturePath);
+                byte[] bytes = texture.EncodeToPNG();
+                File.WriteAllBytes(absolutePath + "/texture.png", bytes);
+                AssetDatabase.Refresh();
 
+                string texturePath = innerPath + "/texture.png";
                 Texture2D newTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(texturePath);
                 material.mainTexture = newTexture;
             }
@@ -197,6 +198,7 @@ namespace Iviz.Editor
                 marker.enabled = false;
             }
 
+            Debug.Log("Writing to " + topPath + "/" + filenameWithExtension + ".prefab");
             PrefabUtility.SaveAsPrefabAssetAndConnect(obj, topPath + "/" + filenameWithExtension + ".prefab", InteractionMode.UserAction);
 
             //DestroyImmediate(obj);
@@ -282,7 +284,7 @@ namespace Iviz.Editor
                 visualObject.transform.SetParent(linkObject.transform, false);
 
                 GameObject resourceObject = null;
-                bool isSynthetic = false;
+                //bool isSynthetic = false;
                 if (geometry.Mesh != null)
                 {
                     Uri uri = geometry.Mesh.Uri.ToUri();
@@ -300,7 +302,7 @@ namespace Iviz.Editor
                     
                     resourceObject = Instantiate(assetObject, visualObject.transform, false);
                     visualObject.transform.localScale = geometry.Mesh.Scale?.ToVector3().Abs() ?? Vector3.one;
-                    isSynthetic = true;
+                    //isSynthetic = true;
                 }
                 else if (geometry.Cylinder != null)
                 {

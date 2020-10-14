@@ -160,7 +160,7 @@ namespace Iviz.Displays
                         }
                     }
 
-                    GameThread.RunOnce(() =>
+                    GameThread.Post(() =>
                     {
                         resource.PointsWithColor = pointBuffer;
                         resource.IntensityBounds = new Vector2(0, 1);

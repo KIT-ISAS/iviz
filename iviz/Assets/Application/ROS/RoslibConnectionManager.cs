@@ -680,23 +680,11 @@ namespace Iviz.Controllers
             return result[0];
         }
 
-        protected override void Update()
-        {
-            // TODO: get rid of RosClient.Cleanup()!
-            /*
-            if (client != null)
-            {
-                AddTask(client.Cleanup);
-            }
-            */
-        }
-
         public override int GetNumPublishers(string topic)
         {
             subscribersByTopic.TryGetValue(topic, out SubscribedTopic subscribedTopic);
             return subscribedTopic?.Subscriber?.NumPublishers ?? 0;
         }
-
 
         public override int GetNumSubscribers(string topic)
         {

@@ -1,40 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
+using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.Roslib
 {
     internal sealed class TcpReceiverAsync : IDisposable
     {
-        readonly TopicInfo topicInfo;
-        readonly Action<IMessage> callback;
-
-        TcpClient tcpClient;
-        NetworkStream stream;
-
         const int BufferSizeIncrease = 1024;
+        const int MaxConnectionRetries = 5;
+        
+        readonly Action<IMessage> callback;
+        readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
+        readonly TopicInfo topicInfo;
+
+        volatile bool keepRunning;
         byte[] readBuffer = new byte[BufferSizeIncrease];
-
-        bool keepRunning;
+        NetworkStream stream;
         Task task;
-
-        public Uri RemoteUri { get; }
-        Endpoint RemoteEndpoint { get; }
-        Endpoint Endpoint { get; set; }
-
-        string Topic => topicInfo.Topic;
-        public bool IsAlive => task != null && !task.IsCompleted && !task.IsFaulted;
-        int NumReceived { get; set; }
-        int BytesReceived { get; set; }
-
-        bool RequestNoDelay { get; }
+        TcpClient tcpClient;
+        bool disposed;
 
         public TcpReceiverAsync(Uri remoteUri, Endpoint remoteEndpoint, TopicInfo topicInfo, Action<IMessage> callback,
             bool requestNoDelay)
@@ -44,6 +36,37 @@ namespace Iviz.Roslib
             this.topicInfo = topicInfo;
             this.callback = callback;
             RequestNoDelay = requestNoDelay;
+        }
+
+        public Uri RemoteUri { get; }
+        Endpoint RemoteEndpoint { get; }
+        Endpoint Endpoint { get; set; }
+        string Topic => topicInfo.Topic;
+        public bool IsAlive => task != null && !task.IsCompleted && !task.IsFaulted;
+        int NumReceived { get; set; }
+        int BytesReceived { get; set; }
+        bool RequestNoDelay { get; }
+
+        public SubscriberReceiverState State => new SubscriberReceiverState(
+            IsAlive, RequestNoDelay, Endpoint,
+            RemoteUri, RemoteEndpoint,
+            NumReceived, BytesReceived
+        );
+
+        public void Dispose()
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+            keepRunning = false;
+
+            try { signal.Release(); }
+            catch (SemaphoreFullException) { }
+
+            task?.Wait();
         }
 
         public void Start(int timeoutInMs)
@@ -61,13 +84,9 @@ namespace Iviz.Roslib
                 $"topic={topicInfo.Topic}",
                 $"md5sum={topicInfo.Md5Sum}",
                 $"type={topicInfo.Type}",
-                $"tcp_nodelay={(RequestNoDelay ? "1" : "0")}",
+                $"tcp_nodelay={(RequestNoDelay ? "1" : "0")}"
             };
-            int totalLength = 4 * contents.Length;
-            foreach (string entry in contents)
-            {
-                totalLength += entry.Length;
-            }
+            int totalLength = 4 * contents.Length + contents.Sum(entry => entry.Length);    
 
             byte[] array = new byte[totalLength + 4];
             using (BinaryWriter writer = new BinaryWriter(new MemoryStream(array)))
@@ -149,12 +168,9 @@ namespace Iviz.Roslib
             return ParseHeader(receivedLength);
         }
 
-
-        readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
-
         async Task Run(int timeoutInMs)
         {
-            Task runLoopTask = RunLoop(timeoutInMs);
+            Task runLoopTask = StartSession(timeoutInMs);
 
             while (keepRunning)
             {
@@ -167,11 +183,9 @@ namespace Iviz.Roslib
             await runLoopTask;
         }
 
-        async Task RunLoop(int timeoutInMs)
+        async Task StartSession(int timeoutInMs)
         {
-            const int numTries = 5;
-
-            for (int round = 0; round < numTries && keepRunning; round++)
+            for (int round = 0; round < MaxConnectionRetries && keepRunning; round++)
             {
                 using (tcpClient = new TcpClient())
                 {
@@ -180,25 +194,23 @@ namespace Iviz.Roslib
                         Task connectionTask = tcpClient.ConnectAsync(RemoteEndpoint.Hostname, RemoteEndpoint.Port);
                         if (!await connectionTask.WaitFor(timeoutInMs) || !connectionTask.IsCompleted)
                         {
-                            Logger.LogDebug($"{this}: Connection timed out! Retrying... ({round + 1}/{numTries})");
+                            Logger.LogDebug($"{this}: Connection timed out! Retrying... " +
+                                            $"({round + 1}/{MaxConnectionRetries})");
                             continue;
                         }
 
                         if (tcpClient.Client?.LocalEndPoint == null)
                         {
-                            Logger.LogDebug($"{this}: Connection failed! Retrying... ({round + 1}/{numTries})");
+                            Logger.LogDebug($"{this}: Connection failed! Retrying... " +
+                                            $"({round + 1}/{MaxConnectionRetries})");
                             continue;
                         }
-                        
-                        IPEndPoint endPoint = (IPEndPoint) tcpClient.Client.LocalEndPoint;
-                        
-                        Endpoint = new Endpoint(endPoint);
 
+                        Endpoint = new Endpoint((IPEndPoint) tcpClient.Client.LocalEndPoint);
                         stream = tcpClient.GetStream();
-
                         round = 0; // reset if successful
 
-                        await ProcessLoop();
+                        await ProcessSession();
                     }
                     catch (ObjectDisposedException)
                     {
@@ -218,30 +230,32 @@ namespace Iviz.Roslib
 
                 if (keepRunning)
                 {
-                    Thread.Sleep(1000);
+                    await Task.Delay(1000);
                 }
 
-                Logger.LogDebug($"{this}: Connection closed. Retrying... ({round + 1}/{numTries})");
+                Logger.LogDebug($"{this}: Connection closed. Retrying... ({round + 1}/{MaxConnectionRetries})");
             }
 
             tcpClient = null;
             stream = null;
 
             keepRunning = false;
+
             try { signal.Release(); }
-            catch(SemaphoreFullException) {}
-            
+            catch (SemaphoreFullException) { }
+
             Logger.Log($"{this}: Stopped!");
         }
 
-        async Task ProcessLoop()
+        async Task ProcessSession()
         {
             List<string> responses = await DoHandshake();
             if (responses.Count != 0 && responses[0].HasPrefix("error"))
             {
                 int index = responses[0].IndexOf('=');
-                string errorMsg = (index != -1) ? responses[0].Substring(index + 1) : responses[0];
-                throw new ConnectionException("Partner sent error code: " + errorMsg);
+                string errorMsg = index != -1 ? responses[0].Substring(index + 1) : responses[0];
+                Logger.LogDebug($"{this}: Partner sent error code: " + errorMsg);
+                return;
             }
 
             while (keepRunning)
@@ -249,51 +263,29 @@ namespace Iviz.Roslib
                 int rcvLength = await ReceivePacket();
                 if (rcvLength == 0)
                 {
-                    throw new ConnectionException("Partner closed connection.");
+                    Logger.LogDebug($"{this}: Partner closed connection.");
+                    return;
                 }
+
+                IMessage message = Buffer.Deserialize(topicInfo.Generator, readBuffer, rcvLength);
 
                 try
                 {
-                    IMessage result = Msgs.Buffer.Deserialize(topicInfo.Generator, readBuffer, rcvLength);
-                    callback(result);
-                    NumReceived++;
-                    BytesReceived += rcvLength + 4;
+                    callback(message);
                 }
-                catch (Exception e) when (e is ArgumentException || e is IndexOutOfRangeException)
+                catch (Exception e)
                 {
-                    Logger.Log($"{this}: {e}"); // shouldn't happen
+                    Logger.LogError($"{this}: Exception from callback : {e}");
                 }
+
+                NumReceived++;
+                BytesReceived += rcvLength + 4;
             }
         }
-
-        public SubscriberReceiverState State => new SubscriberReceiverState(
-            IsAlive, RequestNoDelay, Endpoint,
-            RemoteUri, RemoteEndpoint,
-            NumReceived, BytesReceived
-        );
 
         public override string ToString()
         {
             return $"[TcpReceiver {RemoteEndpoint.Hostname}:{RemoteEndpoint.Port} '{Topic}']";
-        }
-
-        bool disposed;
-
-        public void Dispose()
-        {
-            if (disposed)
-            {
-                return;
-            }
-
-            disposed = true;
-            keepRunning = false;
-
-            try { signal.Release(); }
-            catch(SemaphoreFullException) {}
-
-
-            task?.Wait();
         }
     }
 }

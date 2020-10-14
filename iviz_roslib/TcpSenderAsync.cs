@@ -6,13 +6,13 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.Roslib
 {
@@ -27,45 +27,21 @@ namespace Iviz.Roslib
 
     internal sealed class TcpSenderAsync : IDisposable
     {
-        readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
-        readonly List<IMessage> messageQueue = new List<IMessage>();
-
-        TcpListener tcpListener;
-        TcpClient tcpClient;
-        NetworkStream stream;
-
         const int BufferSizeIncrease = 1024;
-        byte[] writeBuffer = new byte[BufferSizeIncrease];
-
-        bool keepRunning;
-        Task task;
-
-        public string RemoteCallerId { get; }
-        Uri CallerUri { get; }
-        bool Latching { get; }
+        readonly List<IMessage> messageQueue = new List<IMessage>();
+        readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
 
         readonly TopicInfo topicInfo;
 
-        string Topic => topicInfo.Topic;
-        public bool IsAlive => task != null && !task.IsCompleted && !task.IsFaulted;
-        Endpoint Endpoint { get; set; }
-        Endpoint RemoteEndpoint { get; set; }
-        public int MaxQueueSizeInBytes { get; set; } = 50000;
+        bool disposed;
 
-        int CurrentQueueSize
-        {
-            get
-            {
-                lock (messageQueue)
-                    return messageQueue.Count;
-            }
-        }
+        bool keepRunning;
+        NetworkStream stream;
+        Task task;
+        TcpClient tcpClient;
 
-        int NumSent { get; set; }
-        int BytesSent { get; set; }
-        int NumDropped { get; set; }
-        int BytesDropped { get; set; }
-        public SenderStatus Status { get; private set; }
+        TcpListener tcpListener;
+        byte[] writeBuffer = new byte[BufferSizeIncrease];
 
         public TcpSenderAsync(
             Uri callerUri,
@@ -78,6 +54,56 @@ namespace Iviz.Roslib
             CallerUri = callerUri;
             Status = SenderStatus.Inactive;
             Latching = latching;
+        }
+
+        public string RemoteCallerId { get; }
+        Uri CallerUri { get; }
+        bool Latching { get; }
+
+        string Topic => topicInfo.Topic;
+        public bool IsAlive => task != null && !task.IsCompleted && !task.IsFaulted;
+        Endpoint Endpoint { get; set; }
+        Endpoint RemoteEndpoint { get; set; }
+        public int MaxQueueSizeInBytes { get; set; } = 50000;
+
+        int CurrentQueueSize
+        {
+            get
+            {
+                lock (messageQueue)
+                {
+                    return messageQueue.Count;
+                }
+            }
+        }
+
+        int NumSent { get; set; }
+        int BytesSent { get; set; }
+        int NumDropped { get; set; }
+        int BytesDropped { get; set; }
+        public SenderStatus Status { get; private set; }
+
+        public PublisherSenderState State =>
+            new PublisherSenderState(
+                IsAlive, Latching, Status,
+                Endpoint, RemoteCallerId, RemoteEndpoint,
+                CurrentQueueSize, MaxQueueSizeInBytes, NumSent, BytesSent, NumDropped
+            );
+
+        public void Dispose()
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+            keepRunning = false;
+
+            try { signal.Release(); }
+            catch (SemaphoreFullException) { }
+
+            task?.Wait();
         }
 
         public IPEndPoint Start(int timeoutInMs, SemaphoreSlim managerSignal)
@@ -156,7 +182,7 @@ namespace Iviz.Roslib
                     errorMessage,
                     $"md5sum={topicInfo.Md5Sum}",
                     $"type={topicInfo.Type}",
-                    $"callerid={topicInfo.CallerId}",
+                    $"callerid={topicInfo.CallerId}"
                 };
             }
             else
@@ -166,7 +192,7 @@ namespace Iviz.Roslib
                     $"md5sum={topicInfo.Md5Sum}",
                     $"type={topicInfo.Type}",
                     $"callerid={topicInfo.CallerId}",
-                    $"latching={(Latching ? "1" : "0")}",
+                    $"latching={(Latching ? "1" : "0")}"
                 };
             }
 
@@ -283,14 +309,6 @@ namespace Iviz.Roslib
             return errorMessage == null;
         }
 
-        /*
-        static async Task<TcpClient> TimeoutTask(int timeoutInMs)
-        {
-            await Task.Delay(timeoutInMs);
-            return null;
-        }
-        */
-
         async Task Run(int timeoutInMs, SemaphoreSlim managerSignal)
         {
             try
@@ -325,6 +343,7 @@ namespace Iviz.Roslib
                     List<IMessage> tmpQueue = new List<IMessage>();
 
                     byte[] lengthArray = new byte[4];
+
                     byte[] ToLengthArray(uint i)
                     {
                         lengthArray[0] = (byte) i;
@@ -359,7 +378,7 @@ namespace Iviz.Roslib
 
                             try
                             {
-                                uint sendLength = Msgs.Buffer.Serialize(message, writeBuffer);
+                                uint sendLength = Buffer.Serialize(message, writeBuffer);
                                 await stream.WriteAsync(ToLengthArray(sendLength), 0, 4);
                                 await stream.WriteAsync(writeBuffer, 0, (int) sendLength);
 
@@ -432,31 +451,6 @@ namespace Iviz.Roslib
             BytesDropped = totalQueueSizeInBytes - MaxQueueSizeInBytes - overflowInBytes;
             messageQueue.RemoveRange(0, toDrop);
         }
-
-        bool disposed;
-
-        public void Dispose()
-        {
-            if (disposed)
-            {
-                return;
-            }
-
-            disposed = true;
-            keepRunning = false;
-
-            try { signal.Release(); }
-            catch (SemaphoreFullException) { }
-
-            task?.Wait();
-        }
-
-        public PublisherSenderState State =>
-            new PublisherSenderState(
-                IsAlive, Latching, Status,
-                Endpoint, RemoteCallerId, RemoteEndpoint,
-                CurrentQueueSize, MaxQueueSizeInBytes, NumSent, BytesSent, NumDropped
-            );
 
         public override string ToString()
         {

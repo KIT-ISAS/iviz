@@ -58,14 +58,14 @@ namespace Iviz.App
         public override void Initialize(ModuleListPanel newPanel)
         {
             base.Initialize(newPanel);
-            this.panel = (ConnectionDialogContents)DialogPanelManager.GetPanelByType(DialogPanelType.Connection);
+            panel = (ConnectionDialogContents)DialogPanelManager.GetPanelByType(DialogPanelType.Connection);
 
-            Logger.LogInternal += Logger_Log;
+            Logger.LogInternal += OnLogInternal;
         }
 
-        void Logger_Log(string msg)
+        void OnLogInternal(string msg)
         {
-            GameThread.RunOnce(() =>
+            GameThread.Post(() =>
             {
                 panel.LineLog.Add(msg);
                 panel.LineLog.Flush();

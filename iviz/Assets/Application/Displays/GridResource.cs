@@ -131,7 +131,7 @@ namespace Iviz.Displays
         {
             base.Awake();
 
-            mesh = new Mesh();
+            mesh = new Mesh { name = "Grid Mesh" };
             GetComponent<MeshFilter>().sharedMesh = mesh;
             meshRenderer = GetComponent<MeshRenderer>();
             meshRenderer.sharedMaterial = Resource.Materials.Grid.Object;
@@ -162,7 +162,7 @@ namespace Iviz.Displays
 
         void Update()
         {
-            if (!FollowCamera || TFListener.MainCamera is null)
+            if (!FollowCamera || TFListener.MainCamera == null)
             {
                 return;
             }

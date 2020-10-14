@@ -14,7 +14,6 @@ namespace Iviz.Roslib
 
         internal Endpoint(IPEndPoint endPoint) : this(endPoint.Address.ToString(), endPoint.Port)
         {
-            
         }
 
         [DataMember] public string Hostname { get; }

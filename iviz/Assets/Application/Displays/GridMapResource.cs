@@ -20,7 +20,7 @@ namespace Iviz.Displays
         protected override void Awake()
         {
             material = Resource.Materials.GridMap.Instantiate();
-            mesh = new Mesh();
+            mesh = new Mesh {name = "GridMap Mesh"};
 
             base.Awake();
 
@@ -114,7 +114,7 @@ namespace Iviz.Displays
             mesh.SetIndices(indices, MeshTopology.Quads, 0);
             mesh.Optimize();
 
-            if (!(inputTexture is null))
+            if (inputTexture != null)
             {
                 Destroy(inputTexture);
             }

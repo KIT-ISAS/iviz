@@ -114,7 +114,7 @@ namespace Iviz.Displays
             Dispose(info, behaviour.gameObject);
             return true;
         }
-
+        
         void CheckForDead()
         {
             float now = Time.time;
