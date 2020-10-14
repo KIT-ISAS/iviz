@@ -15,7 +15,7 @@ namespace Iviz.Msgs
         /// <summary>
         /// Callback function when a log message of level 'debug' is produced. 
         /// </summary>
-        public static Action<object> LogDebug { get; set; } = Console.Out.WriteLine;
+        public static Action<object> LogDebug { get; set; } = None;
 
         /// <summary>
         /// Callback function when a log message of level 'default' is produced. 
