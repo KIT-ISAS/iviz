@@ -5,6 +5,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>Iviz.ModelService</RootNamespace>
     <AssemblyName>Iviz.ModelService.App</AssemblyName>
+    <LangVersion>8</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\iviz_model_service_lib\iviz_model_service_lib.csproj" />

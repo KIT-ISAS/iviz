@@ -445,7 +445,11 @@ namespace Iviz.Displays
 
             Texture2D texture = new Texture2D(1, 1, TextureFormat.RGB24, false);
             texture.LoadImage(buffer);
-            texture.Compress(true);
+            if (!UnityEngine.Application.isEditor)
+            {
+                texture.Compress(true);
+            }
+
             texture.name = uri.ToString();
 
             Info<Texture2D> resource = new Info<Texture2D>(uri.ToString(), texture);
@@ -571,7 +575,7 @@ namespace Iviz.Displays
             GameObject model = SceneModel.Create(uri, msg).gameObject;
             if (Node != null)
             {
-                model.transform.SetParent(Node?.transform, false);
+                model.transform.SetParent(Node.transform, false);
             }
 
             return model;

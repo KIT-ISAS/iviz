@@ -274,7 +274,7 @@ namespace Iviz.Controllers
 
                 GeneratePointBuffer(msg, xOffset, yOffset, zOffset, iOffset, iField.Datatype, rgbaHint);
 
-                GameThread.RunOnce(() =>
+                GameThread.Post(() =>
                 {
                     if (pointCloud is null)
                     {

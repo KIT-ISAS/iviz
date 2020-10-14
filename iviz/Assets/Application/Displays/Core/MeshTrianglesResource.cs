@@ -47,7 +47,8 @@ namespace Iviz.Displays
             {
                 indexFormat = pointsCount > ushort.MaxValue
                     ? UnityEngine.Rendering.IndexFormat.UInt32
-                    : UnityEngine.Rendering.IndexFormat.UInt16
+                    : UnityEngine.Rendering.IndexFormat.UInt16,
+                name = "MeshTrianglesResource Mesh"
             };
 
 

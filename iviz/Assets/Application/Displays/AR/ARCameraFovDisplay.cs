@@ -80,7 +80,7 @@ namespace Iviz.Displays
 
             resource.LinesWithColor = lines;
             resource.Tint = Color.yellow;
-            resource.ElementSize = 0.005f;
+            resource.ElementScale = 0.005f;
         }
 
         void OnDestroy()

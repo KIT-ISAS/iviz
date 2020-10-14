@@ -1,59 +1,23 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
-using System;
-using JetBrains.Annotations;
+﻿using System;
+using System.Collections.Concurrent;
+using UnityEngine;
 
 namespace Iviz.Displays
 {
+    /// <summary>
+    /// Singleton that other threads can use to post actions to the main thread.
+    /// </summary>
     public class GameThread : MonoBehaviour
     {
-        readonly List<Action> actionsOnlyOnce = new List<Action>();
-        readonly List<Action> actionsOnlyOnceTmp = new List<Action>();
+        static GameThread Instance;
+        readonly ConcurrentQueue<Action> actionsOnlyOnce = new ConcurrentQueue<Action>();
         float lastRunTime;
-
-        public static event Action EveryFrame;
-        public static event Action LateEveryFrame;
-        public static event Action EverySecond;
-        public static event Action LateEverySecond;
-        
-        static GameThread mInstance;
-        static GameThread Instance
-        {
-            get
-            {
-                return mInstance;
-            }
-        }
 
         void Awake()
         {
-            mInstance = this;
+            Instance = this;
         }
 
-        void OnDestroy()
-        {
-            mInstance = null;
-        }
-
-        public static void RunOnce([NotNull] Action action)
-        {
-            if (action is null)
-            {
-                throw new ArgumentNullException(nameof(action));
-            }
-            
-            if (Instance is null)
-            {
-                return;
-            }
-
-            lock (Instance.actionsOnlyOnce)
-            {
-                Instance.actionsOnlyOnce.Add(action);
-            }
-        }
-
-        // Update is called once per frame
         void Update()
         {
             EveryFrame?.Invoke();
@@ -66,20 +30,57 @@ namespace Iviz.Displays
                 lastRunTime = newRunTime;
             }
 
-            lock (actionsOnlyOnce)
+            while (actionsOnlyOnce.TryDequeue(out Action action))
             {
-                if (actionsOnlyOnce.Count == 0) return;
-                actionsOnlyOnceTmp.Clear();
-                actionsOnlyOnceTmp.AddRange(actionsOnlyOnce);
-                actionsOnlyOnce.Clear();
+                action();
             }
-            actionsOnlyOnceTmp.ForEach(x => x());
         }
-        
+
         void LateUpdate()
         {
             LateEveryFrame?.Invoke();
         }
 
+        void OnDestroy()
+        {
+            Instance = null;
+        }
+
+        /// <summary>
+        /// Run every frame.
+        /// </summary>
+        public static event Action EveryFrame;
+        /// <summary>
+        /// Run every frame after the rest.
+        /// </summary>
+        public static event Action LateEveryFrame;
+        /// <summary>
+        /// Run once per second.
+        /// </summary>
+        public static event Action EverySecond;
+        /// <summary>
+        /// Run once per second after the others.
+        /// </summary>
+        public static event Action LateEverySecond;
+
+        /// <summary>
+        /// Run this action on the main thread.
+        /// </summary>
+        /// <param name="action">Action to be run.</param>
+        /// <exception cref="ArgumentNullException">If action is null.</exception>
+        public static void Post(Action action)
+        {
+            if (action is null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
+            if (Instance == null)
+            {
+                return;
+            }
+
+            Instance.actionsOnlyOnce.Enqueue(action);
+        }
     }
 }

@@ -14,6 +14,7 @@ using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.Tf2Msgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Roslib;
+using Iviz.Urdf;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Int64 = System.Int64;
@@ -26,6 +27,12 @@ namespace iviz_test
     {
         static void Main()
         {
+            UrdfFile.CreateFromFile(
+                "/Users/akzeac/Library/Application Support/edu_kit_isas/iviz/robots/D80211C28B21E0F3F49E71F36BFF236F");
+            
+            Thread.Sleep(10000);
+
+            /*
             Uri masterUri = RosClient.EnvironmentMasterUri ?? 
                             new Uri("http://141.3.59.19:11311");
 
@@ -36,6 +43,7 @@ namespace iviz_test
             {
                 Thread.Sleep(1000);
             }
+            */
         }
         
         static void Main222()
