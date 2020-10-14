@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -12,16 +13,34 @@ using Iviz.Msgs;
 
 namespace Iviz.XmlRpc
 {
-    public class FaultException : Exception
+    public class XmlRpcException : Exception
+    {
+        protected XmlRpcException(string message) : base(message)
+        {
+        }
+
+        protected XmlRpcException(string message, Exception inner) : base(message, inner)
+        {
+        }
+    }
+
+    public class FaultException : XmlRpcException
     {
         public FaultException(string message) : base(message)
         {
         }
     }
 
-    public class ParseException : Exception
+    public class ParseException : XmlRpcException
     {
         public ParseException(string message) : base(message)
+        {
+        }
+    }
+
+    public class RpcSocketException : XmlRpcException
+    {
+        public RpcSocketException(string message, Exception e) : base(message, e)
         {
         }
     }
@@ -211,7 +230,14 @@ namespace Iviz.XmlRpc
             using (HttpRequest request = new HttpRequest(callerUri, remoteUri))
             {
                 await request.StartAsync(timeoutInMs).Caf();
-                inData = await request.RequestAsync(outData, timeoutInMs).Caf();
+                try
+                {
+                    inData = await request.RequestAsync(outData, timeoutInMs).Caf();
+                }
+                catch (Exception e)
+                {
+                    throw new RpcSocketException("Method call failed!", e);
+                }
             }
 
             return ProcessResponse(inData);
@@ -232,7 +258,14 @@ namespace Iviz.XmlRpc
             using (HttpRequest request = new HttpRequest(callerUri, remoteUri))
             {
                 request.Start(timeoutInMs);
-                inData = request.Request(outData, timeoutInMs);
+                try
+                {
+                    inData = request.Request(outData, timeoutInMs);
+                }
+                catch (Exception e)
+                {
+                    throw new RpcSocketException("Method call failed!", e);
+                }
             }
 
             return ProcessResponse(inData);
