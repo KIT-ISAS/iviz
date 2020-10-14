@@ -2,17 +2,14 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using Iviz.Controllers;
 using Iviz.Displays;
-using Iviz.Roslib.XmlRpc;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
-using Logger = Iviz.Controllers.Logger; 
+using Logger = Iviz.Displays.Logger; 
 
 namespace Iviz.App
 {

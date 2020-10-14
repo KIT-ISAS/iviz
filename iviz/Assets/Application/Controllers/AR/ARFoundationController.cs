@@ -1,12 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.Displays;
 using Iviz.Resources;
 using UnityEngine;
-using UnityEngine.Analytics;
 using UnityEngine.Rendering;
-using UnityEngine.Serialization;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 
@@ -162,11 +159,17 @@ namespace Iviz.Controllers
             WorldPoseChanged += OnWorldPoseChanged;
         }
 
+        bool IsSamePose(in Pose b)
+        {
+            return Vector3.Distance(WorldPosition, b.position) < 0.001f &&
+                   Mathf.Abs(WorldAngle - AngleFromPose(b)) < 0.1f;
+        }
+        
         void OnWorldPoseChanged(RootMover mover)
         {
             if (mover == RootMover.Anchor||
                 worldAnchor == null ||
-                Vector3.Distance(WorldPosition, worldAnchor.Pose.position) < 0.001f)
+                IsSamePose(worldAnchor.Pose))
             {
                 return;
             }

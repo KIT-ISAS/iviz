@@ -72,7 +72,7 @@ namespace Iviz.Displays
 
                 cellSize = value;
                 resource.ElementScale = value;
-                resource.PreTranslation = new Vector3(0, cellSize / 2, 0);
+                //resource.PreTranslation = new Vector3(0, cellSize / 2, 0);
                 UpdateSize();
             }
         }
@@ -114,11 +114,6 @@ namespace Iviz.Displays
             resource.UseColormap = true;
             resource.UseIntensityForScaleY = true;
             resource.CastShadows = false; // fix weird shadow bug
-        }
-
-        public void SplitForRecycle()
-        {
-            ResourcePool.DisposeDisplay(resource);
         }
 
         public Color Tint

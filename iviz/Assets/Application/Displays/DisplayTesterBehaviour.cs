@@ -61,7 +61,6 @@ namespace Iviz.App
                 resource.ElementScale = 0.5f;
                 resource.ElementScale3 = new Vector3(1, 2, 1);
                 resource.UseIntensityForScaleY = true;
-                resource.PreTranslation = new Vector3(0, 0.5f, 0);
                 resource.Colormap = Resource.ColormapId.hsv;
                 resource.PointsWithColor = points;
             }                    
@@ -93,7 +92,6 @@ namespace Iviz.App
                 resource.ElementScale = 0.5f;
                 resource.ElementScale3 = new Vector3(1, 2, 1);
                 resource.UseIntensityForScaleY = true;
-                resource.PreTranslation = new Vector3(0, 0.5f, 0);
                 resource.Colormap = Resource.ColormapId.hsv;
                 resource.PointsWithColor = points;
                 resource.OcclusionOnly = true;

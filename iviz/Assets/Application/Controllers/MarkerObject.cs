@@ -6,6 +6,7 @@ using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Displays;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Resources;
+using Logger = Iviz.Displays.Logger;
 
 #if UNITY_WSA
 using Microsoft.MixedReality.Toolkit.Input;
@@ -319,23 +320,32 @@ namespace Iviz.Controllers
                     if (msg.Colors.Length == 0)
                     {
                         Color32 color = msg.Color.ToUnityColor32();
+                        Vector3 lastPosition = msg.Points[0].Ros2Unity();
                         for (int i = 0; i < lines.Length; i++)
                         {
+                            Vector3 newPosition = msg.Points[i + 1].Ros2Unity();
                             lines[i] = new LineWithColor(
-                                msg.Points[i + 0].Ros2Unity(), color,
-                                msg.Points[i + 1].Ros2Unity(), color
+                                lastPosition, color,
+                                newPosition, color
                             );
+                            lastPosition = newPosition;
                         }
                     }
                     else
                     {
                         Color color = msg.Color.Sanitize().ToUnityColor();
+                        Color32 lastColor = color * msg.Colors[0].ToUnityColor();
+                        Vector3 lastPosition = msg.Points[0].Ros2Unity();
                         for (int i = 0; i < lines.Length; i++)
                         {
+                            Color32 newColor = color * msg.Colors[i + 1].ToUnityColor();
+                            Vector3 newPosition = msg.Points[i + 1].Ros2Unity();
                             lines[i] = new LineWithColor(
-                                msg.Points[i + 0].Ros2Unity(), color * msg.Colors[i + 0].ToUnityColor(),
-                                msg.Points[i + 1].Ros2Unity(), color * msg.Colors[i + 1].ToUnityColor()
+                                lastPosition, lastColor,
+                                newPosition, newColor
                             );
+                            lastColor = newColor;
+                            lastPosition = newPosition;
                         }
                     }
 
@@ -502,7 +512,7 @@ namespace Iviz.Controllers
                         return null;
                     }
 
-                    return Resource.TryGetResource(uri, out Info<GameObject> info) ? info : null;
+                    return Resource.TryGetResource(uri, out Info<GameObject> info, ConnectionManager.Connection) ? info : null;
                 case MarkerType.CubeList:
                 case MarkerType.SphereList:
                     return Resource.Displays.MeshList;

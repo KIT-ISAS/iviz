@@ -107,7 +107,7 @@ namespace Iviz.Editor
             
             Directory.CreateDirectory(absolutePath);
             
-            if (!manager.TryGet(assetUri, out Info<GameObject> resourceInfo, false))
+            if (!manager.TryGet(assetUri, out Info<GameObject> resourceInfo, null))
             {
                 throw new FileNotFoundException(assetUri.ToString());
             }

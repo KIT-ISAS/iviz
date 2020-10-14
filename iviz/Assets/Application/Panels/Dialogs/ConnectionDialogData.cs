@@ -2,8 +2,7 @@
 using Iviz.Controllers;
 using Iviz.Displays;
 using Iviz.Roslib;
-using UnityEngine;
-using Logger = Iviz.Controllers.Logger;
+using Logger = Iviz.Displays.Logger;
 
 namespace Iviz.App
 {

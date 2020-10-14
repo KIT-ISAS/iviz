@@ -1,9 +1,6 @@
-using System;
-using Iviz.App;
 using Iviz.Controllers;
 using Iviz.Displays;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace Application.Displays
 {

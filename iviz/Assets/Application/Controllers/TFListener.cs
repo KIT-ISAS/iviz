@@ -7,12 +7,9 @@ using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.Tf;
 using System.Runtime.Serialization;
 using System;
-using System.Collections.ObjectModel;
 using Iviz.App;
 using Iviz.Displays;
-using Iviz.Msgs;
 using Iviz.Resources;
-using Iviz.Urdf;
 using Transform = UnityEngine.Transform;
 using Vector3 = UnityEngine.Vector3;
 
@@ -397,12 +394,7 @@ namespace Iviz.Controllers
             );
         }
 
-        public static Vector3 RelativePosition(in Vector3 unityPosition)
-        {
-            return Settings.IsMobile ? RootFrame.transform.InverseTransformPoint(unityPosition) : unityPosition;
-        }
-
-        static uint tfSeq = 0;
+        static uint tfSeq;
 
         public static void Publish(string parentFrame, string childFrame, in UnityEngine.Pose unityPose)
         {

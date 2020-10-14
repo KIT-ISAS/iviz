@@ -3,12 +3,11 @@ using Iviz.Roslib;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Iviz.Displays;
 using UnityEngine;
+using Logger = Iviz.Displays.Logger;
 
 namespace Iviz.Controllers
 {

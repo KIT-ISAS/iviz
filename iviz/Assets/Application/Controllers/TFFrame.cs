@@ -6,6 +6,7 @@ using Iviz.App;
 using Iviz.Displays;
 using Iviz.Resources;
 using UnityEngine;
+using Logger = Iviz.Displays.Logger;
 
 namespace Iviz.Controllers
 {

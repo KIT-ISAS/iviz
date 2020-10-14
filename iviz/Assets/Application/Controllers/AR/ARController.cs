@@ -2,9 +2,7 @@
 using Iviz.Roslib;
 using System.Runtime.Serialization;
 using System;
-using Iviz.App;
 using Iviz.Resources;
-using Iviz.Displays;
 
 namespace Iviz.Controllers
 {
@@ -106,14 +104,20 @@ namespace Iviz.Controllers
             WorldPoseChanged?.Invoke(mover);
         }
 
-        protected void SetWorldPose(in Pose unityPose, RootMover mover)
+        protected static float AngleFromPose(in Pose unityPose)
         {
             float angle = unityPose.rotation.eulerAngles.y;
             if (angle > 180)
             {
                 angle -= 360;
             }
-            
+
+            return angle;
+        }
+        
+        protected void SetWorldPose(in Pose unityPose, RootMover mover)
+        {
+            float angle = AngleFromPose(unityPose);
             WorldPosition = unityPose.position;
             WorldAngle = angle;
             UpdateWorldPose(unityPose, mover);
@@ -262,7 +266,7 @@ namespace Iviz.Controllers
             return Instance == null ? unityPose : Instance.WorldPose.Inverse().Multiply(unityPose);
         }
 
-        public virtual void Reset()
+        public void Reset()
         {
         }
     }

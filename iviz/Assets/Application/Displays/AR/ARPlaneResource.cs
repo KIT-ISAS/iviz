@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using Iviz.Controllers;
-using Iviz.Resources;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
@@ -86,9 +84,9 @@ namespace Iviz.Displays
             b = boundary[0];
             lineArray.Add(new LineWithColor(Project(a), Project(b)));
 
-            lines.LinesWithColor = lineArray;
-            lines.Visible = true;
-            pulseStart = Time.time;
+            //lines.LinesWithColor = lineArray;
+            //lines.Visible = true;
+            //pulseStart = Time.time;
         }
 
         float? pulseStart;

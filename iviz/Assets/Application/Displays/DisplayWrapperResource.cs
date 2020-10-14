@@ -46,7 +46,7 @@ namespace Iviz.Displays
             set => gameObject.SetActive(value);
         }
 
-        public virtual void SplitForRecycle()
+        public void SplitForRecycle()
         {
             if (Display != null)
             {

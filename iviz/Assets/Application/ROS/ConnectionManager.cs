@@ -1,16 +1,15 @@
 ﻿//#define PUBLISH_LOG
 
 using Iviz.Msgs;
-using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Roslib;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Displays;
 using UnityEngine;
+using Logger = Iviz.Displays.Logger;
 
 namespace Iviz.Controllers
 {
@@ -118,7 +117,7 @@ namespace Iviz.Controllers
         }
     }
 
-    public abstract class RosConnection
+    public abstract class RosConnection : IExternalServiceProvider
     {
         static readonly TimeSpan TaskWaitTime = TimeSpan.FromMilliseconds(2000);
 
@@ -246,8 +245,6 @@ namespace Iviz.Controllers
         public abstract void Publish(RosSender advertiser, IMessage msg);
 
         public abstract void AdvertiseService<T>(string service, Action<T> callback) where T : IService, new();
-
-        //public abstract void CallServiceAsync<T>(string service, T srv, Action<T> callback) where T : IService;
         public abstract bool CallService<T>(string service, T srv) where T : IService;
         public abstract ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics();
         public abstract ReadOnlyCollection<string> GetSystemParameterList();
