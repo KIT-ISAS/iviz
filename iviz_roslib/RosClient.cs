@@ -267,8 +267,7 @@ namespace Iviz.Roslib
                 // Do a simple ping to the master. This will tell us whether the master is reachable.
                 Master.GetUri();
             }
-            catch (Exception e) when
-                (e is SocketException || e is TimeoutException || e is AggregateException || e is IOException)
+            catch (Exception e)
             {
                 listener.Dispose();
                 throw new ConnectionException($"Failed to contact the master URI '{masterUri}'", e);
@@ -282,11 +281,10 @@ namespace Iviz.Roslib
             {
                 response = CreateTalker(CallerUri).GetPid();
             }
-            catch (Exception e) when
-                (e is SocketException || e is TimeoutException || e is AggregateException || e is IOException)
+            catch (Exception e) 
             {
                 listener.Dispose();
-                throw new UnreachableUriException($"My own uri '{CallerUri}' does not appear to be reachable!");
+                throw new UnreachableUriException($"My own uri '{CallerUri}' does not appear to be reachable!", e);
             }
 
             if (!response.IsValid)
@@ -439,8 +437,7 @@ namespace Iviz.Roslib
                     .Where(tuple => tuple.Members.Contains(CallerId))
                     .ForEach(tuple => Master.UnregisterPublisher(tuple.Topic));
             }
-            catch (Exception e) when
-                (e is SocketException || e is TimeoutException || e is AggregateException || e is IOException)
+            catch (Exception e) 
             {
                 throw new ConnectionException($"Failed to contact the master URI '{MasterUri}'", e);
             }
@@ -469,8 +466,7 @@ namespace Iviz.Roslib
             {
                 await Task.WhenAll(tasks).Caf();
             }
-            catch (Exception e) when
-                (e is SocketException || e is TimeoutException || e is IOException)
+            catch (Exception e)
             {
                 throw new ConnectionException($"Failed to contact the master URI '{MasterUri}'", e);
             }
@@ -1242,7 +1238,7 @@ namespace Iviz.Roslib
                     return result;
                 }
             }
-            catch (Exception e) when (e is SocketException)
+            catch (Exception e)
             {
                 throw new TimeoutException($"Service uri '{serviceUri}' is not reachable", e);
             }
@@ -1272,7 +1268,7 @@ namespace Iviz.Roslib
                 await serviceReceiver.StartAsync();
                 return await serviceReceiver.ExecuteAsync(service);
             }
-            catch (Exception e) when (e is SocketException)
+            catch (Exception e)
             {
                 throw new TimeoutException($"Service uri '{serviceUri}' is not reachable", e);
             }
