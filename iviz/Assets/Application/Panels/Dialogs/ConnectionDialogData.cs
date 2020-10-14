@@ -2,7 +2,7 @@
 using Iviz.Controllers;
 using Iviz.Displays;
 using Iviz.Roslib;
-using Logger = Iviz.Displays.Logger;
+using Logger = Iviz.Logger;
 
 namespace Iviz.App
 {

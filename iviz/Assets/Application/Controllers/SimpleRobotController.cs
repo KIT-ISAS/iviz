@@ -25,20 +25,14 @@ namespace Iviz.Controllers
     public sealed class SimpleRobotController : IController, IHasFrame, IJointProvider
     {
         readonly SimpleDisplayNode node;
-
-        public const string LocalPrefix = "↓ ";
-
-        public RobotModel Robot { get; private set; }
-
-        public TFFrame Frame => node.Parent;
-
-        GameObject RobotObject => Robot.BaseLinkObject;
-
-        public string Name => Robot == null ? "[Empty]" : Robot.Name ?? "[No Name]";
-
-        public event Action Stopped;
-
         readonly SimpleRobotConfiguration config = new SimpleRobotConfiguration();
+        
+        public RobotModel Robot { get; private set; }
+        public TFFrame Frame => node.Parent;
+        public string Name => Robot == null ? "[Empty]" : Robot.Name ?? "[No Name]";
+        GameObject RobotObject => Robot.BaseLinkObject;
+        
+        public event Action Stopped;
 
         public SimpleRobotConfiguration Config
         {
@@ -353,13 +347,12 @@ namespace Iviz.Controllers
             Robot.BaseLinkObject.transform.SetParentLocal(node.transform);
         }
 
-        public IModuleData ModuleData { get; private set; }
+        public IModuleData ModuleData { get; }
 
         public SimpleRobotController(IModuleData moduleData)
         {
             node = SimpleDisplayNode.Instantiate("SimpleRobotNode");
             ModuleData = moduleData;
-
             Config = new SimpleRobotConfiguration();
         }
 
@@ -379,8 +372,10 @@ namespace Iviz.Controllers
 
         public void Reset()
         {
-            return;
-            /*
+        }
+
+        void ResetRobotToDefault()
+        {
             Robot?.Dispose();
             Robot = null;
 
@@ -404,7 +399,6 @@ namespace Iviz.Controllers
                 AttachedToTf = false;
                 AttachedToTf = true;
             }
-            */
         }
     }
 }

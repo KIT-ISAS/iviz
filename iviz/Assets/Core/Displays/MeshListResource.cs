@@ -15,6 +15,8 @@ namespace Iviz.Displays
     /// </summary>
     public sealed class MeshListResource : MarkerResourceWithColormap, ISupportsAROcclusion
     {
+        const float MaxPositionMagnitudeSq = 1e9f;
+
         static readonly int BoundaryCenterID = Shader.PropertyToID("_BoundaryCenter");
         static readonly int PointsID = Shader.PropertyToID("_Points");
         static readonly int PropLocalScale = Shader.PropertyToID("_LocalScale");
@@ -213,14 +215,19 @@ namespace Iviz.Displays
             Size = 0;
             OcclusionOnly = false;
             UseIntensityForScaleY = false;
+
+            if (pointBuffer.Length > 0)
+            {
+                pointBuffer.Dispose();
+            }
             
             pointComputeBuffer?.Release();
             pointComputeBuffer = null;
             Properties.SetBuffer(PointsID, null);
         }
 
-        static bool IsValid(PointWithColor t) => !t.HasNaN() && t.Position.sqrMagnitude < 1e9f;
-        
+        static bool IsValid(PointWithColor t) => !t.HasNaN() && t.Position.sqrMagnitude < MaxPositionMagnitudeSq;
+
         /// <summary>
         /// Sets the instance positions and colors with the given enumeration.
         /// </summary>
@@ -243,7 +250,8 @@ namespace Iviz.Displays
             var realSize = 0;
             foreach (var point in points)
             {
-                if (!IsValid(point)) {continue;}
+                if (!IsValid(point)) { continue; }
+
                 pointBuffer[realSize] = point;
                 realSize++;
             }
@@ -260,7 +268,7 @@ namespace Iviz.Displays
                 ElementScale * elementScale3.z,
                 1);
             Properties.SetVector(PropLocalScale, realScale);
-            
+
             preTranslation = UseIntensityForScaleY ? ElementScale * ElementScale3.y * Vector3.up : Vector3.zero;
             Properties.SetVector(PropLocalOffset, preTranslation);
         }
@@ -299,11 +307,11 @@ namespace Iviz.Displays
             {
                 meshScale.y *= Mathf.Max(Mathf.Abs(span.x), Mathf.Abs(span.y));
             }
-            
+
             Bounds meshBounds = mesh.bounds;
-            meshBounds.center =  Vector3.Scale(meshBounds.center + preTranslation, meshScale);
+            meshBounds.center = Vector3.Scale(meshBounds.center + preTranslation, meshScale);
             meshBounds.size = Vector3.Scale(meshBounds.size, meshScale);
-            
+
             BoxCollider.size = pointBounds.size + meshBounds.size;
             BoxCollider.center = pointBounds.center + meshBounds.center;
             IntensityBounds = span;
@@ -315,6 +323,7 @@ namespace Iviz.Displays
             {
                 pointComputeBuffer.Release();
                 pointComputeBuffer = null;
+                Properties.SetBuffer(PointsID, null);
             }
 
             if (pointBuffer.Length != 0)

@@ -122,7 +122,9 @@ namespace Iviz.Displays
             {
                 Vector3 a = line.c0.xyz;
                 Vector3 b = line.c1.xyz;
-                dirx = (b - a).normalized;
+                dirx = b - a;
+                dirx /= dirx.magnitude;
+                
                 diry = Vector3.Cross(Vector3.forward, dirx);
                 if (Mathf.Approximately(diry.sqrMagnitude, 0))
                 {
@@ -130,8 +132,9 @@ namespace Iviz.Displays
                 }
 
                 dirx *= scale;
-                diry = diry.normalized * scale;
-                dirz = Vector3.Cross(dirx, diry).normalized * scale;
+                diry *= scale / diry.magnitude;
+                dirz = Vector3.Cross(dirx, diry);
+                dirz *= scale / dirz.magnitude;
 
                 points[poff + 0] = Transform(CapsuleLines[0]) + a;
                 points[poff + 1] = Transform(CapsuleLines[1]) + a;

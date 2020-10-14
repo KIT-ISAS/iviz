@@ -10,8 +10,9 @@
         Tags
         {
             "RenderType"="Opaque"
-            "LightMode"="Always"
+            //"LightMode"="Always"
         }
+    	LOD 200
        
         CGPROGRAM
         #pragma surface surf NoLighting noforwardadd noambient

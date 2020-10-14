@@ -18,7 +18,9 @@ namespace Iviz.Displays
     /// </summary>
     public sealed class LineResource : MarkerResourceWithColormap
     {
-        public const int MaxSegmentsForMesh = 30;
+        const int MaxSegmentsForMesh = 30;
+        const float MinLineWidthSq = 1E-09f;
+        const float MaxPositionMagnitudeSq = 1e9f;
 
         static readonly int LinesID = Shader.PropertyToID("_Lines");
         static readonly int ScaleID = Shader.PropertyToID("_Scale");
@@ -67,10 +69,10 @@ namespace Iviz.Displays
 
         bool UseCapsuleLines => Size <= MaxSegmentsForMesh;
 
-        static bool IsValid(LineWithColor t) => !t.HasNaN() &&
-                                                (t.A - t.B).sqrMagnitude > 1E-08f &&
-                                                t.A.sqrMagnitude < 1e9f &&
-                                                t.B.sqrMagnitude < 1e9f;
+        public static bool IsElementValid(in LineWithColor t) => !t.HasNaN() &&
+                                                                 (t.A - t.B).sqrMagnitude > MinLineWidthSq &&
+                                                                 t.A.sqrMagnitude < MaxPositionMagnitudeSq &&
+                                                                 t.B.sqrMagnitude < MaxPositionMagnitudeSq;
 
         /// <summary>
         /// Sets the lines with the given collection.
@@ -106,7 +108,8 @@ namespace Iviz.Displays
                 int realSize = 0;
                 foreach (LineWithColor t in lines)
                 {
-                    if (!IsValid(t)) {continue;}
+                    if (!IsElementValid(t)) { continue; }
+
                     lineBuffer[realSize++] = t;
                 }
 
@@ -117,7 +120,8 @@ namespace Iviz.Displays
                 int realSize = 0;
                 foreach (LineWithColor t in lines)
                 {
-                    if (!IsValid(t)) {continue;}
+                    if (!IsElementValid(t)) { continue; }
+
                     lineBuffer[realSize++] = t;
                     linesNeedAlpha |= t.ColorA.a < 255 || t.ColorB.a < 255;
                 }
@@ -256,6 +260,11 @@ namespace Iviz.Displays
                 return;
             }
 
+            if (lineComputeBuffer == null)
+            {
+                Debug.Log("Aa");
+            }
+            
             lineComputeBuffer.SetData(lineBuffer, 0, 0, Size);
             CalculateBounds();
 
@@ -276,6 +285,7 @@ namespace Iviz.Displays
             var (points, colors, indices, coords) =
                 LineUtils.CreateCapsulesFromSegments(lineBuffer.AsReadOnlyList(), ElementScale);
 
+            mesh.Clear();
             mesh.vertices = points;
             mesh.triangles = indices;
             mesh.colors32 = colors;
@@ -331,6 +341,7 @@ namespace Iviz.Displays
             {
                 lineComputeBuffer.Release();
                 lineComputeBuffer = null;
+                Properties.SetBuffer(LinesID, null);
             }
 
             if (lineBuffer.Length != 0)
@@ -350,6 +361,13 @@ namespace Iviz.Displays
             base.Suspend();
             Size = 0;
             mesh.Clear();
+            meshRenderer.enabled = false;
+
+            Debug.Log(lineBuffer.Length);
+            if (lineBuffer.Length != 0)
+            {
+                lineBuffer.Dispose();
+            }            
             
             lineComputeBuffer?.Release();
             lineComputeBuffer = null;

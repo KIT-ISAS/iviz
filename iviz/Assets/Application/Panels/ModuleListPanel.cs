@@ -9,7 +9,7 @@ using Iviz.Displays;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using Logger = Iviz.Displays.Logger; 
+using Logger = Iviz.Logger; 
 
 namespace Iviz.App
 {

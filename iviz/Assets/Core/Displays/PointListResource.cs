@@ -16,6 +16,8 @@ namespace Iviz.Displays
     /// </summary>
     public sealed class PointListResource : MarkerResourceWithColormap
     {
+        const float MaxPositionMagnitudeSq = 1e9f;
+
         static readonly int PointsID = Shader.PropertyToID("_Points");
         static readonly int ScaleID = Shader.PropertyToID("_Scale");
 
@@ -66,8 +68,8 @@ namespace Iviz.Displays
             set => Set(value.Count, value);
         }
 
-        static bool IsValid(PointWithColor t) => !t.HasNaN() && t.Position.sqrMagnitude < 1e9f;
-        
+        static bool IsValid(PointWithColor t) => !t.HasNaN() && t.Position.sqrMagnitude < MaxPositionMagnitudeSq;
+
         /// <summary>
         /// Sets the list of points with the given enumerator.
         /// </summary>
@@ -90,12 +92,13 @@ namespace Iviz.Displays
             int realSize = 0;
             foreach (PointWithColor t in points)
             {
-                if (!IsValid(t)) {continue;}
+                if (!IsValid(t)) { continue; }
+
                 pointBuffer[realSize++] = t;
             }
 
             Size = realSize;
-            UpdateBuffer();            
+            UpdateBuffer();
         }
 
         void UpdateBuffer()
@@ -143,6 +146,7 @@ namespace Iviz.Displays
             {
                 pointComputeBuffer.Release();
                 pointComputeBuffer = null;
+                Properties.SetBuffer(PointsID, null);
             }
 
             if (pointBuffer.Length > 0)
@@ -157,6 +161,7 @@ namespace Iviz.Displays
             {
                 pointComputeBuffer.Release();
                 pointComputeBuffer = null;
+                Properties.SetBuffer(PointsID, null);
             }
 
             if (pointBuffer.Length != 0)
@@ -174,12 +179,17 @@ namespace Iviz.Displays
         {
             base.Suspend();
             Size = 0;
-            
+
+            if (pointBuffer.Length > 0)
+            {
+                pointBuffer.Dispose();
+            }
+
             pointComputeBuffer?.Release();
             pointComputeBuffer = null;
             Properties.SetBuffer(PointsID, null);
         }
-        
+
         internal class PointGetHelper : IReadOnlyCollection<PointWithColor>
         {
             readonly NativeArray<float4> nArray;

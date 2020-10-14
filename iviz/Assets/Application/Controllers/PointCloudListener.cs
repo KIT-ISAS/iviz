@@ -9,7 +9,7 @@ using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
 using Iviz.Roslib;
 using UnityEngine;
-using Logger = Iviz.Displays.Logger;
+using Logger = Iviz.Logger;
 
 namespace Iviz.Controllers
 {

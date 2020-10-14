@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using Iviz.Msgs.RosgraphMsgs;
 
-namespace Iviz.Displays
+namespace Iviz
 {
     [DataContract]
     public readonly struct LogMessage
@@ -22,17 +22,7 @@ namespace Iviz.Displays
             Line = line;
         }
     }
-    
-    [Flags]
-    public enum LogLevel
-    {
-        Debug = Log.DEBUG,
-        Info = Log.INFO,
-        Warn = Log.WARN,
-        Error = Log.ERROR,
-        Fatal = Log.FATAL
-    }
-    
+
     public static class Logger
     {
         public delegate void Delegate(in LogMessage msg);
@@ -87,5 +77,15 @@ namespace Iviz.Displays
 
             LogInternal?.Invoke(str.ToString());
         }
+    }
+
+    [Flags]
+    public enum LogLevel
+    {
+        Debug = Log.DEBUG,
+        Info = Log.INFO,
+        Warn = Log.WARN,
+        Error = Log.ERROR,
+        Fatal = Log.FATAL
     }
 }

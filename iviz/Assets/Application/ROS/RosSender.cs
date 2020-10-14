@@ -4,7 +4,7 @@ using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Roslib;
 using JetBrains.Annotations;
-using Logger = Iviz.Displays.Logger;
+using Logger = Iviz.Logger;
 
 namespace Iviz.Controllers
 {

@@ -5,7 +5,7 @@ using BitMiracle.LibJpeg;
 using Iviz.Resources;
 using Unity.Collections;
 using UnityEngine;
-using Logger = Iviz.Displays.Logger;
+using Logger = Iviz.Logger;
 
 namespace Iviz.Displays
 {

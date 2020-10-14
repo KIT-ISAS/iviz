@@ -7,6 +7,8 @@ namespace Iviz.App
 {
     public class DisplayTesterBehaviour : MonoBehaviour
     {
+        const int MaxSegmentsForMesh = 30;
+
         void OnEnable()
         {
             CreatePointListResource(-3);
@@ -47,8 +49,8 @@ namespace Iviz.App
                 resource.UseColormap = true;
                 resource.Colormap = Resource.ColormapId.hsv;
                 resource.PointsWithColor = points;
-            }            
-            
+            }
+
             {
                 var resource = ResourcePool.GetOrCreateDisplay<MeshListResource>();
                 List<PointWithColor> points = new List<PointWithColor>();
@@ -63,8 +65,8 @@ namespace Iviz.App
                 resource.UseIntensityForScaleY = true;
                 resource.Colormap = Resource.ColormapId.hsv;
                 resource.PointsWithColor = points;
-            }                    
-            
+            }
+
             {
                 var resource = ResourcePool.GetOrCreateDisplay<MeshListResource>();
                 List<PointWithColor> points = new List<PointWithColor>();
@@ -78,8 +80,8 @@ namespace Iviz.App
                 resource.ElementScale3 = new Vector3(1, 2, 1);
                 resource.PointsWithColor = points;
                 resource.OcclusionOnly = true;
-            }             
-            
+            }
+
             {
                 var resource = ResourcePool.GetOrCreateDisplay<MeshListResource>();
                 List<PointWithColor> points = new List<PointWithColor>();
@@ -95,7 +97,7 @@ namespace Iviz.App
                 resource.Colormap = Resource.ColormapId.hsv;
                 resource.PointsWithColor = points;
                 resource.OcclusionOnly = true;
-            }             
+            }
         }
 
         static void CreateLineResourceShort(float z)
@@ -103,7 +105,7 @@ namespace Iviz.App
             {
                 LineResource resource = ResourcePool.GetOrCreateDisplay<LineResource>();
                 List<LineWithColor> lines = new List<LineWithColor>();
-                for (int i = 0; i < LineResource.MaxSegmentsForMesh/2; i++)
+                for (int i = 0; i < MaxSegmentsForMesh / 2; i++)
                 {
                     lines.Add(new LineWithColor(
                         new Vector3(i, 0, z), Color.green,
@@ -117,7 +119,7 @@ namespace Iviz.App
             {
                 LineResource resource = ResourcePool.GetOrCreateDisplay<LineResource>();
                 List<LineWithColor> lines = new List<LineWithColor>();
-                for (int i = 0; i < LineResource.MaxSegmentsForMesh /2; i++)
+                for (int i = 0; i < MaxSegmentsForMesh / 2; i++)
                 {
                     lines.Add(new LineWithColor(
                         new Vector3(i, 0, z + 1), 0.1f * i,
@@ -133,7 +135,7 @@ namespace Iviz.App
             {
                 LineResource resource = ResourcePool.GetOrCreateDisplay<LineResource>();
                 List<LineWithColor> lines = new List<LineWithColor>();
-                for (int i = 0; i < LineResource.MaxSegmentsForMesh /2; i++)
+                for (int i = 0; i < MaxSegmentsForMesh / 2; i++)
                 {
                     lines.Add(new LineWithColor(
                         new Vector3(i, 0, z + 2), new Color(1, 0, 0, 0.25f),
@@ -147,7 +149,7 @@ namespace Iviz.App
             {
                 LineResource resource = ResourcePool.GetOrCreateDisplay<LineResource>();
                 List<LineWithColor> lines = new List<LineWithColor>();
-                for (int i = 0; i < LineResource.MaxSegmentsForMesh/2; i++)
+                for (int i = 0; i < MaxSegmentsForMesh / 2; i++)
                 {
                     lines.Add(new LineWithColor(
                         new Vector3(i, 0, z + 3), 0.1f * i,
@@ -168,7 +170,7 @@ namespace Iviz.App
             {
                 LineResource resource = ResourcePool.GetOrCreateDisplay<LineResource>();
                 List<LineWithColor> lines = new List<LineWithColor>();
-                for (int i = 0; i < LineResource.MaxSegmentsForMesh + 10; i++)
+                for (int i = 0; i < MaxSegmentsForMesh + 10; i++)
                 {
                     lines.Add(new LineWithColor(
                         new Vector3(i, 0, z), Color.green,
@@ -182,7 +184,7 @@ namespace Iviz.App
             {
                 LineResource resource = ResourcePool.GetOrCreateDisplay<LineResource>();
                 List<LineWithColor> lines = new List<LineWithColor>();
-                for (int i = 0; i < LineResource.MaxSegmentsForMesh + 10; i++)
+                for (int i = 0; i < MaxSegmentsForMesh + 10; i++)
                 {
                     lines.Add(new LineWithColor(
                         new Vector3(i, 0, z + 1), 0.025f * i,
@@ -198,7 +200,7 @@ namespace Iviz.App
             {
                 LineResource resource = ResourcePool.GetOrCreateDisplay<LineResource>();
                 List<LineWithColor> lines = new List<LineWithColor>();
-                for (int i = 0; i < LineResource.MaxSegmentsForMesh + 10; i++)
+                for (int i = 0; i < MaxSegmentsForMesh + 10; i++)
                 {
                     lines.Add(new LineWithColor(
                         new Vector3(i, 0, z + 2), new Color(1, 0, 0, 0.5f),
@@ -212,7 +214,7 @@ namespace Iviz.App
             {
                 LineResource resource = ResourcePool.GetOrCreateDisplay<LineResource>();
                 List<LineWithColor> lines = new List<LineWithColor>();
-                for (int i = 0; i < LineResource.MaxSegmentsForMesh + 10; i++)
+                for (int i = 0; i < MaxSegmentsForMesh + 10; i++)
                 {
                     lines.Add(new LineWithColor(
                         new Vector3(i, 0, z + 3), 0.025f * i,

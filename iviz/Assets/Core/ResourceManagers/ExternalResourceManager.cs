@@ -9,7 +9,7 @@ using Iviz.Resources;
 using Iviz.Roslib;
 using Newtonsoft.Json;
 using UnityEngine;
-using Logger = Iviz.Displays.Logger;
+using Logger = Iviz.Logger;
 
 namespace Iviz.Displays
 {
