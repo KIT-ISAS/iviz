@@ -33,6 +33,11 @@ namespace Iviz.XmlRpc
             {
                 throw new TimeoutException($"HttpRequest: Host '{hostname}' timed out", task.Exception);
             }
+
+            if (client.Client?.LocalEndPoint == null)
+            {
+                throw new RpcSocketException($"HttpRequest: Connection with '{hostname}' failed.");
+            }            
         }
 
         public async Task StartAsync(int timeoutInMs = DefaultTimeoutInMs)
@@ -45,6 +50,11 @@ namespace Iviz.XmlRpc
             {
                 throw new TimeoutException($"HttpRequest: Host '{hostname}' timed out", task.Exception);
             }
+            
+            if (client.Client?.LocalEndPoint == null)
+            {
+                throw new RpcSocketException($"HttpRequest: Connection with '{hostname}' failed.");
+            }            
         }
 
         string CreateRequest(string msgIn)

@@ -40,6 +40,10 @@ namespace Iviz.XmlRpc
 
     public class RpcSocketException : XmlRpcException
     {
+        public RpcSocketException(string message) : base(message)
+        {
+        }
+
         public RpcSocketException(string message, Exception e) : base(message, e)
         {
         }
@@ -230,14 +234,7 @@ namespace Iviz.XmlRpc
             using (HttpRequest request = new HttpRequest(callerUri, remoteUri))
             {
                 await request.StartAsync(timeoutInMs).Caf();
-                try
-                {
-                    inData = await request.RequestAsync(outData, timeoutInMs).Caf();
-                }
-                catch (Exception e)
-                {
-                    throw new RpcSocketException("Method call failed!", e);
-                }
+                inData = await request.RequestAsync(outData, timeoutInMs).Caf();
             }
 
             return ProcessResponse(inData);
@@ -258,14 +255,7 @@ namespace Iviz.XmlRpc
             using (HttpRequest request = new HttpRequest(callerUri, remoteUri))
             {
                 request.Start(timeoutInMs);
-                try
-                {
-                    inData = request.Request(outData, timeoutInMs);
-                }
-                catch (Exception e)
-                {
-                    throw new RpcSocketException("Method call failed!", e);
-                }
+                inData = request.Request(outData, timeoutInMs);
             }
 
             return ProcessResponse(inData);
