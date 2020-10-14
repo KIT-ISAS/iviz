@@ -16,6 +16,7 @@ namespace Iviz.Roslib
         public int NumSent { get; }
         public int BytesSent { get; }
         public int NumDropped { get; }
+        public int BytesDropped { get; }
 
         internal PublisherSenderState(bool isAlive,
                            bool latching,
@@ -27,7 +28,8 @@ namespace Iviz.Roslib
                            int maxQueueSize,
                            int numSent,
                            int bytesSent,
-                           int numDropped)
+                           int numDropped, 
+                           int bytesDropped)
         {
             IsAlive = isAlive;
             Latching = latching;
@@ -40,6 +42,7 @@ namespace Iviz.Roslib
             NumSent = numSent;
             BytesSent = bytesSent;
             NumDropped = numDropped;
+            BytesDropped = bytesDropped;
         }
     }
 

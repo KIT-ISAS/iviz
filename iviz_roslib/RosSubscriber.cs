@@ -79,9 +79,9 @@ namespace Iviz.Roslib
 
         internal void MessageCallback(IMessage msg)
         {
-            foreach (Action<IMessage> callback in callbacksById.Values)
+            foreach (var callback in callbacksById)
             {
-                callback(msg);
+                callback.Value(msg);
             }
         }
 

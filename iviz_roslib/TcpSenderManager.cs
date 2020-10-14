@@ -27,7 +27,6 @@ namespace Iviz.Roslib
 
         public Uri CallerUri { get; }
         public string Topic => topicInfo.Topic;
-        public string CallerId => topicInfo.CallerId;
         public string TopicType => topicInfo.Type;
 
         public int NumConnections
@@ -73,7 +72,7 @@ namespace Iviz.Roslib
         public IPEndPoint CreateConnection(string remoteCallerId)
         {
             Logger.LogDebug($"{this}: '{remoteCallerId}' is requesting {Topic}");
-            TcpSenderAsync newSender = new TcpSenderAsync(CallerUri, remoteCallerId, topicInfo, Latching);
+            TcpSenderAsync newSender = new TcpSenderAsync(remoteCallerId, topicInfo, Latching);
 
             if (connectionsByCallerId.TryGetValue(remoteCallerId, out TcpSenderAsync oldSender) &&
                 oldSender.IsAlive)
@@ -90,8 +89,8 @@ namespace Iviz.Roslib
             Cleanup();
 
             // wait until newSender is ready to accept
-            const int waitInMs = 100;
-            if (!managerSignal.Wait(waitInMs))
+            const int maxWaitInMs = 100;
+            if (!managerSignal.Wait(maxWaitInMs))
             {
                 Logger.Log($"{this}: Sender start timeout?");
             }
@@ -132,9 +131,9 @@ namespace Iviz.Roslib
                 LatchedMessage = msg;
             }
 
-            foreach (TcpSenderAsync connection in connectionsByCallerId.Values)
+            foreach (var sender in connectionsByCallerId)
             {
-                connection.Publish(msg);
+                sender.Value.Publish(msg);
             }
         }
 

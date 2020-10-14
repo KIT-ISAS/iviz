@@ -63,23 +63,15 @@ namespace Iviz.Roslib
         public UnreachableUriException(string message, Exception innerException) : base(message, innerException)
         {
         }
-
-        public UnreachableUriException()
-        {
-        }
     }
 
-    public class XmlRpcException : Exception
+    public class XmlCallException : Exception
     {
-        public XmlRpcException(string message) : base(message)
+        public XmlCallException(string message) : base(message)
         {
         }
 
-        public XmlRpcException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-
-        public XmlRpcException()
+        public XmlCallException(string message, Exception innerException) : base(message, innerException)
         {
         }
     }
@@ -396,11 +388,17 @@ namespace Iviz.Roslib
 
             static bool IsAlpha(char c) => ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
 
-            if (!IsAlpha(name[0]) && name[0] != '/' && name[0] != '~') { return false; }
+            if (!IsAlpha(name[0]) && name[0] != '/' && name[0] != '~')
+            {
+                return false;
+            }
 
             for (int i = 1; i < name.Length; i++)
             {
-                if (!IsAlpha(name[i]) && !char.IsDigit(name[i]) && name[i] != '_' && name[i] != '/') { return false; }
+                if (!IsAlpha(name[i]) && !char.IsDigit(name[i]) && name[i] != '_' && name[i] != '/')
+                {
+                    return false;
+                }
             }
 
             return true;
@@ -472,10 +470,6 @@ namespace Iviz.Roslib
             }
         }
 
-        public void Cleanup()
-        {
-        }
-
         internal NodeClient CreateTalker(Uri otherUri)
         {
             return new NodeClient(CallerId, CallerUri, otherUri, (int) RpcNodeTimeout.TotalMilliseconds);
@@ -494,7 +488,7 @@ namespace Iviz.Roslib
             if (!masterResponse.IsValid)
             {
                 subscribersByTopic.TryRemove(topic, out _);
-                throw new XmlRpcException(
+                throw new XmlCallException(
                     $"Error registering publisher for topic {topic}: {masterResponse.StatusMessage}");
             }
 
@@ -517,7 +511,7 @@ namespace Iviz.Roslib
             if (!masterResponse.IsValid)
             {
                 subscribersByTopic.TryRemove(topic, out _);
-                throw new XmlRpcException(
+                throw new XmlCallException(
                     $"Error registering publisher for topic {topic}: {masterResponse.StatusMessage}");
             }
 
@@ -885,7 +879,7 @@ namespace Iviz.Roslib
                     .ToArray().AsReadOnly();
             }
 
-            throw new XmlRpcException("Failed to retrieve topics: " + response.StatusMessage);
+            throw new XmlCallException("Failed to retrieve topics: " + response.StatusMessage);
         }
 
         /// <summary>
@@ -903,7 +897,7 @@ namespace Iviz.Roslib
                     .ToArray().AsReadOnly();
             }
 
-            throw new XmlRpcException("Failed to retrieve topics: " + response.StatusMessage);
+            throw new XmlCallException("Failed to retrieve topics: " + response.StatusMessage);
         }
 
         /// <summary>
@@ -925,7 +919,7 @@ namespace Iviz.Roslib
                 return new SystemState(response.Publishers, response.Subscribers, response.Services);
             }
 
-            throw new XmlRpcException("Failed to retrieve system state: " + response.StatusMessage);
+            throw new XmlCallException("Failed to retrieve system state: " + response.StatusMessage);
         }
 
         /// <summary>
@@ -941,7 +935,7 @@ namespace Iviz.Roslib
                 return new SystemState(response.Publishers, response.Subscribers, response.Services);
             }
 
-            throw new XmlRpcException("Failed to retrieve system state: " + response.StatusMessage);
+            throw new XmlCallException("Failed to retrieve system state: " + response.StatusMessage);
         }
 
         /// <summary>
@@ -1007,6 +1001,8 @@ namespace Iviz.Roslib
         /// </summary>
         public void Close()
         {
+            listener.Dispose();
+            
             RosPublisher[] publishers = publishersByTopic.Values.ToArray();
             publishersByTopic.Clear();
 
@@ -1067,9 +1063,6 @@ namespace Iviz.Roslib
                     Logger.LogDebug($"Error closing subscriber {serviceSender}: {e}");
                 }
             });
-
-
-            listener.Dispose();
         }
 
         /// <summary>
@@ -1077,6 +1070,8 @@ namespace Iviz.Roslib
         /// </summary>
         public async Task CloseAsync()
         {
+            listener.Dispose();
+            
             var publishers = publishersByTopic.Values.ToArray();
             publishersByTopic.Clear();
 
@@ -1119,8 +1114,6 @@ namespace Iviz.Roslib
             }));
 
             await Task.WhenAll(tasks).Caf();
-
-            listener.Dispose();
         }
 
         public SubscriberState GetSubscriberStatistics()
@@ -1215,7 +1208,7 @@ namespace Iviz.Roslib
             LookupServiceResponse response = Master.LookupService(serviceName);
             if (!response.IsValid)
             {
-                throw new XmlRpcException("Failed to call service: " + response.StatusMessage);
+                throw new XmlCallException("Failed to call service: " + response.StatusMessage);
             }
 
             Uri serviceUri = response.ServiceUrl;
@@ -1256,7 +1249,7 @@ namespace Iviz.Roslib
             LookupServiceResponse response = await Master.LookupServiceAsync(serviceName);
             if (!response.IsValid)
             {
-                throw new XmlRpcException("Failed to call service: " + response.StatusMessage);
+                throw new XmlCallException("Failed to call service: " + response.StatusMessage);
             }
 
             Uri serviceUri = response.ServiceUrl;

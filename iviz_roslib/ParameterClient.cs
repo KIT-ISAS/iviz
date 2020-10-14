@@ -52,7 +52,7 @@ namespace Iviz.Roslib.XmlRpc
                 return response.ParameterNameList;
             }
 
-            throw new XmlRpcException("Failed to retrieve parameter names: " + response.StatusMessage);
+            throw new XmlCallException("Failed to retrieve parameter names: " + response.StatusMessage);
         }
 
         public async Task<ReadOnlyCollection<string>> GetParameterNamesAsync()
@@ -63,7 +63,7 @@ namespace Iviz.Roslib.XmlRpc
                 return response.ParameterNameList;
             }
 
-            throw new XmlRpcException("Failed to retrieve parameter names: " + response.StatusMessage);
+            throw new XmlCallException("Failed to retrieve parameter names: " + response.StatusMessage);
         }
 
 
