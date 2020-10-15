@@ -8,7 +8,7 @@ namespace Iviz.Displays
 {
     public sealed class ResourcePool : MonoBehaviour
     {
-        const int TimeToDestroy = 60; // sec
+        const int TimeToDestroyInSec = 60;
 
         static ResourcePool Instance;
         readonly HashSet<int> destroyedObjects = new HashSet<int>();
@@ -193,7 +193,7 @@ namespace Iviz.Displays
             public ObjectWithDeadline(GameObject o)
             {
                 GameObject = o;
-                ExpirationTime = Time.time + TimeToDestroy;
+                ExpirationTime = Time.time + TimeToDestroyInSec;
             }
 
             public float ExpirationTime { get; }

@@ -35,9 +35,9 @@ namespace Iviz.Controllers
     public sealed class TFListener : ListenerController
     {
         public const string DefaultTopic = "/tf";
-        const string DefaultTopicStatic = "/tf_static";
-
         public const string BaseFrameId = "map";
+        
+        const string DefaultTopicStatic = "/tf_static";
 
         public static TFListener Instance { get; private set; }
         public RosSender<tfMessage_v2> Publisher { get; }

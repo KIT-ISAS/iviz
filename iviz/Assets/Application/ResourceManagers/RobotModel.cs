@@ -263,7 +263,8 @@ namespace Iviz.Displays
             if (parent.transform.IsChildOf(child.transform))
             {
                 Dispose();
-                throw new MalformedUrdfException();
+                throw new MalformedUrdfException(
+                    $"Node '{parent.name}' is child of '{child.name}' and cannot be set as its parent!");
             }
 
             linkParents[joint.Child.Link] = joint.Parent.Link;
@@ -360,7 +361,7 @@ namespace Iviz.Displays
             {
                 case Joint.JointType.Revolute:
                 case Joint.JointType.Continuous:
-                    var angle = value * Mathf.Rad2Deg;
+                    float angle = value * Mathf.Rad2Deg;
                     unityPose = new Pose(Vector3.zero, Quaternion.AngleAxis(-angle, joint.Axis.Xyz.ToVector3()));
                     break;
                 case Joint.JointType.Prismatic:

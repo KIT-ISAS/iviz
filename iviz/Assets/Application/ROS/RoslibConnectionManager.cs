@@ -286,7 +286,6 @@ namespace Iviz.Controllers
             catch (Exception e) when
                 (e is UnreachableUriException || e is ConnectionException || e is XmlRpcException)
             {
-                //Logger.Debug(e);
                 Logger.Internal("Error:", e);
                 if (RosServerManager.IsActive && RosServerManager.MasterUri == MasterUri)
                 {

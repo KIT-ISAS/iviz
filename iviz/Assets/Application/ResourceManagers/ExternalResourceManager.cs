@@ -28,7 +28,8 @@ namespace Iviz.Displays
 
         const string StrMissingFileRemoving = "ExternalResourceManager: Missing file '{0}'. Removing.";
         const string StrServiceFailedWithMessage = "ExternalResourceManager: Call Service failed with message '{0}'";
-        const string StrCallServiceFailed = "ExternalResourceManager: Call Service failed! Are you sure iviz is connected and the iviz_model_service program is running?";
+        const string StrCallServiceFailed = 
+            "ExternalResourceManager: Call Service failed! Are you sure iviz is connected and the iviz_model_service program is running?";
         const string StrResourceFailedWithError = "ExternalResourceManager: Loading resource {0} failed with error {1}";
 
         [DataContract]

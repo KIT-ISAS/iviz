@@ -12,43 +12,37 @@ namespace Iviz.Controllers
 {
     public abstract class RosConnection
     {
-        static readonly TimeSpan TaskWaitTime = TimeSpan.FromMilliseconds(2000);
-
-        readonly ConcurrentQueue<Func<Task>> toDos = new ConcurrentQueue<Func<Task>>();
-        readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
-        readonly Task task;
-
-        volatile bool keepRunning;
-
-        public event Action<ConnectionState> ConnectionStateChanged;
-
-        public ConnectionState ConnectionState { get; private set; } = ConnectionState.Disconnected;
-
-        public virtual Uri MasterUri { get; set; }
-        public virtual Uri MyUri { get; set; }
-        public virtual string MyId { get; set; }
-
-        public bool KeepReconnecting { get; set; }
+        const int TaskWaitTimeInMs = 2000;
 
         protected static readonly ReadOnlyCollection<BriefTopicInfo> EmptyTopics =
             Array.Empty<BriefTopicInfo>().AsReadOnly();
 
-        public ReadOnlyCollection<BriefTopicInfo> PublishedTopics { get; protected set; } = EmptyTopics;
+        readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
+        readonly Task task;
+        readonly ConcurrentQueue<Func<Task>> toDos = new ConcurrentQueue<Func<Task>>();
+
+        volatile bool keepRunning;
 
         protected RosConnection()
         {
             keepRunning = true;
             task = Task.Run(Run);
-            GameThread.EverySecond += Update;
         }
+
+        public ConnectionState ConnectionState { get; private set; } = ConnectionState.Disconnected;
+        public virtual Uri MasterUri { get; set; }
+        public virtual Uri MyUri { get; set; }
+        public virtual string MyId { get; set; }
+        public bool KeepReconnecting { get; set; }
+        public ReadOnlyCollection<BriefTopicInfo> PublishedTopics { get; protected set; } = EmptyTopics;
+
+        public event Action<ConnectionState> ConnectionStateChanged;
 
         public virtual void Stop()
         {
             keepRunning = false;
             Signal();
-
             task?.Wait();
-            GameThread.EverySecond -= Update;
         }
 
         void SetConnectionState(ConnectionState newState)
@@ -89,7 +83,7 @@ namespace Iviz.Controllers
                         SetConnectionState(connectionResult ? ConnectionState.Connected : ConnectionState.Disconnected);
                     }
 
-                    await signal.WaitAsync(TaskWaitTime);
+                    await signal.WaitAsync(TaskWaitTimeInMs);
                     await ExecuteTasks();
                 }
 
@@ -130,21 +124,12 @@ namespace Iviz.Controllers
         public abstract void Advertise<T>(RosSender<T> advertiser) where T : IMessage;
         public abstract void Unadvertise(RosSender advertiser);
         public abstract void Publish(RosSender advertiser, IMessage msg);
-
         public abstract void AdvertiseService<T>(string service, Action<T> callback) where T : IService, new();
-
-        //public abstract void CallServiceAsync<T>(string service, T srv, Action<T> callback) where T : IService;
         public abstract bool CallService<T>(string service, T srv) where T : IService;
         public abstract ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics();
         public abstract ReadOnlyCollection<string> GetSystemParameterList();
         public abstract int GetNumPublishers(string topic);
         public abstract int GetNumSubscribers(string topic);
-
         public abstract object GetParameter(string parameter);
-
-        protected virtual void Update()
-        {
-            // do nothing
-        }
     }
 }

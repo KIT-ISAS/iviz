@@ -67,8 +67,9 @@ namespace Iviz.Editor
                 resourceFile[robotName] = filename;
             }
 
-            string text = JsonConvert.SerializeObject(resourceFile, Formatting.Indented);
-            File.WriteAllText(absolutePath + "/../resources.txt", text);
+            //string text = JsonConvert.SerializeObject(resourceFile, Formatting.Indented);
+            //File.WriteAllText(absolutePath + "/../resources.txt", text);
+            Debug.LogWarning("SavedAssetLoader: Not writing robot resource files.");
             
             foreach (string robotName in manager.GetRobotNames())
             {

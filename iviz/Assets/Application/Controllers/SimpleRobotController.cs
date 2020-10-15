@@ -1,44 +1,48 @@
-using UnityEngine;
-using System.Runtime.Serialization;
-using Iviz.Roslib;
 using System;
+using System.Collections.Generic;
+using System.Runtime.Serialization;
 using Iviz.Displays;
 using Iviz.Resources;
+using Iviz.Roslib;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Iviz.Controllers
 {
     [DataContract]
     public sealed class SimpleRobotConfiguration : JsonToString, IConfiguration
     {
-        [DataMember] public Guid Id { get; set; }
-        [DataMember] public Resource.Module Module => Resource.Module.Robot;
-        [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string SourceParameter { get; set; } = "";
         [DataMember] public string SavedRobotName { get; set; } = "";
         [DataMember] public string FramePrefix { get; set; } = "";
         [DataMember] public string FrameSuffix { get; set; } = "";
-        [DataMember] public bool AttachedToTf { get; set; } = false;
-        [DataMember] public bool RenderAsOcclusionOnly { get; set; } = false;
+        [DataMember] public bool AttachedToTf { get; set; }
+        [DataMember] public bool RenderAsOcclusionOnly { get; set; }
         [DataMember] public SerializableColor Tint { get; set; } = Color.white;
+        [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
+        [DataMember] public Resource.Module Module => Resource.Module.Robot;
+        [DataMember] public bool Visible { get; set; } = true;
     }
 
+    /// <summary>
+    /// Controller for robots.
+    /// </summary>
     public sealed class SimpleRobotController : IController, IHasFrame, IJointProvider
     {
+        readonly SimpleRobotConfiguration config = new SimpleRobotConfiguration();
         readonly SimpleDisplayNode node;
 
-        public const string LocalPrefix = "↓ ";
+        public SimpleRobotController(IModuleData moduleData)
+        {
+            node = SimpleDisplayNode.Instantiate("SimpleRobotNode");
+            ModuleData = moduleData;
+
+            Config = new SimpleRobotConfiguration();
+        }
 
         public RobotModel Robot { get; private set; }
 
-        public TFFrame Frame => node.Parent;
-
         GameObject RobotObject => Robot.BaseLinkObject;
-
-        public string Name => Robot == null ? "[Empty]" : Robot.Name ?? "[No Name]";
-
-        public event Action Stopped;
-
-        readonly SimpleRobotConfiguration config = new SimpleRobotConfiguration();
 
         public SimpleRobotConfiguration Config
         {
@@ -75,105 +79,7 @@ namespace Iviz.Controllers
 
         public string SourceParameter => config.SourceParameter;
 
-        public bool TryLoadFromSourceParameter(string value)
-        {
-            config.SourceParameter = "";
-            Robot?.Dispose();
-            Robot = null;
-
-            if (string.IsNullOrEmpty(value))
-            {
-                config.SavedRobotName = "";
-                HelpText = "[No Robot Selected]";
-                return true;
-            }
-
-            object parameterValue;
-            try
-            {
-                parameterValue = ConnectionManager.Connection.GetParameter(value);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"SimpleRobotController: Error while loading parameter '{value}': {e}");
-                HelpText = "[Failed to Retrieve Parameter]";
-                return false;
-            }
-
-            if (parameterValue == null || !(parameterValue is string robotDescription))
-            {
-                Debug.Log($"SimpleRobotController: Failed to retrieve parameter '{value}'");
-                HelpText = "[Invalid Parameter Type]";
-                return false;
-            }
-
-            if (!LoadRobotFromDescription(robotDescription))
-            {
-                return false;
-            }
-
-            config.SavedRobotName = "";
-            config.SourceParameter = value;
-            return true;
-        }
-
         public string SavedRobotName => config.SavedRobotName;
-
-        public bool TryLoadSavedRobot(string robotName)
-        {
-            config.SavedRobotName = "";
-            Robot?.Dispose();
-            Robot = null;
-
-            if (string.IsNullOrEmpty(robotName))
-            {
-                config.SourceParameter = "";
-                HelpText = "[No Robot Selected]";
-                return true;
-            }
-
-            if (!Resource.TryGetRobot(robotName, out string robotDescription))
-            {
-                // shouldn't happen!
-                Debug.Log($"SimpleRobotController: Failed to load robot!");
-                HelpText = "[Failed to Load Saved Robot]";
-                return false;
-            }
-
-            config.SourceParameter = "";
-            config.SavedRobotName = robotName;
-            return LoadRobotFromDescription(robotDescription);
-        }
-
-        bool LoadRobotFromDescription(string description)
-        {
-            if (string.IsNullOrEmpty(description))
-            {
-                Debug.Log($"SimpleRobotController: Empty parameter '{description}'");
-                HelpText = "[Robot Specification is Empty]";
-                return false;
-            }
-
-            try
-            {
-                Robot = new RobotModel(description);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"SimpleRobotController: Error parsing description': {e}");
-                HelpText = "[Failed to Parse Specification]";
-                Robot = null;
-                return false;
-            }
-
-            node.name = "SimpleRobotNode:" + Name;
-            HelpText = string.IsNullOrEmpty(Robot.Name) ? "<b>[No Name]</b>" : $"<b>- {Name} -</b>";
-            AttachedToTf = AttachedToTf;
-            Visible = Visible;
-            RenderAsOcclusionOnly = RenderAsOcclusionOnly;
-            Tint = Tint;
-            return true;
-        }
 
         public string FramePrefix
         {
@@ -270,10 +176,54 @@ namespace Iviz.Controllers
             }
         }
 
-        string Decorate(string jointName)
+        public IModuleData ModuleData { get; }
+
+        public void Stop()
         {
-            return $"{config.FramePrefix}{jointName}{config.FrameSuffix}";
+            node.Stop();
+
+            if (AttachedToTf)
+            {
+                AttachedToTf = false;
+            }
+
+            Robot?.Dispose();
+            Stopped?.Invoke();
+            Object.Destroy(node.gameObject);
         }
+
+        public void Reset()
+        {
+            Robot?.Dispose();
+            Robot = null;
+
+            if (!string.IsNullOrEmpty(SavedRobotName))
+            {
+                if (!string.IsNullOrEmpty(SourceParameter))
+                {
+                    config.SourceParameter = "";
+                }
+
+                TryLoadSavedRobot(SavedRobotName);
+            }
+
+            if (!string.IsNullOrEmpty(SourceParameter))
+            {
+                TryLoadFromSourceParameter(SourceParameter);
+            }
+
+            if (AttachedToTf)
+            {
+                AttachedToTf = false;
+                AttachedToTf = true;
+            }
+        }
+
+        public TFFrame Frame => node.Parent;
+
+        public string Name => Robot == null ? "[Empty]" : Robot.Name ?? "[No Name]";
+
+        public event Action Stopped;
 
         public bool TryWriteJoint(string joint, float value)
         {
@@ -301,6 +251,116 @@ namespace Iviz.Controllers
                     DetachFromTf();
                 }
             }
+        }
+
+        public bool TryLoadFromSourceParameter(string value)
+        {
+            config.SourceParameter = "";
+            Robot?.Dispose();
+            Robot = null;
+
+            if (string.IsNullOrEmpty(value))
+            {
+                config.SavedRobotName = "";
+                HelpText = "[No Robot Selected]";
+                return true;
+            }
+
+            object parameterValue;
+            try
+            {
+                parameterValue = ConnectionManager.Connection.GetParameter(value);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"SimpleRobotController: Error while loading parameter '{value}': {e}");
+                HelpText = "[Failed to Retrieve Parameter]";
+                return false;
+            }
+
+            if (parameterValue == null)
+            {
+                Debug.Log($"SimpleRobotController: Failed to retrieve parameter '{value}'");
+                HelpText = "[Parameter Not Found]";
+                return false;
+            }
+
+            if (!(parameterValue is string robotDescription))
+            {
+                Debug.Log($"SimpleRobotController: Parameter '{value}' was not string!");
+                HelpText = "[Invalid Parameter Type]";
+                return false;
+            }
+
+            if (!LoadRobotFromDescription(robotDescription))
+            {
+                return false;
+            }
+
+            config.SavedRobotName = "";
+            config.SourceParameter = value;
+            return true;
+        }
+
+        public bool TryLoadSavedRobot(string robotName)
+        {
+            config.SavedRobotName = "";
+            Robot?.Dispose();
+            Robot = null;
+
+            if (string.IsNullOrEmpty(robotName))
+            {
+                config.SourceParameter = "";
+                HelpText = "[No Robot Selected]";
+                return true;
+            }
+
+            if (!Resource.TryGetRobot(robotName, out string robotDescription))
+            {
+                // shouldn't happen!
+                Debug.Log("SimpleRobotController: Failed to load robot!");
+                HelpText = "[Failed to Load Saved Robot]";
+                return false;
+            }
+
+            config.SourceParameter = "";
+            config.SavedRobotName = robotName;
+            return LoadRobotFromDescription(robotDescription);
+        }
+
+        bool LoadRobotFromDescription(string description)
+        {
+            if (string.IsNullOrEmpty(description))
+            {
+                Debug.Log($"SimpleRobotController: Empty parameter '{description}'");
+                HelpText = "[Robot Specification is Empty]";
+                return false;
+            }
+
+            try
+            {
+                Robot = new RobotModel(description);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"SimpleRobotController: Error parsing description': {e}");
+                HelpText = "[Failed to Parse Specification]";
+                Robot = null;
+                return false;
+            }
+
+            node.name = "SimpleRobotNode:" + Name;
+            HelpText = string.IsNullOrEmpty(Robot.Name) ? "<b>[No Name]</b>" : $"<b>- {Name} -</b>";
+            AttachedToTf = AttachedToTf;
+            Visible = Visible;
+            RenderAsOcclusionOnly = RenderAsOcclusionOnly;
+            Tint = Tint;
+            return true;
+        }
+
+        string Decorate(string jointName)
+        {
+            return $"{config.FramePrefix}{jointName}{config.FrameSuffix}";
         }
 
         void DetachFromTf()
@@ -351,57 +411,6 @@ namespace Iviz.Controllers
 
             node.AttachTo(Decorate(Robot.BaseLink));
             Robot.BaseLinkObject.transform.SetParentLocal(node.transform);
-        }
-
-        public IModuleData ModuleData { get; private set; }
-
-        public SimpleRobotController(IModuleData moduleData)
-        {
-            node = SimpleDisplayNode.Instantiate("SimpleRobotNode");
-            ModuleData = moduleData;
-
-            Config = new SimpleRobotConfiguration();
-        }
-
-        public void Stop()
-        {
-            node.Stop();
-
-            if (AttachedToTf)
-            {
-                AttachedToTf = false;
-            }
-
-            Robot?.Dispose();
-            Stopped?.Invoke();
-            UnityEngine.Object.Destroy(node.gameObject);
-        }
-
-        public void Reset()
-        {
-            Robot?.Dispose();
-            Robot = null;
-
-            if (!string.IsNullOrEmpty(SavedRobotName))
-            {
-                if (!string.IsNullOrEmpty(SourceParameter))
-                {
-                    config.SourceParameter = "";
-                }
-
-                TryLoadFromSourceParameter(SavedRobotName);
-            }
-
-            if (!string.IsNullOrEmpty(SourceParameter))
-            {
-                TryLoadFromSourceParameter(SourceParameter);
-            }
-
-            if (AttachedToTf)
-            {
-                AttachedToTf = false;
-                AttachedToTf = true;
-            }
         }
     }
 }

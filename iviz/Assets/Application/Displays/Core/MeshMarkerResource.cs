@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
+    /// <summary>
+    /// Parent class for all displays that use a "mesh" (MeshFilter / MeshRenderer combo)
+    /// </summary>
     public class MeshMarkerResource : MarkerResource, ISupportsTintAndAROcclusion
     {
         [SerializeField] Texture2D texture;
@@ -12,15 +15,12 @@ namespace Iviz.Displays
         [SerializeField] bool occlusionOnly;
 
         MeshRenderer mainRenderer;
-        MeshRenderer MainRenderer =>
-            mainRenderer == null ? (mainRenderer = GetComponent<MeshRenderer>()) : mainRenderer;
-
         MeshFilter meshFilter;
-        MeshFilter MeshFilter =>
-            meshFilter == null ? (meshFilter = GetComponent<MeshFilter>()) : meshFilter;
-
         Material textureMaterial;
         Material textureMaterialAlpha;
+
+        MeshRenderer MainRenderer => mainRenderer == null ? mainRenderer = GetComponent<MeshRenderer>() : mainRenderer;
+        MeshFilter MeshFilter => meshFilter == null ? meshFilter = GetComponent<MeshFilter>() : meshFilter;
 
         public Texture2D Texture
         {
@@ -58,8 +58,6 @@ namespace Iviz.Displays
                 SetEffectiveColor();
             }
         }
-
-        Color EffectiveColor => Color * Tint;
 
         public Mesh Mesh => MeshFilter.sharedMesh;
 
@@ -121,7 +119,7 @@ namespace Iviz.Displays
                 return;
             }
 
-            var effectiveColor = EffectiveColor;
+            var effectiveColor = Color * Tint;
             if (Texture == null)
             {
                 var material = effectiveColor.a > 254f / 255f
