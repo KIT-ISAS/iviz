@@ -68,7 +68,7 @@ namespace Iviz.Displays
             set => Set(value.Count, value);
         }
 
-        static bool IsValid(PointWithColor t) => !t.HasNaN() && t.Position.sqrMagnitude < MaxPositionMagnitudeSq;
+        static bool IsValid(in PointWithColor t) => !t.HasNaN() && t.Position.sqrMagnitude < MaxPositionMagnitudeSq;
 
         /// <summary>
         /// Sets the list of points with the given enumerator.

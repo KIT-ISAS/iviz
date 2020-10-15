@@ -105,9 +105,8 @@ namespace Iviz.Displays
 
 
         public static (Vector3[], Color32[], int[], Vector2[]) CreateCapsulesFromSegments(
-            IReadOnlyCollection<float4x2> lineBuffer, float scale)
+            IEnumerable<float4x2> lineBuffer, int length, float scale)
         {
-            int length = lineBuffer.Count;
             Vector3[] points = new Vector3[10 * length];
             Color32[] colors = new Color32[10 * length];
             int[] indices = new int[48 * length];

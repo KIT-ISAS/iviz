@@ -240,7 +240,7 @@ namespace Iviz.Controllers
 
                     Color color = msg.Color.Sanitize().ToUnityColor();
                     PointWithColor[] points = new PointWithColor[msg.Points.Length];
-                    if (msg.Colors.Length == 0 || color == Color.black)
+                    if (msg.Colors.Length == 0)
                     {
                         for (int i = 0; i < points.Length; i++)
                         {
@@ -282,95 +282,124 @@ namespace Iviz.Controllers
                         break;
                     }
 
-                    List<LineWithColor> lines = new List<LineWithColor>(msg.Points.Length / 2);
+                    Color32 color32 = msg.Color.ToUnityColor32();
+                    IEnumerable<LineWithColor> lines;
                     if (msg.Colors.Length == 0)
                     {
-                        Color32 color = msg.Color.ToUnityColor32();
-                        for (int i = 0; i < msg.Points.Length / 2; i++)
+                        float colorAsFloat = PointWithColor.FloatFromColorBits(color32);
+                        IEnumerable<LineWithColor> LineEnumerator()
                         {
-                            LineWithColor line = new LineWithColor(
-                                msg.Points[2 * i + 0].Ros2Unity(), color,
-                                msg.Points[2 * i + 1].Ros2Unity(), color
-                            );
-                            if (LineResource.IsElementValid(line))
+                            for (int i = 0; i < msg.Points.Length / 2; i++)
                             {
-                                lines.Add(line);
+                                yield return new LineWithColor(
+                                    msg.Points[2 * i + 0].Ros2Unity(), colorAsFloat,
+                                    msg.Points[2 * i + 1].Ros2Unity(), colorAsFloat
+                                );
                             }
                         }
+
+                        lines = LineEnumerator();
+                    }
+                    else if (color32 == Color.white)
+                    {
+                        IEnumerable<LineWithColor> LineEnumerator()
+                        {
+                            for (int i = 0; i < msg.Points.Length / 2; i++)
+                            {
+                                yield return new LineWithColor(
+                                    msg.Points[2 * i + 0].Ros2Unity(), msg.Colors[2 * i + 0].ToUnityColor32(),
+                                    msg.Points[2 * i + 1].Ros2Unity(), msg.Colors[2 * i + 1].ToUnityColor32()
+                                );
+                            }
+                        }
+
+                        lines = LineEnumerator();
                     }
                     else
                     {
-                        Color color = msg.Color.Sanitize().ToUnityColor();
-                        for (int i = 0; i < msg.Points.Length / 2; i++)
+                        Color color = color32;
+                        IEnumerable<LineWithColor> LineEnumerator()
                         {
-                            LineWithColor line = new LineWithColor(
-                                msg.Points[2 * i + 0].Ros2Unity(), color * msg.Colors[2 * i + 0].ToUnityColor(),
-                                msg.Points[2 * i + 1].Ros2Unity(), color * msg.Colors[2 * i + 1].ToUnityColor()
-                            );
-                            if (LineResource.IsElementValid(line))
+                            for (int i = 0; i < msg.Points.Length / 2; i++)
                             {
-                                lines.Add(line);
+                                yield return new LineWithColor(
+                                    msg.Points[2 * i + 0].Ros2Unity(), color * msg.Colors[2 * i + 0].ToUnityColor(),
+                                    msg.Points[2 * i + 1].Ros2Unity(), color * msg.Colors[2 * i + 1].ToUnityColor()
+                                );
                             }
                         }
+
+                        lines = LineEnumerator();                        
                     }
 
-                    lineResource.LinesWithColor = lines;
+                    lineResource.Set(lines);
                     break;
                 }
                 case MarkerType.LineStrip:
                 {
                     LineResource lineResource = (LineResource) resource;
                     lineResource.ElementScale = Mathf.Abs((float) msg.Scale.X);
-                    if ((msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length) || msg.Color.A == 0)
+                    if ((msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length) || msg.Color.A == 0 ||
+                        msg.Color == ColorRGBA.Black)
                     {
                         Debug.Log("MarkerObject: Received linelist marker with unset or incorrect colors!");
                         lineResource.LinesWithColor = Array.Empty<LineWithColor>();
                         break;
                     }
 
-                    List<LineWithColor> lines = new List<LineWithColor>(msg.Points.Length - 1);
+                    Color32 color32 = msg.Color.ToUnityColor32();
+                    IEnumerable<LineWithColor> lines;
                     if (msg.Colors.Length == 0)
                     {
-                        Color32 color = msg.Color.ToUnityColor32();
-                        Vector3 lastPosition = msg.Points[0].Ros2Unity();
-                        foreach (Point point in msg.Points.Skip(1))
-                        {
-                            Vector3 newPosition = point.Ros2Unity();
-                            LineWithColor line = new LineWithColor(
-                                lastPosition, color,
-                                newPosition, color
-                            );
-                            if (LineResource.IsElementValid(line))
-                            {
-                                lines.Add(line);
-                            }
+                        float colorAsFloat = PointWithColor.FloatFromColorBits(color32);
 
-                            lastPosition = newPosition;
+                        IEnumerable<LineWithColor> LineEnumerator()
+                        {
+                            for (int i = 0; i < msg.Points.Length - 1; i++)
+                            {
+                                yield return new LineWithColor(
+                                    msg.Points[i].Ros2Unity(), colorAsFloat,
+                                    msg.Points[i + 1].Ros2Unity(), colorAsFloat
+                                );
+                            }
                         }
+
+                        lines = LineEnumerator();
+                    }
+                    else if (color32 == Color.white)
+                    {
+                        IEnumerable<LineWithColor> LineEnumerator()
+                        {
+                            for (int i = 0; i < msg.Points.Length - 1; i++)
+                            {
+                                yield return new LineWithColor(
+                                    msg.Points[i].Ros2Unity(), msg.Colors[i].ToUnityColor32(),
+                                    msg.Points[i + 1].Ros2Unity(), msg.Colors[i + 1].ToUnityColor32()
+                                );
+                            }
+                        }
+
+                        lines = LineEnumerator();
                     }
                     else
                     {
-                        Color color = msg.Color.Sanitize().ToUnityColor();
-                        Color32 lastColor = color * msg.Colors[0].ToUnityColor();
-                        Vector3 lastPosition = msg.Points[0].Ros2Unity();
-                        for (int i = 0; i < msg.Points.Length - 1; i++)
-                        {
-                            Color32 newColor = color * msg.Colors[i + 1].ToUnityColor();
-                            Vector3 newPosition = msg.Points[i + 1].Ros2Unity();
-                            LineWithColor line = new LineWithColor(
-                                lastPosition, lastColor,
-                                newPosition, newColor);
-                            if (LineResource.IsElementValid(line))
-                            {
-                                lines.Add(line);
-                            }
+                        Color color = color32;
 
-                            lastColor = newColor;
-                            lastPosition = newPosition;
+                        IEnumerable<LineWithColor> LineEnumerator()
+                        {
+                            for (int i = 0; i < msg.Points.Length - 1; i++)
+                            {
+                                yield return new LineWithColor(
+                                    msg.Points[i].Ros2Unity(), color * msg.Colors[i].ToUnityColor(),
+                                    msg.Points[i + 1].Ros2Unity(), color * msg.Colors[i + 1].ToUnityColor()
+                                );
+                            }
                         }
+
+                        lines = LineEnumerator();
                     }
 
-                    lineResource.LinesWithColor = lines;
+                    lineResource.Set(lines);
                     break;
                 }
                 case MarkerType.Points:
@@ -417,6 +446,7 @@ namespace Iviz.Controllers
                     break;
                 }
                 case MarkerType.TriangleList:
+                {
                     MeshTrianglesResource meshTriangles = (MeshTrianglesResource) resource;
                     if ((msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length) || msg.Color.A == 0)
                     {
@@ -426,20 +456,30 @@ namespace Iviz.Controllers
                     }
 
                     meshTriangles.Color = msg.Color.Sanitize().ToUnityColor();
+                    Vector3[] points = new Vector3[msg.Points.Length];
+                    for (int i = 0; i < points.Length; i++)
+                    {
+                        points[i] = msg.Points[i].Ros2Unity();
+                    }
+
                     if (msg.Colors.Length != 0)
                     {
-                        meshTriangles.Set(
-                            msg.Points.Select(x => x.Ros2Unity()).ToArray(),
-                            msg.Colors.Select(x => x.ToUnityColor()).ToArray()
-                        );
+                        Color[] colors = new Color[msg.Colors.Length];
+                        for (int i = 0; i < colors.Length; i++)
+                        {
+                            colors[i] = msg.Colors[i].ToUnityColor();
+                        }
+
+                        meshTriangles.Set(points, colors);
                     }
                     else
                     {
-                        meshTriangles.Set(msg.Points.Select(x => x.Ros2Unity()).ToArray());
+                        meshTriangles.Set(points);
                     }
 
                     transform.localScale = msg.Scale.Ros2Unity().Abs();
                     break;
+                }
                 case MarkerType.Image:
                     ImageResource image = (ImageResource) resource;
                     int count = msg.Colors.Length;

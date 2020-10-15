@@ -25,9 +25,7 @@ namespace Iviz.Displays
         static readonly int LinesID = Shader.PropertyToID("_Lines");
         static readonly int ScaleID = Shader.PropertyToID("_Scale");
 
-        [SerializeField] int size;
-
-        NativeArray<float4x2> lineBuffer;
+        NativeList<float4x2> lineBuffer;
         ComputeBuffer lineComputeBuffer;
 
 
@@ -52,27 +50,14 @@ namespace Iviz.Displays
         }
 
 
-        int Size
-        {
-            get => size;
-            set
-            {
-                if (value == size)
-                {
-                    return;
-                }
-
-                size = value;
-                Reserve(size * 11 / 10);
-            }
-        }
+        int Size => lineBuffer.Length;
 
         bool UseCapsuleLines => Size <= MaxSegmentsForMesh;
 
-        public static bool IsElementValid(in LineWithColor t) => !t.HasNaN() &&
-                                                                 (t.A - t.B).sqrMagnitude > MinLineWidthSq &&
-                                                                 t.A.sqrMagnitude < MaxPositionMagnitudeSq &&
-                                                                 t.B.sqrMagnitude < MaxPositionMagnitudeSq;
+        static bool IsElementValid(in LineWithColor t) => !t.HasNaN() &&
+                                                          (t.A - t.B).sqrMagnitude > MinLineWidthSq &&
+                                                          t.A.sqrMagnitude < MaxPositionMagnitudeSq &&
+                                                          t.B.sqrMagnitude < MaxPositionMagnitudeSq;
 
         /// <summary>
         /// Sets the lines with the given collection.
@@ -80,19 +65,19 @@ namespace Iviz.Displays
         public IReadOnlyCollection<LineWithColor> LinesWithColor
         {
             get => new GetHelper(lineBuffer);
-            set => Set(value.Count, value);
+            set => Set(value, value.Count);
         }
 
         /// <summary>
         /// Sets the lines with the given enumeration.
         /// </summary>
-        /// <param name="count">The number of lines, or at least an upper bound.</param>
         /// <param name="lines">The line enumerator.</param>
-        public void Set(int count, IEnumerable<LineWithColor> lines)
+        /// <param name="reserve">The expected number of lines, or 0 if unknown.</param>
+        public void Set(IEnumerable<LineWithColor> lines, int reserve = 0)
         {
-            if (count < 0)
+            if (reserve < 0)
             {
-                throw new ArgumentException("Invalid count " + count, nameof(count));
+                throw new ArgumentException("Invalid count " + reserve, nameof(reserve));
             }
 
             if (lines == null)
@@ -100,33 +85,37 @@ namespace Iviz.Displays
                 throw new ArgumentNullException(nameof(lines));
             }
 
-            Size = count;
+            if (reserve > 0)
+            {
+                lineBuffer.Capacity = Math.Max(lineBuffer.Capacity, reserve);
+            }
 
             linesNeedAlpha = false;
+            lineBuffer.Clear();
             if (UseColormap)
             {
-                int realSize = 0;
                 foreach (LineWithColor t in lines)
                 {
-                    if (!IsElementValid(t)) { continue; }
+                    if (!IsElementValid(t))
+                    {
+                        continue;
+                    }
 
-                    lineBuffer[realSize++] = t;
+                    lineBuffer.Add(t);
                 }
-
-                Size = realSize;
             }
             else
             {
-                int realSize = 0;
                 foreach (LineWithColor t in lines)
                 {
-                    if (!IsElementValid(t)) { continue; }
+                    if (!IsElementValid(t))
+                    {
+                        continue;
+                    }
 
-                    lineBuffer[realSize++] = t;
+                    lineBuffer.Add(t);
                     linesNeedAlpha |= t.ColorA.a < 255 || t.ColorB.a < 255;
                 }
-
-                Size = realSize;
             }
 
             if (UseCapsuleLines)
@@ -167,6 +156,7 @@ namespace Iviz.Displays
 
         protected override void Awake()
         {
+            lineBuffer = new NativeList<float4x2>(Allocator.Persistent);
             mesh = new Mesh {name = "Line Capsule"};
             GetComponent<MeshFilter>().sharedMesh = mesh;
             meshRenderer = GetComponent<MeshRenderer>();
@@ -220,29 +210,7 @@ namespace Iviz.Displays
                 Properties.SetBuffer(LinesID, null);
             }
 
-            if (lineBuffer.Length > 0)
-            {
-                lineBuffer.Dispose();
-            }
-        }
-
-        void Reserve(int reqDataSize)
-        {
-            if (lineBuffer.Length >= reqDataSize)
-            {
-                return;
-            }
-
-            if (lineBuffer.Length != 0)
-            {
-                lineBuffer.Dispose();
-            }
-
-            lineBuffer = new NativeArray<float4x2>(reqDataSize, Allocator.Persistent);
-
-            lineComputeBuffer?.Release();
-            lineComputeBuffer = new ComputeBuffer(lineBuffer.Length, Marshal.SizeOf<LineWithColor>());
-            Properties.SetBuffer(LinesID, lineComputeBuffer);
+            lineBuffer.Dispose();
         }
 
         protected override void UpdateProperties()
@@ -260,12 +228,14 @@ namespace Iviz.Displays
                 return;
             }
 
-            if (lineComputeBuffer == null)
+            if (lineComputeBuffer == null || lineComputeBuffer.count < Size)
             {
-                Debug.Log("Aa");
+                lineComputeBuffer?.Release();
+                lineComputeBuffer = new ComputeBuffer(lineBuffer.Length, Marshal.SizeOf<LineWithColor>());
+                Properties.SetBuffer(LinesID, lineComputeBuffer);
             }
-            
-            lineComputeBuffer.SetData(lineBuffer, 0, 0, Size);
+
+            lineComputeBuffer.SetData(lineBuffer.AsArray(), 0, 0, Size);
             CalculateBounds();
 
             enabled = true;
@@ -283,7 +253,7 @@ namespace Iviz.Displays
             }
 
             var (points, colors, indices, coords) =
-                LineUtils.CreateCapsulesFromSegments(lineBuffer.AsReadOnlyList(), ElementScale);
+                LineUtils.CreateCapsulesFromSegments(lineBuffer.AsArray(), lineBuffer.Length, ElementScale);
 
             mesh.Clear();
             mesh.vertices = points;
@@ -347,7 +317,7 @@ namespace Iviz.Displays
             if (lineBuffer.Length != 0)
             {
                 lineComputeBuffer = new ComputeBuffer(lineBuffer.Length, Marshal.SizeOf<LineWithColor>());
-                lineComputeBuffer.SetData(lineBuffer, 0, 0, Size);
+                lineComputeBuffer.SetData(lineBuffer.AsArray(), 0, 0, Size);
                 Properties.SetBuffer(LinesID, lineComputeBuffer);
             }
 
@@ -359,16 +329,11 @@ namespace Iviz.Displays
         public override void Suspend()
         {
             base.Suspend();
-            Size = 0;
             mesh.Clear();
             meshRenderer.enabled = false;
 
-            Debug.Log(lineBuffer.Length);
-            if (lineBuffer.Length != 0)
-            {
-                lineBuffer.Dispose();
-            }            
-            
+            lineBuffer.Clear();
+
             lineComputeBuffer?.Release();
             lineComputeBuffer = null;
             Properties.SetBuffer(LinesID, null);

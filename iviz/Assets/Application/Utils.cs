@@ -175,9 +175,10 @@ namespace Iviz
             return float.IsNaN(f) ? 0 : Mathf.Max(Mathf.Min(f, 1), 0);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Color32 ToUnityColor32(this ColorRGBA p)
         {
-            return p.ToUnityColor(); // ColorRGBA -> Color -> Color32
+            return (Color32) p.ToUnityColor();
             // note: Color -> Color32 sanitizes implicitly 
         }
 

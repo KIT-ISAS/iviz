@@ -104,19 +104,22 @@ namespace Iviz.Displays
 
             lastMeasurement = newMeasurement;
 
-            float scale = 255f / measurements.Count;
-
-            Color32 AdjustColor(int index)
+            IEnumerable<LineWithColor> LineEnumerator()
             {
-                return new Color32(Color.r, Color.g, Color.b, (byte) (255 - index * scale));
+                int i = 1;
+                Color32 colorA = Color;
+                float scale = 255f / measurements.Count;
+
+                foreach (LineWithColor line in measurements)
+                {
+                    Color32 colorB = new Color32(Color.r, Color.g, Color.b, (byte) (255 - i * scale));
+                    yield return new LineWithColor(line.A, colorA, line.B, colorB);
+                    colorA = colorB;
+                    i++;
+                }
             }
 
-            LineWithColor AdjustLineColor(LineWithColor line, int i)
-            {
-                return new LineWithColor(line.A, AdjustColor(i), line.B, AdjustColor(i + 1));
-            }
-
-            resource.Set(measurements.Count, measurements.Zip(Enumerable.Range(0, measurements.Count), AdjustLineColor));
+            resource.Set(LineEnumerator());
         }
 
         public override void Suspend()
