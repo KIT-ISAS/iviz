@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Iviz.Controllers
 {
@@ -93,9 +92,6 @@ namespace Iviz.Controllers
                 return Pose.identity;
             }
 
-            //Debug.Log("1) [" + (sortedPoses[0].Timestamp - ts).TotalMilliseconds + " " +
-            //          (sortedPoses[n - 1].Timestamp - ts).TotalMilliseconds + "]");
-
             TimeSpan tsLatest = sortedPoses[n - 1].Timestamp;
             if (tsNew >= tsLatest)
             {
@@ -140,17 +136,12 @@ namespace Iviz.Controllers
                 TimeSpan b = sortedPoses[i + 1].Timestamp;
                 double t = (tsNew - a).TotalMilliseconds / (b - a).TotalMilliseconds;
 
-                //Debug.Log("2) [" + (sortedPoses[i].Timestamp - ts).TotalMilliseconds + " " +
-                //          (sortedPoses[i + 1].Timestamp - ts).TotalMilliseconds + "] -> " + t);
-
-
                 Pose pA = sortedPoses[i].Pose;
                 Pose pB = sortedPoses[i + 1].Pose;
                 //return (t > 0.5f) ? pB : pA;
                 return pA.Lerp(pB, (float) t);
             }
 
-            //Debug.Log("OUT!");
             return sortedPoses[0].Pose; // shouldn't happen
         }
 
@@ -162,6 +153,5 @@ namespace Iviz.Controllers
         }
 
         public int Count => poses.Count;
-        public bool Empty => Count == 0;
     }
 }

@@ -1,14 +1,11 @@
 ﻿using Iviz.Resources;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
 using Iviz.Controllers;
 using Iviz.Displays;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UnityEngine.XR.WSA;
 
 // ReSharper disable ConditionIsAlwaysTrueOrFalse
 // ReSharper disable HeuristicUnreachableCode
@@ -110,10 +107,6 @@ namespace Iviz.App
             }
         }
         
-        //public HashSet<Canvas> Canvases { get; } = new HashSet<Canvas>();
-        //public HashSet<GraphicRaycaster> Raycasters { get; } = new HashSet<GraphicRaycaster>();
-        //public HashSet<IBlocksPointer> GuiPointerBlockers { get; } = new HashSet<IBlocksPointer>();
-
         void Awake()
         {
             Instance = this;

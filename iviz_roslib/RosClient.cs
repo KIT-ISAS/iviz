@@ -63,23 +63,15 @@ namespace Iviz.Roslib
         public UnreachableUriException(string message, Exception innerException) : base(message, innerException)
         {
         }
-
-        public UnreachableUriException()
-        {
-        }
     }
 
-    public class XmlRpcException : Exception
+    public class XmlCallException : Exception
     {
-        public XmlRpcException(string message) : base(message)
+        public XmlCallException(string message) : base(message)
         {
         }
 
-        public XmlRpcException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-
-        public XmlRpcException()
+        public XmlCallException(string message, Exception innerException) : base(message, innerException)
         {
         }
     }
@@ -267,8 +259,7 @@ namespace Iviz.Roslib
                 // Do a simple ping to the master. This will tell us whether the master is reachable.
                 Master.GetUri();
             }
-            catch (Exception e) when
-                (e is SocketException || e is TimeoutException || e is AggregateException || e is IOException)
+            catch (Exception e)
             {
                 listener.Dispose();
                 throw new ConnectionException($"Failed to contact the master URI '{masterUri}'", e);
@@ -282,11 +273,10 @@ namespace Iviz.Roslib
             {
                 response = CreateTalker(CallerUri).GetPid();
             }
-            catch (Exception e) when
-                (e is SocketException || e is TimeoutException || e is AggregateException || e is IOException)
+            catch (Exception e) 
             {
                 listener.Dispose();
-                throw new UnreachableUriException($"My own uri '{CallerUri}' does not appear to be reachable!");
+                throw new UnreachableUriException($"My own uri '{CallerUri}' does not appear to be reachable!", e);
             }
 
             if (!response.IsValid)
@@ -398,11 +388,17 @@ namespace Iviz.Roslib
 
             static bool IsAlpha(char c) => ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
 
-            if (!IsAlpha(name[0]) && name[0] != '/' && name[0] != '~') { return false; }
+            if (!IsAlpha(name[0]) && name[0] != '/' && name[0] != '~')
+            {
+                return false;
+            }
 
             for (int i = 1; i < name.Length; i++)
             {
-                if (!IsAlpha(name[i]) && !char.IsDigit(name[i]) && name[i] != '_' && name[i] != '/') { return false; }
+                if (!IsAlpha(name[i]) && !char.IsDigit(name[i]) && name[i] != '_' && name[i] != '/')
+                {
+                    return false;
+                }
             }
 
             return true;
@@ -439,8 +435,7 @@ namespace Iviz.Roslib
                     .Where(tuple => tuple.Members.Contains(CallerId))
                     .ForEach(tuple => Master.UnregisterPublisher(tuple.Topic));
             }
-            catch (Exception e) when
-                (e is SocketException || e is TimeoutException || e is AggregateException || e is IOException)
+            catch (Exception e) 
             {
                 throw new ConnectionException($"Failed to contact the master URI '{MasterUri}'", e);
             }
@@ -469,15 +464,10 @@ namespace Iviz.Roslib
             {
                 await Task.WhenAll(tasks).Caf();
             }
-            catch (Exception e) when
-                (e is SocketException || e is TimeoutException || e is IOException)
+            catch (Exception e)
             {
                 throw new ConnectionException($"Failed to contact the master URI '{MasterUri}'", e);
             }
-        }
-
-        public void Cleanup()
-        {
         }
 
         internal NodeClient CreateTalker(Uri otherUri)
@@ -498,7 +488,7 @@ namespace Iviz.Roslib
             if (!masterResponse.IsValid)
             {
                 subscribersByTopic.TryRemove(topic, out _);
-                throw new XmlRpcException(
+                throw new XmlCallException(
                     $"Error registering publisher for topic {topic}: {masterResponse.StatusMessage}");
             }
 
@@ -521,7 +511,7 @@ namespace Iviz.Roslib
             if (!masterResponse.IsValid)
             {
                 subscribersByTopic.TryRemove(topic, out _);
-                throw new XmlRpcException(
+                throw new XmlCallException(
                     $"Error registering publisher for topic {topic}: {masterResponse.StatusMessage}");
             }
 
@@ -889,7 +879,7 @@ namespace Iviz.Roslib
                     .ToArray().AsReadOnly();
             }
 
-            throw new XmlRpcException("Failed to retrieve topics: " + response.StatusMessage);
+            throw new XmlCallException("Failed to retrieve topics: " + response.StatusMessage);
         }
 
         /// <summary>
@@ -907,7 +897,7 @@ namespace Iviz.Roslib
                     .ToArray().AsReadOnly();
             }
 
-            throw new XmlRpcException("Failed to retrieve topics: " + response.StatusMessage);
+            throw new XmlCallException("Failed to retrieve topics: " + response.StatusMessage);
         }
 
         /// <summary>
@@ -929,7 +919,7 @@ namespace Iviz.Roslib
                 return new SystemState(response.Publishers, response.Subscribers, response.Services);
             }
 
-            throw new XmlRpcException("Failed to retrieve system state: " + response.StatusMessage);
+            throw new XmlCallException("Failed to retrieve system state: " + response.StatusMessage);
         }
 
         /// <summary>
@@ -945,7 +935,7 @@ namespace Iviz.Roslib
                 return new SystemState(response.Publishers, response.Subscribers, response.Services);
             }
 
-            throw new XmlRpcException("Failed to retrieve system state: " + response.StatusMessage);
+            throw new XmlCallException("Failed to retrieve system state: " + response.StatusMessage);
         }
 
         /// <summary>
@@ -1011,6 +1001,8 @@ namespace Iviz.Roslib
         /// </summary>
         public void Close()
         {
+            listener.Dispose();
+            
             RosPublisher[] publishers = publishersByTopic.Values.ToArray();
             publishersByTopic.Clear();
 
@@ -1071,9 +1063,6 @@ namespace Iviz.Roslib
                     Logger.LogDebug($"Error closing subscriber {serviceSender}: {e}");
                 }
             });
-
-
-            listener.Dispose();
         }
 
         /// <summary>
@@ -1081,6 +1070,8 @@ namespace Iviz.Roslib
         /// </summary>
         public async Task CloseAsync()
         {
+            listener.Dispose();
+            
             var publishers = publishersByTopic.Values.ToArray();
             publishersByTopic.Clear();
 
@@ -1123,8 +1114,6 @@ namespace Iviz.Roslib
             }));
 
             await Task.WhenAll(tasks).Caf();
-
-            listener.Dispose();
         }
 
         public SubscriberState GetSubscriberStatistics()
@@ -1219,7 +1208,7 @@ namespace Iviz.Roslib
             LookupServiceResponse response = Master.LookupService(serviceName);
             if (!response.IsValid)
             {
-                throw new XmlRpcException("Failed to call service: " + response.StatusMessage);
+                throw new XmlCallException("Failed to call service: " + response.StatusMessage);
             }
 
             Uri serviceUri = response.ServiceUrl;
@@ -1242,7 +1231,7 @@ namespace Iviz.Roslib
                     return result;
                 }
             }
-            catch (Exception e) when (e is SocketException)
+            catch (Exception e)
             {
                 throw new TimeoutException($"Service uri '{serviceUri}' is not reachable", e);
             }
@@ -1260,7 +1249,7 @@ namespace Iviz.Roslib
             LookupServiceResponse response = await Master.LookupServiceAsync(serviceName);
             if (!response.IsValid)
             {
-                throw new XmlRpcException("Failed to call service: " + response.StatusMessage);
+                throw new XmlCallException("Failed to call service: " + response.StatusMessage);
             }
 
             Uri serviceUri = response.ServiceUrl;
@@ -1272,7 +1261,7 @@ namespace Iviz.Roslib
                 await serviceReceiver.StartAsync();
                 return await serviceReceiver.ExecuteAsync(service);
             }
-            catch (Exception e) when (e is SocketException)
+            catch (Exception e)
             {
                 throw new TimeoutException($"Service uri '{serviceUri}' is not reachable", e);
             }

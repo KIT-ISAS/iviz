@@ -9,10 +9,13 @@ namespace Iviz.Msgs
     [AttributeUsage(AttributeTargets.Field)]
     public class PreserveAttribute : Attribute { }
 
+    /// <summary>
+    /// Establishes that the class can be (de-)serialized as a ROS binary stream. 
+    /// </summary>
     public interface ISerializable
     {
         /// <summary>
-        /// Fills this message with information read from the given buffer.
+        /// Deserializes a new message from information read from the given buffer.
         /// </summary>
         /// <param name="b">
         /// Buffer object.
@@ -20,7 +23,7 @@ namespace Iviz.Msgs
         ISerializable RosDeserialize(Buffer b);
 
         /// <summary>
-        /// Fills the buffer with the information from this message.
+        /// Serializes this message into the buffer.
         /// </summary>
         /// <param name="b">
         /// Buffer object.

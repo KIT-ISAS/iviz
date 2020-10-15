@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Iviz.Resources;
-using JetBrains.Annotations;
 using Unity.Mathematics;
 using UnityEngine;
 

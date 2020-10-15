@@ -1,11 +1,16 @@
 ﻿using UnityEngine;
 using System.Linq;
 using System;
+using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Displays;
+using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Resources;
+using Logger = Iviz.Logger;
+using Pose = UnityEngine.Pose;
+using Vector3 = UnityEngine.Vector3;
 
 #if UNITY_WSA
 using Microsoft.MixedReality.Toolkit.Input;
@@ -277,27 +282,35 @@ namespace Iviz.Controllers
                         break;
                     }
 
-                    LineWithColor[] lines = new LineWithColor[msg.Points.Length / 2];
+                    List<LineWithColor> lines = new List<LineWithColor>(msg.Points.Length / 2);
                     if (msg.Colors.Length == 0)
                     {
                         Color32 color = msg.Color.ToUnityColor32();
-                        for (int i = 0; i < lines.Length; i++)
+                        for (int i = 0; i < msg.Points.Length / 2; i++)
                         {
-                            lines[i] = new LineWithColor(
+                            LineWithColor line = new LineWithColor(
                                 msg.Points[2 * i + 0].Ros2Unity(), color,
                                 msg.Points[2 * i + 1].Ros2Unity(), color
                             );
+                            if (LineResource.IsElementValid(line))
+                            {
+                                lines.Add(line);
+                            }
                         }
                     }
                     else
                     {
                         Color color = msg.Color.Sanitize().ToUnityColor();
-                        for (int i = 0; i < lines.Length; i++)
+                        for (int i = 0; i < msg.Points.Length / 2; i++)
                         {
-                            lines[i] = new LineWithColor(
+                            LineWithColor line = new LineWithColor(
                                 msg.Points[2 * i + 0].Ros2Unity(), color * msg.Colors[2 * i + 0].ToUnityColor(),
                                 msg.Points[2 * i + 1].Ros2Unity(), color * msg.Colors[2 * i + 1].ToUnityColor()
                             );
+                            if (LineResource.IsElementValid(line))
+                            {
+                                lines.Add(line);
+                            }
                         }
                     }
 
@@ -315,27 +328,45 @@ namespace Iviz.Controllers
                         break;
                     }
 
-                    LineWithColor[] lines = new LineWithColor[msg.Points.Length - 1];
+                    List<LineWithColor> lines = new List<LineWithColor>(msg.Points.Length - 1);
                     if (msg.Colors.Length == 0)
                     {
                         Color32 color = msg.Color.ToUnityColor32();
-                        for (int i = 0; i < lines.Length; i++)
+                        Vector3 lastPosition = msg.Points[0].Ros2Unity();
+                        foreach (Point point in msg.Points.Skip(1))
                         {
-                            lines[i] = new LineWithColor(
-                                msg.Points[i + 0].Ros2Unity(), color,
-                                msg.Points[i + 1].Ros2Unity(), color
+                            Vector3 newPosition = point.Ros2Unity();
+                            LineWithColor line = new LineWithColor(
+                                lastPosition, color,
+                                newPosition, color
                             );
+                            if (LineResource.IsElementValid(line))
+                            {
+                                lines.Add(line);
+                            }
+
+                            lastPosition = newPosition;
                         }
                     }
                     else
                     {
                         Color color = msg.Color.Sanitize().ToUnityColor();
-                        for (int i = 0; i < lines.Length; i++)
+                        Color32 lastColor = color * msg.Colors[0].ToUnityColor();
+                        Vector3 lastPosition = msg.Points[0].Ros2Unity();
+                        for (int i = 0; i < msg.Points.Length - 1; i++)
                         {
-                            lines[i] = new LineWithColor(
-                                msg.Points[i + 0].Ros2Unity(), color * msg.Colors[i + 0].ToUnityColor(),
-                                msg.Points[i + 1].Ros2Unity(), color * msg.Colors[i + 1].ToUnityColor()
-                            );
+                            Color32 newColor = color * msg.Colors[i + 1].ToUnityColor();
+                            Vector3 newPosition = msg.Points[i + 1].Ros2Unity();
+                            LineWithColor line = new LineWithColor(
+                                lastPosition, lastColor,
+                                newPosition, newColor);
+                            if (LineResource.IsElementValid(line))
+                            {
+                                lines.Add(line);
+                            }
+
+                            lastColor = newColor;
+                            lastPosition = newPosition;
                         }
                     }
 
@@ -502,7 +533,9 @@ namespace Iviz.Controllers
                         return null;
                     }
 
-                    return Resource.TryGetResource(uri, out Info<GameObject> info) ? info : null;
+                    return Resource.TryGetResource(uri, out Info<GameObject> info, ConnectionManager.Connection)
+                        ? info
+                        : null;
                 case MarkerType.CubeList:
                 case MarkerType.SphereList:
                     return Resource.Displays.MeshList;

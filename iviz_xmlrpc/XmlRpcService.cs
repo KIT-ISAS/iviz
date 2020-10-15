@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -12,16 +13,38 @@ using Iviz.Msgs;
 
 namespace Iviz.XmlRpc
 {
-    public class FaultException : Exception
+    public class XmlRpcException : Exception
+    {
+        protected XmlRpcException(string message) : base(message)
+        {
+        }
+
+        protected XmlRpcException(string message, Exception inner) : base(message, inner)
+        {
+        }
+    }
+
+    public class FaultException : XmlRpcException
     {
         public FaultException(string message) : base(message)
         {
         }
     }
 
-    public class ParseException : Exception
+    public class ParseException : XmlRpcException
     {
         public ParseException(string message) : base(message)
+        {
+        }
+    }
+
+    public class RpcSocketException : XmlRpcException
+    {
+        public RpcSocketException(string message) : base(message)
+        {
+        }
+
+        public RpcSocketException(string message, Exception e) : base(message, e)
         {
         }
     }

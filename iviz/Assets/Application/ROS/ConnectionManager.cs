@@ -1,12 +1,15 @@
 ﻿//#define PUBLISH_LOG
 
-using Iviz.Msgs;
-using Iviz.Msgs.RosgraphMsgs;
-using Iviz.Roslib;
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
+using System.Threading;
+using System.Threading.Tasks;
+using Iviz.Displays;
+using Iviz.Msgs;
+using Iviz.Roslib;
 using UnityEngine;
+using Logger = Iviz.Logger;
 
 namespace Iviz.Controllers
 {
@@ -14,7 +17,7 @@ namespace Iviz.Controllers
     {
         Disconnected,
         Connecting,
-        Connected,
+        Connected
     }
 
     public class ConnectionManager : MonoBehaviour
@@ -77,23 +80,44 @@ namespace Iviz.Controllers
         public static bool IsConnected => ConnectionState == ConnectionState.Connected;
 
         public static void Subscribe<T>(RosListener<T> listener) where T : IMessage, new()
-            => Connection.Subscribe(listener);
+        {
+            Connection.Subscribe(listener);
+        }
 
-        public static void Unsubscribe(RosListener subscriber) => Connection.Unsubscribe(subscriber);
+        public static void Unsubscribe(RosListener subscriber)
+        {
+            Connection.Unsubscribe(subscriber);
+        }
 
         public static void Advertise<T>(RosSender<T> advertiser) where T : IMessage
-            => Connection.Advertise(advertiser);
+        {
+            Connection.Advertise(advertiser);
+        }
 
-        public static void Unadvertise(RosSender advertiser) => Connection.Unadvertise(advertiser);
-        public static void Publish(RosSender advertiser, IMessage msg) => Connection.Publish(advertiser, msg);
+        public static void Unadvertise(RosSender advertiser)
+        {
+            Connection.Unadvertise(advertiser);
+        }
+
+        public static void Publish(RosSender advertiser, IMessage msg)
+        {
+            Connection.Publish(advertiser, msg);
+        }
 
         public static void AdvertiseService<T>(string service, Action<T> callback) where T : IService, new()
-            => Connection.AdvertiseService(service, callback);
+        {
+            Connection.AdvertiseService(service, callback);
+        }
 
-        public static ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics() =>
-            Connection.GetSystemPublishedTopics();
+        public static ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics()
+        {
+            return Connection.GetSystemPublishedTopics();
+        }
 
-        public static ReadOnlyCollection<string> GetSystemParameterList() => Connection.GetSystemParameterList();
+        public static ReadOnlyCollection<string> GetSystemParameterList()
+        {
+            return Connection.GetSystemParameterList();
+        }
 
         public static void ReportBandwidthUp(int size)
         {

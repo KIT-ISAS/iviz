@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace Iviz.Controllers
 {
-    public abstract class RosConnection
+    public abstract class RosConnection : IExternalServiceProvider
     {
         const int TaskWaitTimeInMs = 2000;
 

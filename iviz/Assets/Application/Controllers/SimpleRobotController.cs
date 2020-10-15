@@ -339,7 +339,7 @@ namespace Iviz.Controllers
 
             try
             {
-                Robot = new RobotModel(description);
+                Robot = new RobotModel(description, ConnectionManager.Connection);
             }
             catch (Exception e)
             {

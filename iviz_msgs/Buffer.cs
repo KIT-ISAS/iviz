@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Iviz.Msgs
 {
@@ -18,11 +19,13 @@ namespace Iviz.Msgs
             this.end = end;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         static void Memcpy(void* dst, void* src, uint size)
         {
             System.Buffer.MemoryCopy(src, dst, size, size);
         }
-        
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         void AssertInRange(uint off)
         {
             if (ptr + off > end)
@@ -30,7 +33,8 @@ namespace Iviz.Msgs
                 throw new ArgumentOutOfRangeException(nameof(off));
             }
         }
-        
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         static void AssertSize<T>(ICollection<T> array, uint size)
         {
             if (array is null)
@@ -45,6 +49,7 @@ namespace Iviz.Msgs
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         internal string DeserializeString()
         {
             AssertInRange(4);
@@ -61,6 +66,7 @@ namespace Iviz.Msgs
             return val;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         internal string[] DeserializeStringArray(uint count = 0)
         {
             if (count == 0)
@@ -83,6 +89,7 @@ namespace Iviz.Msgs
             return val;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         internal T Deserialize<T>() where T : unmanaged
         {
             AssertInRange((uint) sizeof(T));
@@ -91,6 +98,7 @@ namespace Iviz.Msgs
             return val;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         internal void Deserialize<T>(out T t) where T : unmanaged
         {
             AssertInRange((uint) sizeof(T));
@@ -98,19 +106,18 @@ namespace Iviz.Msgs
             ptr += sizeof(T);
         }
 
-        internal T[] DeserializeStructArray<T>(uint count = 0) where T : unmanaged
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+        internal T[] DeserializeStructArray<T>() where T : unmanaged
         {
-            if (count == 0)
-            {
-                AssertInRange(4);
-                count = *(uint*) ptr;
-                ptr += 4;
-                if (count == 0)
-                {
-                    return Array.Empty<T>();
-                }
-            }
+            AssertInRange(4);
+            uint count = *(uint*) ptr;
+            ptr += 4;
+            return count == 0 ? Array.Empty<T>() : DeserializeStructArray<T>(count);
+        }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+        internal T[] DeserializeStructArray<T>(uint count) where T : unmanaged
+        {
             AssertInRange(count * (uint) sizeof(T));
             T[] val = new T[count];
             fixed (T* bPtr = val)
@@ -123,22 +130,22 @@ namespace Iviz.Msgs
             return val;
         }
 
-        internal T[] DeserializeArray<T>(uint count = 0) where T : IMessage, new()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+        internal T[] DeserializeArray<T>() where T : IMessage, new()
         {
-            if (count == 0)
-            {
-                AssertInRange(4);
-                count = *(uint*) ptr;
-                ptr += 4;
-                if (count == 0)
-                {
-                    return Array.Empty<T>();
-                }
-            }
+            AssertInRange(4);
+            uint count = *(uint*) ptr;
+            ptr += 4;
+            return count == 0 ? Array.Empty<T>() : new T[count];
+        }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+        internal T[] DeserializeArray<T>(uint count) where T : IMessage, new()
+        {
             return new T[count];
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         internal void Serialize<T>(in T val) where T : unmanaged
         {
             AssertInRange((uint) sizeof(T));
@@ -146,13 +153,14 @@ namespace Iviz.Msgs
             ptr += sizeof(T);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         internal void Serialize(string val)
         {
             uint count = (uint) BuiltIns.UTF8.GetByteCount(val);
             AssertInRange(4 + count);
             *(uint*) ptr = count;
             ptr += 4;
-            if (count == 0) return;
+            if (count == 0) {return;}
             fixed (char* bPtr = val)
             {
                 BuiltIns.UTF8.GetBytes(bPtr, val.Length, ptr, (int) count);
@@ -160,11 +168,13 @@ namespace Iviz.Msgs
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         internal void Serialize(ISerializable val)
         {
             val.RosSerialize(this);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         internal void SerializeArray(IList<string> val, uint count)
         {
             if (count == 0)
@@ -184,6 +194,7 @@ namespace Iviz.Msgs
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         internal void SerializeStructArray<T>(T[] val, uint count) where T : unmanaged
         {
             if (count == 0)
@@ -205,8 +216,8 @@ namespace Iviz.Msgs
                 ptr += size;
             }
         }
-
-
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         internal void SerializeArray<T>(IList<T> val, uint count) where T : IMessage
         {
             if (count == 0)

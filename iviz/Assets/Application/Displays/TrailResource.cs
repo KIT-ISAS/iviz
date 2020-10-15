@@ -119,11 +119,6 @@ namespace Iviz.Displays
             resource.Set(measurements.Count, measurements.Zip(Enumerable.Range(0, measurements.Count), AdjustLineColor));
         }
 
-        public void SplitForRecycle()
-        {
-            ResourcePool.DisposeDisplay(resource);
-        }
-
         public override void Suspend()
         {
             base.Suspend();

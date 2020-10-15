@@ -3,12 +3,11 @@ using Iviz.Roslib;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Iviz.Displays;
 using UnityEngine;
+using Logger = Iviz.Logger;
 
 namespace Iviz.Controllers
 {
@@ -284,7 +283,7 @@ namespace Iviz.Controllers
                 return true;
             }
             catch (Exception e) when
-                (e is UnreachableUriException || e is ConnectionException || e is XmlRpcException)
+                (e is UnreachableUriException || e is ConnectionException || e is XmlCallException)
             {
                 Logger.Internal("Error:", e);
                 if (RosServerManager.IsActive && RosServerManager.MasterUri == MasterUri)
@@ -332,7 +331,14 @@ namespace Iviz.Controllers
                     Logger.Internal("Disconnecting...");
                     if (client != null)
                     {
-                        await client.CloseAsync();
+                        try
+                        {
+                            await client.CloseAsync();
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.Log(e);
+                        }
                     }
 
                     client = null;

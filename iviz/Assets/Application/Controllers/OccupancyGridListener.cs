@@ -6,6 +6,7 @@ using Iviz.Msgs.NavMsgs;
 using Iviz.Resources;
 using Iviz.Roslib;
 using UnityEngine;
+using Logger = Iviz.Logger;
 
 namespace Iviz.Controllers
 {

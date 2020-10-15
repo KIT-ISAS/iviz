@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using Iviz.Roslib;
 using Iviz.Resources;
 using UnityEngine;
+using Logger = Iviz.Logger;
 
 namespace Iviz.Controllers
 {

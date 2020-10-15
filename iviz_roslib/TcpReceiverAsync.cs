@@ -16,7 +16,7 @@ namespace Iviz.Roslib
     {
         const int BufferSizeIncrease = 1024;
         const int MaxConnectionRetries = 5;
-        
+
         readonly Action<IMessage> callback;
         readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
         readonly TopicInfo topicInfo;
@@ -86,7 +86,7 @@ namespace Iviz.Roslib
                 $"type={topicInfo.Type}",
                 $"tcp_nodelay={(RequestNoDelay ? "1" : "0")}"
             };
-            int totalLength = 4 * contents.Length + contents.Sum(entry => entry.Length);    
+            int totalLength = 4 * contents.Length + contents.Sum(entry => entry.Length);
 
             byte[] array = new byte[totalLength + 4];
             using (BinaryWriter writer = new BinaryWriter(new MemoryStream(array)))
@@ -183,57 +183,101 @@ namespace Iviz.Roslib
             await runLoopTask;
         }
 
+        async Task<TcpClient> TryToConnect(int timeoutInMs)
+        {
+            TcpClient client = new TcpClient();
+            try
+            {
+                Task connectionTask = client.ConnectAsync(RemoteEndpoint.Hostname, RemoteEndpoint.Port);
+                if (!await connectionTask.WaitFor(timeoutInMs) ||
+                    !connectionTask.IsCompleted ||
+                    client.Client?.LocalEndPoint == null)
+                {
+                    client.Dispose();
+                    return null;
+                }
+            }
+            catch (Exception e) when (e is IOException || e is SocketException)
+            {
+                client.Dispose();
+                return null;
+            }
+            catch (Exception e)
+            {
+                Logger.Log($"{this}: " + e);
+                client.Dispose();
+                return null;
+            }
+
+            return client;
+        }
+
+        async Task<TcpClient> KeepReconnecting(int timeoutInMs)
+        {
+            var client = await TryToConnect(timeoutInMs);
+            if (client != null)
+            {
+                return client;
+            }
+
+            Logger.Log($"{this}: Connection round 1 failed!");
+            
+            for (int i = 0; i < 5 && keepRunning; i++)
+            {
+                await Task.Delay(1000);
+                client = await TryToConnect(timeoutInMs);
+                if (client != null)
+                {
+                    return client;
+                }
+            }
+
+            Logger.Log($"{this}: Connection round 2 failed!");
+
+            for (int i = 0; i < 12 * 5 && keepRunning; i++)
+            {
+                await Task.Delay(5000);
+                client = await TryToConnect(timeoutInMs);
+                if (client != null)
+                {
+                    return client;
+                }
+            }
+
+            return null;
+        }
+
         async Task StartSession(int timeoutInMs)
         {
-            for (int round = 0; round < MaxConnectionRetries && keepRunning; round++)
+            while (keepRunning)
             {
-                using (tcpClient = new TcpClient())
+                tcpClient = await KeepReconnecting(timeoutInMs);
+                if (tcpClient == null)
                 {
-                    try
+                    Logger.Log($"{this}: Ran out of retries. Leaving!");
+                    break;
+                }
+
+                Endpoint = new Endpoint((IPEndPoint) tcpClient.Client.LocalEndPoint);
+                stream = tcpClient.GetStream();
+
+                try
+                {
+                    using (tcpClient)
                     {
-                        Task connectionTask = tcpClient.ConnectAsync(RemoteEndpoint.Hostname, RemoteEndpoint.Port);
-                        if (!await connectionTask.WaitFor(timeoutInMs) || !connectionTask.IsCompleted)
-                        {
-                            Logger.LogDebug($"{this}: Connection timed out! Retrying... " +
-                                            $"({round + 1}/{MaxConnectionRetries})");
-                            continue;
-                        }
-
-                        if (tcpClient.Client?.LocalEndPoint == null)
-                        {
-                            Logger.LogDebug($"{this}: Connection failed! Retrying... " +
-                                            $"({round + 1}/{MaxConnectionRetries})");
-                            continue;
-                        }
-
-                        Endpoint = new Endpoint((IPEndPoint) tcpClient.Client.LocalEndPoint);
-                        stream = tcpClient.GetStream();
-                        round = 0; // reset if successful
-
                         await ProcessSession();
                     }
-                    catch (ObjectDisposedException)
-                    {
-                        Logger.LogDebug($"{this}: Leaving thread"); // expected
-                    }
-                    catch (Exception e) when
-                    (e is ConnectionException || e is IOException || e is AggregateException ||
-                     e is SocketException || e is TimeoutException)
-                    {
-                        Logger.LogDebug($"{this}: " + e);
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Log($"{this}: " + e);
-                    }
                 }
-
-                if (keepRunning)
+                catch (ObjectDisposedException) { }
+                catch (Exception e) when
+                    (e is IOException || e is SocketException || e is TimeoutException)
                 {
-                    await Task.Delay(1000);
+                    Logger.LogDebug($"{this}: " + e);
                 }
-
-                Logger.LogDebug($"{this}: Connection closed. Retrying... ({round + 1}/{MaxConnectionRetries})");
+                catch (Exception e)
+                {
+                    Logger.Log($"{this}: " + e);
+                }
             }
 
             tcpClient = null;

@@ -5,8 +5,8 @@ using System.Runtime.Serialization;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Roslib;
-using JetBrains.Annotations;
 using UnityEngine;
+using Logger = Iviz.Logger;
 
 namespace Iviz.Controllers
 {

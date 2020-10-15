@@ -14,7 +14,6 @@ namespace Iviz.XmlRpc
 
         public HttpListenerContext(TcpClient client)
         {
-            Logger.Log("-- In callback!");
             this.client = client ?? throw new ArgumentNullException(nameof(client));
         }
 
