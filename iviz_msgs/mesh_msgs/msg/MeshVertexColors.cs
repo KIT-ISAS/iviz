@@ -23,19 +23,18 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal MeshVertexColors(Buffer b)
+        internal MeshVertexColors(ref Buffer b)
         {
             VertexColors = b.DeserializeStructArray<StdMsgs.ColorRGBA>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new MeshVertexColors(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new MeshVertexColors(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeStructArray(VertexColors, 0);
         }
         

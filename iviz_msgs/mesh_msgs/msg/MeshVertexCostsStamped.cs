@@ -32,26 +32,25 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal MeshVertexCostsStamped(Buffer b)
+        internal MeshVertexCostsStamped(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
+            Header = new StdMsgs.Header(ref b);
             Uuid = b.DeserializeString();
             Type = b.DeserializeString();
-            MeshVertexCosts = new MeshMsgs.MeshVertexCosts(b);
+            MeshVertexCosts = new MeshMsgs.MeshVertexCosts(ref b);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new MeshVertexCostsStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new MeshVertexCostsStamped(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
+            Header.RosSerialize(ref b);
             b.Serialize(Uuid);
             b.Serialize(Type);
-            MeshVertexCosts.RosSerialize(b);
+            MeshVertexCosts.RosSerialize(ref b);
         }
         
         public void RosValidate()

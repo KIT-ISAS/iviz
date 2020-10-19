@@ -8,6 +8,7 @@ using Iviz.Displays;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
 using Iviz.Roslib;
+using Unity.Mathematics;
 using UnityEngine;
 using Logger = Iviz.Logger;
 
@@ -32,6 +33,8 @@ namespace Iviz.Controllers
 
     public sealed class PointCloudListener : ListenerController
     {
+        static readonly PointField EmptyPointField = new PointField();
+
         readonly DisplayNode node;
         readonly PointListResource pointCloud;
 
@@ -44,6 +47,7 @@ namespace Iviz.Controllers
         public override TfFrame Frame => node.Parent;
 
         readonly PointCloudConfiguration config = new PointCloudConfiguration();
+
         public PointCloudConfiguration Config
         {
             get => config;
@@ -152,9 +156,9 @@ namespace Iviz.Controllers
             }
         }
 
-        public bool IsIntensityUsed => pointCloud != null && pointCloud.UseColormap; 
+        public bool IsIntensityUsed => pointCloud != null && pointCloud.UseColormap;
 
-        public uint MaxQueueSize
+        uint MaxQueueSize
         {
             get => config.MaxQueueSize;
             set
@@ -162,13 +166,13 @@ namespace Iviz.Controllers
                 config.MaxQueueSize = value;
                 if (Listener != null)
                 {
-                    Listener.MaxQueueSize = (int)value;
+                    Listener.MaxQueueSize = (int) value;
                 }
             }
         }
 
-        readonly List<string> fieldNames = new List<string>() { "x", "y", "z" };
-        
+        readonly List<string> fieldNames = new List<string>() {"x", "y", "z"};
+
         public ReadOnlyCollection<string> FieldNames { get; }
 
         PointWithColor[] pointBuffer = new PointWithColor[0];
@@ -178,7 +182,7 @@ namespace Iviz.Controllers
             ModuleData = moduleData;
 
             FieldNames = new ReadOnlyCollection<string>(fieldNames);
-            
+
             node = SimpleDisplayNode.Instantiate("[PointCloudNode]");
             pointCloud = ResourcePool.GetOrCreate<PointListResource>(Resource.Displays.PointList, node.transform);
 
@@ -187,9 +191,8 @@ namespace Iviz.Controllers
 
         public override void StartListening()
         {
-            Listener = new RosListener<PointCloud2>(config.Topic, Handler);
-            Listener.MaxQueueSize = (int)MaxQueueSize;
-            node.name = "[" + config.Topic + "]";
+            Listener = new RosListener<PointCloud2>(config.Topic, Handler) {MaxQueueSize = (int) MaxQueueSize};
+            node.name = $"[{config.Topic}]";
         }
 
         static int FieldSizeFromType(int datatype)
@@ -213,7 +216,25 @@ namespace Iviz.Controllers
             }
         }
 
+        static bool TryGetField(PointField[] fields, string name, out PointField result)
+        {
+            foreach (PointField field in fields)
+            {
+                if (field.Name != name)
+                {
+                    continue;
+                }
+
+                result = field;
+                return true;
+            }
+
+            result = null;
+            return false;
+        }
+
         bool isProcessing;
+
         void Handler(PointCloud2 msg)
         {
             if (isProcessing)
@@ -232,9 +253,12 @@ namespace Iviz.Controllers
             }
 
             fieldNames.Clear();
-            fieldNames.AddRange(msg.Fields.Select(x => x.Name));
+            foreach (var field in msg.Fields)
+            {
+                fieldNames.Add(field.Name);
+            }
 
-            int newSize = (int)(msg.Width * msg.Height);
+            int newSize = (int) (msg.Width * msg.Height);
             if (newSize > pointBuffer.Length)
             {
                 pointBuffer = new PointWithColor[newSize * 11 / 10];
@@ -242,30 +266,29 @@ namespace Iviz.Controllers
 
             Task.Run(() =>
             {
-                Dictionary<string, PointField> fieldOffsets = new Dictionary<string, PointField>();
-                msg.Fields.ForEach(x => fieldOffsets.Add(x.Name, x));
-
-                if (!fieldOffsets.TryGetValue("x", out PointField xField) || xField.Datatype != PointField.FLOAT32 ||
-                    !fieldOffsets.TryGetValue("y", out PointField yField) || yField.Datatype != PointField.FLOAT32 ||
-                    !fieldOffsets.TryGetValue("z", out PointField zField) || zField.Datatype != PointField.FLOAT32)
+                if (!TryGetField(msg.Fields, "x", out PointField xField) || xField.Datatype != PointField.FLOAT32 ||
+                    !TryGetField(msg.Fields, "y", out PointField yField) || yField.Datatype != PointField.FLOAT32 ||
+                    !TryGetField(msg.Fields, "z", out PointField zField) || zField.Datatype != PointField.FLOAT32)
                 {
                     Logger.Info($"{this}: Unsupported point cloud! Expected XYZ as floats.");
                     isProcessing = false;
                     return;
                 }
-                int xOffset = (int)xField.Offset;
-                int yOffset = (int)yField.Offset;
-                int zOffset = (int)zField.Offset;
 
-                if (!fieldOffsets.TryGetValue(config.IntensityChannel, out PointField iField))
+                int xOffset = (int) xField.Offset;
+                int yOffset = (int) yField.Offset;
+                int zOffset = (int) zField.Offset;
+
+                if (!TryGetField(msg.Fields, config.IntensityChannel, out PointField iField))
                 {
-                    iField = new PointField();
+                    iField = EmptyPointField;
                 }
-                int iOffset = (int)iField.Offset;
+
+                int iOffset = (int) iField.Offset;
                 int iSize = FieldSizeFromType(iField.Datatype);
                 if (iSize == -1 || msg.PointStep < iOffset + iSize)
                 {
-                    Debug.Log(iSize + " " + msg.PointStep + " " + iOffset + " " + iSize);
+                    //Debug.Log(iSize + " " + msg.PointStep + " " + iOffset + " " + iSize);
                     Logger.Info($"{this}: Invalid or unsupported intensity field type!");
                     isProcessing = false;
                     return;
@@ -280,9 +303,9 @@ namespace Iviz.Controllers
                     if (pointCloud is null)
                     {
                         return;
-                    } 
-                    
-                    node.AttachTo(msg.Header.FrameId, msg.Header.Stamp); 
+                    }
+
+                    node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
 
                     Size = newSize;
                     pointCloud.UseColormap = !rgbaHint;
@@ -298,7 +321,8 @@ namespace Iviz.Controllers
             });
         }
 
-        void GeneratePointBuffer(PointCloud2 msg, int xOffset, int yOffset, int zOffset, int iOffset, int iType, bool rgbaHint)
+        void GeneratePointBuffer(PointCloud2 msg, int xOffset, int yOffset, int zOffset, int iOffset, int iType,
+            bool rgbaHint)
         {
             bool xyzAligned = xOffset == 0 && yOffset == 4 && zOffset == 8;
             if (xyzAligned)
@@ -311,12 +335,13 @@ namespace Iviz.Controllers
             }
         }
 
-        void GeneratePointBufferSlow(PointCloud2 msg, int xOffset, int yOffset, int zOffset, int iOffset, int iType, bool rgbaHint)
+        void GeneratePointBufferSlow(PointCloud2 msg, int xOffset, int yOffset, int zOffset, int iOffset, int iType,
+            bool rgbaHint)
         {
             int heightOffset = 0;
             int pointOffset = 0;
-            int rowStep = (int)msg.RowStep;
-            int pointStep = (int)msg.PointStep;
+            int rowStep = (int) msg.RowStep;
+            int pointStep = (int) msg.PointStep;
 
             Func<byte[], int, float> intensityFn;
             if (rgbaHint)
@@ -331,10 +356,10 @@ namespace Iviz.Controllers
                         intensityFn = BitConverter.ToSingle;
                         break;
                     case PointField.FLOAT64:
-                        intensityFn = (m, o) => (float)BitConverter.ToDouble(m, o);
+                        intensityFn = (m, o) => (float) BitConverter.ToDouble(m, o);
                         break;
                     case PointField.INT8:
-                        intensityFn = (m, o) => (sbyte)m[o];
+                        intensityFn = (m, o) => (sbyte) m[o];
                         break;
                     case PointField.UINT8:
                         intensityFn = (m, o) => m[o];
@@ -357,10 +382,10 @@ namespace Iviz.Controllers
                 }
             }
 
-            for (int v = (int)msg.Height; v > 0; v--, heightOffset += rowStep)
+            for (int v = (int) msg.Height; v > 0; v--, heightOffset += rowStep)
             {
                 int rowOffset = heightOffset;
-                for (int u = (int)msg.Width; u > 0; u--, rowOffset += pointStep, pointOffset++)
+                for (int u = (int) msg.Width; u > 0; u--, rowOffset += pointStep, pointOffset++)
                 {
                     Vector3 xyz = new Vector3(
                         BitConverter.ToSingle(msg.Data, rowOffset + xOffset),
@@ -377,10 +402,10 @@ namespace Iviz.Controllers
 
         void GeneratePointBufferXYZ(PointCloud2 msg, int iOffset, int iType)
         {
-            int rowStep = (int)msg.RowStep;
-            int pointStep = (int)msg.PointStep;
-            int height = (int)msg.Height;
-            int width = (int)msg.Width;
+            int rowStep = (int) msg.RowStep;
+            int pointStep = (int) msg.PointStep;
+            int height = (int) msg.Height;
+            int width = (int) msg.Width;
 
             unsafe
             {
@@ -388,72 +413,128 @@ namespace Iviz.Controllers
                 fixed (PointWithColor* pointBufferPtr = pointBuffer)
                 {
                     PointWithColor* pointBufferOff = pointBufferPtr;
-                    byte* dataRow = dataPtr;
-                    for (int v = height; v > 0; v--, dataRow += rowStep)
+                    byte* dataRowOff = dataPtr;
+                    switch (iType)
                     {
-                        byte* dataOff = dataRow;
-                        switch (iType)
-                        {
-                            case PointField.FLOAT32:
-                                for (int u = width; u > 0; u--, dataOff += pointStep, pointBufferOff++)
+                        case PointField.FLOAT32 when iOffset == 12:
+                            for (int v = height; v > 0; v--, dataRowOff += rowStep)
+                            {
+                                byte* dataOff = dataRowOff;
+                                for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
-                                    float* datap = (float*)dataOff;
-                                    *pointBufferOff = new PointWithColor(-datap[1], datap[2], datap[0], *(float*)(dataOff + iOffset));
+                                    float4 data = *(float4*) dataOff;
+                                    *pointBufferOff++ = new PointWithColor(-data.y, data.z, data.x, data.w);
                                 }
-                                break;
-                            case PointField.FLOAT64:
-                                for (int u = width; u > 0; u--, dataOff += pointStep, pointBufferOff++)
+                            }
+
+                            break;
+                        case PointField.FLOAT32:
+                            for (int v = height; v > 0; v--, dataRowOff += rowStep)
+                            {
+                                byte* dataOff = dataRowOff;
+                                for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
-                                    float* datap = (float*)dataOff;
-                                    *pointBufferOff = new PointWithColor(-datap[1], datap[2], datap[0], (float)*(double*)(dataOff + iOffset));
+                                    float3 data = *(float3*) dataOff;
+                                    var f = *(float*) (dataOff + iOffset);
+                                    *pointBufferOff++ = new PointWithColor(-data.y, data.z, data.x, f);
                                 }
-                                break;
-                            case PointField.INT8:
-                                for (int u = width; u > 0; u--, dataOff += pointStep, pointBufferOff++)
+                            }
+
+                            break;
+                        case PointField.FLOAT64:
+                            for (int v = height; v > 0; v--, dataRowOff += rowStep)
+                            {
+                                byte* dataOff = dataRowOff;
+                                for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
-                                    float* datap = (float*)dataOff;
-                                    *pointBufferOff = new PointWithColor(-datap[1], datap[2], datap[0], (sbyte)*(dataOff + iOffset));
+                                    float3 data = *(float3*) dataOff;
+                                    var f = *(double*) (dataOff + iOffset);
+                                    *pointBufferOff++ = new PointWithColor(-data.y, data.z, data.x, (float) f);
                                 }
-                                break;
-                            case PointField.UINT8:
-                                for (int u = width; u > 0; u--, dataOff += pointStep, pointBufferOff++)
+                            }
+
+                            break;
+                        case PointField.INT8:
+                            for (int v = height; v > 0; v--, dataRowOff += rowStep)
+                            {
+                                byte* dataOff = dataRowOff;
+                                for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
-                                    float* datap = (float*)dataOff;
-                                    *pointBufferOff = new PointWithColor(-datap[1], datap[2], datap[0], *(dataOff + iOffset));
+                                    float3 data = *(float3*) dataOff;
+                                    var f = *(sbyte*) (dataOff + iOffset);
+                                    *pointBufferOff++ = new PointWithColor(-data.y, data.z, data.x, f);
                                 }
-                                break;
-                            case PointField.INT16:
-                                for (int u = width; u > 0; u--, dataOff += pointStep, pointBufferOff++)
+                            }
+
+                            break;
+                        case PointField.UINT8:
+                            for (int v = height; v > 0; v--, dataRowOff += rowStep)
+                            {
+                                byte* dataOff = dataRowOff;
+                                for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
-                                    float* datap = (float*)dataOff;
-                                    *pointBufferOff = new PointWithColor(-datap[1], datap[2], datap[0], *(short*)(dataOff + iOffset));
+                                    float3 data = *(float3*) dataOff;
+                                    var f = *(dataOff + iOffset);
+                                    *pointBufferOff++ = new PointWithColor(-data.y, data.z, data.x, f);
                                 }
-                                break;
-                            case PointField.UINT16:
-                                for (int u = width; u > 0; u--, dataOff += pointStep, pointBufferOff++)
+                            }
+
+                            break;
+                        case PointField.INT16:
+                            for (int v = height; v > 0; v--, dataRowOff += rowStep)
+                            {
+                                byte* dataOff = dataRowOff;
+                                for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
-                                    float* datap = (float*)dataOff;
-                                    *pointBufferOff = new PointWithColor(-datap[1], datap[2], datap[0], *(ushort*)(dataOff + iOffset));
+                                    float3 data = *(float3*) dataOff;
+                                    var f = *(short*)(dataOff + iOffset);
+                                    *pointBufferOff++ = new PointWithColor(-data.y, data.z, data.x, f);
                                 }
-                                break;
-                            case PointField.INT32:
-                                for (int u = width; u > 0; u--, dataOff += pointStep, pointBufferOff++)
+                            }
+
+                            break;
+                        case PointField.UINT16:
+                            for (int v = height; v > 0; v--, dataRowOff += rowStep)
+                            {
+                                byte* dataOff = dataRowOff;
+                                for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
-                                    float* datap = (float*)dataOff;
-                                    *pointBufferOff = new PointWithColor(-datap[1], datap[2], datap[0], *(int*)(dataOff + iOffset));
+                                    float3 data = *(float3*) dataOff;
+                                    var f = *(ushort*)(dataOff + iOffset);
+                                    *pointBufferOff++ = new PointWithColor(-data.y, data.z, data.x, f);
                                 }
-                                break;
-                            case PointField.UINT32:
-                                for (int u = width; u > 0; u--, dataOff += pointStep, pointBufferOff++)
+                            }
+
+                            break;
+                        case PointField.INT32:
+                            for (int v = height; v > 0; v--, dataRowOff += rowStep)
+                            {
+                                byte* dataOff = dataRowOff;
+                                for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
-                                    float* datap = (float*)dataOff;
-                                    *pointBufferOff = new PointWithColor(-datap[1], datap[2], datap[0], *(uint*)(dataOff + iOffset));
+                                    float3 data = *(float3*) dataOff;
+                                    var f = *(int*)(dataOff + iOffset);
+                                    *pointBufferOff++ = new PointWithColor(-data.y, data.z, data.x, f);
                                 }
-                                break;
-                            default:
-                                //??
-                                break;
-                        }
+                            }
+
+                            break;
+                        case PointField.UINT32:
+                            for (int v = height; v > 0; v--, dataRowOff += rowStep)
+                            {
+                                byte* dataOff = dataRowOff;
+                                for (int u = width; u > 0; u--, dataOff += pointStep)
+                                {
+                                    float3 data = *(float3*) dataOff;
+                                    var f = *(uint*)(dataOff + iOffset);
+                                    *pointBufferOff++ = new PointWithColor(-data.y, data.z, data.x, f);
+                                }
+                            }
+
+                            break;
+                        default:
+                            //??
+                            break;
                     }
                 }
             }

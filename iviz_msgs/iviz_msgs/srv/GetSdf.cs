@@ -72,19 +72,18 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetSdfRequest(Buffer b)
+        internal GetSdfRequest(ref Buffer b)
         {
             Uri = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GetSdfRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new GetSdfRequest(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Uri);
         }
         
@@ -125,23 +124,22 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetSdfResponse(Buffer b)
+        internal GetSdfResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
-            Scene = new Scene(b);
+            Scene = new Scene(ref b);
             Message = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GetSdfResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new GetSdfResponse(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Success);
-            Scene.RosSerialize(b);
+            Scene.RosSerialize(ref b);
             b.Serialize(Message);
         }
         

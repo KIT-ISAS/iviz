@@ -28,14 +28,14 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Vector3(Buffer b)
+        internal Vector3(ref Buffer b)
         {
             b.Deserialize(out this);
         }
         
-        public readonly ISerializable RosDeserialize(Buffer b)
+        public readonly ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Vector3(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Vector3(ref b);
         }
         
         public override readonly int GetHashCode() => (X, Y, Z).GetHashCode();
@@ -48,9 +48,8 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public static bool operator!=(in Vector3 a, in Vector3 b) => !a.Equals(b);
     
-        public readonly void RosSerialize(Buffer b)
+        public readonly void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this);
         }
         

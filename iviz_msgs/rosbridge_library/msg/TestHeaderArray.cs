@@ -22,23 +22,22 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TestHeaderArray(Buffer b)
+        internal TestHeaderArray(ref Buffer b)
         {
             Header = b.DeserializeArray<StdMsgs.Header>();
             for (int i = 0; i < Header.Length; i++)
             {
-                Header[i] = new StdMsgs.Header(b);
+                Header[i] = new StdMsgs.Header(ref b);
             }
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new TestHeaderArray(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new TestHeaderArray(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeArray(Header, 0);
         }
         

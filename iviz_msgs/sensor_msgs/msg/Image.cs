@@ -51,9 +51,9 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Image(Buffer b)
+        internal Image(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
+            Header = new StdMsgs.Header(ref b);
             Height = b.Deserialize<uint>();
             Width = b.Deserialize<uint>();
             Encoding = b.DeserializeString();
@@ -62,15 +62,14 @@ namespace Iviz.Msgs.SensorMsgs
             Data = b.DeserializeStructArray<byte>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Image(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Image(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
+            Header.RosSerialize(ref b);
             b.Serialize(Height);
             b.Serialize(Width);
             b.Serialize(Encoding);

@@ -21,14 +21,14 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Accel(Buffer b)
+        internal Accel(ref Buffer b)
         {
             b.Deserialize(out this);
         }
         
-        public readonly ISerializable RosDeserialize(Buffer b)
+        public readonly ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Accel(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Accel(ref b);
         }
         
         public override readonly int GetHashCode() => (Linear, Angular).GetHashCode();
@@ -41,9 +41,8 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public static bool operator!=(in Accel a, in Accel b) => !a.Equals(b);
     
-        public readonly void RosSerialize(Buffer b)
+        public readonly void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this);
         }
         

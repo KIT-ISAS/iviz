@@ -36,28 +36,27 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal MapMetaData(Buffer b)
+        internal MapMetaData(ref Buffer b)
         {
             MapLoadTime = b.Deserialize<time>();
             Resolution = b.Deserialize<float>();
             Width = b.Deserialize<uint>();
             Height = b.Deserialize<uint>();
-            Origin = new GeometryMsgs.Pose(b);
+            Origin = new GeometryMsgs.Pose(ref b);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new MapMetaData(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new MapMetaData(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(MapLoadTime);
             b.Serialize(Resolution);
             b.Serialize(Width);
             b.Serialize(Height);
-            Origin.RosSerialize(b);
+            Origin.RosSerialize(ref b);
         }
         
         public void RosValidate()

@@ -72,20 +72,19 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal SetGridMapRequest(Buffer b)
+        internal SetGridMapRequest(ref Buffer b)
         {
-            Map = new GridMapMsgs.GridMap(b);
+            Map = new GridMapMsgs.GridMap(ref b);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new SetGridMapRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new SetGridMapRequest(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Map.RosSerialize(b);
+            Map.RosSerialize(ref b);
         }
         
         public void RosValidate()

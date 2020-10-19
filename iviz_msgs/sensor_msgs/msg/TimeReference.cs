@@ -29,22 +29,21 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TimeReference(Buffer b)
+        internal TimeReference(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
+            Header = new StdMsgs.Header(ref b);
             TimeRef = b.Deserialize<time>();
             Source = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new TimeReference(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new TimeReference(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
+            Header.RosSerialize(ref b);
             b.Serialize(TimeRef);
             b.Serialize(Source);
         }

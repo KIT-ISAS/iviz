@@ -33,23 +33,22 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal OccupancyGrid(Buffer b)
+        internal OccupancyGrid(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
-            Info = new MapMetaData(b);
+            Header = new StdMsgs.Header(ref b);
+            Info = new MapMetaData(ref b);
             Data = b.DeserializeStructArray<sbyte>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new OccupancyGrid(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new OccupancyGrid(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
-            Info.RosSerialize(b);
+            Header.RosSerialize(ref b);
+            Info.RosSerialize(ref b);
             b.SerializeStructArray(Data, 0);
         }
         

@@ -52,9 +52,9 @@ namespace Iviz.Msgs.RosgraphMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Log(Buffer b)
+        internal Log(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
+            Header = new StdMsgs.Header(ref b);
             Level = b.Deserialize<byte>();
             Name = b.DeserializeString();
             Msg = b.DeserializeString();
@@ -64,15 +64,14 @@ namespace Iviz.Msgs.RosgraphMsgs
             Topics = b.DeserializeStringArray();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Log(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Log(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
+            Header.RosSerialize(ref b);
             b.Serialize(Level);
             b.Serialize(Name);
             b.Serialize(Msg);

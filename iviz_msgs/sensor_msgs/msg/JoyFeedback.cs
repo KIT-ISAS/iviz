@@ -33,21 +33,20 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal JoyFeedback(Buffer b)
+        internal JoyFeedback(ref Buffer b)
         {
             Type = b.Deserialize<byte>();
             Id = b.Deserialize<byte>();
             Intensity = b.Deserialize<float>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new JoyFeedback(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new JoyFeedback(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Type);
             b.Serialize(Id);
             b.Serialize(Intensity);

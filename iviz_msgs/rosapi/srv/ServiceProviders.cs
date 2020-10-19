@@ -71,19 +71,18 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal ServiceProvidersRequest(Buffer b)
+        internal ServiceProvidersRequest(ref Buffer b)
         {
             Service = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new ServiceProvidersRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new ServiceProvidersRequest(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Service);
         }
         
@@ -119,19 +118,18 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal ServiceProvidersResponse(Buffer b)
+        internal ServiceProvidersResponse(ref Buffer b)
         {
             Providers = b.DeserializeStringArray();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new ServiceProvidersResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new ServiceProvidersResponse(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeArray(Providers, 0);
         }
         

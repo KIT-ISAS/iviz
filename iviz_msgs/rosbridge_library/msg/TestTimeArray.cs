@@ -22,19 +22,18 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TestTimeArray(Buffer b)
+        internal TestTimeArray(ref Buffer b)
         {
             Times = b.DeserializeStructArray<time>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new TestTimeArray(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new TestTimeArray(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeStructArray(Times, 0);
         }
         

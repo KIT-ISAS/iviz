@@ -26,25 +26,24 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal DiagnosticArray(Buffer b)
+        internal DiagnosticArray(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
+            Header = new StdMsgs.Header(ref b);
             Status = b.DeserializeArray<DiagnosticStatus>();
             for (int i = 0; i < Status.Length; i++)
             {
-                Status[i] = new DiagnosticStatus(b);
+                Status[i] = new DiagnosticStatus(ref b);
             }
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new DiagnosticArray(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new DiagnosticArray(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
+            Header.RosSerialize(ref b);
             b.SerializeArray(Status, 0);
         }
         

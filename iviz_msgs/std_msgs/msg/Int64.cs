@@ -18,14 +18,14 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Int64(Buffer b)
+        internal Int64(ref Buffer b)
         {
             b.Deserialize(out this);
         }
         
-        public readonly ISerializable RosDeserialize(Buffer b)
+        public readonly ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Int64(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Int64(ref b);
         }
         
         public override readonly int GetHashCode() => (Data).GetHashCode();
@@ -38,9 +38,8 @@ namespace Iviz.Msgs.StdMsgs
         
         public static bool operator!=(in Int64 a, in Int64 b) => !a.Equals(b);
     
-        public readonly void RosSerialize(Buffer b)
+        public readonly void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this);
         }
         

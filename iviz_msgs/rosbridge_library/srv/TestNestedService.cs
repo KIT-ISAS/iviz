@@ -71,20 +71,19 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TestNestedServiceRequest(Buffer b)
+        internal TestNestedServiceRequest(ref Buffer b)
         {
-            Pose = new GeometryMsgs.Pose(b);
+            Pose = new GeometryMsgs.Pose(ref b);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new TestNestedServiceRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new TestNestedServiceRequest(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Pose.RosSerialize(b);
+            Pose.RosSerialize(ref b);
         }
         
         public void RosValidate()
@@ -111,20 +110,19 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TestNestedServiceResponse(Buffer b)
+        internal TestNestedServiceResponse(ref Buffer b)
         {
-            Data = new StdMsgs.Float64(b);
+            Data = new StdMsgs.Float64(ref b);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new TestNestedServiceResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new TestNestedServiceResponse(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Data.RosSerialize(b);
+            Data.RosSerialize(ref b);
         }
         
         public void RosValidate()

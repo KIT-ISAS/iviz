@@ -33,7 +33,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal MultiDOFJointTrajectoryPoint(Buffer b)
+        internal MultiDOFJointTrajectoryPoint(ref Buffer b)
         {
             Transforms = b.DeserializeStructArray<GeometryMsgs.Transform>();
             Velocities = b.DeserializeStructArray<GeometryMsgs.Twist>();
@@ -41,14 +41,13 @@ namespace Iviz.Msgs.TrajectoryMsgs
             TimeFromStart = b.Deserialize<duration>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new MultiDOFJointTrajectoryPoint(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new MultiDOFJointTrajectoryPoint(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeStructArray(Transforms, 0);
             b.SerializeStructArray(Velocities, 0);
             b.SerializeStructArray(Accelerations, 0);

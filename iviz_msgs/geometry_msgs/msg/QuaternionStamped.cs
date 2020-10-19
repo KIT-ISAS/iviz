@@ -25,22 +25,21 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal QuaternionStamped(Buffer b)
+        internal QuaternionStamped(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
-            Quaternion = new Quaternion(b);
+            Header = new StdMsgs.Header(ref b);
+            Quaternion = new Quaternion(ref b);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new QuaternionStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new QuaternionStamped(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
-            Quaternion.RosSerialize(b);
+            Header.RosSerialize(ref b);
+            Quaternion.RosSerialize(ref b);
         }
         
         public void RosValidate()

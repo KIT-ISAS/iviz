@@ -77,20 +77,19 @@ namespace Iviz.Msgs.StdSrvs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TriggerResponse(Buffer b)
+        internal TriggerResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new TriggerResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new TriggerResponse(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Success);
             b.Serialize(Message);
         }

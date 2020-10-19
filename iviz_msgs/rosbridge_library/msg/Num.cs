@@ -21,19 +21,18 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Num(Buffer b)
+        internal Num(ref Buffer b)
         {
             Num_ = b.Deserialize<long>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Num(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Num(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Num_);
         }
         

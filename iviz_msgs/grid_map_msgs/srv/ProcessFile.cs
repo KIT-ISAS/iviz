@@ -76,20 +76,19 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal ProcessFileRequest(Buffer b)
+        internal ProcessFileRequest(ref Buffer b)
         {
             FilePath = b.DeserializeString();
             TopicName = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new ProcessFileRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new ProcessFileRequest(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(FilePath);
             b.Serialize(TopicName);
         }
@@ -128,19 +127,18 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal ProcessFileResponse(Buffer b)
+        internal ProcessFileResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new ProcessFileResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new ProcessFileResponse(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Success);
         }
         

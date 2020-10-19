@@ -376,8 +376,16 @@ namespace Iviz.Roslib
                     break;
                 }
 
+                if (messageQueue.Count == 0)
+                {
+                    continue;
+                }
+
                 localQueue.Clear();
-                while (messageQueue.TryDequeue(out var msg)) localQueue.Add((msg, msg.RosMessageLength));
+                while (messageQueue.TryDequeue(out var msg))
+                {
+                    localQueue.Add((msg, msg.RosMessageLength));
+                }
 
                 ApplyQueueSizeConstraint(localQueue, MinQueueSizeInPackets, MaxQueueSizeInBytes,
                     out var startIndex, out var newBytesDropped);
@@ -385,9 +393,9 @@ namespace Iviz.Roslib
                 numDropped += startIndex;
                 bytesDropped += newBytesDropped;
 
-                var messages = localQueue.Skip(startIndex).Select(tuple => tuple.msg);
-                foreach (var message in messages)
+                for (int i = startIndex; i < localQueue.Count; i++)
                 {
+                    var message = localQueue[i].msg;
                     var msgLength = message.RosMessageLength;
                     if (writeBuffer.Length < msgLength)
                     {

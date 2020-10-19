@@ -29,21 +29,20 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal AccelWithCovariance(Buffer b)
+        internal AccelWithCovariance(ref Buffer b)
         {
-            Accel = new Accel(b);
+            Accel = new Accel(ref b);
             Covariance = b.DeserializeStructArray<double>(36);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new AccelWithCovariance(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new AccelWithCovariance(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Accel.RosSerialize(b);
+            Accel.RosSerialize(ref b);
             b.SerializeStructArray(Covariance, 36);
         }
         

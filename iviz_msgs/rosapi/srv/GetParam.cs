@@ -74,20 +74,19 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetParamRequest(Buffer b)
+        internal GetParamRequest(ref Buffer b)
         {
             Name = b.DeserializeString();
             @default = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GetParamRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new GetParamRequest(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Name);
             b.Serialize(@default);
         }
@@ -126,19 +125,18 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetParamResponse(Buffer b)
+        internal GetParamResponse(ref Buffer b)
         {
             Value = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GetParamResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new GetParamResponse(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Value);
         }
         

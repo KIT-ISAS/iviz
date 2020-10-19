@@ -73,7 +73,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal MenuEntry(Buffer b)
+        internal MenuEntry(ref Buffer b)
         {
             Id = b.Deserialize<uint>();
             ParentId = b.Deserialize<uint>();
@@ -82,14 +82,13 @@ namespace Iviz.Msgs.VisualizationMsgs
             CommandType = b.Deserialize<byte>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new MenuEntry(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new MenuEntry(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Id);
             b.Serialize(ParentId);
             b.Serialize(Title);

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -104,9 +105,9 @@ namespace Iviz.Displays
         }
 
 
-        public static (Vector3[], Color32[], int[], Vector2[]) CreateCapsulesFromSegments(
-            IEnumerable<float4x2> lineBuffer, int length, float scale)
+        public static (Vector3[], Color32[], int[], Vector2[]) CreateCapsulesFromSegments(in NativeList<float4x2> lineBuffer, float scale)
         {
+            int length = lineBuffer.Length;
             Vector3[] points = new Vector3[10 * length];
             Color32[] colors = new Color32[10 * length];
             int[] indices = new int[48 * length];
@@ -153,7 +154,7 @@ namespace Iviz.Displays
                 for (int i = 0; i < 5; i++)
                 {
                     colors[poff + i] = ca;
-                    coords[poff + i] = new Vector2(line.c0.w, 0);;
+                    coords[poff + i] = new Vector2(line.c0.w, 0);
                 }
 
                 for (int i = 5; i < 10; i++)

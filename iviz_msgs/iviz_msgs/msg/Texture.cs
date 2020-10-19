@@ -31,7 +31,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Texture(Buffer b)
+        internal Texture(ref Buffer b)
         {
             Path = b.DeserializeString();
             Width = b.Deserialize<uint>();
@@ -40,14 +40,13 @@ namespace Iviz.Msgs.IvizMsgs
             Data = b.DeserializeStructArray<byte>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Texture(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Texture(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Path);
             b.Serialize(Width);
             b.Serialize(Height);

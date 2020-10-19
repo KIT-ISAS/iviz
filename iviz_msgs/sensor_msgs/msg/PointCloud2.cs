@@ -52,15 +52,15 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal PointCloud2(Buffer b)
+        internal PointCloud2(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
+            Header = new StdMsgs.Header(ref b);
             Height = b.Deserialize<uint>();
             Width = b.Deserialize<uint>();
             Fields = b.DeserializeArray<PointField>();
             for (int i = 0; i < Fields.Length; i++)
             {
-                Fields[i] = new PointField(b);
+                Fields[i] = new PointField(ref b);
             }
             IsBigendian = b.Deserialize<bool>();
             PointStep = b.Deserialize<uint>();
@@ -69,15 +69,14 @@ namespace Iviz.Msgs.SensorMsgs
             IsDense = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new PointCloud2(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new PointCloud2(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
+            Header.RosSerialize(ref b);
             b.Serialize(Height);
             b.Serialize(Width);
             b.SerializeArray(Fields, 0);

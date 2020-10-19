@@ -37,7 +37,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Model(Buffer b)
+        internal Model(ref Buffer b)
         {
             Name = b.DeserializeString();
             Filename = b.DeserializeString();
@@ -45,28 +45,27 @@ namespace Iviz.Msgs.IvizMsgs
             Meshes = b.DeserializeArray<Mesh>();
             for (int i = 0; i < Meshes.Length; i++)
             {
-                Meshes[i] = new Mesh(b);
+                Meshes[i] = new Mesh(ref b);
             }
             Materials = b.DeserializeArray<Material>();
             for (int i = 0; i < Materials.Length; i++)
             {
-                Materials[i] = new Material(b);
+                Materials[i] = new Material(ref b);
             }
             Nodes = b.DeserializeArray<Node>();
             for (int i = 0; i < Nodes.Length; i++)
             {
-                Nodes[i] = new Node(b);
+                Nodes[i] = new Node(ref b);
             }
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Model(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Model(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Name);
             b.Serialize(Filename);
             b.Serialize(OrientationHint);

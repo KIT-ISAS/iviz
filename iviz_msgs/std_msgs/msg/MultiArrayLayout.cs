@@ -46,24 +46,23 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal MultiArrayLayout(Buffer b)
+        internal MultiArrayLayout(ref Buffer b)
         {
             Dim = b.DeserializeArray<MultiArrayDimension>();
             for (int i = 0; i < Dim.Length; i++)
             {
-                Dim[i] = new MultiArrayDimension(b);
+                Dim[i] = new MultiArrayDimension(ref b);
             }
             DataOffset = b.Deserialize<uint>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new MultiArrayLayout(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new MultiArrayLayout(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeArray(Dim, 0);
             b.Serialize(DataOffset);
         }

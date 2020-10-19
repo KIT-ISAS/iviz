@@ -25,20 +25,19 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal VectorField(Buffer b)
+        internal VectorField(ref Buffer b)
         {
             Positions = b.DeserializeStructArray<GeometryMsgs.Point>();
             Vectors = b.DeserializeStructArray<GeometryMsgs.Vector3>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new VectorField(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new VectorField(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeStructArray(Positions, 0);
             b.SerializeStructArray(Vectors, 0);
         }

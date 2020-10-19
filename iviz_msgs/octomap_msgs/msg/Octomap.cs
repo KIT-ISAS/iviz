@@ -37,24 +37,23 @@ namespace Iviz.Msgs.OctomapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Octomap(Buffer b)
+        internal Octomap(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
+            Header = new StdMsgs.Header(ref b);
             Binary = b.Deserialize<bool>();
             Id = b.DeserializeString();
             Resolution = b.Deserialize<double>();
             Data = b.DeserializeStructArray<sbyte>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Octomap(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Octomap(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
+            Header.RosSerialize(ref b);
             b.Serialize(Binary);
             b.Serialize(Id);
             b.Serialize(Resolution);

@@ -36,26 +36,25 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal PointCloud(Buffer b)
+        internal PointCloud(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
+            Header = new StdMsgs.Header(ref b);
             Points = b.DeserializeStructArray<GeometryMsgs.Point32>();
             Channels = b.DeserializeArray<ChannelFloat32>();
             for (int i = 0; i < Channels.Length; i++)
             {
-                Channels[i] = new ChannelFloat32(b);
+                Channels[i] = new ChannelFloat32(ref b);
             }
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new PointCloud(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new PointCloud(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
+            Header.RosSerialize(ref b);
             b.SerializeStructArray(Points, 0);
             b.SerializeArray(Channels, 0);
         }

@@ -25,23 +25,22 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal MeshMaterial(Buffer b)
+        internal MeshMaterial(ref Buffer b)
         {
             TextureIndex = b.Deserialize<uint>();
-            Color = new StdMsgs.ColorRGBA(b);
+            Color = new StdMsgs.ColorRGBA(ref b);
             HasTexture = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new MeshMaterial(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new MeshMaterial(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(TextureIndex);
-            Color.RosSerialize(b);
+            Color.RosSerialize(ref b);
             b.Serialize(HasTexture);
         }
         

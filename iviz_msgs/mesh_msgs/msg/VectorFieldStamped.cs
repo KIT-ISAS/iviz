@@ -25,22 +25,21 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal VectorFieldStamped(Buffer b)
+        internal VectorFieldStamped(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
-            VectorField = new MeshMsgs.VectorField(b);
+            Header = new StdMsgs.Header(ref b);
+            VectorField = new MeshMsgs.VectorField(ref b);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new VectorFieldStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new VectorFieldStamped(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
-            VectorField.RosSerialize(b);
+            Header.RosSerialize(ref b);
+            VectorField.RosSerialize(ref b);
         }
         
         public void RosValidate()

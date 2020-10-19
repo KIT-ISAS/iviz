@@ -54,31 +54,30 @@ namespace Iviz.Msgs.StereoMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal DisparityImage(Buffer b)
+        internal DisparityImage(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
-            Image = new SensorMsgs.Image(b);
+            Header = new StdMsgs.Header(ref b);
+            Image = new SensorMsgs.Image(ref b);
             F = b.Deserialize<float>();
             T = b.Deserialize<float>();
-            ValidWindow = new SensorMsgs.RegionOfInterest(b);
+            ValidWindow = new SensorMsgs.RegionOfInterest(ref b);
             MinDisparity = b.Deserialize<float>();
             MaxDisparity = b.Deserialize<float>();
             DeltaD = b.Deserialize<float>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new DisparityImage(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new DisparityImage(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
-            Image.RosSerialize(b);
+            Header.RosSerialize(ref b);
+            Image.RosSerialize(ref b);
             b.Serialize(F);
             b.Serialize(T);
-            ValidWindow.RosSerialize(b);
+            ValidWindow.RosSerialize(ref b);
             b.Serialize(MinDisparity);
             b.Serialize(MaxDisparity);
             b.Serialize(DeltaD);

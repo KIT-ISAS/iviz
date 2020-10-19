@@ -56,41 +56,40 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal ImageMarker(Buffer b)
+        internal ImageMarker(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
+            Header = new StdMsgs.Header(ref b);
             Ns = b.DeserializeString();
             Id = b.Deserialize<int>();
             Type = b.Deserialize<int>();
             Action = b.Deserialize<int>();
-            Position = new GeometryMsgs.Point(b);
+            Position = new GeometryMsgs.Point(ref b);
             Scale = b.Deserialize<float>();
-            OutlineColor = new StdMsgs.ColorRGBA(b);
+            OutlineColor = new StdMsgs.ColorRGBA(ref b);
             Filled = b.Deserialize<byte>();
-            FillColor = new StdMsgs.ColorRGBA(b);
+            FillColor = new StdMsgs.ColorRGBA(ref b);
             Lifetime = b.Deserialize<duration>();
             Points = b.DeserializeStructArray<GeometryMsgs.Point>();
             OutlineColors = b.DeserializeStructArray<StdMsgs.ColorRGBA>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new ImageMarker(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new ImageMarker(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
+            Header.RosSerialize(ref b);
             b.Serialize(Ns);
             b.Serialize(Id);
             b.Serialize(Type);
             b.Serialize(Action);
-            Position.RosSerialize(b);
+            Position.RosSerialize(ref b);
             b.Serialize(Scale);
-            OutlineColor.RosSerialize(b);
+            OutlineColor.RosSerialize(ref b);
             b.Serialize(Filled);
-            FillColor.RosSerialize(b);
+            FillColor.RosSerialize(ref b);
             b.Serialize(Lifetime);
             b.SerializeStructArray(Points, 0);
             b.SerializeStructArray(OutlineColors, 0);

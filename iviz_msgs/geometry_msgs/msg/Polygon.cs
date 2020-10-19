@@ -23,19 +23,18 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Polygon(Buffer b)
+        internal Polygon(ref Buffer b)
         {
             Points = b.DeserializeStructArray<Point32>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Polygon(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Polygon(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeStructArray(Points, 0);
         }
         

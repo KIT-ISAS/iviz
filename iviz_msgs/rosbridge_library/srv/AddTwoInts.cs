@@ -72,20 +72,19 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal AddTwoIntsRequest(Buffer b)
+        internal AddTwoIntsRequest(ref Buffer b)
         {
             A = b.Deserialize<long>();
             B = b.Deserialize<long>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new AddTwoIntsRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new AddTwoIntsRequest(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(A);
             b.Serialize(B);
         }
@@ -113,19 +112,18 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal AddTwoIntsResponse(Buffer b)
+        internal AddTwoIntsResponse(ref Buffer b)
         {
             Sum = b.Deserialize<long>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new AddTwoIntsResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new AddTwoIntsResponse(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Sum);
         }
         

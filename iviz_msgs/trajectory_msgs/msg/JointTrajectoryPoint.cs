@@ -36,7 +36,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal JointTrajectoryPoint(Buffer b)
+        internal JointTrajectoryPoint(ref Buffer b)
         {
             Positions = b.DeserializeStructArray<double>();
             Velocities = b.DeserializeStructArray<double>();
@@ -45,14 +45,13 @@ namespace Iviz.Msgs.TrajectoryMsgs
             TimeFromStart = b.Deserialize<duration>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new JointTrajectoryPoint(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new JointTrajectoryPoint(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeStructArray(Positions, 0);
             b.SerializeStructArray(Velocities, 0);
             b.SerializeStructArray(Accelerations, 0);

@@ -52,24 +52,23 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal JointState(Buffer b)
+        internal JointState(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
+            Header = new StdMsgs.Header(ref b);
             Name = b.DeserializeStringArray();
             Position = b.DeserializeStructArray<double>();
             Velocity = b.DeserializeStructArray<double>();
             Effort = b.DeserializeStructArray<double>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new JointState(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new JointState(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
+            Header.RosSerialize(ref b);
             b.SerializeArray(Name, 0);
             b.SerializeStructArray(Position, 0);
             b.SerializeStructArray(Velocity, 0);

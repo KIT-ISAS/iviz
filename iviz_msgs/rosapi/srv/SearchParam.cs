@@ -71,19 +71,18 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal SearchParamRequest(Buffer b)
+        internal SearchParamRequest(ref Buffer b)
         {
             Name = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new SearchParamRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new SearchParamRequest(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Name);
         }
         
@@ -119,19 +118,18 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal SearchParamResponse(Buffer b)
+        internal SearchParamResponse(ref Buffer b)
         {
             GlobalName = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new SearchParamResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new SearchParamResponse(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(GlobalName);
         }
         

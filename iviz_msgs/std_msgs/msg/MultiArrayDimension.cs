@@ -26,21 +26,20 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal MultiArrayDimension(Buffer b)
+        internal MultiArrayDimension(ref Buffer b)
         {
             Label = b.DeserializeString();
             Size = b.Deserialize<uint>();
             Stride = b.Deserialize<uint>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new MultiArrayDimension(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new MultiArrayDimension(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Label);
             b.Serialize(Size);
             b.Serialize(Stride);

@@ -48,12 +48,12 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TriangleMesh(Buffer b)
+        internal TriangleMesh(ref Buffer b)
         {
             Triangles = b.DeserializeArray<TriangleIndices>();
             for (int i = 0; i < Triangles.Length; i++)
             {
-                Triangles[i] = new TriangleIndices(b);
+                Triangles[i] = new TriangleIndices(ref b);
             }
             Vertices = b.DeserializeStructArray<GeometryMsgs.Point>();
             VertexNormals = b.DeserializeStructArray<GeometryMsgs.Point>();
@@ -63,28 +63,27 @@ namespace Iviz.Msgs.MeshMsgs
             FaceMaterials = b.DeserializeArray<MeshMsgs.MeshMaterial>();
             for (int i = 0; i < FaceMaterials.Length; i++)
             {
-                FaceMaterials[i] = new MeshMsgs.MeshMaterial(b);
+                FaceMaterials[i] = new MeshMsgs.MeshMaterial(ref b);
             }
             Textures = b.DeserializeArray<SensorMsgs.Image>();
             for (int i = 0; i < Textures.Length; i++)
             {
-                Textures[i] = new SensorMsgs.Image(b);
+                Textures[i] = new SensorMsgs.Image(ref b);
             }
             Clusters = b.DeserializeArray<MeshMsgs.MeshFaceCluster>();
             for (int i = 0; i < Clusters.Length; i++)
             {
-                Clusters[i] = new MeshMsgs.MeshFaceCluster(b);
+                Clusters[i] = new MeshMsgs.MeshFaceCluster(ref b);
             }
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new TriangleMesh(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new TriangleMesh(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeArray(Triangles, 0);
             b.SerializeStructArray(Vertices, 0);
             b.SerializeStructArray(VertexNormals, 0);

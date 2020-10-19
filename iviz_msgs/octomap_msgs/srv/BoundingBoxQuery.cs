@@ -75,22 +75,21 @@ namespace Iviz.Msgs.OctomapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal BoundingBoxQueryRequest(Buffer b)
+        internal BoundingBoxQueryRequest(ref Buffer b)
         {
-            Min = new GeometryMsgs.Point(b);
-            Max = new GeometryMsgs.Point(b);
+            Min = new GeometryMsgs.Point(ref b);
+            Max = new GeometryMsgs.Point(ref b);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new BoundingBoxQueryRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new BoundingBoxQueryRequest(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Min.RosSerialize(b);
-            Max.RosSerialize(b);
+            Min.RosSerialize(ref b);
+            Max.RosSerialize(ref b);
         }
         
         public void RosValidate()
@@ -109,18 +108,17 @@ namespace Iviz.Msgs.OctomapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal BoundingBoxQueryResponse(Buffer b)
+        internal BoundingBoxQueryResponse(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new BoundingBoxQueryResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new BoundingBoxQueryResponse(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
         }
         
         public void RosValidate()

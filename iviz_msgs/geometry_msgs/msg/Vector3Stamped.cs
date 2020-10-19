@@ -25,22 +25,21 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Vector3Stamped(Buffer b)
+        internal Vector3Stamped(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
-            Vector = new Vector3(b);
+            Header = new StdMsgs.Header(ref b);
+            Vector = new Vector3(ref b);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Vector3Stamped(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Vector3Stamped(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
-            Vector.RosSerialize(b);
+            Header.RosSerialize(ref b);
+            Vector.RosSerialize(ref b);
         }
         
         public void RosValidate()

@@ -71,19 +71,18 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetGeometryRequest(Buffer b)
+        internal GetGeometryRequest(ref Buffer b)
         {
             Uuid = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GetGeometryRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new GetGeometryRequest(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Uuid);
         }
         
@@ -119,20 +118,19 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetGeometryResponse(Buffer b)
+        internal GetGeometryResponse(ref Buffer b)
         {
-            MeshGeometryStamped = new MeshMsgs.MeshGeometryStamped(b);
+            MeshGeometryStamped = new MeshMsgs.MeshGeometryStamped(ref b);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GetGeometryResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new GetGeometryResponse(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            MeshGeometryStamped.RosSerialize(b);
+            MeshGeometryStamped.RosSerialize(ref b);
         }
         
         public void RosValidate()

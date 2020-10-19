@@ -71,19 +71,18 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetModelTextureRequest(Buffer b)
+        internal GetModelTextureRequest(ref Buffer b)
         {
             Uri = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GetModelTextureRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new GetModelTextureRequest(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Uri);
         }
         
@@ -124,23 +123,22 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetModelTextureResponse(Buffer b)
+        internal GetModelTextureResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
-            Image = new SensorMsgs.CompressedImage(b);
+            Image = new SensorMsgs.CompressedImage(ref b);
             Message = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GetModelTextureResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new GetModelTextureResponse(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Success);
-            Image.RosSerialize(b);
+            Image.RosSerialize(ref b);
             b.Serialize(Message);
         }
         

@@ -30,25 +30,24 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Node(Buffer b)
+        internal Node(ref Buffer b)
         {
             Name = b.DeserializeString();
             Parent = b.Deserialize<int>();
-            Transform = new Matrix4(b);
+            Transform = new Matrix4(ref b);
             Meshes = b.DeserializeStructArray<int>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Node(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Node(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Name);
             b.Serialize(Parent);
-            Transform.RosSerialize(b);
+            Transform.RosSerialize(ref b);
             b.SerializeStructArray(Meshes, 0);
         }
         

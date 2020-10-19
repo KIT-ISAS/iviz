@@ -8,7 +8,7 @@ namespace Iviz.Msgs
     /// <summary>
     /// Wrapper around a byte array that contains a serialized ROS message. 
     /// </summary>
-    public unsafe class Buffer
+    public unsafe struct Buffer
     {
         byte* ptr;
         readonly byte* end;
@@ -19,37 +19,45 @@ namespace Iviz.Msgs
             this.end = end;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void Memcpy(void* dst, void* src, uint size)
         {
             System.Buffer.MemoryCopy(src, dst, size, size);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
-        void AssertInRange(uint off)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        readonly void AssertInRange(uint off)
         {
-            if (ptr + off > end)
+            if (ptr + off <= end)
             {
-                throw new ArgumentOutOfRangeException(nameof(off));
+                return;
             }
+
+            if (ptr == default && end == default)
+            {
+                throw new InvalidOperationException("Buffer has not been initialized!");
+            }
+
+            throw new InvalidOperationException(
+                $"Buffer: Requested {off} bytes, but only {(end - ptr)} remain!");
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
-        static void AssertSize<T>(ICollection<T> array, uint size)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void AssertSize<T>(T[] array, uint size)
         {
             if (array is null)
             {
                 throw new ArgumentNullException(nameof(array));
             }
 
-            if (array.Count != size)
+            if (array.Length != size)
             {
-                throw new ArgumentException($"Invalid array size. Expected {size}, but got {array.Count}.",
+                throw new ArgumentException($"Invalid array size. Expected {size}, but got {array.Length}.",
                     nameof(array));
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal string DeserializeString()
         {
             AssertInRange(4);
@@ -66,7 +74,7 @@ namespace Iviz.Msgs
             return val;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal string[] DeserializeStringArray(uint count = 0)
         {
             if (count == 0)
@@ -89,7 +97,7 @@ namespace Iviz.Msgs
             return val;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal T Deserialize<T>() where T : unmanaged
         {
             AssertInRange((uint) sizeof(T));
@@ -98,7 +106,7 @@ namespace Iviz.Msgs
             return val;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Deserialize<T>(out T t) where T : unmanaged
         {
             AssertInRange((uint) sizeof(T));
@@ -106,7 +114,7 @@ namespace Iviz.Msgs
             ptr += sizeof(T);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal T[] DeserializeStructArray<T>() where T : unmanaged
         {
             AssertInRange(4);
@@ -115,7 +123,7 @@ namespace Iviz.Msgs
             return count == 0 ? Array.Empty<T>() : DeserializeStructArray<T>(count);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal T[] DeserializeStructArray<T>(uint count) where T : unmanaged
         {
             AssertInRange(count * (uint) sizeof(T));
@@ -130,7 +138,7 @@ namespace Iviz.Msgs
             return val;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal T[] DeserializeArray<T>() where T : IMessage, new()
         {
             AssertInRange(4);
@@ -139,13 +147,7 @@ namespace Iviz.Msgs
             return count == 0 ? Array.Empty<T>() : new T[count];
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
-        internal T[] DeserializeArray<T>(uint count) where T : IMessage, new()
-        {
-            return new T[count];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Serialize<T>(in T val) where T : unmanaged
         {
             AssertInRange((uint) sizeof(T));
@@ -153,14 +155,15 @@ namespace Iviz.Msgs
             ptr += sizeof(T);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Serialize(string val)
         {
             uint count = (uint) BuiltIns.UTF8.GetByteCount(val);
             AssertInRange(4 + count);
             *(uint*) ptr = count;
             ptr += 4;
-            if (count == 0) {return;}
+            if (count == 0) { return; }
+
             fixed (char* bPtr = val)
             {
                 BuiltIns.UTF8.GetBytes(bPtr, val.Length, ptr, (int) count);
@@ -168,19 +171,13 @@ namespace Iviz.Msgs
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
-        internal void Serialize(ISerializable val)
-        {
-            val.RosSerialize(this);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
-        internal void SerializeArray(IList<string> val, uint count)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal void SerializeArray(string[] val, uint count)
         {
             if (count == 0)
             {
                 AssertInRange(4);
-                *(int*) ptr = val.Count;
+                *(int*) ptr = val.Length;
                 ptr += 4;
             }
             else
@@ -194,7 +191,7 @@ namespace Iviz.Msgs
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void SerializeStructArray<T>(T[] val, uint count) where T : unmanaged
         {
             if (count == 0)
@@ -216,14 +213,14 @@ namespace Iviz.Msgs
                 ptr += size;
             }
         }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
-        internal void SerializeArray<T>(IList<T> val, uint count) where T : IMessage
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal void SerializeArray<T>(T[] val, uint count) where T : IMessage
         {
             if (count == 0)
             {
                 AssertInRange(4);
-                *(int*) ptr = val.Count;
+                *(int*) ptr = val.Length;
                 ptr += 4;
             }
             else
@@ -233,7 +230,7 @@ namespace Iviz.Msgs
 
             foreach (T t in val)
             {
-                t.RosSerialize(this);
+                t.RosSerialize(ref this);
             }
         }
 
@@ -250,7 +247,7 @@ namespace Iviz.Msgs
         /// </param>
         /// <typeparam name="T">Message type.</typeparam>
         /// <returns>The deserialized message.</returns>
-        public static T Deserialize<T>(T generator, ArraySegment<byte> buffer) where T : ISerializable
+        static T Deserialize<T>(T generator, in ArraySegment<byte> buffer) where T : ISerializable
         {
             if (generator == null)
             {
@@ -260,7 +257,7 @@ namespace Iviz.Msgs
             fixed (byte* bPtr = buffer.Array)
             {
                 Buffer b = new Buffer(bPtr + buffer.Offset, bPtr + buffer.Offset + buffer.Count);
-                return (T) generator.RosDeserialize(b);
+                return (T) generator.RosDeserialize(ref b);
             }
         }
 
@@ -311,7 +308,7 @@ namespace Iviz.Msgs
         /// <param name="message">The ROS message.</param>
         /// <param name="buffer">The destination byte array.</param>
         /// <returns>The number of bytes written.</returns>
-        public static uint Serialize(ISerializable message, ArraySegment<byte> buffer)
+        static uint Serialize(ISerializable message, ArraySegment<byte> buffer)
         {
             if (message is null)
             {
@@ -321,7 +318,7 @@ namespace Iviz.Msgs
             fixed (byte* bPtr = buffer.Array)
             {
                 Buffer b = new Buffer(bPtr + buffer.Offset, bPtr + buffer.Offset + buffer.Count);
-                message.RosSerialize(b);
+                message.RosSerialize(ref b);
                 return (uint) (b.ptr - bPtr);
             }
         }

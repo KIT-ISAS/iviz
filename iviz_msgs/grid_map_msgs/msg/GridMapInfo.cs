@@ -35,28 +35,27 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GridMapInfo(Buffer b)
+        internal GridMapInfo(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
+            Header = new StdMsgs.Header(ref b);
             Resolution = b.Deserialize<double>();
             LengthX = b.Deserialize<double>();
             LengthY = b.Deserialize<double>();
-            Pose = new GeometryMsgs.Pose(b);
+            Pose = new GeometryMsgs.Pose(ref b);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GridMapInfo(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new GridMapInfo(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
+            Header.RosSerialize(ref b);
             b.Serialize(Resolution);
             b.Serialize(LengthX);
             b.Serialize(LengthY);
-            Pose.RosSerialize(b);
+            Pose.RosSerialize(ref b);
         }
         
         public void RosValidate()

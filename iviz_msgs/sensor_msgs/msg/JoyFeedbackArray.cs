@@ -23,23 +23,22 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal JoyFeedbackArray(Buffer b)
+        internal JoyFeedbackArray(ref Buffer b)
         {
             Array = b.DeserializeArray<JoyFeedback>();
             for (int i = 0; i < Array.Length; i++)
             {
-                Array[i] = new JoyFeedback(b);
+                Array[i] = new JoyFeedback(ref b);
             }
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new JoyFeedbackArray(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new JoyFeedbackArray(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeArray(Array, 0);
         }
         

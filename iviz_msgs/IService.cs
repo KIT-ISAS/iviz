@@ -59,12 +59,12 @@ namespace Iviz.Msgs
         [DataContract]
         public class EmptyRequest : IRequest
         {
-            ISerializable ISerializable.RosDeserialize(Buffer b)
+            ISerializable ISerializable.RosDeserialize(ref Buffer _)
             {
                 return new EmptyRequest();
             }
 
-            void ISerializable.RosSerialize(Buffer b)
+            void ISerializable.RosSerialize(ref Buffer _)
             {
             }
 
@@ -81,12 +81,12 @@ namespace Iviz.Msgs
         [DataContract]
         public class EmptyResponse : IResponse
         {
-            ISerializable ISerializable.RosDeserialize(Buffer b)
+            ISerializable ISerializable.RosDeserialize(ref Buffer _)
             {
                 return new EmptyResponse();
             }
 
-            void ISerializable.RosSerialize(Buffer b)
+            void ISerializable.RosSerialize(ref Buffer _)
             {
             }
 

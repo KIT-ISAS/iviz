@@ -29,21 +29,20 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal PoseWithCovariance(Buffer b)
+        internal PoseWithCovariance(ref Buffer b)
         {
-            Pose = new Pose(b);
+            Pose = new Pose(ref b);
             Covariance = b.DeserializeStructArray<double>(36);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new PoseWithCovariance(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new PoseWithCovariance(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Pose.RosSerialize(b);
+            Pose.RosSerialize(ref b);
             b.SerializeStructArray(Covariance, 36);
         }
         

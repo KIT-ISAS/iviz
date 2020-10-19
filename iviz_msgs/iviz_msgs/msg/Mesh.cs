@@ -39,7 +39,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Mesh(Buffer b)
+        internal Mesh(ref Buffer b)
         {
             Name = b.DeserializeString();
             Vertices = b.DeserializeStructArray<Vector3>();
@@ -50,14 +50,13 @@ namespace Iviz.Msgs.IvizMsgs
             MaterialIndex = b.Deserialize<uint>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Mesh(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Mesh(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Name);
             b.SerializeStructArray(Vertices, 0);
             b.SerializeStructArray(Normals, 0);

@@ -33,24 +33,23 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TransformStamped(Buffer b)
+        internal TransformStamped(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
+            Header = new StdMsgs.Header(ref b);
             ChildFrameId = b.DeserializeString();
-            Transform = new Transform(b);
+            Transform = new Transform(ref b);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new TransformStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new TransformStamped(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
+            Header.RosSerialize(ref b);
             b.Serialize(ChildFrameId);
-            Transform.RosSerialize(b);
+            Transform.RosSerialize(ref b);
         }
         
         public void RosValidate()

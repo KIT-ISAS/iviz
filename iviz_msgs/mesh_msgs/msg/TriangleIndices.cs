@@ -23,19 +23,18 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TriangleIndices(Buffer b)
+        internal TriangleIndices(ref Buffer b)
         {
             VertexIndices = b.DeserializeStructArray<uint>(3);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new TriangleIndices(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new TriangleIndices(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeStructArray(VertexIndices, 3);
         }
         

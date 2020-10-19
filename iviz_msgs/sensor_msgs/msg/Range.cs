@@ -59,9 +59,9 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Range(Buffer b)
+        internal Range(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
+            Header = new StdMsgs.Header(ref b);
             RadiationType = b.Deserialize<byte>();
             FieldOfView = b.Deserialize<float>();
             MinRange = b.Deserialize<float>();
@@ -69,15 +69,14 @@ namespace Iviz.Msgs.SensorMsgs
             Range_ = b.Deserialize<float>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Range(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Range(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
+            Header.RosSerialize(ref b);
             b.Serialize(RadiationType);
             b.Serialize(FieldOfView);
             b.Serialize(MinRange);

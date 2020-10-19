@@ -75,19 +75,18 @@ namespace Iviz.Msgs.Tf2Msgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal FrameGraphResponse(Buffer b)
+        internal FrameGraphResponse(ref Buffer b)
         {
             FrameYaml = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new FrameGraphResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new FrameGraphResponse(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(FrameYaml);
         }
         

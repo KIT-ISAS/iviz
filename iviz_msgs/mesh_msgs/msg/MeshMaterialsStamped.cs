@@ -29,24 +29,23 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal MeshMaterialsStamped(Buffer b)
+        internal MeshMaterialsStamped(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
+            Header = new StdMsgs.Header(ref b);
             Uuid = b.DeserializeString();
-            MeshMaterials = new MeshMsgs.MeshMaterials(b);
+            MeshMaterials = new MeshMsgs.MeshMaterials(ref b);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new MeshMaterialsStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new MeshMaterialsStamped(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
+            Header.RosSerialize(ref b);
             b.Serialize(Uuid);
-            MeshMaterials.RosSerialize(b);
+            MeshMaterials.RosSerialize(ref b);
         }
         
         public void RosValidate()

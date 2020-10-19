@@ -31,22 +31,21 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal FluidPressure(Buffer b)
+        internal FluidPressure(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
+            Header = new StdMsgs.Header(ref b);
             FluidPressure_ = b.Deserialize<double>();
             Variance = b.Deserialize<double>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new FluidPressure(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new FluidPressure(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
+            Header.RosSerialize(ref b);
             b.Serialize(FluidPressure_);
             b.Serialize(Variance);
         }

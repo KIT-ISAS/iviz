@@ -25,14 +25,14 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Quaternion(Buffer b)
+        internal Quaternion(ref Buffer b)
         {
             b.Deserialize(out this);
         }
         
-        public readonly ISerializable RosDeserialize(Buffer b)
+        public readonly ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Quaternion(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Quaternion(ref b);
         }
         
         public override readonly int GetHashCode() => (X, Y, Z, W).GetHashCode();
@@ -45,9 +45,8 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public static bool operator!=(in Quaternion a, in Quaternion b) => !a.Equals(b);
     
-        public readonly void RosSerialize(Buffer b)
+        public readonly void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this);
         }
         

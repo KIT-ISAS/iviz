@@ -32,25 +32,24 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Include(Buffer b)
+        internal Include(ref Buffer b)
         {
             Uri = b.DeserializeString();
-            Pose = new Matrix4(b);
-            Material = new Material(b);
+            Pose = new Matrix4(ref b);
+            Material = new Material(ref b);
             Package = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Include(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Include(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Uri);
-            Pose.RosSerialize(b);
-            Material.RosSerialize(b);
+            Pose.RosSerialize(ref b);
+            Material.RosSerialize(ref b);
             b.Serialize(Package);
         }
         

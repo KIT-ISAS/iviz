@@ -80,25 +80,24 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal SelfTestResponse(Buffer b)
+        internal SelfTestResponse(ref Buffer b)
         {
             Id = b.DeserializeString();
             Passed = b.Deserialize<byte>();
             Status = b.DeserializeArray<DiagnosticStatus>();
             for (int i = 0; i < Status.Length; i++)
             {
-                Status[i] = new DiagnosticStatus(b);
+                Status[i] = new DiagnosticStatus(ref b);
             }
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new SelfTestResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new SelfTestResponse(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Id);
             b.Serialize(Passed);
             b.SerializeArray(Status, 0);
