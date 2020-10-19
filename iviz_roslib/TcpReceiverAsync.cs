@@ -204,7 +204,7 @@ namespace Iviz.Roslib
             }
             catch (Exception e)
             {
-                Logger.Log($"{this}: " + e);
+                Logger.Log($"{this}: {e}");
                 client.Dispose();
                 return null;
             }
@@ -298,7 +298,7 @@ namespace Iviz.Roslib
             {
                 int index = responses[0].IndexOf('=');
                 string errorMsg = index != -1 ? responses[0].Substring(index + 1) : responses[0];
-                Logger.LogDebug($"{this}: Partner sent error code: " + errorMsg);
+                Logger.LogDebug($"{this}: Partner sent error code: {errorMsg}");
                 return;
             }
 
