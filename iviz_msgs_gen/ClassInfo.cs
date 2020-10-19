@@ -380,7 +380,7 @@ namespace Iviz.MsgsGen
             }
 
             lines.Add("/// <summary> Constructor with buffer. </summary>");
-            lines.Add("internal " + name + "(Buffer b)");
+            lines.Add("internal " + name + "(ref Buffer b)");
             lines.Add("{");
             if (forceStruct)
             {
@@ -430,7 +430,7 @@ namespace Iviz.MsgsGen
                     {
                         if (!variable.IsArray)
                         {
-                            lines.Add("    " + variable.fieldName + " = new " + variable.className + "(b);");
+                            lines.Add("    " + variable.fieldName + " = new " + variable.className + "(ref b);");
                         }
                         else if (variable.IsDynamicSizeArray)
                         {
@@ -443,7 +443,7 @@ namespace Iviz.MsgsGen
                                 lines.Add("    " + variable.fieldName + " = b.DeserializeArray<" + variable.className + ">();");
                                 lines.Add("    for (int i = 0; i < " + variable.fieldName + ".Length; i++)");
                                 lines.Add("    {");
-                                lines.Add("        " + variable.fieldName + "[i] = new " + variable.className + "(b);");
+                                lines.Add("        " + variable.fieldName + "[i] = new " + variable.className + "(ref b);");
                                 lines.Add("    }");
                             }
                         }
@@ -458,7 +458,7 @@ namespace Iviz.MsgsGen
                                 lines.Add("    " + variable.fieldName + " = b.DeserializeArray<" + variable.className + ">(" + variable.arraySize + ");");
                                 lines.Add("    for (int i = 0; i < " + variable.arraySize + "; i++)");
                                 lines.Add("    {");
-                                lines.Add("        " + variable.fieldName + "[i] = new " + variable.className + "(b);");
+                                lines.Add("        " + variable.fieldName + "[i] = new " + variable.className + "(ref b);");
                                 lines.Add("    }");
                             }
                         }
@@ -469,9 +469,10 @@ namespace Iviz.MsgsGen
             lines.Add("");
 
             string readOnlyId = forceStruct ? "readonly " : "";
-            lines.Add("public " + readOnlyId + "ISerializable RosDeserialize(Buffer b)");
+            lines.Add("public " + readOnlyId + "ISerializable RosDeserialize(ref Buffer b)");
             lines.Add("{");
-            lines.Add("    return new " + name + "(b ?? throw new System.ArgumentNullException(nameof(b)));");
+            //lines.Add("    return new " + name + "(b ?? throw new System.ArgumentNullException(nameof(b)));");
+            lines.Add("    return new " + name + "(ref b);");
             lines.Add("}");
 
 
@@ -504,9 +505,9 @@ namespace Iviz.MsgsGen
 
             string readOnlyId = forceStruct ? "readonly " : "";
 
-            lines.Add("public " + readOnlyId + "void RosSerialize(Buffer b)");
+            lines.Add("public " + readOnlyId + "void RosSerialize(ref Buffer b)");
             lines.Add("{");
-            lines.Add("    if (b is null) throw new System.ArgumentNullException(nameof(b));");
+            //lines.Add("    if (b is null) throw new System.ArgumentNullException(nameof(b));");
             if (forceStruct)
             {
                 lines.Add("    b.Serialize(this);");
@@ -537,7 +538,7 @@ namespace Iviz.MsgsGen
                     {
                         if (!variable.IsArray)
                         {
-                            lines.Add("    " + variable.fieldName + ".RosSerialize(b);");
+                            lines.Add("    " + variable.fieldName + ".RosSerialize(ref b);");
                         }
                         else
                         {
