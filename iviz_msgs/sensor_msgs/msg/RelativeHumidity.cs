@@ -32,22 +32,21 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal RelativeHumidity(Buffer b)
+        internal RelativeHumidity(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
+            Header = new StdMsgs.Header(ref b);
             RelativeHumidity_ = b.Deserialize<double>();
             Variance = b.Deserialize<double>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new RelativeHumidity(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new RelativeHumidity(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
+            Header.RosSerialize(ref b);
             b.Serialize(RelativeHumidity_);
             b.Serialize(Variance);
         }

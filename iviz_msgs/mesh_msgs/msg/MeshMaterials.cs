@@ -32,34 +32,33 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal MeshMaterials(Buffer b)
+        internal MeshMaterials(ref Buffer b)
         {
             Clusters = b.DeserializeArray<MeshMsgs.MeshFaceCluster>();
             for (int i = 0; i < Clusters.Length; i++)
             {
-                Clusters[i] = new MeshMsgs.MeshFaceCluster(b);
+                Clusters[i] = new MeshMsgs.MeshFaceCluster(ref b);
             }
             Materials = b.DeserializeArray<MeshMsgs.MeshMaterial>();
             for (int i = 0; i < Materials.Length; i++)
             {
-                Materials[i] = new MeshMsgs.MeshMaterial(b);
+                Materials[i] = new MeshMsgs.MeshMaterial(ref b);
             }
             ClusterMaterials = b.DeserializeStructArray<uint>();
             VertexTexCoords = b.DeserializeArray<MeshMsgs.MeshVertexTexCoords>();
             for (int i = 0; i < VertexTexCoords.Length; i++)
             {
-                VertexTexCoords[i] = new MeshMsgs.MeshVertexTexCoords(b);
+                VertexTexCoords[i] = new MeshMsgs.MeshVertexTexCoords(ref b);
             }
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new MeshMaterials(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new MeshMaterials(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeArray(Clusters, 0);
             b.SerializeArray(Materials, 0);
             b.SerializeStructArray(ClusterMaterials, 0);

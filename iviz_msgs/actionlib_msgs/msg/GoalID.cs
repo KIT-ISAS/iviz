@@ -30,20 +30,19 @@ namespace Iviz.Msgs.ActionlibMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GoalID(Buffer b)
+        internal GoalID(ref Buffer b)
         {
             Stamp = b.Deserialize<time>();
             Id = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GoalID(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new GoalID(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Stamp);
             b.Serialize(Id);
         }

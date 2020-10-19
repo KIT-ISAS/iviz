@@ -74,20 +74,19 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal SetParamRequest(Buffer b)
+        internal SetParamRequest(ref Buffer b)
         {
             Name = b.DeserializeString();
             Value = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new SetParamRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new SetParamRequest(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Name);
             b.Serialize(Value);
         }

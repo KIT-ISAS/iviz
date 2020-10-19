@@ -34,26 +34,25 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Odometry(Buffer b)
+        internal Odometry(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
+            Header = new StdMsgs.Header(ref b);
             ChildFrameId = b.DeserializeString();
-            Pose = new GeometryMsgs.PoseWithCovariance(b);
-            Twist = new GeometryMsgs.TwistWithCovariance(b);
+            Pose = new GeometryMsgs.PoseWithCovariance(ref b);
+            Twist = new GeometryMsgs.TwistWithCovariance(ref b);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Odometry(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Odometry(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
+            Header.RosSerialize(ref b);
             b.Serialize(ChildFrameId);
-            Pose.RosSerialize(b);
-            Twist.RosSerialize(b);
+            Pose.RosSerialize(ref b);
+            Twist.RosSerialize(ref b);
         }
         
         public void RosValidate()

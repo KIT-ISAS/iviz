@@ -37,20 +37,19 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal NavSatStatus(Buffer b)
+        internal NavSatStatus(ref Buffer b)
         {
             Status = b.Deserialize<sbyte>();
             Service = b.Deserialize<ushort>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new NavSatStatus(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new NavSatStatus(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Status);
             b.Serialize(Service);
         }

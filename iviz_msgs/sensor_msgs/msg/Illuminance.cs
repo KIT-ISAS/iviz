@@ -39,22 +39,21 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Illuminance(Buffer b)
+        internal Illuminance(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
+            Header = new StdMsgs.Header(ref b);
             Illuminance_ = b.Deserialize<double>();
             Variance = b.Deserialize<double>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Illuminance(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Illuminance(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
+            Header.RosSerialize(ref b);
             b.Serialize(Illuminance_);
             b.Serialize(Variance);
         }

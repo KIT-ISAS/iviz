@@ -25,24 +25,23 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal MeshFeatures(Buffer b)
+        internal MeshFeatures(ref Buffer b)
         {
             MapUuid = b.DeserializeString();
             Features = b.DeserializeArray<MeshMsgs.Feature>();
             for (int i = 0; i < Features.Length; i++)
             {
-                Features[i] = new MeshMsgs.Feature(b);
+                Features[i] = new MeshMsgs.Feature(ref b);
             }
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new MeshFeatures(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new MeshFeatures(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(MapUuid);
             b.SerializeArray(Features, 0);
         }

@@ -61,7 +61,7 @@ namespace Iviz.Msgs.RosgraphMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TopicStatistics(Buffer b)
+        internal TopicStatistics(ref Buffer b)
         {
             Topic = b.DeserializeString();
             NodePub = b.DeserializeString();
@@ -79,14 +79,13 @@ namespace Iviz.Msgs.RosgraphMsgs
             StampAgeMax = b.Deserialize<duration>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new TopicStatistics(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new TopicStatistics(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Topic);
             b.Serialize(NodePub);
             b.Serialize(NodeSub);

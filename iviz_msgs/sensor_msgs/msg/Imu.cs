@@ -50,31 +50,30 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Imu(Buffer b)
+        internal Imu(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
-            Orientation = new GeometryMsgs.Quaternion(b);
+            Header = new StdMsgs.Header(ref b);
+            Orientation = new GeometryMsgs.Quaternion(ref b);
             OrientationCovariance = b.DeserializeStructArray<double>(9);
-            AngularVelocity = new GeometryMsgs.Vector3(b);
+            AngularVelocity = new GeometryMsgs.Vector3(ref b);
             AngularVelocityCovariance = b.DeserializeStructArray<double>(9);
-            LinearAcceleration = new GeometryMsgs.Vector3(b);
+            LinearAcceleration = new GeometryMsgs.Vector3(ref b);
             LinearAccelerationCovariance = b.DeserializeStructArray<double>(9);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Imu(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Imu(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
-            Orientation.RosSerialize(b);
+            Header.RosSerialize(ref b);
+            Orientation.RosSerialize(ref b);
             b.SerializeStructArray(OrientationCovariance, 9);
-            AngularVelocity.RosSerialize(b);
+            AngularVelocity.RosSerialize(ref b);
             b.SerializeStructArray(AngularVelocityCovariance, 9);
-            LinearAcceleration.RosSerialize(b);
+            LinearAcceleration.RosSerialize(ref b);
             b.SerializeStructArray(LinearAccelerationCovariance, 9);
         }
         

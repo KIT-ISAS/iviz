@@ -154,9 +154,9 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal CameraInfo(Buffer b)
+        internal CameraInfo(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
+            Header = new StdMsgs.Header(ref b);
             Height = b.Deserialize<uint>();
             Width = b.Deserialize<uint>();
             DistortionModel = b.DeserializeString();
@@ -166,18 +166,17 @@ namespace Iviz.Msgs.SensorMsgs
             P = b.DeserializeStructArray<double>(12);
             BinningX = b.Deserialize<uint>();
             BinningY = b.Deserialize<uint>();
-            Roi = new RegionOfInterest(b);
+            Roi = new RegionOfInterest(ref b);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new CameraInfo(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new CameraInfo(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
+            Header.RosSerialize(ref b);
             b.Serialize(Height);
             b.Serialize(Width);
             b.Serialize(DistortionModel);
@@ -187,7 +186,7 @@ namespace Iviz.Msgs.SensorMsgs
             b.SerializeStructArray(P, 12);
             b.Serialize(BinningX);
             b.Serialize(BinningY);
-            Roi.RosSerialize(b);
+            Roi.RosSerialize(ref b);
         }
         
         public void RosValidate()

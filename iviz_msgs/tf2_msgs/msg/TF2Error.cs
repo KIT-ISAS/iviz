@@ -31,20 +31,19 @@ namespace Iviz.Msgs.Tf2Msgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TF2Error(Buffer b)
+        internal TF2Error(ref Buffer b)
         {
             Error = b.Deserialize<byte>();
             ErrorString = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new TF2Error(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new TF2Error(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Error);
             b.Serialize(ErrorString);
         }

@@ -65,10 +65,10 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal NavSatFix(Buffer b)
+        internal NavSatFix(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
-            Status = new NavSatStatus(b);
+            Header = new StdMsgs.Header(ref b);
+            Status = new NavSatStatus(ref b);
             Latitude = b.Deserialize<double>();
             Longitude = b.Deserialize<double>();
             Altitude = b.Deserialize<double>();
@@ -76,16 +76,15 @@ namespace Iviz.Msgs.SensorMsgs
             PositionCovarianceType = b.Deserialize<byte>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new NavSatFix(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new NavSatFix(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
-            Status.RosSerialize(b);
+            Header.RosSerialize(ref b);
+            Status.RosSerialize(ref b);
             b.Serialize(Latitude);
             b.Serialize(Longitude);
             b.Serialize(Altitude);

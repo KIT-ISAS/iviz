@@ -72,19 +72,18 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetModelResourceRequest(Buffer b)
+        internal GetModelResourceRequest(ref Buffer b)
         {
             Uri = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GetModelResourceRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new GetModelResourceRequest(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Uri);
         }
         
@@ -125,23 +124,22 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetModelResourceResponse(Buffer b)
+        internal GetModelResourceResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
-            Model = new Model(b);
+            Model = new Model(ref b);
             Message = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GetModelResourceResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new GetModelResourceResponse(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Success);
-            Model.RosSerialize(b);
+            Model.RosSerialize(ref b);
             b.Serialize(Message);
         }
         

@@ -64,18 +64,17 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetMapRequest(Buffer b)
+        internal GetMapRequest(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GetMapRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new GetMapRequest(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
         }
         
         public void RosValidate()
@@ -102,20 +101,19 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetMapResponse(Buffer b)
+        internal GetMapResponse(ref Buffer b)
         {
-            Map = new NavMsgs.OccupancyGrid(b);
+            Map = new NavMsgs.OccupancyGrid(ref b);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GetMapResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new GetMapResponse(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Map.RosSerialize(b);
+            Map.RosSerialize(ref b);
         }
         
         public void RosValidate()

@@ -65,35 +65,34 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal InteractiveMarkerFeedback(Buffer b)
+        internal InteractiveMarkerFeedback(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
+            Header = new StdMsgs.Header(ref b);
             ClientId = b.DeserializeString();
             MarkerName = b.DeserializeString();
             ControlName = b.DeserializeString();
             EventType = b.Deserialize<byte>();
-            Pose = new GeometryMsgs.Pose(b);
+            Pose = new GeometryMsgs.Pose(ref b);
             MenuEntryId = b.Deserialize<uint>();
-            MousePoint = new GeometryMsgs.Point(b);
+            MousePoint = new GeometryMsgs.Point(ref b);
             MousePointValid = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new InteractiveMarkerFeedback(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new InteractiveMarkerFeedback(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
+            Header.RosSerialize(ref b);
             b.Serialize(ClientId);
             b.Serialize(MarkerName);
             b.Serialize(ControlName);
             b.Serialize(EventType);
-            Pose.RosSerialize(b);
+            Pose.RosSerialize(ref b);
             b.Serialize(MenuEntryId);
-            MousePoint.RosSerialize(b);
+            MousePoint.RosSerialize(ref b);
             b.Serialize(MousePointValid);
         }
         

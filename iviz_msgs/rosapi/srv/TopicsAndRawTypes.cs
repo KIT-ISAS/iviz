@@ -63,18 +63,17 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TopicsAndRawTypesRequest(Buffer b)
+        internal TopicsAndRawTypesRequest(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new TopicsAndRawTypesRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new TopicsAndRawTypesRequest(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
         }
         
         public void RosValidate()
@@ -107,21 +106,20 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TopicsAndRawTypesResponse(Buffer b)
+        internal TopicsAndRawTypesResponse(ref Buffer b)
         {
             Topics = b.DeserializeStringArray();
             Types = b.DeserializeStringArray();
             TypedefsFullText = b.DeserializeStringArray();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new TopicsAndRawTypesResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new TopicsAndRawTypesResponse(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeArray(Topics, 0);
             b.SerializeArray(Types, 0);
             b.SerializeArray(TypedefsFullText, 0);

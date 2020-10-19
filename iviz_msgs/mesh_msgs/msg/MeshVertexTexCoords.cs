@@ -24,20 +24,19 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal MeshVertexTexCoords(Buffer b)
+        internal MeshVertexTexCoords(ref Buffer b)
         {
             U = b.Deserialize<float>();
             V = b.Deserialize<float>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new MeshVertexTexCoords(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new MeshVertexTexCoords(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(U);
             b.Serialize(V);
         }

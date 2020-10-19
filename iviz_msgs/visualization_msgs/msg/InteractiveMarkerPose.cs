@@ -31,23 +31,22 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal InteractiveMarkerPose(Buffer b)
+        internal InteractiveMarkerPose(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
-            Pose = new GeometryMsgs.Pose(b);
+            Header = new StdMsgs.Header(ref b);
+            Pose = new GeometryMsgs.Pose(ref b);
             Name = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new InteractiveMarkerPose(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new InteractiveMarkerPose(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
-            Pose.RosSerialize(b);
+            Header.RosSerialize(ref b);
+            Pose.RosSerialize(ref b);
             b.Serialize(Name);
         }
         

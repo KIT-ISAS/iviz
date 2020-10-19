@@ -25,22 +25,21 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal PointStamped(Buffer b)
+        internal PointStamped(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
-            Point = new Point(b);
+            Header = new StdMsgs.Header(ref b);
+            Point = new Point(ref b);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new PointStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new PointStamped(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
-            Point.RosSerialize(b);
+            Header.RosSerialize(ref b);
+            Point.RosSerialize(ref b);
         }
         
         public void RosValidate()

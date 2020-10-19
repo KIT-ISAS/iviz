@@ -77,7 +77,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TestMultipleRequestFieldsRequest(Buffer b)
+        internal TestMultipleRequestFieldsRequest(ref Buffer b)
         {
             @int = b.Deserialize<int>();
             @float = b.Deserialize<float>();
@@ -85,14 +85,13 @@ namespace Iviz.Msgs.RosbridgeLibrary
             @bool = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new TestMultipleRequestFieldsRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new TestMultipleRequestFieldsRequest(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(@int);
             b.Serialize(@float);
             b.Serialize(@string);

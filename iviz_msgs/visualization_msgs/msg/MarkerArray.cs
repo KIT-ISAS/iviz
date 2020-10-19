@@ -22,23 +22,22 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal MarkerArray(Buffer b)
+        internal MarkerArray(ref Buffer b)
         {
             Markers = b.DeserializeArray<Marker>();
             for (int i = 0; i < Markers.Length; i++)
             {
-                Markers[i] = new Marker(b);
+                Markers[i] = new Marker(ref b);
             }
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new MarkerArray(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new MarkerArray(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeArray(Markers, 0);
         }
         

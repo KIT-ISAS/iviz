@@ -86,19 +86,18 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal AddDiagnosticsRequest(Buffer b)
+        internal AddDiagnosticsRequest(ref Buffer b)
         {
             LoadNamespace = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new AddDiagnosticsRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new AddDiagnosticsRequest(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(LoadNamespace);
         }
         
@@ -141,20 +140,19 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal AddDiagnosticsResponse(Buffer b)
+        internal AddDiagnosticsResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new AddDiagnosticsResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new AddDiagnosticsResponse(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Success);
             b.Serialize(Message);
         }

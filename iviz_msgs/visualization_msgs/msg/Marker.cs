@@ -78,16 +78,16 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Marker(Buffer b)
+        internal Marker(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
+            Header = new StdMsgs.Header(ref b);
             Ns = b.DeserializeString();
             Id = b.Deserialize<int>();
             Type = b.Deserialize<int>();
             Action = b.Deserialize<int>();
-            Pose = new GeometryMsgs.Pose(b);
-            Scale = new GeometryMsgs.Vector3(b);
-            Color = new StdMsgs.ColorRGBA(b);
+            Pose = new GeometryMsgs.Pose(ref b);
+            Scale = new GeometryMsgs.Vector3(ref b);
+            Color = new StdMsgs.ColorRGBA(ref b);
             Lifetime = b.Deserialize<duration>();
             FrameLocked = b.Deserialize<bool>();
             Points = b.DeserializeStructArray<GeometryMsgs.Point>();
@@ -97,22 +97,21 @@ namespace Iviz.Msgs.VisualizationMsgs
             MeshUseEmbeddedMaterials = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Marker(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Marker(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
+            Header.RosSerialize(ref b);
             b.Serialize(Ns);
             b.Serialize(Id);
             b.Serialize(Type);
             b.Serialize(Action);
-            Pose.RosSerialize(b);
-            Scale.RosSerialize(b);
-            Color.RosSerialize(b);
+            Pose.RosSerialize(ref b);
+            Scale.RosSerialize(ref b);
+            Color.RosSerialize(ref b);
             b.Serialize(Lifetime);
             b.Serialize(FrameLocked);
             b.SerializeStructArray(Points, 0);

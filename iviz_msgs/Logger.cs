@@ -20,12 +20,12 @@ namespace Iviz.Msgs
         /// <summary>
         /// Callback function when a log message of level 'default' is produced. 
         /// </summary>
-        public static Action<object> Log { get; set; } = Console.Out.WriteLine;
+        public static Action<object> Log { get; set; } = None;
 
         /// <summary>
         /// Callback function when a log message of level 'error' is produced. 
         /// </summary>
-        public static Action<object> LogError { get; set; } = Console.Error.WriteLine;
+        public static Action<object> LogError { get; set; } = None;
 
         /// <summary>
         /// Suppresses all printing of log text. 

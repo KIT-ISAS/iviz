@@ -71,19 +71,18 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetLabeledClustersRequest(Buffer b)
+        internal GetLabeledClustersRequest(ref Buffer b)
         {
             Uuid = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GetLabeledClustersRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new GetLabeledClustersRequest(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Uuid);
         }
         
@@ -119,23 +118,22 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetLabeledClustersResponse(Buffer b)
+        internal GetLabeledClustersResponse(ref Buffer b)
         {
             Clusters = b.DeserializeArray<MeshFaceCluster>();
             for (int i = 0; i < Clusters.Length; i++)
             {
-                Clusters[i] = new MeshFaceCluster(b);
+                Clusters[i] = new MeshFaceCluster(ref b);
             }
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GetLabeledClustersResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new GetLabeledClustersResponse(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeArray(Clusters, 0);
         }
         

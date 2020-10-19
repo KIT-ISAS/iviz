@@ -74,19 +74,18 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetTimeResponse(Buffer b)
+        internal GetTimeResponse(ref Buffer b)
         {
             Time = b.Deserialize<time>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GetTimeResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new GetTimeResponse(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Time);
         }
         

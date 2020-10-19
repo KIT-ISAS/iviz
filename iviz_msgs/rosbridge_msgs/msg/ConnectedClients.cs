@@ -22,23 +22,22 @@ namespace Iviz.Msgs.RosbridgeMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal ConnectedClients(Buffer b)
+        internal ConnectedClients(ref Buffer b)
         {
             Clients = b.DeserializeArray<ConnectedClient>();
             for (int i = 0; i < Clients.Length; i++)
             {
-                Clients[i] = new ConnectedClient(b);
+                Clients[i] = new ConnectedClient(ref b);
             }
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new ConnectedClients(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new ConnectedClients(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeArray(Clients, 0);
         }
         

@@ -36,22 +36,21 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal CompressedImage(Buffer b)
+        internal CompressedImage(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
+            Header = new StdMsgs.Header(ref b);
             Format = b.DeserializeString();
             Data = b.DeserializeStructArray<byte>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new CompressedImage(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new CompressedImage(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
+            Header.RosSerialize(ref b);
             b.Serialize(Format);
             b.SerializeStructArray(Data, 0);
         }

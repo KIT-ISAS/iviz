@@ -41,34 +41,33 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Light(Buffer b)
+        internal Light(ref Buffer b)
         {
             Name = b.DeserializeString();
             Type = b.Deserialize<byte>();
             CastShadows = b.Deserialize<bool>();
-            Diffuse = new Color(b);
+            Diffuse = new Color(ref b);
             Range = b.Deserialize<float>();
-            Position = new Vector3(b);
-            Direction = new Vector3(b);
+            Position = new Vector3(ref b);
+            Direction = new Vector3(ref b);
             InnerAngle = b.Deserialize<float>();
             OuterAngle = b.Deserialize<float>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Light(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Light(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Name);
             b.Serialize(Type);
             b.Serialize(CastShadows);
-            Diffuse.RosSerialize(b);
+            Diffuse.RosSerialize(ref b);
             b.Serialize(Range);
-            Position.RosSerialize(b);
-            Direction.RosSerialize(b);
+            Position.RosSerialize(ref b);
+            Direction.RosSerialize(ref b);
             b.Serialize(InnerAngle);
             b.Serialize(OuterAngle);
         }

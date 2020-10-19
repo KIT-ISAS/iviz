@@ -43,29 +43,28 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GridMap(Buffer b)
+        internal GridMap(ref Buffer b)
         {
-            Info = new GridMapInfo(b);
+            Info = new GridMapInfo(ref b);
             Layers = b.DeserializeStringArray();
             BasicLayers = b.DeserializeStringArray();
             Data = b.DeserializeArray<StdMsgs.Float32MultiArray>();
             for (int i = 0; i < Data.Length; i++)
             {
-                Data[i] = new StdMsgs.Float32MultiArray(b);
+                Data[i] = new StdMsgs.Float32MultiArray(ref b);
             }
             OuterStartIndex = b.Deserialize<ushort>();
             InnerStartIndex = b.Deserialize<ushort>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GridMap(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new GridMap(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Info.RosSerialize(b);
+            Info.RosSerialize(ref b);
             b.SerializeArray(Layers, 0);
             b.SerializeArray(BasicLayers, 0);
             b.SerializeArray(Data, 0);

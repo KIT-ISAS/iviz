@@ -22,14 +22,14 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Triangle(Buffer b)
+        internal Triangle(ref Buffer b)
         {
             b.Deserialize(out this);
         }
         
-        public readonly ISerializable RosDeserialize(Buffer b)
+        public readonly ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Triangle(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Triangle(ref b);
         }
         
         public override readonly int GetHashCode() => (A, B, C).GetHashCode();
@@ -42,9 +42,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public static bool operator!=(in Triangle a, in Triangle b) => !a.Equals(b);
     
-        public readonly void RosSerialize(Buffer b)
+        public readonly void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this);
         }
         

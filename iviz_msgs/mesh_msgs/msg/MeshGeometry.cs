@@ -29,25 +29,24 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal MeshGeometry(Buffer b)
+        internal MeshGeometry(ref Buffer b)
         {
             Vertices = b.DeserializeStructArray<GeometryMsgs.Point>();
             VertexNormals = b.DeserializeStructArray<GeometryMsgs.Point>();
             Faces = b.DeserializeArray<MeshMsgs.TriangleIndices>();
             for (int i = 0; i < Faces.Length; i++)
             {
-                Faces[i] = new MeshMsgs.TriangleIndices(b);
+                Faces[i] = new MeshMsgs.TriangleIndices(ref b);
             }
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new MeshGeometry(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new MeshGeometry(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeStructArray(Vertices, 0);
             b.SerializeStructArray(VertexNormals, 0);
             b.SerializeArray(Faces, 0);

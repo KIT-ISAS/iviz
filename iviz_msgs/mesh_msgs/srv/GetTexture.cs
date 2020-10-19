@@ -73,20 +73,19 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetTextureRequest(Buffer b)
+        internal GetTextureRequest(ref Buffer b)
         {
             Uuid = b.DeserializeString();
             TextureIndex = b.Deserialize<uint>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GetTextureRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new GetTextureRequest(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Uuid);
             b.Serialize(TextureIndex);
         }
@@ -123,20 +122,19 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetTextureResponse(Buffer b)
+        internal GetTextureResponse(ref Buffer b)
         {
-            Texture = new MeshMsgs.MeshTexture(b);
+            Texture = new MeshMsgs.MeshTexture(ref b);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GetTextureResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new GetTextureResponse(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Texture.RosSerialize(b);
+            Texture.RosSerialize(ref b);
         }
         
         public void RosValidate()

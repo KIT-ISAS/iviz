@@ -30,21 +30,20 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Pose2D(Buffer b)
+        internal Pose2D(ref Buffer b)
         {
             X = b.Deserialize<double>();
             Y = b.Deserialize<double>();
             Theta = b.Deserialize<double>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Pose2D(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Pose2D(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(X);
             b.Serialize(Y);
             b.Serialize(Theta);

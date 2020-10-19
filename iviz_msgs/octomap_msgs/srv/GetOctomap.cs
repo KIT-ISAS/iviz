@@ -64,18 +64,17 @@ namespace Iviz.Msgs.OctomapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetOctomapRequest(Buffer b)
+        internal GetOctomapRequest(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GetOctomapRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new GetOctomapRequest(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
         }
         
         public void RosValidate()
@@ -102,20 +101,19 @@ namespace Iviz.Msgs.OctomapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetOctomapResponse(Buffer b)
+        internal GetOctomapResponse(ref Buffer b)
         {
-            Map = new OctomapMsgs.Octomap(b);
+            Map = new OctomapMsgs.Octomap(ref b);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GetOctomapResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new GetOctomapResponse(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Map.RosSerialize(b);
+            Map.RosSerialize(ref b);
         }
         
         public void RosValidate()

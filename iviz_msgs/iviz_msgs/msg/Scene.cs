@@ -32,30 +32,29 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Scene(Buffer b)
+        internal Scene(ref Buffer b)
         {
             Name = b.DeserializeString();
             Filename = b.DeserializeString();
             Includes = b.DeserializeArray<Include>();
             for (int i = 0; i < Includes.Length; i++)
             {
-                Includes[i] = new Include(b);
+                Includes[i] = new Include(ref b);
             }
             Lights = b.DeserializeArray<Light>();
             for (int i = 0; i < Lights.Length; i++)
             {
-                Lights[i] = new Light(b);
+                Lights[i] = new Light(ref b);
             }
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Scene(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Scene(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Name);
             b.Serialize(Filename);
             b.SerializeArray(Includes, 0);

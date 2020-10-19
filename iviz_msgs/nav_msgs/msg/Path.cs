@@ -26,25 +26,24 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Path(Buffer b)
+        internal Path(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
+            Header = new StdMsgs.Header(ref b);
             Poses = b.DeserializeArray<GeometryMsgs.PoseStamped>();
             for (int i = 0; i < Poses.Length; i++)
             {
-                Poses[i] = new GeometryMsgs.PoseStamped(b);
+                Poses[i] = new GeometryMsgs.PoseStamped(ref b);
             }
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Path(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Path(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
+            Header.RosSerialize(ref b);
             b.SerializeArray(Poses, 0);
         }
         

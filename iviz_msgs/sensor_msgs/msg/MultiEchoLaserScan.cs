@@ -58,9 +58,9 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal MultiEchoLaserScan(Buffer b)
+        internal MultiEchoLaserScan(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
+            Header = new StdMsgs.Header(ref b);
             AngleMin = b.Deserialize<float>();
             AngleMax = b.Deserialize<float>();
             AngleIncrement = b.Deserialize<float>();
@@ -71,24 +71,23 @@ namespace Iviz.Msgs.SensorMsgs
             Ranges = b.DeserializeArray<LaserEcho>();
             for (int i = 0; i < Ranges.Length; i++)
             {
-                Ranges[i] = new LaserEcho(b);
+                Ranges[i] = new LaserEcho(ref b);
             }
             Intensities = b.DeserializeArray<LaserEcho>();
             for (int i = 0; i < Intensities.Length; i++)
             {
-                Intensities[i] = new LaserEcho(b);
+                Intensities[i] = new LaserEcho(ref b);
             }
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new MultiEchoLaserScan(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new MultiEchoLaserScan(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
+            Header.RosSerialize(ref b);
             b.Serialize(AngleMin);
             b.Serialize(AngleMax);
             b.Serialize(AngleIncrement);

@@ -88,7 +88,7 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetGridMapRequest(Buffer b)
+        internal GetGridMapRequest(ref Buffer b)
         {
             FrameId = b.DeserializeString();
             PositionX = b.Deserialize<double>();
@@ -98,14 +98,13 @@ namespace Iviz.Msgs.GridMapMsgs
             Layers = b.DeserializeStringArray();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GetGridMapRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new GetGridMapRequest(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(FrameId);
             b.Serialize(PositionX);
             b.Serialize(PositionY);
@@ -157,20 +156,19 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetGridMapResponse(Buffer b)
+        internal GetGridMapResponse(ref Buffer b)
         {
-            Map = new GridMapMsgs.GridMap(b);
+            Map = new GridMapMsgs.GridMap(ref b);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GetGridMapResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new GetGridMapResponse(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Map.RosSerialize(b);
+            Map.RosSerialize(ref b);
         }
         
         public void RosValidate()

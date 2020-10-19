@@ -41,23 +41,22 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal MagneticField(Buffer b)
+        internal MagneticField(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
-            MagneticField_ = new GeometryMsgs.Vector3(b);
+            Header = new StdMsgs.Header(ref b);
+            MagneticField_ = new GeometryMsgs.Vector3(ref b);
             MagneticFieldCovariance = b.DeserializeStructArray<double>(9);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new MagneticField(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new MagneticField(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
-            MagneticField_.RosSerialize(b);
+            Header.RosSerialize(ref b);
+            MagneticField_.RosSerialize(ref b);
             b.SerializeStructArray(MagneticFieldCovariance, 9);
         }
         

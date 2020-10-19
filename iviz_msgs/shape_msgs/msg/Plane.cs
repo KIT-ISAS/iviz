@@ -27,19 +27,18 @@ namespace Iviz.Msgs.ShapeMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Plane(Buffer b)
+        internal Plane(ref Buffer b)
         {
             Coef = b.DeserializeStructArray<double>(4);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Plane(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Plane(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeStructArray(Coef, 4);
         }
         

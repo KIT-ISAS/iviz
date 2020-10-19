@@ -24,14 +24,14 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal ColorRGBA(Buffer b)
+        internal ColorRGBA(ref Buffer b)
         {
             b.Deserialize(out this);
         }
         
-        public readonly ISerializable RosDeserialize(Buffer b)
+        public readonly ISerializable RosDeserialize(ref Buffer b)
         {
-            return new ColorRGBA(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new ColorRGBA(ref b);
         }
         
         public override readonly int GetHashCode() => (R, G, B, A).GetHashCode();
@@ -44,9 +44,8 @@ namespace Iviz.Msgs.StdMsgs
         
         public static bool operator!=(in ColorRGBA a, in ColorRGBA b) => !a.Equals(b);
     
-        public readonly void RosSerialize(Buffer b)
+        public readonly void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this);
         }
         

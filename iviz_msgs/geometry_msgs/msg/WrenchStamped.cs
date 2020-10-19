@@ -25,22 +25,21 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal WrenchStamped(Buffer b)
+        internal WrenchStamped(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
-            Wrench = new Wrench(b);
+            Header = new StdMsgs.Header(ref b);
+            Wrench = new Wrench(ref b);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new WrenchStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new WrenchStamped(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
-            Wrench.RosSerialize(b);
+            Header.RosSerialize(ref b);
+            Wrench.RosSerialize(ref b);
         }
         
         public void RosValidate()

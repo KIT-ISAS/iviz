@@ -26,22 +26,21 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal AccelWithCovarianceStamped(Buffer b)
+        internal AccelWithCovarianceStamped(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
-            Accel = new AccelWithCovariance(b);
+            Header = new StdMsgs.Header(ref b);
+            Accel = new AccelWithCovariance(ref b);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new AccelWithCovarianceStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new AccelWithCovarianceStamped(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
-            Accel.RosSerialize(b);
+            Header.RosSerialize(ref b);
+            Accel.RosSerialize(ref b);
         }
         
         public void RosValidate()

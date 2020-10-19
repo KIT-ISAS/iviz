@@ -71,19 +71,18 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TestArrayRequestRequest(Buffer b)
+        internal TestArrayRequestRequest(ref Buffer b)
         {
             @int = b.DeserializeStructArray<int>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new TestArrayRequestRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new TestArrayRequestRequest(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeStructArray(@int, 0);
         }
         

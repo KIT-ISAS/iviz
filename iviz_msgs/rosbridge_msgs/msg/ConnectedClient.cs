@@ -24,20 +24,19 @@ namespace Iviz.Msgs.RosbridgeMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal ConnectedClient(Buffer b)
+        internal ConnectedClient(ref Buffer b)
         {
             IpAddress = b.DeserializeString();
             ConnectionTime = b.Deserialize<time>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new ConnectedClient(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new ConnectedClient(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(IpAddress);
             b.Serialize(ConnectionTime);
         }

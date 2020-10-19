@@ -25,22 +25,21 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TwistStamped(Buffer b)
+        internal TwistStamped(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
-            Twist = new Twist(b);
+            Header = new StdMsgs.Header(ref b);
+            Twist = new Twist(ref b);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new TwistStamped(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new TwistStamped(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
-            Twist.RosSerialize(b);
+            Header.RosSerialize(ref b);
+            Twist.RosSerialize(ref b);
         }
         
         public void RosValidate()

@@ -36,21 +36,20 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Header(Buffer b)
+        internal Header(ref Buffer b)
         {
             Seq = b.Deserialize<uint>();
             Stamp = b.Deserialize<time>();
             FrameId = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Header(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Header(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Seq);
             b.Serialize(Stamp);
             b.Serialize(FrameId);

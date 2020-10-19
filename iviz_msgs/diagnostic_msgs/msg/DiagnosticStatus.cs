@@ -40,7 +40,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal DiagnosticStatus(Buffer b)
+        internal DiagnosticStatus(ref Buffer b)
         {
             Level = b.Deserialize<byte>();
             Name = b.DeserializeString();
@@ -49,18 +49,17 @@ namespace Iviz.Msgs.DiagnosticMsgs
             Values = b.DeserializeArray<KeyValue>();
             for (int i = 0; i < Values.Length; i++)
             {
-                Values[i] = new KeyValue(b);
+                Values[i] = new KeyValue(ref b);
             }
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new DiagnosticStatus(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new DiagnosticStatus(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Level);
             b.Serialize(Name);
             b.Serialize(Message);

@@ -52,20 +52,19 @@ namespace Iviz.Msgs.ShapeMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal SolidPrimitive(Buffer b)
+        internal SolidPrimitive(ref Buffer b)
         {
             Type = b.Deserialize<byte>();
             Dimensions = b.DeserializeStructArray<double>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new SolidPrimitive(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new SolidPrimitive(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Type);
             b.SerializeStructArray(Dimensions, 0);
         }

@@ -38,7 +38,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal PointField(Buffer b)
+        internal PointField(ref Buffer b)
         {
             Name = b.DeserializeString();
             Offset = b.Deserialize<uint>();
@@ -46,14 +46,13 @@ namespace Iviz.Msgs.SensorMsgs
             Count = b.Deserialize<uint>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new PointField(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new PointField(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Name);
             b.Serialize(Offset);
             b.Serialize(Datatype);

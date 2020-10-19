@@ -78,20 +78,19 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal SetCameraInfoRequest(Buffer b)
+        internal SetCameraInfoRequest(ref Buffer b)
         {
-            CameraInfo = new SensorMsgs.CameraInfo(b);
+            CameraInfo = new SensorMsgs.CameraInfo(ref b);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new SetCameraInfoRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new SetCameraInfoRequest(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            CameraInfo.RosSerialize(b);
+            CameraInfo.RosSerialize(ref b);
         }
         
         public void RosValidate()
@@ -129,20 +128,19 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal SetCameraInfoResponse(Buffer b)
+        internal SetCameraInfoResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
             StatusMessage = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new SetCameraInfoResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new SetCameraInfoResponse(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Success);
             b.Serialize(StatusMessage);
         }

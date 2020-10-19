@@ -28,26 +28,25 @@ namespace Iviz.Msgs.TrajectoryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal JointTrajectory(Buffer b)
+        internal JointTrajectory(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
+            Header = new StdMsgs.Header(ref b);
             JointNames = b.DeserializeStringArray();
             Points = b.DeserializeArray<JointTrajectoryPoint>();
             for (int i = 0; i < Points.Length; i++)
             {
-                Points[i] = new JointTrajectoryPoint(b);
+                Points[i] = new JointTrajectoryPoint(ref b);
             }
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new JointTrajectory(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new JointTrajectory(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
+            Header.RosSerialize(ref b);
             b.SerializeArray(JointNames, 0);
             b.SerializeArray(Points, 0);
         }

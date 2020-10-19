@@ -70,19 +70,18 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal SendBytesRequest(Buffer b)
+        internal SendBytesRequest(ref Buffer b)
         {
             Count = b.Deserialize<long>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new SendBytesRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new SendBytesRequest(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Count);
         }
         
@@ -110,19 +109,18 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal SendBytesResponse(Buffer b)
+        internal SendBytesResponse(ref Buffer b)
         {
             Data = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new SendBytesResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new SendBytesResponse(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Data);
         }
         

@@ -40,7 +40,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TypeDef(Buffer b)
+        internal TypeDef(ref Buffer b)
         {
             Type = b.DeserializeString();
             Fieldnames = b.DeserializeStringArray();
@@ -51,14 +51,13 @@ namespace Iviz.Msgs.Rosapi
             Constvalues = b.DeserializeStringArray();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new TypeDef(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new TypeDef(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Type);
             b.SerializeArray(Fieldnames, 0);
             b.SerializeArray(Fieldtypes, 0);

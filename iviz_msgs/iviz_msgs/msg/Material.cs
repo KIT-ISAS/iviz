@@ -31,28 +31,27 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Material(Buffer b)
+        internal Material(ref Buffer b)
         {
             Name = b.DeserializeString();
-            Ambient = new Color(b);
-            Diffuse = new Color(b);
-            Emissive = new Color(b);
-            DiffuseTexture = new Texture(b);
+            Ambient = new Color(ref b);
+            Diffuse = new Color(ref b);
+            Emissive = new Color(ref b);
+            DiffuseTexture = new Texture(ref b);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Material(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Material(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(Name);
-            Ambient.RosSerialize(b);
-            Diffuse.RosSerialize(b);
-            Emissive.RosSerialize(b);
-            DiffuseTexture.RosSerialize(b);
+            Ambient.RosSerialize(ref b);
+            Diffuse.RosSerialize(ref b);
+            Emissive.RosSerialize(ref b);
+            DiffuseTexture.RosSerialize(ref b);
         }
         
         public void RosValidate()

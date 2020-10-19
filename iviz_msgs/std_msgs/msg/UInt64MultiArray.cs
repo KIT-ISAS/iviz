@@ -27,21 +27,20 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal UInt64MultiArray(Buffer b)
+        internal UInt64MultiArray(ref Buffer b)
         {
-            Layout = new MultiArrayLayout(b);
+            Layout = new MultiArrayLayout(ref b);
             Data = b.DeserializeStructArray<ulong>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new UInt64MultiArray(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new UInt64MultiArray(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Layout.RosSerialize(b);
+            Layout.RosSerialize(ref b);
             b.SerializeStructArray(Data, 0);
         }
         

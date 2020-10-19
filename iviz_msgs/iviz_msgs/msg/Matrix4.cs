@@ -22,19 +22,18 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Matrix4(Buffer b)
+        internal Matrix4(ref Buffer b)
         {
             M = b.DeserializeStructArray<float>(16);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Matrix4(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Matrix4(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeStructArray(M, 16);
         }
         

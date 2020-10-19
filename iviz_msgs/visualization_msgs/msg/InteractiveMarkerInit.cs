@@ -36,25 +36,24 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal InteractiveMarkerInit(Buffer b)
+        internal InteractiveMarkerInit(ref Buffer b)
         {
             ServerId = b.DeserializeString();
             SeqNum = b.Deserialize<ulong>();
             Markers = b.DeserializeArray<InteractiveMarker>();
             for (int i = 0; i < Markers.Length; i++)
             {
-                Markers[i] = new InteractiveMarker(b);
+                Markers[i] = new InteractiveMarker(ref b);
             }
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new InteractiveMarkerInit(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new InteractiveMarkerInit(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(ServerId);
             b.Serialize(SeqNum);
             b.SerializeArray(Markers, 0);

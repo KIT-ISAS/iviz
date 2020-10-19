@@ -22,23 +22,22 @@ namespace Iviz.Msgs.Tf2Msgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TFMessage(Buffer b)
+        internal TFMessage(ref Buffer b)
         {
             Transforms = b.DeserializeArray<GeometryMsgs.TransformStamped>();
             for (int i = 0; i < Transforms.Length; i++)
             {
-                Transforms[i] = new GeometryMsgs.TransformStamped(b);
+                Transforms[i] = new GeometryMsgs.TransformStamped(ref b);
             }
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new TFMessage(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new TFMessage(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.SerializeArray(Transforms, 0);
         }
         

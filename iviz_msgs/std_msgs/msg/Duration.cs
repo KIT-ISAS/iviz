@@ -18,14 +18,14 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Duration(Buffer b)
+        internal Duration(ref Buffer b)
         {
             b.Deserialize(out this);
         }
         
-        public readonly ISerializable RosDeserialize(Buffer b)
+        public readonly ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Duration(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Duration(ref b);
         }
         
         public override readonly int GetHashCode() => (Data).GetHashCode();
@@ -38,9 +38,8 @@ namespace Iviz.Msgs.StdMsgs
         
         public static bool operator!=(in Duration a, in Duration b) => !a.Equals(b);
     
-        public readonly void RosSerialize(Buffer b)
+        public readonly void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
             b.Serialize(this);
         }
         

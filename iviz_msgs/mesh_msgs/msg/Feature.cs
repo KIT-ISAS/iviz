@@ -24,21 +24,20 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Feature(Buffer b)
+        internal Feature(ref Buffer b)
         {
-            Location = new GeometryMsgs.Point(b);
+            Location = new GeometryMsgs.Point(ref b);
             Descriptor = b.DeserializeStructArray<StdMsgs.Float32>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Feature(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new Feature(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Location.RosSerialize(b);
+            Location.RosSerialize(ref b);
             b.SerializeStructArray(Descriptor, 0);
         }
         

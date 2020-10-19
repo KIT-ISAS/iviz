@@ -53,24 +53,23 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal MultiDOFJointState(Buffer b)
+        internal MultiDOFJointState(ref Buffer b)
         {
-            Header = new StdMsgs.Header(b);
+            Header = new StdMsgs.Header(ref b);
             JointNames = b.DeserializeStringArray();
             Transforms = b.DeserializeStructArray<GeometryMsgs.Transform>();
             Twist = b.DeserializeStructArray<GeometryMsgs.Twist>();
             Wrench = b.DeserializeStructArray<GeometryMsgs.Wrench>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new MultiDOFJointState(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new MultiDOFJointState(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Header.RosSerialize(b);
+            Header.RosSerialize(ref b);
             b.SerializeArray(JointNames, 0);
             b.SerializeStructArray(Transforms, 0);
             b.SerializeStructArray(Twist, 0);

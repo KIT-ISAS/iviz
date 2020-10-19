@@ -81,23 +81,22 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetPlanRequest(Buffer b)
+        internal GetPlanRequest(ref Buffer b)
         {
-            Start = new GeometryMsgs.PoseStamped(b);
-            Goal = new GeometryMsgs.PoseStamped(b);
+            Start = new GeometryMsgs.PoseStamped(ref b);
+            Goal = new GeometryMsgs.PoseStamped(ref b);
             Tolerance = b.Deserialize<float>();
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GetPlanRequest(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new GetPlanRequest(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Start.RosSerialize(b);
-            Goal.RosSerialize(b);
+            Start.RosSerialize(ref b);
+            Goal.RosSerialize(ref b);
             b.Serialize(Tolerance);
         }
         
@@ -137,20 +136,19 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetPlanResponse(Buffer b)
+        internal GetPlanResponse(ref Buffer b)
         {
-            Plan = new NavMsgs.Path(b);
+            Plan = new NavMsgs.Path(ref b);
         }
         
-        public ISerializable RosDeserialize(Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GetPlanResponse(b ?? throw new System.ArgumentNullException(nameof(b)));
+            return new GetPlanResponse(ref b);
         }
     
-        public void RosSerialize(Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            if (b is null) throw new System.ArgumentNullException(nameof(b));
-            Plan.RosSerialize(b);
+            Plan.RosSerialize(ref b);
         }
         
         public void RosValidate()
