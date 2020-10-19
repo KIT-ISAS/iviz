@@ -92,6 +92,7 @@ namespace Iviz.Roslib
             const int maxWaitInMs = 100;
             if (!managerSignal.Wait(maxWaitInMs))
             {
+                // shouldn't happen
                 Logger.Log($"{this}: Sender start timeout?");
             }
 

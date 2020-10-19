@@ -220,23 +220,9 @@ namespace Iviz.Roslib
                 return client;
             }
 
-            Logger.Log($"{this}: Connection round 1 failed!");
-            
-            for (int i = 0; i < 5 && keepRunning; i++)
+            for (int i = 0; i < 60 && keepRunning; i++)
             {
                 await Task.Delay(1000);
-                client = await TryToConnect(timeoutInMs);
-                if (client != null)
-                {
-                    return client;
-                }
-            }
-
-            Logger.Log($"{this}: Connection round 2 failed!");
-
-            for (int i = 0; i < 12 * 5 && keepRunning; i++)
-            {
-                await Task.Delay(5000);
                 client = await TryToConnect(timeoutInMs);
                 if (client != null)
                 {
@@ -254,7 +240,7 @@ namespace Iviz.Roslib
                 tcpClient = await KeepReconnecting(timeoutInMs);
                 if (tcpClient == null)
                 {
-                    Logger.Log($"{this}: Ran out of retries. Leaving!");
+                    Logger.LogDebug($"{this}: Ran out of retries. Leaving!");
                     break;
                 }
 

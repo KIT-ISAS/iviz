@@ -23,14 +23,6 @@ namespace Iviz.Roslib
         public InvalidMessageTypeException(string message) : base(message)
         {
         }
-
-        public InvalidMessageTypeException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-
-        public InvalidMessageTypeException()
-        {
-        }
     }
 
     /// <summary>
@@ -38,15 +30,7 @@ namespace Iviz.Roslib
     /// </summary>
     public class ConnectionException : Exception
     {
-        public ConnectionException(string message) : base(message)
-        {
-        }
-
         public ConnectionException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-
-        public ConnectionException()
         {
         }
     }
@@ -65,13 +49,9 @@ namespace Iviz.Roslib
         }
     }
 
-    public class XmlCallException : Exception
+    public class RosRpcException : Exception
     {
-        public XmlCallException(string message) : base(message)
-        {
-        }
-
-        public XmlCallException(string message, Exception innerException) : base(message, innerException)
+        public RosRpcException(string message) : base(message)
         {
         }
     }
@@ -488,7 +468,7 @@ namespace Iviz.Roslib
             if (!masterResponse.IsValid)
             {
                 subscribersByTopic.TryRemove(topic, out _);
-                throw new XmlCallException(
+                throw new RosRpcException(
                     $"Error registering publisher for topic {topic}: {masterResponse.StatusMessage}");
             }
 
@@ -511,7 +491,7 @@ namespace Iviz.Roslib
             if (!masterResponse.IsValid)
             {
                 subscribersByTopic.TryRemove(topic, out _);
-                throw new XmlCallException(
+                throw new RosRpcException(
                     $"Error registering publisher for topic {topic}: {masterResponse.StatusMessage}");
             }
 
@@ -879,7 +859,7 @@ namespace Iviz.Roslib
                     .ToArray().AsReadOnly();
             }
 
-            throw new XmlCallException("Failed to retrieve topics: " + response.StatusMessage);
+            throw new RosRpcException("Failed to retrieve topics: " + response.StatusMessage);
         }
 
         /// <summary>
@@ -897,7 +877,7 @@ namespace Iviz.Roslib
                     .ToArray().AsReadOnly();
             }
 
-            throw new XmlCallException("Failed to retrieve topics: " + response.StatusMessage);
+            throw new RosRpcException("Failed to retrieve topics: " + response.StatusMessage);
         }
 
         /// <summary>
@@ -919,7 +899,7 @@ namespace Iviz.Roslib
                 return new SystemState(response.Publishers, response.Subscribers, response.Services);
             }
 
-            throw new XmlCallException("Failed to retrieve system state: " + response.StatusMessage);
+            throw new RosRpcException("Failed to retrieve system state: " + response.StatusMessage);
         }
 
         /// <summary>
@@ -935,7 +915,7 @@ namespace Iviz.Roslib
                 return new SystemState(response.Publishers, response.Subscribers, response.Services);
             }
 
-            throw new XmlCallException("Failed to retrieve system state: " + response.StatusMessage);
+            throw new RosRpcException("Failed to retrieve system state: " + response.StatusMessage);
         }
 
         /// <summary>
@@ -1208,7 +1188,7 @@ namespace Iviz.Roslib
             LookupServiceResponse response = Master.LookupService(serviceName);
             if (!response.IsValid)
             {
-                throw new XmlCallException("Failed to call service: " + response.StatusMessage);
+                throw new RosRpcException("Failed to call service: " + response.StatusMessage);
             }
 
             Uri serviceUri = response.ServiceUrl;
@@ -1249,7 +1229,7 @@ namespace Iviz.Roslib
             LookupServiceResponse response = await Master.LookupServiceAsync(serviceName);
             if (!response.IsValid)
             {
-                throw new XmlCallException("Failed to call service: " + response.StatusMessage);
+                throw new RosRpcException("Failed to call service: " + response.StatusMessage);
             }
 
             Uri serviceUri = response.ServiceUrl;
