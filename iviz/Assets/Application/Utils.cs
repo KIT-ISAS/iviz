@@ -311,7 +311,7 @@ namespace Iviz
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool HasNaN(this Msgs.GeometryMsgs.Quaternion v)
+        static bool HasNaN(this Msgs.GeometryMsgs.Quaternion v)
         {
             return double.IsNaN(v.X) || double.IsNaN(v.Y) || double.IsNaN(v.Z) || double.IsNaN(v.W);
         }

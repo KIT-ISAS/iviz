@@ -12,22 +12,22 @@ namespace Iviz.Displays
         struct MinMaxJobPoints : IJob
         {
             [ReadOnly]
-            public NativeSlice<float4> Input;
+            public NativeSlice<float4> input;
 
             [WriteOnly]
-            public NativeArray<float4> Output;
+            public NativeArray<float4> output;
 
             public void Execute()
             {
-                float4 Min = new float4(float.MaxValue);
-                float4 Max = new float4(float.MinValue);
-                for (int i = 0; i < Input.Length; i++)
+                float4 min = new float4(float.MaxValue);
+                float4 max = new float4(float.MinValue);
+                for (int i = 0; i < input.Length; i++)
                 {
-                    Min = math.min(Min, Input[i]);
-                    Max = math.max(Max, Input[i]);
+                    min = math.min(min, input[i]);
+                    max = math.max(max, input[i]);
                 }
-                Output[0] = Min;
-                Output[1] = Max;
+                output[0] = min;
+                output[1] = max;
             }
         }
 
@@ -41,13 +41,13 @@ namespace Iviz.Displays
 
             MinMaxJobPoints job = new MinMaxJobPoints
             {
-                Input = pointBuffer.Slice(0, size),
-                Output = output
+                input = pointBuffer.Slice(0, size),
+                output = output
             };
             job.Schedule().Complete();
 
-            Vector3 positionMin = new Vector3(output[0].x, output[0].y, output[0].z);
-            Vector3 positionMax = new Vector3(output[1].x, output[1].y, output[1].z);
+            Vector3 positionMin = output[0].xyz;
+            Vector3 positionMax = output[1].xyz;
 
             bounds = new Bounds((positionMax + positionMin) / 2, positionMax - positionMin);
             intensitySpan = new Vector2(output[0].w, output[1].w);
@@ -59,24 +59,24 @@ namespace Iviz.Displays
         struct MinMaxJobLines : IJob
         {
             [ReadOnly]
-            public NativeSlice<float4x2> Input;
+            public NativeSlice<float4x2> input;
 
             [WriteOnly]
-            public NativeArray<float4> Output;
+            public NativeArray<float4> output;
 
             public void Execute()
             {
-                float4 Min = new float4(float.MaxValue);
-                float4 Max = new float4(float.MinValue);
-                for (int i = 0; i < Input.Length; i++)
+                float4 min = new float4(float.MaxValue);
+                float4 max = new float4(float.MinValue);
+                for (int i = 0; i < input.Length; i++)
                 {
-                    Min = math.min(Min, Input[i].c0);
-                    Max = math.max(Max, Input[i].c0);
-                    Min = math.min(Min, Input[i].c1);
-                    Max = math.max(Max, Input[i].c1);
+                    min = math.min(min, input[i].c0);
+                    max = math.max(max, input[i].c0);
+                    min = math.min(min, input[i].c1);
+                    max = math.max(max, input[i].c1);
                 }
-                Output[0] = Min;
-                Output[1] = Max;
+                output[0] = min;
+                output[1] = max;
             }
         }
 
@@ -90,13 +90,13 @@ namespace Iviz.Displays
 
             MinMaxJobLines job = new MinMaxJobLines
             {
-                Input = pointBuffer.Slice(0, size),
-                Output = output
+                input = pointBuffer.Slice(0, size),
+                output = output
             };
             job.Schedule().Complete();
 
-            Vector3 positionMin = new Vector3(output[0].x, output[0].y, output[0].z);
-            Vector3 positionMax = new Vector3(output[1].x, output[1].y, output[1].z);
+            Vector3 positionMin = output[0].xyz;
+            Vector3 positionMax = output[1].xyz;
 
             bounds = new Bounds((positionMax + positionMin) / 2, positionMax - positionMin);
             intensitySpan = new Vector2(output[0].w, output[1].w);

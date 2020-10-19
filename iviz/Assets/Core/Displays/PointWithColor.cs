@@ -14,7 +14,7 @@ namespace Iviz.Displays
         /// <summary>
         /// Color representation from the bits of a float.
         /// </summary>
-        public static Color32 ColorFromFloatBits(float f)
+        internal static Color32 ColorFromFloatBits(float f)
         {
             unsafe
             {

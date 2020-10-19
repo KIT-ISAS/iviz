@@ -333,7 +333,7 @@ namespace Iviz.Controllers
         TFFrame CreateFrameObject(string id, Transform parent, TFFrame parentFrame)
         {
             TFFrame frame = ResourcePool.GetOrCreate<TFFrame>(Resource.Displays.TFFrame, parent);
-            frame.name = "{" + id + "}";
+            frame.name = $"{{{id}}}";
             frame.Id = id;
             frame.Visible = config.AxisVisible;
             frame.FrameSize = config.AxisSize;

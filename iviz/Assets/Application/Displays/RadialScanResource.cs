@@ -25,6 +25,9 @@ namespace Iviz.Displays
         readonly List<LineWithColor> lineBuffer = new List<LineWithColor>();
         readonly List<PointWithColor> pointBuffer = new List<PointWithColor>();
 
+        (float angleMin, float angleIncrement, int length) cacheProperties;
+        readonly List<Vector2> cache = new List<Vector2>();
+
         LineResource lines;
         PointListResource pointCloud;
         bool colliderEnabled;
@@ -261,38 +264,35 @@ namespace Iviz.Displays
                 throw new ArgumentException("Invalid intensity size", nameof(ranges));
             }
 
-            pointBuffer.Clear();
-            if (!UseIntensityNotRange)
+            if (!Mathf.Approximately(angleMin, cacheProperties.angleMin) ||
+                !Mathf.Approximately(angleIncrement, cacheProperties.angleIncrement) ||
+                intensities.Length != cacheProperties.length)
             {
+                cache.Clear();
+                cacheProperties = (angleMin, angleIncrement, intensities.Length);
                 for (int i = 0; i < ranges.Length; i++)
                 {
-                    float range = ranges[i];
-                    if (float.IsNaN(range) || range > rangeMax || range < rangeMin)
-                    {
-                        continue;
-                    }
-
                     float a = angleMin + angleIncrement * i;
-                    float x = Mathf.Cos(a);
-                    float y = Mathf.Sin(a);
-                    pointBuffer.Add(new PointWithColor(new float4(-y, 0, x, 1) * range));
+                    Vector3 rosPos = new Vector3(Mathf.Cos(a), Mathf.Sin(a), 0);
+                    Vector3 unityPos = rosPos.Ros2Unity();
+                    cache.Add(new Vector2(unityPos.x, unityPos.z));
                 }
             }
-            else
-            {
-                for (int i = 0; i < ranges.Length; i++)
-                {
-                    float range = ranges[i];
-                    if (float.IsNaN(range) || range > rangeMax || range < rangeMin)
-                    {
-                        continue;
-                    }
 
-                    float a = angleMin + angleIncrement * i;
-                    float x = Mathf.Cos(a);
-                    float y = Mathf.Sin(a);
-                    pointBuffer.Add(new PointWithColor(-y * range, 0, x * range, intensities[i]));
+            pointBuffer.Clear();
+            bool tmpUseIntensityNotRange = UseIntensityNotRange;
+            for (int i = 0; i < ranges.Length; i++)
+            {
+                float range = ranges[i];
+                if (float.IsNaN(range) || range > rangeMax || range < rangeMin)
+                {
+                    continue;
                 }
+
+                float x = cache[i].x;
+                float z = cache[i].y;
+                pointBuffer.Add(new PointWithColor(x * range, 0, z * range,
+                    tmpUseIntensityNotRange ? intensities[i] : range));
             }
 
             Size = pointBuffer.Count;

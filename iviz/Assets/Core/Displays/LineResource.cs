@@ -107,7 +107,7 @@ namespace Iviz.Displays
             else
             {
                 foreach (LineWithColor t in lines)
-                {
+                { 
                     if (!IsElementValid(t))
                     {
                         continue;
@@ -253,7 +253,7 @@ namespace Iviz.Displays
             }
 
             var (points, colors, indices, coords) =
-                LineUtils.CreateCapsulesFromSegments(lineBuffer.AsArray(), lineBuffer.Length, ElementScale);
+                LineUtils.CreateCapsulesFromSegments(lineBuffer, ElementScale);
 
             mesh.Clear();
             mesh.vertices = points;
