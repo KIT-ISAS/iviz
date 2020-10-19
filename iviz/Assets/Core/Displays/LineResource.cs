@@ -27,8 +27,7 @@ namespace Iviz.Displays
 
         NativeList<float4x2> lineBuffer;
         ComputeBuffer lineComputeBuffer;
-
-
+        
         bool linesNeedAlpha;
 
         Mesh mesh;
@@ -55,9 +54,9 @@ namespace Iviz.Displays
         bool UseCapsuleLines => Size <= MaxSegmentsForMesh;
 
         static bool IsElementValid(in LineWithColor t) => !t.HasNaN() &&
-                                                          (t.A - t.B).sqrMagnitude > MinLineWidthSq &&
-                                                          t.A.sqrMagnitude < MaxPositionMagnitudeSq &&
-                                                          t.B.sqrMagnitude < MaxPositionMagnitudeSq;
+                                                          (t.A - t.B).MagnitudeSq() > MinLineWidthSq &&
+                                                          t.A.MagnitudeSq() < MaxPositionMagnitudeSq &&
+                                                          t.B.MagnitudeSq() < MaxPositionMagnitudeSq;
 
         /// <summary>
         /// Sets the lines with the given collection.
@@ -117,7 +116,7 @@ namespace Iviz.Displays
                     linesNeedAlpha |= t.ColorA.a < 255 || t.ColorB.a < 255;
                 }
             }
-
+            
             if (UseCapsuleLines)
             {
                 UpdateLineMesh();
@@ -228,10 +227,10 @@ namespace Iviz.Displays
                 return;
             }
 
-            if (lineComputeBuffer == null || lineComputeBuffer.count < Size)
+            if (lineComputeBuffer == null || lineComputeBuffer.count < lineBuffer.Capacity)
             {
                 lineComputeBuffer?.Release();
-                lineComputeBuffer = new ComputeBuffer(lineBuffer.Length, Marshal.SizeOf<LineWithColor>());
+                lineComputeBuffer = new ComputeBuffer(lineBuffer.Capacity, Marshal.SizeOf<LineWithColor>());
                 Properties.SetBuffer(LinesID, lineComputeBuffer);
             }
 
@@ -314,9 +313,9 @@ namespace Iviz.Displays
                 Properties.SetBuffer(LinesID, null);
             }
 
-            if (lineBuffer.Length != 0)
+            if (lineBuffer.Capacity != 0)
             {
-                lineComputeBuffer = new ComputeBuffer(lineBuffer.Length, Marshal.SizeOf<LineWithColor>());
+                lineComputeBuffer = new ComputeBuffer(lineBuffer.Capacity, Marshal.SizeOf<LineWithColor>());
                 lineComputeBuffer.SetData(lineBuffer.AsArray(), 0, 0, Size);
                 Properties.SetBuffer(LinesID, lineComputeBuffer);
             }

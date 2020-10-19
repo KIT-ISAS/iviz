@@ -594,7 +594,7 @@ namespace Iviz.App
             imageData.Show();
         }
 
-        public void ShowFrame(TFFrame frame)
+        public void ShowFrame(TfFrame frame)
         {
             tfTreeData.Show(frame);
         }

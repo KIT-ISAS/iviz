@@ -1,67 +1,60 @@
-﻿using UnityEngine;
-using Iviz.Roslib;
+﻿using System;
 using System.Runtime.Serialization;
-using System;
 using Iviz.Resources;
+using Iviz.Roslib;
+using UnityEngine;
 
 namespace Iviz.Controllers
 {
     [DataContract]
     public sealed class ARConfiguration : JsonToString, IConfiguration
     {
+        /* NonSerializable */ public float WorldScale { get; set; } = 1.0f;
+        /* NonSerializable */ public SerializableVector3 WorldOffset { get; set; } = ARController.DefaultWorldOffset;
+        /* NonSerializable */ public float WorldAngle { get; set; }
+        [DataMember] public bool SearchMarker { get; set; }
+        [DataMember] public bool MarkerHorizontal { get; set; } = true;
+        [DataMember] public int MarkerAngle { get; set; }
+        [DataMember] public string MarkerFrame { get; set; } = "";
+        [DataMember] public SerializableVector3 MarkerOffset { get; set; } = Vector3.zero;
+        /* NonSerializable */ public bool ShowRootMarker { get; set; }
+        /* NonSerializable */ public bool PinRootMarker { get; set; }
         [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
         [DataMember] public Resource.Module Module => Resource.Module.AugmentedReality;
         [DataMember] public bool Visible { get; set; } = true;
-        /* NonSerializable */ public float WorldScale { get; set; } = 1.0f;
-        /* NonSerializable */ public SerializableVector3 WorldOffset { get; set; } = ARController.DefaultWorldOffset;
-        /* NonSerializable */ public float WorldAngle { get; set; } = 0;
-        [DataMember] public bool SearchMarker { get; set; } = false;
-        [DataMember] public bool MarkerHorizontal { get; set; } = true;
-        [DataMember] public int MarkerAngle { get; set; } = 0;
-        [DataMember] public string MarkerFrame { get; set; } = "";
-        [DataMember] public SerializableVector3 MarkerOffset { get; set; } = Vector3.zero;
-
-        /* NonSerializable */ public bool ShowRootMarker { get; set; }
-        /* NonSerializable */ public bool PinRootMarker { get; set; }
     }
-    
+
     [DataContract]
     public sealed class ARSessionInfo : JsonToString
     {
         [DataMember] public float WorldScale { get; set; } = 1.0f;
         [DataMember] public SerializableVector3 WorldOffset { get; set; } = Vector3.zero;
-        [DataMember] public float WorldAngle { get; set; } = 0;
+        [DataMember] public float WorldAngle { get; set; }
         [DataMember] public bool ShowRootMarker { get; set; }
         [DataMember] public bool PinRootMarker { get; set; }
     }
 
     public abstract class ARController : MonoBehaviour, IController, IHasFrame
     {
-        public static readonly Vector3 DefaultWorldOffset = new Vector3(0.5f, 0, -0.2f);
-
-        public static ARController Instance { get; private set; }
-        public static bool ARModeEnabled => Instance != null && Instance.Visible;
-
-        public static event Action<bool> ARModeChanged;
-
         public enum RootMover
         {
             ModuleData,
             Anchor,
             ImageMarker,
             ControlMarker,
-            Configuration,
+            Configuration
         }
-        
+
+        public static readonly Vector3 DefaultWorldOffset = new Vector3(0.5f, 0, -0.2f);
         
         static ARSessionInfo savedSessionInfo;
-        
+
+        readonly ARConfiguration config = new ARConfiguration();
         protected Canvas canvas;
         protected DisplayClickableNode node;
 
-        public IModuleData ModuleData { get; set; }
+        public static ARController Instance { get; private set; }
 
-        readonly ARConfiguration config = new ARConfiguration();
         public ARConfiguration Config
         {
             get => config;
@@ -76,73 +69,20 @@ namespace Iviz.Controllers
                 MarkerOffset = value.MarkerOffset;
             }
         }
-        
+
         public Vector3 WorldPosition
         {
             get => config.WorldOffset;
             private set => config.WorldOffset = value;
         }
-        
+
         public float WorldAngle
         {
             get => config.WorldAngle;
             private set => config.WorldAngle = value;
         }
 
-        public Pose WorldPose { get; private set; } = Pose.identity;
-    
-        public event Action<RootMover> WorldPoseChanged;
-
-        void UpdateWorldPose(in Pose pose, RootMover mover)
-        {
-            WorldPose = pose;
-            if (Visible)
-            {
-                TFListener.RootFrame.transform.SetPose(pose);
-            }
-
-            WorldPoseChanged?.Invoke(mover);
-        }
-
-        protected static float AngleFromPose(in Pose unityPose)
-        {
-            float angle = unityPose.rotation.eulerAngles.y;
-            if (angle > 180)
-            {
-                angle -= 360;
-            }
-
-            return angle;
-        }
-        
-        protected void SetWorldPose(in Pose unityPose, RootMover mover)
-        {
-            float angle = AngleFromPose(unityPose);
-            WorldPosition = unityPose.position;
-            WorldAngle = angle;
-            UpdateWorldPose(unityPose, mover);
-        }
-
-        void SetWorldPose(in Vector3 unityPosition, float angle, RootMover mover)
-        {
-            WorldPosition = unityPosition;
-            WorldAngle = angle;
-            Quaternion rotation = Quaternion.AngleAxis(angle, Vector3.up);
-            UpdateWorldPose(new Pose(unityPosition, rotation), mover);
-        }
-        
-        public void SetWorldPosition(in Vector3 unityPosition, RootMover mover)
-        {
-            WorldPosition = unityPosition;
-            UpdateWorldPose(new Pose(unityPosition, WorldPose.rotation), mover);
-        }
-
-        public void SetWorldAngle(float angle, RootMover mover)
-        {
-            WorldAngle = angle;
-            Quaternion rotation = Quaternion.AngleAxis(angle, Vector3.up);
-            UpdateWorldPose(new Pose(WorldPosition, rotation), mover);
-        }
+        protected Pose WorldPose { get; private set; } = Pose.identity;
 
         public float WorldScale
         {
@@ -187,53 +127,131 @@ namespace Iviz.Controllers
         {
             get => config.MarkerFrame;
             set => config.MarkerFrame = value;
-        }    
-        
+        }
+
         public virtual Vector3 MarkerOffset
         {
             get => config.MarkerOffset;
             set => config.MarkerOffset = value;
-        }        
-        
-        public TFFrame Frame => node.Parent;
+        }
 
         static float TfRootScale
         {
             set => TFListener.RootFrame.transform.localScale = value * Vector3.one;
-        }          
-        
+        }
+
         public virtual bool PinRootMarker
         {
             get => config.PinRootMarker;
             set => config.PinRootMarker = value;
         }
-        
+
         public bool ShowRootMarker
         {
             get => config.ShowRootMarker;
             set => config.ShowRootMarker = value;
         }
-        
+
         protected virtual void Awake()
         {
             Instance = this;
-            
+            gameObject.name = "AR";
+
             if (canvas == null)
             {
                 canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
             }
 
             node = DisplayClickableNode.Instantiate("AR Node");
-            
+
             if (savedSessionInfo != null)
             {
                 SetWorldPose(savedSessionInfo.WorldOffset, savedSessionInfo.WorldAngle, RootMover.Configuration);
                 WorldScale = savedSessionInfo.WorldScale;
             }
-            
+
             TFListener.RootMarker.SetTargetPoseUpdater(pose => SetWorldPose(pose, RootMover.ControlMarker));
         }
-        
+
+        public IModuleData ModuleData { get; set; }
+
+        public virtual void StopController()
+        {
+            savedSessionInfo = new ARSessionInfo
+            {
+                WorldAngle = WorldAngle,
+                WorldOffset = WorldPosition,
+                WorldScale = WorldScale
+            };
+
+            Visible = false;
+            WorldScale = 1;
+
+            TFListener.RootMarker.SetTargetPoseUpdater(pose => TFListener.RootFrame.transform.SetPose(pose));
+
+            Instance = null;
+        }
+        void IController.ResetController()
+        {
+        }
+
+        public TfFrame Frame => node.Parent;
+
+        public static event Action<bool> ARModeChanged;
+
+        public event Action<RootMover> WorldPoseChanged;
+
+        void UpdateWorldPose(in Pose pose, RootMover mover)
+        {
+            WorldPose = pose;
+            if (Visible)
+            {
+                TFListener.RootFrame.transform.SetPose(pose);
+            }
+
+            WorldPoseChanged?.Invoke(mover);
+        }
+
+        protected static float AngleFromPose(in Pose unityPose)
+        {
+            float angle = unityPose.rotation.eulerAngles.y;
+            if (angle > 180)
+            {
+                angle -= 360;
+            }
+
+            return angle;
+        }
+
+        protected void SetWorldPose(in Pose unityPose, RootMover mover)
+        {
+            float angle = AngleFromPose(unityPose);
+            WorldPosition = unityPose.position;
+            WorldAngle = angle;
+            UpdateWorldPose(unityPose, mover);
+        }
+
+        void SetWorldPose(in Vector3 unityPosition, float angle, RootMover mover)
+        {
+            WorldPosition = unityPosition;
+            WorldAngle = angle;
+            Quaternion rotation = Quaternion.AngleAxis(angle, Vector3.up);
+            UpdateWorldPose(new Pose(unityPosition, rotation), mover);
+        }
+
+        public void SetWorldPosition(in Vector3 unityPosition, RootMover mover)
+        {
+            WorldPosition = unityPosition;
+            UpdateWorldPose(new Pose(unityPosition, WorldPose.rotation), mover);
+        }
+
+        public void SetWorldAngle(float angle, RootMover mover)
+        {
+            WorldAngle = angle;
+            Quaternion rotation = Quaternion.AngleAxis(angle, Vector3.up);
+            UpdateWorldPose(new Pose(WorldPosition, rotation), mover);
+        }
+
         public virtual bool FindClosest(in Vector3 position, out Vector3 anchor, out Vector3 normal)
         {
             Vector3 origin = position + 0.05f * Vector3.up;
@@ -243,31 +261,9 @@ namespace Iviz.Controllers
 
         protected abstract bool FindRayHit(in Ray ray, out Vector3 anchor, out Vector3 normal);
 
-        public virtual void Stop()
-        {
-            savedSessionInfo = new ARSessionInfo()
-            {
-                WorldAngle = WorldAngle,
-                WorldOffset = WorldPosition,
-                WorldScale = WorldScale
-            };
-            
-            Visible = false;
-            WorldScale = 1;
-
-            TFListener.RootMarker.SetTargetPoseUpdater(pose => TFListener.RootFrame.transform.SetPose(pose));
-            
-            Instance = null;
-        }
-        
         public static Pose RelativePoseToWorld(in Pose unityPose)
         {
-            //Debug.Log(Instance.WorldPose);
             return Instance == null ? unityPose : Instance.WorldPose.Inverse().Multiply(unityPose);
-        }
-
-        public void Reset()
-        {
         }
     }
 }

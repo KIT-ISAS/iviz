@@ -32,7 +32,7 @@ namespace Iviz.Controllers
         public DisplayClickableNode Node { get; }
         ImageResource marker;
 
-        public override TFFrame Frame => Node.Parent;
+        public override TfFrame Frame => Node.Parent;
 
         public ImageTexture ImageTexture { get; }
         public Texture2D Texture => ImageTexture.Texture;
@@ -231,9 +231,9 @@ namespace Iviz.Controllers
             ImageTexture.Set(width, height, msg.Encoding, msg.Data);
         }
 
-        public override void Stop()
+        public override void StopController()
         {
-            base.Stop();
+            base.StopController();
             marker.Texture = null;
             ResourcePool.Dispose(Resource.Displays.Image, marker.gameObject);
             marker = null;

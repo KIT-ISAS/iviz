@@ -26,7 +26,7 @@ namespace Iviz.Controllers
         
         public RosSender<InteractiveMarkerFeedback> Publisher { get; private set; }
 
-        public override TFFrame Frame => TFListener.MapFrame;
+        public override TfFrame Frame => TFListener.MapFrame;
 
         readonly Dictionary<string, InteractiveMarkerObject> imarkers =
             new Dictionary<string, InteractiveMarkerObject>();
@@ -64,9 +64,9 @@ namespace Iviz.Controllers
             Publisher = new RosSender<InteractiveMarkerFeedback>(config.Topic + "/feedback");
         }
 
-        public override void Stop()
+        public override void StopController()
         {
-            base.Stop();
+            base.StopController();
             GameThread.EverySecond -= CheckForExpiredMarkers;
 
             foreach (var markerObject in imarkers.Values)
@@ -81,9 +81,9 @@ namespace Iviz.Controllers
             UnityEngine.Object.Destroy(node.gameObject);
         }
 
-        public override void Reset()
+        public override void ResetController()
         {
-            base.Reset();
+            base.ResetController();
             foreach (var markerObject in imarkers.Values)
             {
                 DeleteMarkerObject(markerObject);

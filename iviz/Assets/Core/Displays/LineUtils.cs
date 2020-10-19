@@ -45,7 +45,7 @@ namespace Iviz.Displays
         public static void AddLineStipple(List<LineWithColor> lines, in Vector3 a, in Vector3 b, Color color,
             float stippleLength = 0.1f)
         {
-            float remainingLength = (b - a).magnitude;
+            float remainingLength = (b - a).Magnitude();
             Vector3 direction = (b - a) / remainingLength;
             Vector3 advance = direction * stippleLength;
             Vector3 position = a;
@@ -73,14 +73,14 @@ namespace Iviz.Displays
             Color color,
             int numStipples = 10)
         {
-            Vector3 x = Vector3.forward;
-            if (x == axis)
+            Vector3 notAxis = Vector3.forward;
+            if (Mathf.Approximately(notAxis.Cross(axis).MagnitudeSq(), 0))
             {
-                x = Vector3.right;
+                notAxis = Vector3.right;
             }
 
-            Vector3 diry = Vector3.Cross(x, axis).normalized;
-            Vector3 dirx = Vector3.Cross(axis, diry).normalized;
+            Vector3 diry = notAxis.Cross(axis).Normalized();
+            Vector3 dirx = axis.Cross(diry).Normalized();
             dirx *= radius;
             diry *= radius;
 
@@ -122,18 +122,18 @@ namespace Iviz.Displays
                 Vector3 a = line.c0.xyz;
                 Vector3 b = line.c1.xyz;
                 dirx = b - a;
-                dirx /= dirx.magnitude;
+                dirx /= dirx.Magnitude();
                 
-                diry = Vector3.Cross(Vector3.forward, dirx);
-                if (Mathf.Approximately(diry.sqrMagnitude, 0))
+                diry = Vector3.forward.Cross(dirx);
+                if (Mathf.Approximately(diry.MagnitudeSq(), 0))
                 {
-                    diry = Vector3.Cross(Vector3.up, dirx);
+                    diry = Vector3.up.Cross(dirx);
                 }
 
                 dirx *= scale;
-                diry *= scale / diry.magnitude;
-                dirz = Vector3.Cross(dirx, diry);
-                dirz *= scale / dirz.magnitude;
+                diry *= scale / diry.Magnitude();
+                dirz = dirx.Cross(diry);
+                dirz *= scale / dirz.Magnitude();
 
                 points[poff + 0] = Transform(CapsuleLines[0]) + a;
                 points[poff + 1] = Transform(CapsuleLines[1]) + a;

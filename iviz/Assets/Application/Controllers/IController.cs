@@ -29,12 +29,12 @@ namespace Iviz.Controllers
         /// <summary>
         /// Tells the controller to finalize and dispose its resources. 
         /// </summary>
-        void Stop();
+        void StopController();
         /// <summary>
         /// Tells the controller to 'reset' itself.
         /// What this means is dependent on the controller.
         /// For example, it can erase its cache or removed stored information.
         /// </summary>
-        void Reset();
+        void ResetController();
     }
 }

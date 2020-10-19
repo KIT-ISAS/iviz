@@ -29,8 +29,8 @@ namespace Iviz.App
             }
         }
 
-        TFFrame frame;
-        public TFFrame Frame
+        TfFrame frame;
+        public TfFrame Frame
         {
             get => frame;
             private set

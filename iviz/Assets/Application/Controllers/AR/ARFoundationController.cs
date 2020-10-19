@@ -11,22 +11,26 @@ namespace Iviz.Controllers
 {
     public sealed class ARFoundationController : ARController
     {
+        const float AnchorPauseTimeInSec = 2;
+        const int SetupModeLayer = 14;
+        
         static ARSessionInfo savedSessionInfo;
 
         [SerializeField] Camera arCamera = null;
         [SerializeField] ARSessionOrigin arSessionOrigin = null;
         [SerializeField] Light arLight = null;
         [SerializeField] ARCameraFovDisplay fovDisplay = null;
-
+        [SerializeField] AxisFrameResource setupModeFrame = null;
+        
         Camera mainCamera;
         ARPlaneManager planeManager;
         ARTrackedImageManager tracker;
         ARRaycastManager raycaster;
         ARMarkerResource resource;
-
         ARAnchorManager anchorManager;
         ARAnchorResource worldAnchor;
-
+        
+        
         public override bool Visible
         {
             get => base.Visible;
@@ -41,6 +45,19 @@ namespace Iviz.Controllers
                 canvas.worldCamera = TFListener.MainCamera;
             }
         }
+
+        bool setupModeEnabled = true;
+        bool SetupModeEnabled
+        {
+            get => setupModeEnabled;
+            set
+            {
+                setupModeEnabled = value;
+                arCamera.cullingMask = value ? (1 << SetupModeLayer) : ~(1 << SetupModeLayer);
+            }
+        }
+        
+        public bool HasSetupModePose { get; private set; }
 
         bool MarkerFound { get; set; }
 
@@ -142,7 +159,6 @@ namespace Iviz.Controllers
 
             tracker = arSessionOrigin.GetComponent<ARTrackedImageManager>();
             raycaster = arSessionOrigin.GetComponent<ARRaycastManager>();
-
             anchorManager = arSessionOrigin.GetComponent<ARAnchorManager>();
             lastAnchorMoved = Time.time;
 
@@ -155,6 +171,15 @@ namespace Iviz.Controllers
             MarkerFound = false;
 
             Config = new ARConfiguration();
+
+            if (setupModeFrame == null)
+            {
+                setupModeFrame = ResourcePool.GetOrCreateDisplay<AxisFrameResource>(arCamera.transform);
+                setupModeFrame.Layer = SetupModeLayer;
+            }
+            
+            SetupModeEnabled = true;
+            setupModeFrame.AxisLength = TFListener.Instance.FrameSize;
 
             WorldPoseChanged += OnWorldPoseChanged;
         }
@@ -185,7 +210,7 @@ namespace Iviz.Controllers
                 worldAnchor = null;
             }
 
-            lastAnchorMoved = recreateNow ? Time.time - 2 : Time.time;
+            lastAnchorMoved = recreateNow ? Time.time - AnchorPauseTimeInSec : Time.time;
             //Debug.Log("destroying anchor! " + recreateNow);
         }
 
@@ -193,7 +218,26 @@ namespace Iviz.Controllers
 
         void Update()
         {
-            if (lastAnchorMoved == null || Time.time - lastAnchorMoved.Value < 2)
+            if (SetupModeEnabled)
+            {
+                Transform cameraTransform = arCamera.transform;
+                setupModeFrame.transform.rotation = Quaternion.Euler(0, 90 + cameraTransform.rotation.eulerAngles.y, 0);
+                Ray ray = new Ray(cameraTransform.position, cameraTransform.forward);
+                if (FindClosestPlane(ray, out ARRaycastHit hit, out _))
+                {
+                    setupModeFrame.transform.position = hit.pose.position;
+                    setupModeFrame.Tint = Color.white;
+                    HasSetupModePose = true;
+                }
+                else
+                {
+                    setupModeFrame.transform.localPosition = new Vector3(0, 0, 0.5f);
+                    setupModeFrame.Tint = new Color(1, 1, 1, 0.5f);
+                    HasSetupModePose = false;
+                }
+            }
+            
+            if (lastAnchorMoved == null || Time.time - lastAnchorMoved.Value < AnchorPauseTimeInSec)
             {
                 return;
             }
@@ -202,8 +246,6 @@ namespace Iviz.Controllers
 
             if (PinRootMarker)
             {
-                //Debug.Log("pinrootmarker!");
-
                 Vector3 origin = WorldPosition + 0.05f * Vector3.up;
                 Ray ray = new Ray(origin, Vector3.down);
                 if (FindClosestPlane(ray, out ARRaycastHit hit, out ARPlane plane))
@@ -211,13 +253,11 @@ namespace Iviz.Controllers
                     Pose pose = new Pose(hit.pose.position, WorldPose.rotation);
                     worldAnchor = anchorManager.AttachAnchor(plane, pose).GetComponent<ARAnchorResource>();
                     worldAnchor.Moved += OnWorldAnchorMoved;
-                    //Debug.Log("recreating anchor with plane!");
 
                     SetWorldPose(pose, RootMover.Anchor);
                 }
                 else
                 {
-                    //Debug.Log("not yet...!");
                     lastAnchorMoved = Time.time + 2;
                 }
             }
@@ -225,7 +265,6 @@ namespace Iviz.Controllers
             {
                 worldAnchor = anchorManager.AddAnchor(WorldPose).GetComponent<ARAnchorResource>();
                 worldAnchor.Moved += OnWorldAnchorMoved;
-                //Debug.Log("recreating anchor!");
             }
         }
 
@@ -253,7 +292,7 @@ namespace Iviz.Controllers
             if (arSessionOrigin == null || arSessionOrigin.trackablesParent == null)
             {
                 // not initialized yet!
-                plane = null;
+                plane = default;
                 hit = default;
                 return false;
             }
@@ -262,7 +301,7 @@ namespace Iviz.Controllers
             raycaster.Raycast(ray, results, TrackableType.PlaneWithinBounds);
             if (results.Count == 0)
             {
-                plane = null;
+                plane = default;
                 hit = default;
                 return false;
             }
@@ -329,9 +368,9 @@ namespace Iviz.Controllers
             MarkerFound = true;
         }
 
-        public override void Stop()
+        public override void StopController()
         {
-            base.Stop();
+            base.StopController();
             Destroy(fovDisplay.gameObject);
         }
     }

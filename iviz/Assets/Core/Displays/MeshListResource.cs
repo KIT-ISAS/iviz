@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 using Iviz.Resources;
 using Unity.Collections;
@@ -32,7 +31,7 @@ namespace Iviz.Displays
         readonly uint[] argsBuffer = {0, 0, 0, 0, 0};
         ComputeBuffer argsComputeBuffer;
         Info<GameObject> meshResource;
-        NativeArray<float4> pointBuffer;
+        NativeList<float4> pointBuffer;
         ComputeBuffer pointComputeBuffer;
 
         Mesh Mesh
@@ -86,25 +85,8 @@ namespace Iviz.Displays
             }
         }
 
-        int Size
-        {
-            get => size;
-            set
-            {
-                if (value == size)
-                {
-                    return;
-                }
-
-                size = value;
-
-                Reserve(size * 11 / 10);
-
-                argsBuffer[1] = (uint) size;
-                argsComputeBuffer.SetData(argsBuffer);
-            }
-        }
-
+        int Size => pointBuffer.Length;
+        
         /// <summary>
         /// Whether to enable shadows. Displayed shadows can get bugged if the number of instances is too high.
         /// </summary>
@@ -116,7 +98,7 @@ namespace Iviz.Displays
         public IReadOnlyCollection<PointWithColor> PointsWithColor
         {
             get => new PointListResource.PointGetHelper(pointBuffer);
-            set => Set(value.Count, value);
+            set => Set(value, value.Count);
         }
 
         public override float ElementScale
@@ -145,6 +127,8 @@ namespace Iviz.Displays
         protected override void Awake()
         {
             base.Awake();
+
+            pointBuffer = new NativeList<float4>(Allocator.Persistent);
 
             UseColormap = true;
             MeshResource = Resource.Displays.Sphere;
@@ -212,51 +196,51 @@ namespace Iviz.Displays
         public override void Suspend()
         {
             base.Suspend();
-            Size = 0;
             OcclusionOnly = false;
             UseIntensityForScaleY = false;
 
-            if (pointBuffer.Length > 0)
-            {
-                pointBuffer.Dispose();
-            }
+            pointBuffer.Clear();
             
             pointComputeBuffer?.Release();
             pointComputeBuffer = null;
             Properties.SetBuffer(PointsID, null);
         }
 
-        static bool IsValid(PointWithColor t) => !t.HasNaN() && t.Position.sqrMagnitude < MaxPositionMagnitudeSq;
+        static bool IsValid(in PointWithColor t) => !t.HasNaN() && t.Position.MagnitudeSq() < MaxPositionMagnitudeSq;
 
         /// <summary>
         /// Sets the instance positions and colors with the given enumeration.
         /// </summary>
-        /// <param name="count">The number of instances, or an upper bound.</param>
         /// <param name="points">The list of positions and colors.</param>
-        public void Set(int count, IEnumerable<PointWithColor> points)
+        /// <param name="reserve">The number of points to reserve, or 0 if unknown.</param>
+        public void Set(IEnumerable<PointWithColor> points, int reserve = 0)
         {
-            if (count < 0)
+            if (reserve < 0)
             {
-                throw new ArgumentException("Invalid count " + count, nameof(count));
+                throw new ArgumentException("Invalid reserve " + reserve, nameof(reserve));
             }
 
+            if (reserve > 0)
+            {
+                pointBuffer.Capacity = Math.Max(pointBuffer.Capacity, reserve);
+            }
+            
             if (points == null)
             {
                 throw new ArgumentNullException(nameof(points));
             }
 
-            Size = count;
-
-            var realSize = 0;
-            foreach (var point in points)
+            pointBuffer.Clear();
+            foreach (PointWithColor t in points)
             {
-                if (!IsValid(point)) { continue; }
+                if (!IsValid(t))
+                {
+                    continue;
+                }
 
-                pointBuffer[realSize] = point;
-                realSize++;
+                pointBuffer.Add(t);
             }
-
-            Size = realSize;
+            
             UpdateBuffer();
         }
 
@@ -269,27 +253,8 @@ namespace Iviz.Displays
                 1);
             Properties.SetVector(PropLocalScale, realScale);
 
-            preTranslation = UseIntensityForScaleY ? ElementScale * ElementScale3.y * Vector3.up : Vector3.zero;
+            preTranslation = UseIntensityForScaleY ? (ElementScale * ElementScale3.y / 2) * Vector3.up : Vector3.zero;
             Properties.SetVector(PropLocalOffset, preTranslation);
-        }
-
-        void Reserve(int reqDataSize)
-        {
-            if (pointBuffer.Length >= reqDataSize)
-            {
-                return;
-            }
-
-            if (pointBuffer.Length != 0)
-            {
-                pointBuffer.Dispose();
-            }
-
-            pointBuffer = new NativeArray<float4>(reqDataSize, Allocator.Persistent);
-
-            pointComputeBuffer?.Release();
-            pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithColor>());
-            Properties.SetBuffer(PointsID, pointComputeBuffer);
         }
 
         void UpdateBuffer()
@@ -299,8 +264,16 @@ namespace Iviz.Displays
                 return;
             }
 
-            pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
+            if (pointComputeBuffer == null || pointComputeBuffer.count < pointBuffer.Capacity)
+            {
+                pointComputeBuffer?.Release();
+                pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Marshal.SizeOf<PointWithColor>());
+                Properties.SetBuffer(PointsID, pointComputeBuffer);
+            }
+            
+            pointComputeBuffer.SetData(pointBuffer.AsArray(), 0, 0, Size);
             MinMaxJob.CalculateBounds(pointBuffer, Size, out Bounds pointBounds, out Vector2 span);
+            argsBuffer[1] = (uint)Size;
 
             Vector3 meshScale = ElementScale * ElementScale3;
             if (UseIntensityForScaleY)
@@ -326,10 +299,10 @@ namespace Iviz.Displays
                 Properties.SetBuffer(PointsID, null);
             }
 
-            if (pointBuffer.Length != 0)
+            if (pointBuffer.Capacity != 0)
             {
-                pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithColor>());
-                pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
+                pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Marshal.SizeOf<PointWithColor>());
+                pointComputeBuffer.SetData(pointBuffer.AsArray(), 0, 0, Size);
                 Properties.SetBuffer(PointsID, pointComputeBuffer);
             }
 

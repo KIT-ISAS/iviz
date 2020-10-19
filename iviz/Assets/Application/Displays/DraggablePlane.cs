@@ -89,7 +89,7 @@ namespace Iviz.Displays
             else
             {
                 Vector3 deltaPosition = localIntersection - startIntersection;
-                float deltaDistance = deltaPosition.magnitude;
+                float deltaDistance = deltaPosition.Magnitude();
                 if (deltaDistance > 0.5f)
                 {
                     deltaPosition *= 0.5f / deltaDistance;

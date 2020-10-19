@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Threading;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -12,10 +13,12 @@ namespace Iviz.Displays
         static GameThread Instance;
         readonly ConcurrentQueue<Action> actionsOnlyOnce = new ConcurrentQueue<Action>();
         float lastRunTime;
+        Thread gameThread;
 
         void Awake()
         {
             Instance = this;
+            gameThread = Thread.CurrentThread;
         }
 
         void Update()
@@ -50,21 +53,25 @@ namespace Iviz.Displays
         /// Run every frame.
         /// </summary>
         public static event Action EveryFrame;
+
         /// <summary>
         /// Run every frame after the rest.
         /// </summary>
         public static event Action LateEveryFrame;
+
         /// <summary>
         /// Run once per second.
         /// </summary>
         public static event Action EverySecond;
+
         /// <summary>
         /// Run once per second after the others.
         /// </summary>
         public static event Action LateEverySecond;
 
         /// <summary>
-        /// Run this action on the main thread.
+        /// Puts this action in a queue to be run on the main thread.
+        /// If it is already on the main thread, it will run on the next frame.
         /// </summary>
         /// <param name="action">Action to be run.</param>
         /// <exception cref="ArgumentNullException">If action is null.</exception>
@@ -82,5 +89,35 @@ namespace Iviz.Displays
 
             Instance.actionsOnlyOnce.Enqueue(action);
         }
+
+        /// <summary>
+        /// Puts this action in a queue to be run on the main thread.
+        /// If it is already on the main thread, runs it immediately.
+        /// </summary>
+        /// <param name="action">Action to be run.</param>
+        /// <exception cref="ArgumentNullException">If action is null.</exception>        
+        public static void PostImmediate(Action action)
+        {
+            if (action is null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
+            if (IsGameThread)
+            {
+                action();
+            }
+            else
+            {
+                if (Instance == null)
+                {
+                    return;
+                }
+
+                Instance.actionsOnlyOnce.Enqueue(action);
+            }
+        }
+
+        static bool IsGameThread => Thread.CurrentThread == Instance.gameThread;
     }
 }

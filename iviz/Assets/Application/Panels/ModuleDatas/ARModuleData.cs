@@ -42,7 +42,7 @@ namespace Iviz.App
         {
             base.Stop();
 
-            controller.Stop();
+            controller.StopController();
             Object.Destroy(controller.gameObject);
         }
 

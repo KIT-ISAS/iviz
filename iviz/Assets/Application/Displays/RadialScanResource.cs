@@ -297,14 +297,17 @@ namespace Iviz.Displays
 
             Size = pointBuffer.Count;
 
-            if (!UseLines)
+            GameThread.PostImmediate(() =>
             {
-                SetPoints();
-            }
-            else
-            {
-                SetLines();
-            }
+                if (!UseLines)
+                {
+                    SetPoints();
+                }
+                else
+                {
+                    SetLines();
+                }
+            });
         }
 
         void SetPoints()
@@ -327,7 +330,7 @@ namespace Iviz.Displays
             {
                 PointWithColor pA = pointBuffer[i];
                 PointWithColor pB = pointBuffer[(i + 1) % n];
-                if ((pB.Position - pA.Position).sqrMagnitude < maxLineDistanceSq)
+                if ((pB.Position - pA.Position).MagnitudeSq() < maxLineDistanceSq)
                 {
                     lineBuffer.Add(new LineWithColor(pA, pB));
                 }

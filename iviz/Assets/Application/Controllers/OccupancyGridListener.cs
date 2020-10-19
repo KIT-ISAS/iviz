@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 using Iviz.Displays;
 using Iviz.Msgs.NavMsgs;
 using Iviz.Resources;
@@ -33,7 +34,7 @@ namespace Iviz.Controllers
 
         public override IModuleData ModuleData { get; }
 
-        public override TFFrame Frame => node.Parent;
+        public override TfFrame Frame => node.Parent;
 
         readonly OccupancyGridConfiguration config = new OccupancyGridConfiguration();
 
@@ -146,7 +147,7 @@ namespace Iviz.Controllers
         public OccupancyGridListener(IModuleData moduleData)
         {
             ModuleData = moduleData;
-            
+
             node = DisplayClickableNode.Instantiate("Node");
 
             grids = new OccupancyGridResource[16];
@@ -161,8 +162,7 @@ namespace Iviz.Controllers
 
         public override void StartListening()
         {
-            Listener = new RosListener<OccupancyGrid>(config.Topic, Handler);
-            Listener.MaxQueueSize = (int) MaxQueueSize;
+            Listener = new RosListener<OccupancyGrid>(config.Topic, Handler) {MaxQueueSize = (int) MaxQueueSize};
             //name = "OccupancyGrid:" + config.Topic;
             node.SetName($"[{config.Topic}]");
         }
@@ -173,7 +173,7 @@ namespace Iviz.Controllers
             {
                 return;
             }
-            
+
             if (msg.Data.Length != msg.Info.Width * msg.Info.Height)
             {
                 Logger.Debug(
@@ -212,10 +212,11 @@ namespace Iviz.Controllers
             {
                 for (int u = 0; u < 4; u++, i++)
                 {
-                    grids[i].NumCellsX = numCellsX;
-                    grids[i].NumCellsY = numCellsY;
-                    grids[i].CellSize = cellSize;
-                    grids[i].transform.SetLocalPose(origin);
+                    OccupancyGridResource grid = grids[i];
+                    grid.NumCellsX = numCellsX;
+                    grid.NumCellsY = numCellsY;
+                    grid.CellSize = cellSize;
+                    grid.transform.SetLocalPose(origin);
 
                     var rect = new OccupancyGridResource.Rect
                     (
@@ -224,7 +225,7 @@ namespace Iviz.Controllers
                         ymin: v * numCellsY / 4,
                         ymax: (v + 1) * numCellsY / 4
                     );
-                    grids[i].SetOccupancy(msg.Data, rect);
+                    Task.Run(() => grid.SetOccupancy(msg.Data, rect));
                 }
             }
 
@@ -232,9 +233,9 @@ namespace Iviz.Controllers
         }
 
 
-        public override void Stop()
+        public override void StopController()
         {
-            base.Stop();
+            base.StopController();
             if (grids != null)
             {
                 foreach (var grid in grids)

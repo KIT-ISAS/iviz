@@ -37,7 +37,7 @@ namespace Iviz.App
         {
             base.Stop();
 
-            controller.Stop();
+            controller.StopController();
         }
 
 

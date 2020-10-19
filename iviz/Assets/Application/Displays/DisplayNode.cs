@@ -5,15 +5,15 @@ namespace Iviz.Controllers
 {
     public abstract class DisplayNode : MonoBehaviour
     {
-        TFFrame parent;
+        TfFrame parent;
 
-        public virtual TFFrame Parent
+        public virtual TfFrame Parent
         {
             get => parent;
             set => SetParent(value, true);
         }
 
-        void SetParent(TFFrame newParent, bool attach)
+        void SetParent(TfFrame newParent, bool attach)
         {
             if (newParent == parent)
             {
@@ -57,7 +57,7 @@ namespace Iviz.Controllers
             {
                 if (Parent == null || parentId != Parent.Id)
                 {
-                    TFFrame frame = TFListener.GetOrCreateFrame(parentId, this);
+                    TfFrame frame = TFListener.GetOrCreateFrame(parentId, this);
                     SetParent(frame, false);
                 }
 

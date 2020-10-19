@@ -16,7 +16,7 @@ namespace Iviz.App
         public override void Stop()
         {
             base.Stop();
-            Listener.Stop();
+            Listener.StopController();
             //UnityEngine.Object.Destroy(Listener.gameObject);
         }
     }

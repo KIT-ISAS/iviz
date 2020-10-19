@@ -31,7 +31,7 @@ namespace Iviz.Controllers
 
         public override IModuleData ModuleData { get; }
 
-        public override TFFrame Frame => node.Parent;
+        public override TfFrame Frame => node.Parent;
 
         readonly PathConfiguration config = new PathConfiguration();
 
@@ -203,7 +203,7 @@ namespace Iviz.Controllers
                     Pose pose = topPoseInv.Multiply(newPose.Multiply(ps.Pose.Ros2Unity()));
                     savedPoses.Add(pose);
                 }
-                else if (TFListener.TryGetFrame(ps.Header.FrameId, out TFFrame frame))
+                else if (TFListener.TryGetFrame(ps.Header.FrameId, out TfFrame frame))
                 {
                     Pose newPose = frame.LookupPose(stamp.ToTimeSpan());
                     Pose pose = topPoseInv.Multiply(newPose.Multiply(ps.Pose.Ros2Unity()));
@@ -292,9 +292,9 @@ namespace Iviz.Controllers
             resource.LinesWithColor = lines;
         }
 
-        public override void Stop()
+        public override void StopController()
         {
-            base.Stop();
+            base.StopController();
 
             ResourcePool.Dispose(Resource.Displays.Line, resource.gameObject);
             node.Stop();

@@ -21,43 +21,10 @@ namespace Iviz.Displays
         static readonly int PointsID = Shader.PropertyToID("_Points");
         static readonly int ScaleID = Shader.PropertyToID("_Scale");
 
-        NativeArray<float4> pointBuffer;
+        NativeList<float4> pointBuffer;
         ComputeBuffer pointComputeBuffer;
-        [SerializeField] int size;
 
-        int Size
-        {
-            get => size;
-            set
-            {
-                if (value == size)
-                {
-                    return;
-                }
-
-                size = value;
-                Reserve(size * 11 / 10);
-            }
-        }
-
-        void Reserve(int reqDataSize)
-        {
-            if (pointBuffer.Length >= reqDataSize)
-            {
-                return;
-            }
-
-            if (pointBuffer.Length != 0)
-            {
-                pointBuffer.Dispose();
-            }
-
-            pointBuffer = new NativeArray<float4>(reqDataSize, Allocator.Persistent);
-
-            pointComputeBuffer?.Release();
-            pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithColor>());
-            Properties.SetBuffer(PointsID, pointComputeBuffer);
-        }
+        int Size => pointBuffer.Length;
 
         /// <summary>
         /// Sets the points with the given collection.
@@ -65,21 +32,26 @@ namespace Iviz.Displays
         public IReadOnlyCollection<PointWithColor> PointsWithColor
         {
             get => new PointGetHelper(pointBuffer);
-            set => Set(value.Count, value);
+            set => Set(value, value.Count);
         }
 
-        static bool IsValid(in PointWithColor t) => !t.HasNaN() && t.Position.sqrMagnitude < MaxPositionMagnitudeSq;
+        static bool IsValid(in PointWithColor t) => !t.HasNaN() && t.Position.MagnitudeSq() < MaxPositionMagnitudeSq;
 
         /// <summary>
         /// Sets the list of points with the given enumerator.
         /// </summary>
-        /// <param name="count">The number of points, or at least an upper bound.</param>
         /// <param name="points">The point enumerator.</param>
-        public void Set(int count, IEnumerable<PointWithColor> points)
+        /// <param name="reserve">The number of points to reserve, or 0 if unknown.</param>
+        public void Set(IEnumerable<PointWithColor> points, int reserve = 0)
         {
-            if (count < 0)
+            if (reserve < 0)
             {
-                throw new ArgumentException("Invalid count " + count, nameof(count));
+                throw new ArgumentException("Invalid reserve " + reserve, nameof(reserve));
+            }
+
+            if (reserve > 0)
+            {
+                pointBuffer.Capacity = Math.Max(pointBuffer.Capacity, reserve);
             }
 
             if (points == null)
@@ -87,17 +59,17 @@ namespace Iviz.Displays
                 throw new ArgumentNullException(nameof(points));
             }
 
-            Size = count;
-
-            int realSize = 0;
+            pointBuffer.Clear();
             foreach (PointWithColor t in points)
             {
-                if (!IsValid(t)) { continue; }
+                if (!IsValid(t))
+                {
+                    continue;
+                }
 
-                pointBuffer[realSize++] = t;
+                pointBuffer.Add(t);
             }
 
-            Size = realSize;
             UpdateBuffer();
         }
 
@@ -108,7 +80,14 @@ namespace Iviz.Displays
                 return;
             }
 
-            pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
+            if (pointComputeBuffer == null || pointComputeBuffer.count < pointBuffer.Capacity)
+            {
+                pointComputeBuffer?.Release();
+                pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Marshal.SizeOf<PointWithColor>());
+                Properties.SetBuffer(PointsID, pointComputeBuffer);
+            }
+
+            pointComputeBuffer.SetData(pointBuffer.AsArray(), 0, 0, Size);
             MinMaxJob.CalculateBounds(pointBuffer, Size, out Bounds bounds, out Vector2 span);
             BoxCollider.center = bounds.center;
             BoxCollider.size = bounds.size + ElementScale * Vector3.one;
@@ -118,6 +97,7 @@ namespace Iviz.Displays
         protected override void Awake()
         {
             base.Awake();
+            pointBuffer = new NativeList<float4>(Allocator.Persistent);
             ElementScale = 0.1f;
         }
 
@@ -149,10 +129,7 @@ namespace Iviz.Displays
                 Properties.SetBuffer(PointsID, null);
             }
 
-            if (pointBuffer.Length > 0)
-            {
-                pointBuffer.Dispose();
-            }
+            pointBuffer.Dispose();
         }
 
         protected override void Rebuild()
@@ -164,10 +141,10 @@ namespace Iviz.Displays
                 Properties.SetBuffer(PointsID, null);
             }
 
-            if (pointBuffer.Length != 0)
+            if (pointBuffer.Capacity != 0)
             {
-                pointComputeBuffer = new ComputeBuffer(pointBuffer.Length, Marshal.SizeOf<PointWithColor>());
-                pointComputeBuffer.SetData(pointBuffer, 0, 0, Size);
+                pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Marshal.SizeOf<PointWithColor>());
+                pointComputeBuffer.SetData(pointBuffer.AsArray(), 0, 0, Size);
                 Properties.SetBuffer(PointsID, pointComputeBuffer);
             }
 
@@ -178,12 +155,8 @@ namespace Iviz.Displays
         public override void Suspend()
         {
             base.Suspend();
-            Size = 0;
 
-            if (pointBuffer.Length > 0)
-            {
-                pointBuffer.Dispose();
-            }
+            pointBuffer.Clear();
 
             pointComputeBuffer?.Release();
             pointComputeBuffer = null;

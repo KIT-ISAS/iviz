@@ -107,19 +107,19 @@ namespace Iviz.Displays
             IEnumerable<LineWithColor> LineEnumerator()
             {
                 int i = 1;
-                Color32 colorA = Color;
+                Color32 colorA = new Color32(Color.r, Color.g, Color.b, 0);
                 float scale = 255f / measurements.Count;
 
                 foreach (LineWithColor line in measurements)
                 {
-                    Color32 colorB = new Color32(Color.r, Color.g, Color.b, (byte) (255 - i * scale));
+                    Color32 colorB = new Color32(Color.r, Color.g, Color.b, (byte) (i * scale));
                     yield return new LineWithColor(line.A, colorA, line.B, colorB);
                     colorA = colorB;
                     i++;
                 }
             }
 
-            resource.Set(LineEnumerator());
+            resource.Set(LineEnumerator(), measurements.Count);
         }
 
         public override void Suspend()

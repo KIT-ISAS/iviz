@@ -221,7 +221,7 @@ namespace Iviz.Controllers
             reflectionProbe.RenderProbe();
         }
 
-        public void Stop()
+        public void StopController()
         {
             grid.Suspend();
             ResourcePool.DisposeDisplay(grid);
@@ -232,7 +232,7 @@ namespace Iviz.Controllers
             GameThread.EverySecond -= CheckProbeUpdate;
         }
 
-        public void Reset()
+        public void ResetController()
         {
             reflectionProbe?.RenderProbe();
         }

@@ -10,7 +10,7 @@ using Logger = Iviz.Logger;
 
 namespace Iviz.Controllers
 {
-    public sealed class TFFrame : ClickableNode, IRecyclable
+    public sealed class TfFrame : ClickableNode, IRecyclable
     {
         const int MaxPoseMagnitude = 1000;
         const int Layer = 9;
@@ -18,7 +18,7 @@ namespace Iviz.Controllers
         [SerializeField] string id;
         [SerializeField] Vector3 rosPosition;
 
-        readonly Dictionary<string, TFFrame> children = new Dictionary<string, TFFrame>();
+        readonly Dictionary<string, TfFrame> children = new Dictionary<string, TfFrame>();
         readonly HashSet<DisplayNode> listeners = new HashSet<DisplayNode>();
         readonly Timeline timeline = new Timeline();
 
@@ -40,8 +40,8 @@ namespace Iviz.Controllers
         LineConnector parentConnector;
         TrailResource trail;
 
-        public ReadOnlyDictionary<string, TFFrame> Children =>
-            new ReadOnlyDictionary<string, TFFrame>(children);
+        public ReadOnlyDictionary<string, TfFrame> Children =>
+            new ReadOnlyDictionary<string, TfFrame>(children);
 
         public string Id
         {
@@ -179,7 +179,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public override TFFrame Parent
+        public override TfFrame Parent
         {
             get => base.Parent;
             set
@@ -276,13 +276,13 @@ namespace Iviz.Controllers
             CheckIfDead();
         }
 
-        void AddChild(TFFrame frame)
+        void AddChild(TfFrame frame)
         {
             //Debug.Log(Id + " has new child " + frame);
             children.Add(frame.Id, frame);
         }
 
-        void RemoveChild(TFFrame frame)
+        void RemoveChild(TfFrame frame)
         {
             if (IsChildless)
             {
@@ -301,7 +301,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public bool SetParent(TFFrame newParent)
+        public bool SetParent(TfFrame newParent)
         {
             if (!AcceptsParents &&
                 newParent != TFListener.RootFrame &&
@@ -344,7 +344,7 @@ namespace Iviz.Controllers
             return true;
         }
 
-        bool IsChildOf(TFFrame frame)
+        bool IsChildOf(TfFrame frame)
         {
             if (Parent == null)
             {
@@ -359,7 +359,7 @@ namespace Iviz.Controllers
             pose = newPose;
             rosPosition = pose.position.Unity2Ros();
 
-            if (newPose.position.sqrMagnitude > MaxPoseMagnitude * MaxPoseMagnitude)
+            if (newPose.position.MagnitudeSq() > MaxPoseMagnitude * MaxPoseMagnitude)
             {
                 return; // lel
             }

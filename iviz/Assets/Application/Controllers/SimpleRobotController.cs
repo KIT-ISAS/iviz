@@ -178,7 +178,7 @@ namespace Iviz.Controllers
 
         public IModuleData ModuleData { get; }
 
-        public void Stop()
+        public void StopController()
         {
             node.Stop();
 
@@ -192,7 +192,7 @@ namespace Iviz.Controllers
             Object.Destroy(node.gameObject);
         }
 
-        public void Reset()
+        public void ResetController()
         {
             Robot?.Dispose();
             Robot = null;
@@ -219,7 +219,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public TFFrame Frame => node.Parent;
+        public TfFrame Frame => node.Parent;
 
         public string Name => Robot == null ? "[Empty]" : Robot.Name ?? "[No Name]";
 
@@ -367,12 +367,12 @@ namespace Iviz.Controllers
         {
             foreach (var entry in Robot.LinkParents)
             {
-                if (TFListener.TryGetFrame(Decorate(entry.Key), out TFFrame frame))
+                if (TFListener.TryGetFrame(Decorate(entry.Key), out TfFrame frame))
                 {
                     frame.RemoveListener(node);
                 }
 
-                if (TFListener.TryGetFrame(Decorate(entry.Value), out TFFrame parentFrame))
+                if (TFListener.TryGetFrame(Decorate(entry.Value), out TfFrame parentFrame))
                 {
                     parentFrame.RemoveListener(node);
                 }
@@ -393,7 +393,7 @@ namespace Iviz.Controllers
             {
                 string link = entry.Key;
                 GameObject linkObject = entry.Value;
-                TFFrame frame = TFListener.GetOrCreateFrame(Decorate(link), node);
+                TfFrame frame = TFListener.GetOrCreateFrame(Decorate(link), node);
                 linkObject.transform.SetParentLocal(frame.transform);
                 linkObject.transform.SetLocalPose(Pose.identity);
             }
@@ -401,10 +401,10 @@ namespace Iviz.Controllers
             // fill in missing frame parents, but only if it hasn't been provided already
             foreach (var entry in Robot.LinkParents)
             {
-                TFFrame frame = TFListener.GetOrCreateFrame(Decorate(entry.Key), node);
+                TfFrame frame = TFListener.GetOrCreateFrame(Decorate(entry.Key), node);
                 if (frame.Parent == TFListener.RootFrame)
                 {
-                    TFFrame parentFrame = TFListener.GetOrCreateFrame(Decorate(entry.Value), node);
+                    TfFrame parentFrame = TFListener.GetOrCreateFrame(Decorate(entry.Value), node);
                     frame.Parent = parentFrame;
                 }
             }

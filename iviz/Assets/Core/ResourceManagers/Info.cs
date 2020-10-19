@@ -72,7 +72,7 @@ namespace Iviz.Resources
 
         public override string ToString()
         {
-            return Object.ToString();
+            return Object == null ? "[null]" : Object.ToString();
         }
 
         /// <summary>

@@ -53,7 +53,7 @@ namespace Iviz.Controllers
         public override Pose BoundsPose => Target?.transform.AsPose() ?? Pose.identity;
         public override Vector3 BoundsScale => Target?.transform.lossyScale ?? Vector3.one;
 
-        public static ObjectClickableNode Instantiate(string name, TFFrame frame = null)
+        public static ObjectClickableNode Instantiate(string name, TfFrame frame = null)
         {
             GameObject obj = new GameObject(name);
             ObjectClickableNode node = obj.AddComponent<ObjectClickableNode>();

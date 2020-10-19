@@ -147,14 +147,9 @@ namespace Iviz.Controllers
                 resourceType = newResourceType;
                 if (resourceType == null)
                 {
-                    if (msg.Type() == MarkerType.MeshResource)
-                    {
-                        Logger.Error($"MarkerObject: Unknown mesh resource '{msg.MeshResource}'");
-                    }
-                    else
-                    {
-                        Logger.Error($"MarkerObject: Marker type '{msg.Type}' has no resource assigned!");
-                    }
+                    Logger.Error(msg.Type() == MarkerType.MeshResource
+                        ? $"MarkerObject: Unknown mesh resource '{msg.MeshResource}'"
+                        : $"MarkerObject: Marker type '{msg.Type}' has no resource assigned!");
 
                     return;
                 }
@@ -238,37 +233,44 @@ namespace Iviz.Controllers
                         break;
                     }
 
-                    Color color = msg.Color.Sanitize().ToUnityColor();
-                    PointWithColor[] points = new PointWithColor[msg.Points.Length];
+                    IEnumerable<PointWithColor> points;
+                    Color32 color32 = msg.Color.Sanitize().ToUnityColor32();
                     if (msg.Colors.Length == 0)
                     {
-                        for (int i = 0; i < points.Length; i++)
-                        {
-                            points[i] = new PointWithColor(msg.Points[i].Ros2Unity(), color);
-                        }
+                        points = msg.Points.Select(point => new PointWithColor(point.Ros2Unity(), color32));
                     }
-                    else if (color == Color.white)
+                    else if (color32 == Color.white)
                     {
-                        points = new PointWithColor[msg.Points.Length];
-                        for (int i = 0; i < points.Length; i++)
+                        IEnumerable<PointWithColor> PointEnumerator()
                         {
-                            points[i] = new PointWithColor(
-                                msg.Points[i].Ros2Unity(),
-                                msg.Colors[i].ToUnityColor32());
+                            for (int i = 0; i < msg.Points.Length; i++)
+                            {
+                                yield return new PointWithColor(
+                                    msg.Points[i].Ros2Unity(),
+                                    msg.Colors[i].ToUnityColor32());
+                            }
                         }
+
+                        points = PointEnumerator();
                     }
                     else
                     {
-                        points = new PointWithColor[msg.Points.Length];
-                        for (int i = 0; i < points.Length; i++)
+                        Color color = color32;
+
+                        IEnumerable<PointWithColor> PointEnumerator()
                         {
-                            points[i] = new PointWithColor(
-                                msg.Points[i].Ros2Unity(),
-                                color * msg.Colors[i].ToUnityColor());
+                            for (int i = 0; i < msg.Points.Length; i++)
+                            {
+                                yield return new PointWithColor(
+                                    msg.Points[i].Ros2Unity(),
+                                    color * msg.Colors[i].ToUnityColor());
+                            }
                         }
+
+                        points = PointEnumerator();
                     }
 
-                    meshList.PointsWithColor = points;
+                    meshList.Set(points);
                     break;
                 }
                 case MarkerType.LineList:
@@ -287,6 +289,7 @@ namespace Iviz.Controllers
                     if (msg.Colors.Length == 0)
                     {
                         float colorAsFloat = PointWithColor.FloatFromColorBits(color32);
+
                         IEnumerable<LineWithColor> LineEnumerator()
                         {
                             for (int i = 0; i < msg.Points.Length / 2; i++)
@@ -318,6 +321,7 @@ namespace Iviz.Controllers
                     else
                     {
                         Color color = color32;
+
                         IEnumerable<LineWithColor> LineEnumerator()
                         {
                             for (int i = 0; i < msg.Points.Length / 2; i++)
@@ -329,7 +333,7 @@ namespace Iviz.Controllers
                             }
                         }
 
-                        lines = LineEnumerator();                        
+                        lines = LineEnumerator();
                     }
 
                     lineResource.Set(lines);
@@ -413,35 +417,44 @@ namespace Iviz.Controllers
                         break;
                     }
 
-                    PointWithColor[] points = new PointWithColor[msg.Points.Length];
-                    Color color = msg.Color.Sanitize().ToUnityColor();
-                    if (msg.Colors.Length == 0 || color == Color.black)
+                    IEnumerable<PointWithColor> points;
+                    Color32 color32 = msg.Color.Sanitize().ToUnityColor32();
+                    if (msg.Colors.Length == 0)
                     {
-                        for (int i = 0; i < points.Length; i++)
-                        {
-                            points[i] = new PointWithColor(msg.Points[i].Ros2Unity(), color);
-                        }
+                        points = msg.Points.Select(point => new PointWithColor(point.Ros2Unity(), color32));
                     }
-                    else if (color == Color.white)
+                    else if (color32 == Color.white)
                     {
-                        for (int i = 0; i < points.Length; i++)
+                        IEnumerable<PointWithColor> PointEnumerator()
                         {
-                            points[i] = new PointWithColor(
-                                msg.Points[i].Ros2Unity(),
-                                msg.Colors[i].ToUnityColor32());
+                            for (int i = 0; i < msg.Points.Length; i++)
+                            {
+                                yield return new PointWithColor(
+                                    msg.Points[i].Ros2Unity(),
+                                    msg.Colors[i].ToUnityColor32());
+                            }
                         }
+
+                        points = PointEnumerator();
                     }
                     else
                     {
-                        for (int i = 0; i < points.Length; i++)
+                        Color color = color32;
+
+                        IEnumerable<PointWithColor> PointEnumerator()
                         {
-                            points[i] = new PointWithColor(
-                                msg.Points[i].Ros2Unity(),
-                                color * msg.Colors[i].ToUnityColor());
+                            for (int i = 0; i < msg.Points.Length; i++)
+                            {
+                                yield return new PointWithColor(
+                                    msg.Points[i].Ros2Unity(),
+                                    color * msg.Colors[i].ToUnityColor());
+                            }
                         }
+
+                        points = PointEnumerator();
                     }
 
-                    pointList.PointsWithColor = points;
+                    pointList.Set(points);
                     pointList.UseColormap = false;
                     break;
                 }
@@ -521,7 +534,7 @@ namespace Iviz.Controllers
                             }
                         }
 
-                        image.Set(width, height, bpp, data.AsSlice(), true);
+                        image.Set(width, height, bpp, data.AsSegment(), true);
                     }
 
                     Vector3 imageScale = new Msgs.GeometryMsgs.Vector3(msg.Scale.X, msg.Scale.Y, 1).Ros2Unity().Abs();

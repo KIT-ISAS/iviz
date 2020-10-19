@@ -12,7 +12,7 @@ namespace Iviz.Controllers
         /// </summary>
         public RosListener Listener { get; protected set; }
 
-        public abstract TFFrame Frame { get; }
+        public abstract TfFrame Frame { get; }
 
         public abstract IModuleData ModuleData { get; }
 
@@ -21,13 +21,13 @@ namespace Iviz.Controllers
         /// </summary>
         public abstract void StartListening();
         
-        public virtual void Stop()
+        public virtual void StopController()
         {
             Listener?.Stop();
             Listener = null;
         }
 
-        public virtual void Reset()
+        public virtual void ResetController()
         {
             Debug.Log(this + ": Resetting!");
             Listener?.Reset();

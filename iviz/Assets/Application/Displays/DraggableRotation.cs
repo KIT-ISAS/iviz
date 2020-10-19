@@ -84,8 +84,8 @@ namespace Iviz.Displays
             else
             {
                 Matrix4x4 m = Matrix4x4.identity;
-                m.SetColumn(0, startIntersection.normalized);
-                m.SetColumn(1, localIntersection.normalized);
+                m.SetColumn(0, startIntersection.Normalized());
+                m.SetColumn(1, localIntersection.Normalized());
                 m.SetColumn(2, normal);
 
                 float angle = Mathf.Asin(m.determinant) * Mathf.Rad2Deg; 

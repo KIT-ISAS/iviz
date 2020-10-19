@@ -85,6 +85,7 @@ namespace Iviz.Displays
                 axisObjects[i] = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Cube, transform);
                 axisObjects[i].gameObject.name = Names[i];
                 axisObjects[i].ColliderEnabled = false;
+                axisObjects[i].Layer = Layer;
             }
 
             AxisLength = 0.25f;

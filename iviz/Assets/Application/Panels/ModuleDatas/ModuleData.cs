@@ -107,7 +107,7 @@ namespace Iviz.App
 
         public void ResetController()
         {
-            Controller.Reset();
+            Controller.ResetController();
         }
         
         public static ModuleData CreateFromResource([NotNull] ModuleDataConstructor c)

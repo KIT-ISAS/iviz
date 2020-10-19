@@ -41,7 +41,7 @@ namespace Iviz.Controllers
 
         public override Pose BoundsPose => Target?.WorldPose ?? Pose.identity;
 
-        public static DisplayClickableNode Instantiate(string name, TFFrame frame = null)
+        public static DisplayClickableNode Instantiate(string name, TfFrame frame = null)
         {
             GameObject obj = new GameObject(name);
             DisplayClickableNode node = obj.AddComponent<DisplayClickableNode>();

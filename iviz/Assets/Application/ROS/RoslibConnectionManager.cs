@@ -283,7 +283,7 @@ namespace Iviz.Controllers
                 return true;
             }
             catch (Exception e) when
-                (e is UnreachableUriException || e is ConnectionException || e is XmlCallException)
+                (e is UnreachableUriException || e is ConnectionException || e is NodeCallException)
             {
                 Logger.Internal("Error:", e);
                 if (RosServerManager.IsActive && RosServerManager.MasterUri == MasterUri)

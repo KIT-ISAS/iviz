@@ -40,7 +40,7 @@ namespace Iviz.Controllers
 
         public Vector2 MeasuredIntensityBounds { get; private set; }
 
-        public override TFFrame Frame => node.Parent;
+        public override TfFrame Frame => node.Parent;
 
         readonly GridMapConfiguration config = new GridMapConfiguration();
 
@@ -232,9 +232,9 @@ namespace Iviz.Controllers
             }
         }
 
-        public override void Stop()
+        public override void StopController()
         {
-            base.Stop();
+            base.StopController();
 
             ResourcePool.Dispose(Resource.Displays.GridMap, resource.gameObject);
 

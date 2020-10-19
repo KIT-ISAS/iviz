@@ -40,7 +40,7 @@ namespace Iviz.Controllers
 
         public override IModuleData ModuleData { get; }
 
-        public override TFFrame Frame => displayNode.Parent;
+        public override TfFrame Frame => displayNode.Parent;
 
         readonly MagnitudeConfiguration config = new MagnitudeConfiguration();
         public MagnitudeConfiguration Config
@@ -380,17 +380,17 @@ namespace Iviz.Controllers
             trail.DataSource = () => displayNode.transform.TransformPoint(dir * VectorScale);
         }
 
-        public override void Reset()
+        public override void ResetController()
         {
-            base.Reset();
+            base.ResetController();
             arrow?.Reset();
             trail.Reset();
             angleAxis?.Reset();
         }
 
-        public override void Stop()
+        public override void StopController()
         {
-            base.Stop();
+            base.StopController();
 
             trail.DataSource = null;
 

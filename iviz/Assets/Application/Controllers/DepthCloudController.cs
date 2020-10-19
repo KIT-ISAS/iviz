@@ -26,7 +26,7 @@ namespace Iviz.Controllers
 
         public IModuleData ModuleData { get; }
 
-        public TFFrame Frame => depthImage?.Frame;
+        public TfFrame Frame => depthImage?.Frame;
 
         readonly DepthCloudConfiguration config = new DepthCloudConfiguration();
         public DepthCloudConfiguration Config
@@ -122,7 +122,7 @@ namespace Iviz.Controllers
             Config = new DepthCloudConfiguration();
         }
 
-        public void Stop()
+        public void StopController()
         {
             resource.Suspend();
             node.Stop();
@@ -130,7 +130,7 @@ namespace Iviz.Controllers
             UnityEngine.Object.Destroy(node.gameObject);
         }
 
-        public void Reset()
+        public void ResetController()
         {
         }
     }

@@ -27,7 +27,7 @@ namespace Iviz.Controllers
 
         public override IModuleData ModuleData { get; }
 
-        public override TFFrame Frame => TFListener.MapFrame;
+        public override TfFrame Frame => TFListener.MapFrame;
 
         readonly MarkerConfiguration config = new MarkerConfiguration();
         public MarkerConfiguration Config
@@ -103,15 +103,15 @@ namespace Iviz.Controllers
             }
         }
 
-        public override void Stop()
+        public override void StopController()
         {
-            base.Stop();
+            base.StopController();
             DestroyAllMarkers();
         }
 
-        public override void Reset()
+        public override void ResetController()
         {
-            base.Reset();
+            base.ResetController();
             DestroyAllMarkers();
         }
         

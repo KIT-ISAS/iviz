@@ -12,6 +12,6 @@ namespace Iviz.Controllers
         /// <summary>
         /// The transform frame associated to the controller.
         /// </summary>
-        TFFrame Frame { get; }
+        TfFrame Frame { get; }
     }
 }

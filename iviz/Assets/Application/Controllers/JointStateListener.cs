@@ -33,7 +33,7 @@ namespace Iviz.Controllers
     {
         public override IModuleData ModuleData { get; }
 
-        public override TFFrame Frame => TFListener.MapFrame;
+        public override TfFrame Frame => TFListener.MapFrame;
 
         readonly JointStateConfiguration config = new JointStateConfiguration();
         public JointStateConfiguration Config
@@ -115,9 +115,9 @@ namespace Iviz.Controllers
             Listener = new RosListener<JointState>(config.Topic, Handler);
         }
 
-        public override void Stop()
+        public override void StopController()
         {
-            base.Stop();
+            base.StopController();
             Robot = null;
             warnNotFound.Clear();
         }

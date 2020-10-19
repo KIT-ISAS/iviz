@@ -36,7 +36,7 @@ namespace Iviz.App
         public override void Stop()
         {
             base.Stop();
-            controller.Stop();
+            controller.StopController();
             //Object.Destroy(controller.gameObject);
         }
 

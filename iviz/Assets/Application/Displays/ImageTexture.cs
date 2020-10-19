@@ -265,7 +265,7 @@ namespace Iviz.Displays
                     image.WriteBitmap(outStream);
                     GameThread.Post(() =>
                     {
-                        Set(image.Width, image.Height, encoding, pngBuffer.AsSlice(bmpHeaderLength));
+                        Set(image.Width, image.Height, encoding, pngBuffer.AsSegment(bmpHeaderLength));
                         onFinished?.Invoke();
                     });
                 }
@@ -278,7 +278,7 @@ namespace Iviz.Displays
 
         public void Set(int width, int height, string encoding, byte[] data, bool generateMipmaps = false)
         {
-            Set(width, height, encoding, data.AsSlice());
+            Set(width, height, encoding, data.AsSegment());
         }
 
         public void Set(int width, int height, string encoding, in ArraySegment<byte> data,

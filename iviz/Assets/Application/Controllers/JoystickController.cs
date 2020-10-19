@@ -264,7 +264,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public void Stop()
+        public void StopController()
         {
             GameThread.EveryFrame -= PublishData;
             RosSenderJoy?.Stop();
@@ -272,7 +272,7 @@ namespace Iviz.Controllers
             Visible = false;
         }
 
-        public void Reset()
+        public void ResetController()
         {
             
         }

@@ -31,9 +31,9 @@ namespace Iviz.App
 
         SimpleDisplayNode dummy;
 
-        TFFrame selectedFrame;
+        TfFrame selectedFrame;
 
-        public TFFrame SelectedFrame
+        public TfFrame SelectedFrame
         {
             get => selectedFrame;
             set
@@ -100,7 +100,7 @@ namespace Iviz.App
 
         void OnTfLinkClicked(string frameId)
         {
-            if (frameId == null || !TFListener.TryGetFrame(frameId, out TFFrame frame))
+            if (frameId == null || !TFListener.TryGetFrame(frameId, out TfFrame frame))
             {
                 SelectedFrame = null;
             }
@@ -118,7 +118,7 @@ namespace Iviz.App
             bool HasTrail { get; }
             bool Selected { get; }
 
-            public TFNode(TFFrame frame)
+            public TFNode(TfFrame frame)
             {
                 Name = frame.Id;
                 Children = new List<TFNode>();
@@ -127,7 +127,7 @@ namespace Iviz.App
                 Selected = (frame == Instance.SelectedFrame);
 
                 var childrenList = frame.Children;
-                foreach (TFFrame child in childrenList.Values)
+                foreach (TfFrame child in childrenList.Values)
                 {
                     Children.Add(new TFNode(child));
                 }

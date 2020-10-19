@@ -36,7 +36,7 @@ namespace Iviz.App.Gui
     {
         [SerializeField] TextMesh titleText = null;
         [SerializeField] TextMesh contentText = null;
-        TFFrame attachedFrame;
+        TfFrame attachedFrame;
         SimpleDisplayNode node;
 
         void Awake()

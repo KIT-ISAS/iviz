@@ -37,9 +37,9 @@ namespace Iviz.App
         
         Vector3 orbitCenter;
 
-        TFFrame orbitCenterOverride;
+        TfFrame orbitCenterOverride;
 
-        public TFFrame OrbitCenterOverride
+        public TfFrame OrbitCenterOverride
         {
             get => orbitCenterOverride;
             set
@@ -55,9 +55,9 @@ namespace Iviz.App
             }
         }
 
-        TFFrame cameraViewOverride;
+        TfFrame cameraViewOverride;
 
-        public TFFrame CameraViewOverride
+        public TfFrame CameraViewOverride
         {
             get => cameraViewOverride;
             set

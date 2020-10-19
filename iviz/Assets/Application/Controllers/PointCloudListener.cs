@@ -41,7 +41,7 @@ namespace Iviz.Controllers
 
         public int Size { get; private set; }
 
-        public override TFFrame Frame => node.Parent;
+        public override TfFrame Frame => node.Parent;
 
         readonly PointCloudConfiguration config = new PointCloudConfiguration();
         public PointCloudConfiguration Config
@@ -286,7 +286,7 @@ namespace Iviz.Controllers
 
                     Size = newSize;
                     pointCloud.UseColormap = !rgbaHint;
-                    pointCloud.PointsWithColor = pointBuffer.AsSlice(0, Size);
+                    pointCloud.PointsWithColor = pointBuffer.AsSegment(0, Size);
                     MeasuredIntensityBounds = pointCloud.IntensityBounds;
                     if (ForceMinMax)
                     {
@@ -459,9 +459,9 @@ namespace Iviz.Controllers
             }
         }
 
-        public override void Stop()
+        public override void StopController()
         {
-            base.Stop();
+            base.StopController();
 
             ResourcePool.Dispose(Resource.Displays.PointList, pointCloud.gameObject);
 

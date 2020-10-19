@@ -49,6 +49,7 @@ MonoBehaviour:
   arSessionOrigin: {fileID: 6019251946659006209}
   arLight: {fileID: 978464836206565950}
   fovDisplay: {fileID: 749892901891460485}
+  setupModeFrame: {fileID: 0}
 --- !u!1 &2024736478269814889
 GameObject:
   m_ObjectHideFlags: 0

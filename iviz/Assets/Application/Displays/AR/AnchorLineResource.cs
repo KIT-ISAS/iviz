@@ -50,7 +50,7 @@ namespace Iviz.Displays
 
         public Vector3? SetPosition(in Vector3 newPosition, bool forceRebuild = false)
         {
-            if (!forceRebuild && Mathf.Approximately((newPosition - lastPosition).sqrMagnitude, 0))
+            if (!forceRebuild && Mathf.Approximately((newPosition - lastPosition).MagnitudeSq(), 0))
             {
                 return null;
             }

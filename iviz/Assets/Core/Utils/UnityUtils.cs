@@ -13,6 +13,26 @@ namespace Iviz
     {
         public static CultureInfo Culture { get; } = BuiltIns.Culture;
 
+        public static float MagnitudeSq(this Vector3 v)
+        {
+            return v.x * v.x + v.y * v.y + v.z * v.z;
+        }
+        
+        public static float Magnitude(this Vector3 v)
+        {
+            return Mathf.Sqrt(v.MagnitudeSq());
+        }
+
+        public static Vector3 Cross(this Vector3 lhs, in Vector3 rhs)
+        {
+            return new Vector3(lhs.y * rhs.z - lhs.z * rhs.y, lhs.z * rhs.x - lhs.x * rhs.z, lhs.x * rhs.y - lhs.y * rhs.x);   
+        }
+        
+        public static Vector3 Normalized(this Vector3 v)
+        {
+            return v / v.Magnitude();   
+        }
+
         public static bool TryParse(string s, out float f)
         {
             if (float.TryParse(s, NumberStyles.Any, Culture, out f))
@@ -122,17 +142,17 @@ namespace Iviz
             }
         }
 
-        public static ArraySegment<T> AsSlice<T>(this T[] ts)
+        public static ArraySegment<T> AsSegment<T>(this T[] ts)
         {
             return new ArraySegment<T>(ts);
         }
 
-        public static ArraySegment<T> AsSlice<T>(this T[] ts, int offset)
+        public static ArraySegment<T> AsSegment<T>(this T[] ts, int offset)
         {
             return new ArraySegment<T>(ts, offset, ts.Length - offset);
         }        
         
-        public static ArraySegment<T> AsSlice<T>(this T[] ts, int offset, int count)
+        public static ArraySegment<T> AsSegment<T>(this T[] ts, int offset, int count)
         {
             return new ArraySegment<T>(ts, offset, count);
         }        

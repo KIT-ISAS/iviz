@@ -44,26 +44,26 @@ namespace Iviz.Controllers
         public static GuiCamera GuiCamera => GuiCamera.Instance;
         public static Light MainLight { get; set; }
 
-        public static TFFrame MapFrame { get; private set; }
-        public static TFFrame RootFrame { get; private set; }
-        public static TFFrame UnityFrame { get; private set; }
+        public static TfFrame MapFrame { get; private set; }
+        public static TfFrame RootFrame { get; private set; }
+        public static TfFrame UnityFrame { get; private set; }
 
         readonly InteractiveControl rootMarker;
         public static InteractiveControl RootMarker => Instance.rootMarker;
 
-        public static TFFrame ListenersFrame => RootFrame;
+        public static TfFrame ListenersFrame => RootFrame;
 
-        public override TFFrame Frame => MapFrame;
+        public override TfFrame Frame => MapFrame;
 
         readonly DisplayNode showAllListener;
         readonly DisplayNode staticListener;
 
-        readonly Dictionary<string, TFFrame> frames = new Dictionary<string, TFFrame>();
+        readonly Dictionary<string, TfFrame> frames = new Dictionary<string, TfFrame>();
 
         public static IEnumerable<string> FramesUsableAsHints =>
             Instance.frames.Values.Where(IsFrameUsableAsHint).Select(frame => frame.Id);
 
-        static bool IsFrameUsableAsHint(TFFrame frame) => frame != RootFrame && frame != UnityFrame;
+        static bool IsFrameUsableAsHint(TfFrame frame) => frame != RootFrame && frame != UnityFrame;
 
         public override IModuleData ModuleData { get; }
 
@@ -240,7 +240,7 @@ namespace Iviz.Controllers
                     childId = childId.Substring(1);
                 }
 
-                TFFrame child;
+                TfFrame child;
                 if (isStatic)
                 {
                     child = GetOrCreateFrame(childId, staticListener);
@@ -264,7 +264,7 @@ namespace Iviz.Controllers
                     parentId = parentId.Substring(1);
                 }
 
-                TFFrame parent = string.IsNullOrEmpty(parentId) ? RootFrame : GetOrCreateFrame(parentId);
+                TfFrame parent = string.IsNullOrEmpty(parentId) ? RootFrame : GetOrCreateFrame(parentId);
 
                 if (child.SetParent(parent))
                 {
@@ -273,9 +273,9 @@ namespace Iviz.Controllers
             }
         }
 
-        public override void Reset()
+        public override void ResetController()
         {
-            base.Reset();
+            base.ResetController();
 
             ListenerStatic?.Reset();
             Publisher?.Reset();
@@ -292,26 +292,26 @@ namespace Iviz.Controllers
             ShowAllFrames = prevShowAllFrames;
         }
 
-        TFFrame Add(TFFrame t)
+        TfFrame Add(TfFrame t)
         {
             frames.Add(t.Id, t);
             return t;
         }
 
-        public static bool TryGetFrame(string id, out TFFrame frame)
+        public static bool TryGetFrame(string id, out TfFrame frame)
         {
             return Instance.TryGetFrameImpl(id, out frame);
         }
 
 
-        public static TFFrame GetOrCreateFrame(string id, DisplayNode listener = null)
+        public static TfFrame GetOrCreateFrame(string id, DisplayNode listener = null)
         {
             if (id.Length != 0 && id[0] == '/')
             {
                 id = id.Substring(1);
             }
 
-            TFFrame frame = Instance.GetOrCreateFrameImpl(id);
+            TfFrame frame = Instance.GetOrCreateFrameImpl(id);
             if (frame.Id != id)
             {
                 Debug.LogWarning("Error: Broken resource pool! Requested " + id + ", received " + frame.Id);
@@ -325,14 +325,14 @@ namespace Iviz.Controllers
             return frame;
         }
 
-        TFFrame GetOrCreateFrameImpl(string id)
+        TfFrame GetOrCreateFrameImpl(string id)
         {
-            return TryGetFrameImpl(id, out TFFrame t) ? t : Add(CreateFrameObject(id, RootFrame.transform, RootFrame));
+            return TryGetFrameImpl(id, out TfFrame t) ? t : Add(CreateFrameObject(id, RootFrame.transform, RootFrame));
         }
 
-        TFFrame CreateFrameObject(string id, Transform parent, TFFrame parentFrame)
+        TfFrame CreateFrameObject(string id, Transform parent, TfFrame parentFrame)
         {
-            TFFrame frame = ResourcePool.GetOrCreate<TFFrame>(Resource.Displays.TFFrame, parent);
+            TfFrame frame = ResourcePool.GetOrCreate<TfFrame>(Resource.Displays.TFFrame, parent);
             frame.name = "{" + id + "}";
             frame.Id = id;
             frame.Visible = config.AxisVisible;
@@ -347,7 +347,7 @@ namespace Iviz.Controllers
             return frame;
         }
 
-        bool TryGetFrameImpl(string id, out TFFrame t)
+        bool TryGetFrameImpl(string id, out TfFrame t)
         {
             return frames.TryGetValue(id, out t);
         }
@@ -367,7 +367,7 @@ namespace Iviz.Controllers
             ProcessMessages(msg.Transforms, true);
         }
 
-        public void MarkAsDead(TFFrame frame)
+        public void MarkAsDead(TfFrame frame)
         {
             frames.Remove(frame.Id);
             GuiCamera.Unselect(frame);

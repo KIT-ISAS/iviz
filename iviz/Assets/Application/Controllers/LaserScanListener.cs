@@ -35,7 +35,7 @@ namespace Iviz.Controllers
 
         public override IModuleData ModuleData { get; }
 
-        public override TFFrame Frame => node.Parent;
+        public override TfFrame Frame => node.Parent;
 
         public Vector2 MeasuredIntensityBounds => resource.MeasuredIntensityBounds;
 
@@ -168,10 +168,9 @@ namespace Iviz.Controllers
         public LaserScanListener(IModuleData moduleData)
         {
             ModuleData = moduleData;
-            //transform.parent = TFListener.ListenersFrame.transform;
 
             node = SimpleDisplayNode.Instantiate("[LaserScanNode]");
-            resource = ResourcePool.GetOrCreate<RadialScanResource>(Resource.Displays.RadialScanResource, node.transform);
+            resource = ResourcePool.GetOrCreateDisplay<RadialScanResource>(node.transform);
             Config = new LaserScanConfiguration();
         }
 
@@ -210,12 +209,12 @@ namespace Iviz.Controllers
             resource.Set(msg.AngleMin, msg.AngleIncrement, msg.RangeMin, msg.RangeMax, msg.Ranges, msg.Intensities);
         }
 
-        public override void Stop()
+        public override void StopController()
         {
-            base.Stop();
+            base.StopController();
 
             resource.Suspend();
-            ResourcePool.Dispose(Resource.Displays.RadialScanResource, resource.gameObject);
+            ResourcePool.DisposeDisplay(resource);
 
             node.Stop();
             UnityEngine.Object.Destroy(node.gameObject);

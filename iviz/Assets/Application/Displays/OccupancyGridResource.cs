@@ -14,7 +14,7 @@ namespace Iviz.Displays
         [SerializeField] int numCellsX;
         [SerializeField] int numCellsY;
         [SerializeField] float cellSize;
-        
+
         readonly List<PointWithColor> pointBuffer = new List<PointWithColor>();
         MeshListResource resource;
 
@@ -36,7 +36,6 @@ namespace Iviz.Displays
                 }
 
                 numCellsX = value;
-                UpdateSize();
             }
         }
 
@@ -56,7 +55,6 @@ namespace Iviz.Displays
                 }
 
                 numCellsY = value;
-                UpdateSize();
             }
         }
 
@@ -72,8 +70,6 @@ namespace Iviz.Displays
 
                 cellSize = value;
                 resource.ElementScale = value;
-                //resource.PreTranslation = new Vector3(0, cellSize / 2, 0);
-                UpdateSize();
             }
         }
 
@@ -97,7 +93,6 @@ namespace Iviz.Displays
 
         public bool IsProcessing { get; private set; }
 
-
         void Awake()
         {
             resource = ResourcePool.GetOrCreateDisplay<MeshListResource>(transform);
@@ -105,8 +100,6 @@ namespace Iviz.Displays
             NumCellsX = 10;
             NumCellsY = 10;
             CellSize = 1.0f;
-
-            UpdateSize();
 
             Colormap = Resource.ColormapId.gray;
 
@@ -128,49 +121,40 @@ namespace Iviz.Displays
             pointBuffer.Clear();
         }
 
-        void UpdateSize()
-        {
-        }
-
-        public void SetOccupancy(sbyte[] values, Rect? tbounds = null, Action onFinished = null)
+        public void SetOccupancy(sbyte[] values, Rect? tbounds = null)
         {
             IsProcessing = true;
-            Task.Run(() =>
+            Rect bounds = tbounds ?? new Rect(0, numCellsX, 0, numCellsY);
+
+            pointBuffer.Clear();
+
+            float4 mul = new float4(cellSize, cellSize, 0, 0.01f);
+
+            for (int v = bounds.Ymin; v < bounds.Ymax; v++)
+            {
+                int i = v * numCellsX + bounds.Xmin;
+                for (int u = bounds.Xmin; u < bounds.Xmax; u++, i++)
                 {
-                    Rect bounds = tbounds ?? new Rect(0, numCellsX, 0, numCellsY);
-
-                    pointBuffer.Clear();
-
-                    float4 mul = new float4(cellSize, cellSize, 0, 0.01f);
-
-                    for (int v = bounds.Ymin; v < bounds.Ymax; v++)
+                    sbyte val = values[i];
+                    if (val <= 0)
                     {
-                        int i = v * numCellsX + bounds.Xmin;
-                        for (int u = bounds.Xmin; u < bounds.Xmax; u++, i++)
-                        {
-                            sbyte val = values[i];
-                            if (val <= 0)
-                            {
-                                continue;
-                            }
-
-                            float4 p = new float4(u, v, 0, val);
-                            float4 pc = p * mul;
-                            pointBuffer.Add(new PointWithColor(pc.Ros2Unity()));
-                        }
+                        continue;
                     }
 
-                    GameThread.Post(() =>
-                    {
-                        resource.PointsWithColor = pointBuffer;
-                        resource.IntensityBounds = new Vector2(0, 1);
-                        IsProcessing = false;
-                        onFinished?.Invoke();
-                    });
+                    float4 p = new float4(u, v, 0, val);
+                    float4 pc = p * mul;
+                    pointBuffer.Add(new PointWithColor(pc.Ros2Unity()));
                 }
-            );
-        }
+            }
 
+            GameThread.PostImmediate(() =>
+            {
+                resource.PointsWithColor = pointBuffer;
+                resource.IntensityBounds = new Vector2(0, 1);
+                IsProcessing = false;
+            });
+        }
+        
         public readonly struct Rect
         {
             public int Xmin { get; }
@@ -185,6 +169,7 @@ namespace Iviz.Displays
                 Ymin = ymin;
                 Ymax = ymax;
             }
-        }
+        }        
     }
 }
+

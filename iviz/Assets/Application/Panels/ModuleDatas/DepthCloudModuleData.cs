@@ -37,7 +37,7 @@ namespace Iviz.App
         public override void Stop()
         {
             base.Stop();
-            controller.Stop();
+            controller.StopController();
         }
 
         public override void SetupPanel()
