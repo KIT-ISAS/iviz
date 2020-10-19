@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -55,7 +56,7 @@ namespace Iviz.Controllers
         protected int msgsInQueue;
         protected int lastMsgBytes;
         protected int dropped;
-        
+
         protected readonly List<float> timesOfArrival = new List<float>();
 
         protected RosListener(string topic, string type)
@@ -149,7 +150,8 @@ namespace Iviz.Controllers
     public sealed class RosListener<T> : RosListener where T : IMessage, new()
     {
         readonly Action<T> subscriptionHandler;
-        readonly Queue<T> queue = new Queue<T>();
+        readonly ConcurrentQueue<T> messageQueue = new ConcurrentQueue<T>();
+        readonly List<T> tmpMessageBag = new List<T>();
 
         public RosListener(string topic, Action<T> handler) :
             base(topic, BuiltIns.GetMessageType(typeof(T)))
@@ -169,40 +171,30 @@ namespace Iviz.Controllers
                 throw new ArgumentNullException(nameof(t));
             }
 
-            lock (queue)
-            {
-                queue.Enqueue(t);
-                if (queue.Count > MaxQueueSize)
-                {
-                    queue.Dequeue();
-                    dropped++;
-                }
-
-                msgsInQueue = queue.Count;
-            }
+            messageQueue.Enqueue(t);
+            msgsInQueue++;
         }
 
         void CallHandler()
         {
-            lock (queue)
+            tmpMessageBag.Clear();
+            while (messageQueue.TryDequeue(out T t))
             {
-                if (queue.Count == 0)
-                {
-                    return;
-                }
-
-                foreach (T t in queue)
-                {
-                    lastMsgBytes += t.RosMessageLength;
-                    timesOfArrival.Add(Time.time);
-
-                    subscriptionHandler(t);
-                }
-
-                totalMsgCounter += queue.Count;
-                msgsInQueue = 0;
-                queue.Clear();
+                tmpMessageBag.Add(t);
             }
+
+            int start = Math.Max(0, tmpMessageBag.Count - MaxQueueSize);
+            for (int i = start; i < tmpMessageBag.Count; i++)
+            {
+                T msg = tmpMessageBag[i];
+                lastMsgBytes += msg.RosMessageLength;
+                timesOfArrival.Add(Time.time);
+                subscriptionHandler(msg);
+            }
+
+            dropped += start;
+            totalMsgCounter += messageQueue.Count;
+            msgsInQueue = 0;
         }
 
         public override void Stop()

@@ -64,7 +64,7 @@ namespace Iviz.Controllers
 
         public event MouseEventAction MouseEvent;
 
-        public string Id { get; private set; }
+        string Id { get; set; }
 
         public override Bounds Bounds => resource != null ? resource.Bounds : new Bounds();
         public override Bounds WorldBounds => resource != null ? resource.WorldBounds : new Bounds();
@@ -421,7 +421,15 @@ namespace Iviz.Controllers
                     Color32 color32 = msg.Color.Sanitize().ToUnityColor32();
                     if (msg.Colors.Length == 0)
                     {
-                        points = msg.Points.Select(point => new PointWithColor(point.Ros2Unity(), color32));
+                        IEnumerable<PointWithColor> PointEnumerator()
+                        {
+                            foreach (var position in msg.Points)
+                            {
+                                yield return new PointWithColor(position.Ros2Unity(), color32);
+                            }
+                        }
+
+                        points = PointEnumerator();                        
                     }
                     else if (color32 == Color.white)
                     {
@@ -454,7 +462,7 @@ namespace Iviz.Controllers
                         points = PointEnumerator();
                     }
 
-                    pointList.Set(points);
+                    pointList.Set(points, msg.Points.Length);
                     pointList.UseColormap = false;
                     break;
                 }

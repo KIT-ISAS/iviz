@@ -76,7 +76,7 @@ namespace Iviz.Displays
         {
             if (reserve < 0)
             {
-                throw new ArgumentException("Invalid count " + reserve, nameof(reserve));
+                throw new ArgumentException($"Invalid count {reserve}", nameof(reserve));
             }
 
             if (lines == null)

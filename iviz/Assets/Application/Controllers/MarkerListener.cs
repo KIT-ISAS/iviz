@@ -128,7 +128,7 @@ namespace Iviz.Controllers
 
         public static string IdFromMessage(Marker marker)
         {
-            return $"{marker.Ns}/{marker.Id}";
+            return  $"{marker.Ns}/{marker.Id}";
         }
 
         void Handler(MarkerArray msg)

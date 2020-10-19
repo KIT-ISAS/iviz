@@ -16,17 +16,17 @@ namespace Iviz.Displays
         
         readonly float4x2 f;
 
-        public Vector3 A => f.c0.xyz;
+        public float3 A => f.c0.xyz;
 
         public Color32 ColorA => PointWithColor.ColorFromFloatBits(f.c0.w);
 
-        public Vector3 B => f.c1.xyz;
+        public float3 B => f.c1.xyz;
 
         public Color32 ColorB => PointWithColor.ColorFromFloatBits(f.c1.w);
 
-        public float4 PA => f.c0;
+        float4 PA => f.c0;
 
-        public float4 PB => f.c1;
+        float4 PB => f.c1;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         public LineWithColor(in Vector3 start, Color32 colorA, in Vector3 end, Color32 colorB) :

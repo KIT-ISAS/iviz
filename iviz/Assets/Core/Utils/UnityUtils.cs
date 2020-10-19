@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using Iviz.Msgs;
 using Unity.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Iviz
@@ -17,6 +18,11 @@ namespace Iviz
         {
             return v.x * v.x + v.y * v.y + v.z * v.z;
         }
+        
+        public static float MagnitudeSq(this float3 v)
+        {
+            return v.x * v.x + v.y * v.y + v.z * v.z;
+        }        
         
         public static float Magnitude(this Vector3 v)
         {

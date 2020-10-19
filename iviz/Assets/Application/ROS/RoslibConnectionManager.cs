@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -283,7 +284,7 @@ namespace Iviz.Controllers
                 return true;
             }
             catch (Exception e) when
-                (e is UnreachableUriException || e is ConnectionException || e is NodeCallException)
+                (e is UnreachableUriException || e is ConnectionException || e is RosRpcException)
             {
                 Logger.Internal("Error:", e);
                 if (RosServerManager.IsActive && RosServerManager.MasterUri == MasterUri)
@@ -490,6 +491,8 @@ namespace Iviz.Controllers
                     Logger.Error(e);
                     Disconnect();
                 }
+
+                await Task.CompletedTask;
             });
         }
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
@@ -22,6 +23,7 @@ namespace Iviz.Displays
         static readonly int ScaleID = Shader.PropertyToID("_Scale");
 
         NativeList<float4> pointBuffer;
+        int length;
         ComputeBuffer pointComputeBuffer;
 
         int Size => pointBuffer.Length;
@@ -34,8 +36,6 @@ namespace Iviz.Displays
             get => new PointGetHelper(pointBuffer);
             set => Set(value, value.Count);
         }
-
-        static bool IsValid(in PointWithColor t) => !t.HasNaN() && t.Position.MagnitudeSq() < MaxPositionMagnitudeSq;
 
         /// <summary>
         /// Sets the list of points with the given enumerator.
@@ -62,17 +62,50 @@ namespace Iviz.Displays
             pointBuffer.Clear();
             foreach (PointWithColor t in points)
             {
-                if (!IsValid(t))
+                if (t.HasNaN() || t.Position.MagnitudeSq() > MaxPositionMagnitudeSq)
                 {
                     continue;
                 }
-
+                
                 pointBuffer.Add(t);
             }
 
             UpdateBuffer();
         }
 
+        /// <summary>
+        /// Convenience method to sets the list of points with the given array. Takes only the first size elements.
+        /// </summary>
+        /// <param name="points">The point enumerator.</param>
+        /// <param name="size">The number of points to take.</param>        
+        public void SetArray(PointWithColor[] points, int size)
+        {
+            if (points == null)
+            {
+                throw new ArgumentNullException(nameof(points));
+            }
+
+            if (size > points.Length)
+            {
+                throw new IndexOutOfRangeException($"Size {size} is larger than the available length {points.Length}");
+            }
+
+            pointBuffer.Capacity = Math.Max(pointBuffer.Capacity, size);
+            pointBuffer.Clear();
+            for (int i = 0; i < size; i++)
+            {
+                PointWithColor t = points[i];
+                if (t.HasNaN() || t.Position.MagnitudeSq() > MaxPositionMagnitudeSq)
+                {
+                    continue;
+                }
+                
+                pointBuffer.Add(t);
+            }
+
+            UpdateBuffer();
+        }        
+        
         void UpdateBuffer()
         {
             if (Size == 0)

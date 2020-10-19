@@ -105,14 +105,15 @@ namespace Iviz.Displays
         }
 
 
-        public static (Vector3[], Color32[], int[], Vector2[]) CreateCapsulesFromSegments(in NativeList<float4x2> lineBuffer, float scale)
+        public static (Vector3[], Color32[], int[], Vector2[]) CreateCapsulesFromSegments(
+            in NativeList<float4x2> lineBuffer, float scale)
         {
             int length = lineBuffer.Length;
             Vector3[] points = new Vector3[10 * length];
             Color32[] colors = new Color32[10 * length];
             int[] indices = new int[48 * length];
             Vector2[] coords = new Vector2[10 * length];
-            
+
             Vector3 dirx, diry, dirz;
 
             Vector3 Transform(in Vector3 p) => p.x * dirx + p.y * diry + p.z * dirz;
@@ -124,7 +125,7 @@ namespace Iviz.Displays
                 Vector3 b = line.c1.xyz;
                 dirx = b - a;
                 dirx /= dirx.Magnitude();
-                
+
                 diry = Vector3.forward.Cross(dirx);
                 if (Mathf.Approximately(diry.MagnitudeSq(), 0))
                 {

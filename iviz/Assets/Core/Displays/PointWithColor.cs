@@ -40,7 +40,7 @@ namespace Iviz.Displays
         public float X => f.x;
         public float Y => f.y;
         public float Z => f.z;
-        public Vector3 Position => new Vector3(f.x, f.y, f.z);
+        public float3 Position => f.xyz;
         public Color32 Color => ColorFromFloatBits(f.w);
         public float Intensity => f.w;
 
