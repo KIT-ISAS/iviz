@@ -15,7 +15,9 @@ namespace Iviz.Roslib
     internal sealed class TcpReceiverAsync : IDisposable
     {
         const int BufferSizeIncrease = 1024;
-        const int MaxConnectionRetries = 5;
+        const int MaxConnectionRetries = 60;
+        const int WaitBetweenRetriesInMs = 1000;
+        const int SleepTimeInMs = 1000;
 
         readonly Action<IMessage> callback;
         readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
@@ -174,7 +176,7 @@ namespace Iviz.Roslib
 
             while (keepRunning)
             {
-                await signal.WaitAsync(1000);
+                await signal.WaitAsync(SleepTimeInMs);
             }
 
             tcpClient?.Dispose();
@@ -220,9 +222,9 @@ namespace Iviz.Roslib
                 return client;
             }
 
-            for (int i = 0; i < 60 && keepRunning; i++)
+            for (int i = 0; i < MaxConnectionRetries && keepRunning; i++)
             {
-                await Task.Delay(1000);
+                await Task.Delay(WaitBetweenRetriesInMs);
                 client = await TryToConnect(timeoutInMs);
                 if (client != null)
                 {
@@ -258,11 +260,11 @@ namespace Iviz.Roslib
                 catch (Exception e) when
                     (e is IOException || e is SocketException || e is TimeoutException)
                 {
-                    Logger.LogDebug($"{this}: " + e);
+                    Logger.LogDebug($"{this}: {e}");
                 }
                 catch (Exception e)
                 {
-                    Logger.Log($"{this}: " + e);
+                    Logger.Log($"{this}: {e}");
                 }
             }
 

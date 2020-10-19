@@ -12,6 +12,8 @@ namespace Iviz.Roslib
 {
     internal class TcpReceiverManager
     {
+        const int DefaultTimeoutInMs = 5000;
+        
         static readonly string[][] SupportedProtocols = {new[] {"TCPROS"}};
 
         readonly ConcurrentDictionary<Uri, TcpReceiverAsync> connectionsByUri =
@@ -39,7 +41,7 @@ namespace Iviz.Roslib
         }
 
         public bool RequestNoDelay { get; }
-        public int TimeoutInMs { get; set; } = 5000;
+        public int TimeoutInMs { get; set; } = DefaultTimeoutInMs;
 
         public event Action NumConnectionsChanged;
 

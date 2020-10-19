@@ -1267,7 +1267,8 @@ namespace Iviz.Roslib
 
                 async Task Wrapper(IService x)
                 {
-                    await Task.Run(() => callback((T) x));
+                    callback((T) x);
+                    await Task.CompletedTask;
                 }
 
                 ServiceInfo serviceInfo = new ServiceInfo(CallerId, serviceName, typeof(T), new T());

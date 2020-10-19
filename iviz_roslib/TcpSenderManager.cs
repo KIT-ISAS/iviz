@@ -10,12 +10,16 @@ namespace Iviz.Roslib
 {
     internal class TcpSenderManager
     {
+        const int NewSenderTimeoutInMs = 100;
+        const int DefaultTimeoutInMs = 5000;
+        
         readonly ConcurrentDictionary<string, TcpSenderAsync> connectionsByCallerId =
             new ConcurrentDictionary<string, TcpSenderAsync>();
 
         readonly TopicInfo topicInfo;
-        bool latching;
         int maxQueueSizeInBytes;
+        bool latching;
+        IMessage latchedMessage;
 
         public event Action NumConnectionsChanged;
 
@@ -38,8 +42,7 @@ namespace Iviz.Roslib
             }
         }
 
-        public int TimeoutInMs { get; set; } = 5000;
-        IMessage LatchedMessage { get; set; }
+        public int TimeoutInMs { get; set; } = DefaultTimeoutInMs;
 
         public bool Latching
         {
@@ -49,7 +52,7 @@ namespace Iviz.Roslib
                 latching = value;
                 if (!value)
                 {
-                    LatchedMessage = null;
+                    latchedMessage = null;
                 }
             }
         }
@@ -81,24 +84,26 @@ namespace Iviz.Roslib
                 oldSender.Dispose();
             }
 
-            SemaphoreSlim managerSignal = new SemaphoreSlim(0, 1);
-            IPEndPoint endPoint = newSender.Start(TimeoutInMs, managerSignal);
-            connectionsByCallerId[remoteCallerId] = newSender;
-
-            // while we're here
-            Cleanup();
-
-            // wait until newSender is ready to accept
-            const int maxWaitInMs = 100;
-            if (!managerSignal.Wait(maxWaitInMs))
+            IPEndPoint endPoint;
+            using (SemaphoreSlim managerSignal = new SemaphoreSlim(0, 1))
             {
-                // shouldn't happen
-                Logger.Log($"{this}: Sender start timeout?");
+                endPoint = newSender.Start(TimeoutInMs, managerSignal);
+                connectionsByCallerId[remoteCallerId] = newSender;
+
+                // while we're here
+                Cleanup();
+
+                // wait until newSender is ready to accept
+                if (!managerSignal.Wait(NewSenderTimeoutInMs))
+                {
+                    // shouldn't happen
+                    Logger.Log($"{this}: Sender start timeout?");
+                }
             }
 
-            if (Latching && LatchedMessage != null)
+            if (Latching && latchedMessage != null)
             {
-                newSender.Publish(LatchedMessage);
+                newSender.Publish(latchedMessage);
             }
 
             newSender.MaxQueueSizeInBytes = MaxQueueSizeInBytes;
@@ -129,7 +134,7 @@ namespace Iviz.Roslib
         {
             if (Latching)
             {
-                LatchedMessage = msg;
+                latchedMessage = msg;
             }
 
             foreach (var sender in connectionsByCallerId)

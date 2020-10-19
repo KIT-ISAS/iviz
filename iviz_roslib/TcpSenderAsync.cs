@@ -31,6 +31,8 @@ namespace Iviz.Roslib
     {
         const int BufferSizeIncrease = 1024;
         const int MinQueueSizeInPackets = 2;
+        const int MaxConnectionRetries = 10;
+        const int WaitBetweenRetriesInMs = 1000;
 
         readonly ConcurrentQueue<IMessage> messageQueue = new ConcurrentQueue<IMessage>();
         readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
@@ -297,7 +299,8 @@ namespace Iviz.Roslib
             Logger.LogDebug($"{this}: initialized!");
             status = SenderStatus.Waiting;
 
-            for (int round = 0; round < 10 && keepRunning; round++)
+
+            for (int round = 0; round < MaxConnectionRetries && keepRunning; round++)
             {
                 try
                 {
@@ -312,7 +315,8 @@ namespace Iviz.Roslib
 
                     if (!await connectionTask.WaitFor(timeoutInMs) || !connectionTask.IsCompleted)
                     {
-                        Logger.Log($"{this}: Connection timed out (round {(round + 1)}/{10}): {connectionTask.Exception}");
+                        Logger.Log(
+                            $"{this}: Connection timed out (round {round + 1}/{MaxConnectionRetries}): {connectionTask.Exception}");
                         continue;
                     }
 
@@ -370,7 +374,7 @@ namespace Iviz.Roslib
 
             while (keepRunning)
             {
-                await signal.WaitAsync(1000);
+                await signal.WaitAsync(WaitBetweenRetriesInMs);
                 if (!keepRunning)
                 {
                     break;
