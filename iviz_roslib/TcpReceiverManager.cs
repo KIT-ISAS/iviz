@@ -10,7 +10,7 @@ using Iviz.XmlRpc;
 
 namespace Iviz.Roslib
 {
-    internal class TcpReceiverManager
+    internal sealed class TcpReceiverManager
     {
         const int DefaultTimeoutInMs = 5000;
         

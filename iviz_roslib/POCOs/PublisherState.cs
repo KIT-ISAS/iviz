@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 
 namespace Iviz.Roslib
 {
-    public class PublisherSenderState : JsonToString
+    public sealed class PublisherSenderState : JsonToString
     {
         public bool IsAlive { get; }
         public bool Latching { get; }
@@ -46,7 +46,7 @@ namespace Iviz.Roslib
         }
     }
 
-    public class PublisherTopicState : JsonToString
+    public sealed class PublisherTopicState : JsonToString
     {
         public string Topic { get; }
         public string Type { get; }
@@ -62,7 +62,7 @@ namespace Iviz.Roslib
         }
     }
 
-    public class PublisherState : JsonToString
+    public sealed class PublisherState : JsonToString
     {
         public ReadOnlyCollection<PublisherTopicState> Topics { get; }
 

@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 namespace Iviz.Msgs
 {
     /// <summary>
-    /// Wrapper around a byte array that contains a serialized ROS message. 
+    /// Contains utilities to (de)serialize ROS messages from a byte array. 
     /// </summary>
     public unsafe struct Buffer
     {

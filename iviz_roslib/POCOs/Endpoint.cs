@@ -3,8 +3,11 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Roslib
 {
+    /// <summary>
+    /// Simple class containing endpoint data for an IP connection.
+    /// </summary>
     [DataContract]
-    public sealed class Endpoint
+    public sealed class Endpoint : JsonToString
     {
         internal Endpoint(string Hostname, int Port)
         {

@@ -6,7 +6,7 @@ using Iviz.XmlRpc;
 
 namespace Iviz.Roslib.XmlRpc
 {
-    internal class NodeClient
+    internal sealed class NodeClient
     {
         public string CallerId { get; }
         public Uri CallerUri { get; }

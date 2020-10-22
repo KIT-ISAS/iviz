@@ -19,7 +19,7 @@ namespace Iviz.Roslib
         /// <summary>
         /// Whether this publisher is valid.
         /// </summary>
-        public bool IsAlive { get; private set; }
+        bool IsAlive { get; set; }
         /// <summary>
         /// The name of the topic.
         /// </summary>

@@ -3,7 +3,7 @@
     /// <summary>
     /// Topic name and message type.
     /// </summary>
-    public class BriefTopicInfo : JsonToString
+    public sealed class BriefTopicInfo : JsonToString
     {
         /// <summary>
         /// Topic name

@@ -6,7 +6,7 @@ using Iviz.Roslib.XmlRpc;
 
 namespace Iviz.Roslib
 {
-    public class SystemState : JsonToString
+    public sealed class SystemState : JsonToString
     {
         public ReadOnlyCollection<TopicTuple> Publishers { get; }
         public ReadOnlyCollection<TopicTuple> Subscribers { get; }

@@ -3,47 +3,50 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Iviz.Msgs;
 
 namespace Iviz.XmlRpc
 {
-    public sealed class Arg
+    public readonly struct Arg
     {
-        readonly string value;
+        readonly string content;
 
-        public Arg(bool f)
+        public bool IsValid => content != null;
+
+        Arg(bool f)
         {
-            value = f ?
-                "<value><boolean>1</boolean></value>\n" :
-                "<value><boolean>0</boolean></value>\n";
+            content = f ? "<value><boolean>1</boolean></value>\n" : "<value><boolean>0</boolean></value>\n";
         }
 
-        public Arg(double f)
+        Arg(double f)
         {
-            value = $"<value><double>{f}</double></value>\n";
+            content = $"<value><double>{f.ToString(BuiltIns.Culture)}</double></value>\n";
         }
 
-        public Arg(int f)
+        Arg(int f)
         {
-            value = $"<value><i4>{f}</i4></value>\n";
+            content = f == 0
+                ? "<value><i4>0</i4></value>\n"
+                : $"<value><i4>{f.ToString(BuiltIns.Culture)}</i4></value>\n";
         }
 
-        public Arg(Uri f) : this(ThrowIfNull(f).ToString())
+        Arg(Uri f) : this(ThrowIfNull(f).ToString())
         {
         }
 
         public Arg(IEnumerable<Uri> f) : this(ThrowIfNull(f).Select(x => new Arg(x)))
         {
         }
-        
-        public Arg(in DateTime f)
+
+        Arg(in DateTime f)
         {
-            value = $"<value><dateTime.iso8601>{f:yyyy-MM-ddTHH:mm:ssZ}</dateTime.iso8601></value>\n";
+            content = $"<value><dateTime.iso8601>{f.ToString("yyyy-MM-ddTHH:mm:ssZ")}</dateTime.iso8601></value>\n";
         }
-        
+
         public Arg(string f)
         {
             ThrowIfNull(f);
-            value = $"<value>{f}</value>\n";
+            content = $"<value>{f}</value>\n";
         }
 
         public Arg(IEnumerable<string> f) : this(ThrowIfNull(f).Select(x => new Arg(x)))
@@ -54,10 +57,10 @@ namespace Iviz.XmlRpc
         {
         }
 
-        public Arg((string, string) f) : this(new Arg[] { ThrowIfNull(f.Item1), ThrowIfNull(f.Item2) })
+        Arg((string, string) f) : this(new Arg[] {ThrowIfNull(f.Item1), ThrowIfNull(f.Item2)})
         {
         }
-        
+
         public Arg(IEnumerable<(string, string)> f) : this(ThrowIfNull(f).Select(x => new Arg(x)))
         {
         }
@@ -65,62 +68,118 @@ namespace Iviz.XmlRpc
         public Arg(IEnumerable<Arg> f)
         {
             ThrowIfNull(f);
-            value = $"<value><array><data>{string.Join("", f)}</data></array></value>";
+            content = $"<value><array><data>{string.Join("", f)}</data></array></value>";
         }
 
         public Arg(IEnumerable<Arg[]> f) : this(ThrowIfNull(f).Select(x => new Arg(x)))
         {
         }
-        
-        public Arg(byte[] f)
+
+        Arg(byte[] f)
         {
             ThrowIfNull(f);
-            value = $"<value><base64>{Convert.ToBase64String(f)}</base64></value>\n";
+            content = $"<value><base64>{Convert.ToBase64String(f)}</base64></value>\n";
         }
 
         public Arg(in ArraySegment<byte> f)
         {
             ThrowIfNull(f.Array);
-            value = $"<value><base64>{Convert.ToBase64String(f.Array, f.Offset, f.Count)}</base64></value>\n";
+            content = $"<value><base64>{Convert.ToBase64String(f.Array, f.Offset, f.Count)}</base64></value>\n";
         }
-        
+
         public Arg(IEnumerable<(string name, Arg value)> f)
         {
             ThrowIfNull(f);
-            value = $"<value><struct>" +
-                    string.Join("", f.Select(tuple => $"<member><name>{tuple.name}</name>{tuple.value}</member>")) +
-                    $"</struct></value>\n";
+            content = "<value><struct>" +
+                      string.Join("",
+                          f.Select(tuple => $"<member><name>{tuple.name}</name>{tuple.value.content}</member>")) +
+                      "</struct></value>\n";
         }
-        
+
         public Arg(IEnumerable<(string name, object value)> f)
         {
             ThrowIfNull(f);
-            value = "<value><struct>" +
-                    string.Join("", f.Select(tuple => $"<member><name>{tuple.name}</name>{Create(tuple.value)}</member>")) +
-                    "</struct></value>\n";
+            content = "<value><struct>" +
+                      string.Join("",
+                          f.Select(tuple =>
+                              $"<member><name>{tuple.name}</name>{Create(tuple.value).content}</member>")) +
+                      "</struct></value>\n";
         }
 
-        static T ThrowIfNull<T>(T t)  => t ?? throw new NullReferenceException(nameof(t));
+        static T ThrowIfNull<T>(T t)
+        {
+            return t ?? throw new NullReferenceException(nameof(t));
+        }
 
         public override string ToString()
         {
-            return value;
+            return content ?? throw new InvalidOperationException("Arg has no valid value");
         }
 
-        public static implicit operator string(Arg arg) => arg?.ToString();
+        public static implicit operator string(Arg arg)
+        {
+            return arg.ToString();
+        }
 
-        public static implicit operator Arg(bool f) => new Arg(f);
-        public static implicit operator Arg(double f) => new Arg(f);
-        public static implicit operator Arg(int f) => new Arg(f);
-        public static implicit operator Arg(Uri f) => new Arg(f);
-        public static implicit operator Arg(Uri[] f) => new Arg(f);
-        public static implicit operator Arg(string f) => new Arg(f);
-        public static implicit operator Arg(string[] f) => new Arg(f);
-        public static implicit operator Arg(string[][] f) => new Arg(f);
-        public static implicit operator Arg((string, string) f) => new Arg(f);
-        public static implicit operator Arg((string, string)[] f) => new Arg(f);
-        public static implicit operator Arg(Arg[] f) => new Arg(f);
-        public static implicit operator Arg(Arg[][] f) => new Arg(f);
+        public static implicit operator Arg(bool f)
+        {
+            return new Arg(f);
+        }
+
+        public static implicit operator Arg(double f)
+        {
+            return new Arg(f);
+        }
+
+        public static implicit operator Arg(int f)
+        {
+            return new Arg(f);
+        }
+
+        public static implicit operator Arg(Uri f)
+        {
+            return new Arg(f);
+        }
+
+        public static implicit operator Arg(Uri[] f)
+        {
+            return new Arg(f);
+        }
+
+        public static implicit operator Arg(string f)
+        {
+            return new Arg(f);
+        }
+
+        public static implicit operator Arg(string[] f)
+        {
+            return new Arg(f);
+        }
+
+        public static implicit operator Arg(string[][] f)
+        {
+            return new Arg(f);
+        }
+
+        public static implicit operator Arg((string, string) f)
+        {
+            return new Arg(f);
+        }
+
+        public static implicit operator Arg((string, string)[] f)
+        {
+            return new Arg(f);
+        }
+
+        public static implicit operator Arg(Arg[] f)
+        {
+            return new Arg(f);
+        }
+
+        public static implicit operator Arg(Arg[][] f)
+        {
+            return new Arg(f);
+        }
 
         public static Arg Create(object o)
         {
@@ -134,7 +193,7 @@ namespace Iviz.XmlRpc
                 byte[] i => new Arg(i),
                 DateTime i => new Arg(i),
                 List<(string, object)> i => new Arg(i),
-                _ => null
+                _ => throw new InvalidOperationException("Type is not supported")
             };
         }
     }

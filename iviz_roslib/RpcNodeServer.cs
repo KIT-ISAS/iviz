@@ -13,6 +13,8 @@ namespace Iviz.Roslib.XmlRpc
 {
     internal sealed class NodeServer : IDisposable
     {
+        static readonly Arg[] DefaultOkResponse = OkResponse(0);        
+        
         readonly Dictionary<string, Func<object[], Arg[]>> methods;
         readonly Dictionary<string, Func<object[], Task>> lateCallbacks; // gets called after response to method callback is sent 
         readonly Iviz.XmlRpc.HttpListener listener;
@@ -123,7 +125,6 @@ namespace Iviz.Roslib.XmlRpc
             task.Wait();
         }
 
-
         static Arg[] OkResponse(Arg arg)
         {
             return new Arg[] {StatusCode.Success, "ok", arg};
@@ -171,9 +172,9 @@ namespace Iviz.Roslib.XmlRpc
 
             string callerId = (string) args[0];
             string reason = args.Length > 1 ? (string) args[1] : "";
-            client.ShutdownAction(callerId, reason, out int status, out string response);
+            client.ShutdownAction(callerId, reason, out _, out _);
 
-            return OkResponse(0);
+            return DefaultOkResponse;
         }
 
         static Arg[] GetPid(object[] _)
@@ -199,7 +200,7 @@ namespace Iviz.Roslib.XmlRpc
         {
             if (client.ParamUpdateAction == null)
             {
-                return OkResponse(0);
+                return DefaultOkResponse;
             }
 
             string callerId = (string) args[0];
@@ -207,13 +208,13 @@ namespace Iviz.Roslib.XmlRpc
             object parameterValue = args[2];
             client.ParamUpdateAction(callerId, parameterKey, parameterValue, out _, out _);
 
-            return OkResponse(0);
+            return DefaultOkResponse;
         }
 
         static Arg[] PublisherUpdate(object[] args)
         {
             // processing happens in PublisherUpdateLateCallback
-            return OkResponse(0);
+            return DefaultOkResponse;
         }
 
         async Task PublisherUpdateLateCallback(object[] args)

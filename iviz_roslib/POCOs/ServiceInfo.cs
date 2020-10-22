@@ -6,7 +6,7 @@ namespace Iviz.Roslib
     /// <summary>
     /// Full info about a ROS service and its service type, including dependencies.
     /// </summary>
-    class ServiceInfo : JsonToString
+    internal sealed class ServiceInfo : JsonToString
     {
         /// <summary>
         /// ROS name of this node.

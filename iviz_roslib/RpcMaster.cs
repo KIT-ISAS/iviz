@@ -16,7 +16,10 @@ namespace Iviz.Roslib.XmlRpc
         public const int Failure = 0;
         public const int Success = 1;
     }
-
+    
+    /// <summary>
+    /// Implements communication to the ROS master API.
+    /// </summary>
     public sealed class Master
     {
         public Uri MasterUri { get; }

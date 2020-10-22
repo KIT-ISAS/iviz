@@ -6,7 +6,7 @@ namespace Iviz.Roslib
     /// <summary>
     /// Full info about a ROS topic and its message type, including dependencies.
     /// </summary>
-    internal class TopicInfo
+    internal sealed class TopicInfo
     {
         /// <summary>
         /// Concatenated dependencies file.

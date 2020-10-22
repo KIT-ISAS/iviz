@@ -13,6 +13,9 @@ using Iviz.Msgs;
 
 namespace Iviz.XmlRpc
 {
+    /// <summary>
+    /// Parent class for the exceptions from this library.
+    /// </summary>
     public class XmlRpcException : Exception
     {
         protected XmlRpcException(string message) : base(message)
@@ -24,6 +27,9 @@ namespace Iviz.XmlRpc
         }
     }
 
+    /// <summary>
+    /// Thrown when the remote call reported an exception. 
+    /// </summary>
     public class FaultException : XmlRpcException
     {
         public FaultException(string message) : base(message)
@@ -31,6 +37,9 @@ namespace Iviz.XmlRpc
         }
     }
 
+    /// <summary>
+    /// Thrown when the XML could not be parsed.
+    /// </summary>
     public class ParseException : XmlRpcException
     {
         public ParseException(string message) : base(message)
@@ -38,13 +47,12 @@ namespace Iviz.XmlRpc
         }
     }
 
-    public class RpcSocketException : XmlRpcException
+    /// <summary>
+    /// Thrown when an error happened during the connection.
+    /// </summary>    
+    public class RpcConnectionException : XmlRpcException
     {
-        public RpcSocketException(string message) : base(message)
-        {
-        }
-
-        public RpcSocketException(string message, Exception e) : base(message, e)
+        public RpcConnectionException(string message) : base(message)
         {
         }
     }
@@ -72,8 +80,7 @@ namespace Iviz.XmlRpc
             {
                 return primitive.InnerText;
             }
-
-            ;
+            
             switch (primitive.Name)
             {
                 case "double":
@@ -101,14 +108,10 @@ namespace Iviz.XmlRpc
 
                     return children;
                 case "dateTime.iso8601":
-                    return DateTime.TryParseExact(
-                        primitive.InnerText,
-                        "yyyy-MM-ddTHH:mm:ssZ",
-                        CultureInfo.InvariantCulture,
-                        DateTimeStyles.None,
-                        out DateTime dt)
-                        ? dt
-                        : DateTime.MinValue;
+                    return DateTime.TryParseExact(primitive.InnerText, "yyyy-MM-ddTHH:mm:ssZ",
+                        CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dt)
+                        ? (object)dt
+                        : (object)DateTime.MinValue;
                 case "base64":
                     try
                     {
@@ -201,7 +204,7 @@ namespace Iviz.XmlRpc
             switch (child?.Name)
             {
                 case null:
-                    throw new ParseException("MethodResponse has no children");
+                    throw new ParseException("'methodResponse' tag has no children");
                 case "params" when child.ChildNodes.Count == 0:
                     throw new ParseException("Empty response");
                 case "params" when child.ChildNodes.Count > 1:
@@ -219,6 +222,16 @@ namespace Iviz.XmlRpc
             }
         }
 
+        /// <summary>
+        /// Calls an XML-RPC method.
+        /// </summary>
+        /// <param name="remoteUri">Uri of the callee.</param>
+        /// <param name="callerUri">Uri of the caller.</param>
+        /// <param name="method">Name of the XML-RPC method.</param>
+        /// <param name="args">List of arguments.</param>
+        /// <param name="timeoutInMs">Timeout in milliseconds.</param>
+        /// <returns>The result of the remote call.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if one of the arguments is null.</exception>
         public static async Task<object> MethodCallAsync(Uri remoteUri, Uri callerUri, string method,
             IEnumerable<Arg> args, int timeoutInMs = 2000)
         {
@@ -239,7 +252,17 @@ namespace Iviz.XmlRpc
 
             return ProcessResponse(inData);
         }
-
+        
+        /// <summary>
+        /// Calls an XML-RPC method.
+        /// </summary>
+        /// <param name="remoteUri">Uri of the callee.</param>
+        /// <param name="callerUri">Uri of the caller.</param>
+        /// <param name="method">Name of the XML-RPC method.</param>
+        /// <param name="args">List of arguments.</param>
+        /// <param name="timeoutInMs">Timeout in milliseconds.</param>
+        /// <returns>The result of the remote call.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if one of the arguments is null.</exception>        
         public static object MethodCall(Uri remoteUri, Uri callerUri, string method, IEnumerable<Arg> args,
             int timeoutInMs = 2000)
         {

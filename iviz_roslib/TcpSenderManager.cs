@@ -8,7 +8,7 @@ using Iviz.Msgs;
 
 namespace Iviz.Roslib
 {
-    internal class TcpSenderManager
+    internal sealed class TcpSenderManager
     {
         const int NewSenderTimeoutInMs = 100;
         const int DefaultTimeoutInMs = 5000;

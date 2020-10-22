@@ -16,9 +16,23 @@ using Iviz.XmlRpc;
 namespace Iviz.Roslib
 {
     /// <summary>
-    /// The provided message type is not correct.
+    /// Parent class for the exceptions of this library.
     /// </summary>
-    public class InvalidMessageTypeException : Exception
+    public class RoslibException : Exception
+    {
+        protected RoslibException(string message) : base(message)
+        {
+        }
+
+        protected RoslibException(string message, Exception innerException) : base(message, innerException)
+        {
+        }        
+    }    
+    
+    /// <summary>
+    /// Thrown when the provided message type is not correct.
+    /// </summary>
+    public class InvalidMessageTypeException : RoslibException
     {
         public InvalidMessageTypeException(string message) : base(message)
         {
@@ -26,9 +40,9 @@ namespace Iviz.Roslib
     }
 
     /// <summary>
-    /// An error happened during the connection.
+    /// Thrown when an error happened during the connection.
     /// </summary>
-    public class ConnectionException : Exception
+    public class ConnectionException : RoslibException
     {
         public ConnectionException(string message, Exception innerException) : base(message, innerException)
         {
@@ -36,9 +50,9 @@ namespace Iviz.Roslib
     }
 
     /// <summary>
-    /// The uri provided for the caller (this node) is not reachable.
+    /// Thrown when the uri provided for the caller (this node) is not reachable.
     /// </summary>
-    public class UnreachableUriException : Exception
+    public class UnreachableUriException : RoslibException
     {
         public UnreachableUriException(string message) : base(message)
         {
@@ -49,7 +63,10 @@ namespace Iviz.Roslib
         }
     }
 
-    public class RosRpcException : Exception
+    /// <summary>
+    /// Wrapper around a <see cref="XmlRpcException"/>
+    /// </summary>
+    public class RosRpcException : RoslibException
     {
         public RosRpcException(string message) : base(message)
         {
@@ -253,7 +270,7 @@ namespace Iviz.Roslib
             {
                 response = CreateTalker(CallerUri).GetPid();
             }
-            catch (Exception e) 
+            catch (Exception e)
             {
                 listener.Dispose();
                 throw new UnreachableUriException($"My own uri '{CallerUri}' does not appear to be reachable!", e);
@@ -324,9 +341,9 @@ namespace Iviz.Roslib
         {
             UnicastIPAddressInformation ipInfo =
                 NetworkInterface.GetAllNetworkInterfaces()
-                    .Where(iface =>
-                        iface.NetworkInterfaceType == type && iface.OperationalStatus == OperationalStatus.Up)
-                    .SelectMany(iface => iface.GetIPProperties().UnicastAddresses)
+                    .Where(@interface =>
+                        @interface.NetworkInterfaceType == type && @interface.OperationalStatus == OperationalStatus.Up)
+                    .SelectMany(@interface => @interface.GetIPProperties().UnicastAddresses)
                     .FirstOrDefault(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork);
             // TODO: Consider ipv6 too
 
@@ -415,7 +432,7 @@ namespace Iviz.Roslib
                     .Where(tuple => tuple.Members.Contains(CallerId))
                     .ForEach(tuple => Master.UnregisterPublisher(tuple.Topic));
             }
-            catch (Exception e) 
+            catch (Exception e)
             {
                 throw new ConnectionException($"Failed to contact the master URI '{MasterUri}'", e);
             }
@@ -436,8 +453,8 @@ namespace Iviz.Roslib
 
             tasks.AddRange(
                 state.Publishers
-                    .Where(x => x.Members.Contains(CallerId))
-                    .Select(x => Master.UnregisterPublisherAsync(x.Topic))
+                    .Where(tuple => tuple.Members.Contains(CallerId))
+                    .Select(tuple => Master.UnregisterPublisherAsync(tuple.Topic))
             );
 
             try
@@ -982,7 +999,7 @@ namespace Iviz.Roslib
         public void Close()
         {
             listener.Dispose();
-            
+
             RosPublisher[] publishers = publishersByTopic.Values.ToArray();
             publishersByTopic.Clear();
 
@@ -1022,7 +1039,7 @@ namespace Iviz.Roslib
                 subscribedServicesByName.Clear();
             }
 
-            receivers.ForEach(x => x.Stop());
+            receivers.ForEach(receiver => receiver.Stop());
 
             ServiceSenderManager[] serviceManagers;
             lock (advertisedServicesByName)
@@ -1051,7 +1068,7 @@ namespace Iviz.Roslib
         public async Task CloseAsync()
         {
             listener.Dispose();
-            
+
             var publishers = publishersByTopic.Values.ToArray();
             publishersByTopic.Clear();
 
@@ -1078,7 +1095,7 @@ namespace Iviz.Roslib
                 subscribedServicesByName.Clear();
             }
 
-            receivers.ForEach(x => x.Stop());
+            receivers.ForEach(receiver => receiver.Stop());
 
             ServiceSenderManager[] serviceManagers;
             lock (advertisedServicesByName)
@@ -1098,12 +1115,12 @@ namespace Iviz.Roslib
 
         public SubscriberState GetSubscriberStatistics()
         {
-            return new SubscriberState(subscribersByTopic.Values.Select(x => x.GetState()).ToArray());
+            return new SubscriberState(subscribersByTopic.Values.Select(subscriber => subscriber.GetState()).ToArray());
         }
 
         public PublisherState GetPublisherStatistics()
         {
-            return new PublisherState(publishersByTopic.Values.Select(x => x.GetState()).ToArray());
+            return new PublisherState(publishersByTopic.Values.Select(publisher => publisher.GetState()).ToArray());
         }
 
         internal IEnumerable<BusInfo> GetBusInfoRcp()
@@ -1140,8 +1157,7 @@ namespace Iviz.Roslib
                             continue;
                         }
 
-                        BusInfo busInfo = new BusInfo(busInfos.Count, response.Uri, "o", topic.Topic,
-                            status: sender.IsAlive);
+                        BusInfo busInfo = new BusInfo(busInfos.Count, response.Uri, "o", topic.Topic, sender.IsAlive);
                         busInfos.Add(busInfo);
                     }
                 }

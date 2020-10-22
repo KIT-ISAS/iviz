@@ -2,7 +2,10 @@
 
 namespace Iviz.Roslib
 {
-    class BusInfo : JsonToString
+    /// <summary>
+    /// Class for generic connection data.
+    /// </summary>
+    internal sealed class BusInfo : JsonToString
     {
         public int ConnectionId { get; }
         public Uri DestinationId { get; }

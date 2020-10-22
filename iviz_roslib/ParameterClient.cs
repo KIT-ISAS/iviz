@@ -7,6 +7,9 @@ using TopicTuples = System.Tuple<string, string[]>;
 
 namespace Iviz.Roslib.XmlRpc
 {
+    /// <summary>
+    /// Contains utilities to access data from a ROS parameter server.
+    /// </summary>
     public sealed class ParameterClient
     {
         public Uri MasterUri { get; }

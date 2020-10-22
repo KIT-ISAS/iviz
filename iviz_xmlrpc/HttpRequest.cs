@@ -36,7 +36,7 @@ namespace Iviz.XmlRpc
 
             if (client.Client?.LocalEndPoint == null)
             {
-                throw new RpcSocketException($"HttpRequest: Connection with '{hostname}' failed.");
+                throw new RpcConnectionException($"HttpRequest: Connection with '{hostname}' failed.");
             }            
         }
 
@@ -53,7 +53,7 @@ namespace Iviz.XmlRpc
             
             if (client.Client?.LocalEndPoint == null)
             {
-                throw new RpcSocketException($"HttpRequest: Connection with '{hostname}' failed.");
+                throw new RpcConnectionException($"HttpRequest: Connection with '{hostname}' failed.");
             }            
         }
 
@@ -61,11 +61,11 @@ namespace Iviz.XmlRpc
         {
             StringBuilder str = new StringBuilder();
             string path = Uri.UnescapeDataString(uri.AbsolutePath);
-            str.Append($"POST {path} HTTP/1.0").Append("\r\n");
-            str.Append($"User-Agent: iviz XML-RPC").Append("\r\n");
-            str.Append($"Host: {callerUri.Host}").Append("\r\n");
-            str.Append($"Content-Length: {BuiltIns.UTF8.GetByteCount(msgIn)}").Append("\r\n");
-            str.Append($"Content-Type: text/xml; charset=utf-8").Append("\r\n");
+            str.Append($"POST {path} HTTP/1.0\r\n");
+            str.Append("User-Agent: iviz XML-RPC\r\n");
+            str.Append($"Host: {callerUri.Host}\r\n");
+            str.Append("Content-Length: ").Append(BuiltIns.UTF8.GetByteCount(msgIn)).Append("\r\n");
+            str.Append("Content-Type: text/xml; charset=utf-8\r\n");
             str.Append("\r\n");
             str.Append(msgIn).Append("\r\n");
             return str.ToString();

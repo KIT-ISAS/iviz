@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 
 namespace Iviz.Roslib
 {
-    public class SubscriberReceiverState
+    public sealed class SubscriberReceiverState
     {
         public bool IsAlive { get; }
         public bool RequestNoDelay { get; }
@@ -30,7 +30,7 @@ namespace Iviz.Roslib
 
     }
 
-    public class SubscriberTopicState
+    public sealed class SubscriberTopicState
     {
         public string Topic { get; }
         public string Type { get; }
@@ -46,7 +46,7 @@ namespace Iviz.Roslib
         }
     }
 
-    public class SubscriberState
+    public sealed class SubscriberState
     {
         public ReadOnlyCollection<SubscriberTopicState> Topics { get; }
 
