@@ -12,7 +12,7 @@ namespace Iviz.Roslib
     {
         const int NewSenderTimeoutInMs = 100;
         const int DefaultTimeoutInMs = 5000;
-        
+
         readonly ConcurrentDictionary<string, TcpSenderAsync> connectionsByCallerId =
             new ConcurrentDictionary<string, TcpSenderAsync>();
 
@@ -72,28 +72,29 @@ namespace Iviz.Roslib
             }
         }
 
-        public IPEndPoint CreateConnection(string remoteCallerId)
+        public IPEndPoint CreateConnectionRpc(string remoteCallerId)
         {
             Logger.LogDebug($"{this}: '{remoteCallerId}' is requesting {Topic}");
             TcpSenderAsync newSender = new TcpSenderAsync(remoteCallerId, topicInfo, Latching);
-
-            if (connectionsByCallerId.TryGetValue(remoteCallerId, out TcpSenderAsync oldSender) &&
-                oldSender.IsAlive)
-            {
-                Logger.LogDebug($"{this}: '{remoteCallerId}' is requesting {Topic} again? Closing old connection.");
-                oldSender.Dispose();
-            }
 
             IPEndPoint endPoint;
             using (SemaphoreSlim managerSignal = new SemaphoreSlim(0, 1))
             {
                 endPoint = newSender.Start(TimeoutInMs, managerSignal);
-                connectionsByCallerId[remoteCallerId] = newSender;
+
+                connectionsByCallerId.AddOrUpdate(remoteCallerId, newSender, (_, oldSender) =>
+                {
+                    Logger.LogDebug(
+                        $"{this}: '{oldSender.RemoteCallerId}' is requesting {Topic} again? Closing old connection.");
+                    oldSender.Dispose();
+                    return newSender;
+                });
 
                 // while we're here
                 Cleanup();
 
                 // wait until newSender is ready to accept
+                // should last only a couple of ms
                 if (!managerSignal.Wait(NewSenderTimeoutInMs))
                 {
                     // shouldn't happen
@@ -108,7 +109,7 @@ namespace Iviz.Roslib
 
             newSender.MaxQueueSizeInBytes = MaxQueueSizeInBytes;
             NumConnectionsChanged?.Invoke();
-            
+
             return endPoint;
         }
 
@@ -118,9 +119,11 @@ namespace Iviz.Roslib
             TcpSenderAsync[] toDelete = connectionsByCallerId.Values.Where(sender => !sender.IsAlive).ToArray();
             foreach (TcpSenderAsync sender in toDelete)
             {
-                Logger.LogDebug($"{this}: Removing connection with '{sender}' - dead x_x");
                 sender.Dispose();
-                connectionsByCallerId.TryRemove(sender.RemoteCallerId, out _);
+                if (connectionsByCallerId.RemovePair(sender.RemoteCallerId, sender))
+                {
+                    Logger.LogDebug($"{this}: Removing connection with '{sender}' - dead x_x");
+                }
             }
 
             subscribersChanged = toDelete.Length != 0;
@@ -137,9 +140,9 @@ namespace Iviz.Roslib
                 latchedMessage = msg;
             }
 
-            foreach (var sender in connectionsByCallerId)
+            foreach (var pair in connectionsByCallerId)
             {
-                sender.Value.Publish(msg);
+                pair.Value.Publish(msg);
             }
         }
 

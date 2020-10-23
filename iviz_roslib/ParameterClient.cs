@@ -23,6 +23,12 @@ namespace Iviz.Roslib.XmlRpc
             CallerId = callerId;
         }
         
+
+        public override string ToString()
+        {
+            return $"[ParameterClient masterUri={MasterUri} callerUri={CallerUri} callerId={CallerId}]";
+        }
+
         public bool SetParameter(string key, Arg value)
         {
             return SetParam(key, value).Code == StatusCode.Success;
@@ -264,7 +270,7 @@ namespace Iviz.Roslib.XmlRpc
         }
     }
 
-    sealed class HasParamResponse : BaseResponse
+    internal sealed class HasParamResponse : BaseResponse
     {
         public bool HasParam { get; }
 
@@ -274,7 +280,7 @@ namespace Iviz.Roslib.XmlRpc
         }
     }
 
-    sealed class GetParamNamesResponse : BaseResponse
+    internal sealed class GetParamNamesResponse : BaseResponse
     {
         public ReadOnlyCollection<string> ParameterNameList { get; }
 

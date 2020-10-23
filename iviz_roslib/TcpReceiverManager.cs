@@ -13,11 +13,11 @@ namespace Iviz.Roslib
     internal sealed class TcpReceiverManager
     {
         const int DefaultTimeoutInMs = 5000;
-        
+
         static readonly string[][] SupportedProtocols = {new[] {"TCPROS"}};
 
-        readonly ConcurrentDictionary<Uri, TcpReceiverAsync> connectionsByUri =
-            new ConcurrentDictionary<Uri, TcpReceiverAsync>();
+        readonly AsyncLock mutex = new AsyncLock();
+        readonly Dictionary<Uri, TcpReceiverAsync> connectionsByUri = new Dictionary<Uri, TcpReceiverAsync>();
 
         public TcpReceiverManager(TopicInfo topicInfo, bool requestNoDelay)
         {
@@ -35,6 +35,7 @@ namespace Iviz.Roslib
         {
             get
             {
+                using IDisposable @lock = mutex.Lock();
                 Cleanup();
                 return connectionsByUri.Count;
             }
@@ -53,7 +54,7 @@ namespace Iviz.Roslib
             {
                 response = await talker.RequestTopicAsync(Topic, SupportedProtocols).Caf();
             }
-            catch (Exception e) when (e is TimeoutException)
+            catch (Exception e) when (e is TimeoutException || e is XmlRpcException)
             {
                 Logger.LogDebug($"{this}: Failed to add publisher {remoteUri}: {e}");
                 return false;
@@ -83,7 +84,7 @@ namespace Iviz.Roslib
             {
                 response = talker.RequestTopic(Topic, SupportedProtocols);
             }
-            catch (Exception e) when (e is TimeoutException || e is AggregateException)
+            catch (Exception e) when (e is TimeoutException || e is AggregateException || e is XmlRpcException)
             {
                 Logger.LogDebug($"{this}: Failed to add publisher {remoteUri}: {e}");
                 return false;
@@ -119,8 +120,27 @@ namespace Iviz.Roslib
 
         public async Task PublisherUpdateRpcAsync(RosClient caller, IEnumerable<Uri> publisherUris)
         {
-            HashSet<Uri> keys = new HashSet<Uri>(connectionsByUri.Keys);
-            Uri[] toAdd = publisherUris.Where(uri => uri != null && !keys.Contains(uri)).ToArray();
+            using IDisposable @lock = await mutex.LockAsync();
+            
+            HashSet<Uri> newPublishers = new HashSet<Uri>(publisherUris);
+            IEnumerable<Uri> toAdd = newPublishers.Where(uri => uri != null && !connectionsByUri.ContainsKey(uri));
+
+            // if an uri is not registered as a publisher anymore,
+            // we kill existing receivers only if they are still trying to reconnect
+            // existing sessions should continue
+            IEnumerable<TcpReceiverAsync> toDelete = connectionsByUri
+                .Where(pair => !newPublishers.Contains(pair.Key) /*&& !pair.Value.IsConnected*/)
+                .Select(pair => pair.Value).ToArray();
+
+            //Logger.Log(this + " old: " + string.Join(",", connectionsByUri.Keys) + " new: " +
+            //           string.Join(",", newPublishers) + " todie: " + string.Join(",", toDelete));
+
+            foreach (TcpReceiverAsync receiver in toDelete)
+            {
+                //Logger.Log(this + " disposing: " + receiver);
+                receiver.Dispose();
+            }
+
             bool[] results = await Task.WhenAll(toAdd.Select(uri => AddPublisherAsync(caller.CreateTalker(uri)))).Caf();
 
             if (results.Any())
@@ -128,14 +148,34 @@ namespace Iviz.Roslib
                 NumConnectionsChanged?.Invoke();
             }
 
+            //Logger.Log(this + " calling cleanup!");
             Cleanup();
         }
 
         public void PublisherUpdateRpc(RosClient caller, IEnumerable<Uri> publisherUris)
         {
-            HashSet<Uri> keys = new HashSet<Uri>(connectionsByUri.Keys);
-            IEnumerable<Uri> toAdd = publisherUris.Where(uri => uri != null && !keys.Contains(uri));
-            IEnumerable<bool> results = toAdd.Select(uri => AddPublisher(caller.CreateTalker(uri)));
+            using IDisposable @lock = mutex.Lock();
+            
+            HashSet<Uri> newPublishers = new HashSet<Uri>(publisherUris);
+            IEnumerable<Uri> toAdd = newPublishers.Where(uri => uri != null && !connectionsByUri.ContainsKey(uri));
+
+            // if an uri is not registered as a publisher anymore,
+            // we kill existing receivers only if they are still trying to reconnect
+            // existing sessions should continue
+            IEnumerable<TcpReceiverAsync> toDelete = connectionsByUri
+                .Where(pair => !newPublishers.Contains(pair.Key)/* && !pair.Value.IsConnected*/)
+                .Select(pair => pair.Value);
+
+            //Logger.Log(this + " old: " + string.Join(",", connectionsByUri.Keys) + " new: " +
+            //           string.Join(",", newPublishers) + " todie: " + string.Join(",", toDelete));
+            
+            
+            foreach (TcpReceiverAsync receiver in toDelete)
+            {
+                receiver.Dispose();
+            }
+
+            IEnumerable<bool> results = toAdd.Select(uri => AddPublisher(caller.CreateTalker(uri))).ToArray();
 
             if (results.Any())
             {
@@ -151,8 +191,8 @@ namespace Iviz.Roslib
             TcpReceiverAsync[] toDelete = connectionsByUri.Values.Where(receiver => !receiver.IsAlive).ToArray();
             foreach (TcpReceiverAsync receiver in toDelete)
             {
+                connectionsByUri.Remove(receiver.RemoteUri);
                 Logger.Log($"{this}: Removing connection with '{receiver.RemoteUri}' - dead x_x");
-                connectionsByUri.TryRemove(receiver.RemoteUri, out _);
                 receiver.Dispose();
             }
 
@@ -165,6 +205,7 @@ namespace Iviz.Roslib
 
         public void Stop()
         {
+            using IDisposable @lock = mutex.Lock();
             connectionsByUri.Values.ForEach(x => x.Dispose());
             connectionsByUri.Clear();
             NumConnectionsChanged = null;

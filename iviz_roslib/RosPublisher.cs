@@ -130,7 +130,7 @@ namespace Iviz.Roslib
 
         internal (string hostname, int port) RequestTopicRpc(string remoteCallerId)
         {
-            IPEndPoint endPoint = manager.CreateConnection(remoteCallerId);
+            IPEndPoint endPoint = manager.CreateConnectionRpc(remoteCallerId);
             return (manager.CallerUri.Host, endPoint.Port);
         }
 

@@ -203,7 +203,8 @@ namespace Iviz.Roslib
         /// <param name="masterUri">URI to the master node. Example: new Uri("http://localhost:11311")</param>
         /// <param name="callerId">The ROS name of this node</param>
         /// <param name="callerUri">URI of this node. Leave empty to generate one automatically</param>
-        public RosClient(Uri masterUri = null, string callerId = null, Uri callerUri = null)
+        /// <param name="ensureCleanSlate">Checks if masterUri has any previous subscriptions or advertisements, and unregisters them.</param>
+        public RosClient(Uri masterUri = null, string callerId = null, Uri callerUri = null, bool ensureCleanSlate = true)
         {
             masterUri ??= EnvironmentMasterUri;
 
@@ -287,6 +288,11 @@ namespace Iviz.Roslib
             }
 
             Logger.Log("RosClient: Initialized.");
+
+            if (ensureCleanSlate)
+            {
+                EnsureCleanSlate();
+            }
         }
 
 
@@ -440,6 +446,7 @@ namespace Iviz.Roslib
 
         /// <summary>
         /// Asks the master which topics we advertise and are subscribed to, and removes them.
+        /// If you are interested in the async version, make sure to set ensureCleanSlate to false in the constructor.
         /// </summary>
         public async Task EnsureCleanSlateAsync()
         {

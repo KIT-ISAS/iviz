@@ -20,17 +20,17 @@ namespace Iviz.RosMaster
 
         readonly Dictionary<string, Func<object[], Task>> lateCallbacks;
 
-        readonly ConcurrentDictionary<string, ConcurrentDictionary<string, Uri>> publishersByTopic =
-            new ConcurrentDictionary<string, ConcurrentDictionary<string, Uri>>();
+        readonly Dictionary<string, Dictionary<string, Uri>> publishersByTopic =
+            new Dictionary<string, Dictionary<string, Uri>>();
 
-        readonly ConcurrentDictionary<string, ConcurrentDictionary<string, Uri>> subscribersByTopic =
-            new ConcurrentDictionary<string, ConcurrentDictionary<string, Uri>>();
+        readonly Dictionary<string, Dictionary<string, Uri>> subscribersByTopic =
+            new Dictionary<string, Dictionary<string, Uri>>();
 
-        readonly ConcurrentDictionary<string, Uri> serviceProviders = new ConcurrentDictionary<string, Uri>();
+        readonly Dictionary<string, Uri> serviceProviders = new Dictionary<string, Uri>();
 
-        readonly ConcurrentDictionary<string, string> topicTypes = new ConcurrentDictionary<string, string>();
+        readonly Dictionary<string, string> topicTypes = new Dictionary<string, string>();
 
-        readonly ConcurrentDictionary<string, Arg> parameters = new ConcurrentDictionary<string, Arg>();
+        readonly Dictionary<string, Arg> parameters = new Dictionary<string, Arg>();
 
         public Uri MasterUri { get; }
         public string MasterCallerId { get; }
@@ -95,14 +95,14 @@ namespace Iviz.RosMaster
 
         public void AddKey(string key, Arg value)
         {
-            Logger.Log("** Adding key '" + key + "'");
+            Logger.Log($"** Adding key '{key}'");
             parameters[key] = value;
         }
 
         public async Task Start()
         {
-            Logger.Log("** Starting at " + MasterUri);
-            await listener.StartAsync(StartContext);
+            Logger.Log($"** Starting at {MasterUri}");
+            await listener.StartAsync(StartContext, false);
             await listener.AwaitRunningTasks();
             Logger.Log("** Leaving thread.");
         }
@@ -121,6 +121,8 @@ namespace Iviz.RosMaster
                 }
             }
         }
+
+        static readonly Arg[] DefaultOkResponse = OkResponse(0);
 
         static Arg[] OkResponse(Arg arg)
         {
@@ -155,21 +157,19 @@ namespace Iviz.RosMaster
 
             if (!publishersByTopic.TryGetValue(topic, out var publishers))
             {
-                publishers = new ConcurrentDictionary<string, Uri>();
+                publishers = new Dictionary<string, Uri>();
                 publishersByTopic[topic] = publishers;
                 topicTypes[topic] = topicType;
 
                 Logger.Log($"++ Topic: {topic} [{topicType}]");
             }
 
-            if (publishers.TryAdd(callerId, callerUri))
-            {
-                Logger.Log($"++ Publisher: {callerId}@{callerUri} -> {topic}");
-            }
+            publishers.Add(callerId, callerUri);
+            Logger.Log($"++ Publisher: {callerId}@{callerUri} -> {topic}");
 
             IEnumerable<Uri> currentSubscribers =
                 subscribersByTopic.TryGetValue(topic, out var subscribers)
-                    ? subscribers.Values
+                    ? (IEnumerable<Uri>) subscribers.Values
                     : Array.Empty<Uri>();
 
             return OkResponse(new Arg(currentSubscribers));
@@ -185,15 +185,20 @@ namespace Iviz.RosMaster
 
             IEnumerable<Uri> publisherUris =
                 publishersByTopic.TryGetValue(topic, out var publishers)
-                    ? publishers.Values
+                    ? (IEnumerable<Uri>) publishers.Values
                     : Array.Empty<Uri>();
+
             Arg[] methodArgs = {MasterCallerId, topic, new Arg(publisherUris)};
 
-            Task[] tasks = subscribers.Values.Select(uri => NotifySubscriber(uri, methodArgs)).ToArray();
-            await Task.WhenAll(tasks);
+            foreach (var uri in subscribers.Values)
+            {
+                NotifySubscriber(uri, methodArgs);
+            }
+
+            await Task.CompletedTask;
         }
 
-        async Task NotifySubscriber(Uri remoteUri, IEnumerable<Arg> methodArgs)
+        async void NotifySubscriber(Uri remoteUri, IEnumerable<Arg> methodArgs)
         {
             try
             {
@@ -223,15 +228,15 @@ namespace Iviz.RosMaster
 
             if (!subscribersByTopic.TryGetValue(topic, out var subscribers))
             {
-                subscribers = new ConcurrentDictionary<string, Uri>();
+                subscribers = new Dictionary<string, Uri>();
                 subscribersByTopic[topic] = subscribers;
             }
 
-            subscribers.TryAdd(callerId, callerUri);
+            subscribers.Add(callerId, callerUri);
 
             IEnumerable<Uri> currentPublishers =
                 publishersByTopic.TryGetValue(topic, out var publishers)
-                    ? publishers.Values
+                    ? (IEnumerable<Uri>) publishers.Values
                     : Array.Empty<Uri>();
 
             return OkResponse(new Arg(currentPublishers));
@@ -254,14 +259,14 @@ namespace Iviz.RosMaster
 
             if (!subscribersByTopic.TryGetValue(topic, out var subscribers) ||
                 !(subscribers.TryGetValue(callerId, out Uri tmpUri) && tmpUri == callerUri) ||
-                !subscribers.TryRemove(callerId, out _))
+                !subscribers.Remove(callerId))
             {
-                return OkResponse(0);
+                return DefaultOkResponse;
             }
 
             if (!subscribers.Any())
             {
-                subscribersByTopic.TryRemove(topic, out _);
+                subscribersByTopic.Remove(topic);
             }
 
             return OkResponse(1);
@@ -284,17 +289,17 @@ namespace Iviz.RosMaster
 
             if (!publishersByTopic.TryGetValue(topic, out var publishers) ||
                 !(publishers.TryGetValue(callerId, out Uri tmpUri) && tmpUri == callerUri) ||
-                !publishers.TryRemove(callerId, out _))
+                !publishers.Remove(callerId))
             {
-                return OkResponse(0);
+                return DefaultOkResponse;
             }
 
             Logger.Log($"-- Publisher: {callerId}@{callerUri} -> {topic}");
 
             if (!publishers.Any())
             {
-                publishersByTopic.TryRemove(topic, out _);
-                topicTypes.TryRemove(topic, out _);
+                publishersByTopic.Remove(topic);
+                topicTypes.Remove(topic);
 
                 Logger.Log($"-- Topic: {topic}");
             }
@@ -320,7 +325,7 @@ namespace Iviz.RosMaster
 
             serviceProviders[service] = serviceUri;
 
-            return OkResponse(0);
+            return DefaultOkResponse;
         }
 
         Arg[] UnregisterService(object[] args)
@@ -339,10 +344,10 @@ namespace Iviz.RosMaster
 
             if (!serviceProviders.TryGetValue(service, out Uri currentServiceUri) || serviceUri != currentServiceUri)
             {
-                return OkResponse(0);
+                return DefaultOkResponse;
             }
 
-            serviceProviders.TryRemove(service, out _);
+            serviceProviders.Remove(service);
             return OkResponse(1);
         }
 
@@ -403,9 +408,7 @@ namespace Iviz.RosMaster
             var providers = serviceProviders.Select(
                 pair => new Arg[] {pair.Key, new Arg(Yield(pair.Value))});
 
-            return OkResponse(
-                new[] {new Arg(publishers), new Arg(subscribers), new Arg(providers)}
-            );
+            return OkResponse(new[] {new Arg(publishers), new Arg(subscribers), new Arg(providers)});
         }
 
         Arg[] DeleteParam(object[] args)
@@ -416,8 +419,8 @@ namespace Iviz.RosMaster
                 return ErrorResponse("Failed to parse arguments");
             }
 
-            parameters.TryRemove(key, out _);
-            return OkResponse(0);
+            parameters.Remove(key);
+            return DefaultOkResponse;
         }
 
         Arg[] SetParam(object[] args)
@@ -426,7 +429,7 @@ namespace Iviz.RosMaster
 
             if (args.Length != 3 ||
                 !(args[1] is string key) ||
-                (arg = Arg.Create(args[2])) is null)
+                !(arg = Arg.Create(args[2])).IsValid)
             {
                 return ErrorResponse("Failed to parse arguments");
             }
@@ -442,7 +445,7 @@ namespace Iviz.RosMaster
             }
 
             parameters[key] = arg;
-            return OkResponse(0);
+            return DefaultOkResponse;
         }
 
         Arg[] GetParam(object[] args)

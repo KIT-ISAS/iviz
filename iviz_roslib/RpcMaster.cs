@@ -34,6 +34,11 @@ namespace Iviz.Roslib.XmlRpc
             CallerId = callerId;
         }
 
+        public override string ToString()
+        {
+            return $"[Master masterUri={MasterUri} callerUri={CallerUri} callerId={CallerId}]";
+        }
+
         public GetUriResponse GetUri()
         {
             Arg[] args = {CallerId};

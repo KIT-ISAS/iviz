@@ -91,7 +91,14 @@ namespace Iviz.Roslib
             try { signal.Release(); }
             catch (SemaphoreFullException) { }
 
-            task?.Wait();
+            try
+            {
+                task?.Wait();
+            }
+            catch (Exception e)
+            {
+                Logger.Log($"{this}: {e}");
+            }
         }
 
         public IPEndPoint Start(int timeoutInMs, SemaphoreSlim managerSignal)
@@ -348,6 +355,8 @@ namespace Iviz.Roslib
             }
 
             status = SenderStatus.Dead;
+            tcpListener?.Stop();
+            tcpClient?.Dispose();
             tcpClient = null;
             stream = null;
         }
