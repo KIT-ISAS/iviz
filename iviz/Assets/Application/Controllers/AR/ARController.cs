@@ -42,7 +42,8 @@ namespace Iviz.Controllers
             Anchor,
             ImageMarker,
             ControlMarker,
-            Configuration
+            Configuration,
+            Setup
         }
 
         public static readonly Vector3 DefaultWorldOffset = new Vector3(0.5f, 0, -0.2f);

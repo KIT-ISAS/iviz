@@ -13,12 +13,16 @@ namespace Iviz.App
         static readonly Color DisabledColor = Settings.IsHololens
             ? new Color(0.75f, 0.75f, 0.75f, 1.0f)
             : new Color(0.75f, 0.75f, 0.75f, 0.25f);
-        
+
         [SerializeField] bool state;
+
         Image image;
 
+        Button button;
+        Button Button => button == null ? (button = GetComponent<Button>()) : button;
+
         public event Action Clicked;
-        
+
         public bool State
         {
             get => state;
@@ -30,19 +34,25 @@ namespace Iviz.App
                     image.color = state ? EnabledColor : DisabledColor;
                 }
             }
-        } 
-        
+        }
+
         public bool Visible
         {
             get => gameObject.activeSelf;
             set => gameObject.SetActive(value);
-        } 
-        
+        }
+
+        public bool Interactable
+        {
+            get => Button.interactable;
+            set => Button.interactable = value;
+        }
+
         void Awake()
         {
             image = transform.GetChild(0).GetComponent<Image>();
             State = State;
-            GetComponent<Button>().onClick.AddListener(() =>
+            Button.onClick.AddListener(() =>
             {
                 State = !State;
                 Clicked?.Invoke();

@@ -165,29 +165,29 @@ namespace Iviz.Displays
                         arrowMx.SetActive(true);
                         break;
                     case InteractionModeType.MovePlaneYZ:
-                        arrowPy.SetActive(true);
-                        arrowMy.SetActive(true);
-                        arrowPz.SetActive(true);
-                        arrowMz.SetActive(true);
+                        //arrowPy.SetActive(true);
+                        //arrowMy.SetActive(true);
+                        //arrowPz.SetActive(true);
+                        //arrowMz.SetActive(true);
                         ringXPlane.SetActive(true);
                         break;
                     case InteractionModeType.RotateAxisX:
                         ringX.SetActive(true);
                         break;
                     case InteractionModeType.MovePlaneYZ_RotateAxisX:
-                        arrowPy.SetActive(true);
-                        arrowMy.SetActive(true);
-                        arrowPz.SetActive(true);
-                        arrowMz.SetActive(true);
+                        //arrowPy.SetActive(true);
+                        //arrowMy.SetActive(true);
+                        //arrowPz.SetActive(true);
+                        //arrowMz.SetActive(true);
                         ringX.SetActive(true);
                         ringXPlane.SetActive(true);
                         break;
                     case InteractionModeType.Frame:
-                        arrowPx.SetActive(true);
-                        arrowMx.SetActive(true);
-                        arrowPy.SetActive(true);
-                        arrowMy.SetActive(true);
-                        arrowPz.SetActive(true);
+                        //arrowPx.SetActive(true);
+                        //arrowMx.SetActive(true);
+                        //arrowPy.SetActive(true);
+                        //arrowMy.SetActive(true);
+                        //arrowPz.SetActive(true);
                         //arrowMZ.SetActive(true);
                         ringZ.SetActive(true);
                         ringZPlane.SetActive(true);

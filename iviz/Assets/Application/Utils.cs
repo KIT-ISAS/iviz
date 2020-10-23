@@ -240,7 +240,7 @@ namespace Iviz
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static Msgs.GeometryMsgs.Quaternion Unity2RosQuaternion(this Quaternion p)
+        public static Msgs.GeometryMsgs.Quaternion Unity2RosQuaternion(this Quaternion p)
         {
             return ToRos(p.Unity2Ros());
         }

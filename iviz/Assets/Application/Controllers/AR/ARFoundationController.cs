@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Iviz.App;
 using Iviz.Displays;
 using Iviz.Resources;
 using UnityEngine;
@@ -13,7 +14,7 @@ namespace Iviz.Controllers
     {
         const float AnchorPauseTimeInSec = 2;
         const int SetupModeLayer = 14;
-        
+
         static ARSessionInfo savedSessionInfo;
 
         [SerializeField] Camera arCamera = null;
@@ -21,7 +22,7 @@ namespace Iviz.Controllers
         [SerializeField] Light arLight = null;
         [SerializeField] ARCameraFovDisplay fovDisplay = null;
         [SerializeField] AxisFrameResource setupModeFrame = null;
-        
+
         Camera mainCamera;
         ARPlaneManager planeManager;
         ARTrackedImageManager tracker;
@@ -29,8 +30,11 @@ namespace Iviz.Controllers
         ARMarkerResource resource;
         ARAnchorManager anchorManager;
         ARAnchorResource worldAnchor;
-        
-        
+
+        int defaultCullingMask;
+
+        static AnchorToggleButton ArSet => ModuleListPanel.AnchorCanvas.ArSet;
+
         public override bool Visible
         {
             get => base.Visible;
@@ -41,22 +45,41 @@ namespace Iviz.Controllers
                 mainCamera.gameObject.SetActive(!value);
                 arCamera.enabled = value;
                 arLight.gameObject.SetActive(value);
+                ArSet.Visible = value;
                 TFListener.MainCamera = value ? arCamera : mainCamera;
                 canvas.worldCamera = TFListener.MainCamera;
             }
         }
 
         bool setupModeEnabled = true;
+
         bool SetupModeEnabled
         {
             get => setupModeEnabled;
             set
             {
                 setupModeEnabled = value;
-                arCamera.cullingMask = value ? (1 << SetupModeLayer) : ~(1 << SetupModeLayer);
+                if (value)
+                {
+                    arCamera.cullingMask = 1 << SetupModeLayer;
+                }
+                else
+                {
+                    arCamera.cullingMask = defaultCullingMask;
+                    Pose sourcePose = setupModeFrame.transform.AsPose();
+                    Pose pose = new Pose
+                    {
+                        position = sourcePose.position,
+                        rotation = Quaternion.Euler(0, sourcePose.rotation.eulerAngles.y - 90, 0)
+                    };
+
+                    Debug.Log(sourcePose);
+                    SetWorldPose(pose, RootMover.Setup);
+                    ArSet.Visible = false;
+                }
             }
         }
-        
+
         public bool HasSetupModePose { get; private set; }
 
         bool MarkerFound { get; set; }
@@ -162,6 +185,7 @@ namespace Iviz.Controllers
             anchorManager = arSessionOrigin.GetComponent<ARAnchorManager>();
             lastAnchorMoved = Time.time;
 
+            defaultCullingMask = arCamera.cullingMask;
             var cameraManager = arCamera.GetComponent<ARCameraManager>();
             cameraManager.frameReceived += args => { UpdateLights(args.lightEstimation); };
 
@@ -177,9 +201,14 @@ namespace Iviz.Controllers
                 setupModeFrame = ResourcePool.GetOrCreateDisplay<AxisFrameResource>(arCamera.transform);
                 setupModeFrame.Layer = SetupModeLayer;
             }
-            
+
             SetupModeEnabled = true;
             setupModeFrame.AxisLength = TFListener.Instance.FrameSize;
+
+            ArSet.Clicked += () =>
+            {
+                SetupModeEnabled = !SetupModeEnabled;
+            };
 
             WorldPoseChanged += OnWorldPoseChanged;
         }
@@ -189,10 +218,10 @@ namespace Iviz.Controllers
             return Vector3.Distance(WorldPosition, b.position) < 0.001f &&
                    Mathf.Abs(WorldAngle - AngleFromPose(b)) < 0.1f;
         }
-        
+
         void OnWorldPoseChanged(RootMover mover)
         {
-            if (mover == RootMover.Anchor||
+            if (mover == RootMover.Anchor ||
                 worldAnchor == null ||
                 IsSamePose(worldAnchor.Pose))
             {
@@ -228,15 +257,17 @@ namespace Iviz.Controllers
                     setupModeFrame.transform.position = hit.pose.position;
                     setupModeFrame.Tint = Color.white;
                     HasSetupModePose = true;
+                    ArSet.Interactable = true;
                 }
                 else
                 {
                     setupModeFrame.transform.localPosition = new Vector3(0, 0, 0.5f);
                     setupModeFrame.Tint = new Color(1, 1, 1, 0.5f);
                     HasSetupModePose = false;
+                    ArSet.Interactable = false;
                 }
             }
-            
+
             if (lastAnchorMoved == null || Time.time - lastAnchorMoved.Value < AnchorPauseTimeInSec)
             {
                 return;
@@ -258,7 +289,7 @@ namespace Iviz.Controllers
                 }
                 else
                 {
-                    lastAnchorMoved = Time.time + 2;
+                    lastAnchorMoved = Time.time + AnchorPauseTimeInSec;
                 }
             }
             else

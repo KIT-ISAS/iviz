@@ -11,10 +11,12 @@
         //Pass 
         //{
 		    Tags { "Queue"="Transparent" "RenderType"="Transparent"}
+			ZWrite Off
+			Tags { "Queue"="Geometry+1" }
             //Tags {"RenderType"="Opaque"}
     
             CGPROGRAM
-            #pragma surface surf Standard addshadow fullforwardshadows
+            #pragma surface surf Standard addshadow fullforwardshadows alpha:fade
             #pragma target 3.0
     
             struct Input {
@@ -31,6 +33,8 @@
     
             void surf(Input IN, inout SurfaceOutputStandard o) {
                 o.Albedo = UNITY_ACCESS_INSTANCED_PROP(Props, _Color).rgb * IN.color;
+            	//o.Albedo = float3(1,0,1);
+            	o.Alpha = 0.15;
                 o.Metallic = _Metallic;
                 o.Smoothness = _Smoothness;
                 o.Emission = UNITY_ACCESS_INSTANCED_PROP(Props, _EmissiveColor).rgb;
@@ -42,12 +46,11 @@
         //{
 		    //Tags { "Queue"="Transparent" "RenderType"="Transparent"}
 		    ZWrite Off
-            ZTest Greater
-            Blend One SrcAlpha
-    
+            ZTest Less
+            Blend One Zero
+
             CGPROGRAM
             #pragma surface surf NoLighting alpha:fade
-            #pragma target 3.0
     
             struct Input {
                 float4 color : COLOR;
@@ -61,15 +64,18 @@
             fixed4 LightingNoLighting(SurfaceOutput s)
             {
                 fixed4 c;
-                c.rgb = s.Albedo; 
-                c.a = s.Alpha;
+                //c.rgb = s.Albedo; 
+                c.rgb = float3(1,1,0); 
+                //c.a = s.Alpha;
+                c.a = 0.1;
                 return c;
             }
     
             void surf(Input IN, inout SurfaceOutput o) {
                 o.Albedo = UNITY_ACCESS_INSTANCED_PROP(Props, _Color).rgb * IN.color;
                 o.Emission = UNITY_ACCESS_INSTANCED_PROP(Props, _EmissiveColor).rgb;
-                o.Alpha = 0.05;
+            	o.Alpha = 1;
+                //o.Alpha = 0.05;
             }
             ENDCG
         //}        

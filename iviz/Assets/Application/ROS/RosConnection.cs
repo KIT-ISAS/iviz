@@ -119,6 +119,13 @@ namespace Iviz.Controllers
             SetConnectionState(ConnectionState.Disconnected);
         }
 
+        public enum RequestType
+        {
+            CachedOnly,
+            CachedButRequestInBackground,
+            WaitForRequest
+        } 
+
         public abstract void Subscribe<T>(RosListener<T> listener) where T : IMessage, new();
         public abstract void Unsubscribe(RosListener subscriber);
         public abstract void Advertise<T>(RosSender<T> advertiser) where T : IMessage;
@@ -126,7 +133,7 @@ namespace Iviz.Controllers
         public abstract void Publish(RosSender advertiser, IMessage msg);
         public abstract void AdvertiseService<T>(string service, Action<T> callback) where T : IService, new();
         public abstract bool CallService<T>(string service, T srv) where T : IService;
-        public abstract ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics();
+        public abstract ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics(RequestType type = RequestType.CachedButRequestInBackground);
         public abstract ReadOnlyCollection<string> GetSystemParameterList();
         public abstract int GetNumPublishers(string topic);
         public abstract int GetNumSubscribers(string topic);

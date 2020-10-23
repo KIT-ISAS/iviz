@@ -4,11 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.XmlRpc;
 using UnityEngine;
-using Logger = Iviz.Logger;
 
 namespace Iviz.Controllers
 {
@@ -257,13 +256,13 @@ namespace Iviz.Controllers
             try
             {
                 //Msgs.Logger.LogDebug = x => Logger.Debug(x);
-                Msgs.Logger.LogError = x => Logger.Error(x);
-                Msgs.Logger.Log = x => Logger.Info(x);
+                //Msgs.Logger.LogError = x => Logger.Error(x);
+                //Msgs.Logger.Log = x => Logger.Info(x);
 
                 Logger.Internal("Connecting...");
-                
-                client = new RosClient(MasterUri, MyId, MyUri);
-                
+
+                client = new RosClient(MasterUri, MyId, MyUri, false);
+
                 await client.EnsureCleanSlateAsync();
 
                 if (publishersByTopic.Count != 0 || subscribersByTopic.Count != 0)
@@ -284,7 +283,7 @@ namespace Iviz.Controllers
                 return true;
             }
             catch (Exception e) when
-                (e is UnreachableUriException || e is ConnectionException || e is RosRpcException)
+                (e is UnreachableUriException || e is ConnectionException || e is RosRpcException || e is XmlRpcException)
             {
                 Logger.Internal("Error:", e);
                 if (RosServerManager.IsActive && RosServerManager.MasterUri == MasterUri)
@@ -444,6 +443,8 @@ namespace Iviz.Controllers
                 return;
             }
 
+            Logger.Internal($"Advertising service <b>{service}</b> <i>[{BuiltIns.GetServiceType(typeof(T))}]</i>.");
+
             AdvertisedService<T> newAdvertisedService = new AdvertisedService<T>(service, callback);
 
             if (client != null)
@@ -454,10 +455,9 @@ namespace Iviz.Controllers
             servicesByTopic.Add(service, newAdvertisedService);
         }
 
-        readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
-
         public override bool CallService<T>(string service, T srv)
         {
+            SemaphoreSlim signal = new SemaphoreSlim(0, 1);
             bool[] result = {false};
 
             AddTask(async () =>
@@ -614,8 +614,20 @@ namespace Iviz.Controllers
 
         ReadOnlyCollection<BriefTopicInfo> cachedTopics = EmptyTopics;
 
-        public override ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics()
+        public override ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics(
+            RequestType type = RequestType.CachedButRequestInBackground)
         {
+            if (type == RequestType.CachedOnly)
+            {
+                return cachedTopics;
+            }
+
+            SemaphoreSlim signal = null;
+            if (type == RequestType.WaitForRequest)
+            {
+                signal = new SemaphoreSlim(0, 1);
+            }
+
             AddTask(async () =>
             {
                 try
@@ -632,7 +644,17 @@ namespace Iviz.Controllers
                 {
                     Logger.Error(e);
                 }
+
+                if (type == RequestType.WaitForRequest)
+                {
+                    signal.Release();
+                }
             });
+
+            if (type == RequestType.WaitForRequest)
+            {
+                signal.Wait();
+            }
 
             return cachedTopics;
         }
@@ -666,6 +688,7 @@ namespace Iviz.Controllers
 
         public override object GetParameter(string parameter)
         {
+            SemaphoreSlim signal = new SemaphoreSlim(0, 1);
             object[] result = {null};
 
             AddTask(async () =>
@@ -703,7 +726,7 @@ namespace Iviz.Controllers
 
         public override void Stop()
         {
-            Disconnect(); 
+            Disconnect();
             base.Stop();
         }
     }

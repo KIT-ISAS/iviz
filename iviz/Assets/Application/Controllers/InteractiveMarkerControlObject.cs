@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Iviz.Displays;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Iviz.Controllers
 {
@@ -16,20 +18,30 @@ namespace Iviz.Controllers
 
         bool markerIsInteractive;
         InteractiveControl control;
+        GameObject markerNode;
 
         public delegate void MouseEventAction(in Pose pose, in Vector3 point, MouseEventType type);
 
         public event MouseEventAction MouseEvent;
         public event InteractiveControl.MovedAction Moved;
 
+        void Awake()
+        {
+            markerNode = new GameObject("[MarkerNode]");
+            markerNode.transform.SetParent(transform, false);
+            markerNode.AddComponent<Billboard>().enabled = false;
+        }
+        
         public void Set(InteractiveMarkerControl msg)
         {
             //Description = msg.Description;
             name = msg.Name;
             //Id = msg.Name;
 
-
             transform.localRotation = msg.Orientation.Ros2Unity();
+            //Debug.Log("--------------");
+            //Debug.Log(transform.localRotation);
+            //Debug.Log(transform.rotation);
 
             UpdateMarkers(msg.Markers);
             UpdateInteractionMode(msg.InteractionMode, msg.OrientationMode, msg.IndependentMarkerOrientation);
@@ -37,14 +49,14 @@ namespace Iviz.Controllers
 
         void EnsureControlDisplayExists()
         {
-            if (!(control is null))
+            if (control != null)
             {
                 return;
             }
 
             control = ResourcePool.GetOrCreate<InteractiveControl>(Resource.Displays.InteractiveControl, transform);
             control.TargetTransform = transform.parent;
-            control.Moved += (in Pose pose) => Moved?.Invoke(pose);
+            control.Moved += (in Pose pose) => Moved?.Invoke(transform.AsPose());
         }
 
         void UpdateInteractionMode(int interactionMode, int orientationMode, bool independentMarkerOrientation)
@@ -87,6 +99,18 @@ namespace Iviz.Controllers
                 case InteractiveMarkerControl.MOVE_ROTATE_3D:
                     EnsureControlDisplayExists();
                     control.InteractionMode = InteractiveControl.InteractionModeType.MoveRotate3D;
+                    break;
+            }
+
+            switch (orientationMode)
+            {
+                case InteractiveMarkerControl.VIEW_FACING:
+                    markerNode.GetComponent<Billboard>().enabled = true;
+                    break;
+                case InteractiveMarkerControl.INHERIT:
+                case InteractiveMarkerControl.FIXED:
+                    markerNode.GetComponent<Billboard>().enabled = false;
+                    markerNode.transform.localRotation = Quaternion.identity;
                     break;
             }
 
@@ -136,7 +160,7 @@ namespace Iviz.Controllers
                         markerToAdd.Set(marker);
                         if (marker.Header.FrameId.Length == 0)
                         {
-                            markerToAdd.transform.SetParentLocal(transform);
+                            markerToAdd.transform.SetParentLocal(markerNode.transform);
                         }
 
                         markersToDelete.Remove(id);
