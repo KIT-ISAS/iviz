@@ -1,0 +1,7 @@
+# Adds a module
+
+string topic		# Name of the topic
+string configuration	# Configuration in JSON form
+---
+bool success		# Whether the retrieval succeeded
+string message		# An error message if success is false
