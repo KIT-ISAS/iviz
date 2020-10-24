@@ -45,6 +45,7 @@ namespace Iviz.Roslib
         Endpoint Endpoint { get; set; }
         string Topic => topicInfo.Topic;
         public bool IsAlive => task != null && !task.IsCompleted && !task.IsFaulted;
+        public bool IsConnected => tcpClient != null;
         int NumReceived { get; set; }
         int BytesReceived { get; set; }
         bool RequestNoDelay { get; }
@@ -68,7 +69,16 @@ namespace Iviz.Roslib
             try { signal.Release(); }
             catch (SemaphoreFullException) { }
 
-            task?.Wait();
+            try
+            {
+                task?.Wait();
+            }
+            catch (Exception e)
+            {
+                Logger.Log($"{this}: {e}");
+            }
+
+            task = null;
         }
 
         public void Start(int timeoutInMs)
@@ -239,12 +249,15 @@ namespace Iviz.Roslib
         {
             while (keepRunning)
             {
+                tcpClient = null;                
+                Logger.LogDebug($"{this}: Trying to connect!");
                 tcpClient = await KeepReconnecting(timeoutInMs);
                 if (tcpClient == null)
                 {
                     Logger.LogDebug($"{this}: Ran out of retries. Leaving!");
                     break;
                 }
+                Logger.LogDebug($"{this}: Connected!");
 
                 Endpoint = new Endpoint((IPEndPoint) tcpClient.Client.LocalEndPoint);
                 stream = tcpClient.GetStream();
@@ -277,7 +290,7 @@ namespace Iviz.Roslib
             catch (SemaphoreFullException) { }
 
             Logger.Log($"{this}: Stopped!");
-        }
+        } 
 
         async Task ProcessSession()
         {
@@ -318,7 +331,7 @@ namespace Iviz.Roslib
 
         public override string ToString()
         {
-            return $"[TcpReceiver {RemoteEndpoint.Hostname}:{RemoteEndpoint.Port} '{Topic}']";
+            return $"[TcpReceiver Uri={RemoteUri} {RemoteEndpoint.Hostname}:{RemoteEndpoint.Port} '{Topic}']";
         }
     }
 }

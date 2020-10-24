@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Iviz.Msgs;
@@ -108,6 +109,11 @@ namespace Iviz.Roslib
         public static ReadOnlyCollection<T> AsReadOnly<T>(this IList<T> t)
         {
             return new ReadOnlyCollection<T>(t);
+        }
+        
+        public static bool RemovePair<T, U>(this ConcurrentDictionary<T, U> dictionary, T t, U u)
+        {
+            return ((ICollection<KeyValuePair<T, U>>) dictionary).Remove(new KeyValuePair<T, U>(t, u));
         }
     }
 }

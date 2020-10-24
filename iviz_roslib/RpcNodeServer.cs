@@ -66,7 +66,7 @@ namespace Iviz.Roslib.XmlRpc
         {
             Logger.LogDebug($"{this}: Starting!");
 
-            Task listenerTask = listener.StartAsync(StartContext);
+            Task listenerTask = listener.StartAsync(StartContext, true);
 
             // wait until we're disposed
             await signal.WaitAsync();

@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Iviz.Msgs;
 
 namespace Iviz.XmlRpc
@@ -45,7 +46,11 @@ namespace Iviz.XmlRpc
 
         public Arg(string f)
         {
-            ThrowIfNull(f);
+            if (f == null)
+            {
+                throw new ArgumentNullException(nameof(f));
+            }
+
             content = $"<value>{f}</value>\n";
         }
 
@@ -67,8 +72,20 @@ namespace Iviz.XmlRpc
 
         public Arg(IEnumerable<Arg> f)
         {
-            ThrowIfNull(f);
-            content = $"<value><array><data>{string.Join("", f)}</data></array></value>";
+            if (f == null)
+            {
+                throw new ArgumentNullException(nameof(f));
+            }
+
+            StringBuilder builder = new StringBuilder();
+            builder.Append("<value><array><data>");
+            foreach (Arg arg in f)
+            {
+                builder.Append(arg);
+            }
+
+            builder.Append("</data></array></value>");
+            content = builder.ToString();
         }
 
         public Arg(IEnumerable<Arg[]> f) : this(ThrowIfNull(f).Select(x => new Arg(x)))
@@ -77,33 +94,59 @@ namespace Iviz.XmlRpc
 
         Arg(byte[] f)
         {
-            ThrowIfNull(f);
+            if (f == null)
+            {
+                throw new ArgumentNullException(nameof(f));
+            }
+
             content = $"<value><base64>{Convert.ToBase64String(f)}</base64></value>\n";
         }
 
         public Arg(in ArraySegment<byte> f)
         {
-            ThrowIfNull(f.Array);
+            if (f.Array == null)
+            {
+                throw new ArgumentNullException(nameof(f));
+            }
+
             content = $"<value><base64>{Convert.ToBase64String(f.Array, f.Offset, f.Count)}</base64></value>\n";
         }
 
         public Arg(IEnumerable<(string name, Arg value)> f)
         {
-            ThrowIfNull(f);
-            content = "<value><struct>" +
-                      string.Join("",
-                          f.Select(tuple => $"<member><name>{tuple.name}</name>{tuple.value.content}</member>")) +
-                      "</struct></value>\n";
+            if (f == null)
+            {
+                throw new ArgumentNullException(nameof(f));
+            }
+
+            StringBuilder builder = new StringBuilder();
+            builder.Append("<value><struct>");
+            foreach (var (name, arg) in f)
+            {
+                builder.Append("<member><name>").Append(name).Append("</name>").Append(arg.content).Append("</member>");
+            }
+
+            builder.Append("</struct></value>");
+            content = builder.ToString();
         }
 
         public Arg(IEnumerable<(string name, object value)> f)
         {
-            ThrowIfNull(f);
-            content = "<value><struct>" +
-                      string.Join("",
-                          f.Select(tuple =>
-                              $"<member><name>{tuple.name}</name>{Create(tuple.value).content}</member>")) +
-                      "</struct></value>\n";
+            if (f == null)
+            {
+                throw new ArgumentNullException(nameof(f));
+            }
+
+            StringBuilder builder = new StringBuilder();
+            builder.Append("<value><struct>");
+            foreach (var (name, obj) in f)
+            {
+                builder.Append("<member><name>").Append(name).Append("</name>").Append(Create(obj).content)
+                    .Append("</member>");
+            }
+
+            builder.Append("</struct></value>");
+            content = builder.ToString();
         }
 
         static T ThrowIfNull<T>(T t)

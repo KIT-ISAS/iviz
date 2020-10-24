@@ -12,11 +12,12 @@ namespace Iviz.XmlRpc
     public sealed class HttpListener : IDisposable
     {
         const int AnyPort = 0;
+        const int DefaultTimeoutInMs = 2000;
+        const int BackgroundTimeoutInMs = 5000;
 
         TcpListener listener;
         bool keepGoing;
         readonly List<(DateTime start, Task task)> backgroundTasks = new List<(DateTime, Task)>();
-
 
         public Uri LocalEndpoint { get; }
 
@@ -32,7 +33,7 @@ namespace Iviz.XmlRpc
             LocalEndpoint = new Uri($"http://{endpoint.Address}:{endpoint.Port}/");
         }
 
-        public async Task StartAsync(Func<HttpListenerContext, Task> callback)
+        public async Task StartAsync(Func<HttpListenerContext, Task> callback, bool runInBackground)
         {
             if (callback is null) { throw new ArgumentNullException(nameof(callback)); }
 
@@ -51,7 +52,15 @@ namespace Iviz.XmlRpc
                         break;
                     }
 
-                    AddToBackgroundTask(callback(new HttpListenerContext(client)));
+                    Task task = callback(new HttpListenerContext(client));
+                    if (runInBackground)
+                    {
+                        AddToBackgroundTask(task);
+                    }
+                    else
+                    {
+                        await task;
+                    }
                 }
                 catch (ObjectDisposedException)
                 {
@@ -74,12 +83,12 @@ namespace Iviz.XmlRpc
             backgroundTasks.Add((DateTime.Now, task));
         }
 
-        public async Task AwaitRunningTasks(int timeoutInMs = 2000)
+        public async Task AwaitRunningTasks(int timeoutInMs = DefaultTimeoutInMs)
         {
             backgroundTasks.RemoveAll(tuple => tuple.task.IsCompleted);
 
             DateTime now = DateTime.Now;
-            int count = backgroundTasks.Count(tuple => (tuple.start - now).TotalSeconds > 5);
+            int count = backgroundTasks.Count(tuple => (tuple.start - now).TotalMilliseconds > BackgroundTimeoutInMs);
             if (count > 0)
             {
                 Logger.Log($"{this}: There appear to be {count} tasks deadlocked!");

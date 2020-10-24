@@ -111,7 +111,7 @@ namespace Iviz.Controllers
             string id = msg.Name;
             if (!imarkers.TryGetValue(id, out InteractiveMarkerObject imarker))
             {
-                imarker = CreateMarkerObject();
+                imarker = CreateIMarkerObject();
                 imarker.Parent = TFListener.ListenersFrame;
                 imarker.MouseEvent += (string controlId, in Pose pose, in Vector3 point, MouseEventType type) =>
                 {
@@ -128,7 +128,7 @@ namespace Iviz.Controllers
             imarker.Set(msg);
         }
 
-        static InteractiveMarkerObject CreateMarkerObject()
+        static InteractiveMarkerObject CreateIMarkerObject()
         {
             GameObject gameObject = new GameObject("InteractiveMarkerObject");
             return gameObject.AddComponent<InteractiveMarkerObject>();

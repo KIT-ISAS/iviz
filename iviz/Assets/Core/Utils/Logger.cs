@@ -39,7 +39,7 @@ namespace Iviz
 
         public static void Error<T>(T t, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
         {
-            UnityEngine.Debug.LogError(t);
+            UnityEngine.Debug.LogWarning(t);
             Log?.Invoke(new LogMessage(LogLevel.Error, t, file, line));
         }
 
@@ -76,6 +76,7 @@ namespace Iviz
             }
 
             LogInternal?.Invoke(str.ToString());
+            UnityEngine.Debug.LogWarning("InternalError: " + str);
         }
     }
 

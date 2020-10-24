@@ -1,23 +1,83 @@
-﻿using Iviz.Resources;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Security;
 using Iviz.Controllers;
 using Iviz.Displays;
+using Iviz.Resources;
+using Iviz.Roslib;
+using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
-using Logger = Iviz.Logger; 
 
 namespace Iviz.App
 {
     public sealed class ModuleListPanel : MonoBehaviour
     {
+        const float YOffset = 2;
+
+        public const int ModuleDataCaptionWidth = 200;
+
+        static readonly Color ConnectedColor = new Color(0.6f, 1f, 0.5f, 0.4f);
+        static readonly Color ConnectedOwnMasterColor = new Color(0.4f, 0.95f, 1f, 0.4f);
+        static readonly Color DisconnectedColor = new Color(0.9f, 0.95f, 1f, 0.4f);
+
+        [SerializeField] DataLabelWidget masterUriStr;
+        [SerializeField] TrashButtonWidget masterUriButton;
+        [SerializeField] TrashButtonWidget connectButton;
+        [SerializeField] TrashButtonWidget stopButton;
+        [SerializeField] Image topPanel;
+        [SerializeField] Button save;
+        [SerializeField] Button load;
+        [SerializeField] Image status;
+
+        [SerializeField] AnchorCanvas anchorCanvas;
+        [SerializeField] GameObject contentObject;
+        [SerializeField] DataPanelManager dataPanelManager;
+        [SerializeField] DialogPanelManager dialogPanelManager;
+        [SerializeField] Button addDisplayByTopic;
+        [SerializeField] Button addDisplay;
+        [SerializeField] Button showTfTree;
+        [SerializeField] Button resetAll;
+
+        [SerializeField] Sprite connectedSprite;
+        [SerializeField] Sprite connectingSprite;
+        [SerializeField] Sprite disconnectedSprite;
+        [SerializeField] Sprite questionSprite;
+
+        [SerializeField] Text bottomTime;
+        [SerializeField] Text bottomFps;
+        [SerializeField] Text bottomBandwidth;
+
+        [SerializeField] Joystick joystick;
+
+        readonly List<GameObject> buttons = new List<GameObject>();
+        readonly List<ModuleData> moduleDatas = new List<ModuleData>();
+        readonly HashSet<string> topicsWithModule = new HashSet<string>();
+
+        int frameCounter;
         float buttonHeight;
 
         Canvas parentCanvas;
+        DialogData availableModules;
+        DialogData availableTopics;
+        ConnectionDialogData connectionData;
+        ImageDialogData imageData;
+        LoadConfigDialogData loadConfigData;
+        SaveConfigDialogData saveConfigData;
+        TFDialogData tfTreeData;
+
+        ControllerService controllerService;
+
+        public ModuleListPanel()
+        {
+            ModuleDatas = moduleDatas.AsReadOnly();
+        }
+
         public bool AllGuiVisible
         {
             get => parentCanvas.gameObject.activeSelf;
@@ -25,77 +85,22 @@ namespace Iviz.App
         }
 
         public static ModuleListPanel Instance { get; private set; }
-
-        //[SerializeField] InputField address = null;
-        [SerializeField] DataLabelWidget MasterUriStr = null;
-        [SerializeField] TrashButtonWidget MasterUriButton = null;
-        [SerializeField] TrashButtonWidget ConnectButton = null;
-        [SerializeField] TrashButtonWidget StopButton = null;
-
-        [SerializeField] Image topPanel = null;
-
-        [SerializeField] Button save = null;
-        [SerializeField] Button load = null;
-        [SerializeField] Image status = null;
-
-        [SerializeField] AnchorToggleButton hideGuiButton = null;
-        [SerializeField] AnchorToggleButton showControlButton = null;
-        [SerializeField] AnchorToggleButton pinControlButton = null;
-
-        [SerializeField] Button unlock = null;
-        public Button UnlockButton => unlock;
-
-        [SerializeField] GameObject contentObject = null;
-
-        [SerializeField] DataPanelManager dataPanelManager = null;
+        public static AnchorCanvas AnchorCanvas => Instance.anchorCanvas;
+        AnchorToggleButton HideGuiButton => anchorCanvas.HideGui;
+        AnchorToggleButton ShowControlButton => anchorCanvas.ShowMarker;
+        AnchorToggleButton PinControlButton => anchorCanvas.PinMarker;
+        public Button UnlockButton => anchorCanvas.Unlock;
         public DataPanelManager DataPanelManager => dataPanelManager;
-
-        [SerializeField] DialogPanelManager dialogPanelManager = null;
         public DialogPanelManager DialogPanelManager => dialogPanelManager;
-
-        [SerializeField] Button addDisplayByTopic = null;
-        [SerializeField] Button addDisplay = null;
-        [SerializeField] Button showTFTree = null;
-        [SerializeField] Button resetAll = null;
-
-        [SerializeField] Sprite ConnectedSprite = null;
-        [SerializeField] Sprite ConnectingSprite = null;
-        [SerializeField] Sprite DisconnectedSprite = null;
-        [SerializeField] Sprite QuestionSprite = null;
-
-        [SerializeField] Text bottomTime = null;
-        [SerializeField] Text bottomFps = null;
-        [SerializeField] Text bottomBandwidth = null;
-
-        [SerializeField] Joystick joystick = null;
         public Joystick Joystick => joystick;
-
-        readonly List<ModuleData> moduleDatas = new List<ModuleData>();
         public IReadOnlyCollection<ModuleData> ModuleDatas { get; }
-
-        DialogData availableModules;
-        DialogData availableTopics;
-        ConnectionDialogData connectionData;
-        ImageDialogData imageData;
-        TFDialogData tfTreeData;
-        LoadConfigDialogData loadConfigData;
-        SaveConfigDialogData saveConfigData;
-
-        readonly List<GameObject> buttons = new List<GameObject>();
-
-        TFModuleData TFData => (TFModuleData)moduleDatas[0];
-
-        readonly HashSet<string> topicsWithModule = new HashSet<string>();
+        TFModuleData TfData => (TFModuleData) moduleDatas[0];
         public IEnumerable<string> DisplayedTopics => topicsWithModule;
-
-        static readonly Color ConnectedColor = new Color(0.6f, 1f, 0.5f, 0.4f);
-        static readonly Color ConnectedOwnMasterColor = new Color(0.4f, 0.95f, 1f, 0.4f);
-        static readonly Color DisconnectedColor = new Color(0.9f, 0.95f, 1f, 0.4f);
 
         public bool UnlockButtonVisible
         {
-            get => unlock.gameObject.activeSelf;
-            set => unlock.gameObject.SetActive(value);
+            get => UnlockButton.gameObject.activeSelf;
+            set => UnlockButton.gameObject.SetActive(value);
         }
 
         bool KeepReconnecting
@@ -106,11 +111,6 @@ namespace Iviz.App
                 ConnectionManager.Connection.KeepReconnecting = value;
                 status.enabled = value;
             }
-        }
-
-        public ModuleListPanel()
-        {
-            ModuleDatas = moduleDatas.AsReadOnly();            
         }
 
         void Awake()
@@ -133,7 +133,7 @@ namespace Iviz.App
             saveConfigData = CreateDialog<SaveConfigDialogData>();
 
             connectionData = CreateDialog<ConnectionDialogData>();
-            
+
             Directory.CreateDirectory(Settings.SavedFolder);
             LoadSimpleConfiguration();
 
@@ -141,12 +141,12 @@ namespace Iviz.App
 
             CreateModule(Resource.Module.TF, TFListener.DefaultTopic);
             CreateModule(Resource.Module.Grid);
-            
+
             if (Settings.IsHololens)
             {
                 ARController controller = (ARController) CreateModule(Resource.Module.AugmentedReality).Controller;
                 controller.Visible = true;
-            }            
+            }
 
             if (Resource.External == null)
             {
@@ -155,34 +155,34 @@ namespace Iviz.App
 
             save.onClick.AddListener(saveConfigData.Show);
             load.onClick.AddListener(loadConfigData.Show);
-            
-            hideGuiButton.Clicked += OnHideGuiButtonClick;
-            hideGuiButton.State = true;
 
-            pinControlButton.Clicked += () =>
+            HideGuiButton.Clicked += OnHideGuiButtonClick;
+            HideGuiButton.State = true;
+
+            PinControlButton.Clicked += () =>
             {
                 if (ARController.Instance != null)
                 {
-                    ARController.Instance.PinRootMarker = pinControlButton.State;
+                    ARController.Instance.PinRootMarker = PinControlButton.State;
                 }
             };
-            showControlButton.Clicked += () =>
+            ShowControlButton.Clicked += () =>
             {
                 if (ARController.Instance != null)
                 {
-                    ARController.Instance.ShowRootMarker = showControlButton.State;
+                    ARController.Instance.ShowRootMarker = ShowControlButton.State;
                     TFListener.UpdateRootMarkerVisibility();
                 }
             };
 
             addDisplayByTopic.onClick.AddListener(availableTopics.Show);
             addDisplay.onClick.AddListener(availableModules.Show);
-            showTFTree.onClick.AddListener(tfTreeData.Show);
+            showTfTree.onClick.AddListener(tfTreeData.Show);
             resetAll.onClick.AddListener(ResetAllModules);
-    
-            
-            MasterUriStr.Label = connectionData.MasterUri + " →";
-            MasterUriButton.Clicked += () =>
+
+
+            masterUriStr.Label = connectionData.MasterUri + " →";
+            masterUriButton.Clicked += () =>
             {
                 connectionData.Show();
             };
@@ -198,18 +198,18 @@ namespace Iviz.App
                 KeepReconnecting = false;
                 if (uri == null)
                 {
-                    Logger.Internal($"Failed to set master uri.");
-                    MasterUriStr.Label = "(?) →";
+                    Logger.Internal("Failed to set master uri.");
+                    masterUriStr.Label = "(?) →";
                 }
                 else if (RosServerManager.IsActive)
                 {
                     Logger.Internal($"Changing master uri to local master '{uri}'");
-                    MasterUriStr.Label = "Master Mode\n" + uri + " →";
+                    masterUriStr.Label = "Master Mode\n" + uri + " →";
                 }
                 else
                 {
                     Logger.Internal($"Changing master uri to '{uri}'");
-                    MasterUriStr.Label = uri + " →";
+                    masterUriStr.Label = uri + " →";
                 }
             };
             connectionData.MyIdChanged += id =>
@@ -222,7 +222,7 @@ namespace Iviz.App
                     Logger.Internal("* Remaining characters must be alpha, digits, _ or /");
                     return;
                 }
-                
+
                 ConnectionManager.Connection.MyId = id;
                 KeepReconnecting = false;
                 Logger.Internal($"Changing caller id to '{id}'");
@@ -232,27 +232,23 @@ namespace Iviz.App
                 ConnectionManager.Connection.MyUri = uri;
                 KeepReconnecting = false;
                 Logger.Internal(
-                    uri == null ? 
-                    "Failed to set caller uri." : 
-                    $"Changing caller uri to '{uri}'"
-                    );
+                    uri == null ? "Failed to set caller uri." : $"Changing caller uri to '{uri}'"
+                );
             };
-            StopButton.Clicked += () =>
+            stopButton.Clicked += () =>
             {
                 Logger.Internal(
-                    ConnectionManager.IsConnected ?
-                    "Disconnection requested." :
-                    "Disconnection requested (but already disconnected)."
-                    );
+                    ConnectionManager.IsConnected
+                        ? "Disconnection requested."
+                        : "Disconnection requested (but already disconnected)."
+                );
                 KeepReconnecting = false;
                 ConnectionManager.Connection.Disconnect();
             };
-            ConnectButton.Clicked += () =>
+            connectButton.Clicked += () =>
             {
                 Logger.Internal(
-                    ConnectionManager.IsConnected ? 
-                    "Reconnection requested." : 
-                    "Connection requested."
+                    ConnectionManager.IsConnected ? "Reconnection requested." : "Connection requested."
                 );
                 ConnectionManager.Connection.Disconnect();
                 KeepReconnecting = true;
@@ -263,27 +259,13 @@ namespace Iviz.App
                 ConnectionManager.Connection.Disconnect();
             };
 
-
-            //address.onEndEdit.AddListener(OnAddressChanged);
-
             ConnectionManager.Connection.ConnectionStateChanged += OnConnectionStateChanged;
-
-            /*
-            TFListener.GuiCamera.Canvases.Add(GetComponentInParent<Canvas>());
-            TFListener.GuiCamera.Canvases.Add(dataPanelManager.GetComponentInParent<Canvas>());
-            TFListener.GuiCamera.Canvases.Add(dialogPanelManager.GetComponentInParent<Canvas>());
-            TFListener.GuiCamera.GuiPointerBlockers.Add(Joystick);
-
-            TFListener.GuiCamera.Raycasters.Add(GetComponentInParent<GraphicRaycaster>());
-            TFListener.GuiCamera.Raycasters.Add(dataPanelManager.GetComponentInParent<GraphicRaycaster>());
-            TFListener.GuiCamera.Raycasters.Add(dialogPanelManager.GetComponentInParent<GraphicRaycaster>());
-            */
-
             ARController.ARModeChanged += OnARModeChanged;
-
             GameThread.LateEverySecond += UpdateFpsStats;
             GameThread.EveryFrame += UpdateFpsCounter;
             UpdateFpsStats();
+            
+            controllerService = new ControllerService();
         }
 
         void OnConnectionStateChanged(ConnectionState state)
@@ -294,7 +276,7 @@ namespace Iviz.App
                 ConnectionManager.Connection.MyUri == null ||
                 ConnectionManager.Connection.MyId == null)
             {
-                status.sprite = QuestionSprite;
+                status.sprite = questionSprite;
                 return;
             }
 
@@ -302,17 +284,17 @@ namespace Iviz.App
             {
                 case ConnectionState.Connected:
                     GameThread.EverySecond -= RotateSprite;
-                    status.sprite = ConnectedSprite;
+                    status.sprite = connectedSprite;
                     topPanel.color = RosServerManager.IsActive ? ConnectedOwnMasterColor : ConnectedColor;
                     SaveSimpleConfiguration();
                     break;
                 case ConnectionState.Disconnected:
                     GameThread.EverySecond -= RotateSprite;
-                    status.sprite = DisconnectedSprite;
+                    status.sprite = disconnectedSprite;
                     topPanel.color = DisconnectedColor;
                     break;
                 case ConnectionState.Connecting:
-                    status.sprite = ConnectingSprite;
+                    status.sprite = connectingSprite;
                     GameThread.EverySecond += RotateSprite;
                     break;
             }
@@ -348,14 +330,14 @@ namespace Iviz.App
                 Logger.Internal("Done.");
             }
             catch (Exception e) when
-            (e is IOException || e is System.Security.SecurityException || e is JsonException)
+                (e is IOException || e is SecurityException || e is JsonException)
             {
                 Logger.Error(e);
                 Logger.Internal("Error:", e);
                 return;
             }
-            Logger.Debug("DisplayListPanel: Writing config to " + Settings.SavedFolder + "/" + file);
 
+            Logger.Debug("DisplayListPanel: Writing config to " + Settings.SavedFolder + "/" + file);
         }
 
         public void LoadStateConfiguration(string file)
@@ -374,17 +356,14 @@ namespace Iviz.App
                 return;
             }
             catch (Exception e) when
-            (e is IOException || e is System.Security.SecurityException || e is JsonException)
+                (e is IOException || e is SecurityException || e is JsonException)
             {
                 Logger.Error(e);
                 Logger.Internal("Error:", e);
                 return;
             }
 
-            while (moduleDatas.Count > 1)
-            {
-                RemoveModule(1);
-            }
+            while (moduleDatas.Count > 1) RemoveModule(1);
 
             StateConfiguration stateConfig = JsonConvert.DeserializeObject<StateConfiguration>(text);
 
@@ -393,7 +372,7 @@ namespace Iviz.App
             connectionData.MyId = stateConfig.MyId;
 
 
-            TFData.UpdateConfiguration(stateConfig.Tf);
+            TfData.UpdateConfiguration(stateConfig.Tf);
             stateConfig.CreateListOfEntries().ForEach(
                 displayConfigList => displayConfigList?.ForEach(
                     displayConfig =>
@@ -419,6 +398,7 @@ namespace Iviz.App
             {
                 return;
             }
+
             try
             {
                 string text = File.ReadAllText(path);
@@ -428,7 +408,7 @@ namespace Iviz.App
                 connectionData.MyId = config.MyId;
             }
             catch (Exception e) when
-            (e is IOException || e is System.Security.SecurityException || e is JsonException)
+                (e is IOException || e is SecurityException || e is JsonException)
             {
                 //Debug.Log(e);
             }
@@ -442,28 +422,26 @@ namespace Iviz.App
                 {
                     MasterUri = connectionData.MasterUri,
                     MyUri = connectionData.MyUri,
-                    MyId = connectionData.MyId,
+                    MyId = connectionData.MyId
                 };
 
                 string text = JsonConvert.SerializeObject(config, Formatting.Indented);
                 File.WriteAllText(Settings.SimpleConfigurationPath, text);
             }
             catch (Exception e) when
-            (e is IOException || e is System.Security.SecurityException || e is JsonException)
+                (e is IOException || e is SecurityException || e is JsonException)
             {
                 //Debug.Log(e);
             }
         }
 
-        public void ResetAllModules()
+        void ResetAllModules()
         {
-            foreach (ModuleData m in moduleDatas)
-            {
-                m.ResetController();
-            }
+            foreach (ModuleData m in moduleDatas) m.ResetController();
         }
         
-        public ModuleData CreateModule(Resource.Module resource, string topic = "", string type = "", IConfiguration configuration = null)
+        public ModuleData CreateModule(Resource.Module resource, string topic = "", string type = "",
+            IConfiguration configuration = null)
         {
             ModuleDataConstructor constructor =
                 new ModuleDataConstructor(resource, this, topic, type, configuration);
@@ -478,6 +456,7 @@ namespace Iviz.App
                 Debug.LogError(e);
                 return null;
             }
+
             moduleDatas.Add(moduleData);
             CreateButtonObject(moduleData);
             return moduleData;
@@ -490,28 +469,25 @@ namespace Iviz.App
             return dialogData;
         }
 
-        const float YOffset = 2;
-
         void CreateButtonObject(ModuleData moduleData)
         {
-            GameObject buttonObject = ResourcePool.GetOrCreate(Resource.Widgets.DisplayButton, contentObject.transform, false);
+            GameObject buttonObject =
+                ResourcePool.GetOrCreate(Resource.Widgets.DisplayButton, contentObject.transform, false);
 
-            int size = buttons.Count();
+            int size = buttons.Count;
             float y = 2 * YOffset + size * (buttonHeight + YOffset);
 
-            ((RectTransform)buttonObject.transform).anchoredPosition = new Vector2(0, -y);
+            ((RectTransform) buttonObject.transform).anchoredPosition = new Vector2(0, -y);
 
             Text buttonObjectText = buttonObject.GetComponentInChildren<Text>();
-            buttonObjectText.text = moduleData.ButtonText; // $"<b>{displayData.Module}</b>";
+            buttonObjectText.text = moduleData.ButtonText;
             buttonObject.name = $"Button:{moduleData.Module}";
             buttonObject.SetActive(true);
             buttons.Add(buttonObject);
 
             Button button = buttonObject.GetComponent<Button>();
             button.onClick.AddListener(moduleData.ToggleShowPanel);
-            ((RectTransform)contentObject.transform).sizeDelta = new Vector2(0, y + buttonHeight + YOffset);
-
-            //return buttonObject;
+            ((RectTransform) contentObject.transform).sizeDelta = new Vector2(0, y + buttonHeight + YOffset);
         }
 
         public ModuleData CreateModuleForTopic(string topic, string type)
@@ -551,12 +527,12 @@ namespace Iviz.App
             {
                 GameObject buttonObject = buttons[i];
                 float y = 2 * YOffset + i * (buttonHeight + YOffset);
-                ((RectTransform)buttonObject.transform).anchoredPosition = new Vector3(0, -y);
+                ((RectTransform) buttonObject.transform).anchoredPosition = new Vector3(0, -y);
             }
-            ((RectTransform)contentObject.transform).sizeDelta = new Vector2(0, 2 * YOffset + i * (buttonHeight + YOffset));
-        }
 
-        public const int ModuleDataCaptionWidth = 200;
+            ((RectTransform) contentObject.transform).sizeDelta =
+                new Vector2(0, 2 * YOffset + i * (buttonHeight + YOffset));
+        }
 
         public void UpdateModuleButton(ModuleData entry, string content)
         {
@@ -565,6 +541,7 @@ namespace Iviz.App
             {
                 return;
             }
+
             GameObject buttonObject = buttons[index];
             Text text = buttonObject.GetComponentInChildren<Text>();
             text.text = content;
@@ -598,14 +575,12 @@ namespace Iviz.App
         {
             tfTreeData.Show(frame);
         }
-        
-        int frames = 0;
 
         void UpdateFpsStats()
         {
             bottomTime.text = $"<b>{DateTime.Now:HH:mm:ss}</b>";
-            bottomFps.text = $"<b>{frames} FPS</b>";
-            frames = 0;
+            bottomFps.text = $"<b>{frameCounter} FPS</b>";
+            frameCounter = 0;
 
             var (downB, upB) = ConnectionManager.CollectBandwidthReport();
             int downKb = downB / 1000;
@@ -615,18 +590,18 @@ namespace Iviz.App
 
         void UpdateFpsCounter()
         {
-            frames++;
+            frameCounter++;
         }
 
         void OnARModeChanged(bool value)
         {
-            pinControlButton.Visible = value;
-            showControlButton.Visible = value;
-            
+            PinControlButton.Visible = value;
+            ShowControlButton.Visible = value;
+
             foreach (var module in ModuleDatas)
             {
                 module.OnARModeChanged(value);
             }
-        } 
+        }
     }
 }
