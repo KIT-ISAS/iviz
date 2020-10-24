@@ -26,9 +26,9 @@ namespace Iviz.Roslib
 
         protected RoslibException(string message, Exception innerException) : base(message, innerException)
         {
-        }        
-    }    
-    
+        }
+    }
+
     /// <summary>
     /// Thrown when the provided message type is not correct.
     /// </summary>
@@ -82,11 +82,8 @@ namespace Iviz.Roslib
 
         readonly NodeServer listener;
 
-        readonly ConcurrentDictionary<string, RosSubscriber> subscribersByTopic =
-            new ConcurrentDictionary<string, RosSubscriber>();
-
-        readonly ConcurrentDictionary<string, RosPublisher> publishersByTopic =
-            new ConcurrentDictionary<string, RosPublisher>();
+        readonly Dictionary<string, IRosSubscriber> subscribersByTopic = new Dictionary<string, IRosSubscriber>();
+        readonly Dictionary<string, RosPublisher> publishersByTopic = new Dictionary<string, RosPublisher>();
 
         readonly Dictionary<string, ServiceReceiver> subscribedServicesByName =
             new Dictionary<string, ServiceReceiver>();
@@ -472,19 +469,20 @@ namespace Iviz.Roslib
             return new NodeClient(CallerId, CallerUri, otherUri, (int) RpcNodeTimeout.TotalMilliseconds);
         }
 
-        RosSubscriber CreateSubscriber(string topic, bool requestNoDelay, Type type, IMessage generator)
+        RosSubscriber<T> CreateSubscriber<T>(string topic, bool requestNoDelay, Type type, IMessage generator)
+            where T : IMessage
         {
             TopicInfo topicInfo = new TopicInfo(CallerId, topic, type, generator);
             int timeoutInMs = (int) TcpRosTimeout.TotalMilliseconds;
             TcpReceiverManager manager = new TcpReceiverManager(topicInfo, requestNoDelay) {TimeoutInMs = timeoutInMs};
-            RosSubscriber subscription = new RosSubscriber(this, manager);
+            RosSubscriber<T> subscription = new RosSubscriber<T>(this, manager);
 
             subscribersByTopic[topic] = subscription;
 
             var masterResponse = Master.RegisterSubscriber(topic, topicInfo.Type);
             if (!masterResponse.IsValid)
             {
-                subscribersByTopic.TryRemove(topic, out _);
+                subscribersByTopic.Remove(topic);
                 throw new RosRpcException(
                     $"Error registering publisher for topic {topic}: {masterResponse.StatusMessage}");
             }
@@ -494,20 +492,20 @@ namespace Iviz.Roslib
             return subscription;
         }
 
-        async Task<RosSubscriber> CreateSubscriberAsync(string topic, bool requestNoDelay, Type type,
-            IMessage generator)
+        async Task<RosSubscriber<T>> CreateSubscriberAsync<T>(string topic, bool requestNoDelay, Type type,
+            IMessage generator) where T : IMessage
         {
             TopicInfo topicInfo = new TopicInfo(CallerId, topic, type, generator);
             int timeoutInMs = (int) TcpRosTimeout.TotalMilliseconds;
             TcpReceiverManager manager = new TcpReceiverManager(topicInfo, requestNoDelay) {TimeoutInMs = timeoutInMs};
-            RosSubscriber subscription = new RosSubscriber(this, manager);
+            RosSubscriber<T> subscription = new RosSubscriber<T>(this, manager);
 
             subscribersByTopic[topic] = subscription;
 
             var masterResponse = await Master.RegisterSubscriberAsync(topic, topicInfo.Type).Caf();
             if (!masterResponse.IsValid)
             {
-                subscribersByTopic.TryRemove(topic, out _);
+                subscribersByTopic.Remove(topic);
                 throw new RosRpcException(
                     $"Error registering publisher for topic {topic}: {masterResponse.StatusMessage}");
             }
@@ -528,7 +526,7 @@ namespace Iviz.Roslib
         public string Subscribe<T>(string topic, Action<T> callback, bool requestNoDelay = false)
             where T : IMessage, new()
         {
-            return Subscribe(topic, callback, out RosSubscriber _, requestNoDelay);
+            return Subscribe(topic, callback, out RosSubscriber<T> _, requestNoDelay);
         }
 
         /// <summary>
@@ -542,7 +540,7 @@ namespace Iviz.Roslib
         /// </param>
         /// <param name="requestNoDelay">Whether a request of NoDelay should be sent.</param>
         /// <returns>A token that can be used to unsubscribe from this topic.</returns>
-        public string Subscribe<T>(string topic, Action<T> callback, out RosSubscriber subscriber,
+        public string Subscribe<T>(string topic, Action<T> callback, out RosSubscriber<T> subscriber,
             bool requestNoDelay = false)
             where T : IMessage, new()
         {
@@ -550,20 +548,21 @@ namespace Iviz.Roslib
 
             if (callback is null) { throw new ArgumentNullException(nameof(callback)); }
 
-            if (!TryGetSubscriber(topic, out subscriber))
+            if (!TryGetSubscriber(topic, out IRosSubscriber baseSubscriber))
             {
-                subscriber = CreateSubscriber(topic, requestNoDelay, typeof(T), new T());
+                subscriber = CreateSubscriber<T>(topic, requestNoDelay, typeof(T), new T());
             }
 
-            if (!subscriber.MessageTypeMatches<T>())
+            if (!(baseSubscriber is RosSubscriber<T> subscriberT))
             {
                 throw new InvalidMessageTypeException("Type does not match subscriber.");
             }
 
+            subscriber = subscriberT;
             return subscriber.Subscribe(callback);
         }
 
-        public string Subscribe(string topic, Action<IMessage> callback, Type type, out RosSubscriber subscriber,
+        public string Subscribe(string topic, Action<IMessage> callback, Type type, out IRosSubscriber subscriber,
             bool requestNoDelay = false)
         {
             if (topic is null) { throw new ArgumentNullException(nameof(topic)); }
@@ -577,7 +576,7 @@ namespace Iviz.Roslib
 
             if (!TryGetSubscriber(topic, out subscriber))
             {
-                subscriber = CreateSubscriber(topic, requestNoDelay, type, BuiltIns.CreateGenerator(type));
+                subscriber = CreateSubscriber<IMessage>(topic, requestNoDelay, type, BuiltIns.CreateGenerator(type));
             }
 
             if (!subscriber.MessageTypeMatches(type))
@@ -596,7 +595,7 @@ namespace Iviz.Roslib
         /// <param name="callback">Function to be called when a message arrives.</param>
         /// <param name="requestNoDelay">Whether a request of NoDelay should be sent.</param>
         /// <returns>A pair containing a token that can be used to unsubscribe from this topic, and the subscriber object.</returns>
-        public async Task<(string id, RosSubscriber subscriber)>
+        public async Task<(string id, RosSubscriber<T> subscriber)>
             SubscribeAsync<T>(string topic, Action<T> callback, bool requestNoDelay = false)
             where T : IMessage, new()
         {
@@ -604,23 +603,17 @@ namespace Iviz.Roslib
 
             if (callback is null) { throw new ArgumentNullException(nameof(callback)); }
 
-            if (!TryGetSubscriber(topic, out RosSubscriber subscriber))
+            if (!TryGetSubscriber(topic, out IRosSubscriber baseSubscriber))
             {
-                subscriber = await CreateSubscriberAsync(topic, requestNoDelay, typeof(T), new T()).Caf();
+                baseSubscriber = await CreateSubscriberAsync<T>(topic, requestNoDelay, typeof(T), new T()).Caf();
             }
 
-            if (!subscriber.MessageTypeMatches<T>())
+            if (!(baseSubscriber is RosSubscriber<T> subscriber))
             {
                 throw new InvalidMessageTypeException("Type does not match subscriber.");
             }
 
-            // local lambda wrapper for casting
-            void wrapper(IMessage x)
-            {
-                callback((T) x);
-            }
-
-            return (subscriber.Subscribe(wrapper), subscriber);
+            return (subscriber.Subscribe(callback), subscriber);
         }
 
         /// <summary>
@@ -649,15 +642,15 @@ namespace Iviz.Roslib
             return subscriber != null && await subscriber.UnsubscribeAsync(topicId);
         }
 
-        internal void RemoveSubscriber(RosSubscriber subscriber)
+        internal void RemoveSubscriber(IRosSubscriber subscriber)
         {
-            subscribersByTopic.TryRemove(subscriber.Topic, out _);
+            subscribersByTopic.Remove(subscriber.Topic);
             Master.UnregisterSubscriber(subscriber.Topic);
         }
 
-        internal async Task RemoveSubscriberAsync(RosSubscriber subscriber)
+        internal async Task RemoveSubscriberAsync(IRosSubscriber subscriber)
         {
-            subscribersByTopic.TryRemove(subscriber.Topic, out _);
+            subscribersByTopic.Remove(subscriber.Topic);
             await Master.UnregisterSubscriberAsync(subscriber.Topic);
         }
 
@@ -667,7 +660,7 @@ namespace Iviz.Roslib
         /// <param name="topic">Name of the topic.</param>
         /// <param name="subscriber">Subscriber for the given topic.</param>
         /// <returns>Whether the subscriber was found.</returns>
-        public bool TryGetSubscriber(string topic, out RosSubscriber subscriber)
+        public bool TryGetSubscriber(string topic, out IRosSubscriber subscriber)
         {
             if (topic is null) { throw new ArgumentNullException(nameof(topic)); }
 
@@ -679,11 +672,11 @@ namespace Iviz.Roslib
         /// </summary>
         /// <param name="topic">Name of the topic.</param>
         /// <returns></returns>
-        public RosSubscriber GetSubscriber(string topic)
+        public IRosSubscriber GetSubscriber(string topic)
         {
             if (topic is null) { throw new ArgumentNullException(nameof(topic)); }
 
-            if (TryGetSubscriber(topic, out RosSubscriber subscriber))
+            if (TryGetSubscriber(topic, out IRosSubscriber subscriber))
             {
                 return subscriber;
             }
@@ -706,7 +699,7 @@ namespace Iviz.Roslib
                 return publisher;
             }
 
-            publishersByTopic.TryRemove(topic, out _);
+            publishersByTopic.Remove(topic);
             throw new ArgumentException($"Error registering publisher: {response.StatusMessage}", nameof(topic));
         }
 
@@ -725,7 +718,7 @@ namespace Iviz.Roslib
                 return publisher;
             }
 
-            publishersByTopic.TryRemove(topic, out _);
+            publishersByTopic.Remove(topic);
             throw new ArgumentException($"Error registering publisher: {response.StatusMessage}", nameof(topic));
         }
 
@@ -823,13 +816,13 @@ namespace Iviz.Roslib
 
         internal void RemovePublisher(RosPublisher publisher)
         {
-            publishersByTopic.TryRemove(publisher.Topic, out _);
+            publishersByTopic.Remove(publisher.Topic);
             Master.UnregisterPublisher(publisher.Topic);
         }
 
         internal async Task RemovePublisherAsync(RosPublisher publisher)
         {
-            publishersByTopic.TryRemove(publisher.Topic, out _);
+            publishersByTopic.Remove(publisher.Topic);
             await Master.UnregisterPublisherAsync(publisher.Topic);
         }
 
@@ -958,7 +951,7 @@ namespace Iviz.Roslib
 
         internal async Task PublisherUpdateRcpAsync(string topic, IEnumerable<Uri> publishers)
         {
-            if (!TryGetSubscriber(topic, out RosSubscriber subscriber))
+            if (!TryGetSubscriber(topic, out IRosSubscriber subscriber))
             {
                 Logger.Log($"{this}: PublisherUpdate called for nonexisting topic '{topic}'");
                 return;
@@ -1016,7 +1009,7 @@ namespace Iviz.Roslib
                 }
             });
 
-            RosSubscriber[] subscribers = subscribersByTopic.Values.ToArray();
+            IRosSubscriber[] subscribers = subscribersByTopic.Values.ToArray();
             subscribersByTopic.Clear();
 
             subscribers.ForEach(subscriber =>

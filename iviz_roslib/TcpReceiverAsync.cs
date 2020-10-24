@@ -19,7 +19,7 @@ namespace Iviz.Roslib
         const int WaitBetweenRetriesInMs = 1000;
         const int SleepTimeInMs = 1000;
 
-        readonly Action<IMessage> callback;
+        readonly Action<byte[], int> deserializer;
         readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
         readonly TopicInfo topicInfo;
 
@@ -30,13 +30,13 @@ namespace Iviz.Roslib
         TcpClient tcpClient;
         bool disposed;
 
-        public TcpReceiverAsync(Uri remoteUri, Endpoint remoteEndpoint, TopicInfo topicInfo, Action<IMessage> callback,
+        public TcpReceiverAsync(Uri remoteUri, Endpoint remoteEndpoint, TopicInfo topicInfo, Action<byte[], int> deserializer,
             bool requestNoDelay)
         {
             RemoteUri = remoteUri;
             RemoteEndpoint = remoteEndpoint;
             this.topicInfo = topicInfo;
-            this.callback = callback;
+            this.deserializer = deserializer;
             RequestNoDelay = requestNoDelay;
         }
 
@@ -299,11 +299,12 @@ namespace Iviz.Roslib
                     return;
                 }
 
-                IMessage message = Buffer.Deserialize(topicInfo.Generator, readBuffer, rcvLength);
+                //IMessage message = Buffer.Deserialize(topicInfo.Generator, readBuffer, rcvLength);
 
                 try
                 {
-                    callback(message);
+                    deserializer(readBuffer, rcvLength);
+                    //callback(message);
                 }
                 catch (Exception e)
                 {

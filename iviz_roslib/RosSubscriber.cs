@@ -11,10 +11,24 @@ namespace Iviz.Roslib
     /// <summary>
     /// Class that manages a subscription to a ROS topic.
     /// </summary>
-    public class RosSubscriber
+    public interface IRosSubscriber
     {
-        readonly ConcurrentDictionary<string, Action<IMessage>> callbacksById =
-            new ConcurrentDictionary<string, Action<IMessage>>();
+        public int TimeoutInMs { get; set; }
+        public string Topic { get; }
+        public string TopicType { get; }
+        public SubscriberTopicState GetState();
+        public bool ContainsId(string id);
+        public bool MessageTypeMatches(Type type);
+        public string Subscribe(Action<IMessage> callback);
+        public bool Unsubscribe(string id);
+        public Task<bool> UnsubscribeAsync(string id);
+        internal void Stop();
+        internal Task PublisherUpdateRcpAsync(IEnumerable<Uri> publisherUris);
+    }
+    
+    public class RosSubscriber<T> : IRosSubscriber where T : IMessage
+    {
+        readonly Dictionary<string, Action<T>> callbacksById = new Dictionary<string, Action<T>>();
 
         readonly TcpReceiverManager manager;
         readonly RosClient client;
@@ -55,7 +69,7 @@ namespace Iviz.Roslib
         /// <summary>
         /// Event triggered when a new publisher appears.
         /// </summary>
-        public event Action<RosSubscriber> NumPublishersChanged;
+        public event Action<RosSubscriber<T>> NumPublishersChanged;
 
         /// <summary>
         /// Timeout in milliseconds to wait for a publisher handshake.
@@ -74,10 +88,10 @@ namespace Iviz.Roslib
             IsAlive = true;
 
             manager.NumConnectionsChanged += () => NumPublishersChanged?.Invoke(this);
-            manager.Subscriber = this;
+            manager.SetCallback(this);
         }
 
-        internal void MessageCallback(IMessage msg)
+        internal void MessageCallback(T msg)
         {
             foreach (var callback in callbacksById)
             {
@@ -108,13 +122,18 @@ namespace Iviz.Roslib
             AssertIsAlive();
             return new SubscriberTopicState(Topic, TopicType, callbacksById.Keys.ToArray(), manager.GetStates());
         }
-
-        internal async Task PublisherUpdateRcpAsync(IEnumerable<Uri> publisherUris)
+        
+        async Task IRosSubscriber.PublisherUpdateRcpAsync(IEnumerable<Uri> publisherUris)
         {
             await manager.PublisherUpdateRpcAsync(client, publisherUris).Caf();
         }
 
-        internal void Stop()
+        void IRosSubscriber.Stop()
+        {
+            Stop();
+        }
+
+        void Stop()
         {
             callbacksById.Clear();
             manager.Stop();
@@ -130,16 +149,6 @@ namespace Iviz.Roslib
         public bool MessageTypeMatches(Type type)
         {
             return type == topicClassType;
-        }
-
-        /// <summary>
-        /// Checks whether the class of the subscriber message type corresponds to the given type.
-        /// </summary>
-        /// <typeparam name="T">The type to check.</typeparam>
-        /// <returns></returns>
-        public bool MessageTypeMatches<T>()
-        {
-            return MessageTypeMatches(typeof(T));
         }
 
         /// <summary>
@@ -159,7 +168,7 @@ namespace Iviz.Roslib
 #endif
 
             string id = GenerateId();
-            callbacksById.TryAdd(id, callback);
+            callbacksById.Add(id, t => callback(t));
             return id;
         }
 
@@ -171,22 +180,13 @@ namespace Iviz.Roslib
         /// <returns>The subscribed id.</returns>
         /// <exception cref="ArgumentNullException">The callback is null.</exception>
         /// <exception cref="InvalidMessageTypeException">The argument type of the callback does not match.</exception>
-        public string Subscribe<T>(Action<T> callback) where T : IMessage
+        public string Subscribe(Action<T> callback)
         {
             if (callback is null) { throw new ArgumentNullException(nameof(callback)); }
 
-            if (!MessageTypeMatches<T>())
-            {
-                throw new InvalidMessageTypeException("Type does not match publisher.");
-            }
-
-            // local lambda wrapper for casting
-            void Wrapper(IMessage x)
-            {
-                callback((T) x);
-            }
-
-            return Subscribe(Wrapper);
+            string id = GenerateId();
+            callbacksById.Add(id, callback);
+            return id;
         }
 
         /// <summary>
@@ -211,7 +211,7 @@ namespace Iviz.Roslib
             if (id is null) { throw new ArgumentNullException(nameof(id)); }
 
             AssertIsAlive();
-            bool removed = callbacksById.TryRemove(id, out _);
+            bool removed = callbacksById.Remove(id);
 
             if (callbacksById.Count == 0)
             {
@@ -232,7 +232,7 @@ namespace Iviz.Roslib
             if (id is null) { throw new ArgumentNullException(nameof(id)); }
 
             AssertIsAlive();
-            bool removed = callbacksById.TryRemove(id, out _);
+            bool removed = callbacksById.Remove(id);
 
             if (callbacksById.Count == 0)
             {

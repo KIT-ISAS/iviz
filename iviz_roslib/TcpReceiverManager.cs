@@ -2,22 +2,26 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Roslib.XmlRpc;
 using Iviz.XmlRpc;
+using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.Roslib
 {
     internal sealed class TcpReceiverManager
     {
         const int DefaultTimeoutInMs = 5000;
-        
+
         static readonly string[][] SupportedProtocols = {new[] {"TCPROS"}};
 
         readonly ConcurrentDictionary<Uri, TcpReceiverAsync> connectionsByUri =
             new ConcurrentDictionary<Uri, TcpReceiverAsync>();
+
+        Action<byte[], int> deserializer;
 
         public TcpReceiverManager(TopicInfo topicInfo, bool requestNoDelay)
         {
@@ -25,7 +29,6 @@ namespace Iviz.Roslib
             RequestNoDelay = requestNoDelay;
         }
 
-        internal RosSubscriber Subscriber { private get; set; }
         public TopicInfo TopicInfo { get; }
         public string Topic => TopicInfo.Topic;
         public string CallerId => TopicInfo.CallerId;
@@ -44,6 +47,12 @@ namespace Iviz.Roslib
         public int TimeoutInMs { get; set; } = DefaultTimeoutInMs;
 
         public event Action NumConnectionsChanged;
+
+        public void SetCallback<T>(RosSubscriber<T> subscriber) where T : IMessage
+        {
+            deserializer =
+                Buffer.GenerateDeserializer((IDeserializable<T>) TopicInfo.Generator, subscriber.MessageCallback);
+        }
 
         async Task<bool> AddPublisherAsync(NodeClient talker)
         {
@@ -110,7 +119,7 @@ namespace Iviz.Roslib
         {
             Endpoint remoteEndpoint = new Endpoint(response.Protocol.Hostname, response.Protocol.Port);
             TcpReceiverAsync connection = new TcpReceiverAsync(remoteUri, remoteEndpoint, TopicInfo,
-                Subscriber.MessageCallback, RequestNoDelay);
+                deserializer, RequestNoDelay);
 
             connectionsByUri[remoteUri] = connection;
 

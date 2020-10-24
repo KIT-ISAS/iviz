@@ -11,7 +11,7 @@ namespace Iviz.Roslib
     public class RosPublisher
     {
         readonly TcpSenderManager manager;
-        readonly ConcurrentDictionary<string, object> ids = new ConcurrentDictionary<string, object>();
+        readonly List<string> ids = new List<string>();
         readonly RosClient client;
         readonly Type topicClassType;
         int totalPublishers;
@@ -101,7 +101,7 @@ namespace Iviz.Roslib
         public PublisherTopicState GetState()
         {
             AssertIsAlive();
-            return new PublisherTopicState(Topic, TopicType, ids.Keys.ToArray(), manager.GetStates());
+            return new PublisherTopicState(Topic, TopicType, ids, manager.GetStates());
         }
 
         
@@ -152,7 +152,7 @@ namespace Iviz.Roslib
             AssertIsAlive();
 
             string id = GenerateId();
-            ids.TryAdd(id, null);
+            ids.Add(id);
 
 #if DEBUG__
             Logger.LogDebug($"{this}: Advertising '{Topic}' with type {TopicType} and id '{id}'");
@@ -164,7 +164,7 @@ namespace Iviz.Roslib
         bool RemoveId(string topicId)
         {
             if (topicId is null) { throw new ArgumentNullException(nameof(topicId)); }
-            return ids.TryRemove(topicId, out _);
+            return ids.Remove(topicId);
         }
         
         /// <summary>
@@ -212,7 +212,7 @@ namespace Iviz.Roslib
         {
             if (id is null) { throw new ArgumentNullException(nameof(id)); }
 
-            return ids.ContainsKey(id);
+            return ids.Contains(id);
         }
         
         /// <summary>
