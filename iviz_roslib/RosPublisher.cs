@@ -160,7 +160,7 @@ namespace Iviz.Roslib
         /// <exception cref="InvalidMessageTypeException">The message type does not match.</exception>        
         public void Publish(T message)
         {
-            if (message is null)
+            if (message == null)
             {
                 throw new ArgumentNullException(nameof(message));
             }
@@ -172,7 +172,8 @@ namespace Iviz.Roslib
 
         Endpoint IRosPublisher.RequestTopicRpc(string remoteCallerId)
         {
-            return manager.CreateConnectionRpc(remoteCallerId);
+            Endpoint localEndpoint = manager.CreateConnectionRpc(remoteCallerId);
+            return new Endpoint(client.CallerUri.Host, localEndpoint.Port);
         }
 
         void IRosPublisher.Stop()

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -229,6 +230,7 @@ namespace Iviz.Roslib
         {
             for (int i = 0; i < MaxConnectionRetries && keepRunning; i++)
             {
+                //Logger.Log($"{this}: Trying to connect to " + remoteEndpoint);
                 var client = await TryToConnect(timeoutInMs);
                 if (client != null)
                 {
@@ -259,7 +261,9 @@ namespace Iviz.Roslib
                 tcpClient = await KeepReconnecting(timeoutInMs);
                 if (tcpClient == null)
                 {
-                    Logger.LogDebug($"{this}: Ran out of retries. Leaving!");
+                    Logger.LogDebug(keepRunning
+                        ? $"{this}: Ran out of retries. Leaving!"
+                        : $"{this}: Disposed! Getting out.");
                     break;
                 }
 

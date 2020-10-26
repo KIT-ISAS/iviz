@@ -31,7 +31,7 @@ namespace Iviz.Roslib
     {
         const int BufferSizeIncrease = 1024;
         const int MinQueueSizeInPackets = 2;
-        const int MaxConnectionRetries = 10;
+        const int MaxConnectionRetries = 3;
         const int WaitBetweenRetriesInMs = 1000;
 
         readonly AsyncLock mutex = new AsyncLock();

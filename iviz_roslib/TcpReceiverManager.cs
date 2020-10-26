@@ -72,14 +72,21 @@ namespace Iviz.Roslib
                 return null;
             }
 
-            if (response.IsValid && response.Protocol.Type != null)
+            if (!response.IsValid || response.Protocol.Type == null)
             {
-                return new Endpoint(response.Protocol.Hostname, response.Protocol.Port);
+                Logger.LogDebug(
+                    $"{this}: Connection request to publisher {remoteUri} has failed: {response.StatusMessage}");
+                return null;
             }
 
-            Logger.LogDebug(
-                $"{this}: Connection request to publisher {remoteUri} has failed: {response.StatusMessage}");
-            return null;
+            if (response.Protocol.Port == 0)
+            {
+                Logger.LogDebug(
+                    $"{this}: Connection request to publisher {remoteUri} returned an uninitialized address!");
+                return null;
+            }
+
+            return new Endpoint(response.Protocol.Hostname, response.Protocol.Port);
         }
 
         internal void MessageCallback(in T msg)

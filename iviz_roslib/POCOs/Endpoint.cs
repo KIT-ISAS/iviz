@@ -8,7 +8,7 @@ namespace Iviz.Roslib
     ///     Simple class containing endpoint data for an IP connection.
     /// </summary>
     [DataContract]
-    public sealed class Endpoint : JsonToString
+    public sealed class Endpoint
     {
         [DataMember] public string Hostname { get; }
         [DataMember] public int Port { get; }
@@ -26,6 +26,11 @@ namespace Iviz.Roslib
         public bool Equals(Endpoint other)
         {
             return other != null && Hostname == other.Hostname && Port == other.Port;
+        }
+
+        public override string ToString()
+        {
+            return $"[Endpoint '{Hostname}':{Port}]";
         }
     }
 }
