@@ -26,17 +26,10 @@ namespace Iviz.Roslib
         readonly bool requestNoDelay;
         readonly bool persistent;
 
-        public string RemoteHostname { get; }
-        public int RemotePort { get; }
-
-        public int NumReceived { get; private set; }
-        public int BytesReceived { get; private set; }
-        public int NumSent { get; private set; }
-        public int BytesSent { get; private set; }
         public bool IsAlive => tcpClient.Connected;
 
-        public int Port => remoteEndPoint.Port;
-        public string Hostname => remoteEndPoint.Address.ToString();
+        int Port => remoteEndPoint.Port;
+        string Hostname => remoteEndPoint.Address.ToString();
 
         public ServiceReceiver(
             ServiceInfo serviceInfo,
@@ -48,13 +41,13 @@ namespace Iviz.Roslib
             this.requestNoDelay = requestNoDelay;
             this.persistent = persistent;
 
-            RemoteHostname = remoteUri.Host;
-            RemotePort = remoteUri.Port;
+            var remoteHostname = remoteUri.Host;
+            var remotePort = remoteUri.Port;
 
             tcpClient.ReceiveTimeout = 5000;
             tcpClient.SendTimeout = 5000;
 
-            tcpClient.Connect(RemoteHostname, RemotePort);
+            tcpClient.Connect(remoteHostname, remotePort);
             NetworkStream stream = tcpClient.GetStream();
             reader = new BinaryReader(stream);
             writer = new BinaryWriter(stream);
@@ -204,26 +197,23 @@ namespace Iviz.Roslib
             writer.Write(sendLength);
 
             writer.Write(writeBuffer, 0, (int)sendLength);
-            BytesSent += (int)sendLength + 5;
 
 
-            int rcvLength = reader.Read(readBuffer, 0, 1);
-            if (rcvLength == 0)
+            int rcvLengthH = reader.Read(readBuffer, 0, 1);
+            if (rcvLengthH == 0)
             {
                 service.ErrorMessage = $"Connection to {Hostname}:{Port} closed remotely.";
                 return false;
             }
-            BytesReceived++;
 
             byte statusByte = readBuffer[0];
             
-            rcvLength = ReceivePacket();
+            int rcvLength = ReceivePacket();
             if (rcvLength == 0)
             {
                 service.ErrorMessage = $"Connection to {Hostname}:{Port} closed remotely.";
                 return false;
             }
-            BytesReceived += 4 + rcvLength;
 
             if (statusByte == ErrorByte)
             {
@@ -233,7 +223,6 @@ namespace Iviz.Roslib
 
             service.ErrorMessage = null;
             service.Response = Msgs.Buffer.Deserialize(service.Response, readBuffer, rcvLength);
-            NumReceived++;
             return true;
         }
 

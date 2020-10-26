@@ -20,24 +20,6 @@ namespace Iviz.Roslib
 
     public static class Utils
     {
-        public static void ForEach<T>(this IEnumerable<T> ts, Action<T> action)
-        {
-            if (ts is null) { throw new ArgumentNullException(nameof(ts)); }
-
-            foreach (T t in ts)
-            {
-                action(t);
-            }
-        }
-
-        public static void ForEach<T>(this T[] ts, Action<T> action)
-        {
-            for (int i = 0; i < ts.Length; i++)
-            {
-                action(ts[i]);
-            }
-        }
-
         public static bool HasPrefix(this string check, string prefix)
         {
             if (check is null) { throw new ArgumentNullException(nameof(check)); }
@@ -111,9 +93,9 @@ namespace Iviz.Roslib
             return new ReadOnlyCollection<T>(t);
         }
         
-        public static bool RemovePair<T, U>(this ConcurrentDictionary<T, U> dictionary, T t, U u)
+        public static bool RemovePair<T, TU>(this ConcurrentDictionary<T, TU> dictionary, T t, TU u)
         {
-            return ((ICollection<KeyValuePair<T, U>>) dictionary).Remove(new KeyValuePair<T, U>(t, u));
+            return ((ICollection<KeyValuePair<T, TU>>) dictionary).Remove(new KeyValuePair<T, TU>(t, u));
         }
     }
 }

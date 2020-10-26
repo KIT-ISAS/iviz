@@ -230,7 +230,7 @@ namespace Iviz.Roslib.XmlRpc
         }
     }
 
-    sealed class GetParamResponse : BaseResponse
+    internal sealed class GetParamResponse : BaseResponse
     {
         public object ParameterValue { get; }
 
@@ -240,7 +240,7 @@ namespace Iviz.Roslib.XmlRpc
         }
     }
 
-    sealed class SearchParamResponse : BaseResponse
+    internal sealed class SearchParamResponse : BaseResponse
     {
         public string FoundKey { get; }
 
@@ -250,7 +250,7 @@ namespace Iviz.Roslib.XmlRpc
         }
     }
 
-    sealed class SubscribeParamResponse : BaseResponse
+    internal sealed class SubscribeParamResponse : BaseResponse
     {
         public object ParameterValue { get; }
 
@@ -260,7 +260,7 @@ namespace Iviz.Roslib.XmlRpc
         }
     }
 
-    sealed class UnsubscribeParamResponse : BaseResponse
+    internal sealed class UnsubscribeParamResponse : BaseResponse
     {
         public int NumUnsubscribed { get; }
 

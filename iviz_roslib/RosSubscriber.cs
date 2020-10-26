@@ -16,6 +16,7 @@ namespace Iviz.Roslib
         public int TimeoutInMs { get; set; }
         public string Topic { get; }
         public string TopicType { get; }
+        public int NumPublishers { get; }
         public SubscriberTopicState GetState();
         public bool ContainsId(string id);
         public bool MessageTypeMatches(Type type);
@@ -29,10 +30,8 @@ namespace Iviz.Roslib
     public class RosSubscriber<T> : IRosSubscriber where T : IMessage
     {
         readonly Dictionary<string, Action<T>> callbacksById = new Dictionary<string, Action<T>>();
-
-        readonly TcpReceiverManager manager;
+        readonly TcpReceiverManager<T> manager;
         readonly RosClient client;
-        readonly Type topicClassType;
 
         int totalSubscribers;
 
@@ -80,25 +79,28 @@ namespace Iviz.Roslib
             set => manager.TimeoutInMs = value;
         }
 
-        internal RosSubscriber(RosClient client, TcpReceiverManager manager)
+        internal RosSubscriber(RosClient client, TcpReceiverManager<T> manager)
         {
             this.client = client;
             this.manager = manager;
-            topicClassType = manager.TopicInfo.Generator.GetType();
             IsAlive = true;
-
-            manager.NumConnectionsChanged += () => NumPublishersChanged?.Invoke(this);
-            manager.SetCallback(this);
+            
+            manager.Subscriber = this;
         }
 
-        internal void MessageCallback(T msg)
+        internal void MessageCallback(in T msg)
         {
-            foreach (var callback in callbacksById)
+            foreach (Action<T> callback in callbacksById.Values)
             {
-                callback.Value(msg);
+                callback(msg);
             }
         }
 
+        internal void RaiseNumPublishersChanged()
+        {
+            NumPublishersChanged?.Invoke(this);            
+        }
+        
         string GenerateId()
         {
             string newId = totalSubscribers == 0 ? Topic : $"{Topic}-{totalSubscribers}";
@@ -125,7 +127,7 @@ namespace Iviz.Roslib
         
         async Task IRosSubscriber.PublisherUpdateRcpAsync(IEnumerable<Uri> publisherUris)
         {
-            await manager.PublisherUpdateRpcAsync(client, publisherUris).Caf();
+            await manager.PublisherUpdateRpcAsync(publisherUris).Caf();
         }
 
         void IRosSubscriber.Stop()
@@ -148,7 +150,7 @@ namespace Iviz.Roslib
         /// <returns>Whether the class type matches.</returns>
         public bool MessageTypeMatches(Type type)
         {
-            return type == topicClassType;
+            return type == typeof(T);
         }
 
         /// <summary>
@@ -157,7 +159,7 @@ namespace Iviz.Roslib
         /// <param name="callback">The function to call when a message arrives.</param>
         /// <returns>The subscribed id.</returns>
         /// <exception cref="ArgumentNullException">The callback is null.</exception>
-        public string Subscribe(Action<IMessage> callback)
+        string IRosSubscriber.Subscribe(Action<IMessage> callback)
         {
             if (callback is null) { throw new ArgumentNullException(nameof(callback)); }
 
@@ -179,7 +181,6 @@ namespace Iviz.Roslib
         /// <typeparam name="T">The message type</typeparam>
         /// <returns>The subscribed id.</returns>
         /// <exception cref="ArgumentNullException">The callback is null.</exception>
-        /// <exception cref="InvalidMessageTypeException">The argument type of the callback does not match.</exception>
         public string Subscribe(Action<T> callback)
         {
             if (callback is null) { throw new ArgumentNullException(nameof(callback)); }

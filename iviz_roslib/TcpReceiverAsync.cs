@@ -12,16 +12,22 @@ using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.Roslib
 {
-    internal sealed class TcpReceiverAsync : IDisposable
+    internal sealed class TcpReceiverAsync<T> : IDisposable where T : IMessage
     {
         const int BufferSizeIncrease = 1024;
         const int MaxConnectionRetries = 60;
         const int WaitBetweenRetriesInMs = 1000;
         const int SleepTimeInMs = 1000;
 
-        readonly Action<byte[], int> deserializer;
+        readonly TcpReceiverManager<T> manager;
         readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
-        readonly TopicInfo topicInfo;
+        readonly TopicInfo<T> topicInfo;
+        readonly bool requestNoDelay;
+
+        Endpoint remoteEndpoint;
+        Endpoint endpoint;
+        int numReceived;
+        int bytesReceived;
 
         volatile bool keepRunning;
         byte[] readBuffer = new byte[BufferSizeIncrease];
@@ -30,30 +36,25 @@ namespace Iviz.Roslib
         TcpClient tcpClient;
         bool disposed;
 
-        public TcpReceiverAsync(Uri remoteUri, Endpoint remoteEndpoint, TopicInfo topicInfo, Action<byte[], int> deserializer,
+        public TcpReceiverAsync(TcpReceiverManager<T> manager,
+            Uri remoteUri, Endpoint remoteEndpoint, TopicInfo<T> topicInfo,
             bool requestNoDelay)
         {
             RemoteUri = remoteUri;
-            RemoteEndpoint = remoteEndpoint;
+            this.remoteEndpoint = remoteEndpoint;
             this.topicInfo = topicInfo;
-            this.deserializer = deserializer;
-            RequestNoDelay = requestNoDelay;
+            this.manager = manager;
+            this.requestNoDelay = requestNoDelay;
         }
 
         public Uri RemoteUri { get; }
-        Endpoint RemoteEndpoint { get; }
-        Endpoint Endpoint { get; set; }
         string Topic => topicInfo.Topic;
         public bool IsAlive => task != null && !task.IsCompleted && !task.IsFaulted;
-        public bool IsConnected => tcpClient != null;
-        int NumReceived { get; set; }
-        int BytesReceived { get; set; }
-        bool RequestNoDelay { get; }
 
         public SubscriberReceiverState State => new SubscriberReceiverState(
-            IsAlive, RequestNoDelay, Endpoint,
-            RemoteUri, RemoteEndpoint,
-            NumReceived, BytesReceived
+            IsAlive, requestNoDelay, endpoint,
+            RemoteUri, remoteEndpoint,
+            numReceived, bytesReceived
         );
 
         public void Dispose()
@@ -96,7 +97,7 @@ namespace Iviz.Roslib
                 $"topic={topicInfo.Topic}",
                 $"md5sum={topicInfo.Md5Sum}",
                 $"type={topicInfo.Type}",
-                $"tcp_nodelay={(RequestNoDelay ? "1" : "0")}"
+                $"tcp_nodelay={(requestNoDelay ? "1" : "0")}"
             };
             int totalLength = 4 * contents.Length + contents.Sum(entry => entry.Length);
 
@@ -131,7 +132,7 @@ namespace Iviz.Roslib
             return contents;
         }
 
-        async Task<int> ReceivePacket()
+        async ValueTask<int> ReceivePacket()
         {
             int numRead = 0;
             while (numRead < 4)
@@ -200,7 +201,7 @@ namespace Iviz.Roslib
             TcpClient client = new TcpClient();
             try
             {
-                Task connectionTask = client.ConnectAsync(RemoteEndpoint.Hostname, RemoteEndpoint.Port);
+                Task connectionTask = client.ConnectAsync(remoteEndpoint.Hostname, remoteEndpoint.Port);
                 if (!await connectionTask.WaitFor(timeoutInMs) ||
                     !connectionTask.IsCompleted ||
                     client.Client?.LocalEndPoint == null)
@@ -226,20 +227,24 @@ namespace Iviz.Roslib
 
         async Task<TcpClient> KeepReconnecting(int timeoutInMs)
         {
-            var client = await TryToConnect(timeoutInMs);
-            if (client != null)
-            {
-                return client;
-            }
-
             for (int i = 0; i < MaxConnectionRetries && keepRunning; i++)
             {
-                await Task.Delay(WaitBetweenRetriesInMs);
-                client = await TryToConnect(timeoutInMs);
+                var client = await TryToConnect(timeoutInMs);
                 if (client != null)
                 {
                     return client;
                 }
+
+                await Task.Delay(WaitBetweenRetriesInMs);
+
+                Endpoint newEndpoint = await manager.RequestConnectionFromPublisherAsync(RemoteUri);
+                if (newEndpoint == null || newEndpoint.Equals(remoteEndpoint))
+                {
+                    continue;
+                }
+
+                Logger.Log($"{this}: Changed endpoint from {remoteEndpoint} to {newEndpoint}");
+                remoteEndpoint = newEndpoint;
             }
 
             return null;
@@ -249,7 +254,7 @@ namespace Iviz.Roslib
         {
             while (keepRunning)
             {
-                tcpClient = null;                
+                tcpClient = null;
                 Logger.LogDebug($"{this}: Trying to connect!");
                 tcpClient = await KeepReconnecting(timeoutInMs);
                 if (tcpClient == null)
@@ -257,16 +262,17 @@ namespace Iviz.Roslib
                     Logger.LogDebug($"{this}: Ran out of retries. Leaving!");
                     break;
                 }
+
                 Logger.LogDebug($"{this}: Connected!");
 
-                Endpoint = new Endpoint((IPEndPoint) tcpClient.Client.LocalEndPoint);
+                endpoint = new Endpoint((IPEndPoint) tcpClient.Client.LocalEndPoint);
                 stream = tcpClient.GetStream();
 
                 try
                 {
                     using (tcpClient)
                     {
-                        await ProcessSession();
+                        await ProcessLoop();
                     }
                 }
                 catch (ObjectDisposedException) { }
@@ -290,16 +296,12 @@ namespace Iviz.Roslib
             catch (SemaphoreFullException) { }
 
             Logger.Log($"{this}: Stopped!");
-        } 
+        }
 
-        async Task ProcessSession()
+        async Task ProcessLoop()
         {
-            List<string> responses = await DoHandshake();
-            if (responses.Count != 0 && responses[0].HasPrefix("error"))
+            if (!await ProcessHandshake())
             {
-                int index = responses[0].IndexOf('=');
-                string errorMsg = index != -1 ? responses[0].Substring(index + 1) : responses[0];
-                Logger.LogDebug($"{this}: Partner sent error code: {errorMsg}");
                 return;
             }
 
@@ -312,26 +314,39 @@ namespace Iviz.Roslib
                     return;
                 }
 
-                //IMessage message = Buffer.Deserialize(topicInfo.Generator, readBuffer, rcvLength);
+                T message = Buffer.Deserialize(topicInfo.Generator, readBuffer, rcvLength);
 
                 try
                 {
-                    deserializer(readBuffer, rcvLength);
-                    //callback(message);
+                    manager.Subscriber.MessageCallback(message);
                 }
                 catch (Exception e)
                 {
                     Logger.LogError($"{this}: Exception from callback : {e}");
                 }
 
-                NumReceived++;
-                BytesReceived += rcvLength + 4;
+                numReceived++;
+                bytesReceived += rcvLength + 4;
             }
+        }
+
+        async Task<bool> ProcessHandshake()
+        {
+            List<string> responses = await DoHandshake();
+            if (responses.Count == 0 || !responses[0].HasPrefix("error"))
+            {
+                return true;
+            }
+
+            int index = responses[0].IndexOf('=');
+            string errorMsg = index != -1 ? responses[0].Substring(index + 1) : responses[0];
+            Logger.LogDebug($"{this}: Partner sent error code: {errorMsg}");
+            return false;
         }
 
         public override string ToString()
         {
-            return $"[TcpReceiver Uri={RemoteUri} {RemoteEndpoint.Hostname}:{RemoteEndpoint.Port} '{Topic}']";
+            return $"[TcpReceiver Uri={RemoteUri} {remoteEndpoint.Hostname}:{remoteEndpoint.Port} '{Topic}']";
         }
     }
 }

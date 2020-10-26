@@ -8,6 +8,8 @@ namespace Iviz.Roslib.XmlRpc
 {
     internal sealed class NodeClient
     {
+        static readonly string[][] SupportedProtocols = {new[] {"TCPROS"}};        
+        
         public string CallerId { get; }
         public Uri CallerUri { get; }
         public int TimeoutInMs { get; }
@@ -21,16 +23,16 @@ namespace Iviz.Roslib.XmlRpc
             TimeoutInMs = timeoutInMs;
         }
 
-        public RequestTopicResponse RequestTopic(string topic, string[][] protocols)
+        public RequestTopicResponse RequestTopic(string topic)
         {
-            Arg[] args = {CallerId, topic, protocols};
+            Arg[] args = {CallerId, topic, SupportedProtocols};
             object[] response = MethodCall("requestTopic", args);
             return new RequestTopicResponse(response);
         }
         
-        public async Task<RequestTopicResponse> RequestTopicAsync(string topic, string[][] protocols)
+        public async Task<RequestTopicResponse> RequestTopicAsync(string topic)
         {
-            Arg[] args = {CallerId, topic, protocols};
+            Arg[] args = {CallerId, topic, SupportedProtocols};
             object[] response = await MethodCallAsync("requestTopic", args).Caf();
             return new RequestTopicResponse(response);
         }        

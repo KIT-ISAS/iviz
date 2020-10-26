@@ -12,20 +12,18 @@ namespace Iviz.Roslib
 {
     internal sealed class ServiceSenderManager
     {
-        public Uri Uri { get; }
-        public string Service => serviceInfo.Service;
-        public string ServiceType => serviceInfo.Type;
-        readonly TcpListener listener;
-        readonly ServiceInfo serviceInfo;
         readonly Func<IService, Task> callback;
-
-        readonly Task task;
-        readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
-
-        bool keepGoing;
 
         readonly ConcurrentDictionary<ServiceSenderAsync, object> connections =
             new ConcurrentDictionary<ServiceSenderAsync, object>();
+
+        readonly TcpListener listener;
+        readonly ServiceInfo serviceInfo;
+        readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
+
+        readonly Task task;
+
+        bool keepGoing;
 
         public ServiceSenderManager(ServiceInfo serviceInfo, string host, Func<IService, Task> callback)
         {
@@ -43,6 +41,10 @@ namespace Iviz.Roslib
 
             task = Task.Run(StartAsync);
         }
+
+        public Uri Uri { get; }
+        public string Service => serviceInfo.Service;
+        string ServiceType => serviceInfo.Type;
 
         async Task StartAsync()
         {
@@ -66,11 +68,11 @@ namespace Iviz.Roslib
                     if (!keepGoing)
                     {
                         break;
-                    }    
+                    }
 
                     ServiceSenderAsync sender = new ServiceSenderAsync(serviceInfo, client, callback);
                     connections[sender] = null;
-                    
+
                     Cleanup();
                 }
             }
@@ -81,7 +83,7 @@ namespace Iviz.Roslib
             }
             catch (Exception e)
             {
-                Logger.Log($"{this}: Stopped thread" + e);
+                Logger.Log($"{this}: Stopped thread{e}");
                 return;
             }
 
@@ -90,8 +92,8 @@ namespace Iviz.Roslib
 
         void Cleanup()
         {
-            var toRemove = connections.Keys.Where(connection => !connection.IsAlive).ToArray();
-            foreach (var connection in toRemove)
+            ServiceSenderAsync[] toRemove = connections.Keys.Where(connection => !connection.IsAlive).ToArray();
+            foreach (ServiceSenderAsync connection in toRemove)
             {
                 Logger.LogDebug(
                     $"{this}: Removing service connection with '{connection.Hostname}' - dead x_x");
@@ -103,12 +105,16 @@ namespace Iviz.Roslib
 
         public void Stop()
         {
-            connections.Keys.ForEach(sender => sender.Stop());
+            foreach (ServiceSenderAsync sender in connections.Keys)
+            {
+                sender.Stop();
+            }
+
             connections.Clear();
             signal.Release();
             task?.Wait();
         }
-        
+
         public async Task StopAsync()
         {
             Task[] tasks = connections.Keys.Select(sender => sender.StopAsync()).ToArray();

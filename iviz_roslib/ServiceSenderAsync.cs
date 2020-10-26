@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.Roslib
 {
@@ -14,28 +15,20 @@ namespace Iviz.Roslib
     {
         const int BufferSizeIncrease = 1024;
 
+        const byte ErrorByte = 0;
+        const byte SuccessByte = 1;
+        readonly Func<IService, Task> callback;
+        readonly IPEndPoint remoteEndPoint;
+        readonly ServiceInfo serviceInfo;
+        readonly NetworkStream stream;
+        readonly Task task;
+        readonly TcpClient tcpClient;
+
+        bool keepRunning;
+        string remoteCallerId;
         byte[] readBuffer = new byte[1024];
         byte[] writeBuffer = new byte[1024];
 
-        readonly NetworkStream stream;
-        readonly TcpClient tcpClient;
-        readonly IPEndPoint remoteEndPoint;
-        readonly Func<IService, Task> callback;
-        readonly Task task;
-        bool keepRunning;
-
-        public int NumReceived { get; private set; }
-        public int BytesReceived { get; private set; }
-        public int NumSent { get; private set; }
-        public int BytesSent { get; private set; }
-        public bool IsAlive => task != null && !task.IsCompleted && !task.IsFaulted;
-
-        public string Service => ServiceInfo.Service;
-        public int Port => remoteEndPoint.Port;
-        public string Hostname => remoteEndPoint.Address.ToString();
-
-        internal ServiceInfo ServiceInfo { get; }
-        public string RemoteCallerId { get; private set; }
 
         internal ServiceSenderAsync(ServiceInfo serviceInfo, TcpClient tcpClient, Func<IService, Task> callback)
         {
@@ -43,11 +36,16 @@ namespace Iviz.Roslib
             this.tcpClient = tcpClient;
             this.callback = callback;
             remoteEndPoint = (IPEndPoint) tcpClient.Client.RemoteEndPoint;
-            ServiceInfo = serviceInfo;
+            this.serviceInfo = serviceInfo;
 
             keepRunning = true;
             task = Task.Run(Run);
         }
+
+        public bool IsAlive => task != null && !task.IsCompleted && !task.IsFaulted;
+        string Service => serviceInfo.Service;
+        int Port => remoteEndPoint.Port;
+        public string Hostname => remoteEndPoint.Address.ToString();
 
         public void Stop()
         {
@@ -55,7 +53,7 @@ namespace Iviz.Roslib
             tcpClient.Close();
             task.Wait();
         }
-        
+
         public async Task StopAsync()
         {
             keepRunning = false;
@@ -126,7 +124,7 @@ namespace Iviz.Roslib
             }
 
             Dictionary<string, string> values = new Dictionary<string, string>();
-            foreach (var entry in fields)
+            foreach (string entry in fields)
             {
                 int index = entry.IndexOf('=');
                 if (index < 0)
@@ -141,42 +139,42 @@ namespace Iviz.Roslib
             if (!values.TryGetValue("callerid", out string receivedId))
             {
                 return
-                    $"error=Expected callerid '{RemoteCallerId}' but received instead '{receivedId}', closing connection";
+                    $"error=Expected callerid '{remoteCallerId}' but received instead '{receivedId}', closing connection";
             }
 
-            RemoteCallerId = receivedId;
+            remoteCallerId = receivedId;
 
-            if (!values.TryGetValue("service", out string receivedService) || receivedService != ServiceInfo.Service)
+            if (!values.TryGetValue("service", out string receivedService) || receivedService != serviceInfo.Service)
             {
                 return
-                    $"error=Expected service '{ServiceInfo.Service}' but received instead '{receivedService}', closing connection";
+                    $"error=Expected service '{serviceInfo.Service}' but received instead '{receivedService}', closing connection";
             }
 
-            if (!values.TryGetValue("md5sum", out string receivedMd5Sum) || receivedMd5Sum != ServiceInfo.Md5Sum)
+            if (!values.TryGetValue("md5sum", out string receivedMd5Sum) || receivedMd5Sum != serviceInfo.Md5Sum)
             {
                 if (receivedMd5Sum == "*")
                 {
                     Logger.LogDebug(
-                        $"{this}: Expected md5 '{ServiceInfo.Md5Sum}' but received instead '{receivedMd5Sum}'. Continuing...");
+                        $"{this}: Expected md5 '{serviceInfo.Md5Sum}' but received instead '{receivedMd5Sum}'. Continuing...");
                 }
                 else
                 {
                     return
-                        $"error=Expected md5 '{ServiceInfo.Md5Sum}' but received instead '{receivedMd5Sum}', closing connection";
+                        $"error=Expected md5 '{serviceInfo.Md5Sum}' but received instead '{receivedMd5Sum}', closing connection";
                 }
             }
 
-            if (values.TryGetValue("type", out string receivedType) && receivedType != ServiceInfo.Type)
+            if (values.TryGetValue("type", out string receivedType) && receivedType != serviceInfo.Type)
             {
                 if (receivedType == "*")
                 {
                     Logger.LogDebug(
-                        $"{this}: Expected type '{ServiceInfo.Type}' but received instead '{receivedType}'. Continuing...");
+                        $"{this}: Expected type '{serviceInfo.Type}' but received instead '{receivedType}'. Continuing...");
                 }
                 else
                 {
                     return
-                        $"error=Expected type '{ServiceInfo.Type}' but received instead '{receivedType}', closing connection";
+                        $"error=Expected type '{serviceInfo.Type}' but received instead '{receivedType}', closing connection";
                 }
             }
 
@@ -189,7 +187,7 @@ namespace Iviz.Roslib
             return null;
         }
 
-        async Task<int> SendResponseHeader(string errorMessage)
+        async Task SendResponseHeader(string errorMessage)
         {
             string[] contents;
             if (errorMessage != null)
@@ -197,14 +195,14 @@ namespace Iviz.Roslib
                 contents = new[]
                 {
                     errorMessage,
-                    $"callerid={ServiceInfo.CallerId}",
+                    $"callerid={serviceInfo.CallerId}"
                 };
             }
             else
             {
                 contents = new[]
                 {
-                    $"callerid={ServiceInfo.CallerId}",
+                    $"callerid={serviceInfo.CallerId}"
                 };
             }
 
@@ -229,8 +227,6 @@ namespace Iviz.Roslib
             }
 
             await stream.WriteAsync(array, 0, array.Length);
-
-            return totalLength;
         }
 
         async Task<bool> DoHandshake()
@@ -249,9 +245,6 @@ namespace Iviz.Roslib
             return errorMessage == null;
         }
 
-        const byte ErrorByte = 0;
-        const byte SuccessByte = 1;
-
         async Task Run()
         {
             try
@@ -265,8 +258,9 @@ namespace Iviz.Roslib
             {
                 Logger.Log($"{this}: {e}");
             }
-            
+
             byte[] lengthArray = new byte[4];
+
             byte[] ToLengthArray(uint i)
             {
                 lengthArray[0] = (byte) i;
@@ -274,8 +268,10 @@ namespace Iviz.Roslib
                 lengthArray[2] = (byte) (i >> 0x10);
                 lengthArray[3] = (byte) (i >> 0x18);
                 return lengthArray;
-            }            
+            }
 
+            byte[] statusByte = {0};
+                
             while (keepRunning)
             {
                 try
@@ -287,10 +283,8 @@ namespace Iviz.Roslib
                         break;
                     }
 
-                    IService serviceMsg = ServiceInfo.Generator.Create();
-                    serviceMsg.Request = Msgs.Buffer.Deserialize(serviceMsg.Request, readBuffer, rcvLength);
-                    NumReceived++;
-                    BytesReceived += rcvLength + 4;
+                    IService serviceMsg = serviceInfo.Generator.Create();
+                    serviceMsg.Request = Buffer.Deserialize(serviceMsg.Request, readBuffer, rcvLength);
 
                     byte resultStatus;
                     string errorMessage;
@@ -302,7 +296,7 @@ namespace Iviz.Roslib
                     }
                     catch (Exception e)
                     {
-                        Logger.LogError($"{this}: Inner exception in service callback: " + e);
+                        Logger.LogError($"{this}: Inner exception in service callback: {e}");
                         serviceMsg.Response = null;
                     }
 
@@ -324,7 +318,7 @@ namespace Iviz.Roslib
                         errorMessage = null;
                     }
 
-                    byte[] statusByte = {resultStatus};
+                    statusByte[0] = resultStatus;
                     if (resultStatus == SuccessByte)
                     {
                         int msgLength = responseMsg.RosMessageLength;
@@ -333,12 +327,11 @@ namespace Iviz.Roslib
                             writeBuffer = new byte[msgLength + BufferSizeIncrease];
                         }
 
-                        uint sendLength = Msgs.Buffer.Serialize(responseMsg, writeBuffer);
+                        uint sendLength = Buffer.Serialize(responseMsg, writeBuffer);
 
                         await stream.WriteAsync(statusByte, 0, 1);
                         await stream.WriteAsync(ToLengthArray(sendLength), 0, 4);
                         await stream.WriteAsync(writeBuffer, 0, (int) sendLength);
-                        BytesSent += (int) sendLength + 5;
                     }
                     else
                     {
@@ -347,10 +340,7 @@ namespace Iviz.Roslib
 
                         byte[] tmpBuffer = BuiltIns.UTF8.GetBytes(errorMessage);
                         await stream.WriteAsync(tmpBuffer, 0, tmpBuffer.Length);
-                        BytesSent += tmpBuffer.Length + 5;
                     }
-
-                    NumSent++;
                 }
                 catch (Exception e)
                 {
@@ -363,7 +353,7 @@ namespace Iviz.Roslib
 
         public override string ToString()
         {
-            return $"[TcpSender {Hostname}:{Port} '{Service}' >>'{RemoteCallerId}']";
+            return $"[TcpSender {Hostname}:{Port} '{Service}' >>'{remoteCallerId}']";
         }
     }
 }

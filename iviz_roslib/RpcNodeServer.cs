@@ -13,10 +13,13 @@ namespace Iviz.Roslib.XmlRpc
 {
     internal sealed class NodeServer : IDisposable
     {
-        static readonly Arg[] DefaultOkResponse = OkResponse(0);        
-        
+        static readonly Arg[] DefaultOkResponse = OkResponse(0);
+
         readonly Dictionary<string, Func<object[], Arg[]>> methods;
-        readonly Dictionary<string, Func<object[], Task>> lateCallbacks; // gets called after response to method callback is sent 
+
+        readonly Dictionary<string, Func<object[], Task>>
+            lateCallbacks; // gets called after response to method callback is sent 
+
         readonly Iviz.XmlRpc.HttpListener listener;
         readonly RosClient client;
 
@@ -73,7 +76,7 @@ namespace Iviz.Roslib.XmlRpc
 
             // tell the listener in every possible way to stop listening
             listener.Dispose();
-            
+
             // wait for any remaining rpc calls
             await listener.AwaitRunningTasks();
 
@@ -276,12 +279,10 @@ namespace Iviz.Roslib.XmlRpc
                 return new Arg[] {StatusCode.Failure, "Client only supports TCPROS", 0};
             }
 
-            string hostname;
-            int port;
-
+            Endpoint endpoint;
             try
             {
-                (hostname, port) = client.RequestTopicRpc(callerId, topic);
+                endpoint = client.RequestTopicRpc(callerId, topic);
             }
             catch (Exception e)
             {
@@ -289,12 +290,9 @@ namespace Iviz.Roslib.XmlRpc
                 return new Arg[] {StatusCode.Error, $"Unknown error: {e.Message}", 0};
             }
 
-            if (hostname == null)
-            {
-                return new Arg[] {StatusCode.Failure, $"Client is not publishing topic '{topic}'", 0};
-            }
-
-            return OkResponse(new Arg[] {"TCPROS", hostname, port});
+            return endpoint?.Hostname == null
+                ? new Arg[] {StatusCode.Failure, $"Client is not publishing topic '{topic}'", 0}
+                : OkResponse(new Arg[] {"TCPROS", endpoint.Hostname, endpoint.Port});
         }
     }
 }

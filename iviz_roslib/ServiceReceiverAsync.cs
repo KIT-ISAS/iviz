@@ -3,40 +3,30 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.Roslib
 {
     internal sealed class ServiceReceiverAsync : IDisposable
     {
         const int BufferSizeIncrease = 512;
+        const byte ErrorByte = 0;
+        
+        readonly bool persistent;
+        readonly IPEndPoint remoteEndPoint;
+        readonly bool requestNoDelay;
+        readonly ServiceInfo serviceInfo;
+        readonly NetworkStream stream;
+        readonly TcpClient tcpClient = new TcpClient();
+
+        bool disposed;
 
         byte[] readBuffer = new byte[16];
         byte[] writeBuffer = new byte[16];
-
-        readonly NetworkStream stream;
-        readonly TcpClient tcpClient = new TcpClient();
-        readonly IPEndPoint remoteEndPoint;
-        readonly ServiceInfo serviceInfo;
-        readonly bool requestNoDelay;
-        readonly bool persistent;
-
-        public string RemoteHostname { get; }
-        public int RemotePort { get; }
-
-        public int NumReceived { get; private set; }
-        public int BytesReceived { get; private set; }
-        public int NumSent { get; private set; }
-        public int BytesSent { get; private set; }
-        public bool IsAlive => tcpClient.Connected;
-
-        public int Port => remoteEndPoint.Port;
-        public string Hostname => remoteEndPoint.Address.ToString();
 
         public ServiceReceiverAsync(
             ServiceInfo serviceInfo,
@@ -48,18 +38,32 @@ namespace Iviz.Roslib
             this.requestNoDelay = requestNoDelay;
             this.persistent = persistent;
 
-            RemoteHostname = remoteUri.Host;
-            RemotePort = remoteUri.Port;
+            string remoteHostname = remoteUri.Host;
+            int remotePort = remoteUri.Port;
 
             tcpClient.ReceiveTimeout = 5000;
             tcpClient.SendTimeout = 5000;
 
-            tcpClient.Connect(RemoteHostname, RemotePort);
+            tcpClient.Connect(remoteHostname, remotePort);
             stream = tcpClient.GetStream();
             remoteEndPoint = (IPEndPoint) tcpClient.Client.RemoteEndPoint;
         }
 
-        async Task<int> SerializeHeader()
+        int Port => remoteEndPoint.Port;
+        string Hostname => remoteEndPoint.Address.ToString();
+
+        public void Dispose()
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+            tcpClient.Dispose();
+        }
+
+        async Task SerializeHeader()
         {
             string[] contents =
             {
@@ -68,10 +72,10 @@ namespace Iviz.Roslib
                 $"md5sum={serviceInfo.Md5Sum}",
                 $"type={serviceInfo.Type}",
                 $"tcp_nodelay={(requestNoDelay ? "1" : "0")}",
-                $"persistent={(persistent ? "1" : "0")}",
+                $"persistent={(persistent ? "1" : "0")}"
             };
             int totalLength = 4 * contents.Length;
-            foreach (var entry in contents)
+            foreach (string entry in contents)
             {
                 totalLength += entry.Length;
             }
@@ -80,7 +84,7 @@ namespace Iviz.Roslib
             using (BinaryWriter writer = new BinaryWriter(new MemoryStream(array)))
             {
                 writer.Write(totalLength);
-                foreach (var t in contents)
+                foreach (string t in contents)
                 {
                     writer.Write(t.Length);
                     writer.Write(BuiltIns.UTF8.GetBytes(t));
@@ -92,7 +96,6 @@ namespace Iviz.Roslib
             }
 
             await stream.WriteAsync(array, 0, array.Length);
-            return totalLength;
         }
 
         List<string> ParseHeader(int totalLength)
@@ -116,7 +119,7 @@ namespace Iviz.Roslib
             return contents;
         }
 
-        public async Task<bool> StartAsync()
+        public async Task StartAsync()
         {
             await SerializeHeader();
 
@@ -125,7 +128,7 @@ namespace Iviz.Roslib
 
             if (responses.Count == 0 || !responses[0].HasPrefix("error"))
             {
-                return true;
+                return;
             }
 
             int index = responses[0].IndexOf('=');
@@ -139,8 +142,6 @@ namespace Iviz.Roslib
             }
 
             tcpClient.Close();
-            return false;
-
         }
 
         async Task<int> ReceivePacket()
@@ -200,8 +201,6 @@ namespace Iviz.Roslib
             return success;
         }
 
-        const byte ErrorByte = 0;
-
         async Task<bool> ExecuteImpl(IService service)
         {
             IRequest requestMsg = service.Request;
@@ -211,30 +210,25 @@ namespace Iviz.Roslib
                 writeBuffer = new byte[msgLength + BufferSizeIncrease];
             }
 
-            uint sendLength = Msgs.Buffer.Serialize(requestMsg, writeBuffer);
+            uint sendLength = Buffer.Serialize(requestMsg, writeBuffer);
             await stream.WriteAsync(BitConverter.GetBytes(sendLength), 0, 4);
             await stream.WriteAsync(writeBuffer, 0, (int) sendLength);
-            BytesSent += (int) sendLength + 5;
 
-            int rcvLength = await stream.ReadAsync(readBuffer, 0, 1);
-            if (rcvLength == 0)
+            int rcvLengthH = await stream.ReadAsync(readBuffer, 0, 1);
+            if (rcvLengthH == 0)
             {
                 service.ErrorMessage = $"Connection to {Hostname}:{Port} closed remotely.";
                 return false;
             }
-
-            BytesReceived++;
 
             byte statusByte = readBuffer[0];
 
-            rcvLength = await ReceivePacket();
+            int rcvLength = await ReceivePacket();
             if (rcvLength == 0)
             {
                 service.ErrorMessage = $"Connection to {Hostname}:{Port} closed remotely.";
                 return false;
             }
-
-            BytesReceived += 4 + rcvLength;
 
             if (statusByte == ErrorByte)
             {
@@ -243,21 +237,8 @@ namespace Iviz.Roslib
             }
 
             service.ErrorMessage = null;
-            service.Response = Msgs.Buffer.Deserialize(service.Response, readBuffer, rcvLength);
-            NumReceived++;
+            service.Response = Buffer.Deserialize(service.Response, readBuffer, rcvLength);
             return true;
-        }
-
-        bool disposed;
-        public void Dispose()
-        {
-            if (disposed)
-            {
-                return;
-            }
-
-            disposed = true;
-            tcpClient.Dispose();
         }
     }
 }

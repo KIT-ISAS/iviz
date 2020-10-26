@@ -6,7 +6,7 @@ namespace Iviz.Roslib
     /// <summary>
     /// Full info about a ROS topic and its message type, including dependencies.
     /// </summary>
-    internal sealed class TopicInfo
+    internal sealed class TopicInfo<T> where T : IMessage
     {
         /// <summary>
         /// Concatenated dependencies file.
@@ -36,9 +36,9 @@ namespace Iviz.Roslib
         /// <summary>
         /// Instance of the message used to generate others of the same type.
         /// </summary>
-        public IMessage Generator { get; }
+        public IDeserializable<T> Generator { get; }
 
-        TopicInfo(string messageDefinition, string callerId, string topic, string md5Sum, string type, IMessage generator)
+        TopicInfo(string messageDefinition, string callerId, string topic, string md5Sum, string type, IDeserializable<T> generator)
         {
             MessageDefinition = messageDefinition;
             CallerId = callerId;
@@ -48,12 +48,12 @@ namespace Iviz.Roslib
             Generator = generator;
         }
 
-        public TopicInfo(string callerId, string topic, Type type, IMessage generator = null)
+        public TopicInfo(string callerId, string topic, IDeserializable<T> generator = null)
         : this(
-                BuiltIns.DecompressDependency(type),
+                BuiltIns.DecompressDependency(typeof(T)),
                 callerId, topic,
-                BuiltIns.GetMd5Sum(type),
-                BuiltIns.GetMessageType(type),
+                BuiltIns.GetMd5Sum(typeof(T)),
+                BuiltIns.GetMessageType(typeof(T)),
                 generator
                 )
         {
