@@ -11,6 +11,27 @@ namespace Iviz.App
 
         void OnEnable()
         {
+            /*
+            Matrix4x4 f = new Matrix4x4();
+            f.SetColumn(0, new Vector3(1, 0, 0).Ros2Unity());
+            f.SetColumn(1, new Vector3(0, 1, 0).Ros2Unity());
+            f.SetColumn(2, new Vector3(0, 0, 1).Ros2Unity());
+            f.SetColumn(3, new Vector4(0, 0, 0, 1));
+            Matrix4x4 q = Matrix4x4.Rotate(new Quaternion(0.5f, -0.5f, 0.5f, 0.5f));
+            
+            Matrix4x4 f = new Matrix4x4();
+            f.SetColumn(0, new Vector3(1, 0, 0).Unity2Ros());
+            f.SetColumn(1, new Vector3(0, 1, 0).Unity2Ros());
+            f.SetColumn(2, new Vector3(0, 0, 1).Unity2Ros());
+            f.SetColumn(3, new Vector4(0, 0, 0, 1));
+            Matrix4x4 q = Matrix4x4.Rotate(new Quaternion(0.5f, -0.5f, -0.5f, 0.5f));
+
+            
+            Debug.Log(f);
+            Debug.Log(q);
+            */
+            
+            
             CreatePointListResource(-3);
             CreateLineResource(0);
             CreateLineResourceShort(5);

@@ -33,7 +33,7 @@ namespace Iviz.Displays
         /// </summary>
         public IReadOnlyCollection<PointWithColor> PointsWithColor
         {
-            get => new PointGetHelper(pointBuffer);
+            get => pointBuffer.Select(f => new PointWithColor(f)).ToArray();
             set => Set(value, value.Count);
         }
 
@@ -66,7 +66,7 @@ namespace Iviz.Displays
                 {
                     continue;
                 }
-                
+
                 pointBuffer.Add(t);
             }
 
@@ -74,20 +74,30 @@ namespace Iviz.Displays
         }
 
         /// <summary>
-        /// Convenience method to sets the list of points with the given array. Takes only the first size elements.
+        /// Convenience method to sets the list of points with the given array. Takes only the first 'size' elements.
         /// </summary>
         /// <param name="points">The point enumerator.</param>
         /// <param name="size">The number of points to take.</param>        
-        public void SetArray(PointWithColor[] points, int size)
+        public void SetArray(PointWithColor[] points, int size = 0)
         {
             if (points == null)
             {
                 throw new ArgumentNullException(nameof(points));
             }
 
+            if (size < 0)
+            {
+                throw new ArgumentException($"Size {size} is invalid!");
+            }
+
             if (size > points.Length)
             {
                 throw new IndexOutOfRangeException($"Size {size} is larger than the available length {points.Length}");
+            }
+
+            if (size == 0)
+            {
+                size = points.Length;
             }
 
             pointBuffer.Capacity = Math.Max(pointBuffer.Capacity, size);
@@ -99,13 +109,13 @@ namespace Iviz.Displays
                 {
                     continue;
                 }
-                
+
                 pointBuffer.Add(t);
             }
 
             UpdateBuffer();
-        }        
-        
+        }
+
         void UpdateBuffer()
         {
             if (Size == 0)
@@ -194,19 +204,6 @@ namespace Iviz.Displays
             pointComputeBuffer?.Release();
             pointComputeBuffer = null;
             Properties.SetBuffer(PointsID, null);
-        }
-
-        internal class PointGetHelper : IReadOnlyCollection<PointWithColor>
-        {
-            readonly NativeArray<float4> nArray;
-            public PointGetHelper(in NativeArray<float4> array) => nArray = array;
-            public int Count => nArray.Length;
-
-            public IEnumerator<PointWithColor> GetEnumerator() =>
-                nArray.Select(f => new PointWithColor(f)).GetEnumerator();
-
-            IEnumerator IEnumerable.GetEnumerator() =>
-                nArray.Select(f => new PointWithColor(f)).GetEnumerator();
         }
     }
 }

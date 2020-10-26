@@ -1,15 +1,10 @@
 ﻿//#define PUBLISH_LOG
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
-using System.Threading;
-using System.Threading.Tasks;
-using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Roslib;
 using UnityEngine;
-using Logger = Iviz.Logger;
 
 namespace Iviz.Controllers
 {
@@ -30,7 +25,8 @@ namespace Iviz.Controllers
         RosSender<Log> sender;
 #endif
 
-        int collectedUp, collectedDown;
+        int frameBandwidthUp;
+        int frameBandwidthDown;
 
         void Awake()
         {
@@ -73,13 +69,10 @@ namespace Iviz.Controllers
 #endif
 
         public static string MyId => Connection?.MyId;
-        public static Uri MyUri => Connection?.MyUri;
-        public static Uri MasterUri => Connection?.MasterUri;
-
         public static ConnectionState ConnectionState => Connection?.ConnectionState ?? ConnectionState.Disconnected;
         public static bool IsConnected => ConnectionState == ConnectionState.Connected;
 
-        public static void Subscribe<T>(RosListener<T> listener) where T : IMessage, new()
+        public static void Subscribe<T>(RosListener<T> listener) where T : IMessage, IDeserializable<T>, new()
         {
             Connection.Subscribe(listener);
         }
@@ -121,19 +114,19 @@ namespace Iviz.Controllers
 
         public static void ReportBandwidthUp(int size)
         {
-            Instance.collectedUp += size;
+            Instance.frameBandwidthUp += size;
         }
 
         public static void ReportBandwidthDown(int size)
         {
-            Instance.collectedDown += size;
+            Instance.frameBandwidthDown += size;
         }
 
         public static (int, int) CollectBandwidthReport()
         {
-            (int, int) result = (Instance.collectedDown, Instance.collectedUp);
-            Instance.collectedDown = 0;
-            Instance.collectedUp = 0;
+            (int, int) result = (Instance.frameBandwidthDown, Instance.frameBandwidthUp);
+            Instance.frameBandwidthDown = 0;
+            Instance.frameBandwidthUp = 0;
             return result;
         }
     }

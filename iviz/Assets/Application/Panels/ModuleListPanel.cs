@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Security;
 using Iviz.Controllers;
 using Iviz.Displays;
 using Iviz.Resources;
-using Iviz.Roslib;
 using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace Iviz.App
@@ -26,34 +23,34 @@ namespace Iviz.App
         static readonly Color ConnectedOwnMasterColor = new Color(0.4f, 0.95f, 1f, 0.4f);
         static readonly Color DisconnectedColor = new Color(0.9f, 0.95f, 1f, 0.4f);
 
-        [SerializeField] DataLabelWidget masterUriStr;
-        [SerializeField] TrashButtonWidget masterUriButton;
-        [SerializeField] TrashButtonWidget connectButton;
-        [SerializeField] TrashButtonWidget stopButton;
-        [SerializeField] Image topPanel;
-        [SerializeField] Button save;
-        [SerializeField] Button load;
-        [SerializeField] Image status;
+        [SerializeField] DataLabelWidget masterUriStr = null;
+        [SerializeField] TrashButtonWidget masterUriButton = null;
+        [SerializeField] TrashButtonWidget connectButton = null;
+        [SerializeField] TrashButtonWidget stopButton = null;
+        [SerializeField] Image topPanel = null;
+        [SerializeField] Button save = null;
+        [SerializeField] Button load = null;
+        [SerializeField] Image status = null;
 
-        [SerializeField] AnchorCanvas anchorCanvas;
-        [SerializeField] GameObject contentObject;
-        [SerializeField] DataPanelManager dataPanelManager;
-        [SerializeField] DialogPanelManager dialogPanelManager;
-        [SerializeField] Button addDisplayByTopic;
-        [SerializeField] Button addDisplay;
-        [SerializeField] Button showTfTree;
-        [SerializeField] Button resetAll;
+        [SerializeField] AnchorCanvas anchorCanvas = null;
+        [SerializeField] GameObject contentObject = null;
+        [SerializeField] DataPanelManager dataPanelManager = null;
+        [SerializeField] DialogPanelManager dialogPanelManager = null;
+        [SerializeField] Button addDisplayByTopic = null;
+        [SerializeField] Button addDisplay = null;
+        [SerializeField] Button showTfTree = null;
+        [SerializeField] Button resetAll = null;
 
-        [SerializeField] Sprite connectedSprite;
-        [SerializeField] Sprite connectingSprite;
-        [SerializeField] Sprite disconnectedSprite;
-        [SerializeField] Sprite questionSprite;
+        [SerializeField] Sprite connectedSprite = null;
+        [SerializeField] Sprite connectingSprite = null;
+        [SerializeField] Sprite disconnectedSprite = null;
+        [SerializeField] Sprite questionSprite = null;
 
-        [SerializeField] Text bottomTime;
-        [SerializeField] Text bottomFps;
-        [SerializeField] Text bottomBandwidth;
+        [SerializeField] Text bottomTime = null;
+        [SerializeField] Text bottomFps = null;
+        [SerializeField] Text bottomBandwidth = null;
 
-        [SerializeField] Joystick joystick;
+        [SerializeField] Joystick joystick = null;
 
         readonly List<GameObject> buttons = new List<GameObject>();
         readonly List<ModuleData> moduleDatas = new List<ModuleData>();
@@ -264,7 +261,7 @@ namespace Iviz.App
             GameThread.LateEverySecond += UpdateFpsStats;
             GameThread.EveryFrame += UpdateFpsCounter;
             UpdateFpsStats();
-            
+
             controllerService = new ControllerService();
         }
 
@@ -320,7 +317,10 @@ namespace Iviz.App
                 MyId = connectionData.MyId,
                 Entries = moduleDatas.Select(x => x.Configuration.Id).ToList()
             };
-            moduleDatas.ForEach(x => x.AddToState(config));
+            foreach (var moduleData in moduleDatas)
+            {
+                moduleData.AddToState(config);
+            }
 
             try
             {
@@ -363,7 +363,11 @@ namespace Iviz.App
                 return;
             }
 
-            while (moduleDatas.Count > 1) RemoveModule(1);
+            while (moduleDatas.Count > 1)
+            {
+                // TODO: refine this
+                RemoveModule(1);
+            }
 
             StateConfiguration stateConfig = JsonConvert.DeserializeObject<StateConfiguration>(text);
 
@@ -371,17 +375,16 @@ namespace Iviz.App
             connectionData.MyUri = stateConfig.MyUri;
             connectionData.MyId = stateConfig.MyId;
 
-
             TfData.UpdateConfiguration(stateConfig.Tf);
-            stateConfig.CreateListOfEntries().ForEach(
-                displayConfigList => displayConfigList?.ForEach(
-                    displayConfig =>
-                    {
-                        if (displayConfig != null)
-                        {
-                            CreateModule(displayConfig.Module, configuration: displayConfig);
-                        }
-                    }));
+
+            var configurations = stateConfig.CreateListOfEntries()
+                .SelectMany(config => config)
+                .Where(config => config != null);
+
+            foreach (var config in configurations)
+            {
+                CreateModule(config.Module, configuration: config);
+            }
 
             if (connectionData.MasterUri != null &&
                 connectionData.MyUri != null &&
@@ -437,9 +440,12 @@ namespace Iviz.App
 
         void ResetAllModules()
         {
-            foreach (ModuleData m in moduleDatas) m.ResetController();
+            foreach (ModuleData m in moduleDatas)
+            {
+                m.ResetController();
+            }
         }
-        
+
         public ModuleData CreateModule(Resource.Module resource, string topic = "", string type = "",
             IConfiguration configuration = null)
         {
@@ -469,6 +475,7 @@ namespace Iviz.App
             return dialogData;
         }
 
+        // TODO: move graphics out of this
         void CreateButtonObject(ModuleData moduleData)
         {
             GameObject buttonObject =
@@ -514,6 +521,7 @@ namespace Iviz.App
             RemoveButton(index);
         }
 
+        // TODO: move graphics out of this
         void RemoveButton(int index)
         {
             GameObject displayButton = buttons[index];

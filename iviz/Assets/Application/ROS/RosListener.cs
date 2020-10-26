@@ -147,7 +147,7 @@ namespace Iviz.Controllers
         }
     }
 
-    public sealed class RosListener<T> : RosListener where T : IMessage, new()
+    public sealed class RosListener<T> : RosListener where T : IMessage, IDeserializable<T>, new()
     {
         readonly Action<T> subscriptionHandler;
         readonly ConcurrentQueue<T> messageQueue = new ConcurrentQueue<T>();

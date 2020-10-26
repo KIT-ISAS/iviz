@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Iviz.Msgs;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -14,26 +15,31 @@ namespace Iviz
     {
         public static CultureInfo Culture { get; } = BuiltIns.Culture;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float MagnitudeSq(this Vector3 v)
         {
             return v.x * v.x + v.y * v.y + v.z * v.z;
         }
         
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float MagnitudeSq(this float3 v)
         {
             return v.x * v.x + v.y * v.y + v.z * v.z;
         }        
         
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Magnitude(this Vector3 v)
         {
             return Mathf.Sqrt(v.MagnitudeSq());
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Cross(this Vector3 lhs, in Vector3 rhs)
         {
             return new Vector3(lhs.y * rhs.z - lhs.z * rhs.y, lhs.z * rhs.x - lhs.x * rhs.z, lhs.x * rhs.y - lhs.y * rhs.x);   
         }
         
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Normalized(this Vector3 v)
         {
             return v / v.Magnitude();   

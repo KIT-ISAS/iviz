@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Iviz.Displays;
@@ -10,7 +9,6 @@ using Iviz.Resources;
 using Iviz.Roslib;
 using Unity.Mathematics;
 using UnityEngine;
-using Logger = Iviz.Logger;
 
 namespace Iviz.Controllers
 {
@@ -184,7 +182,10 @@ namespace Iviz.Controllers
             FieldNames = new ReadOnlyCollection<string>(fieldNames);
 
             node = SimpleDisplayNode.Instantiate("[PointCloudNode]");
-            pointCloud = ResourcePool.GetOrCreate<PointListResource>(Resource.Displays.PointList, node.transform);
+            
+            pointCloud = ResourcePool.GetOrCreateDisplay<PointListResource>(node.transform);
+            pointCloud.transform.rotation = RosUtils.Ros2UnityRotation;
+            pointCloud.transform.localScale = RosUtils.Ros2UnityScale;
 
             Config = new PointCloudConfiguration();
         }
@@ -393,8 +394,8 @@ namespace Iviz.Controllers
                         BitConverter.ToSingle(msg.Data, rowOffset + zOffset)
                     );
                     pointBuffer[pointOffset] = new PointWithColor(
-                        new Vector3(-xyz.y, xyz.z, xyz.x),
-                        intensityFn(msg.Data, rowOffset + iOffset)
+                        //new Vector3(-xyz.y, xyz.z, xyz.x),
+                        xyz, intensityFn(msg.Data, rowOffset + iOffset)
                     );
                 }
             }
@@ -422,8 +423,9 @@ namespace Iviz.Controllers
                                 byte* dataOff = dataRowOff;
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
-                                    float4 data = *(float4*) dataOff;
-                                    *pointBufferOff++ = new PointWithColor(-data.y, data.z, data.x, data.w);
+                                    //float4 data = *(PointWithColor*) dataOff;
+                                    //*pointBufferOff++ = new PointWithColor(-data.y, data.z, data.x, data.w);
+                                    *pointBufferOff++ = *(PointWithColor*) dataOff;
                                 }
                             }
 
@@ -436,7 +438,8 @@ namespace Iviz.Controllers
                                 {
                                     float3 data = *(float3*) dataOff;
                                     var f = *(float*) (dataOff + iOffset);
-                                    *pointBufferOff++ = new PointWithColor(-data.y, data.z, data.x, f);
+                                    //*pointBufferOff++ = new PointWithColor(-data.y, data.z, data.x, f);
+                                    *pointBufferOff++ = new PointWithColor(data, f);
                                 }
                             }
 
@@ -449,7 +452,8 @@ namespace Iviz.Controllers
                                 {
                                     float3 data = *(float3*) dataOff;
                                     var f = *(double*) (dataOff + iOffset);
-                                    *pointBufferOff++ = new PointWithColor(-data.y, data.z, data.x, (float) f);
+                                    //*pointBufferOff++ = new PointWithColor(-data.y, data.z, data.x, (float) f);
+                                    *pointBufferOff++ = new PointWithColor(data, (float) f);
                                 }
                             }
 
@@ -462,7 +466,8 @@ namespace Iviz.Controllers
                                 {
                                     float3 data = *(float3*) dataOff;
                                     var f = *(sbyte*) (dataOff + iOffset);
-                                    *pointBufferOff++ = new PointWithColor(-data.y, data.z, data.x, f);
+                                    //*pointBufferOff++ = new PointWithColor(-data.y, data.z, data.x, f);
+                                    *pointBufferOff++ = new PointWithColor(data, f);
                                 }
                             }
 
@@ -475,7 +480,8 @@ namespace Iviz.Controllers
                                 {
                                     float3 data = *(float3*) dataOff;
                                     var f = *(dataOff + iOffset);
-                                    *pointBufferOff++ = new PointWithColor(-data.y, data.z, data.x, f);
+                                    //*pointBufferOff++ = new PointWithColor(-data.y, data.z, data.x, f);
+                                    *pointBufferOff++ = new PointWithColor(data, f);
                                 }
                             }
 
@@ -487,8 +493,9 @@ namespace Iviz.Controllers
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float3 data = *(float3*) dataOff;
-                                    var f = *(short*)(dataOff + iOffset);
-                                    *pointBufferOff++ = new PointWithColor(-data.y, data.z, data.x, f);
+                                    var f = *(short*) (dataOff + iOffset);
+                                    //*pointBufferOff++ = new PointWithColor(-data.y, data.z, data.x, f);
+                                    *pointBufferOff++ = new PointWithColor(data, f);
                                 }
                             }
 
@@ -500,8 +507,9 @@ namespace Iviz.Controllers
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float3 data = *(float3*) dataOff;
-                                    var f = *(ushort*)(dataOff + iOffset);
-                                    *pointBufferOff++ = new PointWithColor(-data.y, data.z, data.x, f);
+                                    var f = *(ushort*) (dataOff + iOffset);
+                                    //*pointBufferOff++ = new PointWithColor(-data.y, data.z, data.x, f);
+                                    *pointBufferOff++ = new PointWithColor(data, f);
                                 }
                             }
 
@@ -513,8 +521,9 @@ namespace Iviz.Controllers
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float3 data = *(float3*) dataOff;
-                                    var f = *(int*)(dataOff + iOffset);
-                                    *pointBufferOff++ = new PointWithColor(-data.y, data.z, data.x, f);
+                                    var f = *(int*) (dataOff + iOffset);
+                                    //*pointBufferOff++ = new PointWithColor(-data.y, data.z, data.x, f);
+                                    *pointBufferOff++ = new PointWithColor(data, f);
                                 }
                             }
 
@@ -526,8 +535,9 @@ namespace Iviz.Controllers
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float3 data = *(float3*) dataOff;
-                                    var f = *(uint*)(dataOff + iOffset);
-                                    *pointBufferOff++ = new PointWithColor(-data.y, data.z, data.x, f);
+                                    var f = *(uint*) (dataOff + iOffset);
+                                    //*pointBufferOff++ = new PointWithColor(-data.y, data.z, data.x, f);
+                                    *pointBufferOff++ = new PointWithColor(data, f);
                                 }
                             }
 

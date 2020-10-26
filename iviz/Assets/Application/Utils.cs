@@ -72,6 +72,12 @@ namespace Iviz
 
     public static class RosUtils
     {
+        public static readonly Vector3 Ros2UnityScale = new Vector3(1, -1, 1);
+        public static readonly Quaternion Ros2UnityRotation = new Quaternion(0.5f, -0.5f, 0.5f, 0.5f);
+
+        public static readonly Vector3 Unity2RosScale = new Vector3(1, 1, -1);
+        public static readonly Quaternion Unity2RosRotation = new Quaternion(0.5f, -0.5f, -0.5f, 0.5f);
+
         //----
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Unity2Ros(this Vector3 vector3) => new Vector3(vector3.z, -vector3.x, vector3.y);

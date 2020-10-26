@@ -18,7 +18,7 @@ namespace Iviz.Controllers
         abstract class AdvertisedTopic
         {
             public string Topic { get; }
-            public RosPublisher Publisher { get; protected set; }
+            public IRosPublisher Publisher { get; protected set; }
             public virtual int Id { get; set; }
 
             protected AdvertisedTopic(string topic)
@@ -83,10 +83,14 @@ namespace Iviz.Controllers
             public override async Task AdvertiseAsync(RosClient client)
             {
                 string topic = (Topic[0] == '/') ? Topic : $"{client.CallerId}/{Topic}";
-                RosPublisher publisher = null;
+                IRosPublisher publisher;
                 if (client != null)
                 {
                     (_, publisher) = await client.AdvertiseAsync<T>(topic);
+                }
+                else
+                {
+                    publisher = null;
                 }
 
                 Publisher = publisher;
@@ -96,7 +100,7 @@ namespace Iviz.Controllers
         abstract class SubscribedTopic
         {
             public string Topic { get; }
-            public RosSubscriber Subscriber { get; protected set; }
+            public IRosSubscriber Subscriber { get; protected set; }
             public abstract int Count { get; }
 
             protected SubscribedTopic(string topic)
@@ -123,7 +127,7 @@ namespace Iviz.Controllers
             }
         }
 
-        class SubscribedTopic<T> : SubscribedTopic where T : IMessage, new()
+        class SubscribedTopic<T> : SubscribedTopic where T : IMessage, IDeserializable<T>, new()
         {
             readonly HashSet<RosListener<T>> listeners = new HashSet<RosListener<T>>();
 
@@ -152,10 +156,14 @@ namespace Iviz.Controllers
             public override async Task SubscribeAsync(RosClient client)
             {
                 string topic = (Topic[0] == '/') ? Topic : $"{client.CallerId}/{Topic}";
-                RosSubscriber subscriber = null;
+                IRosSubscriber subscriber ;
                 if (client != null)
                 {
                     (_, subscriber) = await client.SubscribeAsync<T>(topic, Callback);
+                }
+                else
+                {
+                    subscriber = null;
                 }
 
                 Subscriber = subscriber;
@@ -203,7 +211,7 @@ namespace Iviz.Controllers
         readonly Dictionary<string, AdvertisedTopic> publishersByTopic = new Dictionary<string, AdvertisedTopic>();
         readonly Dictionary<string, SubscribedTopic> subscribersByTopic = new Dictionary<string, SubscribedTopic>();
         readonly Dictionary<string, AdvertisedService> servicesByTopic = new Dictionary<string, AdvertisedService>();
-        readonly List<RosPublisher> publishers = new List<RosPublisher>();
+        readonly List<IRosPublisher> publishers = new List<IRosPublisher>();
 
         public override Uri MasterUri
         {
@@ -523,7 +531,7 @@ namespace Iviz.Controllers
             });
         }
 
-        async Task SubscribeImpl<T>(RosListener listener) where T : IMessage, new()
+        async Task SubscribeImpl<T>(RosListener listener) where T : IMessage, IDeserializable<T>, new()
         {
             if (!subscribersByTopic.TryGetValue(listener.Topic, out SubscribedTopic subscribedTopic))
             {

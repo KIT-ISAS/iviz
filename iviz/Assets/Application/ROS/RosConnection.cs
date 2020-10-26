@@ -126,7 +126,7 @@ namespace Iviz.Controllers
             WaitForRequest
         } 
 
-        public abstract void Subscribe<T>(RosListener<T> listener) where T : IMessage, new();
+        public abstract void Subscribe<T>(RosListener<T> listener) where T : IMessage, IDeserializable<T>, new();
         public abstract void Unsubscribe(RosListener subscriber);
         public abstract void Advertise<T>(RosSender<T> advertiser) where T : IMessage;
         public abstract void Unadvertise(RosSender advertiser);

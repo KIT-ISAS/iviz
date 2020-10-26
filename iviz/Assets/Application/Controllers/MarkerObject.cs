@@ -237,7 +237,15 @@ namespace Iviz.Controllers
                     Color32 color32 = msg.Color.Sanitize().ToUnityColor32();
                     if (msg.Colors.Length == 0)
                     {
-                        points = msg.Points.Select(point => new PointWithColor(point.Ros2Unity(), color32));
+                        IEnumerable<PointWithColor> PointEnumerator()
+                        {
+                            foreach (var position in msg.Points)
+                            {
+                                yield return new PointWithColor(position.Ros2Unity(), color32);
+                            }
+                        }
+
+                        points = PointEnumerator();
                     }
                     else if (color32 == Color.white)
                     {
@@ -429,7 +437,7 @@ namespace Iviz.Controllers
                             }
                         }
 
-                        points = PointEnumerator();                        
+                        points = PointEnumerator();
                     }
                     else if (color32 == Color.white)
                     {
@@ -591,12 +599,17 @@ namespace Iviz.Controllers
                 case MarkerType.MeshResource:
                     if (!Uri.TryCreate(msg.MeshResource, UriKind.Absolute, out Uri uri))
                     {
+                        Debug.Log($"MarkerObject: Could not convert '{msg.MeshResource}' into an uri!");
                         return null;
                     }
 
-                    return Resource.TryGetResource(uri, out Info<GameObject> info, ConnectionManager.Connection)
-                        ? info
-                        : null;
+                    if (Resource.TryGetResource(uri, out Info<GameObject> info, ConnectionManager.Connection))
+                    {
+                        return info;
+                    }
+
+                    Debug.Log($"MarkerObject: Failed to obtain resource '{uri}'!");
+                    return null;
                 case MarkerType.CubeList:
                 case MarkerType.SphereList:
                     return Resource.Displays.MeshList;

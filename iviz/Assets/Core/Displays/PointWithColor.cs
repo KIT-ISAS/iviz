@@ -63,6 +63,12 @@ namespace Iviz.Displays
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+        public PointWithColor(in float3 position, float intensity) :
+            this(position.x, position.y, position.z, intensity)
+        {
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         public PointWithColor(float x, float y, float z, float w)
         {
             f.x = x;

@@ -1,12 +1,8 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 namespace Iviz.App
 {
-
     public class AnchorCanvas : MonoBehaviour
     {
         [SerializeField] AnchorToggleButton hideGui = null;

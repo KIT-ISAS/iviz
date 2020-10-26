@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Iviz.Resources;
 using Unity.Collections;
@@ -86,7 +87,7 @@ namespace Iviz.Displays
         }
 
         int Size => pointBuffer.Length;
-        
+
         /// <summary>
         /// Whether to enable shadows. Displayed shadows can get bugged if the number of instances is too high.
         /// </summary>
@@ -97,7 +98,7 @@ namespace Iviz.Displays
         /// </summary>
         public IReadOnlyCollection<PointWithColor> PointsWithColor
         {
-            get => new PointListResource.PointGetHelper(pointBuffer);
+            get => pointBuffer.Select(f => new PointWithColor(f)).ToArray();
             set => Set(value, value.Count);
         }
 
@@ -200,13 +201,11 @@ namespace Iviz.Displays
             UseIntensityForScaleY = false;
 
             pointBuffer.Clear();
-            
+
             pointComputeBuffer?.Release();
             pointComputeBuffer = null;
             Properties.SetBuffer(PointsID, null);
         }
-
-        static bool IsValid(in PointWithColor t) => !t.HasNaN() && t.Position.MagnitudeSq() < MaxPositionMagnitudeSq;
 
         /// <summary>
         /// Sets the instance positions and colors with the given enumeration.
@@ -217,14 +216,14 @@ namespace Iviz.Displays
         {
             if (reserve < 0)
             {
-                throw new ArgumentException("Invalid reserve " + reserve, nameof(reserve));
+                throw new ArgumentException($"Invalid reserve {reserve}", nameof(reserve));
             }
 
             if (reserve > 0)
             {
                 pointBuffer.Capacity = Math.Max(pointBuffer.Capacity, reserve);
             }
-            
+
             if (points == null)
             {
                 throw new ArgumentNullException(nameof(points));
@@ -233,14 +232,14 @@ namespace Iviz.Displays
             pointBuffer.Clear();
             foreach (PointWithColor t in points)
             {
-                if (!IsValid(t))
+                if (t.HasNaN() || t.Position.MagnitudeSq() > MaxPositionMagnitudeSq)
                 {
                     continue;
                 }
 
                 pointBuffer.Add(t);
             }
-            
+
             UpdateBuffer();
         }
 
@@ -270,10 +269,10 @@ namespace Iviz.Displays
                 pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Marshal.SizeOf<PointWithColor>());
                 Properties.SetBuffer(PointsID, pointComputeBuffer);
             }
-            
+
             pointComputeBuffer.SetData(pointBuffer.AsArray(), 0, 0, Size);
             MinMaxJob.CalculateBounds(pointBuffer, Size, out Bounds pointBounds, out Vector2 span);
-            argsBuffer[1] = (uint)Size;
+            argsBuffer[1] = (uint) Size;
 
             Vector3 meshScale = ElementScale * ElementScale3;
             if (UseIntensityForScaleY)

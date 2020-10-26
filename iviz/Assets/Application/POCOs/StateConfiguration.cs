@@ -31,7 +31,7 @@ namespace Iviz.App
         [DataMember] public ARConfiguration AR { get; set; } = null;
         [DataMember] public JoystickConfiguration Joystick { get; set; } = null;
 
-        public List<IReadOnlyList<IConfiguration>> CreateListOfEntries() => new List<IReadOnlyList<IConfiguration>>
+        public IEnumerable<IEnumerable<IConfiguration>> CreateListOfEntries() => new IEnumerable<IConfiguration>[]
         {
             Grids,
             SimpleRobots,

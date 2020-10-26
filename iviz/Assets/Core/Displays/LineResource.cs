@@ -63,7 +63,7 @@ namespace Iviz.Displays
         /// </summary>
         public IReadOnlyCollection<LineWithColor> LinesWithColor
         {
-            get => new GetHelper(lineBuffer);
+            get => lineBuffer.Select(f => new LineWithColor(f)).ToArray();
             set => Set(value, value.Count);
         }
 
@@ -336,19 +336,6 @@ namespace Iviz.Displays
             lineComputeBuffer?.Release();
             lineComputeBuffer = null;
             Properties.SetBuffer(LinesID, null);
-        }
-
-        class GetHelper : IReadOnlyCollection<LineWithColor>
-        {
-            readonly NativeArray<float4x2> nArray;
-            public GetHelper(in NativeArray<float4x2> array) => nArray = array;
-            public int Count => nArray.Length;
-
-            public IEnumerator<LineWithColor> GetEnumerator() =>
-                nArray.Select(f => new LineWithColor(f)).GetEnumerator();
-
-            IEnumerator IEnumerable.GetEnumerator() =>
-                nArray.Select(f => new LineWithColor(f)).GetEnumerator();
         }
     }
 }
