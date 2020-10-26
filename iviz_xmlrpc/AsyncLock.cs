@@ -23,9 +23,7 @@ SOFTWARE.
 *************************************************************************/
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -33,41 +31,58 @@ namespace Iviz.XmlRpc
 {
     public class AsyncLock
     {
-        object _reentrancy = new object();
+        //We do not have System.Threading.Thread.* on .NET Standard without additional dependencies
+        //Work around is easy: create a new ThreadLocal<T> with a random value and this is our thread id :)
+        const long UnlockedThreadId = 0; //"owning" thread id when unlocked
 
-        int _reentrances = 0;
+        static int globalThreadCounter;
+
+        static readonly ThreadLocal<int> threadId =
+            new ThreadLocal<int>(() => Interlocked.Increment(ref globalThreadCounter));
+
+        readonly object reentrancy = new object();
 
         //We are using this SemaphoreSlim like a posix condition variable
         //we only want to wake waiters, one or more of whom will try to obtain a different lock to do their thing
         //so long as we can guarantee no wakes are missed, the number of awakees is not important
         //ideally, this would be "friend" for access only from InnerLock, but whatever.
-        internal SemaphoreSlim _retry = new SemaphoreSlim(0, 1);
+        readonly SemaphoreSlim retry = new SemaphoreSlim(0, 1);
+        
+        long owningId = UnlockedThreadId;
 
-        //We do not have System.Threading.Thread.* on .NET Standard without additional dependencies
-        //Work around is easy: create a new ThreadLocal<T> with a random value and this is our thread id :)
-        static readonly long UnlockedThreadId = 0; //"owning" thread id when unlocked
-        internal long _owningId = UnlockedThreadId;
-        static int _globalThreadCounter;
-
-        static readonly ThreadLocal<int> _threadId =
-            new ThreadLocal<int>(() => Interlocked.Increment(ref _globalThreadCounter));
+        int reentrances;
 
         //We generate a unique id from the thread ID combined with the task ID, if any
-        public static long ThreadId => (long) (((ulong) _threadId.Value) << 32) | ((uint) (Task.CurrentId ?? 0));
+        static long ThreadId => (long) ((ulong) threadId.Value << 32) | (uint) (Task.CurrentId ?? 0);
 
-        struct InnerLock : IDisposable
+        public InnerLock Lock()
         {
-            readonly AsyncLock _parent;
-#if DEBUG
-            private bool _disposed;
-#endif
+            var @lock = new InnerLock(this);
+            @lock.ObtainLock();
+            return @lock;
+        }
+
+        public async ValueTask<InnerLock> LockAsync()
+        {
+            var @lock = new InnerLock(this);
+            await @lock.ObtainLockAsync();
+            return @lock;
+        }
+
+        public async ValueTask<InnerLock> LockAsync(CancellationToken ct)
+        {
+            var @lock = new InnerLock(this);
+            await @lock.ObtainLockAsync(ct);
+            return @lock;
+        }
+
+        public readonly struct InnerLock : IDisposable
+        {
+            readonly AsyncLock parent;
 
             internal InnerLock(AsyncLock parent)
             {
-                _parent = parent;
-#if DEBUG
-                _disposed = false;
-#endif
+                this.parent = parent;
             }
 
             internal async Task ObtainLockAsync()
@@ -75,7 +90,7 @@ namespace Iviz.XmlRpc
                 while (!TryEnter())
                 {
                     //we need to wait for someone to leave the lock before trying again
-                    await _parent._retry.WaitAsync();
+                    await parent.retry.WaitAsync();
                 }
             }
 
@@ -84,7 +99,7 @@ namespace Iviz.XmlRpc
                 while (!TryEnter())
                 {
                     //we need to wait for someone to leave the lock before trying again
-                    await _parent._retry.WaitAsync(ct);
+                    await parent.retry.WaitAsync(ct);
                 }
             }
 
@@ -93,70 +108,44 @@ namespace Iviz.XmlRpc
                 while (!TryEnter())
                 {
                     //we need to wait for someone to leave the lock before trying again
-                    _parent._retry.Wait();
+                    parent.retry.Wait();
                 }
             }
 
             bool TryEnter()
             {
-                lock (_parent._reentrancy)
+                lock (parent.reentrancy)
                 {
-                    Debug.Assert((_parent._owningId == UnlockedThreadId) == (_parent._reentrances == 0));
-                    if (_parent._owningId != UnlockedThreadId && _parent._owningId != AsyncLock.ThreadId)
+                    if (parent.owningId != UnlockedThreadId && parent.owningId != ThreadId)
                     {
                         //another thread currently owns the lock
                         return false;
                     }
 
                     //we can go in
-                    Interlocked.Increment(ref _parent._reentrances);
-                    _parent._owningId = AsyncLock.ThreadId;
+                    Interlocked.Increment(ref parent.reentrances);
+                    parent.owningId = ThreadId;
                     return true;
                 }
             }
 
             public void Dispose()
             {
-#if DEBUG
-                Debug.Assert(!_disposed);
-                _disposed = true;
-#endif
-                lock (_parent._reentrancy)
+                lock (parent.reentrancy)
                 {
-                    Interlocked.Decrement(ref _parent._reentrances);
-                    if (_parent._reentrances == 0)
+                    Interlocked.Decrement(ref parent.reentrances);
+                    if (parent.reentrances == 0)
                     {
                         //the owning thread is always the same so long as we are in a nested stack call
                         //we reset the owning id to null only when the lock is fully unlocked
-                        _parent._owningId = UnlockedThreadId;
-                        if (_parent._retry.CurrentCount == 0)
+                        parent.owningId = UnlockedThreadId;
+                        if (parent.retry.CurrentCount == 0)
                         {
-                            _parent._retry.Release();
+                            parent.retry.Release();
                         }
                     }
                 }
             }
-        }
-
-        public IDisposable Lock()
-        {
-            var @lock = new InnerLock(this);
-            @lock.ObtainLock();
-            return @lock;
-        }
-
-        public async Task<IDisposable> LockAsync()
-        {
-            var @lock = new InnerLock(this);
-            await @lock.ObtainLockAsync();
-            return @lock;
-        }
-
-        public async Task<IDisposable> LockAsync(CancellationToken ct)
-        {
-            var @lock = new InnerLock(this);
-            await @lock.ObtainLockAsync(ct);
-            return @lock;
         }
     }
 }
