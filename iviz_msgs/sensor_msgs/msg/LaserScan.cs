@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract (Name = "sensor_msgs/LaserScan")]
-    public sealed class LaserScan : IMessage
+    public sealed class LaserScan : IMessage, IDeserializable<LaserScan>
     {
         // Single scan from a planar laser range-finder
         //
@@ -71,6 +71,11 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new LaserScan(ref b);
+        }
+        
+        LaserScan IDeserializable<LaserScan>.RosDeserialize(ref Buffer b)
         {
             return new LaserScan(ref b);
         }

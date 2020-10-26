@@ -54,7 +54,7 @@ namespace Iviz.Msgs.Rosapi
         [Preserve] public const string RosMd5Sum = "e44a7e7bcb900acadbcc28b132378f0c";
     }
 
-    public sealed class ServicesRequest : IRequest
+    public sealed class ServicesRequest : IRequest, IDeserializable<ServicesRequest>
     {
     
         /// <summary> Constructor for empty message. </summary>
@@ -71,6 +71,11 @@ namespace Iviz.Msgs.Rosapi
         {
             return new ServicesRequest(ref b);
         }
+        
+        ServicesRequest IDeserializable<ServicesRequest>.RosDeserialize(ref Buffer b)
+        {
+            return new ServicesRequest(ref b);
+        }
     
         public void RosSerialize(ref Buffer b)
         {
@@ -83,7 +88,7 @@ namespace Iviz.Msgs.Rosapi
         public int RosMessageLength => 0;
     }
 
-    public sealed class ServicesResponse : IResponse
+    public sealed class ServicesResponse : IResponse, IDeserializable<ServicesResponse>
     {
         [DataMember (Name = "services")] public string[] Services_ { get; set; }
     
@@ -106,6 +111,11 @@ namespace Iviz.Msgs.Rosapi
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new ServicesResponse(ref b);
+        }
+        
+        ServicesResponse IDeserializable<ServicesResponse>.RosDeserialize(ref Buffer b)
         {
             return new ServicesResponse(ref b);
         }

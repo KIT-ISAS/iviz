@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract (Name = "visualization_msgs/InteractiveMarkerFeedback")]
-    public sealed class InteractiveMarkerFeedback : IMessage
+    public sealed class InteractiveMarkerFeedback : IMessage, IDeserializable<InteractiveMarkerFeedback>
     {
         // Time/frame info.
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
@@ -79,6 +79,11 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new InteractiveMarkerFeedback(ref b);
+        }
+        
+        InteractiveMarkerFeedback IDeserializable<InteractiveMarkerFeedback>.RosDeserialize(ref Buffer b)
         {
             return new InteractiveMarkerFeedback(ref b);
         }

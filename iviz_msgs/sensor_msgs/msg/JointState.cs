@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract (Name = "sensor_msgs/JointState")]
-    public sealed class JointState : IMessage
+    public sealed class JointState : IMessage, IDeserializable<JointState>
     {
         // This is a message that holds data to describe the state of a set of torque controlled joints. 
         //
@@ -62,6 +62,11 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new JointState(ref b);
+        }
+        
+        JointState IDeserializable<JointState>.RosDeserialize(ref Buffer b)
         {
             return new JointState(ref b);
         }

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.DiagnosticMsgs
 {
     [DataContract (Name = "diagnostic_msgs/DiagnosticStatus")]
-    public sealed class DiagnosticStatus : IMessage
+    public sealed class DiagnosticStatus : IMessage, IDeserializable<DiagnosticStatus>
     {
         // This message holds the status of an individual component of the robot.
         // 
@@ -54,6 +54,11 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new DiagnosticStatus(ref b);
+        }
+        
+        DiagnosticStatus IDeserializable<DiagnosticStatus>.RosDeserialize(ref Buffer b)
         {
             return new DiagnosticStatus(ref b);
         }

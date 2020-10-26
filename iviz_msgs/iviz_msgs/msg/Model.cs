@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract (Name = "iviz_msgs/Model")]
-    public sealed class Model : IMessage
+    public sealed class Model : IMessage, IDeserializable<Model>
     {
         [DataMember (Name = "name")] public string Name { get; set; }
         [DataMember (Name = "filename")] public string Filename { get; set; }
@@ -60,6 +60,11 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Model(ref b);
+        }
+        
+        Model IDeserializable<Model>.RosDeserialize(ref Buffer b)
         {
             return new Model(ref b);
         }

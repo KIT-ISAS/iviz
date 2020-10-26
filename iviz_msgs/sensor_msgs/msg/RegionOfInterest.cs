@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract (Name = "sensor_msgs/RegionOfInterest")]
-    public sealed class RegionOfInterest : IMessage
+    public sealed class RegionOfInterest : IMessage, IDeserializable<RegionOfInterest>
     {
         // This message is used to specify a region of interest within an image.
         //
@@ -51,6 +51,11 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new RegionOfInterest(ref b);
+        }
+        
+        RegionOfInterest IDeserializable<RegionOfInterest>.RosDeserialize(ref Buffer b)
         {
             return new RegionOfInterest(ref b);
         }

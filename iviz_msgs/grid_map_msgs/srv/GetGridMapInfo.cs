@@ -58,7 +58,7 @@ namespace Iviz.Msgs.GridMapMsgs
     {
     }
 
-    public sealed class GetGridMapInfoResponse : IResponse
+    public sealed class GetGridMapInfoResponse : IResponse, IDeserializable<GetGridMapInfoResponse>
     {
         // Grid map info
         [DataMember (Name = "info")] public GridMapMsgs.GridMapInfo Info { get; set; }
@@ -82,6 +82,11 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new GetGridMapInfoResponse(ref b);
+        }
+        
+        GetGridMapInfoResponse IDeserializable<GetGridMapInfoResponse>.RosDeserialize(ref Buffer b)
         {
             return new GetGridMapInfoResponse(ref b);
         }

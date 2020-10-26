@@ -54,7 +54,7 @@ namespace Iviz.Msgs.MeshMsgs
         [Preserve] public const string RosMd5Sum = "f9e04e76772e6c10688525f021cfc500";
     }
 
-    public sealed class GetMaterialsRequest : IRequest
+    public sealed class GetMaterialsRequest : IRequest, IDeserializable<GetMaterialsRequest>
     {
         [DataMember (Name = "uuid")] public string Uuid { get; set; }
     
@@ -80,6 +80,11 @@ namespace Iviz.Msgs.MeshMsgs
         {
             return new GetMaterialsRequest(ref b);
         }
+        
+        GetMaterialsRequest IDeserializable<GetMaterialsRequest>.RosDeserialize(ref Buffer b)
+        {
+            return new GetMaterialsRequest(ref b);
+        }
     
         public void RosSerialize(ref Buffer b)
         {
@@ -101,7 +106,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
     }
 
-    public sealed class GetMaterialsResponse : IResponse
+    public sealed class GetMaterialsResponse : IResponse, IDeserializable<GetMaterialsResponse>
     {
         [DataMember (Name = "mesh_materials_stamped")] public MeshMsgs.MeshMaterialsStamped MeshMaterialsStamped { get; set; }
     
@@ -124,6 +129,11 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new GetMaterialsResponse(ref b);
+        }
+        
+        GetMaterialsResponse IDeserializable<GetMaterialsResponse>.RosDeserialize(ref Buffer b)
         {
             return new GetMaterialsResponse(ref b);
         }

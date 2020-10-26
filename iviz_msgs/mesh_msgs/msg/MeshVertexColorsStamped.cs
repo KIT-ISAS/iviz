@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract (Name = "mesh_msgs/MeshVertexColorsStamped")]
-    public sealed class MeshVertexColorsStamped : IMessage
+    public sealed class MeshVertexColorsStamped : IMessage, IDeserializable<MeshVertexColorsStamped>
     {
         // Mesh Attribute Message
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
@@ -37,6 +37,11 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new MeshVertexColorsStamped(ref b);
+        }
+        
+        MeshVertexColorsStamped IDeserializable<MeshVertexColorsStamped>.RosDeserialize(ref Buffer b)
         {
             return new MeshVertexColorsStamped(ref b);
         }

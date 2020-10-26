@@ -54,7 +54,7 @@ namespace Iviz.Msgs.GridMapMsgs
         [Preserve] public const string RosMd5Sum = "03f389710f49a6dd2a8b447bb2850cd6";
     }
 
-    public sealed class ProcessFileRequest : IRequest
+    public sealed class ProcessFileRequest : IRequest, IDeserializable<ProcessFileRequest>
     {
         // Absolute file path.
         [DataMember (Name = "file_path")] public string FilePath { get; set; }
@@ -86,6 +86,11 @@ namespace Iviz.Msgs.GridMapMsgs
         {
             return new ProcessFileRequest(ref b);
         }
+        
+        ProcessFileRequest IDeserializable<ProcessFileRequest>.RosDeserialize(ref Buffer b)
+        {
+            return new ProcessFileRequest(ref b);
+        }
     
         public void RosSerialize(ref Buffer b)
         {
@@ -110,7 +115,7 @@ namespace Iviz.Msgs.GridMapMsgs
         }
     }
 
-    public sealed class ProcessFileResponse : IResponse
+    public sealed class ProcessFileResponse : IResponse, IDeserializable<ProcessFileResponse>
     {
         // True if file processing was successful.
         [DataMember (Name = "success")] public bool Success { get; set; }
@@ -133,6 +138,11 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new ProcessFileResponse(ref b);
+        }
+        
+        ProcessFileResponse IDeserializable<ProcessFileResponse>.RosDeserialize(ref Buffer b)
         {
             return new ProcessFileResponse(ref b);
         }

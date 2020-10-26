@@ -58,7 +58,7 @@ namespace Iviz.Msgs.Rosapi
     {
     }
 
-    public sealed class GetParamNamesResponse : IResponse
+    public sealed class GetParamNamesResponse : IResponse, IDeserializable<GetParamNamesResponse>
     {
         [DataMember (Name = "names")] public string[] Names { get; set; }
     
@@ -81,6 +81,11 @@ namespace Iviz.Msgs.Rosapi
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new GetParamNamesResponse(ref b);
+        }
+        
+        GetParamNamesResponse IDeserializable<GetParamNamesResponse>.RosDeserialize(ref Buffer b)
         {
             return new GetParamNamesResponse(ref b);
         }

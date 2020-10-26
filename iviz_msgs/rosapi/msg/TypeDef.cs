@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Rosapi
 {
     [DataContract (Name = "rosapi/TypeDef")]
-    public sealed class TypeDef : IMessage
+    public sealed class TypeDef : IMessage, IDeserializable<TypeDef>
     {
         [DataMember (Name = "type")] public string Type { get; set; }
         [DataMember (Name = "fieldnames")] public string[] Fieldnames { get; set; }
@@ -52,6 +52,11 @@ namespace Iviz.Msgs.Rosapi
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new TypeDef(ref b);
+        }
+        
+        TypeDef IDeserializable<TypeDef>.RosDeserialize(ref Buffer b)
         {
             return new TypeDef(ref b);
         }

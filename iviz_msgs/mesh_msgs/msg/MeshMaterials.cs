@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract (Name = "mesh_msgs/MeshMaterials")]
-    public sealed class MeshMaterials : IMessage
+    public sealed class MeshMaterials : IMessage, IDeserializable<MeshMaterials>
     {
         // Mesh Attribute Message
         [DataMember (Name = "clusters")] public MeshMsgs.MeshFaceCluster[] Clusters { get; set; }
@@ -53,6 +53,11 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new MeshMaterials(ref b);
+        }
+        
+        MeshMaterials IDeserializable<MeshMaterials>.RosDeserialize(ref Buffer b)
         {
             return new MeshMaterials(ref b);
         }

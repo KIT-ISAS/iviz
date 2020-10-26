@@ -54,7 +54,7 @@ namespace Iviz.Msgs.MeshMsgs
         [Preserve] public const string RosMd5Sum = "d0fc06ce39b58884e8cdf147765b9d6b";
     }
 
-    public sealed class GetVertexCostsRequest : IRequest
+    public sealed class GetVertexCostsRequest : IRequest, IDeserializable<GetVertexCostsRequest>
     {
         [DataMember (Name = "uuid")] public string Uuid { get; set; }
     
@@ -80,6 +80,11 @@ namespace Iviz.Msgs.MeshMsgs
         {
             return new GetVertexCostsRequest(ref b);
         }
+        
+        GetVertexCostsRequest IDeserializable<GetVertexCostsRequest>.RosDeserialize(ref Buffer b)
+        {
+            return new GetVertexCostsRequest(ref b);
+        }
     
         public void RosSerialize(ref Buffer b)
         {
@@ -101,7 +106,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
     }
 
-    public sealed class GetVertexCostsResponse : IResponse
+    public sealed class GetVertexCostsResponse : IResponse, IDeserializable<GetVertexCostsResponse>
     {
         [DataMember (Name = "mesh_vertex_costs_stamped")] public MeshMsgs.MeshVertexCostsStamped MeshVertexCostsStamped { get; set; }
     
@@ -124,6 +129,11 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new GetVertexCostsResponse(ref b);
+        }
+        
+        GetVertexCostsResponse IDeserializable<GetVertexCostsResponse>.RosDeserialize(ref Buffer b)
         {
             return new GetVertexCostsResponse(ref b);
         }

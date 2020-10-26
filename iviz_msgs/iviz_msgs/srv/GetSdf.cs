@@ -54,7 +54,7 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosMd5Sum = "920692c7a5a3dd3789f2d8f444a0bf8f";
     }
 
-    public sealed class GetSdfRequest : IRequest
+    public sealed class GetSdfRequest : IRequest, IDeserializable<GetSdfRequest>
     {
         // Retrieves a scene, which can contain one or multiple 3D models and lights
         [DataMember (Name = "uri")] public string Uri { get; set; } // Uri of the file. Example: package://some_package/file.world
@@ -81,6 +81,11 @@ namespace Iviz.Msgs.IvizMsgs
         {
             return new GetSdfRequest(ref b);
         }
+        
+        GetSdfRequest IDeserializable<GetSdfRequest>.RosDeserialize(ref Buffer b)
+        {
+            return new GetSdfRequest(ref b);
+        }
     
         public void RosSerialize(ref Buffer b)
         {
@@ -102,7 +107,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
     }
 
-    public sealed class GetSdfResponse : IResponse
+    public sealed class GetSdfResponse : IResponse, IDeserializable<GetSdfResponse>
     {
         [DataMember (Name = "success")] public bool Success { get; set; } // Whether the retrieval succeeded
         [DataMember (Name = "scene")] public Scene Scene { get; set; } // The scene
@@ -132,6 +137,11 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new GetSdfResponse(ref b);
+        }
+        
+        GetSdfResponse IDeserializable<GetSdfResponse>.RosDeserialize(ref Buffer b)
         {
             return new GetSdfResponse(ref b);
         }

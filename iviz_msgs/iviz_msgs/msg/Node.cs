@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract (Name = "iviz_msgs/Node")]
-    public sealed class Node : IMessage
+    public sealed class Node : IMessage, IDeserializable<Node>
     {
         [DataMember (Name = "name")] public string Name { get; set; }
         [DataMember (Name = "parent")] public int Parent { get; set; }
@@ -39,6 +39,11 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Node(ref b);
+        }
+        
+        Node IDeserializable<Node>.RosDeserialize(ref Buffer b)
         {
             return new Node(ref b);
         }

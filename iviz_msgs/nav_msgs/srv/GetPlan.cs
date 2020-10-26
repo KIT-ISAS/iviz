@@ -54,7 +54,7 @@ namespace Iviz.Msgs.NavMsgs
         [Preserve] public const string RosMd5Sum = "421c8ea4d21c6c9db7054b4bbdf1e024";
     }
 
-    public sealed class GetPlanRequest : IRequest
+    public sealed class GetPlanRequest : IRequest, IDeserializable<GetPlanRequest>
     {
         // Get a plan from the current position to the goal Pose 
         // The start pose for the plan
@@ -92,6 +92,11 @@ namespace Iviz.Msgs.NavMsgs
         {
             return new GetPlanRequest(ref b);
         }
+        
+        GetPlanRequest IDeserializable<GetPlanRequest>.RosDeserialize(ref Buffer b)
+        {
+            return new GetPlanRequest(ref b);
+        }
     
         public void RosSerialize(ref Buffer b)
         {
@@ -119,7 +124,7 @@ namespace Iviz.Msgs.NavMsgs
         }
     }
 
-    public sealed class GetPlanResponse : IResponse
+    public sealed class GetPlanResponse : IResponse, IDeserializable<GetPlanResponse>
     {
         [DataMember (Name = "plan")] public NavMsgs.Path Plan { get; set; }
     
@@ -142,6 +147,11 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new GetPlanResponse(ref b);
+        }
+        
+        GetPlanResponse IDeserializable<GetPlanResponse>.RosDeserialize(ref Buffer b)
         {
             return new GetPlanResponse(ref b);
         }

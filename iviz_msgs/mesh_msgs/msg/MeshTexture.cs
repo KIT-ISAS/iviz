@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract (Name = "mesh_msgs/MeshTexture")]
-    public sealed class MeshTexture : IMessage
+    public sealed class MeshTexture : IMessage, IDeserializable<MeshTexture>
     {
         // Mesh Attribute Message
         [DataMember (Name = "uuid")] public string Uuid { get; set; }
@@ -36,6 +36,11 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new MeshTexture(ref b);
+        }
+        
+        MeshTexture IDeserializable<MeshTexture>.RosDeserialize(ref Buffer b)
         {
             return new MeshTexture(ref b);
         }

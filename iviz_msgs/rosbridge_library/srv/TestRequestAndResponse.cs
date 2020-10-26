@@ -54,7 +54,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         [Preserve] public const string RosMd5Sum = "491d316f183df11876531749005b31d1";
     }
 
-    public sealed class TestRequestAndResponseRequest : IRequest
+    public sealed class TestRequestAndResponseRequest : IRequest, IDeserializable<TestRequestAndResponseRequest>
     {
         [DataMember (Name = "data")] public int Data { get; set; }
     
@@ -79,6 +79,11 @@ namespace Iviz.Msgs.RosbridgeLibrary
         {
             return new TestRequestAndResponseRequest(ref b);
         }
+        
+        TestRequestAndResponseRequest IDeserializable<TestRequestAndResponseRequest>.RosDeserialize(ref Buffer b)
+        {
+            return new TestRequestAndResponseRequest(ref b);
+        }
     
         public void RosSerialize(ref Buffer b)
         {
@@ -92,7 +97,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         public int RosMessageLength => 4;
     }
 
-    public sealed class TestRequestAndResponseResponse : IResponse
+    public sealed class TestRequestAndResponseResponse : IResponse, IDeserializable<TestRequestAndResponseResponse>
     {
         [DataMember (Name = "data")] public int Data { get; set; }
     
@@ -114,6 +119,11 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new TestRequestAndResponseResponse(ref b);
+        }
+        
+        TestRequestAndResponseResponse IDeserializable<TestRequestAndResponseResponse>.RosDeserialize(ref Buffer b)
         {
             return new TestRequestAndResponseResponse(ref b);
         }

@@ -7,7 +7,7 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract (Name = "iviz_msgs/Vector3")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Vector3 : IMessage, System.IEquatable<Vector3>
+    public struct Vector3 : IMessage, System.IEquatable<Vector3>, IDeserializable<Vector3>
     {
         [DataMember (Name = "x")] public float X { get; set; }
         [DataMember (Name = "y")] public float Y { get; set; }
@@ -28,6 +28,11 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public readonly ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Vector3(ref b);
+        }
+        
+        readonly Vector3 IDeserializable<Vector3>.RosDeserialize(ref Buffer b)
         {
             return new Vector3(ref b);
         }

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract (Name = "visualization_msgs/InteractiveMarker")]
-    public sealed class InteractiveMarker : IMessage
+    public sealed class InteractiveMarker : IMessage, IDeserializable<InteractiveMarker>
     {
         // Time/frame info.
         // If header.time is set to 0, the marker will be retransformed into
@@ -71,6 +71,11 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new InteractiveMarker(ref b);
+        }
+        
+        InteractiveMarker IDeserializable<InteractiveMarker>.RosDeserialize(ref Buffer b)
         {
             return new InteractiveMarker(ref b);
         }

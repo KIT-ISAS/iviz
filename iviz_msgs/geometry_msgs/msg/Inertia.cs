@@ -7,7 +7,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Inertia")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Inertia : IMessage, System.IEquatable<Inertia>
+    public struct Inertia : IMessage, System.IEquatable<Inertia>, IDeserializable<Inertia>
     {
         // Mass [kg]
         [DataMember (Name = "m")] public double M { get; set; }
@@ -44,6 +44,11 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         public readonly ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Inertia(ref b);
+        }
+        
+        readonly Inertia IDeserializable<Inertia>.RosDeserialize(ref Buffer b)
         {
             return new Inertia(ref b);
         }

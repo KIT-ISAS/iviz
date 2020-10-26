@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract (Name = "visualization_msgs/ImageMarker")]
-    public sealed class ImageMarker : IMessage
+    public sealed class ImageMarker : IMessage, IDeserializable<ImageMarker>
     {
         public const byte CIRCLE = 0;
         public const byte LINE_STRIP = 1;
@@ -74,6 +74,11 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new ImageMarker(ref b);
+        }
+        
+        ImageMarker IDeserializable<ImageMarker>.RosDeserialize(ref Buffer b)
         {
             return new ImageMarker(ref b);
         }

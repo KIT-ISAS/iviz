@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract (Name = "mesh_msgs/MeshFaceClusterStamped")]
-    public sealed class MeshFaceClusterStamped : IMessage
+    public sealed class MeshFaceClusterStamped : IMessage, IDeserializable<MeshFaceClusterStamped>
     {
         // header
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
@@ -43,6 +43,11 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new MeshFaceClusterStamped(ref b);
+        }
+        
+        MeshFaceClusterStamped IDeserializable<MeshFaceClusterStamped>.RosDeserialize(ref Buffer b)
         {
             return new MeshFaceClusterStamped(ref b);
         }

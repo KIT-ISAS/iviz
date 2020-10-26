@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract (Name = "std_msgs/Int32MultiArray")]
-    public sealed class Int32MultiArray : IMessage
+    public sealed class Int32MultiArray : IMessage, IDeserializable<Int32MultiArray>
     {
         // Please look at the MultiArrayLayout message definition for
         // documentation on all multiarrays.
@@ -34,6 +34,11 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Int32MultiArray(ref b);
+        }
+        
+        Int32MultiArray IDeserializable<Int32MultiArray>.RosDeserialize(ref Buffer b)
         {
             return new Int32MultiArray(ref b);
         }

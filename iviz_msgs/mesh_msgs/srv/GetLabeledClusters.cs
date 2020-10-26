@@ -54,7 +54,7 @@ namespace Iviz.Msgs.MeshMsgs
         [Preserve] public const string RosMd5Sum = "d4165053db3e9b1ffe9db49f0702734c";
     }
 
-    public sealed class GetLabeledClustersRequest : IRequest
+    public sealed class GetLabeledClustersRequest : IRequest, IDeserializable<GetLabeledClustersRequest>
     {
         [DataMember (Name = "uuid")] public string Uuid { get; set; }
     
@@ -80,6 +80,11 @@ namespace Iviz.Msgs.MeshMsgs
         {
             return new GetLabeledClustersRequest(ref b);
         }
+        
+        GetLabeledClustersRequest IDeserializable<GetLabeledClustersRequest>.RosDeserialize(ref Buffer b)
+        {
+            return new GetLabeledClustersRequest(ref b);
+        }
     
         public void RosSerialize(ref Buffer b)
         {
@@ -101,7 +106,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
     }
 
-    public sealed class GetLabeledClustersResponse : IResponse
+    public sealed class GetLabeledClustersResponse : IResponse, IDeserializable<GetLabeledClustersResponse>
     {
         [DataMember (Name = "clusters")] public MeshFaceCluster[] Clusters { get; set; }
     
@@ -128,6 +133,11 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new GetLabeledClustersResponse(ref b);
+        }
+        
+        GetLabeledClustersResponse IDeserializable<GetLabeledClustersResponse>.RosDeserialize(ref Buffer b)
         {
             return new GetLabeledClustersResponse(ref b);
         }

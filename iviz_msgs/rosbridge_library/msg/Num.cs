@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RosbridgeLibrary
 {
     [DataContract (Name = "rosbridge_library/Num")]
-    public sealed class Num : IMessage
+    public sealed class Num : IMessage, IDeserializable<Num>
     {
         [DataMember (Name = "num")] public long Num_ { get; set; }
     
@@ -27,6 +27,11 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Num(ref b);
+        }
+        
+        Num IDeserializable<Num>.RosDeserialize(ref Buffer b)
         {
             return new Num(ref b);
         }

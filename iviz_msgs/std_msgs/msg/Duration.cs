@@ -7,7 +7,7 @@ namespace Iviz.Msgs.StdMsgs
 {
     [DataContract (Name = "std_msgs/Duration")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Duration : IMessage, System.IEquatable<Duration>
+    public struct Duration : IMessage, System.IEquatable<Duration>, IDeserializable<Duration>
     {
         [DataMember (Name = "data")] public duration Data { get; set; }
     
@@ -24,6 +24,11 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         public readonly ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Duration(ref b);
+        }
+        
+        readonly Duration IDeserializable<Duration>.RosDeserialize(ref Buffer b)
         {
             return new Duration(ref b);
         }

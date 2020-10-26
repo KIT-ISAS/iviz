@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ShapeMsgs
 {
     [DataContract (Name = "shape_msgs/SolidPrimitive")]
-    public sealed class SolidPrimitive : IMessage
+    public sealed class SolidPrimitive : IMessage, IDeserializable<SolidPrimitive>
     {
         // Define box, sphere, cylinder, cone 
         // All shapes are defined to have their bounding boxes centered around 0,0,0.
@@ -59,6 +59,11 @@ namespace Iviz.Msgs.ShapeMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new SolidPrimitive(ref b);
+        }
+        
+        SolidPrimitive IDeserializable<SolidPrimitive>.RosDeserialize(ref Buffer b)
         {
             return new SolidPrimitive(ref b);
         }

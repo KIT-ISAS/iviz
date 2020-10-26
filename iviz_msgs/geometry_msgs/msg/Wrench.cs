@@ -7,7 +7,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Wrench")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Wrench : IMessage, System.IEquatable<Wrench>
+    public struct Wrench : IMessage, System.IEquatable<Wrench>, IDeserializable<Wrench>
     {
         // This represents force in free space, separated into
         // its linear and angular parts.
@@ -28,6 +28,11 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         public readonly ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Wrench(ref b);
+        }
+        
+        readonly Wrench IDeserializable<Wrench>.RosDeserialize(ref Buffer b)
         {
             return new Wrench(ref b);
         }

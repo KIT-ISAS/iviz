@@ -54,7 +54,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         [Preserve] public const string RosMd5Sum = "d875457256decc7436099d9d612ebf8a";
     }
 
-    public sealed class SendBytesRequest : IRequest
+    public sealed class SendBytesRequest : IRequest, IDeserializable<SendBytesRequest>
     {
         [DataMember (Name = "count")] public long Count { get; set; }
     
@@ -79,6 +79,11 @@ namespace Iviz.Msgs.RosbridgeLibrary
         {
             return new SendBytesRequest(ref b);
         }
+        
+        SendBytesRequest IDeserializable<SendBytesRequest>.RosDeserialize(ref Buffer b)
+        {
+            return new SendBytesRequest(ref b);
+        }
     
         public void RosSerialize(ref Buffer b)
         {
@@ -92,7 +97,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         public int RosMessageLength => 8;
     }
 
-    public sealed class SendBytesResponse : IResponse
+    public sealed class SendBytesResponse : IResponse, IDeserializable<SendBytesResponse>
     {
         [DataMember (Name = "data")] public string Data { get; set; }
     
@@ -115,6 +120,11 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new SendBytesResponse(ref b);
+        }
+        
+        SendBytesResponse IDeserializable<SendBytesResponse>.RosDeserialize(ref Buffer b)
         {
             return new SendBytesResponse(ref b);
         }

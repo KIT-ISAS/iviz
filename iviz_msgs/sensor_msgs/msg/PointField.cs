@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract (Name = "sensor_msgs/PointField")]
-    public sealed class PointField : IMessage
+    public sealed class PointField : IMessage, IDeserializable<PointField>
     {
         // This message holds the description of one point entry in the
         // PointCloud2 message format.
@@ -47,6 +47,11 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new PointField(ref b);
+        }
+        
+        PointField IDeserializable<PointField>.RosDeserialize(ref Buffer b)
         {
             return new PointField(ref b);
         }

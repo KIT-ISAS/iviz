@@ -7,7 +7,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Pose")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Pose : IMessage, System.IEquatable<Pose>
+    public struct Pose : IMessage, System.IEquatable<Pose>, IDeserializable<Pose>
     {
         // A representation of pose in free space, composed of position and orientation. 
         [DataMember (Name = "position")] public Point Position { get; set; }
@@ -27,6 +27,11 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         public readonly ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Pose(ref b);
+        }
+        
+        readonly Pose IDeserializable<Pose>.RosDeserialize(ref Buffer b)
         {
             return new Pose(ref b);
         }

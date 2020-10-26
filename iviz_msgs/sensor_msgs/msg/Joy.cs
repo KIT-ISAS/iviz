@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract (Name = "sensor_msgs/Joy")]
-    public sealed class Joy : IMessage
+    public sealed class Joy : IMessage, IDeserializable<Joy>
     {
         // Reports the state of a joysticks axes and buttons.
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; } // timestamp in the header is the time the data is received from the joystick
@@ -37,6 +37,11 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Joy(ref b);
+        }
+        
+        Joy IDeserializable<Joy>.RosDeserialize(ref Buffer b)
         {
             return new Joy(ref b);
         }

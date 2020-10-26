@@ -54,7 +54,7 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosMd5Sum = "02c42b3fdf08f126e5fad7a629a839e0";
     }
 
-    public sealed class GetModelResourceRequest : IRequest
+    public sealed class GetModelResourceRequest : IRequest, IDeserializable<GetModelResourceRequest>
     {
         // Retrieves a 3D model, and converts it into a format that can be used in iviz
         [DataMember (Name = "uri")] public string Uri { get; set; } // Uri of the file. Example: package://some_package/file.dae
@@ -81,6 +81,11 @@ namespace Iviz.Msgs.IvizMsgs
         {
             return new GetModelResourceRequest(ref b);
         }
+        
+        GetModelResourceRequest IDeserializable<GetModelResourceRequest>.RosDeserialize(ref Buffer b)
+        {
+            return new GetModelResourceRequest(ref b);
+        }
     
         public void RosSerialize(ref Buffer b)
         {
@@ -102,7 +107,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
     }
 
-    public sealed class GetModelResourceResponse : IResponse
+    public sealed class GetModelResourceResponse : IResponse, IDeserializable<GetModelResourceResponse>
     {
         [DataMember (Name = "success")] public bool Success { get; set; } // Whether the retrieval succeeded
         [DataMember (Name = "model")] public Model Model { get; set; } // The 3D model
@@ -132,6 +137,11 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new GetModelResourceResponse(ref b);
+        }
+        
+        GetModelResourceResponse IDeserializable<GetModelResourceResponse>.RosDeserialize(ref Buffer b)
         {
             return new GetModelResourceResponse(ref b);
         }

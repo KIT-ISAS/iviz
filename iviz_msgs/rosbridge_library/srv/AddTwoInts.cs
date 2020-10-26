@@ -54,7 +54,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         [Preserve] public const string RosMd5Sum = "6a2e34150c00229791cc89ff309fff21";
     }
 
-    public sealed class AddTwoIntsRequest : IRequest
+    public sealed class AddTwoIntsRequest : IRequest, IDeserializable<AddTwoIntsRequest>
     {
         [DataMember (Name = "a")] public long A { get; set; }
         [DataMember (Name = "b")] public long B { get; set; }
@@ -82,6 +82,11 @@ namespace Iviz.Msgs.RosbridgeLibrary
         {
             return new AddTwoIntsRequest(ref b);
         }
+        
+        AddTwoIntsRequest IDeserializable<AddTwoIntsRequest>.RosDeserialize(ref Buffer b)
+        {
+            return new AddTwoIntsRequest(ref b);
+        }
     
         public void RosSerialize(ref Buffer b)
         {
@@ -96,7 +101,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         public int RosMessageLength => 16;
     }
 
-    public sealed class AddTwoIntsResponse : IResponse
+    public sealed class AddTwoIntsResponse : IResponse, IDeserializable<AddTwoIntsResponse>
     {
         [DataMember (Name = "sum")] public long Sum { get; set; }
     
@@ -118,6 +123,11 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new AddTwoIntsResponse(ref b);
+        }
+        
+        AddTwoIntsResponse IDeserializable<AddTwoIntsResponse>.RosDeserialize(ref Buffer b)
         {
             return new AddTwoIntsResponse(ref b);
         }

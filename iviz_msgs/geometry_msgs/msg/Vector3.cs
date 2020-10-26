@@ -7,7 +7,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Vector3")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Vector3 : IMessage, System.IEquatable<Vector3>
+    public struct Vector3 : IMessage, System.IEquatable<Vector3>, IDeserializable<Vector3>
     {
         // This represents a vector in free space. 
         // It is only meant to represent a direction. Therefore, it does not
@@ -34,6 +34,11 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         public readonly ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Vector3(ref b);
+        }
+        
+        readonly Vector3 IDeserializable<Vector3>.RosDeserialize(ref Buffer b)
         {
             return new Vector3(ref b);
         }

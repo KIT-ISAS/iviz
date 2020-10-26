@@ -7,7 +7,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Point")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Point : IMessage, System.IEquatable<Point>
+    public struct Point : IMessage, System.IEquatable<Point>, IDeserializable<Point>
     {
         // This contains the position of a point in free space
         [DataMember (Name = "x")] public double X { get; set; }
@@ -29,6 +29,11 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         public readonly ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Point(ref b);
+        }
+        
+        readonly Point IDeserializable<Point>.RosDeserialize(ref Buffer b)
         {
             return new Point(ref b);
         }

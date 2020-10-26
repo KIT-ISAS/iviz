@@ -54,7 +54,7 @@ namespace Iviz.Msgs.OctomapMsgs
         [Preserve] public const string RosMd5Sum = "93aa3d73b866f04880927745f4aab303";
     }
 
-    public sealed class BoundingBoxQueryRequest : IRequest
+    public sealed class BoundingBoxQueryRequest : IRequest, IDeserializable<BoundingBoxQueryRequest>
     {
         // Clear a region specified by a global axis-aligned bounding box in stored OctoMap
         // minimum corner point of axis-aligned bounding box in global frame
@@ -85,6 +85,11 @@ namespace Iviz.Msgs.OctomapMsgs
         {
             return new BoundingBoxQueryRequest(ref b);
         }
+        
+        BoundingBoxQueryRequest IDeserializable<BoundingBoxQueryRequest>.RosDeserialize(ref Buffer b)
+        {
+            return new BoundingBoxQueryRequest(ref b);
+        }
     
         public void RosSerialize(ref Buffer b)
         {
@@ -99,7 +104,7 @@ namespace Iviz.Msgs.OctomapMsgs
         public int RosMessageLength => 48;
     }
 
-    public sealed class BoundingBoxQueryResponse : IResponse
+    public sealed class BoundingBoxQueryResponse : IResponse, IDeserializable<BoundingBoxQueryResponse>
     {
     
         /// <summary> Constructor for empty message. </summary>
@@ -113,6 +118,11 @@ namespace Iviz.Msgs.OctomapMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new BoundingBoxQueryResponse(ref b);
+        }
+        
+        BoundingBoxQueryResponse IDeserializable<BoundingBoxQueryResponse>.RosDeserialize(ref Buffer b)
         {
             return new BoundingBoxQueryResponse(ref b);
         }

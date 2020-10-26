@@ -7,7 +7,7 @@ namespace Iviz.Msgs.StdMsgs
 {
     [DataContract (Name = "std_msgs/ColorRGBA")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct ColorRGBA : IMessage, System.IEquatable<ColorRGBA>
+    public struct ColorRGBA : IMessage, System.IEquatable<ColorRGBA>, IDeserializable<ColorRGBA>
     {
         [DataMember (Name = "r")] public float R { get; set; }
         [DataMember (Name = "g")] public float G { get; set; }
@@ -30,6 +30,11 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         public readonly ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new ColorRGBA(ref b);
+        }
+        
+        readonly ColorRGBA IDeserializable<ColorRGBA>.RosDeserialize(ref Buffer b)
         {
             return new ColorRGBA(ref b);
         }

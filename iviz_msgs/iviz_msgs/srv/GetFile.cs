@@ -54,7 +54,7 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosMd5Sum = "08088c7144705ee9cf37b287c931476d";
     }
 
-    public sealed class GetFileRequest : IRequest
+    public sealed class GetFileRequest : IRequest, IDeserializable<GetFileRequest>
     {
         // Retrieves a file
         [DataMember (Name = "uri")] public string Uri { get; set; } // Uri of the file. Example: package://some_package/file.dae
@@ -81,6 +81,11 @@ namespace Iviz.Msgs.IvizMsgs
         {
             return new GetFileRequest(ref b);
         }
+        
+        GetFileRequest IDeserializable<GetFileRequest>.RosDeserialize(ref Buffer b)
+        {
+            return new GetFileRequest(ref b);
+        }
     
         public void RosSerialize(ref Buffer b)
         {
@@ -102,7 +107,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
     }
 
-    public sealed class GetFileResponse : IResponse
+    public sealed class GetFileResponse : IResponse, IDeserializable<GetFileResponse>
     {
         [DataMember (Name = "success")] public bool Success { get; set; } // Whether the retrieval succeeded
         [DataMember (Name = "bytes")] public byte[] Bytes { get; set; } // The content of the file as byte array
@@ -132,6 +137,11 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new GetFileResponse(ref b);
+        }
+        
+        GetFileResponse IDeserializable<GetFileResponse>.RosDeserialize(ref Buffer b)
         {
             return new GetFileResponse(ref b);
         }

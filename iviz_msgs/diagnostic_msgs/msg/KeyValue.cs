@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.DiagnosticMsgs
 {
     [DataContract (Name = "diagnostic_msgs/KeyValue")]
-    public sealed class KeyValue : IMessage
+    public sealed class KeyValue : IMessage, IDeserializable<KeyValue>
     {
         [DataMember (Name = "key")] public string Key { get; set; } // what to label this value when viewing
         [DataMember (Name = "value")] public string Value { get; set; } // a value to track over time
@@ -32,6 +32,11 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new KeyValue(ref b);
+        }
+        
+        KeyValue IDeserializable<KeyValue>.RosDeserialize(ref Buffer b)
         {
             return new KeyValue(ref b);
         }

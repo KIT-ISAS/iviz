@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract (Name = "std_msgs/String")]
-    public sealed class String : IMessage
+    public sealed class String : IMessage, IDeserializable<String>
     {
         [DataMember (Name = "data")] public string Data { get; set; }
     
@@ -28,6 +28,11 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new String(ref b);
+        }
+        
+        String IDeserializable<String>.RosDeserialize(ref Buffer b)
         {
             return new String(ref b);
         }

@@ -58,7 +58,7 @@ namespace Iviz.Msgs.StdSrvs
     {
     }
 
-    public sealed class TriggerResponse : IResponse
+    public sealed class TriggerResponse : IResponse, IDeserializable<TriggerResponse>
     {
         [DataMember (Name = "success")] public bool Success { get; set; } // indicate successful run of triggered service
         [DataMember (Name = "message")] public string Message { get; set; } // informational, e.g. for error messages
@@ -84,6 +84,11 @@ namespace Iviz.Msgs.StdSrvs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new TriggerResponse(ref b);
+        }
+        
+        TriggerResponse IDeserializable<TriggerResponse>.RosDeserialize(ref Buffer b)
         {
             return new TriggerResponse(ref b);
         }

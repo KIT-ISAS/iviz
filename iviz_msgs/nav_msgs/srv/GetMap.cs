@@ -54,7 +54,7 @@ namespace Iviz.Msgs.NavMsgs
         [Preserve] public const string RosMd5Sum = "6cdd0a18e0aff5b0a3ca2326a89b54ff";
     }
 
-    public sealed class GetMapRequest : IRequest
+    public sealed class GetMapRequest : IRequest, IDeserializable<GetMapRequest>
     {
         // Get the map as a nav_msgs/OccupancyGrid
     
@@ -72,6 +72,11 @@ namespace Iviz.Msgs.NavMsgs
         {
             return new GetMapRequest(ref b);
         }
+        
+        GetMapRequest IDeserializable<GetMapRequest>.RosDeserialize(ref Buffer b)
+        {
+            return new GetMapRequest(ref b);
+        }
     
         public void RosSerialize(ref Buffer b)
         {
@@ -84,7 +89,7 @@ namespace Iviz.Msgs.NavMsgs
         public int RosMessageLength => 0;
     }
 
-    public sealed class GetMapResponse : IResponse
+    public sealed class GetMapResponse : IResponse, IDeserializable<GetMapResponse>
     {
         [DataMember (Name = "map")] public NavMsgs.OccupancyGrid Map { get; set; }
     
@@ -107,6 +112,11 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new GetMapResponse(ref b);
+        }
+        
+        GetMapResponse IDeserializable<GetMapResponse>.RosDeserialize(ref Buffer b)
         {
             return new GetMapResponse(ref b);
         }

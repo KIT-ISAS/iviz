@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract (Name = "sensor_msgs/JoyFeedbackArray")]
-    public sealed class JoyFeedbackArray : IMessage
+    public sealed class JoyFeedbackArray : IMessage, IDeserializable<JoyFeedbackArray>
     {
         // This message publishes values for multiple feedback at once. 
         [DataMember (Name = "array")] public JoyFeedback[] Array { get; set; }
@@ -33,6 +33,11 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new JoyFeedbackArray(ref b);
+        }
+        
+        JoyFeedbackArray IDeserializable<JoyFeedbackArray>.RosDeserialize(ref Buffer b)
         {
             return new JoyFeedbackArray(ref b);
         }

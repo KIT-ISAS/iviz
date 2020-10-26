@@ -7,7 +7,7 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract (Name = "iviz_msgs/Color")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Color : IMessage, System.IEquatable<Color>
+    public struct Color : IMessage, System.IEquatable<Color>, IDeserializable<Color>
     {
         [DataMember (Name = "r")] public byte R { get; set; }
         [DataMember (Name = "g")] public byte G { get; set; }
@@ -30,6 +30,11 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public readonly ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Color(ref b);
+        }
+        
+        readonly Color IDeserializable<Color>.RosDeserialize(ref Buffer b)
         {
             return new Color(ref b);
         }

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract (Name = "mesh_msgs/MeshVertexTexCoords")]
-    public sealed class MeshVertexTexCoords : IMessage
+    public sealed class MeshVertexTexCoords : IMessage, IDeserializable<MeshVertexTexCoords>
     {
         // Mesh Attribute Type
         [DataMember (Name = "u")] public float U { get; set; }
@@ -31,6 +31,11 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new MeshVertexTexCoords(ref b);
+        }
+        
+        MeshVertexTexCoords IDeserializable<MeshVertexTexCoords>.RosDeserialize(ref Buffer b)
         {
             return new MeshVertexTexCoords(ref b);
         }

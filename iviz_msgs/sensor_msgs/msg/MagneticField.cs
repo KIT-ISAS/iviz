@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract (Name = "sensor_msgs/MagneticField")]
-    public sealed class MagneticField : IMessage
+    public sealed class MagneticField : IMessage, IDeserializable<MagneticField>
     {
         // Measurement of the Magnetic Field vector at a specific location.
         // If the covariance of the measurement is known, it should be filled in
@@ -49,6 +49,11 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new MagneticField(ref b);
+        }
+        
+        MagneticField IDeserializable<MagneticField>.RosDeserialize(ref Buffer b)
         {
             return new MagneticField(ref b);
         }

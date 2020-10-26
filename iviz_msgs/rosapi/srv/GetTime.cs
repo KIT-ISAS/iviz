@@ -58,7 +58,7 @@ namespace Iviz.Msgs.Rosapi
     {
     }
 
-    public sealed class GetTimeResponse : IResponse
+    public sealed class GetTimeResponse : IResponse, IDeserializable<GetTimeResponse>
     {
         [DataMember (Name = "time")] public time Time { get; set; }
     
@@ -80,6 +80,11 @@ namespace Iviz.Msgs.Rosapi
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new GetTimeResponse(ref b);
+        }
+        
+        GetTimeResponse IDeserializable<GetTimeResponse>.RosDeserialize(ref Buffer b)
         {
             return new GetTimeResponse(ref b);
         }

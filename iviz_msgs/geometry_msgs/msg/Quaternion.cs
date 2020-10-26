@@ -7,7 +7,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Quaternion")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Quaternion : IMessage, System.IEquatable<Quaternion>
+    public struct Quaternion : IMessage, System.IEquatable<Quaternion>, IDeserializable<Quaternion>
     {
         // This represents an orientation in free space in quaternion form.
         [DataMember (Name = "x")] public double X { get; set; }
@@ -31,6 +31,11 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         public readonly ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Quaternion(ref b);
+        }
+        
+        readonly Quaternion IDeserializable<Quaternion>.RosDeserialize(ref Buffer b)
         {
             return new Quaternion(ref b);
         }

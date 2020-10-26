@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract (Name = "iviz_msgs/Material")]
-    public sealed class Material : IMessage
+    public sealed class Material : IMessage, IDeserializable<Material>
     {
         [DataMember (Name = "name")] public string Name { get; set; }
         [DataMember (Name = "ambient")] public Color Ambient { get; set; }
@@ -41,6 +41,11 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Material(ref b);
+        }
+        
+        Material IDeserializable<Material>.RosDeserialize(ref Buffer b)
         {
             return new Material(ref b);
         }

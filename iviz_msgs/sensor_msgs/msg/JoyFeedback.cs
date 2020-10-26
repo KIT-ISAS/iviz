@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract (Name = "sensor_msgs/JoyFeedback")]
-    public sealed class JoyFeedback : IMessage
+    public sealed class JoyFeedback : IMessage, IDeserializable<JoyFeedback>
     {
         // Declare of the type of feedback
         public const byte TYPE_LED = 0;
@@ -41,6 +41,11 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new JoyFeedback(ref b);
+        }
+        
+        JoyFeedback IDeserializable<JoyFeedback>.RosDeserialize(ref Buffer b)
         {
             return new JoyFeedback(ref b);
         }

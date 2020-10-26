@@ -7,7 +7,7 @@ namespace Iviz.Msgs.StdMsgs
 {
     [DataContract (Name = "std_msgs/Byte")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Byte : IMessage, System.IEquatable<Byte>
+    public struct Byte : IMessage, System.IEquatable<Byte>, IDeserializable<Byte>
     {
         [DataMember (Name = "data")] public byte Data { get; set; }
     
@@ -24,6 +24,11 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         public readonly ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Byte(ref b);
+        }
+        
+        readonly Byte IDeserializable<Byte>.RosDeserialize(ref Buffer b)
         {
             return new Byte(ref b);
         }

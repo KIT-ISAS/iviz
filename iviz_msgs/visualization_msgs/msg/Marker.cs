@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract (Name = "visualization_msgs/Marker")]
-    public sealed class Marker : IMessage
+    public sealed class Marker : IMessage, IDeserializable<Marker>
     {
         // See http://www.ros.org/wiki/rviz/DisplayTypes/Marker and http://www.ros.org/wiki/rviz/Tutorials/Markers%3A%20Basic%20Shapes for more information on using this message with rviz
         public const byte ARROW = 0;
@@ -98,6 +98,11 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Marker(ref b);
+        }
+        
+        Marker IDeserializable<Marker>.RosDeserialize(ref Buffer b)
         {
             return new Marker(ref b);
         }

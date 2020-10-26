@@ -7,7 +7,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Point32")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Point32 : IMessage, System.IEquatable<Point32>
+    public struct Point32 : IMessage, System.IEquatable<Point32>, IDeserializable<Point32>
     {
         // This contains the position of a point in free space(with 32 bits of precision).
         // It is recommeded to use Point wherever possible instead of Point32.  
@@ -35,6 +35,11 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         public readonly ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Point32(ref b);
+        }
+        
+        readonly Point32 IDeserializable<Point32>.RosDeserialize(ref Buffer b)
         {
             return new Point32(ref b);
         }

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ShapeMsgs
 {
     [DataContract (Name = "shape_msgs/Plane")]
-    public sealed class Plane : IMessage
+    public sealed class Plane : IMessage, IDeserializable<Plane>
     {
         // Representation of a plane, using the plane equation ax + by + cz + d = 0
         // a := coef[0]
@@ -33,6 +33,11 @@ namespace Iviz.Msgs.ShapeMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Plane(ref b);
+        }
+        
+        Plane IDeserializable<Plane>.RosDeserialize(ref Buffer b)
         {
             return new Plane(ref b);
         }

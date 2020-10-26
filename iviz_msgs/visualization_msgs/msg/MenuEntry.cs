@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract (Name = "visualization_msgs/MenuEntry")]
-    public sealed class MenuEntry : IMessage
+    public sealed class MenuEntry : IMessage, IDeserializable<MenuEntry>
     {
         // MenuEntry message.
         // Each InteractiveMarker message has an array of MenuEntry messages.
@@ -83,6 +83,11 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new MenuEntry(ref b);
+        }
+        
+        MenuEntry IDeserializable<MenuEntry>.RosDeserialize(ref Buffer b)
         {
             return new MenuEntry(ref b);
         }

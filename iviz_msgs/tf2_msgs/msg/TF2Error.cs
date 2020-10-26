@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf2Msgs
 {
     [DataContract (Name = "tf2_msgs/TF2Error")]
-    public sealed class TF2Error : IMessage
+    public sealed class TF2Error : IMessage, IDeserializable<TF2Error>
     {
         public const byte NO_ERROR = 0;
         public const byte LOOKUP_ERROR = 1;
@@ -38,6 +38,11 @@ namespace Iviz.Msgs.Tf2Msgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new TF2Error(ref b);
+        }
+        
+        TF2Error IDeserializable<TF2Error>.RosDeserialize(ref Buffer b)
         {
             return new TF2Error(ref b);
         }

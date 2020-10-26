@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RosbridgeLibrary
 {
     [DataContract (Name = "rosbridge_library/TestTimeArray")]
-    public sealed class TestTimeArray : IMessage
+    public sealed class TestTimeArray : IMessage, IDeserializable<TestTimeArray>
     {
         [DataMember (Name = "times")] public time[] Times { get; set; }
     
@@ -28,6 +28,11 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new TestTimeArray(ref b);
+        }
+        
+        TestTimeArray IDeserializable<TestTimeArray>.RosDeserialize(ref Buffer b)
         {
             return new TestTimeArray(ref b);
         }

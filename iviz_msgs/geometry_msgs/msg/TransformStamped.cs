@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/TransformStamped")]
-    public sealed class TransformStamped : IMessage
+    public sealed class TransformStamped : IMessage, IDeserializable<TransformStamped>
     {
         // This expresses a transform from coordinate frame header.frame_id
         // to the coordinate frame child_frame_id
@@ -41,6 +41,11 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new TransformStamped(ref b);
+        }
+        
+        TransformStamped IDeserializable<TransformStamped>.RosDeserialize(ref Buffer b)
         {
             return new TransformStamped(ref b);
         }

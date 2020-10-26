@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GridMapMsgs
 {
     [DataContract (Name = "grid_map_msgs/GridMapInfo")]
-    public sealed class GridMapInfo : IMessage
+    public sealed class GridMapInfo : IMessage, IDeserializable<GridMapInfo>
     {
         // Header (time and frame)
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
@@ -45,6 +45,11 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new GridMapInfo(ref b);
+        }
+        
+        GridMapInfo IDeserializable<GridMapInfo>.RosDeserialize(ref Buffer b)
         {
             return new GridMapInfo(ref b);
         }

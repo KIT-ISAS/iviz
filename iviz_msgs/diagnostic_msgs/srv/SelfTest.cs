@@ -58,7 +58,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
     {
     }
 
-    public sealed class SelfTestResponse : IResponse
+    public sealed class SelfTestResponse : IResponse, IDeserializable<SelfTestResponse>
     {
         [DataMember (Name = "id")] public string Id { get; set; }
         [DataMember (Name = "passed")] public byte Passed { get; set; }
@@ -92,6 +92,11 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new SelfTestResponse(ref b);
+        }
+        
+        SelfTestResponse IDeserializable<SelfTestResponse>.RosDeserialize(ref Buffer b)
         {
             return new SelfTestResponse(ref b);
         }

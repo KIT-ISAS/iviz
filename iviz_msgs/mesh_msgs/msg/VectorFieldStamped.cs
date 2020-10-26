@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract (Name = "mesh_msgs/VectorFieldStamped")]
-    public sealed class VectorFieldStamped : IMessage
+    public sealed class VectorFieldStamped : IMessage, IDeserializable<VectorFieldStamped>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "vector_field")] public MeshMsgs.VectorField VectorField { get; set; }
@@ -32,6 +32,11 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new VectorFieldStamped(ref b);
+        }
+        
+        VectorFieldStamped IDeserializable<VectorFieldStamped>.RosDeserialize(ref Buffer b)
         {
             return new VectorFieldStamped(ref b);
         }

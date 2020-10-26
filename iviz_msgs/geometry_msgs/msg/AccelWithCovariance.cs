@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/AccelWithCovariance")]
-    public sealed class AccelWithCovariance : IMessage
+    public sealed class AccelWithCovariance : IMessage, IDeserializable<AccelWithCovariance>
     {
         // This expresses acceleration in free space with uncertainty.
         [DataMember (Name = "accel")] public Accel Accel { get; set; }
@@ -36,6 +36,11 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new AccelWithCovariance(ref b);
+        }
+        
+        AccelWithCovariance IDeserializable<AccelWithCovariance>.RosDeserialize(ref Buffer b)
         {
             return new AccelWithCovariance(ref b);
         }

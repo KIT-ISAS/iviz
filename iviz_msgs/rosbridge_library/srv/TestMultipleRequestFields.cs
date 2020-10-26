@@ -54,7 +54,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         [Preserve] public const string RosMd5Sum = "6cce9fb727dd0f31d504d7d198a1f4ef";
     }
 
-    public sealed class TestMultipleRequestFieldsRequest : IRequest
+    public sealed class TestMultipleRequestFieldsRequest : IRequest, IDeserializable<TestMultipleRequestFieldsRequest>
     {
         [DataMember (Name = "int")] public int @int { get; set; }
         [DataMember (Name = "float")] public float @float { get; set; }
@@ -86,6 +86,11 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new TestMultipleRequestFieldsRequest(ref b);
+        }
+        
+        TestMultipleRequestFieldsRequest IDeserializable<TestMultipleRequestFieldsRequest>.RosDeserialize(ref Buffer b)
         {
             return new TestMultipleRequestFieldsRequest(ref b);
         }

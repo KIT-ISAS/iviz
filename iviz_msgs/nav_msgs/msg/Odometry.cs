@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract (Name = "nav_msgs/Odometry")]
-    public sealed class Odometry : IMessage
+    public sealed class Odometry : IMessage, IDeserializable<Odometry>
     {
         // This represents an estimate of a position and velocity in free space.  
         // The pose in this message should be specified in the coordinate frame given by header.frame_id.
@@ -43,6 +43,11 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Odometry(ref b);
+        }
+        
+        Odometry IDeserializable<Odometry>.RosDeserialize(ref Buffer b)
         {
             return new Odometry(ref b);
         }

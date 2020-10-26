@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract (Name = "nav_msgs/Path")]
-    public sealed class Path : IMessage
+    public sealed class Path : IMessage, IDeserializable<Path>
     {
         //An array of poses that represents a Path for a robot to follow
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
@@ -37,6 +37,11 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Path(ref b);
+        }
+        
+        Path IDeserializable<Path>.RosDeserialize(ref Buffer b)
         {
             return new Path(ref b);
         }

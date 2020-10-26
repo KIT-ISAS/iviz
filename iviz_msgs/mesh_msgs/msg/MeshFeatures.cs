@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract (Name = "mesh_msgs/MeshFeatures")]
-    public sealed class MeshFeatures : IMessage
+    public sealed class MeshFeatures : IMessage, IDeserializable<MeshFeatures>
     {
         [DataMember (Name = "map_uuid")] public string MapUuid { get; set; }
         [DataMember (Name = "features")] public MeshMsgs.Feature[] Features { get; set; }
@@ -36,6 +36,11 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new MeshFeatures(ref b);
+        }
+        
+        MeshFeatures IDeserializable<MeshFeatures>.RosDeserialize(ref Buffer b)
         {
             return new MeshFeatures(ref b);
         }

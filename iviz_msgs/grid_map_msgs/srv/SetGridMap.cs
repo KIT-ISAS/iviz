@@ -54,7 +54,7 @@ namespace Iviz.Msgs.GridMapMsgs
         [Preserve] public const string RosMd5Sum = "4f8e24cfd42bc1470fe765b7516ff7e5";
     }
 
-    public sealed class SetGridMapRequest : IRequest
+    public sealed class SetGridMapRequest : IRequest, IDeserializable<SetGridMapRequest>
     {
         // map
         [DataMember (Name = "map")] public GridMapMsgs.GridMap Map { get; set; }
@@ -78,6 +78,11 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new SetGridMapRequest(ref b);
+        }
+        
+        SetGridMapRequest IDeserializable<SetGridMapRequest>.RosDeserialize(ref Buffer b)
         {
             return new SetGridMapRequest(ref b);
         }

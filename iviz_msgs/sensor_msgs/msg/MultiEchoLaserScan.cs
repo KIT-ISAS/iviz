@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract (Name = "sensor_msgs/MultiEchoLaserScan")]
-    public sealed class MultiEchoLaserScan : IMessage
+    public sealed class MultiEchoLaserScan : IMessage, IDeserializable<MultiEchoLaserScan>
     {
         // Single scan from a multi-echo planar laser range-finder
         //
@@ -81,6 +81,11 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new MultiEchoLaserScan(ref b);
+        }
+        
+        MultiEchoLaserScan IDeserializable<MultiEchoLaserScan>.RosDeserialize(ref Buffer b)
         {
             return new MultiEchoLaserScan(ref b);
         }

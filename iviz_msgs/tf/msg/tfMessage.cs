@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf
 {
     [DataContract (Name = "tf/tfMessage")]
-    public sealed class tfMessage : IMessage
+    public sealed class tfMessage : IMessage, IDeserializable<tfMessage>
     {
         [DataMember (Name = "transforms")] public GeometryMsgs.TransformStamped[] Transforms { get; set; }
     
@@ -32,6 +32,11 @@ namespace Iviz.Msgs.Tf
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new tfMessage(ref b);
+        }
+        
+        tfMessage IDeserializable<tfMessage>.RosDeserialize(ref Buffer b)
         {
             return new tfMessage(ref b);
         }

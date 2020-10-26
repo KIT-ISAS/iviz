@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/PoseWithCovarianceStamped")]
-    public sealed class PoseWithCovarianceStamped : IMessage
+    public sealed class PoseWithCovarianceStamped : IMessage, IDeserializable<PoseWithCovarianceStamped>
     {
         // This expresses an estimated pose with a reference coordinate frame and timestamp
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
@@ -33,6 +33,11 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new PoseWithCovarianceStamped(ref b);
+        }
+        
+        PoseWithCovarianceStamped IDeserializable<PoseWithCovarianceStamped>.RosDeserialize(ref Buffer b)
         {
             return new PoseWithCovarianceStamped(ref b);
         }

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.TrajectoryMsgs
 {
     [DataContract (Name = "trajectory_msgs/JointTrajectory")]
-    public sealed class JointTrajectory : IMessage
+    public sealed class JointTrajectory : IMessage, IDeserializable<JointTrajectory>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "joint_names")] public string[] JointNames { get; set; }
@@ -40,6 +40,11 @@ namespace Iviz.Msgs.TrajectoryMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new JointTrajectory(ref b);
+        }
+        
+        JointTrajectory IDeserializable<JointTrajectory>.RosDeserialize(ref Buffer b)
         {
             return new JointTrajectory(ref b);
         }

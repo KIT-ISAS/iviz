@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract (Name = "iviz_msgs/Include")]
-    public sealed class Include : IMessage
+    public sealed class Include : IMessage, IDeserializable<Include>
     {
         // Reference to an external asset
         [DataMember (Name = "uri")] public string Uri { get; set; } // Uri of the asset
@@ -41,6 +41,11 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Include(ref b);
+        }
+        
+        Include IDeserializable<Include>.RosDeserialize(ref Buffer b)
         {
             return new Include(ref b);
         }

@@ -54,7 +54,7 @@ namespace Iviz.Msgs.Rosapi
         [Preserve] public const string RosMd5Sum = "c1f3d28f1b044c871e6eff2e9fc3c667";
     }
 
-    public sealed class DeleteParamRequest : IRequest
+    public sealed class DeleteParamRequest : IRequest, IDeserializable<DeleteParamRequest>
     {
         [DataMember (Name = "name")] public string Name { get; set; }
     
@@ -77,6 +77,11 @@ namespace Iviz.Msgs.Rosapi
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new DeleteParamRequest(ref b);
+        }
+        
+        DeleteParamRequest IDeserializable<DeleteParamRequest>.RosDeserialize(ref Buffer b)
         {
             return new DeleteParamRequest(ref b);
         }

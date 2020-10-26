@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/AccelStamped")]
-    public sealed class AccelStamped : IMessage
+    public sealed class AccelStamped : IMessage, IDeserializable<AccelStamped>
     {
         // An accel with reference coordinate frame and timestamp
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
@@ -32,6 +32,11 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new AccelStamped(ref b);
+        }
+        
+        AccelStamped IDeserializable<AccelStamped>.RosDeserialize(ref Buffer b)
         {
             return new AccelStamped(ref b);
         }

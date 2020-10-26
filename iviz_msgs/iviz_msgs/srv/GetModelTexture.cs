@@ -54,7 +54,7 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosMd5Sum = "0d382728fb593e7fac7232b27f8a271f";
     }
 
-    public sealed class GetModelTextureRequest : IRequest
+    public sealed class GetModelTextureRequest : IRequest, IDeserializable<GetModelTextureRequest>
     {
         [DataMember (Name = "uri")] public string Uri { get; set; }
     
@@ -80,6 +80,11 @@ namespace Iviz.Msgs.IvizMsgs
         {
             return new GetModelTextureRequest(ref b);
         }
+        
+        GetModelTextureRequest IDeserializable<GetModelTextureRequest>.RosDeserialize(ref Buffer b)
+        {
+            return new GetModelTextureRequest(ref b);
+        }
     
         public void RosSerialize(ref Buffer b)
         {
@@ -101,7 +106,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
     }
 
-    public sealed class GetModelTextureResponse : IResponse
+    public sealed class GetModelTextureResponse : IResponse, IDeserializable<GetModelTextureResponse>
     {
         [DataMember (Name = "success")] public bool Success { get; set; }
         [DataMember (Name = "image")] public SensorMsgs.CompressedImage Image { get; set; }
@@ -131,6 +136,11 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new GetModelTextureResponse(ref b);
+        }
+        
+        GetModelTextureResponse IDeserializable<GetModelTextureResponse>.RosDeserialize(ref Buffer b)
         {
             return new GetModelTextureResponse(ref b);
         }

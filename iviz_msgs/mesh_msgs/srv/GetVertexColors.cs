@@ -54,7 +54,7 @@ namespace Iviz.Msgs.MeshMsgs
         [Preserve] public const string RosMd5Sum = "f9925939094ed9c8a413184db9bca5b3";
     }
 
-    public sealed class GetVertexColorsRequest : IRequest
+    public sealed class GetVertexColorsRequest : IRequest, IDeserializable<GetVertexColorsRequest>
     {
         [DataMember (Name = "uuid")] public string Uuid { get; set; }
     
@@ -80,6 +80,11 @@ namespace Iviz.Msgs.MeshMsgs
         {
             return new GetVertexColorsRequest(ref b);
         }
+        
+        GetVertexColorsRequest IDeserializable<GetVertexColorsRequest>.RosDeserialize(ref Buffer b)
+        {
+            return new GetVertexColorsRequest(ref b);
+        }
     
         public void RosSerialize(ref Buffer b)
         {
@@ -101,7 +106,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
     }
 
-    public sealed class GetVertexColorsResponse : IResponse
+    public sealed class GetVertexColorsResponse : IResponse, IDeserializable<GetVertexColorsResponse>
     {
         [DataMember (Name = "mesh_vertex_colors_stamped")] public MeshMsgs.MeshVertexColorsStamped MeshVertexColorsStamped { get; set; }
     
@@ -124,6 +129,11 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new GetVertexColorsResponse(ref b);
+        }
+        
+        GetVertexColorsResponse IDeserializable<GetVertexColorsResponse>.RosDeserialize(ref Buffer b)
         {
             return new GetVertexColorsResponse(ref b);
         }

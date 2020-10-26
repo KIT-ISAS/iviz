@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract (Name = "iviz_msgs/Scene")]
-    public sealed class Scene : IMessage
+    public sealed class Scene : IMessage, IDeserializable<Scene>
     {
         // A complete scene 
         [DataMember (Name = "name")] public string Name { get; set; } // Name of the scene
@@ -49,6 +49,11 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Scene(ref b);
+        }
+        
+        Scene IDeserializable<Scene>.RosDeserialize(ref Buffer b)
         {
             return new Scene(ref b);
         }

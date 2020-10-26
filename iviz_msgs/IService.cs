@@ -57,21 +57,26 @@ namespace Iviz.Msgs
         /// Class that represents an empty service request.
         /// </summary>
         [DataContract]
-        public class EmptyRequest : IRequest
+        public class EmptyRequest : IRequest, IDeserializable<EmptyRequest>
         {
-            ISerializable ISerializable.RosDeserialize(ref Buffer _)
+            public ISerializable RosDeserialize(ref Buffer _)
             {
                 return new EmptyRequest();
             }
 
-            void ISerializable.RosSerialize(ref Buffer _)
+            public void RosSerialize(ref Buffer _)
             {
             }
 
-            int ISerializable.RosMessageLength => 0;
+            public int RosMessageLength => 0;
 
             public void RosValidate()
             {
+            }
+
+            EmptyRequest IDeserializable<EmptyRequest>.RosDeserialize(ref Buffer _)
+            {
+                return new EmptyRequest();
             }
         }
 
@@ -79,21 +84,26 @@ namespace Iviz.Msgs
         /// Class that represents an empty service response.
         /// </summary>
         [DataContract]
-        public class EmptyResponse : IResponse
+        public class EmptyResponse : IResponse, IDeserializable<EmptyResponse>
         {
-            ISerializable ISerializable.RosDeserialize(ref Buffer _)
+            public ISerializable RosDeserialize(ref Buffer _)
             {
                 return new EmptyResponse();
             }
 
-            void ISerializable.RosSerialize(ref Buffer _)
+            public void RosSerialize(ref Buffer _)
             {
             }
 
-            int ISerializable.RosMessageLength => 0;
+            public int RosMessageLength => 0;
 
             public void RosValidate()
             {
+            }
+
+            EmptyResponse IDeserializable<EmptyResponse>.RosDeserialize(ref Buffer _)
+            {
+                return new EmptyResponse();
             }
         }
     }

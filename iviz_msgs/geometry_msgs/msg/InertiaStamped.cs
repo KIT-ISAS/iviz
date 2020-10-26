@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/InertiaStamped")]
-    public sealed class InertiaStamped : IMessage
+    public sealed class InertiaStamped : IMessage, IDeserializable<InertiaStamped>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "inertia")] public Inertia Inertia { get; set; }
@@ -31,6 +31,11 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new InertiaStamped(ref b);
+        }
+        
+        InertiaStamped IDeserializable<InertiaStamped>.RosDeserialize(ref Buffer b)
         {
             return new InertiaStamped(ref b);
         }

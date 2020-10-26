@@ -7,7 +7,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Accel")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Accel : IMessage, System.IEquatable<Accel>
+    public struct Accel : IMessage, System.IEquatable<Accel>, IDeserializable<Accel>
     {
         // This expresses acceleration in free space broken into its linear and angular parts.
         [DataMember (Name = "linear")] public Vector3 Linear { get; set; }
@@ -27,6 +27,11 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         public readonly ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Accel(ref b);
+        }
+        
+        readonly Accel IDeserializable<Accel>.RosDeserialize(ref Buffer b)
         {
             return new Accel(ref b);
         }

@@ -7,7 +7,7 @@ namespace Iviz.Msgs.StdMsgs
 {
     [DataContract (Name = "std_msgs/Float32")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Float32 : IMessage, System.IEquatable<Float32>
+    public struct Float32 : IMessage, System.IEquatable<Float32>, IDeserializable<Float32>
     {
         [DataMember (Name = "data")] public float Data { get; set; }
     
@@ -24,6 +24,11 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         public readonly ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Float32(ref b);
+        }
+        
+        readonly Float32 IDeserializable<Float32>.RosDeserialize(ref Buffer b)
         {
             return new Float32(ref b);
         }

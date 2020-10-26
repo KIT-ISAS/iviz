@@ -7,7 +7,7 @@ namespace Iviz.Msgs.StdMsgs
 {
     [DataContract (Name = "std_msgs/Int16")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Int16 : IMessage, System.IEquatable<Int16>
+    public struct Int16 : IMessage, System.IEquatable<Int16>, IDeserializable<Int16>
     {
         [DataMember (Name = "data")] public short Data { get; set; }
     
@@ -24,6 +24,11 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         public readonly ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Int16(ref b);
+        }
+        
+        readonly Int16 IDeserializable<Int16>.RosDeserialize(ref Buffer b)
         {
             return new Int16(ref b);
         }

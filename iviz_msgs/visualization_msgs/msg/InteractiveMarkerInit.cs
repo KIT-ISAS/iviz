@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract (Name = "visualization_msgs/InteractiveMarkerInit")]
-    public sealed class InteractiveMarkerInit : IMessage
+    public sealed class InteractiveMarkerInit : IMessage, IDeserializable<InteractiveMarkerInit>
     {
         // Identifying string. Must be unique in the topic namespace
         // that this server works on.
@@ -48,6 +48,11 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new InteractiveMarkerInit(ref b);
+        }
+        
+        InteractiveMarkerInit IDeserializable<InteractiveMarkerInit>.RosDeserialize(ref Buffer b)
         {
             return new InteractiveMarkerInit(ref b);
         }

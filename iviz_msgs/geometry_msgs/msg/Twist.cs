@@ -7,7 +7,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Twist")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Twist : IMessage, System.IEquatable<Twist>
+    public struct Twist : IMessage, System.IEquatable<Twist>, IDeserializable<Twist>
     {
         // This expresses velocity in free space broken into its linear and angular parts.
         [DataMember (Name = "linear")] public Vector3 Linear { get; set; }
@@ -27,6 +27,11 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         public readonly ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Twist(ref b);
+        }
+        
+        readonly Twist IDeserializable<Twist>.RosDeserialize(ref Buffer b)
         {
             return new Twist(ref b);
         }

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract (Name = "mesh_msgs/MeshVertexCosts")]
-    public sealed class MeshVertexCosts : IMessage
+    public sealed class MeshVertexCosts : IMessage, IDeserializable<MeshVertexCosts>
     {
         // Mesh Attribute Message
         [DataMember (Name = "costs")] public float[] Costs { get; set; }
@@ -29,6 +29,11 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new MeshVertexCosts(ref b);
+        }
+        
+        MeshVertexCosts IDeserializable<MeshVertexCosts>.RosDeserialize(ref Buffer b)
         {
             return new MeshVertexCosts(ref b);
         }

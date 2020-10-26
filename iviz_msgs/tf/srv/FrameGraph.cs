@@ -58,7 +58,7 @@ namespace Iviz.Msgs.Tf
     {
     }
 
-    public sealed class FrameGraphResponse : IResponse
+    public sealed class FrameGraphResponse : IResponse, IDeserializable<FrameGraphResponse>
     {
         [DataMember (Name = "dot_graph")] public string DotGraph { get; set; }
     
@@ -81,6 +81,11 @@ namespace Iviz.Msgs.Tf
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new FrameGraphResponse(ref b);
+        }
+        
+        FrameGraphResponse IDeserializable<FrameGraphResponse>.RosDeserialize(ref Buffer b)
         {
             return new FrameGraphResponse(ref b);
         }

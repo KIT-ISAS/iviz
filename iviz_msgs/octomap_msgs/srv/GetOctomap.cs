@@ -54,7 +54,7 @@ namespace Iviz.Msgs.OctomapMsgs
         [Preserve] public const string RosMd5Sum = "be9d2869d24fe40d6bc21ac21f6bb2c5";
     }
 
-    public sealed class GetOctomapRequest : IRequest
+    public sealed class GetOctomapRequest : IRequest, IDeserializable<GetOctomapRequest>
     {
         // Get the map as a octomap
     
@@ -72,6 +72,11 @@ namespace Iviz.Msgs.OctomapMsgs
         {
             return new GetOctomapRequest(ref b);
         }
+        
+        GetOctomapRequest IDeserializable<GetOctomapRequest>.RosDeserialize(ref Buffer b)
+        {
+            return new GetOctomapRequest(ref b);
+        }
     
         public void RosSerialize(ref Buffer b)
         {
@@ -84,7 +89,7 @@ namespace Iviz.Msgs.OctomapMsgs
         public int RosMessageLength => 0;
     }
 
-    public sealed class GetOctomapResponse : IResponse
+    public sealed class GetOctomapResponse : IResponse, IDeserializable<GetOctomapResponse>
     {
         [DataMember (Name = "map")] public OctomapMsgs.Octomap Map { get; set; }
     
@@ -107,6 +112,11 @@ namespace Iviz.Msgs.OctomapMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new GetOctomapResponse(ref b);
+        }
+        
+        GetOctomapResponse IDeserializable<GetOctomapResponse>.RosDeserialize(ref Buffer b)
         {
             return new GetOctomapResponse(ref b);
         }

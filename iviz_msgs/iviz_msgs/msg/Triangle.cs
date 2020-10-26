@@ -7,7 +7,7 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract (Name = "iviz_msgs/Triangle")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Triangle : IMessage, System.IEquatable<Triangle>
+    public struct Triangle : IMessage, System.IEquatable<Triangle>, IDeserializable<Triangle>
     {
         [DataMember (Name = "a")] public uint A { get; set; }
         [DataMember (Name = "b")] public uint B { get; set; }
@@ -28,6 +28,11 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public readonly ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Triangle(ref b);
+        }
+        
+        readonly Triangle IDeserializable<Triangle>.RosDeserialize(ref Buffer b)
         {
             return new Triangle(ref b);
         }

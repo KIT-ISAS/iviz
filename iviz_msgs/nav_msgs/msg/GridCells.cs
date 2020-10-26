@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract (Name = "nav_msgs/GridCells")]
-    public sealed class GridCells : IMessage
+    public sealed class GridCells : IMessage, IDeserializable<GridCells>
     {
         //an array of cells in a 2D grid
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
@@ -39,6 +39,11 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new GridCells(ref b);
+        }
+        
+        GridCells IDeserializable<GridCells>.RosDeserialize(ref Buffer b)
         {
             return new GridCells(ref b);
         }

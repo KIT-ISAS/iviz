@@ -58,7 +58,7 @@ namespace Iviz.Msgs.MeshMsgs
     {
     }
 
-    public sealed class GetUUIDResponse : IResponse
+    public sealed class GetUUIDResponse : IResponse, IDeserializable<GetUUIDResponse>
     {
         [DataMember (Name = "uuid")] public string Uuid { get; set; }
     
@@ -81,6 +81,11 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new GetUUIDResponse(ref b);
+        }
+        
+        GetUUIDResponse IDeserializable<GetUUIDResponse>.RosDeserialize(ref Buffer b)
         {
             return new GetUUIDResponse(ref b);
         }

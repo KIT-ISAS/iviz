@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.TrajectoryMsgs
 {
     [DataContract (Name = "trajectory_msgs/MultiDOFJointTrajectoryPoint")]
-    public sealed class MultiDOFJointTrajectoryPoint : IMessage
+    public sealed class MultiDOFJointTrajectoryPoint : IMessage, IDeserializable<MultiDOFJointTrajectoryPoint>
     {
         // Each multi-dof joint can specify a transform (up to 6 DOF)
         [DataMember (Name = "transforms")] public GeometryMsgs.Transform[] Transforms { get; set; }
@@ -42,6 +42,11 @@ namespace Iviz.Msgs.TrajectoryMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new MultiDOFJointTrajectoryPoint(ref b);
+        }
+        
+        MultiDOFJointTrajectoryPoint IDeserializable<MultiDOFJointTrajectoryPoint>.RosDeserialize(ref Buffer b)
         {
             return new MultiDOFJointTrajectoryPoint(ref b);
         }

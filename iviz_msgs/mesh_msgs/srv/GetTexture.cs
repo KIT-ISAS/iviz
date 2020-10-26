@@ -54,7 +54,7 @@ namespace Iviz.Msgs.MeshMsgs
         [Preserve] public const string RosMd5Sum = "48823554c65f6c317f12f79207ce78ac";
     }
 
-    public sealed class GetTextureRequest : IRequest
+    public sealed class GetTextureRequest : IRequest, IDeserializable<GetTextureRequest>
     {
         [DataMember (Name = "uuid")] public string Uuid { get; set; }
         [DataMember (Name = "texture_index")] public uint TextureIndex { get; set; }
@@ -83,6 +83,11 @@ namespace Iviz.Msgs.MeshMsgs
         {
             return new GetTextureRequest(ref b);
         }
+        
+        GetTextureRequest IDeserializable<GetTextureRequest>.RosDeserialize(ref Buffer b)
+        {
+            return new GetTextureRequest(ref b);
+        }
     
         public void RosSerialize(ref Buffer b)
         {
@@ -105,7 +110,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
     }
 
-    public sealed class GetTextureResponse : IResponse
+    public sealed class GetTextureResponse : IResponse, IDeserializable<GetTextureResponse>
     {
         [DataMember (Name = "texture")] public MeshMsgs.MeshTexture Texture { get; set; }
     
@@ -128,6 +133,11 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new GetTextureResponse(ref b);
+        }
+        
+        GetTextureResponse IDeserializable<GetTextureResponse>.RosDeserialize(ref Buffer b)
         {
             return new GetTextureResponse(ref b);
         }

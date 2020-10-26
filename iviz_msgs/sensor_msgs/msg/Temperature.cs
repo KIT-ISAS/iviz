@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract (Name = "sensor_msgs/Temperature")]
-    public sealed class Temperature : IMessage
+    public sealed class Temperature : IMessage, IDeserializable<Temperature>
     {
         // Single temperature reading.
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; } // timestamp is the time the temperature was measured
@@ -36,6 +36,11 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Temperature(ref b);
+        }
+        
+        Temperature IDeserializable<Temperature>.RosDeserialize(ref Buffer b)
         {
             return new Temperature(ref b);
         }

@@ -54,7 +54,7 @@ namespace Iviz.Msgs.GridMapMsgs
         [Preserve] public const string RosMd5Sum = "802c2cbc7b10fada2d44db75ddb8c738";
     }
 
-    public sealed class GetGridMapRequest : IRequest
+    public sealed class GetGridMapRequest : IRequest, IDeserializable<GetGridMapRequest>
     {
         // Frame id of the submap position request.
         [DataMember (Name = "frame_id")] public string FrameId { get; set; }
@@ -102,6 +102,11 @@ namespace Iviz.Msgs.GridMapMsgs
         {
             return new GetGridMapRequest(ref b);
         }
+        
+        GetGridMapRequest IDeserializable<GetGridMapRequest>.RosDeserialize(ref Buffer b)
+        {
+            return new GetGridMapRequest(ref b);
+        }
     
         public void RosSerialize(ref Buffer b)
         {
@@ -138,7 +143,7 @@ namespace Iviz.Msgs.GridMapMsgs
         }
     }
 
-    public sealed class GetGridMapResponse : IResponse
+    public sealed class GetGridMapResponse : IResponse, IDeserializable<GetGridMapResponse>
     {
         // Submap
         [DataMember (Name = "map")] public GridMapMsgs.GridMap Map { get; set; }
@@ -162,6 +167,11 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new GetGridMapResponse(ref b);
+        }
+        
+        GetGridMapResponse IDeserializable<GetGridMapResponse>.RosDeserialize(ref Buffer b)
         {
             return new GetGridMapResponse(ref b);
         }

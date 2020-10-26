@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/PoseArray")]
-    public sealed class PoseArray : IMessage
+    public sealed class PoseArray : IMessage, IDeserializable<PoseArray>
     {
         // An array of poses with a header for global reference.
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
@@ -33,6 +33,11 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new PoseArray(ref b);
+        }
+        
+        PoseArray IDeserializable<PoseArray>.RosDeserialize(ref Buffer b)
         {
             return new PoseArray(ref b);
         }

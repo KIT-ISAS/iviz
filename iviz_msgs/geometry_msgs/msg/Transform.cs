@@ -7,7 +7,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Transform")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Transform : IMessage, System.IEquatable<Transform>
+    public struct Transform : IMessage, System.IEquatable<Transform>, IDeserializable<Transform>
     {
         // This represents the transform between two coordinate frames in free space.
         [DataMember (Name = "translation")] public Vector3 Translation { get; set; }
@@ -27,6 +27,11 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         public readonly ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Transform(ref b);
+        }
+        
+        readonly Transform IDeserializable<Transform>.RosDeserialize(ref Buffer b)
         {
             return new Transform(ref b);
         }

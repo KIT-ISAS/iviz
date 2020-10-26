@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract (Name = "visualization_msgs/InteractiveMarkerControl")]
-    public sealed class InteractiveMarkerControl : IMessage
+    public sealed class InteractiveMarkerControl : IMessage, IDeserializable<InteractiveMarkerControl>
     {
         // Represents a control that is to be displayed together with an interactive marker
         // Identifying string for this control.
@@ -108,6 +108,11 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new InteractiveMarkerControl(ref b);
+        }
+        
+        InteractiveMarkerControl IDeserializable<InteractiveMarkerControl>.RosDeserialize(ref Buffer b)
         {
             return new InteractiveMarkerControl(ref b);
         }

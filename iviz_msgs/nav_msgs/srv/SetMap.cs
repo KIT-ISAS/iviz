@@ -54,7 +54,7 @@ namespace Iviz.Msgs.NavMsgs
         [Preserve] public const string RosMd5Sum = "c36922319011e63ed7784112ad4fdd32";
     }
 
-    public sealed class SetMapRequest : IRequest
+    public sealed class SetMapRequest : IRequest, IDeserializable<SetMapRequest>
     {
         // Set a new map together with an initial pose
         [DataMember (Name = "map")] public NavMsgs.OccupancyGrid Map { get; set; }
@@ -85,6 +85,11 @@ namespace Iviz.Msgs.NavMsgs
         {
             return new SetMapRequest(ref b);
         }
+        
+        SetMapRequest IDeserializable<SetMapRequest>.RosDeserialize(ref Buffer b)
+        {
+            return new SetMapRequest(ref b);
+        }
     
         public void RosSerialize(ref Buffer b)
         {
@@ -111,7 +116,7 @@ namespace Iviz.Msgs.NavMsgs
         }
     }
 
-    public sealed class SetMapResponse : IResponse
+    public sealed class SetMapResponse : IResponse, IDeserializable<SetMapResponse>
     {
         [DataMember (Name = "success")] public bool Success { get; set; }
     
@@ -133,6 +138,11 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new SetMapResponse(ref b);
+        }
+        
+        SetMapResponse IDeserializable<SetMapResponse>.RosDeserialize(ref Buffer b)
         {
             return new SetMapResponse(ref b);
         }

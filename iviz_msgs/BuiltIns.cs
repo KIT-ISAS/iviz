@@ -42,9 +42,9 @@ namespace Iviz.Msgs
             return GetClassStringConstant(type, "RosDependenciesBase64");
         }
 
-        public static IMessage CreateGenerator(Type type)
+        public static IDeserializable<IMessage> CreateGenerator(Type type)
         {
-            return (IMessage)Activator.CreateInstance(type);
+            return (IDeserializable<IMessage>)Activator.CreateInstance(type);
         }
 
         public static string DecompressDependency(Type type)

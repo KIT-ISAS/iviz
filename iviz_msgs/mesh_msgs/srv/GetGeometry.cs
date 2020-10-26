@@ -54,7 +54,7 @@ namespace Iviz.Msgs.MeshMsgs
         [Preserve] public const string RosMd5Sum = "e21c42f8a3978429fcbcd1c03ddeb4e3";
     }
 
-    public sealed class GetGeometryRequest : IRequest
+    public sealed class GetGeometryRequest : IRequest, IDeserializable<GetGeometryRequest>
     {
         [DataMember (Name = "uuid")] public string Uuid { get; set; }
     
@@ -80,6 +80,11 @@ namespace Iviz.Msgs.MeshMsgs
         {
             return new GetGeometryRequest(ref b);
         }
+        
+        GetGeometryRequest IDeserializable<GetGeometryRequest>.RosDeserialize(ref Buffer b)
+        {
+            return new GetGeometryRequest(ref b);
+        }
     
         public void RosSerialize(ref Buffer b)
         {
@@ -101,7 +106,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
     }
 
-    public sealed class GetGeometryResponse : IResponse
+    public sealed class GetGeometryResponse : IResponse, IDeserializable<GetGeometryResponse>
     {
         [DataMember (Name = "mesh_geometry_stamped")] public MeshMsgs.MeshGeometryStamped MeshGeometryStamped { get; set; }
     
@@ -124,6 +129,11 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new GetGeometryResponse(ref b);
+        }
+        
+        GetGeometryResponse IDeserializable<GetGeometryResponse>.RosDeserialize(ref Buffer b)
         {
             return new GetGeometryResponse(ref b);
         }

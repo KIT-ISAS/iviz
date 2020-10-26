@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract (Name = "mesh_msgs/MeshGeometry")]
-    public sealed class MeshGeometry : IMessage
+    public sealed class MeshGeometry : IMessage, IDeserializable<MeshGeometry>
     {
         // Mesh Geometry Message
         [DataMember (Name = "vertices")] public GeometryMsgs.Point[] Vertices { get; set; }
@@ -41,6 +41,11 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new MeshGeometry(ref b);
+        }
+        
+        MeshGeometry IDeserializable<MeshGeometry>.RosDeserialize(ref Buffer b)
         {
             return new MeshGeometry(ref b);
         }

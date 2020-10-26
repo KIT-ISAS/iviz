@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibMsgs
 {
     [DataContract (Name = "actionlib_msgs/GoalStatus")]
-    public sealed class GoalStatus : IMessage
+    public sealed class GoalStatus : IMessage, IDeserializable<GoalStatus>
     {
         [DataMember (Name = "goal_id")] public GoalID GoalId { get; set; }
         [DataMember (Name = "status")] public byte Status { get; set; }
@@ -53,6 +53,11 @@ namespace Iviz.Msgs.ActionlibMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new GoalStatus(ref b);
+        }
+        
+        GoalStatus IDeserializable<GoalStatus>.RosDeserialize(ref Buffer b)
         {
             return new GoalStatus(ref b);
         }

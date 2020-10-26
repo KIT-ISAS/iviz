@@ -54,7 +54,7 @@ namespace Iviz.Msgs.StdSrvs
         [Preserve] public const string RosMd5Sum = "09fb03525b03e7ea1fd3992bafd87e16";
     }
 
-    public sealed class SetBoolRequest : IRequest
+    public sealed class SetBoolRequest : IRequest, IDeserializable<SetBoolRequest>
     {
         [DataMember (Name = "data")] public bool Data { get; set; } // e.g. for hardware enabling / disabling
     
@@ -79,6 +79,11 @@ namespace Iviz.Msgs.StdSrvs
         {
             return new SetBoolRequest(ref b);
         }
+        
+        SetBoolRequest IDeserializable<SetBoolRequest>.RosDeserialize(ref Buffer b)
+        {
+            return new SetBoolRequest(ref b);
+        }
     
         public void RosSerialize(ref Buffer b)
         {
@@ -92,7 +97,7 @@ namespace Iviz.Msgs.StdSrvs
         public int RosMessageLength => 1;
     }
 
-    public sealed class SetBoolResponse : IResponse
+    public sealed class SetBoolResponse : IResponse, IDeserializable<SetBoolResponse>
     {
         [DataMember (Name = "success")] public bool Success { get; set; } // indicate successful run of triggered service
         [DataMember (Name = "message")] public string Message { get; set; } // informational, e.g. for error messages
@@ -118,6 +123,11 @@ namespace Iviz.Msgs.StdSrvs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new SetBoolResponse(ref b);
+        }
+        
+        SetBoolResponse IDeserializable<SetBoolResponse>.RosDeserialize(ref Buffer b)
         {
             return new SetBoolResponse(ref b);
         }

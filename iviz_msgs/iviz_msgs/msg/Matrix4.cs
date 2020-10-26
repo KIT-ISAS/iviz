@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract (Name = "iviz_msgs/Matrix4")]
-    public sealed class Matrix4 : IMessage
+    public sealed class Matrix4 : IMessage, IDeserializable<Matrix4>
     {
         [DataMember (Name = "m")] public float[/*16*/] M { get; set; } // row major 
     
@@ -28,6 +28,11 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Matrix4(ref b);
+        }
+        
+        Matrix4 IDeserializable<Matrix4>.RosDeserialize(ref Buffer b)
         {
             return new Matrix4(ref b);
         }

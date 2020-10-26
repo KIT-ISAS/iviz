@@ -58,7 +58,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     {
     }
 
-    public sealed class TestResponseOnlyResponse : IResponse
+    public sealed class TestResponseOnlyResponse : IResponse, IDeserializable<TestResponseOnlyResponse>
     {
         [DataMember (Name = "data")] public int Data { get; set; }
     
@@ -80,6 +80,11 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new TestResponseOnlyResponse(ref b);
+        }
+        
+        TestResponseOnlyResponse IDeserializable<TestResponseOnlyResponse>.RosDeserialize(ref Buffer b)
         {
             return new TestResponseOnlyResponse(ref b);
         }

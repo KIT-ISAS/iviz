@@ -54,7 +54,7 @@ namespace Iviz.Msgs.Rosapi
         [Preserve] public const string RosMd5Sum = "dfadc39f113c1cc6d7759508d8461d5a";
     }
 
-    public sealed class SearchParamRequest : IRequest
+    public sealed class SearchParamRequest : IRequest, IDeserializable<SearchParamRequest>
     {
         [DataMember (Name = "name")] public string Name { get; set; }
     
@@ -80,6 +80,11 @@ namespace Iviz.Msgs.Rosapi
         {
             return new SearchParamRequest(ref b);
         }
+        
+        SearchParamRequest IDeserializable<SearchParamRequest>.RosDeserialize(ref Buffer b)
+        {
+            return new SearchParamRequest(ref b);
+        }
     
         public void RosSerialize(ref Buffer b)
         {
@@ -101,7 +106,7 @@ namespace Iviz.Msgs.Rosapi
         }
     }
 
-    public sealed class SearchParamResponse : IResponse
+    public sealed class SearchParamResponse : IResponse, IDeserializable<SearchParamResponse>
     {
         [DataMember (Name = "global_name")] public string GlobalName { get; set; }
     
@@ -124,6 +129,11 @@ namespace Iviz.Msgs.Rosapi
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new SearchParamResponse(ref b);
+        }
+        
+        SearchParamResponse IDeserializable<SearchParamResponse>.RosDeserialize(ref Buffer b)
         {
             return new SearchParamResponse(ref b);
         }

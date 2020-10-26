@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract (Name = "sensor_msgs/FluidPressure")]
-    public sealed class FluidPressure : IMessage
+    public sealed class FluidPressure : IMessage, IDeserializable<FluidPressure>
     {
         // Single pressure reading.  This message is appropriate for measuring the
         // pressure inside of a fluid (air, water, etc).  This also includes
@@ -39,6 +39,11 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new FluidPressure(ref b);
+        }
+        
+        FluidPressure IDeserializable<FluidPressure>.RosDeserialize(ref Buffer b)
         {
             return new FluidPressure(ref b);
         }

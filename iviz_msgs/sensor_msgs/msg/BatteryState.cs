@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract (Name = "sensor_msgs/BatteryState")]
-    public sealed class BatteryState : IMessage
+    public sealed class BatteryState : IMessage, IDeserializable<BatteryState>
     {
         // Constants are chosen to match the enums in the linux kernel
         // defined in include/linux/power_supply.h as of version 3.7
@@ -107,6 +107,11 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new BatteryState(ref b);
+        }
+        
+        BatteryState IDeserializable<BatteryState>.RosDeserialize(ref Buffer b)
         {
             return new BatteryState(ref b);
         }

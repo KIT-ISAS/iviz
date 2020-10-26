@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract (Name = "iviz_msgs/Light")]
-    public sealed class Light : IMessage
+    public sealed class Light : IMessage, IDeserializable<Light>
     {
         public const byte POINT = 0;
         public const byte DIRECTIONAL = 1;
@@ -55,6 +55,11 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Light(ref b);
+        }
+        
+        Light IDeserializable<Light>.RosDeserialize(ref Buffer b)
         {
             return new Light(ref b);
         }

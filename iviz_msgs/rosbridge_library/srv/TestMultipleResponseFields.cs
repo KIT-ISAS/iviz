@@ -58,7 +58,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     {
     }
 
-    public sealed class TestMultipleResponseFieldsResponse : IResponse
+    public sealed class TestMultipleResponseFieldsResponse : IResponse, IDeserializable<TestMultipleResponseFieldsResponse>
     {
         [DataMember (Name = "int")] public int @int { get; set; }
         [DataMember (Name = "float")] public float @float { get; set; }
@@ -90,6 +90,11 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new TestMultipleResponseFieldsResponse(ref b);
+        }
+        
+        TestMultipleResponseFieldsResponse IDeserializable<TestMultipleResponseFieldsResponse>.RosDeserialize(ref Buffer b)
         {
             return new TestMultipleResponseFieldsResponse(ref b);
         }

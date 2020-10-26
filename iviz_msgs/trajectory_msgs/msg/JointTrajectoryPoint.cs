@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.TrajectoryMsgs
 {
     [DataContract (Name = "trajectory_msgs/JointTrajectoryPoint")]
-    public sealed class JointTrajectoryPoint : IMessage
+    public sealed class JointTrajectoryPoint : IMessage, IDeserializable<JointTrajectoryPoint>
     {
         // Each trajectory point specifies either positions[, velocities[, accelerations]]
         // or positions[, effort] for the trajectory to be executed.
@@ -46,6 +46,11 @@ namespace Iviz.Msgs.TrajectoryMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new JointTrajectoryPoint(ref b);
+        }
+        
+        JointTrajectoryPoint IDeserializable<JointTrajectoryPoint>.RosDeserialize(ref Buffer b)
         {
             return new JointTrajectoryPoint(ref b);
         }

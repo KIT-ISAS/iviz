@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RosbridgeLibrary
 {
     [DataContract (Name = "rosbridge_library/TestHeader")]
-    public sealed class TestHeader : IMessage
+    public sealed class TestHeader : IMessage, IDeserializable<TestHeader>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
     
@@ -28,6 +28,11 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new TestHeader(ref b);
+        }
+        
+        TestHeader IDeserializable<TestHeader>.RosDeserialize(ref Buffer b)
         {
             return new TestHeader(ref b);
         }

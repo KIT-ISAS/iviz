@@ -54,7 +54,7 @@ namespace Iviz.Msgs.SensorMsgs
         [Preserve] public const string RosMd5Sum = "bef1df590ed75ed1f393692395e15482";
     }
 
-    public sealed class SetCameraInfoRequest : IRequest
+    public sealed class SetCameraInfoRequest : IRequest, IDeserializable<SetCameraInfoRequest>
     {
         // This service requests that a camera stores the given CameraInfo 
         // as that camera's calibration information.
@@ -87,6 +87,11 @@ namespace Iviz.Msgs.SensorMsgs
         {
             return new SetCameraInfoRequest(ref b);
         }
+        
+        SetCameraInfoRequest IDeserializable<SetCameraInfoRequest>.RosDeserialize(ref Buffer b)
+        {
+            return new SetCameraInfoRequest(ref b);
+        }
     
         public void RosSerialize(ref Buffer b)
         {
@@ -109,7 +114,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
     }
 
-    public sealed class SetCameraInfoResponse : IResponse
+    public sealed class SetCameraInfoResponse : IResponse, IDeserializable<SetCameraInfoResponse>
     {
         [DataMember (Name = "success")] public bool Success { get; set; } // True if the call succeeded
         [DataMember (Name = "status_message")] public string StatusMessage { get; set; } // Used to give details about success
@@ -135,6 +140,11 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new SetCameraInfoResponse(ref b);
+        }
+        
+        SetCameraInfoResponse IDeserializable<SetCameraInfoResponse>.RosDeserialize(ref Buffer b)
         {
             return new SetCameraInfoResponse(ref b);
         }

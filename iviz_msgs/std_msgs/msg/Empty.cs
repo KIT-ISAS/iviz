@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract (Name = "std_msgs/Empty")]
-    public sealed class Empty : IMessage
+    public sealed class Empty : IMessage, IDeserializable<Empty>
     {
         /// <summary> Constructor for empty message. </summary>
         public Empty()
@@ -18,6 +18,11 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Empty(ref b);
+        }
+        
+        Empty IDeserializable<Empty>.RosDeserialize(ref Buffer b)
         {
             return new Empty(ref b);
         }

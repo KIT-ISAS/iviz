@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace Iviz.Msgs
@@ -10,7 +8,14 @@ namespace Iviz.Msgs
     /// </summary>
     public unsafe struct Buffer
     {
+        /// <summary>
+        /// Current position.
+        /// </summary>
         byte* ptr;
+
+        /// <summary>
+        /// Maximal position.
+        /// </summary>
         readonly byte* end;
 
         Buffer(byte* ptr, byte* end)
@@ -75,19 +80,17 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal string[] DeserializeStringArray(uint count = 0)
+        internal string[] DeserializeStringArray()
         {
-            if (count == 0)
-            {
-                AssertInRange(4);
-                count = *(uint*) ptr;
-                ptr += 4;
-                if (count == 0)
-                {
-                    return Array.Empty<string>();
-                }
-            }
+            AssertInRange(4);
+            uint count = *(uint*) ptr;
+            ptr += 4;
+            return count == 0 ? Array.Empty<string>() : DeserializeStringArray(count);
+        }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal string[] DeserializeStringArray(uint count)
+        {
             string[] val = new string[count];
             for (int i = 0; i < val.Length; i++)
             {
@@ -238,34 +241,7 @@ namespace Iviz.Msgs
         /// Deserializes a message of the given type from the buffer array.  
         /// </summary>
         /// <param name="generator">
-        /// An arbitrary instance of the type T. Can be anything, for example "new T()".
-        /// This is a (rather unclean) workaround to the fact that C# cannot invoke static functions from generics.
-        /// So instead of using T.Deserialize(), we call the "static" method from the instance.
-        /// </param>
-        /// <param name="buffer">
-        /// The byte array that contains the serialized message. 
-        /// </param>
-        /// <typeparam name="T">Message type.</typeparam>
-        /// <returns>The deserialized message.</returns>
-        static T Deserialize<T>(T generator, in ArraySegment<byte> buffer) where T : ISerializable
-        {
-            if (generator == null)
-            {
-                throw new ArgumentNullException(nameof(generator));
-            }
-
-            fixed (byte* bPtr = buffer.Array)
-            {
-                Buffer b = new Buffer(bPtr + buffer.Offset, bPtr + buffer.Offset + buffer.Count);
-                return (T) generator.RosDeserialize(ref b);
-            }
-        }
-
-        /// <summary>
-        /// Deserializes a message of the given type from the buffer array.  
-        /// </summary>
-        /// <param name="generator">
-        /// An arbitrary instance of the type T. Can be anything.
+        /// An arbitrary instance of the type T. Can be anything, such as new T().
         /// This is a (rather unclean) workaround to the fact that C# cannot invoke static functions from generics.
         /// So instead of using T.Deserialize(), we need an instance to do this.
         /// </param>
@@ -279,27 +255,64 @@ namespace Iviz.Msgs
         /// <returns>The deserialized message.</returns>
         public static T Deserialize<T>(T generator, byte[] buffer, int size = -1) where T : ISerializable
         {
-            ArraySegment<byte> segment;
             if (buffer == null)
             {
                 throw new ArgumentNullException(nameof(buffer));
             }
 
-            if (size == -1)
+            if (generator == null)
             {
-                segment = new ArraySegment<byte>(buffer);
-            }
-            else
-            {
-                if (buffer.Length < size)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(buffer));
-                }
-
-                segment = new ArraySegment<byte>(buffer, 0, size);
+                throw new ArgumentNullException(nameof(generator));
             }
 
-            return Deserialize(generator, segment);
+            fixed (byte* bPtr = buffer)
+            {
+                int span = (size == -1) ? buffer.Length : size;
+                Buffer b = new Buffer(bPtr, bPtr + span);
+                return (T) generator.RosDeserialize(ref b);
+            }
+        }
+
+        /// <summary>
+        /// Deserializes a message of the given type from the buffer array.  
+        /// </summary>
+        /// <param name="generator">
+        /// An arbitrary instance of the type T. Can be anything, such as new T().
+        /// This is a (rather unclean) workaround to the fact that C# cannot invoke static functions from generics.
+        /// So instead of using T.Deserialize(), we need an instance to do this.
+        /// </param>
+        /// <param name="buffer">
+        /// The source byte array. 
+        /// </param>
+        /// <param name="size">
+        /// Optional. The expected size of the message inside of the array. Must be less or equal the array size.
+        /// </param>
+        /// <typeparam name="T">Message type.</typeparam>
+        /// <returns>The deserialized message.</returns>
+        public static T Deserialize<T>(IDeserializable<T> generator, byte[] buffer, int size = -1)
+            where T : ISerializable
+        {
+            if (buffer == null)
+            {
+                throw new ArgumentNullException(nameof(buffer));
+            }
+
+            if (buffer.Length < size || size < -1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(size));
+            }
+
+            if (generator == null)
+            {
+                throw new ArgumentNullException(nameof(generator));
+            }
+
+            fixed (byte* bPtr = buffer)
+            {
+                int span = (size == -1) ? buffer.Length : size;
+                Buffer b = new Buffer(bPtr, bPtr + span);
+                return generator.RosDeserialize(ref b);
+            }
         }
 
         /// <summary>
@@ -308,35 +321,24 @@ namespace Iviz.Msgs
         /// <param name="message">The ROS message.</param>
         /// <param name="buffer">The destination byte array.</param>
         /// <returns>The number of bytes written.</returns>
-        static uint Serialize(ISerializable message, ArraySegment<byte> buffer)
+        public static uint Serialize<T>(in T message, byte[] buffer) where T : ISerializable
         {
+            if (buffer == null)
+            {
+                throw new ArgumentNullException(nameof(buffer));
+            }
+
             if (message is null)
             {
                 throw new ArgumentNullException(nameof(message));
             }
 
-            fixed (byte* bPtr = buffer.Array)
+            fixed (byte* bPtr = buffer)
             {
-                Buffer b = new Buffer(bPtr + buffer.Offset, bPtr + buffer.Offset + buffer.Count);
+                Buffer b = new Buffer(bPtr, bPtr + buffer.Length);
                 message.RosSerialize(ref b);
                 return (uint) (b.ptr - bPtr);
             }
-        }
-
-        /// <summary>
-        /// Serializes the given message into the buffer array.
-        /// </summary>
-        /// <param name="message">The ROS message.</param>
-        /// <param name="buffer">The destination byte array.</param>
-        /// <returns>The number of bytes written.</returns>
-        public static uint Serialize(ISerializable message, byte[] buffer)
-        {
-            if (buffer == null)
-            {
-                throw new ArgumentNullException(nameof(buffer));
-            }
-
-            return Serialize(message, new ArraySegment<byte>(buffer));
         }
     }
 }

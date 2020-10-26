@@ -54,7 +54,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         [Preserve] public const string RosMd5Sum = "e6ac9bbde83d0d3186523c3687aecaee";
     }
 
-    public sealed class AddDiagnosticsRequest : IRequest
+    public sealed class AddDiagnosticsRequest : IRequest, IDeserializable<AddDiagnosticsRequest>
     {
         // This service is used as part of the process for loading analyzers at runtime,
         // and should be used by a loader script or program, not as a standalone service.
@@ -95,6 +95,11 @@ namespace Iviz.Msgs.DiagnosticMsgs
         {
             return new AddDiagnosticsRequest(ref b);
         }
+        
+        AddDiagnosticsRequest IDeserializable<AddDiagnosticsRequest>.RosDeserialize(ref Buffer b)
+        {
+            return new AddDiagnosticsRequest(ref b);
+        }
     
         public void RosSerialize(ref Buffer b)
         {
@@ -116,7 +121,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
     }
 
-    public sealed class AddDiagnosticsResponse : IResponse
+    public sealed class AddDiagnosticsResponse : IResponse, IDeserializable<AddDiagnosticsResponse>
     {
         // True if diagnostic aggregator was updated with new diagnostics, False
         // otherwise. A false return value means that either there is a bond in the
@@ -147,6 +152,11 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new AddDiagnosticsResponse(ref b);
+        }
+        
+        AddDiagnosticsResponse IDeserializable<AddDiagnosticsResponse>.RosDeserialize(ref Buffer b)
         {
             return new AddDiagnosticsResponse(ref b);
         }

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RosgraphMsgs
 {
     [DataContract (Name = "rosgraph_msgs/TopicStatistics")]
-    public sealed class TopicStatistics : IMessage
+    public sealed class TopicStatistics : IMessage, IDeserializable<TopicStatistics>
     {
         // name of the topic
         [DataMember (Name = "topic")] public string Topic { get; set; }
@@ -80,6 +80,11 @@ namespace Iviz.Msgs.RosgraphMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new TopicStatistics(ref b);
+        }
+        
+        TopicStatistics IDeserializable<TopicStatistics>.RosDeserialize(ref Buffer b)
         {
             return new TopicStatistics(ref b);
         }

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract (Name = "iviz_msgs/Texture")]
-    public sealed class Texture : IMessage
+    public sealed class Texture : IMessage, IDeserializable<Texture>
     {
         [DataMember (Name = "path")] public string Path { get; set; }
         [DataMember (Name = "width")] public uint Width { get; set; }
@@ -41,6 +41,11 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Texture(ref b);
+        }
+        
+        Texture IDeserializable<Texture>.RosDeserialize(ref Buffer b)
         {
             return new Texture(ref b);
         }

@@ -7,7 +7,7 @@ namespace Iviz.Msgs.StdMsgs
 {
     [DataContract (Name = "std_msgs/UInt16")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct UInt16 : IMessage, System.IEquatable<UInt16>
+    public struct UInt16 : IMessage, System.IEquatable<UInt16>, IDeserializable<UInt16>
     {
         [DataMember (Name = "data")] public ushort Data { get; set; }
     
@@ -24,6 +24,11 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         public readonly ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new UInt16(ref b);
+        }
+        
+        readonly UInt16 IDeserializable<UInt16>.RosDeserialize(ref Buffer b)
         {
             return new UInt16(ref b);
         }

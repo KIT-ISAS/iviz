@@ -54,7 +54,7 @@ namespace Iviz.Msgs.Rosapi
         [Preserve] public const string RosMd5Sum = "93e9fe8ae5a9136008e260fe510bd2b0";
     }
 
-    public sealed class ServicesForTypeRequest : IRequest
+    public sealed class ServicesForTypeRequest : IRequest, IDeserializable<ServicesForTypeRequest>
     {
         [DataMember (Name = "type")] public string Type { get; set; }
     
@@ -80,6 +80,11 @@ namespace Iviz.Msgs.Rosapi
         {
             return new ServicesForTypeRequest(ref b);
         }
+        
+        ServicesForTypeRequest IDeserializable<ServicesForTypeRequest>.RosDeserialize(ref Buffer b)
+        {
+            return new ServicesForTypeRequest(ref b);
+        }
     
         public void RosSerialize(ref Buffer b)
         {
@@ -101,7 +106,7 @@ namespace Iviz.Msgs.Rosapi
         }
     }
 
-    public sealed class ServicesForTypeResponse : IResponse
+    public sealed class ServicesForTypeResponse : IResponse, IDeserializable<ServicesForTypeResponse>
     {
         [DataMember (Name = "services")] public string[] Services { get; set; }
     
@@ -124,6 +129,11 @@ namespace Iviz.Msgs.Rosapi
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new ServicesForTypeResponse(ref b);
+        }
+        
+        ServicesForTypeResponse IDeserializable<ServicesForTypeResponse>.RosDeserialize(ref Buffer b)
         {
             return new ServicesForTypeResponse(ref b);
         }

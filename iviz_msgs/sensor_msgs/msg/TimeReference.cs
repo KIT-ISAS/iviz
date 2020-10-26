@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract (Name = "sensor_msgs/TimeReference")]
-    public sealed class TimeReference : IMessage
+    public sealed class TimeReference : IMessage, IDeserializable<TimeReference>
     {
         // Measurement from an external time source not actively synchronized with the system clock.
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; } // stamp is system time for which measurement was valid
@@ -37,6 +37,11 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new TimeReference(ref b);
+        }
+        
+        TimeReference IDeserializable<TimeReference>.RosDeserialize(ref Buffer b)
         {
             return new TimeReference(ref b);
         }

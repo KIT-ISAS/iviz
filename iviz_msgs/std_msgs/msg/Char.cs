@@ -7,7 +7,7 @@ namespace Iviz.Msgs.StdMsgs
 {
     [DataContract (Name = "std_msgs/Char")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Char : IMessage, System.IEquatable<Char>
+    public struct Char : IMessage, System.IEquatable<Char>, IDeserializable<Char>
     {
         [DataMember (Name = "data")] public sbyte Data { get; set; }
     
@@ -24,6 +24,11 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         public readonly ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new Char(ref b);
+        }
+        
+        readonly Char IDeserializable<Char>.RosDeserialize(ref Buffer b)
         {
             return new Char(ref b);
         }

@@ -7,7 +7,7 @@ namespace Iviz.Msgs.StdMsgs
 {
     [DataContract (Name = "std_msgs/UInt64")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct UInt64 : IMessage, System.IEquatable<UInt64>
+    public struct UInt64 : IMessage, System.IEquatable<UInt64>, IDeserializable<UInt64>
     {
         [DataMember (Name = "data")] public ulong Data { get; set; }
     
@@ -24,6 +24,11 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         public readonly ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new UInt64(ref b);
+        }
+        
+        readonly UInt64 IDeserializable<UInt64>.RosDeserialize(ref Buffer b)
         {
             return new UInt64(ref b);
         }

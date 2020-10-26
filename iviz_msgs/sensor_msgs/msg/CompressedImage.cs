@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract (Name = "sensor_msgs/CompressedImage")]
-    public sealed class CompressedImage : IMessage
+    public sealed class CompressedImage : IMessage, IDeserializable<CompressedImage>
     {
         // This message contains a compressed image
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; } // Header timestamp should be acquisition time of image
@@ -44,6 +44,11 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new CompressedImage(ref b);
+        }
+        
+        CompressedImage IDeserializable<CompressedImage>.RosDeserialize(ref Buffer b)
         {
             return new CompressedImage(ref b);
         }

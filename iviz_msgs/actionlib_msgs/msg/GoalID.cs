@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibMsgs
 {
     [DataContract (Name = "actionlib_msgs/GoalID")]
-    public sealed class GoalID : IMessage
+    public sealed class GoalID : IMessage, IDeserializable<GoalID>
     {
         // The stamp should store the time at which this goal was requested.
         // It is used by an action server when it tries to preempt all
@@ -37,6 +37,11 @@ namespace Iviz.Msgs.ActionlibMsgs
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return new GoalID(ref b);
+        }
+        
+        GoalID IDeserializable<GoalID>.RosDeserialize(ref Buffer b)
         {
             return new GoalID(ref b);
         }
