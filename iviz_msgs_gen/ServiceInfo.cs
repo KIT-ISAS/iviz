@@ -93,7 +93,7 @@ namespace Iviz.MsgsGen
                 return lines;
             }
 
-            lines.Add("public sealed class " + name + " : " + (isRequest ? "IRequest" : "IResponse"));
+            lines.Add("public sealed class " + name + " : " + (isRequest ? "IRequest" : "IResponse") + ", IDeserializable<" + name + ">");
 
             lines.Add("{");
 
