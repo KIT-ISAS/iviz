@@ -54,7 +54,7 @@ namespace iviz_test
 
             RosClient client = new RosClient(masterUri, callerId);
 
-            client.Advertise<PoseStamped>("/test_topic", out RosPublisher publisher);
+            client.Advertise("/test_topic", out RosPublisher<PoseStamped> publisher);
 
             PoseStamped msg = new PoseStamped
             {
@@ -126,7 +126,7 @@ namespace iviz_test
                 "http://192.168.0.157:7619"
                 //"http://141.3.59.19:7621"
             );            
-            client.Advertise<JointState>("/joints", out RosPublisher publisher2);
+            client.Advertise("/joints", out RosPublisher<JointState> publisher2);
 
             double k = 0.5f;
             while (true)
@@ -203,8 +203,8 @@ namespace iviz_test
 
             intMarker.Controls = new[] {boxControl, control, control2};
 
-            client.Advertise<InteractiveMarkerUpdate>("/update", out RosPublisher publisher);
-            client.Advertise<TFMessage>("/tf", out RosPublisher publisher2);
+            client.Advertise("/update", out RosPublisher<InteractiveMarkerUpdate> publisher);
+            client.Advertise("/tf", out RosPublisher<TFMessage> publisher2);
             client.Subscribe<InteractiveMarkerFeedback>("/interactive_markers/feedback", Callback);
             while (true)
             {
@@ -290,7 +290,7 @@ namespace iviz_test
 
             path.Poses = list.ToArray();
 
-            client.Advertise<Iviz.Msgs.NavMsgs.Path>("/my_path", out RosPublisher publisher);
+            client.Advertise("/my_path", out RosPublisher<Iviz.Msgs.NavMsgs.Path> publisher);
             while (true)
             {
                 Console.WriteLine("publishing...");
@@ -315,8 +315,8 @@ namespace iviz_test
             */
 
 
-            client.Advertise<TFMessage>("/tf", out RosPublisher publisherTf);
-            client.Advertise<MarkerArray>("/test_markers", out RosPublisher publisherMarkers);
+            client.Advertise("/tf", out RosPublisher<TFMessage> publisherTf);
+            client.Advertise("/test_markers", out RosPublisher<MarkerArray> publisherMarkers);
 
             TransformStamped[] tfs = new TransformStamped[1];
             tfs[0] = new TransformStamped
@@ -531,7 +531,7 @@ namespace iviz_test
             client.Close();
             */
             //client.Subscribe<TFMessage>("/tf", Callback);
-            client.Advertise<TFMessage>("/tf", out RosPublisher publisher);
+            client.Advertise("/tf", out RosPublisher<TFMessage> publisher);
 
             //client.Subscribe<Marker>("/hololens/environment", Callback);
 
