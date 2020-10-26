@@ -92,7 +92,14 @@ namespace Iviz.Roslib
         {
             foreach (Action<T> callback in callbacksById.Values)
             {
-                callback(msg);
+                try
+                {
+                    callback(msg);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogError($"{this}: Exception from callback : {e}");
+                }
             }
         }
 

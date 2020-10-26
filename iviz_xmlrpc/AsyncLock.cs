@@ -62,14 +62,14 @@ namespace Iviz.XmlRpc
             return @lock;
         }
 
-        public async ValueTask<InnerLock> LockAsync()
+        public async Task<InnerLock> LockAsync()
         {
             var @lock = new InnerLock(this);
             await @lock.ObtainLockAsync();
             return @lock;
         }
 
-        public async ValueTask<InnerLock> LockAsync(CancellationToken ct)
+        public async Task<InnerLock> LockAsync(CancellationToken ct)
         {
             var @lock = new InnerLock(this);
             await @lock.ObtainLockAsync(ct);

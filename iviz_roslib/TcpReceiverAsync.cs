@@ -132,7 +132,7 @@ namespace Iviz.Roslib
             return contents;
         }
 
-        async ValueTask<int> ReceivePacket()
+        async Task<int> ReceivePacket()
         {
             int numRead = 0;
             while (numRead < 4)
@@ -315,15 +315,7 @@ namespace Iviz.Roslib
                 }
 
                 T message = Buffer.Deserialize(topicInfo.Generator, readBuffer, rcvLength);
-
-                try
-                {
-                    manager.Subscriber.MessageCallback(message);
-                }
-                catch (Exception e)
-                {
-                    Logger.LogError($"{this}: Exception from callback : {e}");
-                }
+                manager.MessageCallback(message);
 
                 numReceived++;
                 bytesReceived += rcvLength + 4;

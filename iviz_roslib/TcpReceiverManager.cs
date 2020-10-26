@@ -52,7 +52,7 @@ namespace Iviz.Roslib
 
         public bool RequestNoDelay { get; }
         public int TimeoutInMs { get; set; } = DefaultTimeoutInMs;
-        public RosSubscriber<T> Subscriber { get; set; }
+        public RosSubscriber<T> Subscriber { private get; set; }
 
         internal async Task<Endpoint> RequestConnectionFromPublisherAsync(Uri remoteUri)
         {
@@ -80,6 +80,11 @@ namespace Iviz.Roslib
             Logger.LogDebug(
                 $"{this}: Connection request to publisher {remoteUri} has failed: {response.StatusMessage}");
             return null;
+        }
+
+        internal void MessageCallback(in T msg)
+        {
+            Subscriber.MessageCallback(msg);
         }
 
         async Task<bool> AddPublisherAsync(Uri remoteUri)
