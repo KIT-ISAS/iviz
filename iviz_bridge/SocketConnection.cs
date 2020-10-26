@@ -143,7 +143,7 @@ namespace Iviz.Bridge
                                 msg.Topic,
                                 x => MessageCallback(msg.Topic, x),
                                 typeInfo.msgType,
-                                out RosSubscriber subscriber,
+                                out IRosSubscriber subscriber,
                                 true);
                             subscription = new Subscription(
                                 msg.Topic, typeInfo, subscriber, subscriptionId);
@@ -169,7 +169,7 @@ namespace Iviz.Bridge
                             string advertisementId = client.RosClient.Advertise(
                                 msg.Topic,
                                 typeInfo.msgType,
-                                out RosPublisher publisher
+                                out IRosPublisher publisher
                                 );
                             advertisement = new Advertisement(
                                 msg.Topic, typeInfo, publisher, advertisementId);

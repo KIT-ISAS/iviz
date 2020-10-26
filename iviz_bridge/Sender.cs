@@ -19,7 +19,6 @@ namespace Iviz.Bridge
         protected TypeInfo type;
         protected bool keepRunning;
         protected RosClient client;
-        protected RosPublisher publisher;
         Task task;
 
         public int Port { get; private set; }
@@ -75,8 +74,9 @@ namespace Iviz.Bridge
         }
     }
 
-    class SenderImpl<T> : Sender where T : IMessage, new()
+    class SenderImpl<T> : Sender where T : IMessage,  IDeserializable<T>, new()
     {
+        RosPublisher<T> publisher;
         readonly List<SenderSocket<T>> publishers = new List<SenderSocket<T>>();
 
         DateTime emptyTime = DateTime.Now;
@@ -106,19 +106,20 @@ namespace Iviz.Bridge
             //publisher?.Cleanup();
             lock (publishers)
             {
-                var deadSockets = publishers.Where(x => !x.IsAlive);
-                if (deadSockets.Any())
+                var deadSockets = publishers.Where(x => !x.IsAlive).ToArray();
+                if (!deadSockets.Any())
                 {
-                    var deadSocketsArray = deadSockets.ToArray();
-                    foreach (var socket in deadSockets)
-                    {
-                        socket.Stop();
-                        publishers.Remove(socket);
-                    }
-                    if (publishers.Count == 0)
-                    {
-                        emptyTime = DateTime.Now;
-                    }
+                    return;
+                }
+
+                foreach (var socket in deadSockets)
+                {
+                    socket.Stop();
+                    publishers.Remove(socket);
+                }
+                if (publishers.Count == 0)
+                {
+                    emptyTime = DateTime.Now;
                 }
             }
         }
@@ -139,21 +140,21 @@ namespace Iviz.Bridge
         }
     }
 
-    class SenderSocket<T> where T : IMessage, new()
+    class SenderSocket<T> where T : IMessage, IDeserializable<T>, new()
     {
-        readonly RosPublisher publisher;
+        readonly RosPublisher<T> publisher;
         readonly string id;
         readonly TcpClient client;
         readonly BinaryReader reader;
         byte[] buffer = new byte[0];
-        readonly T generator;
+        readonly IDeserializable<T> generator;
 
         bool keepRunning;
         readonly Task task;
 
         public bool IsAlive => client.Connected;
 
-        public SenderSocket(RosPublisher publisher, TcpClient client)
+        public SenderSocket(RosPublisher<T> publisher, TcpClient client)
         {
             //Console.WriteLine("-- Starting SenderSocket " + id);
 
@@ -190,7 +191,7 @@ namespace Iviz.Bridge
                     }
                     reader.Read(buffer, 0, length);
 
-                    IMessage msg = Msgs.Buffer.Deserialize(generator, buffer, length);
+                    T msg = Msgs.Buffer.Deserialize(generator, buffer, length);
                     publisher.Publish(msg);
                 }
             }

@@ -36,9 +36,9 @@ namespace Iviz.Bridge
 
     class Subscription : TopicAction
     {
-        public readonly RosSubscriber subscriber;
+        public readonly IRosSubscriber subscriber;
 
-        public Subscription(string topic, TypeInfo type, RosSubscriber subscriber, string topicId)
+        public Subscription(string topic, TypeInfo type, IRosSubscriber subscriber, string topicId)
             : base(topic, type, topicId)
         {
             this.subscriber = subscriber;
@@ -57,9 +57,9 @@ namespace Iviz.Bridge
 
     class Advertisement : TopicAction
     {
-        public readonly RosPublisher publisher;
+        public readonly IRosPublisher publisher;
 
-        public Advertisement(string topic, TypeInfo type, RosPublisher publisher, string topicId)
+        public Advertisement(string topic, TypeInfo type, IRosPublisher publisher, string topicId)
             : base(topic, type, topicId)
         {
             this.publisher = publisher;

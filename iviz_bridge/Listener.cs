@@ -12,12 +12,10 @@ namespace Iviz.Bridge
 {
     abstract class Listener
     {
-        protected TcpListener listener;
         protected string topic;
-        protected TypeInfo type;
-        protected bool keepRunning;
         protected RosClient client;
-        protected RosSubscriber subscriber;
+        TcpListener listener;
+        bool keepRunning;
         //Task task;
 
         public int Port { get; private set; }
@@ -31,7 +29,6 @@ namespace Iviz.Bridge
             keepRunning = true;
             this.client = client;
             this.topic = topic;
-            this.type = type;
             listener = new TcpListener(IPAddress.Any, 0);
             listener.Start();
             Port = ((IPEndPoint)listener.LocalEndpoint).Port;
@@ -45,9 +42,8 @@ namespace Iviz.Bridge
             {
                 while (keepRunning)
                 {
-                    //TcpClient client = listener.AcceptTcpClient();
-                    TcpClient client = await listener.AcceptTcpClientAsync().ConfigureAwait(false);
-                    Process(client);
+                    TcpClient tcpClient = await listener.AcceptTcpClientAsync();
+                    Process(tcpClient);
                 }
             }
             catch (Exception e)
@@ -75,8 +71,10 @@ namespace Iviz.Bridge
         }
     }
 
-    class ListenerImpl<T> : Listener where T : IMessage, new()
+    class ListenerImpl<T> : Listener where T : IMessage, IDeserializable<T>, new()
     {
+        RosSubscriber<T> subscriber;
+        
         readonly List<ListenerSocket<T>> subscribers = new List<ListenerSocket<T>>();
 
         DateTime emptyTime = DateTime.Now;
@@ -87,7 +85,7 @@ namespace Iviz.Bridge
             ListenerSocket<T> socket;
             if (subscriber == null)
             {
-                string tmpId = client.Subscribe<T>(topic, null, out subscriber);
+                string tmpId = client.Subscribe(topic, x => { }, out subscriber);
                 socket = new ListenerSocket<T>(subscriber, tcpClient);
                 client.Unsubscribe(tmpId);
             }
@@ -106,19 +104,20 @@ namespace Iviz.Bridge
             //subscriber?.Cleanup();
             lock (subscribers)
             {
-                var deadSockets = subscribers.Where(x => !x.IsAlive);
-                if (deadSockets.Any())
+                var deadSockets = subscribers.Where(x => !x.IsAlive).ToArray();
+                if (!deadSockets.Any())
                 {
-                    var deadSocketsArray = deadSockets.ToArray();
-                    foreach (var socket in deadSockets)
-                    {
-                        socket.Stop();
-                        subscribers.Remove(socket);
-                    }
-                    if (subscribers.Count == 0)
-                    {
-                        emptyTime = DateTime.Now;
-                    }
+                    return;
+                }
+
+                foreach (var socket in deadSockets)
+                {
+                    socket.Stop();
+                    subscribers.Remove(socket);
+                }
+                if (subscribers.Count == 0)
+                {
+                    emptyTime = DateTime.Now;
                 }
             }
         }
@@ -141,7 +140,7 @@ namespace Iviz.Bridge
 
     class ListenerSocket<T> where T : IMessage, new()
     {
-        readonly RosSubscriber subscriber;
+        readonly RosSubscriber<T> subscriber;
         readonly string id;
         readonly TcpClient client;
         readonly BinaryWriter writer;
@@ -151,7 +150,7 @@ namespace Iviz.Bridge
 
         public bool IsAlive => client.Connected;
 
-        public ListenerSocket(RosSubscriber subscriber, TcpClient client)
+        public ListenerSocket(RosSubscriber<T> subscriber, TcpClient client)
         {
             //Console.WriteLine("++ Starting ListenerSocket " + id);
 
@@ -171,9 +170,9 @@ namespace Iviz.Bridge
             //Console.WriteLine("-- Stopping ListenerSocket " + id);
         }
 
-        void Callback(IMessage msg)
+        void Callback(T msg)
         {
-            queue.Enqueue((T)msg);
+            queue.Enqueue(msg);
         }
 
         bool Process(T msg)
