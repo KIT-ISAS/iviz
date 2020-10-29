@@ -46,7 +46,7 @@ namespace Iviz.RosMaster
         {
             MasterUri = masterUri;
             MasterCallerId = callerId;
-            listener = new HttpListener(masterUri);
+            listener = new HttpListener(masterUri.Port);
 
             methods = new Dictionary<string, Func<object[], Arg[]>>
             {
@@ -109,16 +109,13 @@ namespace Iviz.RosMaster
 
         async Task StartContext(HttpListenerContext context)
         {
-            using (context)
+            try
             {
-                try
-                {
-                    await XmlRpcService.MethodResponseAsync(context, methods, lateCallbacks);
-                }
-                catch (Exception e)
-                {
-                    Logger.LogError(e);
-                }
+                await XmlRpcService.MethodResponseAsync(context, methods, lateCallbacks);
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e);
             }
         }
 
