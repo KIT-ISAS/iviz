@@ -26,6 +26,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_rosmaster", "iviz_rosm
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_rosmaster_lib", "iviz_rosmaster_lib\iviz_rosmaster_lib.csproj", "{0288F28C-4FC0-4B6E-BA07-0663F4EC5603}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_msgs_gen_lib", "iviz_msgs_gen_lib\iviz_msgs_gen_lib.csproj", "{CBAB9820-EF39-4706-8FE4-77AC58D6C041}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -80,6 +82,10 @@ Global
 		{0288F28C-4FC0-4B6E-BA07-0663F4EC5603}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0288F28C-4FC0-4B6E-BA07-0663F4EC5603}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0288F28C-4FC0-4B6E-BA07-0663F4EC5603}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CBAB9820-EF39-4706-8FE4-77AC58D6C041}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBAB9820-EF39-4706-8FE4-77AC58D6C041}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBAB9820-EF39-4706-8FE4-77AC58D6C041}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBAB9820-EF39-4706-8FE4-77AC58D6C041}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
