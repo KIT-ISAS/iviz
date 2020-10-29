@@ -7,125 +7,111 @@ using System.Text;
 
 namespace Iviz.MsgsGen
 {
-    public class ServiceInfo
+    public sealed class ServiceInfo
     {
-        public readonly string rosPackage;
-        public readonly string package;
-        public readonly string name;
-        public readonly string fullMessage;
+        readonly IElement[] elementsReq;
+        readonly IElement[] elementsResp;
 
-        public readonly List<MsgParser.IElement> elementsReq;
-        public readonly List<MsgParser.IElement> elementsResp;
+        readonly VariableElement[] variablesReq;
+        readonly VariableElement[] variablesResp;
 
-        public readonly List<MsgParser.Variable> variablesReq;
-        public readonly List<MsgParser.Variable> variablesResp;
+        int fixedSizeReq = ClassInfo.UninitializedSize;
+        int fixedSizeResp = ClassInfo.UninitializedSize;
 
-        int fixedSizeReq = -2;
-        int fixedSizeResp = -2;
-
-        readonly bool hasStrings;
-
-        public ServiceInfo(string package, string path)
+        internal ServiceInfo(string package, string path)
         {
-            Console.WriteLine("-- Parsing '" + path + "'");
+            Console.WriteLine($"-- Parsing '{path}'");
 
-            this.rosPackage = package;
-            this.package = MsgParser.Sanitize(package);
-            name = Path.GetFileNameWithoutExtension(path);
-            string[] lines = File.ReadAllLines(path);
-            fullMessage = File.ReadAllText(path);
+            RosPackage = package;
+            Package = MsgParser.Sanitize(package);
+            Name = Path.GetFileNameWithoutExtension(path);
+            var lines = File.ReadAllLines(path);
+            File.ReadAllText(path);
 
-            List<MsgParser.IElement> elements = MsgParser.ParseFile(lines, name);
-            int serviceSeparator = elements.FindIndex(x => x.Type == MsgParser.ElementType.ServiceSeparator);
+            var elements = MsgParser.ParseFile(lines, Name);
+            var serviceSeparator = elements.FindIndex(x => x.Type == ElementType.ServiceSeparator);
             if (serviceSeparator == -1)
             {
                 throw new ArgumentException();
             }
-            elementsReq = elements.GetRange(0, serviceSeparator);
-            elementsResp = elements.GetRange(serviceSeparator + 1, elements.Count - serviceSeparator - 1);
 
-            variablesReq = elementsReq.
-                Where(x => x.Type == MsgParser.ElementType.Variable).
-                Cast<MsgParser.Variable>().
-                ToList();
-            
-            variablesResp = elementsResp.
-                Where(x => x.Type == MsgParser.ElementType.Variable).
-                Cast<MsgParser.Variable>().
-                ToList();
+            elementsReq = elements.GetRange(0, serviceSeparator).ToArray();
+            elementsResp = elements.GetRange(serviceSeparator + 1, elements.Count - serviceSeparator - 1).ToArray();
 
-            hasStrings = elements.Any(x =>
-                ((x is MsgParser.Variable xv) && xv.className == "string") ||
-                ((x is MsgParser.Constant xc) && xc.className == "string")
-            );
+            variablesReq = elementsReq.OfType<VariableElement>().ToArray();
+            variablesResp = elementsResp.OfType<VariableElement>().ToArray();
         }
 
-        public void ResolveClasses(PackageInfo packageInfo)
+        public string RosPackage { get; }
+        public string Package { get; }
+        public string Name { get; }
+
+        internal void ResolveClasses(PackageInfo packageInfo)
         {
-            ClassInfo.DoResolveClasses(packageInfo, rosPackage, variablesReq);
-            ClassInfo.DoResolveClasses(packageInfo, rosPackage, variablesResp);
+            ClassInfo.DoResolveClasses(packageInfo, RosPackage, variablesReq);
+            ClassInfo.DoResolveClasses(packageInfo, RosPackage, variablesResp);
         }
 
-        public void CheckFixedSize()
+        internal void CheckFixedSize()
         {
             ClassInfo.DoCheckFixedSize(ref fixedSizeReq, variablesReq);
             ClassInfo.DoCheckFixedSize(ref fixedSizeResp, variablesResp);
         }
 
-        static List<string> CreateClassContent(
-            List<MsgParser.IElement> elements,
-            List<MsgParser.Variable> variables,
+        static IEnumerable<string> CreateClassContent(
+            IReadOnlyCollection<IElement> elements,
+            IReadOnlyCollection<VariableElement> variables,
             string service,
             int fixedSize,
             bool isRequest
-            )
+        )
         {
-            const bool forceStruct = false;
+            var name = service + (isRequest ? "Request" : "Response");
 
-            string name = service + (isRequest ? "Request" : "Response");
-
-            List<string> lines = new List<string>();
             if (elements.Count == 0)
             {
-                lines.Add("public sealed class " + name + " : Internal.Empty" + (isRequest ? "Request" : "Response"));
-                lines.Add("{");
-                lines.Add("}");
-                return lines;
+                return new[]
+                {
+                    $"public sealed class {name} : Internal.Empty{(isRequest ? "Request" : "Response")}",
+                    "{",
+                    "}"
+                };
             }
 
-            lines.Add("public sealed class " + name + " : " + (isRequest ? "IRequest" : "IResponse") + ", IDeserializable<" + name + ">");
-
+            var lines = new List<string>();
+            lines.Add(
+                $"public sealed class {name} : {(isRequest ? "IRequest" : "IResponse")}, IDeserializable<{name}>");
             lines.Add("{");
 
             foreach (var element in elements)
             {
-                var sublines = element.ToCString(forceStruct);
+                var sublines = element.ToCsString();
                 foreach (var entry in sublines)
                 {
-                    lines.Add("    " + entry);
+                    lines.Add($"    {entry}");
                 }
             }
 
             lines.Add("");
 
-            List<string> deserializer = ClassInfo.CreateConstructors(variables, name, forceStruct);
+            var deserializer = ClassInfo.CreateConstructors(variables, name, false);
             foreach (var entry in deserializer)
             {
-                lines.Add("    " + entry);
+                lines.Add($"    {entry}");
             }
 
             lines.Add("");
-            List<string> serializer = ClassInfo.CreateSerializers(variables, forceStruct);
+            var serializer = ClassInfo.CreateSerializers(variables, false);
             foreach (var entry in serializer)
             {
-                lines.Add("    " + entry);
+                lines.Add($"    {entry}");
             }
 
             lines.Add("");
-            List<string> lengthProperty = ClassInfo.CreateLengthProperty(variables, fixedSize, false);
+            var lengthProperty = ClassInfo.CreateLengthProperty(variables, fixedSize, false);
             foreach (var entry in lengthProperty)
             {
-                lines.Add("    " + entry);
+                lines.Add($"    {entry}");
             }
 
             lines.Add("}");
@@ -133,29 +119,25 @@ namespace Iviz.MsgsGen
             return lines;
         }
 
-        public void AddDependencies(List<ClassInfo> dependencies, List<MsgParser.Variable> variables)
+        void AddDependencies(List<ClassInfo> dependencies, List<VariableElement> variables)
         {
             foreach (var variable in variables)
             {
-                if (variable.classInfo != null &&
-                    !dependencies.Contains(variable.classInfo))
+                if (variable.ClassInfo != null &&
+                    !dependencies.Contains(variable.ClassInfo))
                 {
-                    dependencies.Add(variable.classInfo);
-                    variable.classInfo.AddDependencies(dependencies);
+                    dependencies.Add(variable.ClassInfo);
+                    variable.ClassInfo.AddDependencies(dependencies);
                 }
             }
         }
 
         string GetMd5()
         {
-            StringBuilder str = new StringBuilder();
+            var str = new StringBuilder();
 
-            string[] constantsReq = elementsReq.
-                Where(x => x.Type == MsgParser.ElementType.Constant).
-                Cast<MsgParser.Constant>().
-                Select(x => x.ToMd5String()).
-                ToArray();
-            
+            var constantsReq = elementsReq.OfType<ConstantElement>().Select(x => x.ToMd5String()).ToArray();
+
             if (constantsReq.Any())
             {
                 str.AppendJoin("\n", constantsReq);
@@ -164,14 +146,11 @@ namespace Iviz.MsgsGen
                     str.Append("\n");
                 }
             }
-            str.AppendJoin("\n", variablesReq.Select(x => x.GetMd5Entry()));
 
-            var constantsResp = elementsResp.
-                Where(x => x.Type == MsgParser.ElementType.Constant).
-                Cast<MsgParser.Constant>().
-                Select(x => x.ToMd5String()).
-                ToArray();
-            
+            str.AppendJoin("\n", variablesReq.Select(x => x.GetEntryForMd5Hash()));
+
+            var constantsResp = elementsResp.OfType<ConstantElement>().Select(x => x.ToMd5String()).ToArray();
+
             if (constantsResp.Any())
             {
                 str.AppendJoin("\n", constantsResp);
@@ -180,97 +159,85 @@ namespace Iviz.MsgsGen
                     str.Append("\n");
                 }
             }
-            str.AppendJoin("\n", variablesResp.Select(x => x.GetMd5Entry()));
 
-            string md5File = str.ToString();
+            str.AppendJoin("\n", variablesResp.Select(x => x.GetEntryForMd5Hash()));
 
-            string md5 = ClassInfo.GetMd5Hash(MD5.Create(), md5File);
+            var md5File = str.ToString();
+
+            var md5 = ClassInfo.GetMd5Hash(MD5.Create(), md5File);
 
             return md5;
         }
 
-        List<string> CreateServiceContent()
+        IEnumerable<string> CreateServiceContent()
         {
-            List<string> lines = new List<string>();
-
-            lines.Add("/// <summary> Request message. </summary>");
-            lines.Add("[DataMember] public " + name + "Request Request { get; set; }");
-
-            lines.Add("");
-            lines.Add("/// <summary> Response message. </summary>");
-            lines.Add("[DataMember] public " + name + "Response Response { get; set; }");
-
-            lines.Add("");
-            lines.Add("/// <summary> Empty constructor. </summary>");
-            lines.Add("public " + name + "()");
-            lines.Add("{");
-            lines.Add("    Request = new " + name + "Request();");
-            lines.Add("    Response = new " + name + "Response();");
-            lines.Add("}");
-
-            lines.Add("");
-            lines.Add("/// <summary> Setter constructor. </summary>");
-            lines.Add("public " + name + "(" + name + "Request request)");
-            lines.Add("{");
-            lines.Add("    Request = request;");
-            lines.Add("    Response = new " + name + "Response();");
-            lines.Add("}");
-
-            lines.Add("");
-            lines.Add("IService IService.Create() => new " + name + "();");
-
-            lines.Add("");
-            lines.Add("IRequest IService.Request");
-            lines.Add("{");
-            lines.Add("    get => Request;");
-            lines.Add("    set => Request = (" + name + "Request)value;");
-            lines.Add("}");
-
-            lines.Add("");
-            lines.Add("IResponse IService.Response");
-            lines.Add("{");
-            lines.Add("    get => Response;");
-            lines.Add("    set => Response = (" + name + "Response)value;");
-            lines.Add("}");
-
-            lines.Add("");
-            lines.Add("/// <summary>");
-            lines.Add("/// An error message in case the call fails.");
-            lines.Add("/// If the provider sets this to non-null, the ok byte is set to false, and the error message is sent instead of the response.");
-            lines.Add("/// </summary>");
-            lines.Add("public string ErrorMessage { get; set; }");
-
-            lines.Add("");
-            lines.Add("string IService.RosType => RosServiceType;");
-
-            lines.Add("");
-            lines.Add("/// <summary> Full ROS name of this service. </summary>");
-            lines.Add("[Preserve] public const string RosServiceType = \"" + rosPackage + "/" + name + "\";");
-
-            lines.Add("");
-            string md5 = GetMd5();
-            lines.Add("/// <summary> MD5 hash of a compact representation of the service. </summary>");
-            lines.Add("[Preserve] public const string RosMd5Sum = \"" + md5 + "\";");
-
-
-            return lines;
+            return new[]
+            {
+                "/// <summary> Request message. </summary>",
+                $"[DataMember] public {Name}Request Request {{ get; set; }}",
+                "",
+                "/// <summary> Response message. </summary>",
+                $"[DataMember] public {Name}Response Response {{ get; set; }}",
+                "",
+                "/// <summary> Empty constructor. </summary>",
+                $"public {Name}()",
+                "{",
+                $"    Request = new {Name}Request();",
+                $"    Response = new {Name}Response();",
+                "}",
+                "",
+                "/// <summary> Setter constructor. </summary>",
+                $"public {Name}({Name}Request request)",
+                "{",
+                "    Request = request;",
+                $"    Response = new {Name}Response();",
+                "}",
+                "",
+                $"IService IService.Create() => new {Name}();",
+                "",
+                "IRequest IService.Request",
+                "{",
+                "    get => Request;",
+                $"    set => Request = ({Name}Request)value;",
+                "}",
+                "",
+                "IResponse IService.Response",
+                "{",
+                "    get => Response;",
+                $"    set => Response = ({Name}Response)value;",
+                "}",
+                "",
+                "/// <summary>",
+                "/// An error message in case the call fails.",
+                "/// If the provider sets this to non-null, the ok byte is set to false, and the error message is sent instead of the response.",
+                "/// </summary>",
+                "public string ErrorMessage { get; set; }",
+                "",
+                "string IService.RosType => RosServiceType;",
+                "",
+                "/// <summary> Full ROS name of this service. </summary>",
+                $"[Preserve] public const string RosServiceType = \"{RosPackage}/{Name}\";",
+                "",
+                "/// <summary> MD5 hash of a compact representation of the service. </summary>",
+                $"[Preserve] public const string RosMd5Sum = \"{GetMd5()}\";"
+            };
         }
 
 
         public string ToCString()
         {
-            StringBuilder str = new StringBuilder();
+            var str = new StringBuilder();
 
             str.AppendLine("using System.Runtime.Serialization;");
-            
+
             str.AppendLine("");
-            str.AppendLine("namespace Iviz.Msgs." + package);
+            str.AppendLine($"namespace Iviz.Msgs.{Package}");
             str.AppendLine("{");
-            str.AppendLine("    [DataContract (Name = \"" + rosPackage + "/" + name + "\")]");
-            str.AppendLine("    public sealed class " + name + " : IService");
+            str.AppendLine($"    [DataContract (Name = \"{RosPackage}/{Name}\")]");
+            str.AppendLine($"    public sealed class {Name} : IService");
             str.AppendLine("    {");
 
-            List<string> mainClassLines = CreateServiceContent();
+            var mainClassLines = CreateServiceContent();
             foreach (var entry in mainClassLines)
             {
                 str.Append("        ").AppendLine(entry);
@@ -279,7 +246,7 @@ namespace Iviz.MsgsGen
             str.AppendLine("    }");
             str.AppendLine();
 
-            List<string> linesReq = CreateClassContent(elementsReq, variablesReq, name, fixedSizeReq, true);
+            var linesReq = CreateClassContent(elementsReq, variablesReq, Name, fixedSizeReq, true);
             foreach (var entry in linesReq)
             {
                 str.Append("    ").AppendLine(entry);
@@ -287,16 +254,15 @@ namespace Iviz.MsgsGen
 
             str.AppendLine();
 
-            List<string> linesResp = CreateClassContent(elementsResp, variablesResp, name, fixedSizeResp, false);
+            var linesResp = CreateClassContent(elementsResp, variablesResp, Name, fixedSizeResp, false);
             foreach (var entry in linesResp)
             {
                 str.Append("    ").AppendLine(entry);
             }
-            str.AppendLine("}");
 
+            str.AppendLine("}");
 
             return str.ToString();
         }
-
     }
 }

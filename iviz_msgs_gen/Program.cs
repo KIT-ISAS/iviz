@@ -23,18 +23,18 @@ namespace Iviz.MsgsGen
 
             foreach(ClassInfo classInfo in p.messages.Values)
             {
-                string packageDir = ivizMsgPaths + "/" + classInfo.rosPackage + "/msg/";
+                string packageDir = ivizMsgPaths + "/" + classInfo.RosPackage + "/msg/";
                 Directory.CreateDirectory(packageDir);
                 string text = classInfo.ToCString();
-                File.WriteAllText(packageDir + classInfo.name + ".cs", text);
+                File.WriteAllText(packageDir + classInfo.RosName + ".cs", text);
             }
 
             foreach (ServiceInfo classInfo in p.services.Values)
             {
-                string packageDir = ivizMsgPaths + "/" + classInfo.rosPackage + "/srv/";
+                string packageDir = ivizMsgPaths + "/" + classInfo.RosPackage + "/srv/";
                 Directory.CreateDirectory(packageDir);
                 string text = classInfo.ToCString();
-                File.WriteAllText(packageDir + classInfo.name + ".cs", text);
+                File.WriteAllText(packageDir + classInfo.Name + ".cs", text);
             }
         }
 
