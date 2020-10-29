@@ -23,16 +23,16 @@ namespace Iviz.MsgsGen
             Console.WriteLine($"-- Parsing '{path}'");
 
             RosPackage = package;
-            Package = MsgParser.Sanitize(package);
+            CsPackage = MsgParser.Sanitize(package);
             Name = Path.GetFileNameWithoutExtension(path);
-            var lines = File.ReadAllLines(path);
+            string[] lines = File.ReadAllLines(path);
             File.ReadAllText(path);
 
-            var elements = MsgParser.ParseFile(lines, Name);
-            var serviceSeparator = elements.FindIndex(x => x.Type == ElementType.ServiceSeparator);
+            List<IElement> elements = MsgParser.ParseFile(lines, Name);
+            int serviceSeparator = elements.FindIndex(x => x.Type == ElementType.ServiceSeparator);
             if (serviceSeparator == -1)
             {
-                throw new ArgumentException();
+                throw new InvalidDataException("Service file has no separator");
             }
 
             elementsReq = elements.GetRange(0, serviceSeparator).ToArray();
@@ -43,8 +43,9 @@ namespace Iviz.MsgsGen
         }
 
         public string RosPackage { get; }
-        public string Package { get; }
+        public string CsPackage { get; }
         public string Name { get; }
+        public string FullRosName => $"{RosPackage}/{Name}";
 
         internal void ResolveClasses(PackageInfo packageInfo)
         {
@@ -54,8 +55,15 @@ namespace Iviz.MsgsGen
 
         internal void CheckFixedSize()
         {
-            ClassInfo.DoCheckFixedSize(ref fixedSizeReq, variablesReq);
-            ClassInfo.DoCheckFixedSize(ref fixedSizeResp, variablesResp);
+            if (fixedSizeReq == ClassInfo.UninitializedSize)
+            {
+                fixedSizeReq = ClassInfo.DoCheckFixedSize(variablesReq);
+            }
+
+            if (fixedSizeResp != ClassInfo.UninitializedSize)
+            {
+                fixedSizeResp = ClassInfo.DoCheckFixedSize(variablesResp);
+            }
         }
 
         static IEnumerable<string> CreateClassContent(
@@ -66,50 +74,47 @@ namespace Iviz.MsgsGen
             bool isRequest
         )
         {
-            var name = service + (isRequest ? "Request" : "Response");
+            string strType = isRequest ? "Request" : "Response";
+            string name = service + strType;
 
             if (elements.Count == 0)
             {
                 return new[]
                 {
-                    $"public sealed class {name} : Internal.Empty{(isRequest ? "Request" : "Response")}",
+                    $"public sealed class {name} : Internal.Empty{strType}",
                     "{",
                     "}"
                 };
             }
 
-            var lines = new List<string>();
-            lines.Add(
-                $"public sealed class {name} : {(isRequest ? "IRequest" : "IResponse")}, IDeserializable<{name}>");
+            List<string> lines = new List<string>();
+            lines.Add($"public sealed class {name} : I{strType}, IDeserializable<{name}>");
             lines.Add("{");
 
-            foreach (var element in elements)
-            {
-                var sublines = element.ToCsString();
-                foreach (var entry in sublines)
-                {
-                    lines.Add($"    {entry}");
-                }
-            }
-
-            lines.Add("");
-
-            var deserializer = ClassInfo.CreateConstructors(variables, name, false);
-            foreach (var entry in deserializer)
+            IEnumerable<string> entries = elements.SelectMany(element => element.ToCsString());
+            foreach (string entry in entries)
             {
                 lines.Add($"    {entry}");
             }
 
             lines.Add("");
-            var serializer = ClassInfo.CreateSerializers(variables, false);
-            foreach (var entry in serializer)
+
+            IEnumerable<string> deserializer = ClassInfo.CreateConstructors(variables, name, false);
+            foreach (string entry in deserializer)
             {
                 lines.Add($"    {entry}");
             }
 
             lines.Add("");
-            var lengthProperty = ClassInfo.CreateLengthProperty(variables, fixedSize, false);
-            foreach (var entry in lengthProperty)
+            IEnumerable<string> serializer = ClassInfo.CreateSerializers(variables, false);
+            foreach (string entry in serializer)
+            {
+                lines.Add($"    {entry}");
+            }
+
+            lines.Add("");
+            IEnumerable<string> lengthProperty = ClassInfo.CreateLengthProperty(variables, fixedSize, false);
+            foreach (string entry in lengthProperty)
             {
                 lines.Add($"    {entry}");
             }
@@ -119,6 +124,7 @@ namespace Iviz.MsgsGen
             return lines;
         }
 
+        /*
         void AddDependencies(List<ClassInfo> dependencies, List<VariableElement> variables)
         {
             foreach (var variable in variables)
@@ -131,40 +137,44 @@ namespace Iviz.MsgsGen
                 }
             }
         }
+        */
 
         string GetMd5()
         {
-            var str = new StringBuilder();
+            StringBuilder str = new StringBuilder();
 
-            var constantsReq = elementsReq.OfType<ConstantElement>().Select(x => x.ToMd5String()).ToArray();
+            string[] constantsReq = elementsReq.OfType<ConstantElement>().Select(x => x.GetEntryForMd5Hash()).ToArray();
 
             if (constantsReq.Any())
             {
-                str.AppendJoin("\n", constantsReq);
+                str.Append(string.Join("\n", constantsReq));
                 if (variablesReq.Any())
                 {
-                    str.Append("\n");
+                    str.Append('\n');
                 }
             }
 
-            str.AppendJoin("\n", variablesReq.Select(x => x.GetEntryForMd5Hash()));
+            IEnumerable<string> hashVariables = variablesReq.Select(x => x.GetEntryForMd5Hash());
+            str.Append(string.Join("\n", hashVariables));
 
-            var constantsResp = elementsResp.OfType<ConstantElement>().Select(x => x.ToMd5String()).ToArray();
+            string[] constantsHash = elementsResp.OfType<ConstantElement>().Select(x => x.GetEntryForMd5Hash()).ToArray();
 
-            if (constantsResp.Any())
+            if (constantsHash.Any())
             {
-                str.AppendJoin("\n", constantsResp);
+                str.Append(string.Join("\n", constantsHash));
                 if (variablesResp.Any())
                 {
-                    str.Append("\n");
+                    str.Append('\n');
                 }
             }
 
-            str.AppendJoin("\n", variablesResp.Select(x => x.GetEntryForMd5Hash()));
+            IEnumerable<string> variablesHash = variablesResp.Select(x => x.GetEntryForMd5Hash());
+            str.Append(string.Join("\n", variablesHash));
 
-            var md5File = str.ToString();
+            string md5File = str.ToString();
 
-            var md5 = ClassInfo.GetMd5Hash(MD5.Create(), md5File);
+            using MD5 md5Hash = MD5.Create();
+            string md5 = ClassInfo.GetMd5Hash(md5Hash, md5File);
 
             return md5;
         }
@@ -226,19 +236,19 @@ namespace Iviz.MsgsGen
 
         public string ToCString()
         {
-            var str = new StringBuilder();
+            StringBuilder str = new StringBuilder();
 
             str.AppendLine("using System.Runtime.Serialization;");
 
             str.AppendLine("");
-            str.AppendLine($"namespace Iviz.Msgs.{Package}");
+            str.AppendLine($"namespace Iviz.Msgs.{CsPackage}");
             str.AppendLine("{");
             str.AppendLine($"    [DataContract (Name = \"{RosPackage}/{Name}\")]");
             str.AppendLine($"    public sealed class {Name} : IService");
             str.AppendLine("    {");
 
-            var mainClassLines = CreateServiceContent();
-            foreach (var entry in mainClassLines)
+            IEnumerable<string> mainClassLines = CreateServiceContent();
+            foreach (string entry in mainClassLines)
             {
                 str.Append("        ").AppendLine(entry);
             }
@@ -246,16 +256,16 @@ namespace Iviz.MsgsGen
             str.AppendLine("    }");
             str.AppendLine();
 
-            var linesReq = CreateClassContent(elementsReq, variablesReq, Name, fixedSizeReq, true);
-            foreach (var entry in linesReq)
+            IEnumerable<string> linesReq = CreateClassContent(elementsReq, variablesReq, Name, fixedSizeReq, true);
+            foreach (string entry in linesReq)
             {
                 str.Append("    ").AppendLine(entry);
             }
 
             str.AppendLine();
 
-            var linesResp = CreateClassContent(elementsResp, variablesResp, Name, fixedSizeResp, false);
-            foreach (var entry in linesResp)
+            IEnumerable<string> linesResp = CreateClassContent(elementsResp, variablesResp, Name, fixedSizeResp, false);
+            foreach (string entry in linesResp)
             {
                 str.Append("    ").AppendLine(entry);
             }

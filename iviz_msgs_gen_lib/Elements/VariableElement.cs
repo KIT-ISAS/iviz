@@ -22,6 +22,7 @@ namespace Iviz.MsgsGen
         public int FixedArraySize => IsFixedSizeArray ? ArraySize : -1;
         public ClassInfo ClassInfo { get; internal set; }
         public bool ClassIsStruct => ClassInfo != null && ClassInfo.ForceStruct;
+        public bool ClassHasFixedSize => ClassInfo != null && ClassInfo.HasFixedSize;
 
         static readonly HashSet<string> Keywords = new HashSet<string>
         {
@@ -139,7 +140,7 @@ namespace Iviz.MsgsGen
                 }
             }
 
-            string csString = Comment == ""
+            string csString = Comment.Length == 0
                 ? $"{attrStr} {result}"
                 : $"{attrStr} {result} //{Comment}";
 

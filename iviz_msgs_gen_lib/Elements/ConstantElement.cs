@@ -25,7 +25,7 @@ namespace Iviz.MsgsGen
 
         public IEnumerable<string> ToCsString(bool _)
         {
-            string commentStr = Comment == "" ? "" : $" //{Comment}";   
+            string commentStr = Comment.Length == 0 ? "" : $" //{Comment}";   
 
             string result;
             if (MsgParser.BuiltInsMaps.TryGetValue(ClassName, out string alias))
@@ -49,7 +49,7 @@ namespace Iviz.MsgsGen
             return new[] {result};
         }
 
-        public string ToMd5String()
+        public string GetEntryForMd5Hash()
         {
             return $"{ClassName} {FieldName}={Value}";
         }

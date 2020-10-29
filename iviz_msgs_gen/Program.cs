@@ -16,25 +16,25 @@ namespace Iviz.MsgsGen
             foreach(string packageDir in packages)
             {
                 string package = Path.GetFileName(packageDir);
-                p.Create(packageDir, package);
+                p.AddPackagePath(packageDir, package);
             }
 
             p.ResolveAll();
 
-            foreach(ClassInfo classInfo in p.messages.Values)
+            foreach(ClassInfo classInfo in p.Messages.Values)
             {
-                string packageDir = ivizMsgPaths + "/" + classInfo.RosPackage + "/msg/";
-                Directory.CreateDirectory(packageDir);
+                string dstPackageDir = $"{ivizMsgPaths}/{classInfo.RosPackage}/msg/";
+                Directory.CreateDirectory(dstPackageDir);
                 string text = classInfo.ToCString();
-                File.WriteAllText(packageDir + classInfo.RosName + ".cs", text);
+                File.WriteAllText($"{dstPackageDir}{classInfo.Name}.cs", text);
             }
 
-            foreach (ServiceInfo classInfo in p.services.Values)
+            foreach (ServiceInfo classInfo in p.Services.Values)
             {
-                string packageDir = ivizMsgPaths + "/" + classInfo.RosPackage + "/srv/";
+                string packageDir = $"{ivizMsgPaths}/{classInfo.RosPackage}/srv/";
                 Directory.CreateDirectory(packageDir);
                 string text = classInfo.ToCString();
-                File.WriteAllText(packageDir + classInfo.Name + ".cs", text);
+                File.WriteAllText($"{packageDir}{classInfo.Name}.cs", text);
             }
         }
 

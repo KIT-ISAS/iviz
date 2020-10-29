@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Iviz.MsgsGen
 {
-    public static class MsgParser
+    internal static class MsgParser
     {
         internal static readonly Dictionary<string, string> BuiltInsMaps = new Dictionary<string, string>
         {
@@ -27,7 +27,7 @@ namespace Iviz.MsgsGen
             {"byte", "byte"},
         };
 
-        public static string Sanitize(string name)
+        internal static string Sanitize(string name)
         {
             StringBuilder str = new StringBuilder();
             str.Append(char.ToUpper(name[0]));
@@ -58,7 +58,7 @@ namespace Iviz.MsgsGen
             return char.IsWhiteSpace(c);
         }
 
-        public static List<IElement> ParseFile(IEnumerable<string> lines, string className)
+        internal static List<IElement> ParseFile(IEnumerable<string> lines, string className)
         {
             List<IElement> elements = new List<IElement>();
 

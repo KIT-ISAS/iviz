@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Iviz.MsgsGen
 {
-    public static class Additions
+    internal static class Additions
     {
         public static readonly Dictionary<string, string[]> Contents = new Dictionary<string, string[]>
         {
