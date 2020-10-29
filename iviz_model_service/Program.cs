@@ -9,6 +9,8 @@ namespace Iviz.ModelService
     {
         static void Main()
         {
+            Console.WriteLine("** iviz_model_service: Starting...");
+            
             Uri masterUri = RosClient.EnvironmentMasterUri;
             if (masterUri is null)
             {
@@ -31,7 +33,13 @@ namespace Iviz.ModelService
             client.AdvertiseService<GetFile>(ModelServer.FileServiceName, modelServer.FileCallback);
             client.AdvertiseService<GetSdf>(ModelServer.SdfServiceName, modelServer.SdfCallback);
 
-            Console.WriteLine("** Done. Waiting for requests...");
+            Console.WriteLine("** Starting service {0} [{1}]...", ModelServer.ModelServiceName, GetModelResource.RosServiceType);
+            Console.WriteLine("** Starting service {0} [{1}]...", ModelServer.TextureServiceName, GetModelTexture.RosServiceType);
+            Console.WriteLine("** Starting service {0} [{1}]...", ModelServer.FileServiceName, GetFile.RosServiceType);
+            Console.WriteLine("** Starting service {0} [{1}]...", ModelServer.SdfServiceName, GetSdf.RosServiceType);
+
+            Console.WriteLine("** Done.");
+            Console.WriteLine("** Waiting for requests...");
 
             WaitForCancel();
         }
