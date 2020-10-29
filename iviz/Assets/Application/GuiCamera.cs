@@ -72,7 +72,7 @@ namespace Iviz.App
             }
         }
 
-        void OnUnlockClick()
+        public void DisableCameraLock()
         {
             CameraViewOverride = null;
             OrbitCenterOverride = null;
@@ -124,7 +124,7 @@ namespace Iviz.App
                 new Vector2(800, 800);
             QualitySettings.antiAliasing = Settings.IsMobile ? 0 : 2;
 
-            ModuleListPanel.Instance.UnlockButton.onClick.AddListener(OnUnlockClick);
+            ModuleListPanel.Instance.UnlockButton.onClick.AddListener(DisableCameraLock);
 
             namedBoundary = ResourcePool.GetOrCreate<NamedBoundary>(Resource.Displays.NamedBoundary);
             StartOrbiting();

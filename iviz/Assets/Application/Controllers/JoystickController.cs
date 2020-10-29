@@ -1,35 +1,47 @@
-﻿using UnityEngine;
+﻿using System;
 using System.Runtime.Serialization;
-using Iviz.Roslib;
-using System;
 using Iviz.Displays;
+using Iviz.Msgs.GeometryMsgs;
+using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
+using Iviz.Roslib;
+using UnityEngine;
+using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Controllers
 {
     [DataContract]
     public sealed class JoystickConfiguration : JsonToString, IConfiguration
     {
-        [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
-        [DataMember] public Resource.Module Module => Resource.Module.Joystick;
-        [DataMember] public bool Visible { get; set; } = true;
-
         [DataMember] public string JoyTopic { get; set; } = "";
-        [DataMember] public bool PublishJoy { get; set; } = false;
+        [DataMember] public bool PublishJoy { get; set; }
         [DataMember] public string TwistTopic { get; set; } = "";
         [DataMember] public bool PublishTwist { get; set; } = true;
-        [DataMember] public bool TwistStamped { get; set; } = false;
+        [DataMember] public bool TwistStamped { get; set; }
         [DataMember] public SerializableVector3 MaxSpeed { get; set; } = Vector3.one * 0.25f;
         [DataMember] public string AttachToFrame { get; set; } = "map";
         [DataMember] public bool XIsFront { get; set; } = true;
+        [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
+        [DataMember] public Resource.Module Module => Resource.Module.Joystick;
+        [DataMember] public bool Visible { get; set; } = true;
     }
 
 
     public sealed class JoystickController : IController
     {
-        public IModuleData ModuleData { get; }
-
         readonly JoystickConfiguration config = new JoystickConfiguration();
+        uint joySeq;
+        uint twistSeq;
+
+        Joystick joystick;
+        
+        public JoystickController(IModuleData moduleData)
+        {
+            ModuleData = moduleData;
+            Config = new JoystickConfiguration();
+            GameThread.EveryFrame += PublishData;
+        }
+
         public JoystickConfiguration Config
         {
             get => config;
@@ -56,20 +68,6 @@ namespace Iviz.Controllers
             }
         }
 
-        void RebuildJoy()
-        {
-            if (RosSenderJoy != null && RosSenderJoy.Topic != config.JoyTopic)
-            {
-                RosSenderJoy.Stop();
-                RosSenderJoy = null;
-            }
-
-            if (RosSenderJoy is null)
-            {
-                RosSenderJoy = new RosSender<Msgs.SensorMsgs.Joy>(JoyTopic);
-            }
-        }
-
         public bool TwistStamped
         {
             get => config.TwistStamped;
@@ -90,36 +88,6 @@ namespace Iviz.Controllers
             }
         }
 
-        void RebuildTwist()
-        {
-            string twistType = TwistStamped
-                ? Msgs.GeometryMsgs.TwistStamped.RosMessageType
-                : Msgs.GeometryMsgs.Twist.RosMessageType;
-
-            if (RosSenderTwist != null &&
-                (RosSenderTwist.Topic != config.TwistTopic || RosSenderTwist.Type != twistType))
-            {
-                //Debug.Log("Stopping");
-                RosSenderTwist.Stop();
-                RosSenderTwist = null;
-            }
-
-            if (RosSenderTwist == null)
-            {
-                //Debug.Log("Rebuilding " + TwistStamped);
-                if (TwistStamped)
-                {
-                    RosSenderTwist = new RosSender<Msgs.GeometryMsgs.TwistStamped>(TwistTopic);
-                }
-                else
-                {
-                    RosSenderTwist = new RosSender<Msgs.GeometryMsgs.Twist>(TwistTopic);
-                }
-            }
-        }
-
-        Joystick joystick;
-
         public Joystick Joystick
         {
             get => joystick;
@@ -130,10 +98,8 @@ namespace Iviz.Controllers
             }
         }
 
-        public RosSender<Msgs.SensorMsgs.Joy> RosSenderJoy { get; private set; }
-
-        //public RosSender<Msgs.GeometryMsgs.TwistStamped> RosSenderTwist { get; private set; }
-        public RosSender RosSenderTwist { get; private set; }
+        public RosSender<Joy> RosSenderJoy { get; private set; }
+        public IRosSender RosSenderTwist { get; private set; }
 
         public bool Visible
         {
@@ -202,16 +168,54 @@ namespace Iviz.Controllers
             set => config.MaxSpeed = value.HasNaN() ? Vector3.zero : value;
         }
 
-        //void Awake()
-        public JoystickController(IModuleData moduleData)
+        public IModuleData ModuleData { get; }
+
+        public void StopController()
         {
-            ModuleData = moduleData;
-            Config = new JoystickConfiguration();
-            GameThread.EveryFrame += PublishData;
+            GameThread.EveryFrame -= PublishData;
+            RosSenderJoy?.Stop();
+            RosSenderTwist?.Stop();
+            Visible = false;
         }
 
-        uint twistSeq = 0;
-        uint joySeq = 0;
+        public void ResetController()
+        {
+        }
+
+        void RebuildJoy()
+        {
+            if (RosSenderJoy != null && RosSenderJoy.Topic != config.JoyTopic)
+            {
+                RosSenderJoy.Stop();
+                RosSenderJoy = null;
+            }
+
+            if (RosSenderJoy is null)
+            {
+                RosSenderJoy = new RosSender<Joy>(JoyTopic);
+            }
+        }
+
+        void RebuildTwist()
+        {
+            string twistType = TwistStamped
+                ? Msgs.GeometryMsgs.TwistStamped.RosMessageType
+                : Twist.RosMessageType;
+
+            if (RosSenderTwist != null &&
+                (RosSenderTwist.Topic != config.TwistTopic || RosSenderTwist.Type != twistType))
+            {
+                RosSenderTwist.Stop();
+                RosSenderTwist = null;
+            }
+
+            if (RosSenderTwist == null)
+            {
+                RosSenderTwist = TwistStamped
+                    ? (IRosSender) new RosSender<TwistStamped>(TwistTopic)
+                    : new RosSender<Twist>(TwistTopic);
+            }
+        }
 
         void PublishData()
         {
@@ -229,16 +233,16 @@ namespace Iviz.Controllers
 
                 Vector2 linear = XIsFront ? new Vector2(leftDir.y, -leftDir.x) : new Vector2(leftDir.x, leftDir.y);
 
-                Msgs.GeometryMsgs.Twist twist = new Msgs.GeometryMsgs.Twist(
-                    Linear: new Msgs.GeometryMsgs.Vector3(linear.x * MaxSpeed.x, linear.y * MaxSpeed.y, 0),
-                    Angular: new Msgs.GeometryMsgs.Vector3(0, 0, -rightDir.x * MaxSpeed.z)
+                Twist twist = new Twist(
+                    new Msgs.GeometryMsgs.Vector3(linear.x * MaxSpeed.x, linear.y * MaxSpeed.y, 0),
+                    new Msgs.GeometryMsgs.Vector3(0, 0, -rightDir.x * MaxSpeed.z)
                 );
 
                 if (TwistStamped)
                 {
-                    Msgs.GeometryMsgs.TwistStamped twistStamped = new Msgs.GeometryMsgs.TwistStamped(
-                        Header: RosUtils.CreateHeader(twistSeq++, frame),
-                        Twist: twist
+                    TwistStamped twistStamped = new TwistStamped(
+                        RosUtils.CreateHeader(twistSeq++, frame),
+                        twist
                     );
                     RosSenderTwist.Publish(twistStamped);
                 }
@@ -255,26 +259,13 @@ namespace Iviz.Controllers
 
                 string frame = string.IsNullOrWhiteSpace(AttachToFrame) ? TFListener.BaseFrameId : AttachToFrame;
 
-                Msgs.SensorMsgs.Joy joy = new Msgs.SensorMsgs.Joy(
-                    Header: RosUtils.CreateHeader(joySeq++, frame),
-                    Axes: new[] {leftDir.x, leftDir.y, rightDir.x, rightDir.y},
-                    Buttons: Array.Empty<int>()
+                Joy joy = new Joy(
+                    RosUtils.CreateHeader(joySeq++, frame),
+                    new[] {leftDir.x, leftDir.y, rightDir.x, rightDir.y},
+                    Array.Empty<int>()
                 );
                 RosSenderJoy.Publish(joy);
             }
-        }
-
-        public void StopController()
-        {
-            GameThread.EveryFrame -= PublishData;
-            RosSenderJoy?.Stop();
-            RosSenderTwist?.Stop();
-            Visible = false;
-        }
-
-        public void ResetController()
-        {
-            
         }
     }
 }

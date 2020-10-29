@@ -77,7 +77,7 @@ namespace Iviz.Controllers
             Connection.Subscribe(listener);
         }
 
-        public static void Unsubscribe(RosListener subscriber)
+        public static void Unsubscribe(IRosListener subscriber)
         {
             Connection.Unsubscribe(subscriber);
         }
@@ -87,12 +87,12 @@ namespace Iviz.Controllers
             Connection.Advertise(advertiser);
         }
 
-        public static void Unadvertise(RosSender advertiser)
+        public static void Unadvertise(IRosSender advertiser)
         {
             Connection.Unadvertise(advertiser);
         }
 
-        public static void Publish(RosSender advertiser, IMessage msg)
+        public static void Publish<T>(RosSender<T> advertiser, T msg) where T : IMessage
         {
             Connection.Publish(advertiser, msg);
         }

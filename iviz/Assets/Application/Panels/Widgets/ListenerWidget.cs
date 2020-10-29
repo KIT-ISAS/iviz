@@ -14,8 +14,8 @@ namespace Iviz.App
         //[SerializeField] Button button = null;
         [SerializeField] Image panel = null;
 
-        RosListener listener;
-        public RosListener RosListener
+        IRosListener listener;
+        public IRosListener RosListener
         {
             get => listener;
             set

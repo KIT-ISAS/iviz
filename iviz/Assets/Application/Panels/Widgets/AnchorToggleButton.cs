@@ -1,4 +1,5 @@
 using System;
+using System.Data.SqlTypes;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,10 +17,15 @@ namespace Iviz.App
 
         [SerializeField] bool state;
 
-        Image image;
+        [SerializeField] Image image = null;
 
-        Button button;
+        [SerializeField] Button button = null;
         Button Button => button == null ? (button = GetComponent<Button>()) : button;
+
+        [SerializeField] Text text = null;
+
+        [SerializeField] string enabledText = null;
+        [SerializeField] string disabledText = null;
 
         public event Action Clicked;
 
@@ -32,6 +38,19 @@ namespace Iviz.App
                 if (image != null)
                 {
                     image.color = state ? EnabledColor : DisabledColor;
+                }
+
+                if (text != null)
+                {
+                    text.color = state ? EnabledColor : DisabledColor;
+                    if (value && !string.IsNullOrEmpty(enabledText))
+                    {
+                        text.text = enabledText;
+                    }
+                    else if (!value && !string.IsNullOrEmpty(disabledText))
+                    {
+                        text.text = disabledText;
+                    }
                 }
             }
         }
@@ -50,7 +69,10 @@ namespace Iviz.App
 
         void Awake()
         {
-            image = transform.GetChild(0).GetComponent<Image>();
+            if (image == null)
+            {
+                image = transform.GetChild(0).GetComponent<Image>();
+            }
             State = State;
             Button.onClick.AddListener(() =>
             {

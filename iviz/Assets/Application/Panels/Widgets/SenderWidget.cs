@@ -12,8 +12,8 @@ namespace Iviz.App
         const int Size = 200;
         [SerializeField] Text text = null;
 
-        RosSender rosSender;
-        public RosSender RosSender
+        IRosSender rosSender;
+        public IRosSender RosSender
         {
             get => rosSender;
             private set
@@ -43,7 +43,7 @@ namespace Iviz.App
         int MessagesPerSecond => RosSender?.Stats.MessagesPerSecond ?? 0;
         int BytesPerSecond => RosSender?.Stats.BytesPerSecond ?? 0;
 
-        public void Set(RosSender sender)
+        public void Set(IRosSender sender)
         {
             RosSender = sender;
             if (sender == null)

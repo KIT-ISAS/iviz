@@ -84,8 +84,8 @@ namespace Iviz.App
         public static ModuleListPanel Instance { get; private set; }
         public static AnchorCanvas AnchorCanvas => Instance.anchorCanvas;
         AnchorToggleButton HideGuiButton => anchorCanvas.HideGui;
-        AnchorToggleButton ShowControlButton => anchorCanvas.ShowMarker;
-        AnchorToggleButton PinControlButton => anchorCanvas.PinMarker;
+        public AnchorToggleButton ShowRootMarkerButton => anchorCanvas.ShowMarker;
+        public AnchorToggleButton PinControlButton => anchorCanvas.PinMarker;
         public Button UnlockButton => anchorCanvas.Unlock;
         public DataPanelManager DataPanelManager => dataPanelManager;
         public DialogPanelManager DialogPanelManager => dialogPanelManager;
@@ -155,22 +155,6 @@ namespace Iviz.App
 
             HideGuiButton.Clicked += OnHideGuiButtonClick;
             HideGuiButton.State = true;
-
-            PinControlButton.Clicked += () =>
-            {
-                if (ARController.Instance != null)
-                {
-                    ARController.Instance.PinRootMarker = PinControlButton.State;
-                }
-            };
-            ShowControlButton.Clicked += () =>
-            {
-                if (ARController.Instance != null)
-                {
-                    ARController.Instance.ShowRootMarker = ShowControlButton.State;
-                    TFListener.UpdateRootMarkerVisibility();
-                }
-            };
 
             addDisplayByTopic.onClick.AddListener(availableTopics.Show);
             addDisplay.onClick.AddListener(availableModules.Show);
@@ -604,7 +588,7 @@ namespace Iviz.App
         void OnARModeChanged(bool value)
         {
             PinControlButton.Visible = value;
-            ShowControlButton.Visible = value;
+            ShowRootMarkerButton.Visible = value;
 
             foreach (var module in ModuleDatas)
             {

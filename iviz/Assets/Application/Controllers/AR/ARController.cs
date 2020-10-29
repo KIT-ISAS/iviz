@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.Serialization;
+using Iviz.App;
 using Iviz.Resources;
 using Iviz.Roslib;
 using UnityEngine;
@@ -9,16 +10,26 @@ namespace Iviz.Controllers
     [DataContract]
     public sealed class ARConfiguration : JsonToString, IConfiguration
     {
-        /* NonSerializable */ public float WorldScale { get; set; } = 1.0f;
-        /* NonSerializable */ public SerializableVector3 WorldOffset { get; set; } = ARController.DefaultWorldOffset;
-        /* NonSerializable */ public float WorldAngle { get; set; }
+        /* NonSerializable */
+        public float WorldScale { get; set; } = 1.0f;
+
+        /* NonSerializable */
+        public SerializableVector3 WorldOffset { get; set; } = ARController.DefaultWorldOffset;
+
+        /* NonSerializable */
+        public float WorldAngle { get; set; }
         [DataMember] public bool SearchMarker { get; set; }
         [DataMember] public bool MarkerHorizontal { get; set; } = true;
         [DataMember] public int MarkerAngle { get; set; }
         [DataMember] public string MarkerFrame { get; set; } = "";
+
         [DataMember] public SerializableVector3 MarkerOffset { get; set; } = Vector3.zero;
-        /* NonSerializable */ public bool ShowRootMarker { get; set; }
-        /* NonSerializable */ public bool PinRootMarker { get; set; }
+
+        /* NonSerializable */
+        public bool ShowRootMarker { get; set; }
+
+        /* NonSerializable */
+        public bool PinRootMarker { get; set; }
         [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
         [DataMember] public Resource.Module Module => Resource.Module.AugmentedReality;
         [DataMember] public bool Visible { get; set; } = true;
@@ -47,8 +58,10 @@ namespace Iviz.Controllers
         }
 
         public static readonly Vector3 DefaultWorldOffset = new Vector3(0.5f, 0, -0.2f);
-        
-        static ARSessionInfo savedSessionInfo;
+
+        //static ARSessionInfo savedSessionInfo;
+        static AnchorToggleButton PinControlButton => ModuleListPanel.Instance.PinControlButton;
+        static AnchorToggleButton ShowRootMarkerButton => ModuleListPanel.Instance.ShowRootMarkerButton;        
 
         readonly ARConfiguration config = new ARConfiguration();
         protected Canvas canvas;
@@ -101,6 +114,7 @@ namespace Iviz.Controllers
             set
             {
                 config.Visible = value;
+                GuiCamera.Instance.DisableCameraLock();
                 TFListener.RootFrame.transform.SetPose(value ? WorldPose : Pose.identity);
                 ARModeChanged?.Invoke(value);
             }
@@ -144,13 +158,21 @@ namespace Iviz.Controllers
         public virtual bool PinRootMarker
         {
             get => config.PinRootMarker;
-            set => config.PinRootMarker = value;
+            protected set
+            {
+                config.PinRootMarker = value;
+                PinControlButton.State = value;
+            }
         }
 
         public bool ShowRootMarker
         {
             get => config.ShowRootMarker;
-            set => config.ShowRootMarker = value;
+            private set
+            {
+                config.ShowRootMarker = value;
+                ShowRootMarkerButton.State = value;
+            }
         }
 
         protected virtual void Awake()
@@ -165,33 +187,54 @@ namespace Iviz.Controllers
 
             node = DisplayClickableNode.Instantiate("AR Node");
 
+            /*
             if (savedSessionInfo != null)
             {
                 SetWorldPose(savedSessionInfo.WorldOffset, savedSessionInfo.WorldAngle, RootMover.Configuration);
                 WorldScale = savedSessionInfo.WorldScale;
             }
+            */
 
             TFListener.RootMarker.SetTargetPoseUpdater(pose => SetWorldPose(pose, RootMover.ControlMarker));
+
+            PinControlButton.Clicked += OnPinControlButtonClicked;
+            ShowRootMarkerButton.Clicked += OnShowRootMarkerClicked;
+        }
+
+        void OnPinControlButtonClicked()
+        {
+            PinRootMarker = PinControlButton.State;            
+        }
+        
+        void OnShowRootMarkerClicked()
+        {
+            ShowRootMarker = ShowRootMarkerButton.State;
+            TFListener.UpdateRootMarkerVisibility();
         }
 
         public IModuleData ModuleData { get; set; }
 
         public virtual void StopController()
         {
+            /*
             savedSessionInfo = new ARSessionInfo
             {
                 WorldAngle = WorldAngle,
                 WorldOffset = WorldPosition,
                 WorldScale = WorldScale
             };
+            */
 
             Visible = false;
             WorldScale = 1;
 
             TFListener.RootMarker.SetTargetPoseUpdater(pose => TFListener.RootFrame.transform.SetPose(pose));
 
+            PinControlButton.Clicked -= OnPinControlButtonClicked;
+            ShowRootMarkerButton.Clicked -= OnShowRootMarkerClicked;            
             Instance = null;
         }
+
         void IController.ResetController()
         {
         }

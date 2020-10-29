@@ -10,7 +10,7 @@ namespace Iviz.Controllers
         /// <summary>
         /// The ROS subscriber of this controller. Only active after <see cref="StartListening"/> is called.
         /// </summary>
-        public RosListener Listener { get; protected set; }
+        public IRosListener Listener { get; protected set; }
 
         public abstract TfFrame Frame { get; }
 

@@ -38,7 +38,7 @@ namespace Iviz.Controllers
 
         public static TFListener Instance { get; private set; }
         public RosSender<tfMessage_v2> Publisher { get; }
-        public RosListener ListenerStatic { get; private set; }
+        public IRosListener ListenerStatic { get; private set; }
 
         public static Camera MainCamera { get; set; }
         public static GuiCamera GuiCamera => GuiCamera.Instance;

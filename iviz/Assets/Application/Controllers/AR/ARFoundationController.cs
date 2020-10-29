@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.App;
@@ -34,6 +35,7 @@ namespace Iviz.Controllers
         int defaultCullingMask;
 
         static AnchorToggleButton ArSet => ModuleListPanel.AnchorCanvas.ArSet;
+        static GameObject ArInfoPanel => ModuleListPanel.AnchorCanvas.ArInfoPanel;
 
         public override bool Visible
         {
@@ -62,6 +64,9 @@ namespace Iviz.Controllers
                 if (value)
                 {
                     arCamera.cullingMask = 1 << SetupModeLayer;
+                    ArSet.Visible = false;
+                    ArSet.State = true;
+                    ArInfoPanel.SetActive(true);   
                 }
                 else
                 {
@@ -73,16 +78,14 @@ namespace Iviz.Controllers
                         rotation = Quaternion.Euler(0, sourcePose.rotation.eulerAngles.y - 90, 0)
                     };
 
-                    Debug.Log(sourcePose);
+                    //Debug.Log(sourcePose);
                     SetWorldPose(pose, RootMover.Setup);
-                    ArSet.Visible = false;
                 }
             }
         }
 
-        public bool HasSetupModePose { get; private set; }
-
-        bool MarkerFound { get; set; }
+        //bool hasSetupModePose;
+        //bool markerFound;
 
         public override bool UseMarker
         {
@@ -146,7 +149,7 @@ namespace Iviz.Controllers
         public override bool PinRootMarker
         {
             get => base.PinRootMarker;
-            set
+            protected set
             {
                 //Debug.Log("pin changed");
                 if (value && !base.PinRootMarker)
@@ -154,6 +157,8 @@ namespace Iviz.Controllers
                     //Debug.Log("pin changed to true!");
                     ResetAnchor(true);
                 }
+                
+                
 
                 base.PinRootMarker = value;
             }
@@ -192,7 +197,7 @@ namespace Iviz.Controllers
             resource = ResourcePool.GetOrCreate<ARMarkerResource>(Resource.Displays.ARMarkerResource);
             node.Target = resource;
 
-            MarkerFound = false;
+            //markerFound = false;
 
             Config = new ARConfiguration();
 
@@ -203,16 +208,21 @@ namespace Iviz.Controllers
             }
 
             SetupModeEnabled = true;
-            setupModeFrame.AxisLength = TFListener.Instance.FrameSize;
-
-            ArSet.Clicked += () =>
-            {
-                SetupModeEnabled = !SetupModeEnabled;
-            };
-
+            setupModeFrame.AxisLength = 0.5f * TFListener.Instance.FrameSize;
+            
+            ArSet.Clicked += ArSetOnClicked;
+            ArSet.State = true;
+            ArSet.Visible = false;
+            ArInfoPanel.SetActive(true);   
+            
             WorldPoseChanged += OnWorldPoseChanged;
         }
 
+        void ArSetOnClicked()
+        {
+            SetupModeEnabled = !SetupModeEnabled;
+        }
+        
         bool IsSamePose(in Pose b)
         {
             return Vector3.Distance(WorldPosition, b.position) < 0.001f &&
@@ -256,15 +266,16 @@ namespace Iviz.Controllers
                 {
                     setupModeFrame.transform.position = hit.pose.position;
                     setupModeFrame.Tint = Color.white;
-                    HasSetupModePose = true;
-                    ArSet.Interactable = true;
+                    //hasSetupModePose = true;
+                    ArSet.Visible = true;
+                    ArInfoPanel.SetActive(false);   
                 }
                 else
                 {
                     setupModeFrame.transform.localPosition = new Vector3(0, 0, 0.5f);
-                    setupModeFrame.Tint = new Color(1, 1, 1, 0.5f);
-                    HasSetupModePose = false;
-                    ArSet.Interactable = false;
+                    setupModeFrame.Tint = new Color(1, 1, 1, 0.3f);
+                    //hasSetupModePose = false;
+                    ArSet.Visible = false;
                 }
             }
 
@@ -277,7 +288,9 @@ namespace Iviz.Controllers
 
             if (PinRootMarker)
             {
-                Vector3 origin = WorldPosition + 0.05f * Vector3.up;
+                const float maxDistanceAbovePlane = 0.05f;
+                
+                Vector3 origin = WorldPosition + maxDistanceAbovePlane * Vector3.up;
                 Ray ray = new Ray(origin, Vector3.down);
                 if (FindClosestPlane(ray, out ARRaycastHit hit, out ARPlane plane))
                 {
@@ -396,12 +409,14 @@ namespace Iviz.Controllers
 
             SetWorldPose(registeredPose, RootMover.ImageMarker);
 
-            MarkerFound = true;
+            //markerFound = true;
         }
 
         public override void StopController()
         {
             base.StopController();
+            ArSet.Clicked -= ArSetOnClicked;
+            WorldPoseChanged -= OnWorldPoseChanged;
             Destroy(fovDisplay.gameObject);
         }
     }
