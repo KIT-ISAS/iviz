@@ -29,6 +29,10 @@ using System.Threading.Tasks;
 
 namespace Iviz.XmlRpc
 {
+    /// <summary>
+    /// Simple implementation of an awaitable lock
+    /// Taken from <see href="https://github.com/neosmart/AsyncLock"/>
+    /// </summary>
     public class AsyncLock
     {
         //We do not have System.Threading.Thread.* on .NET Standard without additional dependencies
@@ -134,15 +138,17 @@ namespace Iviz.XmlRpc
                 lock (parent.reentrancy)
                 {
                     Interlocked.Decrement(ref parent.reentrances);
-                    if (parent.reentrances == 0)
+                    if (parent.reentrances != 0)
                     {
-                        //the owning thread is always the same so long as we are in a nested stack call
-                        //we reset the owning id to null only when the lock is fully unlocked
-                        parent.owningId = UnlockedThreadId;
-                        if (parent.retry.CurrentCount == 0)
-                        {
-                            parent.retry.Release();
-                        }
+                        return;
+                    }
+
+                    //the owning thread is always the same so long as we are in a nested stack call
+                    //we reset the owning id to null only when the lock is fully unlocked
+                    parent.owningId = UnlockedThreadId;
+                    if (parent.retry.CurrentCount == 0)
+                    {
+                        parent.retry.Release();
                     }
                 }
             }

@@ -8,6 +8,9 @@ using Iviz.Msgs;
 
 namespace Iviz.XmlRpc
 {
+    /// <summary>
+    /// Wrapper around an XML-RPC function argument.
+    /// </summary>
     public readonly struct Arg
     {
         readonly string content;

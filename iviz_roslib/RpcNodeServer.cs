@@ -2,38 +2,34 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
-using HttpListenerContext = Iviz.XmlRpc.HttpListenerContext;
 
 namespace Iviz.Roslib.XmlRpc
 {
     internal sealed class NodeServer : IDisposable
     {
         static readonly Arg[] DefaultOkResponse = OkResponse(0);
-
-        readonly Dictionary<string, Func<object[], Arg[]>> methods;
+        readonly RosClient client;
 
         readonly Dictionary<string, Func<object[], Task>>
             lateCallbacks; // gets called after response to method callback is sent 
 
-        readonly Iviz.XmlRpc.HttpListener listener;
-        readonly RosClient client;
+        readonly HttpListener listener;
 
+        readonly Dictionary<string, Func<object[], Arg[]>> methods;
         readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
-        Task task;
 
-        public Uri ListenerUri => listener.LocalEndpoint;
-        public Uri Uri => client.CallerUri;
+        Task task;
+        bool disposed;
 
         public NodeServer(RosClient client)
         {
             this.client = client;
 
-            listener = new Iviz.XmlRpc.HttpListener(client.CallerUri);
+            listener = new HttpListener(client.CallerUri.Port);
 
             methods = new Dictionary<string, Func<object[], Arg[]>>
             {
@@ -46,65 +42,17 @@ namespace Iviz.Roslib.XmlRpc
                 ["paramUpdate"] = ParamUpdate,
                 ["publisherUpdate"] = PublisherUpdate,
                 ["requestTopic"] = RequestTopic,
-                ["getPid"] = GetPid,
+                ["getPid"] = GetPid
             };
 
             lateCallbacks = new Dictionary<string, Func<object[], Task>>
             {
-                ["publisherUpdate"] = PublisherUpdateLateCallback,
+                ["publisherUpdate"] = PublisherUpdateLateCallback
             };
         }
 
-        public void Start()
-        {
-            task = Task.Run(Run);
-        }
-
-        public override string ToString()
-        {
-            return $"[NodeServer {Uri}]";
-        }
-
-        async Task Run()
-        {
-            Logger.LogDebug($"{this}: Starting!");
-
-            Task listenerTask = listener.StartAsync(StartContext, true);
-
-            // wait until we're disposed
-            await signal.WaitAsync();
-
-            // tell the listener in every possible way to stop listening
-            listener.Dispose();
-
-            // wait for any remaining rpc calls
-            await listener.AwaitRunningTasks();
-
-            // and that is usually not enough. so we bail out
-            if (!await listenerTask.WaitFor(2000))
-            {
-                Logger.LogDebug($"{this}: Listener stuck. Abandoning.");
-            }
-
-            Logger.LogDebug($"{this}: Leaving thread");
-        }
-
-        async Task StartContext(HttpListenerContext context)
-        {
-            using (context)
-            {
-                try
-                {
-                    await XmlRpcService.MethodResponseAsync(context, methods, lateCallbacks).Caf();
-                }
-                catch (Exception e)
-                {
-                    Logger.LogError(e);
-                }
-            }
-        }
-
-        bool disposed;
+        public int ListenerPort => listener.LocalPort;
+        Uri Uri => client.CallerUri;
 
         public void Dispose()
         {
@@ -124,8 +72,55 @@ namespace Iviz.Roslib.XmlRpc
 
             // tell task thread to dispose
             signal.Release();
+            signal.Dispose();
 
             task.Wait();
+        }
+
+        public void Start()
+        {
+            task = Task.Run(Run);
+        }
+
+        public override string ToString()
+        {
+            return $"[NodeServer {Uri}]";
+        }
+
+        async Task Run()
+        {
+            Logger.LogDebug($"{this}: Starting!");
+
+            Task listenerTask = listener.StartAsync(StartContext, true);
+
+            // wait until we're disposed
+            await signal.WaitAsync().Caf();
+
+            // tell the listener to stop listening
+            listener.Dispose();
+
+            // wait for any remaining rpc calls
+            await listener.AwaitRunningTasks().Caf();
+
+            // and that is usually not enough. so we bail out
+            if (!await listenerTask.WaitFor(2000).Caf())
+            {
+                Logger.LogDebug($"{this}: Listener stuck. Abandoning.");
+            }
+
+            Logger.LogDebug($"{this}: Leaving thread");
+        }
+
+        async Task StartContext(HttpListenerContext context)
+        {
+            try
+            {
+                await XmlRpcService.MethodResponseAsync(context, methods, lateCallbacks).Caf();
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e);
+            }
         }
 
         static Arg[] OkResponse(Arg arg)
@@ -155,7 +150,7 @@ namespace Iviz.Roslib.XmlRpc
                     info.Direction,
                     info.Transport,
                     info.Topic,
-                    info.Connected,
+                    info.Connected
                 }).ToArray();
 
             return OkResponse(response);
@@ -244,7 +239,7 @@ namespace Iviz.Roslib.XmlRpc
 
             try
             {
-                await client.PublisherUpdateRcpAsync(topic, publisherUris);
+                await client.PublisherUpdateRcpAsync(topic, publisherUris).Caf();
             }
             catch (Exception e)
             {

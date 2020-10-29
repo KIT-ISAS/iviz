@@ -1,22 +1,42 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
-using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 
 namespace Iviz.XmlRpc
 {
+    /// <summary>
+    /// Handler for an HTTP request.
+    /// </summary>
     public sealed class HttpListenerContext : IDisposable
     {
         readonly TcpClient client;
+        bool disposed;
 
-        public HttpListenerContext(TcpClient client)
+        internal HttpListenerContext(TcpClient client)
         {
-            this.client = client ?? throw new ArgumentNullException(nameof(client));
+            this.client = client;
         }
 
+        public void Dispose()
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            client.Close();
+            disposed = true;
+        }
+
+        /// <summary>
+        /// Retrieves the HTTP request.
+        /// </summary>
+        /// <param name="timeoutInMs">Maximal time to wait</param>
+        /// <returns>An awaitable task</returns>
+        /// <exception cref="TimeoutException">Wait time exceeded</exception>
+        /// <exception cref="ParseException">The HTTP request could not be understood</exception>
         public async Task<string> GetRequest(int timeoutInMs = 2000)
         {
             StreamReader stream = new StreamReader(client.GetStream(), BuiltIns.UTF8);
@@ -25,13 +45,13 @@ namespace Iviz.XmlRpc
             while (true)
             {
                 Task<string> readTask = stream.ReadLineAsync();
-                if (!await readTask.WaitFor(timeoutInMs) || !readTask.IsCompleted)
+                if (!await readTask.WaitFor(timeoutInMs) || !readTask.RanToCompletion())
                 {
                     throw new TimeoutException("Read line timed out!", readTask.Exception);
                 }
 
                 string line = await readTask;
-                
+
                 if (CheckHeaderLine(line, "Content-Length", out string lengthStr))
                 {
                     if (!int.TryParse(lengthStr, out length))
@@ -55,7 +75,7 @@ namespace Iviz.XmlRpc
             while (BuiltIns.UTF8.GetByteCount(buffer, 0, numRead) < length)
             {
                 Task<int> readTask = stream.ReadAsync(buffer, 0, length - numRead);
-                if (!await readTask.WaitFor(timeoutInMs) || !readTask.IsCompleted)
+                if (!await readTask.WaitFor(timeoutInMs) || !readTask.RanToCompletion())
                 {
                     throw new TimeoutException("Read line timed out!", readTask.Exception);
                 }
@@ -98,6 +118,12 @@ namespace Iviz.XmlRpc
             return true;
         }
 
+        /// <summary>
+        /// Sends an HTTP response.
+        /// </summary>
+        /// <param name="msgOut">The response message</param>
+        /// <returns>An awaitable task</returns>
+        /// <exception cref="ArgumentNullException">Thrown if msgOut is null</exception>
         public async Task Respond(string msgOut)
         {
             if (msgOut is null)
@@ -118,18 +144,6 @@ namespace Iviz.XmlRpc
             await writer.WriteLineAsync();
             await writer.WriteAsync(msgOut);
             writer.Close();
-        }
-
-        bool disposed;
-        public void Dispose()
-        {
-            if (disposed)
-            {
-                return;
-            }
-
-            client.Close();
-            disposed = true;
         }
     }
 }

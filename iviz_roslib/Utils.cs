@@ -67,6 +67,11 @@ namespace Iviz.Roslib
 
         public static void PrintBuffer(byte[] bytes, int start, int size)
         {
+            if (bytes == null)
+            {
+                throw new ArgumentNullException(nameof(bytes));
+            }
+
             for (int i = 0; i < size; i++)
             {
                 Logger.Log($"[{i}]: {(int) bytes[start + i]} --> {(char) bytes[start + i]}");
@@ -95,6 +100,11 @@ namespace Iviz.Roslib
         
         public static bool RemovePair<T, TU>(this ConcurrentDictionary<T, TU> dictionary, T t, TU u)
         {
+            if (dictionary == null)
+            {
+                throw new ArgumentNullException(nameof(dictionary));
+            }
+
             return ((ICollection<KeyValuePair<T, TU>>) dictionary).Remove(new KeyValuePair<T, TU>(t, u));
         }
     }

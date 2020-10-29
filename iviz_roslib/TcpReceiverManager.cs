@@ -59,7 +59,7 @@ namespace Iviz.Roslib
             NodeClient.RequestTopicResponse response;
             try
             {
-                response = await client.CreateTalker(remoteUri).RequestTopicAsync(Topic);
+                response = await client.CreateTalker(remoteUri).RequestTopicAsync(Topic).Caf();
             }
             catch (Exception e) when (e is TimeoutException || e is AggregateException || e is XmlRpcException)
             {
@@ -96,7 +96,7 @@ namespace Iviz.Roslib
 
         async Task<bool> AddPublisherAsync(Uri remoteUri)
         {
-            Endpoint remoteEndpoint = await RequestConnectionFromPublisherAsync(remoteUri);
+            Endpoint remoteEndpoint = await RequestConnectionFromPublisherAsync(remoteUri).Caf();
             if (remoteEndpoint == null)
             {
                 return false;

@@ -6,7 +6,7 @@ namespace Iviz.Roslib
     /// <summary>
     /// Full info about a ROS service and its service type, including dependencies.
     /// </summary>
-    internal sealed class ServiceInfo : JsonToString
+    internal sealed class ServiceInfo<T> : JsonToString
     {
         /// <summary>
         /// ROS name of this node.
@@ -32,9 +32,9 @@ namespace Iviz.Roslib
         /// Instance of the message used to generate others of the same type.
         /// <seealso cref="IService.Create"/>
         /// </summary>
-        public IService Generator { get; }
+        public T Generator { get; }
 
-        ServiceInfo(string callerId, string topic, string md5Sum, string type, IService generator)
+        ServiceInfo(string callerId, string topic, string md5Sum, string type, T generator)
         {
             CallerId = callerId;
             Service = topic;
@@ -43,11 +43,11 @@ namespace Iviz.Roslib
             Generator = generator;
         }
 
-        public ServiceInfo(string callerId, string service, Type type, IService generator = null)
+        public ServiceInfo(string callerId, string service, T generator = default)
         : this(
                 callerId, service,
-                BuiltIns.GetMd5Sum(type),
-                BuiltIns.GetServiceType(type),
+                BuiltIns.GetMd5Sum(typeof(T)),
+                BuiltIns.GetServiceType(typeof(T)),
                 generator
                 )
         {

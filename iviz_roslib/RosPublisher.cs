@@ -5,26 +5,90 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.XmlRpc;
 
 namespace Iviz.Roslib
 {
+    /// <summary>
+    /// Interface for all ROS publishers.
+    /// </summary>
     public interface IRosPublisher
     {
+        /// <summary>
+        /// The name of the topic.
+        /// </summary>
         public string Topic { get; }
+        
+        /// <summary>
+        /// The ROS message type of the topic.
+        /// </summary>        
         public string TopicType { get; }
+        
+        /// <summary>
+        /// Timeout in milliseconds to wait for a subscriber handshake.
+        /// </summary>             
         public int TimeoutInMs { get; set; }
+        
+        /// <summary>
+        /// The number of publishers in the topic.
+        /// </summary>
         public int NumSubscribers { get; }
+        
+        /// <summary>
+        /// Publishes the given message into the topic. 
+        /// </summary>
+        /// <param name="message">The message to be published.</param>
+        /// <exception cref="ArgumentNullException">The message is null</exception>
+        /// <exception cref="InvalidMessageTypeException">The message type does not match.</exception>          
         public void Publish(IMessage message);
+        
+        /// <summary>
+        /// Unregisters the given id from the publisher. If the publisher has no ids left, the topic will be unadvertised from the master.
+        /// </summary>
+        /// <param name="id">The id to be unregistered.</param>
+        /// <returns>Whether the id belonged to the publisher.</returns>        
         public bool Unadvertise(string id);
+        
+        /// <summary>
+        /// Unregisters the given id from the publisher. If the publisher has no ids left, the topic will be unadvertised from the master.
+        /// </summary>
+        /// <param name="id">The id to be unregistered.</param>
+        /// <returns>Whether the id belonged to the publisher.</returns>
         public Task<bool> UnadvertiseAsync(string id);
+        
+        /// <summary>
+        /// Generates a new advertisement id. Use this string for Unadvertise().
+        /// </summary>
+        /// <returns>The advertisement id.</returns>
         public string Advertise();
+        
+        /// <summary>
+        /// Checks whether this publisher has provided the given id from an Advertise() call.
+        /// </summary>
+        /// <param name="id">Identifier to check.</param>
+        /// <returns>Whether the id was provided by this publisher.</returns>
         public bool ContainsId(string id);
+        
+        /// <summary>
+        /// Checks whether this publisher's message type corresponds to the given type
+        /// </summary>
+        /// <param name="type">The type to check.</param>
+        /// <returns>Whether the class type matches.</returns>        
         public bool MessageTypeMatches(Type type);
+        
+        /// <summary>
+        /// Returns a structure that represents the internal state of the publisher. 
+        /// </summary>        
         public PublisherTopicState GetState();
+        
         internal void Stop();
         internal Endpoint RequestTopicRpc(string remoteCallerId);
     }
 
+    /// <summary>
+    /// Manager for a ROS publisher.
+    /// </summary>
+    /// <typeparam name="T">Topic type</typeparam>
     public class RosPublisher<T> : IRosPublisher where T : IMessage
     {
         readonly TcpSenderManager<T> manager;
@@ -36,20 +100,8 @@ namespace Iviz.Roslib
         /// Whether this publisher is valid.
         /// </summary>
         bool IsAlive { get; set; }
-
-        /// <summary>
-        /// The name of the topic.
-        /// </summary>
         public string Topic => manager.Topic;
-
-        /// <summary>
-        /// The ROS message type of the topic.
-        /// </summary>
         public string TopicType => manager.TopicType;
-
-        /// <summary>
-        /// The number of publishers in the topic.
-        /// </summary>
         public int NumSubscribers => manager.NumConnections;
 
         /// <summary>
@@ -76,9 +128,7 @@ namespace Iviz.Roslib
             set => manager.MaxQueueSizeInBytes = value;
         }
 
-        /// <summary>
-        /// Timeout in milliseconds to wait for a subscriber handshake.
-        /// </summary>        
+   
         public int TimeoutInMs
         {
             get => manager.TimeoutInMs;
@@ -118,23 +168,13 @@ namespace Iviz.Roslib
             totalPublishers++;
             return newId;
         }
-
-        /// <summary>
-        /// Returns a structure that represents the internal state of the publisher. 
-        /// </summary>        
+        
         public PublisherTopicState GetState()
         {
             AssertIsAlive();
             return new PublisherTopicState(Topic, TopicType, ids, manager.GetStates());
         }
-
-
-        /// <summary>
-        /// Publishes the given message into the topic. 
-        /// </summary>
-        /// <param name="message">The message to be published.</param>
-        /// <exception cref="ArgumentNullException">The message is null</exception>
-        /// <exception cref="InvalidMessageTypeException">The message type does not match.</exception>        
+        
         void IRosPublisher.Publish(IMessage message)
         {
             if (message is null)
@@ -188,12 +228,7 @@ namespace Iviz.Roslib
             NumSubscribersChanged = null;
             IsAlive = false;
         }
-
-
-        /// <summary>
-        /// Generates a new advertisement id. Use this string for Unadvertise().
-        /// </summary>
-        /// <returns>The advertisement id.</returns>        
+        
         public string Advertise()
         {
             AssertIsAlive();
@@ -218,11 +253,6 @@ namespace Iviz.Roslib
             return ids.Remove(topicId);
         }
 
-        /// <summary>
-        /// Unregisters the given id from the publisher. If the publisher has no ids left, the topic will be unadvertised from the master.
-        /// </summary>
-        /// <param name="id">The id to be unregistered.</param>
-        /// <returns>Whether the id belonged to the publisher.</returns>
         public bool Unadvertise(string id)
         {
             bool removed = RemoveId(id);
@@ -236,11 +266,6 @@ namespace Iviz.Roslib
             return removed;
         }
 
-        /// <summary>
-        /// Unregisters the given id from the publisher. If the publisher has no ids left, the topic will be unadvertised from the master.
-        /// </summary>
-        /// <param name="id">The id to be unregistered.</param>
-        /// <returns>Whether the id belonged to the publisher.</returns>
         public async Task<bool> UnadvertiseAsync(string id)
         {
             bool removed = RemoveId(id);
@@ -248,29 +273,22 @@ namespace Iviz.Roslib
             if (ids.Count == 0)
             {
                 Stop();
-                await client.RemovePublisherAsync(this);
+                await client.RemovePublisherAsync(this).Caf();
             }
 
             return removed;
         }
 
-        /// <summary>
-        /// Checks whether this publisher has provided the given id from an Advertise() call.
-        /// </summary>
-        /// <param name="id">Identifier to check.</param>
-        /// <returns>Whether the id was provided by this publisher.</returns>        
         public bool ContainsId(string id)
         {
-            if (id is null) { throw new ArgumentNullException(nameof(id)); }
+            if (id is null)
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
 
             return ids.Contains(id);
         }
 
-        /// <summary>
-        /// Checks whether the class of the publisher message type corresponds to the given type
-        /// </summary>
-        /// <param name="type">The type to check.</param>
-        /// <returns>Whether the class type matches.</returns>
         public bool MessageTypeMatches(Type type)
         {
             return type == typeof(T);

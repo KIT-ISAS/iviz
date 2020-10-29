@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -10,22 +11,28 @@ using Iviz.XmlRpc;
 
 namespace Iviz.Roslib
 {
-    internal sealed class ServiceSenderManager
+    internal interface IServiceSenderManager
     {
-        readonly Func<IService, Task> callback;
-
-        readonly ConcurrentDictionary<ServiceSenderAsync, object> connections =
-            new ConcurrentDictionary<ServiceSenderAsync, object>();
+        string Service { get; }
+        string ServiceType { get; }
+        Uri Uri { get; }
+        void Stop();
+        Task StopAsync();
+    }
+    
+    internal sealed class ServiceSenderManager<T> : IServiceSenderManager where T : IService
+    {
+        readonly Func<T, Task> callback;
+        readonly HashSet<ServiceSenderAsync<T>> connections = new HashSet<ServiceSenderAsync<T>>();
 
         readonly TcpListener listener;
-        readonly ServiceInfo serviceInfo;
+        readonly ServiceInfo<T> serviceInfo;
         readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
-
         readonly Task task;
 
         bool keepGoing;
 
-        public ServiceSenderManager(ServiceInfo serviceInfo, string host, Func<IService, Task> callback)
+        public ServiceSenderManager(ServiceInfo<T> serviceInfo, string host, Func<T, Task> callback)
         {
             this.serviceInfo = serviceInfo;
             this.callback = callback;
@@ -44,15 +51,15 @@ namespace Iviz.Roslib
 
         public Uri Uri { get; }
         public string Service => serviceInfo.Service;
-        string ServiceType => serviceInfo.Type;
+        public string ServiceType => serviceInfo.Type;
 
         async Task StartAsync()
         {
             Task loopTask = RunLoop();
-            await signal.WaitAsync();
+            await signal.WaitAsync().Caf();
             keepGoing = false;
             listener.Stop();
-            if (!await loopTask.WaitFor(2000))
+            if (!await loopTask.WaitFor(2000).Caf())
             {
                 Logger.LogDebug($"{this}: Listener stuck. Abandoning.");
             }
@@ -70,8 +77,8 @@ namespace Iviz.Roslib
                         break;
                     }
 
-                    ServiceSenderAsync sender = new ServiceSenderAsync(serviceInfo, client, callback);
-                    connections[sender] = null;
+                    var sender = new ServiceSenderAsync<T>(serviceInfo, client, callback);
+                    connections.Add(sender);
 
                     Cleanup();
                 }
@@ -92,39 +99,41 @@ namespace Iviz.Roslib
 
         void Cleanup()
         {
-            ServiceSenderAsync[] toRemove = connections.Keys.Where(connection => !connection.IsAlive).ToArray();
-            foreach (ServiceSenderAsync connection in toRemove)
+            ServiceSenderAsync<T>[] toRemove = connections.Where(connection => !connection.IsAlive).ToArray();
+            foreach (ServiceSenderAsync<T> connection in toRemove)
             {
                 Logger.LogDebug(
                     $"{this}: Removing service connection with '{connection.Hostname}' - dead x_x");
                 connection.Stop();
-                connections.TryRemove(connection, out _);
+                connections.Remove(connection);
             }
         }
 
 
         public void Stop()
         {
-            foreach (ServiceSenderAsync sender in connections.Keys)
+            signal.Release();
+            task?.Wait();
+
+            foreach (ServiceSenderAsync<T> sender in connections)
             {
                 sender.Stop();
             }
 
             connections.Clear();
-            signal.Release();
-            task?.Wait();
         }
 
         public async Task StopAsync()
         {
-            Task[] tasks = connections.Keys.Select(sender => sender.StopAsync()).ToArray();
-            Task.WaitAll(tasks);
-            connections.Clear();
             signal.Release();
             if (task != null)
             {
-                await task;
+                await task.Caf();
             }
+
+            Task[] tasks = connections.Select(sender => sender.StopAsync()).ToArray();
+            Task.WaitAll(tasks);
+            connections.Clear();
         }
 
         public override string ToString()

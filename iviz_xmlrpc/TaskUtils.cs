@@ -3,31 +3,48 @@ using System.Threading.Tasks;
 
 namespace Iviz.XmlRpc
 {
+    /// <summary>
+    /// Task utilities
+    /// </summary>
     public static class TaskUtils
     {
-        public static async Task<bool> WaitFor<T>(this Task<T> task, int timeoutInMs) where T : class
-        {
-            async Task<T> Timeout()
-            {
-                await Task.Delay(timeoutInMs).Caf();
-                return null;
-            }
-
-            Task<T> result = await Task.WhenAny(task, Timeout()).Caf();
-            return result == task;
-        }
-        
+        /// <summary>
+        /// Waits for the task to complete, or throw a timeout if this is not achieved in the given time.
+        /// </summary>
+        /// <param name="task">The task to be awaited</param>
+        /// <param name="timeoutInMs">The maximal amount to wait</param>
+        /// <returns>An awaitable task</returns>
         public static async Task<bool> WaitFor(this Task task, int timeoutInMs)
         {
             Task result = await Task.WhenAny(task, Task.Delay(timeoutInMs)).Caf();
             return result == task;
         }
+        
+        /// <summary>
+        /// Returns whether the task ran to completion (i.e., completed but not cancelled or faulted)
+        /// </summary>
+        /// <param name="task">The task to be checked</param>
+        /// <returns>Whether the task ran to completion</returns>
+        public static bool RanToCompletion(this Task task)
+        {
+            return task.Status == TaskStatus.RanToCompletion;
+        }
 
+        /// <summary>
+        /// Set ConfigureAwait(false) for a task.
+        /// </summary>
+        /// <param name="task">Task to be caffed</param>
+        /// <returns>The caffed task</returns>
         public static ConfiguredTaskAwaitable Caf(this Task task)
         {
             return task.ConfigureAwait(false);
         }
         
+        /// <summary>
+        /// Sets ConfigureAwait(false) for a task.
+        /// </summary>
+        /// <param name="task">Task to be caffed</param>
+        /// <returns>The caffed task</returns>        
         public static ConfiguredTaskAwaitable<T> Caf<T>(this Task<T> task)
         {
             return task.ConfigureAwait(false);

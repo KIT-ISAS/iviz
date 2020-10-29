@@ -283,15 +283,32 @@ namespace Iviz.XmlRpc
 
             return ProcessResponse(inData);
         }
-
+        
+        /// <summary>
+        /// Responds to an XML-RPC function call sent through an HTTP request.
+        /// First deserializes the function arguments from the request, then it calls one
+        /// of the methods in the list, and finally it responds with the serialized arguments. 
+        /// </summary>
+        /// <param name="httpContext">The context containing the HTTP request</param>
+        /// <param name="methods">A list of available XML-RPC methods</param>
+        /// <param name="lateCallbacks">Will be called after the response is sent</param>
+        /// <returns>An awaitable task</returns>
+        /// <exception cref="ArgumentNullException">Thrown if the context or the method list is null</exception>
+        /// <exception cref="ParseException">Thrown if the request could not be understood</exception>
         public static async Task MethodResponseAsync(
             HttpListenerContext httpContext,
             IReadOnlyDictionary<string, Func<object[], Arg[]>> methods,
             IReadOnlyDictionary<string, Func<object[], Task>> lateCallbacks = null)
         {
-            if (httpContext is null) { throw new ArgumentNullException(nameof(httpContext)); }
+            if (httpContext is null)
+            {
+                throw new ArgumentNullException(nameof(httpContext));
+            }
 
-            if (methods is null) { throw new ArgumentNullException(nameof(methods)); }
+            if (methods is null)
+            {
+                throw new ArgumentNullException(nameof(methods));
+            }
 
             string inData = await httpContext.GetRequest().Caf();
 

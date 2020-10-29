@@ -29,7 +29,7 @@ namespace Iviz.XmlRpc
             int port = uri.Port;
 
             Task task = client.ConnectAsync(hostname, port);
-            if (!task.Wait(timeoutInMs) || !task.IsCompleted) // will deadlock if called from Unity thread!
+            if (!task.Wait(timeoutInMs) || !task.RanToCompletion())
             {
                 throw new TimeoutException($"HttpRequest: Host '{hostname}' timed out", task.Exception);
             }
@@ -46,7 +46,7 @@ namespace Iviz.XmlRpc
             int port = uri.Port;
 
             Task task = client.ConnectAsync(hostname, port);
-            if (!await task.WaitFor(timeoutInMs) || !task.IsCompleted)
+            if (!await task.WaitFor(timeoutInMs) || !task.RanToCompletion())
             {
                 throw new TimeoutException($"HttpRequest: Host '{hostname}' timed out", task.Exception);
             }
@@ -123,7 +123,7 @@ namespace Iviz.XmlRpc
 
                 StreamReader reader = new StreamReader(stream, BuiltIns.UTF8);
                 Task<string> readTask = reader.ReadToEndAsync();
-                if (!await readTask.WaitFor(timeoutInMs) || !readTask.IsCompleted)
+                if (!await readTask.WaitFor(timeoutInMs) || !readTask.RanToCompletion())
                 {
                     reader.Close();
                     throw new TimeoutException("HttpRequest: Request response timed out!", readTask.Exception);

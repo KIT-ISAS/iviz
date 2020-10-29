@@ -8,40 +8,58 @@ I have tested it in Windows, Ubuntu Linux, macOS, iOS, Android, and UWP 32-bit (
 ## Getting Started
 
 To use this library in your code, you can either:
-* Include the iviz_roslib project into your solution, or
-* Reference the files __iviz_roslib.dll__, __iviz_msgs.dll__, and __Newtonsoft.Json.dll__ from _iviz/Assets/Application/Dependencies_ in your own project.
+* include the iviz_roslib project into your VS, VSCode, or Rider solution, or
+* reference the files __Iviz.Roslib.dll__, __Iviz.Msgs.dll__, __Iviz.XmlRpc.dll__, and __Newtonsoft.Json.dll__ from the _Publish_ folder in your own project.
 
-If you are in Unity, all you need to do is copy the three files and put them somewhere in your Assets directory. 
+If you are in Unity, all you need to do is copy the four files and put them somewhere in your Assets directory.
+As newer versions of Unity usually provide their own version of __Newtonsoft.Json.dll__, you may have to remove  it if you get errors due to duplicated references.  
 
 ## Examples
 
 The interface is inspired by [ROS#](https://github.com/siemens/ros-sharp), so if you come from that background you will find the library more intuitive than if you were using roscpp.
-Important differences include:
-* You communicate with the roscore node (port 11311) directly. A rosbridge node is not needed.
-* TCPROS is a peer-to-peer network, which means that when you publish a topic, you need to accept direct connections from subscriber nodes that may be in other computers.
-This can cause firewall issues that were not present in rosbridge, because that only requires a single outgoing connection.
-* Also for this reason, iviz_roslib needs to know an IP that is accessible from the outside.
-Currently, the library tries to guess it, but if you have multiple interfaces we may send the wrong one.
-A symptom of this is if you can subscribe to other nodes, but cannot publish. Check roswtf to verify the connectivity.
-* You also need a caller id. This can be any name (no spaces), but it needs to be unique in the network.
 
-### Publisher
-A publisher example follows:
+### Connection
+
+Unlike Rosbridge, you do not need a special websocket app to talk to ROS.
+Still, there are some things you need to keep in mind.
+* Instead of URIs like _ws://localhost:9090_, you now connect directly to _http://localhost:11311_.
+* ROS is a peer-to-peer network, so if you're working with other computers, it is important for you to know your address.
+This is because this address will be sent to the other computers when they want to establish a connection with you.
+If this address is not reachable to other nodes, you will only be able to subscribe and listen to other nodes, but they will not be able to subscribe to your topics.
+* You also need a caller id, such as _/my_node_. This name must be unique in the ROS network.
+
+A connection example follows:
 ```c#
 // set the master uri: check ROS_MASTER_URI first, else use the given value
 Uri masterUri = RosClient.EnvironmentMasterUri ?? new Uri("http://192.168.0.220:11311");
-// the name of our node
+
+// set our own uri: check ROS_HOSTNAME and ROS_IP first, then use the IP address of the wifi/ethernet interface
+Uri callerUri = TryGetCallerUri();
+
+// set the name of our node
 string callerId = "/iviz_test";
 
 // create the connection
-RosClient client = new RosClient(masterUri, callerId);
+RosClient client = new RosClient(masterUri, callerId, callerUri);
+```
 
-// note: to set our own IP directly, use
-// Uri callerUri = new Uri("http://192.168.0.10:" + RosClient.AnyPort);
-// RosClient client = new RosClient(masterUri, callerId, callerUri);
+The function _TryGetCallerUri()_ tries to guess your address, but if it gets the wrong one you will need to provide it directly.
 
-// now we advertise a topic, note that we retrieve a publisher object.
-client.Advertise<PoseStamped>("/test_topic", out RosPublisher publisher);
+Calling _TryGetCallerUri_ without an argument will use a random free port.
+However, you can also provide your own port using _TryGetCallerUri(my_port)_.
+When choosing whether to use your own port or a random port, keep in mind the following guidelines:
+* A random port is useful for finished apps. It ensures that you will never get an error like "address is already in use".
+* Specific ports are better for new apps being debugged.
+The problem is that if your app crashes or gets terminated before it unregisters itself gracefully, the advertisements and subscriptions will remain in the system.
+If your program keeps getting restarted with a new port every time, it will keep adding new entries in the list of nodes, which makes debugging difficult.   
+
+
+### Publishers
+Publishers are used to send messages to topics.
+A publisher example follows:
+```c#
+// we advertise a topic, and retrieve a publisher object.
+string id = client.Advertise("/test_topic", out RosPublisher<PoseStamped> publisher);
 
 for (int i = 0; i < 100; i++)
 {
@@ -63,47 +81,50 @@ for (int i = 0; i < 100; i++)
     Thread.Sleep(1000);
 }
 
+// closing the client automatically unadvertises all topics 
 client.Close(); 
 ```
-If you come from a roscpp background, you will notice that there are no _spin_ instructions.
-This is because all connections happen in a different thread. 
- 
-If you want to unadvertise a topic, you can use the same _id_ system as ROS#:
 
+The identifier _id_ acts as a sort of reference counter, and is needed if you want to unadvertise the topic when you don't need it anymore. 
 ```c#
-string id = client.Advertise<PoseStamped>("/test_topic", out RosPublisher publisher);
-// ...
 publisher.Unadvertise(id);
 ``` 
 You can advertise a topic multiple times, for example if your application has multiple modules that use the same client.
 You will receive a different id each time.
-Note that if you unadvertise all the ids of a topic, the publisher object will be disposed and become invalid.   
+If all the ids are unadvertised, the publisher will be disposed and the topic will be unregistered from the ROS system.   
 
-When publishing information that requires heavy use of resources, such as a video stream from a camera, it generally helps to activate the processing only once a subscriber appears.
-You can achieve this using the _NumSubscribersChanged_ event.
-
+Other things of interest:
+* You can use the _NumSubscribersChanged_ event to see if somebody has subscribed or unsubscribed from your topic. 
+ This is useful if your topic requires heavy use of resources, such as a video stream from a camera, so that you can activate the processing only if a subscriber appears.
 ```c#
 publisher.NumSubscribersChanged += pub =>
 {
     Console.WriteLine("Publisher for topic " + pub.Topic + " now has " + pub.NumSubscribers + " subscribers!");
 };
 ``` 
-### Subscriber
+* If you enable _Latching_, the publisher will automatically send the last message you published to any new node that subscribes.
+This is useful if you have a message that doesn't change but which every subscriber needs to know, and you don't want to have to republish it periodically. 
+* Most client functions have an _async_ equivalent. For example, you can do: 
+```c#
+var (id, publisher) = await client.AdvertiseAsync<PoseStamped>("/test_topic");
+// ...
+await publisher.UnadvertiseAsync(id);
+```
 
-A subscriber example follows:
+ 
+### Subscribers
+
+Subscribers are used to receive messages from topics.
+A subscriber example that prints all messages from "/tf" looks as follows:
 
 ```c#
-Uri masterUri = RosClient.EnvironmentMasterUri ?? new Uri("http://192.168.0.220:11311");
-string callerId = "/iviz_test";
-
-// create the connection
-RosClient client = new RosClient(masterUri, callerId);
-
-// now we subscribe to a topic
+// we subscribe to a topic with the given callback
 client.Subscribe<TFMessage>("/tf", msg =>
 {
-    // print the tf message as json
-    Console.WriteLine(JsonConvert.SerializeObject(msg));
+    // transform the message to JSON
+    string msgAsJson = JsonConvert.SerializeObject(msg);
+    // print the json representation
+    Console.WriteLine(msgAsJson);
 });
 
 // wait 10 seconds
@@ -119,20 +140,95 @@ The following example also shows us how to obtain a _Subscriber_ object:
 ```c#
 string id = client.Subscribe<TFMessage>("/tf", msg =>
 {
-    Console.WriteLine(JsonConvert.SerializeObject(msg));
-}, out Subscriber subscriber);
+    // transform the message to JSON
+    string msgAsJson = JsonConvert.SerializeObject(msg);
+    // print the json representation
+    Console.WriteLine(msgAsJson);
+}, out var subscriber);
 //...
-client.Unsubscribe(id);
+subscriber.Unsubscribe(id);
 ```
 
-Note that you can subscribe to a topic before it exists.
-You will start receiving message transparently once a publisher appears.
-You can check the number of publishers with the _NumPublishers_ property in the subscriber object, or by using the event _NumPublishersChanged_.
+Note that you can subscribe to a topic before a publisher for it exists.
+You will start receiving message once the publisher appears.
+You can similarly check the number of publishers with the _NumPublishers_ property in the subscriber object, or by using the event _NumPublishersChanged_.
+
+Finally, as with the publishers, there are _async_ versions of the client functions: 
+
+```c#
+var (id, subscriber)  = await client.SubscribeAsync<TFMessage>("/tf", msg =>
+{
+    // transform the message to JSON
+    string msgAsJson = JsonConvert.SerializeObject(msg);
+    // print the json representation
+    Console.WriteLine(msgAsJson);
+});
+//...
+await subscriber.UnsubscribeAsync(id);
+```
 
 ### Services
 
-TBW
+Calling a service consists of creating a service variable, setting up the request, and then reading the response.
+For example, let us assume we want to implement a service _/add_two_ints_ of type _rosbridge_library/AddTwoInts_.
+
+On the server side, we implement it as follows:
+```c#
+client.AdvertiseService<AddTwoInts>("/add_two_ints", srv =>
+{
+    Console.WriteLine("Received service call!");
+    srv.Response.Sum = callAddTwoInts.Request.A + callAddTwoInts.Request.B;
+});
+```
+
+On the client side, we do as follows:
+```c#
+AddTwoInts srvAddTwoInts = new AddTwoInts();
+srvAddTwoInts.Request.A = 2;
+srvAddTwoInts.Request.B = 3;
+
+client.CallService("/add_two_ints", srvAddTwoInts);
+
+long result = srvAddTwoInts.Response.Sum;
+Console.WriteLine("The result is " + result);
+```
+As with the publishers and subscribers, there exist _async_ versions of the functions.
+On the server side, we implement it as follows:
+```c#
+await client.AdvertiseServiceAsync<AddTwoInts>("/add_two_ints", async srv =>
+{
+    Console.WriteLine("Received service call!");
+    srv.Response.Sum = callAddTwoInts.Request.A + callAddTwoInts.Request.B;
+    await Task.CompletedTask;
+});
+```
+Then, on the client side:
+```c#
+await client.CallServiceAsync("/add_two_ints", srvAddTwoInts);
+```
 
 ### Parameters
 
-TBW
+To write a parameter to the parameter server, you need a client that is already connected.
+Then you do for example:
+```c#
+client.Parameters.SetParameter("/my_param", "abcd");
+```
+This will write the string "abcd" as the parameter "/my_param".
+The second argument is of type _Arg_, which accepts expressions of type string, integer, float, and so on. 
+This means that you can also do
+```c#
+client.Parameters.SetParameter("/my_other_param", 10);
+```
+To retrieve parameters, you call:
+```c#
+client.Parameters.GetParameter("/my_param", out object o);
+if (o is string str)
+{
+    Console.WriteLine("The value of /my_param is " + str);
+}
+else
+{
+    Console.WriteLine("Expected string value in /my_param, but got " + o);
+}
+```

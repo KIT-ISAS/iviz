@@ -7,19 +7,20 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.XmlRpc;
 using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.Roslib
 {
-    internal sealed class ServiceSenderAsync
+    internal sealed class ServiceSenderAsync<T> where T : IService
     {
         const int BufferSizeIncrease = 1024;
 
         const byte ErrorByte = 0;
         const byte SuccessByte = 1;
-        readonly Func<IService, Task> callback;
+        readonly Func<T, Task> callback;
         readonly IPEndPoint remoteEndPoint;
-        readonly ServiceInfo serviceInfo;
+        readonly ServiceInfo<T> serviceInfo;
         readonly NetworkStream stream;
         readonly Task task;
         readonly TcpClient tcpClient;
@@ -30,7 +31,7 @@ namespace Iviz.Roslib
         byte[] writeBuffer = new byte[1024];
 
 
-        internal ServiceSenderAsync(ServiceInfo serviceInfo, TcpClient tcpClient, Func<IService, Task> callback)
+        internal ServiceSenderAsync(ServiceInfo<T> serviceInfo, TcpClient tcpClient, Func<T, Task> callback)
         {
             stream = tcpClient.GetStream();
             this.tcpClient = tcpClient;
@@ -42,7 +43,7 @@ namespace Iviz.Roslib
             task = Task.Run(Run);
         }
 
-        public bool IsAlive => task != null && !task.IsCompleted && !task.IsFaulted;
+        public bool IsAlive => task != null && !task.IsCompleted;
         string Service => serviceInfo.Service;
         int Port => remoteEndPoint.Port;
         public string Hostname => remoteEndPoint.Address.ToString();
@@ -58,7 +59,7 @@ namespace Iviz.Roslib
         {
             keepRunning = false;
             tcpClient.Close();
-            await task;
+            await task.Caf();
         }
 
         async Task<int> ReceivePacket()
@@ -66,7 +67,7 @@ namespace Iviz.Roslib
             int numRead = 0;
             while (numRead < 4)
             {
-                int readNow = await stream.ReadAsync(readBuffer, numRead, 4 - numRead);
+                int readNow = await stream.ReadAsync(readBuffer, numRead, 4 - numRead).Caf();
                 if (readNow == 0)
                 {
                     return 0;
@@ -84,7 +85,7 @@ namespace Iviz.Roslib
             numRead = 0;
             while (numRead < length)
             {
-                int readNow = await stream.ReadAsync(readBuffer, numRead, length - numRead);
+                int readNow = await stream.ReadAsync(readBuffer, numRead, length - numRead).Caf();
                 if (readNow == 0)
                 {
                     return 0;
@@ -226,12 +227,12 @@ namespace Iviz.Roslib
                 }
             }
 
-            await stream.WriteAsync(array, 0, array.Length);
+            await stream.WriteAsync(array, 0, array.Length).Caf();
         }
 
         async Task<bool> DoHandshake()
         {
-            int totalLength = await ReceivePacket();
+            int totalLength = await ReceivePacket().Caf();
             List<string> fields = ParseHeader(totalLength);
             string errorMessage = ProcessRemoteHeader(fields);
 
@@ -240,7 +241,7 @@ namespace Iviz.Roslib
                 Logger.Log($"{this}: Failed handshake\n{errorMessage}");
             }
 
-            await SendResponseHeader(errorMessage);
+            await SendResponseHeader(errorMessage).Caf();
 
             return errorMessage == null;
         }
@@ -249,7 +250,7 @@ namespace Iviz.Roslib
         {
             try
             {
-                if (!await DoHandshake())
+                if (!await DoHandshake().Caf())
                 {
                     keepRunning = false;
                 }
@@ -276,14 +277,14 @@ namespace Iviz.Roslib
             {
                 try
                 {
-                    int rcvLength = await ReceivePacket();
+                    int rcvLength = await ReceivePacket().Caf();
                     if (rcvLength == 0)
                     {
                         Logger.LogDebug($"{this}: closed remotely.");
                         break;
                     }
 
-                    IService serviceMsg = serviceInfo.Generator.Create();
+                    T serviceMsg = (T) serviceInfo.Generator.Create();
                     serviceMsg.Request = Buffer.Deserialize(serviceMsg.Request, readBuffer, rcvLength);
 
                     byte resultStatus;
@@ -291,7 +292,7 @@ namespace Iviz.Roslib
 
                     try
                     {
-                        await callback(serviceMsg);
+                        await callback(serviceMsg).Caf();
                         serviceMsg.Response.RosValidate();
                     }
                     catch (Exception e)
@@ -329,17 +330,17 @@ namespace Iviz.Roslib
 
                         uint sendLength = Buffer.Serialize(responseMsg, writeBuffer);
 
-                        await stream.WriteAsync(statusByte, 0, 1);
-                        await stream.WriteAsync(ToLengthArray(sendLength), 0, 4);
-                        await stream.WriteAsync(writeBuffer, 0, (int) sendLength);
+                        await stream.WriteAsync(statusByte, 0, 1).Caf();
+                        await stream.WriteAsync(ToLengthArray(sendLength), 0, 4).Caf();
+                        await stream.WriteAsync(writeBuffer, 0, (int) sendLength).Caf();
                     }
                     else
                     {
-                        await stream.WriteAsync(statusByte, 0, 1);
-                        await stream.WriteAsync(BitConverter.GetBytes(errorMessage.Length), 0, 4);
+                        await stream.WriteAsync(statusByte, 0, 1).Caf();
+                        await stream.WriteAsync(BitConverter.GetBytes(errorMessage.Length), 0, 4).Caf();
 
                         byte[] tmpBuffer = BuiltIns.UTF8.GetBytes(errorMessage);
-                        await stream.WriteAsync(tmpBuffer, 0, tmpBuffer.Length);
+                        await stream.WriteAsync(tmpBuffer, 0, tmpBuffer.Length).Caf();
                     }
                 }
                 catch (Exception e)
