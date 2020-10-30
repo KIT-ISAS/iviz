@@ -162,7 +162,7 @@ namespace Iviz.Roslib
                 {
                     return 0;
                 }
-
+    
                 numRead += readNow;
             }
 

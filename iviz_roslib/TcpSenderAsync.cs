@@ -28,7 +28,7 @@ namespace Iviz.Roslib
     internal sealed class TcpSenderAsync<T> : IDisposable where T : IMessage
     {
         const int BufferSizeIncrease = 1024;
-        const int MaxUnconstrainedSizeInPackets = 2;
+        const int MaxSizeInPacketsWithoutConstraint = 2;
         const int MaxConnectionRetries = 3;
         const int WaitBetweenRetriesInMs = 1000;
 
@@ -90,7 +90,7 @@ namespace Iviz.Roslib
 
             try { signal.Release(); }
             catch (SemaphoreFullException) { }
-            
+
             signal.Dispose();
 
             try
@@ -194,7 +194,8 @@ namespace Iviz.Roslib
             }
 
             int totalLength = 4 * contents.Length;
-            foreach (string entry in contents) totalLength += entry.Length;
+            foreach (string entry in contents)
+                totalLength += entry.Length;
 
             byte[] array = new byte[4 + totalLength];
             using (BinaryWriter writer = new BinaryWriter(new MemoryStream(array)))
@@ -367,7 +368,7 @@ namespace Iviz.Roslib
                 keepRunning = false;
             }
 
-            List<(T msg, int length)> localQueue = new List<(T, int)>();
+            List<(T msg, int msgLength)> localQueue = new List<(T, int)>();
 
             byte[] lengthArray = new byte[4];
 
@@ -395,18 +396,30 @@ namespace Iviz.Roslib
 
                 localQueue.Clear();
 
+                int totalQueueSizeInBytes = 0;
                 using (await mutex.LockAsync())
                 {
                     foreach (T msg in messageQueue)
                     {
-                        localQueue.Add((msg, msg.RosMessageLength));
+                        int msgLength = msg.RosMessageLength;
+                        localQueue.Add((msg, msgLength));
+                        totalQueueSizeInBytes += msgLength;
                     }
 
                     messageQueue.Clear();
                 }
 
-                ApplyQueueSizeConstraint(localQueue, MaxQueueSizeInBytes,
-                    out int startIndex, out int newBytesDropped);
+                int startIndex, newBytesDropped;
+                if (localQueue.Count <= MaxSizeInPacketsWithoutConstraint || totalQueueSizeInBytes < MaxQueueSizeInBytes)
+                {
+                    startIndex = 0;
+                    newBytesDropped = 0;
+                }
+                else
+                {
+                    ApplyQueueSizeConstraint(localQueue, totalQueueSizeInBytes, MaxQueueSizeInBytes,
+                        out startIndex, out newBytesDropped);
+                }
 
                 numDropped += startIndex;
                 bytesDropped += newBytesDropped;
@@ -414,7 +427,7 @@ namespace Iviz.Roslib
                 for (int i = startIndex; i < localQueue.Count; i++)
                 {
                     T message = localQueue[i].msg;
-                    int msgLength = localQueue[i].length;
+                    int msgLength = localQueue[i].msgLength;
                     if (writeBuffer.Length < msgLength)
                     {
                         writeBuffer = new byte[msgLength + BufferSizeIncrease];
@@ -447,37 +460,40 @@ namespace Iviz.Roslib
             catch (SemaphoreFullException) { }
         }
 
-        static void ApplyQueueSizeConstraint(List<(T msg, int length)> queue,
-            int maxQueueSizeInBytes, out int numDropped, out int bytesDropped)
+        static void ApplyQueueSizeConstraint(List<(T msg, int msgLength)> queue,
+            int totalQueueSizeInBytes, int maxQueueSizeInBytes, out int numDropped, out int bytesDropped)
         {
-            // don't cull if we're too short
-            if (queue.Count <= MaxUnconstrainedSizeInPackets)
+            int c = queue.Count - 1;
+
+            int remainingBytes = maxQueueSizeInBytes;
+            for (int i = 0; i < MaxSizeInPacketsWithoutConstraint; i++)
             {
-                numDropped = 0;
-                bytesDropped = 0;
+                remainingBytes -= queue[c - i].msgLength;
+            }
+
+            if (remainingBytes <= 0)
+            {
+                numDropped = queue.Count - MaxSizeInPacketsWithoutConstraint;
+                bytesDropped = totalQueueSizeInBytes - remainingBytes;
                 return;
             }
             
-            // don't cull if queue is too short
-            int totalQueueSizeInBytes = queue.Sum(message => message.length);
-            if (totalQueueSizeInBytes <= maxQueueSizeInBytes)
-            {
-                numDropped = 0;
-                bytesDropped = 0;
-                return;
-            }
-
             // start discarding old messages
-            int overflowInBytes = totalQueueSizeInBytes - maxQueueSizeInBytes;
-            int toDrop = 0;
-            while (toDrop < queue.Count - MaxUnconstrainedSizeInPackets && overflowInBytes > 0)
+            int remainingPackages = MaxSizeInPacketsWithoutConstraint;
+            for (int i = MaxSizeInPacketsWithoutConstraint; i < queue.Count; i++)
             {
-                overflowInBytes -= queue[toDrop].length;
-                toDrop++;
+                int currentMsgLength = queue[c - i].msgLength;
+                if (currentMsgLength > remainingBytes)
+                {
+                    break;
+                }
+                
+                remainingBytes -= currentMsgLength;
+                remainingPackages++;
             }
 
-            numDropped = toDrop;
-            bytesDropped = totalQueueSizeInBytes - maxQueueSizeInBytes - overflowInBytes;
+            numDropped = queue.Count - remainingPackages;
+            bytesDropped = totalQueueSizeInBytes - maxQueueSizeInBytes + remainingBytes;
         }
 
         public override string ToString()
