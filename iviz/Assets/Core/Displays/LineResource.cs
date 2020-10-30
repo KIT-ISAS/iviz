@@ -156,7 +156,7 @@ namespace Iviz.Displays
         protected override void Awake()
         {
             lineBuffer = new NativeList<float4x2>(Allocator.Persistent);
-            mesh = new Mesh {name = "Line Capsule"};
+            mesh = new Mesh {name = "Line Capsules"};
             GetComponent<MeshFilter>().sharedMesh = mesh;
             meshRenderer = GetComponent<MeshRenderer>();
             meshRenderer.SetPropertyBlock(Properties);

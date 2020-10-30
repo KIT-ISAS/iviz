@@ -40,7 +40,6 @@ namespace Iviz.Controllers
     {
         int lastMsgBytes;
         int lastMsgCounter;
-
         int totalMsgCounter;
 
         public RosSender(string topic)

@@ -7,16 +7,17 @@ using Iviz.Msgs;
 
 namespace Iviz.App
 {
-    public class SenderWidget : MonoBehaviour, IWidget
+    public sealed class SenderWidget : MonoBehaviour, IWidget
     {
         const int Size = 200;
         [SerializeField] Text text = null;
 
         IRosSender rosSender;
-        public IRosSender RosSender
+
+        IRosSender RosSender
         {
             get => rosSender;
-            private set
+            set
             {
                 if (rosSender == null && value != null)
                 {
@@ -56,14 +57,12 @@ namespace Iviz.App
         public void Set<T>(RosSender<T> sender) where T : IMessage, new()
         {
             RosSender = sender;
-            if (sender != null)
+            if (sender == null)
             {
-                return;
+                string messageType = BuiltIns.GetMessageType(typeof(T));
+                text.text = "<i>Empty</i>\n" +
+                            $"<b>{messageType}</b>";
             }
-
-            string messageType = BuiltIns.GetMessageType(typeof(T));
-            text.text = $"<i>Empty</i>\n" +
-                        $"<b>{messageType}</b>";
         }
 
         void UpdateStats()

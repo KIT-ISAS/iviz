@@ -296,6 +296,9 @@ namespace Iviz
         public static bool HasNaN(this float4 v) => float.IsNaN(v.x) || float.IsNaN(v.y) || float.IsNaN(v.z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool HasNaN(this float3 v) => float.IsNaN(v.x) || float.IsNaN(v.y) || float.IsNaN(v.z);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool HasNaN(this Vector3 v) => float.IsNaN(v.x) || float.IsNaN(v.y) || float.IsNaN(v.z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

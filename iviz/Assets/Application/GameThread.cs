@@ -106,16 +106,15 @@ namespace Iviz.Displays
             if (IsGameThread)
             {
                 action();
+                return;
             }
-            else
-            {
-                if (Instance == null)
-                {
-                    return;
-                }
 
-                Instance.actionsOnlyOnce.Enqueue(action);
+            if (Instance == null)
+            {
+                return;
             }
+
+            Instance.actionsOnlyOnce.Enqueue(action);
         }
 
         static bool IsGameThread => Thread.CurrentThread == Instance.gameThread;

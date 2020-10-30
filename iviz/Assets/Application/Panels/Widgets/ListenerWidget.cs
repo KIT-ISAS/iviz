@@ -6,18 +6,17 @@ using Iviz.Resources;
 
 namespace Iviz.App
 {
-    public class ListenerWidget : MonoBehaviour, IWidget
+    public sealed class ListenerWidget : MonoBehaviour, IWidget
     {
         const int Size = 200;
 
         [SerializeField] Text text = null;
-        //[SerializeField] Button button = null;
         [SerializeField] Image panel = null;
-
         IRosListener listener;
+        
         public IRosListener RosListener
         {
-            get => listener;
+            private get => listener;
             set
             {
                 if (listener == null && value != null)
@@ -36,13 +35,12 @@ namespace Iviz.App
             }
         }
 
-        public string Topic => RosListener?.Topic;
-        public int NumPublishers => (!ConnectionManager.IsConnected || RosListener == null) ? -1 : RosListener.NumPublishers;
-        public int MessagesPerSecond => RosListener?.Stats.MessagesPerSecond ?? 0;
-        public int BytesPerSecond => RosListener?.Stats.BytesPerSecond ?? 0;
-        public int Dropped => RosListener?.Stats.Dropped ?? 0;
-
-        public bool Subscribed => RosListener?.Subscribed ?? false;
+        string Topic => RosListener?.Topic;
+        int NumPublishers => (!ConnectionManager.IsConnected || RosListener == null) ? -1 : RosListener.NumPublishers;
+        int MessagesPerSecond => RosListener?.Stats.MessagesPerSecond ?? 0;
+        int BytesPerSecond => RosListener?.Stats.BytesPerSecond ?? 0;
+        int Dropped => RosListener?.Stats.Dropped ?? 0;
+        bool Subscribed => RosListener?.Subscribed ?? false;
 
         void UpdateStats()
         {
@@ -58,7 +56,7 @@ namespace Iviz.App
             }
             else
             {
-                subscriberStatus = numPublishers + "↓ ";
+                subscriberStatus = $"{numPublishers}↓ ";
             }
             string messagesPerSecond = MessagesPerSecond.ToString(UnityUtils.Culture);
             string kbPerSecond = (BytesPerSecond * 0.001f).ToString("#,0.#", UnityUtils.Culture);

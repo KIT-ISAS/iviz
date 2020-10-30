@@ -17,7 +17,7 @@ namespace Iviz.Displays
     /// </summary>
     public sealed class PointListResource : MarkerResourceWithColormap
     {
-        const float MaxPositionMagnitudeSq = 1e9f;
+        public const float MaxPositionMagnitudeSq = 1e9f;
 
         static readonly int PointsID = Shader.PropertyToID("_Points");
         static readonly int ScaleID = Shader.PropertyToID("_Scale");
@@ -46,7 +46,7 @@ namespace Iviz.Displays
         {
             if (reserve < 0)
             {
-                throw new ArgumentException("Invalid reserve " + reserve, nameof(reserve));
+                throw new ArgumentException($"Invalid reserve size {reserve}", nameof(reserve));
             }
 
             if (reserve > 0)
@@ -74,45 +74,14 @@ namespace Iviz.Displays
         }
 
         /// <summary>
-        /// Convenience method to sets the list of points with the given array. Takes only the first 'size' elements.
+        /// Simply copies and pastes the array without checking.
         /// </summary>
         /// <param name="points">The point enumerator.</param>
-        /// <param name="size">The number of points to take.</param>        
-        public void SetArray(PointWithColor[] points, int size = 0)
+        public void SetArray(in NativeArray<float4> points)
         {
-            if (points == null)
-            {
-                throw new ArgumentNullException(nameof(points));
-            }
-
-            if (size < 0)
-            {
-                throw new ArgumentException($"Size {size} is invalid!");
-            }
-
-            if (size > points.Length)
-            {
-                throw new IndexOutOfRangeException($"Size {size} is larger than the available length {points.Length}");
-            }
-
-            if (size == 0)
-            {
-                size = points.Length;
-            }
-
-            pointBuffer.Capacity = Math.Max(pointBuffer.Capacity, size);
             pointBuffer.Clear();
-            for (int i = 0; i < size; i++)
-            {
-                PointWithColor t = points[i];
-                if (t.HasNaN() || t.Position.MagnitudeSq() > MaxPositionMagnitudeSq)
-                {
-                    continue;
-                }
-
-                pointBuffer.Add(t);
-            }
-
+            pointBuffer.AddRange(points);
+            
             UpdateBuffer();
         }
 

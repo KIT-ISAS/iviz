@@ -1,35 +1,41 @@
-﻿using System.Collections.Generic;
-using System;
-using Iviz.Msgs.VisualizationMsgs;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
-using Iviz.Roslib;
+using Iviz.Displays;
+using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
+using Iviz.Roslib;
 using UnityEngine;
-using Logger = Iviz.Logger;
+using Object = UnityEngine.Object;
 
 namespace Iviz.Controllers
 {
     [DataContract]
     public sealed class MarkerConfiguration : JsonToString, IConfiguration
     {
+        [DataMember] public string Topic { get; set; } = "";
+        [DataMember] public string Type { get; set; } = "";
+        [DataMember] public bool RenderAsOcclusionOnly { get; set; }
+        [DataMember] public SerializableColor Tint { get; set; } = Color.white;
         [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
         [DataMember] public Resource.Module Module => Resource.Module.Marker;
         [DataMember] public bool Visible { get; set; } = true;
-        [DataMember] public string Topic { get; set; } = "";
-        [DataMember] public string Type { get; set; } = "";
-        [DataMember] public bool RenderAsOcclusionOnly { get; set; } = false;
-        [DataMember] public SerializableColor Tint { get; set; } = Color.white;
     }
 
     public sealed class MarkerListener : ListenerController
     {
+        readonly MarkerConfiguration config = new MarkerConfiguration();
         readonly Dictionary<string, MarkerObject> markers = new Dictionary<string, MarkerObject>();
 
-        public override IModuleData ModuleData { get; }
+        public MarkerListener(IModuleData moduleData)
+        {
+            ModuleData = moduleData;
+        }
 
+        public override IModuleData ModuleData { get; }
         public override TfFrame Frame => TFListener.MapFrame;
 
-        readonly MarkerConfiguration config = new MarkerConfiguration();
         public MarkerConfiguration Config
         {
             get => config;
@@ -50,7 +56,7 @@ namespace Iviz.Controllers
             {
                 config.RenderAsOcclusionOnly = value;
 
-                foreach (MarkerObject marker in markers.Values)
+                foreach (var marker in markers.Values)
                 {
                     marker.OcclusionOnly = value;
                 }
@@ -64,7 +70,7 @@ namespace Iviz.Controllers
             {
                 config.Tint = value;
 
-                foreach (MarkerObject marker in markers.Values)
+                foreach (var marker in markers.Values)
                 {
                     marker.Tint = value;
                 }
@@ -78,16 +84,11 @@ namespace Iviz.Controllers
             {
                 config.Visible = value;
 
-                foreach (MarkerObject marker in markers.Values)
+                foreach (var marker in markers.Values)
                 {
                     marker.Visible = value;
                 }
             }
-        }
-
-        public MarkerListener(IModuleData moduleData)
-        {
-            ModuleData = moduleData;
         }
 
         public override void StartListening()
@@ -101,12 +102,29 @@ namespace Iviz.Controllers
                     Listener = new RosListener<MarkerArray>(config.Topic, Handler);
                     break;
             }
+
+            GameThread.EverySecond += CheckDeadMarkers;
+        }
+
+        void CheckDeadMarkers()
+        {
+            DateTime now = DateTime.Now;
+            var deadEntries = markers
+                .Where(entry => entry.Value.ExpirationTime < now)
+                .ToArray();
+            foreach (var entry in deadEntries)
+            {
+                markers.Remove(entry.Key);
+                DeleteMarkerObject(entry.Value);
+            }
         }
 
         public override void StopController()
         {
             base.StopController();
             DestroyAllMarkers();
+
+            GameThread.EverySecond -= CheckDeadMarkers;
         }
 
         public override void ResetController()
@@ -114,21 +132,15 @@ namespace Iviz.Controllers
             base.ResetController();
             DestroyAllMarkers();
         }
-        
+
         void DestroyAllMarkers()
         {
-            foreach (MarkerObject marker in markers.Values)
+            foreach (var marker in markers.Values)
             {
-                marker.Stop();
-                UnityEngine.Object.Destroy(marker.gameObject);
+                DeleteMarkerObject(marker);
             }
 
             markers.Clear();
-        }
-
-        public static string IdFromMessage(Marker marker)
-        {
-            return  $"{marker.Ns}/{marker.Id}";
         }
 
         void Handler(MarkerArray msg)
@@ -141,7 +153,7 @@ namespace Iviz.Controllers
 
         void Handler(Marker msg)
         {
-            string id = IdFromMessage(msg);
+            var id = IdFromMessage(msg);
             switch (msg.Action)
             {
                 case Marker.ADD:
@@ -150,12 +162,14 @@ namespace Iviz.Controllers
                         Logger.Debug("MarkerListener: NaN in pose!");
                         return;
                     }
+
                     if (msg.Scale.HasNaN())
                     {
                         Logger.Debug("MarkerListener: NaN in scale!");
                         return;
                     }
-                    if (!markers.TryGetValue(id, out MarkerObject markerToAdd))
+
+                    if (!markers.TryGetValue(id, out var markerToAdd))
                     {
                         markerToAdd = CreateMarkerObject();
                         markerToAdd.ModuleData = ModuleData;
@@ -165,29 +179,35 @@ namespace Iviz.Controllers
                         markerToAdd.Visible = Visible;
                         markers[id] = markerToAdd;
                     }
+
                     markerToAdd.Set(msg);
                     break;
                 case Marker.DELETE:
-                    if (markers.TryGetValue(id, out MarkerObject markerToDelete))
+                    if (markers.TryGetValue(id, out var markerToDelete))
                     {
                         DeleteMarkerObject(markerToDelete);
                         markers.Remove(id);
                     }
+
                     break;
             }
+        }
+
+        public static string IdFromMessage(Marker marker)
+        {
+            return $"[{marker.Ns}] {marker.Id}";
         }
 
         static void DeleteMarkerObject(MarkerObject markerToDelete)
         {
             markerToDelete.Stop();
-            UnityEngine.Object.Destroy(markerToDelete.gameObject);
+            Object.Destroy(markerToDelete.gameObject);
         }
 
         static MarkerObject CreateMarkerObject()
         {
-            GameObject gameObject = new GameObject("MarkerObject");
+            var gameObject = new GameObject("MarkerObject");
             return gameObject.AddComponent<MarkerObject>();
         }
     }
-
 }

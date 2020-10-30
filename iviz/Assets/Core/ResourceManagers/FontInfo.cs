@@ -13,7 +13,7 @@ namespace Iviz.Resources
 
         public FontInfo()
         {
-            font = UnityEngine.Resources.Load<Font>("Fonts/Montserrat Real NonDynamic");
+            font = UnityEngine.Resources.Load<Font>("Fonts/selawk");
             dotWidth = CharWidth('.') * 3; // ...
             arrowWidth = CharWidth('→') + CharWidth(' ');
         }
