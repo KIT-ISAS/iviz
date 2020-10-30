@@ -471,25 +471,21 @@ namespace Iviz.Roslib
                 remainingBytes -= queue[c - i].msgLength;
             }
 
-            if (remainingBytes <= 0)
-            {
-                numDropped = queue.Count - MaxSizeInPacketsWithoutConstraint;
-                bytesDropped = totalQueueSizeInBytes - remainingBytes;
-                return;
-            }
-            
-            // start discarding old messages
             int remainingPackages = MaxSizeInPacketsWithoutConstraint;
-            for (int i = MaxSizeInPacketsWithoutConstraint; i < queue.Count; i++)
+            if (remainingBytes > 0)
             {
-                int currentMsgLength = queue[c - i].msgLength;
-                if (currentMsgLength > remainingBytes)
+                // start discarding old messages
+                for (int i = MaxSizeInPacketsWithoutConstraint; i < queue.Count; i++)
                 {
-                    break;
+                    int currentMsgLength = queue[c - i].msgLength;
+                    if (currentMsgLength > remainingBytes)
+                    {
+                        break;
+                    }
+
+                    remainingBytes -= currentMsgLength;
+                    remainingPackages++;
                 }
-                
-                remainingBytes -= currentMsgLength;
-                remainingPackages++;
             }
 
             numDropped = queue.Count - remainingPackages;
