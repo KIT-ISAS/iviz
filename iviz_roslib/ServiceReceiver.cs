@@ -235,7 +235,6 @@ namespace Iviz.Roslib
             }
             catch (Exception e)
             {
-                service.ErrorMessage = e.Message;
                 Logger.Log("ServiceReceiver: Error during service call:" + e);
                 success = false;
             }
@@ -257,7 +256,6 @@ namespace Iviz.Roslib
             }
             catch (Exception e)
             {
-                service.ErrorMessage = e.Message;
                 Logger.Log("ServiceReceiver: Error during service call:" + e);
                 success = false;
             }
@@ -286,7 +284,6 @@ namespace Iviz.Roslib
             int rcvLengthH = await stream.ReadAsync(readBuffer, 0, 1);
             if (rcvLengthH == 0)
             {
-                service.ErrorMessage = $"Connection to {Hostname}:{Port} closed remotely.";
                 return false;
             }
 
@@ -295,17 +292,15 @@ namespace Iviz.Roslib
             int rcvLength = await ReceivePacketAsync();
             if (rcvLength == 0)
             {
-                service.ErrorMessage = $"Connection to {Hostname}:{Port} closed remotely.";
                 return false;
             }
 
             if (statusByte == ErrorByte)
             {
-                service.ErrorMessage = BuiltIns.UTF8.GetString(readBuffer, 0, rcvLength);
+                Logger.Log($"{this}: {BuiltIns.UTF8.GetString(readBuffer, 0, rcvLength)}");
                 return false;
             }
 
-            service.ErrorMessage = null;
             service.Response = Buffer.Deserialize(service.Response, readBuffer, rcvLength);
             return true;
         }
@@ -326,7 +321,6 @@ namespace Iviz.Roslib
             int rcvLengthH = stream.Read(readBuffer, 0, 1);
             if (rcvLengthH == 0)
             {
-                service.ErrorMessage = $"Connection to {Hostname}:{Port} closed remotely.";
                 return false;
             }
 
@@ -335,17 +329,15 @@ namespace Iviz.Roslib
             int rcvLength = ReceivePacket();
             if (rcvLength == 0)
             {
-                service.ErrorMessage = $"Connection to {Hostname}:{Port} closed remotely.";
                 return false;
             }
 
             if (statusByte == ErrorByte)
             {
-                service.ErrorMessage = BuiltIns.UTF8.GetString(readBuffer, 0, rcvLength);
+                Logger.Log($"{this}: {BuiltIns.UTF8.GetString(readBuffer, 0, rcvLength)}");
                 return false;
             }
 
-            service.ErrorMessage = null;
             service.Response = Buffer.Deserialize(service.Response, readBuffer, rcvLength);
             return true;
         }

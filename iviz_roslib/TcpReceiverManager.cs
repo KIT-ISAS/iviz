@@ -35,18 +35,28 @@ namespace Iviz.Roslib
         {
             get
             {
-                bool numConnectionsChanged;
-                using (mutex.Lock())
-                {
-                    numConnectionsChanged = Cleanup();
-                }
-
-                if (numConnectionsChanged)
-                {
-                    Subscriber.RaiseNumPublishersChanged();
-                }
-
+                TryToCleanup();
                 return connectionsByUri.Count;
+            }
+        }
+
+        void TryToCleanup()
+        {
+            AsyncLock.InnerLock? @lock = mutex.TryLock();
+            if (@lock == null)
+            {
+                return;
+            }
+
+            bool numConnectionsChanged;
+            using (@lock.Value)
+            {
+                numConnectionsChanged = Cleanup();
+            }
+
+            if (numConnectionsChanged)
+            {
+                Subscriber.RaiseNumPublishersChanged();
             }
         }
 

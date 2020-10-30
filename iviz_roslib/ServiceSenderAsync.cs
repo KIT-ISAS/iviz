@@ -305,13 +305,7 @@ namespace Iviz.Roslib
                     if (responseMsg is null)
                     {
                         resultStatus = ErrorByte;
-                        errorMessage = serviceMsg.ErrorMessage ??
-                                       "Callback function returned null, an invalid value, or an exception happened.";
-                    }
-                    else if (serviceMsg.ErrorMessage != null)
-                    {
-                        resultStatus = ErrorByte;
-                        errorMessage = serviceMsg.ErrorMessage;
+                        errorMessage = "Callback function returned null, an invalid value, or an exception happened.";
                     }
                     else
                     {

@@ -105,16 +105,6 @@ namespace Iviz.XmlRpc
             content = $"<value><base64>{Convert.ToBase64String(f)}</base64></value>\n";
         }
 
-        public Arg(in ArraySegment<byte> f)
-        {
-            if (f.Array == null)
-            {
-                throw new ArgumentNullException(nameof(f));
-            }
-
-            content = $"<value><base64>{Convert.ToBase64String(f.Array, f.Offset, f.Count)}</base64></value>\n";
-        }
-
         public Arg(IEnumerable<(string name, Arg value)> f)
         {
             if (f == null)

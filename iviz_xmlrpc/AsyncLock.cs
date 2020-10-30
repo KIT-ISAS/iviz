@@ -51,7 +51,7 @@ namespace Iviz.XmlRpc
         //so long as we can guarantee no wakes are missed, the number of awakees is not important
         //ideally, this would be "friend" for access only from InnerLock, but whatever.
         readonly SemaphoreSlim retry = new SemaphoreSlim(0, 1);
-        
+
         long owningId = UnlockedThreadId;
 
         int reentrances;
@@ -64,6 +64,12 @@ namespace Iviz.XmlRpc
             var @lock = new InnerLock(this);
             @lock.ObtainLock();
             return @lock;
+        }
+
+        public InnerLock? TryLock()
+        {
+            var @lock = new InnerLock(this);
+            return @lock.TryObtainLock() ? @lock : (InnerLock?) null;
         }
 
         public async Task<InnerLock> LockAsync()
@@ -114,6 +120,11 @@ namespace Iviz.XmlRpc
                     //we need to wait for someone to leave the lock before trying again
                     parent.retry.Wait();
                 }
+            }
+
+            internal bool TryObtainLock()
+            {
+                return TryEnter();
             }
 
             bool TryEnter()
