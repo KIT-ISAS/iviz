@@ -39,12 +39,6 @@ namespace Iviz.Msgs.GridMapMsgs
             set => Response = (SetGridMapResponse)value;
         }
         
-        /// <summary>
-        /// An error message in case the call fails.
-        /// If the provider sets this to non-null, the ok byte is set to false, and the error message is sent instead of the response.
-        /// </summary>
-        public string ErrorMessage { get; set; }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>

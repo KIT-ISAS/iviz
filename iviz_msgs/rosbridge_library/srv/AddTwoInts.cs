@@ -39,12 +39,6 @@ namespace Iviz.Msgs.RosbridgeLibrary
             set => Response = (AddTwoIntsResponse)value;
         }
         
-        /// <summary>
-        /// An error message in case the call fails.
-        /// If the provider sets this to non-null, the ok byte is set to false, and the error message is sent instead of the response.
-        /// </summary>
-        public string ErrorMessage { get; set; }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -141,6 +135,6 @@ namespace Iviz.Msgs.RosbridgeLibrary
         {
         }
     
-        public int RosMessageLength => 8;
+        public int RosMessageLength => -2;
     }
 }

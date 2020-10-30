@@ -39,12 +39,6 @@ namespace Iviz.Msgs.RosbridgeLibrary
             set => Response = (SendBytesResponse)value;
         }
         
-        /// <summary>
-        /// An error message in case the call fails.
-        /// If the provider sets this to non-null, the ok byte is set to false, and the error message is sent instead of the response.
-        /// </summary>
-        public string ErrorMessage { get; set; }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -139,13 +133,6 @@ namespace Iviz.Msgs.RosbridgeLibrary
             if (Data is null) throw new System.NullReferenceException(nameof(Data));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(Data);
-                return size;
-            }
-        }
+        public int RosMessageLength => -2;
     }
 }

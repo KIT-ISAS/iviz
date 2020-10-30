@@ -39,12 +39,6 @@ namespace Iviz.Msgs.IvizMsgs
             set => Response = (AddModuleFromTopicResponse)value;
         }
         
-        /// <summary>
-        /// An error message in case the call fails.
-        /// If the provider sets this to non-null, the ok byte is set to false, and the error message is sent instead of the response.
-        /// </summary>
-        public string ErrorMessage { get; set; }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -54,7 +48,7 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosMd5Sum = "f286bf1bf4d1e91c992ad2eae3061a6f";
     }
 
-    public sealed class AddModuleFromTopicRequest : IRequest
+    public sealed class AddModuleFromTopicRequest : IRequest, IDeserializable<AddModuleFromTopicRequest>
     {
         // Adds a module
         [DataMember (Name = "topic")] public string Topic { get; set; } // Name of the topic
@@ -85,6 +79,11 @@ namespace Iviz.Msgs.IvizMsgs
         {
             return new AddModuleFromTopicRequest(ref b);
         }
+        
+        AddModuleFromTopicRequest IDeserializable<AddModuleFromTopicRequest>.RosDeserialize(ref Buffer b)
+        {
+            return new AddModuleFromTopicRequest(ref b);
+        }
     
         public void RosSerialize(ref Buffer b)
         {
@@ -109,7 +108,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
     }
 
-    public sealed class AddModuleFromTopicResponse : IResponse
+    public sealed class AddModuleFromTopicResponse : IResponse, IDeserializable<AddModuleFromTopicResponse>
     {
         [DataMember (Name = "success")] public bool Success { get; set; } // Whether the retrieval succeeded
         [DataMember (Name = "message")] public string Message { get; set; } // An error message if success is false
@@ -138,6 +137,11 @@ namespace Iviz.Msgs.IvizMsgs
         {
             return new AddModuleFromTopicResponse(ref b);
         }
+        
+        AddModuleFromTopicResponse IDeserializable<AddModuleFromTopicResponse>.RosDeserialize(ref Buffer b)
+        {
+            return new AddModuleFromTopicResponse(ref b);
+        }
     
         public void RosSerialize(ref Buffer b)
         {
@@ -150,13 +154,6 @@ namespace Iviz.Msgs.IvizMsgs
             if (Message is null) throw new System.NullReferenceException(nameof(Message));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 5;
-                size += BuiltIns.UTF8.GetByteCount(Message);
-                return size;
-            }
-        }
+        public int RosMessageLength => -2;
     }
 }

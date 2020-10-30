@@ -4,6 +4,7 @@
     <AssemblyName>Iviz.Msgs</AssemblyName>
     <RootNamespace>Iviz.Msgs</RootNamespace>
     <TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.1</TargetFrameworks>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

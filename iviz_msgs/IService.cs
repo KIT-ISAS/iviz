@@ -25,11 +25,6 @@ namespace Iviz.Msgs
         IResponse Response { get; set; }
 
         /// <summary>
-        /// The error message. Can be null. If not null, overrides the response.
-        /// </summary>
-        string ErrorMessage { get; set; }
-
-        /// <summary>
         /// Full ROS name of the service.
         /// </summary>
         string RosType { get; }

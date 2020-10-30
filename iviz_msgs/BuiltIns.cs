@@ -12,9 +12,9 @@ namespace Iviz.Msgs
 
         public static CultureInfo Culture { get; } = CultureInfo.InvariantCulture;
 
-        public static string GetClassStringConstant(Type type, string name)
+        static string GetClassStringConstant(Type type, string name)
         {
-            string constant = (string)type?.GetField(name)?.GetRawConstantValue();
+            string constant = (string)type.GetField(name)?.GetRawConstantValue();
             if (constant == null)
             {
                 throw new ArgumentException("Failed to resolve constant '" + name + "' in class " + type.FullName, nameof(name));
@@ -24,49 +24,63 @@ namespace Iviz.Msgs
 
         public static string GetMessageType(Type type)
         {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
             return GetClassStringConstant(type, "RosMessageType");
         }
 
         public static string GetServiceType(Type type)
         {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
             return GetClassStringConstant(type, "RosServiceType");
         }
 
         public static string GetMd5Sum(Type type)
         {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
             return GetClassStringConstant(type, "RosMd5Sum");
         }
 
-        public static string GetDependenciesBase64(Type type)
+        static string GetDependenciesBase64(Type type)
         {
             return GetClassStringConstant(type, "RosDependenciesBase64");
         }
 
-        public static IDeserializable<IMessage> CreateGenerator(Type type)
-        {
-            return (IDeserializable<IMessage>)Activator.CreateInstance(type);
-        }
-
         public static string DecompressDependency(Type type)
         {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
             string dependenciesBase64 = GetDependenciesBase64(type);
             byte[] inputBytes = Convert.FromBase64String(dependenciesBase64);
 
             StringBuilder str = new StringBuilder();
             byte[] outputBytes = new byte[32];
 
-            using (var inputStream = new MemoryStream(inputBytes))
-            using (var gZipStream = new GZipStream(inputStream, CompressionMode.Decompress))
+            using var inputStream = new MemoryStream(inputBytes);
+            using var gZipStream = new GZipStream(inputStream, CompressionMode.Decompress);
+            
+            int read;
+            do
             {
-                int read;
-                do
-                {
-                    read = gZipStream.Read(outputBytes, 0, outputBytes.Length);
-                    str.Append(UTF8.GetString(outputBytes, 0, read));
-                }
-                while (read != 0);
-                return str.ToString();
+                read = gZipStream.Read(outputBytes, 0, outputBytes.Length);
+                str.Append(UTF8.GetString(outputBytes, 0, read));
             }
+            while (read != 0);
+            return str.ToString();
         }
     }
 }
