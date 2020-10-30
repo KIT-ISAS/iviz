@@ -43,7 +43,7 @@ namespace Application.Displays
                 return;
             }
 
-            transform.rotation = TFListener.RootFrame.transform.rotation * BaseTransform;
+            transform.rotation = TfListener.RootFrame.transform.rotation * BaseTransform;
         }
     }
 }

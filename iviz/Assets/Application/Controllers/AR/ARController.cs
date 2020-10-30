@@ -3,6 +3,7 @@ using System.Runtime.Serialization;
 using Iviz.App;
 using Iviz.Resources;
 using Iviz.Roslib;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Controllers
@@ -67,7 +68,7 @@ namespace Iviz.Controllers
         protected Canvas canvas;
         protected DisplayClickableNode node;
 
-        public static ARController Instance { get; private set; }
+        [CanBeNull] public static ARController Instance { get; private set; }
 
         public ARConfiguration Config
         {
@@ -115,7 +116,7 @@ namespace Iviz.Controllers
             {
                 config.Visible = value;
                 GuiCamera.Instance.DisableCameraLock();
-                TFListener.RootFrame.transform.SetPose(value ? WorldPose : Pose.identity);
+                TfListener.RootFrame.transform.SetPose(value ? WorldPose : Pose.identity);
                 ARModeChanged?.Invoke(value);
             }
         }
@@ -152,7 +153,7 @@ namespace Iviz.Controllers
 
         static float TfRootScale
         {
-            set => TFListener.RootFrame.transform.localScale = value * Vector3.one;
+            set => TfListener.RootFrame.transform.localScale = value * Vector3.one;
         }
 
         public virtual bool PinRootMarker
@@ -195,7 +196,7 @@ namespace Iviz.Controllers
             }
             */
 
-            TFListener.RootMarker.SetTargetPoseUpdater(pose => SetWorldPose(pose, RootMover.ControlMarker));
+            TfListener.RootMarker.SetTargetPoseUpdater(pose => SetWorldPose(pose, RootMover.ControlMarker));
 
             PinControlButton.Clicked += OnPinControlButtonClicked;
             ShowRootMarkerButton.Clicked += OnShowRootMarkerClicked;
@@ -209,7 +210,7 @@ namespace Iviz.Controllers
         void OnShowRootMarkerClicked()
         {
             ShowRootMarker = ShowRootMarkerButton.State;
-            TFListener.UpdateRootMarkerVisibility();
+            TfListener.UpdateRootMarkerVisibility();
         }
 
         public IModuleData ModuleData { get; set; }
@@ -228,7 +229,7 @@ namespace Iviz.Controllers
             Visible = false;
             WorldScale = 1;
 
-            TFListener.RootMarker.SetTargetPoseUpdater(pose => TFListener.RootFrame.transform.SetPose(pose));
+            TfListener.RootMarker.SetTargetPoseUpdater(pose => TfListener.RootFrame.transform.SetPose(pose));
 
             PinControlButton.Clicked -= OnPinControlButtonClicked;
             ShowRootMarkerButton.Clicked -= OnShowRootMarkerClicked;            
@@ -250,7 +251,7 @@ namespace Iviz.Controllers
             WorldPose = pose;
             if (Visible)
             {
-                TFListener.RootFrame.transform.SetPose(pose);
+                TfListener.RootFrame.transform.SetPose(pose);
             }
 
             WorldPoseChanged?.Invoke(mover);

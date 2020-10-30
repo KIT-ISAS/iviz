@@ -42,7 +42,7 @@ namespace Iviz.App
         {
             switch (resource)
             {
-                case Resource.Module.TF: return o.AddComponent<TFPanelContents>();
+                case Resource.Module.TF: return o.AddComponent<TfPanelContents>();
                 case Resource.Module.PointCloud: return o.AddComponent<PointCloudPanelContents>();
                 case Resource.Module.Grid: return o.AddComponent<GridPanelContents>();
                 case Resource.Module.Image: return o.AddComponent<ImagePanelContents>();

@@ -1,4 +1,5 @@
 ﻿using System;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,7 +11,7 @@ namespace Iviz.App
         [SerializeField] RawImage image = null;
         [SerializeField] Button button = null;
 
-        public Action Clicked;
+        public Action Clicked { get; set; }
 
         void Awake()
         {
@@ -31,11 +32,17 @@ namespace Iviz.App
             }
         }
 
+        [NotNull]
         public string Label
         {
             get => label.text;
             set
             {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+                
                 name = "ImagePreview:" + value;
                 label.text = value;
             }
@@ -44,18 +51,17 @@ namespace Iviz.App
         public Material Material
         {
             get => image.material;
-            set
-            {
-                image.material = value;
-            }
+            set => image.material = value;
         }
 
-        public ImagePreviewWidget SetLabel(string f)
+        [NotNull]
+        public ImagePreviewWidget SetLabel([NotNull] string f)
         {
             Label = f;
             return this;
         }
 
+        [NotNull]
         public ImagePreviewWidget SetMaterial(Material f)
         {
             Material = f;

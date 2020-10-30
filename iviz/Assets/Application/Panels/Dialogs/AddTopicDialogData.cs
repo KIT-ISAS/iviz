@@ -2,6 +2,7 @@
 using System.Linq;
 using Iviz.Controllers;
 using Iviz.Resources;
+using JetBrains.Annotations;
 
 namespace Iviz.App
 {
@@ -9,7 +10,7 @@ namespace Iviz.App
     {
         const int MaxLineWidth = 250;
 
-        AddTopicDialogContents panel;
+        readonly AddTopicDialogContents panel;
         public override IDialogPanelContents Panel => panel;
         bool sortByType = false;
 
@@ -20,7 +21,7 @@ namespace Iviz.App
             public string ShortType { get; }
             public Resource.Module ResourceType { get; }
 
-            public TopicWithResource(string topic, string type, Resource.Module resourceType)
+            public TopicWithResource([NotNull] string topic, [NotNull] string type, Resource.Module resourceType)
             {
                 Topic = topic;
                 Type = type;
@@ -40,10 +41,9 @@ namespace Iviz.App
 
         readonly List<TopicWithResource> topics = new List<TopicWithResource>();
 
-        public override void Initialize(ModuleListPanel newPanel)
+        public AddTopicDialogData([NotNull] ModuleListPanel newModuleListPanel) : base(newModuleListPanel)
         {
-            base.Initialize(newPanel);
-            panel = (AddTopicDialogContents)DialogPanelManager.GetPanelByType(DialogPanelType.AddTopic);
+            panel = DialogPanelManager.GetPanelByType<AddTopicDialogContents>(DialogPanelType.AddTopic);
             panel.ShowAll.Value = false;
         }
 
@@ -60,12 +60,14 @@ namespace Iviz.App
                 {
                     continue;
                 }
+
                 bool resourceFound =
                     Resource.ResourceByRosMessageType.TryGetValue(msgType, out Resource.Module resource);
                 if (!resourceFound && !panel.ShowAll.Value)
                 {
                     continue;
                 }
+
                 topics.Add(new TopicWithResource(topic, msgType, resource));
             }
         }
@@ -95,9 +97,9 @@ namespace Iviz.App
             {
                 topics.Sort((x, y) => string.CompareOrdinal(x.ShortType, y.ShortType));
             }
-            
+
             panel.Items = topics.Select(x => x.ToString());
-            
+
             if (panel.ShowAll.Value)
             {
                 for (int i = 0; i < topics.Count; i++)
@@ -108,9 +110,8 @@ namespace Iviz.App
                     }
                 }
             }
-            panel.EmptyText = ConnectionManager.IsConnected ?
-                "No Topics Available" :
-                "(Not Connected)";
+
+            panel.EmptyText = ConnectionManager.IsConnected ? "No Topics Available" : "(Not Connected)";
         }
 
         void OnItemClicked(int index, string _)
@@ -124,6 +125,5 @@ namespace Iviz.App
         {
             DialogPanelManager.HidePanelFor(this);
         }
-
     }
 }

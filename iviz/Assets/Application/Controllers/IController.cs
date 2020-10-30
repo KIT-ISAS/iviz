@@ -1,4 +1,6 @@
 ﻿
+using JetBrains.Annotations;
+
 namespace Iviz.Controllers
 {
     /// <summary>
@@ -25,7 +27,7 @@ namespace Iviz.Controllers
         /// <summary>
         /// The <see cref="ModuleData"/> of this controller.
         /// </summary>
-        IModuleData ModuleData { get; }
+        [NotNull] IModuleData ModuleData { get; }
         /// <summary>
         /// Tells the controller to finalize and dispose its resources. 
         /// </summary>

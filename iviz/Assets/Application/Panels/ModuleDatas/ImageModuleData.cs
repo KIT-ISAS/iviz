@@ -1,5 +1,6 @@
 ﻿using Iviz.Controllers;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.App
@@ -9,8 +10,8 @@ namespace Iviz.App
     /// </summary>
     public sealed class ImageModuleData : ListenerModuleData, IImageDialogListener
     {
-        readonly ImageListener listener;
-        readonly ImagePanelContents panel;
+        [NotNull] readonly ImageListener listener;
+        [NotNull] readonly ImagePanelContents panel;
 
         protected override ListenerController Listener => listener;
 
@@ -18,21 +19,19 @@ namespace Iviz.App
         public override Resource.Module Module => Resource.Module.Image;
         public override IConfiguration Configuration => listener.Config;
 
-        public ImageListener Image => listener;
+        [NotNull] public ImageListener Image => listener;
 
         Material IImageDialogListener.Material => listener.Material;
 
         Vector2 IImageDialogListener.ImageSize => new Vector2(listener.ImageWidth, listener.ImageHeight);
 
-        public ImageModuleData(ModuleDataConstructor constructor) :
+        public ImageModuleData([NotNull] ModuleDataConstructor constructor) :
             base(constructor.ModuleList,
                 constructor.GetConfiguration<ImageConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.GetConfiguration<ImageConfiguration>()?.Type ?? constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Image) as ImagePanelContents;
+            panel = DataPanelManager.GetPanelByResourceType<ImagePanelContents>(Resource.Module.Image);
             listener = new ImageListener(this);
-            //listener = Instantiate<ImageListener>();
-            //listener.name = "Image";
             if (constructor.Configuration != null)
             {
                 listener.Config = (ImageConfiguration)constructor.Configuration;

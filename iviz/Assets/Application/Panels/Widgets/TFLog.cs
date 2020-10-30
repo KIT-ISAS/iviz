@@ -5,6 +5,7 @@ using System.Text;
 using TMPro;
 using System;
 using Iviz.Controllers;
+using JetBrains.Annotations;
 
 namespace Iviz.App
 {
@@ -31,8 +32,9 @@ namespace Iviz.App
 
         SimpleDisplayNode dummy;
 
-        TfFrame selectedFrame;
+        [CanBeNull] TfFrame selectedFrame;
 
+        [CanBeNull]
         public TfFrame SelectedFrame
         {
             get => selectedFrame;
@@ -54,7 +56,7 @@ namespace Iviz.App
                 lockPivot.interactable = interactable;
                 //lock1PV.interactable = interactable;
 
-                if (selectedFrame == null)
+                if (value == null)
                 {
                     tfName.text = "<color=grey>[ ⮑none ]</color>";
                 }
@@ -87,7 +89,7 @@ namespace Iviz.App
             tfLink.LinkClicked += OnTfLinkClicked;
             SelectedFrame = null;
 
-            dummy = SimpleDisplayNode.Instantiate("TFLog Dummy", TFListener.ListenersFrame.transform);
+            dummy = SimpleDisplayNode.Instantiate("TFLog Dummy", TfListener.ListenersFrame.transform);
 
             gotoButton.interactable = false;
             trail.interactable = false;
@@ -98,9 +100,9 @@ namespace Iviz.App
             UpdateFrameTexts();
         }
 
-        void OnTfLinkClicked(string frameId)
+        void OnTfLinkClicked([CanBeNull] string frameId)
         {
-            if (frameId == null || !TFListener.TryGetFrame(frameId, out TfFrame frame))
+            if (frameId == null || !TfListener.TryGetFrame(frameId, out TfFrame frame))
             {
                 SelectedFrame = null;
             }
@@ -110,18 +112,18 @@ namespace Iviz.App
             }
         }
 
-        class TFNode
+        class TfNode
         {
-            public string Name { get; }
-            List<TFNode> Children { get; }
+            string Name { get; }
+            List<TfNode> Children { get; }
             Pose Pose { get; }
             bool HasTrail { get; }
             bool Selected { get; }
 
-            public TFNode(TfFrame frame)
+            public TfNode([NotNull] TfFrame frame)
             {
                 Name = frame.Id;
-                Children = new List<TFNode>();
+                Children = new List<TfNode>();
                 Pose = frame.WorldPose;
                 HasTrail = frame.TrailVisible;
                 Selected = (frame == Instance.SelectedFrame);
@@ -129,13 +131,13 @@ namespace Iviz.App
                 var childrenList = frame.Children;
                 foreach (TfFrame child in childrenList.Values)
                 {
-                    Children.Add(new TFNode(child));
+                    Children.Add(new TfNode(child));
                 }
 
                 Children.Sort((x, y) => string.CompareOrdinal(x.Name, y.Name));
             }
 
-            void Write(StringBuilder str, int level)
+            void Write([NotNull] StringBuilder str, int level)
             {
                 string tabs = new string(' ', level * 4);
 
@@ -156,15 +158,15 @@ namespace Iviz.App
                 
                 str.Append(tabs).AppendLine($"<link={Name}><u><font=Bold>{decoratedName}</font></u> [{x}, {y}, {z}]</link>");
 
-                foreach (TFNode node in Children)
+                foreach (TfNode node in Children)
                 {
                     node.Write(str, level + 1);
                 }
             }
 
-            public void Write(StringBuilder str)
+            public void Write([NotNull] StringBuilder str)
             {
-                foreach (TFNode node in Children)
+                foreach (TfNode node in Children)
                 {
                     node.Write(str, 0);
                 }
@@ -175,7 +177,7 @@ namespace Iviz.App
         {
             Initialize();
             
-            TFNode root = new TFNode(TFListener.RootFrame);
+            TfNode root = new TfNode(TfListener.RootFrame);
 
             StringBuilder str = new StringBuilder();
             root.Write(str);
@@ -192,25 +194,33 @@ namespace Iviz.App
 
         public void OnGotoClicked()
         {
-            TFListener.GuiCamera.LookAt(SelectedFrame.AbsolutePose.position);
+            if (SelectedFrame != null)
+            {
+                TfListener.GuiCamera.LookAt(SelectedFrame.AbsolutePose.position);
+            }
+
             Close?.Invoke();
         }
 
         public void OnTrailClicked()
         {
-            SelectedFrame.TrailVisible = !SelectedFrame.TrailVisible;
+            if (SelectedFrame != null)
+            {
+                SelectedFrame.TrailVisible = !SelectedFrame.TrailVisible;
+            }
+
             UpdateFrameTexts();
         }
 
         public void OnLockPivotClicked()
         {
-            if (TFListener.GuiCamera.OrbitCenterOverride == SelectedFrame)
+            if (TfListener.GuiCamera.OrbitCenterOverride == SelectedFrame)
             {
-                TFListener.GuiCamera.OrbitCenterOverride = null;
+                TfListener.GuiCamera.OrbitCenterOverride = null;
             }
             else
             {
-                TFListener.GuiCamera.OrbitCenterOverride = SelectedFrame;
+                TfListener.GuiCamera.OrbitCenterOverride = SelectedFrame;
             }
 
             UpdateFrameTexts();
@@ -236,7 +246,7 @@ namespace Iviz.App
                     trailText.text = "Trail:\nOff";
                 }
 
-                if (TFListener.GuiCamera.OrbitCenterOverride == SelectedFrame)
+                if (TfListener.GuiCamera.OrbitCenterOverride == SelectedFrame)
                 {
                     lockPivotText.text = "Lock Pivot\n<b>On</b>";
                 }
@@ -244,29 +254,18 @@ namespace Iviz.App
                 {
                     lockPivotText.text = "Lock Pivot\nOff";
                 }
-
-                /*
-                if (TFListener.GuiManager.CameraViewOverride == SelectedFrame)
-                {
-                    lock1PVText.text = "Lock 1PV\n<b>On</b>";
-                }
-                else
-                {
-                    lock1PVText.text = "Lock 1PV\nOff";
-                }
-                */
             }
         }
 
         public void OnLock1PVClicked()
         {
-            if (TFListener.GuiCamera.CameraViewOverride == SelectedFrame)
+            if (TfListener.GuiCamera.CameraViewOverride == SelectedFrame)
             {
-                TFListener.GuiCamera.CameraViewOverride = null;
+                TfListener.GuiCamera.CameraViewOverride = null;
             }
             else
             {
-                TFListener.GuiCamera.CameraViewOverride = SelectedFrame;
+                TfListener.GuiCamera.CameraViewOverride = SelectedFrame;
             }
 
             UpdateFrameTexts();

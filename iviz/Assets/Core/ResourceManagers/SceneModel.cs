@@ -2,13 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Displays
 {
     public static class SceneModel
     {
-        public static AggregatedMeshMarkerResource Create(Uri uri, Msgs.IvizMsgs.Model msg, IExternalServiceProvider provider)
+        [NotNull]
+        public static AggregatedMeshMarkerResource Create([NotNull] Uri uri, [NotNull] Msgs.IvizMsgs.Model msg,
+            [CanBeNull] IExternalServiceProvider provider)
         {
             if (uri is null)
             {
@@ -70,7 +73,8 @@ namespace Iviz.Displays
 
                 var material = msg.Materials[mesh.MaterialIndex];
                 r.Color = new Color32(material.Diffuse.R, material.Diffuse.G, material.Diffuse.B, material.Diffuse.A);
-                r.EmissiveColor = new Color32(material.Emissive.R, material.Emissive.G, material.Emissive.B, material.Emissive.A);
+                r.EmissiveColor = new Color32(material.Emissive.R, material.Emissive.G, material.Emissive.B,
+                    material.Emissive.A);
 
                 if (material.DiffuseTexture.Path.Length != 0)
                 {
@@ -80,7 +84,7 @@ namespace Iviz.Displays
                     {
                         directoryName = directoryName.Replace('\\', '/'); // windows!
                     }
-                    
+
                     string texturePath = $"{directoryName}/{material.DiffuseTexture.Path}";
                     Uri textureUri = new Uri($"{uri.Scheme}://{uri.Host}{texturePath}");
                     if (Resource.TryGetResource(textureUri, out Info<Texture2D> info, provider))
@@ -133,7 +137,7 @@ namespace Iviz.Displays
                     {
                         GameObject newMesh = UnityEngine.Object.Instantiate(
                             templateMeshes[meshId].gameObject,
-                            nodeObject.transform, 
+                            nodeObject.transform,
                             false);
                         children.Add(newMesh.GetComponent<MeshTrianglesResource>());
                     }
@@ -148,7 +152,7 @@ namespace Iviz.Displays
 
         static Vector3 Assimp2Unity(in Iviz.Msgs.IvizMsgs.Vector3 vector3) =>
             new Vector3(vector3.X, vector3.Y, vector3.Z);
-        
+
         static void MemCopy<A, B>(A[] src, B[] dst, int bytes)
             where A : unmanaged
             where B : unmanaged

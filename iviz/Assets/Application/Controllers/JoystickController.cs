@@ -229,7 +229,7 @@ namespace Iviz.Controllers
                 Vector2 leftDir = Joystick.Left;
                 Vector2 rightDir = Joystick.Right;
 
-                string frame = string.IsNullOrWhiteSpace(AttachToFrame) ? TFListener.BaseFrameId : AttachToFrame;
+                string frame = string.IsNullOrWhiteSpace(AttachToFrame) ? TfListener.BaseFrameId : AttachToFrame;
 
                 Vector2 linear = XIsFront ? new Vector2(leftDir.y, -leftDir.x) : new Vector2(leftDir.x, leftDir.y);
 
@@ -257,7 +257,7 @@ namespace Iviz.Controllers
                 Vector2 leftDir = Joystick.Left;
                 Vector2 rightDir = Joystick.Right;
 
-                string frame = string.IsNullOrWhiteSpace(AttachToFrame) ? TFListener.BaseFrameId : AttachToFrame;
+                string frame = string.IsNullOrWhiteSpace(AttachToFrame) ? TfListener.BaseFrameId : AttachToFrame;
 
                 Joy joy = new Joy(
                     RosUtils.CreateHeader(joySeq++, frame),

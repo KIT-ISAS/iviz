@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Iviz.Resources;
 using Iviz.Msgs;
+using JetBrains.Annotations;
 
 namespace Iviz.App
 {
@@ -12,8 +13,10 @@ namespace Iviz.App
         const int Size = 200;
         [SerializeField] Text text = null;
 
+        [CanBeNull]
         IRosSender rosSender;
 
+        [CanBeNull]
         IRosSender RosSender
         {
             get => rosSender;
@@ -36,7 +39,7 @@ namespace Iviz.App
             }
         }
 
-        string Topic => RosSender?.Topic;
+        [CanBeNull] string Topic => RosSender?.Topic;
 
         int NumSubscribers =>
             (!ConnectionManager.IsConnected || RosSender == null) ? -1 : RosSender.NumSubscribers;
@@ -44,7 +47,7 @@ namespace Iviz.App
         int MessagesPerSecond => RosSender?.Stats.MessagesPerSecond ?? 0;
         int BytesPerSecond => RosSender?.Stats.BytesPerSecond ?? 0;
 
-        public void Set(IRosSender sender)
+        public void Set([CanBeNull] IRosSender sender)
         {
             RosSender = sender;
             if (sender == null)
@@ -54,7 +57,7 @@ namespace Iviz.App
             }
         }
 
-        public void Set<T>(RosSender<T> sender) where T : IMessage, new()
+        public void Set<T>([CanBeNull] RosSender<T> sender) where T : IMessage, new()
         {
             RosSender = sender;
             if (sender == null)

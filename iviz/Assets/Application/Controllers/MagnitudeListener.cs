@@ -5,6 +5,7 @@ using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.NavMsgs;
 using Iviz.Resources;
 using Iviz.Roslib;
+using JetBrains.Annotations;
 using UnityEngine;
 using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
@@ -175,9 +176,9 @@ namespace Iviz.Controllers
             }
         }
 
-        public MagnitudeListener(IModuleData moduleData)
+        public MagnitudeListener([NotNull] IModuleData moduleData)
         {
-            ModuleData = moduleData;
+            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             
             displayNode = SimpleDisplayNode.Instantiate("DisplayNode");
 

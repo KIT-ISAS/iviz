@@ -6,6 +6,7 @@ using System.Security;
 using Iviz.Controllers;
 using Iviz.Displays;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -66,7 +67,7 @@ namespace Iviz.App
         ImageDialogData imageData;
         LoadConfigDialogData loadConfigData;
         SaveConfigDialogData saveConfigData;
-        TFDialogData tfTreeData;
+        TfDialogData tfTreeData;
 
         ControllerService controllerService;
 
@@ -90,9 +91,9 @@ namespace Iviz.App
         public DataPanelManager DataPanelManager => dataPanelManager;
         public DialogPanelManager DialogPanelManager => dialogPanelManager;
         public Joystick Joystick => joystick;
-        public IReadOnlyCollection<ModuleData> ModuleDatas { get; }
-        TFModuleData TfData => (TFModuleData) moduleDatas[0];
-        public IEnumerable<string> DisplayedTopics => topicsWithModule;
+        [NotNull] public IReadOnlyCollection<ModuleData> ModuleDatas { get; }
+        TfModuleData TfData => (TfModuleData) moduleDatas[0];
+        [NotNull] public IEnumerable<string> DisplayedTopics => topicsWithModule;
 
         public bool UnlockButtonVisible
         {
@@ -121,33 +122,28 @@ namespace Iviz.App
 
             buttonHeight = Resource.Widgets.DisplayButton.Object.GetComponent<RectTransform>().rect.height;
 
-            availableModules = CreateDialog<AddModuleDialogData>();
-            availableTopics = CreateDialog<AddTopicDialogData>();
+            availableModules = new AddModuleDialogData(this);
+            availableTopics = new AddTopicDialogData(this);
 
-            imageData = CreateDialog<ImageDialogData>();
-            tfTreeData = CreateDialog<TFDialogData>();
-            loadConfigData = CreateDialog<LoadConfigDialogData>();
-            saveConfigData = CreateDialog<SaveConfigDialogData>();
-
-            connectionData = CreateDialog<ConnectionDialogData>();
+            imageData = new ImageDialogData(this);
+            tfTreeData = new TfDialogData(this);
+            loadConfigData = new LoadConfigDialogData(this);
+            saveConfigData = new SaveConfigDialogData(this);
+            
+            connectionData = new ConnectionDialogData(this);
 
             Directory.CreateDirectory(Settings.SavedFolder);
             LoadSimpleConfiguration();
 
             Logger.Internal("<b>Welcome to iviz</b>");
 
-            CreateModule(Resource.Module.TF, TFListener.DefaultTopic);
+            CreateModule(Resource.Module.TF, TfListener.DefaultTopic);
             CreateModule(Resource.Module.Grid);
 
             if (Settings.IsHololens)
             {
                 ARController controller = (ARController) CreateModule(Resource.Module.AugmentedReality).Controller;
                 controller.Visible = true;
-            }
-
-            if (Resource.External == null)
-            {
-                Debug.LogError("Failed to load external manager!");
             }
 
             save.onClick.AddListener(saveConfigData.Show);
@@ -292,8 +288,13 @@ namespace Iviz.App
             EventSystem.current.SetSelectedGameObject(null);
         }
 
-        public void SaveStateConfiguration(string file)
+        public void SaveStateConfiguration([NotNull] string file)
         {
+            if (file == null)
+            {
+                throw new ArgumentNullException(nameof(file));
+            }
+
             StateConfiguration config = new StateConfiguration
             {
                 MasterUri = connectionData.MasterUri,
@@ -324,8 +325,13 @@ namespace Iviz.App
             Logger.Debug("DisplayListPanel: Writing config to " + Settings.SavedFolder + "/" + file);
         }
 
-        public void LoadStateConfiguration(string file)
+        public void LoadStateConfiguration([NotNull] string file)
         {
+            if (file == null)
+            {
+                throw new ArgumentNullException(nameof(file));
+            }
+
             Logger.Debug("DisplayListPanel: Reading config from " + Settings.SavedFolder + "/" + file);
             string text;
             try
@@ -430,37 +436,34 @@ namespace Iviz.App
             }
         }
 
-        public ModuleData CreateModule(Resource.Module resource, string topic = "", string type = "",
-            IConfiguration configuration = null)
+        [NotNull]
+        public ModuleData CreateModule(Resource.Module resource, [NotNull] string topic = "",
+            [NotNull] string type = "",
+            [CanBeNull] IConfiguration configuration = null)
         {
+            if (topic == null)
+            {
+                throw new ArgumentNullException(nameof(topic));
+            }
+
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
             ModuleDataConstructor constructor =
                 new ModuleDataConstructor(resource, this, topic, type, configuration);
 
-            ModuleData moduleData;
-            try
-            {
-                moduleData = ModuleData.CreateFromResource(constructor);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError(e);
-                return null;
-            }
+            ModuleData moduleData = ModuleData.CreateFromResource(constructor);
 
             moduleDatas.Add(moduleData);
             CreateButtonObject(moduleData);
+            
             return moduleData;
         }
 
-        T CreateDialog<T>() where T : DialogData, new()
-        {
-            T dialogData = new T();
-            dialogData.Initialize(this);
-            return dialogData;
-        }
-
         // TODO: move graphics out of this
-        void CreateButtonObject(ModuleData moduleData)
+        void CreateButtonObject([NotNull] ModuleData moduleData)
         {
             GameObject buttonObject =
                 ResourcePool.GetOrCreate(Resource.Widgets.DisplayButton, contentObject.transform, false);
@@ -481,8 +484,19 @@ namespace Iviz.App
             ((RectTransform) contentObject.transform).sizeDelta = new Vector2(0, y + buttonHeight + YOffset);
         }
 
-        public ModuleData CreateModuleForTopic(string topic, string type)
+        [NotNull]
+        public ModuleData CreateModuleForTopic([NotNull] string topic, [NotNull] string type)
         {
+            if (topic == null)
+            {
+                throw new ArgumentNullException(nameof(topic));
+            }
+
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
             if (!Resource.ResourceByRosMessageType.TryGetValue(type, out Resource.Module resource))
             {
                 throw new ArgumentException(nameof(type));
@@ -491,8 +505,13 @@ namespace Iviz.App
             return CreateModule(resource, topic, type);
         }
 
-        public void RemoveModule(ModuleData entry)
+        public void RemoveModule([NotNull] ModuleData entry)
         {
+            if (entry == null)
+            {
+                throw new ArgumentNullException(nameof(entry));
+            }
+
             RemoveModule(moduleDatas.IndexOf(entry));
         }
 
@@ -526,8 +545,18 @@ namespace Iviz.App
                 new Vector2(0, 2 * YOffset + i * (buttonHeight + YOffset));
         }
 
-        public void UpdateModuleButton(ModuleData entry, string content)
+        public void UpdateModuleButton([NotNull] ModuleData entry, [NotNull] string content)
         {
+            if (entry == null)
+            {
+                throw new ArgumentNullException(nameof(entry));
+            }
+
+            if (content == null)
+            {
+                throw new ArgumentNullException(nameof(content));
+            }
+
             int index = moduleDatas.IndexOf(entry);
             if (index == -1)
             {
@@ -552,32 +581,42 @@ namespace Iviz.App
             }
         }
 
-        public void RegisterDisplayedTopic(string topic)
+        public void RegisterDisplayedTopic([NotNull] string topic)
         {
+            if (topic == null)
+            {
+                throw new ArgumentNullException(nameof(topic));
+            }
+
             topicsWithModule.Add(topic);
         }
 
-        public void ShowImageDialog(IImageDialogListener caller)
+        public void ShowImageDialog([NotNull] IImageDialogListener caller)
         {
-            imageData.Listener = caller;
+            imageData.Listener = caller ?? throw new ArgumentNullException(nameof(caller));
             imageData.Show();
         }
 
-        public void ShowFrame(TfFrame frame)
+        public void ShowFrame([NotNull] TfFrame frame)
         {
+            if (frame == null)
+            {
+                throw new ArgumentNullException(nameof(frame));
+            }
+
             tfTreeData.Show(frame);
         }
 
         void UpdateFpsStats()
         {
-            bottomTime.text = $"<b>{DateTime.Now:HH:mm:ss}</b>";
-            bottomFps.text = $"<b>{frameCounter} FPS</b>";
+            bottomTime.text = $"<b>{DateTime.Now.ToString("HH:mm:ss")}</b>";
+            bottomFps.text = $"<b>{frameCounter.ToString()} FPS</b>";
             frameCounter = 0;
 
             var (downB, upB) = ConnectionManager.CollectBandwidthReport();
             int downKb = downB / 1000;
             int upKb = upB / 1000;
-            bottomBandwidth.text = $"<b>↓{downKb:N0}kB/s ↑{upKb:N0}kB/s</b>";
+            bottomBandwidth.text = $"<b>↓{downKb.ToString("N0")}kB/s ↑{upKb.ToString("N0")}kB/s</b>";
         }
 
         void UpdateFpsCounter()

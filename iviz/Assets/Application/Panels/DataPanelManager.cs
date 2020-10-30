@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Iviz.Displays;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.App
@@ -40,24 +42,34 @@ namespace Iviz.App
             GameThread.EverySecond -= UpdateSelected;
         }
 
-        public DataPanelContents GetPanelByResourceType(Resource.Module resource)
+        [NotNull] public T GetPanelByResourceType<T>(Resource.Module resource) where T : DataPanelContents
         {
-            if (panelByResourceType.TryGetValue(resource, out DataPanelContents cm))
+            if (panelByResourceType.TryGetValue(resource, out DataPanelContents existingContents))
             {
-                return cm;
+                if (!(existingContents is T tContents))
+                {
+                    throw new InvalidOperationException("Panel type does not match!");
+                }
+                
+                return tContents;
             }
 
-            cm = DataPanelContents.AddTo(CreatePanelObject(resource + " Panel"), resource);
-            if (cm is null)
+            DataPanelContents newContents = DataPanelContents.AddTo(CreatePanelObject(resource + " Panel"), resource);
+            if (newContents == null)
             {
-                return defaultPanel;
+                throw new InvalidOperationException("There is no panel for this type");
+            }
+            
+            if (!(newContents is T contents))
+            {
+                throw new InvalidOperationException("Panel type does not match!");
             }
 
-            panelByResourceType[resource] = cm;
-            return cm;
+            panelByResourceType[resource] = contents;
+            return contents;
         }
 
-        public void SelectPanelFor(ModuleData newSelected)
+        public void SelectPanelFor([CanBeNull] ModuleData newSelected)
         {
             if (!started)
             {
@@ -88,7 +100,7 @@ namespace Iviz.App
             Active = true;
         }
 
-        public void HidePanelFor(ModuleData newSelected)
+        public void HidePanelFor([CanBeNull] ModuleData newSelected)
         {
             if (SelectedModuleData == newSelected)
             {
@@ -116,7 +128,7 @@ namespace Iviz.App
             Active = false;
         }
 
-        public void TogglePanel(ModuleData selected)
+        public void TogglePanel([CanBeNull] ModuleData selected)
         {
             if (SelectedModuleData == selected)
             {

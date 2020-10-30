@@ -14,11 +14,12 @@ namespace Iviz.Resources
     {
         readonly string resourceName;
 
-        T baseObject;
+        [CanBeNull] T baseObject;
 
         /// <summary>
         /// Returns or loads a resource of this type.  
         /// </summary>
+        [NotNull]
         public T Object
         {
             get
@@ -38,7 +39,7 @@ namespace Iviz.Resources
             }
         }
 
-        int id = 0;
+        int id;
 
         /// <summary>
         /// Returns the instance id of the resource.
@@ -59,15 +60,16 @@ namespace Iviz.Resources
         /// </summary>
         /// <param name="resourceName">Path to the resource.</param>
         /// <param name="baseObject">Previously loaded instance.</param>
-        public Info(string resourceName, T baseObject)
+        public Info([NotNull] string resourceName, [CanBeNull] T baseObject)
         {
-            this.resourceName = resourceName;
+            this.resourceName = resourceName ?? throw new ArgumentNullException(nameof(resourceName));
             this.baseObject = baseObject;
         }
 
         /// <summary>
         /// Name of this resource.
         /// </summary>
+        [NotNull]
         public string Name => Object.name;
 
         public override string ToString()
@@ -80,7 +82,7 @@ namespace Iviz.Resources
         /// </summary>
         /// <param name="parent">If not null, sets the clone parent to this.</param>
         /// <returns>An instantiated clone.</returns>
-        public T Instantiate(Transform parent = null)
+        public T Instantiate([CanBeNull] Transform parent = null)
         {
             if (Object == null)
             {
@@ -100,12 +102,12 @@ namespace Iviz.Resources
             return obj != null && obj is Info<T> info && Id == info.Id;
         }
 
-        public static bool operator ==(Info<T> a, Info<T> b)
+        public static bool operator ==([CanBeNull] Info<T> a, [CanBeNull] Info<T> b)
         {
             return ReferenceEquals(a, b) || (!(a is null) && a.Equals(b));
         }
 
-        public static bool operator !=(Info<T> a, Info<T> b)
+        public static bool operator !=([CanBeNull] Info<T> a, [CanBeNull] Info<T> b)
         {
             return !(a == b);
         }

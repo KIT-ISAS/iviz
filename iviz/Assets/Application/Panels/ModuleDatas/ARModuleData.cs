@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Iviz.Controllers;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.App
@@ -20,10 +21,10 @@ namespace Iviz.App
         public override IConfiguration Configuration => controller.Config;
         public override IController Controller => controller;
 
-        public ARModuleData(ModuleDataConstructor constructor) :
+        public ARModuleData([NotNull] ModuleDataConstructor constructor) :
             base(constructor.ModuleList, constructor.Topic, constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.AugmentedReality) as ARPanelContents;
+            panel = DataPanelManager.GetPanelByResourceType<ARPanelContents>(Resource.Module.AugmentedReality);
 
             controller = Settings.IsHololens ?
                 new GameObject("AR Hololens Controller").AddComponent<ARHololensController>() :
@@ -61,7 +62,7 @@ namespace Iviz.App
             panel.MarkerFrame.Value = controller.MarkerFrame;
 
             List<string> frameHints = new List<string> { NoneString };
-            frameHints.AddRange(TFListener.FramesUsableAsHints);
+            frameHints.AddRange(TfListener.FramesUsableAsHints);
             panel.MarkerFrame.Hints = frameHints;
 
             panel.MarkerOffset.Value = controller.MarkerOffset;

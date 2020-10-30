@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Iviz.Controllers;
 using Iviz.Displays;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -28,7 +29,7 @@ namespace Iviz.App
         bool alreadyMoving;
         bool alreadyScaling;
 
-        static Camera MainCamera => TFListener.MainCamera;
+        static Camera MainCamera => TfListener.MainCamera;
         NamedBoundary namedBoundary;
 
         bool PointerOnGui { get; set; }
@@ -39,6 +40,7 @@ namespace Iviz.App
 
         TfFrame orbitCenterOverride;
 
+        [CanBeNull]
         public TfFrame OrbitCenterOverride
         {
             get => orbitCenterOverride;
@@ -57,6 +59,7 @@ namespace Iviz.App
 
         TfFrame cameraViewOverride;
 
+        [CanBeNull]
         public TfFrame CameraViewOverride
         {
             get => cameraViewOverride;
@@ -92,6 +95,7 @@ namespace Iviz.App
 
         IDraggable draggedObject;
 
+        [CanBeNull]
         public IDraggable DraggedObject
         {
             get => draggedObject;
@@ -130,7 +134,7 @@ namespace Iviz.App
             StartOrbiting();
         }
 
-        public void Unselect(ClickableNode display)
+        public void Unselect([CanBeNull] ClickableNode display)
         {
             if (SelectedDisplay != display)
             {
@@ -142,7 +146,7 @@ namespace Iviz.App
             namedBoundary.Target = null;
         }
 
-        public void Select(ClickableNode display)
+        public void Select([CanBeNull] ClickableNode display)
         {
             if (SelectedDisplay == display)
             {
@@ -162,7 +166,7 @@ namespace Iviz.App
             }
         }
 
-        public void ToggleSelect(ClickableNode display)
+        public void ToggleSelect([CanBeNull] ClickableNode display)
         {
             if (SelectedDisplay != display)
             {
@@ -174,7 +178,7 @@ namespace Iviz.App
             }
         }
 
-        public void ShowBoundary(ClickableNode display)
+        public void ShowBoundary([CanBeNull] ClickableNode display)
         {
             if (display != SelectedDisplay)
             {

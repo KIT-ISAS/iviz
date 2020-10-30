@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Iviz.Resources;
 using Unity.Mathematics;
 using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public sealed class OccupancyGridResource : DisplayWrapperResource, IRecyclable, ISupportsTint
+    public sealed class OccupancyGridResource : DisplayWrapperResource, ISupportsTint
     {
         const int MaxSize = 10000;
 

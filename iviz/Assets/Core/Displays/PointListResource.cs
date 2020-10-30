@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -31,6 +30,7 @@ namespace Iviz.Displays
         /// <summary>
         /// Sets the points with the given collection.
         /// </summary>
+        [NotNull]
         public IReadOnlyCollection<PointWithColor> PointsWithColor
         {
             get => pointBuffer.Select(f => new PointWithColor(f)).ToArray();
@@ -42,7 +42,7 @@ namespace Iviz.Displays
         /// </summary>
         /// <param name="points">The point enumerator.</param>
         /// <param name="reserve">The number of points to reserve, or 0 if unknown.</param>
-        public void Set(IEnumerable<PointWithColor> points, int reserve = 0)
+        public void Set([NotNull] IEnumerable<PointWithColor> points, int reserve = 0)
         {
             if (reserve < 0)
             {
@@ -81,7 +81,6 @@ namespace Iviz.Displays
         {
             pointBuffer.Clear();
             pointBuffer.AddRange(points);
-            
             UpdateBuffer();
         }
 

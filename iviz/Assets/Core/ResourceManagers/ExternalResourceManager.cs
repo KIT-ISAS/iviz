@@ -7,9 +7,9 @@ using System.Runtime.Serialization;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using Iviz.Roslib;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
-using Logger = Iviz.Logger;
 
 namespace Iviz.Displays
 {
@@ -22,8 +22,10 @@ namespace Iviz.Displays
 
         const string StrMissingFileRemoving = "ExternalResourceManager: Missing file '{0}'. Removing.";
         const string StrServiceFailedWithMessage = "ExternalResourceManager: Call Service failed with message '{0}'";
-        const string StrCallServiceFailed = 
+
+        const string StrCallServiceFailed =
             "ExternalResourceManager: Call Service failed! Are you sure iviz is connected and the iviz_model_service program is running?";
+
         const string StrResourceFailedWithError = "ExternalResourceManager: Loading resource {0} failed with error {1}";
 
         [DataContract]
@@ -59,7 +61,8 @@ namespace Iviz.Displays
 
         readonly Model modelGenerator = new Model();
         readonly Scene sceneGenerator = new Scene();
-        
+
+        [NotNull]
         public ReadOnlyCollection<Uri> GetListOfModels() =>
             new ReadOnlyCollection<Uri>(resourceFiles.Models.Keys.ToList());
 
@@ -104,7 +107,8 @@ namespace Iviz.Displays
         {
             try
             {
-                File.WriteAllText(Settings.ResourcesFilePath, JsonConvert.SerializeObject(resourceFiles, Formatting.Indented));
+                File.WriteAllText(Settings.ResourcesFilePath,
+                    JsonConvert.SerializeObject(resourceFiles, Formatting.Indented));
             }
             catch (IOException e)
             {
@@ -112,14 +116,21 @@ namespace Iviz.Displays
             }
         }
 
-        public static string SanitizeForFilename(string input)
+        [NotNull]
+        public static string SanitizeForFilename([NotNull] string input)
         {
+            if (input == null)
+            {
+                throw new ArgumentNullException(nameof(input));
+            }
+
             return Uri.EscapeDataString(input);
         }
 
+        [NotNull]
         public IEnumerable<string> GetRobotNames() => resourceFiles.RobotDescriptions.Keys.ToArray();
 
-        public bool ContainsRobot(string robotName)
+        public bool ContainsRobot([NotNull] string robotName)
         {
             if (robotName == null)
             {
@@ -129,7 +140,8 @@ namespace Iviz.Displays
             return resourceFiles.RobotDescriptions.ContainsKey(robotName);
         }
 
-        public bool TryGetRobot(string robotName, out string robotDescription)
+        [ContractAnnotation("=> false, robotDescription:null; => true, robotDescription:notnull")]
+        public bool TryGetRobot([NotNull] string robotName, out string robotDescription)
         {
             if (string.IsNullOrEmpty(robotName))
             {
@@ -163,7 +175,7 @@ namespace Iviz.Displays
             }
         }
 
-        public void AddRobot(string robotName, string robotDescription)
+        public void AddRobot([NotNull] string robotName, [NotNull] string robotDescription)
         {
             if (string.IsNullOrEmpty(robotName))
             {
@@ -176,7 +188,7 @@ namespace Iviz.Displays
             }
 
             string localPath = SanitizeForFilename(robotName);
-            
+
             File.WriteAllText($"{Settings.SavedRobotsPath}/{localPath}", robotDescription);
             Debug.Log($"Saving to {Settings.SavedRobotsPath}/{localPath}");
             Logger.Internal($"Added robot <i>{robotName}</i> to cache");
@@ -184,8 +196,8 @@ namespace Iviz.Displays
             resourceFiles.RobotDescriptions[robotName] = localPath;
             WriteResourceFile();
         }
-        
-        public void RemoveRobot(string robotName)
+
+        public void RemoveRobot([NotNull] string robotName)
         {
             if (string.IsNullOrEmpty(robotName))
             {
@@ -201,7 +213,7 @@ namespace Iviz.Displays
             try
             {
                 File.Delete(absolutePath);
-                Logger.Debug("Removing '" + localPath + "'");
+                Logger.Debug($"Removing '{localPath}'");
             }
             catch (IOException)
             {
@@ -211,9 +223,10 @@ namespace Iviz.Displays
             Logger.Internal($"Removed robot <i>{robotName}</i> from cache");
             resourceFiles.RobotDescriptions.Remove(robotName);
             WriteResourceFile();
-        }        
+        }
 
-        public bool TryGet(Uri uri, out Info<GameObject> resource, IExternalServiceProvider provider)
+        public bool TryGet([NotNull] Uri uri, [CanBeNull] out Info<GameObject> resource,
+            [CanBeNull] IExternalServiceProvider provider)
         {
             if (uri is null)
             {
@@ -242,7 +255,7 @@ namespace Iviz.Displays
             return resource != null;
         }
 
-        Info<GameObject> TryGetModel(Uri uri, IExternalServiceProvider provider)
+        Info<GameObject> TryGetModel([NotNull] Uri uri, [CanBeNull] IExternalServiceProvider provider)
         {
             if (loadedModels.TryGetValue(uri, out Info<GameObject> resource))
             {
@@ -288,7 +301,7 @@ namespace Iviz.Displays
             return null;
         }
 
-        Info<GameObject> TryGetScene(Uri uri, IExternalServiceProvider provider)
+        Info<GameObject> TryGetScene([NotNull] Uri uri, [CanBeNull] IExternalServiceProvider provider)
         {
             if (loadedScenes.TryGetValue(uri, out Info<GameObject> resource))
             {
@@ -315,7 +328,7 @@ namespace Iviz.Displays
                 }
             };
 
-            if (provider != null && 
+            if (provider != null &&
                 provider.CallService(SceneServiceName, msg) &&
                 msg.Response.Success)
             {
@@ -334,7 +347,9 @@ namespace Iviz.Displays
             return null;
         }
 
-        public bool TryGet(Uri uri, out Info<Texture2D> resource, IExternalServiceProvider provider)
+        [ContractAnnotation("=> false, resource:null; => true, resource:notnull")]
+        public bool TryGet([NotNull] Uri uri, out Info<Texture2D> resource,
+            [CanBeNull] IExternalServiceProvider provider)
         {
             if (uri is null)
             {
@@ -387,7 +402,9 @@ namespace Iviz.Displays
             return false;
         }
 
-        Info<GameObject> LoadLocalModel(Uri uri, string localPath, IExternalServiceProvider provider)
+        [CanBeNull]
+        Info<GameObject> LoadLocalModel([NotNull] Uri uri, [NotNull] string localPath,
+            [CanBeNull] IExternalServiceProvider provider)
         {
             byte[] buffer;
 
@@ -410,7 +427,8 @@ namespace Iviz.Displays
             return resource;
         }
 
-        Info<Texture2D> LoadLocalTexture(Uri uri, string localPath)
+        [CanBeNull]
+        Info<Texture2D> LoadLocalTexture([NotNull] Uri uri, [NotNull] string localPath)
         {
             byte[] buffer;
 
@@ -439,7 +457,9 @@ namespace Iviz.Displays
             return resource;
         }
 
-        Info<GameObject> LoadLocalScene(Uri uri, string localPath, IExternalServiceProvider provider)
+        [CanBeNull]
+        Info<GameObject> LoadLocalScene([NotNull] Uri uri, [NotNull] string localPath,
+            [CanBeNull] IExternalServiceProvider provider)
         {
             byte[] buffer;
 
@@ -454,7 +474,7 @@ namespace Iviz.Displays
             }
 
             Scene msg = Msgs.Buffer.Deserialize(sceneGenerator, buffer, buffer.Length);
-            GameObject obj = CreateSceneNode(uri, msg, provider);
+            GameObject obj = CreateSceneNode(msg, provider);
 
             Info<GameObject> resource = new Info<GameObject>(uri.ToString(), obj);
             loadedScenes[uri] = resource;
@@ -462,7 +482,9 @@ namespace Iviz.Displays
             return resource;
         }
 
-        Info<GameObject> ProcessModelResponse(Uri uri, GetModelResourceResponse msg, IExternalServiceProvider provider)
+        [CanBeNull]
+        Info<GameObject> ProcessModelResponse([NotNull] Uri uri, [NotNull] GetModelResourceResponse msg,
+            [CanBeNull] IExternalServiceProvider provider)
         {
             try
             {
@@ -491,7 +513,8 @@ namespace Iviz.Displays
             }
         }
 
-        Info<Texture2D> ProcessTextureResponse(Uri uri, GetModelTextureResponse msg)
+        [CanBeNull]
+        Info<Texture2D> ProcessTextureResponse([NotNull] Uri uri, [NotNull] GetModelTextureResponse msg)
         {
             try
             {
@@ -521,11 +544,13 @@ namespace Iviz.Displays
             }
         }
 
-        Info<GameObject> ProcessSceneResponse(Uri uri, GetSdfResponse msg, IExternalServiceProvider provider)
+        [CanBeNull]
+        Info<GameObject> ProcessSceneResponse([NotNull] Uri uri, [NotNull] GetSdfResponse msg,
+            [CanBeNull] IExternalServiceProvider provider)
         {
             try
             {
-                GameObject node = CreateSceneNode(uri, msg.Scene, provider);
+                GameObject node = CreateSceneNode(msg.Scene, provider);
 
                 Info<GameObject> info = new Info<GameObject>(uri.ToString(), node);
 
@@ -551,7 +576,9 @@ namespace Iviz.Displays
             }
         }
 
-        GameObject CreateModelObject(Uri uri, Model msg, IExternalServiceProvider provider)
+        [NotNull]
+        GameObject CreateModelObject([NotNull] Uri uri, [NotNull] Model msg,
+            [CanBeNull] IExternalServiceProvider provider)
         {
             GameObject model = SceneModel.Create(uri, msg, provider).gameObject;
             if (Node != null)
@@ -562,7 +589,8 @@ namespace Iviz.Displays
             return model;
         }
 
-        GameObject CreateSceneNode(Uri _, Scene scene, IExternalServiceProvider provider)
+        [NotNull]
+        GameObject CreateSceneNode([NotNull] Scene scene, [CanBeNull] IExternalServiceProvider provider)
         {
             GameObject node = new GameObject(scene.Name);
             if (Node != null)

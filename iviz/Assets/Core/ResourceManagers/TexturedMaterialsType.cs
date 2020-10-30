@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Resources
@@ -9,7 +10,7 @@ namespace Iviz.Resources
         readonly Dictionary<Texture, Material> materialsByTexture = new Dictionary<Texture, Material>();
         readonly Dictionary<Texture, Material> materialsByTextureAlpha = new Dictionary<Texture, Material>();
 
-        public Material Get(Texture texture)
+        public Material Get([NotNull] Texture texture)
         {
             if (texture is null)
             {
@@ -23,12 +24,12 @@ namespace Iviz.Resources
 
             material = Resource.Materials.TexturedLit.Instantiate();
             material.mainTexture = texture;
-            material.name = Resource.Materials.TexturedLit.Name + " - " + materialsByTexture.Count;
+            material.name = $"{Resource.Materials.TexturedLit.Name} - {materialsByTexture.Count}";
             materialsByTexture[texture] = material;
             return material;
         }
 
-        public Material GetAlpha(Texture texture)
+        public Material GetAlpha([NotNull] Texture texture)
         {
             if (texture is null)
             {

@@ -1,9 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.App;
 using Iviz.Displays;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.XR.ARFoundation;
@@ -48,8 +48,8 @@ namespace Iviz.Controllers
                 arCamera.enabled = value;
                 arLight.gameObject.SetActive(value);
                 ArSet.Visible = value;
-                TFListener.MainCamera = value ? arCamera : mainCamera;
-                canvas.worldCamera = TFListener.MainCamera;
+                TfListener.MainCamera = value ? arCamera : mainCamera;
+                canvas.worldCamera = TfListener.MainCamera;
             }
         }
 
@@ -157,8 +157,6 @@ namespace Iviz.Controllers
                     //Debug.Log("pin changed to true!");
                     ResetAnchor(true);
                 }
-                
-                
 
                 base.PinRootMarker = value;
             }
@@ -208,7 +206,7 @@ namespace Iviz.Controllers
             }
 
             SetupModeEnabled = true;
-            setupModeFrame.AxisLength = 0.5f * TFListener.Instance.FrameSize;
+            setupModeFrame.AxisLength = 0.5f * TfListener.Instance.FrameSize;
             
             ArSet.Clicked += ArSetOnClicked;
             ArSet.State = true;
@@ -262,7 +260,7 @@ namespace Iviz.Controllers
                 Transform cameraTransform = arCamera.transform;
                 setupModeFrame.transform.rotation = Quaternion.Euler(0, 90 + cameraTransform.rotation.eulerAngles.y, 0);
                 Ray ray = new Ray(cameraTransform.position, cameraTransform.forward);
-                if (FindClosestPlane(ray, out ARRaycastHit hit, out _))
+                if (TryGetClosestPlane(ray, out ARRaycastHit hit, out _))
                 {
                     setupModeFrame.transform.position = hit.pose.position;
                     setupModeFrame.Tint = Color.white;
@@ -292,7 +290,7 @@ namespace Iviz.Controllers
                 
                 Vector3 origin = WorldPosition + maxDistanceAbovePlane * Vector3.up;
                 Ray ray = new Ray(origin, Vector3.down);
-                if (FindClosestPlane(ray, out ARRaycastHit hit, out ARPlane plane))
+                if (TryGetClosestPlane(ray, out ARRaycastHit hit, out ARPlane plane))
                 {
                     Pose pose = new Pose(hit.pose.position, WorldPose.rotation);
                     worldAnchor = anchorManager.AttachAnchor(plane, pose).GetComponent<ARAnchorResource>();
@@ -319,7 +317,7 @@ namespace Iviz.Controllers
 
         protected override bool FindRayHit(in Ray ray, out Vector3 anchor, out Vector3 normal)
         {
-            if (!FindClosestPlane(ray, out ARRaycastHit hit, out ARPlane plane))
+            if (!TryGetClosestPlane(ray, out ARRaycastHit hit, out ARPlane plane))
             {
                 anchor = ray.origin;
                 normal = Vector3.zero;
@@ -331,7 +329,8 @@ namespace Iviz.Controllers
             return true;
         }
 
-        bool FindClosestPlane(in Ray ray, out ARRaycastHit hit, out ARPlane plane)
+        [ContractAnnotation("=> false, plane:null; => true, plane:notnull")]
+        bool TryGetClosestPlane(in Ray ray, out ARRaycastHit hit, out ARPlane plane)
         {
             if (arSessionOrigin == null || arSessionOrigin.trackablesParent == null)
             {
@@ -400,7 +399,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            Pose expectedPose = TFListener.RelativePoseToRoot(resource.transform.AsPose());
+            Pose expectedPose = TfListener.RelativePoseToRoot(resource.transform.AsPose());
             Pose registeredPose = newPose.Value.Multiply(expectedPose.Inverse());
 
             Quaternion corrected =

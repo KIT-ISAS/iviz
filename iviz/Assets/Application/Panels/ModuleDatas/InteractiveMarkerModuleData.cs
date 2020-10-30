@@ -1,5 +1,6 @@
 ﻿using Iviz.Controllers;
 using Iviz.Resources;
+using JetBrains.Annotations;
 
 namespace Iviz.App
 {
@@ -8,8 +9,8 @@ namespace Iviz.App
     /// </summary>
     public sealed class InteractiveMarkerModuleData : ListenerModuleData
     {
-        readonly InteractiveMarkerListener listener;
-        readonly InteractiveMarkerPanelContents panel;
+        [NotNull] readonly InteractiveMarkerListener listener;
+        [NotNull] readonly InteractiveMarkerPanelContents panel;
 
         protected override ListenerController Listener => listener;
 
@@ -18,13 +19,12 @@ namespace Iviz.App
 
         public override IConfiguration Configuration => listener.Config;
 
-        public InteractiveMarkerModuleData(ModuleDataConstructor constructor) :
+        public InteractiveMarkerModuleData([NotNull] ModuleDataConstructor constructor) :
         base(constructor.ModuleList,
             constructor.GetConfiguration<InteractiveMarkerConfiguration>()?.Topic ?? constructor.Topic,
             constructor.Type)
         {
-
-            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.InteractiveMarker) as InteractiveMarkerPanelContents;
+            panel = DataPanelManager.GetPanelByResourceType<InteractiveMarkerPanelContents>(Resource.Module.InteractiveMarker);
             listener = new InteractiveMarkerListener(this);
             if (constructor.Configuration != null)
             {

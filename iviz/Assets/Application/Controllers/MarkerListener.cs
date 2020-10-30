@@ -6,6 +6,7 @@ using Iviz.Displays;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
 using Iviz.Roslib;
+using JetBrains.Annotations;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -28,13 +29,13 @@ namespace Iviz.Controllers
         readonly MarkerConfiguration config = new MarkerConfiguration();
         readonly Dictionary<string, MarkerObject> markers = new Dictionary<string, MarkerObject>();
 
-        public MarkerListener(IModuleData moduleData)
+        public MarkerListener([NotNull] IModuleData moduleData)
         {
-            ModuleData = moduleData;
+            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
         }
 
         public override IModuleData ModuleData { get; }
-        public override TfFrame Frame => TFListener.MapFrame;
+        public override TfFrame Frame => TfListener.MapFrame;
 
         public MarkerConfiguration Config
         {
@@ -143,7 +144,7 @@ namespace Iviz.Controllers
             markers.Clear();
         }
 
-        void Handler(MarkerArray msg)
+        void Handler([NotNull] MarkerArray msg)
         {
             foreach (var marker in msg.Markers)
             {
@@ -151,7 +152,7 @@ namespace Iviz.Controllers
             }
         }
 
-        void Handler(Marker msg)
+        void Handler([NotNull] Marker msg)
         {
             var id = IdFromMessage(msg);
             switch (msg.Action)
@@ -173,7 +174,7 @@ namespace Iviz.Controllers
                     {
                         markerToAdd = CreateMarkerObject();
                         markerToAdd.ModuleData = ModuleData;
-                        markerToAdd.Parent = TFListener.ListenersFrame;
+                        markerToAdd.Parent = TfListener.ListenersFrame;
                         markerToAdd.OcclusionOnly = RenderAsOcclusionOnly;
                         markerToAdd.Tint = Tint;
                         markerToAdd.Visible = Visible;
@@ -193,12 +194,13 @@ namespace Iviz.Controllers
             }
         }
 
-        public static string IdFromMessage(Marker marker)
+        [NotNull]
+        public static string IdFromMessage([NotNull] Marker marker)
         {
             return $"[{marker.Ns}] {marker.Id}";
         }
 
-        static void DeleteMarkerObject(MarkerObject markerToDelete)
+        static void DeleteMarkerObject([NotNull] MarkerObject markerToDelete)
         {
             markerToDelete.Stop();
             Object.Destroy(markerToDelete.gameObject);

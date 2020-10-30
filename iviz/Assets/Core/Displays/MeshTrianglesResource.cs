@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -10,7 +11,7 @@ namespace Iviz.Displays
     /// </summary>
     public sealed class MeshTrianglesResource : MeshMarkerResource
     {
-        Mesh mesh;
+        [CanBeNull] Mesh mesh;
         Bounds localBounds;
 
         public Bounds LocalBounds
@@ -28,6 +29,14 @@ namespace Iviz.Displays
             }
         }
 
+        void OnDestroy()
+        {
+            if (mesh != null)
+            {
+                Destroy(mesh);
+            }
+        }
+
         protected override void Awake()
         {
             base.Awake();
@@ -35,11 +44,12 @@ namespace Iviz.Displays
             LocalBounds = LocalBounds;
         }
 
-        void EnsureOwnMesh(int pointsCount)
+        [NotNull]
+        Mesh EnsureOwnMesh(int pointsCount)
         {
             if (mesh != null)
             {
-                return;
+                return mesh;
             }
 
             mesh = new Mesh
@@ -52,9 +62,10 @@ namespace Iviz.Displays
 
 
             GetComponent<MeshFilter>().sharedMesh = mesh;
+            return mesh;
         }
 
-        void SetVertices(IEnumerable<Vector3> points)
+        static void SetVertices([NotNull] IEnumerable<Vector3> points, [NotNull] Mesh mesh)
         {
             switch (points)
             {
@@ -70,7 +81,7 @@ namespace Iviz.Displays
             }
         }
 
-        void SetNormals(IEnumerable<Vector3> points)
+        static void SetNormals([NotNull] IEnumerable<Vector3> points, [NotNull] Mesh mesh)
         {
             switch (points)
             {
@@ -86,7 +97,7 @@ namespace Iviz.Displays
             }
         }
 
-        void SetTexCoords(IEnumerable<Vector2> uvs)
+        static void SetTexCoords([NotNull] IEnumerable<Vector2> uvs, [NotNull] Mesh mesh)
         {
             switch (uvs)
             {
@@ -102,7 +113,7 @@ namespace Iviz.Displays
             }
         }
 
-        void SetColors(IEnumerable<Color> colors)
+        static void SetColors([NotNull] IEnumerable<Color> colors, [NotNull] Mesh mesh)
         {
             switch (colors)
             {
@@ -118,7 +129,7 @@ namespace Iviz.Displays
             }
         }
 
-        void SetColors(IEnumerable<Color32> colors)
+        static void SetColors([NotNull] IEnumerable<Color32> colors, [NotNull] Mesh mesh)
         {
             switch (colors)
             {
@@ -134,24 +145,24 @@ namespace Iviz.Displays
             }
         }
 
-        void SetTriangles(IEnumerable<int> indices, int i)
+        static void SetTriangles([NotNull] IEnumerable<int> indices, [NotNull] Mesh mesh, int subMesh)
         {
             switch (indices)
             {
                 case List<int> indicesV:
-                    mesh.SetTriangles(indicesV, i);
+                    mesh.SetTriangles(indicesV, subMesh);
                     break;
                 case int[] indicesA:
-                    mesh.SetTriangles(indicesA, i);
+                    mesh.SetTriangles(indicesA, subMesh);
                     break;
                 default:
-                    mesh.SetTriangles(indices.ToArray(), i);
+                    mesh.SetTriangles(indices.ToArray(), subMesh);
                     break;
             }
         }
 
 
-        public void Set(IReadOnlyCollection<Vector3> points, IReadOnlyCollection<Color> colors = null)
+        public void Set([NotNull] IReadOnlyCollection<Vector3> points, [CanBeNull] IReadOnlyCollection<Color> colors = null)
         {
             if (points is null)
             {
@@ -170,27 +181,28 @@ namespace Iviz.Displays
 
             int[] triangles = Enumerable.Range(0, points.Count).ToArray();
 
-            EnsureOwnMesh(points.Count);
+            Mesh ownMesh = EnsureOwnMesh(points.Count);
 
-            mesh.Clear();
-            SetVertices(points);
+            ownMesh.Clear();
+            SetVertices(points, ownMesh);
             if (colors != null && colors.Count != 0)
             {
-                SetColors(colors);
+                SetColors(colors, ownMesh);
             }
 
-            mesh.SetTriangles(triangles, 0);
-            mesh.RecalculateNormals();
+            SetTriangles(triangles, ownMesh, 0);
+            //mesh.SetTriangles(triangles, 0);
+            ownMesh.RecalculateNormals();
 
-            LocalBounds = mesh.bounds;
+            LocalBounds = ownMesh.bounds;
         }
 
         public void Set(
-            IReadOnlyCollection<Vector3> points,
-            IReadOnlyCollection<Vector3> normals,
-            IReadOnlyCollection<Vector2> texCoords,
-            IReadOnlyCollection<int> triangles,
-            IReadOnlyCollection<Color32> colors = null)
+            [NotNull] IReadOnlyCollection<Vector3> points,
+            [CanBeNull] IReadOnlyCollection<Vector3> normals,
+            [CanBeNull] IReadOnlyCollection<Vector2> texCoords,
+            [NotNull] IReadOnlyCollection<int> triangles,
+            [CanBeNull] IReadOnlyCollection<Color32> colors = null)
         {
             if (points is null)
             {
@@ -217,26 +229,34 @@ namespace Iviz.Displays
                 throw new ArgumentException("Inconsistent color size!", nameof(colors));
             }
 
-            EnsureOwnMesh(points.Count);
+            Mesh ownMesh = EnsureOwnMesh(points.Count);
 
-            mesh.Clear();
-            SetVertices(points);
-            SetNormals(normals);
+            ownMesh.Clear();
+            SetVertices(points, ownMesh);
+            if (normals != null && normals.Count != 0)
+            {
+                SetNormals(normals, ownMesh);
+            }
+            else
+            {
+                ownMesh.RecalculateNormals();
+            }
+
             if (texCoords != null && texCoords.Count != 0)
             {
-                SetTexCoords(texCoords);
+                SetTexCoords(texCoords, ownMesh);
             }
 
             if (colors != null && colors.Count != 0)
             {
-                SetColors(colors);
+                SetColors(colors, ownMesh);
             }
 
-            SetTriangles(triangles, 0);
+            SetTriangles(triangles, ownMesh, 0);
 
-            mesh.Optimize();
+            ownMesh.Optimize();
 
-            LocalBounds = mesh.bounds;
+            LocalBounds = ownMesh.bounds;
 
         }
 

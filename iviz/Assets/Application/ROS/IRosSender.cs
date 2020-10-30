@@ -3,6 +3,7 @@ using System.Runtime.Serialization;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Roslib;
+using JetBrains.Annotations;
 
 namespace Iviz.Controllers
 {
@@ -27,13 +28,13 @@ namespace Iviz.Controllers
 
     public interface IRosSender
     {
-        string Topic { get; }
-        string Type { get; }
+        [NotNull] string Topic { get; }
+        [NotNull] string Type { get; }
         int Id { get; }
-        RosSenderStats Stats { get; }
+        [NotNull] RosSenderStats Stats { get; }
         int NumSubscribers { get; }
         void Stop();
-        void Publish(IMessage msg);
+        void Publish([NotNull] IMessage msg);
     }
 
     public sealed class RosSender<T> : IRosSender where T : IMessage
@@ -42,7 +43,7 @@ namespace Iviz.Controllers
         int lastMsgCounter;
         int totalMsgCounter;
 
-        public RosSender(string topic)
+        public RosSender([NotNull] string topic)
         {
             if (string.IsNullOrWhiteSpace(topic))
             {
@@ -80,7 +81,7 @@ namespace Iviz.Controllers
             Id = id;
         }
 
-        public void Publish(T msg)
+        public void Publish([NotNull] T msg)
         {
             if (msg == null)
             {

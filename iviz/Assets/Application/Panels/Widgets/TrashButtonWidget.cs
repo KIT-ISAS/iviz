@@ -1,4 +1,5 @@
 ﻿using System;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,19 +13,13 @@ namespace Iviz.App
         public bool Interactable
         {
             get => button.interactable;
-            set
-            {
-                button.interactable = value;
-            }
+            set => button.interactable = value;
         }
 
         public Sprite Sprite
         {
             get => image.sprite;
-            set
-            {
-                image.sprite = value;
-            }
+            set => image.sprite = value;
         }
 
         public event Action Clicked;
@@ -39,6 +34,7 @@ namespace Iviz.App
             Clicked = null;
         }
 
+        [NotNull]
         public TrashButtonWidget SubscribeClicked(Action f)
         {
             Clicked += f;

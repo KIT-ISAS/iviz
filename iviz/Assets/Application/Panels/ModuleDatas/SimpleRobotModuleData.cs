@@ -3,6 +3,7 @@ using System.Linq;
 using Iviz.Controllers;
 using Iviz.Resources;
 using Iviz.Roslib;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.App
@@ -14,8 +15,8 @@ namespace Iviz.App
     {
         const string ParamSuffix = "_description";
 
-        readonly SimpleRobotPanelContents panel;
-        readonly SimpleRobotController robot;
+        [NotNull] readonly SimpleRobotPanelContents panel;
+        [NotNull] readonly SimpleRobotController robot;
 
         public override DataPanelContents Panel => panel;
         public override Resource.Module Module => Resource.Module.Robot;
@@ -24,7 +25,7 @@ namespace Iviz.App
 
         static readonly string[] NoneStr = {"<color=#b0b0b0ff><i><none></i></color>"};
 
-        public SimpleRobotModuleData(ModuleDataConstructor constructor) :
+        public SimpleRobotModuleData([NotNull] ModuleDataConstructor constructor) :
             base(constructor.ModuleList, constructor.Topic, constructor.Type)
         {
             robot = new SimpleRobotController(this);
@@ -33,7 +34,7 @@ namespace Iviz.App
                 robot.Config = (SimpleRobotConfiguration) constructor.Configuration;
             }
 
-            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Robot) as SimpleRobotPanelContents;
+            panel = DataPanelManager.GetPanelByResourceType<SimpleRobotPanelContents>(Resource.Module.Robot);
             UpdateModuleButton();
 
             ConnectionManager.Connection.ConnectionStateChanged += OnConnectionStateChanged;

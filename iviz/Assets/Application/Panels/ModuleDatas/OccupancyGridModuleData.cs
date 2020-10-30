@@ -1,5 +1,6 @@
 ﻿using Iviz.Controllers;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.App
@@ -10,8 +11,8 @@ namespace Iviz.App
 
     public sealed class OccupancyGridModuleData : ListenerModuleData
     {
-        readonly OccupancyGridListener listener;
-        readonly OccupancyGridPanelContents panel;
+        [NotNull] readonly OccupancyGridListener listener;
+        [NotNull] readonly OccupancyGridPanelContents panel;
 
         protected override ListenerController Listener => listener;
 
@@ -20,14 +21,11 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
 
-        public OccupancyGridModuleData(ModuleDataConstructor constructor) :
+        public OccupancyGridModuleData([NotNull] ModuleDataConstructor constructor) :
         base(constructor.ModuleList,
             constructor.GetConfiguration<OccupancyGridConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.OccupancyGrid) as OccupancyGridPanelContents;
-            //listener = Instantiate<OccupancyGridListener>();
-            //listener.name = "OccupancyGrid:" + Topic;
-            //listener.ModuleData = this;
+            panel = DataPanelManager.GetPanelByResourceType<OccupancyGridPanelContents>(Resource.Module.OccupancyGrid);
             listener = new OccupancyGridListener(this);
             if (constructor.Configuration == null)
             {

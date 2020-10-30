@@ -3,9 +3,9 @@ using System.IO;
 using System.Threading.Tasks;
 using BitMiracle.LibJpeg;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using Unity.Collections;
 using UnityEngine;
-using Logger = Iviz.Logger;
 
 namespace Iviz.Displays
 {
@@ -66,8 +66,8 @@ namespace Iviz.Displays
             }
         }
 
-        public Texture2D Texture { get; private set; }
-        public Material Material { get; }
+        [CanBeNull] public Texture2D Texture { get; private set; }
+        [NotNull] public Material Material { get; }
         public string Description { get; private set; }
         public bool IsMono { get; private set; }
         public int Width => Texture?.width ?? 0;
@@ -150,7 +150,7 @@ namespace Iviz.Displays
             return null;
         }
 
-        public void SetPng(byte[] data, Action onFinished = null)
+        public void ProcessPng(byte[] data, [NotNull] Action onFinished)
         {
             Task.Run(() =>
             {
@@ -185,17 +185,18 @@ namespace Iviz.Displays
                     GameThread.Post(() =>
                     {
                         Set(png.Width, png.Height, EncodingFromPng(png), newData);
-                        onFinished?.Invoke();
+                        onFinished();
                     });
                 }
                 catch (Exception e)
                 {
                     Logger.Error(e);
+                    GameThread.Post(onFinished);                    
                 }
             });
         }
 
-        public void SetJpg(byte[] data, Action onFinished = null)
+        public void ProcessJpg(byte[] data, [NotNull] Action onFinished)
         {
             Task.Run(() =>
             {
@@ -205,7 +206,7 @@ namespace Iviz.Displays
                     var image = new JpegImage(inStream);
 
                     string encoding = null;
-                    ;
+                    
                     int reqSize = image.Height * image.Width;
                     switch (image.Colorspace)
                     {
@@ -266,12 +267,13 @@ namespace Iviz.Displays
                     GameThread.Post(() =>
                     {
                         Set(image.Width, image.Height, encoding, pngBuffer.AsSegment(bmpHeaderLength));
-                        onFinished?.Invoke();
+                        onFinished();
                     });
                 }
                 catch (Exception e)
                 {
                     Logger.Error(e);
+                    GameThread.Post(onFinished);                    
                 }
             });
         }

@@ -57,7 +57,7 @@ namespace Iviz.Controllers
         {
             GameObject obj = new GameObject(name);
             ObjectClickableNode node = obj.AddComponent<ObjectClickableNode>();
-            node.Parent = frame ?? TFListener.MapFrame;
+            node.Parent = frame ?? TfListener.MapFrame;
             return node;
         }
 

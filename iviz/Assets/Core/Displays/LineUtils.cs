@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
@@ -43,9 +45,14 @@ namespace Iviz.Displays
             9, 5, 8
         };
 
-        public static void AddLineStipple(List<LineWithColor> lines, in Vector3 a, in Vector3 b, Color color,
+        public static void AddLineStipple([NotNull] List<LineWithColor> lines, in Vector3 a, in Vector3 b, Color color,
             float stippleLength = 0.1f)
         {
+            if (lines == null)
+            {
+                throw new ArgumentNullException(nameof(lines));
+            }
+
             float remainingLength = (b - a).Magnitude();
             Vector3 direction = (b - a) / remainingLength;
             Vector3 advance = direction * stippleLength;

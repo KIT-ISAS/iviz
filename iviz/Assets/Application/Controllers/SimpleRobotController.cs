@@ -1,9 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Iviz.Displays;
 using Iviz.Resources;
 using Iviz.Roslib;
+using JetBrains.Annotations;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -32,10 +32,10 @@ namespace Iviz.Controllers
         readonly SimpleRobotConfiguration config = new SimpleRobotConfiguration();
         readonly SimpleDisplayNode node;
 
-        public SimpleRobotController(IModuleData moduleData)
+        public SimpleRobotController([NotNull] IModuleData moduleData)
         {
             node = SimpleDisplayNode.Instantiate("SimpleRobotNode");
-            ModuleData = moduleData;
+            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
 
             Config = new SimpleRobotConfiguration();
         }
@@ -253,7 +253,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public bool TryLoadFromSourceParameter(string value)
+        public bool TryLoadFromSourceParameter([CanBeNull] string value)
         {
             config.SourceParameter = "";
             Robot?.Dispose();
@@ -302,7 +302,7 @@ namespace Iviz.Controllers
             return true;
         }
 
-        public bool TryLoadSavedRobot(string robotName)
+        public bool TryLoadSavedRobot([CanBeNull] string robotName)
         {
             config.SavedRobotName = "";
             Robot?.Dispose();
@@ -328,7 +328,7 @@ namespace Iviz.Controllers
             return LoadRobotFromDescription(robotDescription);
         }
 
-        bool LoadRobotFromDescription(string description)
+        bool LoadRobotFromDescription([CanBeNull] string description)
         {
             if (string.IsNullOrEmpty(description))
             {
@@ -358,6 +358,7 @@ namespace Iviz.Controllers
             return true;
         }
 
+        [NotNull]
         string Decorate(string jointName)
         {
             return $"{config.FramePrefix}{jointName}{config.FrameSuffix}";
@@ -367,12 +368,12 @@ namespace Iviz.Controllers
         {
             foreach (var entry in Robot.LinkParents)
             {
-                if (TFListener.TryGetFrame(Decorate(entry.Key), out TfFrame frame))
+                if (TfListener.TryGetFrame(Decorate(entry.Key), out TfFrame frame))
                 {
                     frame.RemoveListener(node);
                 }
 
-                if (TFListener.TryGetFrame(Decorate(entry.Value), out TfFrame parentFrame))
+                if (TfListener.TryGetFrame(Decorate(entry.Value), out TfFrame parentFrame))
                 {
                     parentFrame.RemoveListener(node);
                 }
@@ -388,12 +389,12 @@ namespace Iviz.Controllers
 
         void AttachToTf()
         {
-            RobotObject.transform.SetParentLocal(TFListener.MapFrame.transform);
+            RobotObject.transform.SetParentLocal(TfListener.MapFrame.transform);
             foreach (var entry in Robot.LinkObjects)
             {
                 string link = entry.Key;
                 GameObject linkObject = entry.Value;
-                TfFrame frame = TFListener.GetOrCreateFrame(Decorate(link), node);
+                TfFrame frame = TfListener.GetOrCreateFrame(Decorate(link), node);
                 linkObject.transform.SetParentLocal(frame.transform);
                 linkObject.transform.SetLocalPose(Pose.identity);
             }
@@ -401,10 +402,10 @@ namespace Iviz.Controllers
             // fill in missing frame parents, but only if it hasn't been provided already
             foreach (var entry in Robot.LinkParents)
             {
-                TfFrame frame = TFListener.GetOrCreateFrame(Decorate(entry.Key), node);
-                if (frame.Parent == TFListener.RootFrame)
+                TfFrame frame = TfListener.GetOrCreateFrame(Decorate(entry.Key), node);
+                if (frame.Parent == TfListener.RootFrame)
                 {
-                    TfFrame parentFrame = TFListener.GetOrCreateFrame(Decorate(entry.Value), node);
+                    TfFrame parentFrame = TfListener.GetOrCreateFrame(Decorate(entry.Value), node);
                     frame.Parent = parentFrame;
                 }
             }

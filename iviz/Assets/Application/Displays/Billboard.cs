@@ -20,7 +20,7 @@ namespace Iviz.Displays
 
         void LateUpdate()
         {
-            GameObject mainCamera = TFListener.MainCamera.gameObject;
+            GameObject mainCamera = TfListener.MainCamera.gameObject;
             transform.LookAt(2 * transform.position - mainCamera.transform.position, Vector3.up);
             if (UseAbsoluteOffset && parent != null)
             {

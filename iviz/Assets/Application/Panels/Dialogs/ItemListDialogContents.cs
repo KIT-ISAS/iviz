@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using Iviz.Displays;
 using Iviz.Resources;
+using JetBrains.Annotations;
 
 namespace Iviz.App
 {
@@ -14,7 +15,7 @@ namespace Iviz.App
         const float yOffset = 5;
 
         readonly List<ItemEntry> itemEntries = new List<ItemEntry>();
-        
+
         public ReadOnlyCollection<ItemEntry> ItemEntries { get; }
 
         [SerializeField] GameObject contentObject = null;
@@ -45,10 +46,20 @@ namespace Iviz.App
             readonly Button button;
             public float ButtonHeight { get; }
 
-            public ItemEntry(int index, GameObject parent, Action<int, string> callback)
+            public ItemEntry(int index, [NotNull] GameObject parent, [NotNull] Action<int, string> callback)
             {
+                if (parent == null)
+                {
+                    throw new ArgumentNullException(nameof(parent));
+                }
+
+                if (callback == null)
+                {
+                    throw new ArgumentNullException(nameof(callback));
+                }
+
                 buttonObject = ResourcePool.GetOrCreate(Resource.Widgets.TopicsButton, parent.transform, false);
-                ButtonHeight = ((RectTransform)buttonObject.transform).rect.height;
+                ButtonHeight = ((RectTransform) buttonObject.transform).rect.height;
 
                 text = buttonObject.GetComponentInChildren<Text>();
                 button = buttonObject.GetComponentInChildren<Button>();
@@ -60,6 +71,7 @@ namespace Iviz.App
             }
 
             int index;
+
             public int Index
             {
                 get => index;
@@ -69,9 +81,10 @@ namespace Iviz.App
                     {
                         throw new ArgumentOutOfRangeException(nameof(value));
                     }
+
                     index = value;
                     float y = yOffset + index * (yOffset + ButtonHeight);
-                    ((RectTransform)buttonObject.transform).anchoredPosition = new Vector2(0, -y);
+                    ((RectTransform) buttonObject.transform).anchoredPosition = new Vector2(0, -y);
                 }
             }
 
@@ -111,11 +124,17 @@ namespace Iviz.App
             }
         }
 
+        [NotNull]
         public IEnumerable<string> Items
         {
             get => itemEntries.Select(x => x.Text);
             set
             {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+
                 if (value.Count() == itemEntries.Count)
                 {
                     int i = 0;
@@ -132,10 +151,12 @@ namespace Iviz.App
                     {
                         itemEntries[i++].Text = str;
                     }
+
                     for (int j = i; j < itemEntries.Count; j++)
                     {
                         itemEntries[j].Invalidate();
                     }
+
                     itemEntries.RemoveRange(i, itemEntries.Count - i);
                     UpdateSize();
                     canvas.enabled = true;
@@ -150,15 +171,17 @@ namespace Iviz.App
                         {
                             itemEntries.Add(new ItemEntry(i, contentObject, RaiseClicked));
                         }
+
                         itemEntries[i++].Text = str;
                     }
+
                     UpdateSize();
                     canvas.enabled = true;
                 }
             }
         }
 
-        public ItemEntry this[int i] => itemEntries[i];
+        [NotNull] public ItemEntry this[int i] => itemEntries[i];
 
         public bool Empty => itemEntries.Count == 0;
 
@@ -172,7 +195,7 @@ namespace Iviz.App
 
         public ItemListDialogContents()
         {
-            ItemEntries = itemEntries.AsReadOnly();              
+            ItemEntries = itemEntries.AsReadOnly();
         }
 
         // Use this for initialization
@@ -205,6 +228,7 @@ namespace Iviz.App
             {
                 throw new ArgumentOutOfRangeException(nameof(index));
             }
+
             if (index >= itemEntries.Count)
             {
                 return false;
@@ -217,6 +241,7 @@ namespace Iviz.App
             {
                 itemEntries[i].Index = i;
             }
+
             UpdateSize();
             canvas.enabled = true;
             return true;
@@ -224,11 +249,11 @@ namespace Iviz.App
 
         void UpdateSize()
         {
-            RectTransform rectTransform = ((RectTransform)contentObject.transform);
+            RectTransform rectTransform = ((RectTransform) contentObject.transform);
             rectTransform.sizeDelta =
-                (itemEntries.Count == 0) ?
-                new Vector2(0, 2 * yOffset) :
-                new Vector2(0, 2 * yOffset + itemEntries.Count * (itemEntries[0].ButtonHeight + yOffset));
+                (itemEntries.Count == 0)
+                    ? new Vector2(0, 2 * yOffset)
+                    : new Vector2(0, 2 * yOffset + itemEntries.Count * (itemEntries[0].ButtonHeight + yOffset));
 
             emptyText.gameObject.SetActive(itemEntries.Count == 0);
             itemEntries.ForEach(x => x.Interactable = true);

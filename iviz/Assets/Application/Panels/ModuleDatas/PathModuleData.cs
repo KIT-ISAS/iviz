@@ -1,6 +1,7 @@
 ﻿using Iviz.Controllers;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Resources;
+using JetBrains.Annotations;
 
 namespace Iviz.App
 {
@@ -10,8 +11,8 @@ namespace Iviz.App
 
     public sealed class PathModuleData : ListenerModuleData
     {
-        readonly PathListener listener;
-        readonly PathPanelContents panel;
+        [NotNull] readonly PathListener listener;
+        [NotNull] readonly PathPanelContents panel;
 
         protected override ListenerController Listener => listener;
 
@@ -20,15 +21,12 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
 
-        public PathModuleData(ModuleDataConstructor constructor) :
+        public PathModuleData([NotNull] ModuleDataConstructor constructor) :
         base(constructor.ModuleList,
             constructor.GetConfiguration<PathConfiguration>()?.Topic ?? constructor.Topic,
             constructor.GetConfiguration<PathConfiguration>()?.Type ?? constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Path) as PathPanelContents;
-            //listener = Instantiate<PathListener>();
-            //listener.name = "Path:" + Topic;
-            //listener.ModuleData = this;
+            panel = DataPanelManager.GetPanelByResourceType<PathPanelContents>(Resource.Module.Path);
             listener = new PathListener(this);
             if (constructor.Configuration == null)
             {

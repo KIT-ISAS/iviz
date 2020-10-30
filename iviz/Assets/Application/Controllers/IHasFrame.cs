@@ -1,4 +1,5 @@
 ﻿using Iviz.App;
+using JetBrains.Annotations;
 
 namespace Iviz.Controllers
 {
@@ -12,6 +13,6 @@ namespace Iviz.Controllers
         /// <summary>
         /// The transform frame associated to the controller.
         /// </summary>
-        TfFrame Frame { get; }
+        [CanBeNull] TfFrame Frame { get; }
     }
 }

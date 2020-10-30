@@ -43,7 +43,7 @@ namespace Iviz.Displays
         /// For external 3D models, whether to keep the materials instead
         /// of replacing them with the provided colors.
         /// </param>
-        public RobotModel(string robotDescription, [CanBeNull] IExternalServiceProvider provider, bool keepMeshMaterials = true)
+        public RobotModel([NotNull] string robotDescription, [CanBeNull] IExternalServiceProvider provider, bool keepMeshMaterials = true)
         {
             if (string.IsNullOrEmpty(robotDescription))
             {
@@ -349,7 +349,7 @@ namespace Iviz.Displays
             }
         }
 
-        public bool TryWriteJoint(string jointName, float value, out Pose unityPose, bool onlyCalculatePose = false)
+        public bool TryWriteJoint([NotNull] string jointName, float value, out Pose unityPose, bool onlyCalculatePose = false)
         {
             if (jointName == null)
             {

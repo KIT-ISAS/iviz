@@ -7,6 +7,7 @@ using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using Pose = UnityEngine.Pose;
@@ -57,8 +58,8 @@ namespace Iviz.Controllers
         , IMixedRealityPointerHandler
 #endif
     {
-        MarkerResource resource;
-        Info<GameObject> resourceInfo;
+        [CanBeNull] MarkerResource resource;
+        [CanBeNull] Info<GameObject> resourceInfo;
         readonly StringBuilder description = new StringBuilder();
         bool clickable;
         string id;
@@ -126,8 +127,13 @@ namespace Iviz.Controllers
             }
         }
 
-        public void Set(Marker msg)
+        public void Set([NotNull] Marker msg)
         {
+            if (msg == null)
+            {
+                throw new ArgumentNullException(nameof(msg));
+            }
+
             id = MarkerListener.IdFromMessage(msg);
             name = id;
 
@@ -202,9 +208,20 @@ namespace Iviz.Controllers
             }
         }
 
-        void CreateImage(Marker msg)
+        [NotNull]
+        T ValidateResource<T>() where T : MarkerResource
         {
-            ImageResource image = (ImageResource) resource;
+            if (!(resource is T result))
+            {
+                throw new InvalidOperationException("Resource is not set!");
+            }
+
+            return result;
+        }        
+        
+        void CreateImage([NotNull] Marker msg)
+        {
+            ImageResource image = ValidateResource<ImageResource>();
             int count = msg.Colors.Length;
             int width = (int) msg.Scale.Z;
             int height = width == 0 ? 0 : count / width;
@@ -249,9 +266,9 @@ namespace Iviz.Controllers
             transform.localScale = imageScale;
         }
 
-        void CreateTriangleList(Marker msg)
+        void CreateTriangleList([NotNull] Marker msg)
         {
-            MeshTrianglesResource meshTriangles = (MeshTrianglesResource) resource;
+            MeshTrianglesResource meshTriangles = ValidateResource<MeshTrianglesResource>();
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length)
             {
                 description.Append("Error: Color array length ").Append(msg.Colors.Length)
@@ -292,9 +309,9 @@ namespace Iviz.Controllers
             transform.localScale = msg.Scale.Ros2Unity().Abs();
         }
 
-        void CreatePoints(Marker msg)
+        void CreatePoints([NotNull] Marker msg)
         {
-            PointListResource pointList = (PointListResource) resource;
+            PointListResource pointList = ValidateResource<PointListResource>();
             pointList.ElementScale = Mathf.Abs((float) msg.Scale.X);
 
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length)
@@ -361,9 +378,9 @@ namespace Iviz.Controllers
             pointList.UseColormap = false;
         }
 
-        void CreateLineStrip(Marker msg)
+        void CreateLineStrip([NotNull] Marker msg)
         {
-            LineResource lineResource = (LineResource) resource;
+            LineResource lineResource = ValidateResource<LineResource>();
             lineResource.ElementScale = Mathf.Abs((float) msg.Scale.X);
 
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length)
@@ -436,9 +453,9 @@ namespace Iviz.Controllers
             lineResource.Set(lines);
         }
 
-        void CreateLineList(Marker msg)
+        void CreateLineList([NotNull] Marker msg)
         {
-            LineResource lineResource = (LineResource) resource;
+            LineResource lineResource = ValidateResource<LineResource>();
             lineResource.ElementScale = Mathf.Abs((float) msg.Scale.X);
 
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length)
@@ -511,9 +528,9 @@ namespace Iviz.Controllers
             lineResource.Set(lines);
         }
 
-        void CreateMeshList(Marker msg)
+        void CreateMeshList([NotNull] Marker msg)
         {
-            MeshListResource meshList = (MeshListResource) resource;
+            MeshListResource meshList = ValidateResource<MeshListResource>();
             meshList.UseColormap = false;
             meshList.UseIntensityForScaleY = false;
             meshList.MeshResource = msg.Type() == MarkerType.CubeList
@@ -584,9 +601,9 @@ namespace Iviz.Controllers
             meshList.Set(points);
         }
 
-        void CreateTextResource(Marker msg)
+        void CreateTextResource([NotNull] Marker msg)
         {
-            TextMarkerResource textResource = (TextMarkerResource) resource;
+            TextMarkerResource textResource = ValidateResource<TextMarkerResource>();
             textResource.Text = msg.Text;
             textResource.Color = msg.Color.Sanitize().ToUnityColor();
             textResource.BillboardEnabled = msg.Type() != MarkerType.Text;
@@ -598,7 +615,7 @@ namespace Iviz.Controllers
             }
         }
 
-        void CrateMeshResource(Marker msg)
+        void CrateMeshResource([NotNull] Marker msg)
         {
             if (resource is MeshMarkerResource meshMarker)
             {
@@ -617,9 +634,10 @@ namespace Iviz.Controllers
             transform.localScale = msg.Scale.Ros2Unity().Abs();
         }
 
-        void CreateArrow(Marker msg)
+        
+        void CreateArrow([NotNull] Marker msg)
         {
-            ArrowResource arrowMarker = (ArrowResource) resource;
+            ArrowResource arrowMarker = ValidateResource<ArrowResource>();
             arrowMarker.Color = msg.Color.Sanitize().ToUnityColor();
             switch (msg.Points.Length)
             {
@@ -670,7 +688,7 @@ namespace Iviz.Controllers
             }
         }
 
-        void UpdateResource(Marker msg)
+        void UpdateResource([NotNull] Marker msg)
         {
             Info<GameObject> newResourceType = GetRequestedResource(msg);
             if (newResourceType == resourceInfo)
@@ -678,7 +696,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            if (resource != null)
+            if (resource != null && resourceInfo != null)
             {
                 resource.Suspend();
                 ResourcePool.Dispose(resourceInfo, resource.gameObject);
@@ -719,7 +737,7 @@ namespace Iviz.Controllers
             Clickable = Clickable; // reset value
         }
 
-        void UpdateTransform(Marker msg)
+        void UpdateTransform([NotNull] Marker msg)
         {
             if (msg.FrameLocked)
             {
@@ -736,7 +754,8 @@ namespace Iviz.Controllers
             }
         }
 
-        static Info<GameObject> GetRequestedResource(Marker msg)
+        [CanBeNull]
+        static Info<GameObject> GetRequestedResource([NotNull] Marker msg)
         {
             switch (msg.Type())
             {
@@ -782,7 +801,8 @@ namespace Iviz.Controllers
             }
         }
 
-        static string DescriptionFromType(Marker msg)
+        [NotNull]
+        static string DescriptionFromType([NotNull] Marker msg)
         {
             switch (msg.Type())
             {
@@ -824,7 +844,7 @@ namespace Iviz.Controllers
             base.Stop();
             MouseEvent = null;
 
-            if (resource == null)
+            if (resource == null || resourceInfo == null)
             {
                 return;
             }
@@ -882,7 +902,7 @@ namespace Iviz.Controllers
 
     internal static class MarkerTypeHelper
     {
-        public static MarkerType Type(this Marker marker)
+        public static MarkerType Type([NotNull] this Marker marker)
         {
             return (MarkerType) marker.Type;
         }

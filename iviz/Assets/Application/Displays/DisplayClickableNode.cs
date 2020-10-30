@@ -46,7 +46,7 @@ namespace Iviz.Controllers
             GameObject obj = new GameObject(name);
             DisplayClickableNode node = obj.AddComponent<DisplayClickableNode>();
             node.SetName(name);
-            node.Parent = frame ?? TFListener.MapFrame;
+            node.Parent = frame ?? TfListener.MapFrame;
             return node;
         }
 

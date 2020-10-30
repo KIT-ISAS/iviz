@@ -1,22 +1,22 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using JetBrains.Annotations;
 
 namespace Iviz.App
 {
     public sealed class LoadConfigDialogData : DialogData
     {
-        ItemListDialogContents itemList;
+        [NotNull] readonly ItemListDialogContents itemList;
         public override IDialogPanelContents Panel => itemList;
 
         const string Suffix = ".config.json";
 
         readonly List<string> files = new List<string>();
 
-        public override void Initialize(ModuleListPanel panel)
+        public LoadConfigDialogData([NotNull] ModuleListPanel panel) : base(panel)
         {
-            base.Initialize(panel);
-            itemList = (ItemListDialogContents)DialogPanelManager.GetPanelByType(DialogPanelType.ItemList);
+            itemList = DialogPanelManager.GetPanelByType<ItemListDialogContents>(DialogPanelType.ItemList);
         }
 
         public override void SetupPanel()
@@ -32,7 +32,8 @@ namespace Iviz.App
             itemList.EmptyText = "No Config Files Found";
         }
 
-        static string GetFileName(string s)
+        [NotNull]
+        static string GetFileName([NotNull] string s)
         {
             string fs = Path.GetFileName(s);
             return fs.Substring(0, fs.Length - Suffix.Length);

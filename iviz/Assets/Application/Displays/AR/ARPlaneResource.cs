@@ -53,7 +53,7 @@ namespace Iviz.Displays
             }
             else
             {
-                lines.transform.parent = TFListener.RootFrame.transform;
+                lines.transform.parent = TfListener.RootFrame.transform;
             }
         }
 
@@ -71,6 +71,7 @@ namespace Iviz.Displays
 
             Vector3 Project(in Vector2 v) => new Vector3(v.x, 0, v.y);
 
+            /*
             Vector3 a, b;
             List<LineWithColor> lineArray = new List<LineWithColor>();
             for (int i = 0; i < boundary.Length - 1; ++i)
@@ -83,6 +84,7 @@ namespace Iviz.Displays
             a = boundary[boundary.Length - 1];
             b = boundary[0];
             lineArray.Add(new LineWithColor(Project(a), Project(b)));
+            */
 
             //lines.LinesWithColor = lineArray;
             //lines.Visible = true;

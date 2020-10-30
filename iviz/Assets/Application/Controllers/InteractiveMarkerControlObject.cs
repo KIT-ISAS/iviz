@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using Iviz.Displays;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace Iviz.Controllers
 {

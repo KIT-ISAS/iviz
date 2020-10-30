@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Net.Configuration;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Iviz.Displays;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
 using Iviz.Roslib;
+using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
@@ -43,11 +46,11 @@ namespace Iviz.Controllers
 
         bool isProcessing;
 
-        NativeArray<float4> pointBuffer = new NativeArray<float4>(1, Allocator.Persistent);
+        NativeList<float4> pointBuffer = new NativeList<float4>(Allocator.Persistent);
 
-        public PointCloudListener(IModuleData moduleData)
+        public PointCloudListener([NotNull] IModuleData moduleData)
         {
-            ModuleData = moduleData;
+            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
 
             FieldNames = new ReadOnlyCollection<string>(fieldNames);
 
@@ -218,7 +221,21 @@ namespace Iviz.Controllers
             }
         }
 
-        static bool TryGetField(PointField[] fields, string name, out PointField result)
+        bool Handler(PointCloud2 msg)
+        {
+            if (isProcessing)
+            {
+                return false;
+            }
+
+            isProcessing = true;
+            Task.Run(() => ProcessMessage(msg));
+
+            return true;
+        }
+
+        [ContractAnnotation("=> false, result:null; => true, result:notnull")]
+        static bool TryGetField([NotNull] PointField[] fields, string name, out PointField result)
         {
             foreach (var field in fields)
             {
@@ -235,94 +252,107 @@ namespace Iviz.Controllers
             return false;
         }
 
-        void Handler(PointCloud2 msg)
+        bool FieldsEqual([NotNull] PointField[] fields)
         {
-            if (isProcessing)
+            if (fieldNames.Count != fields.Length)
             {
-                return;
+                return false;
             }
 
-            isProcessing = true;
+            for (int i = 0; i < fieldNames.Count; i++)
+            {
+                if (fieldNames[i] != fields[i].Name)
+                {
+                    return false;
+                }
+            }
 
+            return true;
+        }
+
+        void ProcessMessage([NotNull] PointCloud2 msg)
+        {
             if (msg.PointStep < 3 * sizeof(float) ||
                 msg.RowStep < msg.PointStep * msg.Width ||
                 msg.Data.Length < msg.RowStep * msg.Height)
             {
                 Logger.Info($"{this}: Invalid point cloud dimensions!");
+                isProcessing = false;
                 return;
             }
 
-            fieldNames.Clear();
-            foreach (var field in msg.Fields)
+            if (!FieldsEqual(msg.Fields))
             {
-                fieldNames.Add(field.Name);
+                fieldNames.Clear();
+                foreach (PointField field in msg.Fields)
+                {
+                    fieldNames.Add(field.Name);
+                }                
             }
 
-            var newSize = (int) (msg.Width * msg.Height);
-            if (newSize > pointBuffer.Length)
+            if (!TryGetField(msg.Fields, "x", out PointField xField) || xField.Datatype != PointField.FLOAT32 ||
+                !TryGetField(msg.Fields, "y", out PointField yField) || yField.Datatype != PointField.FLOAT32 ||
+                !TryGetField(msg.Fields, "z", out PointField zField) || zField.Datatype != PointField.FLOAT32)
             {
-                pointBuffer.Dispose();
-                pointBuffer = new NativeArray<float4>(newSize * 11 / 10, Allocator.Persistent);
+                Logger.Info($"{this}: Unsupported point cloud! Expected XYZ as floats.");
+                isProcessing = false;
+                return;
             }
 
-            Task.Run(() =>
+            int xOffset = (int) xField.Offset;
+            int yOffset = (int) yField.Offset;
+            int zOffset = (int) zField.Offset;
+
+            if (!TryGetField(msg.Fields, config.IntensityChannel, out PointField iField))
             {
-                if (!TryGetField(msg.Fields, "x", out var xField) || xField.Datatype != PointField.FLOAT32 ||
-                    !TryGetField(msg.Fields, "y", out var yField) || yField.Datatype != PointField.FLOAT32 ||
-                    !TryGetField(msg.Fields, "z", out var zField) || zField.Datatype != PointField.FLOAT32)
+                iField = EmptyPointField;
+            }
+
+            int iOffset = (int) iField.Offset;
+            int iSize = FieldSizeFromType(iField.Datatype);
+            if (iSize == -1 || msg.PointStep < iOffset + iSize)
+            {
+                Logger.Info($"{this}: Invalid or unsupported intensity field type!");
+                isProcessing = false;
+                return;
+            }
+
+            bool rgbaHint = iSize == 4 && (iField.Name == "rgb" || iField.Name == "rgba");
+
+            int numPoints = (int) (msg.Width * msg.Height);
+
+            pointBuffer.Clear();
+            pointBuffer.ResizeUninitialized(numPoints);
+
+            GeneratePointBuffer(msg, xOffset, yOffset, zOffset, iOffset, iField.Datatype, rgbaHint);
+
+            GameThread.Post(() =>
+            {
+                if (node.gameObject == null)
                 {
-                    Logger.Info($"{this}: Unsupported point cloud! Expected XYZ as floats.");
-                    isProcessing = false;
+                    // we're dead
                     return;
                 }
+                
+                node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
 
-                var xOffset = (int) xField.Offset;
-                var yOffset = (int) yField.Offset;
-                var zOffset = (int) zField.Offset;
+                Size = numPoints;
+                pointCloud.UseColormap = !rgbaHint;
+                pointCloud.SetArray(pointBuffer);
 
-                if (!TryGetField(msg.Fields, config.IntensityChannel, out var iField))
+                //Debug.LogError("listener:"  + pointBuffer.Capacity);
+
+                MeasuredIntensityBounds = pointCloud.IntensityBounds;
+                if (ForceMinMax)
                 {
-                    iField = EmptyPointField;
+                    pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
                 }
 
-                var iOffset = (int) iField.Offset;
-                var iSize = FieldSizeFromType(iField.Datatype);
-                if (iSize == -1 || msg.PointStep < iOffset + iSize)
-                {
-                    //Debug.Log(iSize + " " + msg.PointStep + " " + iOffset + " " + iSize);
-                    Logger.Info($"{this}: Invalid or unsupported intensity field type!");
-                    isProcessing = false;
-                    return;
-                }
-
-                var rgbaHint = iSize == 4 && (iField.Name == "rgb" || iField.Name == "rgba");
-
-                GeneratePointBuffer(msg, xOffset, yOffset, zOffset, iOffset, iField.Datatype, rgbaHint);
-
-                GameThread.Post(() =>
-                {
-                    if (pointCloud is null)
-                    {
-                        return;
-                    }
-
-                    node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
-
-                    Size = newSize;
-                    pointCloud.UseColormap = !rgbaHint;
-                    pointCloud.SetArray(pointBuffer.GetSubArray(0, Size));
-                    MeasuredIntensityBounds = pointCloud.IntensityBounds;
-                    if (ForceMinMax)
-                    {
-                        pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
-                    }
-
-                    isProcessing = false;
-                });
+                isProcessing = false;
             });
         }
 
-        void GeneratePointBuffer(PointCloud2 msg, int xOffset, int yOffset, int zOffset, int iOffset, int iType,
+        void GeneratePointBuffer([NotNull] PointCloud2 msg, int xOffset, int yOffset, int zOffset, int iOffset, int iType,
             bool rgbaHint)
         {
             var xyzAligned = xOffset == 0 && yOffset == 4 && zOffset == 8;
@@ -336,7 +366,7 @@ namespace Iviz.Controllers
             }
         }
 
-        void GeneratePointBufferSlow(PointCloud2 msg, int xOffset, int yOffset, int zOffset, int iOffset, int iType,
+        void GeneratePointBufferSlow([NotNull] PointCloud2 msg, int xOffset, int yOffset, int zOffset, int iOffset, int iType,
             bool rgbaHint)
         {
             var heightOffset = 0;
@@ -401,10 +431,10 @@ namespace Iviz.Controllers
             }
         }
 
-        void GeneratePointBufferXYZ(PointCloud2 msg, int iOffset, int iType)
+        void GeneratePointBufferXYZ([NotNull] PointCloud2 msg, int iOffset, int iType)
         {
             const float maxPositionMagnitudeSq = PointListResource.MaxPositionMagnitudeSq;
-            
+
             int rowStep = (int) msg.RowStep;
             int pointStep = (int) msg.PointStep;
             int height = (int) msg.Height;
@@ -412,7 +442,7 @@ namespace Iviz.Controllers
 
             unsafe
             {
-                float4* pointBufferPtr = (float4*)pointBuffer.GetUnsafePtr();
+                float4* pointBufferPtr = (float4*) pointBuffer.GetUnsafePtr();
                 fixed (byte* dataPtr = msg.Data)
                 {
                     float4* pointBufferOff = pointBufferPtr;
@@ -501,7 +531,7 @@ namespace Iviz.Controllers
                                     {
                                         continue;
                                     }
-                                    
+
                                     byte f = *(dataOff + iOffset);
                                     *pointBufferOff++ = new float4(-data.y, data.z, data.x, f);
                                 }
@@ -519,7 +549,7 @@ namespace Iviz.Controllers
                                     {
                                         continue;
                                     }
-                                    
+
                                     short f = *(short*) (dataOff + iOffset);
                                     *pointBufferOff++ = new float4(-data.y, data.z, data.x, f);
                                 }
@@ -593,6 +623,8 @@ namespace Iviz.Controllers
 
             node.Stop();
             Object.Destroy(node.gameObject);
+
+            pointBuffer.Dispose();
         }
     }
 }

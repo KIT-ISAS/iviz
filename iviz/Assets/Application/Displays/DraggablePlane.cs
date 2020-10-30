@@ -50,7 +50,7 @@ namespace Iviz.Displays
 
         public void OnPointerDown(PointerEventData eventData)
         {
-            TFListener.GuiCamera.DraggedObject = this;
+            TfListener.GuiCamera.DraggedObject = this;
             PointerDown?.Invoke();
         }
         
@@ -61,7 +61,7 @@ namespace Iviz.Displays
 
         public void OnPointerMove(in Vector2 cursorPos)
         {
-            Ray pointerRay = TFListener.MainCamera.ScreenPointToRay(cursorPos);
+            Ray pointerRay = TfListener.MainCamera.ScreenPointToRay(cursorPos);
             OnPointerMove(pointerRay);
         }
 

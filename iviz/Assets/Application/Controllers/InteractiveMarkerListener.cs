@@ -7,6 +7,7 @@ using Iviz.Roslib;
 using System.Runtime.Serialization;
 using Iviz.Displays;
 using Iviz.Resources;
+using JetBrains.Annotations;
 
 namespace Iviz.Controllers
 {
@@ -26,7 +27,7 @@ namespace Iviz.Controllers
         
         public RosSender<InteractiveMarkerFeedback> Publisher { get; private set; }
 
-        public override TfFrame Frame => TFListener.MapFrame;
+        public override TfFrame Frame => TfListener.MapFrame;
 
         readonly Dictionary<string, InteractiveMarkerObject> imarkers =
             new Dictionary<string, InteractiveMarkerObject>();
@@ -51,9 +52,9 @@ namespace Iviz.Controllers
             }
         }
 
-        public InteractiveMarkerListener(IModuleData moduleData)
+        public InteractiveMarkerListener([NotNull] IModuleData moduleData)
         {
-            ModuleData = moduleData;
+            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             node = SimpleDisplayNode.Instantiate("[InteractiveMarkerListener]");
         }
 
@@ -112,7 +113,7 @@ namespace Iviz.Controllers
             if (!imarkers.TryGetValue(id, out InteractiveMarkerObject imarker))
             {
                 imarker = CreateIMarkerObject();
-                imarker.Parent = TFListener.ListenersFrame;
+                imarker.Parent = TfListener.ListenersFrame;
                 imarker.MouseEvent += (string controlId, in Pose pose, in Vector3 point, MouseEventType type) =>
                 {
                     OnInteractiveControlObjectMouseEvent(id, pose, controlId, point, type);
@@ -194,7 +195,7 @@ namespace Iviz.Controllers
                 MarkerName: imarkerId,
                 ControlName: controlId,
                 EventType: eventType,
-                Pose: TFListener.RelativePoseToRoot(controlPose).Unity2RosPose(),
+                Pose: TfListener.RelativePoseToRoot(controlPose).Unity2RosPose(),
                 MenuEntryId: 0,
                 MousePoint: position.Unity2RosPoint(),
                 MousePointValid: true
@@ -211,7 +212,7 @@ namespace Iviz.Controllers
                 MarkerName: imarkerId,
                 ControlName: controlId,
                 EventType: InteractiveMarkerFeedback.POSE_UPDATE,
-                Pose: TFListener.RelativePoseToRoot(controlPose).Unity2RosPose(),
+                Pose: TfListener.RelativePoseToRoot(controlPose).Unity2RosPose(),
                 MenuEntryId: 0,
                 MousePoint: Vector3.zero.Unity2RosPoint(),
                 MousePointValid: false

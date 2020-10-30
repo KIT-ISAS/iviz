@@ -2,22 +2,22 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using JetBrains.Annotations;
 
 namespace Iviz.App
 {
     public sealed class SaveConfigDialogData : DialogData
     {
-        SaveConfigDialogContents panel;
+        [NotNull] readonly SaveConfigDialogContents panel;
         public override IDialogPanelContents Panel => panel;
 
         const string Suffix = ".config.json";
 
         readonly List<string> files = new List<string>();
 
-        public override void Initialize(ModuleListPanel panel)
+        public SaveConfigDialogData([NotNull] ModuleListPanel panel) : base(panel)
         {
-            base.Initialize(panel);
-            this.panel = (SaveConfigDialogContents)DialogPanelManager.GetPanelByType(DialogPanelType.SaveAs);
+            this.panel = DialogPanelManager.GetPanelByType<SaveConfigDialogContents>(DialogPanelType.SaveAs);
         }
 
         public override void SetupPanel()

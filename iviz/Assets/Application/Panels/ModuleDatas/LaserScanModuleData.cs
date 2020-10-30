@@ -1,5 +1,6 @@
 ﻿using Iviz.Controllers;
 using Iviz.Resources;
+using JetBrains.Annotations;
 
 namespace Iviz.App
 {
@@ -9,8 +10,8 @@ namespace Iviz.App
 
     public sealed class LaserScanModuleData : ListenerModuleData
     {
-        readonly LaserScanListener listener;
-        readonly LaserScanPanelContents panel;
+        [NotNull] readonly LaserScanListener listener;
+        [NotNull] readonly LaserScanPanelContents panel;
 
         protected override ListenerController Listener => listener;
 
@@ -19,15 +20,12 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
 
-        public LaserScanModuleData(ModuleDataConstructor constructor) :
+        public LaserScanModuleData([NotNull] ModuleDataConstructor constructor) :
         base(constructor.ModuleList,
             constructor.GetConfiguration<LaserScanConfiguration>()?.Topic ?? constructor.Topic,
             constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.LaserScan) as LaserScanPanelContents;
-            //listener = Instantiate<LaserScanListener>();
-            //listener.name = "LaserScan:" + Topic;
-            //listener.ModuleData = this;
+            panel = DataPanelManager.GetPanelByResourceType<LaserScanPanelContents>(Resource.Module.LaserScan);
             listener = new LaserScanListener(this);
             if (constructor.Configuration == null)
             {

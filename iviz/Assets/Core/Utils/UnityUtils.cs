@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Iviz.Msgs;
+using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
@@ -80,17 +81,17 @@ namespace Iviz
             );
         }
 
-        public static void SetPose(this Transform t, in Pose p)
+        public static void SetPose([NotNull] this Transform t, in Pose p)
         {
             t.SetPositionAndRotation(p.position, p.rotation);
         }
 
-        public static void SetParentLocal(this Transform t, Transform parent)
+        public static void SetParentLocal([NotNull] this Transform t, [CanBeNull] Transform parent)
         {
             t.SetParent(parent, false);
         }
 
-        public static void SetLocalPose(this Transform t, in Pose p)
+        public static void SetLocalPose([NotNull] this Transform t, in Pose p)
         {
             t.localPosition = p.position;
             t.localRotation = p.rotation;
@@ -114,7 +115,7 @@ namespace Iviz
             );
         }
 
-        public static Pose Lerp(this Transform p, in Pose o, float t)
+        public static Pose Lerp([NotNull] this Transform p, in Pose o, float t)
         {
             return new Pose(
                 Vector3.Lerp(p.position, o.position, t),
@@ -122,7 +123,7 @@ namespace Iviz
             );
         }
 
-        public static Pose LocalLerp(this Transform p, in Pose o, float t)
+        public static Pose LocalLerp([NotNull] this Transform p, in Pose o, float t)
         {
             return new Pose(
                 Vector3.Lerp(p.localPosition, o.position, t),
@@ -130,7 +131,7 @@ namespace Iviz
             );
         }
 
-        public static void ForEach<T>(this IEnumerable<T> col, Action<T> action)
+        public static void ForEach<T>([NotNull] this IEnumerable<T> col, Action<T> action)
         {
             foreach (var item in col)
             {
@@ -138,7 +139,7 @@ namespace Iviz
             }
         }
 
-        public static void ForEach<T>(this T[] col, Action<T> action)
+        public static void ForEach<T>([NotNull] this T[] col, Action<T> action)
         {
             foreach (var t in col)
             {
@@ -146,7 +147,7 @@ namespace Iviz
             }
         }
 
-        public static void ForEach<T>(this IList<T> col, Action<T> action)
+        public static void ForEach<T>([NotNull] this IList<T> col, Action<T> action)
         {
             foreach (var t in col)
             {
@@ -154,17 +155,17 @@ namespace Iviz
             }
         }
 
-        public static ArraySegment<T> AsSegment<T>(this T[] ts)
+        public static ArraySegment<T> AsSegment<T>([NotNull] this T[] ts)
         {
             return new ArraySegment<T>(ts);
         }
 
-        public static ArraySegment<T> AsSegment<T>(this T[] ts, int offset)
+        public static ArraySegment<T> AsSegment<T>([NotNull] this T[] ts, int offset)
         {
             return new ArraySegment<T>(ts, offset, ts.Length - offset);
         }        
         
-        public static ArraySegment<T> AsSegment<T>(this T[] ts, int offset, int count)
+        public static ArraySegment<T> AsSegment<T>([NotNull] this T[] ts, int offset, int count)
         {
             return new ArraySegment<T>(ts, offset, count);
         }        
@@ -172,8 +173,13 @@ namespace Iviz
         static MaterialPropertyBlock propBlock;
         static readonly int ColorPropId = Shader.PropertyToID("_Color");
 
-        public static void SetPropertyColor(this MeshRenderer meshRenderer, Color color, int id = 0)
+        public static void SetPropertyColor([NotNull] this MeshRenderer meshRenderer, Color color, int id = 0)
         {
+            if (meshRenderer == null)
+            {
+                throw new ArgumentNullException(nameof(meshRenderer));
+            }
+
             if (propBlock == null)
             {
                 propBlock = new MaterialPropertyBlock();
@@ -186,8 +192,13 @@ namespace Iviz
 
         static readonly int EmissiveColorPropId = Shader.PropertyToID("_EmissiveColor");
 
-        public static void SetPropertyEmissiveColor(this MeshRenderer meshRenderer, Color color, int id = 0)
+        public static void SetPropertyEmissiveColor([NotNull] this MeshRenderer meshRenderer, Color color, int id = 0)
         {
+            if (meshRenderer == null)
+            {
+                throw new ArgumentNullException(nameof(meshRenderer));
+            }
+
             if (propBlock == null)
             {
                 propBlock = new MaterialPropertyBlock();
@@ -201,11 +212,16 @@ namespace Iviz
         static readonly int MainTexStPropId = Shader.PropertyToID("_MainTex_ST_");
 
         public static void SetPropertyMainTexST(
-            this MeshRenderer meshRenderer, 
+            [NotNull] this MeshRenderer meshRenderer, 
             in Vector2 xy, 
             in Vector2 wh,
             int id = 0)
         {
+            if (meshRenderer == null)
+            {
+                throw new ArgumentNullException(nameof(meshRenderer));
+            }
+
             if (propBlock == null)
             {
                 propBlock = new MaterialPropertyBlock();

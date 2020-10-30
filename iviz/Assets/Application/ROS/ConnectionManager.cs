@@ -4,6 +4,7 @@ using System;
 using System.Collections.ObjectModel;
 using Iviz.Msgs;
 using Iviz.Roslib;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Controllers
@@ -68,46 +69,86 @@ namespace Iviz.Controllers
         }
 #endif
 
-        public static string MyId => Connection?.MyId;
+        [CanBeNull] public static string MyId => Connection?.MyId;
         public static ConnectionState ConnectionState => Connection?.ConnectionState ?? ConnectionState.Disconnected;
         public static bool IsConnected => ConnectionState == ConnectionState.Connected;
 
-        public static void Subscribe<T>(RosListener<T> listener) where T : IMessage, IDeserializable<T>, new()
+        public static void Subscribe<T>([NotNull] RosListener<T> listener) where T : IMessage, IDeserializable<T>, new()
         {
+            if (listener == null)
+            {
+                throw new ArgumentNullException(nameof(listener));
+            }
+
             Connection.Subscribe(listener);
         }
 
-        public static void Unsubscribe(IRosListener subscriber)
+        public static void Unsubscribe([NotNull] IRosListener subscriber)
         {
+            if (subscriber == null)
+            {
+                throw new ArgumentNullException(nameof(subscriber));
+            }
+
             Connection.Unsubscribe(subscriber);
         }
 
-        public static void Advertise<T>(RosSender<T> advertiser) where T : IMessage
+        public static void Advertise<T>([NotNull] RosSender<T> advertiser) where T : IMessage
         {
+            if (advertiser == null)
+            {
+                throw new ArgumentNullException(nameof(advertiser));
+            }
+
             Connection.Advertise(advertiser);
         }
 
-        public static void Unadvertise(IRosSender advertiser)
+        public static void Unadvertise([NotNull] IRosSender advertiser)
         {
+            if (advertiser == null)
+            {
+                throw new ArgumentNullException(nameof(advertiser));
+            }
+
             Connection.Unadvertise(advertiser);
         }
 
-        public static void Publish<T>(RosSender<T> advertiser, T msg) where T : IMessage
+        public static void Publish<T>([NotNull] RosSender<T> advertiser, [NotNull] T msg) where T : IMessage
         {
+            if (advertiser == null)
+            {
+                throw new ArgumentNullException(nameof(advertiser));
+            }
+
+            if (msg == null)
+            {
+                throw new ArgumentNullException(nameof(msg));
+            }
+
             Connection.Publish(advertiser, msg);
         }
 
-        public static void AdvertiseService<T>(string service, Action<T> callback) where T : IService, new()
+        public static void AdvertiseService<T>([NotNull] string service, [NotNull] Action<T> callback) where T : IService, new()
         {
+            if (service == null)
+            {
+                throw new ArgumentNullException(nameof(service));
+            }
+
+            if (callback == null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
             Connection.AdvertiseService(service, callback);
         }
 
-        public static ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics()
+        [NotNull] public static ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics()
         {
             return Connection.GetSystemPublishedTopics();
         }
 
-        public static ReadOnlyCollection<string> GetSystemParameterList()
+        [NotNull] public static ReadOnlyCollection<string> GetSystemParameterList()
         {
             return Connection.GetSystemParameterList();
         }

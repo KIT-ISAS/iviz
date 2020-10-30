@@ -8,6 +8,7 @@ using Iviz.Msgs.GridMapMsgs;
 using Iviz.Msgs.NavMsgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Msgs.VisualizationMsgs;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using UnityEngine;
@@ -110,42 +111,51 @@ namespace Iviz.Resources
                 }
             );
 
-        public static MaterialsType Materials => materials ?? (materials = new MaterialsType());
-        public static ColormapsType Colormaps => colormaps ?? (colormaps = new ColormapsType());
-        public static DisplaysType Displays => displays ?? (displays = new DisplaysType());
-        public static ControllersType Controllers => controllers ?? (controllers = new ControllersType());
-        public static WidgetsType Widgets => widgets ?? (widgets = new WidgetsType());
+        [NotNull] public static MaterialsType Materials => materials ?? (materials = new MaterialsType());
+        [NotNull] public static ColormapsType Colormaps => colormaps ?? (colormaps = new ColormapsType());
+        [NotNull] public static DisplaysType Displays => displays ?? (displays = new DisplaysType());
+        [NotNull] public static ControllersType Controllers => controllers ?? (controllers = new ControllersType());
+        [NotNull] public static WidgetsType Widgets => widgets ?? (widgets = new WidgetsType());
         public static ColorScheme Colors { get; } = new ColorScheme();
+
+        [NotNull]
         public static TexturedMaterialsType TexturedMaterials =>
             texturedMaterials ?? (texturedMaterials = new TexturedMaterialsType());
-        public static FontInfo Font => fontInfo ?? (fontInfo = new FontInfo());
-        public static InternalResourceManager Internal => internals ?? (internals = new InternalResourceManager());
-        public static ExternalResourceManager External => external ?? (external = new ExternalResourceManager());
 
-        public static bool ContainsRobot(string robotName)
+        [NotNull] public static FontInfo Font => fontInfo ?? (fontInfo = new FontInfo());
+        [NotNull] public static InternalResourceManager Internal => internals ?? (internals = new InternalResourceManager());
+        [NotNull] public static ExternalResourceManager External => external ?? (external = new ExternalResourceManager());
+
+        public static bool ContainsRobot([NotNull] string robotName)
         {
             return Internal.ContainsRobot(robotName) ||
                    External.ContainsRobot(robotName);
         }
 
+        [NotNull]
         public static IEnumerable<string> GetRobotNames()
         {
             return Internal.GetRobotNames().Concat(External.GetRobotNames());
         }
 
-        public static bool TryGetRobot(string robotName, out string robotDescription)
+        [ContractAnnotation("=> false, robotDescription:null; => true, robotDescription:notnull")]
+        public static bool TryGetRobot([NotNull] string robotName, out string robotDescription)
         {
             return Internal.TryGetRobot(robotName, out robotDescription) ||
                    External.TryGetRobot(robotName, out robotDescription);
         }
 
-        public static bool TryGetResource(Uri uri, out GameObjectInfo info, IExternalServiceProvider provider)
+        [ContractAnnotation("=> false, info:null; => true, info:notnull")]
+        public static bool TryGetResource([NotNull] Uri uri, out GameObjectInfo info,
+            [CanBeNull] IExternalServiceProvider provider)
         {
             return Internal.TryGet(uri, out info) ||
                    External.TryGet(uri, out info, provider);
         }
 
-        public static bool TryGetResource(Uri uri, out Info<Texture2D> info, IExternalServiceProvider provider)
+        [ContractAnnotation("=> false, info:null; => true, info:notnull")]
+        public static bool TryGetResource([NotNull] Uri uri, out Info<Texture2D> info,
+            [CanBeNull] IExternalServiceProvider provider)
         {
             return Internal.TryGet(uri, out info) ||
                    External.TryGet(uri, out info, provider);

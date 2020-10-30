@@ -1,16 +1,16 @@
 ﻿using Iviz.Controllers;
+using JetBrains.Annotations;
 
 namespace Iviz.App
 {
-    public sealed class TFDialogData : DialogData
+    public sealed class TfDialogData : DialogData
     {
-        TFDialogContents panel;
+        [NotNull] readonly TFDialogContents panel;
         public override IDialogPanelContents Panel => panel;
 
-        public override void Initialize(ModuleListPanel newPanel)
+        public TfDialogData([NotNull] ModuleListPanel newPanel) : base(newPanel)
         {
-            base.Initialize(newPanel);
-            panel = (TFDialogContents)DialogPanelManager.GetPanelByType(DialogPanelType.TF);
+            panel = DialogPanelManager.GetPanelByType<TFDialogContents>(DialogPanelType.Tf);
         }
 
         public override void SetupPanel()
@@ -21,11 +21,11 @@ namespace Iviz.App
             panel.TfLog.Flush();
             panel.TfLog.UpdateFrameTexts();
 
-            panel.ShowOnlyUsed.Value = !TFListener.Instance.ShowAllFrames;
+            panel.ShowOnlyUsed.Value = !TfListener.Instance.ShowAllFrames;
             panel.ShowOnlyUsed.ValueChanged += f =>
             {
-                TFListener.Instance.ShowAllFrames = !f;
-                TFListener.Instance.ModuleData.ResetPanel();
+                TfListener.Instance.ShowAllFrames = !f;
+                TfListener.Instance.ModuleData.ResetPanel();
             };
         }
 

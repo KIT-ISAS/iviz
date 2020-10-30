@@ -1,17 +1,25 @@
-﻿using UnityEngine;
+﻿using System;
+using JetBrains.Annotations;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace Iviz.App
 {
     public class SectionTitleWidget : MonoBehaviour, IWidget
     {
-        public Text label;
+        [SerializeField] Text label;
 
+        [NotNull]
         public string Label
         {
             get => label.text;
             set
             {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+                
                 label.text = value;
                 name = "SectionTitle:" + value;
             }
@@ -19,7 +27,8 @@ namespace Iviz.App
 
         public void ClearSubscribers() { }
 
-        public SectionTitleWidget SetLabel(string f)
+        [NotNull]
+        public SectionTitleWidget SetLabel([NotNull] string f)
         {
             Label = f;
             return this;

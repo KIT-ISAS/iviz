@@ -9,7 +9,7 @@ namespace Iviz.Resources
         public Info<GameObject> ItemListPanel { get; }
         public Info<GameObject> ConnectionPanel { get; }
         public Info<GameObject> ImagePanel { get; }
-        public Info<GameObject> TFPanel { get; }
+        public Info<GameObject> TfPanel { get; }
         public Info<GameObject> SaveAsPanel { get; }
         public Info<GameObject> AddTopicPanel { get; }
 
@@ -41,7 +41,7 @@ namespace Iviz.Resources
             ItemListPanel = new Info<GameObject>("Widgets/Item List Panel");
             ConnectionPanel = new Info<GameObject>("Widgets/Connection Panel");
             ImagePanel = new Info<GameObject>("Widgets/Image Panel");
-            TFPanel = new Info<GameObject>("Widgets/TF Tree Panel");
+            TfPanel = new Info<GameObject>("Widgets/TF Tree Panel");
             SaveAsPanel = new Info<GameObject>("Widgets/Save As Panel");
             AddTopicPanel = new Info<GameObject>("Widgets/Add Topic Panel");
 

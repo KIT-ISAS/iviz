@@ -1,5 +1,6 @@
 ﻿using System;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,11 +11,17 @@ namespace Iviz.App
         [SerializeField] Toggle toggle = null;
         [SerializeField] Text label = null;
 
+        [NotNull]
         public string Label
         {
             get => label.text;
             set
             {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+                
                 name = "Toggle:" + value;
                 label.text = value;
             }
@@ -50,24 +57,28 @@ namespace Iviz.App
             ValueChanged = null;
         }
 
-        public ToggleWidget SetLabel(string f)
+        [NotNull]
+        public ToggleWidget SetLabel([NotNull] string f)
         {
             Label = f;
             return this;
         }
 
+        [NotNull]
         public ToggleWidget SetValue(bool f)
         {
             Value = f;
             return this;
         }
 
+        [NotNull]
         public ToggleWidget SetInteractable(bool f)
         {
             Interactable = f;
             return this;
         }
 
+        [NotNull]
         public ToggleWidget SubscribeValueChanged(Action<bool> f)
         {
             ValueChanged += f;

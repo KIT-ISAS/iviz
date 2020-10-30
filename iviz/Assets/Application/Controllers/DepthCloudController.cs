@@ -4,6 +4,7 @@ using System.Runtime.Serialization;
 using Iviz.Roslib;
 using Iviz.Displays;
 using Iviz.Resources;
+using JetBrains.Annotations;
 
 namespace Iviz.Controllers
 {
@@ -114,9 +115,9 @@ namespace Iviz.Controllers
             }
         }
 
-        public DepthCloudController(IModuleData moduleData)
+        public DepthCloudController([NotNull] IModuleData moduleData)
         {
-            ModuleData = moduleData;
+            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             node = SimpleDisplayNode.Instantiate("DepthImage");
             resource = ResourcePool.GetOrCreate<DepthCloudResource>(Resource.Displays.DepthImageResource, node.transform);
             Config = new DepthCloudConfiguration();

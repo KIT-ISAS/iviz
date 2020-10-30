@@ -1,5 +1,4 @@
 using System;
-using System.Data.SqlTypes;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -23,7 +22,6 @@ namespace Iviz.App
         Button Button => button == null ? (button = GetComponent<Button>()) : button;
 
         [SerializeField] Text text = null;
-
         [SerializeField] string enabledText = null;
         [SerializeField] string disabledText = null;
 

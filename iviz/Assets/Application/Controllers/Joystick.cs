@@ -36,7 +36,7 @@ namespace Iviz.Controllers
 
         public bool IsPointerOnGui(in Vector2 pointerPosition)
         {
-            Camera mainCamera = TFListener.MainCamera;
+            Camera mainCamera = TfListener.MainCamera;
             return Visible &&
                 (RectTransformUtility.RectangleContainsScreenPoint(left.transform as RectTransform, pointerPosition, mainCamera) ||
                 RectTransformUtility.RectangleContainsScreenPoint(right.transform as RectTransform, pointerPosition, mainCamera));

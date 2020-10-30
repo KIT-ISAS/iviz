@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using JetBrains.Annotations;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace Iviz.App
@@ -24,16 +26,18 @@ namespace Iviz.App
             set => inactiveSprite = value;
         }
 
+        [NotNull]
         public string ActiveText
         {
             get => activeText;
-            set => activeText = value;
+            set => activeText = value ?? throw new ArgumentNullException(nameof(value));
         }
 
+        [NotNull]
         public string InactiveText
         {
             get => inactiveText;
-            set => inactiveText = value;
+            set => inactiveText = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         bool state;

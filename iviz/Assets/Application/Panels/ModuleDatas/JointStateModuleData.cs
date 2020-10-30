@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.Controllers;
+using JetBrains.Annotations;
 
 namespace Iviz.App
 {
     public sealed class JointStateModuleData : ListenerModuleData
     {
-        readonly JointStateListener listener;
-        readonly JointStatePanelContents panel;
+        [NotNull] readonly JointStateListener listener;
+        [NotNull] readonly JointStatePanelContents panel;
         readonly List<string> robotNames = new List<string>();
 
         protected override ListenerController Listener => listener;
@@ -18,12 +19,12 @@ namespace Iviz.App
 
         public override IConfiguration Configuration => listener.Config;
 
-        public JointStateModuleData(ModuleDataConstructor constructor) :
+        public JointStateModuleData([NotNull] ModuleDataConstructor constructor) :
             base(constructor.ModuleList,
                 constructor.GetConfiguration<JointStateConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.JointState) as JointStatePanelContents;
+            panel = DataPanelManager.GetPanelByResourceType<JointStatePanelContents>(Resource.Module.JointState);
             listener = new JointStateListener(this);
             if (constructor.Configuration != null)
             {

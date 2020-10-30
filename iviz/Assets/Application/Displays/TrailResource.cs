@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Iviz.Controllers;
 using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public sealed class TrailResource : DisplayWrapperResource, IRecyclable
+    public sealed class TrailResource : DisplayWrapperResource
     {
         const int MeasurementsPerSecond = 32;
 
@@ -65,7 +64,7 @@ namespace Iviz.Displays
             resource.ElementScale = 0.01f;
             TimeWindowInMs = TimeWindowInMs;
 
-            transform.parent = TFListener.UnityFrame?.transform;
+            transform.parent = TfListener.UnityFrame?.transform;
         }
 
         public void Reset()

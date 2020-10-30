@@ -1,5 +1,6 @@
 ﻿using Iviz.Controllers;
 using Iviz.Resources;
+using JetBrains.Annotations;
 
 namespace Iviz.App
 {
@@ -9,8 +10,8 @@ namespace Iviz.App
 
     public sealed class GridMapModuleData : ListenerModuleData
     {
-        readonly GridMapListener listener;
-        readonly GridMapPanelContents panel;
+        [NotNull] readonly GridMapListener listener;
+        [NotNull] readonly GridMapPanelContents panel;
 
         protected override ListenerController Listener => listener;
 
@@ -19,11 +20,11 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
 
-        public GridMapModuleData(ModuleDataConstructor constructor) :
+        public GridMapModuleData([NotNull] ModuleDataConstructor constructor) :
         base(constructor.ModuleList,
             constructor.GetConfiguration<GridMapConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.GridMap) as GridMapPanelContents;
+            panel = DataPanelManager.GetPanelByResourceType<GridMapPanelContents>(Resource.Module.GridMap);
             listener = new GridMapListener(this);
             if (constructor.Configuration == null)
             {

@@ -60,7 +60,7 @@ namespace Iviz.App.Gui
             attachedFrame?.RemoveListener(node);
             if (!string.IsNullOrEmpty(panelData.AttachToFrameId))
             {
-                attachedFrame = TFListener.GetOrCreateFrame(panelData.AttachToFrameId, node);
+                attachedFrame = TfListener.GetOrCreateFrame(panelData.AttachToFrameId, node);
             }
             
             

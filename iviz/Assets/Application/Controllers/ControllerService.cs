@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using Iviz.App;
-using Iviz.Controllers;
 using Iviz.Displays;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;

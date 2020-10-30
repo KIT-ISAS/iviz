@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -26,7 +27,9 @@ namespace Iviz.Displays
             Instance = null;
         }
 
-        public static GameObject GetOrCreate(Info<GameObject> resource, Transform parent = null, bool enable = true)
+        [NotNull]
+        public static GameObject GetOrCreate([NotNull] Info<GameObject> resource, [CanBeNull] Transform parent = null,
+            bool enable = true)
         {
             if (resource == null)
             {
@@ -43,7 +46,8 @@ namespace Iviz.Displays
             return obj;
         }
 
-        public static T GetOrCreate<T>(Info<GameObject> resource, Transform parent = null, bool enable = true)
+        [NotNull]
+        public static T GetOrCreate<T>([NotNull] Info<GameObject> resource, [CanBeNull] Transform parent = null, bool enable = true)
             where T : MonoBehaviour
         {
             if (resource == null)
@@ -54,8 +58,18 @@ namespace Iviz.Displays
             return GetOrCreate(resource, parent, enable).GetComponent<T>();
         }
 
-        public static void Dispose(Info<GameObject> resource, GameObject instance)
+        public static void Dispose([NotNull] Info<GameObject> resource, [NotNull] GameObject instance)
         {
+            if (resource == null)
+            {
+                throw new ArgumentNullException(nameof(resource));
+            }
+
+            if (instance == null)
+            {
+                throw new ArgumentNullException(nameof(instance));
+            }
+
             if (Instance == null)
             {
                 Destroy(instance);
@@ -66,7 +80,8 @@ namespace Iviz.Displays
             }
         }
 
-        public static T GetOrCreateDisplay<T>(Transform parent = null) where T : MonoBehaviour, IDisplay
+        [NotNull]
+        public static T GetOrCreateDisplay<T>([CanBeNull] Transform parent = null) where T : MonoBehaviour, IDisplay
         {
             if (!Resource.Displays.TryGetResource(typeof(T), out var info))
             {
@@ -74,10 +89,9 @@ namespace Iviz.Displays
             }
 
             return GetOrCreate<T>(info, parent);
-            
         }
 
-        public static void DisposeDisplay<T>(T resource) where T : MonoBehaviour, IDisplay
+        public static void DisposeDisplay<T>([NotNull] T resource) where T : MonoBehaviour, IDisplay
         {
             if (resource == null)
             {
@@ -92,7 +106,7 @@ namespace Iviz.Displays
             Dispose(info, resource.gameObject);
         }
 
-        public static bool TryDisposeDisplay(IDisplay resource)
+        public static bool TryDisposeDisplay([NotNull] IDisplay resource)
         {
             if (resource == null)
             {
@@ -106,7 +120,7 @@ namespace Iviz.Displays
 
             if (!Resource.Displays.TryGetResource(resource.GetType(), out Info<GameObject> info))
             {
-                Debug.Log("ResourcePool: Could not find display for '" + behaviour.gameObject.name + "'");
+                Debug.Log($"ResourcePool: Could not find display for '{behaviour.gameObject.name}'");
                 Destroy(behaviour.gameObject);
                 return false;
             }
@@ -114,7 +128,7 @@ namespace Iviz.Displays
             Dispose(info, behaviour.gameObject);
             return true;
         }
-        
+
         void CheckForDead()
         {
             float now = Time.time;
@@ -132,12 +146,11 @@ namespace Iviz.Displays
             {
                 var recyclable = deadObject.GetComponent<IRecyclable>();
                 recyclable?.SplitForRecycle();
-                //Debug.Log("ResourcePool: Destroying object of type '" + deadObject.name + "'");
                 Destroy(deadObject);
             }
         }
 
-        GameObject Get(Info<GameObject> resource, Transform parent, bool enable)
+        GameObject Get([NotNull] Info<GameObject> resource, [CanBeNull] Transform parent, bool enable)
         {
             if (!pool.TryGetValue(resource.Id, out var instances) || !instances.Any())
             {
@@ -192,14 +205,14 @@ namespace Iviz.Displays
 
         class ObjectWithDeadline
         {
-            public ObjectWithDeadline(GameObject o)
+            public ObjectWithDeadline([NotNull] GameObject o)
             {
                 GameObject = o;
                 ExpirationTime = Time.time + TimeToDestroyInSec;
             }
 
             public float ExpirationTime { get; }
-            public GameObject GameObject { get; }
+            [NotNull] public GameObject GameObject { get; }
         }
     }
 }

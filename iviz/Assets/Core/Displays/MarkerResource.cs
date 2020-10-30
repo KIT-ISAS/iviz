@@ -1,18 +1,29 @@
-﻿using UnityEngine;
+﻿using System;
+using JetBrains.Annotations;
+using UnityEngine;
 
 namespace Iviz.Displays
 {
     public abstract class MarkerResource : MonoBehaviour, IDisplay
     {
-        protected BoxCollider BoxCollider { get; set; }
+        [CanBeNull] protected BoxCollider BoxCollider { get; set; }
 
         public Bounds Bounds => BoxCollider == null ? new Bounds() : new Bounds(BoxCollider.center, BoxCollider.size);
         public Bounds WorldBounds => BoxCollider == null ? new Bounds() : BoxCollider.bounds;
 
+        [NotNull]
         public virtual string Name
         {
             get => gameObject.name;
-            set => gameObject.name = value;
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+                
+                gameObject.name = value;
+            }
         }
 
         bool colliderEnabled = true;
@@ -29,6 +40,7 @@ namespace Iviz.Displays
             }
         }
 
+        [CanBeNull]
         public Transform Parent
         {
             get => transform.parent;

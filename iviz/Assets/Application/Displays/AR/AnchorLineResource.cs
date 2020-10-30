@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Iviz.Displays
 {
     [Obsolete]
-    public sealed class AnchorLineResource : DisplayWrapperResource, IRecyclable, ISupportsTint
+    public sealed class AnchorLineResource : DisplayWrapperResource, ISupportsTint
     {
         [SerializeField] public GameObject anchorPlane;
         

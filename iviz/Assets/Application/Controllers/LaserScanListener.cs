@@ -5,7 +5,6 @@ using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
 using Iviz.Roslib;
 using UnityEngine;
-using Logger = Iviz.Logger;
 
 namespace Iviz.Controllers
 {
@@ -178,7 +177,6 @@ namespace Iviz.Controllers
         {
             Listener = new RosListener<LaserScan>(config.Topic, Handler);
             Listener.MaxQueueSize = (int)MaxQueueSize;
-            //name = "[" + config.Topic + "]";
             node.name = "[" + config.Topic + "]";
         }
 

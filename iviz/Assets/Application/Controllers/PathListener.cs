@@ -4,6 +4,7 @@ using System.Runtime.Serialization;
 using Iviz.Displays;
 using Iviz.Resources;
 using Iviz.Roslib;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Controllers
@@ -139,9 +140,9 @@ namespace Iviz.Controllers
         readonly List<Pose> savedPoses = new List<Pose>();
         readonly List<LineWithColor> lines = new List<LineWithColor>();
 
-        public PathListener(IModuleData moduleData)
+        public PathListener([NotNull] IModuleData moduleData)
         {
-            ModuleData = moduleData;
+            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             
             node = SimpleDisplayNode.Instantiate("PathNode");
             resource = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, node.transform);
@@ -166,23 +167,30 @@ namespace Iviz.Controllers
                     ShowAxes = false;
                     break;
                 case Msgs.GeometryMsgs.Polygon.RosMessageType:
-                    node.Parent = TFListener.MapFrame;
+                    node.Parent = TfListener.MapFrame;
                     Listener = new RosListener<Msgs.GeometryMsgs.Polygon>(config.Topic, Handler);
                     ShowAxes = false;
                     break;
             }
 
             Listener.MaxQueueSize = (int) MaxQueueSize;
-            node.name = "[" + config.Topic + "]";;
+            node.name = $"[{config.Topic}]";
         }
 
 
-        void Handler(Msgs.NavMsgs.Path msg)
+        void Handler([NotNull] Msgs.NavMsgs.Path msg)
         {
             node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
 
             string topHeader = msg.Header.FrameId;
             Msgs.time topStamp = msg.Header.Stamp;
+
+            if (node.Parent == null)
+            {
+                // shouldn't happen
+                return;
+            }
+            
             Pose topPoseInv = node.Parent.WorldPose.Inverse();
 
             savedPoses.Clear();
@@ -203,7 +211,7 @@ namespace Iviz.Controllers
                     Pose pose = topPoseInv.Multiply(newPose.Multiply(ps.Pose.Ros2Unity()));
                     savedPoses.Add(pose);
                 }
-                else if (TFListener.TryGetFrame(ps.Header.FrameId, out TfFrame frame))
+                else if (TfListener.TryGetFrame(ps.Header.FrameId, out TfFrame frame))
                 {
                     Pose newPose = frame.LookupPose(stamp.ToTimeSpan());
                     Pose pose = topPoseInv.Multiply(newPose.Multiply(ps.Pose.Ros2Unity()));
@@ -219,7 +227,7 @@ namespace Iviz.Controllers
             ProcessPoses();
         }
 
-        void Handler(Msgs.GeometryMsgs.PoseArray msg)
+        void Handler([NotNull] Msgs.GeometryMsgs.PoseArray msg)
         {
             node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
 
@@ -236,13 +244,13 @@ namespace Iviz.Controllers
             ProcessPoses();
         }
 
-        void Handler(Msgs.GeometryMsgs.PolygonStamped msg)
+        void Handler([NotNull] Msgs.GeometryMsgs.PolygonStamped msg)
         {
             node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
             Handler(msg.Polygon);
         }        
 
-        void Handler(Msgs.GeometryMsgs.Polygon msg)
+        void Handler([NotNull] Msgs.GeometryMsgs.Polygon msg)
         {
             savedPoses.Clear();
             foreach (Msgs.GeometryMsgs.Point32 p in msg.Points)

@@ -1,5 +1,6 @@
 ﻿using Iviz.Controllers;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.App
@@ -9,8 +10,8 @@ namespace Iviz.App
     /// </summary>
     public sealed class MarkerModuleData : ListenerModuleData
     {
-        readonly MarkerListener listener;
-        readonly MarkerPanelContents panel;
+        [NotNull] readonly MarkerListener listener;
+        [NotNull] readonly MarkerPanelContents panel;
 
         public override DataPanelContents Panel => panel;
         protected override ListenerController Listener => listener;
@@ -18,15 +19,12 @@ namespace Iviz.App
 
         public override IConfiguration Configuration => listener.Config;
 
-        public MarkerModuleData(ModuleDataConstructor constructor) :
+        public MarkerModuleData([NotNull] ModuleDataConstructor constructor) :
             base(constructor.ModuleList,
                 constructor.GetConfiguration<MarkerConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.GetConfiguration<MarkerConfiguration>()?.Type ?? constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Marker) as MarkerPanelContents;
-            //listener = Instantiate<MarkerListener>();
-            //listener.name = "Marker:" + Topic;
-            //listener.ModuleData = this;
+            panel = DataPanelManager.GetPanelByResourceType<MarkerPanelContents>(Resource.Module.Marker);
             listener = new MarkerListener(this);
             if (constructor.Configuration == null)
             {

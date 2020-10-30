@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Iviz.Resources;
+using JetBrains.Annotations;
 
 namespace Iviz.App
 {
@@ -21,13 +22,12 @@ namespace Iviz.App
             Resource.Module.Joystick
         };
 
-        ItemListDialogContents itemList;
+        [NotNull] readonly ItemListDialogContents itemList;
         public override IDialogPanelContents Panel => itemList;
 
-        public override void Initialize(ModuleListPanel panel)
+        public AddModuleDialogData([NotNull] ModuleListPanel panel) : base(panel)
         {
-            base.Initialize(panel);
-            itemList = (ItemListDialogContents)DialogPanelManager.GetPanelByType(DialogPanelType.ItemList);
+            itemList = DialogPanelManager.GetPanelByType<ItemListDialogContents>(DialogPanelType.ItemList);
         }
 
         public override void SetupPanel()

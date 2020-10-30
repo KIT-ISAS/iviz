@@ -5,6 +5,7 @@ using Iviz.Msgs.StdMsgs;
 using System.Runtime.Serialization;
 using System.Runtime.CompilerServices;
 using Iviz.Controllers;
+using JetBrains.Annotations;
 using Unity.Mathematics;
 
 namespace Iviz
@@ -287,9 +288,9 @@ namespace Iviz
             return new Msgs.GeometryMsgs.Pose(p.position.Unity2RosPoint(), p.rotation.Unity2RosQuaternion());
         }
 
-        public static Header CreateHeader(uint seq = 0, string frameId = null)
+        public static Header CreateHeader(uint seq = 0, [CanBeNull] string frameId = null)
         {
-            return new Header(seq, new time(DateTime.Now), frameId ?? TFListener.BaseFrameId);
+            return new Header(seq, new time(DateTime.Now), frameId ?? TfListener.BaseFrameId);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

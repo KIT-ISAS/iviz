@@ -1,7 +1,7 @@
 ﻿using Iviz.Controllers;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Resources;
-using UnityEngine;
+using JetBrains.Annotations;
 
 namespace Iviz.App
 {
@@ -11,8 +11,8 @@ namespace Iviz.App
 
     public sealed class MagnitudeModuleData : ListenerModuleData
     {
-        readonly MagnitudeListener listener;
-        readonly MagnitudePanelContents panel;
+        [NotNull] readonly MagnitudeListener listener;
+        [NotNull] readonly MagnitudePanelContents panel;
 
         public override DataPanelContents Panel => panel;
         protected override ListenerController Listener => listener;
@@ -20,16 +20,14 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
 
-        public MagnitudeModuleData(ModuleDataConstructor constructor) :
+        public MagnitudeModuleData([NotNull] ModuleDataConstructor constructor) :
             base(constructor.ModuleList,
                 constructor.GetConfiguration<MagnitudeConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.GetConfiguration<MagnitudeConfiguration>()?.Type ?? constructor.Type)
         {
-            GameObject listenerObject = new GameObject("Magnitude:" + Topic);
+            //GameObject listenerObject = new GameObject("Magnitude:" + Topic);
 
-            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Magnitude) as MagnitudePanelContents;
-            //listener = listenerObject.AddComponent<MagnitudeListener>();
-            //listener.ModuleData = this;
+            panel = DataPanelManager.GetPanelByResourceType<MagnitudePanelContents>(Resource.Module.Magnitude);
             listener = new MagnitudeListener(this);
             if (constructor.Configuration == null)
             {

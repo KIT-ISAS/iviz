@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using JetBrains.Annotations;
+using UnityEngine;
 
 namespace Iviz.App
 {
@@ -11,15 +12,14 @@ namespace Iviz.App
 
     public sealed class ImageDialogData : DialogData
     {
-        ImageDialogContents panel;
+        [NotNull] readonly ImageDialogContents panel;
         public override IDialogPanelContents Panel => panel;
 
         public IImageDialogListener Listener { get; set; }
 
-        public override void Initialize(ModuleListPanel panel)
+        public ImageDialogData([NotNull] ModuleListPanel panel) : base(panel)
         {
-            base.Initialize(panel);
-            this.panel = (ImageDialogContents)DialogPanelManager.GetPanelByType(DialogPanelType.Image);
+            this.panel = DialogPanelManager.GetPanelByType<ImageDialogContents>(DialogPanelType.Image);
         }
 
         public override void SetupPanel()

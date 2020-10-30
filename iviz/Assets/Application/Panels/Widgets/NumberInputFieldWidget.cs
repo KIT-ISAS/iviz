@@ -1,6 +1,7 @@
 ﻿
 using System;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,11 +14,17 @@ namespace Iviz.App
         [SerializeField] Text placeholder = null;
         [SerializeField] Image textImage = null;
 
+        [NotNull]
         public string Label
         {
             get => label.text;
             set
             {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+                
                 label.text = value;
                 name = "NumberInputField:" + value;
             }
@@ -33,10 +40,19 @@ namespace Iviz.App
             set => text.text = value.ToString(UnityUtils.Culture);
         }
 
+        [NotNull]
         public string Placeholder
         {
             get => placeholder.text;
-            set => placeholder.text = value;
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+                
+                placeholder.text = value;
+            }
         }
 
         public bool Interactable
@@ -77,36 +93,42 @@ namespace Iviz.App
             EndEdit = null;
         }
 
+        [NotNull]
         public NumberInputFieldWidget SetInteractable(bool f)
         {
             Interactable = f;
             return this;
         }
 
+        [NotNull]
         public NumberInputFieldWidget SetValue(float f)
         {
             Value = f;
             return this;
         }
 
-        public NumberInputFieldWidget SetPlaceholder(string f)
+        [NotNull]
+        public NumberInputFieldWidget SetPlaceholder([NotNull] string f)
         {
             Placeholder = f;
             return this;
         }
 
-        public NumberInputFieldWidget SetLabel(string f)
+        [NotNull]
+        public NumberInputFieldWidget SetLabel([NotNull] string f)
         {
             Label = f;
             return this;
         }
 
+        [NotNull]
         public NumberInputFieldWidget SubscribeValueChanged(Action<float> f)
         {
             ValueChanged += f;
             return this;
         }
 
+        [NotNull]
         public NumberInputFieldWidget SubscribeEndEdit(Action<float> f)
         {
             EndEdit += f;

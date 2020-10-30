@@ -1,13 +1,14 @@
 ﻿using Iviz.Controllers;
+using JetBrains.Annotations;
 
 namespace Iviz.App
 {
     public abstract class ListenerModuleData : ModuleData
     {
-        protected abstract ListenerController Listener { get; }
+        [NotNull] protected abstract ListenerController Listener { get; }
         public override IController Controller => Listener;
 
-        protected ListenerModuleData(ModuleListPanel moduleList, string topic, string type) :
+        protected ListenerModuleData([NotNull] ModuleListPanel moduleList, [NotNull] string topic, [NotNull] string type) :
             base(moduleList, topic, type)
         {
             ModuleListPanel.RegisterDisplayedTopic(Topic);

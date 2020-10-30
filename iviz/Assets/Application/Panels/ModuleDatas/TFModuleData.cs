@@ -1,15 +1,16 @@
 ﻿using Iviz.Controllers;
 using Iviz.Resources;
+using JetBrains.Annotations;
 
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="TFPanelContents"/> 
+    /// <see cref="TfPanelContents"/> 
     /// </summary>
-    public sealed class TFModuleData : ListenerModuleData
+    public sealed class TfModuleData : ListenerModuleData
     {
-        readonly TFListener listener;
-        readonly TFPanelContents panel;
+        [NotNull] readonly TfListener listener;
+        [NotNull] readonly TfPanelContents panel;
 
         protected override ListenerController Listener => listener;
 
@@ -17,16 +18,16 @@ namespace Iviz.App
         public override Resource.Module Module => Resource.Module.TF;
         public override IConfiguration Configuration => listener.Config;
 
-        public TFModuleData(ModuleDataConstructor constructor) :
+        public TfModuleData([NotNull] ModuleDataConstructor constructor) :
             base(constructor.ModuleList,
-                constructor.GetConfiguration<TFConfiguration>()?.Topic ?? constructor.Topic,
+                constructor.GetConfiguration<TfConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.TF) as TFPanelContents;
-            listener = new TFListener(this);
+            panel = DataPanelManager.GetPanelByResourceType<TfPanelContents>(Resource.Module.TF);
+            listener = new TfListener(this);
             if (constructor.Configuration != null)
             {
-                listener.Config = (TFConfiguration)constructor.Configuration;
+                listener.Config = (TfConfiguration)constructor.Configuration;
             }
             else
             {
@@ -36,7 +37,7 @@ namespace Iviz.App
             UpdateModuleButton();
         }
 
-        public void UpdateConfiguration(TFConfiguration configuration)
+        public void UpdateConfiguration(TfConfiguration configuration)
         {
             listener.Config = configuration;
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -14,6 +15,8 @@ namespace Iviz.Displays
         readonly ConcurrentQueue<Action> actionsOnlyOnce = new ConcurrentQueue<Action>();
         float lastRunTime;
         Thread gameThread;
+        
+        public static float GameTime { get; private set; }
 
         void Awake()
         {
@@ -25,12 +28,12 @@ namespace Iviz.Displays
         {
             EveryFrame?.Invoke();
 
-            float newRunTime = Time.time;
-            if (newRunTime - lastRunTime > 1)
+            GameTime = Time.time;
+            if (GameTime - lastRunTime > 1)
             {
                 EverySecond?.Invoke();
                 LateEverySecond?.Invoke();
-                lastRunTime = newRunTime;
+                lastRunTime = GameTime;
             }
 
             while (actionsOnlyOnce.TryDequeue(out Action action))
@@ -75,7 +78,7 @@ namespace Iviz.Displays
         /// </summary>
         /// <param name="action">Action to be run.</param>
         /// <exception cref="ArgumentNullException">If action is null.</exception>
-        public static void Post(Action action)
+        public static void Post([NotNull] Action action)
         {
             if (action is null)
             {
@@ -96,7 +99,7 @@ namespace Iviz.Displays
         /// </summary>
         /// <param name="action">Action to be run.</param>
         /// <exception cref="ArgumentNullException">If action is null.</exception>        
-        public static void PostImmediate(Action action)
+        public static void PostImmediate([NotNull] Action action)
         {
             if (action is null)
             {

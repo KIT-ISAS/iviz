@@ -1,5 +1,6 @@
 ﻿using System;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,40 +13,56 @@ namespace Iviz.App
         [SerializeField] Text placeholder = null;
         [SerializeField] Image textImage = null;
 
+        [NotNull]
         public string Label
         {
             get => label.text;
             set
             {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+
                 label.text = value;
                 name = "InputField:" + value;
             }
         }
+
+        [NotNull]
         public string Value
         {
             get => text.text;
             set
             {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+
                 text.text = value;
             }
         }
 
+        [NotNull]
         public string Placeholder
         {
             get => placeholder.text;
             set
             {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+                
                 placeholder.text = value;
             }
         }
 
-        public InputField.ContentType ContentType
+        InputField.ContentType ContentType
         {
             get => text.contentType;
-            set
-            {
-                text.contentType = value;
-            }
+            set => text.contentType = value;
         }
 
         public bool Interactable
@@ -78,42 +95,49 @@ namespace Iviz.App
             EndEdit = null;
         }
 
+        [NotNull]
         public InputFieldWidget SetInteractable(bool f)
         {
             Interactable = f;
             return this;
         }
 
-        public InputFieldWidget SetValue(string f)
+        [NotNull]
+        public InputFieldWidget SetValue([NotNull] string f)
         {
-            Value = f;
+            Value = f ?? throw new ArgumentNullException(nameof(f));
             return this;
         }
 
-        public InputFieldWidget SetPlaceholder(string f)
+        [NotNull]
+        public InputFieldWidget SetPlaceholder([NotNull] string f)
         {
             Placeholder = f;
             return this;
         }
 
+        [NotNull]
         public InputFieldWidget SetContentType(InputField.ContentType contentType)
         {
             ContentType = contentType;
             return this;
         }
 
-        public InputFieldWidget SetLabel(string f)
+        [NotNull]
+        public InputFieldWidget SetLabel([NotNull] string f)
         {
             Label = f;
             return this;
         }
 
+        [NotNull]
         public InputFieldWidget SubscribeValueChanged(Action<string> f)
         {
             ValueChanged += f;
             return this;
         }
 
+        [NotNull]
         public InputFieldWidget SubscribeEndEdit(Action<string> f)
         {
             EndEdit += f;

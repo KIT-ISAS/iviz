@@ -7,32 +7,38 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.XmlRpc;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Controllers
 {
     public sealed class RoslibConnection : RosConnection
     {
-        RosClient client;
+        [CanBeNull] RosClient client;
 
         abstract class AdvertisedTopic
         {
-            public string Topic { get; }
-            public IRosPublisher Publisher { get; protected set; }
+            [NotNull] protected string Topic { get; }
+            [CanBeNull] public IRosPublisher Publisher { get; protected set; }
             public virtual int Id { get; set; }
 
-            protected AdvertisedTopic(string topic)
+            protected AdvertisedTopic([NotNull] string topic)
             {
-                Topic = topic;
+                Topic = topic ?? throw new ArgumentNullException(nameof(topic));
             }
 
-            public abstract void Add(IRosSender subscriber);
-            public abstract void Remove(IRosSender subscriber);
+            public abstract void Add([NotNull] IRosSender subscriber);
+            public abstract void Remove([NotNull] IRosSender subscriber);
             public abstract int Count { get; }
-            public abstract Task AdvertiseAsync(RosClient client);
+            public abstract Task AdvertiseAsync([CanBeNull] RosClient client);
 
-            public async Task UnadvertiseAsync(RosClient client)
+            public async Task UnadvertiseAsync([NotNull] RosClient client)
             {
+                if (client == null)
+                {
+                    throw new ArgumentNullException(nameof(client));
+                }
+
                 string topic = (Topic[0] == '/') ? Topic : $"{client.CallerId}/{Topic}";
                 if (Publisher != null)
                 {
@@ -51,7 +57,7 @@ namespace Iviz.Controllers
         {
             readonly HashSet<RosSender<T>> senders = new HashSet<RosSender<T>>();
 
-            public AdvertisedTopic(string topic) : base(topic)
+            public AdvertisedTopic([NotNull] string topic) : base(topic)
             {
             }
 
@@ -82,7 +88,7 @@ namespace Iviz.Controllers
 
             public override async Task AdvertiseAsync(RosClient client)
             {
-                string topic = (Topic[0] == '/') ? Topic : $"{client.CallerId}/{Topic}";
+                string topic = (Topic[0] == '/') ? Topic : $"{client?.CallerId}/{Topic}";
                 IRosPublisher publisher;
                 if (client != null)
                 {
@@ -99,20 +105,20 @@ namespace Iviz.Controllers
 
         abstract class SubscribedTopic
         {
-            public string Topic { get; }
-            public IRosSubscriber Subscriber { get; protected set; }
+            [NotNull] protected string Topic { get; }
+            [CanBeNull] public IRosSubscriber Subscriber { get; protected set; }
             public abstract int Count { get; }
 
-            protected SubscribedTopic(string topic)
+            protected SubscribedTopic([NotNull] string topic)
             {
-                Topic = topic;
+                Topic = topic ?? throw new ArgumentNullException(nameof(topic));
             }
 
-            public abstract void Add(IRosListener subscriber);
-            public abstract void Remove(IRosListener subscriber);
-            public abstract Task SubscribeAsync(RosClient client);
+            public abstract void Add([NotNull] IRosListener subscriber);
+            public abstract void Remove([NotNull] IRosListener subscriber);
+            public abstract Task SubscribeAsync([CanBeNull] RosClient client);
 
-            public async Task UnsubscribeAsync(RosClient client)
+            public async Task UnsubscribeAsync([NotNull] RosClient client)
             {
                 string topic = Topic[0] == '/'
                     ? Topic 
@@ -134,7 +140,7 @@ namespace Iviz.Controllers
         {
             readonly HashSet<RosListener<T>> listeners = new HashSet<RosListener<T>>();
 
-            public SubscribedTopic(string topic) : base(topic)
+            public SubscribedTopic([NotNull] string topic) : base(topic)
             {
             }
 
@@ -158,7 +164,7 @@ namespace Iviz.Controllers
 
             public override async Task SubscribeAsync(RosClient client)
             {
-                string topic = (Topic[0] == '/') ? Topic : $"{client.CallerId}/{Topic}";
+                string topic = (Topic[0] == '/') ? Topic : $"{client?.CallerId}/{Topic}";
                 IRosSubscriber subscriber;
                 if (client != null)
                 {
@@ -177,22 +183,27 @@ namespace Iviz.Controllers
 
         abstract class AdvertisedService
         {
-            protected string Service { get; }
+            [NotNull] protected string Service { get; }
 
-            protected AdvertisedService(string service)
+            protected AdvertisedService([NotNull] string service)
             {
-                Service = service;
+                Service = service ?? throw new ArgumentNullException(nameof(service));
             }
 
-            public abstract Task AdvertiseAsync(RosClient client);
+            public abstract Task AdvertiseAsync([CanBeNull] RosClient client);
         }
 
         class AdvertisedService<T> : AdvertisedService where T : IService, new()
         {
-            readonly Func<T, Task> callback;
+            [NotNull] readonly Func<T, Task> callback;
 
-            public AdvertisedService(string service, Action<T> callback) : base(service)
+            public AdvertisedService([NotNull] string service, [NotNull] Action<T> callback) : base(service)
             {
+                if (callback == null)
+                {
+                    throw new ArgumentNullException(nameof(callback));
+                }
+
                 this.callback = async t =>
                 {
                     callback(t);
@@ -200,14 +211,14 @@ namespace Iviz.Controllers
                 };
             }
 
-            public AdvertisedService(string service, Func<T, Task> callback) : base(service)
+            public AdvertisedService([NotNull] string service, [NotNull] Func<T, Task> callback) : base(service)
             {
-                this.callback = callback;
+                this.callback = callback ?? throw new ArgumentNullException(nameof(callback));
             }
 
             public override async Task AdvertiseAsync(RosClient client)
             {
-                string service = (Service[0] == '/') ? Service : $"{client.CallerId}/{Service}";
+                string service = (Service[0] == '/') ? Service : $"{client?.CallerId}/{Service}";
                 if (client != null)
                 {
                     await client.AdvertiseServiceAsync(service, callback);
@@ -335,14 +346,14 @@ namespace Iviz.Controllers
             return false;
         }
 
-        async Task Readvertise(AdvertisedTopic topic)
+        async Task Readvertise([NotNull] AdvertisedTopic topic)
         {
             await topic.AdvertiseAsync(client);
             topic.Id = publishers.Count;
             publishers.Add(topic.Publisher);
         }
 
-        async Task Resubscribe(SubscribedTopic topic)
+        async Task Resubscribe([NotNull] SubscribedTopic topic)
         {
             await topic.SubscribeAsync(client);
         }
@@ -379,6 +390,11 @@ namespace Iviz.Controllers
 
         public override void Advertise<T>(RosSender<T> advertiser)
         {
+            if (advertiser == null)
+            {
+                throw new ArgumentNullException(nameof(advertiser));
+            }
+
             AddTask(async () =>
             {
                 try
@@ -393,7 +409,7 @@ namespace Iviz.Controllers
             });
         }
 
-        async Task AdvertiseImpl<T>(RosSender<T> advertiser) where T : IMessage
+        async Task AdvertiseImpl<T>([NotNull] RosSender<T> advertiser) where T : IMessage
         {
             if (!publishersByTopic.TryGetValue(advertiser.Topic, out AdvertisedTopic advertisedTopic))
             {
@@ -439,6 +455,16 @@ namespace Iviz.Controllers
 
         public override void AdvertiseService<T>(string service, Action<T> callback)
         {
+            if (service == null)
+            {
+                throw new ArgumentNullException(nameof(service));
+            }
+
+            if (callback == null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
             AddTask(async () =>
             {
                 try
@@ -453,7 +479,7 @@ namespace Iviz.Controllers
             });
         }
 
-        async Task AdvertiseServiceImpl<T>(string service, Action<T> callback) where T : IService, new()
+        async Task AdvertiseServiceImpl<T>([NotNull] string service, [NotNull] Action<T> callback) where T : IService, new()
         {
             if (servicesByTopic.ContainsKey(service))
             {
@@ -474,6 +500,16 @@ namespace Iviz.Controllers
 
         public override bool CallService<T>(string service, T srv)
         {
+            if (service == null)
+            {
+                throw new ArgumentNullException(nameof(service));
+            }
+
+            if (srv == null)
+            {
+                throw new ArgumentNullException(nameof(srv));
+            }
+
             SemaphoreSlim signal = new SemaphoreSlim(0, 1);
             bool[] result = {false};
 
@@ -497,6 +533,16 @@ namespace Iviz.Controllers
 
         public override void Publish<T>(RosSender<T> advertiser, T msg)
         {
+            if (advertiser == null)
+            {
+                throw new ArgumentNullException(nameof(advertiser));
+            }
+
+            if (msg == null)
+            {
+                throw new ArgumentNullException(nameof(msg));
+            }
+
             AddTask(async () =>
             {
                 try
@@ -514,7 +560,7 @@ namespace Iviz.Controllers
         }
 
 
-        void PublishImpl<T>(IRosSender advertiser, T msg) where T : IMessage
+        void PublishImpl<T>([NotNull] IRosSender advertiser, T msg) where T : IMessage
         {
             if (advertiser.Id == -1)
             {
@@ -530,6 +576,11 @@ namespace Iviz.Controllers
 
         public override void Subscribe<T>(RosListener<T> listener)
         {
+            if (listener == null)
+            {
+                throw new ArgumentNullException(nameof(listener));
+            }
+
             AddTask(async () =>
             {
                 try
@@ -544,7 +595,7 @@ namespace Iviz.Controllers
             });
         }
 
-        async Task SubscribeImpl<T>(IRosListener listener) where T : IMessage, IDeserializable<T>, new()
+        async Task SubscribeImpl<T>([NotNull] IRosListener listener) where T : IMessage, IDeserializable<T>, new()
         {
             if (!subscribersByTopic.TryGetValue(listener.Topic, out SubscribedTopic subscribedTopic))
             {
@@ -561,6 +612,11 @@ namespace Iviz.Controllers
 
         public override void Unadvertise(IRosSender advertiser)
         {
+            if (advertiser == null)
+            {
+                throw new ArgumentNullException(nameof(advertiser));
+            }
+
             AddTask(async () =>
             {
                 try
@@ -575,7 +631,7 @@ namespace Iviz.Controllers
             });
         }
 
-        async Task UnadvertiseImpl(IRosSender advertiser)
+        async Task UnadvertiseImpl([NotNull] IRosSender advertiser)
         {
             if (!publishersByTopic.TryGetValue(advertiser.Topic, out AdvertisedTopic advertisedTopic))
             {
@@ -603,6 +659,11 @@ namespace Iviz.Controllers
 
         public override void Unsubscribe(IRosListener subscriber)
         {
+            if (subscriber == null)
+            {
+                throw new ArgumentNullException(nameof(subscriber));
+            }
+
             AddTask(async () =>
             {
                 try
@@ -618,7 +679,7 @@ namespace Iviz.Controllers
         }
 
 
-        async Task UnsubscribeImpl(IRosListener subscriber)
+        async Task UnsubscribeImpl([NotNull] IRosListener subscriber)
         {
             if (!subscribersByTopic.TryGetValue(subscriber.Topic, out SubscribedTopic subscribedTopic))
             {
@@ -629,7 +690,10 @@ namespace Iviz.Controllers
             if (subscribedTopic.Count == 0)
             {
                 subscribersByTopic.Remove(subscriber.Topic);
-                await subscribedTopic.UnsubscribeAsync(client);
+                if (client != null)
+                {
+                    await subscribedTopic.UnsubscribeAsync(client);
+                }
             }
         }
 
@@ -668,13 +732,13 @@ namespace Iviz.Controllers
 
                 if (type == RequestType.WaitForRequest)
                 {
-                    signal.Release();
+                    signal?.Release();
                 }
             });
 
             if (type == RequestType.WaitForRequest)
             {
-                signal.Wait();
+                signal?.Wait();
             }
 
             return cachedTopics;
@@ -709,6 +773,11 @@ namespace Iviz.Controllers
 
         public override object GetParameter(string parameter)
         {
+            if (parameter == null)
+            {
+                throw new ArgumentNullException(nameof(parameter));
+            }
+
             SemaphoreSlim signal = new SemaphoreSlim(0, 1);
             object[] result = {null};
 
@@ -735,12 +804,22 @@ namespace Iviz.Controllers
 
         public override int GetNumPublishers(string topic)
         {
+            if (topic == null)
+            {
+                throw new ArgumentNullException(nameof(topic));
+            }
+
             subscribersByTopic.TryGetValue(topic, out SubscribedTopic subscribedTopic);
             return subscribedTopic?.Subscriber?.NumPublishers ?? 0;
         }
 
         public override int GetNumSubscribers(string topic)
         {
+            if (topic == null)
+            {
+                throw new ArgumentNullException(nameof(topic));
+            }
+
             publishersByTopic.TryGetValue(topic, out AdvertisedTopic advertisedTopic);
             return advertisedTopic?.Publisher?.NumSubscribers ?? 0;
         }

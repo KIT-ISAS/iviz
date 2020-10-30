@@ -1,5 +1,6 @@
 ﻿using Iviz.Controllers;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.App
@@ -11,18 +12,18 @@ namespace Iviz.App
     {
         const float InteriorColorFactor = 0.25f;
         
-        readonly GridController controller;
-        readonly GridPanelContents panel;
+        [NotNull] readonly GridController controller;
+        [NotNull] readonly GridPanelContents panel;
 
         public override Resource.Module Module => Resource.Module.Grid;
         public override DataPanelContents Panel => panel;
         public override IConfiguration Configuration => controller.Config;
         public override IController Controller => controller;
 
-        public GridModuleData(ModuleDataConstructor constructor) :
+        public GridModuleData([NotNull] ModuleDataConstructor constructor) :
             base(constructor.ModuleList, constructor.Topic, constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Grid) as GridPanelContents;
+            panel = DataPanelManager.GetPanelByResourceType<GridPanelContents>(Resource.Module.Grid);
 
             controller = new GridController(this);
             if (constructor.Configuration != null)

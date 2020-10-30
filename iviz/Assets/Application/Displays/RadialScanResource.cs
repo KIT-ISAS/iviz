@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Iviz.Resources;
-using Unity.Mathematics;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -236,8 +236,8 @@ namespace Iviz.Displays
             ResourcePool.DisposeDisplay(lines);
         }
 
-        public void Set(float angleMin, float angleIncrement, float rangeMin, float rangeMax, float[] ranges,
-            float[] intensities)
+        public void Set(float angleMin, float angleIncrement, float rangeMin, float rangeMax, [NotNull] float[] ranges,
+            [NotNull] float[] intensities)
         {
             if (ranges == null)
             {

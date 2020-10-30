@@ -1,5 +1,6 @@
 ﻿using System;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,20 +18,29 @@ namespace Iviz.App
 
         enum ColorMode
         {
-            RGB, HSV
+            RGB,
+            HSV
         }
+
         ColorMode colorMode;
         bool disableUpdates;
 
+        [NotNull]
         public string Label
         {
             get => label.text;
             set
             {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+
                 name = "ColorPicker:" + value;
                 label.text = value;
             }
         }
+
         public Color Value
         {
             get => color;
@@ -64,6 +74,7 @@ namespace Iviz.App
             {
                 return;
             }
+
             switch (colorMode)
             {
                 case ColorMode.RGB:
@@ -73,6 +84,7 @@ namespace Iviz.App
                     color = Color.HSVToRGB(sliderX.Value, sliderY.Value, sliderZ.Value);
                     break;
             }
+
             UpdateColorButton();
             ValueChanged?.Invoke(color);
         }
@@ -103,8 +115,8 @@ namespace Iviz.App
                     sliderY.Value = s;
                     sliderZ.Value = v;
                     break;
-
             }
+
             disableUpdates = false;
         }
 
@@ -125,6 +137,7 @@ namespace Iviz.App
                     sliderZ.Label = "B";
                     break;
             }
+
             UpdateSliderLabels();
         }
 
@@ -133,24 +146,28 @@ namespace Iviz.App
             ValueChanged = null;
         }
 
-        public ColorPickerWidget SetLabel(string f)
+        [NotNull]
+        public ColorPickerWidget SetLabel([NotNull] string f)
         {
             Label = f;
             return this;
         }
 
+        [NotNull]
         public ColorPickerWidget SetValue(Color f)
         {
             Value = f;
             return this;
         }
 
+        [NotNull]
         public ColorPickerWidget SetInteractable(bool f)
         {
             Interactable = f;
             return this;
         }
 
+        [NotNull]
         public ColorPickerWidget SubscribeValueChanged(Action<Color> f)
         {
             ValueChanged += f;

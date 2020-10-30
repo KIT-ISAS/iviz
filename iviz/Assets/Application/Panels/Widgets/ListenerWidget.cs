@@ -3,6 +3,7 @@ using Iviz.Displays;
 using UnityEngine;
 using UnityEngine.UI;
 using Iviz.Resources;
+using JetBrains.Annotations;
 
 namespace Iviz.App
 {
@@ -12,8 +13,9 @@ namespace Iviz.App
 
         [SerializeField] Text text = null;
         [SerializeField] Image panel = null;
-        IRosListener listener;
+        [CanBeNull] IRosListener listener;
         
+        [CanBeNull]
         public IRosListener RosListener
         {
             private get => listener;
@@ -35,7 +37,7 @@ namespace Iviz.App
             }
         }
 
-        string Topic => RosListener?.Topic;
+        [CanBeNull] string Topic => RosListener?.Topic;
         int NumPublishers => (!ConnectionManager.IsConnected || RosListener == null) ? -1 : RosListener.NumPublishers;
         int MessagesPerSecond => RosListener?.Stats.MessagesPerSecond ?? 0;
         int BytesPerSecond => RosListener?.Stats.BytesPerSecond ?? 0;
@@ -56,7 +58,7 @@ namespace Iviz.App
             }
             else
             {
-                subscriberStatus = $"{numPublishers}↓ ";
+                subscriberStatus = $"{numPublishers.ToString()}↓ ";
             }
             string messagesPerSecond = MessagesPerSecond.ToString(UnityUtils.Culture);
             string kbPerSecond = (BytesPerSecond * 0.001f).ToString("#,0.#", UnityUtils.Culture);

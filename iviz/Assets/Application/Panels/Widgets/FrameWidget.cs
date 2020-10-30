@@ -1,5 +1,6 @@
 ﻿using Iviz.Controllers;
 using Iviz.Displays;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,9 +8,12 @@ namespace Iviz.App
 {
     public class FrameWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] Text text = null;
+        [SerializeField] Text text;
 
+        TfFrame frame;
         IHasFrame owner;
+
+        [CanBeNull]
         public IHasFrame Owner
         {
             get => owner;
@@ -29,7 +33,7 @@ namespace Iviz.App
             }
         }
 
-        TfFrame frame;
+        [CanBeNull]
         public TfFrame Frame
         {
             get => frame;
@@ -39,6 +43,7 @@ namespace Iviz.App
                 {
                     return;
                 }
+
                 frame = value;
                 if (frame != null)
                 {
@@ -57,29 +62,27 @@ namespace Iviz.App
             Frame = null;
         }
 
-        void UpdateStats()
-        {
-            Frame = Owner?.Frame;
-        }
-
         public void ClearSubscribers()
         {
             Owner = null;
             Frame = null;
         }
 
+        void UpdateStats()
+        {
+            Frame = Owner?.Frame;
+        }
+
         public void OnGotoClick()
         {
             if (Frame != null)
             {
-                TFListener.GuiCamera.LookAt(Frame.WorldPose.position);
+                TfListener.GuiCamera.LookAt(Frame.WorldPose.position);
             }
         }
 
         public void OnTrailClick()
         {
-
         }
-
     }
 }

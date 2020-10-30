@@ -5,8 +5,8 @@ using System.Linq;
 using Iviz.App;
 using Iviz.Displays;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using UnityEngine;
-using Logger = Iviz.Logger;
 
 namespace Iviz.Controllers
 {
@@ -174,7 +174,7 @@ namespace Iviz.Controllers
                 acceptsParents = value;
                 if (!acceptsParents)
                 {
-                    Parent = TFListener.RootFrame;
+                    Parent = TfListener.RootFrame;
                 }
             }
         }
@@ -191,7 +191,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public Pose WorldPose => TFListener.RelativePoseToRoot(transform.AsPose());
+        public Pose WorldPose => TfListener.RelativePoseToRoot(transform.AsPose());
 
         public Pose AbsolutePose => transform.AsPose();
 
@@ -219,7 +219,7 @@ namespace Iviz.Controllers
 
             // TFListener.BaseFrame may not exist yet
             var parent = transform.parent;
-            parentConnector.B = parent != null ? parent : TFListener.RootFrame?.transform;
+            parentConnector.B = parent != null ? parent : TfListener.RootFrame?.transform;
 
             parentConnector.name = "[Connector]";
 
@@ -260,13 +260,23 @@ namespace Iviz.Controllers
             trail = null;
         }
 
-        public void AddListener(DisplayNode display)
+        public void AddListener([NotNull] DisplayNode display)
         {
+            if (display == null)
+            {
+                throw new ArgumentNullException(nameof(display));
+            }
+
             listeners.Add(display);
         }
 
-        public void RemoveListener(DisplayNode display)
+        public void RemoveListener([NotNull] DisplayNode display)
         {
+            if (display == null)
+            {
+                throw new ArgumentNullException(nameof(display));
+            }
+
             if (HasNoListeners)
             {
                 return;
@@ -297,15 +307,15 @@ namespace Iviz.Controllers
         {
             if (HasNoListeners && IsChildless)
             {
-                TFListener.Instance.MarkAsDead(this);
+                TfListener.Instance.MarkAsDead(this);
             }
         }
 
-        public bool SetParent(TfFrame newParent)
+        public bool SetParent([CanBeNull] TfFrame newParent)
         {
             if (!AcceptsParents &&
-                newParent != TFListener.RootFrame &&
-                newParent != TFListener.UnityFrame &&
+                newParent != TfListener.RootFrame &&
+                newParent != TfListener.UnityFrame &&
                 newParent != null)
             {
                 return false;
@@ -339,7 +349,7 @@ namespace Iviz.Controllers
             }
 
             var parent = transform.parent;
-            parentConnector.B = parent != null ? parent : TFListener.RootFrame.transform;
+            parentConnector.B = parent != null ? parent : TfListener.RootFrame.transform;
 
             return true;
         }
@@ -399,7 +409,7 @@ namespace Iviz.Controllers
 
         protected override void OnDoubleClick()
         {
-            TFListener.GuiCamera.Select(this);
+            TfListener.GuiCamera.Select(this);
             ModuleListPanel.Instance.ShowFrame(this);
         }
     }

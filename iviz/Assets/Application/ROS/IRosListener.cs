@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Roslib;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Controllers
@@ -45,9 +46,9 @@ namespace Iviz.Controllers
     /// </summary>
     public interface IRosListener
     {
-        string Topic { get; }
-        string Type { get; }
-        RosListenerStats Stats { get; }
+        [NotNull] string Topic { get; }
+        [NotNull] string Type { get; }
+        [NotNull] RosListenerStats Stats { get; }
         int NumPublishers { get; }
         int MaxQueueSize { set; }
         bool Subscribed { get; }
@@ -60,16 +61,20 @@ namespace Iviz.Controllers
     public sealed class RosListener<T> : IRosListener where T : IMessage, IDeserializable<T>, new()
     {
         readonly ConcurrentQueue<T> messageQueue = new ConcurrentQueue<T>();
-        readonly Action<T> subscriptionHandler;
+
+        readonly Action<T> delayedHandler;
+        readonly Func<T, bool> directHandler;
+
         readonly List<float> timesOfArrival = new List<float>();
         readonly List<T> tmpMessageBag = new List<T>();
+        readonly bool callbackInGameThread;
 
         int dropped;
         int lastMsgBytes;
         int msgsInQueue;
         int totalMsgCounter;
 
-        public RosListener(string topic, Action<T> handler)
+        RosListener([NotNull] string topic)
         {
             if (string.IsNullOrWhiteSpace(topic))
             {
@@ -81,13 +86,24 @@ namespace Iviz.Controllers
 
             Logger.Internal($"Subscribing to <b>{topic}</b> <i>[{Type}]</i>.");
 
-            subscriptionHandler = handler;
-
             ConnectionManager.Subscribe(this);
             Subscribed = true;
 
             GameThread.EverySecond += UpdateStats;
-            GameThread.EveryFrame += CallHandler;
+        }
+
+
+        public RosListener([NotNull] string topic, [NotNull] Action<T> handler) : this(topic)
+        {
+            delayedHandler = handler ?? throw new ArgumentNullException(nameof(handler));
+            callbackInGameThread = true;
+            GameThread.EveryFrame += CallHandlerDelayed;
+        }
+
+        public RosListener([NotNull] string topic, [NotNull] Func<T, bool> handler) : this(topic)
+        {
+            directHandler = handler ?? throw new ArgumentNullException(nameof(handler));
+            callbackInGameThread = false;
         }
 
         public string Topic { get; }
@@ -100,7 +116,11 @@ namespace Iviz.Controllers
         public void Stop()
         {
             GameThread.EverySecond -= UpdateStats;
-            GameThread.EveryFrame -= CallHandler;
+            if (callbackInGameThread)
+            {
+                GameThread.EveryFrame -= CallHandlerDelayed;
+            }
+
             Logger.Internal($"Unsubscribing from {Topic}.");
             if (Subscribed)
             {
@@ -137,18 +157,25 @@ namespace Iviz.Controllers
             Unpause();
         }
 
-        public void EnqueueMessage(in T t)
+        public void EnqueueMessage([NotNull] in T msg)
         {
-            if (t == null)
+            if (msg == null)
             {
-                throw new ArgumentNullException(nameof(t));
+                throw new ArgumentNullException(nameof(msg));
             }
 
-            messageQueue.Enqueue(t);
-            msgsInQueue++;
+            if (callbackInGameThread)
+            {
+                messageQueue.Enqueue(msg);
+                msgsInQueue++;
+            }
+            else
+            {
+                CallHandlerDirect(msg);
+            }
         }
 
-        void CallHandler()
+        void CallHandlerDelayed()
         {
             tmpMessageBag.Clear();
             while (messageQueue.TryDequeue(out T t)) tmpMessageBag.Add(t);
@@ -159,12 +186,43 @@ namespace Iviz.Controllers
                 T msg = tmpMessageBag[i];
                 lastMsgBytes += msg.RosMessageLength;
                 timesOfArrival.Add(Time.time);
-                subscriptionHandler(msg);
+
+                try
+                {
+                    delayedHandler(msg);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e);
+                }
             }
 
             dropped += start;
             totalMsgCounter += messageQueue.Count;
             msgsInQueue = 0;
+        }
+
+        void CallHandlerDirect([NotNull] in T msg)
+        {
+            lastMsgBytes += msg.RosMessageLength;
+            totalMsgCounter++;
+
+            timesOfArrival.Add(GameThread.GameTime);
+
+            bool processed = false;
+            try
+            {
+                processed = directHandler(msg);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e);
+            }
+
+            if (!processed)
+            {
+                dropped++;
+            }
         }
 
         void UpdateStats()

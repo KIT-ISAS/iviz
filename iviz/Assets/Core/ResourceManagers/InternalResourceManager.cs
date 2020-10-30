@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -47,7 +48,7 @@ namespace Iviz.Resources
             robotDescriptions = new ReadOnlyDictionary<string, string>(tmpRobotDescriptions);
         }
         
-        public bool ContainsRobot(string robotName)
+        public bool ContainsRobot([NotNull] string robotName)
         {
             if (robotName == null)
             {
@@ -57,7 +58,8 @@ namespace Iviz.Resources
             return robotDescriptions.ContainsKey(robotName);
         }
 
-        public bool TryGetRobot(string robotName, out string robotDescription)
+        [ContractAnnotation("=> false, robotDescription:null; => true, robotDescription:notnull")]
+        public bool TryGetRobot([NotNull] string robotName, out string robotDescription)
         {
             if (robotName == null)
             {
@@ -67,17 +69,19 @@ namespace Iviz.Resources
             return robotDescriptions.TryGetValue(robotName, out robotDescription);
         }
         
-        public bool TryGet(Uri uri, out Info<GameObject> info)
+        [ContractAnnotation("=> false, info:null; => true, info:notnull")]
+        public bool TryGet([NotNull] Uri uri, out Info<GameObject> info)
         {
             return TryGet(uri, gameObjects, out info);
         }
         
-        public bool TryGet(Uri uri, out Info<Texture2D> info)
+        [ContractAnnotation("=> false, info:null; => true, info:notnull")]
+        public bool TryGet([NotNull] Uri uri, out Info<Texture2D> info)
         {
             return TryGet(uri, textures, out info);
         } 
         
-        static bool TryGet<T>(Uri uri, Dictionary<Uri, Info<T>> repository, out Info<T> info) where T : UnityEngine.Object
+        static bool TryGet<T>([NotNull] Uri uri, [NotNull] Dictionary<Uri, Info<T>> repository, out Info<T> info) where T : UnityEngine.Object
         {
             if (uri is null)
             {

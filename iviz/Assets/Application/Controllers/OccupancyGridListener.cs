@@ -6,8 +6,8 @@ using Iviz.Displays;
 using Iviz.Msgs.NavMsgs;
 using Iviz.Resources;
 using Iviz.Roslib;
+using JetBrains.Annotations;
 using UnityEngine;
-using Logger = Iviz.Logger;
 
 namespace Iviz.Controllers
 {
@@ -144,9 +144,9 @@ namespace Iviz.Controllers
             }
         }
 
-        public OccupancyGridListener(IModuleData moduleData)
+        public OccupancyGridListener([NotNull] IModuleData moduleData)
         {
-            ModuleData = moduleData;
+            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
 
             node = DisplayClickableNode.Instantiate("Node");
 

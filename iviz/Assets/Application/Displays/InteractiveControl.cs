@@ -265,7 +265,7 @@ namespace Iviz.Displays
             }
 
             const float referenceDistance = 2.0f;
-            Transform cameraTransform = TFListener.MainCamera.transform;
+            Transform cameraTransform = TfListener.MainCamera.transform;
             float distanceToCamera = Vector3.Dot(cameraTransform.forward, transform.position - cameraTransform.position);
             if (distanceToCamera > referenceDistance)
             {
@@ -275,7 +275,7 @@ namespace Iviz.Displays
         
         void RotateToCamera()
         {
-            Vector3 cameraForward = TFListener.MainCamera.transform.forward;
+            Vector3 cameraForward = TfListener.MainCamera.transform.forward;
             Transform mTransform = transform;
             if (CameraPivotIsParent)
             {
@@ -289,7 +289,7 @@ namespace Iviz.Displays
 
         void RotateBackToFixed()
         {
-            transform.rotation = TFListener.RootFrame.transform.rotation;
+            transform.rotation = TfListener.RootFrame.transform.rotation;
         }
         
         public void SetTargetPoseUpdater(Action<Pose> setTargetPose) 

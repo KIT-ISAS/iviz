@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Iviz.Displays;
 using Iviz.RosMaster;
+using JetBrains.Annotations;
 
 namespace Iviz.Controllers
 {
@@ -19,13 +19,13 @@ namespace Iviz.Controllers
         };
 
         static RosServerManager instance;
-        static RosServerManager Instance => instance ?? (instance = new RosServerManager());
+        [NotNull] static RosServerManager Instance => instance ?? (instance = new RosServerManager());
         public static bool IsActive => instance?.server != null;
-        public static Uri MasterUri => instance?.server?.MasterUri;
+        [CanBeNull] public static Uri MasterUri => instance?.server?.MasterUri;
 
-        public static bool Create(Uri masterUri, string masterId) =>
+        public static bool Create([NotNull] Uri masterUri, [NotNull] string masterId) =>
             Instance.TryCreate(
-                masterUri ?? throw new ArgumentNullException(nameof(masterUri)), 
+                masterUri ?? throw new ArgumentNullException(nameof(masterUri)),
                 masterId ?? throw new ArgumentNullException(nameof(masterId)));
 
         public static void Dispose() => instance?.Reset();
@@ -51,7 +51,7 @@ namespace Iviz.Controllers
             }
 
             task = Task.Run(async () => await TryCreateAsync(masterUri, masterId));
-            
+
             // wait for TryCreateAsync()
             signal1.Wait();
 
@@ -105,7 +105,7 @@ namespace Iviz.Controllers
 
             // tell TryCreate() to stop waiting
             signal2.Release();
-            
+
             task.Wait();
         }
     }

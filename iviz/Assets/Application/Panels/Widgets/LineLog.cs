@@ -1,7 +1,9 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Text;
+using JetBrains.Annotations;
 
 namespace Iviz.App
 {
@@ -9,7 +11,6 @@ namespace Iviz.App
     {
         [SerializeField] Text text = null;
         [SerializeField] GameObject content = null;
-        //[SerializeField] Scrollbar vertical = null;
 
         readonly List<string> lines = new List<string>();
         const int maxLines = 100;
@@ -28,9 +29,14 @@ namespace Iviz.App
             }
         }
 
-        public void Add(string text)
+        public void Add([NotNull] string str)
         {
-            string[] sublines = text.Split('\n');
+            if (str == null)
+            {
+                throw new ArgumentNullException(nameof(str));
+            }
+
+            string[] sublines = str.Split('\n');
             lines.AddRange(sublines);
         }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,11 +15,17 @@ namespace Iviz.App
         [SerializeField] Image panel = null;
         //bool disableUpdates;
 
+        [NotNull]
         public string Label
         {
             get => label.text;
             set
             {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+                
                 name = "Vector3SliderWidget:" + value;
                 label.text = value;
             }
@@ -116,30 +123,35 @@ namespace Iviz.App
             ValueChanged = null;
         }
 
-        public Vector3SliderWidget SetLabel(string f)
+        [NotNull]
+        public Vector3SliderWidget SetLabel([NotNull] string f)
         {
             Label = f;
             return this;
         }
 
+        [NotNull]
         public Vector3SliderWidget SetValue(Vector3 f)
         {
             Value = f;
             return this;
         }
 
+        [NotNull]
         public Vector3SliderWidget SetInteractable(bool f)
         {
             Interactable = f;
             return this;
         }
 
+        [NotNull]
         public Vector3SliderWidget SubscribeValueChanged(Action<Vector3> f)
         {
             ValueChanged += f;
             return this;
         }
 
+        [NotNull]
         public Vector3SliderWidget SetRange(float f)
         {
             Range = f;

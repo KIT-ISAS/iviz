@@ -1,5 +1,6 @@
 ﻿using Iviz.Controllers;
 using Iviz.Resources;
+using JetBrains.Annotations;
 
 namespace Iviz.App
 {
@@ -8,22 +9,20 @@ namespace Iviz.App
     /// </summary>
     public sealed class JoystickModuleData : ModuleData
     {
-        readonly JoystickController controller;
-        readonly JoystickPanelContents panel;
+        [NotNull] readonly JoystickController controller;
+        [NotNull] readonly JoystickPanelContents panel;
 
         public override Resource.Module Module => Resource.Module.Joystick;
         public override DataPanelContents Panel => panel;
         public override IConfiguration Configuration => controller.Config;
         public override IController Controller => controller;
 
-        public JoystickModuleData(ModuleDataConstructor constructor) :
+        public JoystickModuleData([NotNull] ModuleDataConstructor constructor) :
             base(constructor.ModuleList, constructor.Topic, constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.Joystick) as JoystickPanelContents;
+            panel = DataPanelManager.GetPanelByResourceType<JoystickPanelContents>(Resource.Module.Joystick);
 
-            //controller = Instantiate<JoystickController>();
             controller = new JoystickController(this);
-            //controller.ModuleData = this;
             if (constructor.Configuration != null)
             {
                 controller.Config = (JoystickConfiguration)constructor.Configuration;
@@ -37,7 +36,6 @@ namespace Iviz.App
         {
             base.Stop();
             controller.StopController();
-            //Object.Destroy(controller.gameObject);
         }
 
         public override void SetupPanel()
@@ -55,7 +53,7 @@ namespace Iviz.App
 
             panel.MaxSpeed.Value = controller.MaxSpeed;
             panel.AttachToFrame.Value = controller.AttachToFrame;
-            panel.AttachToFrame.Hints = TFListener.FramesUsableAsHints;
+            panel.AttachToFrame.Hints = TfListener.FramesUsableAsHints;
             panel.XIsFront.Value = controller.XIsFront;
 
             panel.MaxSpeed.Interactable = controller.PublishTwist;

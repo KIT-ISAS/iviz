@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Iviz.Displays;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Resources
@@ -21,7 +22,7 @@ namespace Iviz.Resources
         public Info<GameObject> MeshList { get; }
         public Info<GameObject> PointList { get; }
         public Info<GameObject> MeshTriangles { get; }
-        public Info<GameObject> TFFrame { get; }
+        public Info<GameObject> TfFrame { get; }
         public Info<GameObject> Image { get; }
         public Info<GameObject> Square { get; }
         public Info<GameObject> Line { get; }
@@ -49,7 +50,7 @@ namespace Iviz.Resources
             MeshList = new Info<GameObject>("Displays/MeshList");
             PointList = new Info<GameObject>("Displays/PointList");
             MeshTriangles = new Info<GameObject>("Displays/MeshTriangles");
-            TFFrame = new Info<GameObject>("Displays/TFFrame");
+            TfFrame = new Info<GameObject>("Displays/TFFrame");
             Image = new Info<GameObject>("Displays/ImageResource");
             Square = new Info<GameObject>("Displays/Plane");
             Line = new Info<GameObject>("Displays/Line");
@@ -67,6 +68,7 @@ namespace Iviz.Resources
             resourceByType = CreateTypeDictionary();
         }
 
+        [NotNull]
         Dictionary<Type, Info<GameObject>> CreateTypeDictionary()
         {
             Dictionary<Type, Info<GameObject>> tmpResourceByType = new Dictionary<Type, Info<GameObject>>();
@@ -99,8 +101,14 @@ namespace Iviz.Resources
             return tmpResourceByType;
         }
 
-        public bool TryGetResource(Type type, out Info<GameObject> info)
+        [ContractAnnotation("=> false, info:null; => true, info:notnull")]
+        public bool TryGetResource([NotNull] Type type, out Info<GameObject> info)
         {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
             return resourceByType.TryGetValue(type, out info) && info != null;
         }
     }

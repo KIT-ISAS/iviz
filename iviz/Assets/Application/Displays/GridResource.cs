@@ -162,12 +162,12 @@ namespace Iviz.Displays
 
         void Update()
         {
-            if (!FollowCamera || TFListener.MainCamera == null)
+            if (!FollowCamera || TfListener.MainCamera == null)
             {
                 return;
             }
 
-            Vector3 cameraPos = TFListener.MainCamera.transform.position;
+            Vector3 cameraPos = TfListener.MainCamera.transform.position;
             switch (Orientation)
             {
                 case GridOrientation.XY:

@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
@@ -26,7 +26,7 @@ namespace Iviz.Displays
         static readonly int ScaleID = Shader.PropertyToID("_Scale");
 
         NativeList<float4x2> lineBuffer;
-        ComputeBuffer lineComputeBuffer;
+        [CanBeNull] ComputeBuffer lineComputeBuffer;
         
         bool linesNeedAlpha;
 
@@ -61,6 +61,7 @@ namespace Iviz.Displays
         /// <summary>
         /// Sets the lines with the given collection.
         /// </summary>
+        [NotNull]
         public IReadOnlyCollection<LineWithColor> LinesWithColor
         {
             get => lineBuffer.Select(f => new LineWithColor(f)).ToArray();
@@ -72,7 +73,7 @@ namespace Iviz.Displays
         /// </summary>
         /// <param name="lines">The line enumerator.</param>
         /// <param name="reserve">The expected number of lines, or 0 if unknown.</param>
-        public void Set(IEnumerable<LineWithColor> lines, int reserve = 0)
+        public void Set([NotNull] IEnumerable<LineWithColor> lines, int reserve = 0)
         {
             if (reserve < 0)
             {
@@ -202,14 +203,16 @@ namespace Iviz.Displays
 
         void OnDestroy()
         {
+            lineBuffer.Dispose();
+
             if (lineComputeBuffer != null)
             {
                 lineComputeBuffer.Release();
                 lineComputeBuffer = null;
                 Properties.SetBuffer(LinesID, null);
             }
-
-            lineBuffer.Dispose();
+            
+            Destroy(mesh);
         }
 
         protected override void UpdateProperties()

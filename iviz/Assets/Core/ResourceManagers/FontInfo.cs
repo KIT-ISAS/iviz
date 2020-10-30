@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Resources
@@ -18,8 +20,14 @@ namespace Iviz.Resources
             arrowWidth = CharWidth('→') + CharWidth(' ');
         }
 
-        public string Split(string s, int maxWidth, int maxLines = 2)
+        [NotNull]
+        public string Split([NotNull] string s, int maxWidth, int maxLines = 2)
         {
+            if (s == null)
+            {
+                throw new ArgumentNullException(nameof(s));
+            }
+
             int usableWidth = maxWidth - dotWidth;
             StringBuilder str = new StringBuilder();
             int usedWidth = 0;

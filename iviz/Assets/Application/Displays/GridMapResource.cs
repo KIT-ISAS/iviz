@@ -1,4 +1,6 @@
+using System;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -38,8 +40,13 @@ namespace Iviz.Displays
             // not needed
         }
 
-        public void Set(int cellsX, int cellsY, float width, float height, float[] data)
+        public void Set(int cellsX, int cellsY, float width, float height, [NotNull] float[] data)
         {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
+
             EnsureSize(cellsX, cellsY);
 
             Transform mTransform = transform;
@@ -149,6 +156,7 @@ namespace Iviz.Displays
         }
 
 
+        [NotNull]
         static Texture2D GenerateTexture()
         {
             const int size = 64;

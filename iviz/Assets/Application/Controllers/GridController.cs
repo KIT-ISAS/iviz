@@ -3,6 +3,7 @@ using System;
 using System.Runtime.Serialization;
 using Iviz.Resources;
 using Iviz.Displays;
+using JetBrains.Annotations;
 
 namespace Iviz.Controllers
 {
@@ -73,7 +74,7 @@ namespace Iviz.Controllers
                 config.Visible = value;
                 if (!value)
                 {
-                    reflectionProbe.transform.parent = TFListener.MapFrame.transform;
+                    reflectionProbe.transform.parent = TfListener.MapFrame.transform;
                     grid.Visible = false;
                     //node.Selected = false;
                 }
@@ -180,7 +181,7 @@ namespace Iviz.Controllers
         }
 
         //void Awake()
-        public GridController(IModuleData moduleData)
+        public GridController([NotNull] IModuleData moduleData)
         {
             //name = "Grid Controller";
 
@@ -193,7 +194,7 @@ namespace Iviz.Controllers
             //node.Target = grid;
             //node.SetName("");
 
-            ModuleData = moduleData;
+            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
 
             reflectionProbe = new GameObject().AddComponent<ReflectionProbe>();
             reflectionProbe.gameObject.name = "Grid Reflection Probe";
@@ -202,7 +203,7 @@ namespace Iviz.Controllers
             reflectionProbe.nearClipPlane = 0.5f;
             reflectionProbe.farClipPlane = 100f;
             
-            reflectionProbe.backgroundColor = TFListener.MainCamera.backgroundColor;
+            reflectionProbe.backgroundColor = TfListener.MainCamera.backgroundColor;
             
             reflectionProbe.mode = UnityEngine.Rendering.ReflectionProbeMode.Realtime;
             reflectionProbe.refreshMode = UnityEngine.Rendering.ReflectionProbeRefreshMode.ViaScripting;

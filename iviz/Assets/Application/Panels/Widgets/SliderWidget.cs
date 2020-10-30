@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,11 +13,17 @@ namespace Iviz.App
         [SerializeField] Text label = null;
         [SerializeField] Text value = null;
 
+        [NotNull]
         public string Label
         {
             get => label.text;
             set
             {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+                
                 name = "Slider:" + value;
                 label.text = value;
             }
@@ -133,54 +140,63 @@ namespace Iviz.App
             ValueChanged = null;
         }
 
-        public SliderWidget SetLabel(string f)
+        [NotNull]
+        public SliderWidget SetLabel([NotNull] string f)
         {
             Label = f;
             return this;
         }
 
+        [NotNull]
         public SliderWidget SetValue(float f)
         {
             Value = f;
             return this;
         }
 
+        [NotNull]
         public SliderWidget SetMinValue(float f)
         {
             Min = f;
             return this;
         }
 
+        [NotNull]
         public SliderWidget SetMaxValue(float f)
         {
             Max = f;
             return this;
         }
 
+        [NotNull]
         public SliderWidget UpdateValue()
         {
             OnValueChanged(ValueInternal);
             return this;
         }
 
+        [NotNull]
         public SliderWidget SetInteractable(bool f)
         {
             Interactable = f;
             return this;
         }
 
+        [NotNull]
         public SliderWidget SetIntegerOnly(bool f)
         {
             IntegerOnly = f;
             return this;
         }
 
+        [NotNull]
         public SliderWidget SubscribeValueChanged(Action<float> f)
         {
             ValueChanged += f;
             return this;
         }
 
+        [NotNull]
         public SliderWidget SetNumberOfSteps(int num)
         {
             NumberOfSteps = num;

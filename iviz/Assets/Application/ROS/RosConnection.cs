@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Roslib;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Controllers
@@ -30,9 +31,9 @@ namespace Iviz.Controllers
         }
 
         public ConnectionState ConnectionState { get; private set; } = ConnectionState.Disconnected;
-        public virtual Uri MasterUri { get; set; }
-        public virtual Uri MyUri { get; set; }
-        public virtual string MyId { get; set; }
+        [CanBeNull] public virtual Uri MasterUri { get; set; }
+        [CanBeNull] public virtual Uri MyUri { get; set; }
+        [CanBeNull] public virtual string MyId { get; set; }
         public bool KeepReconnecting { get; set; }
         public ReadOnlyCollection<BriefTopicInfo> PublishedTopics { get; protected set; } = EmptyTopics;
 
@@ -126,17 +127,17 @@ namespace Iviz.Controllers
             WaitForRequest
         } 
 
-        public abstract void Subscribe<T>(RosListener<T> listener) where T : IMessage, IDeserializable<T>, new();
-        public abstract void Unsubscribe(IRosListener subscriber);
-        public abstract void Advertise<T>(RosSender<T> advertiser) where T : IMessage;
-        public abstract void Unadvertise(IRosSender advertiser);
-        public abstract void Publish<T>(RosSender<T> advertiser, T msg) where T : IMessage;
-        public abstract void AdvertiseService<T>(string service, Action<T> callback) where T : IService, new();
+        public abstract void Subscribe<T>([NotNull] RosListener<T> listener) where T : IMessage, IDeserializable<T>, new();
+        public abstract void Unsubscribe([NotNull] IRosListener subscriber);
+        public abstract void Advertise<T>([NotNull] RosSender<T> advertiser) where T : IMessage;
+        public abstract void Unadvertise([NotNull] IRosSender advertiser);
+        public abstract void Publish<T>([NotNull] RosSender<T> advertiser, [NotNull] T msg) where T : IMessage;
+        public abstract void AdvertiseService<T>([NotNull] string service, [NotNull] Action<T> callback) where T : IService, new();
         public abstract bool CallService<T>(string service, T srv) where T : IService;
-        public abstract ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics(RequestType type = RequestType.CachedButRequestInBackground);
-        public abstract ReadOnlyCollection<string> GetSystemParameterList();
-        public abstract int GetNumPublishers(string topic);
-        public abstract int GetNumSubscribers(string topic);
-        public abstract object GetParameter(string parameter);
+        [NotNull] public abstract ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics(RequestType type = RequestType.CachedButRequestInBackground);
+        [NotNull] public abstract ReadOnlyCollection<string> GetSystemParameterList();
+        public abstract int GetNumPublishers([NotNull] string topic);
+        public abstract int GetNumSubscribers([NotNull] string topic);
+        public abstract object GetParameter([NotNull] string parameter);
     }
 }

@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using Iviz.Roslib;
 using Iviz.Displays;
 using Iviz.Resources;
+using JetBrains.Annotations;
 
 namespace Iviz.Controllers
 {
@@ -34,9 +35,9 @@ namespace Iviz.Controllers
 
         public override TfFrame Frame => Node.Parent;
 
-        public ImageTexture ImageTexture { get; }
-        public Texture2D Texture => ImageTexture.Texture;
-        public Material Material => ImageTexture.Material;
+        [NotNull] public ImageTexture ImageTexture { get; }
+        [CanBeNull] Texture2D Texture => ImageTexture.Texture;
+        [NotNull] public Material Material => ImageTexture.Material;
 
         public int ImageWidth => Texture?.width ?? 0;
         public int ImageHeight => Texture?.height ?? 0;
@@ -45,6 +46,7 @@ namespace Iviz.Controllers
         public string Description => descriptionOverride ?? ImageTexture.Description;
 
         public bool IsMono => ImageTexture.IsMono;
+        bool isProcessing;
 
         public override IModuleData ModuleData => Node.ModuleData;
 
@@ -172,11 +174,11 @@ namespace Iviz.Controllers
             }
         }
 
-        public ImageListener(IModuleData moduleData)
+        public ImageListener([NotNull] IModuleData moduleData)
         {
             ImageTexture = new ImageTexture();
             Node = DisplayClickableNode.Instantiate("[ImageNode]");
-            Node.ModuleData = moduleData; 
+            Node.ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData)); 
             marker = ResourcePool.GetOrCreate<ImageResource>(Resource.Displays.Image);
             marker.Texture = ImageTexture;
             Node.Target = marker;
@@ -200,19 +202,30 @@ namespace Iviz.Controllers
             Node.SetName($"[{config.Topic}]");
         }
 
-        void HandlerCompressed(CompressedImage msg)
+        bool HandlerCompressed(CompressedImage msg)
         {
-            void AttachToParent() => Node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
+            if (isProcessing)
+            {
+                return false;
+            }
+            
+            isProcessing = true;
+
+            void PostProcess()
+            {
+                Node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
+                isProcessing = false;
+            }
 
             switch (msg.Format)
             {
                 case "png":
                     descriptionOverride = null;
-                    ImageTexture.SetPng(msg.Data, AttachToParent);
+                    ImageTexture.ProcessPng(msg.Data, PostProcess);
                     break;
                 case "jpeg":
                     descriptionOverride = null;
-                    ImageTexture.SetJpg(msg.Data, AttachToParent);
+                    ImageTexture.ProcessJpg(msg.Data, PostProcess);
                     break;
                 default:
                     descriptionOverride = msg.Format.Length == 0 ?
@@ -220,6 +233,8 @@ namespace Iviz.Controllers
                         $"<b>Desc:</b> <color=red>[{msg.Format}](?)</color>";
                     break;
             }
+
+            return true;
         }
 
         void Handler(Image msg)

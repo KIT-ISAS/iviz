@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System;
+using JetBrains.Annotations;
 
 namespace Iviz.Controllers
 {
@@ -7,7 +8,7 @@ namespace Iviz.Controllers
     {
         TfFrame parent;
 
-        public virtual TfFrame Parent
+        [CanBeNull] public virtual TfFrame Parent
         {
             get => parent;
             set => SetParent(value, true);
@@ -25,30 +26,45 @@ namespace Iviz.Controllers
             parent?.AddListener(this);
             if (attach)
             {
-                transform.SetParentLocal(newParent is null ? 
-                    TFListener.RootFrame.transform : 
+                transform.SetParentLocal(newParent == null ? 
+                    TfListener.RootFrame.transform : 
                     newParent.transform);
             }
         }
 
-        public void AttachTo(string parentId)
+        public void AttachTo([NotNull] string parentId)
         {
+            if (parentId == null)
+            {
+                throw new ArgumentNullException(nameof(parentId));
+            }
+
             if (Parent == null || parentId != Parent.Id)
             {
                 Parent = string.IsNullOrEmpty(parentId) ? 
-                    TFListener.MapFrame : 
-                    TFListener.GetOrCreateFrame(parentId);
+                    TfListener.MapFrame : 
+                    TfListener.GetOrCreateFrame(parentId);
             }
         }
-
-        public void AttachTo(string parentId, in Msgs.time timestamp)
+        
+        public void AttachTo([NotNull] string parentId, in Msgs.time timestamp)
         {
+            if (parentId == null)
+            {
+                throw new ArgumentNullException(nameof(parentId));
+            }
+
             AttachTo(parentId, timestamp.ToTimeSpan());
         }
 
-        public void AttachTo(string parentId, in TimeSpan timestamp)
+        public void AttachTo([NotNull] string parentId, in TimeSpan timestamp)
         {
-            transform.SetParentLocal(TFListener.MapFrame.transform);
+            if (parentId == null)
+            {
+                throw new ArgumentNullException(nameof(parentId));
+            }
+
+            transform.SetParentLocal(TfListener.MapFrame.transform);
             if (parentId.Length == 0)
             {
                 transform.SetPose(Pose.identity);
@@ -57,11 +73,14 @@ namespace Iviz.Controllers
             {
                 if (Parent == null || parentId != Parent.Id)
                 {
-                    TfFrame frame = TFListener.GetOrCreateFrame(parentId, this);
+                    TfFrame frame = TfListener.GetOrCreateFrame(parentId, this);
                     SetParent(frame, false);
                 }
 
-                transform.SetPose(Parent.LookupPose(timestamp));
+                if (!(Parent is null))
+                {
+                    transform.SetPose(Parent.LookupPose(timestamp));
+                }
             }
         }
 
@@ -77,8 +96,13 @@ namespace Iviz.Controllers
 
     public sealed class SimpleDisplayNode : DisplayNode
     {
-        public static SimpleDisplayNode Instantiate(string name, Transform transform = null)
+        public static SimpleDisplayNode Instantiate([NotNull] string name, [CanBeNull] Transform transform = null)
         {
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
             GameObject obj = new GameObject(name);
             SimpleDisplayNode node = obj.AddComponent<SimpleDisplayNode>();
             if (!(transform is null))
@@ -87,7 +111,7 @@ namespace Iviz.Controllers
             }
             else
             {
-                node.Parent = TFListener.MapFrame;
+                node.Parent = TfListener.MapFrame;
             }
 
             return node;

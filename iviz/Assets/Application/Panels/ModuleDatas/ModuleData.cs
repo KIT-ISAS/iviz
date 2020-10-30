@@ -7,11 +7,12 @@ namespace Iviz.App
 {
     public abstract class ModuleData : IModuleData
     {
-        protected ModuleListPanel ModuleListPanel { get; }
+        [NotNull] protected ModuleListPanel ModuleListPanel { get; }
         protected DataPanelManager DataPanelManager => ModuleListPanel.DataPanelManager;
 
-        string buttonText;
+        string buttonText = "";
 
+        [NotNull]
         public string ButtonText
         {
             get => buttonText;
@@ -22,20 +23,20 @@ namespace Iviz.App
             }
         }
 
-        public string Topic { get; }
-        public string Type { get; }
+        [NotNull] public string Topic { get; }
+        [NotNull] public string Type { get; }
         public abstract Resource.Module Module { get; }
-        public abstract DataPanelContents Panel { get; }
-        public abstract IController Controller { get; }
-        public abstract IConfiguration Configuration { get; }
+        [NotNull] public abstract DataPanelContents Panel { get; }
+        [NotNull] public abstract IController Controller { get; }
+        [NotNull] public abstract IConfiguration Configuration { get; }
         bool Visible => Configuration?.Visible ?? true;
         bool IsSelected => DataPanelManager.SelectedModuleData == this;
 
-        protected ModuleData(ModuleListPanel moduleList, string topic, string type)
+        protected ModuleData([NotNull] ModuleListPanel moduleList, [NotNull] string topic, [NotNull] string type)
         {
-            ModuleListPanel = moduleList;
-            Topic = topic;
-            Type = type;
+            ModuleListPanel = moduleList ? moduleList : throw new ArgumentNullException(nameof(moduleList));
+            Topic = topic ?? throw new ArgumentNullException(nameof(topic));
+            Type = type ?? throw new ArgumentNullException(nameof(type));
         }
 
         protected virtual void UpdateModuleButton()
@@ -70,10 +71,11 @@ namespace Iviz.App
             {
                 return;
             }
+
             Panel.ClearSubscribers();
             SetupPanel();
         }
-        
+
         public virtual void CleanupPanel()
         {
         }
@@ -94,7 +96,7 @@ namespace Iviz.App
             ModuleListPanel.AllGuiVisible = true;
         }
 
-        public abstract void AddToState(StateConfiguration config);
+        public abstract void AddToState([NotNull] StateConfiguration config);
 
         public virtual void OnARModeChanged(bool value)
         {
@@ -109,17 +111,18 @@ namespace Iviz.App
         {
             Controller.ResetController();
         }
-        
+
+        [NotNull]
         public static ModuleData CreateFromResource([NotNull] ModuleDataConstructor c)
         {
             if (c is null)
             {
                 throw new ArgumentNullException(nameof(c));
             }
-            
+
             switch (c.Module)
             {
-                case Resource.Module.TF: return new TFModuleData(c);
+                case Resource.Module.TF: return new TfModuleData(c);
                 case Resource.Module.PointCloud: return new PointCloudModuleData(c);
                 case Resource.Module.Grid: return new GridModuleData(c);
                 case Resource.Module.Image: return new ImageModuleData(c);

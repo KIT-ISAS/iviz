@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -22,7 +23,7 @@ namespace Iviz.Displays
             }
         }
 
-        static void SetLayer(Transform transform, int layer)
+        static void SetLayer([NotNull] Transform transform, int layer)
         {
             transform.gameObject.layer = layer;
             for (int i = 0; i < transform.childCount; i++)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
@@ -22,18 +23,16 @@ namespace Iviz.Displays
         static readonly int PropLocalScale = Shader.PropertyToID("_LocalScale");
         static readonly int PropLocalOffset = Shader.PropertyToID("_LocalOffset");
 
-        [SerializeField] int size;
         [SerializeField] Vector3 elementScale3;
         [SerializeField] Vector3 preTranslation;
         [SerializeField] Mesh mesh;
-        bool useIntensityForScaleY;
-
-
+        
         readonly uint[] argsBuffer = {0, 0, 0, 0, 0};
-        ComputeBuffer argsComputeBuffer;
-        Info<GameObject> meshResource;
+        [CanBeNull] ComputeBuffer argsComputeBuffer;
+        [CanBeNull] Info<GameObject> meshResource;
         NativeList<float4> pointBuffer;
-        ComputeBuffer pointComputeBuffer;
+        [CanBeNull] ComputeBuffer pointComputeBuffer;
+        bool useIntensityForScaleY;
 
         Mesh Mesh
         {
@@ -50,6 +49,7 @@ namespace Iviz.Displays
         /// <summary>
         /// The resource to be multiplied.
         /// </summary>
+        [CanBeNull]
         public Info<GameObject> MeshResource
         {
             get => meshResource;
@@ -96,6 +96,7 @@ namespace Iviz.Displays
         /// <summary>
         /// Sets the instance positions and colors with the given collection.
         /// </summary>
+        [NotNull]
         public IReadOnlyCollection<PointWithColor> PointsWithColor
         {
             get => pointBuffer.Select(f => new PointWithColor(f)).ToArray();
@@ -212,7 +213,7 @@ namespace Iviz.Displays
         /// </summary>
         /// <param name="points">The list of positions and colors.</param>
         /// <param name="reserve">The number of points to reserve, or 0 if unknown.</param>
-        public void Set(IEnumerable<PointWithColor> points, int reserve = 0)
+        public void Set([NotNull] IEnumerable<PointWithColor> points, int reserve = 0)
         {
             if (reserve < 0)
             {

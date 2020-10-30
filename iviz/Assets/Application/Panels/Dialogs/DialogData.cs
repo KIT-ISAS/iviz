@@ -1,14 +1,17 @@
-﻿namespace Iviz.App
+﻿using System;
+using JetBrains.Annotations;
+
+namespace Iviz.App
 {
     public abstract class DialogData
     {
-        protected ModuleListPanel ModuleListPanel { get; private set; }
+        [NotNull] protected ModuleListPanel ModuleListPanel { get; }
         protected DialogPanelManager DialogPanelManager => ModuleListPanel.DialogPanelManager;
-        public abstract IDialogPanelContents Panel { get; }
+        [NotNull] public abstract IDialogPanelContents Panel { get; }
 
-        public virtual void Initialize(ModuleListPanel panel)
+        protected DialogData([NotNull] ModuleListPanel moduleListPanel)
         {
-            ModuleListPanel = panel;
+            ModuleListPanel = moduleListPanel ? moduleListPanel : throw new ArgumentNullException(nameof(moduleListPanel));
         }
 
         public abstract void SetupPanel();

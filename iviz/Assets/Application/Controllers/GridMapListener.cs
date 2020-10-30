@@ -6,6 +6,7 @@ using Iviz.Displays;
 using Iviz.Msgs.GridMapMsgs;
 using Iviz.Resources;
 using Iviz.Roslib;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Controllers
@@ -153,9 +154,9 @@ namespace Iviz.Controllers
 
         public ReadOnlyCollection<string> FieldNames { get; }
 
-        public GridMapListener(IModuleData moduleData)
+        public GridMapListener([NotNull] IModuleData moduleData)
         {
-            ModuleData = moduleData;
+            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
          
             FieldNames = new ReadOnlyCollection<string>(fieldNames);
             
@@ -168,8 +169,7 @@ namespace Iviz.Controllers
 
         public override void StartListening()
         {
-            Listener = new RosListener<GridMap>(config.Topic, Handler);
-            Listener.MaxQueueSize = (int) MaxQueueSize;
+            Listener = new RosListener<GridMap>(config.Topic, Handler) {MaxQueueSize = (int) MaxQueueSize};
             //name = "[" + config.Topic + "]";
         }
 
@@ -178,7 +178,7 @@ namespace Iviz.Controllers
             return double.IsNaN(x) || x <= 0;
         }
 
-        void Handler(GridMap msg)
+        void Handler([NotNull] GridMap msg)
         {
             if (IsInvalidSize(msg.Info.LengthX) ||
                 IsInvalidSize(msg.Info.LengthY) ||

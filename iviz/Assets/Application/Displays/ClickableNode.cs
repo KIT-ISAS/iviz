@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using JetBrains.Annotations;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
 #if UNITY_WSA
@@ -20,9 +21,8 @@ namespace Iviz.Controllers
         public abstract Bounds WorldBounds { get; }
         public abstract Pose BoundsPose { get; }
         public abstract Vector3 BoundsScale { get; }
-        public abstract string Name { get; }
-
-        public IModuleData ModuleData { get; set; }
+        [NotNull] public abstract string Name { get; }
+        [CanBeNull] public IModuleData ModuleData { get; set; }
         public bool UsesBoundaryBox { get; protected set; } = false;
 
 
@@ -35,22 +35,22 @@ namespace Iviz.Controllers
                 if (value && !selected)
                 {
                     selected = true;
-                    TFListener.GuiCamera.Select(this);
+                    TfListener.GuiCamera.Select(this);
                 }
                 else if (!value && selected)
                 {
                     selected = false;
-                    TFListener.GuiCamera.Unselect(this);
+                    TfListener.GuiCamera.Unselect(this);
                 }
             }
         }
 
-        static int GetClickCount(PointerEventData eventData)
+        static int GetClickCount([NotNull] PointerEventData eventData)
         {
             return Settings.IsMobile ? Input.GetTouch(0).tapCount : eventData.clickCount;
         }
 
-        static bool IsRealClick(PointerEventData eventData)
+        static bool IsRealClick([NotNull] PointerEventData eventData)
         {
             return
                 eventData.button == PointerEventData.InputButton.Right &&
@@ -58,7 +58,7 @@ namespace Iviz.Controllers
                 (Time.realtimeSinceStartup - eventData.clickTime) < MaxClickTime;
         }
 
-        public virtual void OnPointerClick(PointerEventData eventData)
+        public virtual void OnPointerClick([NotNull] PointerEventData eventData)
         {
             if (!Settings.IsMobile && (eventData.button != PointerEventData.InputButton.Right || !IsRealClick(eventData)))
             {
@@ -85,12 +85,12 @@ namespace Iviz.Controllers
 
         protected virtual void OnSingleClick()
         {
-            TFListener.GuiCamera.ToggleSelect(this);
+            TfListener.GuiCamera.ToggleSelect(this);
         }
 
         protected virtual void OnDoubleClick()
         {
-            TFListener.GuiCamera.Select(this);
+            TfListener.GuiCamera.Select(this);
             ModuleData?.ShowPanel();
         }
         
@@ -98,7 +98,7 @@ namespace Iviz.Controllers
         {
             base.Stop();
             ModuleData = null;
-            TFListener.GuiCamera.Unselect(this);
+            TfListener.GuiCamera.Unselect(this);
         }
 
 #if UNITY_WSA

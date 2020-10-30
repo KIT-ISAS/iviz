@@ -5,6 +5,7 @@ using Iviz.Msgs.SensorMsgs;
 using System.Runtime.Serialization;
 using Iviz.Roslib;
 using Iviz.Resources;
+using JetBrains.Annotations;
 
 namespace Iviz.Controllers
 {
@@ -33,7 +34,7 @@ namespace Iviz.Controllers
     {
         public override IModuleData ModuleData { get; }
 
-        public override TfFrame Frame => TFListener.MapFrame;
+        public override TfFrame Frame => TfListener.MapFrame;
 
         readonly JointStateConfiguration config = new JointStateConfiguration();
         public JointStateConfiguration Config
@@ -100,9 +101,9 @@ namespace Iviz.Controllers
 
         readonly HashSet<string> warnNotFound = new HashSet<string>();
 
-        public JointStateListener(IModuleData moduleData)
+        public JointStateListener([NotNull] IModuleData moduleData)
         {
-            ModuleData = moduleData;
+            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
         }
 
         void OnRobotStopped()

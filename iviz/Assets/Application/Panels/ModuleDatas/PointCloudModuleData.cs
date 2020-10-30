@@ -1,5 +1,6 @@
 ﻿using Iviz.Controllers;
 using Iviz.Resources;
+using JetBrains.Annotations;
 
 namespace Iviz.App
 {
@@ -9,8 +10,8 @@ namespace Iviz.App
 
     public sealed class PointCloudModuleData : ListenerModuleData
     {
-        readonly PointCloudListener listener;
-        readonly PointCloudPanelContents panel;
+        [NotNull] readonly PointCloudListener listener;
+        [NotNull] readonly PointCloudPanelContents panel;
 
         protected override ListenerController Listener => listener;
 
@@ -19,11 +20,11 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
 
-        public PointCloudModuleData(ModuleDataConstructor constructor) :
+        public PointCloudModuleData([NotNull] ModuleDataConstructor constructor) :
         base(constructor.ModuleList,
             constructor.GetConfiguration<PointCloudConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.PointCloud) as PointCloudPanelContents;
+            panel = DataPanelManager.GetPanelByResourceType<PointCloudPanelContents>(Resource.Module.PointCloud);
             listener = new PointCloudListener(this);
             if (constructor.Configuration == null)
             {

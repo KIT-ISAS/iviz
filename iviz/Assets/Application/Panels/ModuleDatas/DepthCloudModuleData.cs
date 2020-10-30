@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.Controllers;
+using JetBrains.Annotations;
 
 namespace Iviz.App
 {
     public sealed class DepthCloudModuleData : ModuleData
     {
-        readonly DepthCloudController controller;
-        readonly DepthCloudPanelContents panel;
+        [NotNull] readonly DepthCloudController controller;
+        [NotNull] readonly DepthCloudPanelContents panel;
 
         public override DataPanelContents Panel => panel;
         public override Resource.Module Module => Resource.Module.DepthCloud;
@@ -18,19 +19,19 @@ namespace Iviz.App
         readonly List<string> depthImageCandidates = new List<string>();
         readonly List<string> colorImageCandidates = new List<string>();
 
-        public DepthCloudModuleData(ModuleDataConstructor constructor) :
-        base(constructor.ModuleList, constructor.Topic, constructor.Type)
+        public DepthCloudModuleData([NotNull] ModuleDataConstructor constructor) :
+            base(constructor.ModuleList, constructor.Topic, constructor.Type)
         {
-
-            panel = DataPanelManager.GetPanelByResourceType(Resource.Module.DepthCloud) as DepthCloudPanelContents;
+            panel = DataPanelManager.GetPanelByResourceType<DepthCloudPanelContents>(Resource.Module.DepthCloud);
 
             controller = new DepthCloudController(this);
             if (constructor.Configuration != null)
             {
-                controller.Config = (DepthCloudConfiguration)constructor.Configuration;
+                controller.Config = (DepthCloudConfiguration) constructor.Configuration;
                 controller.ColorImage = GetImageWithName(controller.ColorName);
                 controller.DepthImage = GetImageWithName(controller.DepthName);
             }
+
             UpdateModuleButton();
         }
 
@@ -48,9 +49,7 @@ namespace Iviz.App
             depthImageCandidates.Clear();
             depthImageCandidates.Add("<none>");
             depthImageCandidates.AddRange(
-                ModuleListPanel.ModuleDatas.
-                Where(x => x.Module == Resource.Module.Image).
-                Select(x => x.Topic)
+                ModuleListPanel.ModuleDatas.Where(x => x.Module == Resource.Module.Image).Select(x => x.Topic)
             );
             panel.Depth.Options = depthImageCandidates;
             panel.Depth.Value = controller.DepthName;
@@ -58,9 +57,7 @@ namespace Iviz.App
             colorImageCandidates.Clear();
             colorImageCandidates.Add("<none>");
             colorImageCandidates.AddRange(
-                ModuleListPanel.ModuleDatas.
-                Where(x => x.Module == Resource.Module.Image).
-                Select(x => x.Topic)
+                ModuleListPanel.ModuleDatas.Where(x => x.Module == Resource.Module.Image).Select(x => x.Topic)
             );
             panel.Color.Options = colorImageCandidates;
             panel.Color.Value = controller.ColorName;
@@ -101,9 +98,7 @@ namespace Iviz.App
 
         ImageListener GetImageWithName(string name)
         {
-            return ModuleListPanel.ModuleDatas.
-                OfType<ImageModuleData>().
-                FirstOrDefault(x => x.Topic == name)?.Image;
+            return ModuleListPanel.ModuleDatas.OfType<ImageModuleData>().FirstOrDefault(x => x.Topic == name)?.Image;
         }
 
         public override void UpdatePanel()
@@ -113,18 +108,14 @@ namespace Iviz.App
             depthImageCandidates.Clear();
             depthImageCandidates.Add("<none>");
             depthImageCandidates.AddRange(
-                ModuleListPanel.ModuleDatas.
-                Where(x => x.Module == Resource.Module.Image).
-                Select(x => x.Topic)
+                ModuleListPanel.ModuleDatas.Where(x => x.Module == Resource.Module.Image).Select(x => x.Topic)
             );
             panel.Depth.Options = depthImageCandidates;
 
             colorImageCandidates.Clear();
             colorImageCandidates.Add("<none>");
             colorImageCandidates.AddRange(
-                ModuleListPanel.ModuleDatas.
-                Where(x => x.Module == Resource.Module.Image).
-                Select(x => x.Topic)
+                ModuleListPanel.ModuleDatas.Where(x => x.Module == Resource.Module.Image).Select(x => x.Topic)
             );
             panel.Color.Options = colorImageCandidates;
         }

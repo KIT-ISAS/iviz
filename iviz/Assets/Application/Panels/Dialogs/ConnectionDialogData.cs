@@ -2,7 +2,7 @@
 using Iviz.Controllers;
 using Iviz.Displays;
 using Iviz.Roslib;
-using Logger = Iviz.Logger;
+using JetBrains.Annotations;
 
 namespace Iviz.App
 {
@@ -16,11 +16,11 @@ namespace Iviz.App
         static Uri DefaultMyUri => RosClient.TryGetCallerUri(DefaultPort);
         static string DefaultMyId { get; } = "/iviz_" + UnityEngine.Application.platform.ToString().ToLower();
 
-        ConnectionDialogContents panel;
+        [NotNull] readonly ConnectionDialogContents panel;
         public override IDialogPanelContents Panel => panel;
 
-        Uri masterUri = DefaultMasterUri;
-        public Uri MasterUri
+        [CanBeNull] Uri masterUri = DefaultMasterUri;
+        [CanBeNull] public Uri MasterUri
         {
             get => masterUri;
             set
@@ -29,8 +29,8 @@ namespace Iviz.App
                 MasterUriChanged?.Invoke(value);
             }
         }
-        Uri myUri = DefaultMyUri;
-        public Uri MyUri
+        [CanBeNull] Uri myUri = DefaultMyUri;
+        [CanBeNull] public Uri MyUri
         {
             get => myUri;
             set
@@ -39,8 +39,8 @@ namespace Iviz.App
                 MyUriChanged?.Invoke(value);
             }
         }
-        string myId = DefaultMyId;
-        public string MyId
+        [CanBeNull] string myId = DefaultMyId;
+        [CanBeNull] public string MyId
         {
             get => myId;
             set
@@ -55,10 +55,9 @@ namespace Iviz.App
         public event Action<string> MyIdChanged;
         public event Action<bool> MasterActiveChanged;
         
-        public override void Initialize(ModuleListPanel newPanel)
+        public ConnectionDialogData([NotNull] ModuleListPanel newPanel) : base(newPanel)
         {
-            base.Initialize(newPanel);
-            panel = (ConnectionDialogContents)DialogPanelManager.GetPanelByType(DialogPanelType.Connection);
+            panel = DialogPanelManager.GetPanelByType<ConnectionDialogContents>(DialogPanelType.Connection);
 
             Logger.LogInternal += OnLogInternal;
         }
@@ -74,9 +73,9 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
-            panel.MyUri.Value = MyUri.ToString();
-            panel.MyId.Value = MyId;
-            panel.MasterUri.Value = MasterUri.ToString();
+            panel.MyUri.Value = MyUri == null ? "" : MyUri.ToString();
+            panel.MyId.Value = MyId ?? "";
+            panel.MasterUri.Value = MasterUri == null ? "" : MasterUri.ToString();
             panel.MasterUri.Interactable = !RosServerManager.IsActive;
             panel.LineLog.Active = true;
 
@@ -97,13 +96,13 @@ namespace Iviz.App
             panel.RefreshMyId.Clicked += () =>
             {
                 MyId = DefaultMyId;
-                panel.MyId.Value = MyId;
+                panel.MyId.Value = MyId ?? "";
                 MyIdChanged?.Invoke(MyId);
             };
             panel.RefreshMyUri.Clicked += () =>
             {
                 MyUri = DefaultMyUri;
-                panel.MyUri.Value = MyUri.ToString();
+                panel.MyUri.Value = MyUri == null ? "" : MyUri.ToString();
             };
             panel.ServerMode.Clicked += () =>
             {
@@ -115,6 +114,12 @@ namespace Iviz.App
                         return;
                     }
 
+                    if (MyUri == null)
+                    {
+                        Logger.Internal($"Cannot create master node without a valid own uri!");
+                        return;
+                    }
+
                     if (MyUri.Port == RosServerManager.DefaultPort)
                     {
                         Logger.Internal($"Master port {RosServerManager.DefaultPort} is already being used by the caller!");
@@ -122,7 +127,7 @@ namespace Iviz.App
                     }
                     
                     Uri ownMasterUri = new Uri($"http://{MyUri.Host}:{RosServerManager.DefaultPort}/");
-                    string ownMasterId = "/iviz_master";
+                    const string ownMasterId = "/iviz_master";
 
                     if (RosServerManager.Create(ownMasterUri, ownMasterId))
                     {

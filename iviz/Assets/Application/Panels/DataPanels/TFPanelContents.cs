@@ -1,14 +1,13 @@
 ﻿namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="TFModuleData"/> 
+    /// <see cref="TfModuleData"/> 
     /// </summary>
-    public sealed class TFPanelContents : ListenerPanelContents
+    public sealed class TfPanelContents : ListenerPanelContents
     {
         public ListenerWidget ListenerStatic { get; private set; }
         public ToggleButtonWidget HideButton { get; private set; }
         public FrameWidget Frame { get; private set; }
-        //public ToggleWidget ShowAxes { get; private set; }
         public ToggleWidget ShowFrameLabels { get; private set; }
         public SliderWidget FrameSize { get; private set; }
         public ToggleWidget ConnectToParent { get; private set; }
