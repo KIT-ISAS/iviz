@@ -1,4 +1,6 @@
-﻿using Iviz.Resources;
+﻿using System;
+using Iviz.Resources;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,11 +11,17 @@ namespace Iviz.App
         [SerializeField] Text label = null;
         bool interactable = true;
 
+        [NotNull]
         public string Label
         {
             get => label.text;
             set
             {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+                
                 name = "DataLabel:" + value;
                 label.text = value;
             }
@@ -30,10 +38,7 @@ namespace Iviz.App
         public bool HasRichText
         {
             get => label.supportRichText;
-            set
-            {
-                label.supportRichText = value;
-            }
+            set => label.supportRichText = value;
         }
 
         public TextAnchor Alignment
@@ -42,7 +47,8 @@ namespace Iviz.App
             set => label.alignment = value;
         }
 
-        public DataLabelWidget SetLabel(string f)
+        [NotNull]
+        public DataLabelWidget SetLabel([NotNull] string f)
         {
             Label = f;
             return this;
@@ -52,12 +58,14 @@ namespace Iviz.App
         {
         }
 
+        [NotNull]
         public DataLabelWidget SetHasRichText(bool b)
         {
             HasRichText = b;
             return this;
         }
         
+        [NotNull]
         public DataLabelWidget SetAlignment(TextAnchor t)
         {
             Alignment = t;

@@ -15,7 +15,7 @@ namespace Iviz.Controllers
     {
         const int TaskWaitTimeInMs = 2000;
 
-        protected static readonly ReadOnlyCollection<BriefTopicInfo> EmptyTopics =
+        [ItemNotNull] protected static readonly ReadOnlyCollection<BriefTopicInfo> EmptyTopics =
             Array.Empty<BriefTopicInfo>().AsReadOnly();
 
         readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
@@ -35,7 +35,7 @@ namespace Iviz.Controllers
         [CanBeNull] public virtual Uri MyUri { get; set; }
         [CanBeNull] public virtual string MyId { get; set; }
         public bool KeepReconnecting { get; set; }
-        public ReadOnlyCollection<BriefTopicInfo> PublishedTopics { get; protected set; } = EmptyTopics;
+        protected ReadOnlyCollection<BriefTopicInfo> PublishedTopics { get; set; } = EmptyTopics;
 
         public event Action<ConnectionState> ConnectionStateChanged;
 
@@ -125,17 +125,30 @@ namespace Iviz.Controllers
             CachedOnly,
             CachedButRequestInBackground,
             WaitForRequest
-        } 
+        }
 
-        public abstract void Subscribe<T>([NotNull] RosListener<T> listener) where T : IMessage, IDeserializable<T>, new();
+        public abstract void Subscribe<T>([NotNull] RosListener<T> listener)
+            where T : IMessage, IDeserializable<T>, new();
+
         public abstract void Unsubscribe([NotNull] IRosListener subscriber);
         public abstract void Advertise<T>([NotNull] RosSender<T> advertiser) where T : IMessage;
         public abstract void Unadvertise([NotNull] IRosSender advertiser);
         public abstract void Publish<T>([NotNull] RosSender<T> advertiser, [NotNull] T msg) where T : IMessage;
-        public abstract void AdvertiseService<T>([NotNull] string service, [NotNull] Action<T> callback) where T : IService, new();
+
+        public abstract void AdvertiseService<T>([NotNull] string service, [NotNull] Action<T> callback)
+            where T : IService, new();
+
         public abstract bool CallService<T>(string service, T srv) where T : IService;
-        [NotNull] public abstract ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics(RequestType type = RequestType.CachedButRequestInBackground);
-        [NotNull] public abstract ReadOnlyCollection<string> GetSystemParameterList();
+
+        [ItemNotNull]
+        [NotNull]
+        public abstract ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics(
+            RequestType type = RequestType.CachedButRequestInBackground);
+
+        [NotNull]
+        [ItemNotNull]
+        public abstract ReadOnlyCollection<string> GetSystemParameterList();
+
         public abstract int GetNumPublishers([NotNull] string topic);
         public abstract int GetNumSubscribers([NotNull] string topic);
         public abstract object GetParameter([NotNull] string parameter);

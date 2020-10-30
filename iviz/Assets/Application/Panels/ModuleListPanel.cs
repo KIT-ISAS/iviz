@@ -53,9 +53,9 @@ namespace Iviz.App
 
         [SerializeField] Joystick joystick = null;
 
-        readonly List<GameObject> buttons = new List<GameObject>();
-        readonly List<ModuleData> moduleDatas = new List<ModuleData>();
-        readonly HashSet<string> topicsWithModule = new HashSet<string>();
+        [ItemNotNull] readonly List<GameObject> buttons = new List<GameObject>();
+        [ItemNotNull] readonly List<ModuleData> moduleDatas = new List<ModuleData>();
+        [ItemNotNull] readonly HashSet<string> topicsWithModule = new HashSet<string>();
 
         int frameCounter;
         float buttonHeight;
@@ -92,7 +92,7 @@ namespace Iviz.App
         public DialogPanelManager DialogPanelManager => dialogPanelManager;
         public Joystick Joystick => joystick;
         [NotNull] public IReadOnlyCollection<ModuleData> ModuleDatas { get; }
-        TfModuleData TfData => (TfModuleData) moduleDatas[0];
+        [NotNull] TfModuleData TfData => (TfModuleData) moduleDatas[0];
         [NotNull] public IEnumerable<string> DisplayedTopics => topicsWithModule;
 
         public bool UnlockButtonVisible

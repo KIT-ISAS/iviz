@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Iviz.Controllers;
 using Unity.Collections;
 using UnityEngine;
@@ -69,7 +68,7 @@ namespace Iviz.Displays
                 return;
             }
 
-            Vector3 Project(in Vector2 v) => new Vector3(v.x, 0, v.y);
+            //Vector3 Project(in Vector2 v) => new Vector3(v.x, 0, v.y);
 
             /*
             Vector3 a, b;

@@ -3,12 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using Iviz.Displays;
 using Iviz.Resources;
-using Newtonsoft.Json;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Rendering;
 using LightType = Iviz.Sdf.LightType;
-using Object = System.Object;
 
 namespace Iviz.Editor
 {

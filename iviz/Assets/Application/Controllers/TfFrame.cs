@@ -40,6 +40,7 @@ namespace Iviz.Controllers
         LineConnector parentConnector;
         TrailResource trail;
 
+        [NotNull]
         public ReadOnlyDictionary<string, TfFrame> Children =>
             new ReadOnlyDictionary<string, TfFrame>(children);
 

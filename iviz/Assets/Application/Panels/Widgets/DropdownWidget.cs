@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,22 +13,40 @@ namespace Iviz.App
         [SerializeField] Text label = null;
         [SerializeField] Dropdown dropdown = null;
 
+        [NotNull]
         public string Label
         {
             get => label.text;
             set
             {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+                
                 label.text = value;
                 name = "Dropdown:" + value;
             }
         }
 
+        [NotNull]
         public string Value
         {
             get => optionDatas[Index].text;
             set
             {
-                Index = optionDatas.FindIndex(x => x.text == value);
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+                
+                int index = optionDatas.FindIndex(x => x.text == value);
+                if (index == -1)
+                {
+                    throw new ArgumentException("Value does not correspond to any index");
+                }
+
+                Index = index;
             }
         }
 
@@ -48,6 +67,7 @@ namespace Iviz.App
         }
 
         readonly List<Dropdown.OptionData> optionDatas = new List<Dropdown.OptionData>();
+        [NotNull]
         public IEnumerable<string> Options
         {
             get => optionDatas.Select(x => x.text);
@@ -71,30 +91,35 @@ namespace Iviz.App
             ValueChanged = null;
         }
 
+        [NotNull]
         public DropdownWidget SetInteractable(bool f)
         {
             Interactable = f;
             return this;
         }
 
+        [NotNull]
         public DropdownWidget SetIndex(int f)
         {
             Index = f;
             return this;
         }
 
-        public DropdownWidget SetLabel(string f)
+        [NotNull]
+        public DropdownWidget SetLabel([NotNull] string f)
         {
             Label = f;
             return this;
         }
 
-        public DropdownWidget SetOptions(IEnumerable<string> f)
+        [NotNull]
+        public DropdownWidget SetOptions([NotNull] IEnumerable<string> f)
         {
             Options = f;
             return this;
         }
 
+        [NotNull]
         public DropdownWidget SubscribeValueChanged(Action<int, string> f)
         {
             ValueChanged += f;
