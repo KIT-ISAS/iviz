@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using Iviz.Msgs.RosgraphMsgs;
 
-namespace Iviz
+namespace Iviz.Core
 {
     [DataContract]
     public readonly struct LogMessage
@@ -76,7 +76,7 @@ namespace Iviz
             }
 
             LogInternal?.Invoke(str.ToString());
-            UnityEngine.Debug.LogWarning("InternalError: " + str);
+            UnityEngine.Debug.LogWarning(str);
         }
     }
 

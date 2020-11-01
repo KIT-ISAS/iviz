@@ -1,4 +1,4 @@
-﻿using Iviz.Controllers;
+﻿using Iviz.Core;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -20,7 +20,7 @@ namespace Iviz.Displays
 
         void LateUpdate()
         {
-            GameObject mainCamera = TfListener.MainCamera.gameObject;
+            GameObject mainCamera = Settings.MainCamera.gameObject;
             transform.LookAt(2 * transform.position - mainCamera.transform.position, Vector3.up);
             if (UseAbsoluteOffset && parent != null)
             {

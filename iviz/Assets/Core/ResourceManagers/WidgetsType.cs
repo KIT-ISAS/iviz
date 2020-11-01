@@ -12,6 +12,7 @@ namespace Iviz.Resources
         public Info<GameObject> TfPanel { get; }
         public Info<GameObject> SaveAsPanel { get; }
         public Info<GameObject> AddTopicPanel { get; }
+        public Info<GameObject> MarkerPanel { get; }
 
         public Info<GameObject> HeadTitle { get; }
         public Info<GameObject> SectionTitle { get; }
@@ -33,6 +34,7 @@ namespace Iviz.Resources
         public Info<GameObject> Frame { get; }
         public Info<GameObject> Vector3Slider { get; }
         public Info<GameObject> InputWithHints { get; }
+        public Info<GameObject> MarkerWidget { get; }
 
         public WidgetsType()
         {
@@ -44,6 +46,7 @@ namespace Iviz.Resources
             TfPanel = new Info<GameObject>("Widgets/TF Tree Panel");
             SaveAsPanel = new Info<GameObject>("Widgets/Save As Panel");
             AddTopicPanel = new Info<GameObject>("Widgets/Add Topic Panel");
+            MarkerPanel = new Info<GameObject>("Widgets/Markers Panel");
 
             HeadTitle = new Info<GameObject>("Widgets/Head Title");
             SectionTitle = new Info<GameObject>("Widgets/Section Title");
@@ -65,6 +68,7 @@ namespace Iviz.Resources
             Frame = new Info<GameObject>("Widgets/Frame");
             Vector3Slider = new Info<GameObject>("Widgets/Vector3 Slider");
             InputWithHints = new Info<GameObject>("Widgets/Input Field With Hints");
+            MarkerWidget = new Info<GameObject>("Widgets/Markers");
         }
     }
 }

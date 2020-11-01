@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using System.Runtime.Serialization;
+using Iviz.Core;
 using Iviz.Roslib;
 using Iviz.Displays;
 using Iviz.Resources;

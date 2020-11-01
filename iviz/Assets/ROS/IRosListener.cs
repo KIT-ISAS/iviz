@@ -2,53 +2,22 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
+using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs;
-using Iviz.Roslib;
 using JetBrains.Annotations;
 using UnityEngine;
+using Logger = Iviz.Core.Logger;
 
-namespace Iviz.Controllers
+namespace Iviz.Ros
 {
-    [DataContract]
-    public class RosListenerStats : JsonToString
-    {
-        public RosListenerStats()
-        {
-        }
-
-        public RosListenerStats(int totalMessages, float jitterMin, float jitterMax,
-            float jitterMean, int messagesPerSecond, int bytesPerSecond, int messagesInQueue, int dropped)
-        {
-            TotalMessages = totalMessages;
-            JitterMin = jitterMin;
-            JitterMax = jitterMax;
-            JitterMean = jitterMean;
-            MessagesPerSecond = messagesPerSecond;
-            BytesPerSecond = bytesPerSecond;
-            MessagesInQueue = messagesInQueue;
-            Dropped = dropped;
-        }
-
-        [DataMember] public int TotalMessages { get; }
-        [DataMember] public float JitterMin { get; }
-        [DataMember] public float JitterMax { get; }
-        [DataMember] public float JitterMean { get; }
-        [DataMember] public int MessagesPerSecond { get; }
-        [DataMember] public int BytesPerSecond { get; }
-        [DataMember] public int MessagesInQueue { get; }
-        [DataMember] public int Dropped { get; }
-    }
-
     /// <summary>
     /// Wrapper around a ROS subscriber.
     /// </summary>
     public interface IRosListener
     {
         [NotNull] string Topic { get; }
-        [NotNull] string Type { get; }
-        [NotNull] RosListenerStats Stats { get; }
+        RosListenerStats Stats { get; }
         int NumPublishers { get; }
         int MaxQueueSize { set; }
         bool Subscribed { get; }
@@ -60,6 +29,8 @@ namespace Iviz.Controllers
 
     public sealed class RosListener<T> : IRosListener where T : IMessage, IDeserializable<T>, new()
     {
+        static RosConnection Connection => ConnectionManager.Connection;
+        
         readonly ConcurrentQueue<T> messageQueue = new ConcurrentQueue<T>();
 
         readonly Action<T> delayedHandler;
@@ -86,7 +57,7 @@ namespace Iviz.Controllers
 
             Logger.Internal($"Subscribing to <b>{topic}</b> <i>[{Type}]</i>.");
 
-            ConnectionManager.Subscribe(this);
+            Connection.Subscribe(this);
             Subscribed = true;
 
             GameThread.EverySecond += UpdateStats;
@@ -107,9 +78,9 @@ namespace Iviz.Controllers
         }
 
         public string Topic { get; }
-        public string Type { get; }
-        public RosListenerStats Stats { get; private set; } = new RosListenerStats();
-        public int NumPublishers => ConnectionManager.Connection.GetNumPublishers(Topic);
+        string Type { get; }
+        public RosListenerStats Stats { get; private set; }
+        public int NumPublishers => Connection.GetNumPublishers(Topic);
         public int MaxQueueSize { get; set; } = 50;
         public bool Subscribed { get; private set; }
 
@@ -124,7 +95,7 @@ namespace Iviz.Controllers
             Logger.Internal($"Unsubscribing from {Topic}.");
             if (Subscribed)
             {
-                ConnectionManager.Unsubscribe(this);
+                Connection.Unsubscribe(this);
                 Subscribed = false;
             }
         }
@@ -136,7 +107,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            ConnectionManager.Unsubscribe(this);
+            Connection.Unsubscribe(this);
             Subscribed = false;
         }
 
@@ -147,7 +118,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            ConnectionManager.Subscribe(this);
+            Connection.Subscribe(this);
             Subscribed = true;
         }
 
@@ -157,7 +128,7 @@ namespace Iviz.Controllers
             Unpause();
         }
 
-        public void EnqueueMessage([NotNull] in T msg)
+        internal void EnqueueMessage([NotNull] in T msg)
         {
             if (msg == null)
             {
@@ -209,7 +180,7 @@ namespace Iviz.Controllers
 
             timesOfArrival.Add(GameThread.GameTime);
 
-            bool processed = false;
+            bool processed;
             try
             {
                 processed = directHandler(msg);
@@ -217,6 +188,7 @@ namespace Iviz.Controllers
             catch (Exception e)
             {
                 Debug.LogError(e);
+                processed = false;
             }
 
             if (!processed)

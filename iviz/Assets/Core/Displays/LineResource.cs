@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using Unity.Collections;
@@ -16,6 +17,8 @@ namespace Iviz.Displays
     /// It has two modalities: lines as capsule meshes if there are less than 30 segments, otherwise
     /// using mesh instantiation. 
     /// </summary>
+    [RequireComponent(typeof(MeshFilter))]
+    [RequireComponent(typeof(MeshRenderer))]
     public sealed class LineResource : MarkerResourceWithColormap
     {
         const int MaxSegmentsForMesh = 30;
@@ -25,13 +28,18 @@ namespace Iviz.Displays
         static readonly int LinesID = Shader.PropertyToID("_Lines");
         static readonly int ScaleID = Shader.PropertyToID("_Scale");
 
+        readonly CapsuleLinesHelper capsuleHelper = new CapsuleLinesHelper();
+        
         NativeList<float4x2> lineBuffer;
         [CanBeNull] ComputeBuffer lineComputeBuffer;
-        
-        bool linesNeedAlpha;
 
+        bool linesNeedAlpha;
         Mesh mesh;
-        MeshRenderer meshRenderer;
+
+        [CanBeNull] MeshRenderer meshRenderer;
+
+        [NotNull]
+        MeshRenderer MeshRenderer => meshRenderer != null ? meshRenderer : meshRenderer = GetComponent<MeshRenderer>();
 
         bool UsesAlpha => linesNeedAlpha || Tint.a <= 254f / 255f;
 
@@ -53,10 +61,10 @@ namespace Iviz.Displays
 
         bool UseCapsuleLines => Size <= MaxSegmentsForMesh;
 
-        static bool IsElementValid(in LineWithColor t) => !t.HasNaN() &&
-                                                          (t.A - t.B).MagnitudeSq() > MinLineWidthSq &&
-                                                          t.A.MagnitudeSq() < MaxPositionMagnitudeSq &&
-                                                          t.B.MagnitudeSq() < MaxPositionMagnitudeSq;
+        public static bool IsElementValid(in LineWithColor t) => !t.HasNaN() &&
+                                                                 (t.A - t.B).MagnitudeSq() > MinLineWidthSq &&
+                                                                 t.A.MagnitudeSq() < MaxPositionMagnitudeSq &&
+                                                                 t.B.MagnitudeSq() < MaxPositionMagnitudeSq;
 
         /// <summary>
         /// Sets the lines with the given collection.
@@ -64,7 +72,7 @@ namespace Iviz.Displays
         [NotNull]
         public IReadOnlyCollection<LineWithColor> LinesWithColor
         {
-            get => lineBuffer.Select(f => new LineWithColor(f)).ToArray();
+            //get => lineBuffer.Select(f => new LineWithColor(f)).ToArray();
             set => Set(value, value.Count);
         }
 
@@ -73,51 +81,32 @@ namespace Iviz.Displays
         /// </summary>
         /// <param name="lines">The line enumerator.</param>
         /// <param name="reserve">The expected number of lines, or 0 if unknown.</param>
-        public void Set([NotNull] IEnumerable<LineWithColor> lines, int reserve = 0)
+        /// <param name="overrideNeedsAlpha">A check of alpha colors will be done if <see cref="UseColormap"/> is disabled. Use this to override the check.</param>
+        public void Set([NotNull] IEnumerable<LineWithColor> lines, int reserve = 0, bool? overrideNeedsAlpha = null)
         {
-            if (reserve < 0)
-            {
-                throw new ArgumentException($"Invalid count {reserve}", nameof(reserve));
-            }
-
             if (lines == null)
             {
                 throw new ArgumentNullException(nameof(lines));
             }
 
-            if (reserve > 0)
+            if (reserve != 0)
             {
                 lineBuffer.Capacity = Math.Max(lineBuffer.Capacity, reserve);
             }
 
-            linesNeedAlpha = false;
             lineBuffer.Clear();
-            if (UseColormap)
+            foreach (LineWithColor t in lines)
             {
-                foreach (LineWithColor t in lines)
+                if (!IsElementValid(t))
                 {
-                    if (!IsElementValid(t))
-                    {
-                        continue;
-                    }
-
-                    lineBuffer.Add(t);
+                    continue;
                 }
-            }
-            else
-            {
-                foreach (LineWithColor t in lines)
-                { 
-                    if (!IsElementValid(t))
-                    {
-                        continue;
-                    }
 
-                    lineBuffer.Add(t);
-                    linesNeedAlpha |= t.ColorA.a < 255 || t.ColorB.a < 255;
-                }
+                lineBuffer.Add(t);
             }
-            
+
+            linesNeedAlpha = !UseColormap && (overrideNeedsAlpha ?? CheckIfAlphaNeeded());
+
             if (UseCapsuleLines)
             {
                 UpdateLineMesh();
@@ -126,6 +115,57 @@ namespace Iviz.Displays
             {
                 UpdateLineBuffer();
             }
+        }
+
+        public delegate bool? DirectLineSetter(ref NativeList<float4x2> lineBuffer);
+
+        /// <summary>
+        /// Exposes the line list directly for manual setting.
+        /// </summary>
+        /// <param name="callback">
+        /// A function that receives the internal line list as parameter, and returns true if alpha is needed, false if not, or null to request a manual check.
+        /// </param>
+        /// <param name="reserve">The expected number of lines, or 0 if unknown.</param>
+        public void SetDirect([NotNull] DirectLineSetter callback, int reserve = 0)
+        {
+            if (callback == null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
+            if (reserve != 0)
+            {
+                lineBuffer.Capacity = Math.Max(lineBuffer.Capacity, reserve);
+            }
+
+            lineBuffer.Clear();
+            bool? overrideNeedsAlpha = callback(ref lineBuffer);
+
+            linesNeedAlpha = !UseColormap && (overrideNeedsAlpha ?? CheckIfAlphaNeeded());
+
+            if (UseCapsuleLines)
+            {
+                UpdateLineMesh();
+            }
+            else
+            {
+                UpdateLineBuffer();
+            }
+        }
+
+        bool CheckIfAlphaNeeded()
+        {
+            foreach (float4x2 t in lineBuffer)
+            {
+                Color32 cA = PointWithColor.ColorFromFloatBits(t.c0.w);
+                Color32 cB = PointWithColor.ColorFromFloatBits(t.c1.w);
+                if (cA.a < 255 || cB.a < 255)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public override Color Tint
@@ -159,10 +199,10 @@ namespace Iviz.Displays
             lineBuffer = new NativeList<float4x2>(Allocator.Persistent);
             mesh = new Mesh {name = "Line Capsules"};
             GetComponent<MeshFilter>().sharedMesh = mesh;
-            meshRenderer = GetComponent<MeshRenderer>();
-            meshRenderer.SetPropertyBlock(Properties);
+            MeshRenderer.SetPropertyBlock(Properties);
 
             base.Awake();
+
             ElementScale = 0.1f;
             UseColormap = false;
             IntensityBounds = new Vector2(0, 1);
@@ -211,16 +251,13 @@ namespace Iviz.Displays
                 lineComputeBuffer = null;
                 Properties.SetBuffer(LinesID, null);
             }
-            
+
             Destroy(mesh);
         }
 
         protected override void UpdateProperties()
         {
-            if (meshRenderer != null)
-            {
-                meshRenderer.SetPropertyBlock(Properties);
-            }
+            MeshRenderer.SetPropertyBlock(Properties);
         }
 
         void UpdateLineBuffer()
@@ -241,7 +278,7 @@ namespace Iviz.Displays
             CalculateBounds();
 
             enabled = true;
-            meshRenderer.enabled = false;
+            MeshRenderer.enabled = false;
         }
 
 
@@ -250,23 +287,17 @@ namespace Iviz.Displays
             if (Size == 0)
             {
                 enabled = false;
-                meshRenderer.enabled = false;
+                MeshRenderer.enabled = false;
                 return;
             }
 
-            var (points, colors, indices, coords) =
-                LineUtils.CreateCapsulesFromSegments(lineBuffer, ElementScale);
-
-            mesh.Clear();
-            mesh.vertices = points;
-            mesh.triangles = indices;
-            mesh.colors32 = colors;
-            mesh.uv = coords;
+            capsuleHelper.CreateCapsulesFromSegments(lineBuffer, ElementScale);
+            capsuleHelper.UpdateMesh(mesh);
 
             CalculateBounds();
 
             enabled = false;
-            meshRenderer.enabled = true;
+            MeshRenderer.enabled = true;
 
             UpdateMeshMaterial();
         }
@@ -288,10 +319,7 @@ namespace Iviz.Displays
 
         void UpdateMeshMaterial()
         {
-            if (meshRenderer != null)
-            {
-                meshRenderer.sharedMaterial = GetMeshMaterial();
-            }
+            MeshRenderer.sharedMaterial = GetMeshMaterial();
         }
 
         void CalculateBounds()
@@ -332,7 +360,7 @@ namespace Iviz.Displays
         {
             base.Suspend();
             mesh.Clear();
-            meshRenderer.enabled = false;
+            MeshRenderer.enabled = false;
 
             lineBuffer.Clear();
 

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Iviz
+namespace Iviz.Core
 {
     public static class SdfUtils
     {

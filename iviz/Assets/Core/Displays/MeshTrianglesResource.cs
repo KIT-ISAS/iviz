@@ -20,10 +20,11 @@ namespace Iviz.Displays
             private set
             {
                 localBounds = value;
-                if (BoxCollider == null)
+                if (!HasBoxCollider)
                 {
                     return;
                 }
+
                 BoxCollider.center = localBounds.center;
                 BoxCollider.size = localBounds.size;
             }
@@ -45,24 +46,25 @@ namespace Iviz.Displays
         }
 
         [NotNull]
-        Mesh EnsureOwnMesh(int pointsCount)
+        Mesh EnsureOwnMesh(int numPointsNeeded)
         {
             if (mesh != null)
             {
                 return mesh;
             }
 
-            mesh = new Mesh
+            Mesh tmpMesh = new Mesh()
             {
-                indexFormat = pointsCount > ushort.MaxValue
+                indexFormat = numPointsNeeded > ushort.MaxValue
                     ? UnityEngine.Rendering.IndexFormat.UInt32
                     : UnityEngine.Rendering.IndexFormat.UInt16,
                 name = "MeshTrianglesResource Mesh"
             };
 
 
-            GetComponent<MeshFilter>().sharedMesh = mesh;
-            return mesh;
+            mesh = tmpMesh;
+            GetComponent<MeshFilter>().sharedMesh = tmpMesh;
+            return tmpMesh;
         }
 
         static void SetVertices([NotNull] IEnumerable<Vector3> points, [NotNull] Mesh mesh)
@@ -162,13 +164,14 @@ namespace Iviz.Displays
         }
 
 
-        public void Set([NotNull] IReadOnlyCollection<Vector3> points, [CanBeNull] IReadOnlyCollection<Color> colors = null)
+        public void Set([NotNull] IReadOnlyCollection<Vector3> points,
+            [CanBeNull] IReadOnlyCollection<Color> colors = null)
         {
             if (points is null)
             {
                 throw new ArgumentNullException(nameof(points));
             }
-            
+
             if (points.Count % 3 != 0)
             {
                 throw new ArgumentException($"Invalid triangle list {points.Count}", nameof(points));
@@ -223,7 +226,7 @@ namespace Iviz.Displays
             {
                 throw new ArgumentException("Inconsistent normals size!", nameof(normals));
             }
-            
+
             if (colors != null && colors.Count != 0 && colors.Count != points.Count)
             {
                 throw new ArgumentException("Inconsistent color size!", nameof(colors));
@@ -257,13 +260,15 @@ namespace Iviz.Displays
             ownMesh.Optimize();
 
             LocalBounds = ownMesh.bounds;
-
         }
 
         public override void Suspend()
         {
             base.Suspend();
-            mesh?.Clear();
+            if (mesh != null)
+            {
+                mesh.Clear();
+            }
         }
     }
 }

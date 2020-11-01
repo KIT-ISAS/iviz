@@ -1,6 +1,8 @@
 ﻿using System;
 using Iviz.Controllers;
+using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Ros;
 using Iviz.Roslib;
 using JetBrains.Annotations;
 

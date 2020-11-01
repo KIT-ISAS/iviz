@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using System.Runtime.Serialization;
+using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Displays;
 using JetBrains.Annotations;
@@ -183,16 +184,11 @@ namespace Iviz.Controllers
         //void Awake()
         public GridController([NotNull] IModuleData moduleData)
         {
-            //name = "Grid Controller";
-
-            //grid = ResourcePool.GetOrCreate<GridResource>(Resource.Displays.Grid);
             grid = ResourcePool.GetOrCreateDisplay<GridResource>();
             grid.name = "Grid";
 
             node = DisplayClickableNode.Instantiate("GridNode");
             grid.transform.parent = node.transform;
-            //node.Target = grid;
-            //node.SetName("");
 
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
 
@@ -203,7 +199,7 @@ namespace Iviz.Controllers
             reflectionProbe.nearClipPlane = 0.5f;
             reflectionProbe.farClipPlane = 100f;
             
-            reflectionProbe.backgroundColor = TfListener.MainCamera.backgroundColor;
+            reflectionProbe.backgroundColor = Settings.MainCamera.backgroundColor;
             
             reflectionProbe.mode = UnityEngine.Rendering.ReflectionProbeMode.Realtime;
             reflectionProbe.refreshMode = UnityEngine.Rendering.ReflectionProbeRefreshMode.ViaScripting;

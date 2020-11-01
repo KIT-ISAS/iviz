@@ -2,7 +2,7 @@ using System;
 using JetBrains.Annotations;
 using UnityEngine;
 
-namespace Iviz
+namespace Iviz.Core
 {
     public static class UrdfUtils
     {

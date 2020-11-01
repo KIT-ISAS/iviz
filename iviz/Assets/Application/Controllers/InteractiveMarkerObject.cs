@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System;
+using Iviz.Core;
 using Iviz.Msgs.VisualizationMsgs;
 
 namespace Iviz.Controllers

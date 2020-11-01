@@ -3,15 +3,18 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
+using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
+using Iviz.Ros;
 using Iviz.Roslib;
 using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
+using Logger = Iviz.Core.Logger;
 using Object = UnityEngine.Object;
 
 namespace Iviz.Controllers
@@ -324,6 +327,8 @@ namespace Iviz.Controllers
 
             GeneratePointBuffer(msg, xOffset, yOffset, zOffset, iOffset, iField.Datatype, rgbaHint);
 
+            var msgHeader = msg.Header;
+
             GameThread.Post(() =>
             {
                 if (node.gameObject == null)
@@ -332,11 +337,11 @@ namespace Iviz.Controllers
                     return;
                 }
                 
-                node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
+                node.AttachTo(msgHeader.FrameId, msgHeader.Stamp);
 
                 Size = numPoints;
                 pointCloud.UseColormap = !rgbaHint;
-                pointCloud.SetArray(pointBuffer);
+                pointCloud.SetDirect(pointBuffer);
 
                 //Debug.LogError("listener:"  + pointBuffer.Capacity);
 

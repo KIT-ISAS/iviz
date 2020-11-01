@@ -2,12 +2,15 @@
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
+using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.NavMsgs;
 using Iviz.Resources;
+using Iviz.Ros;
 using Iviz.Roslib;
 using JetBrains.Annotations;
 using UnityEngine;
+using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Controllers
 {

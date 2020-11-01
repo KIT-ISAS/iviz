@@ -4,13 +4,16 @@ using System.IO;
 using System.Linq;
 using System.Security;
 using Iviz.Controllers;
+using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
+using Iviz.Ros;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using Logger = Iviz.Core.Logger;
 
 namespace Iviz.App
 {
@@ -68,6 +71,7 @@ namespace Iviz.App
         LoadConfigDialogData loadConfigData;
         SaveConfigDialogData saveConfigData;
         TfDialogData tfTreeData;
+        MarkerDialogData markerData;
 
         ControllerService controllerService;
 
@@ -129,6 +133,7 @@ namespace Iviz.App
             tfTreeData = new TfDialogData(this);
             loadConfigData = new LoadConfigDialogData(this);
             saveConfigData = new SaveConfigDialogData(this);
+            markerData = new MarkerDialogData(this);
             
             connectionData = new ConnectionDialogData(this);
 
@@ -593,8 +598,12 @@ namespace Iviz.App
 
         public void ShowImageDialog([NotNull] IImageDialogListener caller)
         {
-            imageData.Listener = caller ?? throw new ArgumentNullException(nameof(caller));
-            imageData.Show();
+            imageData.Show(caller ?? throw new ArgumentNullException(nameof(caller)));
+        }
+        
+        public void ShowMarkerDialog([NotNull] IMarkerDialogListener caller)
+        {
+            markerData.Show(caller ?? throw new ArgumentNullException(nameof(caller)));
         }
 
         public void ShowFrame([NotNull] TfFrame frame)

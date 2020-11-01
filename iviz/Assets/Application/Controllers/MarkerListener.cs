@@ -2,12 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Text;
+using Iviz.App;
+using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
+using Iviz.Ros;
 using Iviz.Roslib;
 using JetBrains.Annotations;
+using Microsoft.Win32;
+using UnityEditor.Timeline;
 using UnityEngine;
+using Logger = Iviz.Core.Logger;
 using Object = UnityEngine.Object;
 
 namespace Iviz.Controllers
@@ -24,7 +31,7 @@ namespace Iviz.Controllers
         [DataMember] public bool Visible { get; set; } = true;
     }
 
-    public sealed class MarkerListener : ListenerController
+    public sealed class MarkerListener : ListenerController, IMarkerDialogListener
     {
         readonly MarkerConfiguration config = new MarkerConfiguration();
         readonly Dictionary<string, MarkerObject> markers = new Dictionary<string, MarkerObject>();
@@ -126,6 +133,88 @@ namespace Iviz.Controllers
             DestroyAllMarkers();
 
             GameThread.EverySecond -= CheckDeadMarkers;
+        }
+
+        public string Topic => config.Topic;
+
+        public void GenerateLog(StringBuilder description)
+        {
+            if (description == null)
+            {
+                throw new ArgumentNullException(nameof(description));
+            }
+
+            foreach (var marker in markers.Values)
+            {
+                marker.GenerateLog(description);
+            }
+        }
+
+        public string BriefDescription
+        {
+            get
+            {
+                string markerStr;
+                switch (markers.Count)
+                {
+                    case 0:
+                        markerStr = "<b>No markers →</b>";
+                        break;
+                    case 1:
+                        markerStr = "<b>1 marker →</b>";
+                        break;
+                    default:
+                        markerStr = $"<b>{markers.Count} markers →</b>";
+                        break;
+                }
+                
+                int totalErrors = 0, totalWarnings = 0;
+                foreach (var marker in markers.Values)
+                {
+                    marker.GetErrorCount(out int numErrors, out int numWarnings);
+                    totalErrors += numErrors;
+                    totalWarnings += numWarnings;
+                }
+
+                if (totalErrors == 0 && totalWarnings == 0)
+                {
+                    return $"{markerStr}\nNo errors";
+                }
+
+                string errorStr, warnStr;
+                switch (totalErrors)
+                {
+                    case 0:
+                        errorStr = "No errors";
+                        break;
+                    case 1:
+                        errorStr = "1 error";
+                        break;
+                    default:
+                        errorStr = $"{totalErrors} errors";
+                        break;
+                }
+            
+                switch (totalWarnings)
+                {
+                    case 0:
+                        warnStr = "No warnings";
+                        break;
+                    case 1:
+                        warnStr = "1 warning";
+                        break;
+                    default:
+                        warnStr = $"{totalErrors} warnings";
+                        break;
+                }
+
+                return $"{markerStr}\n{errorStr}, {warnStr}";
+            }
+        } 
+
+        public void Reset()
+        {
+            DestroyAllMarkers();
         }
 
         public override void ResetController()

@@ -5,6 +5,7 @@ using System.Text;
 using TMPro;
 using System;
 using Iviz.Controllers;
+using Iviz.Core;
 using JetBrains.Annotations;
 
 namespace Iviz.App
@@ -14,20 +15,17 @@ namespace Iviz.App
         [SerializeField] TMP_Text tfText = null;
         [SerializeField] Text tfName = null;
         [SerializeField] GameObject content = null;
-
         [SerializeField] Button gotoButton = null;
         [SerializeField] Button trail = null;
         [SerializeField] Button lockPivot = null;
         //[SerializeField] Button lock1PV = null;
-
         [SerializeField] Text trailText = null;
         [SerializeField] Text lockPivotText = null;
         //[SerializeField] Text lock1PVText = null;
-
         [SerializeField] TFLink tfLink = null;
 
         static TFLog Instance;
-        
+
         public event Action Close;
 
         SimpleDisplayNode dummy;
@@ -76,6 +74,7 @@ namespace Iviz.App
         }
 
         bool isAwake;
+
         void Initialize()
         {
             if (isAwake)
@@ -102,14 +101,10 @@ namespace Iviz.App
 
         void OnTfLinkClicked([CanBeNull] string frameId)
         {
-            if (frameId == null || !TfListener.TryGetFrame(frameId, out TfFrame frame))
-            {
-                SelectedFrame = null;
-            }
-            else
-            {
-                SelectedFrame = frame;
-            }
+            SelectedFrame =
+                frameId == null || !TfListener.TryGetFrame(frameId, out TfFrame frame)
+                    ? null
+                    : frame;
         }
 
         class TfNode
@@ -151,12 +146,14 @@ namespace Iviz.App
                 {
                     decoratedName = $"~{decoratedName}~";
                 }
+
                 if (Selected)
                 {
                     decoratedName = $"<color=blue>{decoratedName}</color>";
                 }
-                
-                str.Append(tabs).AppendLine($"<link={Name}><u><font=Bold>{decoratedName}</font></u> [{x}, {y}, {z}]</link>");
+
+                str.Append(tabs)
+                    .AppendLine($"<link={Name}><u><font=Bold>{decoratedName}</font></u> [{x}, {y}, {z}]</link>");
 
                 foreach (TfNode node in Children)
                 {
@@ -176,7 +173,7 @@ namespace Iviz.App
         public void Flush()
         {
             Initialize();
-            
+
             TfNode root = new TfNode(TfListener.RootFrame);
 
             StringBuilder str = new StringBuilder();
@@ -214,14 +211,10 @@ namespace Iviz.App
 
         public void OnLockPivotClicked()
         {
-            if (TfListener.GuiCamera.OrbitCenterOverride == SelectedFrame)
-            {
-                TfListener.GuiCamera.OrbitCenterOverride = null;
-            }
-            else
-            {
-                TfListener.GuiCamera.OrbitCenterOverride = SelectedFrame;
-            }
+            TfListener.GuiCamera.OrbitCenterOverride =
+                TfListener.GuiCamera.OrbitCenterOverride == SelectedFrame
+                    ? null
+                    : SelectedFrame;
 
             UpdateFrameTexts();
             Close?.Invoke();
@@ -259,14 +252,10 @@ namespace Iviz.App
 
         public void OnLock1PVClicked()
         {
-            if (TfListener.GuiCamera.CameraViewOverride == SelectedFrame)
-            {
-                TfListener.GuiCamera.CameraViewOverride = null;
-            }
-            else
-            {
-                TfListener.GuiCamera.CameraViewOverride = SelectedFrame;
-            }
+            TfListener.GuiCamera.CameraViewOverride =
+                TfListener.GuiCamera.CameraViewOverride == SelectedFrame
+                    ? null
+                    : SelectedFrame;
 
             UpdateFrameTexts();
             Close?.Invoke();

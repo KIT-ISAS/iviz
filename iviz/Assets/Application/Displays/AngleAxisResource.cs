@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Iviz.Core;
 using Iviz.Resources;
 using UnityEngine;
 
@@ -25,7 +26,7 @@ namespace Iviz.Displays
                     lines[i] = new LineWithColor(prevLine.A, prevLine.B, color);
                 }
 
-                resource.LinesWithColor = lines;
+                resource.Set(lines, lines.Count, color.a < 1);
             }
         }
 
@@ -119,7 +120,7 @@ namespace Iviz.Displays
             }
 
             lines.Add(new LineWithColor(Vector3.zero, 1.2f * v1, Color));
-            resource.LinesWithColor = lines;
+            resource.Set(lines, lines.Count, Color.a < 1);
         }
     }
 }

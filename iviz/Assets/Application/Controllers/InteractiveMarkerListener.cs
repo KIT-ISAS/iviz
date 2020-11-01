@@ -5,8 +5,10 @@ using System;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Roslib;
 using System.Runtime.Serialization;
+using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
+using Iviz.Ros;
 using JetBrains.Annotations;
 
 namespace Iviz.Controllers

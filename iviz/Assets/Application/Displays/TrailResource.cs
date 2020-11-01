@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using Iviz.Controllers;
+using Unity.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -22,8 +24,13 @@ namespace Iviz.Displays
         protected override IDisplay Display => resource;
 
         public Func<Vector3> DataSource { get; set; }
+        readonly LineResource.DirectLineSetter lineSetterDelegate;
 
-
+        public TrailResource()
+        {
+            lineSetterDelegate = LineSetter;
+        }
+        
         public int TimeWindowInMs
         {
             get => timeWindowInMs;
@@ -102,23 +109,25 @@ namespace Iviz.Displays
             }
 
             lastMeasurement = newMeasurement;
+            
+            resource.SetDirect(lineSetterDelegate, measurements.Count);
+        }
+        
+        bool? LineSetter(ref NativeList<float4x2> lineBuffer)
+        {
+            int i = 1;
+            Color32 colorA = new Color32(Color.r, Color.g, Color.b, 0);
+            float scale = 255f / measurements.Count;
 
-            IEnumerable<LineWithColor> LineEnumerator()
+            foreach (LineWithColor line in measurements)
             {
-                int i = 1;
-                Color32 colorA = new Color32(Color.r, Color.g, Color.b, 0);
-                float scale = 255f / measurements.Count;
-
-                foreach (LineWithColor line in measurements)
-                {
-                    Color32 colorB = new Color32(Color.r, Color.g, Color.b, (byte) (i * scale));
-                    yield return new LineWithColor(line.A, colorA, line.B, colorB);
-                    colorA = colorB;
-                    i++;
-                }
+                Color32 colorB = new Color32(Color.r, Color.g, Color.b, (byte) (i * scale));
+                lineBuffer.Add(new LineWithColor(line.A, colorA, line.B, colorB));
+                colorA = colorB;
+                i++;
             }
 
-            resource.Set(LineEnumerator(), measurements.Count);
+            return true;
         }
 
         public override void Suspend()

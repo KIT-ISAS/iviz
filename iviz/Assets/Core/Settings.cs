@@ -1,4 +1,6 @@
-namespace Iviz
+using UnityEngine;
+
+namespace Iviz.Core
 {
     public static class Settings
     {
@@ -41,5 +43,6 @@ namespace Iviz
         public static string ResourcesPath => PersistentDataPath + "/resources";
         public static string SavedRobotsPath => PersistentDataPath + "/robots";
         public static string ResourcesFilePath => PersistentDataPath + "/resources.json";
+        public static Camera MainCamera { get; set; }
     }
 }

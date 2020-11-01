@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections.Generic;
+using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
 using JetBrains.Annotations;
@@ -14,7 +15,8 @@ namespace Iviz.App
         AddTopic,
         Image,
         Tf,
-        SaveAs
+        SaveAs,
+        Marker
     }
 
     public class DialogPanelManager : MonoBehaviour
@@ -49,6 +51,8 @@ namespace Iviz.App
                 .GetComponent<SaveConfigDialogContents>();
             PanelByType[DialogPanelType.AddTopic] = Resource.Widgets.AddTopicPanel.Instantiate(transform)
                 .GetComponent<AddTopicDialogContents>();
+            PanelByType[DialogPanelType.Marker] = Resource.Widgets.MarkerPanel.Instantiate(transform)
+                .GetComponent<MarkerDialogContents>();
 
             PanelByType.Values.ForEach(x => x.Active = false);
             Active = false;

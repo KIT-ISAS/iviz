@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -336,7 +337,7 @@ namespace Iviz.Displays
                 }
             }
 
-            lines.LinesWithColor = lineBuffer;
+            lines.Set(lineBuffer, lineBuffer.Count, false);
             MeasuredIntensityBounds = lines.IntensityBounds;
             if (ForceMinMax)
             {

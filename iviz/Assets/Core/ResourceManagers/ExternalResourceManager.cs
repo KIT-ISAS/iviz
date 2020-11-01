@@ -4,12 +4,14 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
+using Iviz.Core;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using Iviz.Roslib;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
+using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Displays
 {
@@ -225,7 +227,8 @@ namespace Iviz.Displays
             WriteResourceFile();
         }
 
-        public bool TryGet([NotNull] Uri uri, [CanBeNull] out Info<GameObject> resource,
+        [ContractAnnotation("=> false, resource:null; => true, resource:notnull")]
+        public bool TryGet([NotNull] Uri uri, out Info<GameObject> resource,
             [CanBeNull] IExternalServiceProvider provider)
         {
             if (uri is null)

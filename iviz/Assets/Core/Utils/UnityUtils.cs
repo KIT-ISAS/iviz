@@ -10,7 +10,7 @@ using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace Iviz
+namespace Iviz.Core
 {
     public static class UnityUtils
     {
@@ -45,7 +45,19 @@ namespace Iviz
         {
             return v / v.Magnitude();   
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3 Abs(this Vector3 p)
+        {
+            return new Vector3(Mathf.Abs(p.x), Mathf.Abs(p.y), Mathf.Abs(p.z));
+        }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3 CwiseProduct(this Vector3 p, Vector3 o)
+        {
+            return Vector3.Scale(p, o);
+        }
+        
         public static bool TryParse(string s, out float f)
         {
             if (float.TryParse(s, NumberStyles.Any, Culture, out f))

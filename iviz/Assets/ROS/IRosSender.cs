@@ -1,37 +1,18 @@
 using System;
-using System.Runtime.Serialization;
+using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs;
-using Iviz.Roslib;
 using JetBrains.Annotations;
+using Logger = Iviz.Core.Logger;
 
-namespace Iviz.Controllers
+namespace Iviz.Ros
 {
-    [DataContract]
-    public class RosSenderStats : JsonToString
-    {
-        public RosSenderStats()
-        {
-        }
-
-        public RosSenderStats(int totalMessages, int messagesPerSecond, int bytesPerSecond)
-        {
-            TotalMessages = totalMessages;
-            MessagesPerSecond = messagesPerSecond;
-            BytesPerSecond = bytesPerSecond;
-        }
-
-        [DataMember] public int TotalMessages { get; }
-        [DataMember] public int MessagesPerSecond { get; }
-        [DataMember] public int BytesPerSecond { get; }
-    }
-
     public interface IRosSender
     {
         [NotNull] string Topic { get; }
         [NotNull] string Type { get; }
         int Id { get; }
-        [NotNull] RosSenderStats Stats { get; }
+        RosSenderStats Stats { get; }
         int NumSubscribers { get; }
         void Stop();
         void Publish([NotNull] IMessage msg);
@@ -39,6 +20,8 @@ namespace Iviz.Controllers
 
     public sealed class RosSender<T> : IRosSender where T : IMessage
     {
+        static RosConnection Connection => ConnectionManager.Connection;
+        
         int lastMsgBytes;
         int lastMsgCounter;
         int totalMsgCounter;
@@ -55,14 +38,14 @@ namespace Iviz.Controllers
 
             Logger.Internal($"Advertising <b>{topic}</b> <i>[{Type}]</i>.");
             GameThread.EverySecond += UpdateStats;
-            ConnectionManager.Advertise(this);
+            Connection.Advertise(this);
         }
 
         public string Topic { get; }
         public string Type { get; }
         public int Id { get; private set; }
-        public RosSenderStats Stats { get; private set; } = new RosSenderStats();
-        public int NumSubscribers => ConnectionManager.Connection.GetNumSubscribers(Topic);
+        public RosSenderStats Stats { get; private set; }
+        public int NumSubscribers => Connection.GetNumSubscribers(Topic);
 
         public void Publish(IMessage msg)
         {
@@ -73,7 +56,7 @@ namespace Iviz.Controllers
         {
             GameThread.EverySecond -= UpdateStats;
             Logger.Internal($"Unadvertising {Topic}.");
-            ConnectionManager.Unadvertise(this);
+            Connection.Unadvertise(this);
         }
 
         public void SetId(int id)
@@ -92,13 +75,13 @@ namespace Iviz.Controllers
             lastMsgCounter++;
             lastMsgBytes += msg.RosMessageLength;
 
-            ConnectionManager.Publish(this, msg);
+            Connection.Publish(this, msg);
         }
 
         public void Reset()
         {
-            ConnectionManager.Unadvertise(this);
-            ConnectionManager.Advertise(this);
+            Connection.Unadvertise(this);
+            Connection.Advertise(this);
         }
 
         void UpdateStats()

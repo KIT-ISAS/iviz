@@ -1,4 +1,5 @@
-﻿using Iviz.Controllers;
+﻿using System;
+using Iviz.Controllers;
 using JetBrains.Annotations;
 
 namespace Iviz.App
@@ -15,7 +16,6 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
-            panel.Active = true;
             panel.Close.Clicked += Close;
             panel.TfLog.Close += Close;
             panel.TfLog.Flush();
@@ -40,8 +40,13 @@ namespace Iviz.App
             DialogPanelManager.HidePanelFor(this);
         }
         
-        public void Show(TfFrame frame)
+        public void Show([NotNull] TfFrame frame)
         {
+            if (frame == null)
+            {
+                throw new ArgumentNullException(nameof(frame));
+            }
+
             Show();
             panel.TfLog.SelectedFrame = frame;
         }        

@@ -3,12 +3,7 @@ using External;
 
 namespace Iviz.Controllers
 {
-    public interface IBlocksPointer
-    {
-        bool IsPointerOnGui(in Vector2 pointerPosition);
-    }
-
-    public sealed class Joystick : MonoBehaviour, IBlocksPointer
+    public sealed class Joystick : MonoBehaviour
     {
         [SerializeField] FixedJoystick left = null;
         [SerializeField] FixedJoystick right = null;
@@ -32,14 +27,6 @@ namespace Iviz.Controllers
         void Awake()
         {
             Visible = false;
-        }
-
-        public bool IsPointerOnGui(in Vector2 pointerPosition)
-        {
-            Camera mainCamera = TfListener.MainCamera;
-            return Visible &&
-                (RectTransformUtility.RectangleContainsScreenPoint(left.transform as RectTransform, pointerPosition, mainCamera) ||
-                RectTransformUtility.RectangleContainsScreenPoint(right.transform as RectTransform, pointerPosition, mainCamera));
         }
     }
 }

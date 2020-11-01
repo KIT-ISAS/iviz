@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Iviz.App;
+using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using UnityEngine;
+using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Controllers
 {
@@ -34,22 +36,19 @@ namespace Iviz.Controllers
         bool forceVisible;
 
         AxisFrameResource axis;
-        GameObject labelObject;
-        Billboard labelObjectBillboard;
         TextMarkerResource labelObjectText;
         LineConnector parentConnector;
         TrailResource trail;
 
-        [NotNull]
-        public ReadOnlyDictionary<string, TfFrame> Children =>
-            new ReadOnlyDictionary<string, TfFrame>(children);
+        [NotNull] public ReadOnlyDictionary<string, TfFrame> Children { get; }
 
+        [NotNull]
         public string Id
         {
             get => id;
             set
             {
-                id = value;
+                id = value ?? throw new ArgumentNullException(nameof(value));
                 labelObjectText.Text = id;
                 trail.Name = "[Trail:" + id + "]";
             }
@@ -61,7 +60,7 @@ namespace Iviz.Controllers
             set
             {
                 base.Selected = value;
-                labelObject.SetActive(value || LabelVisible);
+                labelObjectText.Visible = value || LabelVisible;
             }
         }
 
@@ -117,7 +116,7 @@ namespace Iviz.Controllers
             set
             {
                 labelVisible = value;
-                labelObject.SetActive(!ForceInvisible && (value || Selected) && (ForceVisible || Visible));
+                labelObjectText.Visible = !ForceInvisible && (value || Selected) && (ForceVisible || Visible);
             }
         }
 
@@ -127,14 +126,14 @@ namespace Iviz.Controllers
             set
             {
                 labelSize = value;
-                labelObject.transform.localScale = 0.5f * value * FrameSize * Vector3.one;
+                labelObjectText.transform.localScale = 0.5f * value * FrameSize * Vector3.one;
             }
         }
 
         public bool ConnectorVisible
         {
-            get => parentConnector.gameObject.activeSelf;
-            set => parentConnector.gameObject.SetActive(value);
+            get => parentConnector.Visible;
+            set => parentConnector.Visible = value;
         }
 
         public float FrameSize
@@ -144,7 +143,7 @@ namespace Iviz.Controllers
             {
                 axis.AxisLength = value;
                 parentConnector.LineWidth = FrameSize / 20;
-                labelObjectBillboard.offset = 1.5f * FrameSize * Vector3.up;
+                labelObjectText.BillboardOffset = 1.5f * FrameSize * Vector3.up;
                 LabelSize = LabelSize;
             }
         }
@@ -187,7 +186,7 @@ namespace Iviz.Controllers
             {
                 if (!SetParent(value))
                 {
-                    Logger.Error($"TFFrame: Failed to set '{value.Id}' as a parent to {Id}");
+                    Logger.Error($"TFFrame: Failed to set '{(value != null ? value.Id : "null")}' as a parent to {Id}");
                 }
             }
         }
@@ -204,27 +203,31 @@ namespace Iviz.Controllers
 
         public override Pose BoundsPose => transform.AsPose();
 
+        public TfFrame()
+        {
+            Children = new ReadOnlyDictionary<string, TfFrame>(children);
+        }
+
         void Awake()
         {
-            labelObjectText = ResourcePool.GetOrCreateDisplay<TextMarkerResource>(transform);
-            labelObject = labelObjectText.gameObject;
-            labelObject.SetActive(false);
-            labelObject.name = "[Label]";
-            labelObject.transform.localScale = 0.5f * Vector3.one;
-            labelObjectBillboard = labelObject.GetComponent<Billboard>();
+            Transform mTransform = transform;
+            
+            labelObjectText = ResourcePool.GetOrCreateDisplay<TextMarkerResource>(mTransform);
+            labelObjectText.Visible = false;
+            labelObjectText.Name = "[Label]";
+            labelObjectText.transform.localScale = 0.5f * Vector3.one;
 
-            parentConnector = ResourcePool.GetOrCreate(Resource.Displays.LineConnector, transform)
-                .GetComponent<LineConnector>();
-            parentConnector.A = transform;
+            parentConnector = ResourcePool.GetOrCreateDisplay<LineConnector>(mTransform);
+            parentConnector.A = mTransform;
 
 
             // TFListener.BaseFrame may not exist yet
-            var parent = transform.parent;
+            var parent = mTransform.parent;
             parentConnector.B = parent != null ? parent : TfListener.RootFrame?.transform;
 
             parentConnector.name = "[Connector]";
 
-            axis = ResourcePool.GetOrCreateDisplay<AxisFrameResource>(transform);
+            axis = ResourcePool.GetOrCreateDisplay<AxisFrameResource>(mTransform);
 
             if (Settings.IsHololens)
             {
@@ -242,7 +245,7 @@ namespace Iviz.Controllers
 
             UsesBoundaryBox = false;
 
-            trail = ResourcePool.GetOrCreateDisplay<TrailResource>(transform);
+            trail = ResourcePool.GetOrCreateDisplay<TrailResource>(mTransform);
             trail.TimeWindowInMs = 5000;
             trail.Color = Color.yellow;
             TrailVisible = false;
@@ -252,11 +255,10 @@ namespace Iviz.Controllers
         {
             ResourcePool.DisposeDisplay(axis);
             ResourcePool.DisposeDisplay(labelObjectText);
-            ResourcePool.Dispose(Resource.Displays.LineConnector, parentConnector.gameObject);
+            ResourcePool.DisposeDisplay(parentConnector);
             ResourcePool.DisposeDisplay(trail);
 
             axis = null;
-            labelObject = null;
             parentConnector = null;
             trail = null;
         }

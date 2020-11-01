@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.Controllers;
+using Iviz.Core;
 using Iviz.Displays;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -29,7 +30,7 @@ namespace Iviz.App
         bool alreadyMoving;
         bool alreadyScaling;
 
-        static Camera MainCamera => TfListener.MainCamera;
+        static Camera MainCamera => Settings.MainCamera;
         NamedBoundary namedBoundary;
 
         bool PointerOnGui { get; set; }
@@ -198,7 +199,7 @@ namespace Iviz.App
             GameThread.EveryFrame += UpdateEvenIfInactive;
         }
 
-        float tmpAltDistance;
+        //float tmpAltDistance;
         void UpdateEvenIfInactive()
         {
             bool prevPointerDown = PointerDown;

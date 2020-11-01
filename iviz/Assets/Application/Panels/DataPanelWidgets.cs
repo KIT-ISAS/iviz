@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Iviz.Core;
 using Iviz.Resources;
 using UnityEngine;
 
@@ -144,6 +145,12 @@ namespace Iviz.App
         {
             GameObject o = Resource.Widgets.Listener.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<ListenerWidget>();
+        }
+        
+        public MarkerWidget AddMarker()
+        {
+            GameObject o = Resource.Widgets.MarkerWidget.Instantiate(nonstatics.transform);
+            return AddToBottom(o).GetComponent<MarkerWidget>();
         }
 
         public FrameWidget AddFrame()

@@ -3,6 +3,7 @@ using Iviz.Resources;
 
 namespace Iviz.Displays
 {
+    [RequireComponent(typeof(BoxCollider))]
     public sealed class AxisFrameResource : MarkerResource, IRecyclable, ISupportsAROcclusion, ISupportsTint
     {
         static readonly string[] Names = { "Axis-X", "Axis-Y", "Axis-Z" };

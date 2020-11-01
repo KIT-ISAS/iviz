@@ -1,16 +1,20 @@
-﻿using UnityEngine;
+﻿using System;
 using System.Collections.Generic;
-using tfMessage_v2 = Iviz.Msgs.Tf2Msgs.TFMessage;
 using System.Linq;
-using Iviz.Roslib;
+using System.Runtime.Serialization;
+using Iviz.App;
+using Iviz.Core;
+using Iviz.Displays;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.Tf;
-using System.Runtime.Serialization;
-using System;
-using Iviz.App;
-using Iviz.Displays;
 using Iviz.Resources;
+using Iviz.Ros;
+using Iviz.Roslib;
 using JetBrains.Annotations;
+using UnityEngine;
+using Pose = UnityEngine.Pose;
+using Quaternion = UnityEngine.Quaternion;
+using tfMessage_v2 = Iviz.Msgs.Tf2Msgs.TFMessage;
 using Transform = UnityEngine.Transform;
 
 namespace Iviz.Controllers
@@ -18,15 +22,15 @@ namespace Iviz.Controllers
     [DataContract]
     public sealed class TfConfiguration : JsonToString, IConfiguration
     {
-        [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
-        [DataMember] public Resource.Module Module => Resource.Module.TF;
-        [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public bool AxisVisible { get; set; } = true;
         [DataMember] public float AxisSize { get; set; } = 0.125f;
-        [DataMember] public bool AxisLabelVisible { get; set; } = false;
-        [DataMember] public bool ParentConnectorVisible { get; set; } = false;
+        [DataMember] public bool AxisLabelVisible { get; set; }
+        [DataMember] public bool ParentConnectorVisible { get; set; }
         [DataMember] public bool ShowAllFrames { get; set; } = true;
+        [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
+        [DataMember] public Resource.Module Module => Resource.Module.TF;
+        [DataMember] public bool Visible { get; set; } = true;
     }
 
     public sealed class TfListener : ListenerController
@@ -36,39 +40,81 @@ namespace Iviz.Controllers
 
         const string DefaultTopicStatic = "/tf_static";
 
+        static uint tfSeq;
+
+        readonly TfConfiguration config = new TfConfiguration();
+        readonly Dictionary<string, TfFrame> frames = new Dictionary<string, TfFrame>();
+        readonly InteractiveControl rootMarker;
+        readonly DisplayNode showAllListener;
+        readonly DisplayNode staticListener;
+
+        public TfListener([NotNull] IModuleData moduleData)
+        {
+            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
+            Instance = this;
+
+            DisplayNode defaultListener = SimpleDisplayNode.Instantiate("[.]");
+
+            UnityFrame = Add(CreateFrameObject("TF", null, null));
+            UnityFrame.ForceInvisible = true;
+            UnityFrame.Visible = false;
+            UnityFrame.AddListener(defaultListener);
+
+            showAllListener = SimpleDisplayNode.Instantiate("[TFNode]", UnityFrame.transform);
+            staticListener = SimpleDisplayNode.Instantiate("[TFStatic]", UnityFrame.transform);
+            defaultListener.transform.parent = UnityFrame.transform;
+
+            var mainCameraObj = GameObject.Find("MainCamera");
+            Settings.MainCamera = mainCameraObj.GetComponent<Camera>();
+
+            var mainLight = GameObject.Find("MainLight");
+            MainLight = mainLight.GetComponent<Light>();
+
+            Config = new TfConfiguration();
+
+            RootFrame = Add(CreateFrameObject("/", UnityFrame.transform, UnityFrame));
+            RootFrame.ForceInvisible = true;
+            RootFrame.Visible = false;
+            RootFrame.AddListener(defaultListener);
+
+            MapFrame = Add(CreateFrameObject(BaseFrameId, UnityFrame.transform, RootFrame));
+            MapFrame.Parent = RootFrame;
+            MapFrame.AddListener(defaultListener);
+            MapFrame.AcceptsParents = false;
+            //BaseFrame.ForceInvisible = true;
+
+            rootMarker = ResourcePool.GetOrCreate<InteractiveControl>(
+                Resource.Displays.InteractiveControl,
+                RootFrame.transform);
+            rootMarker.name = "[InteractiveController for /]";
+            rootMarker.TargetTransform = RootFrame.transform;
+            rootMarker.InteractionMode = InteractiveControl.InteractionModeType.Disabled;
+            rootMarker.BaseScale = 2.5f * FrameSize;
+
+            Publisher = new RosSender<tfMessage_v2>(DefaultTopic);
+        }
+
         public static TfListener Instance { get; private set; }
         [NotNull] public RosSender<tfMessage_v2> Publisher { get; }
         public IRosListener ListenerStatic { get; private set; }
 
-        public static Camera MainCamera { get; set; }
         public static GuiCamera GuiCamera => GuiCamera.Instance;
         public static Light MainLight { get; set; }
 
         public static TfFrame MapFrame { get; private set; }
         public static TfFrame RootFrame { get; private set; }
         public static TfFrame UnityFrame { get; private set; }
-
-        readonly InteractiveControl rootMarker;
         public static InteractiveControl RootMarker => Instance.rootMarker;
 
         public static TfFrame ListenersFrame => RootFrame;
 
         public override TfFrame Frame => MapFrame;
 
-        readonly DisplayNode showAllListener;
-        readonly DisplayNode staticListener;
-
-        readonly Dictionary<string, TfFrame> frames = new Dictionary<string, TfFrame>();
-
         [NotNull]
         public static IEnumerable<string> FramesUsableAsHints =>
             Instance.frames.Values.Where(IsFrameUsableAsHint).Select(frame => frame.Id);
 
-        static bool IsFrameUsableAsHint(TfFrame frame) => frame != RootFrame && frame != UnityFrame;
-
         public override IModuleData ModuleData { get; }
-
-        readonly TfConfiguration config = new TfConfiguration();
 
         [NotNull]
         public TfConfiguration Config
@@ -174,50 +220,9 @@ namespace Iviz.Controllers
             }
         }
 
-        public TfListener([NotNull] IModuleData moduleData)
+        static bool IsFrameUsableAsHint(TfFrame frame)
         {
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
-            Instance = this;
-
-            DisplayNode defaultListener = SimpleDisplayNode.Instantiate("[.]", null);
-
-            UnityFrame = Add(CreateFrameObject("TF", null, null));
-            UnityFrame.ForceInvisible = true;
-            UnityFrame.Visible = false;
-            UnityFrame.AddListener(defaultListener);
-
-            showAllListener = SimpleDisplayNode.Instantiate("[TFNode]", UnityFrame.transform);
-            staticListener = SimpleDisplayNode.Instantiate("[TFStatic]", UnityFrame.transform);
-            defaultListener.transform.parent = UnityFrame.transform;
-
-            GameObject mainCameraObj = GameObject.Find("MainCamera");
-            MainCamera = mainCameraObj.GetComponent<Camera>();
-
-            GameObject mainLight = GameObject.Find("MainLight");
-            MainLight = mainLight.GetComponent<Light>();
-
-            Config = new TfConfiguration();
-
-            RootFrame = Add(CreateFrameObject("/", UnityFrame.transform, UnityFrame));
-            RootFrame.ForceInvisible = true;
-            RootFrame.Visible = false;
-            RootFrame.AddListener(defaultListener);
-
-            MapFrame = Add(CreateFrameObject(BaseFrameId, UnityFrame.transform, RootFrame));
-            MapFrame.Parent = RootFrame;
-            MapFrame.AddListener(defaultListener);
-            MapFrame.AcceptsParents = false;
-            //BaseFrame.ForceInvisible = true;
-
-            rootMarker = ResourcePool.GetOrCreate<InteractiveControl>(
-                Resource.Displays.InteractiveControl,
-                RootFrame.transform);
-            rootMarker.name = "[InteractiveController for /]";
-            rootMarker.TargetTransform = RootFrame.transform;
-            rootMarker.InteractionMode = InteractiveControl.InteractionModeType.Disabled;
-            rootMarker.BaseScale = 2.5f * FrameSize;
-
-            Publisher = new RosSender<tfMessage_v2>(DefaultTopic);
+            return frame != RootFrame && frame != UnityFrame;
         }
 
         public override void StartListening()
@@ -229,16 +234,16 @@ namespace Iviz.Controllers
 
         void ProcessMessages([NotNull] TransformStamped[] transforms, bool isStatic)
         {
-            foreach (TransformStamped t in transforms)
+            foreach (var t in transforms)
             {
                 if (t.Transform.HasNaN())
                 {
                     continue;
                 }
 
-                TimeSpan timestamp = t.Header.Stamp == default ? TimeSpan.MaxValue : t.Header.Stamp.ToTimeSpan();
+                var timestamp = t.Header.Stamp == default ? TimeSpan.MaxValue : t.Header.Stamp.ToTimeSpan();
 
-                string childId = t.ChildFrameId;
+                var childId = t.ChildFrameId;
                 if (childId.Length != 0 && childId[0] == '/')
                 {
                     childId = childId.Substring(1);
@@ -262,13 +267,13 @@ namespace Iviz.Controllers
                     continue;
                 }
 
-                string parentId = t.Header.FrameId;
+                var parentId = t.Header.FrameId;
                 if (parentId.Length != 0 && parentId[0] == '/') // remove starting '/' from tf v1
                 {
                     parentId = parentId.Substring(1);
                 }
 
-                TfFrame parent = string.IsNullOrEmpty(parentId) ? RootFrame : GetOrCreateFrame(parentId);
+                var parent = string.IsNullOrEmpty(parentId) ? RootFrame : GetOrCreateFrame(parentId);
 
                 if (child.SetParent(parent))
                 {
@@ -284,7 +289,7 @@ namespace Iviz.Controllers
             ListenerStatic?.Reset();
             Publisher.Reset();
 
-            bool prevShowAllFrames = ShowAllFrames;
+            var prevShowAllFrames = ShowAllFrames;
             ShowAllFrames = false;
 
             var framesCopy = frames.Values.ToList();
@@ -328,7 +333,7 @@ namespace Iviz.Controllers
                 id = id.Substring(1);
             }
 
-            TfFrame frame = Instance.GetOrCreateFrameImpl(id);
+            var frame = Instance.GetOrCreateFrameImpl(id);
             if (frame.Id != id)
             {
                 Debug.LogWarning("Error: Broken resource pool! Requested " + id + ", received " + frame.Id);
@@ -345,13 +350,13 @@ namespace Iviz.Controllers
         [NotNull]
         TfFrame GetOrCreateFrameImpl([NotNull] string id)
         {
-            return TryGetFrameImpl(id, out TfFrame t) ? t : Add(CreateFrameObject(id, RootFrame.transform, RootFrame));
+            return TryGetFrameImpl(id, out var t) ? t : Add(CreateFrameObject(id, RootFrame.transform, RootFrame));
         }
 
         [NotNull]
         TfFrame CreateFrameObject([NotNull] string id, [CanBeNull] Transform parent, [CanBeNull] TfFrame parentFrame)
         {
-            TfFrame frame = ResourcePool.GetOrCreate<TfFrame>(Resource.Displays.TfFrame, parent);
+            var frame = ResourcePool.GetOrCreate<TfFrame>(Resource.Displays.TfFrame, parent);
             frame.name = $"{{{id}}}";
             frame.Id = id;
             frame.Visible = config.AxisVisible;
@@ -405,34 +410,32 @@ namespace Iviz.Controllers
             Instance.Publisher.Publish(msg);
         }
 
-        public static UnityEngine.Pose RelativePoseToRoot(in UnityEngine.Pose unityPose)
+        public static Pose RelativePoseToRoot(in Pose unityPose)
         {
             if (!Settings.IsMobile)
             {
                 return unityPose;
             }
 
-            Transform rootFrame = RootFrame.transform;
-            return new UnityEngine.Pose(
+            var rootFrame = RootFrame.transform;
+            return new Pose(
                 rootFrame.InverseTransformPoint(unityPose.position),
-                UnityEngine.Quaternion.Inverse(rootFrame.rotation) * unityPose.rotation
+                Quaternion.Inverse(rootFrame.rotation) * unityPose.rotation
             );
         }
 
-        static uint tfSeq;
-
         public static void Publish([CanBeNull] string parentFrame, [CanBeNull] string childFrame,
-            in UnityEngine.Pose unityPose)
+            in Pose unityPose)
         {
-            tfMessage_v2 msg = new tfMessage_v2
+            var msg = new tfMessage_v2
             (
-                Transforms: new[]
+                new[]
                 {
                     new TransformStamped
                     (
-                        Header: RosUtils.CreateHeader(tfSeq++, parentFrame ?? BaseFrameId),
-                        ChildFrameId: childFrame ?? "",
-                        Transform: RelativePoseToRoot(unityPose).Unity2RosTransform()
+                        RosUtils.CreateHeader(tfSeq++, parentFrame ?? BaseFrameId),
+                        childFrame ?? "",
+                        RelativePoseToRoot(unityPose).Unity2RosTransform()
                     )
                 }
             );
@@ -446,8 +449,8 @@ namespace Iviz.Controllers
 
         public static void UpdateRootMarkerVisibility()
         {
-            bool arEnabled = ARController.Instance?.Visible ?? false;
-            bool viewEnabled = ARController.Instance?.ShowRootMarker ?? false;
+            var arEnabled = ARController.Instance?.Visible ?? false;
+            var viewEnabled = ARController.Instance?.ShowRootMarker ?? false;
             if (arEnabled && viewEnabled)
             {
                 RootMarker.InteractionMode = InteractiveControl.InteractionModeType.Frame;

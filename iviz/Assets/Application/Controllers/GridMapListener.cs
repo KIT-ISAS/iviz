@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
+using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.GridMapMsgs;
 using Iviz.Resources;
+using Iviz.Ros;
 using Iviz.Roslib;
 using JetBrains.Annotations;
 using UnityEngine;

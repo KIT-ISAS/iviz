@@ -1,6 +1,7 @@
 using System;
 using Iviz.App;
 using Iviz.Controllers;
+using Iviz.Core;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -265,7 +266,7 @@ namespace Iviz.Displays
             }
 
             const float referenceDistance = 2.0f;
-            Transform cameraTransform = TfListener.MainCamera.transform;
+            Transform cameraTransform = Settings.MainCamera.transform;
             float distanceToCamera = Vector3.Dot(cameraTransform.forward, transform.position - cameraTransform.position);
             if (distanceToCamera > referenceDistance)
             {
@@ -275,7 +276,7 @@ namespace Iviz.Displays
         
         void RotateToCamera()
         {
-            Vector3 cameraForward = TfListener.MainCamera.transform.forward;
+            Vector3 cameraForward = Settings.MainCamera.transform.forward;
             Transform mTransform = transform;
             if (CameraPivotIsParent)
             {

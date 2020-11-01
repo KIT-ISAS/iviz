@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using Unity.Collections;
@@ -34,12 +35,19 @@ namespace Iviz.Displays
         [CanBeNull] ComputeBuffer pointComputeBuffer;
         bool useIntensityForScaleY;
 
+        [NotNull]
         Mesh Mesh
         {
-            get => mesh;
+            get => mesh != null ? mesh : throw new NullReferenceException("Mesh has not been set!");
             set
             {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value), "Cannot set a null mesh!");
+                }
+                
                 mesh = value;
+
                 argsBuffer[0] = mesh.GetIndexCount(0);
                 argsBuffer[2] = mesh.GetIndexStart(0);
                 argsBuffer[3] = mesh.GetBaseVertex(0);
@@ -99,7 +107,7 @@ namespace Iviz.Displays
         [NotNull]
         public IReadOnlyCollection<PointWithColor> PointsWithColor
         {
-            get => pointBuffer.Select(f => new PointWithColor(f)).ToArray();
+            //get => pointBuffer.Select(f => new PointWithColor(f)).ToArray();
             set => Set(value, value.Count);
         }
 
@@ -244,6 +252,17 @@ namespace Iviz.Displays
             UpdateBuffer();
         }
 
+        /// <summary>
+        /// Copies the array directly without checking.
+        /// </summary>
+        /// <param name="points">A native array with the positions and colors.</param>        
+        public void SetDirect(in NativeArray<float4> points)
+        {
+            pointBuffer.Clear();
+            pointBuffer.AddRange(points);
+            UpdateBuffer();
+        }
+        
         void UpdateScale()
         {
             var realScale = new Vector4(

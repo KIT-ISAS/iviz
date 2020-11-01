@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Iviz.Core;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -23,7 +24,6 @@ namespace Iviz.Displays
             set => children = value.ToArray();
         } 
         
-        [NotNull]
         public string Name
         {
             get => gameObject.name;
@@ -47,7 +47,6 @@ namespace Iviz.Displays
             }
         }
 
-        [CanBeNull]
         public Transform Parent
         {
             get => transform.parent;

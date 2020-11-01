@@ -1,10 +1,14 @@
+using System;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Displays
 {
     public abstract class DisplayWrapperResource : MonoBehaviour, IDisplay, IRecyclable
     {
-        protected abstract IDisplay Display { get; }
+        const string ErrorNoDisplayMessage = "Display has not been set! Make sure to set a display beforehand";
+
+        [CanBeNull] protected abstract IDisplay Display { get; }
 
         public string Name
         {
@@ -12,15 +16,23 @@ namespace Iviz.Displays
             set => gameObject.name = value;
         }
 
-        public Bounds Bounds => Display.Bounds;
-        public Bounds WorldBounds => Display.WorldBounds;
-        public Pose WorldPose => Display.WorldPose;
-        public Vector3 WorldScale => Display.WorldScale;
+        public Bounds Bounds => Display?.Bounds ?? throw new NullReferenceException(ErrorNoDisplayMessage);
+        public Bounds WorldBounds => Display?.WorldBounds ?? throw new NullReferenceException(ErrorNoDisplayMessage);
+        public Pose WorldPose => Display?.WorldPose ?? throw new NullReferenceException(ErrorNoDisplayMessage);
+        public Vector3 WorldScale => Display?.WorldScale ?? throw new NullReferenceException(ErrorNoDisplayMessage);
         
         public int Layer
         {
-            get => Display.Layer;
-            set => Display.Layer = value;
+            get => Display?.Layer ?? throw new NullReferenceException(ErrorNoDisplayMessage);
+            set
+            {
+                if (Display == null)
+                {
+                    throw new NullReferenceException(ErrorNoDisplayMessage);
+                }
+
+                Display.Layer = value;
+            }
         }
 
         public Transform Parent
@@ -31,13 +43,21 @@ namespace Iviz.Displays
 
         public bool ColliderEnabled
         {
-            get => Display.ColliderEnabled;
-            set => Display.ColliderEnabled = value;
+            get => Display?.ColliderEnabled ?? throw new NullReferenceException(ErrorNoDisplayMessage);
+            set
+            {
+                if (Display == null)
+                {
+                    throw new NullReferenceException(ErrorNoDisplayMessage);
+                }
+
+                Display.ColliderEnabled = value;
+            }
         }        
         
         public virtual void Suspend()
         {
-            Display.Suspend();
+            Display?.Suspend();
         }
 
         public virtual bool Visible

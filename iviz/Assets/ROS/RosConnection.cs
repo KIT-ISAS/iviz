@@ -3,13 +3,15 @@ using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Roslib;
 using JetBrains.Annotations;
 using UnityEngine;
+using Logger = Iviz.Core.Logger;
 
-namespace Iviz.Controllers
+namespace Iviz.Ros
 {
     public abstract class RosConnection : IExternalServiceProvider
     {
@@ -37,9 +39,11 @@ namespace Iviz.Controllers
         public bool KeepReconnecting { get; set; }
         protected ReadOnlyCollection<BriefTopicInfo> PublishedTopics { get; set; } = EmptyTopics;
 
+        public abstract bool CallService<T>(string service, T srv) where T : IService;
+
         public event Action<ConnectionState> ConnectionStateChanged;
 
-        public virtual void Stop()
+        internal virtual void Stop()
         {
             keepRunning = false;
             Signal();
@@ -79,7 +83,7 @@ namespace Iviz.Controllers
                     {
                         SetConnectionState(ConnectionState.Connecting);
 
-                        bool connectionResult = await Connect();
+                        var connectionResult = await Connect();
 
                         SetConnectionState(connectionResult ? ConnectionState.Connected : ConnectionState.Disconnected);
                     }
@@ -100,7 +104,7 @@ namespace Iviz.Controllers
 
         async Task ExecuteTasks()
         {
-            while (toDos.TryDequeue(out Func<Task> action))
+            while (toDos.TryDequeue(out var action))
             {
                 try
                 {
@@ -120,25 +124,16 @@ namespace Iviz.Controllers
             SetConnectionState(ConnectionState.Disconnected);
         }
 
-        public enum RequestType
-        {
-            CachedOnly,
-            CachedButRequestInBackground,
-            WaitForRequest
-        }
-
-        public abstract void Subscribe<T>([NotNull] RosListener<T> listener)
+        internal abstract void Subscribe<T>([NotNull] RosListener<T> listener)
             where T : IMessage, IDeserializable<T>, new();
 
-        public abstract void Unsubscribe([NotNull] IRosListener subscriber);
-        public abstract void Advertise<T>([NotNull] RosSender<T> advertiser) where T : IMessage;
-        public abstract void Unadvertise([NotNull] IRosSender advertiser);
-        public abstract void Publish<T>([NotNull] RosSender<T> advertiser, [NotNull] T msg) where T : IMessage;
+        internal abstract void Unsubscribe([NotNull] IRosListener subscriber);
+        internal abstract void Advertise<T>([NotNull] RosSender<T> advertiser) where T : IMessage;
+        internal abstract void Unadvertise([NotNull] IRosSender advertiser);
+        internal abstract void Publish<T>([NotNull] RosSender<T> advertiser, [NotNull] T msg) where T : IMessage;
 
         public abstract void AdvertiseService<T>([NotNull] string service, [NotNull] Action<T> callback)
             where T : IService, new();
-
-        public abstract bool CallService<T>(string service, T srv) where T : IService;
 
         [ItemNotNull]
         [NotNull]
@@ -151,6 +146,15 @@ namespace Iviz.Controllers
 
         public abstract int GetNumPublishers([NotNull] string topic);
         public abstract int GetNumSubscribers([NotNull] string topic);
+
+        [NotNull]
         public abstract object GetParameter([NotNull] string parameter);
+    }
+
+    public enum RequestType
+    {
+        CachedOnly,
+        CachedButRequestInBackground,
+        WaitForRequest
     }
 }

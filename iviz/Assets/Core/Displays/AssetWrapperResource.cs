@@ -10,7 +10,7 @@ namespace Iviz.Displays
     {
         protected override void Awake()
         {
-            BoxCollider = null;
+            DisableBoxCollider();
         }
         
         public override int Layer

@@ -2,6 +2,7 @@
 using System.Linq;
 using Iviz.Controllers;
 using Iviz.Resources;
+using Iviz.Ros;
 using JetBrains.Annotations;
 
 namespace Iviz.App
@@ -50,7 +51,7 @@ namespace Iviz.App
         void GetTopics()
         {
             topics.Clear();
-            var newTopics = ConnectionManager.GetSystemPublishedTopics();
+            var newTopics = ConnectionManager.Connection.GetSystemPublishedTopics();
             foreach (var entry in newTopics)
             {
                 string topic = entry.Topic;

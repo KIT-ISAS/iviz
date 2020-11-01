@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using Unity.Collections;
@@ -22,8 +23,7 @@ namespace Iviz.Displays
         static readonly int ScaleID = Shader.PropertyToID("_Scale");
 
         NativeList<float4> pointBuffer;
-        int length;
-        ComputeBuffer pointComputeBuffer;
+        [CanBeNull] ComputeBuffer pointComputeBuffer;
 
         int Size => pointBuffer.Length;
 
@@ -74,10 +74,10 @@ namespace Iviz.Displays
         }
 
         /// <summary>
-        /// Simply copies and pastes the array without checking.
+        /// Copies the array directly without checking.
         /// </summary>
-        /// <param name="points">The point enumerator.</param>
-        public void SetArray(in NativeArray<float4> points)
+        /// <param name="points">A native array with the points.</param>
+        public void SetDirect(in NativeArray<float4> points)
         {
             pointBuffer.Clear();
             pointBuffer.AddRange(points);

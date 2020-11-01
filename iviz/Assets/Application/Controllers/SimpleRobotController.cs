@@ -1,7 +1,9 @@
 using System;
 using System.Runtime.Serialization;
+using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
+using Iviz.Ros;
 using Iviz.Roslib;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -278,13 +280,6 @@ namespace Iviz.Controllers
                 return false;
             }
 
-            if (parameterValue == null)
-            {
-                Debug.Log($"SimpleRobotController: Failed to retrieve parameter '{value}'");
-                HelpText = "[Parameter Not Found]";
-                return false;
-            }
-
             if (!(parameterValue is string robotDescription))
             {
                 Debug.Log($"SimpleRobotController: Parameter '{value}' was not string!");
@@ -339,7 +334,7 @@ namespace Iviz.Controllers
 
             try
             {
-                Robot = new RobotModel(description, ConnectionManager.Connection);
+                Robot = new RobotModel(description, ConnectionManager.ServiceProvider);
             }
             catch (Exception e)
             {

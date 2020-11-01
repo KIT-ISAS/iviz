@@ -3,8 +3,10 @@ using System.Runtime.Serialization;
 using Iviz.Displays;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
+using Iviz.Ros;
 using Iviz.Roslib;
 using UnityEngine;
+using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Controllers
 {

@@ -1,5 +1,6 @@
 ﻿using System;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -8,6 +9,8 @@ namespace Iviz.Displays
     /// Parent class for displays that use instanced elements like points or lines.
     /// Instanced elements can be shown either with colors or with intensities and colormap textures.
     /// </summary>
+    /// 
+    [RequireComponent(typeof(BoxCollider))]
     public abstract class MarkerResourceWithColormap : MarkerResource, ISupportsTint
     {
         static readonly int IntensityCoeffID = Shader.PropertyToID("_IntensityCoeff");
@@ -23,7 +26,8 @@ namespace Iviz.Displays
         [SerializeField] Color tint;
         [SerializeField] float elementScale = 1.0f;
 
-        protected MaterialPropertyBlock Properties { get; private set; }
+        MaterialPropertyBlock properties;
+        [NotNull] protected MaterialPropertyBlock Properties => properties ?? (properties = new MaterialPropertyBlock());
 
         /// <summary>
         /// Whether to use the element color or the element intensity overlaid with a colormap. 
@@ -31,7 +35,7 @@ namespace Iviz.Displays
         public virtual bool UseColormap { get; set; }
 
         /// <summary>
-        /// The colormap to be used if UseColormap is active.
+        /// The colormap to be used if <see cref="UseColormap"/> is active.
         /// </summary>
         public Resource.ColormapId Colormap
         {
@@ -103,7 +107,7 @@ namespace Iviz.Displays
             {
                 if (value < 0)
                 {
-                    throw new ArgumentException("Invalid elementScale " + elementScale, nameof(value));
+                    throw new ArgumentException($"Invalid elementScale {elementScale}", nameof(value));
                 }
                 
                 elementScale = value;
@@ -113,7 +117,6 @@ namespace Iviz.Displays
         protected override void Awake()
         {
             base.Awake();
-            Properties = new MaterialPropertyBlock();
             Tint = Color.white;
             IntensityBounds = new Vector2(0, 1);
         }

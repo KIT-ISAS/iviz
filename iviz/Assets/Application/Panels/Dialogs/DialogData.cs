@@ -11,7 +11,7 @@ namespace Iviz.App
 
         protected DialogData([NotNull] ModuleListPanel moduleListPanel)
         {
-            ModuleListPanel = moduleListPanel ? moduleListPanel : throw new ArgumentNullException(nameof(moduleListPanel));
+            ModuleListPanel = moduleListPanel != null ? moduleListPanel : throw new ArgumentNullException(nameof(moduleListPanel));
         }
 
         public abstract void SetupPanel();

@@ -10,6 +10,7 @@
         public ColorPickerWidget Tint { get; private set; }
         public SliderWidget Alpha { get; private set; }
         public ToggleWidget OcclusionOnlyMode { get; private set; }
+        public MarkerWidget Marker { get; private set; }
 
         void Awake()
         {
@@ -23,6 +24,8 @@
 
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();
+
+            Marker = p.AddMarker();
 
             p.UpdateSize();
             gameObject.SetActive(false);

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;

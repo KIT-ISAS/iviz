@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 using Iviz.App;
+using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Roslib;
 using JetBrains.Annotations;

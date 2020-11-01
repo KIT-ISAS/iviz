@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using Iviz.Core;
 using Iviz.Resources;
+using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -14,7 +16,7 @@ namespace Iviz.Displays
         [SerializeField] int numCellsY;
         [SerializeField] float cellSize;
 
-        readonly List<PointWithColor> pointBuffer = new List<PointWithColor>();
+        NativeList<float4> pointBuffer;
         MeshListResource resource;
 
         protected override IDisplay Display => resource;
@@ -94,6 +96,7 @@ namespace Iviz.Displays
 
         void Awake()
         {
+            pointBuffer = new NativeList<float4>(Allocator.Persistent);
             resource = ResourcePool.GetOrCreateDisplay<MeshListResource>(transform);
 
             NumCellsX = 10;
@@ -140,20 +143,24 @@ namespace Iviz.Displays
                         continue;
                     }
 
-                    float4 p = new float4(u, v, 0, val);
-                    float4 pc = p * mul;
-                    pointBuffer.Add(new PointWithColor(pc.Ros2Unity()));
+                    float4 p = new float4(u, v, 0, val) * mul;
+                    pointBuffer.Add(p.Ros2Unity());
                 }
             }
 
             GameThread.PostImmediate(() =>
             {
-                resource.PointsWithColor = pointBuffer;
+                resource.SetDirect(pointBuffer);
                 resource.IntensityBounds = new Vector2(0, 1);
                 IsProcessing = false;
             });
         }
-        
+
+        void OnDestroy()
+        {
+            pointBuffer.Dispose();
+        }
+
         public readonly struct Rect
         {
             public int Xmin { get; }

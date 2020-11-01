@@ -9,10 +9,11 @@ using System.Threading.Tasks;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
+using Logger = Iviz.Core.Logger;
 
-namespace Iviz.Controllers
+namespace Iviz.Ros
 {
-    public sealed class RoslibConnection : RosConnection
+    internal sealed class RoslibConnection : RosConnection
     {
         [CanBeNull] RosClient client;
 
@@ -388,7 +389,7 @@ namespace Iviz.Controllers
             );
         }
 
-        public override void Advertise<T>(RosSender<T> advertiser)
+        internal override void Advertise<T>(RosSender<T> advertiser)
         {
             if (advertiser == null)
             {
@@ -531,7 +532,7 @@ namespace Iviz.Controllers
             return result[0];
         }
 
-        public override void Publish<T>(RosSender<T> advertiser, T msg)
+        internal override void Publish<T>(RosSender<T> advertiser, T msg)
         {
             if (advertiser == null)
             {
@@ -574,7 +575,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public override void Subscribe<T>(RosListener<T> listener)
+        internal override void Subscribe<T>(RosListener<T> listener)
         {
             if (listener == null)
             {
@@ -610,7 +611,7 @@ namespace Iviz.Controllers
             subscribedTopic.Add(listener);
         }
 
-        public override void Unadvertise(IRosSender advertiser)
+        internal override void Unadvertise(IRosSender advertiser)
         {
             if (advertiser == null)
             {
@@ -657,7 +658,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public override void Unsubscribe(IRosListener subscriber)
+        internal override void Unsubscribe(IRosListener subscriber)
         {
             if (subscriber == null)
             {
@@ -824,7 +825,7 @@ namespace Iviz.Controllers
             return advertisedTopic?.Publisher?.NumSubscribers ?? 0;
         }
 
-        public override void Stop()
+        internal override void Stop()
         {
             Disconnect();
             base.Stop();

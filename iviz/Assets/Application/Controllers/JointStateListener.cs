@@ -5,6 +5,7 @@ using Iviz.Msgs.SensorMsgs;
 using System.Runtime.Serialization;
 using Iviz.Roslib;
 using Iviz.Resources;
+using Iviz.Ros;
 using JetBrains.Annotations;
 
 namespace Iviz.Controllers

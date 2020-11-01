@@ -1,4 +1,7 @@
-﻿using Iviz.Resources;
+﻿using System;
+using Iviz.Core;
+using Iviz.Resources;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -6,6 +9,9 @@ namespace Iviz.Displays
     /// <summary>
     /// Parent class for all displays that use a "mesh" (MeshFilter / MeshRenderer combo)
     /// </summary>
+    [RequireComponent(typeof(MeshFilter))]
+    [RequireComponent(typeof(MeshRenderer))]
+    [RequireComponent(typeof(BoxCollider))]
     public class MeshMarkerResource : MarkerResource, ISupportsTintAndAROcclusion
     {
         [SerializeField] Texture2D texture;
@@ -19,9 +25,13 @@ namespace Iviz.Displays
         Material textureMaterial;
         Material textureMaterialAlpha;
 
-        MeshRenderer MainRenderer => mainRenderer == null ? mainRenderer = GetComponent<MeshRenderer>() : mainRenderer;
-        MeshFilter MeshFilter => meshFilter == null ? meshFilter = GetComponent<MeshFilter>() : meshFilter;
+        [NotNull]
+        MeshRenderer MainRenderer => mainRenderer != null ? mainRenderer : mainRenderer = GetComponent<MeshRenderer>();
 
+        [NotNull]
+        MeshFilter MeshFilter => meshFilter != null ? meshFilter : meshFilter = GetComponent<MeshFilter>();
+
+        [CanBeNull]
         public Texture2D Texture
         {
             get => texture;

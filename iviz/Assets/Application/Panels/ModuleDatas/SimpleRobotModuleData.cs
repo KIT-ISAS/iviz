@@ -2,6 +2,7 @@
 using System.Linq;
 using Iviz.Controllers;
 using Iviz.Resources;
+using Iviz.Ros;
 using Iviz.Roslib;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -172,7 +173,7 @@ namespace Iviz.App
         }
 
         static IEnumerable<string> GetParameterCandidates() =>
-            ConnectionManager.GetSystemParameterList().Where(x => x.HasSuffix(ParamSuffix));
+            ConnectionManager.Connection.GetSystemParameterList().Where(x => x.HasSuffix(ParamSuffix));
 
         static IEnumerable<string> GetSavedRobots() => NoneStr.Concat(Resource.GetRobotNames());
 

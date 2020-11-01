@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.App
@@ -15,7 +16,7 @@ namespace Iviz.App
         [NotNull] readonly ImageDialogContents panel;
         public override IDialogPanelContents Panel => panel;
 
-        public IImageDialogListener Listener { get; set; }
+        [CanBeNull] IImageDialogListener Listener { get; set; }
 
         public ImageDialogData([NotNull] ModuleListPanel panel) : base(panel)
         {
@@ -24,14 +25,25 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
+            if (Listener == null)
+            {
+                throw new InvalidOperationException("Cannot setup panel without a listener!");
+            }
+            
             panel.CloseButton.Clicked += Close;
             panel.Material = Listener.Material;
             panel.ImageSize = Listener.ImageSize;
         }
+        
+        public void Show([NotNull] IImageDialogListener listener)
+        {
+            Listener = listener ?? throw new ArgumentNullException(nameof(listener));
+            Show();
+        }
 
         void Close()
         {
-            Listener.OnDialogClosed();
+            Listener?.OnDialogClosed();
             DialogPanelManager.HidePanelFor(this);
         }
     }

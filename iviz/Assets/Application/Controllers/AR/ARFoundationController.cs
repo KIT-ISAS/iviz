@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.App;
+using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
 using JetBrains.Annotations;
@@ -16,7 +17,7 @@ namespace Iviz.Controllers
         const float AnchorPauseTimeInSec = 2;
         const int SetupModeLayer = 14;
 
-        static ARSessionInfo savedSessionInfo;
+        //static ARSessionInfo savedSessionInfo;
 
         [SerializeField] Camera arCamera = null;
         [SerializeField] ARSessionOrigin arSessionOrigin = null;
@@ -48,8 +49,8 @@ namespace Iviz.Controllers
                 arCamera.enabled = value;
                 arLight.gameObject.SetActive(value);
                 ArSet.Visible = value;
-                TfListener.MainCamera = value ? arCamera : mainCamera;
-                canvas.worldCamera = TfListener.MainCamera;
+                Settings.MainCamera = value ? arCamera : mainCamera;
+                canvas.worldCamera = Settings.MainCamera;
             }
         }
 

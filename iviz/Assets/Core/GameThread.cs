@@ -4,7 +4,7 @@ using System.Threading;
 using JetBrains.Annotations;
 using UnityEngine;
 
-namespace Iviz.Displays
+namespace Iviz.Core
 {
     /// <summary>
     /// Singleton that other threads can use to post actions to the main thread.

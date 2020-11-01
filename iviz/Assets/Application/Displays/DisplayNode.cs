@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System;
+using Iviz.Core;
 using JetBrains.Annotations;
 
 namespace Iviz.Controllers

@@ -2,10 +2,12 @@
 using System.IO;
 using System.Threading.Tasks;
 using BitMiracle.LibJpeg;
+using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using Unity.Collections;
 using UnityEngine;
+using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Displays
 {
@@ -16,8 +18,7 @@ namespace Iviz.Displays
         static readonly int IntensityID = Shader.PropertyToID("_IntensityTexture");
         static readonly int MainTexID = Shader.PropertyToID("_MainTex");
 
-
-        byte[] rgbaBuffer;
+        //byte[] rgbaBuffer;
         byte[] pngBuffer;
 
         public event Action<Texture2D> TextureChanged;

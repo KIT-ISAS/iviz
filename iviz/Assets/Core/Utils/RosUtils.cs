@@ -4,11 +4,10 @@ using Iviz.Msgs;
 using Iviz.Msgs.StdMsgs;
 using System.Runtime.Serialization;
 using System.Runtime.CompilerServices;
-using Iviz.Controllers;
 using JetBrains.Annotations;
 using Unity.Mathematics;
 
-namespace Iviz
+namespace Iviz.Core
 {
     [DataContract]
     public struct SerializableColor
@@ -73,6 +72,8 @@ namespace Iviz
 
     public static class RosUtils
     {
+        public const string BaseFrameId = "map";
+        
         public static readonly Vector3 Ros2UnityScale = new Vector3(1, -1, 1);
         public static readonly Quaternion Ros2UnityRotation = new Quaternion(0.5f, -0.5f, 0.5f, 0.5f);
 
@@ -123,18 +124,6 @@ namespace Iviz
         public static Vector3 Ros2Unity(this Msgs.GeometryMsgs.Point32 p)
         {
             return p.ToUnity().Ros2Unity();
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 Abs(this Vector3 p)
-        {
-            return new Vector3(Mathf.Abs(p.x), Mathf.Abs(p.y), Mathf.Abs(p.z));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 CwiseProduct(this Vector3 p, Vector3 o)
-        {
-            return Vector3.Scale(p, o);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -290,9 +279,21 @@ namespace Iviz
 
         public static Header CreateHeader(uint seq = 0, [CanBeNull] string frameId = null)
         {
-            return new Header(seq, new time(DateTime.Now), frameId ?? TfListener.BaseFrameId);
+            return new Header(seq, new time(DateTime.Now), frameId ?? BaseFrameId);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsInvalid(this float f)
+        {
+            return float.IsNaN(f) || float.IsInfinity(f);
+        }      
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsInvalid(this double f)
+        {
+            return double.IsNaN(f) || double.IsInfinity(f);
+        } 
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool HasNaN(this float4 v) => float.IsNaN(v.x) || float.IsNaN(v.y) || float.IsNaN(v.z);
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using Iviz.Core;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -6,12 +7,25 @@ namespace Iviz.Displays
 {
     public abstract class MarkerResource : MonoBehaviour, IDisplay
     {
-        [CanBeNull] protected BoxCollider BoxCollider { get; set; }
+        [SerializeField] [CanBeNull] BoxCollider boxCollider;
 
-        public Bounds Bounds => BoxCollider == null ? new Bounds() : new Bounds(BoxCollider.center, BoxCollider.size);
-        public Bounds WorldBounds => BoxCollider == null ? new Bounds() : BoxCollider.bounds;
+        protected bool HasBoxCollider => boxCollider != null;
 
         [NotNull]
+        protected BoxCollider BoxCollider
+        {
+            get => boxCollider != null
+                ? boxCollider
+                : throw new NullReferenceException("This asset has no box collider!");
+            set => boxCollider =
+                value != null
+                    ? value
+                    : throw new ArgumentNullException(nameof(value), "Cannot set a null box collider!");
+        }
+
+        public Bounds Bounds => HasBoxCollider ? new Bounds(BoxCollider.center, BoxCollider.size) : new Bounds();
+        public Bounds WorldBounds => HasBoxCollider ? BoxCollider.bounds : new Bounds();
+
         public virtual string Name
         {
             get => gameObject.name;
@@ -21,26 +35,26 @@ namespace Iviz.Displays
                 {
                     throw new ArgumentNullException(nameof(value));
                 }
-                
+
                 gameObject.name = value;
             }
         }
 
         bool colliderEnabled = true;
+
         public bool ColliderEnabled
         {
             get => colliderEnabled;
             set
             {
                 colliderEnabled = value;
-                if (BoxCollider != null)
+                if (HasBoxCollider)
                 {
                     BoxCollider.enabled = value;
                 }
             }
         }
 
-        [CanBeNull]
         public Transform Parent
         {
             get => transform.parent;
@@ -65,9 +79,9 @@ namespace Iviz.Displays
 
         protected virtual void Awake()
         {
-            if (BoxCollider == null)
+            if (boxCollider == null)
             {
-                BoxCollider = GetComponent<BoxCollider>();
+                boxCollider = GetComponent<BoxCollider>();
             }
 
             ColliderEnabled = ColliderEnabled;
@@ -76,6 +90,11 @@ namespace Iviz.Displays
         public virtual void Suspend()
         {
             Layer = 0;
+        }
+
+        protected void DisableBoxCollider()
+        {
+            boxCollider = null;
         }
     }
 }

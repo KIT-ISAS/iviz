@@ -32,7 +32,7 @@ namespace Iviz.Resources
                 baseObject = UnityEngine.Resources.Load<T>(resourceName);
                 if (baseObject == null)
                 {
-                    throw new ArgumentException($"Cannot find resource '{resourceName}'", nameof(resourceName));
+                    throw new InvalidOperationException($"Cannot find resource '{resourceName}'");
                 }
 
                 return baseObject;

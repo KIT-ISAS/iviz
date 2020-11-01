@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using Iviz.Controllers;
+using Iviz.Core;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json;
 using Iviz.Resources;
@@ -162,12 +163,12 @@ namespace Iviz.Displays
 
         void Update()
         {
-            if (!FollowCamera || TfListener.MainCamera == null)
+            if (!FollowCamera || Settings.MainCamera == null)
             {
                 return;
             }
 
-            Vector3 cameraPos = TfListener.MainCamera.transform.position;
+            Vector3 cameraPos = Settings.MainCamera.transform.position;
             switch (Orientation)
             {
                 case GridOrientation.XY:

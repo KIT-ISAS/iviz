@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
+using Iviz.Ros;
 using Iviz.Roslib;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -297,7 +299,7 @@ namespace Iviz.Controllers
                 }
             }
 
-            resource.LinesWithColor = lines;
+            resource.Set(lines, lines.Count, LineColor.a < 1);
         }
 
         public override void StopController()

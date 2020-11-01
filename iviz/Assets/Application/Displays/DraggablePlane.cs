@@ -1,6 +1,7 @@
 using System;
 using Iviz.App;
 using Iviz.Controllers;
+using Iviz.Core;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -61,7 +62,7 @@ namespace Iviz.Displays
 
         public void OnPointerMove(in Vector2 cursorPos)
         {
-            Ray pointerRay = TfListener.MainCamera.ScreenPointToRay(cursorPos);
+            Ray pointerRay = Settings.MainCamera.ScreenPointToRay(cursorPos);
             OnPointerMove(pointerRay);
         }
 

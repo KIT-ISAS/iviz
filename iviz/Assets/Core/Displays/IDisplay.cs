@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using JetBrains.Annotations;
+using UnityEngine;
 
 namespace Iviz.Displays
 {
@@ -11,7 +12,7 @@ namespace Iviz.Displays
         /// <summary>
         /// Name of the display. Used for the selection caption.
         /// </summary>
-        string Name { get; }
+        [NotNull] string Name { get; }
         /// <summary>
         /// Bounds of the display in local coordinates.
         /// </summary>
@@ -35,7 +36,7 @@ namespace Iviz.Displays
         /// <summary>
         /// Parent transform of the display.
         /// </summary>
-        Transform Parent { get; set; }
+        [CanBeNull] Transform Parent { get; set; }
         /// <summary>
         /// Gets or sets whether the display collider is enabled.
         /// </summary>
