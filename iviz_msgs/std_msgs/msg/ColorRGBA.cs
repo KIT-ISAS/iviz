@@ -41,7 +41,7 @@ namespace Iviz.Msgs.StdMsgs
         
         public override readonly int GetHashCode() => (R, G, B, A).GetHashCode();
         
-        public override readonly bool Equals(object o) => o is ColorRGBA s && Equals(s);
+        public override readonly bool Equals(object? o) => o is ColorRGBA s && Equals(s);
         
         public readonly bool Equals(ColorRGBA o) => (R, G, B, A) == (o.R, o.G, o.B, o.A);
         

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -7,6 +8,8 @@ namespace Iviz.MsgsGen
 {
     internal static class MsgParser
     {
+        static readonly CultureInfo Culture = CultureInfo.InvariantCulture;
+        
         internal static readonly Dictionary<string, string> BuiltInsMaps = new Dictionary<string, string>
         {
             {"bool", "bool"},
@@ -30,12 +33,12 @@ namespace Iviz.MsgsGen
         internal static string Sanitize(string name)
         {
             StringBuilder str = new StringBuilder();
-            str.Append(char.ToUpper(name[0]));
+            str.Append(char.ToUpper(name[0], Culture));
             for (int i = 1; i < name.Length; i++)
             {
                 if (name[i] == '_' && i != name.Length - 1)
                 {
-                    str.Append(char.ToUpper(name[i + 1]));
+                    str.Append(char.ToUpper(name[i + 1], Culture));
                     i++;
                 }
                 else

@@ -35,7 +35,7 @@ namespace Iviz.Msgs.StdMsgs
         
         public override readonly int GetHashCode() => (Data).GetHashCode();
         
-        public override readonly bool Equals(object o) => o is Byte s && Equals(s);
+        public override readonly bool Equals(object? o) => o is Byte s && Equals(s);
         
         public readonly bool Equals(Byte o) => (Data) == (o.Data);
         

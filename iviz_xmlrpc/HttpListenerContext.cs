@@ -44,19 +44,23 @@ namespace Iviz.XmlRpc
             int length = -1;
             while (true)
             {
-                Task<string> readTask = stream.ReadLineAsync();
+                Task<string?> readTask = stream.ReadLineAsync();
                 if (!await readTask.WaitFor(timeoutInMs) || !readTask.RanToCompletion())
                 {
                     throw new TimeoutException("Read line timed out!", readTask.Exception);
                 }
 
-                string line = await readTask;
+                string? line = await readTask;
+                if (line == null)
+                {
+                    throw new TimeoutException("Read line returned empty value!");                    
+                }
 
-                if (CheckHeaderLine(line, "Content-Length", out string lengthStr))
+                if (CheckHeaderLine(line, "Content-Length", out string? lengthStr))
                 {
                     if (!int.TryParse(lengthStr, out length))
                     {
-                        throw new ParseException("Cannot parse length '" + lengthStr + "'");
+                        throw new ParseException($"Cannot parse length '{lengthStr}'");
                     }
                 }
                 else if (string.IsNullOrEmpty(line) || line == "\r")
@@ -86,10 +90,9 @@ namespace Iviz.XmlRpc
             return new string(buffer, 0, numRead);
         }
 
-        static bool CheckHeaderLine(string line, string key, out string value)
+        static bool CheckHeaderLine(string line, string key, out string? value)
         {
-            if (line is null ||
-                line.Length < key.Length + 1 ||
+            if (line.Length < key.Length + 1 ||
                 string.Compare(line, 0, key, 0, key.Length, true, BuiltIns.Culture) != 0)
             {
                 value = null;

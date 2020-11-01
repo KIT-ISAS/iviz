@@ -38,7 +38,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public override readonly int GetHashCode() => (Position, Orientation).GetHashCode();
         
-        public override readonly bool Equals(object o) => o is Pose s && Equals(s);
+        public override readonly bool Equals(object? o) => o is Pose s && Equals(s);
         
         public readonly bool Equals(Pose o) => (Position, Orientation) == (o.Position, o.Orientation);
         

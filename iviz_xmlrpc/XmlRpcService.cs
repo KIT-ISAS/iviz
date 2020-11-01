@@ -67,7 +67,7 @@ namespace Iviz.XmlRpc
             }
         }
 
-        static object Parse(XmlNode value)
+        static object? Parse(XmlNode value)
         {
             Assert(value.Name, "value");
             if (!value.HasChildNodes)
@@ -80,7 +80,7 @@ namespace Iviz.XmlRpc
             {
                 return primitive.InnerText;
             }
-            
+
             switch (primitive.Name)
             {
                 case "double":
@@ -100,7 +100,7 @@ namespace Iviz.XmlRpc
                 case "array":
                     XmlNode data = primitive.FirstChild;
                     Assert(data.Name, "data");
-                    object[] children = new object[data.ChildNodes.Count];
+                    object?[] children = new object[data.ChildNodes.Count];
                     for (int i = 0; i < data.ChildNodes.Count; i++)
                     {
                         children[i] = Parse(data.ChildNodes[i]);
@@ -110,8 +110,8 @@ namespace Iviz.XmlRpc
                 case "dateTime.iso8601":
                     return DateTime.TryParseExact(primitive.InnerText, "yyyy-MM-ddTHH:mm:ssZ",
                         CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dt)
-                        ? (object)dt
-                        : (object)DateTime.MinValue;
+                        ? (object) dt
+                        : (object) DateTime.MinValue;
                 case "base64":
                     try
                     {
@@ -132,8 +132,8 @@ namespace Iviz.XmlRpc
                             continue;
                         }
 
-                        string entryName = null;
-                        object entryValue = null;
+                        string? entryName = null;
+                        object? entryValue = null;
                         for (int j = 0; j < member.ChildNodes.Count; j++)
                         {
                             XmlNode entry = member.ChildNodes[j];
@@ -184,7 +184,7 @@ namespace Iviz.XmlRpc
             return buffer.ToString();
         }
 
-        static object ProcessResponse(string inData)
+        static object? ProcessResponse(string inData)
         {
             XmlDocument document = new XmlDocument();
             document.LoadXml(inData);
@@ -232,7 +232,7 @@ namespace Iviz.XmlRpc
         /// <param name="timeoutInMs">Timeout in milliseconds.</param>
         /// <returns>The result of the remote call.</returns>
         /// <exception cref="ArgumentNullException">Thrown if one of the arguments is null.</exception>
-        public static async Task<object> MethodCallAsync(Uri remoteUri, Uri callerUri, string method,
+        public static async Task<object?> MethodCallAsync(Uri remoteUri, Uri callerUri, string method,
             IEnumerable<Arg> args, int timeoutInMs = 2000)
         {
             if (remoteUri is null) { throw new ArgumentNullException(nameof(remoteUri)); }
@@ -252,7 +252,7 @@ namespace Iviz.XmlRpc
 
             return ProcessResponse(inData);
         }
-        
+
         /// <summary>
         /// Calls an XML-RPC method.
         /// </summary>
@@ -263,7 +263,7 @@ namespace Iviz.XmlRpc
         /// <param name="timeoutInMs">Timeout in milliseconds.</param>
         /// <returns>The result of the remote call.</returns>
         /// <exception cref="ArgumentNullException">Thrown if one of the arguments is null.</exception>        
-        public static object MethodCall(Uri remoteUri, Uri callerUri, string method, IEnumerable<Arg> args,
+        public static object? MethodCall(Uri remoteUri, Uri callerUri, string method, IEnumerable<Arg> args,
             int timeoutInMs = 2000)
         {
             if (remoteUri is null) { throw new ArgumentNullException(nameof(remoteUri)); }
@@ -283,7 +283,7 @@ namespace Iviz.XmlRpc
 
             return ProcessResponse(inData);
         }
-        
+
         /// <summary>
         /// Responds to an XML-RPC function call sent through an HTTP request.
         /// First deserializes the function arguments from the request, then it calls one
@@ -298,7 +298,7 @@ namespace Iviz.XmlRpc
         public static async Task MethodResponseAsync(
             HttpListenerContext httpContext,
             IReadOnlyDictionary<string, Func<object[], Arg[]>> methods,
-            IReadOnlyDictionary<string, Func<object[], Task>> lateCallbacks = null)
+            IReadOnlyDictionary<string, Func<object[], Task>>? lateCallbacks = null)
         {
             if (httpContext is null)
             {
@@ -325,9 +325,7 @@ namespace Iviz.XmlRpc
 #endif
                 var (methodName, args) = ParseResponseXml(inData);
 
-                if (methodName == null ||
-                    !methods.TryGetValue(methodName, out var method) ||
-                    args == null)
+                if (!methods.TryGetValue(methodName, out var method))
                 {
                     throw new ParseException($"Unknown function '{methodName}' or invalid arguments");
                 }
@@ -385,8 +383,8 @@ namespace Iviz.XmlRpc
                 throw new ParseException("Malformed request: no 'methodCall' found");
             }
 
-            string methodName = null;
-            object[] args = null;
+            string? methodName = null;
+            object[]? args = null;
             XmlNode child = root.FirstChild;
             do
             {
@@ -399,7 +397,10 @@ namespace Iviz.XmlRpc
                         {
                             XmlNode param = child.ChildNodes[i];
                             Assert(param.Name, "param");
-                            args[i] = Parse(param.FirstChild);
+                            object? arg = Parse(param.FirstChild);
+                            args[i] = arg ?? 
+                                      throw new ParseException(
+                                          $"Could not parse argument '{param.FirstChild.InnerText}'");
                         }
 
                         break;
@@ -414,6 +415,11 @@ namespace Iviz.XmlRpc
                             $"Expected 'params', 'fault', or 'methodName', got '{child.Name}'");
                 }
             } while ((child = child.NextSibling) != null);
+
+            if (methodName == null || args == null)
+            {
+                throw new ParseException($"Unknown function '{methodName}' or invalid arguments");
+            }
 
             return (methodName, args);
         }

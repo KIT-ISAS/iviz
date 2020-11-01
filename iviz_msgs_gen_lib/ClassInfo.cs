@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -12,6 +13,8 @@ namespace Iviz.MsgsGen
     {
         internal const int UninitializedSize = -2;
         internal const int UnknownSizeAtCompileTime = -1;
+
+        static readonly CultureInfo Culture = CultureInfo.InvariantCulture;
 
         static readonly Dictionary<string, int> BuiltInsSizes = new Dictionary<string, int>
         {
@@ -94,7 +97,7 @@ namespace Iviz.MsgsGen
         readonly string fullMessageText;
         readonly List<VariableElement> variables;
 
-        public int FixedSize { get; private set; } = UninitializedSize;
+        public int FixedSize { get; set; } = UninitializedSize;
         public bool HasFixedSize => FixedSize != UnknownSizeAtCompileTime && FixedSize != UninitializedSize;
         
         string md5;
@@ -485,7 +488,7 @@ namespace Iviz.MsgsGen
                 lines.Add("");
                 lines.Add($"public override readonly int GetHashCode() => ({myVars}).GetHashCode();");
                 lines.Add("");
-                lines.Add($"public override readonly bool Equals(object o) => o is {name} s && Equals(s);");
+                lines.Add($"public override readonly bool Equals(object? o) => o is {name} s && Equals(s);");
                 lines.Add("");
 
                 var oVars = string.Join(", ", variables.Select(x => $"o.{x.FieldName}"));
@@ -805,7 +808,11 @@ namespace Iviz.MsgsGen
         string GetMd5Property()
         {
             GetMd5();
-            using var md5Hash = MD5.Create();
+            
+#pragma warning disable CA5351 
+            using MD5 md5Hash = MD5.Create();
+#pragma warning restore CA5351             
+
             return GetMd5Hash(md5Hash, md5File);
         }
 
@@ -836,7 +843,10 @@ namespace Iviz.MsgsGen
 
             md5File = str.ToString();
             
-            using var md5Hash = MD5.Create();
+#pragma warning disable CA5351 
+            using MD5 md5Hash = MD5.Create();
+#pragma warning restore CA5351             
+
             md5 = GetMd5Hash(md5Hash, md5File);
             
             return md5;
@@ -848,7 +858,7 @@ namespace Iviz.MsgsGen
             var sBuilder = new StringBuilder();
             foreach (var b in data)
             {
-                sBuilder.Append(b.ToString("x2"));
+                sBuilder.Append(b.ToString("x2", Culture));
             }
 
             return sBuilder.ToString();

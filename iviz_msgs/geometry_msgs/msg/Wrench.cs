@@ -39,7 +39,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public override readonly int GetHashCode() => (Force, Torque).GetHashCode();
         
-        public override readonly bool Equals(object o) => o is Wrench s && Equals(s);
+        public override readonly bool Equals(object? o) => o is Wrench s && Equals(s);
         
         public readonly bool Equals(Wrench o) => (Force, Torque) == (o.Force, o.Torque);
         

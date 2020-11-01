@@ -40,7 +40,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public override readonly int GetHashCode() => (X, Y, Z).GetHashCode();
         
-        public override readonly bool Equals(object o) => o is Point s && Equals(s);
+        public override readonly bool Equals(object? o) => o is Point s && Equals(s);
         
         public readonly bool Equals(Point o) => (X, Y, Z) == (o.X, o.Y, o.Z);
         

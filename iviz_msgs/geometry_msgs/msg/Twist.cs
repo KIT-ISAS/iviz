@@ -38,7 +38,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public override readonly int GetHashCode() => (Linear, Angular).GetHashCode();
         
-        public override readonly bool Equals(object o) => o is Twist s && Equals(s);
+        public override readonly bool Equals(object? o) => o is Twist s && Equals(s);
         
         public readonly bool Equals(Twist o) => (Linear, Angular) == (o.Linear, o.Angular);
         

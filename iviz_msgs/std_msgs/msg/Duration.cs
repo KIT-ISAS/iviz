@@ -35,7 +35,7 @@ namespace Iviz.Msgs.StdMsgs
         
         public override readonly int GetHashCode() => (Data).GetHashCode();
         
-        public override readonly bool Equals(object o) => o is Duration s && Equals(s);
+        public override readonly bool Equals(object? o) => o is Duration s && Equals(s);
         
         public readonly bool Equals(Duration o) => (Data) == (o.Data);
         

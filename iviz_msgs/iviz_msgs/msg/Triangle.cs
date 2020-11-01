@@ -39,7 +39,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public override readonly int GetHashCode() => (A, B, C).GetHashCode();
         
-        public override readonly bool Equals(object o) => o is Triangle s && Equals(s);
+        public override readonly bool Equals(object? o) => o is Triangle s && Equals(s);
         
         public readonly bool Equals(Triangle o) => (A, B, C) == (o.A, o.B, o.C);
         

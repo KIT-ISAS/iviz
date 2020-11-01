@@ -13,7 +13,7 @@ namespace Iviz.XmlRpc
     /// </summary>
     public readonly struct Arg
     {
-        readonly string content;
+        readonly string? content;
 
         public bool IsValid => content != null;
 

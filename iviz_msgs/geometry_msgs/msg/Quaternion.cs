@@ -42,7 +42,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public override readonly int GetHashCode() => (X, Y, Z, W).GetHashCode();
         
-        public override readonly bool Equals(object o) => o is Quaternion s && Equals(s);
+        public override readonly bool Equals(object? o) => o is Quaternion s && Equals(s);
         
         public readonly bool Equals(Quaternion o) => (X, Y, Z, W) == (o.X, o.Y, o.Z, o.W);
         

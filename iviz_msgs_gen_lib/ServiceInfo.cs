@@ -173,7 +173,10 @@ namespace Iviz.MsgsGen
 
             string md5File = str.ToString();
 
+#pragma warning disable CA5351 
             using MD5 md5Hash = MD5.Create();
+#pragma warning restore CA5351             
+            
             string md5 = ClassInfo.GetMd5Hash(md5Hash, md5File);
 
             return md5;

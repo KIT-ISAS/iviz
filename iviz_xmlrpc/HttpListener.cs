@@ -19,12 +19,11 @@ namespace Iviz.XmlRpc
         const int BackgroundTimeoutInMs = 5000;
 
         readonly List<(DateTime start, Task task)> backgroundTasks = new List<(DateTime, Task)>();
+        readonly TcpListener listener;
 
         bool disposed;
         bool keepGoing;
-
-        TcpListener listener;
-
+        
         /// <summary>
         /// Creates a new HTTP listener that listens on the given port.
         /// </summary>
@@ -57,7 +56,6 @@ namespace Iviz.XmlRpc
             {
                 // not started, dispose directly
                 listener.Stop();
-                listener = null;
                 return;
             }
 
@@ -78,9 +76,6 @@ namespace Iviz.XmlRpc
 
             // now we close the underlying socket
             listener.Server.Close();
-
-            // set listener to null to maybe trigger a null reference exception
-            listener = null;
 
             // and hope that this is enough to leave AcceptTcpClientAsync()
             Logger.LogDebug($"{this}: Dispose out");

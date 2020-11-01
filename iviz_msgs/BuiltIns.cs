@@ -14,7 +14,7 @@ namespace Iviz.Msgs
 
         static string GetClassStringConstant(Type type, string name)
         {
-            string constant = (string)type.GetField(name)?.GetRawConstantValue();
+            string? constant = (string?)type.GetField(name)?.GetRawConstantValue();
             if (constant == null)
             {
                 throw new ArgumentException("Failed to resolve constant '" + name + "' in class " + type.FullName, nameof(name));

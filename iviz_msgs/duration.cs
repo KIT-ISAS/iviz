@@ -28,7 +28,7 @@ namespace Iviz.Msgs
             return TimeSpan.FromSeconds(Secs) + TimeSpan.FromTicks(Nsecs / 100);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return (obj is duration d) && (this == d);
         }

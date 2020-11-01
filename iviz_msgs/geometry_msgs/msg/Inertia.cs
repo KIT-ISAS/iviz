@@ -55,7 +55,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public override readonly int GetHashCode() => (M, Com, Ixx, Ixy, Ixz, Iyy, Iyz, Izz).GetHashCode();
         
-        public override readonly bool Equals(object o) => o is Inertia s && Equals(s);
+        public override readonly bool Equals(object? o) => o is Inertia s && Equals(s);
         
         public readonly bool Equals(Inertia o) => (M, Com, Ixx, Ixy, Ixz, Iyy, Iyz, Izz) == (o.M, o.Com, o.Ixx, o.Ixy, o.Ixz, o.Iyy, o.Iyz, o.Izz);
         

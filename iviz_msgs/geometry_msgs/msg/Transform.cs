@@ -38,7 +38,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public override readonly int GetHashCode() => (Translation, Rotation).GetHashCode();
         
-        public override readonly bool Equals(object o) => o is Transform s && Equals(s);
+        public override readonly bool Equals(object? o) => o is Transform s && Equals(s);
         
         public readonly bool Equals(Transform o) => (Translation, Rotation) == (o.Translation, o.Rotation);
         

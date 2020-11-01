@@ -39,7 +39,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public override readonly int GetHashCode() => (X, Y, Z).GetHashCode();
         
-        public override readonly bool Equals(object o) => o is Vector3 s && Equals(s);
+        public override readonly bool Equals(object? o) => o is Vector3 s && Equals(s);
         
         public readonly bool Equals(Vector3 o) => (X, Y, Z) == (o.X, o.Y, o.Z);
         
