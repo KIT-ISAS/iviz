@@ -26,7 +26,6 @@ namespace Iviz.Roslib
         const byte ErrorByte = 0;
 
         readonly bool persistent;
-        readonly IPEndPoint remoteEndPoint;
         readonly bool requestNoDelay;
         readonly ServiceInfo<T> serviceInfo;
         readonly NetworkStream stream;
@@ -58,11 +57,7 @@ namespace Iviz.Roslib
 
             tcpClient.Connect(remoteHostname, remotePort);
             stream = tcpClient.GetStream();
-            remoteEndPoint = (IPEndPoint) tcpClient.Client.RemoteEndPoint;
         }
-
-        int Port => remoteEndPoint.Port;
-        string Hostname => remoteEndPoint.Address.ToString();
 
         public void Dispose()
         {
@@ -105,7 +100,7 @@ namespace Iviz.Roslib
                 }
             }
 
-            await stream.WriteAsync(array, 0, array.Length);
+            await stream.WriteAsync(array, 0, array.Length).Caf();
         }
 
         List<string> ParseHeader(int totalLength)
@@ -131,9 +126,9 @@ namespace Iviz.Roslib
 
         public async Task StartAsync()
         {
-            await SerializeHeaderAsync();
+            await SerializeHeaderAsync().Caf();
 
-            int totalLength = await ReceivePacketAsync();
+            int totalLength = await ReceivePacketAsync().Caf();
             List<string> responses = ParseHeader(totalLength);
 
             if (responses.Count == 0 || !responses[0].HasPrefix("error"))
@@ -231,7 +226,7 @@ namespace Iviz.Roslib
             bool success;
             try
             {
-                success = await ExecuteImplAsync(service);
+                success = await ExecuteImplAsync(service).Caf();
             }
             catch (Exception e)
             {
@@ -278,8 +273,8 @@ namespace Iviz.Roslib
             }
 
             uint sendLength = Buffer.Serialize(requestMsg, writeBuffer);
-            await stream.WriteAsync(BitConverter.GetBytes(sendLength), 0, 4);
-            await stream.WriteAsync(writeBuffer, 0, (int) sendLength);
+            await stream.WriteAsync(BitConverter.GetBytes(sendLength), 0, 4).Caf();
+            await stream.WriteAsync(writeBuffer, 0, (int) sendLength).Caf();
 
             int rcvLengthH = await stream.ReadAsync(readBuffer, 0, 1);
             if (rcvLengthH == 0)

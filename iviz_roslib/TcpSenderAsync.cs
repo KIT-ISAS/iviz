@@ -471,7 +471,7 @@ namespace Iviz.Roslib
                 remainingBytes -= queue[c - i].msgLength;
             }
 
-            int remainingPackages = MaxSizeInPacketsWithoutConstraint;
+            int consideredPackets = MaxSizeInPacketsWithoutConstraint;
             if (remainingBytes > 0)
             {
                 // start discarding old messages
@@ -484,11 +484,11 @@ namespace Iviz.Roslib
                     }
 
                     remainingBytes -= currentMsgLength;
-                    remainingPackages++;
+                    consideredPackets++;
                 }
             }
 
-            numDropped = queue.Count - remainingPackages;
+            numDropped = queue.Count - consideredPackets;
             bytesDropped = totalQueueSizeInBytes - maxQueueSizeInBytes + remainingBytes;
         }
 
