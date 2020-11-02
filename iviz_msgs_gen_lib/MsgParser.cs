@@ -120,7 +120,7 @@ namespace Iviz.MsgsGen
                     }
                     else
                     {
-                        Console.WriteLine($"Unknown symbol '{line[index]}'");
+                        Console.WriteLine($"** Unknown symbol '{line[index]}'");
                         index++;
                     }
                 }
