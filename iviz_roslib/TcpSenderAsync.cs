@@ -193,9 +193,7 @@ namespace Iviz.Roslib
                 };
             }
 
-            int totalLength = 4 * contents.Length;
-            foreach (string entry in contents)
-                totalLength += entry.Length;
+            int totalLength = 4 * contents.Length + contents.Sum(entry => entry.Length);
 
             byte[] array = new byte[4 + totalLength];
             using (BinaryWriter writer = new BinaryWriter(new MemoryStream(array)))
@@ -214,7 +212,7 @@ namespace Iviz.Roslib
             await stream.WriteAsync(array, 0, array.Length).Caf();
         }
 
-        string ProcessRemoteHeader(IReadOnlyCollection<string> fields)
+        string ProcessRemoteHeader(List<string> fields)
         {
             if (fields.Count < 5)
             {

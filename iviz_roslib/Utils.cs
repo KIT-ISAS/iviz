@@ -107,5 +107,29 @@ namespace Iviz.Roslib
 
             return ((ICollection<KeyValuePair<T, TU>>) dictionary).Remove(new KeyValuePair<T, TU>(t, u));
         }
+        
+        public static int Sum<T>(this T[] ts, Func<T, int> selector)
+        {
+            int sum = 0;
+            foreach (T t in ts)
+            {
+                sum += selector(t);
+            }
+
+            return sum;
+        }
+        
+        public static bool Any<T>(this T[] ts, Predicate<T> predicate)
+        {
+            foreach (var t in ts)
+            {
+                if (predicate(t))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }

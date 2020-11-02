@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Roslib.XmlRpc;
@@ -135,7 +136,7 @@ namespace Iviz.Roslib
                 // if an uri is not registered as a publisher anymore,
                 // we kill existing receivers only if they are still trying to reconnect
                 // existing sessions should continue
-                IEnumerable<TcpReceiverAsync<T>> toDelete = connectionsByUri
+                TcpReceiverAsync<T>[] toDelete = connectionsByUri
                     .Where(pair => !newPublishers.Contains(pair.Key) /*&& !pair.Value.IsConnected*/)
                     .Select(pair => pair.Value).ToArray();
 
@@ -149,7 +150,7 @@ namespace Iviz.Roslib
                 }
 
                 bool[] results = await Task.WhenAll(toAdd.Select(AddPublisherAsync)).Caf();
-                numConnectionsChanged = results.Any() | Cleanup();
+                numConnectionsChanged = results.Any(b => b) | Cleanup();
             }
 
             if (numConnectionsChanged)
@@ -157,6 +158,7 @@ namespace Iviz.Roslib
                 Subscriber.RaiseNumPublishersChanged();
             }
         }
+        
 
         bool Cleanup()
         {
