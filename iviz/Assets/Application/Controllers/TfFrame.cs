@@ -195,9 +195,9 @@ namespace Iviz.Controllers
 
         public Pose AbsolutePose => transform.AsPose();
 
-        bool HasNoListeners => !listeners.Any();
+        bool HasNoListeners => listeners.Count == 0;
 
-        bool IsChildless => !children.Any();
+        bool IsChildless => children.Count == 0;
 
         public override string Name => Id;
 

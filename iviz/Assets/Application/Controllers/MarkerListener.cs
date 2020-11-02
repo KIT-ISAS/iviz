@@ -150,6 +150,7 @@ namespace Iviz.Controllers
             }
         }
 
+        [NotNull]
         public string BriefDescription
         {
             get

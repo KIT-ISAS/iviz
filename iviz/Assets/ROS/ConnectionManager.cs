@@ -72,8 +72,7 @@ namespace Iviz.Ros
 #endif
 
         [CanBeNull] public static string MyId => Connection.MyId;
-        static ConnectionState ConnectionState => Connection.ConnectionState;
-        public static bool IsConnected => ConnectionState == ConnectionState.Connected;
+        public static bool IsConnected => Connection.ConnectionState == ConnectionState.Connected;
 
         internal static void ReportBandwidthUp(int size)
         {

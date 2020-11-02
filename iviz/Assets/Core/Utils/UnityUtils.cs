@@ -158,13 +158,31 @@ namespace Iviz.Core
                 action(t);
             }
         }
-
-        public static void ForEach<T>([NotNull] this IList<T> col, Action<T> action)
+        
+        public static bool Any<T>([NotNull] this T[] ts, Predicate<T> predicate)
         {
-            foreach (var t in col)
+            foreach (var t in ts)
             {
-                action(t);
+                if (predicate(t))
+                {
+                    return true;
+                }
             }
+
+            return false;
+        }
+        
+        public static bool Any<T>([NotNull] this List<T> ts, Predicate<T> predicate)
+        {
+            foreach (var t in ts)
+            {
+                if (predicate(t))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public static ArraySegment<T> AsSegment<T>([NotNull] this T[] ts)

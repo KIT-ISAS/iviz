@@ -97,7 +97,7 @@ namespace Iviz.Controllers
             Publisher?.Reset();
         }
 
-        void Handler(InteractiveMarkerUpdate msg)
+        void Handler([NotNull] InteractiveMarkerUpdate msg)
         {
             if (msg.Type == InteractiveMarkerUpdate.KEEP_ALIVE)
             {
@@ -109,7 +109,7 @@ namespace Iviz.Controllers
             msg.Erases.ForEach(DestroyInteractiveMarker);
         }
 
-        void CreateInteractiveMarker(InteractiveMarker msg)
+        void CreateInteractiveMarker([NotNull] InteractiveMarker msg)
         {
             string id = msg.Name;
             if (!imarkers.TryGetValue(id, out InteractiveMarkerObject imarker))
@@ -137,13 +137,13 @@ namespace Iviz.Controllers
             return gameObject.AddComponent<InteractiveMarkerObject>();
         }
 
-        static void DeleteMarkerObject(InteractiveMarkerObject imarker)
+        static void DeleteMarkerObject([NotNull] InteractiveMarkerObject imarker)
         {
             imarker.Stop();
             UnityEngine.Object.Destroy(imarker.gameObject);
         }
 
-        void UpdateInteractiveMarkerPose(InteractiveMarkerPose msg)
+        void UpdateInteractiveMarkerPose([NotNull] InteractiveMarkerPose msg)
         {
             string id = msg.Name;
             if (!imarkers.TryGetValue(id, out InteractiveMarkerObject im))
@@ -155,7 +155,7 @@ namespace Iviz.Controllers
             im.UpdateExpirationTime();
         }
 
-        void DestroyInteractiveMarker(string id)
+        void DestroyInteractiveMarker([NotNull] string id)
         {
             if (!imarkers.TryGetValue(id, out InteractiveMarkerObject imarker))
             {
@@ -234,7 +234,7 @@ namespace Iviz.Controllers
                     Where(entry => entry.Value.ExpirationTime < now).
                     Select(entry => entry.Key).
                     ToArray();
-            
+
             foreach (string key in deadMarkers)
             {
                 DestroyInteractiveMarker(key);

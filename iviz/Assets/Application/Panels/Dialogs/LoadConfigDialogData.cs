@@ -23,9 +23,9 @@ namespace Iviz.App
         public override void SetupPanel()
         {
             files.Clear();
-            files.AddRange(Directory.GetFiles(Settings.SavedFolder).
-                Where(x => Roslib.Utils.HasSuffix(x, Suffix)).
-                Select(GetFileName));
+            files.AddRange(Directory.GetFiles(Settings.SavedFolder)
+                .Where(x => Roslib.Utils.HasSuffix(x, Suffix))
+                .Select(GetFileName));
             itemList.Title = "Load Config File";
             itemList.Items = files;
             itemList.ItemClicked += OnItemClicked;
@@ -55,6 +55,5 @@ namespace Iviz.App
         {
             DialogPanelManager.HidePanelFor(this);
         }
-
     }
 }

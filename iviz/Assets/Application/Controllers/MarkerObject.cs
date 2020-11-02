@@ -149,7 +149,7 @@ namespace Iviz.Controllers
 
             numWarnings = 0;
             numErrors = 0;
-            
+
             description.Length = 0;
             description.Append("<b>* Marker: ").Append(id).Append("</b>").AppendLine();
             description.Append("Type: ").Append(DescriptionFromType(msg)).AppendLine();
@@ -425,8 +425,10 @@ namespace Iviz.Controllers
 
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length)
             {
-                description.Append(ErrorStr).Append("Color array length ").Append(msg.Colors.Length)
-                    .Append(" does not match point array length ").Append(msg.Points.Length).AppendLine();
+                description.Append(ErrorStr)
+                    .Append("Color array length ").Append(msg.Colors.Length)
+                    .Append(" does not match point array length ").Append(msg.Points.Length)
+                    .AppendLine();
                 lineResource.LinesWithColor = Array.Empty<LineWithColor>();
                 numErrors++;
                 return;
@@ -775,11 +777,16 @@ namespace Iviz.Controllers
             }
         }
 
-        public void GenerateLog(StringBuilder baseDescription)
+        public void GenerateLog([NotNull] StringBuilder baseDescription)
         {
+            if (baseDescription == null)
+            {
+                throw new ArgumentNullException(nameof(baseDescription));
+            }
+
             baseDescription.Append(description);
         }
-        
+
         public void GetErrorCount(out int totalErrors, out int totalWarnings)
         {
             totalErrors = numErrors;

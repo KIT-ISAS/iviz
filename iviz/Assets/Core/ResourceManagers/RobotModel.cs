@@ -44,7 +44,8 @@ namespace Iviz.Displays
         /// For external 3D models, whether to keep the materials instead
         /// of replacing them with the provided colors.
         /// </param>
-        public RobotModel([NotNull] string robotDescription, [CanBeNull] IExternalServiceProvider provider, bool keepMeshMaterials = true)
+        public RobotModel([NotNull] string robotDescription, [CanBeNull] IExternalServiceProvider provider,
+            bool keepMeshMaterials = true)
         {
             if (string.IsNullOrEmpty(robotDescription))
             {
@@ -92,6 +93,7 @@ namespace Iviz.Displays
             LinkParents = new ReadOnlyDictionary<string, string>(linkParents);
             LinkObjects = new ReadOnlyDictionary<string, GameObject>(linkObjects);
             LinkParentObjects = new ReadOnlyDictionary<GameObject, GameObject>(linkParentObjects);
+            Joints = new ReadOnlyDictionary<string, Joint>(joints);
         }
 
         public string Name { get; }
@@ -102,6 +104,7 @@ namespace Iviz.Displays
         public ReadOnlyDictionary<string, string> LinkParents { get; }
         public ReadOnlyDictionary<string, GameObject> LinkObjects { get; }
         public ReadOnlyDictionary<GameObject, GameObject> LinkParentObjects { get; }
+        public ReadOnlyDictionary<string, Joint> Joints { get; }
 
         public bool OcclusionOnly
         {
@@ -143,9 +146,9 @@ namespace Iviz.Displays
         }
 
         void ProcessLink(bool keepMeshMaterials,
-            Link link,
-            IReadOnlyDictionary<string, Material> rootMaterials,
-            IExternalServiceProvider provider)
+            [NotNull] Link link,
+            [NotNull] IReadOnlyDictionary<string, Material> rootMaterials,
+            [CanBeNull] IExternalServiceProvider provider)
         {
             var linkObject = new GameObject("Link:" + link.Name);
             linkObjects[link.Name] = linkObject;
@@ -256,7 +259,7 @@ namespace Iviz.Displays
             }
         }
 
-        void ProcessJoint(Joint joint)
+        void ProcessJoint([NotNull] Joint joint)
         {
             var jointObject = new GameObject("{Joint:" + joint.Name + "}");
             jointObjects[joint.Name] = jointObject;
@@ -285,7 +288,8 @@ namespace Iviz.Displays
             originObject.transform.SetLocalPose(joint.Origin.ToPose());
         }
 
-        static Material GetMaterialForVisual(Visual visual, IReadOnlyDictionary<string, Material> rootMaterials)
+        [CanBeNull]
+        static Material GetMaterialForVisual([NotNull] Visual visual, [CanBeNull] IReadOnlyDictionary<string, Material> rootMaterials)
         {
             var material = visual.Material;
 

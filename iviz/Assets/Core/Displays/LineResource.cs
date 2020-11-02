@@ -117,13 +117,19 @@ namespace Iviz.Displays
             }
         }
 
+        /// <summary>
+        /// Delegate for a function that receives a line list as parameter, sets the values,
+        /// and returns true if alpha is needed, false if not, or null to request a manual check.
+        /// </summary>
+        /// <param name="lineBuffer">The line list to be set</param>
         public delegate bool? DirectLineSetter(ref NativeList<float4x2> lineBuffer);
 
         /// <summary>
         /// Exposes the line list directly for manual setting.
         /// </summary>
         /// <param name="callback">
-        /// A function that receives the internal line list as parameter, and returns true if alpha is needed, false if not, or null to request a manual check.
+        /// A function that receives the internal line list as parameter, and returns true if alpha is needed,
+        /// false if not, or null to request a manual check.
         /// </param>
         /// <param name="reserve">The expected number of lines, or 0 if unknown.</param>
         public void SetDirect([NotNull] DirectLineSetter callback, int reserve = 0)

@@ -137,7 +137,7 @@ namespace Iviz.Displays
 
             foreach (var entry in pool)
             {
-                while (entry.Value.Any() && entry.Value.Peek().ExpirationTime < now)
+                while (entry.Value.Count != 0 && entry.Value.Peek().ExpirationTime < now)
                 {
                     objectsToDestroy.Add(entry.Value.Dequeue().GameObject);
                 }

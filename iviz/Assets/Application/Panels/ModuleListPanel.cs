@@ -62,6 +62,7 @@ namespace Iviz.App
 
         int frameCounter;
         float buttonHeight;
+        bool allGuiVisible;
 
         Canvas parentCanvas;
         DialogData availableModules;
@@ -75,6 +76,9 @@ namespace Iviz.App
 
         ControllerService controllerService;
 
+        bool initialized;
+        public event Action InitFinished;
+
         public ModuleListPanel()
         {
             ModuleDatas = moduleDatas.AsReadOnly();
@@ -82,11 +86,22 @@ namespace Iviz.App
 
         public bool AllGuiVisible
         {
-            get => parentCanvas.gameObject.activeSelf;
-            set => parentCanvas.gameObject.SetActive(value);
+            get => allGuiVisible;
+            set
+            {
+                allGuiVisible = value;
+                if (parentCanvas == null)
+                {
+                    // not initialized yet
+                    return;
+                }
+                
+                parentCanvas.gameObject.SetActive(value);
+            }
         }
 
         public static ModuleListPanel Instance { get; private set; }
+        public static bool Initialized => Instance != null && Instance.initialized;
         public static AnchorCanvas AnchorCanvas => Instance.anchorCanvas;
         AnchorToggleButton HideGuiButton => anchorCanvas.HideGui;
         public AnchorToggleButton ShowRootMarkerButton => anchorCanvas.ShowMarker;
@@ -248,6 +263,11 @@ namespace Iviz.App
             UpdateFpsStats();
 
             controllerService = new ControllerService();
+
+            AllGuiVisible = AllGuiVisible; // initialize value
+
+            initialized = true;
+            InitFinished?.Invoke();
         }
 
         void OnConnectionStateChanged(ConnectionState state)
