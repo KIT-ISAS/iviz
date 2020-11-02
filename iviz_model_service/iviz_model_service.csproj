@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>Iviz.ModelService</RootNamespace>
-    <AssemblyName>Iviz.ModelService.App</AssemblyName>
+    <AssemblyName>Iviz.ModelService</AssemblyName>
     <LangVersion>8</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -16,5 +16,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AssimpNet" Version="4.1.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Publish" />
   </ItemGroup>
 </Project>
