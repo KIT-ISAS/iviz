@@ -372,7 +372,7 @@ namespace Iviz.XmlRpc
             XmlDocument document = new XmlDocument();
             document.LoadXml(inData);
 
-            XmlNode root = document.FirstChild;
+            XmlNode? root = document.FirstChild;
             while (root != null && root.Name != "methodCall")
             {
                 root = root.NextSibling;
@@ -385,7 +385,7 @@ namespace Iviz.XmlRpc
 
             string? methodName = null;
             object[]? args = null;
-            XmlNode child = root.FirstChild;
+            XmlNode? child = root.FirstChild;
             do
             {
                 switch (child.Name)
