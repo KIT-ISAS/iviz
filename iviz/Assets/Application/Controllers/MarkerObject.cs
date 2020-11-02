@@ -15,6 +15,7 @@ using UnityEngine.EventSystems;
 using Logger = Iviz.Core.Logger;
 using Pose = UnityEngine.Pose;
 using Vector3 = UnityEngine.Vector3;
+using Iviz.Roslib;
 
 #if UNITY_WSA
 using Microsoft.MixedReality.Toolkit.Input;

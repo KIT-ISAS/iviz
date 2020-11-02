@@ -62,7 +62,7 @@ namespace Iviz.App
 
         int frameCounter;
         float buttonHeight;
-        bool allGuiVisible;
+        bool allGuiVisible = true;
 
         Canvas parentCanvas;
         DialogData availableModules;

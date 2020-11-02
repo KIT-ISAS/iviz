@@ -158,20 +158,7 @@ namespace Iviz.Core
                 action(t);
             }
         }
-        
-        public static bool Any<T>([NotNull] this T[] ts, Predicate<T> predicate)
-        {
-            foreach (var t in ts)
-            {
-                if (predicate(t))
-                {
-                    return true;
-                }
-            }
 
-            return false;
-        }
-        
         public static bool Any<T>([NotNull] this List<T> ts, Predicate<T> predicate)
         {
             foreach (var t in ts)
