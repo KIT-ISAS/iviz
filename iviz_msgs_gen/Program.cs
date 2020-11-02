@@ -3,17 +3,44 @@ using System.IO;
 
 namespace Iviz.MsgsGen
 {
-    class Program
+    static class Program
     {
         static void Main()
         {
-            string rosBasePath = Path.GetFullPath("../../../../ros_msgs");
-            string ivizMsgPaths = Path.GetFullPath("../../../../iviz_msgs");
+            string rosBasePath;
+            string ivizMsgPaths;
+
+            string debugRosBasePath = Path.GetFullPath("../../../../ros_msgs");
+            string debugIvizMsgPaths = Path.GetFullPath("../../../../iviz_msgs");
+
+            string releaseRosBasePath = Path.GetFullPath("../ros_msgs");
+            string releaseIvizMsgPaths = Path.GetFullPath("../iviz_msgs");
+
+            Console.WriteLine("** Starting iviz_msgs_gen...");
+
+            if (Directory.Exists(debugRosBasePath) && Directory.Exists(debugIvizMsgPaths))
+            {
+                // running from an IDE
+                rosBasePath = debugRosBasePath;
+                ivizMsgPaths = debugIvizMsgPaths;
+            }
+            else if (Directory.Exists(releaseRosBasePath) && Directory.Exists(releaseIvizMsgPaths))
+            {
+                // running from the Publish folder
+                rosBasePath = releaseRosBasePath;
+                ivizMsgPaths = releaseIvizMsgPaths;
+            }
+            else
+            {
+                Console.WriteLine(
+                    "EE Failed to find the iviz_msgs and ros_msgs folders. They should be in the ../ folder from where you run this.");
+                return;
+            }
 
             PackageInfo p = new PackageInfo();
 
             string[] packages = Directory.GetDirectories(rosBasePath);
-            foreach(string packageDir in packages)
+            foreach (string packageDir in packages)
             {
                 string package = Path.GetFileName(packageDir);
                 p.AddPackagePath(packageDir, package);
@@ -21,7 +48,7 @@ namespace Iviz.MsgsGen
 
             p.ResolveAll();
 
-            foreach(ClassInfo classInfo in p.Messages.Values)
+            foreach (ClassInfo classInfo in p.Messages.Values)
             {
                 string dstPackageDir = $"{ivizMsgPaths}/{classInfo.RosPackage}/msg/";
                 Directory.CreateDirectory(dstPackageDir);
@@ -36,7 +63,8 @@ namespace Iviz.MsgsGen
                 string text = classInfo.ToCString();
                 File.WriteAllText($"{packageDir}{classInfo.Name}.cs", text);
             }
+            
+            Console.WriteLine("** Done!");
         }
-
     }
 }

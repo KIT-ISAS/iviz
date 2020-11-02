@@ -1,0 +1,36 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v3.1",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v3.1": {
+      "Iviz.MsgsGen/1.0.0": {
+        "dependencies": {
+          "Iviz.MsgsGen.Lib": "1.0.0"
+        },
+        "runtime": {
+          "Iviz.MsgsGen.dll": {}
+        }
+      },
+      "Iviz.MsgsGen.Lib/1.0.0": {
+        "runtime": {
+          "Iviz.MsgsGen.Lib.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Iviz.MsgsGen/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Iviz.MsgsGen.Lib/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

@@ -3,6 +3,8 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AssemblyName>Iviz.MsgsGen</AssemblyName>
+    <RootNamespace>Iviz.MsgsGen</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -17,5 +19,8 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\iviz_msgs_gen_lib\iviz_msgs_gen_lib.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Publish" />
   </ItemGroup>
 </Project>
