@@ -10,6 +10,7 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Xml;
 using Iviz.Msgs;
 using Iviz.Roslib.XmlRpc;
 using Iviz.XmlRpc;
@@ -147,9 +148,18 @@ namespace Iviz.Roslib
         /// <summary>
         /// Constructs and connects a ROS client.
         /// </summary>
-        /// <param name="masterUri">URI to the master node. Example: new Uri("http://localhost:11311")</param>
-        /// <param name="callerId">The ROS name of this node</param>
-        /// <param name="callerUri">URI of this node. Leave empty to generate one automatically</param>
+        /// <param name="masterUri">
+        /// URI to the master node. Example: new Uri("http://localhost:11311").
+        /// </param>
+        /// <param name="callerId">
+        /// The ROS name of this node.
+        /// This is your identity in the network, and must be unique. Example: /my_new_node
+        /// Leave empty to generate one automatically.
+        /// </param>
+        /// <param name="callerUri">
+        /// URI of this node.
+        /// Other clients will use this address to connect to this node.
+        /// Leave empty to generate one automatically. </param>
         /// <param name="ensureCleanSlate">Checks if masterUri has any previous subscriptions or advertisements, and unregisters them.</param>
         public RosClient(Uri masterUri = null, string callerId = null, Uri callerUri = null,
             bool ensureCleanSlate = true)
@@ -162,7 +172,7 @@ namespace Iviz.Roslib
             {
                 throw new ArgumentException("URI scheme must be http", nameof(masterUri));
             }
-
+            
             callerUri ??= TryGetCallerUri();
 
             if (callerUri.Scheme != "http")
@@ -170,7 +180,7 @@ namespace Iviz.Roslib
                 throw new ArgumentException("URI scheme must be http", nameof(callerUri));
             }
 
-            callerId ??= "/iviz_rosclient";
+            callerId ??= CreateCallerId();
 
             if (!IsValidGlobalResourceName(callerId))
             {
@@ -227,7 +237,7 @@ namespace Iviz.Roslib
 
             if (!response.IsValid)
             {
-                Logger.LogError("RosClient: Failed to validate reachability response.");
+                Logger.LogError($"{this}: Failed to validate reachability response.");
             }
             else if (response.Pid != Process.GetCurrentProcess().Id)
             {
@@ -235,7 +245,7 @@ namespace Iviz.Roslib
                 throw new UnreachableUriException($"My uri '{CallerUri}' appears to belong to someone else!");
             }
 
-            Logger.Log("RosClient: Initialized.");
+            Logger.Log($"{this}: Initialized.");
 
             if (ensureCleanSlate)
             {
@@ -246,9 +256,18 @@ namespace Iviz.Roslib
         /// <summary>
         /// Constructs and connects a ROS client.
         /// </summary>
-        /// <param name="masterUri">URI to the master node. Example: http://localhost:11311.</param>
-        /// <param name="callerId">The ROS name of this node</param>
-        /// <param name="callerUri">URI of this node. Leave empty to generate one automatically</param>
+        /// <param name="masterUri">
+        /// URI to the master node. Example: http://localhost:11311.
+        /// </param>
+        /// <param name="callerId">
+        /// The ROS name of this node.
+        /// This is your identity in the network, and must be unique. Example: /my_new_node
+        /// Leave empty to generate one automatically.
+        /// </param>
+        /// <param name="callerUri">
+        /// URI of this node.
+        /// Other clients will use this address to connect to this node.
+        /// Leave empty to generate one automatically. </param>
         /// <param name="ensureCleanSlate">Checks if masterUri has any previous subscriptions or advertisements, and unregisters them.</param>
         public RosClient(string masterUri = null,
             string callerId = null,
@@ -263,6 +282,16 @@ namespace Iviz.Roslib
         }
 
         /// <summary>
+        /// Tries to create a unique id based on the project and computer name
+        /// </summary>
+        /// <returns>A more or less unique id</returns>
+        public static string CreateCallerId()
+        {
+            string seed = EnvironmentCallerHostname + Assembly.GetCallingAssembly().GetName().Name;
+            return $"/iviz_{seed.GetDeterministicHashCode():x8}";
+        }
+
+        /// <summary>
         /// Retrieves the environment variable ROS_HOSTNAME as a uri.
         /// If this fails, retrieves ROS_IP.
         /// </summary>
@@ -271,7 +300,9 @@ namespace Iviz.Roslib
             Environment.GetEnvironmentVariable("ROS_IP");
 
         /// <summary>
-        /// Try to retrieve a valid caller uri.
+        /// Try to retrieve a valid caller uri with the given port.
+        /// Other clients will connect to this node using this address.
+        /// If the port is 0, uses a random free port.
         /// </summary>
         public static Uri TryGetCallerUri(int usingPort = AnyPort)
         {
@@ -349,7 +380,7 @@ namespace Iviz.Roslib
 
             return true;
         }
-
+        
         /// <summary>
         /// Checks if the given name is a valid global ROS resource name
         /// </summary>         
@@ -532,7 +563,7 @@ namespace Iviz.Roslib
                 if (subscriber == null)
                 {
                     throw new InvalidMessageTypeException(
-                        $"Existing subscriber message type {baseSubscriber.TopicType} does not match the given type.");
+                        $"There is already a subscriber with a different type [{baseSubscriber.TopicType}]");
                 }
             }
 
@@ -793,7 +824,7 @@ namespace Iviz.Roslib
                 if (publisher == null)
                 {
                     throw new InvalidMessageTypeException(
-                        $"Existing subscriber message type {basePublisher.TopicType} does not match the given type.");
+                        $"There is already an advertiser with a different type [{basePublisher.TopicType}]");
                 }
             }
 

@@ -286,7 +286,7 @@ namespace Iviz.Roslib.XmlRpc
             }
 
             return endpoint?.Hostname == null
-                ? new Arg[] {StatusCode.Failure, $"Client is not publishing topic '{topic}'", 0}
+                ? new Arg[] {StatusCode.Error, $"Internal error [duplicate request]", 0}
                 : OkResponse(new Arg[] {"TCPROS", endpoint.Hostname, endpoint.Port});
         }
     }

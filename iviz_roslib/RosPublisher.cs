@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
@@ -18,22 +19,22 @@ namespace Iviz.Roslib
         /// The name of the topic.
         /// </summary>
         public string Topic { get; }
-        
+
         /// <summary>
         /// The ROS message type of the topic.
         /// </summary>        
         public string TopicType { get; }
-        
+
         /// <summary>
         /// Timeout in milliseconds to wait for a subscriber handshake.
         /// </summary>             
         public int TimeoutInMs { get; set; }
-        
+
         /// <summary>
         /// The number of publishers in the topic.
         /// </summary>
         public int NumSubscribers { get; }
-        
+
         /// <summary>
         /// Publishes the given message into the topic. 
         /// </summary>
@@ -41,46 +42,46 @@ namespace Iviz.Roslib
         /// <exception cref="ArgumentNullException">The message is null</exception>
         /// <exception cref="InvalidMessageTypeException">The message type does not match.</exception>          
         public void Publish(IMessage message);
-        
+
         /// <summary>
         /// Unregisters the given id from the publisher. If the publisher has no ids left, the topic will be unadvertised from the master.
         /// </summary>
         /// <param name="id">The id to be unregistered.</param>
         /// <returns>Whether the id belonged to the publisher.</returns>        
         public bool Unadvertise(string id);
-        
+
         /// <summary>
         /// Unregisters the given id from the publisher. If the publisher has no ids left, the topic will be unadvertised from the master.
         /// </summary>
         /// <param name="id">The id to be unregistered.</param>
         /// <returns>Whether the id belonged to the publisher.</returns>
         public Task<bool> UnadvertiseAsync(string id);
-        
+
         /// <summary>
         /// Generates a new advertisement id. Use this string for Unadvertise().
         /// </summary>
         /// <returns>The advertisement id.</returns>
         public string Advertise();
-        
+
         /// <summary>
         /// Checks whether this publisher has provided the given id from an Advertise() call.
         /// </summary>
         /// <param name="id">Identifier to check.</param>
         /// <returns>Whether the id was provided by this publisher.</returns>
         public bool ContainsId(string id);
-        
+
         /// <summary>
         /// Checks whether this publisher's message type corresponds to the given type
         /// </summary>
         /// <param name="type">The type to check.</param>
         /// <returns>Whether the class type matches.</returns>        
         public bool MessageTypeMatches(Type type);
-        
+
         /// <summary>
         /// Returns a structure that represents the internal state of the publisher. 
         /// </summary>        
         public PublisherTopicState GetState();
-        
+
         internal void Stop();
         internal Endpoint RequestTopicRpc(string remoteCallerId);
     }
@@ -96,10 +97,13 @@ namespace Iviz.Roslib
         readonly RosClient client;
         int totalPublishers;
 
+        readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
+
         /// <summary>
         /// Whether this publisher is valid.
         /// </summary>
         bool IsAlive { get; set; }
+
         public string Topic => manager.Topic;
         public string TopicType => manager.TopicType;
         public int NumSubscribers => manager.NumConnections;
@@ -128,7 +132,7 @@ namespace Iviz.Roslib
             set => manager.MaxQueueSizeInBytes = value;
         }
 
-   
+
         public int TimeoutInMs
         {
             get => manager.TimeoutInMs;
@@ -151,7 +155,7 @@ namespace Iviz.Roslib
 
         internal void RaiseNumConnectionsChanged()
         {
-            NumSubscribersChanged?.Invoke(this);            
+            NumSubscribersChanged?.Invoke(this);
         }
 
         void AssertIsAlive()
@@ -168,13 +172,13 @@ namespace Iviz.Roslib
             totalPublishers++;
             return newId;
         }
-        
+
         public PublisherTopicState GetState()
         {
             AssertIsAlive();
             return new PublisherTopicState(Topic, TopicType, ids, manager.GetStates());
         }
-        
+
         void IRosPublisher.Publish(IMessage message)
         {
             if (message is null)
@@ -213,7 +217,7 @@ namespace Iviz.Roslib
         Endpoint IRosPublisher.RequestTopicRpc(string remoteCallerId)
         {
             Endpoint localEndpoint = manager.CreateConnectionRpc(remoteCallerId);
-            return new Endpoint(client.CallerUri.Host, localEndpoint.Port);
+            return localEndpoint == null ? null : new Endpoint(client.CallerUri.Host, localEndpoint.Port);
         }
 
         void IRosPublisher.Stop()
@@ -227,8 +231,9 @@ namespace Iviz.Roslib
             manager.Stop();
             NumSubscribersChanged = null;
             IsAlive = false;
+            tokenSource.Cancel();
         }
-        
+
         public string Advertise()
         {
             AssertIsAlive();
@@ -255,6 +260,11 @@ namespace Iviz.Roslib
 
         public bool Unadvertise(string id)
         {
+            if (!IsAlive)
+            {
+                return true;
+            }
+
             bool removed = RemoveId(id);
 
             if (ids.Count == 0)
@@ -268,6 +278,11 @@ namespace Iviz.Roslib
 
         public async Task<bool> UnadvertiseAsync(string id)
         {
+            if (!IsAlive)
+            {
+                return true;
+            }
+
             bool removed = RemoveId(id);
 
             if (ids.Count == 0)

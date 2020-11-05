@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -8,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
+using Nito.AsyncEx.Synchronous;
 using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.Roslib
@@ -16,11 +18,13 @@ namespace Iviz.Roslib
     {
         const int BufferSizeIncrease = 1024;
         const int MaxConnectionRetries = 60;
+
         const int WaitBetweenRetriesInMs = 1000;
-        const int SleepTimeInMs = 1000;
+        //const int SleepTimeInMs = 1000;
 
         readonly TcpReceiverManager<T> manager;
-        readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
+
+        //readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
         readonly TopicInfo<T> topicInfo;
         readonly bool requestNoDelay;
 
@@ -29,7 +33,11 @@ namespace Iviz.Roslib
         int numReceived;
         int bytesReceived;
 
-        volatile bool keepRunning;
+        // TODO: replace this with cancellation token
+        //volatile bool keepRunning;
+        readonly CancellationTokenSource runningTs = new CancellationTokenSource();
+        bool KeepRunning => !runningTs.IsCancellationRequested;
+
         byte[] readBuffer = new byte[BufferSizeIncrease];
         NetworkStream stream;
         Task task;
@@ -65,28 +73,29 @@ namespace Iviz.Roslib
             }
 
             disposed = true;
-            keepRunning = false;
+            runningTs.Cancel();
+            //keepRunning = false;
 
-            try { signal.Release(); }
-            catch (SemaphoreFullException) { }
+            //try { signal.Release(); }
+            //catch (SemaphoreFullException) { }
 
-            signal.Dispose();
+            //signal.Dispose();
 
             try
             {
-                task?.Wait();
+                task?.WaitAndUnwrapException();
             }
             catch (Exception e)
             {
                 Logger.Log($"{this}: {e}");
             }
 
+            runningTs.Dispose();
             task = null;
         }
 
         public void Start(int timeoutInMs)
-        {
-            keepRunning = true;
+        { 
             task = Task.Run(async () => await Run(timeoutInMs).Caf());
         }
 
@@ -139,7 +148,7 @@ namespace Iviz.Roslib
             int numRead = 0;
             while (numRead < 4)
             {
-                int readNow = await stream.ReadAsync(readBuffer, numRead, 4 - numRead).Caf();
+                int readNow = await stream.ReadAsync(readBuffer, numRead, 4 - numRead, runningTs.Token).Caf();
                 if (readNow == 0)
                 {
                     return 0;
@@ -157,12 +166,12 @@ namespace Iviz.Roslib
             numRead = 0;
             while (numRead < length)
             {
-                int readNow = await stream.ReadAsync(readBuffer, numRead, length - numRead).Caf();
+                int readNow = await stream.ReadAsync(readBuffer, numRead, length - numRead, runningTs.Token).Caf();
                 if (readNow == 0)
                 {
                     return 0;
                 }
-    
+
                 numRead += readNow;
             }
 
@@ -187,15 +196,18 @@ namespace Iviz.Roslib
         {
             Task runLoopTask = StartSession(timeoutInMs);
 
+            /*
             while (keepRunning)
             {
                 await signal.WaitAsync(SleepTimeInMs).Caf();
             }
 
-            stream?.Dispose();
-            tcpClient?.Dispose();
+            */
 
             await runLoopTask.Caf();
+
+            stream?.Dispose();
+            tcpClient?.Dispose();
         }
 
         async Task<TcpClient> TryToConnect(int timeoutInMs)
@@ -229,7 +241,7 @@ namespace Iviz.Roslib
 
         async Task<TcpClient> KeepReconnecting(int timeoutInMs)
         {
-            for (int i = 0; i < MaxConnectionRetries && keepRunning; i++)
+            for (int i = 0; i < MaxConnectionRetries && KeepRunning; i++)
             {
                 var client = await TryToConnect(timeoutInMs).Caf();
                 if (client != null)
@@ -238,6 +250,10 @@ namespace Iviz.Roslib
                 }
 
                 await Task.Delay(WaitBetweenRetriesInMs).Caf();
+                if (!KeepRunning)
+                {
+                    return null;
+                }
 
                 Endpoint newEndpoint = await manager.RequestConnectionFromPublisherAsync(RemoteUri).Caf();
                 if (newEndpoint == null || newEndpoint.Equals(remoteEndpoint))
@@ -254,15 +270,15 @@ namespace Iviz.Roslib
 
         async Task StartSession(int timeoutInMs)
         {
-            while (keepRunning)
+            while (KeepRunning)
             {
                 tcpClient = null;
-                
+
                 Logger.LogDebug($"{this}: Trying to connect!");
                 tcpClient = await KeepReconnecting(timeoutInMs).Caf();
                 if (tcpClient == null)
                 {
-                    Logger.LogDebug(keepRunning
+                    Logger.LogDebug(KeepRunning
                         ? $"{this}: Ran out of retries. Leaving!"
                         : $"{this}: Disposed! Getting out.");
                     break;
@@ -279,9 +295,10 @@ namespace Iviz.Roslib
                         await ProcessLoop().Caf();
                     }
                 }
-                catch (ObjectDisposedException) { }
-                catch (Exception e) when
-                    (e is IOException || e is SocketException || e is TimeoutException)
+                catch (Exception e) when (e is ObjectDisposedException || e is OperationCanceledException)
+                {
+                }
+                catch (Exception e) when (e is IOException || e is SocketException || e is TimeoutException)
                 {
                     Logger.LogDebug($"{this}: {e}");
                 }
@@ -294,11 +311,7 @@ namespace Iviz.Roslib
             tcpClient = null;
             stream = null;
 
-            keepRunning = false;
-
-            try { signal.Release(); }
-            catch (SemaphoreFullException) { }
-
+            runningTs.Cancel();
             Logger.Log($"{this}: Stopped!");
         }
 
@@ -309,7 +322,7 @@ namespace Iviz.Roslib
                 return;
             }
 
-            while (keepRunning)
+            while (KeepRunning)
             {
                 int rcvLength = await ReceivePacket().Caf();
                 if (rcvLength == 0)

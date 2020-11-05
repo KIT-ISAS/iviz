@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -12,6 +13,8 @@ using Iviz.Msgs;
 using Iviz.XmlRpc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Nito.AsyncEx;
+using Nito.AsyncEx.Synchronous;
 using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.Roslib
@@ -32,10 +35,9 @@ namespace Iviz.Roslib
         const int MaxConnectionRetries = 3;
         const int WaitBetweenRetriesInMs = 1000;
 
-        readonly AsyncLock mutex = new AsyncLock();
-        readonly List<T> messageQueue = new List<T>();
+        readonly AsyncProducerConsumerQueue<T> messageQueue = new AsyncProducerConsumerQueue<T>();
+        readonly CancellationTokenSource runningTs = new CancellationTokenSource();
 
-        readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
         readonly TopicInfo<T> topicInfo;
         readonly bool latching;
 
@@ -43,8 +45,10 @@ namespace Iviz.Roslib
         int bytesSent;
         bool disposed;
         Endpoint endpoint;
+
         Endpoint remoteEndpoint;
-        volatile bool keepRunning;
+
+        //volatile bool keepRunning;
         int numDropped;
         int numSent;
         SenderStatus status;
@@ -54,6 +58,8 @@ namespace Iviz.Roslib
         TcpListener listener;
 
         byte[] writeBuffer = new byte[BufferSizeIncrease];
+
+        bool KeepRunning => !runningTs.IsCancellationRequested;
 
         public TcpSenderAsync(string remoteCallerId, TopicInfo<T> topicInfo, bool latching)
         {
@@ -68,13 +74,11 @@ namespace Iviz.Roslib
         public bool IsAlive => task != null && !task.IsCompleted;
         public int MaxQueueSizeInBytes { get; set; } = 50000;
 
-        int CurrentQueueSize => messageQueue.Count;
-
         public PublisherSenderState State =>
             new PublisherSenderState(
                 IsAlive, latching, status,
                 endpoint, RemoteCallerId, remoteEndpoint,
-                CurrentQueueSize, MaxQueueSizeInBytes,
+                0, MaxQueueSizeInBytes,
                 numSent, bytesSent, numDropped, bytesDropped
             );
 
@@ -86,21 +90,20 @@ namespace Iviz.Roslib
             }
 
             disposed = true;
-            keepRunning = false;
 
-            try { signal.Release(); }
-            catch (SemaphoreFullException) { }
-
-            signal.Dispose();
+            runningTs.Cancel();
 
             try
             {
-                task?.Wait();
+                task?.WaitAndUnwrapException();
             }
             catch (Exception e)
             {
                 Logger.Log($"{this}: {e}");
             }
+
+            runningTs.Dispose();
+            Logger.LogDebug($"{this}: Disposed!");
         }
 
         public Endpoint Start(int timeoutInMs, SemaphoreSlim managerSignal)
@@ -111,7 +114,6 @@ namespace Iviz.Roslib
             IPEndPoint localEndpoint = (IPEndPoint) listener.LocalEndpoint;
             endpoint = new Endpoint(localEndpoint);
 
-            keepRunning = true;
             task = Task.Run(async () => await Run(timeoutInMs, managerSignal).Caf());
 
             return endpoint;
@@ -304,19 +306,25 @@ namespace Iviz.Roslib
 
         async Task Run(int timeoutInMs, SemaphoreSlim managerSignal)
         {
-            Logger.LogDebug($"{this}: initialized!");
+            //Logger.LogDebug($"{this}: initialized!");
             status = SenderStatus.Waiting;
 
 
-            for (int round = 0; round < MaxConnectionRetries && keepRunning; round++)
+            for (int round = 0; round < MaxConnectionRetries && KeepRunning; round++)
             {
                 try
                 {
                     Task<TcpClient> connectionTask = listener.AcceptTcpClientAsync();
-                    managerSignal?.Release();
+                    //Logger.LogDebug($"{this}: Accepting...");
+
+                    try
+                    {
+                        managerSignal?.Release();
+                    }
+                    catch (ObjectDisposedException) { }
                     managerSignal = null;
 
-                    if (!keepRunning)
+                    if (!KeepRunning)
                     {
                         break;
                     }
@@ -334,7 +342,7 @@ namespace Iviz.Roslib
                     using (stream = tcpClient.GetStream())
                     {
                         status = SenderStatus.Active;
-                        Logger.LogDebug($"{this}: started!");
+                        Logger.LogDebug($"{this}: Started!");
 
                         IPEndPoint remoteEndPoint = (IPEndPoint) tcpClient.Client.RemoteEndPoint;
                         remoteEndpoint = new Endpoint(remoteEndPoint);
@@ -342,8 +350,10 @@ namespace Iviz.Roslib
                         await ProcessLoop().Caf();
                     }
                 }
-                catch (Exception e) when
-                    (e is IOException || e is TimeoutException || e is AggregateException || e is SocketException)
+                catch (OperationCanceledException)
+                {
+                }
+                catch (Exception e) when (e is IOException || e is TimeoutException || e is SocketException)
                 {
                     Logger.LogDebug($"{this}: {e}");
                 }
@@ -352,6 +362,14 @@ namespace Iviz.Roslib
                     Logger.Log($"{this}: {e}");
                 }
             }
+
+            //Logger.LogDebug($"{this}: Out!");
+
+            try
+            {
+                managerSignal?.Release();
+            }
+            catch (ObjectDisposedException) { }
 
             status = SenderStatus.Dead;
             listener?.Stop();
@@ -363,7 +381,7 @@ namespace Iviz.Roslib
         {
             if (!await ProcessHandshake().Caf())
             {
-                keepRunning = false;
+                runningTs.Cancel();
             }
 
             List<(T msg, int msgLength)> localQueue = new List<(T, int)>();
@@ -379,36 +397,40 @@ namespace Iviz.Roslib
                 return lengthArray;
             }
 
-            while (keepRunning)
+            while (KeepRunning)
             {
-                await signal.WaitAsync(WaitBetweenRetriesInMs).Caf();
-                if (!keepRunning)
-                {
-                    break;
-                }
-
-                if (messageQueue.Count == 0)
+                Task<bool> waitTask = messageQueue.OutputAvailableAsync(runningTs.Token);
+                if (waitTask.IsCanceled || !await waitTask.Caf())
                 {
                     continue;
                 }
 
+                int totalQueueSizeInBytes = 0;
                 localQueue.Clear();
 
-                int totalQueueSizeInBytes = 0;
-                using (await mutex.LockAsync())
+                while (true)
                 {
-                    foreach (T msg in messageQueue)
+                    // we retrieve all the elements we can without blocking
+                    // to do that, we exploit the fact that, if no blocking is needed, the function will
+                    // return immediately in a completed state
+                    // otherwise, the request will block but be immediately cancelled in the background
+                    CancellationToken cancelledToken = new CancellationToken(true);
+                    var queueTask = messageQueue.DequeueAsync(cancelledToken);
+                    if (!queueTask.RanToCompletion())
                     {
-                        int msgLength = msg.RosMessageLength;
-                        localQueue.Add((msg, msgLength));
-                        totalQueueSizeInBytes += msgLength;
+                        break;
                     }
 
-                    messageQueue.Clear();
+                    T msg = await queueTask.Caf();
+
+                    int msgLength = msg.RosMessageLength;
+                    localQueue.Add((msg, msgLength));
+                    totalQueueSizeInBytes += msgLength;
                 }
 
                 int startIndex, newBytesDropped;
-                if (localQueue.Count <= MaxSizeInPacketsWithoutConstraint || totalQueueSizeInBytes < MaxQueueSizeInBytes)
+                if (localQueue.Count <= MaxSizeInPacketsWithoutConstraint ||
+                    totalQueueSizeInBytes < MaxQueueSizeInBytes)
                 {
                     startIndex = 0;
                     newBytesDropped = 0;
@@ -432,8 +454,8 @@ namespace Iviz.Roslib
                     }
 
                     uint sendLength = Buffer.Serialize(message, writeBuffer);
-                    await stream.WriteAsync(ToLengthArray(sendLength), 0, 4).Caf();
-                    await stream.WriteAsync(writeBuffer, 0, (int) sendLength).Caf();
+                    await stream.WriteAsync(ToLengthArray(sendLength), 0, 4, runningTs.Token).Caf();
+                    await stream.WriteAsync(writeBuffer, 0, (int) sendLength, runningTs.Token).Caf();
 
                     numSent++;
                     bytesSent += (int) sendLength + 4;
@@ -449,13 +471,7 @@ namespace Iviz.Roslib
                 return;
             }
 
-            using (mutex.Lock())
-            {
-                messageQueue.Add(message);
-            }
-
-            try { signal.Release(); }
-            catch (SemaphoreFullException) { }
+            messageQueue.Enqueue(message);
         }
 
         static void ApplyQueueSizeConstraint(List<(T msg, int msgLength)> queue,

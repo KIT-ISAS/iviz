@@ -1,15 +1,14 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics.Contracts;
+using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Roslib.XmlRpc;
 using Iviz.XmlRpc;
-using Buffer = Iviz.Msgs.Buffer;
+using Nito.AsyncEx;
 
 namespace Iviz.Roslib
 {
@@ -40,17 +39,24 @@ namespace Iviz.Roslib
                 return connectionsByUri.Count;
             }
         }
-
+        
         void TryToCleanup()
         {
-            AsyncLock.InnerLock? @lock = mutex.TryLock();
-            if (@lock == null)
+            IDisposable @lock;
+            using (CancellationTokenSource tokenSource = new CancellationTokenSource(100))
             {
-                return;
+                try
+                {
+                    @lock = mutex.Lock(tokenSource.Token);
+                }
+                catch (TaskCanceledException)
+                {
+                    return;
+                }
             }
 
             bool numConnectionsChanged;
-            using (@lock.Value)
+            using (@lock)
             {
                 numConnectionsChanged = Cleanup();
             }
@@ -141,7 +147,7 @@ namespace Iviz.Roslib
                     .Select(pair => pair.Value).ToArray();
 
                 //Logger.Log(this + " old: " + string.Join(",", connectionsByUri.Keys) + " new: " +
-                //           string.Join(",", newPublishers) + " todie: " + string.Join(",", toDelete));
+                //           string.Join(",", newPublishers) + " todie: " + string.Join<TcpReceiverAsync<T>>(",", toDelete));
 
                 foreach (TcpReceiverAsync<T> receiver in toDelete)
                 {

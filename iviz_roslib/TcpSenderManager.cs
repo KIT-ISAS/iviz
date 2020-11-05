@@ -10,7 +10,7 @@ namespace Iviz.Roslib
 {
     internal sealed class TcpSenderManager<T> where T : IMessage
     {
-        const int NewSenderTimeoutInMs = 100;
+        const int NewSenderTimeoutInMs = 1000;
         const int DefaultTimeoutInMs = 5000;
 
         readonly ConcurrentDictionary<string, TcpSenderAsync<T>> connectionsByCallerId =
@@ -88,7 +88,7 @@ namespace Iviz.Roslib
                 connectionsByCallerId.AddOrUpdate(remoteCallerId, newSender, (_, oldSender) =>
                 {
                     Logger.LogDebug(
-                        $"{this}: '{oldSender.RemoteCallerId}' is requesting {Topic} again? Closing old connection.");
+                        $"{this}: '{oldSender.RemoteCallerId}' duplicate. Killing {oldSender}");
                     oldSender.Dispose();
                     return newSender;
                 });
@@ -112,13 +112,14 @@ namespace Iviz.Roslib
 
             newSender.MaxQueueSizeInBytes = MaxQueueSizeInBytes;
             Publisher.RaiseNumConnectionsChanged();
+            
+            //Logger.LogDebug($"{this}: Sending '{endPoint}' to {remoteCallerId}");
 
-            return endPoint;
+            return !newSender.IsAlive ? null : endPoint;
         }
 
         void Cleanup()
         {
-            bool subscribersChanged;
             TcpSenderAsync<T>[] toDelete = connectionsByCallerId.Values.Where(sender => !sender.IsAlive).ToArray();
             foreach (TcpSenderAsync<T> sender in toDelete)
             {
@@ -129,7 +130,7 @@ namespace Iviz.Roslib
                 }
             }
 
-            subscribersChanged = toDelete.Length != 0;
+            var subscribersChanged = toDelete.Length != 0;
             if (subscribersChanged)
             {
                 Publisher.RaiseNumConnectionsChanged();

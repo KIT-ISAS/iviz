@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
@@ -84,8 +85,12 @@ namespace Iviz.Roslib
     public class RosSubscriber<T> : IRosSubscriber where T : IMessage
     {
         readonly Dictionary<string, Action<T>> callbacksById = new Dictionary<string, Action<T>>();
+        Action<T>[] callbacks = Array.Empty<Action<T>>();
+
         readonly TcpReceiverManager<T> manager;
         readonly RosClient client;
+
+        readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
 
         int totalSubscribers;
 
@@ -93,6 +98,7 @@ namespace Iviz.Roslib
         /// Whether this subscriber is valid.
         /// </summary>
         public bool IsAlive { get; private set; }
+
         public string Topic => manager.Topic;
         public string TopicType => manager.TopicType;
         public int NumPublishers => manager.NumConnections;
@@ -129,7 +135,7 @@ namespace Iviz.Roslib
 
         internal void MessageCallback(in T msg)
         {
-            foreach (Action<T> callback in callbacksById.Values)
+            foreach (Action<T> callback in callbacks)
             {
                 try
                 {
@@ -144,7 +150,14 @@ namespace Iviz.Roslib
 
         internal void RaiseNumPublishersChanged()
         {
-            NumPublishersChanged?.Invoke(this);
+            try
+            {
+                NumPublishersChanged?.Invoke(this);
+            }
+            catch (Exception e)
+            {
+                Logger.Log(e);
+            }
         }
 
         string GenerateId()
@@ -182,8 +195,10 @@ namespace Iviz.Roslib
         {
             callbacksById.Clear();
             manager.Stop();
+            callbacks = Array.Empty<Action<T>>();
             NumPublishersChanged = null;
             IsAlive = false;
+            tokenSource.Cancel();
         }
 
         public bool MessageTypeMatches(Type type)
@@ -193,7 +208,10 @@ namespace Iviz.Roslib
 
         string IRosSubscriber.Subscribe(Action<IMessage> callback)
         {
-            if (callback is null) { throw new ArgumentNullException(nameof(callback)); }
+            if (callback is null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
 
             AssertIsAlive();
 
@@ -203,6 +221,7 @@ namespace Iviz.Roslib
 
             string id = GenerateId();
             callbacksById.Add(id, t => callback(t));
+            callbacks = callbacksById.Values.ToArray();
             return id;
         }
 
@@ -215,26 +234,41 @@ namespace Iviz.Roslib
         /// <exception cref="ArgumentNullException">The callback is null.</exception>
         public string Subscribe(Action<T> callback)
         {
-            if (callback is null) { throw new ArgumentNullException(nameof(callback)); }
+            if (callback is null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
 
             string id = GenerateId();
             callbacksById.Add(id, callback);
+            callbacks = callbacksById.Values.ToArray();
             return id;
         }
 
         public bool ContainsId(string id)
         {
-            if (id is null) { throw new ArgumentNullException(nameof(id)); }
+            if (id is null)
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
 
             return callbacksById.ContainsKey(id);
         }
 
         public bool Unsubscribe(string id)
         {
-            if (id is null) { throw new ArgumentNullException(nameof(id)); }
+            if (id is null)
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
 
-            AssertIsAlive();
+            if (!IsAlive)
+            {
+                return true;
+            }
+
             bool removed = callbacksById.Remove(id);
+            callbacks = callbacksById.Values.ToArray();
 
             if (callbacksById.Count == 0)
             {
@@ -247,10 +281,18 @@ namespace Iviz.Roslib
 
         public async Task<bool> UnsubscribeAsync(string id)
         {
-            if (id is null) { throw new ArgumentNullException(nameof(id)); }
+            if (id is null)
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
 
-            AssertIsAlive();
+            if (!IsAlive)
+            {
+                return true;
+            }
+            
             bool removed = callbacksById.Remove(id);
+            callbacks = callbacksById.Values.ToArray();
 
             if (callbacksById.Count == 0)
             {

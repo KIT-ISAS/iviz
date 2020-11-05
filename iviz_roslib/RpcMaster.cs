@@ -16,7 +16,7 @@ namespace Iviz.Roslib.XmlRpc
         public const int Failure = 0;
         public const int Success = 1;
     }
-    
+
     /// <summary>
     /// Implements communication to the ROS master API.
     /// </summary>
@@ -79,21 +79,21 @@ namespace Iviz.Roslib.XmlRpc
             Arg[] args = {CallerId, subgraph};
             object[] response = await MethodCallAsync("getPublishedTopics", args).Caf();
             return new GetPublishedTopicsResponse(response);
-        }        
-        
+        }
+
         public RegisterSubscriberResponse RegisterSubscriber(string topic, string topicType)
         {
             Arg[] args = {CallerId, topic, topicType, CallerUri};
             object[] response = MethodCall("registerSubscriber", args);
             return new RegisterSubscriberResponse(response);
         }
-        
+
         public async Task<RegisterSubscriberResponse> RegisterSubscriberAsync(string topic, string topicType)
         {
             Arg[] args = {CallerId, topic, topicType, CallerUri};
             object[] response = await MethodCallAsync("registerSubscriber", args).Caf();
             return new RegisterSubscriberResponse(response);
-        }        
+        }
 
         public UnregisterSubscriberResponse UnregisterSubscriber(string topic)
         {
@@ -143,13 +143,13 @@ namespace Iviz.Roslib.XmlRpc
             object[] response = MethodCall("getSystemState", args);
             return new GetSystemStateResponse(response);
         }
-        
+
         public async Task<GetSystemStateResponse> GetSystemStateAsync()
         {
             Arg[] args = {CallerId};
             object[] response = await MethodCallAsync("getSystemState", args).Caf();
             return new GetSystemStateResponse(response);
-        }        
+        }
 
         public LookupServiceResponse LookupService(string service)
         {
@@ -157,13 +157,13 @@ namespace Iviz.Roslib.XmlRpc
             object[] response = MethodCall("lookupService", args);
             return new LookupServiceResponse(response);
         }
-        
+
         public async Task<LookupServiceResponse> LookupServiceAsync(string service)
         {
             Arg[] args = {CallerId, service};
             object[] response = await MethodCallAsync("lookupService", args).Caf();
             return new LookupServiceResponse(response);
-        }        
+        }
 
         public DefaultResponse RegisterService(string service, Uri rosRpcUri)
         {
@@ -171,13 +171,13 @@ namespace Iviz.Roslib.XmlRpc
             object[] response = MethodCall("registerService", args);
             return new DefaultResponse(response);
         }
-        
+
         public async Task<DefaultResponse> RegisterServiceAsync(string service, Uri rosRpcUri)
         {
             Arg[] args = {CallerId, service, rosRpcUri, CallerUri};
             object[] response = await MethodCallAsync("registerService", args).Caf();
             return new DefaultResponse(response);
-        }        
+        }
 
         public UnregisterServiceResponse UnregisterService(string service, Uri rosRpcUri)
         {
@@ -185,13 +185,13 @@ namespace Iviz.Roslib.XmlRpc
             object[] response = MethodCall("unregisterService", args);
             return new UnregisterServiceResponse(response);
         }
-        
+
         public async Task<UnregisterServiceResponse> UnregisterServiceAsync(string service, Uri rosRpcUri)
         {
             Arg[] args = {CallerId, service, rosRpcUri};
             object[] response = await MethodCallAsync("unregisterService", args).Caf();
             return new UnregisterServiceResponse(response);
-        }        
+        }
 
         object[] MethodCall(string function, IEnumerable<Arg> args)
         {
@@ -201,8 +201,7 @@ namespace Iviz.Roslib.XmlRpc
                 return result;
             }
 
-            Logger.Log($"Rpc Response: Expected type object[], got {tmp.GetType().Name}");
-            return null;
+            throw new ParseException($"Rpc Response: Expected type object[], got {tmp.GetType().Name}");
         }
 
         async Task<object[]> MethodCallAsync(string function, IEnumerable<Arg> args)
@@ -213,8 +212,7 @@ namespace Iviz.Roslib.XmlRpc
                 return result;
             }
 
-            Logger.Log($"Rpc Response: Expected type object[], got {tmp.GetType().Name}");
-            return null;
+            throw new ParseException($"Rpc Response: Expected type object[], got {tmp.GetType().Name}");
         }
     }
 
