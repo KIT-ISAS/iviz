@@ -67,7 +67,7 @@ namespace Iviz.Controllers
 
         [CanBeNull] MarkerResource resource;
         [CanBeNull] Info<GameObject> resourceInfo;
-        readonly MarkerLineProcessorHelper lineHelper = new MarkerLineProcessorHelper();
+        readonly MarkerLineHelper lineHelper = new MarkerLineHelper();
         bool clickable;
         string id;
 

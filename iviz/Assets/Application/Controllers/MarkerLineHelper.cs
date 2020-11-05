@@ -3,13 +3,14 @@ using Iviz.Displays;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.VisualizationMsgs;
+using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 
 namespace Iviz.Controllers
 {
-    internal class MarkerLineProcessorHelper
+    internal class MarkerLineHelper
     {
         Point[] points;
         ColorRGBA[] colors;
@@ -22,7 +23,7 @@ namespace Iviz.Controllers
         readonly LineResource.DirectLineSetter lineListNoTint;
         readonly LineResource.DirectLineSetter lineListTintColor;
 
-        public MarkerLineProcessorHelper()
+        public MarkerLineHelper()
         {
             lineStripSingleColor = ProcessLineStripSingleColor;
             lineStripNoTint = ProcessLineStripNoTint;
@@ -32,7 +33,7 @@ namespace Iviz.Controllers
             lineListTintColor = ProcessLineListTintColor;
         }
 
-        public LineResource.DirectLineSetter GetLineSetterForStrip(Marker msg)
+        public LineResource.DirectLineSetter GetLineSetterForStrip([NotNull] Marker msg)
         {
             points = msg.Points;
             colors = msg.Colors;
@@ -43,9 +44,11 @@ namespace Iviz.Controllers
                 return lineStripSingleColor;
             }
 
-            return color32 == Color.white ? lineStripNoTint : lineStripTintColor;
-        }            
-            
+            return color32 == Color.white 
+                ? lineStripNoTint 
+                : lineStripTintColor;
+        }
+
         bool? ProcessLineStripSingleColor(ref NativeList<float4x2> lineBuffer)
         {
             float colorAsFloat = PointWithColor.FloatFromColorBits(color32);
@@ -110,7 +113,9 @@ namespace Iviz.Controllers
                 return lineListSingleColor;
             }
 
-            return color32 == Color.white ? lineListNoTint : lineListTintColor;
+            return color32 == Color.white 
+                ? lineListNoTint 
+                : lineListTintColor;
         }
 
         bool? ProcessLineListSingleColor(ref NativeList<float4x2> lineBuffer)

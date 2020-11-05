@@ -29,7 +29,7 @@ namespace Iviz.Ros
 
     public sealed class RosListener<T> : IRosListener where T : IMessage, IDeserializable<T>, new()
     {
-        static RosConnection Connection => ConnectionManager.Connection;
+        [NotNull] static RosConnection Connection => ConnectionManager.Connection;
         
         readonly ConcurrentQueue<T> messageQueue = new ConcurrentQueue<T>();
 
@@ -199,7 +199,7 @@ namespace Iviz.Ros
 
         void UpdateStats()
         {
-            if (!timesOfArrival.Any())
+            if (timesOfArrival.Count == 0)
             {
                 Stats = new RosListenerStats();
                 return;
@@ -242,6 +242,7 @@ namespace Iviz.Ros
             timesOfArrival.Clear();
         }
 
+        [NotNull]
         public override string ToString()
         {
             return $"[Listener Topic='{Topic}' Type={Type}]";

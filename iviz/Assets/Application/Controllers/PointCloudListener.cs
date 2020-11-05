@@ -288,7 +288,7 @@ namespace Iviz.Controllers
                 foreach (PointField field in msg.Fields)
                 {
                     fieldNames.Add(field.Name);
-                }                
+                }
             }
 
             if (!TryGetField(msg.Fields, "x", out PointField xField) || xField.Datatype != PointField.FLOAT32 ||
@@ -323,7 +323,6 @@ namespace Iviz.Controllers
             int numPoints = (int) (msg.Width * msg.Height);
 
             pointBuffer.Clear();
-            pointBuffer.ResizeUninitialized(numPoints);
 
             GeneratePointBuffer(msg, xOffset, yOffset, zOffset, iOffset, iField.Datatype, rgbaHint);
 
@@ -336,7 +335,7 @@ namespace Iviz.Controllers
                     // we're dead
                     return;
                 }
-                
+
                 node.AttachTo(msgHeader.FrameId, msgHeader.Stamp);
 
                 Size = numPoints;
@@ -355,7 +354,8 @@ namespace Iviz.Controllers
             });
         }
 
-        void GeneratePointBuffer([NotNull] PointCloud2 msg, int xOffset, int yOffset, int zOffset, int iOffset, int iType,
+        void GeneratePointBuffer([NotNull] PointCloud2 msg, int xOffset, int yOffset, int zOffset, int iOffset,
+            int iType,
             bool rgbaHint)
         {
             var xyzAligned = xOffset == 0 && yOffset == 4 && zOffset == 8;
@@ -369,11 +369,11 @@ namespace Iviz.Controllers
             }
         }
 
-        void GeneratePointBufferSlow([NotNull] PointCloud2 msg, int xOffset, int yOffset, int zOffset, int iOffset, int iType,
+        void GeneratePointBufferSlow([NotNull] PointCloud2 msg, int xOffset, int yOffset, int zOffset, int iOffset,
+            int iType,
             bool rgbaHint)
         {
             var heightOffset = 0;
-            var pointOffset = 0;
             var rowStep = (int) msg.RowStep;
             var pointStep = (int) msg.PointStep;
 
@@ -419,17 +419,17 @@ namespace Iviz.Controllers
             for (var v = (int) msg.Height; v > 0; v--, heightOffset += rowStep)
             {
                 var rowOffset = heightOffset;
-                for (var u = (int) msg.Width; u > 0; u--, rowOffset += pointStep, pointOffset++)
+                for (var u = (int) msg.Width; u > 0; u--, rowOffset += pointStep)
                 {
                     var xyz = new Vector3(
                         BitConverter.ToSingle(msg.Data, rowOffset + xOffset),
                         BitConverter.ToSingle(msg.Data, rowOffset + yOffset),
                         BitConverter.ToSingle(msg.Data, rowOffset + zOffset)
                     );
-                    pointBuffer[pointOffset] = new float4(
+                    pointBuffer.Add(new float4(
                         new float3(-xyz.y, xyz.z, xyz.x),
                         intensityFn(msg.Data, rowOffset + iOffset)
-                    );
+                    ));
                 }
             }
         }
@@ -442,6 +442,8 @@ namespace Iviz.Controllers
             int pointStep = (int) msg.PointStep;
             int height = (int) msg.Height;
             int width = (int) msg.Width;
+
+            pointBuffer.ResizeUninitialized(width * height);
 
             unsafe
             {
@@ -614,6 +616,8 @@ namespace Iviz.Controllers
 
                             break;
                     }
+
+                    pointBuffer.ResizeUninitialized((int) (pointBufferOff - pointBufferPtr));
                 }
             }
         }

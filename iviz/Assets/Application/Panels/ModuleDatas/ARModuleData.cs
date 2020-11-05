@@ -136,23 +136,6 @@ namespace Iviz.App
             controller.WorldPoseChanged -= OnWorldPoseChanged;            
         }
 
-
-        /*
-        public void CopyControlMarkerPoseToPanel()
-        {
-            var pose = TFListener.RootFrame.transform.AsPose();
-            controller.WorldPosition = pose.position.Unity2Ros();
-
-            float angle = pose.rotation.eulerAngles.y;
-            if (angle > 180)
-            {
-                angle -= 360;
-            }
-
-            controller.WorldAngle = angle;
-        }
-        */
-
         void CheckInteractable()
         {
             panel.MarkerHorizontal.Interactable = controller.UseMarker;
