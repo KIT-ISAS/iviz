@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract (Name = "sensor_msgs/CompressedImage")]
-    public sealed class CompressedImage : IMessage, IDeserializable<CompressedImage>
+    public sealed class CompressedImage : IDeserializable<CompressedImage>, IMessage
     {
         // This message contains a compressed image
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; } // Header timestamp should be acquisition time of image

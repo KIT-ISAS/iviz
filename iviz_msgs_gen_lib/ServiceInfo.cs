@@ -18,8 +18,23 @@ namespace Iviz.MsgsGen
         int fixedSizeReq = ClassInfo.UninitializedSize;
         int fixedSizeResp = ClassInfo.UninitializedSize;
 
-        internal ServiceInfo(string package, string path)
+        public ServiceInfo(string package, string path)
         {
+            if (package == null)
+            {
+                throw new ArgumentNullException(nameof(package));
+            }
+
+            if (path == null)
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+
+            if (!File.Exists(path))
+            {
+                throw new ArgumentException($"File {path} does not exist.");
+            }
+
             Console.WriteLine($"-- Parsing '{path}'");
 
             RosPackage = package;
@@ -232,7 +247,7 @@ namespace Iviz.MsgsGen
         }
 
 
-        public string ToCString()
+        public string ToCsString()
         {
             StringBuilder str = new StringBuilder();
 

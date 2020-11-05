@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/QuaternionStamped")]
-    public sealed class QuaternionStamped : IMessage, IDeserializable<QuaternionStamped>
+    public sealed class QuaternionStamped : IDeserializable<QuaternionStamped>, IMessage
     {
         // This represents an orientation with reference coordinate frame and timestamp.
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }

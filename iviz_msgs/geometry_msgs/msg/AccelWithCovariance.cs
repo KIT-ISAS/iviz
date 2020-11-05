@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/AccelWithCovariance")]
-    public sealed class AccelWithCovariance : IMessage, IDeserializable<AccelWithCovariance>
+    public sealed class AccelWithCovariance : IDeserializable<AccelWithCovariance>, IMessage
     {
         // This expresses acceleration in free space with uncertainty.
         [DataMember (Name = "accel")] public Accel Accel { get; set; }
@@ -57,7 +57,10 @@ namespace Iviz.Msgs.GeometryMsgs
             if (Covariance.Length != 36) throw new System.IndexOutOfRangeException();
         }
     
-        public int RosMessageLength => 336;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 336;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     

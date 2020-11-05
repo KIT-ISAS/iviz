@@ -94,6 +94,13 @@ namespace Iviz.Msgs.MeshMsgs
             if (Uuid is null) throw new System.NullReferenceException(nameof(Uuid));
         }
     
-        public int RosMessageLength => -2;
+        public int RosMessageLength
+        {
+            get {
+                int size = 4;
+                size += BuiltIns.UTF8.GetByteCount(Uuid);
+                return size;
+            }
+        }
     }
 }

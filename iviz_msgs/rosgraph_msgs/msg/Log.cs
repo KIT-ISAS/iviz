@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RosgraphMsgs
 {
     [DataContract (Name = "rosgraph_msgs/Log")]
-    public sealed class Log : IMessage, IDeserializable<Log>
+    public sealed class Log : IDeserializable<Log>, IMessage
     {
         //#
         //# Severity level constants

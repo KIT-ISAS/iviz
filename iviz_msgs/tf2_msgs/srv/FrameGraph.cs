@@ -94,6 +94,13 @@ namespace Iviz.Msgs.Tf2Msgs
             if (FrameYaml is null) throw new System.NullReferenceException(nameof(FrameYaml));
         }
     
-        public int RosMessageLength => -2;
+        public int RosMessageLength
+        {
+            get {
+                int size = 4;
+                size += BuiltIns.UTF8.GetByteCount(FrameYaml);
+                return size;
+            }
+        }
     }
 }

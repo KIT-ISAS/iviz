@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract (Name = "visualization_msgs/InteractiveMarkerPose")]
-    public sealed class InteractiveMarkerPose : IMessage, IDeserializable<InteractiveMarkerPose>
+    public sealed class InteractiveMarkerPose : IDeserializable<InteractiveMarkerPose>, IMessage
     {
         // Time/frame info.
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }

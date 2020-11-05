@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract (Name = "std_msgs/Header")]
-    public sealed class Header : IMessage, IDeserializable<Header>
+    public sealed class Header : IDeserializable<Header>, IMessage
     {
         // Standard metadata for higher-level stamped data types.
         // This is generally used to communicate timestamped data 

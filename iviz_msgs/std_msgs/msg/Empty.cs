@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract (Name = "std_msgs/Empty")]
-    public sealed class Empty : IMessage, IDeserializable<Empty>
+    public sealed class Empty : IDeserializable<Empty>, IMessage
     {
         /// <summary> Constructor for empty message. </summary>
         public Empty()
@@ -35,7 +35,10 @@ namespace Iviz.Msgs.StdMsgs
         {
         }
     
-        public int RosMessageLength => 0;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 0;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     

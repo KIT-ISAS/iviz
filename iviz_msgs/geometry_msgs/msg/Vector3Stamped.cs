@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Vector3Stamped")]
-    public sealed class Vector3Stamped : IMessage, IDeserializable<Vector3Stamped>
+    public sealed class Vector3Stamped : IDeserializable<Vector3Stamped>, IMessage
     {
         // This represents a Vector3 with reference coordinate frame and timestamp
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }

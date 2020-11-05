@@ -150,6 +150,9 @@ namespace Iviz.Msgs.GridMapMsgs
         {
         }
     
-        public int RosMessageLength => -2;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 1;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     }
 }

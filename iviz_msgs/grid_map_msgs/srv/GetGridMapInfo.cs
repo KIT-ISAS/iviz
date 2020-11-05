@@ -96,6 +96,13 @@ namespace Iviz.Msgs.GridMapMsgs
             Info.RosValidate();
         }
     
-        public int RosMessageLength => -2;
+        public int RosMessageLength
+        {
+            get {
+                int size = 0;
+                size += Info.RosMessageLength;
+                return size;
+            }
+        }
     }
 }

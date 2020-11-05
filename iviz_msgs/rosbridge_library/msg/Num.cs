@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RosbridgeLibrary
 {
     [DataContract (Name = "rosbridge_library/Num")]
-    public sealed class Num : IMessage, IDeserializable<Num>
+    public sealed class Num : IDeserializable<Num>, IMessage
     {
         [DataMember (Name = "num")] public long Num_ { get; set; }
     
@@ -45,7 +45,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
         {
         }
     
-        public int RosMessageLength => 8;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 8;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     

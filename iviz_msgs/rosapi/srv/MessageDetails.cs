@@ -151,6 +151,16 @@ namespace Iviz.Msgs.Rosapi
             }
         }
     
-        public int RosMessageLength => -2;
+        public int RosMessageLength
+        {
+            get {
+                int size = 4;
+                foreach (var i in Typedefs)
+                {
+                    size += i.RosMessageLength;
+                }
+                return size;
+            }
+        }
     }
 }

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RosbridgeLibrary
 {
     [DataContract (Name = "rosbridge_library/TestTimeArray")]
-    public sealed class TestTimeArray : IMessage, IDeserializable<TestTimeArray>
+    public sealed class TestTimeArray : IDeserializable<TestTimeArray>, IMessage
     {
         [DataMember (Name = "times")] public time[] Times { get; set; }
     

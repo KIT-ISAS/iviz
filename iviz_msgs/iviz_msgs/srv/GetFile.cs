@@ -153,6 +153,14 @@ namespace Iviz.Msgs.IvizMsgs
             if (Message is null) throw new System.NullReferenceException(nameof(Message));
         }
     
-        public int RosMessageLength => -2;
+        public int RosMessageLength
+        {
+            get {
+                int size = 9;
+                size += 1 * Bytes.Length;
+                size += BuiltIns.UTF8.GetByteCount(Message);
+                return size;
+            }
+        }
     }
 }

@@ -143,6 +143,13 @@ namespace Iviz.Msgs.MeshMsgs
             MeshVertexColorsStamped.RosValidate();
         }
     
-        public int RosMessageLength => -2;
+        public int RosMessageLength
+        {
+            get {
+                int size = 0;
+                size += MeshVertexColorsStamped.RosMessageLength;
+                return size;
+            }
+        }
     }
 }

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibMsgs
 {
     [DataContract (Name = "actionlib_msgs/GoalStatusArray")]
-    public sealed class GoalStatusArray : IMessage, IDeserializable<GoalStatusArray>
+    public sealed class GoalStatusArray : IDeserializable<GoalStatusArray>, IMessage
     {
         // Stores the statuses for goals that are currently being tracked
         // by an action server

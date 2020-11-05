@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract (Name = "std_msgs/Bool")]
-    public sealed class Bool : IMessage, IDeserializable<Bool>
+    public sealed class Bool : IDeserializable<Bool>, IMessage
     {
         [DataMember (Name = "data")] public bool Data { get; set; }
     
@@ -45,7 +45,10 @@ namespace Iviz.Msgs.StdMsgs
         {
         }
     
-        public int RosMessageLength => 1;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 1;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     

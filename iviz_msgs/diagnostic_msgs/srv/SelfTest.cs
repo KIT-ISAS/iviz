@@ -113,6 +113,17 @@ namespace Iviz.Msgs.DiagnosticMsgs
             }
         }
     
-        public int RosMessageLength => -2;
+        public int RosMessageLength
+        {
+            get {
+                int size = 9;
+                size += BuiltIns.UTF8.GetByteCount(Id);
+                foreach (var i in Status)
+                {
+                    size += i.RosMessageLength;
+                }
+                return size;
+            }
+        }
     }
 }

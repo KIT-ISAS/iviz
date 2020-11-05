@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract (Name = "mesh_msgs/MeshGeometryStamped")]
-    public sealed class MeshGeometryStamped : IMessage, IDeserializable<MeshGeometryStamped>
+    public sealed class MeshGeometryStamped : IDeserializable<MeshGeometryStamped>, IMessage
     {
         // Mesh Geometry Message
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }

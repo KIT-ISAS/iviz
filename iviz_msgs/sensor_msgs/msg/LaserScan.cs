@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract (Name = "sensor_msgs/LaserScan")]
-    public sealed class LaserScan : IMessage, IDeserializable<LaserScan>
+    public sealed class LaserScan : IDeserializable<LaserScan>, IMessage
     {
         // Single scan from a planar laser range-finder
         //

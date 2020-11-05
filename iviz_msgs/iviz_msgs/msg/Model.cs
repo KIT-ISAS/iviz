@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract (Name = "iviz_msgs/Model")]
-    public sealed class Model : IMessage, IDeserializable<Model>
+    public sealed class Model : IDeserializable<Model>, IMessage
     {
         [DataMember (Name = "name")] public string Name { get; set; }
         [DataMember (Name = "filename")] public string Filename { get; set; }
@@ -137,12 +137,12 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE71UTU/DMAy951dE4gcgNoQQiNMOaIdxYeIyoSlr3daoTarY28p+PU6bdEziyNrL84dU" +
-                "Pz87JvZoS21NA4oGu8AafvvOI1g2jM5uK7SsVkDV5lM3AkBqZRg8mjpEoknqzeUgAStASr3886dW769P" +
-                "Gg942jZU0m0glNj2zD8gY+fnwuAAnjETEueQdb4JHIfITCIM3cI5n5NauNp5iWQBSa2lG1vWoZXChL/s" +
-                "pf/5bGx0aXPort9f5K6K2plQvhut79E6TUVj9ieNqxfvJ9Pr/6gTlhF3Ec31aaSNSJtgkrFLRjbBvsf1" +
-                "u9j5XiBtml14rdHLsSj2lHLQIBEeQK2h472HlI7uBOLFQpF2a7h6TrIdMecqORVgWfEobdsOA5ZnmBue" +
-                "YMrhfF2IOxBpjQ/aivweu3vN3lgq5JoM6fNJnGIBAoP0/jZ3D1Jb32jvjnKbvmTWSv0AJAnW9NoFAAA=";
+                "H4sIAAAAAAAAE71UTU/DMAy951dE4gcgNoQQEqcdEIdyYeIyoSlr3daoTarY28p+PU6bdEziyNrL84dU" +
+                "Pz87JvZoK21NC4pGu8QGfvvOI1g2jM5ua7SsMqB686lbASCVGQaPpgmRaJJ6cwVIwAqQUs///Kns/eVJ" +
+                "4wFP25Yqug2EEtuB+Qfk7PxSGBzAM+ZC4hyyzreB4xhZSIShXznnC1Ir1zgvkTwgqbV0Y6smtFKa8Je9" +
+                "9L9cTI2+2gL66/cXuauycSaU7yfre7JOc9FY/Enj6sWHyQz6P+qEVcRdRHN9Gmkj0iaYZOySkc+w73H9" +
+                "LnZ+EEibdhdea/QKLMs9pRy0SIQHUGvoee8hpaM7g3ixUKTdGa6Takcszk4NWNU8Kdt143zlFRaGZxhy" +
+                "uF4X2o5EOuODtKK+x/5eszeWSjkmY/p8EeeYf2CQnt/m7kFq6xvt3VFO05eMWqkfwrDc/dkFAAA=";
                 
     }
 }

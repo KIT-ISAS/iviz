@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract (Name = "visualization_msgs/ImageMarker")]
-    public sealed class ImageMarker : IMessage, IDeserializable<ImageMarker>
+    public sealed class ImageMarker : IDeserializable<ImageMarker>, IMessage
     {
         public const byte CIRCLE = 0;
         public const byte LINE_STRIP = 1;

@@ -92,6 +92,9 @@ namespace Iviz.Msgs.RosbridgeLibrary
         {
         }
     
-        public int RosMessageLength => -2;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 4;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     }
 }

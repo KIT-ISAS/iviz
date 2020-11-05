@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract (Name = "sensor_msgs/JoyFeedback")]
-    public sealed class JoyFeedback : IMessage, IDeserializable<JoyFeedback>
+    public sealed class JoyFeedback : IDeserializable<JoyFeedback>, IMessage
     {
         // Declare of the type of feedback
         public const byte TYPE_LED = 0;
@@ -61,7 +61,10 @@ namespace Iviz.Msgs.SensorMsgs
         {
         }
     
-        public int RosMessageLength => 6;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 6;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     

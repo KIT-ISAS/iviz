@@ -146,6 +146,17 @@ namespace Iviz.Msgs.Rosapi
             }
         }
     
-        public int RosMessageLength => -2;
+        public int RosMessageLength
+        {
+            get {
+                int size = 4;
+                size += 4 * Services.Length;
+                foreach (string s in Services)
+                {
+                    size += BuiltIns.UTF8.GetByteCount(s);
+                }
+                return size;
+            }
+        }
     }
 }

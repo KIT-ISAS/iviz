@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.DiagnosticMsgs
 {
     [DataContract (Name = "diagnostic_msgs/DiagnosticArray")]
-    public sealed class DiagnosticArray : IMessage, IDeserializable<DiagnosticArray>
+    public sealed class DiagnosticArray : IDeserializable<DiagnosticArray>, IMessage
     {
         // This message is used to send diagnostic information about the state of the robot
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; } //for timestamp

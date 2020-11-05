@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GridMapMsgs
 {
     [DataContract (Name = "grid_map_msgs/GridMap")]
-    public sealed class GridMap : IMessage, IDeserializable<GridMap>
+    public sealed class GridMap : IDeserializable<GridMap>, IMessage
     {
         // Grid map header
         [DataMember (Name = "info")] public GridMapInfo Info { get; set; }

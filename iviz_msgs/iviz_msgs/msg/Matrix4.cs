@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract (Name = "iviz_msgs/Matrix4")]
-    public sealed class Matrix4 : IMessage, IDeserializable<Matrix4>
+    public sealed class Matrix4 : IDeserializable<Matrix4>, IMessage
     {
         [DataMember (Name = "m")] public float[/*16*/] M { get; set; } // row major 
     
@@ -48,7 +48,10 @@ namespace Iviz.Msgs.IvizMsgs
             if (M.Length != 16) throw new System.IndexOutOfRangeException();
         }
     
-        public int RosMessageLength => 64;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 64;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     

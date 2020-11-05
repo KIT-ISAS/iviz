@@ -147,6 +147,13 @@ namespace Iviz.Msgs.MeshMsgs
             Texture.RosValidate();
         }
     
-        public int RosMessageLength => -2;
+        public int RosMessageLength
+        {
+            get {
+                int size = 0;
+                size += Texture.RosMessageLength;
+                return size;
+            }
+        }
     }
 }

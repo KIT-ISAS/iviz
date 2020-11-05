@@ -88,7 +88,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
         {
         }
     
-        public int RosMessageLength => 8;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 8;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     }
 
     public sealed class SendBytesResponse : IResponse, IDeserializable<SendBytesResponse>
@@ -133,6 +136,13 @@ namespace Iviz.Msgs.RosbridgeLibrary
             if (Data is null) throw new System.NullReferenceException(nameof(Data));
         }
     
-        public int RosMessageLength => -2;
+        public int RosMessageLength
+        {
+            get {
+                int size = 4;
+                size += BuiltIns.UTF8.GetByteCount(Data);
+                return size;
+            }
+        }
     }
 }

@@ -58,7 +58,10 @@ namespace Iviz.Msgs.IvizMsgs
         {
         }
     
-        public readonly int RosMessageLength => 4;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 4;
+        
+        public readonly int RosMessageLength => RosFixedMessageLength;
     
         public readonly string RosType => RosMessageType;
     

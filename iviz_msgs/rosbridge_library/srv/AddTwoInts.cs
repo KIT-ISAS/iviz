@@ -92,7 +92,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
         {
         }
     
-        public int RosMessageLength => 16;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 16;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     }
 
     public sealed class AddTwoIntsResponse : IResponse, IDeserializable<AddTwoIntsResponse>
@@ -135,6 +138,9 @@ namespace Iviz.Msgs.RosbridgeLibrary
         {
         }
     
-        public int RosMessageLength => -2;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 8;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     }
 }

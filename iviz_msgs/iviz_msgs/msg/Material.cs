@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract (Name = "iviz_msgs/Material")]
-    public sealed class Material : IMessage, IDeserializable<Material>
+    public sealed class Material : IDeserializable<Material>, IMessage
     {
         [DataMember (Name = "name")] public string Name { get; set; }
         [DataMember (Name = "ambient")] public Color Ambient { get; set; }
@@ -86,9 +86,9 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE7WQMQ7CMAxFd5/CN0CCBYGYGJiYYEMVShQ3sUTSqHYK4vSgNrkBePl6+oOfLTpy8phM" +
-                "JDgOj2FEEy1T0kqO+75I6yiyCE8EV3ppGanVFQEOPx44X0475Inf9yheVrMGFE66xZa+pq1p/q/R7pXl" +
-                "e9lo2M/bN2t8stPQIBD7oI1szovjrUNn9Cv6AV9/IHZ/AQAA";
+                "H4sIAAAAAAAAE7WQsQoCMQyG9zxF3kDQRQQnBycn3USOlubagO2VS3qKT6/ctfgCmuXn4x/yJaIjJ4/J" +
+                "RILDcB9GNNEyJa3kuO+LtI4ii/BEcKGnlpFaXRFg/+OB0/m4Q5741UXxspo1oHDSLbb0NW1N83+Ndq8s" +
+                "38tGw7x8s8YHuy8EYh+0kc15Ubze0Bn9eL4BQkK3Hn4BAAA=";
                 
     }
 }

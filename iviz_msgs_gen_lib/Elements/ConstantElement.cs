@@ -53,5 +53,10 @@ namespace Iviz.MsgsGen
         {
             return $"{ClassName} {FieldName}={Value}";
         }
+
+        public string ToRosString()
+        {
+            return $"{ClassName} {FieldName}={Value}";
+        }
     }
 }

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract (Name = "std_msgs/MultiArrayDimension")]
-    public sealed class MultiArrayDimension : IMessage, IDeserializable<MultiArrayDimension>
+    public sealed class MultiArrayDimension : IDeserializable<MultiArrayDimension>, IMessage
     {
         [DataMember (Name = "label")] public string Label { get; set; } // label of given dimension
         [DataMember (Name = "size")] public uint Size { get; set; } // size of given dimension (in type units)

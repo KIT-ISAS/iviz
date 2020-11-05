@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf2Msgs
 {
     [DataContract (Name = "tf2_msgs/TFMessage")]
-    public sealed class TFMessage : IMessage, IDeserializable<TFMessage>
+    public sealed class TFMessage : IDeserializable<TFMessage>, IMessage
     {
         [DataMember (Name = "transforms")] public GeometryMsgs.TransformStamped[] Transforms { get; set; }
     

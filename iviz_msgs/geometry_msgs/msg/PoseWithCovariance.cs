@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/PoseWithCovariance")]
-    public sealed class PoseWithCovariance : IMessage, IDeserializable<PoseWithCovariance>
+    public sealed class PoseWithCovariance : IDeserializable<PoseWithCovariance>, IMessage
     {
         // This represents a pose in free space with uncertainty.
         [DataMember (Name = "pose")] public Pose Pose { get; set; }
@@ -57,7 +57,10 @@ namespace Iviz.Msgs.GeometryMsgs
             if (Covariance.Length != 36) throw new System.IndexOutOfRangeException();
         }
     
-        public int RosMessageLength => 344;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 344;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     

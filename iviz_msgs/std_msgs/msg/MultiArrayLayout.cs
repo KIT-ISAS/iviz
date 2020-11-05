@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract (Name = "std_msgs/MultiArrayLayout")]
-    public sealed class MultiArrayLayout : IMessage, IDeserializable<MultiArrayLayout>
+    public sealed class MultiArrayLayout : IDeserializable<MultiArrayLayout>, IMessage
     {
         // The multiarray declares a generic multi-dimensional array of a
         // particular data type.  Dimensions are ordered from outer most

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract (Name = "mesh_msgs/MeshVertexTexCoords")]
-    public sealed class MeshVertexTexCoords : IMessage, IDeserializable<MeshVertexTexCoords>
+    public sealed class MeshVertexTexCoords : IDeserializable<MeshVertexTexCoords>, IMessage
     {
         // Mesh Attribute Type
         [DataMember (Name = "u")] public float U { get; set; }
@@ -50,7 +50,10 @@ namespace Iviz.Msgs.MeshMsgs
         {
         }
     
-        public int RosMessageLength => 8;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 8;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     

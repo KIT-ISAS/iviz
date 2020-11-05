@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ShapeMsgs
 {
     [DataContract (Name = "shape_msgs/Plane")]
-    public sealed class Plane : IMessage, IDeserializable<Plane>
+    public sealed class Plane : IDeserializable<Plane>, IMessage
     {
         // Representation of a plane, using the plane equation ax + by + cz + d = 0
         // a := coef[0]
@@ -53,7 +53,10 @@ namespace Iviz.Msgs.ShapeMsgs
             if (Coef.Length != 4) throw new System.IndexOutOfRangeException();
         }
     
-        public int RosMessageLength => 32;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 32;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     

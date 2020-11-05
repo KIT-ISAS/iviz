@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ShapeMsgs
 {
     [DataContract (Name = "shape_msgs/Mesh")]
-    public sealed class Mesh : IMessage, IDeserializable<Mesh>
+    public sealed class Mesh : IDeserializable<Mesh>, IMessage
     {
         // Definition of a mesh
         // list of triangles; the index values refer to positions in vertices[]

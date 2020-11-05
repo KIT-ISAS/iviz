@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract (Name = "mesh_msgs/MeshMaterial")]
-    public sealed class MeshMaterial : IMessage, IDeserializable<MeshMaterial>
+    public sealed class MeshMaterial : IDeserializable<MeshMaterial>, IMessage
     {
         [DataMember (Name = "texture_index")] public uint TextureIndex { get; set; }
         [DataMember (Name = "color")] public StdMsgs.ColorRGBA Color { get; set; }
@@ -53,7 +53,10 @@ namespace Iviz.Msgs.MeshMsgs
         {
         }
     
-        public int RosMessageLength => 21;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 21;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     

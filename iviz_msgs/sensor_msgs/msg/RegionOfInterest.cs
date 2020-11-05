@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract (Name = "sensor_msgs/RegionOfInterest")]
-    public sealed class RegionOfInterest : IMessage, IDeserializable<RegionOfInterest>
+    public sealed class RegionOfInterest : IDeserializable<RegionOfInterest>, IMessage
     {
         // This message is used to specify a region of interest within an image.
         //
@@ -73,7 +73,10 @@ namespace Iviz.Msgs.SensorMsgs
         {
         }
     
-        public int RosMessageLength => 17;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 17;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     

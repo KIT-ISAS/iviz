@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract (Name = "iviz_msgs/Include")]
-    public sealed class Include : IMessage, IDeserializable<Include>
+    public sealed class Include : IDeserializable<Include>, IMessage
     {
         // Reference to an external asset
         [DataMember (Name = "uri")] public string Uri { get; set; } // Uri of the asset
@@ -89,11 +89,11 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE71STUsDMRA9N79iYK+C2IqI4smDeCiIH6dSZLo7uxndJEtmti3+etM1EcSrNZeXR968" +
-                "eZOkgkdqKZKvCTQAeqC9UvTYA4qQGiMa2XcwRobZrIKXhKEFtZQFS0yC/TkMQeggeEj4S0GRk6PLm+I5" +
-                "YP2O3VR1304dLAoguNBQD1JbcnSSjFiAfcN1KpfJNxceEgthrK0BY27+eJnl090V8JY/Xp10cpoHNW0f" +
-                "UBfz1dnFGhxUEMMuTfYW4v9k+HGDHh2Z29Cn5ug2TF4za7htRyln5FiEt2Se0+uOkcpxpsfPPcUwI3u9" +
-                "hIJdxk1GPH6MMu/3/1N7PXVfzGHHjdpCLHFntbDNMHxlXK2hQU1BPwGIelWuNwMAAA==";
+                "H4sIAAAAAAAAE71STUsDMRA9N79iYK+C2IqI4MmDeCgUP06lyOzuZDN2kyyZbFv89aZroohXay4vj7x5" +
+                "8yZJBY+kKZBrCKIHdECHSMFhDyhCUSmJgV0HY2CYzSp4Seg1RENZsMQkOFzC4IWOglXCXwoKnBxt3hTP" +
+                "AZstdlPVg546GBRAsL6lHqQxZOksGbEAu5abVC6Tby48JhbC0BgFSt3+8VLLp/sb4B2/v1rp5DwPqnTv" +
+                "MS7m64urDVioIPh9muzNh//J8OMGHVpSd75PzdHWTC5m1rLWo5QzsizCO1LP6XXHQOU409PnnmKokV28" +
+                "hoJdxjojnj5Gmffr/0UzNV/MYc/tNzHEnYmF1cPwGXG9gRZjyvkB6k+ZZjYDAAA=";
                 
     }
 }

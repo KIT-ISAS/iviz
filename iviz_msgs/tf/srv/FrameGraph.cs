@@ -94,6 +94,13 @@ namespace Iviz.Msgs.Tf
             if (DotGraph is null) throw new System.NullReferenceException(nameof(DotGraph));
         }
     
-        public int RosMessageLength => -2;
+        public int RosMessageLength
+        {
+            get {
+                int size = 4;
+                size += BuiltIns.UTF8.GetByteCount(DotGraph);
+                return size;
+            }
+        }
     }
 }

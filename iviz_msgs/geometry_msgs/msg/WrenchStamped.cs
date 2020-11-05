@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/WrenchStamped")]
-    public sealed class WrenchStamped : IMessage, IDeserializable<WrenchStamped>
+    public sealed class WrenchStamped : IDeserializable<WrenchStamped>, IMessage
     {
         // A wrench with reference coordinate frame and timestamp
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }

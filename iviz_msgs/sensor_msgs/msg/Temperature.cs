@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract (Name = "sensor_msgs/Temperature")]
-    public sealed class Temperature : IMessage, IDeserializable<Temperature>
+    public sealed class Temperature : IDeserializable<Temperature>, IMessage
     {
         // Single temperature reading.
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; } // timestamp is the time the temperature was measured

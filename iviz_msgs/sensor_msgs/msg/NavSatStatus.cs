@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract (Name = "sensor_msgs/NavSatStatus")]
-    public sealed class NavSatStatus : IMessage, IDeserializable<NavSatStatus>
+    public sealed class NavSatStatus : IDeserializable<NavSatStatus>, IMessage
     {
         // Navigation Satellite fix status for any Global Navigation Satellite System
         // Whether to output an augmented fix is determined by both the fix
@@ -63,7 +63,10 @@ namespace Iviz.Msgs.SensorMsgs
         {
         }
     
-        public int RosMessageLength => 3;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 3;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     

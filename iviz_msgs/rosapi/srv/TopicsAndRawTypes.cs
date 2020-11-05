@@ -79,7 +79,10 @@ namespace Iviz.Msgs.Rosapi
         {
         }
     
-        public int RosMessageLength => 0;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 0;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     }
 
     public sealed class TopicsAndRawTypesResponse : IResponse, IDeserializable<TopicsAndRawTypesResponse>
@@ -148,6 +151,27 @@ namespace Iviz.Msgs.Rosapi
             }
         }
     
-        public int RosMessageLength => -2;
+        public int RosMessageLength
+        {
+            get {
+                int size = 12;
+                size += 4 * Topics.Length;
+                foreach (string s in Topics)
+                {
+                    size += BuiltIns.UTF8.GetByteCount(s);
+                }
+                size += 4 * Types.Length;
+                foreach (string s in Types)
+                {
+                    size += BuiltIns.UTF8.GetByteCount(s);
+                }
+                size += 4 * TypedefsFullText.Length;
+                foreach (string s in TypedefsFullText)
+                {
+                    size += BuiltIns.UTF8.GetByteCount(s);
+                }
+                return size;
+            }
+        }
     }
 }

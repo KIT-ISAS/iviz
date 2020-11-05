@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract (Name = "nav_msgs/Path")]
-    public sealed class Path : IMessage, IDeserializable<Path>
+    public sealed class Path : IDeserializable<Path>, IMessage
     {
         //An array of poses that represents a Path for a robot to follow
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }

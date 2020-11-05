@@ -149,6 +149,13 @@ namespace Iviz.Msgs.Rosapi
             if (Value is null) throw new System.NullReferenceException(nameof(Value));
         }
     
-        public int RosMessageLength => -2;
+        public int RosMessageLength
+        {
+            get {
+                int size = 4;
+                size += BuiltIns.UTF8.GetByteCount(Value);
+                return size;
+            }
+        }
     }
 }

@@ -161,6 +161,13 @@ namespace Iviz.Msgs.NavMsgs
             Plan.RosValidate();
         }
     
-        public int RosMessageLength => -2;
+        public int RosMessageLength
+        {
+            get {
+                int size = 0;
+                size += Plan.RosMessageLength;
+                return size;
+            }
+        }
     }
 }

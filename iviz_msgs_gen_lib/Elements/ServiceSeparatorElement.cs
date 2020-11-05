@@ -20,5 +20,10 @@ namespace Iviz.MsgsGen
         {
             return Array.Empty<string>();
         }
+
+        public string ToRosString()
+        {
+            return "";
+        }
     }
 }

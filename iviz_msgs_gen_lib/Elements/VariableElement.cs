@@ -13,7 +13,7 @@ namespace Iviz.MsgsGen
         public string Comment { get; }
         public string RosFieldName { get; }
         public string RosClassName { get; }
-        public string FieldName { get; }
+        public string CsFieldName { get; }
         public string CsClassName { get; }
         internal int ArraySize { get; }
         public bool IsArray => ArraySize != NotAnArray;
@@ -21,7 +21,7 @@ namespace Iviz.MsgsGen
         public bool IsFixedSizeArray => ArraySize > 0;
         public int FixedArraySize => IsFixedSizeArray ? ArraySize : -1;
         public ClassInfo ClassInfo { get; internal set; }
-        public bool ClassIsStruct => ClassInfo != null && ClassInfo.ForceStruct;
+        public bool ClassIsStruct => ClassInfo?.ForceStruct ?? ClassInfo.IsClassForceStruct(RosClassName);
         public bool ClassHasFixedSize => ClassInfo != null && ClassInfo.HasFixedSize;
 
         static readonly HashSet<string> Keywords = new HashSet<string>
@@ -44,22 +44,22 @@ namespace Iviz.MsgsGen
             "override",
         };
 
-        internal VariableElement(string comment, string rosClassToken, string fieldName, string parentClassName)
+        internal VariableElement(string comment, string rosClassToken, string fieldName, string parentClassName = null, ClassInfo classInfo = null)
         {
             Comment = comment;
             this.rosClassToken = rosClassToken;
 
             RosFieldName = fieldName;
 
-            FieldName = MsgParser.Sanitize(fieldName);
-            if (FieldName == parentClassName)
+            CsFieldName = MsgParser.Sanitize(fieldName);
+            if (CsFieldName == parentClassName)
             {
-                FieldName += "_"; // C# forbids fields with the same name as the class
+                CsFieldName += "_"; // C# forbids fields with the same name as the class
             }
 
             if (Keywords.Contains(fieldName))
             {
-                FieldName = $"@{fieldName}";
+                CsFieldName = $"@{fieldName}";
             }
 
             int bracketLeft = rosClassToken.IndexOf('[');
@@ -109,16 +109,18 @@ namespace Iviz.MsgsGen
             {
                 CsClassName = RosClassName;
             }
+
+            ClassInfo = classInfo;
         }
 
         public override string ToString()
         {
-            return $"['{rosClassToken}' '{RosFieldName}' # '{Comment}']";
+            return $"['{rosClassToken}' '{RosFieldName}' // '{Comment}']";
         }
 
         public IEnumerable<string> ToCsString(bool isInStruct)
         {
-            string attrStr = (FieldName != RosFieldName)
+            string attrStr = (CsFieldName != RosFieldName)
                 ? $"[DataMember (Name = \"{RosFieldName}\")]"
                 : "[DataMember]";
 
@@ -126,16 +128,16 @@ namespace Iviz.MsgsGen
             switch (ArraySize)
             {
                 case NotAnArray:
-                    result = $"public {CsClassName} {FieldName} {{ get; set; }}";
+                    result = $"public {CsClassName} {CsFieldName} {{ get; set; }}";
                     break;
                 case DynamicSizeArray:
-                    result = $"public {CsClassName}[] {FieldName} {{ get; set; }}";
+                    result = $"public {CsClassName}[] {CsFieldName} {{ get; set; }}";
                     break;
                 default:
                 {
                     result = isInStruct
-                        ? $"fixed {CsClassName} {FieldName}[{ArraySize}];"
-                        : $"public {CsClassName}[/*{ArraySize}*/] {FieldName} {{ get; set; }}";
+                        ? $"fixed {CsClassName} {CsFieldName}[{ArraySize}];"
+                        : $"public {CsClassName}[/*{ArraySize}*/] {CsFieldName} {{ get; set; }}";
                     break;
                 }
             }
@@ -152,14 +154,19 @@ namespace Iviz.MsgsGen
             List<string> list = new List<string> { csString };
             for (int i = 0; i < ArraySize; i++)
             {
-                list.Add($"public {CsClassName} {FieldName}{i}");
+                list.Add($"public {CsClassName} {CsFieldName}{i}");
                 list.Add("{");
-                list.Add($"    readonly get => {FieldName}[{i}];");
-                list.Add($"    set => {FieldName}[{i}] = value;");
+                list.Add($"    readonly get => {CsFieldName}[{i}];");
+                list.Add($"    set => {CsFieldName}[{i}] = value;");
                 list.Add("}");
             }
 
             return list;
+        }
+
+        public string ToRosString()
+        {
+            return $"{rosClassToken} {RosFieldName}";
         }
 
         public string GetEntryForMd5Hash()

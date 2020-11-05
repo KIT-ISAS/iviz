@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RosgraphMsgs
 {
     [DataContract (Name = "rosgraph_msgs/TopicStatistics")]
-    public sealed class TopicStatistics : IMessage, IDeserializable<TopicStatistics>
+    public sealed class TopicStatistics : IDeserializable<TopicStatistics>, IMessage
     {
         // name of the topic
         [DataMember (Name = "topic")] public string Topic { get; set; }

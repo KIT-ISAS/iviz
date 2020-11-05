@@ -89,7 +89,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
         {
         }
     
-        public int RosMessageLength => 56;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 56;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     }
 
     public sealed class TestNestedServiceResponse : IResponse, IDeserializable<TestNestedServiceResponse>
@@ -133,6 +136,9 @@ namespace Iviz.Msgs.RosbridgeLibrary
         {
         }
     
-        public int RosMessageLength => -2;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 8;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     }
 }

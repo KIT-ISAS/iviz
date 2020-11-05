@@ -88,7 +88,10 @@ namespace Iviz.Msgs.StdSrvs
         {
         }
     
-        public int RosMessageLength => 1;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 1;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     }
 
     public sealed class SetBoolResponse : IResponse, IDeserializable<SetBoolResponse>
@@ -137,6 +140,13 @@ namespace Iviz.Msgs.StdSrvs
             if (Message is null) throw new System.NullReferenceException(nameof(Message));
         }
     
-        public int RosMessageLength => -2;
+        public int RosMessageLength
+        {
+            get {
+                int size = 5;
+                size += BuiltIns.UTF8.GetByteCount(Message);
+                return size;
+            }
+        }
     }
 }

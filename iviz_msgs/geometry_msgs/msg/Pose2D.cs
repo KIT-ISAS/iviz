@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Pose2D")]
-    public sealed class Pose2D : IMessage, IDeserializable<Pose2D>
+    public sealed class Pose2D : IDeserializable<Pose2D>, IMessage
     {
         // Deprecated
         // Please use the full 3D pose.
@@ -58,7 +58,10 @@ namespace Iviz.Msgs.GeometryMsgs
         {
         }
     
-        public int RosMessageLength => 24;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 24;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     

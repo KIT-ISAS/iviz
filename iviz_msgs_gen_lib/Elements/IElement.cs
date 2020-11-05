@@ -16,5 +16,6 @@ namespace Iviz.MsgsGen
     {
         ElementType Type { get; }
         IEnumerable<string> ToCsString(bool isInStruct = false);
+        string ToRosString();
     }
 }

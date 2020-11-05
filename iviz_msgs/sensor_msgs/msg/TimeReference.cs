@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract (Name = "sensor_msgs/TimeReference")]
-    public sealed class TimeReference : IMessage, IDeserializable<TimeReference>
+    public sealed class TimeReference : IDeserializable<TimeReference>, IMessage
     {
         // Measurement from an external time source not actively synchronized with the system clock.
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; } // stamp is system time for which measurement was valid

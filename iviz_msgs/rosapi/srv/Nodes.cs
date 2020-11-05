@@ -79,7 +79,10 @@ namespace Iviz.Msgs.Rosapi
         {
         }
     
-        public int RosMessageLength => 0;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 0;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     }
 
     public sealed class NodesResponse : IResponse, IDeserializable<NodesResponse>
@@ -128,6 +131,17 @@ namespace Iviz.Msgs.Rosapi
             }
         }
     
-        public int RosMessageLength => -2;
+        public int RosMessageLength
+        {
+            get {
+                int size = 4;
+                size += 4 * Nodes_.Length;
+                foreach (string s in Nodes_)
+                {
+                    size += BuiltIns.UTF8.GetByteCount(s);
+                }
+                return size;
+            }
+        }
     }
 }

@@ -154,6 +154,13 @@ namespace Iviz.Msgs.SensorMsgs
             if (StatusMessage is null) throw new System.NullReferenceException(nameof(StatusMessage));
         }
     
-        public int RosMessageLength => -2;
+        public int RosMessageLength
+        {
+            get {
+                int size = 5;
+                size += BuiltIns.UTF8.GetByteCount(StatusMessage);
+                return size;
+            }
+        }
     }
 }

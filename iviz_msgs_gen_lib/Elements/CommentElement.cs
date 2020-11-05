@@ -21,5 +21,10 @@ namespace Iviz.MsgsGen
         {
             return new[] {$"//{Text}"};
         }
+
+        public string ToRosString()
+        {
+            return "";
+        }
     }
 }

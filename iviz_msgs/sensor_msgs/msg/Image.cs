@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract (Name = "sensor_msgs/Image")]
-    public sealed class Image : IMessage, IDeserializable<Image>
+    public sealed class Image : IDeserializable<Image>, IMessage
     {
         // This message contains an uncompressed image
         // (0, 0) is at top-left corner of image

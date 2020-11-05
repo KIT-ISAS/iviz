@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RosbridgeLibrary
 {
     [DataContract (Name = "rosbridge_library/TestUInt8FixedSizeArray16")]
-    public sealed class TestUInt8FixedSizeArray16 : IMessage, IDeserializable<TestUInt8FixedSizeArray16>
+    public sealed class TestUInt8FixedSizeArray16 : IDeserializable<TestUInt8FixedSizeArray16>, IMessage
     {
         [DataMember (Name = "data")] public byte[/*16*/] Data { get; set; }
     
@@ -48,7 +48,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
             if (Data.Length != 16) throw new System.IndexOutOfRangeException();
         }
     
-        public int RosMessageLength => 16;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 16;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     

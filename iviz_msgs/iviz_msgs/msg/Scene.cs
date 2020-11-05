@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract (Name = "iviz_msgs/Scene")]
-    public sealed class Scene : IMessage, IDeserializable<Scene>
+    public sealed class Scene : IDeserializable<Scene>, IMessage
     {
         // A complete scene 
         [DataMember (Name = "name")] public string Name { get; set; } // Name of the scene
@@ -112,15 +112,15 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE71UTW/bMAw9R7+CQK4DtibDMGzooeiGwUCaBG3WS1EEsk3b3GTJEOUm7a+fZEve2l6X" +
+                "H4sIAAAAAAAAE71UTW/bMAw9R7+CQK4DtibDMAzooWiHwUCaBG22S1EEsk3b3GTJEOUm7a+fZEtuu12b" +
                 "+sIPPZJPz5LmcAGFaTuFDoEL1AhCsLOka9CyxdlsDmtvwVTgmghJgIoUJtDGUk1aqikpMl2ovsS7e6DR" +
-                "Yw9bEbvQqzUlKgZnIMe0XooV1Y3zBSpYnv2DHzNCnP/nT1zd/PgC9EBP+5Zrfh9JizlcY4UWdYGBpNSA" +
-                "R4c2bFAyo5tE6i1BIPrT26jRCLiSHnD8CJ3hQaCtt68QaMl3bKOTenay+C3roSqrhgmNZJCjaP4XNNji" +
-                "O9+I2EtXUuHLeegbCwNjRmmLRsDpJYsbFZUy0i0Xd2ef7qGFOVhz8Dv7ZezbcHim4HAAL43yw2WbE2oX" +
-                "o5Kqque0hi0x0wOKnf+7vcW0HMPT8x5oiJ60+wzJ1tHm0crT00j7nc6fa74O05cLOFDpmhQ0GO5hivKu" +
-                "Gzn6K1tK9wZEhwdCRGG2m2y9g3P4EONv2fX3y122WV+sfPYsZm+2mwBaPHvW4pp77FDkxigoJLs9N7I0" +
-                "B35xVOK5Bit1jeIWC2fsMlxrcmT0lCjJei9kUgFpjXbvq9TfJqZ3U06cXq9Ibhp/nLzHyXsS4g+K6fFv" +
-                "BgYAAA==";
+                "Yw9bEbvQqzUlKgZnIMe0XooV1Y3zBSpYnr3Ajxkhzt/4E9e3P74BPdDTvuWaP0bSYg43WKFFXWAgKTXg" +
+                "0aENG5TM6CaReksQiP70Nmo0Aq6lBxw/Q2d4EGjr7X8ItOQ7ttFJPTtZ/JH1UJVVw4RGMshRNP8LGmzx" +
+                "g29E7KUrqfDlPPSNhYExo7RFI+D0ksWNikoZ6ZaLu7Mv99DCHKw5+J39NvZ9OLxScDiAl0b54bLNCbWL" +
+                "UUlV1XNaw5aY6QHFzv/d3mJajuHpeQ80RE/afYVk62jzaOXpaaT9TufPNcPw5QIOVD4HDYZrmKK860aK" +
+                "/saW0r0Dz+F9EFGX7SZb7+AcPsX4Krv5frnLNuuLlc+exeztdhNAi1evWlxzjx2K3BgFhWS350aW5sD/" +
+                "nJR4rMFKXaP4hYUzdhluNTkyekqUZL0XMqmAtEa791XquYnp3ZQTp9crkpvGHyfvcfKehPgLWKgZowUG" +
+                "AAA=";
                 
     }
 }

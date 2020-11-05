@@ -35,17 +35,22 @@ namespace Iviz.MsgsGen
             foreach (string dir in dirs) GetFilesWithExtension(dir, msgs, ext);
         }
 
-        static void CollectMsgFiles(string path, ICollection<string> msgs)
+        static void CollectMsgFiles(string path, ICollection<string> fullMsgPaths)
         {
-            GetFilesWithExtension(path, msgs, ".msg");
+            GetFilesWithExtension(path, fullMsgPaths, ".msg");
         }
 
-        static void CollectSrvFiles(string path, ICollection<string> srvs)
+        static void CollectSrvFiles(string path, ICollection<string> fullSrvPaths)
         {
-            GetFilesWithExtension(path, srvs, ".srv");
+            GetFilesWithExtension(path, fullSrvPaths, ".srv");
         }
 
-        public void AddPackagePath(string packagePath, string packageName)
+        static void CollectActionFiles(string path, ICollection<string> fullActionPaths)
+        {
+            GetFilesWithExtension(path, fullActionPaths, ".action");
+        }
+
+        public void AddAllInPackagePath(string packagePath, string packageName)
         {
             if (string.IsNullOrEmpty(packagePath))
             {
@@ -64,23 +69,41 @@ namespace Iviz.MsgsGen
 
             packages.Add(packageName);
 
-            List<string> msgs = new List<string>();
-            CollectMsgFiles(packagePath, msgs);
+            List<string> msgFullPaths = new List<string>();
+            CollectMsgFiles(packagePath, msgFullPaths);
 
-            foreach (string msg in msgs)
+            foreach (string msgPath in msgFullPaths)
             {
-                ClassInfo classInfo = new ClassInfo(packageName, msg);
+                ClassInfo classInfo = new ClassInfo(packageName, msgPath);
                 messages.Add(classInfo.FullRosName, classInfo);
             }
 
-            List<string> srvs = new List<string>();
-            CollectSrvFiles(packagePath, srvs);
+            List<string> srvFullPaths = new List<string>();
+            CollectSrvFiles(packagePath, srvFullPaths);
 
-            foreach (string srv in srvs)
+            foreach (string srvPath in srvFullPaths)
             {
-                ServiceInfo classInfo = new ServiceInfo(packageName, srv);
+                ServiceInfo classInfo = new ServiceInfo(packageName, srvPath);
                 services.Add(classInfo.FullRosName, classInfo);
             }
+
+            List<string> actionFullPaths = new List<string>();
+            CollectActionFiles(packagePath, actionFullPaths);
+            
+            foreach (string actionPath in actionFullPaths)
+            {
+                var actionClasses = ActionGenerator.GenerateFor(packageName, actionPath);
+                if (actionClasses == null)
+                {
+                    continue;
+                }
+
+                foreach (var classInfo in actionClasses)
+                {
+                    messages[classInfo.FullRosName] = classInfo;
+                }
+            }            
+            
         }
 
         internal bool TryGet(string name, string package, out ClassInfo classInfo)

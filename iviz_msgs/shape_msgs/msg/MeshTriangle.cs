@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ShapeMsgs
 {
     [DataContract (Name = "shape_msgs/MeshTriangle")]
-    public sealed class MeshTriangle : IMessage, IDeserializable<MeshTriangle>
+    public sealed class MeshTriangle : IDeserializable<MeshTriangle>, IMessage
     {
         // Definition of a triangle's vertices
         [DataMember (Name = "vertex_indices")] public uint[/*3*/] VertexIndices { get; set; }
@@ -49,7 +49,10 @@ namespace Iviz.Msgs.ShapeMsgs
             if (VertexIndices.Length != 3) throw new System.IndexOutOfRangeException();
         }
     
-        public int RosMessageLength => 12;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 12;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     

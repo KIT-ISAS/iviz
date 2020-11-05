@@ -57,7 +57,10 @@ namespace Iviz.Msgs.GeometryMsgs
         {
         }
     
-        public readonly int RosMessageLength => 24;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 24;
+        
+        public readonly int RosMessageLength => RosFixedMessageLength;
     
         public readonly string RosType => RosMessageType;
     

@@ -80,7 +80,10 @@ namespace Iviz.Msgs.OctomapMsgs
         {
         }
     
-        public int RosMessageLength => 0;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 0;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     }
 
     public sealed class GetOctomapResponse : IResponse, IDeserializable<GetOctomapResponse>
@@ -126,6 +129,13 @@ namespace Iviz.Msgs.OctomapMsgs
             Map.RosValidate();
         }
     
-        public int RosMessageLength => -2;
+        public int RosMessageLength
+        {
+            get {
+                int size = 0;
+                size += Map.RosMessageLength;
+                return size;
+            }
+        }
     }
 }

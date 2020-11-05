@@ -106,6 +106,13 @@ namespace Iviz.Msgs.RosbridgeLibrary
             if (@string is null) throw new System.NullReferenceException(nameof(@string));
         }
     
-        public int RosMessageLength => -2;
+        public int RosMessageLength
+        {
+            get {
+                int size = 13;
+                size += BuiltIns.UTF8.GetByteCount(@string);
+                return size;
+            }
+        }
     }
 }

@@ -95,7 +95,10 @@ namespace Iviz.Msgs.OctomapMsgs
         {
         }
     
-        public int RosMessageLength => 48;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 48;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     }
 
     public sealed class BoundingBoxQueryResponse : IResponse, IDeserializable<BoundingBoxQueryResponse>
@@ -129,6 +132,9 @@ namespace Iviz.Msgs.OctomapMsgs
         {
         }
     
-        public int RosMessageLength => -2;
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 0;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     }
 }
