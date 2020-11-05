@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 
@@ -22,7 +23,9 @@ namespace Iviz.XmlRpc
         readonly TcpListener listener;
 
         bool disposed;
-        bool keepGoing;
+        
+        readonly CancellationTokenSource runningTs = new CancellationTokenSource();
+        bool KeepRunning => !runningTs.IsCancellationRequested;
         
         /// <summary>
         /// Creates a new HTTP listener that listens on the given port.
@@ -52,21 +55,21 @@ namespace Iviz.XmlRpc
 
             disposed = true;
 
-            if (!keepGoing)
+            if (!KeepRunning)
             {
                 // not started, dispose directly
                 listener.Stop();
                 return;
             }
 
-            keepGoing = false;
+            runningTs.Cancel();
 
             // now we throw everything at the listener to try to leave AcceptTcpClientAsync()
 
             // first we enqueue a connection
             using (TcpClient client = new TcpClient())
             {
-                Logger.LogDebug($"{this}: Using fake client");
+                //Logger.LogDebug($"{this}: Using fake client");
                 client.Connect(IPAddress.Loopback, LocalPort);
             }
 
@@ -78,7 +81,7 @@ namespace Iviz.XmlRpc
             listener.Server.Close();
 
             // and hope that this is enough to leave AcceptTcpClientAsync()
-            Logger.LogDebug($"{this}: Dispose out");
+            Logger.LogDebug($"{this}: Listener dispose out");
         }
 
         /// <summary>
@@ -103,15 +106,14 @@ namespace Iviz.XmlRpc
                 throw new ArgumentNullException(nameof(handler));
             }
 
-            keepGoing = true;
-            while (keepGoing)
+            while (KeepRunning)
                 try
                 {
                     //Logger.LogDebug($"{this}: Accepting request...");
                     TcpClient client = await listener.AcceptTcpClientAsync().Caf();
                     //Logger.LogDebug($"{this}: Accept Out!");
 
-                    if (!keepGoing)
+                    if (!KeepRunning)
                     {
                         client.Dispose();
                         break;

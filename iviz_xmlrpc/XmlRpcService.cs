@@ -45,6 +45,10 @@ namespace Iviz.XmlRpc
         public ParseException(string message) : base(message)
         {
         }
+        
+        public ParseException(string message, Exception inner) : base(message, inner)
+        {
+        }        
     }
 
     /// <summary>
@@ -67,7 +71,7 @@ namespace Iviz.XmlRpc
             }
         }
 
-        static object? Parse(XmlNode value)
+        static object Parse(XmlNode value)
         {
             Assert(value.Name, "value");
             if (!value.HasChildNodes)
@@ -87,12 +91,12 @@ namespace Iviz.XmlRpc
                     return double.TryParse(primitive.InnerText, NumberStyles.Number, BuiltIns.Culture,
                         out double @double)
                         ? (object) @double
-                        : null;
+                        : throw new ParseException($"Could not parse '{primitive.InnerText}' as double!");
                 case "i4":
                 case "int":
                     return int.TryParse(primitive.InnerText, NumberStyles.Number, BuiltIns.Culture, out int @int)
                         ? (object) @int
-                        : null;
+                        : throw new ParseException($"Could not parse '{primitive.InnerText}' as integer!");
                 case "boolean":
                     return primitive.InnerText == "1";
                 case "string":
@@ -117,10 +121,9 @@ namespace Iviz.XmlRpc
                     {
                         return Convert.FromBase64String(primitive.InnerText);
                     }
-                    catch (FormatException)
+                    catch (FormatException e) 
                     {
-                        Logger.Log("XmlRpc.Service: Failed to parse base64 parameter");
-                        return null;
+                        throw new ParseException($"Could not parse '{primitive.InnerText}' as base64!", e);
                     }
                 case "struct":
                     List<(string, object)> structValue = new List<(string, object)>();
@@ -159,8 +162,7 @@ namespace Iviz.XmlRpc
 
                     return structValue;
                 default:
-                    Logger.Log("XmlRpc.Service: Parameter of unknown type");
-                    return null;
+                    throw new ParseException($"Could not parse type '{primitive.Name}'");
             }
         }
 
@@ -184,11 +186,11 @@ namespace Iviz.XmlRpc
             return buffer.ToString();
         }
 
-        static object? ProcessResponse(string inData)
+        static object ProcessResponse(string inData)
         {
             XmlDocument document = new XmlDocument();
             document.LoadXml(inData);
-            XmlNode root = document.FirstChild;
+            XmlNode? root = document.FirstChild;
             while (root != null && root.Name != "methodResponse")
             {
                 root = root.NextSibling;
@@ -232,7 +234,7 @@ namespace Iviz.XmlRpc
         /// <param name="timeoutInMs">Timeout in milliseconds.</param>
         /// <returns>The result of the remote call.</returns>
         /// <exception cref="ArgumentNullException">Thrown if one of the arguments is null.</exception>
-        public static async Task<object?> MethodCallAsync(Uri remoteUri, Uri callerUri, string method,
+        public static async Task<object> MethodCallAsync(Uri remoteUri, Uri callerUri, string method,
             IEnumerable<Arg> args, int timeoutInMs = 2000)
         {
             if (remoteUri is null) { throw new ArgumentNullException(nameof(remoteUri)); }
@@ -263,7 +265,7 @@ namespace Iviz.XmlRpc
         /// <param name="timeoutInMs">Timeout in milliseconds.</param>
         /// <returns>The result of the remote call.</returns>
         /// <exception cref="ArgumentNullException">Thrown if one of the arguments is null.</exception>        
-        public static object? MethodCall(Uri remoteUri, Uri callerUri, string method, IEnumerable<Arg> args,
+        public static object MethodCall(Uri remoteUri, Uri callerUri, string method, IEnumerable<Arg> args,
             int timeoutInMs = 2000)
         {
             if (remoteUri is null) { throw new ArgumentNullException(nameof(remoteUri)); }

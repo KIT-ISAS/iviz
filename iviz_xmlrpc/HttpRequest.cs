@@ -1,10 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Net.Sockets;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading.Tasks;
 using Iviz.Msgs;
-using Iviz.Msgs.StdMsgs;
 
 namespace Iviz.XmlRpc
 {
@@ -29,7 +29,8 @@ namespace Iviz.XmlRpc
             int port = uri.Port;
 
             Task task = client.ConnectAsync(hostname, port);
-            if (!task.Wait(timeoutInMs) || !task.RanToCompletion())
+            
+            if (!WaitAndUnwrapException(task, timeoutInMs) || !task.RanToCompletion())
             {
                 throw new TimeoutException($"HttpRequest: Host '{hostname}' timed out", task.Exception);
             }
@@ -146,5 +147,23 @@ namespace Iviz.XmlRpc
             disposed = true;
             client?.Close();
         }
+        
+        static bool WaitAndUnwrapException(Task task, int timeoutInMs)
+        {
+            try
+            {
+                return task.Wait(timeoutInMs);
+            }
+            catch (AggregateException ex)
+            {
+                throw PrepareForRethrow(ex.InnerException!);
+            }
+        }
+        
+        static Exception PrepareForRethrow(Exception exception)
+        {
+            ExceptionDispatchInfo.Capture(exception).Throw();
+            return exception;
+        }        
     }
 }
