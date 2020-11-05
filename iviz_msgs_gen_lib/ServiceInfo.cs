@@ -60,7 +60,7 @@ namespace Iviz.MsgsGen
                 fixedSizeReq = ClassInfo.DoCheckFixedSize(variablesReq);
             }
 
-            if (fixedSizeResp != ClassInfo.UninitializedSize)
+            if (fixedSizeResp == ClassInfo.UninitializedSize)
             {
                 fixedSizeResp = ClassInfo.DoCheckFixedSize(variablesResp);
             }
@@ -112,6 +112,7 @@ namespace Iviz.MsgsGen
                 lines.Add($"    {entry}");
             }
 
+            
             lines.Add("");
             IEnumerable<string> lengthProperty = ClassInfo.CreateLengthProperty(variables, fixedSize, false);
             foreach (string entry in lengthProperty)
