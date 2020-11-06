@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
@@ -8,8 +9,8 @@ namespace Iviz.Roslib.XmlRpc
 {
     internal sealed class NodeClient
     {
-        static readonly string[][] SupportedProtocols = {new[] {"TCPROS"}};        
-        
+        static readonly string[][] SupportedProtocols = {new[] {"TCPROS"}};
+
         public string CallerId { get; }
         public Uri CallerUri { get; }
         public int TimeoutInMs { get; }
@@ -26,46 +27,46 @@ namespace Iviz.Roslib.XmlRpc
         public RequestTopicResponse RequestTopic(string topic)
         {
             Arg[] args = {CallerId, topic, SupportedProtocols};
-            object[] response = MethodCall("requestTopic", args);
+            object[]? response = MethodCall("requestTopic", args);
             return new RequestTopicResponse(response);
         }
-        
+
         public async Task<RequestTopicResponse> RequestTopicAsync(string topic)
         {
             Arg[] args = {CallerId, topic, SupportedProtocols};
-            object[] response = await MethodCallAsync("requestTopic", args).Caf();
+            object[]? response = await MethodCallAsync("requestTopic", args).Caf();
             return new RequestTopicResponse(response);
-        }        
+        }
 
         public GetMasterUriResponse GetMasterUri()
         {
             Arg[] args = {CallerId};
-            object[] response = MethodCall("getMasterUri", args);
+            object[]? response = MethodCall("getMasterUri", args);
             return new GetMasterUriResponse(response);
         }
 
         public async Task<GetMasterUriResponse> GetMasterUriAsync()
         {
             Arg[] args = {CallerId};
-            object[] response = await MethodCallAsync("getMasterUri", args).Caf();
+            object[]? response = await MethodCallAsync("getMasterUri", args).Caf();
             return new GetMasterUriResponse(response);
         }
 
         public GetPidResponse GetPid()
         {
             Arg[] args = {CallerId};
-            object[] response = MethodCall("getPid", args);
+            object[]? response = MethodCall("getPid", args);
             return new GetPidResponse(response);
         }
 
         public async Task<GetPidResponse> GetPidAsync()
         {
             Arg[] args = {CallerId};
-            object[] response = await MethodCallAsync("getPid", args).Caf();
+            object[]? response = await MethodCallAsync("getPid", args).Caf();
             return new GetPidResponse(response);
         }
 
-        object[] MethodCall(string function, IEnumerable<Arg> args)
+        object[]? MethodCall(string function, IEnumerable<Arg> args)
         {
             object tmp = XmlRpcService.MethodCall(Uri, CallerUri, function, args, TimeoutInMs);
             if (tmp is object[] result)
@@ -76,8 +77,8 @@ namespace Iviz.Roslib.XmlRpc
             Logger.Log($"Rpc Response: Expected type object[], got {tmp?.GetType().Name}");
             return null;
         }
-        
-        async Task<object[]> MethodCallAsync(string function, IEnumerable<Arg> args)
+
+        async Task<object[]?> MethodCallAsync(string function, IEnumerable<Arg> args)
         {
             object tmp = await XmlRpcService.MethodCallAsync(Uri, CallerUri, function, args, TimeoutInMs).Caf();
             if (tmp is object[] result)
@@ -87,18 +88,14 @@ namespace Iviz.Roslib.XmlRpc
 
             Logger.Log($"Rpc Response: Expected type object[], got {tmp?.GetType().Name}");
             return null;
-        }        
-        
-        
+        }
+
+
         public class ProtocolResponse
         {
-            public string Type { get; } = "";
-            public string Hostname { get; } = "";
+            public string Type { get; }
+            public string Hostname { get; }
             public int Port { get; }
-
-            public ProtocolResponse()
-            {
-            }
 
             public ProtocolResponse(string type, string hostname, int port)
             {
@@ -110,61 +107,105 @@ namespace Iviz.Roslib.XmlRpc
 
         public class RequestTopicResponse : BaseResponse
         {
-            public ProtocolResponse Protocol { get; }
+            public ProtocolResponse? Protocol { get; }
 
-            public RequestTopicResponse(object[] a) : base(a)
+            public RequestTopicResponse(object[]? a)
             {
-                if (!IsValid || !EnsureSize(a, 3))
+                if (a is null ||
+                    a.Length != 3 ||
+                    !(a[0] is int code) ||
+                    !(a[1] is string statusMessage) ||
+                    !(a[2] is object[] protocols))
                 {
-                    Protocol = new ProtocolResponse();
+                    Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                    Code = StatusCode.Error;
+                    hasParseError = true;
                     return;
                 }
 
-                if (a.Length == 0)
+                Code = code;
+                StatusMessage = statusMessage;
+
+                if (Code == StatusCode.Error)
                 {
-                    Protocol = new ProtocolResponse();
+                    return;
                 }
-                else
+
+                if (protocols.Length == 0)
                 {
-                    if (a[2] is object[] tmp)
+                    Code = StatusCode.Error;
+                    return;
+                }
+
+                switch (protocols[0])
+                {
+                    case string tmpType:
                     {
-                        a = tmp;
-                        if (!EnsureSize(a, 3))
+                        if (protocols.Length < 3 ||
+                            !(protocols[1] is string hostname) ||
+                            !(protocols[2] is int port))
                         {
-                            Protocol = new ProtocolResponse();
+                            Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                            Code = StatusCode.Error;
+                            hasParseError = true;
                             return;
                         }
+
+                        Protocol = new ProtocolResponse(tmpType, hostname, port);
+                        break;
                     }
-                    Protocol = new ProtocolResponse
-                    (
-                        type: Cast<string>(a[0]),
-                        hostname: Cast<string>(a[1]),
-                        port: Cast<int>(a[2])
-                    );
+                    case object[] innerProtocols:
+                    {
+                        if (innerProtocols.Length < 3 ||
+                            !(innerProtocols[0] is string type) ||
+                            !(innerProtocols[1] is string hostname) ||
+                            !(innerProtocols[2] is int port))
+                        {
+                            Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                            Code = StatusCode.Error;
+                            hasParseError = true;
+                            return;
+                        }
+
+                        Protocol = new ProtocolResponse(type, hostname, port);
+                        break;
+                    }
+                    default:
+                        Code = StatusCode.Error;
+                        hasParseError = true;
+                        return;
                 }
             }
         }
 
         public class GetMasterUriResponse : BaseResponse
         {
-            public Uri Uri { get; }
+            public Uri? Uri { get; }
 
-            public GetMasterUriResponse(object[] a) : base(a)
+            public GetMasterUriResponse(object[]? a)
             {
-                if (hasParseError || Code != StatusCode.Success)
+                if (a is null ||
+                    a.Length != 3 ||
+                    !(a[0] is int code) ||
+                    !(a[1] is string statusMessage) ||
+                    !(a[2] is string uriStr) ||
+                    !Uri.TryCreate(uriStr, UriKind.Absolute, out Uri? uri))
+                {
+                    Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                    Code = StatusCode.Error;
+                    hasParseError = true;
+                    return;
+                }
+
+                Code = code;
+                StatusMessage = statusMessage;
+
+                if (Code == StatusCode.Error)
                 {
                     return;
                 }
-                if (Uri.TryCreate((string)a[2], UriKind.Absolute, out Uri uri))
-                {
-                    Uri = uri;
-                }
-                else
-                {
-                    Logger.Log($"RpcNodeClient: Failed to parse GetUriResponse uri: " + a[2]);
-                    hasParseError = true;
-                    Uri = null;
-                }
+
+                Uri = uri;
             }
         }
 
@@ -172,15 +213,30 @@ namespace Iviz.Roslib.XmlRpc
         {
             public int Pid { get; }
 
-            public GetPidResponse(object[] a) : base(a)
+            public GetPidResponse(object[]? a)
             {
-                if (!IsValid || !EnsureSize(a, 3))
+                if (a is null ||
+                    a.Length != 3 ||
+                    !(a[0] is int code) ||
+                    !(a[1] is string statusMessage) ||
+                    !(a[2] is int pid))
+                {
+                    Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                    Code = StatusCode.Error;
+                    hasParseError = true;
+                    return;
+                }
+
+                Code = code;
+                StatusMessage = statusMessage;
+
+                if (Code == StatusCode.Error)
                 {
                     return;
                 }
-                Pid = Cast<int>(a[2]);
+                
+                Pid = pid;
             }
         }
-        
     }
 }

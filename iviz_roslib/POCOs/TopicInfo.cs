@@ -36,9 +36,9 @@ namespace Iviz.Roslib
         /// <summary>
         /// Instance of the message used to generate others of the same type.
         /// </summary>
-        public IDeserializable<T> Generator { get; }
+        public IDeserializable<T>? Generator { get; }
 
-        TopicInfo(string messageDefinition, string callerId, string topic, string md5Sum, string type, IDeserializable<T> generator)
+        TopicInfo(string messageDefinition, string callerId, string topic, string md5Sum, string type, IDeserializable<T>? generator)
         {
             MessageDefinition = messageDefinition;
             CallerId = callerId;
@@ -48,7 +48,7 @@ namespace Iviz.Roslib
             Generator = generator;
         }
 
-        public TopicInfo(string callerId, string topic, IDeserializable<T> generator = null)
+        public TopicInfo(string callerId, string topic, IDeserializable<T>? generator = null)
         : this(
                 BuiltIns.DecompressDependency(typeof(T)),
                 callerId, topic,

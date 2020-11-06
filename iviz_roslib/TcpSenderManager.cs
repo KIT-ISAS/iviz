@@ -16,17 +16,17 @@ namespace Iviz.Roslib
         readonly ConcurrentDictionary<string, TcpSenderAsync<T>> connectionsByCallerId =
             new ConcurrentDictionary<string, TcpSenderAsync<T>>();
 
+        readonly RosPublisher<T> publisher;
         readonly TopicInfo<T> topicInfo;
         int maxQueueSizeInBytes;
         
         bool latching;
         bool hasLatchedMessage;
-        T latchedMessage;
+        T latchedMessage = default!;
 
-        public RosPublisher<T> Publisher { set; private get; }
-
-        public TcpSenderManager(TopicInfo<T> topicInfo)
+        public TcpSenderManager(RosPublisher<T> publisher, TopicInfo<T> topicInfo)
         {
+            this.publisher = publisher;
             this.topicInfo = topicInfo;
         }
 
@@ -75,7 +75,7 @@ namespace Iviz.Roslib
             }
         }
 
-        public Endpoint CreateConnectionRpc(string remoteCallerId)
+        public Endpoint? CreateConnectionRpc(string remoteCallerId)
         {
             Logger.LogDebug($"{this}: '{remoteCallerId}' is requesting {Topic}");
             TcpSenderAsync<T> newSender = new TcpSenderAsync<T>(remoteCallerId, topicInfo, Latching);
@@ -87,9 +87,22 @@ namespace Iviz.Roslib
 
                 connectionsByCallerId.AddOrUpdate(remoteCallerId, newSender, (_, oldSender) =>
                 {
+                    // in case of double requests, we kill the old connection
+                    // this happens if our uri is set multiple times because a previous client did not
+                    // shut down gracefully
+                    
+                    /*
+                    if (oldSender.IsAlive)
+                    {
+                        Logger.LogDebug(
+                            $"{this}: '{oldSender.RemoteCallerId}' duplicate.\n--Retaining \t{oldSender}\n--Killing \t{newSender}");
+                        newSender.Dispose();
+                        return oldSender;
+                    }
+                    */
+
                     Logger.LogDebug(
-                        $"{this}: '{oldSender.RemoteCallerId}' duplicate. Killing {oldSender}");
-                    oldSender.Dispose();
+                        $"{this}: '{oldSender.RemoteCallerId}' duplicate.\n--Retaining \t{newSender}\n--Killing \t{oldSender}");
                     return newSender;
                 });
 
@@ -100,8 +113,9 @@ namespace Iviz.Roslib
                 // should last only a couple of ms
                 if (!managerSignal.Wait(NewSenderTimeoutInMs))
                 {
-                    // shouldn't happen
-                    Logger.Log($"{this}: Sender start timeout?");
+                    // or maybe not. either the requester took too long, or did a double request,
+                    // and this is the one that got killed
+                    Logger.Log($"{this}: Sender start timed out!");
                 }
             }
 
@@ -111,10 +125,9 @@ namespace Iviz.Roslib
             }
 
             newSender.MaxQueueSizeInBytes = MaxQueueSizeInBytes;
-            Publisher.RaiseNumConnectionsChanged();
+            publisher.RaiseNumConnectionsChanged();
             
-            //Logger.LogDebug($"{this}: Sending '{endPoint}' to {remoteCallerId}");
-
+            // return null if this connection got killed, which gets translated later as an error response
             return !newSender.IsAlive ? null : endPoint;
         }
 
@@ -133,7 +146,7 @@ namespace Iviz.Roslib
             var subscribersChanged = toDelete.Length != 0;
             if (subscribersChanged)
             {
-                Publisher.RaiseNumConnectionsChanged();
+                publisher.RaiseNumConnectionsChanged();
             }
         }
 

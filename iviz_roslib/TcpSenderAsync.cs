@@ -44,18 +44,18 @@ namespace Iviz.Roslib
         int bytesDropped;
         int bytesSent;
         bool disposed;
-        Endpoint endpoint;
-
-        Endpoint remoteEndpoint;
+        
+        Endpoint? endpoint;
+        Endpoint? remoteEndpoint;
 
         //volatile bool keepRunning;
         int numDropped;
         int numSent;
         SenderStatus status;
-        NetworkStream stream;
-        Task task;
-        TcpClient tcpClient;
-        TcpListener listener;
+        NetworkStream? stream;
+        Task? task;
+        TcpClient? tcpClient;
+        TcpListener? listener;
 
         byte[] writeBuffer = new byte[BufferSizeIncrease];
 
@@ -139,13 +139,13 @@ namespace Iviz.Roslib
             return contents;
         }
 
-        async Task<byte[]> ReceiveHeader()
+        async Task<byte[]?> ReceiveHeader()
         {
             byte[] lengthBuffer = new byte[4];
             int numRead = 0;
             while (numRead < 4)
             {
-                int readNow = await stream.ReadAsync(lengthBuffer, numRead, 4 - numRead).Caf();
+                int readNow = await stream!.ReadAsync(lengthBuffer, numRead, 4 - numRead).Caf();
                 if (readNow == 0)
                 {
                     return null;
@@ -159,7 +159,7 @@ namespace Iviz.Roslib
             numRead = 0;
             while (numRead < length)
             {
-                int readNow = await stream.ReadAsync(readBuffer, numRead, length - numRead).Caf();
+                int readNow = await stream!.ReadAsync(readBuffer, numRead, length - numRead).Caf();
                 if (readNow == 0)
                 {
                     return null;
@@ -171,7 +171,7 @@ namespace Iviz.Roslib
             return readBuffer;
         }
 
-        async Task SendResponseHeader(string errorMessage)
+        async Task SendResponseHeader(string? errorMessage)
         {
             string[] contents;
             if (errorMessage != null)
@@ -211,10 +211,10 @@ namespace Iviz.Roslib
                 }
             }
 
-            await stream.WriteAsync(array, 0, array.Length).Caf();
+            await stream!.WriteAsync(array, 0, array.Length).Caf();
         }
 
-        string ProcessRemoteHeader(List<string> fields)
+        string? ProcessRemoteHeader(List<string> fields)
         {
             if (fields.Count < 5)
             {
@@ -234,19 +234,19 @@ namespace Iviz.Roslib
                 values[key] = field.Substring(index + 1);
             }
 
-            if (!values.TryGetValue("callerid", out string receivedId) || receivedId != RemoteCallerId)
+            if (!values.TryGetValue("callerid", out string? receivedId) || receivedId != RemoteCallerId)
             {
                 return
                     $"error=Expected callerid '{RemoteCallerId}' but received instead '{receivedId}', closing connection";
             }
 
-            if (!values.TryGetValue("topic", out string receivedTopic) || receivedTopic != topicInfo.Topic)
+            if (!values.TryGetValue("topic", out string? receivedTopic) || receivedTopic != topicInfo.Topic)
             {
                 return
                     $"error=Expected topic '{topicInfo.Topic}' but received instead '{receivedTopic}', closing connection";
             }
 
-            if (!values.TryGetValue("type", out string receivedType) || receivedType != topicInfo.Type)
+            if (!values.TryGetValue("type", out string? receivedType) || receivedType != topicInfo.Type)
             {
                 if (receivedType == "*")
                 {
@@ -260,7 +260,7 @@ namespace Iviz.Roslib
                 }
             }
 
-            if (!values.TryGetValue("md5sum", out string receivedMd5Sum) || receivedMd5Sum != topicInfo.Md5Sum)
+            if (!values.TryGetValue("md5sum", out string? receivedMd5Sum) || receivedMd5Sum != topicInfo.Md5Sum)
             {
                 if (receivedMd5Sum == "*")
                 {
@@ -274,9 +274,9 @@ namespace Iviz.Roslib
                 }
             }
 
-            if (values.TryGetValue("tcp_nodelay", out string receivedNoDelay) && receivedNoDelay == "1")
+            if (values.TryGetValue("tcp_nodelay", out string? receivedNoDelay) && receivedNoDelay == "1")
             {
-                tcpClient.NoDelay = true;
+                tcpClient!.NoDelay = true;
                 Logger.LogDebug($"{this}: requested tcp_nodelay");
             }
 
@@ -285,15 +285,14 @@ namespace Iviz.Roslib
 
         async Task<bool> ProcessHandshake()
         {
-            byte[] readBuffer = await ReceiveHeader().Caf();
+            byte[]? readBuffer = await ReceiveHeader().Caf();
             if (readBuffer == null)
             {
                 throw new TimeoutException("Connection closed during handshake.");
             }
 
             List<string> fields = ParseHeader(readBuffer);
-            string errorMessage = ProcessRemoteHeader(fields);
-
+            string? errorMessage = ProcessRemoteHeader(fields);
             if (errorMessage != null)
             {
                 Logger.Log($"{this}: Failed handshake\n{errorMessage}");
@@ -304,7 +303,7 @@ namespace Iviz.Roslib
             return errorMessage == null;
         }
 
-        async Task Run(int timeoutInMs, SemaphoreSlim managerSignal)
+        async Task Run(int timeoutInMs, SemaphoreSlim? managerSignal)
         {
             //Logger.LogDebug($"{this}: initialized!");
             status = SenderStatus.Waiting;
@@ -314,7 +313,7 @@ namespace Iviz.Roslib
             {
                 try
                 {
-                    Task<TcpClient> connectionTask = listener.AcceptTcpClientAsync();
+                    Task<TcpClient> connectionTask = listener!.AcceptTcpClientAsync();
                     //Logger.LogDebug($"{this}: Accepting...");
 
                     try
@@ -454,8 +453,8 @@ namespace Iviz.Roslib
                     }
 
                     uint sendLength = Buffer.Serialize(message, writeBuffer);
-                    await stream.WriteAsync(ToLengthArray(sendLength), 0, 4, runningTs.Token).Caf();
-                    await stream.WriteAsync(writeBuffer, 0, (int) sendLength, runningTs.Token).Caf();
+                    await stream!.WriteAsync(ToLengthArray(sendLength), 0, 4, runningTs.Token).Caf();
+                    await stream!.WriteAsync(writeBuffer, 0, (int) sendLength, runningTs.Token).Caf();
 
                     numSent++;
                     bytesSent += (int) sendLength + 4;
@@ -508,7 +507,7 @@ namespace Iviz.Roslib
 
         public override string ToString()
         {
-            return $"[TcpSender :{endpoint.Port} '{Topic}' >>'{RemoteCallerId}']";
+            return $"[TcpSender :{endpoint?.Port ?? -1} '{Topic}' >>'{RemoteCallerId}']";
         }
     }
 }

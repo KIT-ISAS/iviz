@@ -17,36 +17,37 @@ namespace Iviz.Roslib.Actionlib
     }
 
     public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable
+#if !NETSTANDARD2_0
+        , IAsyncDisposable
+#endif
         where TAGoal : IActionGoal, new()
         where TAFeedback : IActionFeedback, IDeserializable<TAFeedback>, new()
         where TAResult : IActionResult, IDeserializable<TAResult>, new()
     {
-        readonly string actionName;
-        readonly RosClient client;
         readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
-        RosPublisher<GoalID> cancelPublisher;
 
-        string cancelPublisherId;
+        string? actionName;
+        string? callerId;
         bool disposed;
-        RosSubscriberChannel<TAFeedback> feedbackSubscriber;
-        GoalID goalId;
 
-        RosPublisher<TAGoal> goalPublisher;
-        string goalPublisherId;
-        RosSubscriberChannel<TAResult> resultSubscriber;
+        RosSubscriberChannelReader<TAFeedback>? feedbackSubscriber;
+        RosSubscriberChannelReader<TAResult>? resultSubscriber;
+        RosPublisher<GoalID>? cancelPublisher;
+        RosPublisher<TAGoal>? goalPublisher;
+        string? cancelPublisherId;
+        string? goalPublisherId;
 
         RosActionClientState state = RosActionClientState.Done;
-        CombinedSubscriberQueue subscriberQueue;
+        MergedChannelReader? channelReader;
+        GoalID? goalId;
 
-        public RosActionClient(RosClient client, string actionName)
+        public RosActionClient()
         {
-            if (!RosClient.IsValidResourceName(actionName))
-            {
-                throw new ArgumentException($"Action name '{actionName}' is not a valid resource name");
-            }
+        }
 
-            this.actionName = actionName;
-            this.client = client ?? throw new ArgumentNullException(nameof(client));
+        public RosActionClient(RosClient client, string newActionName)
+        {
+            Start(client, newActionName);
         }
 
         public RosActionClientState State
@@ -69,57 +70,99 @@ namespace Iviz.Roslib.Actionlib
             }
 
             disposed = true;
+
+            if (goalPublisher == null)
+            {
+                return; // not started
+            }
+
             tokenSource.Cancel();
-            goalPublisher.Unadvertise(goalPublisherId);
-            cancelPublisher.Unadvertise(cancelPublisherId);
-            feedbackSubscriber.Dispose();
-            resultSubscriber.Dispose();
+            goalPublisher.Unadvertise(goalPublisherId!);
+            cancelPublisher!.Unadvertise(cancelPublisherId!);
+            feedbackSubscriber!.Dispose();
+            resultSubscriber!.Dispose();
         }
 
-        public event Action<RosActionClientState /* old */, RosActionClientState /* new */> StateChanged;
+#if !NETSTANDARD2_0
+        public async ValueTask DisposeAsync()
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+
+            if (goalPublisher == null)
+            {
+                return; // not started
+            }
+
+            tokenSource.Cancel();
+            await goalPublisher.UnadvertiseAsync(goalPublisherId!);
+            await cancelPublisher!.UnadvertiseAsync(cancelPublisherId!);
+            await feedbackSubscriber!.DisposeAsync();
+            await resultSubscriber!.DisposeAsync();
+        }
+#endif
+
+        public event Action<RosActionClientState /* old */, RosActionClientState /* new */>? StateChanged;
 
         public override string ToString()
         {
             return $"[RosActionClient {actionName} state={State}]]";
         }
 
-        public void Start()
+        void ValidateStart(RosClient client, string newActionName)
         {
-            goalPublisherId = client.Advertise($"/{actionName}/goal", out goalPublisher);
-            cancelPublisherId = client.Advertise($"/{actionName}/cancel", out cancelPublisher);
-            feedbackSubscriber = new RosSubscriberChannel<TAFeedback>(client, $"/{actionName}/feedback");
-            resultSubscriber = new RosSubscriberChannel<TAResult>(client, $"/{actionName}/result");
-            subscriberQueue =
-                new CombinedSubscriberQueue(new ISubscriberQueue[] {feedbackSubscriber, resultSubscriber});
+            if (client == null)
+            {
+                throw new ArgumentNullException(nameof(client));
+            }
+
+            if (!RosClient.IsValidResourceName(newActionName))
+            {
+                throw new ArgumentException($"Action name '{newActionName}' is not a valid resource name");
+            }
+
+            if (actionName != null)
+            {
+                throw new InvalidOperationException("Action client has already been started!");
+            }
+
+            actionName = newActionName;
+            callerId = client.CallerId;
         }
 
-        public async Task StartAsync()
+        public void Start(RosClient client, string newActionName)
         {
-            (goalPublisherId, goalPublisher) = await client.AdvertiseAsync<TAGoal>($"/{actionName}/goal");
-            (cancelPublisherId, cancelPublisher) = await client.AdvertiseAsync<GoalID>($"/{actionName}/cancel");
+            ValidateStart(client, newActionName);
 
-            feedbackSubscriber = new RosSubscriberChannel<TAFeedback>();
-            resultSubscriber = new RosSubscriberChannel<TAResult>();
+            goalPublisherId = client.Advertise($"/{newActionName}/goal", out goalPublisher);
+            cancelPublisherId = client.Advertise($"/{newActionName}/cancel", out cancelPublisher);
+            feedbackSubscriber = new RosSubscriberChannelReader<TAFeedback>(client, $"/{newActionName}/feedback");
+            resultSubscriber = new RosSubscriberChannelReader<TAResult>(client, $"/{newActionName}/result");
+            channelReader = new MergedChannelReader(feedbackSubscriber, resultSubscriber);
+        }
 
-            await feedbackSubscriber.StartAsync(client, $"/{actionName}/feedback");
-            await resultSubscriber.StartAsync(client, $"/{actionName}/result");
+        public async Task StartAsync(RosClient client, string newActionName)
+        {
+            ValidateStart(client, newActionName);
 
-            subscriberQueue =
-                new CombinedSubscriberQueue(new ISubscriberQueue[] {feedbackSubscriber, resultSubscriber});
+            (goalPublisherId, goalPublisher) = await client.AdvertiseAsync<TAGoal>($"/{newActionName}/goal");
+            (cancelPublisherId, cancelPublisher) = await client.AdvertiseAsync<GoalID>($"/{newActionName}/cancel");
+
+            feedbackSubscriber = new RosSubscriberChannelReader<TAFeedback>();
+            resultSubscriber = new RosSubscriberChannelReader<TAResult>();
+
+            await feedbackSubscriber.StartAsync(client, $"/{newActionName}/feedback");
+            await resultSubscriber.StartAsync(client, $"/{newActionName}/result");
+
+            channelReader = new MergedChannelReader(feedbackSubscriber, resultSubscriber);
         }
 
         // ---------------------------------------------------------------------------
-
-        void CreateGoalId()
-        {
-            time now = time.Now();
-            goalId = new GoalID
-            {
-                Id = $"{client.CallerId}#{now.ToDateTime()}",
-                Stamp = now
-            };
-        }
-
+        
         void ProcessGoalStatus(RosGoalStatus status)
         {
             switch (State)
@@ -191,7 +234,7 @@ namespace Iviz.Roslib.Actionlib
 
         public void SetGoal<TGoal>(TGoal goal) where TGoal : IGoal<TAGoal>
         {
-            if (goalPublisherId == null)
+            if (goalPublisher == null)
             {
                 throw new InvalidOperationException("Start has not been called!");
             }
@@ -201,7 +244,12 @@ namespace Iviz.Roslib.Actionlib
                 throw new ArgumentNullException(nameof(goal));
             }
 
-            CreateGoalId();
+            time now = time.Now();
+            goalId = new GoalID
+            {
+                Id = $"{callerId}#{now.ToDateTime()}",
+                Stamp = now
+            };
 
             TAGoal actionGoal = new TAGoal
             {
@@ -222,6 +270,16 @@ namespace Iviz.Roslib.Actionlib
 
         public void Cancel()
         {
+            if (cancelPublisher == null)
+            {
+                throw new InvalidOperationException("Start has not been called!!");
+            }
+
+            if (goalId == null)
+            {
+                throw new InvalidOperationException("Goal has not been set!");
+            }
+
             if (State != RosActionClientState.WaitingForGoalAck
                 && State != RosActionClientState.Pending
                 && State != RosActionClientState.Active)
@@ -241,22 +299,22 @@ namespace Iviz.Roslib.Actionlib
         }
 
         #region WaitForServer
-
-        public void WaitForServer()
-        {
-            WaitForServer(CancellationToken.None);
-        }
-
+        
         public bool WaitForServer(int timeInMs)
         {
             using CancellationTokenSource source = new CancellationTokenSource(timeInMs);
             return WaitForServer(source.Token);
         }
 
-        public bool WaitForServer(CancellationToken token)
+        public bool WaitForServer(CancellationToken token = default)
         {
             const int sleepTimeInMs = 100;
             string actionServerId = $"/{actionName}";
+
+            if (goalPublisher == null)
+            {
+                throw new InvalidOperationException("Start has not been called!");
+            }
 
             using CancellationTokenSource linkedSource =
                 CancellationTokenSource.CreateLinkedTokenSource(token, tokenSource.Token);
@@ -275,21 +333,21 @@ namespace Iviz.Roslib.Actionlib
             return false;
         }
 
-        public async Task WaitForServerAsync()
-        {
-            await WaitForServerAsync(CancellationToken.None).Caf();
-        }
-
         public async Task<bool> WaitForServerAsync(int timeInMs)
         {
             using CancellationTokenSource source = new CancellationTokenSource(timeInMs);
             return await WaitForServerAsync(source.Token).Caf();
         }
 
-        public async Task<bool> WaitForServerAsync(CancellationToken token)
+        public async Task<bool> WaitForServerAsync(CancellationToken token = default)
         {
             const int sleepTimeInMs = 100;
             string actionServerId = $"/{actionName}";
+
+            if (goalPublisher == null)
+            {
+                throw new InvalidOperationException("Start has not been called!");
+            }
 
             using CancellationTokenSource linkedSource =
                 CancellationTokenSource.CreateLinkedTokenSource(token, tokenSource.Token);
@@ -312,32 +370,27 @@ namespace Iviz.Roslib.Actionlib
 
 
         #region WaitForResult
-
-        public bool WaitForResult()
-        {
-            return WaitForResult(CancellationToken.None);
-        }
-
+        
         public bool WaitForResult(int timeInMs)
         {
             using CancellationTokenSource source = new CancellationTokenSource(timeInMs);
             return WaitForResult(source.Token);
         }
 
-        public bool WaitForResult(CancellationToken token)
+        public bool WaitForResult(CancellationToken token = default)
         {
             return WaitForResult<IFeedback<TAFeedback>, IResult<TAResult>>(token, null, null);
         }
 
-        public bool WaitForResult<TT, TU>(IProgress<TT> feedbackCallback, IProgress<TU> resultCallback)
+        public bool WaitForResult<TT, TU>(IProgress<TT>? feedbackCallback, IProgress<TU>? resultCallback)
             where TT : IFeedback<TAFeedback> where TU : IResult<TAResult>
         {
             return WaitForResult(CancellationToken.None, feedbackCallback, resultCallback);
         }
 
-        public bool WaitForResult<TT, TU>(CancellationToken token, 
-            IProgress<TT> feedbackCallback,
-            IProgress<TU> resultCallback)
+        public bool WaitForResult<TT, TU>(CancellationToken token,
+            IProgress<TT>? feedbackCallback,
+            IProgress<TU>? resultCallback)
             where TT : IFeedback<TAFeedback> where TU : IResult<TAResult>
         {
             if (goalId == null)
@@ -345,10 +398,15 @@ namespace Iviz.Roslib.Actionlib
                 throw new InvalidOperationException("Goal has not been set!");
             }
 
+            if (channelReader == null)
+            {
+                throw new InvalidOperationException("Start has not been called!");
+            }
+            
             using CancellationTokenSource linkedSource =
                 CancellationTokenSource.CreateLinkedTokenSource(token, tokenSource.Token);
 
-            foreach (IMessage msg in subscriberQueue.AsEnum(linkedSource.Token))
+            foreach (IMessage msg in channelReader.AsEnum(linkedSource.Token))
                 switch (msg)
                 {
                     case IActionFeedback<TT> actionFeedback:
@@ -385,24 +443,20 @@ namespace Iviz.Roslib.Actionlib
         #region WaitForResultAsync
 
 #if !NETSTANDARD2_0
-        public async Task<bool> WaitForResultAsync()
-        {
-            return await WaitForResultAsync(CancellationToken.None);
-        }
-
-        public async Task<bool> WaitForResultAsync(CancellationToken token)
+        public async Task<bool> WaitForResultAsync(CancellationToken token = default)
         {
             return await WaitForResultAsync<IFeedback<TAFeedback>, IResult<TAResult>>(token, null, null);
         }
 
-        public async Task<bool> WaitForResultAsync<TT, TU>(Action<TT> feedbackCallback, Action<TU> resultCallback)
+        public async Task<bool> WaitForResultAsync<TT, TU>(IProgress<TT>? feedbackCallback,
+            IProgress<TU>? resultCallback)
             where TT : IFeedback<TAFeedback> where TU : IResult<TAResult>
         {
             return await WaitForResultAsync(CancellationToken.None, feedbackCallback, resultCallback);
         }
 
-        public async Task<bool> WaitForResultAsync<TT, TU>(CancellationToken token, Action<TT> feedbackCallback,
-            Action<TU> resultCallback)
+        public async Task<bool> WaitForResultAsync<TT, TU>(CancellationToken token, IProgress<TT>? feedbackCallback,
+            IProgress<TU>? resultCallback)
             where TT : IFeedback<TAFeedback> where TU : IResult<TAResult>
         {
             if (goalId == null)
@@ -410,12 +464,17 @@ namespace Iviz.Roslib.Actionlib
                 throw new InvalidOperationException("Goal has not been set!");
             }
 
+            if (channelReader == null)
+            {
+                throw new InvalidOperationException("Start has not been called!");
+            }
+            
             using CancellationTokenSource linkedSource =
                 CancellationTokenSource.CreateLinkedTokenSource(token, tokenSource.Token);
 
             try
             {
-                await foreach (IMessage msg in subscriberQueue.AsAsyncEnum(linkedSource.Token))
+                await foreach (IMessage msg in channelReader.AsAsyncEnum(linkedSource.Token))
                     switch (msg)
                     {
                         case IActionFeedback<TT> actionFeedback:
@@ -425,7 +484,7 @@ namespace Iviz.Roslib.Actionlib
                             }
 
                             ProcessGoalStatus((RosGoalStatus) actionFeedback.Status.Status);
-                            feedbackCallback?.Invoke(actionFeedback.Feedback);
+                            feedbackCallback?.Report(actionFeedback.Feedback);
                             break;
                         case IActionResult<TU> actionResult:
                             if (!Equals(actionResult.Status.GoalId, goalId))
@@ -434,7 +493,7 @@ namespace Iviz.Roslib.Actionlib
                             }
 
                             ProcessGoalStatus((RosGoalStatus) actionResult.Status.Status);
-                            resultCallback?.Invoke(actionResult.Result);
+                            resultCallback?.Report(actionResult.Result);
                             if (State != RosActionClientState.WaitingForResult)
                             {
                                 Logger.LogDebug($"{this}: Terminated in state {State}");
@@ -462,7 +521,7 @@ namespace Iviz.Roslib.Actionlib
             (
                 RosClient client,
                 string actionName,
-                IAction<TActionGoal, TActionFeedback, TActionResult> _
+                IAction<TActionGoal, TActionFeedback, TActionResult>? _
             )
             where TActionGoal : IActionGoal, new()
             where TActionFeedback : IActionFeedback, IDeserializable<TActionFeedback>, new()

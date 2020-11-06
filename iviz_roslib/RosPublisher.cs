@@ -13,7 +13,7 @@ namespace Iviz.Roslib
     /// <summary>
     /// Interface for all ROS publishers.
     /// </summary>
-    public interface IRosPublisher
+    public interface IRosPublisher : IDisposable
     {
         /// <summary>
         /// The name of the topic.
@@ -82,8 +82,7 @@ namespace Iviz.Roslib
         /// </summary>        
         public PublisherTopicState GetState();
 
-        internal void Stop();
-        internal Endpoint RequestTopicRpc(string remoteCallerId);
+        internal Endpoint? RequestTopicRpc(string remoteCallerId);
     }
 
     /// <summary>
@@ -92,17 +91,22 @@ namespace Iviz.Roslib
     /// <typeparam name="T">Topic type</typeparam>
     public class RosPublisher<T> : IRosPublisher where T : IMessage
     {
+        readonly CancellationTokenSource aliveTokenSource = new CancellationTokenSource();
         readonly TcpSenderManager<T> manager;
         readonly List<string> ids = new List<string>();
         readonly RosClient client;
         int totalPublishers;
+        bool disposed;
 
-        readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
-
+        /// <summary>
+        /// A cancellation token that gets canceled when the publisher is disposed.
+        /// </summary>
+        public CancellationToken CancellationToken => aliveTokenSource.Token; 
+        
         /// <summary>
         /// Whether this publisher is valid.
         /// </summary>
-        bool IsAlive { get; set; }
+        public bool IsAlive => !CancellationToken.IsCancellationRequested;
 
         public string Topic => manager.Topic;
         public string TopicType => manager.TopicType;
@@ -142,15 +146,12 @@ namespace Iviz.Roslib
         /// <summary>
         /// Called when the number of subscribers has changed.
         /// </summary>        
-        public event Action<RosPublisher<T>> NumSubscribersChanged;
+        public event Action<RosPublisher<T>>? NumSubscribersChanged;
 
-        internal RosPublisher(RosClient client, TcpSenderManager<T> manager)
+        internal RosPublisher(RosClient client, TopicInfo<T> topicInfo, int timeoutInMs)
         {
             this.client = client;
-            this.manager = manager;
-            IsAlive = true;
-
-            manager.Publisher = this;
+            manager = new TcpSenderManager<T>(this, topicInfo) {TimeoutInMs = timeoutInMs};
         }
 
         internal void RaiseNumConnectionsChanged()
@@ -209,29 +210,34 @@ namespace Iviz.Roslib
                 throw new ArgumentNullException(nameof(message));
             }
 
-            message.RosValidate();
             AssertIsAlive();
+            message.RosValidate();
             manager.Publish(message);
         }
 
-        Endpoint IRosPublisher.RequestTopicRpc(string remoteCallerId)
+        Endpoint? IRosPublisher.RequestTopicRpc(string remoteCallerId)
         {
-            Endpoint localEndpoint = manager.CreateConnectionRpc(remoteCallerId);
+            Endpoint? localEndpoint = manager.CreateConnectionRpc(remoteCallerId);
             return localEndpoint == null ? null : new Endpoint(client.CallerUri.Host, localEndpoint.Port);
         }
 
-        void IRosPublisher.Stop()
+        void IDisposable.Dispose()
         {
-            Stop();
+            Dispose();
         }
-
-        void Stop()
+        
+        void Dispose()
         {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
             ids.Clear();
             manager.Stop();
             NumSubscribersChanged = null;
-            IsAlive = false;
-            tokenSource.Cancel();
+            aliveTokenSource.Cancel();
         }
 
         public string Advertise()
@@ -269,7 +275,7 @@ namespace Iviz.Roslib
 
             if (ids.Count == 0)
             {
-                Stop();
+                Dispose();
                 client.RemovePublisher(this);
             }
 
@@ -287,7 +293,7 @@ namespace Iviz.Roslib
 
             if (ids.Count == 0)
             {
-                Stop();
+                Dispose();
                 await client.RemovePublisherAsync(this).Caf();
             }
 

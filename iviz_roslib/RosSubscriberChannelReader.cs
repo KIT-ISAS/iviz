@@ -1,15 +1,16 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
 using Nito.AsyncEx;
 using Nito.AsyncEx.Synchronous;
+
 #if !NETSTANDARD2_0
 using System.Runtime.CompilerServices;
-
 #endif
 
 namespace Iviz.Roslib
@@ -19,17 +20,19 @@ namespace Iviz.Roslib
     /// in the background, and can be accessed without having to use a separate callback.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public sealed class RosSubscriberChannel<T> : IDisposable, IEnumerable<T>, ISubscriberQueue
+    public sealed class RosSubscriberChannelReader<T> : IDisposable, IEnumerable<T>, ISubscriberChannelReader
 #if !NETSTANDARD2_0
         , IAsyncDisposable
 #endif
         where T : IMessage, IDeserializable<T>, new()
     {
         readonly AsyncProducerConsumerQueue<T> messageQueue = new AsyncProducerConsumerQueue<T>();
+        CancellationTokenRegistration subscriberToken;
         bool disposed;
-        string id;
+        string? subscriberId;
+        RosSubscriber<T>? subscriber;
 
-        public RosSubscriberChannel()
+        public RosSubscriberChannelReader()
         {
         }
 
@@ -39,12 +42,10 @@ namespace Iviz.Roslib
         /// <param name="client">A connected RosClient.</param>
         /// <param name="topic">The topic to listen to.</param>
         /// <param name="requestNoDelay">Whether NO_DELAY should be requested.</param>
-        public RosSubscriberChannel(RosClient client, string topic, bool requestNoDelay = false)
+        public RosSubscriberChannelReader(RosClient client, string topic, bool requestNoDelay = false)
         {
             Start(client, topic, requestNoDelay);
         }
-
-        public RosSubscriber<T> Subscriber { get; private set; }
 
 #if !NETSTANDARD2_0
         public async ValueTask DisposeAsync()
@@ -55,17 +56,23 @@ namespace Iviz.Roslib
             }
 
             disposed = true;
+            messageQueue.CompleteAdding();
+            
+            if (subscriber == null)
+            {
+                return; // not started
+            }
 
             try
             {
-                await Subscriber.UnsubscribeAsync(id);
+                await subscriberToken.DisposeAsync();
+                await subscriber.UnsubscribeAsync(subscriberId!);
             }
             catch (Exception e)
             {
                 Logger.Log($"{this}: {e}");
             }
 
-            messageQueue.CompleteAdding();
         }
 #endif
 
@@ -77,17 +84,22 @@ namespace Iviz.Roslib
             }
 
             disposed = true;
+            messageQueue.CompleteAdding();
 
+            if (subscriber == null)
+            {
+                return; // not started
+            }            
+            
             try
             {
-                Subscriber.Unsubscribe(id);
+                subscriberToken.Dispose();
+                subscriber.Unsubscribe(subscriberId!);
             }
             catch (Exception e)
             {
                 Logger.Log($"{this}: {e}");
             }
-
-            messageQueue.CompleteAdding();
         }
 
         /// <summary>
@@ -111,12 +123,12 @@ namespace Iviz.Roslib
             return GetEnumerator();
         }
 
-        IMessage ISubscriberQueue.Read(CancellationToken token)
+        IMessage ISubscriberChannelReader.Read(CancellationToken token)
         {
             return Read(token);
         }
 
-        async Task<IMessage> ISubscriberQueue.ReadAsync(CancellationToken token)
+        async Task<IMessage> ISubscriberChannelReader.ReadAsync(CancellationToken token)
         {
             return await ReadAsync(token);
         }
@@ -135,8 +147,9 @@ namespace Iviz.Roslib
                 throw new ArgumentNullException(nameof(client));
             }
 
-            id = client.Subscribe<T>(topic, Callback, out var subscriber, requestNoDelay);
-            Subscriber = subscriber;
+            subscriberId = client.Subscribe<T>(topic, Callback, out var subscriber, requestNoDelay);
+            this.subscriber = subscriber;
+            subscriberToken = this.subscriber.CancellationToken.Register(OnSubscriberDisposed);
         }
 
         /// <summary>
@@ -155,8 +168,14 @@ namespace Iviz.Roslib
 
             var (newId, newSubscriber) = await client.SubscribeAsync<T>(topic, Callback, requestNoDelay);
 
-            id = newId;
-            Subscriber = newSubscriber;
+            subscriberId = newId;
+            subscriber = newSubscriber;
+            subscriberToken = subscriber.CancellationToken.Register(OnSubscriberDisposed);
+        }
+
+        void OnSubscriberDisposed()
+        {
+            messageQueue.CompleteAdding();
         }
 
         void Callback(T t)
@@ -169,18 +188,6 @@ namespace Iviz.Roslib
             messageQueue.Enqueue(t);
         }
 
-
-        
-        
-        /// <summary>
-        /// Waits indefinitely until a message arrives.
-        /// </summary>
-        /// <returns>False if the channel has been disposed</returns>
-        public bool WaitToRead()
-        {
-            return WaitToRead(CancellationToken.None);
-        }
-        
         /// <summary>
         /// Waits until a message arrives.
         /// </summary>
@@ -194,21 +201,13 @@ namespace Iviz.Roslib
         /// <summary>
         /// Waits until a message arrives.
         /// </summary>
+        /// <param name="token">A cancellation token that makes the function stop blocking when cancelled. If not provided, waits indefinitely.</param>
         /// <returns>False if the channel has been disposed</returns>
-        public bool WaitToRead(CancellationToken token)
+        public bool WaitToRead(CancellationToken token = default)
         {
             return messageQueue.OutputAvailable(token);
         }
-
-        /// <summary>
-        /// Waits until a message arrives.
-        /// </summary>
-        /// <returns>False if the channel has been disposed</returns>
-        public async Task<bool> WaitToReadAsync()
-        {
-            return await WaitToReadAsync(CancellationToken.None);
-        }
-
+        
         /// <summary>
         /// Waits until a message arrives.
         /// </summary>
@@ -218,35 +217,25 @@ namespace Iviz.Roslib
             using CancellationTokenSource ts = new CancellationTokenSource(timeoutInMs);
             return await WaitToReadAsync(ts.Token);
         }
-        
+
         /// <summary>
         /// Waits until a message arrives.
         /// </summary>
-        /// <param name="token">A cancellation token that makes the function stop blocking when cancelled.</param>
+        /// <param name="token">A cancellation token that makes the function stop blocking when cancelled. If not provided, waits indefinitely.</param>
         /// <returns>False if the channel has been disposed</returns>
-        /// <exception cref="OperationCanceledException">Thrown if the token is canceled</exception>
-        public async Task<bool> WaitToReadAsync(CancellationToken token)
+        public async Task<bool> WaitToReadAsync(CancellationToken token = default)
         {
             return await messageQueue.OutputAvailableAsync(token);
         }
         
 
         /// <summary>
-        /// Waits indefinitely until a message arrives.
-        /// </summary>
-        /// <returns>The message that arrived</returns>
-        public T Read()
-        {
-            return messageQueue.Dequeue();
-        }
-
-
-        /// <summary>
-        /// Waits a given time until a message arrives.
+        /// Waits a given time until a message arrives, and pulls it from the queue.
         /// </summary>
         /// <param name="timeoutInMs">The maximal time to wait</param>
         /// <returns>The message that arrived</returns>
         /// <exception cref="OperationCanceledException">Thrown if the waiting times out</exception>
+        /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
         public T Read(int timeoutInMs)
         {
             using CancellationTokenSource ts = new CancellationTokenSource(timeoutInMs);
@@ -254,31 +243,24 @@ namespace Iviz.Roslib
         }
 
         /// <summary>
-        /// Waits until a message arrives.
+        /// Waits until a message arrives, and pulls it from the queue.
         /// </summary>
-        /// <param name="token">A cancellation token that makes the function stop blocking when cancelled.</param>
+        /// <param name="token">A cancellation token that makes the function stop blocking when cancelled. If not provided, waits indefinitely.</param>
         /// <returns>The message that arrived.</returns>
         /// <exception cref="OperationCanceledException">Thrown if the token is canceled</exception>
-        public T Read(CancellationToken token)
+        /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
+        public T Read(CancellationToken token = default)
         {
             return messageQueue.Dequeue(token);
         }
-
+        
         /// <summary>
-        /// Awaits indefinitely until a message arrives.
-        /// </summary>
-        /// <returns>The message that arrived</returns>
-        public async Task<T> ReadAsync()
-        {
-            return await messageQueue.DequeueAsync();
-        }
-
-        /// <summary>
-        /// Awaits a given time until a message arrives.
+        /// Awaits a given time until a message arrives, and pulls it from the queue.
         /// </summary>
         /// <param name="timeoutInMs">The maximal time to wait</param>
         /// <returns>The message that arrived</returns>
         /// <exception cref="OperationCanceledException">Thrown if the waiting times out</exception>
+        /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
         public async Task<T> ReadAsync(int timeoutInMs)
         {
             using CancellationTokenSource ts = new CancellationTokenSource(timeoutInMs);
@@ -286,12 +268,13 @@ namespace Iviz.Roslib
         }
 
         /// <summary>
-        /// Awaits until a message arrives.
+        /// Awaits until a message arrives, and pulls it from the queue.
         /// </summary>
-        /// <param name="token">A cancellation token that makes the function stop blocking when cancelled.</param>
+        /// <param name="token">A cancellation token that makes the function stop blocking when cancelled. If not provided, waits indefinitely.</param>
         /// <returns>The message that arrived.</returns>
         /// <exception cref="OperationCanceledException">Thrown if the token is canceled</exception>
-        public async Task<T> ReadAsync(CancellationToken token)
+        /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
+        public async Task<T> ReadAsync(CancellationToken token = default)
         {
             return await messageQueue.DequeueAsync(token);
         }
@@ -302,13 +285,14 @@ namespace Iviz.Roslib
         /// </summary>
         /// <param name="t">The received message, or default if no message was available.</param>
         /// <returns>True if there was a message available.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
         public bool TryRead(out T t)
         {
             CancellationToken cancelled = new CancellationToken(true);
             Task<T> task = messageQueue.DequeueAsync(cancelled);
             if (!task.RanToCompletion())
             {
-                t = default;
+                t = default!;
                 return false;
             }
 
@@ -322,6 +306,7 @@ namespace Iviz.Roslib
         /// <param name="t">The received message, or default if no message was available.</param>
         /// <param name="timeoutInMs">The maximal time to wait.</param>
         /// <returns>True if there was a message available.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
         public bool TryRead(out T t, int timeoutInMs)
         {
             using CancellationTokenSource ts = new CancellationTokenSource(timeoutInMs);
@@ -334,6 +319,7 @@ namespace Iviz.Roslib
         /// <param name="t">The received message, or default if no message was available.</param>
         /// <param name="token">A cancellation token that makes the function stop blocking when cancelled.</param>
         /// <returns>True if there was a message available.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
         public bool TryRead(out T t, CancellationToken token)
         {
             try
@@ -343,7 +329,7 @@ namespace Iviz.Roslib
             }
             catch (OperationCanceledException)
             {
-                t = default;
+                t = default!;
                 return false;
             }
         }
@@ -354,6 +340,7 @@ namespace Iviz.Roslib
         /// </summary>
         /// <param name="externalToken">A cancellation token that makes the function stop blocking when cancelled.</param>
         /// <returns>An enumerator that can be used in a foreach</returns>
+        /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
         public IEnumerable<T> AsEnum(CancellationToken externalToken)
         {
             while (true)
@@ -380,6 +367,7 @@ namespace Iviz.Roslib
         /// </summary>
         /// <param name="externalToken">A cancellation token that makes the function stop blocking when cancelled.</param>
         /// <returns>An enumerator that can be used in a foreach</returns>
+        /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
         public async IAsyncEnumerable<T> AsAsyncEnum([EnumeratorCancellation] CancellationToken externalToken)
         {
             while (true)
@@ -402,9 +390,14 @@ namespace Iviz.Roslib
 
         public override string ToString()
         {
-            return Subscriber == null
-                ? "[RosSubscriberQueue (uninitialized)]"
-                : $"[RosSubscriberQueue {Subscriber.Topic} [{Subscriber.TopicType}]]";
+            if (subscriber == null)
+            {
+                return "[RosSubscriberQueue (uninitialized)]";
+            }
+
+            return disposed
+                ? "[RosSubscriberQueue (disposed)]"
+                : $"[RosSubscriberQueue {subscriber.Topic} [{subscriber.TopicType}]]";
         }
     }
 }

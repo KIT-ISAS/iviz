@@ -14,6 +14,7 @@ using System.Xml;
 using Iviz.Msgs;
 using Iviz.Roslib.XmlRpc;
 using Iviz.XmlRpc;
+using Nito.AsyncEx.Synchronous;
 
 namespace Iviz.Roslib
 {
@@ -42,7 +43,7 @@ namespace Iviz.Roslib
         /// <summary>
         /// Handler of 'shutdown' XMLRPC calls from the slave API
         /// </summary>
-        public ShutdownActionCall ShutdownAction { get; set; }
+        public ShutdownActionCall? ShutdownAction { get; set; }
 
         public delegate void ParamUpdateActionCall(
             string callerId, string parameterKey, object parametervalue,
@@ -51,7 +52,7 @@ namespace Iviz.Roslib
         /// <summary>
         /// Handler of 'paramUpdate' XMLRPC calls from the slave API
         /// </summary>
-        public ParamUpdateActionCall ParamUpdateAction { get; set; }
+        public ParamUpdateActionCall? ParamUpdateAction { get; set; }
 
         /// <summary>
         /// ID of this node.
@@ -161,7 +162,7 @@ namespace Iviz.Roslib
         /// Other clients will use this address to connect to this node.
         /// Leave empty to generate one automatically. </param>
         /// <param name="ensureCleanSlate">Checks if masterUri has any previous subscriptions or advertisements, and unregisters them.</param>
-        public RosClient(Uri masterUri = null, string callerId = null, Uri callerUri = null,
+        public RosClient(Uri? masterUri = null, string? callerId = null, Uri? callerUri = null,
             bool ensureCleanSlate = true)
         {
             masterUri ??= EnvironmentMasterUri;
@@ -172,7 +173,7 @@ namespace Iviz.Roslib
             {
                 throw new ArgumentException("URI scheme must be http", nameof(masterUri));
             }
-            
+
             callerUri ??= TryGetCallerUri();
 
             if (callerUri.Scheme != "http")
@@ -197,7 +198,6 @@ namespace Iviz.Roslib
             }
             catch (SocketException e)
             {
-                listener?.Dispose();
                 throw new ConnectionException($"Failed to bind to local URI '{callerUri}'", e);
             }
 
@@ -269,9 +269,9 @@ namespace Iviz.Roslib
         /// Other clients will use this address to connect to this node.
         /// Leave empty to generate one automatically. </param>
         /// <param name="ensureCleanSlate">Checks if masterUri has any previous subscriptions or advertisements, and unregisters them.</param>
-        public RosClient(string masterUri = null,
-            string callerId = null,
-            string callerUri = null,
+        public RosClient(string? masterUri = null,
+            string? callerId = null,
+            string? callerUri = null,
             bool ensureCleanSlate = true) :
             this(masterUri != null ? new Uri(masterUri) : null,
                 callerId,
@@ -295,7 +295,7 @@ namespace Iviz.Roslib
         /// Retrieves the environment variable ROS_HOSTNAME as a uri.
         /// If this fails, retrieves ROS_IP.
         /// </summary>
-        public static string EnvironmentCallerHostname =>
+        public static string? EnvironmentCallerHostname =>
             Environment.GetEnvironmentVariable("ROS_HOSTNAME") ??
             Environment.GetEnvironmentVariable("ROS_IP");
 
@@ -306,7 +306,7 @@ namespace Iviz.Roslib
         /// </summary>
         public static Uri TryGetCallerUri(int usingPort = AnyPort)
         {
-            string envHostname = EnvironmentCallerHostname;
+            string? envHostname = EnvironmentCallerHostname;
             if (envHostname != null)
             {
                 return new Uri($"http://{envHostname}:{usingPort}/");
@@ -317,9 +317,9 @@ namespace Iviz.Roslib
                    new Uri($"http://{Dns.GetHostName()}:{usingPort}/");
         }
 
-        static Uri GetUriFromInterface(NetworkInterfaceType type, int usingPort)
+        static Uri? GetUriFromInterface(NetworkInterfaceType type, int usingPort)
         {
-            UnicastIPAddressInformation ipInfo =
+            UnicastIPAddressInformation? ipInfo =
                 NetworkInterface.GetAllNetworkInterfaces()
                     .Where(@interface =>
                         @interface.NetworkInterfaceType == type && @interface.OperationalStatus == OperationalStatus.Up)
@@ -333,17 +333,17 @@ namespace Iviz.Roslib
         /// <summary>
         /// Retrieves the environment variable ROS_MASTER_URI as a uri.
         /// </summary>
-        public static Uri EnvironmentMasterUri
+        public static Uri? EnvironmentMasterUri
         {
             get
             {
-                string envStr = Environment.GetEnvironmentVariable("ROS_MASTER_URI");
+                string? envStr = Environment.GetEnvironmentVariable("ROS_MASTER_URI");
                 if (envStr is null)
                 {
                     return null;
                 }
 
-                if (Uri.TryCreate(envStr, UriKind.Absolute, out Uri uri))
+                if (Uri.TryCreate(envStr, UriKind.Absolute, out Uri? uri))
                 {
                     return uri;
                 }
@@ -380,7 +380,7 @@ namespace Iviz.Roslib
 
             return true;
         }
-        
+
         /// <summary>
         /// Checks if the given name is a valid global ROS resource name
         /// </summary>         
@@ -466,9 +466,7 @@ namespace Iviz.Roslib
 
             TopicInfo<T> topicInfo = new TopicInfo<T>(CallerId, topic, new T());
             int timeoutInMs = (int) TcpRosTimeout.TotalMilliseconds;
-            TcpReceiverManager<T> manager = new TcpReceiverManager<T>(this, topicInfo, requestNoDelay)
-                {TimeoutInMs = timeoutInMs};
-            RosSubscriber<T> subscription = new RosSubscriber<T>(this, manager);
+            RosSubscriber<T> subscription = new RosSubscriber<T>(this, topicInfo, requestNoDelay, timeoutInMs);
 
             subscribersByTopic[topic] = subscription;
 
@@ -480,7 +478,8 @@ namespace Iviz.Roslib
                     $"Error registering publisher for topic {topic}: {masterResponse.StatusMessage}");
             }
 
-            Task.Run(async () => await manager.PublisherUpdateRpcAsync(masterResponse.Publishers).Caf());
+            Task.Run(async () => await subscription.Manager.PublisherUpdateRpcAsync(masterResponse.Publishers).Caf())
+                .WaitAndUnwrapException();
 
             return subscription;
         }
@@ -495,9 +494,7 @@ namespace Iviz.Roslib
 
             TopicInfo<T> topicInfo = new TopicInfo<T>(CallerId, topic, new T());
             int timeoutInMs = (int) TcpRosTimeout.TotalMilliseconds;
-            TcpReceiverManager<T> manager = new TcpReceiverManager<T>(this, topicInfo, requestNoDelay)
-                {TimeoutInMs = timeoutInMs};
-            RosSubscriber<T> subscription = new RosSubscriber<T>(this, manager);
+            RosSubscriber<T> subscription = new RosSubscriber<T>(this, topicInfo, requestNoDelay, timeoutInMs);
 
             subscribersByTopic[topic] = subscription;
 
@@ -509,7 +506,7 @@ namespace Iviz.Roslib
                     $"Error registering publisher for topic {topic}: {masterResponse.StatusMessage}");
             }
 
-            await manager.PublisherUpdateRpcAsync(masterResponse.Publishers).Caf();
+            await subscription.Manager.PublisherUpdateRpcAsync(masterResponse.Publishers).Caf();
 
             return subscription;
         }
@@ -559,12 +556,9 @@ namespace Iviz.Roslib
             }
             else
             {
-                subscriber = baseSubscriber as RosSubscriber<T>;
-                if (subscriber == null)
-                {
-                    throw new InvalidMessageTypeException(
-                        $"There is already a subscriber with a different type [{baseSubscriber.TopicType}]");
-                }
+                RosSubscriber<T>? newSubscriber = baseSubscriber as RosSubscriber<T>;
+                subscriber = newSubscriber ?? throw new InvalidMessageTypeException(
+                    $"There is already a subscriber with a different type [{baseSubscriber.TopicType}]");
             }
 
             return subscriber.Subscribe(callback);
@@ -602,17 +596,18 @@ namespace Iviz.Roslib
             if (!TryGetSubscriber(topic, out IRosSubscriber baseSubscriber))
             {
                 const BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance;
-                MethodInfo baseMethod = GetType().GetMethod(nameof(CreateSubscriber), flags);
-                MethodInfo method = baseMethod?.MakeGenericMethod(type);
+                MethodInfo? baseMethod = GetType().GetMethod(nameof(CreateSubscriber), flags);
+                MethodInfo? method = baseMethod?.MakeGenericMethod(type);
                 if (method == null)
                 {
                     throw new InvalidMessageTypeException("Type is not a message object");
                 }
 
-                object subscriberObj = method.Invoke(this, flags, null,
+                object? subscriberObj = method.Invoke(this, flags, null,
                     new object[] {topic, requestNoDelay}, BuiltIns.Culture);
 
-                subscriber = (IRosSubscriber) subscriberObj;
+                subscriber = (IRosSubscriber?) subscriberObj ??
+                             throw new InvalidMessageTypeException("Failed to call 'CreateSubscriber'!");
             }
             else
             {
@@ -657,12 +652,9 @@ namespace Iviz.Roslib
             }
             else
             {
-                subscriber = baseSubscriber as RosSubscriber<T>;
-                if (subscriber == null)
-                {
-                    throw new InvalidMessageTypeException(
-                        $"Existing subscriber message type {baseSubscriber.TopicType} does not match the given type.");
-                }
+                var newSubscriber = baseSubscriber as RosSubscriber<T>;
+                subscriber = newSubscriber ?? throw new InvalidMessageTypeException(
+                    $"Existing subscriber message type {baseSubscriber.TopicType} does not match the given type.");
             }
 
 
@@ -726,7 +718,7 @@ namespace Iviz.Roslib
                 throw new ArgumentNullException(nameof(topic));
             }
 
-            return subscribersByTopic.TryGetValue(topic, out subscriber);
+            return subscribersByTopic.TryGetValue(topic, out subscriber!);
         }
 
         /// <summary>
@@ -757,9 +749,7 @@ namespace Iviz.Roslib
             }
 
             TopicInfo<T> topicInfo = new TopicInfo<T>(CallerId, topic);
-            TcpSenderManager<T> manager = new TcpSenderManager<T>(topicInfo)
-                {TimeoutInMs = (int) TcpRosTimeout.TotalMilliseconds};
-            RosPublisher<T> publisher = new RosPublisher<T>(this, manager);
+            RosPublisher<T> publisher = new RosPublisher<T>(this, topicInfo, (int) TcpRosTimeout.TotalMilliseconds);
 
             publishersByTopic[topic] = publisher;
 
@@ -781,9 +771,7 @@ namespace Iviz.Roslib
             }
 
             TopicInfo<T> topicInfo = new TopicInfo<T>(CallerId, topic);
-            TcpSenderManager<T> manager = new TcpSenderManager<T>(topicInfo)
-                {TimeoutInMs = (int) TcpRosTimeout.TotalMilliseconds};
-            RosPublisher<T> publisher = new RosPublisher<T>(this, manager);
+            RosPublisher<T> publisher = new RosPublisher<T>(this, topicInfo, (int) TcpRosTimeout.TotalMilliseconds);
 
             publishersByTopic[topic] = publisher;
 
@@ -820,12 +808,9 @@ namespace Iviz.Roslib
             }
             else
             {
-                publisher = basePublisher as RosPublisher<T>;
-                if (publisher == null)
-                {
-                    throw new InvalidMessageTypeException(
-                        $"There is already an advertiser with a different type [{basePublisher.TopicType}]");
-                }
+                var newPublisher = basePublisher as RosPublisher<T>;
+                publisher = newPublisher ?? throw new InvalidMessageTypeException(
+                    $"There is already an advertiser with a different type [{basePublisher.TopicType}]");
             }
 
             return publisher.Advertise();
@@ -851,12 +836,9 @@ namespace Iviz.Roslib
             }
             else
             {
-                publisher = basePublisher as RosPublisher<T>;
-                if (publisher == null)
-                {
-                    throw new InvalidMessageTypeException(
-                        $"Existing subscriber message type {basePublisher.TopicType} does not match the given type.");
-                }
+                var newPublisher = basePublisher as RosPublisher<T>;
+                publisher = newPublisher ?? throw new InvalidMessageTypeException(
+                    $"Existing subscriber message type {basePublisher.TopicType} does not match the given type.");
             }
 
             return (publisher.Advertise(), publisher);
@@ -877,15 +859,16 @@ namespace Iviz.Roslib
             if (!TryGetPublisher(topic, out IRosPublisher basePublisher))
             {
                 const BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance;
-                MethodInfo baseMethod = GetType().GetMethod(nameof(CreatePublisher), flags);
-                MethodInfo method = baseMethod?.MakeGenericMethod(type);
+                MethodInfo? baseMethod = GetType().GetMethod(nameof(CreatePublisher), flags);
+                MethodInfo? method = baseMethod?.MakeGenericMethod(type);
                 if (method == null)
                 {
                     throw new InvalidMessageTypeException($"Type {type} is not a message object");
                 }
 
-                object publisherObj = method.Invoke(this, flags, null, new object[] {topic}, BuiltIns.Culture);
-                publisher = (IRosPublisher) publisherObj;
+                object? publisherObj = method.Invoke(this, flags, null, new object[] {topic}, BuiltIns.Culture);
+                publisher = (IRosPublisher?) publisherObj ??
+                            throw new InvalidMessageTypeException("Failed to call 'CreatePublisher'!");
             }
             else
             {
@@ -914,7 +897,7 @@ namespace Iviz.Roslib
                 throw new ArgumentNullException(nameof(topicId));
             }
 
-            IRosPublisher publisher = publishersByTopic.Values.FirstOrDefault(p => p.ContainsId(topicId));
+            IRosPublisher? publisher = publishersByTopic.Values.FirstOrDefault(p => p.ContainsId(topicId));
 
             return publisher != null && publisher.Unadvertise(topicId);
         }
@@ -931,7 +914,7 @@ namespace Iviz.Roslib
                 throw new ArgumentNullException(nameof(topicId));
             }
 
-            IRosPublisher publisher = publishersByTopic.Values.FirstOrDefault(p => p.ContainsId(topicId));
+            IRosPublisher? publisher = publishersByTopic.Values.FirstOrDefault(p => p.ContainsId(topicId));
 
             return publisher != null && await publisher.UnadvertiseAsync(topicId).Caf();
         }
@@ -961,7 +944,7 @@ namespace Iviz.Roslib
                 throw new ArgumentNullException(nameof(topic));
             }
 
-            return publishersByTopic.TryGetValue(topic, out publisher);
+            return publishersByTopic.TryGetValue(topic, out publisher!);
         }
 
         /// <summary>
@@ -1089,7 +1072,7 @@ namespace Iviz.Roslib
             }
         }
 
-        internal Endpoint RequestTopicRpc(string remoteCallerId, string topic)
+        internal Endpoint? RequestTopicRpc(string remoteCallerId, string topic)
         {
             if (!TryGetPublisher(topic, out IRosPublisher publisher))
             {
@@ -1122,7 +1105,7 @@ namespace Iviz.Roslib
             {
                 try
                 {
-                    publisher.Stop();
+                    publisher.Dispose();
                     Master.UnregisterPublisher(publisher.Topic);
                 }
                 catch (Exception e)
@@ -1138,7 +1121,7 @@ namespace Iviz.Roslib
             {
                 try
                 {
-                    subscriber.Stop();
+                    subscriber.Dispose();
                     Master.UnregisterSubscriber(subscriber.Topic);
                 }
                 catch (Exception e)
@@ -1185,7 +1168,7 @@ namespace Iviz.Roslib
             List<Task> tasks = new List<Task>();
             tasks.AddRange(publishers.Select(async publisher =>
             {
-                publisher.Stop();
+                publisher.Dispose();
                 await Master.UnregisterPublisherAsync(publisher.Topic).Caf();
             }));
 
@@ -1194,7 +1177,7 @@ namespace Iviz.Roslib
 
             tasks.AddRange(subscribers.Select(async subscriber =>
             {
-                subscriber.Stop();
+                subscriber.Dispose();
                 await Master.UnregisterSubscriberAsync(subscriber.Topic).Caf();
             }));
 
@@ -1264,7 +1247,7 @@ namespace Iviz.Roslib
                             continue;
                         }
 
-                        BusInfo busInfo = new BusInfo(busInfos.Count, response.Uri, "o", topic.Topic, sender.IsAlive);
+                        BusInfo busInfo = new BusInfo(busInfos.Count, response.Uri!, "o", topic.Topic, sender.IsAlive);
                         busInfos.Add(busInfo);
                     }
                 }
@@ -1312,7 +1295,7 @@ namespace Iviz.Roslib
                 throw new RosRpcException($"Failed to call service: {response.StatusMessage}");
             }
 
-            Uri serviceUri = response.ServiceUrl;
+            Uri serviceUri = response.ServiceUrl!;
             ServiceInfo<T> serviceInfo = new ServiceInfo<T>(CallerId, serviceName);
             try
             {
@@ -1374,7 +1357,7 @@ namespace Iviz.Roslib
                 throw new RosRpcException($"Failed to call service: {response.StatusMessage}");
             }
 
-            Uri serviceUri = response.ServiceUrl;
+            Uri serviceUri = response.ServiceUrl!;
             ServiceInfo<T> serviceInfo = new ServiceInfo<T>(CallerId, serviceName);
             try
             {

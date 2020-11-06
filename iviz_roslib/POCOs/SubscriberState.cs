@@ -8,14 +8,14 @@ namespace Iviz.Roslib
     {
         public bool IsAlive { get; }
         public bool RequestNoDelay { get; }
-        public Endpoint EndPoint { get; }
+        public Endpoint? EndPoint { get; }
         public Uri RemoteUri { get; }
         public Endpoint RemoteEndpoint { get; }
         public int NumReceived { get; }
         public int BytesReceived { get; }
 
         internal SubscriberReceiverState(bool isAlive, bool requestNoDelay,
-            Endpoint endPoint,
+            Endpoint? endPoint,
             Uri remoteUri, Endpoint remoteEndpoint,
             int numReceived, int bytesReceived)
         {

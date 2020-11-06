@@ -19,7 +19,7 @@ namespace Iviz.Roslib
         void Stop();
         Task StopAsync();
     }
-    
+
     internal sealed class ServiceSenderManager<T> : IServiceSenderManager where T : IService
     {
         readonly Func<T, Task> callback;
@@ -113,7 +113,7 @@ namespace Iviz.Roslib
         public void Stop()
         {
             signal.Release();
-            task?.Wait();
+            task.Wait();
 
             foreach (ServiceSenderAsync<T> sender in connections)
             {
@@ -126,10 +126,7 @@ namespace Iviz.Roslib
         public async Task StopAsync()
         {
             signal.Release();
-            if (task != null)
-            {
-                await task.Caf();
-            }
+            await task.Caf();
 
             Task[] tasks = connections.Select(sender => sender.StopAsync()).ToArray();
             Task.WaitAll(tasks);

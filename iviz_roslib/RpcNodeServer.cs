@@ -12,17 +12,14 @@ namespace Iviz.Roslib.XmlRpc
     internal sealed class NodeServer : IDisposable
     {
         static readonly Arg[] DefaultOkResponse = OkResponse(0);
+
         readonly RosClient client;
-
-        readonly Dictionary<string, Func<object[], Task>>
-            lateCallbacks; // gets called after response to method callback is sent 
-
+        readonly Dictionary<string, Func<object[], Task>> lateCallbacks;
         readonly HttpListener listener;
-
         readonly Dictionary<string, Func<object[], Arg[]>> methods;
         readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
 
-        Task task;
+        Task? task;
         bool disposed;
 
         public NodeServer(RosClient client)
@@ -228,7 +225,7 @@ namespace Iviz.Roslib.XmlRpc
             foreach (object publisherObj in publishers)
             {
                 if (!(publisherObj is string publisherStr) ||
-                    !Uri.TryCreate(publisherStr, UriKind.Absolute, out Uri publisherUri))
+                    !Uri.TryCreate(publisherStr, UriKind.Absolute, out Uri? publisherUri))
                 {
                     Logger.Log($"{this}: Invalid uri '{publisherObj}'");
                     continue;
@@ -274,7 +271,7 @@ namespace Iviz.Roslib.XmlRpc
                 return new Arg[] {StatusCode.Failure, "Client only supports TCPROS", 0};
             }
 
-            Endpoint endpoint;
+            Endpoint? endpoint;
             try
             {
                 endpoint = client.RequestTopicRpc(callerId, topic);

@@ -26,7 +26,7 @@ namespace Iviz.Roslib
         readonly TcpClient tcpClient;
 
         bool keepRunning;
-        string remoteCallerId;
+        string? remoteCallerId;
         byte[] readBuffer = new byte[1024];
         byte[] writeBuffer = new byte[1024];
 
@@ -43,7 +43,7 @@ namespace Iviz.Roslib
             task = Task.Run(Run);
         }
 
-        public bool IsAlive => task != null && !task.IsCompleted;
+        public bool IsAlive => !task.IsCompleted;
         string Service => serviceInfo.Service;
         int Port => remoteEndPoint.Port;
         public string Hostname => remoteEndPoint.Address.ToString();
@@ -117,7 +117,7 @@ namespace Iviz.Roslib
             return contents;
         }
 
-        string ProcessRemoteHeader(IReadOnlyCollection<string> fields)
+        string? ProcessRemoteHeader(IReadOnlyCollection<string> fields)
         {
             if (fields.Count < 3)
             {
@@ -137,7 +137,7 @@ namespace Iviz.Roslib
                 values[key] = entry.Substring(index + 1);
             }
 
-            if (!values.TryGetValue("callerid", out string receivedId))
+            if (!values.TryGetValue("callerid", out string? receivedId))
             {
                 return
                     $"error=Expected callerid '{remoteCallerId}' but received instead '{receivedId}', closing connection";
@@ -145,13 +145,13 @@ namespace Iviz.Roslib
 
             remoteCallerId = receivedId;
 
-            if (!values.TryGetValue("service", out string receivedService) || receivedService != serviceInfo.Service)
+            if (!values.TryGetValue("service", out string? receivedService) || receivedService != serviceInfo.Service)
             {
                 return
                     $"error=Expected service '{serviceInfo.Service}' but received instead '{receivedService}', closing connection";
             }
 
-            if (!values.TryGetValue("md5sum", out string receivedMd5Sum) || receivedMd5Sum != serviceInfo.Md5Sum)
+            if (!values.TryGetValue("md5sum", out string? receivedMd5Sum) || receivedMd5Sum != serviceInfo.Md5Sum)
             {
                 if (receivedMd5Sum == "*")
                 {
@@ -165,7 +165,7 @@ namespace Iviz.Roslib
                 }
             }
 
-            if (values.TryGetValue("type", out string receivedType) && receivedType != serviceInfo.Type)
+            if (values.TryGetValue("type", out string? receivedType) && receivedType != serviceInfo.Type)
             {
                 if (receivedType == "*")
                 {
@@ -179,7 +179,7 @@ namespace Iviz.Roslib
                 }
             }
 
-            if (values.TryGetValue("tcp_nodelay", out string receivedNoDelay) && receivedNoDelay == "1")
+            if (values.TryGetValue("tcp_nodelay", out string? receivedNoDelay) && receivedNoDelay == "1")
             {
                 tcpClient.NoDelay = true;
                 Logger.LogDebug($"{this}: requested tcp_nodelay");
@@ -188,7 +188,7 @@ namespace Iviz.Roslib
             return null;
         }
 
-        async Task SendResponseHeader(string errorMessage)
+        async Task SendResponseHeader(string? errorMessage)
         {
             string[] contents;
             if (errorMessage != null)
@@ -234,7 +234,7 @@ namespace Iviz.Roslib
         {
             int totalLength = await ReceivePacket().Caf();
             List<string> fields = ParseHeader(totalLength);
-            string errorMessage = ProcessRemoteHeader(fields);
+            string? errorMessage = ProcessRemoteHeader(fields);
 
             if (errorMessage != null)
             {
@@ -288,21 +288,23 @@ namespace Iviz.Roslib
                     serviceMsg.Request = Buffer.Deserialize(serviceMsg.Request, readBuffer, rcvLength);
 
                     byte resultStatus;
-                    string errorMessage;
-
+                    string? errorMessage;
+                    bool errorInResponse;
+                    
                     try
                     {
                         await callback(serviceMsg).Caf();
                         serviceMsg.Response.RosValidate();
+                        errorInResponse = false;
                     }
                     catch (Exception e)
                     {
                         Logger.LogError($"{this}: Inner exception in service callback: {e}");
-                        serviceMsg.Response = null;
+                        errorInResponse = true;
                     }
 
                     IResponse responseMsg = serviceMsg.Response;
-                    if (responseMsg is null)
+                    if (errorInResponse)
                     {
                         resultStatus = ErrorByte;
                         errorMessage = "Callback function returned null, an invalid value, or an exception happened.";
@@ -314,7 +316,7 @@ namespace Iviz.Roslib
                     }
 
                     statusByte[0] = resultStatus;
-                    if (resultStatus == SuccessByte)
+                    if (errorMessage == null)
                     {
                         int msgLength = responseMsg.RosMessageLength;
                         if (writeBuffer.Length < msgLength)

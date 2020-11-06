@@ -17,31 +17,25 @@ namespace Iviz.Roslib
     internal sealed class TcpReceiverAsync<T> : IDisposable where T : IMessage
     {
         const int BufferSizeIncrease = 1024;
-        const int MaxConnectionRetries = 60;
-
-        const int WaitBetweenRetriesInMs = 1000;
-        //const int SleepTimeInMs = 1000;
+        const int MaxConnectionRetries = 120;
+        const int WaitBetweenRetriesInMs = 2000;
 
         readonly TcpReceiverManager<T> manager;
-
-        //readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
         readonly TopicInfo<T> topicInfo;
         readonly bool requestNoDelay;
 
         Endpoint remoteEndpoint;
-        Endpoint endpoint;
+        Endpoint? endpoint;
         int numReceived;
         int bytesReceived;
 
-        // TODO: replace this with cancellation token
-        //volatile bool keepRunning;
         readonly CancellationTokenSource runningTs = new CancellationTokenSource();
         bool KeepRunning => !runningTs.IsCancellationRequested;
 
         byte[] readBuffer = new byte[BufferSizeIncrease];
-        NetworkStream stream;
-        Task task;
-        TcpClient tcpClient;
+        NetworkStream? stream;
+        Task? task;
+        TcpClient? tcpClient;
         bool disposed;
 
         public TcpReceiverAsync(TcpReceiverManager<T> manager,
@@ -74,12 +68,6 @@ namespace Iviz.Roslib
 
             disposed = true;
             runningTs.Cancel();
-            //keepRunning = false;
-
-            //try { signal.Release(); }
-            //catch (SemaphoreFullException) { }
-
-            //signal.Dispose();
 
             try
             {
@@ -95,7 +83,7 @@ namespace Iviz.Roslib
         }
 
         public void Start(int timeoutInMs)
-        { 
+        {
             task = Task.Run(async () => await Run(timeoutInMs).Caf());
         }
 
@@ -123,7 +111,7 @@ namespace Iviz.Roslib
                 }
             }
 
-            await stream.WriteAsync(array, 0, array.Length).Caf();
+            await stream!.WriteAsync(array, 0, array.Length).Caf();
         }
 
         List<string> ParseHeader(int totalLength)
@@ -143,12 +131,23 @@ namespace Iviz.Roslib
             return contents;
         }
 
+#if !NETSTANDARD2_0
+        async ValueTask<int> ReceivePacket()
+#else
         async Task<int> ReceivePacket()
+#endif
         {
             int numRead = 0;
             while (numRead < 4)
             {
-                int readNow = await stream.ReadAsync(readBuffer, numRead, 4 - numRead, runningTs.Token).Caf();
+#if !NETSTANDARD2_0
+                int readNow =
+                    await stream!.ReadAsync(
+                        new Memory<byte>(readBuffer, numRead, 4 - numRead), 
+                        runningTs.Token);
+#else
+                int readNow = await stream!.ReadAsync(readBuffer, numRead, 4 - numRead, runningTs.Token).Caf();
+#endif
                 if (readNow == 0)
                 {
                     return 0;
@@ -166,7 +165,14 @@ namespace Iviz.Roslib
             numRead = 0;
             while (numRead < length)
             {
-                int readNow = await stream.ReadAsync(readBuffer, numRead, length - numRead, runningTs.Token).Caf();
+#if !NETSTANDARD2_0
+                int readNow = await stream!.ReadAsync(
+                    new Memory<byte>(readBuffer, numRead, length - numRead),
+                    runningTs.Token);
+#else
+                int readNow = await stream!.ReadAsync(readBuffer, numRead, length - numRead, runningTs.Token).Caf();
+#endif
+
                 if (readNow == 0)
                 {
                     return 0;
@@ -183,7 +189,7 @@ namespace Iviz.Roslib
         {
             await SerializeHeader().Caf();
 
-            int receivedLength = await ReceivePacket().Caf();
+            int receivedLength = await ReceivePacket();
             if (receivedLength == 0)
             {
                 throw new TimeoutException("Connection closed before handshake finished.");
@@ -194,23 +200,20 @@ namespace Iviz.Roslib
 
         async Task Run(int timeoutInMs)
         {
-            Task runLoopTask = StartSession(timeoutInMs);
+            await StartSession(timeoutInMs);
 
-            /*
-            while (keepRunning)
+#if !NETSTANDARD2_0
+            if (stream != null)
             {
-                await signal.WaitAsync(SleepTimeInMs).Caf();
+                await stream.DisposeAsync();
             }
-
-            */
-
-            await runLoopTask.Caf();
-
+#else
             stream?.Dispose();
+#endif
             tcpClient?.Dispose();
         }
 
-        async Task<TcpClient> TryToConnect(int timeoutInMs)
+        async Task<TcpClient?> TryToConnect(int timeoutInMs)
         {
             TcpClient client = new TcpClient();
             try
@@ -239,7 +242,7 @@ namespace Iviz.Roslib
             return client;
         }
 
-        async Task<TcpClient> KeepReconnecting(int timeoutInMs)
+        async Task<TcpClient?> KeepReconnecting(int timeoutInMs)
         {
             for (int i = 0; i < MaxConnectionRetries && KeepRunning; i++)
             {
@@ -255,7 +258,7 @@ namespace Iviz.Roslib
                     return null;
                 }
 
-                Endpoint newEndpoint = await manager.RequestConnectionFromPublisherAsync(RemoteUri).Caf();
+                Endpoint? newEndpoint = await manager.RequestConnectionFromPublisherAsync(RemoteUri).Caf();
                 if (newEndpoint == null || newEndpoint.Equals(remoteEndpoint))
                 {
                     continue;
@@ -324,14 +327,14 @@ namespace Iviz.Roslib
 
             while (KeepRunning)
             {
-                int rcvLength = await ReceivePacket().Caf();
+                int rcvLength = await ReceivePacket();
                 if (rcvLength == 0)
                 {
                     Logger.LogDebug($"{this}: Partner closed connection.");
                     return;
                 }
 
-                T message = Buffer.Deserialize(topicInfo.Generator, readBuffer, rcvLength);
+                T message = Buffer.Deserialize(topicInfo.Generator!, readBuffer, rcvLength);
                 manager.MessageCallback(message);
 
                 numReceived++;

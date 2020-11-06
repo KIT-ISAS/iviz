@@ -98,14 +98,14 @@ namespace Iviz.Roslib
             return new ReadOnlyCollection<T>(t);
         }
         
-        public static bool RemovePair<T, TU>(this ConcurrentDictionary<T, TU> dictionary, T t, TU u)
+        public static bool RemovePair<TT, TU>(this ConcurrentDictionary<TT, TU> dictionary, TT t, TU u) where TT : notnull
         {
             if (dictionary == null)
             {
                 throw new ArgumentNullException(nameof(dictionary));
             }
 
-            return ((ICollection<KeyValuePair<T, TU>>) dictionary).Remove(new KeyValuePair<T, TU>(t, u));
+            return ((ICollection<KeyValuePair<TT, TU>>) dictionary).Remove(new KeyValuePair<TT, TU>(t, u));
         }
         
         public static int Sum<T>(this T[] ts, Func<T, int> selector)

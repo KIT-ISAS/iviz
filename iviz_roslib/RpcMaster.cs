@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel.Design.Serialization;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
@@ -55,6 +57,11 @@ namespace Iviz.Roslib.XmlRpc
 
         public LookupNodeResponse LookupNode(string nodeId)
         {
+            if (nodeId == null)
+            {
+                throw new ArgumentNullException(nameof(nodeId));
+            }
+
             Arg[] args = {CallerId, nodeId};
             object[] response = MethodCall("lookupNode", args);
             return new LookupNodeResponse(response);
@@ -62,6 +69,11 @@ namespace Iviz.Roslib.XmlRpc
 
         public async Task<LookupNodeResponse> LookupNodeAsync(string nodeId)
         {
+            if (nodeId == null)
+            {
+                throw new ArgumentNullException(nameof(nodeId));
+            }
+
             Arg[] args = {CallerId, nodeId};
             object[] response = await MethodCallAsync("lookupNode", args).Caf();
             return new LookupNodeResponse(response);
@@ -83,6 +95,16 @@ namespace Iviz.Roslib.XmlRpc
 
         public RegisterSubscriberResponse RegisterSubscriber(string topic, string topicType)
         {
+            if (topic == null)
+            {
+                throw new ArgumentNullException(nameof(topic));
+            }
+
+            if (topicType == null)
+            {
+                throw new ArgumentNullException(nameof(topicType));
+            }
+
             Arg[] args = {CallerId, topic, topicType, CallerUri};
             object[] response = MethodCall("registerSubscriber", args);
             return new RegisterSubscriberResponse(response);
@@ -90,6 +112,16 @@ namespace Iviz.Roslib.XmlRpc
 
         public async Task<RegisterSubscriberResponse> RegisterSubscriberAsync(string topic, string topicType)
         {
+            if (topic == null)
+            {
+                throw new ArgumentNullException(nameof(topic));
+            }
+
+            if (topicType == null)
+            {
+                throw new ArgumentNullException(nameof(topicType));
+            }
+
             Arg[] args = {CallerId, topic, topicType, CallerUri};
             object[] response = await MethodCallAsync("registerSubscriber", args).Caf();
             return new RegisterSubscriberResponse(response);
@@ -97,6 +129,11 @@ namespace Iviz.Roslib.XmlRpc
 
         public UnregisterSubscriberResponse UnregisterSubscriber(string topic)
         {
+            if (topic == null)
+            {
+                throw new ArgumentNullException(nameof(topic));
+            }
+
             Arg[] args = {CallerId, topic, CallerUri};
             object[] response = MethodCall("unregisterSubscriber", args);
             return new UnregisterSubscriberResponse(response);
@@ -104,6 +141,11 @@ namespace Iviz.Roslib.XmlRpc
 
         public async Task<UnregisterSubscriberResponse> UnregisterSubscriberAsync(string topic)
         {
+            if (topic == null)
+            {
+                throw new ArgumentNullException(nameof(topic));
+            }
+
             Arg[] args = {CallerId, topic, CallerUri};
             object[] response = await MethodCallAsync("unregisterSubscriber", args).Caf();
             return new UnregisterSubscriberResponse(response);
@@ -111,6 +153,16 @@ namespace Iviz.Roslib.XmlRpc
 
         public RegisterPublisherResponse RegisterPublisher(string topic, string topicType)
         {
+            if (topic == null)
+            {
+                throw new ArgumentNullException(nameof(topic));
+            }
+
+            if (topicType == null)
+            {
+                throw new ArgumentNullException(nameof(topicType));
+            }
+
             Arg[] args = {CallerId, topic, topicType, CallerUri};
             object[] response = MethodCall("registerPublisher", args);
             return new RegisterPublisherResponse(response);
@@ -118,6 +170,16 @@ namespace Iviz.Roslib.XmlRpc
 
         public async Task<RegisterPublisherResponse> RegisterPublisherAsync(string topic, string topicType)
         {
+            if (topic == null)
+            {
+                throw new ArgumentNullException(nameof(topic));
+            }
+
+            if (topicType == null)
+            {
+                throw new ArgumentNullException(nameof(topicType));
+            }
+
             Arg[] args = {CallerId, topic, topicType, CallerUri};
             object[] response = await MethodCallAsync("registerPublisher", args).Caf();
             return new RegisterPublisherResponse(response);
@@ -125,6 +187,11 @@ namespace Iviz.Roslib.XmlRpc
 
         public UnregisterPublisherResponse UnregisterPublisher(string topic)
         {
+            if (topic == null)
+            {
+                throw new ArgumentNullException(nameof(topic));
+            }
+
             Arg[] args = {CallerId, topic, CallerUri};
             object[] response = MethodCall("unregisterPublisher", args);
             return new UnregisterPublisherResponse(response);
@@ -132,6 +199,11 @@ namespace Iviz.Roslib.XmlRpc
 
         public async Task<UnregisterPublisherResponse> UnregisterPublisherAsync(string topic)
         {
+            if (topic == null)
+            {
+                throw new ArgumentNullException(nameof(topic));
+            }
+
             Arg[] args = {CallerId, topic, CallerUri};
             object[] response = await MethodCallAsync("unregisterPublisher", args).Caf();
             return new UnregisterPublisherResponse(response);
@@ -153,6 +225,11 @@ namespace Iviz.Roslib.XmlRpc
 
         public LookupServiceResponse LookupService(string service)
         {
+            if (service == null)
+            {
+                throw new ArgumentNullException(nameof(service));
+            }
+
             Arg[] args = {CallerId, service};
             object[] response = MethodCall("lookupService", args);
             return new LookupServiceResponse(response);
@@ -160,6 +237,11 @@ namespace Iviz.Roslib.XmlRpc
 
         public async Task<LookupServiceResponse> LookupServiceAsync(string service)
         {
+            if (service == null)
+            {
+                throw new ArgumentNullException(nameof(service));
+            }
+
             Arg[] args = {CallerId, service};
             object[] response = await MethodCallAsync("lookupService", args).Caf();
             return new LookupServiceResponse(response);
@@ -167,6 +249,16 @@ namespace Iviz.Roslib.XmlRpc
 
         public DefaultResponse RegisterService(string service, Uri rosRpcUri)
         {
+            if (service == null)
+            {
+                throw new ArgumentNullException(nameof(service));
+            }
+
+            if (rosRpcUri == null)
+            {
+                throw new ArgumentNullException(nameof(rosRpcUri));
+            }
+
             Arg[] args = {CallerId, service, rosRpcUri, CallerUri};
             object[] response = MethodCall("registerService", args);
             return new DefaultResponse(response);
@@ -174,6 +266,16 @@ namespace Iviz.Roslib.XmlRpc
 
         public async Task<DefaultResponse> RegisterServiceAsync(string service, Uri rosRpcUri)
         {
+            if (service == null)
+            {
+                throw new ArgumentNullException(nameof(service));
+            }
+
+            if (rosRpcUri == null)
+            {
+                throw new ArgumentNullException(nameof(rosRpcUri));
+            }
+
             Arg[] args = {CallerId, service, rosRpcUri, CallerUri};
             object[] response = await MethodCallAsync("registerService", args).Caf();
             return new DefaultResponse(response);
@@ -181,6 +283,16 @@ namespace Iviz.Roslib.XmlRpc
 
         public UnregisterServiceResponse UnregisterService(string service, Uri rosRpcUri)
         {
+            if (service == null)
+            {
+                throw new ArgumentNullException(nameof(service));
+            }
+
+            if (rosRpcUri == null)
+            {
+                throw new ArgumentNullException(nameof(rosRpcUri));
+            }
+
             Arg[] args = {CallerId, service, rosRpcUri};
             object[] response = MethodCall("unregisterService", args);
             return new UnregisterServiceResponse(response);
@@ -188,6 +300,16 @@ namespace Iviz.Roslib.XmlRpc
 
         public async Task<UnregisterServiceResponse> UnregisterServiceAsync(string service, Uri rosRpcUri)
         {
+            if (service == null)
+            {
+                throw new ArgumentNullException(nameof(service));
+            }
+
+            if (rosRpcUri == null)
+            {
+                throw new ArgumentNullException(nameof(rosRpcUri));
+            }
+
             Arg[] args = {CallerId, service, rosRpcUri};
             object[] response = await MethodCallAsync("unregisterService", args).Caf();
             return new UnregisterServiceResponse(response);
@@ -218,60 +340,11 @@ namespace Iviz.Roslib.XmlRpc
 
     public abstract class BaseResponse
     {
-        public int Code { get; }
-        public string StatusMessage { get; }
         private protected bool hasParseError;
 
+        public int Code { get; protected set; }
+        public string? StatusMessage { get; protected set; }
         public bool IsValid => Code == StatusCode.Success && !hasParseError;
-
-        private protected BaseResponse(object[] a)
-        {
-            if (!EnsureSize(a, 2))
-            {
-                hasParseError = true;
-                Code = StatusCode.Error;
-                StatusMessage = "Parse error for input.";
-                return;
-            }
-
-            Code = Cast<int>(a[0]);
-            StatusMessage = Cast<string>(a[1]);
-            if (!IsValid)
-            {
-                Logger.LogDebug($"Rpc Response: {GetType().Name} failed! " + StatusMessage);
-            }
-        }
-
-        private protected T Cast<T>(object a)
-        {
-            if (a is T t)
-            {
-                return t;
-            }
-
-            Logger.LogDebug($"Rpc Response: Expected type '{typeof(T).Name}, got {a.GetType().Name}");
-            hasParseError = true;
-            return default;
-        }
-
-        protected bool EnsureSize<T>(IList<T> a, int size = 1)
-        {
-            if (a == null)
-            {
-                Logger.Log($"Rpc Response: Null input");
-                hasParseError = true;
-                return false;
-            }
-
-            if (a.Count >= size)
-            {
-                return true;
-            }
-
-            Logger.Log($"Rpc Response: Expected size '{size}, got {a.Count}");
-            hasParseError = true;
-            return false;
-        }
     }
 
     public class TopicTuple
@@ -294,15 +367,25 @@ namespace Iviz.Roslib.XmlRpc
         public ReadOnlyCollection<TopicTuple> Subscribers { get; } = Empty;
         public ReadOnlyCollection<TopicTuple> Services { get; } = Empty;
 
-        internal GetSystemStateResponse(object[] a) : base(a)
+        internal GetSystemStateResponse(object[]? a)
         {
-            if (!IsValid || !EnsureSize(a, 3))
+            if (a is null ||
+                a.Length != 3 ||
+                !(a[0] is int code) ||
+                !(a[1] is string statusMessage) ||
+                !(a[2] is object[] root) ||
+                root.Length != 3)
             {
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Code = StatusCode.Error;
+                hasParseError = true;
                 return;
             }
 
-            object[] root = Cast<object[]>(a[2]);
-            if (!EnsureSize(root, 3))
+            Code = code;
+            StatusMessage = statusMessage;
+
+            if (Code == StatusCode.Error)
             {
                 return;
             }
@@ -314,30 +397,30 @@ namespace Iviz.Roslib.XmlRpc
 
         ReadOnlyCollection<TopicTuple> CreateTuple(object root)
         {
-            object[] list = Cast<object[]>(root);
-            if (list == null)
+            if (!(root is object[] objTuples))
             {
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Code = StatusCode.Error;
+                hasParseError = true;
                 return Empty;
             }
 
-            TopicTuple[] result = new TopicTuple[list.Length];
-            for (int i = 0; i < list.Length; i++)
+            List<TopicTuple> result = new List<TopicTuple>();
+            foreach (var objTuple in objTuples)
             {
-                object[] tuple = Cast<object[]>(list[i]);
-                if (!EnsureSize(tuple, 2))
+                if (!(objTuple is object[] tuple) ||
+                    tuple.Length != 2 ||
+                    !(tuple[0] is string topic) ||
+                    !(tuple[1] is object[] tmp))
                 {
-                    return Empty;
-                }
-
-                string topic = Cast<string>(tuple[0]);
-                object[] tmp = Cast<object[]>(tuple[1]);
-                if (tmp == null)
-                {
+                    Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                    Code = StatusCode.Error;
+                    hasParseError = true;
                     return Empty;
                 }
 
                 string[] members = tmp.Cast<string>().ToArray();
-                result[i] = new TopicTuple(topic, members);
+                result.Add(new TopicTuple(topic, members));
             }
 
             return result.AsReadOnly();
@@ -346,23 +429,39 @@ namespace Iviz.Roslib.XmlRpc
 
     public sealed class DefaultResponse : BaseResponse
     {
-        internal DefaultResponse(object[] a) : base(a)
+        internal DefaultResponse(object[]? _)
         {
+            Code = StatusCode.Success;
         }
     }
 
     public sealed class GetUriResponse : BaseResponse
     {
-        public Uri Uri { get; }
+        public Uri? Uri { get; }
 
-        internal GetUriResponse(object[] a) : base(a)
+        internal GetUriResponse(object[]? a)
         {
-            if (!IsValid || !EnsureSize(a, 3))
+            if (a is null ||
+                a.Length != 3 ||
+                !(a[0] is int code) ||
+                !(a[1] is string statusMessage) ||
+                !(a[2] is string uriStr))
+            {
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Code = StatusCode.Error;
+                hasParseError = true;
+                return;
+            }
+
+            Code = code;
+            StatusMessage = statusMessage;
+
+            if (Code == StatusCode.Error)
             {
                 return;
             }
 
-            if (Uri.TryCreate(Cast<string>(a[2]) ?? "", UriKind.Absolute, out Uri uri))
+            if (Uri.TryCreate(uriStr, UriKind.Absolute, out Uri? uri))
             {
                 Uri = uri;
             }
@@ -377,16 +476,31 @@ namespace Iviz.Roslib.XmlRpc
 
     public sealed class LookupNodeResponse : BaseResponse
     {
-        public Uri Uri { get; }
+        public Uri? Uri { get; }
 
-        internal LookupNodeResponse(object[] a) : base(a)
+        internal LookupNodeResponse(object[]? a)
         {
-            if (!IsValid || !EnsureSize(a, 3))
+            if (a is null ||
+                a.Length != 3 ||
+                !(a[0] is int code) ||
+                !(a[1] is string statusMessage) ||
+                !(a[2] is string uriStr))
+            {
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Code = StatusCode.Error;
+                hasParseError = true;
+                return;
+            }
+
+            Code = code;
+            StatusMessage = statusMessage;
+
+            if (Code == StatusCode.Error)
             {
                 return;
             }
 
-            if (Uri.TryCreate(Cast<string>(a[2]) ?? "", UriKind.Absolute, out Uri uri))
+            if (Uri.TryCreate(uriStr, UriKind.Absolute, out Uri? uri))
             {
                 Uri = uri;
             }
@@ -405,24 +519,43 @@ namespace Iviz.Roslib.XmlRpc
 
         public ReadOnlyCollection<(string name, string type)> Topics { get; } = Empty;
 
-        internal GetPublishedTopicsResponse(object[] a) : base(a)
+        internal GetPublishedTopicsResponse(object[]? a)
         {
-            if (!IsValid || !EnsureSize(a, 3))
+            if (a is null ||
+                a.Length != 3 ||
+                !(a[0] is int code) ||
+                !(a[1] is string statusMessage) ||
+                !(a[2] is object[] objTopics))
+            {
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Code = StatusCode.Error;
+                hasParseError = true;
+                return;
+            }
+
+            Code = code;
+            StatusMessage = statusMessage;
+
+            if (Code == StatusCode.Error)
             {
                 return;
             }
 
-            object[] tmp = Cast<object[]>(a[2]);
-            if (tmp == null)
+            List<(string, string)> topics = new List<(string, string)>();
+            foreach (var objTopic in objTopics)
             {
-                return;
-            }
+                if (!(objTopic is object[] topic) ||
+                    topic.Length != 2 ||
+                    !(topic[0] is string topicName) ||
+                    !(topic[1] is string topicType))
+                {
+                    Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                    Code = StatusCode.Error;
+                    hasParseError = true;
+                    return;
+                }
 
-            (string, string)[] topics = new (string, string)[tmp.Length];
-            for (int i = 0; i < topics.Length; i++)
-            {
-                object[] topic = Cast<object[]>(tmp[i]);
-                topics[i] = (Cast<string>(topic[0]), Cast<string>(topic[1]));
+                topics.Add((topicName, topicType));
             }
 
             Topics = topics.AsReadOnly();
@@ -435,31 +568,41 @@ namespace Iviz.Roslib.XmlRpc
 
         public ReadOnlyCollection<Uri> Publishers { get; } = Empty;
 
-        internal RegisterSubscriberResponse(object[] a) : base(a)
+        internal RegisterSubscriberResponse(object[]? a)
         {
-            if (!IsValid || !EnsureSize(a, 3))
+            if (a is null ||
+                a.Length != 3 ||
+                !(a[0] is int code) ||
+                !(a[1] is string statusMessage) ||
+                !(a[2] is object[] objUriStrs))
             {
-                return;
-            }
-
-            object[] tmp = Cast<object[]>(a[2]);
-            if (tmp == null)
-            {
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Code = StatusCode.Error;
                 hasParseError = true;
                 return;
             }
 
-            List<Uri> publishers = new List<Uri>();
-            for (int i = 0; i < tmp.Length; i++)
+            Code = code;
+            StatusMessage = statusMessage;
+
+            if (Code == StatusCode.Error)
             {
-                if (!Uri.TryCreate(Cast<string>(tmp[i]) ?? "", UriKind.Absolute, out Uri publisher))
+                return;
+            }
+
+            List<Uri> publishers = new List<Uri>();
+            foreach (var objUriStr in objUriStrs)
+            {
+                if (!(objUriStr is string uriStr) ||
+                    !Uri.TryCreate(uriStr, UriKind.Absolute, out Uri? publisher))
                 {
-                    Logger.Log($"RcpMaster: Invalid uri '{tmp[i]}'");
+                    Logger.Log($"RcpMaster: Invalid uri '{objUriStr}'");
+                    Code = StatusCode.Error;
+                    hasParseError = true;
+                    return;
                 }
-                else
-                {
-                    publishers.Add(publisher);
-                }
+
+                publishers.Add(publisher);
             }
 
             Publishers = publishers.AsReadOnly();
@@ -470,14 +613,29 @@ namespace Iviz.Roslib.XmlRpc
     {
         public int NumUnsubscribed { get; }
 
-        internal UnregisterSubscriberResponse(object[] a) : base(a)
+        internal UnregisterSubscriberResponse(object[]? a)
         {
-            if (!IsValid || !EnsureSize(a, 3))
+            if (a is null ||
+                a.Length != 3 ||
+                !(a[0] is int code) ||
+                !(a[1] is string statusMessage) ||
+                !(a[2] is int numUnsubscribed))
             {
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Code = StatusCode.Error;
+                hasParseError = true;
                 return;
             }
 
-            NumUnsubscribed = Cast<int>(a[2]);
+            Code = code;
+            StatusMessage = statusMessage;
+
+            if (Code == StatusCode.Error)
+            {
+                return;
+            }            
+
+            NumUnsubscribed = numUnsubscribed;
         }
     }
 
@@ -487,23 +645,40 @@ namespace Iviz.Roslib.XmlRpc
 
         public ReadOnlyCollection<string> Subscribers { get; } = Empty;
 
-        internal RegisterPublisherResponse(object[] a) : base(a)
+        internal RegisterPublisherResponse(object[]? a)
         {
-            if (!IsValid || !EnsureSize(a, 3))
+            if (a is null ||
+                a.Length != 3 ||
+                !(a[0] is int code) ||
+                !(a[1] is string statusMessage) ||
+                !(a[2] is object[] objSubscriberStrs))
             {
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Code = StatusCode.Error;
+                hasParseError = true;
                 return;
             }
 
-            object[] tmp = Cast<object[]>(a[2]);
-            if (tmp == null)
+            Code = code;
+            StatusMessage = statusMessage;
+
+            if (Code == StatusCode.Error)
             {
                 return;
-            }
-
-            string[] subscribers = new string[tmp.Length];
-            for (int i = 0; i < subscribers.Length; i++)
+            }              
+            
+            List<string> subscribers = new List<string>();
+            foreach (var objSubscriberStr in objSubscriberStrs)
             {
-                subscribers[i] = Cast<string>(tmp[i]);
+                if (!(objSubscriberStr is string subscriberStr))
+                {
+                    Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                    Code = StatusCode.Error;
+                    hasParseError = true;
+                    return;                    
+                }
+
+                subscribers.Add(subscriberStr);
             }
 
             Subscribers = subscribers.AsReadOnly();
@@ -514,29 +689,60 @@ namespace Iviz.Roslib.XmlRpc
     {
         public int NumUnregistered { get; }
 
-        internal UnregisterPublisherResponse(object[] a) : base(a)
+        internal UnregisterPublisherResponse(object[]? a)
         {
-            if (!IsValid || !EnsureSize(a, 3))
+            if (a is null ||
+                a.Length != 3 ||
+                !(a[0] is int code) ||
+                !(a[1] is string statusMessage) ||
+                !(a[2] is int numUnregistered))
             {
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Code = StatusCode.Error;
+                hasParseError = true;
                 return;
             }
 
-            NumUnregistered = Cast<int>(a[2]);
+            Code = code;
+            StatusMessage = statusMessage;
+
+            if (Code == StatusCode.Error)
+            {
+                return;
+            }              
+
+            NumUnregistered = numUnregistered;
         }
     }
 
     public sealed class LookupServiceResponse : BaseResponse
     {
-        public Uri ServiceUrl { get; }
+        public Uri? ServiceUrl { get; }
 
-        internal LookupServiceResponse(object[] a) : base(a)
+        internal LookupServiceResponse(object[]? a)
         {
-            if (!IsValid || !EnsureSize(a, 3))
+            if (a is null ||
+                a.Length != 3 ||
+                !(a[0] is int code) ||
+                !(a[1] is string statusMessage) ||
+                !(a[2] is string uriStr) ||
+                !Uri.TryCreate(uriStr, UriKind.Absolute, out Uri? uri))
+            {
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Code = StatusCode.Error;
+                hasParseError = true;
+                return;
+            }            
+            
+            Code = code;
+            StatusMessage = statusMessage;
+
+            if (Code == StatusCode.Error)
             {
                 return;
-            }
-
-            ServiceUrl = new Uri(Cast<string>(a[2]));
+            }                
+            
+            ServiceUrl = uri;
         }
     }
 
@@ -544,14 +750,29 @@ namespace Iviz.Roslib.XmlRpc
     {
         public int NumUnregistered { get; }
 
-        internal UnregisterServiceResponse(object[] a) : base(a)
+        internal UnregisterServiceResponse(object[]? a)
         {
-            if (!IsValid || !EnsureSize(a, 3))
+            if (a is null ||
+                a.Length != 3 ||
+                !(a[0] is int code) ||
+                !(a[1] is string statusMessage) ||
+                !(a[2] is int numUnregistered))
             {
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Code = StatusCode.Error;
+                hasParseError = true;
                 return;
             }
 
-            NumUnregistered = Cast<int>(a[2]);
+            Code = code;
+            StatusMessage = statusMessage;
+
+            if (Code == StatusCode.Error)
+            {
+                return;
+            }              
+
+            NumUnregistered = numUnregistered;
         }
     }
 }

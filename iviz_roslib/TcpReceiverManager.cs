@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,10 +18,12 @@ namespace Iviz.Roslib
         readonly AsyncLock mutex = new AsyncLock();
         readonly Dictionary<Uri, TcpReceiverAsync<T>> connectionsByUri = new Dictionary<Uri, TcpReceiverAsync<T>>();
         readonly RosClient client;
+        readonly RosSubscriber<T> subscriber;
         readonly TopicInfo<T> topicInfo;
 
-        public TcpReceiverManager(RosClient client, TopicInfo<T> topicInfo, bool requestNoDelay)
+        public TcpReceiverManager(RosSubscriber<T> subscriber, RosClient client, TopicInfo<T> topicInfo, bool requestNoDelay)
         {
+            this.subscriber = subscriber;
             this.client = client;
             this.topicInfo = topicInfo;
             RequestNoDelay = requestNoDelay;
@@ -63,15 +64,13 @@ namespace Iviz.Roslib
 
             if (numConnectionsChanged)
             {
-                Subscriber.RaiseNumPublishersChanged();
+                subscriber.RaiseNumPublishersChanged();
             }
         }
 
         public bool RequestNoDelay { get; }
         public int TimeoutInMs { get; set; } = DefaultTimeoutInMs;
-        public RosSubscriber<T> Subscriber { private get; set; }
-
-        internal async Task<Endpoint> RequestConnectionFromPublisherAsync(Uri remoteUri)
+        internal async Task<Endpoint?> RequestConnectionFromPublisherAsync(Uri remoteUri)
         {
             NodeClient.RequestTopicResponse response;
             try
@@ -89,7 +88,7 @@ namespace Iviz.Roslib
                 return null;
             }
 
-            if (!response.IsValid || response.Protocol.Type == null)
+            if (!response.IsValid || response.Protocol == null)
             {
                 Logger.LogDebug(
                     $"{this}: Connection request to publisher {remoteUri} has failed: {response.StatusMessage}");
@@ -108,12 +107,12 @@ namespace Iviz.Roslib
 
         internal void MessageCallback(in T msg)
         {
-            Subscriber.MessageCallback(msg);
+            subscriber.MessageCallback(msg);
         }
 
         async Task<bool> AddPublisherAsync(Uri remoteUri)
         {
-            Endpoint remoteEndpoint = await RequestConnectionFromPublisherAsync(remoteUri).Caf();
+            Endpoint? remoteEndpoint = await RequestConnectionFromPublisherAsync(remoteUri).Caf();
             if (remoteEndpoint == null)
             {
                 return false;
@@ -147,7 +146,7 @@ namespace Iviz.Roslib
                     .Select(pair => pair.Value).ToArray();
 
                 //Logger.Log(this + " old: " + string.Join(",", connectionsByUri.Keys) + " new: " +
-                //           string.Join(",", newPublishers) + " todie: " + string.Join<TcpReceiverAsync<T>>(",", toDelete));
+                //           string.Join(",", newPublishers) + " toDie: " + string.Join<TcpReceiverAsync<T>>(",", toDelete));
 
                 foreach (TcpReceiverAsync<T> receiver in toDelete)
                 {
@@ -161,7 +160,7 @@ namespace Iviz.Roslib
 
             if (numConnectionsChanged)
             {
-                Subscriber.RaiseNumPublishersChanged();
+                subscriber.RaiseNumPublishersChanged();
             }
         }
         
@@ -189,7 +188,7 @@ namespace Iviz.Roslib
                 }
 
                 connectionsByUri.Clear();
-                Subscriber.RaiseNumPublishersChanged();
+                subscriber.RaiseNumPublishersChanged();
             }
         }
 

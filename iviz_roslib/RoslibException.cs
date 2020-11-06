@@ -75,7 +75,7 @@ namespace Iviz.Roslib
     }
 
     /// <summary>
-    /// Wrapper around a <see cref="XmlRpcException"/>
+    /// Wrapper around a <see cref="Iviz.XmlRpc.XmlRpcException"/>
     /// </summary>
     public class RosRpcException : RoslibException
     {
