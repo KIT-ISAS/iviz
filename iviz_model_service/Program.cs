@@ -9,9 +9,9 @@ namespace Iviz.ModelService
     {
         static void Main()
         {
-            Console.WriteLine("** iviz_model_service: Starting...");
+            Console.WriteLine("** Iviz.ModelService: Starting...");
             
-            Uri masterUri = RosClient.EnvironmentMasterUri;
+            Uri? masterUri = RosClient.EnvironmentMasterUri;
             if (masterUri is null)
             {
                 Console.Error.WriteLine("EE Fatal error: Failed to determine master uri. Is ROS_MASTER_URI set?");
@@ -42,6 +42,8 @@ namespace Iviz.ModelService
             Console.WriteLine("** Waiting for requests...");
 
             WaitForCancel();
+
+            Console.WriteLine();
         }
 
         static void WaitForCancel()
