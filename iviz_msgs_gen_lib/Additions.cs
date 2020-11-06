@@ -10,6 +10,9 @@ namespace Iviz.MsgsGen
             {
                 "public static readonly Point Zero = new Point(0, 0, 0);",
                 "public static readonly Point One = new Point(1, 1, 1);",
+                "public static readonly Point UnitX = new Point(1, 0, 0);",
+                "public static readonly Point UnitY = new Point(0, 1, 0);",
+                "public static readonly Point UnitZ = new Point(0, 0, 1);",
                 "public static implicit operator Vector3(in Point p) => new Vector3(p.X, p.Y, p.Z);",
                 "public static Point operator +(in Point v, in Point w) => new Point(v.X + w.X, v.Y + w.Y, v.Z + w.Z);",
                 "public static Point operator -(in Point v, in Point w) => new Point(v.X - w.X, v.Y - w.Y, v.Z - w.Z);",
@@ -23,6 +26,9 @@ namespace Iviz.MsgsGen
             {
                 "public static readonly Vector3 Zero = new Vector3(0, 0, 0);",
                 "public static readonly Vector3 One = new Vector3(1, 1, 1);",
+                "public static readonly Vector3 UnitX = new Vector3(1, 0, 0);",
+                "public static readonly Vector3 UnitY = new Vector3(0, 1, 0);",
+                "public static readonly Vector3 UnitZ = new Vector3(0, 0, 1);",
                 "public static implicit operator Point(in Vector3 p) => new Point(p.X, p.Y, p.Z);",
                 "public static Vector3 operator +(in Vector3 v, in Vector3 w) => new Vector3(v.X + w.X, v.Y + w.Y, v.Z + w.Z);",
                 "public static Vector3 operator -(in Vector3 v, in Vector3 w) => new Vector3(v.X - w.X, v.Y - w.Y, v.Z - w.Z);",
