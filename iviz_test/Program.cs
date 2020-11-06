@@ -1,603 +1,493 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Runtime.CompilerServices;
-using System.Text;
+using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Transactions;
-using BitMiracle.LibJpeg;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
-using Iviz.Msgs.SensorMsgs;
 using Iviz.Msgs.StdMsgs;
-using Iviz.Msgs.Tf2Msgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Roslib;
-using Iviz.Urdf;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using Int64 = System.Int64;
 using Pose = Iviz.Msgs.GeometryMsgs.Pose;
+using Uri = System.Uri;
 using Vector3 = Iviz.Msgs.GeometryMsgs.Vector3;
 
 namespace iviz_test
 {
-    class Program
+    public sealed class RosMarkerHelper : IDisposable
     {
-        static void Main()
+        readonly string ns;
+        readonly List<Marker?> markers = new List<Marker?>();
+        bool disposed;
+
+        RosPublisher<MarkerArray>? publisher;
+        string? publisherId;
+
+        public RosMarkerHelper(string ns = "Marker")
         {
-            UrdfFile.CreateFromFile(
-                "/Users/akzeac/Library/Application Support/edu_kit_isas/iviz/robots/D80211C28B21E0F3F49E71F36BFF236F");
-            
-            Thread.Sleep(10000);
-
-            /*
-            Uri masterUri = RosClient.EnvironmentMasterUri ?? 
-                            new Uri("http://141.3.59.19:11311");
-
-            string callerId = "/iviz_test";
-            RosClient client = new RosClient(masterUri, callerId);
-            
-            for (int i = 0; i < 20; i++)
-            {
-                Thread.Sleep(1000);
-            }
-            */
+            this.ns = ns;
         }
-        
-        static void Main222()
+
+        public RosMarkerHelper(RosClient client, string topic = "/markers", string @namespace = "Marker") : this(
+            @namespace)
         {
-            Uri masterUri = RosClient.EnvironmentMasterUri ?? 
-                            new Uri("http://192.168.0.220:11311");
-            string callerId = "/iviz_test";
+            Start(client, topic);
+        }
 
-            RosClient client = new RosClient(masterUri, callerId);
-
-            client.Advertise("/test_topic", out RosPublisher<PoseStamped> publisher);
-
-            PoseStamped msg = new PoseStamped
+        public void Start(RosClient client, string topic = "/markers")
+        {
+            if (publisherId != null)
             {
-                Header = new Header { FrameId = "/map", Stamp = time.Now() },
-                Pose = new Pose
-                {
-                    Orientation = new Quaternion(0, 0, 0, 1),
-                    Position = new Point(0, 0, 2)
-                }
-            };
-
-            for (int i = 0; i < 20; i++)
-            {
-                publisher.Publish(msg);
-                Thread.Sleep(1000);
+                throw new InvalidOperationException("Helper has already been started");
             }
 
-            client.Close();
-            
-            /*
-            string data =
-                File.ReadAllText("/Users/akzeac/Shared/aws-robomaker-hospital-world/worlds/hospital.world");
-            SdfFile sdfFile = SdfFile.Create(data);
-
-            var modelPaths = SdfFile.CreateModelPaths("/Users/akzeac/Shared/aws-robomaker-hospital-world/");
-            SdfFile newSdfFile = sdfFile.ResolveIncludes(modelPaths);
-            */
-
-
-
-            //Console.WriteLine(JsonConvert.SerializeObject(newSdfFile, Formatting.Indented));
-
+            publisherId = client.Advertise(topic, out publisher);
         }
-        
-        /*
-        static void CheckModelPath(string folderName, string path, IDictionary<string, List<string>> modelPaths)
+
+        public void Dispose()
         {
-            if (File.Exists(path + "/model.config"))
+            if (disposed)
             {
-                AddModelPath(folderName, path, modelPaths);
                 return;
             }
 
-            foreach (string subFolderPath in Directory.GetDirectories(path))
+            disposed = true;
+            if (publisher != null && publisherId != null)
             {
-                string subFolder = Path.GetFileName(subFolderPath);
-                CheckModelPath(subFolder, subFolderPath, modelPaths);
+                publisher?.Unadvertise(publisherId);
             }
         }
 
-        static void AddModelPath(string package, string path, IDictionary<string, List<string>> modelPaths)
+        int GetFreeId()
         {
-            if (!modelPaths.TryGetValue(package, out List<string> paths))
+            int index = markers.FindIndex(marker => marker == null);
+            if (index != -1)
             {
-                paths = new List<string>();
-                modelPaths[package.ToLower()] = paths;
+                return index;
             }
-            paths.Add(path);
-            //Console.WriteLine("++ " + package);
-        }
-        */
-        
-        static void Main_Q()
-        {
-            using RosClient client = new RosClient(
-                "http://192.168.0.220:11311",
-                //"http://141.3.59.5:11311",
-                null,
-                "http://192.168.0.157:7619"
-                //"http://141.3.59.19:7621"
-            );            
-            client.Advertise("/joints", out RosPublisher<JointState> publisher2);
 
-            double k = 0.5f;
-            while (true)
+            markers.Add(null);
+            return markers.Count - 1;
+        }
+
+        public int CreateArrow(in Pose pose, in ColorRGBA color, in Vector3 scale, string frameId = "map",
+            int replaceId = -1)
+        {
+            int id = replaceId != -1 ? replaceId : GetFreeId();
+            markers[id] = CreateArrow(ns, id, pose, color, scale, frameId);
+            return id;
+        }
+
+        public static Marker CreateArrow(string ns, int id, in Pose pose, in ColorRGBA color, in Vector3 scale,
+            string frameId)
+        {
+            return new Marker
             {
-                Console.WriteLine("publishing...");
-                JointState msg = new JointState()
+                Header = new Header
                 {
-                    
-                    Header = new Header(),
-                    Name = new []{ "boom_revolute" },
-                    Position = new []{ k }
-                };
-
-                publisher2.Publish(msg);
-
-                Thread.Sleep(100);
-            }
-        }
-        
-        
-        static void Main_P()
-        {
-            RosClient client = new RosClient(
-                //"http://192.168.0.73:11311",
-                "http://141.3.59.5:11311",
-                null,
-                //"http://192.168.0.157:7619"
-                "http://141.3.59.19:7621"
-            );
-            InteractiveMarker intMarker = new InteractiveMarker();
-            intMarker.Header = new Header()
-            {
-                FrameId = "map",
-                Stamp = time.Now(),
-            };
-            intMarker.Name = "my_marker";
-            intMarker.Scale = 1;
-            intMarker.Description = "Simple 1-DOF Control";
-
-            Marker boxMarker = new Marker();
-            boxMarker.Header = new Header()
-            {
-                FrameId = ""
-            };
-            boxMarker.Action = Marker.ADD;
-            boxMarker.Type = Marker.CUBE;
-            boxMarker.Scale = new Vector3(0.45f, 0.45, 0.45);
-            boxMarker.Color = new ColorRGBA(0.5f, 0.5f, 0.5f, 1);
-
-            InteractiveMarkerControl boxControl = new InteractiveMarkerControl();
-            boxControl.AlwaysVisible = true;
-            boxControl.Markers = new[] {boxMarker};
-
-            /*
-            InteractiveMarkerControl rotateControl = new InteractiveMarkerControl();
-            rotateControl.Name = "move_x";
-            rotateControl.InteractionMode = InteractiveMarkerControl.MOVE_AXIS;
-            */
-            InteractiveMarkerControl control = new InteractiveMarkerControl
-            {
-                Name = "e2_move",
-                Orientation = new Quaternion(0, 1, 0, 1),
-                InteractionMode = InteractiveMarkerControl.MOVE_PLANE,
-                OrientationMode = InteractiveMarkerControl.INHERIT
-            };
-
-            InteractiveMarkerControl control2 = new InteractiveMarkerControl
-            {
-                Name = "e2_rotate",
-                Orientation = new Quaternion(0, 1, 0, 1),
-                InteractionMode = InteractiveMarkerControl.ROTATE_AXIS,
-                OrientationMode = InteractiveMarkerControl.INHERIT
-            };
-
-            intMarker.Controls = new[] {boxControl, control, control2};
-
-            client.Advertise("/update", out RosPublisher<InteractiveMarkerUpdate> publisher);
-            client.Advertise("/tf", out RosPublisher<TFMessage> publisher2);
-            client.Subscribe<InteractiveMarkerFeedback>("/interactive_markers/feedback", Callback);
-            while (true)
-            {
-                Console.WriteLine("publishing...");
-                publisher.Publish(new InteractiveMarkerUpdate()
-                {
-                    Type = InteractiveMarkerUpdate.UPDATE,
-                    Markers = new[] {intMarker}
-                });
-
-                position = targetPosition.Subtract(position).Normalized().Multiply(v).Add(position);
-                if (targetPosition.Subtract(position).Magnitude() > 2)
-                {
-                    double newAngle = Math.Atan2(targetPosition.Y - position.Y, targetPosition.X - position.X);
-                    angle += (newAngle - angle) * v2;
-                }
-                Quaternion quaternion = VectorStuff.ToQuat(angle);
-
-                TFMessage msg = new TFMessage()
-                {
-                    Transforms = new[]
-                    {
-                        new TransformStamped()
-                        {
-                            Header = new Header()
-                            {
-                                FrameId = "map",
-                                Stamp = time.Now()
-                            },
-                            ChildFrameId = "e2/base_link",
-                            Transform = new Transform()
-                            {
-                                Translation = new Vector3(position.X, position.Y, position.Z),
-                                Rotation = quaternion
-                            }
-                        }
-                    }
-                };
-                publisher2.Publish(msg);
-
-                Thread.Sleep(10);
-            }
-        }
-
-        static double angle = 0;
-        static Point position = new Point(-20, 20, 0);
-        static double v = 0.01f;
-        static double v2 = 0.01f;
-        static Point targetPosition = new Point(0, 0, 0);
-
-
-        static void Callback(InteractiveMarkerFeedback f)
-        {
-            if (f.EventType != InteractiveMarkerFeedback.POSE_UPDATE ||
-                f.ControlName.Length < 3 ||
-                f.ControlName.Substring(0, 3) != "e2_")
-            {
-            }
-
-            targetPosition = f.Pose.Position;
-        }
-
-        static void Main_D()
-        {
-            RosClient client = new RosClient(
-                "http://192.168.0.73:11311",
-                //"http://141.3.59.5:11311",
-                null,
-                "http://192.168.0.157:7619"
-                //"http://141.3.59.19:7621"
-            );
-            Iviz.Msgs.NavMsgs.Path path = new Iviz.Msgs.NavMsgs.Path();
-
-            List<PoseStamped> list = new List<PoseStamped>();
-
-            path.Header = new Header(0, new time(DateTime.Now), "map");
-            for (int i = 0; i < 5; i++)
-            {
-                float t = i / 5f * 6;
-                list.Add(new PoseStamped(path.Header, new Pose(
-                    new Point(Math.Sin(t), Math.Cos(t), t), new Quaternion(0, 0, 0, 1))));
-            }
-
-            path.Poses = list.ToArray();
-
-            client.Advertise("/my_path", out RosPublisher<Iviz.Msgs.NavMsgs.Path> publisher);
-            while (true)
-            {
-                Console.WriteLine("publishing...");
-                publisher.Publish(path);
-                Thread.Sleep(1000);
-            }
-        }
-
-        static void Main_N()
-        {
-            RosClient client = new RosClient(
-                //"http://192.168.0.73:11311",
-                "http://141.3.59.5:11311",
-                null,
-                //"http://192.168.0.157:7613"
-                "http://141.3.59.19:7621"
-            );
-
-            /*
-            Console.WriteLine(client.GetSystemState());
-            client.Subscribe<TFMessage>("/tf", Callback);
-            */
-
-
-            client.Advertise("/tf", out RosPublisher<TFMessage> publisherTf);
-            client.Advertise("/test_markers", out RosPublisher<MarkerArray> publisherMarkers);
-
-            TransformStamped[] tfs = new TransformStamped[1];
-            tfs[0] = new TransformStamped
-            (
-                Header: new Header(0, new time(DateTime.Now), "map"),
-                ChildFrameId: "ar_marker",
-                Transform: new Transform
-                (
-                    Translation: new Vector3
-                    (
-                        X: 0,
-                        Y: 0,
-                        Z: 0.725f
-                    ),
-                    Rotation: new Quaternion
-                    (
-                        X: 0,
-                        Y: 0,
-                        Z: 0,
-                        W: 1
-                    )
-                )
-            );
-            TFMessage tf = new TFMessage
-            {
-                Transforms = tfs
-            };
-
-            Marker marker = new Marker()
-            {
-                Header = new Header(0, new time(DateTime.Now), "ar_marker"),
-                Ns = "iviz",
-                Id = 0,
-                Type = Marker.CYLINDER,
+                    FrameId = frameId ?? ""
+                },
+                Ns = ns,
+                Id = id,
+                Type = Marker.ARROW,
                 Action = Marker.ADD,
-                Pose = new Pose(new Point(0, 0, -0.0125f), new Quaternion(0, 0, 0, 1)),
-                Scale = new Vector3(0.90f, 0.90f, 0.025f),
-                Color = new ColorRGBA(1, 1, 1, 1),
-                Lifetime = new duration(),
+                Pose = pose,
+                Scale = scale,
+                Color = color,
                 FrameLocked = true,
             };
-            MarkerArray array = new MarkerArray(new[] {marker});
+        }
 
-            while (true)
+        public int CreateArrow(in Point a, in Point b, in ColorRGBA color, double scale = -1, string frameId = "map",
+            int replaceId = -1)
+        {
+            int id = replaceId != -1 ? replaceId : GetFreeId();
+            markers[id] = CreateArrow(ns, id, a, b, color, scale, frameId);
+            return id;
+        }
+
+        public static Marker CreateArrow(string ns, int id, in Point a, in Point b, in ColorRGBA color, double scale,
+            string frameId)
+        {
+            return new Marker
             {
-                publisherTf.Publish(tf);
-                publisherMarkers.Publish(array);
-                Thread.Sleep(1000);
-            }
-
-            Console.In.Read();
-        }
-
-        static void Main_Old4()
-        {
-            Stream stream = File.Open("/Users/akzeac/Downloads/001-0.jpg", FileMode.Open);
-            var image = new JpegImage(stream);
-            Console.WriteLine(image.BitsPerComponent);
-            Console.WriteLine(image.Colorspace);
-
-            const int bmpHeaderLength = 54;
-            byte[] buffer = new byte[image.Width * image.Height * 3 + bmpHeaderLength];
-            Stream stream2 = new MemoryStream(buffer);
-            image.WriteBitmap(stream2);
-            Console.WriteLine(image.Width + " " + image.Height + " " + buffer.Length + " " + stream2.Position);
-            Console.In.Read();
-        }
-
-        static void Main_Old5()
-        {
-            RosClient client = new RosClient(
-                //"http://192.168.0.73:11311",
-                "http://141.3.59.5:11311",
-                null,
-                //"http://192.168.0.157:7613"
-                "http://141.3.59.19:7614"
-            );
-
-            Console.WriteLine(client.GetSystemState());
-            client.Subscribe<TFMessage>("/tf", Callback);
-            Console.In.Read();
-        }
-
-        static void Main_Old_2(string[] args)
-        {
-            RosClient client = new RosClient(
-                //"http://192.168.0.73:11311",
-                "http://141.3.59.5:11311",
-                null,
-                //"http://192.168.0.157:7614"
-                "http://141.3.59.35:7614"
-            );
-
-            /*
-            AddTwoInts service = new AddTwoInts();
-            Console.WriteLine(service.ToJsonString());
-            */
-
-            /*
-            Topics topics = new Topics();
-            client.CallService("/rosapi/topics", topics);
-            Console.WriteLine(topics.ToJsonString());
-
-            client.Close();
-            */
-            /*
-            client.AdvertiseService<AddTwoInts>("/add", x =>
-            {
-                x.response = new AddTwoInts.Response()
+                Header = new Header
                 {
-                    sum = x.request.a + x.request.b
-                };
-                throw new ArgumentException();
-            });
+                    FrameId = frameId ?? ""
+                },
+                Ns = ns,
+                Id = id,
+                Type = Marker.ARROW,
+                Action = Marker.ADD,
+                Pose = Pose.Identity,
+                Scale = Vector3.One,
+                Color = color,
+                FrameLocked = true,
+                Points = new[] {a, b}
+            };
+        }
 
-            while (true)
+        public int CreateCube(in Point position, in ColorRGBA color, in Vector3 scale, string frameId = "map",
+            int replaceId = -1)
+        {
+            return CreateCube(new Pose(position, Quaternion.Identity), color, scale, frameId, replaceId);
+        }
+
+        public int CreateCube(in Pose pose, in ColorRGBA color, in Vector3 scale, string frameId = "map",
+            int replaceId = -1)
+        {
+            int id = replaceId != -1 ? replaceId : GetFreeId();
+            markers[id] = CreateCube(ns, id, pose, scale, color, frameId);
+            return id;
+        }
+
+        public static Marker CreateCube(string ns, int id, in Pose pose, in Vector3 scale, in ColorRGBA color,
+            string frameId)
+        {
+            if (ns == null)
             {
-                Thread.Sleep(1000);
+                throw new ArgumentNullException(nameof(ns));
             }
-            */
 
-            StringBuilder sb = new StringBuilder();
-            StringWriter sw = new StringWriter(sb);
-
-            Point point = new Point();
-            /*
-            TransformStamped[] tfs = new TransformStamped[1];
-            tfs[0] = new TransformStamped
+            return new Marker
             {
-                transform = new Transform
+                Header = new Header
                 {
-                    translation = new Vector3
-                    {
-                        x = 0,
-                        y = 0,
-                        z = 1
-                    },
-                    rotation = new Quaternion
-                    {
-                        x = 0,
-                        y = 0,
-                        z = 0,
-                        w = 1
-                    }
-                }
+                    FrameId = frameId ?? ""
+                },
+                Ns = ns,
+                Id = id,
+                Type = Marker.CUBE,
+                Action = Marker.ADD,
+                Pose = pose,
+                Scale = scale,
+                Color = color,
+                FrameLocked = true
             };
-            TFMessage tf = new TFMessage
+        }
+
+        public int CreateSphere(in Point position, in ColorRGBA color, in Vector3 scale, string frameId = "map",
+            int replaceId = -1)
+        {
+            return CreateSphere(new Pose(position, Quaternion.Identity), color, scale, frameId, replaceId);
+        }
+
+        public int CreateSphere(in Pose pose, in ColorRGBA color, in Vector3 scale, string frameId = "map",
+            int replaceId = -1)
+        {
+            int id = replaceId != -1 ? replaceId : GetFreeId();
+            markers[id] = CreateSphere(ns, id, pose, scale, color, frameId);
+            return id;
+        }
+
+        public static Marker CreateSphere(string ns, int id, in Pose pose, in Vector3 scale, in ColorRGBA color,
+            string frameId)
+        {
+            if (ns == null)
             {
-                transforms = tfs
-            };
-
-
-            Console.WriteLine(tf.ToJsonString());
-            */
-
-            /*
-            string json = sb.ToString();
-
-            JsonTextReader reader = new JsonTextReader(new StringReader(json));
-
-            TFMessage tf2 = new TFMessage();
-
-            Console.WriteLine(tf2.ToJsonString());
-            */
-
-            /*
-            RosClient client = new RosClient("http://192.168.0.73:11311", null, "http://192.168.0.157:7615");
-            //client.Subscribe<Iviz.Msgs.std_msgs.Int32>("/client_count", Callback);
-            //Console.WriteLine(client.GetSystemState());
-
-
-            client.Advertise<TFMessage>("/tf", out RosPublisher publisher);
-
-            */
-            TransformStamped[] tfs = new TransformStamped[1];
-            tfs[0] = new TransformStamped
-            (
-                Header: new Iviz.Msgs.StdMsgs.Header(),
-                ChildFrameId: "",
-                Transform: new Transform
-                (
-                    Translation: new Vector3
-                    (
-                        X: 0,
-                        Y: 0,
-                        Z: 1
-                    ),
-                    Rotation: new Quaternion
-                    (
-                        X: 0,
-                        Y: 0,
-                        Z: 0,
-                        W: 1
-                    )
-                )
-            );
-            TFMessage tf = new TFMessage
-            {
-                Transforms = tfs
-            };
-            /*
-            client.Subscribe<TFMessage>("/tf", Callback);
-
-            while (true)
-            {
-                publisher.Publish(tf);
-                //Console.WriteLine(">> " + tf.ToJsonString());
-                Thread.Sleep(1000);
-            }
-            
-            Console.Read();
-            client.Close();
-            */
-            //client.Subscribe<TFMessage>("/tf", Callback);
-            client.Advertise("/tf", out RosPublisher<TFMessage> publisher);
-
-            //client.Subscribe<Marker>("/hololens/environment", Callback);
-
-
-            while (true)
-            {
-                publisher.Publish(tf);
-                //Console.WriteLine(">> " + tf.ToJsonString());
-                Thread.Sleep(1000);
+                throw new ArgumentNullException(nameof(ns));
             }
 
-            Console.Read();
-            client.Close();
+            return new Marker
+            {
+                Header = new Header
+                {
+                    FrameId = frameId ?? ""
+                },
+                Ns = ns,
+                Id = id,
+                Type = Marker.SPHERE,
+                Action = Marker.ADD,
+                Pose = pose,
+                Scale = scale,
+                Color = color,
+                FrameLocked = true
+            };
         }
 
-        static void Callback(Iviz.Msgs.StdMsgs.Int32 value)
+        public int CreateCylinder(in Point position, in ColorRGBA color, in Vector3 scale, string frameId = "map",
+            int replaceId = -1)
         {
-            Console.WriteLine("<< " + value.ToJsonString());
+            return CreateCylinder(new Pose(position, Quaternion.Identity), color, scale, frameId, replaceId);
         }
 
-        static void Callback(TFMessage value)
+        public int CreateCylinder(in Pose pose, in ColorRGBA color, in Vector3 scale, string frameId = "map",
+            int replaceId = -1)
         {
-            Console.WriteLine("<< " + value.ToJsonString());
+            int id = replaceId != -1 ? replaceId : GetFreeId();
+            markers[id] = CreateCylinder(ns, id, pose, scale, color, frameId);
+            return id;
         }
 
-        static void Callback(Marker value)
+        public static Marker CreateCylinder(string ns, int id, in Pose pose, in Vector3 scale, in ColorRGBA color,
+            string frameId)
         {
-            Console.WriteLine("<< " + value.ToJsonString());
+            if (ns == null)
+            {
+                throw new ArgumentNullException(nameof(ns));
+            }
+
+            return new Marker
+            {
+                Header = new Header
+                {
+                    FrameId = frameId ?? ""
+                },
+                Ns = ns,
+                Id = id,
+                Type = Marker.CYLINDER,
+                Action = Marker.ADD,
+                Pose = pose,
+                Scale = scale,
+                Color = color,
+                FrameLocked = true
+            };
+        }
+
+        public int CreateTextViewFacing(string text, in Point position, in ColorRGBA color, double scale,
+            string frameId = "map",
+            int replaceId = -1)
+        {
+            int id = replaceId != -1 ? replaceId : GetFreeId();
+            Marker marker = new Marker
+            {
+                Header = new Header
+                {
+                    FrameId = frameId ?? ""
+                },
+                Ns = ns,
+                Id = id,
+                Type = Marker.TEXT_VIEW_FACING,
+                Action = Marker.ADD,
+                Pose = new Pose(position, Quaternion.Identity),
+                Scale = scale * Vector3.One,
+                Color = color,
+                FrameLocked = true,
+                Text = text
+            };
+
+            markers[id] = marker;
+            return id;
+        }
+
+        public int CreateLines(Point[] lines, in Pose pose, in ColorRGBA color, double scale, string frameId = "map",
+            int replaceId = -1)
+        {
+            int id = replaceId != -1 ? replaceId : GetFreeId();
+            markers[id] = CreateLines(ns, id, lines, null, color, pose, scale, frameId);
+            return id;
+        }
+
+        public int CreateLines(Point[] lines, ColorRGBA[] colors, in Pose pose, double scale,
+            string frameId = "map", int replaceId = -1)
+        {
+            if (colors == null)
+            {
+                throw new ArgumentNullException(nameof(colors));
+            }
+
+            int id = replaceId != -1 ? replaceId : GetFreeId();
+            markers[id] = CreateLines(ns, id, lines, colors, ColorRGBA.White, pose, scale, frameId);
+            return id;
+        }
+
+        public static Marker CreateLines(string ns, int id, Point[] lines, ColorRGBA[]? colors, in ColorRGBA color,
+            in Pose pose, double scale, string frameId)
+        {
+            if (lines == null)
+            {
+                throw new ArgumentNullException(nameof(lines));
+            }
+
+            if (lines.Length % 2 != 0)
+            {
+                throw new ArgumentException("Number of points must be even", nameof(lines));
+            }
+
+            if (colors != null && colors.Length != lines.Length)
+            {
+                throw new ArgumentException("Number of points and colors must be equal", nameof(colors));
+            }
+
+            return new Marker
+            {
+                Header = new Header
+                {
+                    FrameId = frameId ?? ""
+                },
+                Ns = ns,
+                Id = id,
+                Type = Marker.LINE_LIST,
+                Action = Marker.ADD,
+                Pose = pose,
+                Scale = scale * Vector3.One,
+                Color = color,
+                Points = lines,
+                Colors = colors ?? Array.Empty<ColorRGBA>(),
+                FrameLocked = true
+            };
+        }
+
+        public int CreateLineStrip(Point[] lines, in Pose pose, in ColorRGBA color, double scale,
+            string frameId = "map",
+            int replaceId = -1)
+        {
+            if (lines == null)
+            {
+                throw new ArgumentNullException(nameof(lines));
+            }
+
+            int id = replaceId != -1 ? replaceId : GetFreeId();
+            markers[id] = CreateLines(ns, id, lines, null, color, pose, scale, frameId);
+            return id;
+        }
+
+        public int CreateLineStrip(Point[] lines, ColorRGBA[] colors, in Pose pose, double scale,
+            string frameId = "map",
+            int replaceId = -1)
+        {
+            if (colors == null)
+            {
+                throw new ArgumentNullException(nameof(colors));
+            }
+
+            int id = replaceId != -1 ? replaceId : GetFreeId();
+            markers[id] = CreateLines(ns, id, lines, colors, ColorRGBA.White, pose, scale, frameId);
+            return id;
+        }
+
+        public static Marker CreateLineStrip(string ns, int id, Point[] lines, ColorRGBA[]? colors, in ColorRGBA color,
+            in Pose pose, double scale, string frameId)
+        {
+            if (lines == null)
+            {
+                throw new ArgumentNullException(nameof(lines));
+            }
+
+            if (colors != null && colors.Length != lines.Length)
+            {
+                throw new ArgumentException("Number of points and colors must be equal", nameof(colors));
+            }
+
+            return new Marker
+            {
+                Header = new Header
+                {
+                    FrameId = frameId ?? ""
+                },
+                Ns = ns,
+                Id = id,
+                Type = Marker.LINE_STRIP,
+                Action = Marker.ADD,
+                Pose = pose,
+                Scale = scale * Vector3.One,
+                Color = color,
+                Points = lines,
+                Colors = colors ?? Array.Empty<ColorRGBA>(),
+                FrameLocked = true
+            };
+        }
+
+
+        public void RemoveMarker(int id)
+        {
+            if (id < 0 || id >= markers.Count)
+            {
+                throw new ArgumentOutOfRangeException(nameof(id));
+            }
+
+            markers[id] = null;
+        }
+
+        public void Flush()
+        {
+            if (publisher == null)
+            {
+                throw new InvalidOperationException("Start has not been called!");
+            }
+
+            Marker[] toSend = markers.Where(marker => marker != null).ToArray()!;
+            MarkerArray array = new MarkerArray(toSend);
+
+            publisher.Publish(array);
         }
     }
 
-    public static class VectorStuff
+    static class Program
     {
-        public static Point Lerp(in Point A, in Point B, double t)
-        {
-            return new Point(A.X + t * (B.X - A.X), A.Y + t * (B.Y - A.Y), A.Z + t * (B.Z - A.Z));
-        }
+        static Uri RosMasterUri => RosClient.EnvironmentMasterUri ??
+                                   throw new NullReferenceException("Please set the ROS_MASTER_URI variable!");
 
-        public static double Magnitude(this Point A)
+        public static void Main()
         {
-            return Math.Sqrt(A.X * A.X + A.Y * A.Y + A.Z * A.Z);
-        }
+            Console.WriteLine("** Starting Marker test!");
 
-        public static Point Add(this Point A, in Point B)
-        {
-            return new Point(A.X + B.X, A.Y + B.Y, A.Z + B.Z);
-        }
+            Logger.Log = Console.WriteLine;
+            Logger.LogDebug = Console.WriteLine;
+            Logger.LogError = Console.WriteLine;
 
-        public static Point Subtract(this Point A, in Point B)
-        {
-            return new Point(A.X - B.X, A.Y - B.Y, A.Z - B.Z);
-        }
+            using RosClient client = new RosClient(RosMasterUri, callerUri: RosClient.TryGetCallerUri(7632));
+            using RosMarkerHelper helper = new RosMarkerHelper(client);
 
-        public static Point Multiply(this Point A, double t)
-        {
-            return new Point(A.X * t, A.Y * t, A.Z * t);
-        }
+            helper.CreateArrow(Pose.Identity, ColorRGBA.Red, new Vector3(2, 1, 10));
 
-        public static Point Normalized(this Point A)
-        {
-            return A.Multiply(1 / A.Magnitude());
-        }
+            /*
+            helper.CreateArrow(Point.One, Point.Zero, ColorRGBA.Red);
+            helper.CreateCube(new Point(1, 0, 0), ColorRGBA.Magenta, 0.5 * Vector3.One);
+            helper.CreateSphere(new Point(2, 0, 0), ColorRGBA.Blue, 0.5 * Vector3.One);
+            helper.CreateCylinder(new Point(3, 0, 0), ColorRGBA.Yellow, 0.5 * Vector3.One);
+            helper.CreateTextViewFacing("Cube", new Point(1, 0, 0.5), ColorRGBA.Yellow, 0.1);
+            helper.CreateTextViewFacing("Sphere", new Point(2, 0, 0.5), ColorRGBA.Blue, 0.1);
 
-        public static Quaternion ToQuat(double a)
-        {
-            return new Quaternion(0, 0, Math.Sin(a / 2), Math.Cos(a / 2));
+            Point[] points =
+            {
+                new Point(-3, -1, 0.5),
+                new Point(3, -1, 0.5),
+                new Point(3, 1, 0.5),
+                new Point(-3, 1, 0.5),
+            };
+
+            helper.CreateLines(points, Pose.Identity, ColorRGBA.Red, 0.05f);
+
+            ColorRGBA[] colors =
+            {
+                ColorRGBA.Red,
+                ColorRGBA.Green,
+                ColorRGBA.Blue,
+                ColorRGBA.White,
+            };
+
+            helper.CreateLines(points.Select(x => x + 0.2 * Point.UnitZ).ToArray(), colors,
+                Pose.Identity, 0.05f);
+
+            Point[] points2 =
+            {
+                new Point(-3, -1, 0),
+                new Point(3, -1, 0),
+                new Point(3, 1, 0),
+                new Point(-3, 1, 0),
+                new Point(-3, -1, 0),
+            };
+
+            helper.CreateLineStrip(points2, Pose.Identity, ColorRGBA.Green, 0.05f);
+
+            ColorRGBA[] colors2 =
+            {
+                ColorRGBA.Red,
+                ColorRGBA.Green,
+                ColorRGBA.Blue,
+                ColorRGBA.White,
+                ColorRGBA.Cyan,
+            };
+
+            helper.CreateLineStrip(points2.Select(x => x + 0.2 * Point.UnitZ).ToArray(), colors2,
+                Pose.Identity, 0.05f);
+                */
+
+            while (true)
+            {
+                helper.Flush();
+                Thread.Sleep(1000);
+            }
         }
     }
 }
