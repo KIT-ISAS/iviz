@@ -152,6 +152,14 @@ namespace Iviz.XmlRpc
             return content ?? throw new InvalidOperationException("Arg has no valid value");
         }
 
+        public void ThrowIfEmpty()
+        {
+            if (!IsValid)
+            {
+                throw new InvalidOperationException("Arg is empty");
+            }
+        }
+
         public static implicit operator string(Arg arg)
         {
             return arg.ToString();
