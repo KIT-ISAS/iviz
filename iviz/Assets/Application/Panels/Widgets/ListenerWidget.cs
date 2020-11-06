@@ -13,10 +13,12 @@ namespace Iviz.App
     {
         const int Size = 200;
 
+        static readonly Color EnabledColor = new Color(0.71f, 0.98f, 1, 0.733f);
+
         [SerializeField] Text text = null;
         [SerializeField] Image panel = null;
         [CanBeNull] IRosListener listener;
-        
+
         [CanBeNull]
         public IRosListener RosListener
         {
@@ -31,6 +33,7 @@ namespace Iviz.App
                 {
                     GameThread.EverySecond -= UpdateStats;
                 }
+
                 listener = value;
                 if (value != null)
                 {
@@ -62,12 +65,21 @@ namespace Iviz.App
             {
                 subscriberStatus = $"{numPublishers.ToString()}↓ ";
             }
+
             string messagesPerSecond = MessagesPerSecond.ToString(UnityUtils.Culture);
             string kbPerSecond = (BytesPerSecond * 0.001f).ToString("#,0.#", UnityUtils.Culture);
             string dropped = Dropped.ToString(UnityUtils.Culture);
 
             text.text = $"{Resource.Font.Split(Topic ?? "", Size)}\n" +
-                $"<b>{subscriberStatus} | {messagesPerSecond} Hz | {kbPerSecond} kB/s | {dropped} drop</b>";
+                        $"<b>{subscriberStatus} | {messagesPerSecond} Hz | {kbPerSecond} kB/s | {dropped} drop</b>";
+
+            if (listener == null)
+            {
+                panel.color = EnabledColor;
+                return;
+            }
+
+            panel.color = listener.Subscribed ? EnabledColor : Resource.Colors.DisabledPanelColor;
         }
 
         public void OnClick()
@@ -76,16 +88,17 @@ namespace Iviz.App
             {
                 return;
             }
+
             if (listener.Subscribed)
             {
                 listener.Pause();
-                panel.color = Resource.Colors.DisabledPanelColor;
             }
             else
             {
                 listener.Unpause();
-                panel.color = new Color(0.71f, 0.98f, 1, 0.733f);
             }
+
+            panel.color = listener.Subscribed ? EnabledColor : Resource.Colors.DisabledPanelColor;
         }
 
         public void ClearSubscribers()

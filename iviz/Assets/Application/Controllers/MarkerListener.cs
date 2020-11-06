@@ -123,6 +123,7 @@ namespace Iviz.Controllers
             foreach (var entry in deadEntries)
             {
                 markers.Remove(entry.Key);
+                Debug.Log("Killing " + entry.Key);
                 DeleteMarkerObject(entry.Value);
             }
         }

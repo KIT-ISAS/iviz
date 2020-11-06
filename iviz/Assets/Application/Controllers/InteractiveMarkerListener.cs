@@ -1,48 +1,58 @@
-﻿using UnityEngine;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System;
-using Iviz.Msgs.VisualizationMsgs;
-using Iviz.Roslib;
 using System.Runtime.Serialization;
+using System.Text;
+using Iviz.App;
 using Iviz.Core;
-using Iviz.Displays;
+using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
+using Iviz.Roslib;
 using JetBrains.Annotations;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Iviz.Controllers
 {
     [DataContract]
     public class InteractiveMarkerConfiguration : JsonToString, IConfiguration
     {
+        [DataMember] public string Topic { get; set; } = "";
+        [DataMember] public bool DisableExpiration { get; set; } = true;
         [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
         [DataMember] public Resource.Module Module => Resource.Module.InteractiveMarker;
         [DataMember] public bool Visible { get; set; } = true;
-        [DataMember] public string Topic { get; set; } = "";
-        [DataMember] public bool DisableExpiration { get; set; } = true;
     }
 
-    public sealed class InteractiveMarkerListener : ListenerController
+    public sealed class InteractiveMarkerListener : ListenerController, IMarkerDialogListener
     {
-        readonly SimpleDisplayNode node;
-        
-        public RosSender<InteractiveMarkerFeedback> Publisher { get; private set; }
-
-        public override TfFrame Frame => TfListener.MapFrame;
+        readonly InteractiveMarkerConfiguration config = new InteractiveMarkerConfiguration();
 
         readonly Dictionary<string, InteractiveMarkerObject> imarkers =
             new Dictionary<string, InteractiveMarkerObject>();
 
-        public override IModuleData ModuleData { get; }
+        readonly SimpleDisplayNode node;
 
+        uint feedSeq;
+
+        public InteractiveMarkerListener([NotNull] IModuleData moduleData)
+        {
+            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
+            node = SimpleDisplayNode.Instantiate("[InteractiveMarkerListener]");
+        }
+
+        public RosListener<InteractiveMarkerInit> FullListener { get; private set; }
+        public RosSender<InteractiveMarkerFeedback> Publisher { get; private set; }
+        public override TfFrame Frame => TfListener.MapFrame;
+        public override IModuleData ModuleData { get; }
+        public string Topic => config.Topic;
+        
         public bool DisableExpiration
         {
             get => config.DisableExpiration;
             set => config.DisableExpiration = value;
         }
-
-        readonly InteractiveMarkerConfiguration config = new InteractiveMarkerConfiguration();
 
         public InteractiveMarkerConfiguration Config
         {
@@ -54,17 +64,53 @@ namespace Iviz.Controllers
             }
         }
 
-        public InteractiveMarkerListener([NotNull] IModuleData moduleData)
+        public void GenerateLog(StringBuilder description)
         {
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
-            node = SimpleDisplayNode.Instantiate("[InteractiveMarkerListener]");
+            if (description == null)
+            {
+                throw new ArgumentNullException(nameof(description));
+            }
+
+            foreach (var imarker in imarkers.Values)
+            {
+                imarker.GenerateLog(description);
+            }
+        }
+
+        public string BriefDescription
+        {
+            get
+            {
+                switch (imarkers.Count)
+                {
+                    case 0:
+                        return "<b>No interactive markers</b>";
+                    case 1:
+                        return "<b>1 interactive marker</b>";
+                    default:
+                        return $"<b>{imarkers.Values.Count} interactive markers</b>";
+                }
+            }
+        }
+
+        public void Reset()
+        {
+            DestroyAllMarkers();
         }
 
         public override void StartListening()
         {
             Listener = new RosListener<InteractiveMarkerUpdate>(config.Topic, Handler);
             GameThread.EverySecond += CheckForExpiredMarkers;
-            Publisher = new RosSender<InteractiveMarkerFeedback>(config.Topic + "/feedback");
+
+            int lastSlash = config.Topic.LastIndexOf('/');
+            string root = lastSlash == -1 ? config.Topic : config.Topic.Substring(0, lastSlash);
+
+            string feedbackTopic = root + "/feedback";
+            string fullTopic = root + "/update_full";
+
+            Publisher = new RosSender<InteractiveMarkerFeedback>(feedbackTopic);
+            FullListener = new RosListener<InteractiveMarkerInit>(fullTopic, HandlerFull);
         }
 
         public override void StopController()
@@ -72,28 +118,19 @@ namespace Iviz.Controllers
             base.StopController();
             GameThread.EverySecond -= CheckForExpiredMarkers;
 
-            foreach (var markerObject in imarkers.Values)
-            {
-                DeleteMarkerObject(markerObject);
-            }
-            
+            foreach (var markerObject in imarkers.Values) DeleteMarkerObject(markerObject);
+
             imarkers.Clear();
             Publisher.Stop();
-            
+
             node.Stop();
-            UnityEngine.Object.Destroy(node.gameObject);
+            Object.Destroy(node.gameObject);
         }
 
         public override void ResetController()
         {
             base.ResetController();
-            foreach (var markerObject in imarkers.Values)
-            {
-                DeleteMarkerObject(markerObject);
-            }
-            
-            imarkers.Clear();
-            
+            DestroyAllMarkers();
             Publisher?.Reset();
         }
 
@@ -109,29 +146,37 @@ namespace Iviz.Controllers
             msg.Erases.ForEach(DestroyInteractiveMarker);
         }
 
+        void HandlerFull([NotNull] InteractiveMarkerInit msg)
+        {
+            msg.Markers.ForEach(CreateInteractiveMarker);
+            FullListener.Pause();
+        }
+
         void CreateInteractiveMarker([NotNull] InteractiveMarker msg)
         {
             string id = msg.Name;
-            if (!imarkers.TryGetValue(id, out InteractiveMarkerObject imarker))
+            if (imarkers.TryGetValue(id, out InteractiveMarkerObject existingMarkerObject))
             {
-                imarker = CreateIMarkerObject();
-                imarker.Parent = TfListener.ListenersFrame;
-                imarker.MouseEvent += (string controlId, in Pose pose, in Vector3 point, MouseEventType type) =>
-                {
-                    OnInteractiveControlObjectMouseEvent(id, pose, controlId, point, type);
-                };
-                imarker.Moved += (string controlId, in Pose pose) =>
-                {
-                    OnInteractiveControlObjectMoved(id, pose, controlId);
-                };
-                imarker.transform.SetParentLocal(node.transform);
-                imarkers[id] = imarker;
+                existingMarkerObject.Set(msg);
+                return;
             }
 
-            imarker.Set(msg);
+            InteractiveMarkerObject newMarkerObject = CreateInteractiveMarkerObject();
+            newMarkerObject.Parent = TfListener.ListenersFrame;
+            newMarkerObject.MouseEvent += (string controlId, in Pose pose, in Vector3 point, MouseEventType type) =>
+            {
+                OnInteractiveControlObjectMouseEvent(id, pose, controlId, point, type);
+            };
+            newMarkerObject.Moved += (string controlId, in Pose pose) =>
+            {
+                OnInteractiveControlObjectMoved(id, pose, controlId);
+            };
+            newMarkerObject.transform.SetParentLocal(node.transform);
+            imarkers[id] = newMarkerObject;
+            newMarkerObject.Set(msg);
         }
 
-        static InteractiveMarkerObject CreateIMarkerObject()
+        static InteractiveMarkerObject CreateInteractiveMarkerObject()
         {
             GameObject gameObject = new GameObject("InteractiveMarkerObject");
             return gameObject.AddComponent<InteractiveMarkerObject>();
@@ -140,7 +185,7 @@ namespace Iviz.Controllers
         static void DeleteMarkerObject([NotNull] InteractiveMarkerObject imarker)
         {
             imarker.Stop();
-            UnityEngine.Object.Destroy(imarker.gameObject);
+            Object.Destroy(imarker.gameObject);
         }
 
         void UpdateInteractiveMarkerPose([NotNull] InteractiveMarkerPose msg)
@@ -152,7 +197,7 @@ namespace Iviz.Controllers
             }
 
             im.transform.SetLocalPose(msg.Pose.Ros2Unity());
-            im.UpdateExpirationTime();
+            //im.UpdateExpirationTime();
         }
 
         void DestroyInteractiveMarker([NotNull] string id)
@@ -163,11 +208,9 @@ namespace Iviz.Controllers
             }
 
             imarker.Stop();
-            UnityEngine.Object.Destroy(imarker.gameObject);
+            Object.Destroy(imarker.gameObject);
             imarkers.Remove(id);
         }
-
-        uint feedSeq = 0;
 
         void OnInteractiveControlObjectMouseEvent(
             string imarkerId, in Pose controlPose,
@@ -192,32 +235,33 @@ namespace Iviz.Controllers
 
             InteractiveMarkerFeedback msg = new InteractiveMarkerFeedback
             (
-                Header: RosUtils.CreateHeader(feedSeq++),
-                ClientId: ConnectionManager.MyId,
-                MarkerName: imarkerId,
-                ControlName: controlId,
-                EventType: eventType,
-                Pose: TfListener.RelativePoseToRoot(controlPose).Unity2RosPose(),
-                MenuEntryId: 0,
-                MousePoint: position.Unity2RosPoint(),
-                MousePointValid: true
+                RosUtils.CreateHeader(feedSeq++),
+                ConnectionManager.MyId ?? "",
+                imarkerId,
+                controlId,
+                eventType,
+                TfListener.RelativePoseToRoot(controlPose).Unity2RosPose(),
+                0,
+                position.Unity2RosPoint(),
+                true
             );
             Publisher.Publish(msg);
         }
 
-        void OnInteractiveControlObjectMoved(string imarkerId, in Pose controlPose, string controlId)
+        void OnInteractiveControlObjectMoved([NotNull] string imarkerId, in Pose controlPose,
+            [NotNull] string controlId)
         {
             InteractiveMarkerFeedback msg = new InteractiveMarkerFeedback
             (
-                Header: RosUtils.CreateHeader(feedSeq++),
-                ClientId: ConnectionManager.MyId,
-                MarkerName: imarkerId,
-                ControlName: controlId,
-                EventType: InteractiveMarkerFeedback.POSE_UPDATE,
-                Pose: TfListener.RelativePoseToRoot(controlPose).Unity2RosPose(),
-                MenuEntryId: 0,
-                MousePoint: Vector3.zero.Unity2RosPoint(),
-                MousePointValid: false
+                RosUtils.CreateHeader(feedSeq++),
+                ConnectionManager.MyId ?? "",
+                imarkerId,
+                controlId,
+                InteractiveMarkerFeedback.POSE_UPDATE,
+                TfListener.RelativePoseToRoot(controlPose).Unity2RosPose(),
+                0,
+                Vector3.zero.Unity2RosPoint(),
+                false
             );
             Publisher.Publish(msg);
         }
@@ -229,16 +273,25 @@ namespace Iviz.Controllers
                 return;
             }
 
+            /*
             DateTime now = DateTime.Now;
-            string[] deadMarkers = imarkers.
-                    Where(entry => entry.Value.ExpirationTime < now).
-                    Select(entry => entry.Key).
-                    ToArray();
+            string[] deadMarkers = imarkers
+                .Where(entry => entry.Value.ExpirationTime < now)
+                .Select(entry => entry.Key)
+                .ToArray();
 
-            foreach (string key in deadMarkers)
+            foreach (string key in deadMarkers) DestroyInteractiveMarker(key);
+            */
+        }
+
+        void DestroyAllMarkers()
+        {
+            foreach (var markerObject in imarkers.Values)
             {
-                DestroyInteractiveMarker(key);
+                DeleteMarkerObject(markerObject);
             }
+
+            imarkers.Clear();
         }
     }
 }

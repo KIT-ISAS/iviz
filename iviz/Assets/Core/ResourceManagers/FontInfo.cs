@@ -15,7 +15,7 @@ namespace Iviz.Resources
 
         public FontInfo()
         {
-            font = UnityEngine.Resources.Load<Font>("Fonts/selawk");
+            font = UnityEngine.Resources.Load<Font>("Fonts/selawk base");
             dotWidth = CharWidth('.') * 3; // ...
             arrowWidth = CharWidth('→') + CharWidth(' ');
         }

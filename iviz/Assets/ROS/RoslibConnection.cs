@@ -300,9 +300,9 @@ namespace Iviz.Ros
 
             try
             {
-                //Msgs.Logger.LogDebug = x => Logger.Debug(x);
-                //Msgs.Logger.LogError = x => Logger.Error(x);
-                //Msgs.Logger.Log = x => Logger.Info(x);
+                Msgs.Logger.LogDebug = x => Logger.Debug(x);
+                Msgs.Logger.LogError = x => Logger.Error(x);
+                Msgs.Logger.Log = x => Logger.Info(x);
 
                 Logger.Internal("Connecting...");
 

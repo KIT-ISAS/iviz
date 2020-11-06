@@ -7,9 +7,9 @@ namespace Iviz.App
 {
     public interface IMarkerDialogListener
     {
-        string Topic { get; }
+        [NotNull] string Topic { get; }
         void GenerateLog([NotNull] StringBuilder description);
-        string BriefDescription { get; }
+        [NotNull] string BriefDescription { get; }
         void Reset();
     }
 

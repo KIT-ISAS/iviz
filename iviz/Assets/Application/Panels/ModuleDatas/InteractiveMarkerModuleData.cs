@@ -20,20 +20,22 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
         public InteractiveMarkerModuleData([NotNull] ModuleDataConstructor constructor) :
-        base(constructor.ModuleList,
-            constructor.GetConfiguration<InteractiveMarkerConfiguration>()?.Topic ?? constructor.Topic,
-            constructor.Type)
+            base(constructor.ModuleList,
+                constructor.GetConfiguration<InteractiveMarkerConfiguration>()?.Topic ?? constructor.Topic,
+                constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<InteractiveMarkerPanelContents>(Resource.Module.InteractiveMarker);
+            panel = DataPanelManager.GetPanelByResourceType<InteractiveMarkerPanelContents>(Resource.Module
+                .InteractiveMarker);
             listener = new InteractiveMarkerListener(this);
             if (constructor.Configuration != null)
             {
-                listener.Config = (InteractiveMarkerConfiguration)constructor.Configuration;
+                listener.Config = (InteractiveMarkerConfiguration) constructor.Configuration;
             }
             else
             {
                 listener.Config.Topic = Topic;
             }
+
             listener.StartListening();
             UpdateModuleButton();
         }
@@ -41,9 +43,11 @@ namespace Iviz.App
         public override void SetupPanel()
         {
             panel.Listener.RosListener = listener.Listener;
+            panel.FullListener.RosListener = listener.FullListener;
             panel.DisableExpiration.Value = listener.DisableExpiration;
             panel.Sender.Set(listener.Publisher);
-            
+            panel.Marker.MarkerListener = listener;
+
             panel.DisableExpiration.ValueChanged += f =>
             {
                 listener.DisableExpiration = f;

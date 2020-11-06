@@ -171,10 +171,12 @@ namespace Iviz.Controllers
             set
             {
                 config.VectorScale = value;
-                if (!(arrow is null))
+                /*
+                if (arrow != null)
                 {
                     arrow.Scale = value;
                 }
+                */
             }
         }
 
@@ -310,7 +312,7 @@ namespace Iviz.Controllers
             displayNode.transform.localPosition = msg.Ros2Unity();
         }
 
-        void Handler(WrenchStamped msg)
+        void Handler([NotNull] WrenchStamped msg)
         {
             displayNode.AttachTo(msg.Header.FrameId);
             Handler(msg.Wrench);
@@ -324,12 +326,12 @@ namespace Iviz.Controllers
             }
 
             Vector3 dir = msg.Force.Ros2Unity();
-            arrow.Set(Vector3.zero, dir);
+            arrow.Set(Vector3.zero, dir * Scale);
             angleAxis.Set(msg.Torque.Ros2Unity());
             trail.DataSource = () => displayNode.transform.TransformPoint(dir * VectorScale);
         }
 
-        void Handler(TwistStamped msg)
+        void Handler([NotNull] TwistStamped msg)
         {
             displayNode.AttachTo(msg.Header.FrameId);
             Handler(msg.Twist);
@@ -354,12 +356,12 @@ namespace Iviz.Controllers
             }
 
             Vector3 dir = msg.Linear.Ros2Unity();
-            arrow.Set(Vector3.zero, dir);
+            arrow.Set(Vector3.zero, dir * Scale);
             angleAxis.Set(AngularToQuaternion((float)msg.Angular.X, (float)msg.Angular.Y, (float)msg.Angular.Z));
             trail.DataSource = () => displayNode.transform.TransformPoint(dir * VectorScale);
         }
 
-        void Handler(Odometry msg)
+        void Handler([NotNull] Odometry msg)
         {
             displayNode.AttachTo(msg.Header.FrameId);
             childNode.AttachTo(msg.ChildFrameId);
@@ -375,7 +377,7 @@ namespace Iviz.Controllers
             displayNode.transform.SetLocalPose(msg.Pose.Pose.Ros2Unity());
 
             Vector3 dir = msg.Twist.Twist.Linear.Ros2Unity();
-            arrow.Set(Vector3.zero, dir);
+            arrow.Set(Vector3.zero, dir * Scale);
             angleAxis.Set(AngularToQuaternion(
                 (float)msg.Twist.Twist.Angular.X, 
                 (float)msg.Twist.Twist.Angular.Y, 

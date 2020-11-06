@@ -1,4 +1,6 @@
 ﻿using Iviz.Core;
+using UnityEditor.UI;
+using UnityEditorInternal;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -7,17 +9,17 @@ namespace Iviz.Displays
     {
         const float MaxArrowWidth = 5.0f;
         
-        public float Scale { get; set; } = 1;
+        static readonly Quaternion PointToX = Quaternion.AngleAxis(90, Vector3.up);
 
         protected override void Awake()
         {
             base.Awake();
-            Set(Vector3.zero, Vector3.zero);
+            Reset();
         }
 
         public void Set(in Vector3 a, in Vector3 b, float? overrideScaleYZ = null)
         {
-            Vector3 diff = (a - b) * Scale; // arrow model is flipped
+            Vector3 diff = a - b; // arrow model is flipped
             float scaleX = diff.Magnitude();
             float scaleYZ = overrideScaleYZ ?? Mathf.Min(scaleX, MaxArrowWidth);
 
@@ -49,9 +51,22 @@ namespace Iviz.Displays
             mTransform.localRotation = m.rotation;
         }
 
+        public void Set(in Vector3 scale)
+        {
+            transform.localScale = new Vector3(scale.z, scale.y, scale.x);
+            transform.SetPositionAndRotation(Vector3.zero, PointToX);
+        }
+
         public void Reset()
         {
-            Set(Vector3.zero, Vector3.zero);
+            transform.localScale = Vector3.one;
+            transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
+        }
+
+        public override void Suspend()
+        {
+            base.Suspend();
+            Reset();
         }
     }
 }

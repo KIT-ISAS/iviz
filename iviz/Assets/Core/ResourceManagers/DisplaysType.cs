@@ -18,7 +18,6 @@ namespace Iviz.Resources
         public Info<GameObject> LineConnector { get; }
         public Info<GameObject> NamedBoundary { get; }
         public Info<GameObject> Arrow { get; }
-        public Info<GameObject> SphereSimple { get; }
         public Info<GameObject> MeshList { get; }
         public Info<GameObject> PointList { get; }
         public Info<GameObject> MeshTriangles { get; }
@@ -46,7 +45,6 @@ namespace Iviz.Resources
             LineConnector = new Info<GameObject>("Displays/LineConnector");
             NamedBoundary = new Info<GameObject>("Displays/NamedBoundary");
             Arrow = new Info<GameObject>("Displays/Arrow");
-            SphereSimple = new Info<GameObject>("Spheres/sphere-LOD1");
             MeshList = new Info<GameObject>("Displays/MeshList");
             PointList = new Info<GameObject>("Displays/PointList");
             MeshTriangles = new Info<GameObject>("Displays/MeshTriangles");

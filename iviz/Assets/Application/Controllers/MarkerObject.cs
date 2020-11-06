@@ -165,7 +165,7 @@ namespace Iviz.Controllers
             else
             {
                 ExpirationTime = DateTime.Now + msg.Lifetime.ToTimeSpan();
-                description.Append("Expiration: ").Append(msg.Lifetime.Secs).AppendLine();
+                description.Append("Expiration: ").Append(msg.Lifetime.Secs).Append( " secs").AppendLine();
             }
 
             UpdateResource(msg);
@@ -458,6 +458,11 @@ namespace Iviz.Controllers
                 ? Resource.Displays.Cube
                 : Resource.Displays.Sphere;
 
+            description.Append("Color: ")
+                .Append(msg.Color.R).Append(",")
+                .Append(msg.Color.G).Append(",")
+                .Append(msg.Color.B).Append(",")
+                .Append(msg.Color.A).AppendLine();
 
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length)
             {
@@ -532,11 +537,18 @@ namespace Iviz.Controllers
             textResource.BillboardEnabled = msg.Type() != MarkerType.Text;
             transform.localScale = (float) msg.Scale.Z * Vector3.one;
 
+            description.Append("Size: ").Append(msg.Scale.Z).AppendLine();
             if (msg.Scale.Z == 0 || msg.Scale.Z.IsInvalid())
             {
                 description.Append(WarnStr).Append("Scale value of 0 or NaN").AppendLine();
                 numWarnings++;
             }
+            
+            description.Append("Color: ")
+                .Append(msg.Color.R).Append(",")
+                .Append(msg.Color.G).Append(",")
+                .Append(msg.Color.B).Append(",")
+                .Append(msg.Color.A).AppendLine();
         }
 
         void CrateMeshResource([NotNull] Marker msg)
@@ -546,6 +558,11 @@ namespace Iviz.Controllers
                 meshMarker.Color = msg.Color.Sanitize().ToUnityColor();
             }
 
+            description.Append("Scale: [")
+                .Append(msg.Scale.X).Append(", ")
+                .Append(msg.Scale.Y).Append(", ")
+                .Append(msg.Scale.Z).Append("]").AppendLine();
+            
             if (msg.Scale.SquaredNorm == 0)
             {
                 description.Append(WarnStr).Append("Scale value of 0").AppendLine();
@@ -557,6 +574,12 @@ namespace Iviz.Controllers
                 numWarnings++;
             }
 
+            description.Append("Color: ")
+                .Append(msg.Color.R).Append(",")
+                .Append(msg.Color.G).Append(",")
+                .Append(msg.Color.B).Append(",")
+                .Append(msg.Color.A).AppendLine();
+            
             transform.localScale = msg.Scale.Ros2Unity().Abs();
         }
 
@@ -586,12 +609,18 @@ namespace Iviz.Controllers
                     }
 
                     arrowMarker.Visible = true;
-                    transform.localScale = msg.Scale.Ros2Unity().Abs();
+                    arrowMarker.Set(msg.Scale.Ros2Unity().Abs());
+                    //transform.localScale = msg.Scale.Ros2Unity().Abs();
+                    description.Append("Scale: [")
+                        .Append(msg.Scale.X).Append(", ")
+                        .Append(msg.Scale.Y).Append(", ")
+                        .Append(msg.Scale.Z).Append("]").AppendLine();
                     return;
                 }
                 case 2:
                 {
                     float sx = Mathf.Abs((float) msg.Scale.X);
+                    description.Append("Size: ").Append(msg.Scale.X).AppendLine();
                     switch (sx)
                     {
                         case 0:
@@ -677,6 +706,7 @@ namespace Iviz.Controllers
             if (msg.FrameLocked)
             {
                 AttachTo(msg.Header.FrameId);
+                description.Append("Frame Locked to: <i>").Append(msg.Header.FrameId).Append("</i>").AppendLine();
             }
             else
             {
@@ -752,7 +782,7 @@ namespace Iviz.Controllers
                 case MarkerType.Cube:
                     return "Cube";
                 case MarkerType.Sphere:
-                    return "sphere";
+                    return "Sphere";
                 case MarkerType.TextViewFacing:
                     return "Text_View_Facing";
                 case MarkerType.Text:
