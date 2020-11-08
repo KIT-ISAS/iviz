@@ -2,30 +2,29 @@
 
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.Actionlib
+namespace Iviz.Msgs.Tf2Msgs
 {
-    [DataContract (Name = "actionlib/TestRequestFeedback")]
-    public sealed class TestRequestFeedback : IDeserializable<TestRequestFeedback>, IFeedback<TestRequestActionFeedback>
+    [DataContract (Name = "tf2_msgs/LookupTransformFeedback")]
+    public sealed class LookupTransformFeedback : IDeserializable<LookupTransformFeedback>, IFeedback<LookupTransformActionFeedback>
     {
-    
         /// <summary> Constructor for empty message. </summary>
-        public TestRequestFeedback()
+        public LookupTransformFeedback()
         {
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TestRequestFeedback(ref Buffer b)
+        internal LookupTransformFeedback(ref Buffer b)
         {
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new TestRequestFeedback(ref b);
+            return new LookupTransformFeedback(ref b);
         }
         
-        TestRequestFeedback IDeserializable<TestRequestFeedback>.RosDeserialize(ref Buffer b)
+        LookupTransformFeedback IDeserializable<LookupTransformFeedback>.RosDeserialize(ref Buffer b)
         {
-            return new TestRequestFeedback(ref b);
+            return new LookupTransformFeedback(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -44,7 +43,7 @@ namespace Iviz.Msgs.Actionlib
         public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "actionlib/TestRequestFeedback";
+        [Preserve] public const string RosMessageType = "tf2_msgs/LookupTransformFeedback";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "d41d8cd98f00b204e9800998ecf8427e";

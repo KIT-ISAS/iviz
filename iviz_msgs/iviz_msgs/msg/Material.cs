@@ -8,9 +8,9 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class Material : IDeserializable<Material>, IMessage
     {
         [DataMember (Name = "name")] public string Name { get; set; }
-        [DataMember (Name = "ambient")] public Color Ambient { get; set; }
-        [DataMember (Name = "diffuse")] public Color Diffuse { get; set; }
-        [DataMember (Name = "emissive")] public Color Emissive { get; set; }
+        [DataMember (Name = "ambient")] public Color32 Ambient { get; set; }
+        [DataMember (Name = "diffuse")] public Color32 Diffuse { get; set; }
+        [DataMember (Name = "emissive")] public Color32 Emissive { get; set; }
         [DataMember (Name = "diffuseTexture")] public Texture DiffuseTexture { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
@@ -21,7 +21,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Material(string Name, in Color Ambient, in Color Diffuse, in Color Emissive, Texture DiffuseTexture)
+        public Material(string Name, in Color32 Ambient, in Color32 Diffuse, in Color32 Emissive, Texture DiffuseTexture)
         {
             this.Name = Name;
             this.Ambient = Ambient;
@@ -34,9 +34,9 @@ namespace Iviz.Msgs.IvizMsgs
         internal Material(ref Buffer b)
         {
             Name = b.DeserializeString();
-            Ambient = new Color(ref b);
-            Diffuse = new Color(ref b);
-            Emissive = new Color(ref b);
+            Ambient = new Color32(ref b);
+            Diffuse = new Color32(ref b);
+            Emissive = new Color32(ref b);
             DiffuseTexture = new Texture(ref b);
         }
         
@@ -86,9 +86,9 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE7WQsQoCMQyG9zxF3kDQRQQnBycn3USOlubagO2VS3qKT6/ctfgCmuXn4x/yJaIjJ4/J" +
-                "RILDcB9GNNEyJa3kuO+LtI4ii/BEcKGnlpFaXRFg/+OB0/m4Q5741UXxspo1oHDSLbb0NW1N83+Ndq8s" +
-                "38tGw7x8s8YHuy8EYh+0kc15Ubze0Bn9eL4BQkK3Hn4BAAA=";
+                "H4sIAAAAAAAAE7WQsQoCMQyG9zxF30DQRQQnBycn3USOlubagO2VJj3Fp/fwWu8FNMvPRwL5EpZM0amo" +
+                "A8JhuA95s1Y6GMIoX7bU94WXPgZiphHhgk8pGdtARYD9jwtO5+NO0UivLrDjVRWBQlG2Ktd0NU1N/X+R" +
+                "djHPX0xa/Gf59KQH2QU8kvPSyKQ0K15vymqZPN+5SGTdhgEAAA==";
                 
     }
 }

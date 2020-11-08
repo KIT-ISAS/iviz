@@ -2,30 +2,31 @@
 
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.Actionlib
+namespace Iviz.Msgs.NavMsgs
 {
-    [DataContract (Name = "actionlib/TestRequestFeedback")]
-    public sealed class TestRequestFeedback : IDeserializable<TestRequestFeedback>, IFeedback<TestRequestActionFeedback>
+    [DataContract (Name = "nav_msgs/GetMapFeedback")]
+    public sealed class GetMapFeedback : IDeserializable<GetMapFeedback>, IFeedback<GetMapActionFeedback>
     {
+        // no feedback
     
         /// <summary> Constructor for empty message. </summary>
-        public TestRequestFeedback()
+        public GetMapFeedback()
         {
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TestRequestFeedback(ref Buffer b)
+        internal GetMapFeedback(ref Buffer b)
         {
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new TestRequestFeedback(ref b);
+            return new GetMapFeedback(ref b);
         }
         
-        TestRequestFeedback IDeserializable<TestRequestFeedback>.RosDeserialize(ref Buffer b)
+        GetMapFeedback IDeserializable<GetMapFeedback>.RosDeserialize(ref Buffer b)
         {
-            return new TestRequestFeedback(ref b);
+            return new GetMapFeedback(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -44,7 +45,7 @@ namespace Iviz.Msgs.Actionlib
         public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "actionlib/TestRequestFeedback";
+        [Preserve] public const string RosMessageType = "nav_msgs/GetMapFeedback";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "d41d8cd98f00b204e9800998ecf8427e";

@@ -13,10 +13,10 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "name")] public string Name { get; set; }
         [DataMember (Name = "type")] public byte Type { get; set; }
         [DataMember (Name = "cast_shadows")] public bool CastShadows { get; set; }
-        [DataMember (Name = "diffuse")] public Color Diffuse { get; set; }
+        [DataMember (Name = "diffuse")] public Color32 Diffuse { get; set; }
         [DataMember (Name = "range")] public float Range { get; set; }
-        [DataMember (Name = "position")] public Vector3 Position { get; set; }
-        [DataMember (Name = "direction")] public Vector3 Direction { get; set; }
+        [DataMember (Name = "position")] public Vector3f Position { get; set; }
+        [DataMember (Name = "direction")] public Vector3f Direction { get; set; }
         [DataMember (Name = "inner_angle")] public float InnerAngle { get; set; }
         [DataMember (Name = "outer_angle")] public float OuterAngle { get; set; }
     
@@ -27,7 +27,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Light(string Name, byte Type, bool CastShadows, in Color Diffuse, float Range, in Vector3 Position, in Vector3 Direction, float InnerAngle, float OuterAngle)
+        public Light(string Name, byte Type, bool CastShadows, in Color32 Diffuse, float Range, in Vector3f Position, in Vector3f Direction, float InnerAngle, float OuterAngle)
         {
             this.Name = Name;
             this.Type = Type;
@@ -46,10 +46,10 @@ namespace Iviz.Msgs.IvizMsgs
             Name = b.DeserializeString();
             Type = b.Deserialize<byte>();
             CastShadows = b.Deserialize<bool>();
-            Diffuse = new Color(ref b);
+            Diffuse = new Color32(ref b);
             Range = b.Deserialize<float>();
-            Position = new Vector3(ref b);
-            Direction = new Vector3(ref b);
+            Position = new Vector3f(ref b);
+            Direction = new Vector3f(ref b);
             InnerAngle = b.Deserialize<float>();
             OuterAngle = b.Deserialize<float>();
         }
@@ -101,10 +101,10 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE7WQSw6CMBCG93OKuYGvjTFhYdQYEgUixC2pUnAS6JC2+Dq9qLVeQGfz//3mkc5AR8pO" +
-                "MYnDKMMAh/B+L8PdapGFcTTf9HTkaJrEz6IxgLGaVIVKNNLl7K2VcGCu8SiMzc1JFHwxsOCaNRZUlp2R" +
-                "UNYs7GSMWqhKwl4eLesJtmzIEisPCtK9e5JPAykldd531d8h3FnP+gh+HLBN1zOkM93zxlRm8NrELfvR" +
-                "yunBqfj/N9yN/BWu3t28uwM8ACr8e23YAQAA";
+                "H4sIAAAAAAAAE7WQzwrCMAzG73mKvoE6LyLsICoyUDfc8Dqq62agNqPt/LOnt2JXX0Bz+b780oQm0KGy" +
+                "M5alyb5gMRvDJ18lh/WySNL9YuvoxNM8S9+PIgBjNaqGKX4VvmafrYATkWRnbmxpLryiu4ElSdLTiFVY" +
+                "150RUEvi1uWaq0bAUZytK9esJYMWSX1JhdrZNxpaUCmhS9cnv2Oos4G5iH8csMs3c4Y37MuraczIb+NX" +
+                "1l4bryev/P8fGc4UDvEI7hlcD/AC0NcUX98BAAA=";
                 
     }
 }

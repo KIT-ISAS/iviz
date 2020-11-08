@@ -17,4 +17,7 @@
     <DebugType>full</DebugType>
     <LangVersion>8.0</LangVersion>
   </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="iviz_msgs\msg" />
+  </ItemGroup>
 </Project>

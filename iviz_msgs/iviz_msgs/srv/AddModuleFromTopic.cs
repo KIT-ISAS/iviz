@@ -45,34 +45,30 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosServiceType = "iviz_msgs/AddModuleFromTopic";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve] public const string RosMd5Sum = "f286bf1bf4d1e91c992ad2eae3061a6f";
+        [Preserve] public const string RosMd5Sum = "801b72bf30166359c828a5faf372e586";
     }
 
     public sealed class AddModuleFromTopicRequest : IRequest, IDeserializable<AddModuleFromTopicRequest>
     {
         // Adds a module
         [DataMember (Name = "topic")] public string Topic { get; set; } // Name of the topic
-        [DataMember (Name = "configuration")] public string Configuration { get; set; } // Configuration in JSON form
     
         /// <summary> Constructor for empty message. </summary>
         public AddModuleFromTopicRequest()
         {
             Topic = "";
-            Configuration = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public AddModuleFromTopicRequest(string Topic, string Configuration)
+        public AddModuleFromTopicRequest(string Topic)
         {
             this.Topic = Topic;
-            this.Configuration = Configuration;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal AddModuleFromTopicRequest(ref Buffer b)
         {
             Topic = b.DeserializeString();
-            Configuration = b.DeserializeString();
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
@@ -88,21 +84,18 @@ namespace Iviz.Msgs.IvizMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Topic);
-            b.Serialize(Configuration);
         }
         
         public void RosValidate()
         {
             if (Topic is null) throw new System.NullReferenceException(nameof(Topic));
-            if (Configuration is null) throw new System.NullReferenceException(nameof(Configuration));
         }
     
         public int RosMessageLength
         {
             get {
-                int size = 8;
+                int size = 4;
                 size += BuiltIns.UTF8.GetByteCount(Topic);
-                size += BuiltIns.UTF8.GetByteCount(Configuration);
                 return size;
             }
         }
@@ -112,18 +105,21 @@ namespace Iviz.Msgs.IvizMsgs
     {
         [DataMember (Name = "success")] public bool Success { get; set; } // Whether the retrieval succeeded
         [DataMember (Name = "message")] public string Message { get; set; } // An error message if success is false
+        [DataMember (Name = "id")] public string Id { get; set; } // An id identifying this module
     
         /// <summary> Constructor for empty message. </summary>
         public AddModuleFromTopicResponse()
         {
             Message = "";
+            Id = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public AddModuleFromTopicResponse(bool Success, string Message)
+        public AddModuleFromTopicResponse(bool Success, string Message, string Id)
         {
             this.Success = Success;
             this.Message = Message;
+            this.Id = Id;
         }
         
         /// <summary> Constructor with buffer. </summary>
@@ -131,6 +127,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
+            Id = b.DeserializeString();
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
@@ -147,18 +144,21 @@ namespace Iviz.Msgs.IvizMsgs
         {
             b.Serialize(Success);
             b.Serialize(Message);
+            b.Serialize(Id);
         }
         
         public void RosValidate()
         {
             if (Message is null) throw new System.NullReferenceException(nameof(Message));
+            if (Id is null) throw new System.NullReferenceException(nameof(Id));
         }
     
         public int RosMessageLength
         {
             get {
-                int size = 5;
+                int size = 9;
                 size += BuiltIns.UTF8.GetByteCount(Message);
+                size += BuiltIns.UTF8.GetByteCount(Id);
                 return size;
             }
         }

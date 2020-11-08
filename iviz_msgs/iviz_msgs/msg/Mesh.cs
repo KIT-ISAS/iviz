@@ -8,10 +8,10 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class Mesh : IDeserializable<Mesh>, IMessage
     {
         [DataMember (Name = "name")] public string Name { get; set; }
-        [DataMember (Name = "vertices")] public Vector3[] Vertices { get; set; }
-        [DataMember (Name = "normals")] public Vector3[] Normals { get; set; }
-        [DataMember (Name = "texCoords")] public Vector2[] TexCoords { get; set; }
-        [DataMember (Name = "colors")] public Color[] Colors { get; set; }
+        [DataMember (Name = "vertices")] public Vector3f[] Vertices { get; set; }
+        [DataMember (Name = "normals")] public Vector3f[] Normals { get; set; }
+        [DataMember (Name = "texCoords")] public Vector2f[] TexCoords { get; set; }
+        [DataMember (Name = "colors")] public Color32[] Colors { get; set; }
         [DataMember (Name = "faces")] public Triangle[] Faces { get; set; }
         [DataMember (Name = "materialIndex")] public uint MaterialIndex { get; set; }
     
@@ -19,15 +19,15 @@ namespace Iviz.Msgs.IvizMsgs
         public Mesh()
         {
             Name = "";
-            Vertices = System.Array.Empty<Vector3>();
-            Normals = System.Array.Empty<Vector3>();
-            TexCoords = System.Array.Empty<Vector2>();
-            Colors = System.Array.Empty<Color>();
+            Vertices = System.Array.Empty<Vector3f>();
+            Normals = System.Array.Empty<Vector3f>();
+            TexCoords = System.Array.Empty<Vector2f>();
+            Colors = System.Array.Empty<Color32>();
             Faces = System.Array.Empty<Triangle>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Mesh(string Name, Vector3[] Vertices, Vector3[] Normals, Vector2[] TexCoords, Color[] Colors, Triangle[] Faces, uint MaterialIndex)
+        public Mesh(string Name, Vector3f[] Vertices, Vector3f[] Normals, Vector2f[] TexCoords, Color32[] Colors, Triangle[] Faces, uint MaterialIndex)
         {
             this.Name = Name;
             this.Vertices = Vertices;
@@ -42,10 +42,10 @@ namespace Iviz.Msgs.IvizMsgs
         internal Mesh(ref Buffer b)
         {
             Name = b.DeserializeString();
-            Vertices = b.DeserializeStructArray<Vector3>();
-            Normals = b.DeserializeStructArray<Vector3>();
-            TexCoords = b.DeserializeStructArray<Vector2>();
-            Colors = b.DeserializeStructArray<Color>();
+            Vertices = b.DeserializeStructArray<Vector3f>();
+            Normals = b.DeserializeStructArray<Vector3f>();
+            TexCoords = b.DeserializeStructArray<Vector2f>();
+            Colors = b.DeserializeStructArray<Color32>();
             Faces = b.DeserializeStructArray<Triangle>();
             MaterialIndex = b.Deserialize<uint>();
         }
@@ -105,10 +105,10 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE72SsQrCMBCG93uKvIHQLiI4dRAHJ8VFRK7pNQSSHCSx1D69aWmKg6P1lv/nC9z9XC5E" +
-                "r50SDi3BlWRkX97uoiMftaTwgRx7iyaTIpFIfcXsmwAVG/aJyFEDXLxGpwwl0uLY5aldLAthMVJ6MkfX" +
-                "UA+w/3HB6XzYCd3p4WGDCps5O7SGcRzfL+61uOFfMYqvMVYfPv3MtP+tyKpmrWfF9WPki8iXgNnU2UiA" +
-                "NzpxquqLAgAA";
+                "H4sIAAAAAAAAE72SvwrCMBDG93uKvIGQLiI4dRAHJ8VFRK7pNQTyB5JYap/eRJLi4Khm+T5+d+Q+uAvR" +
+                "KyuZRUNwJhGdb4bLlY3koxIU3pl13qCuiGcUaWqd832A1unUxhMT2QU4eYVWakpkwPzTXdnYcGYwUirp" +
+                "ve1pAth++cHhuNswNar5ZoIMq5ofBu0wz58W91jc/K8c/HOOn08v23ntYM18UVm0K4q/D1Kvol4DVtNV" +
+                "IwCeGDGFE5QCAAA=";
                 
     }
 }

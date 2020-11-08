@@ -2,25 +2,25 @@
 
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs.ActionlibTutorials
+namespace Iviz.Msgs.Tf2Msgs
 {
-    [DataContract (Name = "actionlib_tutorials/AveragingActionGoal")]
-    public sealed class AveragingActionGoal : IDeserializable<AveragingActionGoal>, IActionGoal<AveragingGoal>
+    [DataContract (Name = "tf2_msgs/LookupTransformActionGoal")]
+    public sealed class LookupTransformActionGoal : IDeserializable<LookupTransformActionGoal>, IActionGoal<LookupTransformGoal>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "goal_id")] public ActionlibMsgs.GoalID GoalId { get; set; }
-        [DataMember (Name = "goal")] public AveragingGoal Goal { get; set; }
+        [DataMember (Name = "goal")] public LookupTransformGoal Goal { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
-        public AveragingActionGoal()
+        public LookupTransformActionGoal()
         {
             Header = new StdMsgs.Header();
             GoalId = new ActionlibMsgs.GoalID();
-            Goal = new AveragingGoal();
+            Goal = new LookupTransformGoal();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public AveragingActionGoal(StdMsgs.Header Header, ActionlibMsgs.GoalID GoalId, AveragingGoal Goal)
+        public LookupTransformActionGoal(StdMsgs.Header Header, ActionlibMsgs.GoalID GoalId, LookupTransformGoal Goal)
         {
             this.Header = Header;
             this.GoalId = GoalId;
@@ -28,21 +28,21 @@ namespace Iviz.Msgs.ActionlibTutorials
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal AveragingActionGoal(ref Buffer b)
+        internal LookupTransformActionGoal(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             GoalId = new ActionlibMsgs.GoalID(ref b);
-            Goal = new AveragingGoal(ref b);
+            Goal = new LookupTransformGoal(ref b);
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new AveragingActionGoal(ref b);
+            return new LookupTransformActionGoal(ref b);
         }
         
-        AveragingActionGoal IDeserializable<AveragingActionGoal>.RosDeserialize(ref Buffer b)
+        LookupTransformActionGoal IDeserializable<LookupTransformActionGoal>.RosDeserialize(ref Buffer b)
         {
-            return new AveragingActionGoal(ref b);
+            return new LookupTransformActionGoal(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -65,9 +65,10 @@ namespace Iviz.Msgs.ActionlibTutorials
         public int RosMessageLength
         {
             get {
-                int size = 8;
+                int size = 0;
                 size += Header.RosMessageLength;
                 size += GoalId.RosMessageLength;
+                size += Goal.RosMessageLength;
                 return size;
             }
         }
@@ -75,23 +76,24 @@ namespace Iviz.Msgs.ActionlibTutorials
         public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "actionlib_tutorials/AveragingActionGoal";
+        [Preserve] public const string RosMessageType = "tf2_msgs/LookupTransformActionGoal";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "dbfccd187f2ec9c593916447ffd6cc77";
+        [Preserve] public const string RosMd5Sum = "f2e7bcdb75c847978d0351a13e699da5";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE7VUwWrcMBC96ysG9pCkkA20t0APhdAkh0IhuYdZaWyLypKrkXfrv++TvLtNoIcemsVg" +
-                "JM+8efPezD4IO8k0tJdhW3yKwe9eRu315j5xeLyjHq8X78yXvWTufezrfbs1n//zz3x7ur8lLW4l8LDS" +
-                "2tBT4eg4OxqlsOPC1CWw9v0g+TrIXgKSeJzEUftalkl0i8TnwSvh6SWCfAgLzYqgksimcZyjt1yEih/l" +
-                "TT4yfSSmiXPxdg6cEZ+y87GGd5lHqeh4VH7OEq3Q490tYqKKnYsHoQUINgsrBMNHMrOP5dPHmmA2z4d0" +
-                "jaP00P5cnMrApZKVX1MWrTxZb1Hjw9rcFtgQR1DFKV22uxcc9YpQBBRkSnagSzD/vpQhRQAK7Tl73gWp" +
-                "wBYKAPWiJl1cvUKODTpyTCf4FfFPjX+BjWfc2tP1AM9C7V7nHgIicMpp7x1Cd0sDscFLLISBy5wXU7PW" +
-                "kmbztWqMIGQ1R/Bm1WQ9DHB08GUwWnJFb27U+XynafzrUrTROpIlHdIcHA4pS+urNQIvD4OHIa2Jui50" +
-                "YKVcB0bRRB2gx+Z3G0lIwvFYDCZnLBvyJZIvhEZF69BiLmScCkFwZFdMXafmICh9hqaddJULk5VcGM5V" +
-                "Rq/1PfL37uQJ5AW9pRY560ydiNux/QFmDhkYyjkU7KAq99JMIJ3E+s7btcEjA90e0euCrAEgNc5awIyw" +
-                "dYjanvyrzr27dWWGOR5y3bz5FzNmXUpxvajpQuJ6yuz8rOY3tc9zrxwFAAA=";
+                "H4sIAAAAAAAAE7VUwWobMRC971cM5JCkYBfSW6C30MTQQiG+m7E03hXZlbYayc7+fZ+0azeFHHpozIKQ" +
+                "NPPmzbwnPwlbidTVpWGTXPC92+8GbfXzY+B+80Atlp2zzfcQXvK4jez1EOJQbutd8/U//5ofz4/3pMnO" +
+                "NJ5mclf0nNhbjpYGSWw5MYEHda7tJK56OUqPJB5GsVRv0zSKrpG47ZwSvla8RO77ibIiKAUyYRiyd4aT" +
+                "UHKD/JWPTOeJaeSYnMk9R8SHaJ0v4YfIgxR0fCq/sngjtHm4R4xXMTk5EJqAYKKwOt/ikprsfPpyVxKa" +
+                "q+0prLCVFgpcilPqOBWy8jpG0cKT9R41Ps3NrYGN4QiqWKWberbDVm8JRUBBxmA6ugHzn1Pqggeg0JGj" +
+                "430vBdhgAkC9LknXt2+QfYX27MMZfkb8U+NfYP0Ft/S06qBZX7rX3GKACBxjODqL0P1UQUzvxCeC7SLH" +
+                "qSlZc8nm6luZMYKQVRXByqrBOAhg6eRS12iKBb2qUVz6QW5892lUay1kSbuQe4tNiFL7qo1Ay1PnIEht" +
+                "ojwXOrFSLIZRNFEMtKl6V0tiJOyXYhA5HmGNUyeeXCI0KlpMC1/IMCbCwJFdMHV2zUlQ+gJNezkULkxG" +
+                "YmIoVxi9ne/C39mzJhgv6E2lyGXOdBCxezYvYGaRAVPmPuENqnIrVQTSUYw7ODM3uDDQ9YJeHsgcAFJD" +
+                "1gRmhFeHqPVZv6LcB0mXDnezaO/8gTXn+oljK2lXbXQ+05CjkeVsHtt8Uudoc+QqU9mFnMC/xixINeZs" +
+                "TvcqdsFpmn0IPbE9Mt4Wuv4NE08qNYMFAAA=";
                 
     }
 }
