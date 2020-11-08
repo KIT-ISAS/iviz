@@ -191,7 +191,7 @@ namespace Iviz.Roslib
                     $"md5sum={topicInfo.Md5Sum}",
                     $"type={topicInfo.Type}",
                     $"callerid={topicInfo.CallerId}",
-                    $"latching={(latching ? "1" : "0")}"
+                    latching ? "latching=1" : "latching=0"
                 };
             }
 
@@ -314,7 +314,6 @@ namespace Iviz.Roslib
                 try
                 {
                     Task<TcpClient> connectionTask = listener!.AcceptTcpClientAsync();
-                    //Logger.LogDebug($"{this}: Accepting...");
 
                     try
                     {
@@ -361,8 +360,6 @@ namespace Iviz.Roslib
                     Logger.Log($"{this}: {e}");
                 }
             }
-
-            //Logger.LogDebug($"{this}: Out!");
 
             try
             {

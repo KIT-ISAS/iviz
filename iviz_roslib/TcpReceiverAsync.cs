@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
@@ -28,6 +29,8 @@ namespace Iviz.Roslib
         Endpoint? endpoint;
         int numReceived;
         int bytesReceived;
+        
+        int connectionTimeoutInMs;
 
         readonly CancellationTokenSource runningTs = new CancellationTokenSource();
         bool KeepRunning => !runningTs.IsCancellationRequested;
@@ -84,9 +87,35 @@ namespace Iviz.Roslib
 
         public void Start(int timeoutInMs)
         {
-            task = Task.Run(async () => await Run(timeoutInMs).Caf());
+            connectionTimeoutInMs = timeoutInMs;
+            task = Task.Run(Run);
         }
 
+        async Task Run()
+        {
+            Task sessionTask = StartSession();
+
+            // HACK! sometimes sessionTask gets stuck, and the only way to get it
+            // out is by disposing the tcpClient
+            // so we wait for the cancel, dispose everything, then wait for the task
+            try
+            {
+                await Task.Delay(-1, runningTs.Token);
+            } catch (OperationCanceledException) {}
+
+#if !NETSTANDARD2_0
+            if (stream != null)
+            {
+                await stream.DisposeAsync();
+            }
+#else
+            stream?.Dispose();
+#endif
+            tcpClient?.Dispose();
+
+            await sessionTask;
+        }        
+        
         async Task SerializeHeader()
         {
             string[] contents =
@@ -96,8 +125,9 @@ namespace Iviz.Roslib
                 $"topic={topicInfo.Topic}",
                 $"md5sum={topicInfo.Md5Sum}",
                 $"type={topicInfo.Type}",
-                $"tcp_nodelay={(requestNoDelay ? "1" : "0")}"
+                requestNoDelay ? "tcp_nodelay=1" : "tcp_nodelay=0"
             };
+            
             int totalLength = 4 * contents.Length + contents.Sum(entry => entry.Length);
 
             byte[] array = new byte[totalLength + 4];
@@ -198,28 +228,13 @@ namespace Iviz.Roslib
             return ParseHeader(receivedLength);
         }
 
-        async Task Run(int timeoutInMs)
-        {
-            await StartSession(timeoutInMs);
-
-#if !NETSTANDARD2_0
-            if (stream != null)
-            {
-                await stream.DisposeAsync();
-            }
-#else
-            stream?.Dispose();
-#endif
-            tcpClient?.Dispose();
-        }
-
-        async Task<TcpClient?> TryToConnect(int timeoutInMs)
+        async Task<TcpClient?> TryToConnect()
         {
             TcpClient client = new TcpClient();
             try
             {
                 Task connectionTask = client.ConnectAsync(remoteEndpoint.Hostname, remoteEndpoint.Port);
-                if (!await connectionTask.WaitFor(timeoutInMs).Caf() ||
+                if (!await connectionTask.WaitFor(connectionTimeoutInMs).Caf() ||
                     !connectionTask.RanToCompletion() ||
                     client.Client?.LocalEndPoint == null)
                 {
@@ -242,17 +257,17 @@ namespace Iviz.Roslib
             return client;
         }
 
-        async Task<TcpClient?> KeepReconnecting(int timeoutInMs)
+        async Task<TcpClient?> KeepReconnecting()
         {
             for (int i = 0; i < MaxConnectionRetries && KeepRunning; i++)
             {
-                var client = await TryToConnect(timeoutInMs).Caf();
+                var client = await TryToConnect().Caf();
                 if (client != null)
                 {
                     return client;
                 }
 
-                await Task.Delay(WaitBetweenRetriesInMs).Caf();
+                await Task.Delay(WaitBetweenRetriesInMs, runningTs.Token).Caf();
                 if (!KeepRunning)
                 {
                     return null;
@@ -271,14 +286,14 @@ namespace Iviz.Roslib
             return null;
         }
 
-        async Task StartSession(int timeoutInMs)
+        async Task StartSession()
         {
             while (KeepRunning)
             {
                 tcpClient = null;
 
                 Logger.LogDebug($"{this}: Trying to connect!");
-                tcpClient = await KeepReconnecting(timeoutInMs).Caf();
+                tcpClient = await KeepReconnecting().Caf();
                 if (tcpClient == null)
                 {
                     Logger.LogDebug(KeepRunning
@@ -313,8 +328,6 @@ namespace Iviz.Roslib
 
             tcpClient = null;
             stream = null;
-
-            runningTs.Cancel();
             Logger.Log($"{this}: Stopped!");
         }
 

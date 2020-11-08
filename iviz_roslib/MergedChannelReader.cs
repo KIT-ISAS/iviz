@@ -5,9 +5,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
-
 #if !NETSTANDARD2_0
 using System.Runtime.CompilerServices;
+
 #endif
 
 namespace Iviz.Roslib
@@ -18,7 +18,7 @@ namespace Iviz.Roslib
         IMessage Read(CancellationToken token);
         Task<IMessage> ReadAsync(CancellationToken token);
     }
-    
+
     /// <summary>
     /// A subscriber queue that merges two or more <see cref="RosSubscriberChannelReader{T}"/>
     /// </summary>
@@ -49,53 +49,63 @@ namespace Iviz.Roslib
             }
 
             this.sources = sources.ToArray();
-            
+
             if (this.sources.Length == 0)
             {
                 throw new ArgumentException("Value cannot be an empty collection.", nameof(sources));
             }
         }
 
-        public IMessage Read(CancellationToken externalToken)
+        public IMessage Read(CancellationToken token)
+        {
+            return ReadWithIndex(token).msg;
+        }
+
+        public (IMessage msg, int id) ReadWithIndex(CancellationToken token)
         {
             using CancellationTokenSource stopTokenCts = new CancellationTokenSource();
             using CancellationTokenSource linkedCts =
-                CancellationTokenSource.CreateLinkedTokenSource(stopTokenCts.Token, externalToken);
+                CancellationTokenSource.CreateLinkedTokenSource(stopTokenCts.Token, token);
 
             Task[] tasks = sources
                 .Select(async queue => { await queue.WaitToReadAsync(linkedCts.Token); })
                 .ToArray();
-            int readyTask = Task.WaitAny(tasks, externalToken);
+            int readyTask = Task.WaitAny(tasks, token);
             linkedCts.Cancel();
 
-            externalToken.ThrowIfCancellationRequested();
+            token.ThrowIfCancellationRequested();
 
-            IMessage msg = sources[readyTask].Read(externalToken);
-            return msg;
+            IMessage msg = sources[readyTask].Read(token);
+            return (msg, readyTask);
         }
 
         public async Task<IMessage> ReadAsync(CancellationToken externalToken)
         {
+            return (await ReadWithIndexAsync(externalToken)).msg;
+        }
+
+        public async Task<(IMessage msg, int index)> ReadWithIndexAsync(CancellationToken token)
+        {
             using CancellationTokenSource stopTokenCts = new CancellationTokenSource();
             using CancellationTokenSource linkedCts =
-                CancellationTokenSource.CreateLinkedTokenSource(stopTokenCts.Token, externalToken);
+                CancellationTokenSource.CreateLinkedTokenSource(stopTokenCts.Token, token);
 
             Task<bool>[] tasks = sources.Select(queue => queue.WaitToReadAsync(linkedCts.Token)).ToArray();
             Task<bool> readyTask = await Task.WhenAny(tasks);
             linkedCts.Cancel();
 
-            externalToken.ThrowIfCancellationRequested();
+            token.ThrowIfCancellationRequested();
 
             for (int i = 0; i < tasks.Length; i++)
             {
                 if (tasks[i] == readyTask)
                 {
-                    IMessage msg = await sources[i].ReadAsync(externalToken);
-                    return msg;
+                    IMessage msg = await sources[i].ReadAsync(token);
+                    return (msg, i);
                 }
             }
 
-            return null!; // shouldn't happen
+            return default; // shouldn't happen
         }
 
         public IEnumerator<IMessage> GetEnumerator()
@@ -118,14 +128,14 @@ namespace Iviz.Roslib
             return GetEnumerator();
         }
 
-        public IEnumerable<IMessage> AsEnum(CancellationToken externalToken)
+        public IEnumerable<IMessage> ReadAll(CancellationToken token)
         {
             while (true)
             {
                 IMessage msg;
                 try
                 {
-                    msg = Read(externalToken);
+                    msg = Read(token);
                 }
                 catch (OperationCanceledException)
                 {
@@ -136,15 +146,34 @@ namespace Iviz.Roslib
             }
         }
 
+        public IEnumerable<(IMessage msg, int index)> ReadAllWithIndex(CancellationToken token)
+        {
+            while (true)
+            {
+                IMessage msg;
+                int index;
+                try
+                {
+                    (msg, index) = ReadWithIndex(token);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+
+                yield return (msg, index);
+            }
+        }
+
 #if !NETSTANDARD2_0
-        public async IAsyncEnumerable<IMessage> AsAsyncEnum([EnumeratorCancellation] CancellationToken externalToken)
+        public async IAsyncEnumerable<IMessage> ReadAllAsync([EnumeratorCancellation] CancellationToken token)
         {
             while (true)
             {
                 IMessage msg;
                 try
                 {
-                    msg = await ReadAsync(externalToken);
+                    msg = await ReadAsync(token);
                 }
                 catch (OperationCanceledException)
                 {
@@ -152,6 +181,26 @@ namespace Iviz.Roslib
                 }
 
                 yield return msg;
+            }
+        }
+
+        public async IAsyncEnumerable<(IMessage msg, int index)>
+            ReadAllWithIndexAsync([EnumeratorCancellation] CancellationToken token)
+        {
+            while (true)
+            {
+                IMessage msg;
+                int index;
+                try
+                {
+                    (msg, index) = await ReadWithIndexAsync(token);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+
+                yield return (msg, index);
             }
         }
 #endif

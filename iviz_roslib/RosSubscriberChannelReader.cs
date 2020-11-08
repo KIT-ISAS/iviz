@@ -30,7 +30,7 @@ namespace Iviz.Roslib
         CancellationTokenRegistration subscriberToken;
         bool disposed;
         string? subscriberId;
-        RosSubscriber<T>? subscriber;
+        IRosSubscriber<T>? subscriber;
 
         public RosSubscriberChannelReader()
         {
@@ -42,7 +42,7 @@ namespace Iviz.Roslib
         /// <param name="client">A connected RosClient.</param>
         /// <param name="topic">The topic to listen to.</param>
         /// <param name="requestNoDelay">Whether NO_DELAY should be requested.</param>
-        public RosSubscriberChannelReader(RosClient client, string topic, bool requestNoDelay = false)
+        public RosSubscriberChannelReader(IRosClient client, string topic, bool requestNoDelay = false)
         {
             Start(client, topic, requestNoDelay);
         }
@@ -134,22 +134,15 @@ namespace Iviz.Roslib
         }
 
         /// <summary>
-        /// Starts the channel. Must be called after the constructor.
+        /// Starts the channel from an existing subscriber. Must be called after the constructor.
         /// </summary>
-        /// <param name="client">A connected RosClient</param>
-        /// <param name="topic">The topic to listen to</param>
-        /// <param name="requestNoDelay">Whether NO_DELAY should be requested</param>
+        /// <param name="newSubscriber">The existing subscriber.</param>
         /// <exception cref="ArgumentNullException">Thrown if the client or the topic are null</exception>
-        public void Start(RosClient client, string topic, bool requestNoDelay = false)
+        public void Start(IRosSubscriber<T> newSubscriber)
         {
-            if (client == null)
-            {
-                throw new ArgumentNullException(nameof(client));
-            }
-
-            subscriberId = client.Subscribe<T>(topic, Callback, out var subscriber, requestNoDelay);
-            this.subscriber = subscriber;
-            subscriberToken = this.subscriber.CancellationToken.Register(OnSubscriberDisposed);
+            subscriberId = newSubscriber.Subscribe(Callback);
+            subscriber = newSubscriber;
+            subscriberToken = subscriber.CancellationToken.Register(OnSubscriberDisposed);
         }
 
         /// <summary>
@@ -159,7 +152,7 @@ namespace Iviz.Roslib
         /// <param name="topic">The topic to listen to</param>
         /// <param name="requestNoDelay">Whether NO_DELAY should be requested</param>
         /// <exception cref="ArgumentNullException">Thrown if the client or the topic are null</exception>
-        public async Task StartAsync(RosClient client, string topic, bool requestNoDelay = false)
+        public async Task StartAsync(IRosClient client, string topic, bool requestNoDelay = false)
         {
             if (client == null)
             {
@@ -172,6 +165,24 @@ namespace Iviz.Roslib
             subscriber = newSubscriber;
             subscriberToken = subscriber.CancellationToken.Register(OnSubscriberDisposed);
         }
+        
+        /// <summary>
+        /// Starts the channel. Must be called after the constructor.
+        /// </summary>
+        /// <param name="client">A connected RosClient</param>
+        /// <param name="topic">The topic to listen to</param>
+        /// <param name="requestNoDelay">Whether NO_DELAY should be requested</param>
+        /// <exception cref="ArgumentNullException">Thrown if the client or the topic are null</exception>
+        public void Start(IRosClient client, string topic, bool requestNoDelay = false)
+        {
+            if (client == null)
+            {
+                throw new ArgumentNullException(nameof(client));
+            }
+
+            subscriberId = client.Subscribe(topic, Callback, out subscriber, requestNoDelay);
+            subscriberToken = subscriber.CancellationToken.Register(OnSubscriberDisposed);
+        }        
 
         void OnSubscriberDisposed()
         {
@@ -254,7 +265,6 @@ namespace Iviz.Roslib
             return messageQueue.Dequeue(token);
         }
         
-        /// <summary>
         /// Awaits a given time until a message arrives, and pulls it from the queue.
         /// </summary>
         /// <param name="timeoutInMs">The maximal time to wait</param>
@@ -341,7 +351,7 @@ namespace Iviz.Roslib
         /// <param name="externalToken">A cancellation token that makes the function stop blocking when cancelled.</param>
         /// <returns>An enumerator that can be used in a foreach</returns>
         /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
-        public IEnumerable<T> AsEnum(CancellationToken externalToken)
+        public IEnumerable<T> ReadAll(CancellationToken externalToken)
         {
             while (true)
             {
@@ -352,7 +362,6 @@ namespace Iviz.Roslib
                 }
                 catch (OperationCanceledException)
                 {
-                    Logger.LogDebug("was here!");
                     break;
                 }
 
@@ -368,7 +377,7 @@ namespace Iviz.Roslib
         /// <param name="externalToken">A cancellation token that makes the function stop blocking when cancelled.</param>
         /// <returns>An enumerator that can be used in a foreach</returns>
         /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
-        public async IAsyncEnumerable<T> AsAsyncEnum([EnumeratorCancellation] CancellationToken externalToken)
+        public async IAsyncEnumerable<T> ReadAllAsync([EnumeratorCancellation] CancellationToken externalToken)
         {
             while (true)
             {
@@ -379,7 +388,6 @@ namespace Iviz.Roslib
                 }
                 catch (OperationCanceledException)
                 {
-                    Logger.LogDebug("was here!");
                     break;
                 }
 

@@ -406,7 +406,7 @@ namespace Iviz.Roslib.Actionlib
             using CancellationTokenSource linkedSource =
                 CancellationTokenSource.CreateLinkedTokenSource(token, tokenSource.Token);
 
-            foreach (IMessage msg in channelReader.AsEnum(linkedSource.Token))
+            foreach (IMessage msg in channelReader.ReadAll(linkedSource.Token))
                 switch (msg)
                 {
                     case IActionFeedback<TT> actionFeedback:
@@ -474,7 +474,7 @@ namespace Iviz.Roslib.Actionlib
 
             try
             {
-                await foreach (IMessage msg in channelReader.AsAsyncEnum(linkedSource.Token))
+                await foreach (IMessage msg in channelReader.ReadAllAsync(linkedSource.Token))
                     switch (msg)
                     {
                         case IActionFeedback<TT> actionFeedback:

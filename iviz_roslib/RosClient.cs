@@ -18,10 +18,24 @@ using Nito.AsyncEx.Synchronous;
 
 namespace Iviz.Roslib
 {
+    public interface IRosClient : IDisposable
+    {
+        string CallerId { get; }
+        string Advertise<T>(string topic, out IRosPublisher<T> publisher) where T : IMessage;
+        Task<(string id, IRosPublisher<T> publisher)> AdvertiseAsync<T>(string topic) where T : IMessage;
+
+        string Subscribe<T>(string topic, Action<T> callback, out IRosSubscriber<T> subscriber,
+            bool requestNoDelay = false) where T : IMessage, IDeserializable<T>, new();
+
+        Task<(string id, IRosSubscriber<T> subscriber)>
+            SubscribeAsync<T>(string topic, Action<T> callback, bool requestNoDelay = false)
+            where T : IMessage, IDeserializable<T>, new();
+    }
+
     /// <summary>
     /// Class that manages a client connection to a ROS master. 
     /// </summary>
-    public sealed class RosClient : IDisposable
+    public sealed class RosClient : IRosClient
     {
         public const int AnyPort = 0;
 
@@ -564,6 +578,14 @@ namespace Iviz.Roslib
             return subscriber.Subscribe(callback);
         }
 
+        string IRosClient.Subscribe<T>(string topic, Action<T> callback, out IRosSubscriber<T> subscriber,
+            bool requestNoDelay)
+        {
+            string id = Subscribe(topic, callback, out RosSubscriber<T> newSubscriber, requestNoDelay);
+            subscriber = newSubscriber;
+            return id;
+        }
+
         /// <summary>
         /// Generic version of the subscriber function if the type is not known. You should probably use the templated versions.
         /// </summary>
@@ -659,6 +681,12 @@ namespace Iviz.Roslib
 
 
             return (subscriber.Subscribe(callback), subscriber);
+        }
+
+        async Task<(string id, IRosSubscriber<T> subscriber)>
+            IRosClient.SubscribeAsync<T>(string topic, Action<T> callback, bool requestNoDelay)
+        {
+            return await SubscribeAsync(topic, callback, requestNoDelay);
         }
 
         /// <summary>
@@ -816,6 +844,13 @@ namespace Iviz.Roslib
             return publisher.Advertise();
         }
 
+        string IRosClient.Advertise<T>(string topic, out IRosPublisher<T> publisher)
+        {
+            string id = Advertise<T>(topic, out var newPublisher);
+            publisher = newPublisher;
+            return id;
+        }
+
         /// <summary>
         /// Advertises the given topic.
         /// </summary>
@@ -842,6 +877,11 @@ namespace Iviz.Roslib
             }
 
             return (publisher.Advertise(), publisher);
+        }
+
+        async Task<(string id, IRosPublisher<T> publisher)> IRosClient.AdvertiseAsync<T>(string topic)
+        {
+            return await AdvertiseAsync<T>(topic);
         }
 
         public string Advertise(string topic, Type type, out IRosPublisher publisher)
