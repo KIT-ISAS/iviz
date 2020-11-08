@@ -79,7 +79,29 @@ namespace Iviz.MsgsGen
                 "public static readonly ColorRGBA Magenta = new ColorRGBA(1, 0, 1, 1);", 
                 "public static readonly ColorRGBA Grey = new ColorRGBA(0.5f, 0.5f, 0.5f, 1);", 
                 "public static ColorRGBA operator *(in ColorRGBA v, in ColorRGBA w) => new ColorRGBA(v.R * w.R, v.G * w.G, v.B * w.B, v.A * w.A);",
-            },                 
+            },      
+            
+            ["iviz_msgs/Vector3f"] = new[]
+            {
+                "public static readonly Vector3f Zero = new Vector3f(0, 0, 0);",
+                "public static readonly Vector3f One = new Vector3f(1, 1, 1);",
+                "public static readonly Vector3f UnitX = new Vector3f(1, 0, 0);",
+                "public static readonly Vector3f UnitY = new Vector3f(0, 1, 0);",
+                "public static readonly Vector3f UnitZ = new Vector3f(0, 0, 1);",
+                "public static implicit operator GeometryMsgs.Point(in Vector3f p) => new GeometryMsgs.Point(p.X, p.Y, p.Z);",
+                "public static implicit operator GeometryMsgs.Vector3(in Vector3f p) => new GeometryMsgs.Vector3(p.X, p.Y, p.Z);",
+                "public static Vector3f operator +(in Vector3f v, in Vector3f w) => new Vector3f(v.X + w.X, v.Y + w.Y, v.Z + w.Z);",
+                "public static Vector3f operator -(in Vector3f v, in Vector3f w) => new Vector3f(v.X - w.X, v.Y - w.Y, v.Z - w.Z);",
+                "public static Vector3f operator *(float f, in Vector3f v) => new Vector3f(f * v.X, f * v.Y, f * v.Z);",
+                "public static Vector3f operator *(in Vector3f v, float f) => new Vector3f(f * v.X, f * v.Y, f * v.Z);",
+                "public static Vector3f operator /(in Vector3f v, float f) => new Vector3f(v.X / f, v.Y / f, v.Z / f);",
+                "public static Vector3f operator -(in Vector3f v) => new Vector3f(-v.X, -v.Y, -v.Z);",
+                "public readonly float Dot(in Vector3f v) => X * v.X + Y * v.Y + Z * v.Z;",
+                "public readonly float SquaredNorm => Dot(this);",
+                "public readonly float Norm => (float)System.Math.Sqrt(SquaredNorm);",
+                "public readonly Vector3f Normalized => this / Norm;",
+                "public readonly Vector3f Cross(in Vector3f v) => new Vector3f(Y * v.Z - Z * v.Y, Z * v.X - X * v.Z, X * v.Y - Y * v.X);",
+            },            
         };
     }
 }

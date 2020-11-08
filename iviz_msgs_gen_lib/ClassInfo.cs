@@ -96,9 +96,9 @@ namespace Iviz.MsgsGen
             "std_msgs/UInt8",
             "std_msgs/Byte",
             "std_msgs/Char",
-            "iviz_msgs/Color",
-            "iviz_msgs/Vector2",
-            "iviz_msgs/Vector3",
+            "iviz_msgs/Color32",
+            "iviz_msgs/Vector2f",
+            "iviz_msgs/Vector3f",
             "iviz_msgs/Triangle",
             "iviz_msgs/BoundingBox"
         };
