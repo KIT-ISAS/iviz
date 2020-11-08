@@ -11,7 +11,7 @@ namespace Iviz.Controllers
         /// <summary>
         /// GUID of the controller.
         /// </summary>
-        Guid Id { get; }
+        string Id { get; }
         
         /// <summary>
         /// Module type of the controller. 

@@ -19,11 +19,11 @@ namespace Iviz.Controllers
         [DataMember] public bool PublishJoy { get; set; }
         [DataMember] public string TwistTopic { get; set; } = "";
         [DataMember] public bool PublishTwist { get; set; } = true;
-        [DataMember] public bool TwistStamped { get; set; }
+        [DataMember] public bool UseTwistStamped { get; set; }
         [DataMember] public SerializableVector3 MaxSpeed { get; set; } = Vector3.one * 0.25f;
         [DataMember] public string AttachToFrame { get; set; } = "map";
         [DataMember] public bool XIsFront { get; set; } = true;
-        [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
+        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public Resource.Module Module => Resource.Module.Joystick;
         [DataMember] public bool Visible { get; set; } = true;
     }
@@ -70,12 +70,12 @@ namespace Iviz.Controllers
             }
         }
 
-        public bool TwistStamped
+        public bool UseTwistStamped
         {
-            get => config.TwistStamped;
+            get => config.UseTwistStamped;
             set
             {
-                config.TwistStamped = value;
+                config.UseTwistStamped = value;
                 RebuildTwist();
             }
         }
@@ -100,8 +100,8 @@ namespace Iviz.Controllers
             }
         }
 
-        public RosSender<Joy> RosSenderJoy { get; private set; }
-        public IRosSender RosSenderTwist { get; private set; }
+        public Sender<Joy> SenderJoy { get; private set; }
+        public ISender SenderTwist { get; private set; }
 
         public bool Visible
         {
@@ -122,14 +122,14 @@ namespace Iviz.Controllers
             set
             {
                 config.PublishJoy = value;
-                if (value && RosSenderJoy == null)
+                if (value && SenderJoy == null)
                 {
                     RebuildJoy();
                 }
-                else if (!value && RosSenderJoy != null)
+                else if (!value && SenderJoy != null)
                 {
-                    RosSenderJoy.Stop();
-                    RosSenderJoy = null;
+                    SenderJoy.Stop();
+                    SenderJoy = null;
                 }
             }
         }
@@ -140,14 +140,14 @@ namespace Iviz.Controllers
             set
             {
                 config.PublishTwist = value;
-                if (value && RosSenderTwist == null)
+                if (value && SenderTwist == null)
                 {
                     RebuildTwist();
                 }
-                else if (!value && RosSenderTwist != null)
+                else if (!value && SenderTwist != null)
                 {
-                    RosSenderTwist.Stop();
-                    RosSenderTwist = null;
+                    SenderTwist.Stop();
+                    SenderTwist = null;
                 }
             }
         }
@@ -175,8 +175,8 @@ namespace Iviz.Controllers
         public void StopController()
         {
             GameThread.EveryFrame -= PublishData;
-            RosSenderJoy?.Stop();
-            RosSenderTwist?.Stop();
+            SenderJoy?.Stop();
+            SenderTwist?.Stop();
             Visible = false;
         }
 
@@ -186,36 +186,36 @@ namespace Iviz.Controllers
 
         void RebuildJoy()
         {
-            if (RosSenderJoy != null && RosSenderJoy.Topic != config.JoyTopic)
+            if (SenderJoy != null && SenderJoy.Topic != config.JoyTopic)
             {
-                RosSenderJoy.Stop();
-                RosSenderJoy = null;
+                SenderJoy.Stop();
+                SenderJoy = null;
             }
 
-            if (RosSenderJoy is null)
+            if (SenderJoy is null)
             {
-                RosSenderJoy = new RosSender<Joy>(JoyTopic);
+                SenderJoy = new Sender<Joy>(JoyTopic);
             }
         }
 
         void RebuildTwist()
         {
-            string twistType = TwistStamped
+            string twistType = UseTwistStamped
                 ? Msgs.GeometryMsgs.TwistStamped.RosMessageType
                 : Twist.RosMessageType;
 
-            if (RosSenderTwist != null &&
-                (RosSenderTwist.Topic != config.TwistTopic || RosSenderTwist.Type != twistType))
+            if (SenderTwist != null &&
+                (SenderTwist.Topic != config.TwistTopic || SenderTwist.Type != twistType))
             {
-                RosSenderTwist.Stop();
-                RosSenderTwist = null;
+                SenderTwist.Stop();
+                SenderTwist = null;
             }
 
-            if (RosSenderTwist == null)
+            if (SenderTwist == null)
             {
-                RosSenderTwist = TwistStamped
-                    ? (IRosSender) new RosSender<TwistStamped>(TwistTopic)
-                    : new RosSender<Twist>(TwistTopic);
+                SenderTwist = UseTwistStamped
+                    ? (ISender) new Sender<TwistStamped>(TwistTopic)
+                    : new Sender<Twist>(TwistTopic);
             }
         }
 
@@ -226,7 +226,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            if (RosSenderTwist != null && Visible)
+            if (SenderTwist != null && Visible)
             {
                 Vector2 leftDir = Joystick.Left;
                 Vector2 rightDir = Joystick.Right;
@@ -240,21 +240,21 @@ namespace Iviz.Controllers
                     new Msgs.GeometryMsgs.Vector3(0, 0, -rightDir.x * MaxSpeed.z)
                 );
 
-                if (TwistStamped)
+                if (UseTwistStamped)
                 {
                     TwistStamped twistStamped = new TwistStamped(
                         RosUtils.CreateHeader(twistSeq++, frame),
                         twist
                     );
-                    RosSenderTwist.Publish(twistStamped);
+                    SenderTwist.Publish(twistStamped);
                 }
                 else
                 {
-                    RosSenderTwist.Publish(twist);
+                    SenderTwist.Publish(twist);
                 }
             }
 
-            if (RosSenderJoy != null && Visible)
+            if (SenderJoy != null && Visible)
             {
                 Vector2 leftDir = Joystick.Left;
                 Vector2 rightDir = Joystick.Right;
@@ -266,7 +266,7 @@ namespace Iviz.Controllers
                     new[] {leftDir.x, leftDir.y, rightDir.x, rightDir.y},
                     Array.Empty<int>()
                 );
-                RosSenderJoy.Publish(joy);
+                SenderJoy.Publish(joy);
             }
         }
     }

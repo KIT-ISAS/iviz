@@ -11,34 +11,40 @@ namespace Iviz.Controllers
 {
     public sealed class InteractiveMarkerControlObject : MonoBehaviour
     {
-        public delegate void MouseEventAction(in Pose pose, in Vector3 point, MouseEventType type);
-
         readonly StringBuilder description = new StringBuilder();
         readonly Dictionary<string, MarkerObject> markers = new Dictionary<string, MarkerObject>();
-        //readonly HashSet<string> markersToDelete = new HashSet<string>();
-        InteractiveControl control;
 
-        bool markerIsInteractive;
+        [CanBeNull] InteractiveControl control;
         GameObject markerNode;
+        bool markerIsInteractive;
+
+        string id;
+        [CanBeNull] InteractiveMarkerObject imarkerObject;
 
         void Awake()
         {
             markerNode = new GameObject("[MarkerNode]");
-            markerNode.transform.SetParent(transform, false);
+            markerNode.transform.SetParentLocal(transform);
             markerNode.AddComponent<Billboard>().enabled = false;
         }
 
-        public event MouseEventAction MouseEvent;
-        public event InteractiveControl.MovedAction Moved;
-
+        internal void Initialize(InteractiveMarkerObject newIMarkerObject, string newId)
+        {
+            imarkerObject = newIMarkerObject;
+            id = newId;
+        }
+        
         public void Set([NotNull] InteractiveMarkerControl msg)
         {
             name = $"[ControlObject '{msg.Name}']";
 
             description.Clear();
-            description.Append("<b>** Control '").Append(msg.Name).Append("'</b>").AppendLine();
-            description.Append("Description: ").Append(msg.Description.Length == 0 ? "[]" : msg.Description)
-                .AppendLine();
+            description.Append("<color=green><b>** Control '").Append(msg.Name).Append("'</b></color>").AppendLine();
+
+            string msgDescription = msg.Description.Length != 0
+                ? msg.Description.Replace("\t", "\\t").Replace("\n", "\\n")
+                : "[]";
+            description.Append("Description: ").Append(msgDescription).AppendLine();
 
             transform.localRotation = msg.Orientation.Ros2Unity();
 
@@ -46,7 +52,7 @@ namespace Iviz.Controllers
             OrientationMode orientationMode = (OrientationMode) msg.OrientationMode;
             description.Append("InteractionMode: ").Append(EnumToString(interactionMode)).AppendLine();
             description.Append("OrientationMode: ").Append(EnumToString(orientationMode)).AppendLine();
-            
+
             UpdateMarkers(msg.Markers);
             UpdateInteractionMode(interactionMode, orientationMode, msg.IndependentMarkerOrientation);
 
@@ -62,7 +68,30 @@ namespace Iviz.Controllers
 
             control = ResourcePool.GetOrCreate<InteractiveControl>(Resource.Displays.InteractiveControl, transform);
             control.TargetTransform = transform.parent;
-            control.Moved += (in Pose pose) => Moved?.Invoke(transform.AsPose());
+            
+            control.Moved += (in Pose _) =>
+            {
+                if (imarkerObject != null)
+                {
+                    imarkerObject.OnMoved(id);
+                }
+            };
+            
+            // disable external updates while dragging
+            control.PointerDown += () =>
+            {
+                if (imarkerObject != null)
+                {
+                    imarkerObject.PoseUpdateEnabled = false;
+                }
+            };
+            control.PointerUp += () =>
+            {
+                if (imarkerObject != null)
+                {
+                    imarkerObject.PoseUpdateEnabled = true;
+                }
+            };
         }
 
         void UpdateInteractionMode(InteractionMode interactionMode, OrientationMode orientationMode,
@@ -70,7 +99,7 @@ namespace Iviz.Controllers
         {
             bool clickable = interactionMode == InteractionMode.Button;
             markers.Values.ForEach(marker => marker.Clickable = clickable);
-            
+
             switch (interactionMode)
             {
                 case InteractionMode.None:
@@ -147,30 +176,22 @@ namespace Iviz.Controllers
 
         void UpdateMarkers([NotNull] Marker[] msg)
         {
-            /*
-            markersToDelete.Clear();
-            foreach (string id in markers.Keys)
-            {
-                markersToDelete.Add(id);
-            }
-            */
-
             foreach (Marker marker in msg)
             {
-                string id = MarkerListener.IdFromMessage(marker);
+                string markerId = MarkerListener.IdFromMessage(marker);
                 switch (marker.Action)
                 {
                     case Marker.ADD:
                         MarkerObject markerObject;
-                        if (markers.TryGetValue(id, out MarkerObject existingMarker))
+                        if (markers.TryGetValue(markerId, out MarkerObject existingMarker))
                         {
                             markerObject = existingMarker;
                         }
-                        else 
+                        else
                         {
                             markerObject = CreateMarkerObject();
                             markerObject.MouseEvent += OnMarkerClicked;
-                            markers[id] = markerObject;
+                            markers[markerId] = markerObject;
                         }
 
                         markerObject.Set(marker);
@@ -179,28 +200,17 @@ namespace Iviz.Controllers
                             markerObject.transform.SetParentLocal(markerNode.transform);
                         }
 
-                        //markersToDelete.Remove(id);
                         break;
                     case Marker.DELETE:
-                        if (markers.TryGetValue(id, out MarkerObject markerToDelete))
+                        if (markers.TryGetValue(markerId, out MarkerObject markerToDelete))
                         {
                             DeleteMarkerObject(markerToDelete);
-                            markers.Remove(id);
-                            //markersToDelete.Remove(id);
+                            markers.Remove(markerId);
                         }
 
                         break;
                 }
             }
-            
-            /*
-            foreach (string id in markersToDelete)
-            {
-                MarkerObject markerToDelete = markers[id];
-                DeleteMarkerObject(markerToDelete);
-                markers.Remove(id);
-            }
-            */
         }
 
         void OnMarkerClicked(in Vector3 point, MouseEventType type)
@@ -210,32 +220,29 @@ namespace Iviz.Controllers
                 return;
             }
 
-            MouseEvent?.Invoke(transform.AsPose(), point, type);
+            imarkerObject?.OnMouseEvent(id, transform.AsPose(), point, type);
         }
 
         public void Stop()
         {
             markers.Values.ForEach(DeleteMarkerObject);
             markers.Clear();
-            //markersToDelete.Clear();
 
-            if (!(control is null))
+            if (control != null)
             {
                 control.Stop();
                 ResourcePool.Dispose(Resource.Displays.InteractiveControl, control.gameObject);
             }
-
-            MouseEvent = null;
-            Moved = null;
         }
 
         public void GenerateLog([NotNull] StringBuilder baseDescription)
         {
             baseDescription.Append(description);
 
-            foreach (var marker in markers.Values) marker.GenerateLog(baseDescription);
+            foreach (var marker in markers.Values)
+                marker.GenerateLog(baseDescription);
         }
-        
+
         static void DeleteMarkerObject([NotNull] MarkerObject marker)
         {
             marker.Stop();
@@ -247,7 +254,7 @@ namespace Iviz.Controllers
             GameObject gameObject = new GameObject("MarkerObject");
             return gameObject.AddComponent<MarkerObject>();
         }
-        
+
         [NotNull]
         static string EnumToString(InteractionMode mode)
         {
@@ -293,8 +300,6 @@ namespace Iviz.Controllers
                     return $"Unknown ({(int) mode})";
             }
         }
-
-        
 
         enum InteractionMode
         {

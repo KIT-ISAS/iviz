@@ -1,11 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Iviz.Controllers;
+using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 using UnityEngine;
+using Logger = UnityEngine.Logger;
 
 namespace Iviz.App
 {
@@ -184,6 +187,64 @@ namespace Iviz.App
         protected override void UpdateModuleButton()
         {
             ButtonText = $"{Resource.Font.Split(robot.Name, ModuleListPanel.ModuleDataCaptionWidth)}\n<b>{Module}</b>";
+        }
+
+        public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
+        {
+            var config = JsonConvert.DeserializeObject<SimpleRobotConfiguration>(configAsJson);
+            bool hasRobotName = false;
+            bool hasSourceParameter = false;
+
+            foreach (string field in fields)
+            {
+                switch (field)
+                {
+                    case nameof(SimpleRobotConfiguration.Visible):
+                        robot.Visible = config.Visible;
+                        break;
+                    case nameof(SimpleRobotConfiguration.SourceParameter):
+                        hasSourceParameter = true;
+                        break;
+                    case nameof(SimpleRobotConfiguration.SavedRobotName):
+                        hasRobotName = true;
+                        break;
+                    case nameof(SimpleRobotConfiguration.FramePrefix):
+                        robot.FramePrefix = config.FramePrefix;
+                        break;
+                    case nameof(SimpleRobotConfiguration.FrameSuffix):
+                        robot.FrameSuffix = config.FrameSuffix;
+                        break;
+                    case nameof(SimpleRobotConfiguration.AttachedToTf):
+                        robot.AttachedToTf = config.AttachedToTf;
+                        break;
+                    case nameof(SimpleRobotConfiguration.RenderAsOcclusionOnly):
+                        robot.RenderAsOcclusionOnly = config.RenderAsOcclusionOnly;
+                        break;
+                    case nameof(SimpleRobotConfiguration.Tint):
+                        robot.Tint = config.Tint;
+                        break;
+                    default:
+                        Core.Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
+                        break;
+                }
+            }
+
+            if (hasRobotName || hasSourceParameter)
+            {
+                if (!hasRobotName)
+                {
+                    config.SavedRobotName = "";
+                }
+
+                if (!hasSourceParameter)
+                {
+                    config.SourceParameter = "";
+                }
+
+                robot.ProcessRobotSource(config.SavedRobotName, config.SourceParameter);
+            }
+
+            ResetPanel();
         }
 
         public override void AddToState(StateConfiguration config)

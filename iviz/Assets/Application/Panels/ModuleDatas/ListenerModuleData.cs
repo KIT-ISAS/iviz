@@ -18,7 +18,11 @@ namespace Iviz.App
         {
             base.Stop();
             Listener.StopController();
-            //UnityEngine.Object.Destroy(Listener.gameObject);
         }
+        
+        public override string ToString()
+        {
+            return $"[{Module} Topic='{Topic}' [{Type}] guid={Configuration.Id}]";
+        }        
     }
 }

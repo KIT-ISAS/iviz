@@ -21,10 +21,10 @@ namespace Iviz.App
             panel.TfLog.Flush();
             panel.TfLog.UpdateFrameTexts();
 
-            panel.ShowOnlyUsed.Value = !TfListener.Instance.ShowAllFrames;
+            panel.ShowOnlyUsed.Value = TfListener.Instance.KeepOnlyUsedFrames;
             panel.ShowOnlyUsed.ValueChanged += f =>
             {
-                TfListener.Instance.ShowAllFrames = !f;
+                TfListener.Instance.KeepOnlyUsedFrames = f;
                 TfListener.Instance.ModuleData.ResetPanel();
             };
         }

@@ -1,4 +1,6 @@
-﻿using Iviz.Msgs;
+﻿// #define LOG_ENABLED
+
+using Iviz.Msgs;
 using Iviz.Roslib;
 using System;
 using System.Collections.Generic;
@@ -28,8 +30,8 @@ namespace Iviz.Ros
                 Topic = topic ?? throw new ArgumentNullException(nameof(topic));
             }
 
-            public abstract void Add([NotNull] IRosSender subscriber);
-            public abstract void Remove([NotNull] IRosSender subscriber);
+            public abstract void Add([NotNull] ISender subscriber);
+            public abstract void Remove([NotNull] ISender subscriber);
             public abstract int Count { get; }
             public abstract Task AdvertiseAsync([CanBeNull] RosClient client);
 
@@ -56,7 +58,7 @@ namespace Iviz.Ros
 
         class AdvertisedTopic<T> : AdvertisedTopic where T : IMessage
         {
-            readonly HashSet<RosSender<T>> senders = new HashSet<RosSender<T>>();
+            readonly HashSet<Sender<T>> senders = new HashSet<Sender<T>>();
 
             public AdvertisedTopic([NotNull] string topic) : base(topic)
             {
@@ -68,21 +70,21 @@ namespace Iviz.Ros
                 set
                 {
                     base.Id = value;
-                    foreach (RosSender<T> sender in senders)
+                    foreach (Sender<T> sender in senders)
                     {
                         sender.SetId(value);
                     }
                 }
             }
 
-            public override void Add(IRosSender publisher)
+            public override void Add(ISender publisher)
             {
-                senders.Add((RosSender<T>) publisher);
+                senders.Add((Sender<T>) publisher);
             }
 
-            public override void Remove(IRosSender publisher)
+            public override void Remove(ISender publisher)
             {
-                senders.Remove((RosSender<T>) publisher);
+                senders.Remove((Sender<T>) publisher);
             }
 
             public override int Count => senders.Count;
@@ -115,16 +117,16 @@ namespace Iviz.Ros
                 Topic = topic ?? throw new ArgumentNullException(nameof(topic));
             }
 
-            public abstract void Add([NotNull] IRosListener subscriber);
-            public abstract void Remove([NotNull] IRosListener subscriber);
+            public abstract void Add([NotNull] IListener subscriber);
+            public abstract void Remove([NotNull] IListener subscriber);
             public abstract Task SubscribeAsync([CanBeNull] RosClient client);
 
             public async Task UnsubscribeAsync([NotNull] RosClient client)
             {
                 string topic = Topic[0] == '/'
-                    ? Topic 
+                    ? Topic
                     : $"{client.CallerId}/{Topic}";
-                
+
                 if (Subscriber != null)
                 {
                     await Subscriber.UnsubscribeAsync(topic);
@@ -139,25 +141,25 @@ namespace Iviz.Ros
 
         class SubscribedTopic<T> : SubscribedTopic where T : IMessage, IDeserializable<T>, new()
         {
-            readonly HashSet<RosListener<T>> listeners = new HashSet<RosListener<T>>();
+            readonly HashSet<Listener<T>> listeners = new HashSet<Listener<T>>();
 
             public SubscribedTopic([NotNull] string topic) : base(topic)
             {
             }
 
-            public override void Add(IRosListener subscriber)
+            public override void Add(IListener subscriber)
             {
-                listeners.Add((RosListener<T>) subscriber);
+                listeners.Add((Listener<T>) subscriber);
             }
 
-            public override void Remove(IRosListener subscriber)
+            public override void Remove(IListener subscriber)
             {
-                listeners.Remove((RosListener<T>) subscriber);
+                listeners.Remove((Listener<T>) subscriber);
             }
 
             void Callback(T msg)
             {
-                foreach (RosListener<T> listener in listeners)
+                foreach (Listener<T> listener in listeners)
                 {
                     listener.EnqueueMessage(msg);
                 }
@@ -300,9 +302,12 @@ namespace Iviz.Ros
 
             try
             {
+#if LOG_ENABLED
                 Msgs.Logger.LogDebug = x => Logger.Debug(x);
                 Msgs.Logger.LogError = x => Logger.Error(x);
                 Msgs.Logger.Log = x => Logger.Info(x);
+#endif
+
 
                 Logger.Internal("Connecting...");
 
@@ -328,7 +333,9 @@ namespace Iviz.Ros
                 return true;
             }
             catch (Exception e) when
-            (e is UnreachableUriException || e is ConnectionException || e is RosRpcException ||
+            (e is UnreachableUriException ||
+             e is ConnectionException ||
+             e is RosRpcException ||
              e is XmlRpcException)
             {
                 Logger.Internal("Error:", e);
@@ -389,7 +396,7 @@ namespace Iviz.Ros
             );
         }
 
-        internal override void Advertise<T>(RosSender<T> advertiser)
+        internal override void Advertise<T>(Sender<T> advertiser)
         {
             if (advertiser == null)
             {
@@ -410,7 +417,7 @@ namespace Iviz.Ros
             });
         }
 
-        async Task AdvertiseImpl<T>([NotNull] RosSender<T> advertiser) where T : IMessage
+        async Task AdvertiseImpl<T>([NotNull] Sender<T> advertiser) where T : IMessage
         {
             if (!publishersByTopic.TryGetValue(advertiser.Topic, out AdvertisedTopic advertisedTopic))
             {
@@ -480,7 +487,8 @@ namespace Iviz.Ros
             });
         }
 
-        async Task AdvertiseServiceImpl<T>([NotNull] string service, [NotNull] Action<T> callback) where T : IService, new()
+        async Task AdvertiseServiceImpl<T>([NotNull] string service, [NotNull] Action<T> callback)
+            where T : IService, new()
         {
             if (servicesByTopic.ContainsKey(service))
             {
@@ -532,7 +540,7 @@ namespace Iviz.Ros
             return result[0];
         }
 
-        internal override void Publish<T>(RosSender<T> advertiser, T msg)
+        internal override void Publish<T>(Sender<T> advertiser, T msg)
         {
             if (advertiser == null)
             {
@@ -561,7 +569,7 @@ namespace Iviz.Ros
         }
 
 
-        void PublishImpl<T>([NotNull] IRosSender advertiser, T msg) where T : IMessage
+        void PublishImpl<T>([NotNull] ISender advertiser, T msg) where T : IMessage
         {
             if (advertiser.Id == -1)
             {
@@ -569,13 +577,13 @@ namespace Iviz.Ros
             }
 
             IRosPublisher basePublisher = publishers[advertiser.Id];
-            if (basePublisher != null && basePublisher is RosPublisher<T> publisher)
+            if (basePublisher != null && basePublisher is IRosPublisher<T> publisher)
             {
                 publisher.Publish(msg);
             }
         }
 
-        internal override void Subscribe<T>(RosListener<T> listener)
+        internal override void Subscribe<T>(Listener<T> listener)
         {
             if (listener == null)
             {
@@ -596,7 +604,7 @@ namespace Iviz.Ros
             });
         }
 
-        async Task SubscribeImpl<T>([NotNull] IRosListener listener) where T : IMessage, IDeserializable<T>, new()
+        async Task SubscribeImpl<T>([NotNull] IListener listener) where T : IMessage, IDeserializable<T>, new()
         {
             if (!subscribersByTopic.TryGetValue(listener.Topic, out SubscribedTopic subscribedTopic))
             {
@@ -611,7 +619,7 @@ namespace Iviz.Ros
             subscribedTopic.Add(listener);
         }
 
-        internal override void Unadvertise(IRosSender advertiser)
+        internal override void Unadvertise(ISender advertiser)
         {
             if (advertiser == null)
             {
@@ -632,7 +640,7 @@ namespace Iviz.Ros
             });
         }
 
-        async Task UnadvertiseImpl([NotNull] IRosSender advertiser)
+        async Task UnadvertiseImpl([NotNull] ISender advertiser)
         {
             if (!publishersByTopic.TryGetValue(advertiser.Topic, out AdvertisedTopic advertisedTopic))
             {
@@ -658,7 +666,7 @@ namespace Iviz.Ros
             }
         }
 
-        internal override void Unsubscribe(IRosListener subscriber)
+        internal override void Unsubscribe(IListener subscriber)
         {
             if (subscriber == null)
             {
@@ -680,7 +688,7 @@ namespace Iviz.Ros
         }
 
 
-        async Task UnsubscribeImpl([NotNull] IRosListener subscriber)
+        async Task UnsubscribeImpl([NotNull] IListener subscriber)
         {
             if (!subscribersByTopic.TryGetValue(subscriber.Topic, out SubscribedTopic subscribedTopic))
             {

@@ -1,7 +1,10 @@
-﻿using Iviz.Controllers;
+﻿using System.Collections.Generic;
+using Iviz.Controllers;
+using Iviz.Core;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 
 namespace Iviz.App
 {
@@ -43,14 +46,14 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
-            panel.Listener.RosListener = listener.Listener;
+            panel.Listener.Listener = listener.Listener;
             panel.Frame.Owner = listener;
             panel.HideButton.State = listener.Visible;
 
-            panel.LineWidth.Value = listener.Width;
-            panel.ShowAxes.Value = listener.ShowAxes;
-            panel.AxesLength.Value = listener.AxisLength;
-            panel.ShowLines.Value = listener.ShowLines;
+            panel.LineWidth.Value = listener.LineWidth;
+            panel.ShowAxes.Value = listener.FramesVisible;
+            panel.AxesLength.Value = listener.FrameSize;
+            panel.ShowLines.Value = listener.LinesVisible;
             panel.LineColor.Value = listener.LineColor;
 
             switch (Type)
@@ -72,19 +75,19 @@ namespace Iviz.App
 
             panel.LineWidth.ValueChanged += f =>
             {
-                listener.Width = f;
+                listener.LineWidth = f;
             };
             panel.ShowAxes.ValueChanged += f =>
             {
-                listener.ShowAxes = f;
+                listener.FramesVisible = f;
             };
             panel.ShowLines.ValueChanged += f =>
             {
-                listener.ShowLines = f;
+                listener.LinesVisible = f;
             };
             panel.AxesLength.ValueChanged += f =>
             {
-                listener.AxisLength = f;
+                listener.FrameSize = f;
             };
             panel.LineColor.ValueChanged += f =>
             {
@@ -102,6 +105,42 @@ namespace Iviz.App
                 UpdateModuleButton();
             };
         }
+        
+        public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
+        {
+            var config = JsonConvert.DeserializeObject<PathConfiguration>(configAsJson);
+            
+            foreach (string field in fields)
+            {
+                switch (field) 
+                {
+                    case nameof(PathConfiguration.Visible):
+                        listener.Visible = config.Visible;
+                        break;
+                    case nameof(PathConfiguration.LineWidth):
+                        listener.LineWidth = config.LineWidth;
+                        break;
+                    case nameof(PathConfiguration.FramesVisible):
+                        listener.FramesVisible = config.FramesVisible;
+                        break;
+                    case nameof(PathConfiguration.FrameSize):
+                        listener.FrameSize = config.FrameSize;
+                        break;
+                    case nameof(PathConfiguration.LinesVisible):
+                        listener.LinesVisible = config.LinesVisible;
+                        break;
+                    case nameof(PathConfiguration.LineColor):
+                        listener.LineColor = config.LineColor;
+                        break;
+
+                    default:
+                        Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
+                        break;                    
+                }
+            }
+            
+            ResetPanel();
+        }          
 
         public override void AddToState(StateConfiguration config)
         {

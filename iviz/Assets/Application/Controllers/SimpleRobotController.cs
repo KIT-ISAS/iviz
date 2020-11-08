@@ -21,7 +21,7 @@ namespace Iviz.Controllers
         [DataMember] public bool AttachedToTf { get; set; }
         [DataMember] public bool RenderAsOcclusionOnly { get; set; }
         [DataMember] public SerializableColor Tint { get; set; } = Color.white;
-        [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
+        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public Resource.Module Module => Resource.Module.Robot;
         [DataMember] public bool Visible { get; set; } = true;
     }
@@ -57,23 +57,8 @@ namespace Iviz.Controllers
                 Visible = value.Visible;
                 RenderAsOcclusionOnly = value.RenderAsOcclusionOnly;
                 Tint = value.Tint;
-                if (!string.IsNullOrEmpty(value.SavedRobotName))
-                {
-                    if (!string.IsNullOrEmpty(value.SourceParameter))
-                    {
-                        value.SourceParameter = "";
-                    }
-
-                    TryLoadSavedRobot(value.SavedRobotName);
-                }
-                else if (!string.IsNullOrEmpty(value.SourceParameter))
-                {
-                    TryLoadFromSourceParameter(value.SourceParameter);
-                }
-                else
-                {
-                    TryLoadFromSourceParameter(null);
-                }
+                
+                ProcessRobotSource(value.SavedRobotName, value.SourceParameter);
             }
         }
 
@@ -255,6 +240,27 @@ namespace Iviz.Controllers
             }
         }
 
+        public void ProcessRobotSource(string savedRobotName, string sourceParameter)
+        {
+            if (!string.IsNullOrEmpty(savedRobotName))
+            {
+                if (!string.IsNullOrEmpty(sourceParameter))
+                {
+                    config.SourceParameter = "";
+                }
+
+                TryLoadSavedRobot(savedRobotName);
+            }
+            else if (!string.IsNullOrEmpty(sourceParameter))
+            {
+                TryLoadFromSourceParameter(sourceParameter);
+            }
+            else
+            {
+                TryLoadFromSourceParameter(null);
+            }            
+        }
+        
         public bool TryLoadFromSourceParameter([CanBeNull] string value)
         {
             config.SourceParameter = "";

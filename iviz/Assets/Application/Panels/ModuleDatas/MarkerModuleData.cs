@@ -1,7 +1,11 @@
-﻿using Iviz.Controllers;
+﻿using System.Collections.Generic;
+using Iviz.Controllers;
+using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 using UnityEngine;
+using Logger = Iviz.Core.Logger;
 
 namespace Iviz.App
 {
@@ -33,15 +37,16 @@ namespace Iviz.App
             }
             else
             {
-                listener.Config = (MarkerConfiguration)constructor.Configuration;
+                listener.Config = (MarkerConfiguration) constructor.Configuration;
             }
+
             listener.StartListening();
             UpdateModuleButton();
         }
 
         public override void SetupPanel()
         {
-            panel.Listener.RosListener = listener.Listener;
+            panel.Listener.Listener = listener.Listener;
 
             panel.OcclusionOnlyMode.Value = listener.RenderAsOcclusionOnly;
             panel.Tint.Value = listener.Tint;
@@ -76,6 +81,32 @@ namespace Iviz.App
                 panel.HideButton.State = listener.Visible;
                 UpdateModuleButton();
             };
+        }
+
+        public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
+        {
+            var config = JsonConvert.DeserializeObject<MarkerConfiguration>(configAsJson);
+
+            foreach (string field in fields)
+            {
+                switch (field)
+                {
+                    case nameof(MarkerConfiguration.Visible):
+                        listener.Visible = config.Visible;
+                        break;
+                    case nameof(MarkerConfiguration.RenderAsOcclusionOnly):
+                        listener.RenderAsOcclusionOnly = config.RenderAsOcclusionOnly;
+                        break;
+                    case nameof(MarkerConfiguration.Tint):
+                        listener.Tint = config.Tint;
+                        break;
+                    default:
+                        Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
+                        break;
+                }
+            }
+
+            ResetPanel();
         }
 
         public override void AddToState(StateConfiguration config)

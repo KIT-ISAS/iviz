@@ -16,24 +16,24 @@ namespace Iviz.App
         [SerializeField] Text text = null;
 
         [CanBeNull]
-        IRosSender rosSender;
+        ISender sender;
 
         [CanBeNull]
-        IRosSender RosSender
+        ISender Sender
         {
-            get => rosSender;
+            get => sender;
             set
             {
-                if (rosSender == null && value != null)
+                if (sender == null && value != null)
                 {
                     GameThread.EverySecond += UpdateStats;
                 }
-                else if (rosSender != null && value == null)
+                else if (sender != null && value == null)
                 {
                     GameThread.EverySecond -= UpdateStats;
                 }
 
-                rosSender = value;
+                sender = value;
                 if (value != null)
                 {
                     UpdateStats();
@@ -41,17 +41,17 @@ namespace Iviz.App
             }
         }
 
-        [CanBeNull] string Topic => RosSender?.Topic;
+        [CanBeNull] string Topic => Sender?.Topic;
 
         int NumSubscribers =>
-            (!ConnectionManager.IsConnected || RosSender == null) ? -1 : RosSender.NumSubscribers;
+            (!ConnectionManager.IsConnected || Sender == null) ? -1 : Sender.NumSubscribers;
 
-        int MessagesPerSecond => RosSender?.Stats.MessagesPerSecond ?? 0;
-        int BytesPerSecond => RosSender?.Stats.BytesPerSecond ?? 0;
+        int MessagesPerSecond => Sender?.Stats.MessagesPerSecond ?? 0;
+        int BytesPerSecond => Sender?.Stats.BytesPerSecond ?? 0;
 
-        public void Set([CanBeNull] IRosSender sender)
+        public void Set([CanBeNull] ISender sender)
         {
-            RosSender = sender;
+            Sender = sender;
             if (sender == null)
             {
                 text.text = $"<i>Empty</i>\n" +
@@ -59,9 +59,9 @@ namespace Iviz.App
             }
         }
 
-        public void Set<T>([CanBeNull] RosSender<T> sender) where T : IMessage, new()
+        public void Set<T>([CanBeNull] Sender<T> sender) where T : IMessage, new()
         {
-            RosSender = sender;
+            Sender = sender;
             if (sender == null)
             {
                 string messageType = BuiltIns.GetMessageType(typeof(T));
@@ -92,7 +92,7 @@ namespace Iviz.App
 
         public void ClearSubscribers()
         {
-            RosSender = null;
+            Sender = null;
         }
     }
 }

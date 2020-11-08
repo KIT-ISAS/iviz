@@ -12,7 +12,7 @@ namespace Iviz.Controllers
     [DataContract]
     public sealed class DepthCloudConfiguration : JsonToString, IConfiguration
     {
-        [DataMember] public Guid Id { get; set; }
+        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public Resource.Module Module => Resource.Module.DepthCloud;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string ColorName { get; set; } = "";

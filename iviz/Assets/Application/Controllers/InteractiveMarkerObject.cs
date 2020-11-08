@@ -10,21 +10,48 @@ namespace Iviz.Controllers
 {
     public sealed class InteractiveMarkerObject : DisplayNode
     {
-        public delegate void MouseEventAction(string id, in Pose pose, in Vector3 point, MouseEventType type);
-
-        public delegate void MovedAction(string id, in Pose pose);
-
-        //const int LifetimeInSec = 15;
-
         readonly Dictionary<string, InteractiveMarkerControlObject> controls =
             new Dictionary<string, InteractiveMarkerControlObject>();
 
         readonly HashSet<string> controlsToDelete = new HashSet<string>();
         readonly StringBuilder description = new StringBuilder();
-
+        
+        InteractiveMarkerListener listener;
         GameObject controlNode;
+        string id;
 
-        //public DateTime ExpirationTime { get; private set; }
+        Pose? cachedPose;
+        bool poseUpdateEnabled = true;
+
+        internal bool PoseUpdateEnabled
+        {
+            get => poseUpdateEnabled;
+            set
+            {
+                poseUpdateEnabled = value;
+                if (poseUpdateEnabled && cachedPose != null)
+                {
+                    controlNode.transform.SetLocalPose(cachedPose.Value);
+                    cachedPose = null;
+                }
+            }
+        }
+
+        Pose LocalPose
+        {
+            get => transform.AsLocalPose();
+            set
+            {
+                if (poseUpdateEnabled)
+                {
+                    controlNode.transform.SetLocalPose(value);
+                }
+                else
+                {
+                    cachedPose = value;
+                }
+            }
+        }
 
         void Awake()
         {
@@ -32,17 +59,23 @@ namespace Iviz.Controllers
             controlNode.transform.parent = transform;
         }
 
-        public event MouseEventAction MouseEvent;
-        public event MovedAction Moved;
+        internal void Initialize(InteractiveMarkerListener newListener, string newId)
+        {
+            listener = newListener;
+            id = newId;
+        }
 
         public void Set([NotNull] InteractiveMarker msg)
         {
             name = msg.Name;
 
             description.Clear();
-            description.Append("<b>**** InteractiveMarker '").Append(msg.Name).Append("'</b>").AppendLine();
-            description.Append("Description: ").Append(msg.Description.Length == 0 ? "[]" : msg.Description)
+            description.Append("<color=blue><b>**** InteractiveMarker '").Append(msg.Name).Append("'</b></color>")
                 .AppendLine();
+            string msgDescription = msg.Description.Length != 0
+                ? msg.Description.Replace("\t", "\\t").Replace("\n", "\\n")
+                : "[]";
+            description.Append("Description: ").Append(msgDescription).AppendLine();
 
             if (Mathf.Approximately(msg.Scale, 0))
             {
@@ -55,9 +88,9 @@ namespace Iviz.Controllers
                 description.Append("Scale: ").Append(msg.Scale).AppendLine();
             }
 
-            transform.SetLocalPose(msg.Pose.Ros2Unity());
+            LocalPose = msg.Pose.Ros2Unity();
 
-            description.Append("Attached to: ").Append(msg.Header.FrameId).AppendLine();
+            description.Append("Attached to: <i>").Append(msg.Header.FrameId).Append("</i>").AppendLine();
             AttachTo(msg.Header.FrameId);
 
             controlsToDelete.Clear();
@@ -68,16 +101,17 @@ namespace Iviz.Controllers
 
             foreach (InteractiveMarkerControl controlMsg in msg.Controls)
             {
-                string id = controlMsg.Name;
+                string controlId = controlMsg.Name;
 
-                if (controls.TryGetValue(id, out InteractiveMarkerControlObject existingControl))
+                if (controls.TryGetValue(controlId, out InteractiveMarkerControlObject existingControl))
                 {
                     existingControl.Set(controlMsg);
-                    controlsToDelete.Remove(id);
+                    controlsToDelete.Remove(controlId);
                     continue;
                 }
 
                 InteractiveMarkerControlObject newControl = CreateControlObject();
+                /*
                 newControl.MouseEvent += (in Pose pose, in Vector3 point, MouseEventType type) =>
                 {
                     MouseEvent?.Invoke(id, pose, point, type);
@@ -86,11 +120,13 @@ namespace Iviz.Controllers
                 {
                     Moved?.Invoke(id, pose);
                 };
+                */
+                newControl.Initialize(this, controlId);
                 newControl.transform.SetParentLocal(controlNode.transform);
-                controls[id] = newControl;
+                controls[controlId] = newControl;
 
                 newControl.Set(controlMsg);
-                controlsToDelete.Remove(id);
+                controlsToDelete.Remove(controlId);
             }
 
             foreach (string id in controlsToDelete)
@@ -101,14 +137,29 @@ namespace Iviz.Controllers
             }
         }
 
+        public void Set(in Iviz.Msgs.GeometryMsgs.Pose rosPose)
+        {
+            Debug.Log("Received: " + rosPose.Ros2Unity() + "  ---   Actual:" + controlNode.transform.AsLocalPose());
+            LocalPose = rosPose.Ros2Unity();
+        }
+
+        internal void OnMouseEvent(string controlId, in Pose pose, in Vector3 point, MouseEventType type)
+        {
+            listener?.OnInteractiveControlObjectMouseEvent(id, controlId, pose, point, type);
+        }
+
+        internal void OnMoved(string controlId)
+        {
+            listener?.OnInteractiveControlObjectMoved(id, controlId, controlNode.transform.AsLocalPose());
+        }
+
         public override void Stop()
         {
             base.Stop();
-            foreach (var controlObject in controls.Values) DeleteControlObject(controlObject);
+            foreach (var controlObject in controls.Values)
+                DeleteControlObject(controlObject);
             controls.Clear();
             controlsToDelete.Clear();
-            MouseEvent = null;
-            Moved = null;
 
             Destroy(controlNode.gameObject);
         }
@@ -124,7 +175,10 @@ namespace Iviz.Controllers
         {
             baseDescription.Append(description);
 
-            foreach (var control in controls.Values) control.GenerateLog(baseDescription);
+            foreach (var control in controls.Values)
+            {
+                control.GenerateLog(baseDescription);
+            }
         }
 
         static void DeleteControlObject([NotNull] InteractiveMarkerControlObject control)

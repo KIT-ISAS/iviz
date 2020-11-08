@@ -19,8 +19,8 @@ namespace Iviz.Controllers
     public class InteractiveMarkerConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public string Topic { get; set; } = "";
-        [DataMember] public bool DisableExpiration { get; set; } = true;
-        [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
+        [DataMember] public bool EnableAutoExpiration { get; set; }
+        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public Resource.Module Module => Resource.Module.InteractiveMarker;
         [DataMember] public bool Visible { get; set; } = true;
     }
@@ -42,16 +42,16 @@ namespace Iviz.Controllers
             node = SimpleDisplayNode.Instantiate("[InteractiveMarkerListener]");
         }
 
-        public RosListener<InteractiveMarkerInit> FullListener { get; private set; }
-        public RosSender<InteractiveMarkerFeedback> Publisher { get; private set; }
+        public Listener<InteractiveMarkerInit> FullListener { get; private set; }
+        public Sender<InteractiveMarkerFeedback> Publisher { get; private set; }
         public override TfFrame Frame => TfListener.MapFrame;
         public override IModuleData ModuleData { get; }
         public string Topic => config.Topic;
         
-        public bool DisableExpiration
+        public bool EnableAutoExpiration
         {
-            get => config.DisableExpiration;
-            set => config.DisableExpiration = value;
+            get => config.EnableAutoExpiration;
+            set => config.EnableAutoExpiration = value;
         }
 
         public InteractiveMarkerConfiguration Config
@@ -60,7 +60,7 @@ namespace Iviz.Controllers
             set
             {
                 config.Topic = value.Topic;
-                DisableExpiration = value.DisableExpiration;
+                EnableAutoExpiration = value.EnableAutoExpiration;
             }
         }
 
@@ -100,7 +100,7 @@ namespace Iviz.Controllers
 
         public override void StartListening()
         {
-            Listener = new RosListener<InteractiveMarkerUpdate>(config.Topic, Handler);
+            Listener = new Listener<InteractiveMarkerUpdate>(config.Topic, Handler);
             GameThread.EverySecond += CheckForExpiredMarkers;
 
             int lastSlash = config.Topic.LastIndexOf('/');
@@ -109,8 +109,8 @@ namespace Iviz.Controllers
             string feedbackTopic = root + "/feedback";
             string fullTopic = root + "/update_full";
 
-            Publisher = new RosSender<InteractiveMarkerFeedback>(feedbackTopic);
-            FullListener = new RosListener<InteractiveMarkerInit>(fullTopic, HandlerFull);
+            Publisher = new Sender<InteractiveMarkerFeedback>(feedbackTopic);
+            FullListener = new Listener<InteractiveMarkerInit>(fullTopic, HandlerFull);
         }
 
         public override void StopController()
@@ -162,15 +162,8 @@ namespace Iviz.Controllers
             }
 
             InteractiveMarkerObject newMarkerObject = CreateInteractiveMarkerObject();
+            newMarkerObject.Initialize(this, id);
             newMarkerObject.Parent = TfListener.ListenersFrame;
-            newMarkerObject.MouseEvent += (string controlId, in Pose pose, in Vector3 point, MouseEventType type) =>
-            {
-                OnInteractiveControlObjectMouseEvent(id, pose, controlId, point, type);
-            };
-            newMarkerObject.Moved += (string controlId, in Pose pose) =>
-            {
-                OnInteractiveControlObjectMoved(id, pose, controlId);
-            };
             newMarkerObject.transform.SetParentLocal(node.transform);
             imarkers[id] = newMarkerObject;
             newMarkerObject.Set(msg);
@@ -196,7 +189,8 @@ namespace Iviz.Controllers
                 return;
             }
 
-            im.transform.SetLocalPose(msg.Pose.Ros2Unity());
+            im.Set(msg.Pose);
+            //im.transform.SetLocalPose(msg.Pose.Ros2Unity());
             //im.UpdateExpirationTime();
         }
 
@@ -212,9 +206,9 @@ namespace Iviz.Controllers
             imarkers.Remove(id);
         }
 
-        void OnInteractiveControlObjectMouseEvent(
-            string imarkerId, in Pose controlPose,
-            string controlId, in Vector3 position,
+        internal void OnInteractiveControlObjectMouseEvent(
+            string imarkerId, string controlId,
+            in Pose controlPose, in Vector3 position,
             MouseEventType type)
         {
             byte eventType;
@@ -248,9 +242,9 @@ namespace Iviz.Controllers
             Publisher.Publish(msg);
         }
 
-        void OnInteractiveControlObjectMoved([NotNull] string imarkerId, in Pose controlPose,
-            [NotNull] string controlId)
+        internal void OnInteractiveControlObjectMoved([NotNull] string imarkerId, [NotNull] string controlId, in Pose controlPose)
         {
+            Debug.Log("--> " + controlPose);
             InteractiveMarkerFeedback msg = new InteractiveMarkerFeedback
             (
                 RosUtils.CreateHeader(feedSeq++),
@@ -268,12 +262,12 @@ namespace Iviz.Controllers
 
         void CheckForExpiredMarkers()
         {
-            if (DisableExpiration)
+            /*
+            if (!EnableAutoExpiration)
             {
                 return;
             }
 
-            /*
             DateTime now = DateTime.Now;
             string[] deadMarkers = imarkers
                 .Where(entry => entry.Value.ExpirationTime < now)
@@ -281,7 +275,7 @@ namespace Iviz.Controllers
                 .ToArray();
 
             foreach (string key in deadMarkers) DestroyInteractiveMarker(key);
-            */
+            */    
         }
 
         void DestroyAllMarkers()

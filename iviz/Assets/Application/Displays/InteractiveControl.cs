@@ -8,6 +8,8 @@ namespace Iviz.Displays
 {
     public sealed class InteractiveControl : MonoBehaviour
     {
+        public delegate void MovedAction(in Pose pose);
+
         public enum InteractionModeType
         {
             Disabled,
@@ -23,30 +25,27 @@ namespace Iviz.Displays
             MoveRotate3D
         }
 
-        [SerializeField] GameObject arrowPx = null;
+        GameObject[] allResources;
         [SerializeField] GameObject arrowMx = null;
-        [SerializeField] GameObject arrowPy = null;
         [SerializeField] GameObject arrowMy = null;
-        [SerializeField] GameObject arrowPz = null;
         [SerializeField] GameObject arrowMz = null;
 
+        [SerializeField] GameObject arrowPx = null;
+        [SerializeField] GameObject arrowPy = null;
+        [SerializeField] GameObject arrowPz = null;
+
         [SerializeField] GameObject ringX = null;
+        [SerializeField] GameObject ringXPlane = null;
         [SerializeField] GameObject ringY = null;
         [SerializeField] GameObject ringZ = null;
-
-        [SerializeField] GameObject ringXPlane = null;
         [SerializeField] GameObject ringZPlane = null;
 
-        GameObject[] allResources;
-
-        public delegate void MovedAction(in Pose pose);
-
-        public event MovedAction Moved;
-        public event Action PointerUp;
-        public event Action PointerDown;
-        public event Action DoubleTap;
-
-        Transform targetTransform;
+        [SerializeField] Transform targetTransform;
+        
+        InteractionModeType interactionMode;
+        bool cameraPivotIsParent;
+        bool keepAbsoluteRotation;
+        bool pointsToCamera;
 
         public Transform TargetTransform
         {
@@ -54,7 +53,7 @@ namespace Iviz.Displays
             set
             {
                 targetTransform = value;
-                foreach (GameObject resource in allResources)
+                foreach (var resource in allResources)
                 {
                     resource.GetComponent<IDraggable>().TargetTransform = value;
                 }
@@ -69,8 +68,6 @@ namespace Iviz.Displays
 
         public float BaseScale { get; set; } = 1.0f;
 
-        bool pointsToCamera;
-
         public bool PointsToCamera
         {
             get => pointsToCamera;
@@ -82,13 +79,13 @@ namespace Iviz.Displays
                 }
 
                 pointsToCamera = value;
-                if (!value) 
+                if (!value)
                 {
                     CameraPivotIsParent = false;
                     transform.localRotation = Quaternion.identity;
                 }
 
-                foreach (GameObject resource in allResources)
+                foreach (var resource in allResources)
                 {
                     var draggable = resource.GetComponent<DraggableRotation>();
                     if (draggable != null)
@@ -99,13 +96,16 @@ namespace Iviz.Displays
             }
         }
 
-        bool keepAbsoluteRotation;
-
         public bool KeepAbsoluteRotation
         {
             get => keepAbsoluteRotation;
             set
             {
+                if (keepAbsoluteRotation == value)
+                {
+                    return;
+                }
+                
                 keepAbsoluteRotation = value;
                 if (value)
                 {
@@ -117,7 +117,7 @@ namespace Iviz.Displays
                     transform.localRotation = Quaternion.identity;
                 }
 
-                foreach (GameObject resource in allResources)
+                foreach (var resource in allResources)
                 {
                     var draggable = resource.GetComponent<DraggableRotation>();
                     if (draggable != null)
@@ -128,13 +128,16 @@ namespace Iviz.Displays
             }
         }
 
-        bool cameraPivotIsParent;
-
         public bool CameraPivotIsParent
         {
             get => cameraPivotIsParent;
             set
             {
+                if (cameraPivotIsParent == value)
+                {
+                    return;
+                }
+                
                 cameraPivotIsParent = value;
                 if (!value)
                 {
@@ -143,16 +146,19 @@ namespace Iviz.Displays
             }
         }
 
-        InteractionModeType interactionMode;
-
         public InteractionModeType InteractionMode
         {
             get => interactionMode;
             set
             {
+                if (interactionMode == value)
+                {
+                    return;
+                }
+                
                 interactionMode = value;
 
-                foreach (GameObject resource in allResources)
+                foreach (var resource in allResources)
                 {
                     resource.SetActive(false);
                 }
@@ -222,6 +228,11 @@ namespace Iviz.Displays
             }
         }
 
+        public event MovedAction Moved;
+        public event Action PointerUp;
+        public event Action PointerDown;
+        //public event Action DoubleTap;
+
 
         public void Stop()
         {
@@ -235,27 +246,27 @@ namespace Iviz.Displays
                 {arrowPx, arrowMx, arrowPy, arrowMy, arrowPz, arrowMz, ringX, ringY, ringZ, ringXPlane, ringZPlane};
 
 
-            //void OnMoved(in Pose pose) => Moved?.Invoke(pose);
             void OnMoved(in Pose pose) => Moved?.Invoke(pose);
             void OnPointerUp() => PointerUp?.Invoke();
             void OnPointerDown() => PointerDown?.Invoke();
-            void OnDoubleTap() => DoubleTap?.Invoke();
+            //void OnDoubleTap() => DoubleTap?.Invoke();
 
-
-            foreach (GameObject resource in allResources)
+            foreach (var resource in allResources)
             {
                 var draggable = resource.GetComponent<IDraggable>();
                 draggable.Moved += OnMoved;
                 draggable.PointerUp += OnPointerUp;
                 draggable.PointerDown += OnPointerDown;
-                draggable.DoubleTap += OnDoubleTap;
+                //draggable.DoubleTap += OnDoubleTap;
             }
 
-            InteractionMode = InteractionModeType.Frame;
+            InteractionMode = InteractionModeType.MovePlaneYZ_RotateAxisX;
+            /*
             if (TargetTransform == null)
             {
                 TargetTransform = transform.parent ?? transform;
             }
+            */
         }
 
         void LateUpdate()
@@ -265,6 +276,7 @@ namespace Iviz.Displays
                 RotateToCamera();
             }
 
+            /*
             const float referenceDistance = 2.0f;
             Transform cameraTransform = Settings.MainCamera.transform;
             float distanceToCamera = Vector3.Dot(cameraTransform.forward, transform.position - cameraTransform.position);
@@ -272,12 +284,13 @@ namespace Iviz.Displays
             {
                 transform.localScale = BaseScale * distanceToCamera / referenceDistance * Vector3.one;
             }
+            */
         }
-        
+
         void RotateToCamera()
         {
-            Vector3 cameraForward = Settings.MainCamera.transform.forward;
-            Transform mTransform = transform;
+            var cameraForward = Settings.MainCamera.transform.forward;
+            var mTransform = transform;
             if (CameraPivotIsParent)
             {
                 mTransform.parent.LookAt(mTransform.parent.position + cameraForward);
@@ -292,17 +305,17 @@ namespace Iviz.Displays
         {
             transform.rotation = TfListener.RootFrame.transform.rotation;
         }
-        
-        public void SetTargetPoseUpdater(Action<Pose> setTargetPose) 
+
+        public void SetTargetPoseUpdater(Action<Pose> setTargetPose)
         {
-            foreach (GameObject resource in allResources)
+            foreach (var resource in allResources)
             {
                 var draggable = resource.GetComponent<IDraggable>();
                 if (draggable != null)
                 {
                     draggable.SetTargetPose = setTargetPose;
                 }
-            }            
+            }
         }
     }
 }

@@ -152,7 +152,7 @@ namespace Iviz.Controllers
             numErrors = 0;
 
             description.Length = 0;
-            description.Append("<b>* Marker: ").Append(id).Append("</b>").AppendLine();
+            description.Append("<color=maroon><b>* Marker: ").Append(id).Append("</b></color>").AppendLine();
             description.Append("Type: ").Append(DescriptionFromType(msg)).AppendLine();
 
             ExpirationTime = msg.Lifetime.IsZero ? DateTime.MaxValue : DateTime.Now + msg.Lifetime.ToTimeSpan();

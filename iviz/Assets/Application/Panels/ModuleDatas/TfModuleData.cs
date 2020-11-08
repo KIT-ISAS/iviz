@@ -1,6 +1,9 @@
-﻿using Iviz.Controllers;
+﻿using System.Collections.Generic;
+using Iviz.Controllers;
+using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 
 namespace Iviz.App
 {
@@ -45,24 +48,23 @@ namespace Iviz.App
         public override void SetupPanel()
         {
             panel.Frame.Owner = listener;
-            panel.Listener.RosListener = listener.Listener;
-            panel.ListenerStatic.RosListener = listener.ListenerStatic;
-            //panel.ShowAxes.Value = listener.AxisVisible;
-            panel.HideButton.State = listener.AxisVisible;
+            panel.Listener.Listener = listener.Listener;
+            panel.ListenerStatic.Listener = listener.ListenerStatic;
+            panel.HideButton.State = listener.FramesVisible;
             panel.FrameSize.Value = listener.FrameSize;
-            panel.ShowFrameLabels.Value = listener.AxisLabelVisible;
+            panel.ShowFrameLabels.Value = listener.FrameLabelsVisible;
             panel.ConnectToParent.Value = listener.ParentConnectorVisible;
-            panel.KeepOnlyUsedFrames.Value = !listener.ShowAllFrames;
+            panel.KeepOnlyUsedFrames.Value = listener.KeepOnlyUsedFrames;
             panel.Sender.Set(listener.Publisher);
             
             panel.HideButton.Clicked += () =>
             {
-                listener.AxisVisible = !listener.AxisVisible;
-                panel.HideButton.State = listener.AxisVisible;
+                listener.FramesVisible = !listener.FramesVisible;
+                panel.HideButton.State = listener.FramesVisible;
             };
             panel.ShowFrameLabels.ValueChanged += f =>
             {
-                listener.AxisLabelVisible = f;
+                listener.FrameLabelsVisible = f;
             };
             panel.FrameSize.ValueChanged += f =>
             {
@@ -74,8 +76,40 @@ namespace Iviz.App
             };
             panel.KeepOnlyUsedFrames.ValueChanged += f =>
             {
-                listener.ShowAllFrames = !f;
+                listener.KeepOnlyUsedFrames = f;
             };
+        }
+
+        public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
+        {
+            var config = JsonConvert.DeserializeObject<TfConfiguration>(configAsJson);
+            
+            foreach (string field in fields)
+            {
+                switch (field) 
+                {
+                    case nameof(TfConfiguration.Visible):
+                        listener.FramesVisible = config.Visible;
+                        break;
+                    case nameof(TfConfiguration.FrameSize):
+                        listener.FrameSize = config.FrameSize;
+                        break;
+                    case nameof(TfConfiguration.FrameLabelsVisible):
+                        listener.FrameLabelsVisible = config.FrameLabelsVisible;
+                        break;
+                    case nameof(TfConfiguration.ParentConnectorVisible):
+                        listener.ParentConnectorVisible = config.ParentConnectorVisible;
+                        break;
+                    case nameof(TfConfiguration.KeepOnlyUsedFrames):
+                        listener.KeepOnlyUsedFrames = config.KeepOnlyUsedFrames;
+                        break;
+                    default:
+                        Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
+                        break;                    
+                }
+            }
+            
+            ResetPanel();
         }
 
         public override void AddToState(StateConfiguration config)

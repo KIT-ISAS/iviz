@@ -13,7 +13,7 @@ namespace Iviz.App
         [DataMember] public Uri MyUri { get; set; }
         [DataMember] public string MyId { get; set; }
 
-        [DataMember] public List<Guid> Entries { get; set; } = new List<Guid>();
+        [DataMember] public List<string> Entries { get; set; } = new List<string>();
 
         [DataMember] public TfConfiguration Tf { get; set; }
         [DataMember] public List<GridConfiguration> Grids { get; set; } = new List<GridConfiguration>();

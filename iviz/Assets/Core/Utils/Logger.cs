@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Text;
 using Iviz.Msgs.RosgraphMsgs;
+using JetBrains.Annotations;
 
 namespace Iviz.Core
 {
@@ -10,11 +11,11 @@ namespace Iviz.Core
     public readonly struct LogMessage
     {
         [DataMember] public LogLevel Level { get; }
-        [DataMember] public object Message { get; }
-        [DataMember] public string File { get; }
+        [NotNull] [DataMember] public string Message { get; }
+        [NotNull] [DataMember] public string File { get; }
         [DataMember] public int Line { get; }
 
-        public LogMessage(LogLevel level, object message, string file, int line)
+        public LogMessage(LogLevel level, string message, string file, int line)
         {
             Level = level;
             Message = message;
@@ -25,58 +26,103 @@ namespace Iviz.Core
 
     public static class Logger
     {
-        public delegate void Delegate(in LogMessage msg);
-
-        public static event Delegate Log;
+        public delegate void ExternalLogDelegate(in LogMessage msg);
 
         public static event Action<string> LogInternal;
+        public static event ExternalLogDelegate LogExternal;
 
-        public static void Info<T>(in T t, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
+        public static void Info<T>(in T t)
         {
             UnityEngine.Debug.Log(t);
-            Log?.Invoke(new LogMessage(LogLevel.Info, t, file, line));
         }
 
-        public static void Error<T>(T t, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
+        public static void Error<T>(T t)
         {
             UnityEngine.Debug.LogWarning(t);
-            Log?.Invoke(new LogMessage(LogLevel.Error, t, file, line));
         }
 
-        public static void Warn<T>(T t, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
+        public static void Warn<T>(T t)
         {
             UnityEngine.Debug.LogWarning(t);
-            Log?.Invoke(new LogMessage(LogLevel.Warn, t, file, line));
         }
 
-        public static void Debug<T>(T t, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
+        public static void Debug<T>(T t)
         {
             UnityEngine.Debug.Log(t);
-            Log?.Invoke(new LogMessage(LogLevel.Debug, t, file, line));
         }
 
-        public static void Internal(string msg)
+        public static void Internal([CanBeNull] string msg)
         {
-            var msgTxt = $"<b>[{DateTime.Now:HH:mm:ss}]</b> {msg}";
+            var msgTxt = $"<b>[{DateTime.Now:HH:mm:ss}]</b> {msg ?? "[null message]"}";
             LogInternal?.Invoke(msgTxt);
         }
 
-        public static void Internal(string msg, Exception e)
+        public static void Internal([CanBeNull] string msg, [CanBeNull] Exception e)
         {
             var str = new StringBuilder();
-            str.Append($"<b>[{DateTime.Now:HH:mm:ss}]</b> {msg}");
-            while (e != null)
-            {
-                if (!(e is AggregateException))
-                {
-                    str.Append($"\n<color=red>→ {e.GetType()}</color> {e.Message}");
-                }
+            str.Append("<b>[")
+                .AppendFormat("{0:HH:mm:ss}", DateTime.Now)
+                .Append("]</b> ")
+                .Append(msg ?? "[null message]");
 
-                e = e.InnerException;
+            if (e == null)
+            {
+                str.AppendLine().Append("<color=red>→ (null exception)</color>");
+            }
+            else
+            {
+                Exception childException = e;
+                while (childException != null)
+                {
+                    if (!(childException is AggregateException))
+                    {
+                        str.AppendLine()
+                            .Append("<color=red>→ ")
+                            .Append(childException.GetType())
+                            .Append("</color> ")
+                            .Append(childException.Message);
+                    }
+
+                    childException = childException.InnerException;
+                }
             }
 
             LogInternal?.Invoke(str.ToString());
             UnityEngine.Debug.LogWarning(str);
+        }
+
+        public static void External(LogLevel level, string msg, [CallerFilePath] string file = "",
+            [CallerLineNumber] int line = 0)
+        {
+            LogExternal?.Invoke(new LogMessage(level, msg, file, line));
+        }
+
+        public static void External([CanBeNull] string msg, [CanBeNull] Exception e, [CallerFilePath] string file = "",
+            [CallerLineNumber] int line = 0)
+        {
+            var str = new StringBuilder();
+            str.Append(msg ?? "[null msg]");
+
+            if (e == null)
+            {
+                str.AppendLine().Append("→ (null exception)");
+            }
+            else
+            {
+                Exception childException = e;
+                while (childException != null)
+                {
+                    if (!(childException is AggregateException))
+                    {
+                        str.AppendLine().Append(childException.GetType()).Append(" ").Append(childException.Message);
+                    }
+
+                    childException = childException.InnerException;
+                }
+            }
+
+            LogExternal?.Invoke(new LogMessage(LogLevel.Error, msg, file, line));
+            UnityEngine.Debug.Log(str);
         }
     }
 

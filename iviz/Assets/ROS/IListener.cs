@@ -14,7 +14,7 @@ namespace Iviz.Ros
     /// <summary>
     /// Wrapper around a ROS subscriber.
     /// </summary>
-    public interface IRosListener
+    public interface IListener
     {
         [NotNull] string Topic { get; }
         RosListenerStats Stats { get; }
@@ -27,7 +27,7 @@ namespace Iviz.Ros
         void Reset();
     }
 
-    public sealed class RosListener<T> : IRosListener where T : IMessage, IDeserializable<T>, new()
+    public sealed class Listener<T> : IListener where T : IMessage, IDeserializable<T>, new()
     {
         [NotNull] static RosConnection Connection => ConnectionManager.Connection;
         
@@ -45,7 +45,7 @@ namespace Iviz.Ros
         int msgsInQueue;
         int totalMsgCounter;
 
-        RosListener([NotNull] string topic)
+        Listener([NotNull] string topic)
         {
             if (string.IsNullOrWhiteSpace(topic))
             {
@@ -64,14 +64,14 @@ namespace Iviz.Ros
         }
 
 
-        public RosListener([NotNull] string topic, [NotNull] Action<T> handler) : this(topic)
+        public Listener([NotNull] string topic, [NotNull] Action<T> handler) : this(topic)
         {
             delayedHandler = handler ?? throw new ArgumentNullException(nameof(handler));
             callbackInGameThread = true;
             GameThread.EveryFrame += CallHandlerDelayed;
         }
 
-        public RosListener([NotNull] string topic, [NotNull] Func<T, bool> handler) : this(topic)
+        public Listener([NotNull] string topic, [NotNull] Func<T, bool> handler) : this(topic)
         {
             directHandler = handler ?? throw new ArgumentNullException(nameof(handler));
             callbackInGameThread = false;

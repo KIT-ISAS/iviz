@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.Controllers;
+using Iviz.Core;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 
 namespace Iviz.App
 {
@@ -120,6 +122,39 @@ namespace Iviz.App
             panel.Color.Options = colorImageCandidates;
         }
 
+        public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
+        {
+            var config = JsonConvert.DeserializeObject<DepthCloudConfiguration>(configAsJson);
+
+            foreach (string field in fields)
+            {
+                switch (field)
+                {
+                    case nameof(DepthCloudConfiguration.Visible):
+                        controller.Visible = config.Visible;
+                        break;
+                    case nameof(DepthCloudConfiguration.ColorName):
+                        controller.ColorName = config.ColorName;
+                        break;
+                    case nameof(DepthCloudConfiguration.DepthName):
+                        controller.DepthName = config.DepthName;
+                        break;
+                    case nameof(DepthCloudConfiguration.PointSize):
+                        controller.PointSize = config.PointSize;
+                        break;
+                    case nameof(DepthCloudConfiguration.FovAngle):
+                        controller.FovAngle = config.FovAngle;
+                        break;
+
+                    default:
+                        Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
+                        break;
+                }
+            }
+
+            ResetPanel();
+        }   
+        
         public override void AddToState(StateConfiguration config)
         {
             config.DepthImageProjectors.Add(controller.Config);

@@ -17,10 +17,10 @@ namespace Iviz.App
 
         [SerializeField] Text text = null;
         [SerializeField] Image panel = null;
-        [CanBeNull] IRosListener listener;
+        [CanBeNull] IListener listener;
 
         [CanBeNull]
-        public IRosListener RosListener
+        public IListener Listener
         {
             private get => listener;
             set
@@ -42,12 +42,12 @@ namespace Iviz.App
             }
         }
 
-        [CanBeNull] string Topic => RosListener?.Topic;
-        int NumPublishers => (!ConnectionManager.IsConnected || RosListener == null) ? -1 : RosListener.NumPublishers;
-        int MessagesPerSecond => RosListener?.Stats.MessagesPerSecond ?? 0;
-        int BytesPerSecond => RosListener?.Stats.BytesPerSecond ?? 0;
-        int Dropped => RosListener?.Stats.Dropped ?? 0;
-        bool Subscribed => RosListener?.Subscribed ?? false;
+        [CanBeNull] string Topic => Listener?.Topic;
+        int NumPublishers => (!ConnectionManager.IsConnected || Listener == null) ? -1 : Listener.NumPublishers;
+        int MessagesPerSecond => Listener?.Stats.MessagesPerSecond ?? 0;
+        int BytesPerSecond => Listener?.Stats.BytesPerSecond ?? 0;
+        int Dropped => Listener?.Stats.Dropped ?? 0;
+        bool Subscribed => Listener?.Subscribed ?? false;
 
         void UpdateStats()
         {
@@ -103,7 +103,7 @@ namespace Iviz.App
 
         public void ClearSubscribers()
         {
-            RosListener = null;
+            Listener = null;
         }
     }
 }

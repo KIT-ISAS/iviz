@@ -21,7 +21,7 @@ namespace Iviz.Controllers
     [DataContract]
     public sealed class JointStateConfiguration : JsonToString, IConfiguration
     {
-        [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
+        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public Resource.Module Module => Resource.Module.JointState;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
@@ -114,7 +114,7 @@ namespace Iviz.Controllers
 
         public override void StartListening()
         {
-            Listener = new RosListener<JointState>(config.Topic, Handler);
+            Listener = new Listener<JointState>(config.Topic, Handler);
         }
 
         public override void StopController()

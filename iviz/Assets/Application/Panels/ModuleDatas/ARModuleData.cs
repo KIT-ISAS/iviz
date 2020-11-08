@@ -3,7 +3,9 @@ using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 using UnityEngine;
+using Logger = Iviz.Msgs.Logger;
 
 namespace Iviz.App
 {
@@ -143,6 +145,42 @@ namespace Iviz.App
             panel.MarkerFrame.Interactable = controller.UseMarker;
             panel.MarkerOffset.Interactable = controller.UseMarker && controller.MarkerFrame.Length != 0;
         }
+        
+        public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
+        {
+            var config = JsonConvert.DeserializeObject<ARConfiguration>(configAsJson);
+
+            foreach (string field in fields)
+            {
+                switch (field)
+                {
+                    case nameof(ARConfiguration.Visible):
+                        controller.Visible = config.Visible;
+                        break;
+                    case nameof(ARConfiguration.SearchMarker):
+                        controller.Visible = config.Visible;
+                        break;
+                    case nameof(ARConfiguration.MarkerHorizontal):
+                        controller.Visible = config.Visible;
+                        break;
+                    case nameof(ARConfiguration.MarkerAngle):
+                        controller.Visible = config.Visible;
+                        break;
+                    case nameof(ARConfiguration.MarkerFrame):
+                        controller.Visible = config.Visible;
+                        break;
+                    case nameof(ARConfiguration.MarkerOffset):
+                        controller.Visible = config.Visible;
+                        break;
+                    
+                    default:
+                        Core.Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
+                        break;
+                }
+            }
+
+            ResetPanel();
+        }           
 
         public override void AddToState(StateConfiguration config)
         {

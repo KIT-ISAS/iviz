@@ -26,7 +26,7 @@ namespace Iviz.Controllers
         [DataMember] public string Type { get; set; } = "";
         [DataMember] public bool RenderAsOcclusionOnly { get; set; }
         [DataMember] public SerializableColor Tint { get; set; } = Color.white;
-        [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
+        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public Resource.Module Module => Resource.Module.Marker;
         [DataMember] public bool Visible { get; set; } = true;
     }
@@ -104,10 +104,10 @@ namespace Iviz.Controllers
             switch (config.Type)
             {
                 case Marker.RosMessageType:
-                    Listener = new RosListener<Marker>(config.Topic, Handler);
+                    Listener = new Listener<Marker>(config.Topic, Handler);
                     break;
                 case MarkerArray.RosMessageType:
-                    Listener = new RosListener<MarkerArray>(config.Topic, Handler);
+                    Listener = new Listener<MarkerArray>(config.Topic, Handler);
                     break;
             }
 

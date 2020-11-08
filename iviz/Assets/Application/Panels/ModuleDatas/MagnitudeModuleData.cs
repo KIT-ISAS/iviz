@@ -1,7 +1,10 @@
-﻿using Iviz.Controllers;
+﻿using System.Collections.Generic;
+using Iviz.Controllers;
+using Iviz.Core;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 
 namespace Iviz.App
 {
@@ -45,9 +48,9 @@ namespace Iviz.App
         public override void SetupPanel()
         {
             panel.Frame.Owner = listener;
-            panel.ShowTrail.Value = listener.ShowTrail;
-            panel.ShowAxis.Value = listener.ShowAxis;
-            panel.ShowVector.Value = listener.ShowVector;
+            panel.ShowTrail.Value = listener.TrailVisible;
+            panel.ShowAxis.Value = listener.FrameVisible;
+            panel.ShowVector.Value = listener.VectorVisible;
             panel.Color.Value = listener.Color;
             panel.TrailTime.Value = listener.TrailTime;
             panel.Scale.Value = listener.Scale;
@@ -56,7 +59,7 @@ namespace Iviz.App
 
             panel.ShowTrail.ValueChanged += f =>
             {
-                listener.ShowTrail = f;
+                listener.TrailVisible = f;
             };
             panel.Color.ValueChanged += f =>
             {
@@ -72,11 +75,11 @@ namespace Iviz.App
             };
             panel.ShowAxis.ValueChanged += f =>
             {
-                listener.ShowAxis = f;
+                listener.FrameVisible = f;
             };
             panel.ShowVector.ValueChanged += f =>
             {
-                listener.ShowVector = f;
+                listener.VectorVisible = f;
             };
             panel.VectorScale.ValueChanged += f =>
             {
@@ -97,7 +100,7 @@ namespace Iviz.App
                     break;
             }
 
-            panel.Listener.RosListener = listener.Listener;
+            panel.Listener.Listener = listener.Listener;
             panel.CloseButton.Clicked += () =>
             {
                 DataPanelManager.HideSelectedPanel();
@@ -110,6 +113,48 @@ namespace Iviz.App
                 UpdateModuleButton();
             };
         }
+        
+        public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
+        {
+            var config = JsonConvert.DeserializeObject<MagnitudeConfiguration>(configAsJson);
+            
+            foreach (string field in fields)
+            {
+                switch (field) 
+                {
+                    case nameof(MagnitudeConfiguration.Visible):
+                        listener.Visible = config.Visible;
+                        break;
+                    case nameof(MagnitudeConfiguration.TrailVisible):
+                        listener.TrailVisible = config.TrailVisible;
+                        break;
+                    case nameof(MagnitudeConfiguration.FrameVisible):
+                        listener.FrameVisible = config.FrameVisible;
+                        break;
+                    case nameof(MagnitudeConfiguration.Scale):
+                        listener.Scale = config.Scale;
+                        break;
+                    case nameof(MagnitudeConfiguration.VectorVisible):
+                        listener.VectorVisible = config.VectorVisible;
+                        break;
+                    case nameof(MagnitudeConfiguration.VectorScale):
+                        listener.VectorScale = config.VectorScale;
+                        break;
+                    case nameof(MagnitudeConfiguration.Color):
+                        listener.Color = config.Color;
+                        break;
+                    case nameof(MagnitudeConfiguration.TrailTime):
+                        listener.TrailTime = config.TrailTime;
+                        break;
+
+                    default:
+                        Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
+                        break;                    
+                }
+            }
+
+            ResetPanel();
+        }            
 
         public override void AddToState(StateConfiguration config)
         {

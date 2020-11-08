@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Iviz.Controllers;
 using Iviz.Resources;
 using JetBrains.Annotations;
@@ -45,22 +46,19 @@ namespace Iviz.App
             if (!string.IsNullOrEmpty(Topic))
             {
                 string topicShort = Resource.Font.Split(Topic, ModuleListPanel.ModuleDataCaptionWidth);
-                string typeShort = string.IsNullOrEmpty(Type)
-                    ? Module.ToString()
-                    : Resource.Font.Split(Type, ModuleListPanel.ModuleDataCaptionWidth);
-                text = $"{topicShort}\n<b>{typeShort}</b>";
+
+                string type = string.IsNullOrEmpty(Type) ? Module.ToString() : Type;
+                int lastSlash = type.LastIndexOf('/');
+                string shortType = (lastSlash == -1) ? type : type.Substring(lastSlash + 1);
+                string clampedType = Resource.Font.Split(shortType, ModuleListPanel.ModuleDataCaptionWidth);
+                text = $"{topicShort}\n<b>{clampedType}</b>";
             }
             else
             {
                 text = $"<b>{Module}</b>";
             }
 
-            if (!Visible)
-            {
-                text = $"<color=grey>{text}</color>";
-            }
-
-            ButtonText = text;
+            ButtonText = Visible ? text : $"<color=grey>{text}</color>";
         }
 
         public abstract void SetupPanel();
@@ -96,6 +94,8 @@ namespace Iviz.App
             ModuleListPanel.AllGuiVisible = true;
         }
 
+        public abstract void UpdateConfiguration(string configAsJson, IEnumerable<string> fields);
+
         public abstract void AddToState([NotNull] StateConfiguration config);
 
         public virtual void OnARModeChanged(bool value)
@@ -110,6 +110,11 @@ namespace Iviz.App
         public void ResetController()
         {
             Controller.ResetController();
+        }
+
+        public override string ToString()
+        {
+            return $"[{Module} guid={Configuration.Id}]";
         }
 
         [NotNull]

@@ -150,17 +150,17 @@ namespace Iviz.Displays
         }
 
 
-        static Vector3 Assimp2Unity(in Iviz.Msgs.IvizMsgs.Vector3 vector3) =>
+        static Vector3 Assimp2Unity(in Msgs.IvizMsgs.Vector3f vector3) =>
             new Vector3(vector3.X, vector3.Y, vector3.Z);
 
-        static void MemCopy<A, B>(A[] src, B[] dst, int bytes)
-            where A : unmanaged
-            where B : unmanaged
+        static void MemCopy<TA, TB>(TA[] src, TB[] dst, int bytes)
+            where TA : unmanaged
+            where TB : unmanaged
         {
             unsafe
             {
-                fixed (A* a = src)
-                fixed (B* b = dst)
+                fixed (TA* a = src)
+                fixed (TB* b = dst)
                 {
                     Buffer.MemoryCopy(a, b, bytes, bytes);
                 }

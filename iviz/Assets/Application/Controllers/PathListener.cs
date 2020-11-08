@@ -14,15 +14,15 @@ namespace Iviz.Controllers
     [DataContract]
     public sealed class PathConfiguration : JsonToString, IConfiguration
     {
-        [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
+        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public Resource.Module Module => Resource.Module.Path;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public string Type { get; set; } = "";
-        [DataMember] public float Width { get; set; } = 0.01f;
-        [DataMember] public bool ShowAxes { get; set; } = false;
-        [DataMember] public float AxisLength { get; set; } = 0.125f;
-        [DataMember] public bool ShowLines { get; set; } = true;
+        [DataMember] public float LineWidth { get; set; } = 0.01f;
+        [DataMember] public bool FramesVisible { get; set; } = false;
+        [DataMember] public float FrameSize { get; set; } = 0.125f;
+        [DataMember] public bool LinesVisible { get; set; } = true;
         [DataMember] public SerializableColor LineColor { get; set; } = Color.yellow;
         [DataMember] public uint MaxQueueSize { get; set; } = 1;
     }
@@ -46,12 +46,12 @@ namespace Iviz.Controllers
                 config.Topic = value.Topic;
                 config.Type = value.Type;
                 Visible = value.Visible;
-                Width = value.Width;
-                ShowAxes = value.ShowAxes;
+                LineWidth = value.LineWidth;
+                FramesVisible = value.FramesVisible;
                 MaxQueueSize = value.MaxQueueSize;
-                AxisLength = value.AxisLength;
+                FrameSize = value.FrameSize;
                 LineColor = value.LineColor;
-                ShowLines = value.ShowLines;
+                LinesVisible = value.LinesVisible;
             }
         }
 
@@ -69,33 +69,33 @@ namespace Iviz.Controllers
             }
         }
 
-        public float Width
+        public float LineWidth
         {
-            get => config.Width;
+            get => config.LineWidth;
             set
             {
-                config.Width = value;
+                config.LineWidth = value;
                 resource.ElementScale = value;
             }
         }
 
-        public bool ShowAxes
+        public bool FramesVisible
         {
-            get => config.ShowAxes;
+            get => config.FramesVisible;
             set
             {
-                config.ShowAxes = value;
+                config.FramesVisible = value;
                 //resource.Visible = value;
                 ProcessPoses();
             }
         }
 
-        public bool ShowLines
+        public bool LinesVisible
         {
-            get => config.ShowLines;
+            get => config.LinesVisible;
             set
             {
-                config.ShowLines = value;
+                config.LinesVisible = value;
                 ProcessPoses();
             }
         }
@@ -106,20 +106,20 @@ namespace Iviz.Controllers
             set
             {
                 config.LineColor = value;
-                if (ShowLines)
+                if (LinesVisible)
                 {
                     ProcessPoses();
                 }
             }
         }
 
-        public float AxisLength
+        public float FrameSize
         {
-            get => config.AxisLength;
+            get => config.FrameSize;
             set
             {
-                config.AxisLength = value;
-                if (ShowAxes)
+                config.FrameSize = value;
+                if (FramesVisible)
                 {
                     ProcessPoses();
                 }
@@ -158,20 +158,20 @@ namespace Iviz.Controllers
             switch (config.Type)
             {
                 case Msgs.NavMsgs.Path.RosMessageType:
-                    Listener = new RosListener<Msgs.NavMsgs.Path>(config.Topic, Handler);
+                    Listener = new Listener<Msgs.NavMsgs.Path>(config.Topic, Handler);
                     break;
                 case Msgs.GeometryMsgs.PoseArray.RosMessageType:
-                    Listener = new RosListener<Msgs.GeometryMsgs.PoseArray>(config.Topic, Handler);
-                    ShowLines = false;
+                    Listener = new Listener<Msgs.GeometryMsgs.PoseArray>(config.Topic, Handler);
+                    LinesVisible = false;
                     break;
                 case Msgs.GeometryMsgs.PolygonStamped.RosMessageType:
-                    Listener = new RosListener<Msgs.GeometryMsgs.PolygonStamped>(config.Topic, Handler);
-                    ShowAxes = false;
+                    Listener = new Listener<Msgs.GeometryMsgs.PolygonStamped>(config.Topic, Handler);
+                    FramesVisible = false;
                     break;
                 case Msgs.GeometryMsgs.Polygon.RosMessageType:
                     node.Parent = TfListener.MapFrame;
-                    Listener = new RosListener<Msgs.GeometryMsgs.Polygon>(config.Topic, Handler);
-                    ShowAxes = false;
+                    Listener = new Listener<Msgs.GeometryMsgs.Polygon>(config.Topic, Handler);
+                    FramesVisible = false;
                     break;
             }
 
@@ -276,7 +276,7 @@ namespace Iviz.Controllers
             }
 
             lines.Clear();
-            if (ShowLines)
+            if (LinesVisible)
             {
                 for (int i = 0; i < savedPoses.Count - 1; i++)
                 {
@@ -284,11 +284,11 @@ namespace Iviz.Controllers
                 }
             }
 
-            if (ShowAxes)
+            if (FramesVisible)
             {
-                Vector3 xDir = Vector3.right.Ros2Unity() * AxisLength;
-                Vector3 yDir = Vector3.up.Ros2Unity() * AxisLength;
-                Vector3 zDir = Vector3.forward.Ros2Unity() * AxisLength;
+                Vector3 xDir = Vector3.right.Ros2Unity() * FrameSize;
+                Vector3 yDir = Vector3.up.Ros2Unity() * FrameSize;
+                Vector3 zDir = Vector3.forward.Ros2Unity() * FrameSize;
                 for (int i = 0; i < savedPoses.Count; i++)
                 {
                     Vector3 p = savedPoses[i].position;

@@ -40,7 +40,10 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            SetTargetPose = pose => TargetTransform.SetPose(pose);            
+            SetTargetPose = pose =>
+            {
+                TargetTransform.SetPose(pose);
+            };            
         }
         
         public void OnPointerDown(PointerEventData eventData)

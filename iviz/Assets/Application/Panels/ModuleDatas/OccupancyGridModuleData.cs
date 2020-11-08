@@ -1,7 +1,11 @@
-﻿using Iviz.Controllers;
+﻿using System.Collections.Generic;
+using Iviz.Controllers;
+using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 using UnityEngine;
+using Logger = Iviz.Core.Logger;
 
 namespace Iviz.App
 {
@@ -41,7 +45,7 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
-            panel.Listener.RosListener = listener.Listener;
+            panel.Listener.Listener = listener.Listener;
             panel.Frame.Owner = listener;
 
             panel.Colormap.Index = (int)listener.Colormap;
@@ -59,14 +63,7 @@ namespace Iviz.App
                 color.a = 1;
                 listener.Tint = color;
             };
-            /*
-            panel.Alpha.ValueChanged += f =>
-            {
-                Color color = panel.Tint.Value;
-                color.a = f;
-                listener.Tint = color;
-            };
-            */
+
             panel.OcclusionOnlyMode.ValueChanged += f =>
             {
                 listener.RenderAsOcclusionOnly = f;
@@ -97,6 +94,42 @@ namespace Iviz.App
                 UpdateModuleButton();
             };
         }
+        
+        public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
+        {
+            var config = JsonConvert.DeserializeObject<OccupancyGridConfiguration>(configAsJson);
+            
+            foreach (string field in fields)
+            {
+                switch (field) 
+                {
+                    case nameof(OccupancyGridConfiguration.Visible):
+                        listener.Visible = config.Visible;
+                        break;
+                    case nameof(OccupancyGridConfiguration.Colormap):
+                        listener.Colormap = config.Colormap;
+                        break;
+                    case nameof(OccupancyGridConfiguration.FlipMinMax):
+                        listener.FlipMinMax = config.FlipMinMax;
+                        break;
+                    case nameof(OccupancyGridConfiguration.ScaleZ):
+                        listener.ScaleZ = config.ScaleZ;
+                        break;
+                    case nameof(OccupancyGridConfiguration.RenderAsOcclusionOnly):
+                        listener.RenderAsOcclusionOnly = config.RenderAsOcclusionOnly;
+                        break;
+                    case nameof(OccupancyGridConfiguration.Tint):
+                        listener.Tint = config.Tint;
+                        break;
+
+                    default:
+                        Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
+                        break;                    
+                }
+            }
+
+            ResetPanel();
+        }             
 
         public override void AddToState(StateConfiguration config)
         {

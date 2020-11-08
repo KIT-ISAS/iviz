@@ -7,7 +7,7 @@ using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Ros
 {
-    public interface IRosSender
+    public interface ISender
     {
         [NotNull] string Topic { get; }
         [NotNull] string Type { get; }
@@ -18,7 +18,7 @@ namespace Iviz.Ros
         void Publish([NotNull] IMessage msg);
     }
 
-    public sealed class RosSender<T> : IRosSender where T : IMessage
+    public sealed class Sender<T> : ISender where T : IMessage
     {
         static RosConnection Connection => ConnectionManager.Connection;
         
@@ -26,7 +26,7 @@ namespace Iviz.Ros
         int lastMsgCounter;
         int totalMsgCounter;
 
-        public RosSender([NotNull] string topic)
+        public Sender([NotNull] string topic)
         {
             if (string.IsNullOrWhiteSpace(topic))
             {

@@ -124,13 +124,13 @@ namespace Iviz.Ros
             SetConnectionState(ConnectionState.Disconnected);
         }
 
-        internal abstract void Subscribe<T>([NotNull] RosListener<T> listener)
+        internal abstract void Subscribe<T>([NotNull] Listener<T> listener)
             where T : IMessage, IDeserializable<T>, new();
 
-        internal abstract void Unsubscribe([NotNull] IRosListener subscriber);
-        internal abstract void Advertise<T>([NotNull] RosSender<T> advertiser) where T : IMessage;
-        internal abstract void Unadvertise([NotNull] IRosSender advertiser);
-        internal abstract void Publish<T>([NotNull] RosSender<T> advertiser, [NotNull] T msg) where T : IMessage;
+        internal abstract void Unsubscribe([NotNull] IListener subscriber);
+        internal abstract void Advertise<T>([NotNull] Sender<T> advertiser) where T : IMessage;
+        internal abstract void Unadvertise([NotNull] ISender advertiser);
+        internal abstract void Publish<T>([NotNull] Sender<T> advertiser, [NotNull] T msg) where T : IMessage;
 
         public abstract void AdvertiseService<T>([NotNull] string service, [NotNull] Action<T> callback)
             where T : IService, new();

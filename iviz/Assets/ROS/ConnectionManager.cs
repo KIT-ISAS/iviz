@@ -2,11 +2,15 @@
 
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
+using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs;
+using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Roslib;
 using JetBrains.Annotations;
 using UnityEngine;
+using Logger = Iviz.Msgs.Logger;
 
 namespace Iviz.Ros
 {
@@ -26,9 +30,7 @@ namespace Iviz.Ros
         static RosConnection connection;
         [NotNull] public static RosConnection Connection => connection ?? (connection = new RoslibConnection());
 
-#if PUBLISH_LOG
-        RosSender<Log> sender;
-#endif
+        Sender<Log> sender;
 
         int frameBandwidthUp;
         int frameBandwidthDown;
@@ -37,10 +39,8 @@ namespace Iviz.Ros
         {
             Instance = this;
 
-#if PUBLISH_LOG
-            Logger.Log += LogMessage;
-            sender = new RosSender<Log>("/rosout");
-#endif
+            sender = new Sender<Log>("/rosout");
+            Core.Logger.LogExternal += LogMessage;
         }
 
         void OnDestroy()
@@ -50,26 +50,19 @@ namespace Iviz.Ros
             RosServerManager.Dispose();
         }
 
-#if PUBLISH_LOG
         uint logSeq = 0;
         void LogMessage(in LogMessage msg)
         {
-            if (msg.Level == LogLevel.Debug)
-            {
-                return;
-            }
-
-            sender.Publish(new Log()
+            sender.Publish(new Log
             {
                 Header = RosUtils.CreateHeader(logSeq++),
                 Level = (byte) msg.Level,
-                Name = Connection.MyId,
-                Msg = (msg.Message is Exception ex) ? ex.Message : msg.Message.ToString(),
-                File = msg.File,
+                Name = Connection.MyId ?? "/iviz",
+                Msg = msg.Message,
+                File = Path.GetFileName(msg.File),
                 Line = (uint) msg.Line
             });
         }
-#endif
 
         [CanBeNull] public static string MyId => Connection.MyId;
         public static bool IsConnected => Connection.ConnectionState == ConnectionState.Connected;

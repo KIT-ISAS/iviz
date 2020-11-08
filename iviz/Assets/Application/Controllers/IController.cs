@@ -1,4 +1,4 @@
-﻿
+﻿using System.Collections.Generic;
 using JetBrains.Annotations;
 
 namespace Iviz.Controllers
@@ -13,12 +13,20 @@ namespace Iviz.Controllers
         /// Tells the ModuleData to re-read all information for the controller and update the panel, if active.  
         /// </summary>
         void ResetPanel();
+
         /// <summary>
         /// Tells the ModuleData to activate the panel that corresponds to this controller.
         /// </summary>
         void ShowPanel();
+
+        /// <summary>
+        /// Updates the configuration of the module
+        /// </summary>
+        /// <param name="configAsJson">The new configuration, encoded as JSON</param>
+        /// <param name="fields">The fields in the configuration that are active.</param>
+        void UpdateConfiguration([NotNull] string configAsJson, [NotNull] IEnumerable<string> fields);
     }
-    
+
     /// <summary>
     /// Common interface for controllers. The basic idea is 
     /// </summary>
@@ -27,11 +35,14 @@ namespace Iviz.Controllers
         /// <summary>
         /// The <see cref="ModuleData"/> of this controller.
         /// </summary>
-        [NotNull] IModuleData ModuleData { get; }
+        [NotNull]
+        IModuleData ModuleData { get; }
+
         /// <summary>
         /// Tells the controller to finalize and dispose its resources. 
         /// </summary>
         void StopController();
+
         /// <summary>
         /// Tells the controller to 'reset' itself.
         /// What this means is dependent on the controller.

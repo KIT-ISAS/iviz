@@ -11,7 +11,7 @@ namespace Iviz.Controllers
     [DataContract]
     public class GridConfiguration : IConfiguration
     {
-        [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
+        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public Resource.Module Module => Resource.Module.Grid;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public GridOrientation Orientation { get; set; } = GridOrientation.XY;
@@ -20,7 +20,7 @@ namespace Iviz.Controllers
         [DataMember] public float GridLineWidth { get; set; } = 0.01f;
         [DataMember] public float GridCellSize { get; set; } = 1;
         [DataMember] public int NumberOfGridCells { get; set; } = 90;
-        [DataMember] public bool ShowInterior { get; set; } = true;
+        [DataMember] public bool InteriorVisible { get; set; } = true;
         [DataMember] public bool FollowCamera { get; set; } = true;
         [DataMember] public bool HideInARMode { get; set; } = true;
         [DataMember] public SerializableVector3 Offset { get; set; } = Vector3.zero;
@@ -49,7 +49,7 @@ namespace Iviz.Controllers
                 GridLineWidth = value.GridLineWidth;
                 GridCellSize = value.GridCellSize;
                 NumberOfGridCells = value.NumberOfGridCells;
-                ShowInterior = value.ShowInterior;
+                InteriorVisible = value.InteriorVisible;
                 FollowCamera = value.FollowCamera;
                 HideInARMode = value.HideInARMode;
                 Offset = value.Offset;
@@ -143,12 +143,12 @@ namespace Iviz.Controllers
             }
         }
 
-        public bool ShowInterior
+        public bool InteriorVisible
         {
-            get => config.ShowInterior;
+            get => config.InteriorVisible;
             set
             {
-                config.ShowInterior = value;
+                config.InteriorVisible = value;
                 grid.ShowInterior = value;
                 UpdateMesh();
             }

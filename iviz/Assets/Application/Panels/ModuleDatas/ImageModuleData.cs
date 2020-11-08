@@ -1,7 +1,11 @@
-﻿using Iviz.Controllers;
+﻿using System.Collections.Generic;
+using Iviz.Controllers;
+using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 using UnityEngine;
+using Logger = Iviz.Core.Logger;
 
 namespace Iviz.App
 {
@@ -47,7 +51,7 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
-            panel.Listener.RosListener = listener.Listener;
+            panel.Listener.Listener = listener.Listener;
             panel.Frame.Owner = listener;
             panel.Description.Label = listener.Description;
             panel.HideButton.State = listener.Visible;
@@ -142,6 +146,51 @@ namespace Iviz.App
         {
             config.Images.Add(listener.Config);
         }
+        
+        public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
+        {
+            var config = JsonConvert.DeserializeObject<ImageConfiguration>(configAsJson);
+            
+            foreach (string field in fields)
+            {
+                switch (field) 
+                {
+                    case nameof(ImageConfiguration.Visible):
+                        listener.Visible = config.Visible;
+                        break;
+                    case nameof(ImageConfiguration.Colormap):
+                        listener.Colormap = config.Colormap;
+                        break;
+                    case nameof(ImageConfiguration.MinIntensity):
+                        listener.MinIntensity = config.MinIntensity;
+                        break;
+                    case nameof(ImageConfiguration.MaxIntensity):
+                        listener.MaxIntensity = config.MaxIntensity;
+                        break;
+                    case nameof(ImageConfiguration.FlipMinMax):
+                        listener.Visible = config.Visible;
+                        break;
+                    case nameof(ImageConfiguration.EnableBillboard):
+                        listener.Visible = config.Visible;
+                        break;
+                    case nameof(ImageConfiguration.BillboardSize):
+                        listener.Visible = config.Visible;
+                        break;
+                    case nameof(ImageConfiguration.BillboardFollowCamera):
+                        listener.Visible = config.Visible;
+                        break;
+                    case nameof(ImageConfiguration.BillboardOffset):
+                        listener.Visible = config.Visible;
+                        break;
+
+                    default:
+                        Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
+                        break;                    
+                }
+            }
+            
+            ResetPanel();
+        }              
 
         void IImageDialogListener.OnDialogClosed()
         {

@@ -13,7 +13,7 @@ namespace Iviz.Controllers
     [DataContract]
     public class LaserScanConfiguration : JsonToString, IConfiguration
     {
-        [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
+        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public Resource.Module Module => Resource.Module.LaserScan;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
@@ -21,7 +21,6 @@ namespace Iviz.Controllers
         [DataMember] public Resource.ColormapId Colormap { get; set; } = Resource.ColormapId.hsv;
         [DataMember] public bool UseIntensity { get; set; } = false;
         [DataMember] public bool UseLines { get; set; } = false;
-
         [DataMember] public bool ForceMinMax { get; set; } = false;
         [DataMember] public float MinIntensity { get; set; } = 0;
         [DataMember] public float MaxIntensity { get; set; } = 1;
@@ -177,7 +176,7 @@ namespace Iviz.Controllers
 
         public override void StartListening()
         {
-            Listener = new RosListener<LaserScan>(config.Topic, Handler);
+            Listener = new Listener<LaserScan>(config.Topic, Handler);
             Listener.MaxQueueSize = (int)MaxQueueSize;
             node.name = "[" + config.Topic + "]";
         }

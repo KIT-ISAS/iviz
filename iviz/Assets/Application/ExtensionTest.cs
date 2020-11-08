@@ -15,7 +15,7 @@ namespace Iviz.App
     {
         static RosConnection Connection => ConnectionManager.Connection;
 
-        RosListener<TFMessage> tfListener;
+        Listener<TFMessage> tfListener;
         LineResource lines;
 
         void Start()
@@ -58,7 +58,7 @@ namespace Iviz.App
                 Debug.Log("Connected!");
 
                 // example subscription
-                tfListener = new RosListener<TFMessage>("/tf", TfMessageHandler);
+                tfListener = new Listener<TFMessage>("/tf", TfMessageHandler);
             }
         }
 

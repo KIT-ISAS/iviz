@@ -1,6 +1,10 @@
-﻿using Iviz.Controllers;
+﻿using System.Collections;
+using System.Collections.Generic;
+using Iviz.Controllers;
+using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 
 namespace Iviz.App
 {
@@ -42,15 +46,15 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
-            panel.Listener.RosListener = listener.Listener;
-            panel.FullListener.RosListener = listener.FullListener;
-            panel.DisableExpiration.Value = listener.DisableExpiration;
+            panel.Listener.Listener = listener.Listener;
+            panel.FullListener.Listener = listener.FullListener;
+            panel.DisableExpiration.Value = listener.EnableAutoExpiration;
             panel.Sender.Set(listener.Publisher);
             panel.Marker.MarkerListener = listener;
 
             panel.DisableExpiration.ValueChanged += f =>
             {
-                listener.DisableExpiration = f;
+                listener.EnableAutoExpiration = f;
             };
             panel.CloseButton.Clicked += () =>
             {
@@ -62,6 +66,30 @@ namespace Iviz.App
         public override void AddToState(StateConfiguration config)
         {
             config.InteractiveMarkers.Add(listener.Config);
+        }
+
+        public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
+        {
+            var config = JsonConvert.DeserializeObject<InteractiveMarkerConfiguration>(configAsJson);
+            
+            foreach (string field in fields)
+            {
+                switch (field) 
+                {
+                    case nameof(InteractiveMarkerConfiguration.Visible):
+                        // TODO!
+                        //listener.Visible = config.Visible;
+                        break;
+                    case nameof(InteractiveMarkerConfiguration.EnableAutoExpiration):
+                        listener.EnableAutoExpiration = config.EnableAutoExpiration;
+                        break;
+                    default:
+                        Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
+                        break;
+                }
+            }
+            
+            ResetPanel();
         }
     }
 }

@@ -17,15 +17,15 @@ namespace Iviz.Controllers
     [DataContract]
     public sealed class MagnitudeConfiguration : JsonToString, IConfiguration
     {
-        [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
+        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public Resource.Module Module => Resource.Module.Magnitude;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public string Type { get; set; } = "";
-        [DataMember] public bool ShowTrail { get; set; } = false;
-        [DataMember] public bool ShowAxis { get; set; } = true;
+        [DataMember] public bool TrailVisible { get; set; } = false;
+        [DataMember] public bool FrameVisible { get; set; } = true;
         [DataMember] public float Scale { get; set; } = 1.0f;
-        [DataMember] public bool ShowVector { get; set; } = true;
+        [DataMember] public bool VectorVisible { get; set; } = true;
         [DataMember] public float VectorScale { get; set; } = 1.0f;
         [DataMember] public SerializableColor Color { get; set; } = UnityEngine.Color.red;
         [DataMember] public float TrailTime { get; set; } = 2.0f;
@@ -55,9 +55,9 @@ namespace Iviz.Controllers
                 config.Type = value.Type;
                 Visible = value.Visible;
                 Scale = value.Scale;
-                ShowTrail = value.ShowTrail;
-                ShowAxis = value.ShowAxis;
-                ShowVector = value.ShowVector;
+                TrailVisible = value.TrailVisible;
+                FrameVisible = value.FrameVisible;
+                VectorVisible = value.VectorVisible;
                 VectorScale = value.VectorScale;
                 Color = value.Color;
                 TrailTime = value.TrailTime;
@@ -72,36 +72,36 @@ namespace Iviz.Controllers
                 config.Visible = value;
                 if (!(axis is null))
                 {
-                    axis.Visible = value && ShowAxis;
+                    axis.Visible = value && FrameVisible;
                 }
                 if (!(sphere is null))
                 {
-                    sphere.Visible = value && ShowAxis;
+                    sphere.Visible = value && FrameVisible;
                 }
-                trail.Visible = value && ShowTrail;
+                trail.Visible = value && TrailVisible;
                 if (!(arrow is null))
                 {
-                    arrow.Visible = value && ShowVector;
+                    arrow.Visible = value && VectorVisible;
                 }
             }
         }
 
-        public bool ShowTrail
+        public bool TrailVisible
         {
-            get => config.ShowTrail;
+            get => config.TrailVisible;
             set
             {
-                config.ShowTrail = value;
+                config.TrailVisible = value;
                 trail.Visible = value && Visible;
             }
         }
 
-        public bool ShowAxis
+        public bool FrameVisible
         {
-            get => config.ShowAxis;
+            get => config.FrameVisible;
             set
             {
-                config.ShowAxis = value;
+                config.FrameVisible = value;
                 if (!(axis is null))
                 {
                     axis.Visible = value && Visible;
@@ -113,12 +113,12 @@ namespace Iviz.Controllers
             }
         }
 
-        public bool ShowVector
+        public bool VectorVisible
         {
-            get => config.ShowVector;
+            get => config.VectorVisible;
             set
             {
-                config.ShowVector = value;
+                config.VectorVisible = value;
                 if (!(arrow is null))
                 {
                     arrow.Visible = value && Visible;
@@ -202,25 +202,25 @@ namespace Iviz.Controllers
             switch (config.Type)
             {
                 case PoseStamped.RosMessageType:
-                    Listener = new RosListener<PoseStamped>(config.Topic, Handler);
+                    Listener = new Listener<PoseStamped>(config.Topic, Handler);
                     goto case Msgs.GeometryMsgs.Pose.RosMessageType;
 
                 case Msgs.GeometryMsgs.Pose.RosMessageType:
                     if (Listener == null)
                     {
-                        Listener = new RosListener<Msgs.GeometryMsgs.Pose>(config.Topic, Handler);
+                        Listener = new Listener<Msgs.GeometryMsgs.Pose>(config.Topic, Handler);
                     }
                     axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Displays.AxisFrame, displayNode.transform);
                     break;
 
                 case PointStamped.RosMessageType:
-                    Listener = new RosListener<PointStamped>(config.Topic, Handler);
+                    Listener = new Listener<PointStamped>(config.Topic, Handler);
                     goto case Point.RosMessageType;
 
                 case Point.RosMessageType:
                     if (Listener == null)
                     {
-                        Listener = new RosListener<Point>(config.Topic, Handler);
+                        Listener = new Listener<Point>(config.Topic, Handler);
                     }
 
                     sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere, displayNode.transform);
@@ -229,13 +229,13 @@ namespace Iviz.Controllers
                     break;
 
                 case WrenchStamped.RosMessageType:
-                    Listener = new RosListener<WrenchStamped>(config.Topic, Handler);
+                    Listener = new Listener<WrenchStamped>(config.Topic, Handler);
                     goto case Wrench.RosMessageType;
 
                 case Wrench.RosMessageType:
                     if (Listener == null)
                     {
-                        Listener = new RosListener<Wrench>(config.Topic, Handler);
+                        Listener = new Listener<Wrench>(config.Topic, Handler);
                     }
                     axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Displays.AxisFrame, displayNode.transform);
                     arrow = ResourcePool.GetOrCreate<ArrowResource>(Resource.Displays.Arrow, displayNode.transform);
@@ -248,13 +248,13 @@ namespace Iviz.Controllers
                     break;
 
                 case TwistStamped.RosMessageType:
-                    Listener = new RosListener<TwistStamped>(config.Topic, Handler);
+                    Listener = new Listener<TwistStamped>(config.Topic, Handler);
                     goto case Twist.RosMessageType;
 
                 case Twist.RosMessageType:
                     if (Listener == null)
                     {
-                        Listener = new RosListener<Twist>(config.Topic, Handler);
+                        Listener = new Listener<Twist>(config.Topic, Handler);
                     }
                     axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Displays.AxisFrame, displayNode.transform);
                     arrow = ResourcePool.GetOrCreate<ArrowResource>(Resource.Displays.Arrow, displayNode.transform);
@@ -267,7 +267,7 @@ namespace Iviz.Controllers
                     break;
 
                 case Odometry.RosMessageType:
-                    Listener = new RosListener<Odometry>(config.Topic, Handler);
+                    Listener = new Listener<Odometry>(config.Topic, Handler);
                     axis = ResourcePool.GetOrCreate<AxisFrameResource>(Resource.Displays.AxisFrame, displayNode.transform);
 
                     childNode = SimpleDisplayNode.Instantiate("ChildNode");

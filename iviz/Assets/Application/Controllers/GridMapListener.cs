@@ -16,7 +16,7 @@ namespace Iviz.Controllers
     [DataContract]
     public class GridMapConfiguration : JsonToString, IConfiguration
     {
-        [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
+        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public Resource.Module Module => Resource.Module.GridMap;
         [DataMember] public bool Visible { get; set; } = true;
 
@@ -171,7 +171,7 @@ namespace Iviz.Controllers
 
         public override void StartListening()
         {
-            Listener = new RosListener<GridMap>(config.Topic, Handler) {MaxQueueSize = (int) MaxQueueSize};
+            Listener = new Listener<GridMap>(config.Topic, Handler) {MaxQueueSize = (int) MaxQueueSize};
             //name = "[" + config.Topic + "]";
         }
 

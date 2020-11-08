@@ -32,7 +32,10 @@ namespace Iviz.Displays
         
         void Awake()
         {
-            SetTargetPose = pose => TargetTransform.SetPose(pose);            
+            SetTargetPose = pose =>
+            {
+                TargetTransform.SetPose(pose);
+            };            
         }
         
         public bool Visible
@@ -94,7 +97,6 @@ namespace Iviz.Displays
             }
             else
             {
-                //mTarget.position += deltaPosition - startOffset;
                 SetTargetPose(new Pose(mTarget.position + deltaPosition - startOffset, mTarget.rotation));
                 Moved?.Invoke(mTarget.AsPose());
             }

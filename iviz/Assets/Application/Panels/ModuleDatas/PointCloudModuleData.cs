@@ -1,7 +1,9 @@
-﻿using Iviz.Controllers;
+﻿using System.Collections.Generic;
+using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 
 namespace Iviz.App
 {
@@ -41,7 +43,7 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
-            panel.Listener.RosListener = listener.Listener;
+            panel.Listener.Listener = listener.Listener;
             panel.Frame.Owner = listener;
 
             string minIntensityStr = listener.MeasuredIntensityBounds.x.ToString("#,0.##", UnityUtils.Culture);
@@ -121,6 +123,47 @@ namespace Iviz.App
                 listener.IsIntensityUsed ? $"[{minIntensityStr} .. {maxIntensityStr}]" :
                 "Color");
         }
+        
+        public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
+        {
+            var config = JsonConvert.DeserializeObject<PointCloudConfiguration>(configAsJson);
+            
+            foreach (string field in fields)
+            {
+                switch (field) 
+                {
+                    case nameof(PointCloudConfiguration.Visible):
+                        listener.Visible = config.Visible;
+                        break;
+                    case nameof(PointCloudConfiguration.IntensityChannel):
+                        listener.IntensityChannel = config.IntensityChannel;
+                        break;
+                    case nameof(PointCloudConfiguration.PointSize):
+                        listener.PointSize = config.PointSize;
+                        break;
+                    case nameof(PointCloudConfiguration.Colormap):
+                        listener.Colormap = config.Colormap;
+                        break;
+                    case nameof(PointCloudConfiguration.ForceMinMax):
+                        listener.ForceMinMax = config.ForceMinMax;
+                        break;
+                    case nameof(PointCloudConfiguration.MinIntensity):
+                        listener.MinIntensity = config.MinIntensity;
+                        break;
+                    case nameof(PointCloudConfiguration.MaxIntensity):
+                        listener.MaxIntensity = config.MaxIntensity;
+                        break;
+                    case nameof(PointCloudConfiguration.FlipMinMax):
+                        listener.FlipMinMax = config.FlipMinMax;
+                        break;
+                    default:
+                        Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
+                        break;                    
+                }
+            }
+            
+            ResetPanel();
+        }        
 
         public override void AddToState(StateConfiguration config)
         {

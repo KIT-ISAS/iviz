@@ -1,6 +1,9 @@
-﻿using Iviz.Controllers;
+﻿using System.Collections.Generic;
+using Iviz.Controllers;
+using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Iviz.App
@@ -50,7 +53,7 @@ namespace Iviz.App
             //panel.CellSize.Value = controller.GridCellSize;
             //panel.Orientation.Index = (int)controller.Orientation;
             panel.ColorPicker.Value = controller.InteriorColor;
-            panel.ShowInterior.Value = controller.ShowInterior;
+            panel.ShowInterior.Value = controller.InteriorVisible;
             panel.HideButton.State = controller.Visible;
             panel.Offset.Value = controller.Offset;
             panel.FollowCamera.Value = controller.FollowCamera;
@@ -82,7 +85,7 @@ namespace Iviz.App
             };
             panel.ShowInterior.ValueChanged += f =>
             {
-                controller.ShowInterior = f;
+                controller.InteriorVisible = f;
                 UpdateColor();
             };
             panel.CloseButton.Clicked += () =>
@@ -113,7 +116,7 @@ namespace Iviz.App
         void UpdateColor()
         {
             Color f = panel.ColorPicker.Value;
-            if (controller.ShowInterior)
+            if (controller.InteriorVisible)
             {
                 controller.GridColor = f * InteriorColorFactor;
                 controller.InteriorColor = f;
@@ -122,6 +125,53 @@ namespace Iviz.App
             {
                 controller.GridColor = f;
             }
+        }
+
+        public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
+        {
+            GridConfiguration config = JsonConvert.DeserializeObject<GridConfiguration>(configAsJson);
+            
+            foreach (string field in fields)
+            {
+                switch (field) 
+                {
+                    case nameof(GridConfiguration.Visible):
+                        controller.Visible = config.Visible;
+                        break;
+                    case nameof(GridConfiguration.GridColor):
+                        controller.GridColor = config.GridColor;
+                        break;
+                    case nameof(GridConfiguration.InteriorColor):
+                        controller.InteriorColor = config.InteriorColor;
+                        break;
+                    case nameof(GridConfiguration.GridLineWidth):
+                        controller.GridLineWidth = config.GridLineWidth;
+                        break;
+                    case nameof(GridConfiguration.GridCellSize):
+                        controller.GridCellSize = config.GridCellSize;
+                        break;
+                    case nameof(GridConfiguration.NumberOfGridCells):
+                        controller.NumberOfGridCells = config.NumberOfGridCells;
+                        break;
+                    case nameof(GridConfiguration.InteriorVisible):
+                        controller.InteriorVisible = config.InteriorVisible;
+                        break;
+                    case nameof(GridConfiguration.FollowCamera):
+                        controller.FollowCamera = config.FollowCamera;
+                        break;
+                    case nameof(GridConfiguration.HideInARMode):
+                        controller.HideInARMode = config.HideInARMode;
+                        break;
+                    case nameof(GridConfiguration.Offset):
+                        controller.Offset = config.Offset;
+                        break;
+                    default:
+                        Core.Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
+                        break;                    
+                }
+            }
+            
+            ResetPanel();
         }
 
         public override void AddToState(StateConfiguration config)

@@ -14,7 +14,7 @@ namespace Iviz.Controllers
     [DataContract]
     public sealed class ImageConfiguration : JsonToString, IConfiguration
     {
-        [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
+        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public Resource.Module Module => Resource.Module.Image;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
@@ -193,10 +193,10 @@ namespace Iviz.Controllers
             switch (config.Type)
             {
                 case Image.RosMessageType:
-                    Listener = new RosListener<Image>(config.Topic, Handler);
+                    Listener = new Listener<Image>(config.Topic, Handler);
                     break;
                 case CompressedImage.RosMessageType:
-                    Listener = new RosListener<CompressedImage>(config.Topic, HandlerCompressed);
+                    Listener = new Listener<CompressedImage>(config.Topic, HandlerCompressed);
                     break;
             }
             Listener.MaxQueueSize = (int)MaxQueueSize;

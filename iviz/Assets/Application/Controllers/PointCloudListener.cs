@@ -31,7 +31,7 @@ namespace Iviz.Controllers
         [DataMember] public float MaxIntensity { get; set; } = 1;
         [DataMember] public bool FlipMinMax { get; set; }
         [DataMember] public uint MaxQueueSize { get; set; } = 1;
-        [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
+        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public Resource.Module Module => Resource.Module.PointCloud;
         [DataMember] public bool Visible { get; set; } = true;
     }
@@ -197,7 +197,7 @@ namespace Iviz.Controllers
 
         public override void StartListening()
         {
-            Listener = new RosListener<PointCloud2>(config.Topic, Handler) {MaxQueueSize = (int) MaxQueueSize};
+            Listener = new Listener<PointCloud2>(config.Topic, Handler) {MaxQueueSize = (int) MaxQueueSize};
             node.name = $"[{config.Topic}]";
         }
 

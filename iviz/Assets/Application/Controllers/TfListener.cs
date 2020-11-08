@@ -23,12 +23,11 @@ namespace Iviz.Controllers
     public sealed class TfConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public string Topic { get; set; } = "";
-        [DataMember] public bool AxisVisible { get; set; } = true;
-        [DataMember] public float AxisSize { get; set; } = 0.125f;
-        [DataMember] public bool AxisLabelVisible { get; set; }
+        [DataMember] public float FrameSize { get; set; } = 0.125f;
+        [DataMember] public bool FrameLabelsVisible { get; set; }
         [DataMember] public bool ParentConnectorVisible { get; set; }
-        [DataMember] public bool ShowAllFrames { get; set; } = true;
-        [DataMember] public Guid Id { get; set; } = Guid.NewGuid();
+        [DataMember] public bool KeepOnlyUsedFrames { get; set; } = true;
+        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public Resource.Module Module => Resource.Module.TF;
         [DataMember] public bool Visible { get; set; } = true;
     }
@@ -45,7 +44,7 @@ namespace Iviz.Controllers
         readonly TfConfiguration config = new TfConfiguration();
         readonly Dictionary<string, TfFrame> frames = new Dictionary<string, TfFrame>();
         readonly InteractiveControl rootMarker;
-        readonly DisplayNode showAllListener;
+        readonly DisplayNode keepAllListener;
         readonly DisplayNode staticListener;
 
         public TfListener([NotNull] IModuleData moduleData)
@@ -60,7 +59,7 @@ namespace Iviz.Controllers
             UnityFrame.Visible = false;
             UnityFrame.AddListener(defaultListener);
 
-            showAllListener = SimpleDisplayNode.Instantiate("[TFNode]", UnityFrame.transform);
+            keepAllListener = SimpleDisplayNode.Instantiate("[TFNode]", UnityFrame.transform);
             staticListener = SimpleDisplayNode.Instantiate("[TFStatic]", UnityFrame.transform);
             defaultListener.transform.parent = UnityFrame.transform;
 
@@ -91,12 +90,12 @@ namespace Iviz.Controllers
             rootMarker.InteractionMode = InteractiveControl.InteractionModeType.Disabled;
             rootMarker.BaseScale = 2.5f * FrameSize;
 
-            Publisher = new RosSender<tfMessage_v2>(DefaultTopic);
+            Publisher = new Sender<tfMessage_v2>(DefaultTopic);
         }
 
         public static TfListener Instance { get; private set; }
-        [NotNull] public RosSender<tfMessage_v2> Publisher { get; }
-        public IRosListener ListenerStatic { get; private set; }
+        [NotNull] public Sender<tfMessage_v2> Publisher { get; }
+        public IListener ListenerStatic { get; private set; }
 
         public static GuiCamera GuiCamera => GuiCamera.Instance;
         public static Light MainLight { get; set; }
@@ -123,20 +122,20 @@ namespace Iviz.Controllers
             set
             {
                 config.Topic = value.Topic;
-                AxisVisible = value.AxisVisible;
-                FrameSize = value.AxisSize;
-                AxisLabelVisible = value.AxisLabelVisible;
+                FramesVisible = value.Visible;
+                FrameSize = value.FrameSize;
+                FrameLabelsVisible = value.FrameLabelsVisible;
                 ParentConnectorVisible = value.ParentConnectorVisible;
-                ShowAllFrames = value.ShowAllFrames;
+                KeepOnlyUsedFrames = !value.KeepOnlyUsedFrames;
             }
         }
 
-        public bool AxisVisible
+        public bool FramesVisible
         {
-            get => config.AxisVisible;
+            get => config.Visible;
             set
             {
-                config.AxisVisible = value;
+                config.Visible = value;
                 foreach (var frame in frames.Values)
                 {
                     frame.Visible = value;
@@ -149,12 +148,12 @@ namespace Iviz.Controllers
             }
         }
 
-        public bool AxisLabelVisible
+        public bool FrameLabelsVisible
         {
-            get => config.AxisLabelVisible;
+            get => config.FrameLabelsVisible;
             set
             {
-                config.AxisLabelVisible = value;
+                config.FrameLabelsVisible = value;
                 foreach (var frame in frames.Values)
                 {
                     frame.LabelVisible = value;
@@ -164,10 +163,10 @@ namespace Iviz.Controllers
 
         public float FrameSize
         {
-            get => config.AxisSize;
+            get => config.FrameSize;
             set
             {
-                config.AxisSize = value;
+                config.FrameSize = value;
                 foreach (var frame in frames.Values)
                 {
                     frame.FrameSize = value;
@@ -195,26 +194,27 @@ namespace Iviz.Controllers
             }
         }
 
-        public bool ShowAllFrames
+        public bool KeepOnlyUsedFrames
         {
-            get => config.ShowAllFrames;
+            get => config.KeepOnlyUsedFrames;
             set
             {
-                config.ShowAllFrames = value;
-                if (value)
+                config.KeepOnlyUsedFrames = value;
+                if (!value)
                 {
                     foreach (var frame in frames.Values)
                     {
-                        frame.AddListener(showAllListener);
+                        frame.AddListener(keepAllListener);
                     }
                 }
                 else
                 {
+                    // here we remove unused frames
                     // we create a copy because this generally modifies the collection
                     var framesCopy = frames.Values.ToList();
                     foreach (var frame in framesCopy)
                     {
-                        frame.RemoveListener(showAllListener);
+                        frame.RemoveListener(keepAllListener);
                     }
                 }
             }
@@ -227,8 +227,8 @@ namespace Iviz.Controllers
 
         public override void StartListening()
         {
-            Listener = new RosListener<tfMessage_v2>(DefaultTopic, SubscriptionHandler_v2) {MaxQueueSize = 200};
-            ListenerStatic = new RosListener<tfMessage_v2>(DefaultTopicStatic, SubscriptionHandlerStatic)
+            Listener = new Listener<tfMessage_v2>(DefaultTopic, SubscriptionHandler_v2) {MaxQueueSize = 200};
+            ListenerStatic = new Listener<tfMessage_v2>(DefaultTopicStatic, SubscriptionHandlerStatic)
                 {MaxQueueSize = 200};
         }
 
@@ -253,14 +253,14 @@ namespace Iviz.Controllers
                 if (isStatic)
                 {
                     child = GetOrCreateFrame(childId, staticListener);
-                    if (config.ShowAllFrames)
+                    if (config.KeepOnlyUsedFrames)
                     {
-                        child.AddListener(showAllListener);
+                        child.AddListener(keepAllListener);
                     }
                 }
-                else if (config.ShowAllFrames)
+                else if (config.KeepOnlyUsedFrames)
                 {
-                    child = GetOrCreateFrame(childId, showAllListener);
+                    child = GetOrCreateFrame(childId, keepAllListener);
                 }
                 else if (!TryGetFrameImpl(childId, out child))
                 {
@@ -289,8 +289,8 @@ namespace Iviz.Controllers
             ListenerStatic?.Reset();
             Publisher.Reset();
 
-            var prevShowAllFrames = ShowAllFrames;
-            ShowAllFrames = false;
+            var prevShowAllFrames = !KeepOnlyUsedFrames;
+            KeepOnlyUsedFrames = true;
 
             var framesCopy = frames.Values.ToList();
             foreach (var frame in framesCopy)
@@ -298,7 +298,7 @@ namespace Iviz.Controllers
                 frame.RemoveListener(staticListener);
             }
 
-            ShowAllFrames = prevShowAllFrames;
+            KeepOnlyUsedFrames = !prevShowAllFrames;
         }
 
         [NotNull]
@@ -359,9 +359,9 @@ namespace Iviz.Controllers
             var frame = ResourcePool.GetOrCreate<TfFrame>(Resource.Displays.TfFrame, parent);
             frame.name = $"{{{id}}}";
             frame.Id = id;
-            frame.Visible = config.AxisVisible;
-            frame.FrameSize = config.AxisSize;
-            frame.LabelVisible = config.AxisLabelVisible;
+            frame.Visible = config.Visible;
+            frame.FrameSize = config.FrameSize;
+            frame.LabelVisible = config.FrameLabelsVisible;
             frame.ConnectorVisible = config.ParentConnectorVisible;
             if (parentFrame != null)
             {
@@ -405,7 +405,7 @@ namespace Iviz.Controllers
             ResourcePool.Dispose(Resource.Displays.TfFrame, frame.gameObject);
         }
 
-        public static void Publish([NotNull] tfMessage_v2 msg)
+        static void Publish([NotNull] tfMessage_v2 msg)
         {
             Instance.Publisher.Publish(msg);
         }

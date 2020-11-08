@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.Controllers;
+using Iviz.Core;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 
 namespace Iviz.App
 {
@@ -41,7 +43,7 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
-            panel.Listener.RosListener = listener.Listener;
+            panel.Listener.Listener = listener.Listener;
 
             robotNames.Clear();
             robotNames.Add("<none>");
@@ -89,6 +91,38 @@ namespace Iviz.App
                     OfType<IJointProvider>().
                     FirstOrDefault(x => x.Name == name);
         }
+        
+        public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
+        {
+            var config = JsonConvert.DeserializeObject<JointStateConfiguration>(configAsJson);
+            
+            foreach (string field in fields)
+            {
+                switch (field) 
+                {
+                    case nameof(JointStateConfiguration.Visible):
+                        listener.Visible = config.Visible;
+                        break;
+                    case nameof(JointStateConfiguration.RobotName):
+                        listener.RobotName = config.RobotName;
+                        break;
+                    case nameof(JointStateConfiguration.MsgJointPrefix):
+                        listener.MsgJointPrefix = config.MsgJointPrefix;
+                        break;
+                    case nameof(JointStateConfiguration.MsgJointSuffix):
+                        listener.MsgJointSuffix = config.MsgJointSuffix;
+                        break;
+                    case nameof(JointStateConfiguration.MsgTrimFromEnd):
+                        listener.MsgTrimFromEnd = config.MsgTrimFromEnd;
+                        break;
+                    default:
+                        Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
+                        break;                    
+                }
+            }
+
+            ResetPanel();
+        }            
 
         public override void AddToState(StateConfiguration config)
         {
