@@ -1,7 +1,7 @@
 string name
-Vector3[] vertices
-Vector3[] normals
-Vector2[] texCoords
-Color[] colors
+Vector3f[] vertices
+Vector3f[] normals
+Vector2f[] texCoords
+Color32[] colors
 Triangle[] faces
 uint32 materialIndex

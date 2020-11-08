@@ -1,0 +1,8 @@
+# Updates a module
+
+string id		# Id of the module
+string[] fields		# The fields to be updated
+string config		# Configuration encoded in JSON
+---
+bool success		# Whether the retrieval succeeded
+string message		# An error message if success is false

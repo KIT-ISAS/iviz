@@ -6,10 +6,10 @@ uint8 SPOT = 2
 string name
 uint8 type
 bool cast_shadows
-Color diffuse
+Color32 diffuse
 float32 range
-Vector3 position
-Vector3 direction
+Vector3f position
+Vector3f direction
 float32 inner_angle
 float32 outer_angle
 
