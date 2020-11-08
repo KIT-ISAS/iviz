@@ -5,11 +5,11 @@ namespace Iviz.Sdf
 {
     public sealed class Visual
     {
-        public string Name { get; }
+        public string? Name { get; }
         public bool CastShadows { get; } = true;
         public double Transparency { get; }
         public Pose Pose { get; } = Pose.Identity;
-        public Material Material { get; }
+        public Material? Material { get; }
         public Geometry Geometry { get; }
 
         internal bool HasUri { get; }
@@ -17,7 +17,8 @@ namespace Iviz.Sdf
         internal Visual(XmlNode node)
         {
             Name = node.Attributes?["name"]?.Value;
-            
+
+            Geometry? geometry = null;
             foreach (XmlNode child in node.ChildNodes)
             {
                 switch (child.Name)
@@ -35,11 +36,12 @@ namespace Iviz.Sdf
                         Material = new Material(child);
                         break;
                     case "geometry":
-                        Geometry = new Geometry(child);
+                        geometry = new Geometry(child);
                         break;
                 }
             }
 
+            Geometry = geometry ?? throw new MalformedSdfException(node, "Expected geometry!"); 
             HasUri = Geometry.HasUri;
         }
 

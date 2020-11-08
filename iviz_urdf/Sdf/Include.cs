@@ -5,18 +5,20 @@ namespace Iviz.Sdf
     public sealed class Include
     {
         public Uri Uri { get; }
-        public string Name { get; }
+        public string? Name { get; }
         public bool? Static { get; }
         public Pose Pose { get; } = Pose.Identity;
         
         internal Include(XmlNode node)
         {
+            Uri? uri = null;
+            
             foreach (XmlNode child in node.ChildNodes)
             {
                 switch (child.Name)
                 {
                     case "uri":
-                        Uri = new Uri(child);
+                        uri = new Uri(child);
                         break;
                     case "name":
                         Name = child.InnerText;
@@ -28,7 +30,9 @@ namespace Iviz.Sdf
                         Pose = new Pose(child);
                         break;
                 }
-            }            
+            }
+
+            Uri = uri ?? throw new MalformedSdfException(node, "Expected uri!");
         }        
     }
 }

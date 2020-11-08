@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
@@ -7,12 +8,12 @@ namespace Iviz.Sdf
 {
     public sealed class Geometry
     {
-        public Empty Empty { get; }
-        public Box Box { get; }
-        public Cylinder Cylinder { get; }
-        public Mesh Mesh { get; }
-        public Plane Plane { get; }
-        public Sphere Sphere { get; }
+        public Empty? Empty { get; }
+        public Box? Box { get; }
+        public Cylinder? Cylinder { get; }
+        public Mesh? Mesh { get; }
+        public Plane? Plane { get; }
+        public Sphere? Sphere { get; }
         
         internal bool HasUri { get; }
         
@@ -54,6 +55,11 @@ namespace Iviz.Sdf
             Plane = source.Plane;
             Sphere = source.Sphere;
 
+            if (source.Mesh == null)
+            {
+                throw new InvalidOperationException("Internal error: Mesh should not be null");
+            }
+            
             System.Uri meshUri = source.Mesh.Uri.ToUri();
             string modelPackage = meshUri.Host;
             string modelPath = modelPaths[modelPackage.ToUpperInvariant()];
@@ -70,8 +76,8 @@ namespace Iviz.Sdf
             }
             else
             {
-                // if this happens, then its unfortunate, I cannot tell from here which package this belongs to.
-                // the 'file' scheme is a security risk and will probably get rejected
+                // if this happens, then its unfortunate, we cannot tell from here which package this belongs to.
+                // we send a 'file' scheme but it will probably get rejected for being a security risk
                 resolvedUri = new System.Uri($"file://{modelPath}{modelRelativePath}");
             }
             

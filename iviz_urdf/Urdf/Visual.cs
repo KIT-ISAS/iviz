@@ -4,24 +4,27 @@ namespace Iviz.Urdf
 {
     public sealed class Visual
     {
-        public string Name { get; }
+        public string? Name { get; }
         public Origin Origin { get; }
         public Geometry Geometry { get; }
-        public Material Material { get; }
+        public Material? Material { get; }
 
         internal Visual(XmlNode node)
         {
             Name = node.Attributes?["name"]?.Value;
 
+            Geometry? geometry = null;
+            Origin? origin = null;
+            
             foreach (XmlNode child in node.ChildNodes)
             {
                 switch (child.Name)
                 {
                     case "origin":
-                        Origin = new Origin(child);
+                        origin = new Origin(child);
                         break;
                     case "geometry":
-                        Geometry = new Geometry(child);
+                        geometry = new Geometry(child);
                         break;
                     case "material":
                         Material = new Material(child);
@@ -29,12 +32,8 @@ namespace Iviz.Urdf
                 }
             }
 
-            if (Geometry is null)
-            {
-                throw new MalformedUrdfException(node);
-            }
-
-            Origin ??= Origin.Identity;
+            Geometry = geometry ?? throw new MalformedUrdfException(node);
+            Origin = origin ?? Origin.Identity;
         }
     }
 }

@@ -4,7 +4,7 @@ using Iviz.Urdf;
 
 namespace Iviz.Sdf
 {
-    public sealed class Vector3
+    public sealed class Vector3f
     {
         internal static readonly char[] Separator = {' '};
         
@@ -12,7 +12,7 @@ namespace Iviz.Sdf
         public double Y { get; }
         public double Z { get; }
 
-        internal Vector3(XmlNode node)
+        internal Vector3f(XmlNode node)
         {
             if (node.InnerText is null)
             {
@@ -30,7 +30,7 @@ namespace Iviz.Sdf
             Z = double.Parse(elems[2], Utils.Culture);            
         }
 
-        internal Vector3(double X, double Y, double Z)
+        internal Vector3f(double X, double Y, double Z)
         {
             this.X = X;
             this.Y = Y;
@@ -42,12 +42,12 @@ namespace Iviz.Sdf
             return $"[{X} {Y} {Z}]";
         }        
         
-        public static readonly Vector3 One = new Vector3(1, 1, 1);
+        public static readonly Vector3f One = new Vector3f(1, 1, 1);
 
-        public static readonly Vector3 Zero = new Vector3(0, 0, 0);
+        public static readonly Vector3f Zero = new Vector3f(0, 0, 0);
         
-        public static readonly Vector3 Up = new Vector3(0, 0, 1);
+        public static readonly Vector3f Up = new Vector3f(0, 0, 1);
         
-        public static readonly Vector3 Down = new Vector3(0, 0, -1);
+        public static readonly Vector3f Down = new Vector3f(0, 0, -1);
     }
 }

@@ -13,14 +13,14 @@ namespace Iviz.Sdf
     {
         static readonly Color DefaultSpecular = new Color(0.1, 0.1, 0.1, 1);
         
-        public string Name { get; }
+        public string? Name { get; }
         public LightType Type { get; }
         
         public bool CastShadows { get; }
         public Color Diffuse { get; } = Color.White;
         public Color Specular { get; } = DefaultSpecular;
         public Attenuation Attenuation { get; } = Attenuation.Default;
-        public Vector3 Direction { get; } = Vector3.Down;
+        public Vector3f Direction { get; } = Vector3f.Down;
         public Spot Spot { get; } = Spot.Default;
         public Pose Pose { get; } = Pose.Identity;
         
@@ -28,7 +28,7 @@ namespace Iviz.Sdf
         {
             Name = node.Attributes?["name"]?.Value;
             
-            string type = node.Attributes?["type"]?.Value;
+            string? type = node.Attributes?["type"]?.Value;
             switch (type)
             {
                 case "directional":
@@ -60,7 +60,7 @@ namespace Iviz.Sdf
                         Attenuation = new Attenuation(child);
                         break;
                     case "direction":
-                        Direction = new Vector3(child);
+                        Direction = new Vector3f(child);
                         break;
                     case "spot":
                         Spot = new Spot(child);

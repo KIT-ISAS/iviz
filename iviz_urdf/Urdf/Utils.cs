@@ -8,7 +8,7 @@ namespace Iviz.Urdf
     {
         public static CultureInfo Culture => BuiltIns.Culture;
 
-        public static float ParseFloat(XmlAttribute attr)
+        public static float ParseFloat(XmlAttribute? attr)
         {
             if (attr is null)
             {
@@ -23,7 +23,7 @@ namespace Iviz.Urdf
             throw new MalformedUrdfException("Expected float at ", attr);
         }
 
-        public static float ParseFloat(XmlAttribute attr, float @default)
+        public static float ParseFloat(XmlAttribute? attr, float @default)
         {
             if (attr is null)
             {
@@ -38,7 +38,7 @@ namespace Iviz.Urdf
             throw new MalformedUrdfException("Expected float at ", attr);
         }
 
-        public static string ParseString(XmlAttribute attr)
+        public static string ParseString(XmlAttribute? attr)
         {
             if (attr?.Value is null)
             {

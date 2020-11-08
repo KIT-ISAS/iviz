@@ -3,15 +3,14 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Xml;
 
 namespace Iviz.Sdf
 {
     public sealed class Model
     {
-        public string Name { get; }
-        public string CanonicalLink { get; }
+        public string? Name { get; }
+        public string? CanonicalLink { get; }
         public bool Static { get; }
         public bool SelfCollide { get; }
         public bool AllowAutoDisable { get; }
@@ -20,9 +19,10 @@ namespace Iviz.Sdf
         public bool EnableWind { get; }
         public ReadOnlyCollection<Frame> Frames { get; }
         public Pose Pose { get; } = Pose.Identity;
-        public Pose IncludePose { get; }
+        public Pose? IncludePose { get; }
         public ReadOnlyCollection<Link> Links { get; }
-
+        
+        public bool IsInvalid { get; }
         internal bool HasIncludes { get; }
 
         internal Model(XmlNode node)
@@ -106,6 +106,12 @@ namespace Iviz.Sdf
             if (!modelPaths.TryGetValue(uri.Host.ToUpperInvariant(), out string path))
             {
                 Console.Error.WriteLine("Model: Failed to find path '" + uri.Host + "'");
+                
+                IsInvalid = true;
+                Includes = new List<Include>().AsReadOnly();
+                Models = new List<Model>().AsReadOnly();
+                Frames = new List<Frame>().AsReadOnly();
+                Links = new List<Link>().AsReadOnly();
                 return;
             }
 
@@ -119,6 +125,11 @@ namespace Iviz.Sdf
             if (sdfFile.Models.Count == 0)
             {
                 Console.WriteLine("Warning: Included model file " + sdfPath + " with no models!");
+                IsInvalid = true;
+                Includes = new List<Include>().AsReadOnly();
+                Models = new List<Model>().AsReadOnly();
+                Frames = new List<Frame>().AsReadOnly();
+                Links = new List<Link>().AsReadOnly();
                 return;
             }
 
@@ -144,7 +155,5 @@ namespace Iviz.Sdf
         {
             return HasIncludes ? new Model(this, modelPaths) : this;
         }
-
-        public bool IsInvalid => Models is null || Links is null;
     }
 }

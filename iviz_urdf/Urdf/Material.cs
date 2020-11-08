@@ -5,8 +5,8 @@ namespace Iviz.Urdf
     public sealed class Material
     {
         public string Name { get; }
-        public Color Color { get; }
-        public Texture Texture { get; }
+        public Color? Color { get; }
+        public Texture? Texture { get; }
 
         internal Material(XmlNode node)
         {

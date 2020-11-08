@@ -4,23 +4,23 @@ using System.Xml;
 
 namespace Iviz.Urdf
 {
-    public sealed class Vector3
+    public sealed class Vector3f
     {
-        public static readonly Vector3 Zero = new Vector3(0, 0, 0);
-        public static readonly Vector3 One = new Vector3(1, 1, 1);
+        public static readonly Vector3f Zero = new Vector3f(0, 0, 0);
+        public static readonly Vector3f One = new Vector3f(1, 1, 1);
 
         public float X { get; }
         public float Y { get; }
         public float Z { get; }
 
-        public Vector3(float x, float y, float z)
+        public Vector3f(float x, float y, float z)
         {
             X = x;
             Y = y;
             Z = z;
         }
 
-        internal Vector3(XmlAttribute attr)
+        internal Vector3f(XmlAttribute? attr)
         {
             string s = Utils.ParseString(attr);
             string[] elems = s.Split(new []{' '}, StringSplitOptions.RemoveEmptyEntries);
@@ -41,9 +41,9 @@ namespace Iviz.Urdf
             Z = z;
         }
 
-        public static Vector3 Parse(XmlAttribute attr, Vector3 @default)
+        public static Vector3f Parse(XmlAttribute? attr, Vector3f @default)
         {
-            return attr is null ? @default : new Vector3(attr);
+            return attr is null ? @default : new Vector3f(attr);
         }
 
         public override string ToString()

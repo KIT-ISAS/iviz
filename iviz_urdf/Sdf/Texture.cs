@@ -7,8 +7,8 @@ namespace Iviz.Sdf
     public sealed class Texture
     {
         public double Size { get; }
-        public string Diffuse { get; }
-        public string Normal { get; }
+        public string? Diffuse { get; }
+        public string? Normal { get; }
 
         internal Texture(XmlNode node)
         {

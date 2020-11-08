@@ -8,7 +8,7 @@ namespace Iviz.Sdf
     public sealed class Link
     {
 
-        public string Name { get; }
+        public string? Name { get; }
         public bool Gravity { get; } = true;
         public bool EnableWind { get; }
         public bool SelfCollide { get; }

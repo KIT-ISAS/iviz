@@ -6,7 +6,7 @@ namespace Iviz.Urdf
 {
     public sealed class Link
     {
-        public string Name { get; }
+        public string? Name { get; }
         public Inertial Inertial { get; }
         public ReadOnlyCollection<Visual> Visuals { get; }
         public ReadOnlyCollection<Collision> Collisions { get; }
@@ -18,12 +18,13 @@ namespace Iviz.Urdf
             List<Visual> visuals = new List<Visual>();
             List<Collision> collisions = new List<Collision>();
 
+            Inertial? inertial = null;
             foreach (XmlNode child in node.ChildNodes)
             {
                 switch (child.Name)
                 {
                     case "inertial":
-                        Inertial = new Inertial(child);
+                        inertial = new Inertial(child);
                         break;
                     case "visual":
                         visuals.Add(new Visual(child));
@@ -34,7 +35,7 @@ namespace Iviz.Urdf
                 }
             }
 
-            Inertial ??= Inertial.Empty;
+            Inertial = inertial ?? Inertial.Empty;
             Visuals = new ReadOnlyCollection<Visual>(visuals);
             Collisions = new ReadOnlyCollection<Collision>(collisions);
         }

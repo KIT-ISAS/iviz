@@ -4,10 +4,10 @@ namespace Iviz.Urdf
 {
     public sealed class Geometry
     {
-        public Box Box { get; }
-        public Cylinder Cylinder { get; }
-        public Sphere Sphere { get; }
-        public Mesh Mesh { get; }
+        public Box? Box { get; }
+        public Cylinder? Cylinder { get; }
+        public Sphere? Sphere { get; }
+        public Mesh? Mesh { get; }
 
         internal Geometry(XmlNode node)
         {

@@ -18,7 +18,7 @@ namespace Iviz.Sdf
                 throw new MalformedSdfException();
             }
             
-            string[] elems = node.InnerText.Split(Vector3.Separator, StringSplitOptions.RemoveEmptyEntries);
+            string[] elems = node.InnerText.Split(Vector3f.Separator, StringSplitOptions.RemoveEmptyEntries);
             if (elems.Length != 4)
             {
                 throw new MalformedSdfException(node);

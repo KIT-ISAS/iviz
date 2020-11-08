@@ -19,33 +19,29 @@ namespace Iviz.Urdf
 
         internal Inertial(XmlNode node)
         {
+            Mass? mass = null;
+            Origin? origin = null;
+            Inertia? inertia = null; 
+            
             foreach (XmlNode child in node.ChildNodes)
             {
                 switch (child.Name)
                 {
                     case "mass":
-                        Mass = new Mass(child);
+                        mass = new Mass(child);
                         break;
                     case "origin":
-                        Origin = new Origin(child);
+                        origin = new Origin(child);
                         break;
                     case "inertia":
-                        Inertia = new Inertia(child);
+                        inertia = new Inertia(child);
                         break;
                 }
             }
 
-            if (Mass is null)
-            {
-                throw new MalformedUrdfException(node);
-            }
-
-            Origin ??= Origin.Identity;
-
-            if (Inertia is null)
-            {
-                throw new MalformedUrdfException(node);
-            }
+            Mass = mass ?? throw new MalformedUrdfException(node);
+            Origin = origin ?? Origin.Identity;
+            Inertia = inertia ?? throw new MalformedUrdfException(node);
         }
     }
 }

@@ -5,14 +5,20 @@ namespace Iviz.Urdf
 {
     public class MalformedUrdfException : Exception
     {
-        public XmlNode Node { get; }
+        public XmlNode? Node { get; }
 
-        public MalformedUrdfException(XmlNode node) : base($"Error at node '{node}'")
+        public MalformedUrdfException(XmlNode? node) :
+            base(node == null
+                ? $"Error at node '(null)'"
+                : $"Error at node '{node}'")
         {
             Node = node;
         }
 
-        public MalformedUrdfException(string message, XmlNode node) : base($"{message}'{node}'")
+        public MalformedUrdfException(string message, XmlNode? node)
+            : base(node == null
+                ? $"{message} ('null')"
+                : $"{message}' ({node}')")
         {
             Node = node;
         }

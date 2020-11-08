@@ -28,43 +28,39 @@ namespace Iviz.Urdf
             string typeStr = Utils.ParseString(node.Attributes?["type"]);
             Type = GetJointType(typeStr, node);
 
-            foreach (XmlNode child in node.ChildNodes)
+            Origin? origin = null;
+            Parent? parent = null;
+            Child? child = null;
+            Axis? axis = null;
+            Limit? limit = null;
+            
+            foreach (XmlNode childNode in node.ChildNodes)
             {
-                switch (child.Name)
+                switch (childNode.Name)
                 {
                     case "origin":
-                        Origin = new Origin(child);
+                        origin = new Origin(childNode);
                         break;
                     case "parent":
-                        Parent = new Parent(child);
+                        parent = new Parent(childNode);
                         break;
                     case "child":
-                        Child = new Child(child);
+                        child = new Child(childNode);
                         break;
                     case "axis":
-                        Axis = new Axis(child);
+                        axis = new Axis(childNode);
                         break;
                     case "limit":
-                        Limit = new Limit(child);
+                        limit = new Limit(childNode);
                         break;
                 }
             }
 
-            Origin ??= Origin.Identity;
-
-            if (Parent is null)
-            {
-                throw new MalformedUrdfException(node);
-            }
-
-            if (Child is null)
-            {
-                throw new MalformedUrdfException(node);
-            }
-
-            Axis ??= Axis.Right;
-
-            Limit ??= Limit.Empty;
+            Origin = origin ?? Origin.Identity;
+            Parent = parent ?? throw new MalformedUrdfException(node);
+            Child = child ?? throw new MalformedUrdfException(node);
+            Axis = axis ?? Axis.Right;
+            Limit = limit ?? Limit.Empty;
         }
 
         static JointType GetJointType(string type, XmlNode node)

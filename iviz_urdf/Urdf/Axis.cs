@@ -6,16 +6,16 @@ namespace Iviz.Urdf
     {
         public static readonly Axis Right = new Axis();
 
-        public Vector3 Xyz { get; }
+        public Vector3f Xyz { get; }
 
         Axis()
         {
-            Xyz = new Vector3(1, 0, 0);
+            Xyz = new Vector3f(1, 0, 0);
         }
 
         internal Axis(XmlNode node)
         {
-            Xyz = new Vector3(node.Attributes?["xyz"]);
+            Xyz = new Vector3f(node.Attributes?["xyz"]);
         }
     }
 }

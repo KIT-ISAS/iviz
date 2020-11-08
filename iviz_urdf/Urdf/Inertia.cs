@@ -13,12 +13,6 @@ namespace Iviz.Urdf
 
         public Inertia()
         {
-            Ixx = 0;
-            Ixy = 0;
-            Ixz = 0;
-            Iyy = 0;
-            Iyz = 0;
-            Izz = 0;
         }
 
         internal Inertia(XmlNode node)
@@ -27,6 +21,7 @@ namespace Iviz.Urdf
             {
                 throw new MalformedUrdfException();
             }
+
             Ixx = Utils.ParseFloat(node.Attributes["ixx"]);
             Ixy = Utils.ParseFloat(node.Attributes["ixy"]);
             Ixz = Utils.ParseFloat(node.Attributes["ixz"]);

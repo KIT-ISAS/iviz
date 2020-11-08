@@ -19,7 +19,7 @@ namespace Iviz.Urdf
             A = 1;
         }
 
-        internal Rgba(XmlAttribute attr)
+        internal Rgba(XmlAttribute? attr)
         {
             string s = Utils.ParseString(attr);
             string[] elems = s.Split(new []{' '}, StringSplitOptions.RemoveEmptyEntries);

@@ -4,19 +4,19 @@ using Iviz.Urdf;
 
 namespace Iviz.Sdf
 {
-    public sealed class Vector2
+    public sealed class Vector2f
     {
         public double X { get; }
         public double Y { get; }
 
-        internal Vector2(XmlNode node)
+        internal Vector2f(XmlNode node)
         {
             if (node.InnerText is null)
             {
                 throw new MalformedSdfException();
             }
             
-            string[] elems = node.InnerText.Split(Vector3.Separator, StringSplitOptions.RemoveEmptyEntries);
+            string[] elems = node.InnerText.Split(Vector3f.Separator, StringSplitOptions.RemoveEmptyEntries);
             if (elems.Length != 2)
             {
                 throw new MalformedSdfException(node);
@@ -26,7 +26,7 @@ namespace Iviz.Sdf
             Y = double.Parse(elems[1], Utils.Culture);
         }
 
-        Vector2(double X, double Y)
+        Vector2f(double X, double Y)
         {
             this.X = X;
             this.Y = Y;
@@ -37,8 +37,8 @@ namespace Iviz.Sdf
             return $"[{X} {Y}]";
         }        
         
-        public static readonly Vector2 One = new Vector2(1, 1);
+        public static readonly Vector2f One = new Vector2f(1, 1);
 
-        public static readonly Vector2 Zero = new Vector2(0, 0);
+        public static readonly Vector2f Zero = new Vector2f(0, 0);
     }
 }

@@ -4,8 +4,8 @@ namespace Iviz.Sdf
 {
     public sealed class Frame
     {
-        public string Name { get; }
-        public string AttachedTo { get; }
+        public string? Name { get; }
+        public string? AttachedTo { get; }
         public Pose Pose { get; } = Pose.Identity;
         
         internal Frame(XmlNode node)
