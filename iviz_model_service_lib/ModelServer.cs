@@ -300,10 +300,10 @@ namespace Iviz.ModelService
                     Normals: srcMesh.Normals.Select(x => ToVector3(x)).ToArray(),
                     TexCoords: srcMesh.HasTextureCoords(0)
                         ? srcMesh.TextureCoordinateChannels[0].Select(x => ToVector2(x)).ToArray()
-                        : Array.Empty<Vector2>(),
+                        : Array.Empty<Vector2f>(),
                     Colors: srcMesh.HasVertexColors(0)
                         ? srcMesh.VertexColorChannels[0].Select(x => ToColor(x)).ToArray()
-                        : Array.Empty<Color>(),
+                        : Array.Empty<Color32>(),
                     Faces: faces.ToArray(),
                     MaterialIndex: (uint) srcMesh.MaterialIndex
                 );
@@ -359,24 +359,24 @@ namespace Iviz.ModelService
             }
         }
 
-        static Vector3 ToVector3(in Vector3D v)
+        static Vector3f ToVector3(in Vector3D v)
         {
-            return new Vector3(v.X, v.Y, v.Z);
+            return new Vector3f(v.X, v.Y, v.Z);
         }
 
-        static Vector2 ToVector2(in Vector3D v)
+        static Vector2f ToVector2(in Vector3D v)
         {
-            return new Vector2(v.X, 1 - v.Y);
+            return new Vector2f(v.X, 1 - v.Y);
         }
 
-        static Color ToColor(in Color4D color)
+        static Color32 ToColor(in Color4D color)
         {
             int r = (int) (Math.Max(Math.Min(color.R, 1), 0) * 255);
             int g = (int) (Math.Max(Math.Min(color.G, 1), 0) * 255);
             int b = (int) (Math.Max(Math.Min(color.B, 1), 0) * 255);
 
             int a = (int) (Math.Max(Math.Min(color.A, 1), 0) * 255);
-            return new Color((byte) r, (byte) g, (byte) b, (byte) a);
+            return new Color32((byte) r, (byte) g, (byte) b, (byte) a);
         }
         
 
@@ -491,7 +491,7 @@ namespace Iviz.ModelService
             msg.Response.Success = true;
             msg.Response.Scene = new Msgs.IvizMsgs.Scene
             {
-                Name = file.Worlds.Count != 0 ? file.Worlds[0].Name : "sdf",
+                Name = file.Worlds.Count != 0 && file.Worlds[0].Name != null ? file.Worlds[0].Name : "sdf",
                 Filename = uri.ToString(),
                 Includes = includes.ToArray()
             };
@@ -654,14 +654,14 @@ namespace Iviz.ModelService
         }
 
 
-        static Color ToColor(Sdf.Color color)
+        static Color32 ToColor(Sdf.Color color)
         {
             int r = (int) (Math.Max(Math.Min(color.R, 1), 0) * 255);
             int g = (int) (Math.Max(Math.Min(color.G, 1), 0) * 255);
             int b = (int) (Math.Max(Math.Min(color.B, 1), 0) * 255);
 
             int a = (int) (Math.Max(Math.Min(color.A, 1), 0) * 255);
-            return new Color((byte) r, (byte) g, (byte) b, (byte) a);
+            return new Color32((byte) r, (byte) g, (byte) b, (byte) a);
         }
 
         bool disposed;
