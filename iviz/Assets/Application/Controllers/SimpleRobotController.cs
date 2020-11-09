@@ -22,7 +22,7 @@ namespace Iviz.Controllers
         [DataMember] public bool RenderAsOcclusionOnly { get; set; }
         [DataMember] public SerializableColor Tint { get; set; } = Color.white;
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public Resource.Module Module => Resource.Module.Robot;
+        [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.Robot;
         [DataMember] public bool Visible { get; set; } = true;
     }
 

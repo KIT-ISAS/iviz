@@ -20,9 +20,9 @@ namespace Iviz.App
             public string Topic { get; }
             public string Type { get; }
             public string ShortType { get; }
-            public Resource.Module ResourceType { get; }
+            public Resource.ModuleType ResourceType { get; }
 
-            public TopicWithResource([NotNull] string topic, [NotNull] string type, Resource.Module resourceType)
+            public TopicWithResource([NotNull] string topic, [NotNull] string type, Resource.ModuleType resourceType)
             {
                 Topic = topic;
                 Type = type;
@@ -34,7 +34,7 @@ namespace Iviz.App
 
             public override string ToString()
             {
-                string type = (ResourceType == Resource.Module.Invalid) ? Type : ShortType;
+                string type = (ResourceType == Resource.ModuleType.Invalid) ? Type : ShortType;
                 return $"{Resource.Font.Split(Topic, MaxLineWidth)}\n" +
                        $"<b>{Resource.Font.Split(type, MaxLineWidth)}</b>";
             }
@@ -63,7 +63,7 @@ namespace Iviz.App
                 }
 
                 bool resourceFound =
-                    Resource.ResourceByRosMessageType.TryGetValue(msgType, out Resource.Module resource);
+                    Resource.ResourceByRosMessageType.TryGetValue(msgType, out Resource.ModuleType resource);
                 if (!resourceFound && !panel.ShowAll.Value)
                 {
                     continue;
@@ -105,7 +105,7 @@ namespace Iviz.App
             {
                 for (int i = 0; i < topics.Count; i++)
                 {
-                    if (topics[i].ResourceType == Resource.Module.Invalid)
+                    if (topics[i].ResourceType == Resource.ModuleType.Invalid)
                     {
                         panel[i].Interactable = false;
                     }

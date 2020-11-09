@@ -19,7 +19,7 @@ namespace Iviz.App
 
         public override DataPanelContents Panel => panel;
         protected override ListenerController Listener => listener;
-        public override Resource.Module Module => Resource.Module.Magnitude;
+        public override Resource.ModuleType ModuleType => Resource.ModuleType.Magnitude;
         public override IConfiguration Configuration => listener.Config;
 
 
@@ -30,7 +30,7 @@ namespace Iviz.App
         {
             //GameObject listenerObject = new GameObject("Magnitude:" + Topic);
 
-            panel = DataPanelManager.GetPanelByResourceType<MagnitudePanelContents>(Resource.Module.Magnitude);
+            panel = DataPanelManager.GetPanelByResourceType<MagnitudePanelContents>(Resource.ModuleType.Magnitude);
             listener = new MagnitudeListener(this);
             if (constructor.Configuration == null)
             {

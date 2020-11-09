@@ -14,7 +14,7 @@ namespace Iviz.Controllers
     public class LaserScanConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public Resource.Module Module => Resource.Module.LaserScan;
+        [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.LaserScan;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public float PointSize { get; set; } = 0.03f;

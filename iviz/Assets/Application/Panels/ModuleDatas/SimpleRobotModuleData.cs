@@ -23,7 +23,7 @@ namespace Iviz.App
         [NotNull] readonly SimpleRobotController robot;
 
         public override DataPanelContents Panel => panel;
-        public override Resource.Module Module => Resource.Module.Robot;
+        public override Resource.ModuleType ModuleType => Resource.ModuleType.Robot;
         public override IConfiguration Configuration => robot.Config;
         public override IController Controller => robot;
 
@@ -38,7 +38,7 @@ namespace Iviz.App
                 robot.Config = (SimpleRobotConfiguration) constructor.Configuration;
             }
 
-            panel = DataPanelManager.GetPanelByResourceType<SimpleRobotPanelContents>(Resource.Module.Robot);
+            panel = DataPanelManager.GetPanelByResourceType<SimpleRobotPanelContents>(Resource.ModuleType.Robot);
             UpdateModuleButton();
 
             ConnectionManager.Connection.ConnectionStateChanged += OnConnectionStateChanged;
@@ -186,7 +186,7 @@ namespace Iviz.App
 
         protected override void UpdateModuleButton()
         {
-            ButtonText = $"{Resource.Font.Split(robot.Name, ModuleListPanel.ModuleDataCaptionWidth)}\n<b>{Module}</b>";
+            ButtonText = $"{Resource.Font.Split(robot.Name, ModuleListPanel.ModuleDataCaptionWidth)}\n<b>{ModuleType}</b>";
         }
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)

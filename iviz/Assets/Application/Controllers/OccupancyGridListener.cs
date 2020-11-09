@@ -17,7 +17,7 @@ namespace Iviz.Controllers
     public sealed class OccupancyGridConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public Resource.Module Module => Resource.Module.OccupancyGrid;
+        [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.OccupancyGrid;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public Resource.ColormapId Colormap { get; set; } = Resource.ColormapId.gray;

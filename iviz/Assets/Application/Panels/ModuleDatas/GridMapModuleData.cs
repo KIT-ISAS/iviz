@@ -19,7 +19,7 @@ namespace Iviz.App
         protected override ListenerController Listener => listener;
 
         public override DataPanelContents Panel => panel;
-        public override Resource.Module Module => Resource.Module.GridMap;
+        public override Resource.ModuleType ModuleType => Resource.ModuleType.GridMap;
         public override IConfiguration Configuration => listener.Config;
 
 
@@ -27,7 +27,7 @@ namespace Iviz.App
         base(constructor.ModuleList,
             constructor.GetConfiguration<GridMapConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<GridMapPanelContents>(Resource.Module.GridMap);
+            panel = DataPanelManager.GetPanelByResourceType<GridMapPanelContents>(Resource.ModuleType.GridMap);
             listener = new GridMapListener(this);
             if (constructor.Configuration == null)
             {

@@ -26,7 +26,7 @@ namespace Iviz.App
 
         [NotNull] public string Topic { get; }
         [NotNull] public string Type { get; }
-        public abstract Resource.Module Module { get; }
+        public abstract Resource.ModuleType ModuleType { get; }
         [NotNull] public abstract DataPanelContents Panel { get; }
         [NotNull] public abstract IController Controller { get; }
         [NotNull] public abstract IConfiguration Configuration { get; }
@@ -47,7 +47,7 @@ namespace Iviz.App
             {
                 string topicShort = Resource.Font.Split(Topic, ModuleListPanel.ModuleDataCaptionWidth);
 
-                string type = string.IsNullOrEmpty(Type) ? Module.ToString() : Type;
+                string type = string.IsNullOrEmpty(Type) ? ModuleType.ToString() : Type;
                 int lastSlash = type.LastIndexOf('/');
                 string shortType = (lastSlash == -1) ? type : type.Substring(lastSlash + 1);
                 string clampedType = Resource.Font.Split(shortType, ModuleListPanel.ModuleDataCaptionWidth);
@@ -55,7 +55,7 @@ namespace Iviz.App
             }
             else
             {
-                text = $"<b>{Module}</b>";
+                text = $"<b>{ModuleType}</b>";
             }
 
             ButtonText = Visible ? text : $"<color=grey>{text}</color>";
@@ -114,7 +114,7 @@ namespace Iviz.App
 
         public override string ToString()
         {
-            return $"[{Module} guid={Configuration.Id}]";
+            return $"[{ModuleType} guid={Configuration.Id}]";
         }
 
         [NotNull]
@@ -125,25 +125,25 @@ namespace Iviz.App
                 throw new ArgumentNullException(nameof(c));
             }
 
-            switch (c.Module)
+            switch (c.ModuleType)
             {
-                case Resource.Module.TF: return new TfModuleData(c);
-                case Resource.Module.PointCloud: return new PointCloudModuleData(c);
-                case Resource.Module.Grid: return new GridModuleData(c);
-                case Resource.Module.Image: return new ImageModuleData(c);
-                case Resource.Module.Robot: return new SimpleRobotModuleData(c);
-                case Resource.Module.Marker: return new MarkerModuleData(c);
-                case Resource.Module.InteractiveMarker: return new InteractiveMarkerModuleData(c);
-                case Resource.Module.JointState: return new JointStateModuleData(c);
-                case Resource.Module.DepthCloud: return new DepthCloudModuleData(c);
-                case Resource.Module.LaserScan: return new LaserScanModuleData(c);
-                case Resource.Module.AugmentedReality: return new ARModuleData(c);
-                case Resource.Module.Magnitude: return new MagnitudeModuleData(c);
-                case Resource.Module.OccupancyGrid: return new OccupancyGridModuleData(c);
-                case Resource.Module.Joystick: return new JoystickModuleData(c);
-                case Resource.Module.Path: return new PathModuleData(c);
-                case Resource.Module.GridMap: return new GridMapModuleData(c);
-                default: throw new ArgumentException("Failed to find a module of the given type: " + c.Module);
+                case Resource.ModuleType.TF: return new TfModuleData(c);
+                case Resource.ModuleType.PointCloud: return new PointCloudModuleData(c);
+                case Resource.ModuleType.Grid: return new GridModuleData(c);
+                case Resource.ModuleType.Image: return new ImageModuleData(c);
+                case Resource.ModuleType.Robot: return new SimpleRobotModuleData(c);
+                case Resource.ModuleType.Marker: return new MarkerModuleData(c);
+                case Resource.ModuleType.InteractiveMarker: return new InteractiveMarkerModuleData(c);
+                case Resource.ModuleType.JointState: return new JointStateModuleData(c);
+                case Resource.ModuleType.DepthCloud: return new DepthCloudModuleData(c);
+                case Resource.ModuleType.LaserScan: return new LaserScanModuleData(c);
+                case Resource.ModuleType.AugmentedReality: return new ARModuleData(c);
+                case Resource.ModuleType.Magnitude: return new MagnitudeModuleData(c);
+                case Resource.ModuleType.OccupancyGrid: return new OccupancyGridModuleData(c);
+                case Resource.ModuleType.Joystick: return new JoystickModuleData(c);
+                case Resource.ModuleType.Path: return new PathModuleData(c);
+                case Resource.ModuleType.GridMap: return new GridMapModuleData(c);
+                default: throw new ArgumentException("Failed to find a module of the given type: " + c.ModuleType);
             }
         }
     }

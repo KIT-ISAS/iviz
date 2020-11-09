@@ -19,7 +19,7 @@ namespace Iviz.App
         readonly ARController controller;
         readonly ARPanelContents panel;
 
-        public override Resource.Module Module => Resource.Module.AugmentedReality;
+        public override Resource.ModuleType ModuleType => Resource.ModuleType.AugmentedReality;
         public override DataPanelContents Panel => panel;
         public override IConfiguration Configuration => controller.Config;
         public override IController Controller => controller;
@@ -27,7 +27,7 @@ namespace Iviz.App
         public ARModuleData([NotNull] ModuleDataConstructor constructor) :
             base(constructor.ModuleList, constructor.Topic, constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<ARPanelContents>(Resource.Module.AugmentedReality);
+            panel = DataPanelManager.GetPanelByResourceType<ARPanelContents>(Resource.ModuleType.AugmentedReality);
 
             controller = Settings.IsHololens ?
                 new GameObject("AR Hololens Controller").AddComponent<ARHololensController>() :

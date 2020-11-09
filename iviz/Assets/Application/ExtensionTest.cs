@@ -8,6 +8,7 @@ using Iviz.Msgs.Tf2Msgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using UnityEngine;
+using UnityEngine.Rendering.PostProcessing;
 
 namespace Iviz.App
 {
@@ -18,16 +19,18 @@ namespace Iviz.App
         Listener<TFMessage> tfListener;
         LineResource lines;
 
-        void Start()
+        void Awake()
         {
             // wait until the GUI finishes initializing
-            ModuleListPanel.Instance.InitFinished += Initialize;
+            ModuleListPanel.InitFinished += Initialize;
         }
 
         void Initialize()
         {
+            Debug.Log("was here");
+        
             // remove our stuff from the event
-            ModuleListPanel.Instance.InitFinished -= Initialize;
+            ModuleListPanel.InitFinished -= Initialize;
 
             // we setup the connection data here
             Connection.ConnectionStateChanged += OnConnectionStateChanged;
@@ -80,6 +83,7 @@ namespace Iviz.App
 
         void GenerateRobot()
         {
+            IExternalServiceProvider Connection = null;
             // you can load your own urdf as a string
             string pandaUrdf = UnityEngine.Resources.Load<TextAsset>("Package/iviz/robots/panda").text;
 

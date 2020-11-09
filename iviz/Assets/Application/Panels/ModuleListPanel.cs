@@ -77,7 +77,7 @@ namespace Iviz.App
         ControllerService controllerService;
 
         bool initialized;
-        public event Action InitFinished;
+        public static event Action InitFinished;
 
         public ModuleListPanel()
         {
@@ -157,12 +157,12 @@ namespace Iviz.App
 
             Logger.Internal("<b>Welcome to iviz</b>");
 
-            CreateModule(Resource.Module.TF, TfListener.DefaultTopic);
-            CreateModule(Resource.Module.Grid);
+            CreateModule(Resource.ModuleType.TF, TfListener.DefaultTopic);
+            CreateModule(Resource.ModuleType.Grid);
 
             if (Settings.IsHololens)
             {
-                ARController controller = (ARController) CreateModule(Resource.Module.AugmentedReality).Controller;
+                ARController controller = (ARController) CreateModule(Resource.ModuleType.AugmentedReality).Controller;
                 controller.Visible = true;
             }
 
@@ -398,7 +398,7 @@ namespace Iviz.App
 
             foreach (var config in configurations)
             {
-                CreateModule(config.Module, configuration: config);
+                CreateModule(config.ModuleType, configuration: config);
             }
 
             if (connectionData.MasterUri != null &&
@@ -462,7 +462,7 @@ namespace Iviz.App
         }
 
         [NotNull]
-        public ModuleData CreateModule(Resource.Module resource, [NotNull] string topic = "",
+        public ModuleData CreateModule(Resource.ModuleType resource, [NotNull] string topic = "",
             [NotNull] string type = "",
             [CanBeNull] IConfiguration configuration = null)
         {
@@ -500,7 +500,7 @@ namespace Iviz.App
 
             Text buttonObjectText = buttonObject.GetComponentInChildren<Text>();
             buttonObjectText.text = moduleData.ButtonText;
-            buttonObject.name = $"Button:{moduleData.Module}";
+            buttonObject.name = $"Button:{moduleData.ModuleType}";
             buttonObject.SetActive(true);
             buttons.Add(buttonObject);
 
@@ -522,7 +522,7 @@ namespace Iviz.App
                 throw new ArgumentNullException(nameof(type));
             }
 
-            if (!Resource.ResourceByRosMessageType.TryGetValue(type, out Resource.Module resource))
+            if (!Resource.ResourceByRosMessageType.TryGetValue(type, out Resource.ModuleType resource))
             {
                 throw new ArgumentException(nameof(type));
             }

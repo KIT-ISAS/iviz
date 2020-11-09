@@ -32,7 +32,7 @@ namespace Iviz.Controllers
         [DataMember] public bool FlipMinMax { get; set; }
         [DataMember] public uint MaxQueueSize { get; set; } = 1;
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public Resource.Module Module => Resource.Module.PointCloud;
+        [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.PointCloud;
         [DataMember] public bool Visible { get; set; } = true;
     }
 

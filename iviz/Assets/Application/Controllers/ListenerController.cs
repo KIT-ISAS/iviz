@@ -30,7 +30,7 @@ namespace Iviz.Controllers
 
         public virtual void ResetController()
         {
-            Debug.Log(this + ": Resetting!");
+            Debug.Log($"{this}: Resetting!");
             Listener?.Reset();
         }
 

@@ -22,7 +22,7 @@ namespace Iviz.Controllers
     public sealed class JointStateConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public Resource.Module Module => Resource.Module.JointState;
+        [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.JointState;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public string RobotName { get; set; } = "";

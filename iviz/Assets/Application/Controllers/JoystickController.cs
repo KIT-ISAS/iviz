@@ -24,7 +24,7 @@ namespace Iviz.Controllers
         [DataMember] public string AttachToFrame { get; set; } = "map";
         [DataMember] public bool XIsFront { get; set; } = true;
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public Resource.Module Module => Resource.Module.Joystick;
+        [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.Joystick;
         [DataMember] public bool Visible { get; set; } = true;
     }
 

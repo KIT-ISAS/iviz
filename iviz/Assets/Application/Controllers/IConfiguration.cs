@@ -16,7 +16,7 @@ namespace Iviz.Controllers
         /// <summary>
         /// Module type of the controller. 
         /// </summary>
-        Resource.Module Module { get; }
+        Resource.ModuleType ModuleType { get; }
         
         /// <summary>
         /// Whether the controller is visible. 

@@ -10,8 +10,8 @@ namespace Iviz.App
 {
     public sealed class DataPanelManager : MonoBehaviour
     {
-        readonly Dictionary<Resource.Module, DataPanelContents> panelByResourceType =
-            new Dictionary<Resource.Module, DataPanelContents>();
+        readonly Dictionary<Resource.ModuleType, DataPanelContents> panelByResourceType =
+            new Dictionary<Resource.ModuleType, DataPanelContents>();
 
         DataPanelContents defaultPanel;
 
@@ -43,7 +43,7 @@ namespace Iviz.App
             GameThread.EverySecond -= UpdateSelected;
         }
 
-        [NotNull] public T GetPanelByResourceType<T>(Resource.Module resource) where T : DataPanelContents
+        [NotNull] public T GetPanelByResourceType<T>(Resource.ModuleType resource) where T : DataPanelContents
         {
             if (panelByResourceType.TryGetValue(resource, out DataPanelContents existingContents))
             {

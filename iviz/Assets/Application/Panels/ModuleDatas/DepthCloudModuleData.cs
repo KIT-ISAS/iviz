@@ -14,7 +14,7 @@ namespace Iviz.App
         [NotNull] readonly DepthCloudPanelContents panel;
 
         public override DataPanelContents Panel => panel;
-        public override Resource.Module Module => Resource.Module.DepthCloud;
+        public override Resource.ModuleType ModuleType => Resource.ModuleType.DepthCloud;
         public override IConfiguration Configuration => controller.Config;
         public override IController Controller => controller;
 
@@ -24,7 +24,7 @@ namespace Iviz.App
         public DepthCloudModuleData([NotNull] ModuleDataConstructor constructor) :
             base(constructor.ModuleList, constructor.Topic, constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<DepthCloudPanelContents>(Resource.Module.DepthCloud);
+            panel = DataPanelManager.GetPanelByResourceType<DepthCloudPanelContents>(Resource.ModuleType.DepthCloud);
 
             controller = new DepthCloudController(this);
             if (constructor.Configuration != null)
@@ -51,7 +51,7 @@ namespace Iviz.App
             depthImageCandidates.Clear();
             depthImageCandidates.Add("<none>");
             depthImageCandidates.AddRange(
-                ModuleListPanel.ModuleDatas.Where(x => x.Module == Resource.Module.Image).Select(x => x.Topic)
+                ModuleListPanel.ModuleDatas.Where(x => x.ModuleType == Resource.ModuleType.Image).Select(x => x.Topic)
             );
             panel.Depth.Options = depthImageCandidates;
             panel.Depth.Value = controller.DepthName;
@@ -59,7 +59,7 @@ namespace Iviz.App
             colorImageCandidates.Clear();
             colorImageCandidates.Add("<none>");
             colorImageCandidates.AddRange(
-                ModuleListPanel.ModuleDatas.Where(x => x.Module == Resource.Module.Image).Select(x => x.Topic)
+                ModuleListPanel.ModuleDatas.Where(x => x.ModuleType == Resource.ModuleType.Image).Select(x => x.Topic)
             );
             panel.Color.Options = colorImageCandidates;
             panel.Color.Value = controller.ColorName;
@@ -110,14 +110,14 @@ namespace Iviz.App
             depthImageCandidates.Clear();
             depthImageCandidates.Add("<none>");
             depthImageCandidates.AddRange(
-                ModuleListPanel.ModuleDatas.Where(x => x.Module == Resource.Module.Image).Select(x => x.Topic)
+                ModuleListPanel.ModuleDatas.Where(x => x.ModuleType == Resource.ModuleType.Image).Select(x => x.Topic)
             );
             panel.Depth.Options = depthImageCandidates;
 
             colorImageCandidates.Clear();
             colorImageCandidates.Add("<none>");
             colorImageCandidates.AddRange(
-                ModuleListPanel.ModuleDatas.Where(x => x.Module == Resource.Module.Image).Select(x => x.Topic)
+                ModuleListPanel.ModuleDatas.Where(x => x.ModuleType == Resource.ModuleType.Image).Select(x => x.Topic)
             );
             panel.Color.Options = colorImageCandidates;
         }

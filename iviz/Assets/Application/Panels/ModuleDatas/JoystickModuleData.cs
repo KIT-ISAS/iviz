@@ -15,7 +15,7 @@ namespace Iviz.App
         [NotNull] readonly JoystickController controller;
         [NotNull] readonly JoystickPanelContents panel;
 
-        public override Resource.Module Module => Resource.Module.Joystick;
+        public override Resource.ModuleType ModuleType => Resource.ModuleType.Joystick;
         public override DataPanelContents Panel => panel;
         public override IConfiguration Configuration => controller.Config;
         public override IController Controller => controller;
@@ -23,7 +23,7 @@ namespace Iviz.App
         public JoystickModuleData([NotNull] ModuleDataConstructor constructor) :
             base(constructor.ModuleList, constructor.Topic, constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<JoystickPanelContents>(Resource.Module.Joystick);
+            panel = DataPanelManager.GetPanelByResourceType<JoystickPanelContents>(Resource.ModuleType.Joystick);
 
             controller = new JoystickController(this);
             if (constructor.Configuration != null)

@@ -21,7 +21,7 @@ namespace Iviz.Controllers
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public bool DescriptionsVisible { get; set; }
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public Resource.Module Module => Resource.Module.InteractiveMarker;
+        [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.InteractiveMarker;
         [DataMember] public bool Visible { get; set; } = true;
     }
 
@@ -108,6 +108,7 @@ namespace Iviz.Controllers
         public void Reset()
         {
             DestroyAllMarkers();
+            FullListener?.Unpause();
         }
 
         public override void StartListening()
@@ -146,6 +147,7 @@ namespace Iviz.Controllers
         {
             base.ResetController();
             DestroyAllMarkers();
+            FullListener?.Reset();
             Publisher?.Reset();
         }
 

@@ -19,7 +19,7 @@ namespace Iviz.App
         protected override ListenerController Listener => listener;
 
         public override DataPanelContents Panel => panel;
-        public override Resource.Module Module => Resource.Module.PointCloud;
+        public override Resource.ModuleType ModuleType => Resource.ModuleType.PointCloud;
         public override IConfiguration Configuration => listener.Config;
 
 
@@ -27,7 +27,7 @@ namespace Iviz.App
         base(constructor.ModuleList,
             constructor.GetConfiguration<PointCloudConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<PointCloudPanelContents>(Resource.Module.PointCloud);
+            panel = DataPanelManager.GetPanelByResourceType<PointCloudPanelContents>(Resource.ModuleType.PointCloud);
             listener = new PointCloudListener(this);
             if (constructor.Configuration == null)
             {

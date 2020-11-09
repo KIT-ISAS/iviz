@@ -610,7 +610,8 @@ namespace Iviz.Controllers
 
                     arrowMarker.Visible = true;
                     arrowMarker.Set(msg.Scale.Ros2Unity().Abs());
-                    //transform.localScale = msg.Scale.Ros2Unity().Abs();
+                    
+                    
                     description.Append("Scale: [")
                         .Append(msg.Scale.X).Append(", ")
                         .Append(msg.Scale.Y).Append(", ")

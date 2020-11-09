@@ -11,6 +11,9 @@ namespace Iviz.Controllers
 {
     public sealed class InteractiveMarkerObject : DisplayNode
     {
+        const string WarnStr = "<b>Warning:</b> ";
+        const string ErrorStr = "<color=red>Error:</color> ";
+        
         readonly Dictionary<string, InteractiveMarkerControlObject> controls =
             new Dictionary<string, InteractiveMarkerControlObject>();
 
@@ -92,7 +95,7 @@ namespace Iviz.Controllers
                 : "[]";
             description.Append("Description: ").Append(msgDescription).AppendLine();
 
-            text.Text = msg.Description;
+            text.Text = msg.Description.Length != 0 ? msg.Description : msg.Name;
 
             if (Mathf.Approximately(msg.Scale, 0))
             {
@@ -116,9 +119,10 @@ namespace Iviz.Controllers
                 controlsToDelete.Add(controlId);
             }
 
+            int numUnnamed = 0;
             foreach (InteractiveMarkerControl controlMsg in msg.Controls)
             {
-                string controlId = controlMsg.Name;
+                string controlId = controlMsg.Name.Length != 0 ? controlMsg.Name : $"[Unnamed-{(numUnnamed++)}]";
 
                 if (controls.TryGetValue(controlId, out InteractiveMarkerControlObject existingControl))
                 {
@@ -134,6 +138,11 @@ namespace Iviz.Controllers
 
                 newControl.Set(controlMsg);
                 controlsToDelete.Remove(controlId);
+            }
+
+            if (numUnnamed > 1)
+            {
+                description.Append(WarnStr).Append(numUnnamed).Append(" controls have empty ids").AppendLine();
             }
 
             foreach (string id in controlsToDelete)

@@ -21,7 +21,7 @@ namespace Iviz.Displays
         {
             Vector3 diff = a - b; // arrow model is flipped
             float scaleX = diff.Magnitude();
-            float scaleYZ = overrideScaleYZ ?? Mathf.Min(scaleX, MaxArrowWidth);
+            float scaleYZ = overrideScaleYZ ?? Mathf.Min(scaleX * 0.15f, MaxArrowWidth);
 
             Transform mTransform = transform;
             mTransform.localScale = new Vector3(scaleX, scaleYZ, scaleYZ);
@@ -54,13 +54,13 @@ namespace Iviz.Displays
         public void Set(in Vector3 scale)
         {
             transform.localScale = new Vector3(scale.z, scale.y, scale.x);
-            transform.SetPositionAndRotation(Vector3.zero, PointToX);
+            transform.SetLocalPose(new Pose(Vector3.zero, PointToX));
         }
 
         public void Reset()
         {
             transform.localScale = Vector3.one;
-            transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
+            transform.SetLocalPose(Pose.identity);
         }
 
         public override void Suspend()

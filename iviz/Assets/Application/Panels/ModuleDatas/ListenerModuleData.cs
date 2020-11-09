@@ -22,7 +22,7 @@ namespace Iviz.App
         
         public override string ToString()
         {
-            return $"[{Module} Topic='{Topic}' [{Type}] guid={Configuration.Id}]";
+            return $"[{ModuleType} Topic='{Topic}' [{Type}] guid={Configuration.Id}]";
         }        
     }
 }

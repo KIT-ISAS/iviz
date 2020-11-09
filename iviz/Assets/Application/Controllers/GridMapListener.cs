@@ -17,7 +17,7 @@ namespace Iviz.Controllers
     public class GridMapConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public Resource.Module Module => Resource.Module.GridMap;
+        [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.GridMap;
         [DataMember] public bool Visible { get; set; } = true;
 
         [DataMember] public string Topic { get; set; } = "";

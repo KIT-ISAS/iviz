@@ -10,31 +10,126 @@ using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
+using UnityEngine;
+using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Controllers
 {
     public class ControllerService
     {
-        static RosConnection Connection => ConnectionManager.Connection;
+        [NotNull] static RosConnection Connection => ConnectionManager.Connection;
 
         public ControllerService()
         {
-            Connection.AdvertiseService<AddModuleFromTopic>("add_module_from_topic", AddModuleCallback);
+            Connection.AdvertiseService<AddModule>("add_module", AddModuleCallback);
+            Connection.AdvertiseService<AddModuleFromTopic>("add_module_from_topic", AddModuleFromTopicCallback);
             Connection.AdvertiseService<UpdateModule>("update_module", UpdateModuleCallback);
+            Connection.AdvertiseService<GetModules>("get_modules", GetModulesCallback);
         }
 
-        static void AddModuleCallback(AddModuleFromTopic srv)
+        static void AddModuleCallback([NotNull] AddModule srv)
         {
-            var (id, success, message ) = TryCreateModuleFromTopic(srv.Request.Topic);
+            var (id, success, message) = TryCreateModule(srv.Request.ModuleType);
             srv.Response.Success = success;
             srv.Response.Message = message;
             srv.Response.Id = id ?? "";
         }
 
-        static (string id, bool success, string message) TryCreateModuleFromTopic(string topic)
+        static Resource.ModuleType ModuleTypeFromString(string moduleType)
         {
-            (string id, bool success, string message) result = default;
+            switch (moduleType)
+            {
+                case nameof(Resource.ModuleType.Grid):
+                    return Resource.ModuleType.Grid;
+                case nameof(Resource.ModuleType.TF):
+                    return Resource.ModuleType.TF;
+                case nameof(Resource.ModuleType.PointCloud):
+                    return Resource.ModuleType.PointCloud;
+                case nameof(Resource.ModuleType.Image):
+                    return Resource.ModuleType.Image;
+                case nameof(Resource.ModuleType.Marker):
+                    return Resource.ModuleType.Marker;
+                case nameof(Resource.ModuleType.InteractiveMarker):
+                    return Resource.ModuleType.InteractiveMarker;
+                case nameof(Resource.ModuleType.JointState):
+                    return Resource.ModuleType.JointState;
+                case nameof(Resource.ModuleType.DepthCloud):
+                    return Resource.ModuleType.DepthCloud;
+                case nameof(Resource.ModuleType.LaserScan):
+                    return Resource.ModuleType.LaserScan;
+                case nameof(Resource.ModuleType.AugmentedReality):
+                    return Resource.ModuleType.AugmentedReality;
+                case nameof(Resource.ModuleType.Magnitude):
+                    return Resource.ModuleType.Magnitude;
+                case nameof(Resource.ModuleType.OccupancyGrid):
+                    return Resource.ModuleType.OccupancyGrid;
+                case nameof(Resource.ModuleType.Joystick):
+                    return Resource.ModuleType.Joystick;
+                case nameof(Resource.ModuleType.Path):
+                    return Resource.ModuleType.Path;
+                case nameof(Resource.ModuleType.GridMap):
+                    return Resource.ModuleType.GridMap;
+                case nameof(Resource.ModuleType.Robot):
+                    return Resource.ModuleType.Robot;
+                default:
+                    return Resource.ModuleType.Invalid;
+            }            
+        } 
+        
+        static (string id, bool success, string message) TryCreateModule([NotNull] string moduleType)
+        {
+            (string id, bool success, string message) result = ("", false, "");
+
+            if (string.IsNullOrWhiteSpace(moduleType))
+            {
+                result.message = "Invalid module type";
+                return result;
+            }
+
+            Resource.ModuleType resource = ModuleTypeFromString(moduleType);
+
+            if (resource == Resource.ModuleType.Invalid)
+            {
+                result.message = "Invalid module type";
+                result.success = false;
+                return result;
+            }
+
+            SemaphoreSlim signal = new SemaphoreSlim(0, 1);
+
+            GameThread.Post(() =>
+            {
+                try
+                {
+                    result.id = ModuleListPanel.Instance.CreateModule(resource).Configuration.Id;
+                    result.success = true;
+                }
+                catch (Exception e)
+                {
+                    result.message = $"An exception was raised: {e.Message}";
+                }
+                finally
+                {
+                    signal.Release();
+                }
+            });
+
+            return signal.Wait(5000) ? result : ("", false, "Request timed out!");
+        }        
+        
+        static void AddModuleFromTopicCallback([NotNull] AddModuleFromTopic srv)
+        {
+            var (id, success, message) = TryCreateModuleFromTopic(srv.Request.Topic);
+            srv.Response.Success = success;
+            srv.Response.Message = message;
+            srv.Response.Id = id ?? "";
+        }
+
+        static (string id, bool success, string message) TryCreateModuleFromTopic([NotNull] string topic)
+        {
+            (string id, bool success, string message) result = ("", false, "");
 
             if (string.IsNullOrWhiteSpace(topic))
             {
@@ -64,19 +159,18 @@ namespace Iviz.Controllers
             }
 
 
-            if (!Resource.ResourceByRosMessageType.TryGetValue(type, out Resource.Module resource))
+            if (!Resource.ResourceByRosMessageType.TryGetValue(type, out Resource.ModuleType resource))
             {
                 result.message = $"Type '{type}' is unsupported";
             }
 
-            CancellationTokenSource ts = new CancellationTokenSource();
-            
-            string id = null;
+            SemaphoreSlim signal = new SemaphoreSlim(0, 1);
+
             GameThread.Post(() =>
             {
                 try
                 {
-                    id = ModuleListPanel.Instance.CreateModule(resource, topic, type).Configuration.Id;
+                    result.id = ModuleListPanel.Instance.CreateModule(resource, topic, type).Configuration.Id;
                     result.success = true;
                 }
                 catch (Exception e)
@@ -85,50 +179,44 @@ namespace Iviz.Controllers
                 }
                 finally
                 {
-                    ts.Cancel();
+                    signal.Release();
                 }
             });
 
-            try
-            {
-                Task.Delay(5000, ts.Token);
-            }
-            catch (OperationCanceledException) { }
-
-            return ts.IsCancellationRequested ? result : ("", false, "Request timed out!");
+            return signal.Wait(5000) ? result : ("", false, "Request timed out!");
         }
 
-        static void UpdateModuleCallback(UpdateModule srv)
+        static void UpdateModuleCallback([NotNull] UpdateModule srv)
         {
             var (success, message) = TryUpdateModule(srv.Request.Id, srv.Request.Fields, srv.Request.Config);
             srv.Response.Success = success;
             srv.Response.Message = message;
         }
 
-        static (bool success, string message) TryUpdateModule(string id, string[] fields, string config)
+        static (bool success, string message) TryUpdateModule([NotNull] string id, string[] fields, string config)
         {
-            (bool success, string message) result = default;
+            (bool success, string message) result = (false, "");
 
             if (string.IsNullOrWhiteSpace(id))
             {
-                result.message = "Empty topic name";
+                result.message = "Empty configuration id!";
                 return result;
             }
 
             if (string.IsNullOrWhiteSpace(config))
             {
-                result.message = "Empty configuration";
+                result.message = "Empty configuration text!";
                 return result;
             }
 
-            CancellationTokenSource ts = new CancellationTokenSource();
+            SemaphoreSlim signal = new SemaphoreSlim(0, 1);
 
             GameThread.Post(() =>
             {
                 try
                 {
                     ModuleData module =
-                        ModuleListPanel.Instance.ModuleDatas.FirstOrDefault(mod => mod.Configuration.Id == id);
+                        ModuleListPanel.Instance.ModuleDatas.FirstOrDefault(data => data.Configuration.Id == id);
 
                     if (module == null)
                     {
@@ -138,6 +226,7 @@ namespace Iviz.Controllers
                     }
 
                     module.UpdateConfiguration(config, fields);
+                    result.success = true;
                 }
                 catch (JsonException e)
                 {
@@ -151,17 +240,57 @@ namespace Iviz.Controllers
                 }
                 finally
                 {
-                    ts.Cancel();
+                    signal.Release();
                 }
             });
 
-            try
-            {
-                Task.Delay(5000, ts.Token);
-            }
-            catch (OperationCanceledException) { }
+            return signal.Wait(5000) ? result : (false, "Request timed out!");
+        }
 
-            return ts.IsCancellationRequested ? result : (false, "Request timed out!");
+        static void GetModulesCallback([NotNull] GetModules srv)
+        {
+            string[] result = GetModules();
+            srv.Response.Configs = result;
+        }
+
+        [NotNull]
+        static string[] GetModules()
+        {
+            SemaphoreSlim signal = new SemaphoreSlim(0, 1);
+
+            string[] result = default;
+            GameThread.Post(() =>
+            {
+                try
+                {
+                    IConfiguration[] configurations =
+                        ModuleListPanel.Instance.ModuleDatas.Select(data => data.Configuration).ToArray();
+                    result = configurations.Select(JsonConvert.SerializeObject).ToArray();
+                }
+                catch (JsonException e)
+                {
+                    Logger.External(LogLevel.Error,
+                        $"ControllerService: Unexpected JSON exception in GetModules: {e.Message}");
+                    Debug.LogWarning(e);
+                }
+                catch (Exception e)
+                {
+                    Logger.External(LogLevel.Error,
+                        $"ControllerService: Unexpected exception in GetModules: {e.Message}");
+                    Debug.LogWarning(e);
+                }
+                finally
+                {
+                    signal.Release();
+                }
+            });
+
+            if (!signal.Wait(5000))
+            {
+                Logger.External(LogLevel.Error, "ControllerService: Unexpected timeout in GetModules");
+            }
+
+            return result;
         }
     }
 }

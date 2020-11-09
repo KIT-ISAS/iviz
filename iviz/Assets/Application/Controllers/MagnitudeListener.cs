@@ -18,7 +18,7 @@ namespace Iviz.Controllers
     public sealed class MagnitudeConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public Resource.Module Module => Resource.Module.Magnitude;
+        [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.Magnitude;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public string Type { get; set; } = "";
@@ -168,16 +168,7 @@ namespace Iviz.Controllers
         public float VectorScale
         {
             get => config.VectorScale;
-            set
-            {
-                config.VectorScale = value;
-                /*
-                if (arrow != null)
-                {
-                    arrow.Scale = value;
-                }
-                */
-            }
+            set => config.VectorScale = value;
         }
 
         public MagnitudeListener([NotNull] IModuleData moduleData)

@@ -11,6 +11,9 @@ namespace Iviz.Controllers
 {
     public sealed class InteractiveMarkerControlObject : MonoBehaviour
     {
+        const string WarnStr = "<b>Warning:</b> ";
+        const string ErrorStr = "<color=red>Error:</color> ";
+
         readonly StringBuilder description = new StringBuilder();
         readonly Dictionary<string, MarkerObject> markers = new Dictionary<string, MarkerObject>();
 
@@ -33,7 +36,7 @@ namespace Iviz.Controllers
             imarkerObject = newIMarkerObject;
             id = newId;
         }
-        
+
         public void Set([NotNull] InteractiveMarkerControl msg)
         {
             name = $"[ControlObject '{msg.Name}']";
@@ -68,7 +71,7 @@ namespace Iviz.Controllers
 
             control = ResourcePool.GetOrCreate<InteractiveControl>(Resource.Displays.InteractiveControl, transform);
             control.TargetTransform = transform.parent;
-            
+
             control.Moved += (in Pose _) =>
             {
                 if (imarkerObject != null)
@@ -76,7 +79,7 @@ namespace Iviz.Controllers
                     imarkerObject.OnMoved(id);
                 }
             };
-            
+
             // disable external updates while dragging
             control.PointerDown += () =>
             {
@@ -176,9 +179,13 @@ namespace Iviz.Controllers
 
         void UpdateMarkers([NotNull] Marker[] msg)
         {
+            int numUnnamed = 0;
+
             foreach (Marker marker in msg)
             {
-                string markerId = MarkerListener.IdFromMessage(marker);
+                string markerId = marker.Ns.Length == 0 && marker.Id == 0
+                    ? $"[Unnamed-{(numUnnamed++)}]"
+                    : MarkerListener.IdFromMessage(marker);
                 switch (marker.Action)
                 {
                     case Marker.ADD:
@@ -209,6 +216,11 @@ namespace Iviz.Controllers
                         }
 
                         break;
+                }
+
+                if (numUnnamed > 1)
+                {
+                    description.Append(WarnStr).Append(numUnnamed).Append(" imarkers have empty ids").AppendLine();
                 }
             }
         }

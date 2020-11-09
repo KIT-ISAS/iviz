@@ -19,7 +19,7 @@ namespace Iviz.App
 
         public override DataPanelContents Panel => panel;
         protected override ListenerController Listener => listener;
-        public override Resource.Module Module => Resource.Module.Marker;
+        public override Resource.ModuleType ModuleType => Resource.ModuleType.Marker;
 
         public override IConfiguration Configuration => listener.Config;
 
@@ -28,7 +28,7 @@ namespace Iviz.App
                 constructor.GetConfiguration<MarkerConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.GetConfiguration<MarkerConfiguration>()?.Type ?? constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<MarkerPanelContents>(Resource.Module.Marker);
+            panel = DataPanelManager.GetPanelByResourceType<MarkerPanelContents>(Resource.ModuleType.Marker);
             listener = new MarkerListener(this);
             if (constructor.Configuration == null)
             {

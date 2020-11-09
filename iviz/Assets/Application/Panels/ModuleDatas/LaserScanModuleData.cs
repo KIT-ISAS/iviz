@@ -18,7 +18,7 @@ namespace Iviz.App
         protected override ListenerController Listener => listener;
 
         public override DataPanelContents Panel => panel;
-        public override Resource.Module Module => Resource.Module.LaserScan;
+        public override Resource.ModuleType ModuleType => Resource.ModuleType.LaserScan;
         public override IConfiguration Configuration => listener.Config;
 
 
@@ -27,7 +27,7 @@ namespace Iviz.App
                 constructor.GetConfiguration<LaserScanConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<LaserScanPanelContents>(Resource.Module.LaserScan);
+            panel = DataPanelManager.GetPanelByResourceType<LaserScanPanelContents>(Resource.ModuleType.LaserScan);
             listener = new LaserScanListener(this);
             if (constructor.Configuration == null)
             {

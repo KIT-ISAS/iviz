@@ -21,7 +21,7 @@ namespace Iviz.App
         protected override ListenerController Listener => listener;
 
         public override DataPanelContents Panel => panel;
-        public override Resource.Module Module => Resource.Module.OccupancyGrid;
+        public override Resource.ModuleType ModuleType => Resource.ModuleType.OccupancyGrid;
         public override IConfiguration Configuration => listener.Config;
 
 
@@ -29,7 +29,7 @@ namespace Iviz.App
         base(constructor.ModuleList,
             constructor.GetConfiguration<OccupancyGridConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<OccupancyGridPanelContents>(Resource.Module.OccupancyGrid);
+            panel = DataPanelManager.GetPanelByResourceType<OccupancyGridPanelContents>(Resource.ModuleType.OccupancyGrid);
             listener = new OccupancyGridListener(this);
             if (constructor.Configuration == null)
             {

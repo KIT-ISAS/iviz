@@ -33,7 +33,7 @@ namespace Iviz.Controllers
         /* NonSerializable */
         public bool PinRootMarker { get; set; }
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public Resource.Module Module => Resource.Module.AugmentedReality;
+        [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.AugmentedReality;
         [DataMember] public bool Visible { get; set; } = true;
     }
 

@@ -45,7 +45,7 @@ namespace Iviz.Resources
         /// Module type.
         /// </summary>
         [JsonConverter(typeof(StringEnumConverter))]
-        public enum Module
+        public enum ModuleType
         {
             Invalid = 0,
             Grid,
@@ -82,32 +82,32 @@ namespace Iviz.Resources
         /// <summary>
         /// Dictionary that describes which module handles which ROS message type.
         /// </summary>
-        public static ReadOnlyDictionary<string, Module> ResourceByRosMessageType { get; }
-            = new ReadOnlyDictionary<string, Module>(new Dictionary<string, Module>
+        public static ReadOnlyDictionary<string, ModuleType> ResourceByRosMessageType { get; }
+            = new ReadOnlyDictionary<string, ModuleType>(new Dictionary<string, ModuleType>
                 {
-                    {PointCloud2.RosMessageType, Module.PointCloud},
-                    {Image.RosMessageType, Module.Image},
-                    {CompressedImage.RosMessageType, Module.Image},
-                    {Marker.RosMessageType, Module.Marker},
-                    {MarkerArray.RosMessageType, Module.Marker},
-                    {InteractiveMarkerUpdate.RosMessageType, Module.InteractiveMarker},
-                    {JointState.RosMessageType, Module.JointState},
-                    {LaserScan.RosMessageType, Module.LaserScan},
-                    {PoseStamped.RosMessageType, Module.Magnitude},
-                    {Pose.RosMessageType, Module.Magnitude},
-                    {PointStamped.RosMessageType, Module.Magnitude},
-                    {Point.RosMessageType, Module.Magnitude},
-                    {WrenchStamped.RosMessageType, Module.Magnitude},
-                    {Wrench.RosMessageType, Module.Magnitude},
-                    {Odometry.RosMessageType, Module.Magnitude},
-                    {TwistStamped.RosMessageType, Module.Magnitude},
-                    {Twist.RosMessageType, Module.Magnitude},
-                    {OccupancyGrid.RosMessageType, Module.OccupancyGrid},
-                    {Path.RosMessageType, Module.Path},
-                    {PoseArray.RosMessageType, Module.Path},
-                    {PolygonStamped.RosMessageType, Module.Path},
-                    {Polygon.RosMessageType, Module.Path},
-                    {GridMap.RosMessageType, Module.GridMap}
+                    {PointCloud2.RosMessageType, ModuleType.PointCloud},
+                    {Image.RosMessageType, ModuleType.Image},
+                    {CompressedImage.RosMessageType, ModuleType.Image},
+                    {Marker.RosMessageType, ModuleType.Marker},
+                    {MarkerArray.RosMessageType, ModuleType.Marker},
+                    {InteractiveMarkerUpdate.RosMessageType, ModuleType.InteractiveMarker},
+                    {JointState.RosMessageType, ModuleType.JointState},
+                    {LaserScan.RosMessageType, ModuleType.LaserScan},
+                    {PoseStamped.RosMessageType, ModuleType.Magnitude},
+                    {Pose.RosMessageType, ModuleType.Magnitude},
+                    {PointStamped.RosMessageType, ModuleType.Magnitude},
+                    {Point.RosMessageType, ModuleType.Magnitude},
+                    {WrenchStamped.RosMessageType, ModuleType.Magnitude},
+                    {Wrench.RosMessageType, ModuleType.Magnitude},
+                    {Odometry.RosMessageType, ModuleType.Magnitude},
+                    {TwistStamped.RosMessageType, ModuleType.Magnitude},
+                    {Twist.RosMessageType, ModuleType.Magnitude},
+                    {OccupancyGrid.RosMessageType, ModuleType.OccupancyGrid},
+                    {Path.RosMessageType, ModuleType.Path},
+                    {PoseArray.RosMessageType, ModuleType.Path},
+                    {PolygonStamped.RosMessageType, ModuleType.Path},
+                    {Polygon.RosMessageType, ModuleType.Path},
+                    {GridMap.RosMessageType, ModuleType.GridMap}
                 }
             );
 

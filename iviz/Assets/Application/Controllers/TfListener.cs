@@ -28,7 +28,7 @@ namespace Iviz.Controllers
         [DataMember] public bool ParentConnectorVisible { get; set; }
         [DataMember] public bool KeepOnlyUsedFrames { get; set; } = true;
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public Resource.Module Module => Resource.Module.TF;
+        [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.TF;
         [DataMember] public bool Visible { get; set; } = true;
     }
 
