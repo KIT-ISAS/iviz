@@ -7,7 +7,6 @@ namespace Iviz.Msgs.Actionlib
     [DataContract (Name = "actionlib/TestRequestFeedback")]
     public sealed class TestRequestFeedback : IDeserializable<TestRequestFeedback>, IFeedback<TestRequestActionFeedback>
     {
-    
         /// <summary> Constructor for empty message. </summary>
         public TestRequestFeedback()
         {

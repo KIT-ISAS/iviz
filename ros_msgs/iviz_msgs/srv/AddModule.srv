@@ -1,0 +1,7 @@
+# Adds a module by type
+
+string module_type	# Module type
+---
+bool success		# Whether the retrieval succeeded
+string message		# An error message if success is false
+string id		# An id identifying this module

@@ -7,7 +7,6 @@ namespace Iviz.Msgs.Actionlib
     [DataContract (Name = "actionlib/TwoIntsFeedback")]
     public sealed class TwoIntsFeedback : IDeserializable<TwoIntsFeedback>, IFeedback<TwoIntsActionFeedback>
     {
-    
         /// <summary> Constructor for empty message. </summary>
         public TwoIntsFeedback()
         {

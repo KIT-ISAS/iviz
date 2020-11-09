@@ -8,8 +8,7 @@ namespace Iviz.Msgs.ActionlibTutorials
     public sealed class AveragingGoal : IDeserializable<AveragingGoal>, IGoal<AveragingActionGoal>
     {
         //goal definition
-        [DataMember (Name = "edges")] public int Edges { get; set; }
-        [DataMember (Name = "radius")] public float Radius { get; set; }
+        [DataMember (Name = "samples")] public int Samples { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public AveragingGoal()
@@ -17,17 +16,15 @@ namespace Iviz.Msgs.ActionlibTutorials
         }
         
         /// <summary> Explicit constructor. </summary>
-        public AveragingGoal(int Edges, float Radius)
+        public AveragingGoal(int Samples)
         {
-            this.Edges = Edges;
-            this.Radius = Radius;
+            this.Samples = Samples;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal AveragingGoal(ref Buffer b)
         {
-            Edges = b.Deserialize<int>();
-            Radius = b.Deserialize<float>();
+            Samples = b.Deserialize<int>();
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
@@ -42,8 +39,7 @@ namespace Iviz.Msgs.ActionlibTutorials
     
         public void RosSerialize(ref Buffer b)
         {
-            b.Serialize(Edges);
-            b.Serialize(Radius);
+            b.Serialize(Samples);
         }
         
         public void RosValidate()
@@ -51,7 +47,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         }
     
         /// <summary> Constant size of this message. </summary>
-        public const int RosFixedMessageLength = 8;
+        public const int RosFixedMessageLength = 4;
         
         public int RosMessageLength => RosFixedMessageLength;
     
@@ -61,11 +57,11 @@ namespace Iviz.Msgs.ActionlibTutorials
         [Preserve] public const string RosMessageType = "actionlib_tutorials/AveragingGoal";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "3b9202ab7292cebe5a95ab2bf6b9c091";
+        [Preserve] public const string RosMd5Sum = "32c9b10ef9b253faa93b93f564762c8f";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE+PKzCsxNlJITUlPLeZKy8lPBPGKElMyS4u5AJplSSgcAAAA";
+                "H4sIAAAAAAAAE+PKzCsxNlIoTswtyEkt5gIAdDD8hw8AAAA=";
                 
     }
 }

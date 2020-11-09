@@ -1,0 +1,4 @@
+# Gets a list of modules
+
+---
+string[] configs	# List of module configurations in JSON encoding

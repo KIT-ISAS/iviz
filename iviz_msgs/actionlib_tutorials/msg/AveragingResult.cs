@@ -8,8 +8,8 @@ namespace Iviz.Msgs.ActionlibTutorials
     public sealed class AveragingResult : IDeserializable<AveragingResult>, IResult<AveragingActionResult>
     {
         //result definition
-        [DataMember (Name = "interior_angle")] public float InteriorAngle { get; set; }
-        [DataMember (Name = "apothem")] public float Apothem { get; set; }
+        [DataMember (Name = "mean")] public float Mean { get; set; }
+        [DataMember (Name = "std_dev")] public float StdDev { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public AveragingResult()
@@ -17,17 +17,17 @@ namespace Iviz.Msgs.ActionlibTutorials
         }
         
         /// <summary> Explicit constructor. </summary>
-        public AveragingResult(float InteriorAngle, float Apothem)
+        public AveragingResult(float Mean, float StdDev)
         {
-            this.InteriorAngle = InteriorAngle;
-            this.Apothem = Apothem;
+            this.Mean = Mean;
+            this.StdDev = StdDev;
         }
         
         /// <summary> Constructor with buffer. </summary>
         internal AveragingResult(ref Buffer b)
         {
-            InteriorAngle = b.Deserialize<float>();
-            Apothem = b.Deserialize<float>();
+            Mean = b.Deserialize<float>();
+            StdDev = b.Deserialize<float>();
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
@@ -42,8 +42,8 @@ namespace Iviz.Msgs.ActionlibTutorials
     
         public void RosSerialize(ref Buffer b)
         {
-            b.Serialize(InteriorAngle);
-            b.Serialize(Apothem);
+            b.Serialize(Mean);
+            b.Serialize(StdDev);
         }
         
         public void RosValidate()
@@ -61,11 +61,11 @@ namespace Iviz.Msgs.ActionlibTutorials
         [Preserve] public const string RosMessageType = "actionlib_tutorials/AveragingResult";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "b06c6e2225f820dbc644270387cd1a7c";
+        [Preserve] public const string RosMd5Sum = "d5c7decf6df75ffb4367a05c1bcc7612";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE+NKy8lPLDE2UsjMK0ktyswvik/MS89J5YIJJxbkl2Sk5nIBAEOeaCAoAAAA";
+                "H4sIAAAAAAAAE+NKy8lPLDE2UshNTczjgnGKS1LiU1LLuABqLEBHHgAAAA==";
                 
     }
 }

@@ -137,12 +137,13 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE71UwWrDMAy9+ysM+4CxdIwx2KmHsUN3WdmljOImSqKS2EFy26xfP7mx0xZ2XJOLnmQT" +
-                "PT3JYk9oK21NC4oHXGIDl74jBOuNR2fXNVqvFsD16lu3YoDVwnggNE2IRMjqwxUgASuGlXr9508tPt9e" +
-                "NO7xuG654vtAKLE9Mf+C3DualUJhD+QxFxYXMeuoDSyHUBZCHvq5c1SwmrtGrmUSywNitZSSbNWEekoT" +
-                "/rQTEWbZWO27LaC/fZGJvyobZ0L+fkQ/IzpOxSP7m8fNs8funHrwrCnaKtpNtOb2RNJUpGkwCWwSyCcY" +
-                "/DiCV8MfJdKm3YSHO/oFluWOz+fQIjPuQS2h9zuCdCG6E0gYE0XynfF10u6AxdmpAavaj/p23dBleY+F" +
-                "8RO0OiyzK4UHIp2hIK/0gLB/1J6M5VI2y3B8XpBTTEFgkJ7h6uFJcus7Te4gS2rrSCv1CyRIxw7oBQAA";
+                "H4sIAAAAAAAAE71UPU/DMBDdLfU/WOIHIFKEEBITA2IoCxVLhaprck4OJXZku23or+fc5Jp2YKPJ4nfP" +
+                "Vu7dZ4iebKktNKhCjw3VeG47T2gjRHJ2XZGNaoGhWn3phg8MagERPUGdmAEG9e4KZMLyEZR6/udPLT5e" +
+                "nzTt6LBuQhlukyBRm5TP1Cfm0fm5YQ079JFyDBekdb5hncJliYvYvTjnC2ZfXM0PMybzhJhZcly2rFNQ" +
+                "Bo5/23Iq5tkp5jdbYDe7fqwShDK1gySAnQr8GeFhMinZX1Ku7n+o0rESj9rPBlAK2AiACcRIg0hfgICN" +
+                "gHyCQRia8XIYhjxpaDZpkkeiIGO24ewFNhQC7ZhZYhe3HuXJYE6Rx96TRNBCrCSBeypGo0Iqq3hKctv2" +
+                "teb5LCDC9XWmDXeeZtULacFjWpHAN929jh5sMLxs+utxa07RCkmBDOTq7oF96xvt3Z531rfzWqlf42fJ" +
+                "1f0FAAA=";
                 
     }
 }
