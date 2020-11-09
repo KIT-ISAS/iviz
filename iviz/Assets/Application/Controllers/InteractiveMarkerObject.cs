@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Iviz.Core;
+using Iviz.Displays;
 using Iviz.Msgs.VisualizationMsgs;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -17,6 +18,7 @@ namespace Iviz.Controllers
         readonly StringBuilder description = new StringBuilder();
         
         InteractiveMarkerListener listener;
+        TextMarkerResource text;
         GameObject controlNode;
         string id;
 
@@ -36,6 +38,12 @@ namespace Iviz.Controllers
                 }
             }
         }
+
+        public bool DescriptionVisible
+        {
+            get => text.Visible;
+            set => text.Visible = value;
+        } 
 
         Pose LocalPose
         {
@@ -57,6 +65,13 @@ namespace Iviz.Controllers
         {
             controlNode = new GameObject("[ControlNode]");
             controlNode.transform.parent = transform;
+
+            text = ResourcePool.GetOrCreateDisplay<TextMarkerResource>(controlNode.transform);
+            text.BillboardEnabled = true;
+            text.BillboardOffset = Vector3.up * 0.1f;
+            text.ElementSize = 0.1f;
+            text.Visible = false;
+            text.VisibleOnTop = true;
         }
 
         internal void Initialize(InteractiveMarkerListener newListener, string newId)
@@ -77,6 +92,8 @@ namespace Iviz.Controllers
                 : "[]";
             description.Append("Description: ").Append(msgDescription).AppendLine();
 
+            text.Text = msg.Description;
+
             if (Mathf.Approximately(msg.Scale, 0))
             {
                 transform.localScale = Vector3.one;
@@ -94,9 +111,9 @@ namespace Iviz.Controllers
             AttachTo(msg.Header.FrameId);
 
             controlsToDelete.Clear();
-            foreach (string id in controls.Keys)
+            foreach (string controlId in controls.Keys)
             {
-                controlsToDelete.Add(id);
+                controlsToDelete.Add(controlId);
             }
 
             foreach (InteractiveMarkerControl controlMsg in msg.Controls)
@@ -111,16 +128,6 @@ namespace Iviz.Controllers
                 }
 
                 InteractiveMarkerControlObject newControl = CreateControlObject();
-                /*
-                newControl.MouseEvent += (in Pose pose, in Vector3 point, MouseEventType type) =>
-                {
-                    MouseEvent?.Invoke(id, pose, point, type);
-                };
-                newControl.Moved += (in Pose pose) =>
-                {
-                    Moved?.Invoke(id, pose);
-                };
-                */
                 newControl.Initialize(this, controlId);
                 newControl.transform.SetParentLocal(controlNode.transform);
                 controls[controlId] = newControl;
@@ -139,7 +146,7 @@ namespace Iviz.Controllers
 
         public void Set(in Iviz.Msgs.GeometryMsgs.Pose rosPose)
         {
-            Debug.Log("Received: " + rosPose.Ros2Unity() + "  ---   Actual:" + controlNode.transform.AsLocalPose());
+            //Debug.Log("Received: " + rosPose.Ros2Unity() + "  ---   Actual:" + controlNode.transform.AsLocalPose());
             LocalPose = rosPose.Ros2Unity();
         }
 
@@ -157,10 +164,15 @@ namespace Iviz.Controllers
         {
             base.Stop();
             foreach (var controlObject in controls.Values)
+            {
                 DeleteControlObject(controlObject);
+            }
+
             controls.Clear();
             controlsToDelete.Clear();
 
+            ResourcePool.DisposeDisplay(text);
+            
             Destroy(controlNode.gameObject);
         }
 

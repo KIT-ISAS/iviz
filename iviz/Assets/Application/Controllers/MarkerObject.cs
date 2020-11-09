@@ -535,7 +535,7 @@ namespace Iviz.Controllers
             textResource.Text = msg.Text;
             textResource.Color = msg.Color.Sanitize().ToUnityColor();
             textResource.BillboardEnabled = msg.Type() != MarkerType.Text;
-            transform.localScale = (float) msg.Scale.Z * Vector3.one;
+            textResource.ElementSize = (float) msg.Scale.Z;
 
             description.Append("Size: ").Append(msg.Scale.Z).AppendLine();
             if (msg.Scale.Z == 0 || msg.Scale.Z.IsInvalid())

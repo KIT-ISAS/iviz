@@ -48,13 +48,13 @@ namespace Iviz.App
         {
             panel.Listener.Listener = listener.Listener;
             panel.FullListener.Listener = listener.FullListener;
-            panel.DisableExpiration.Value = listener.EnableAutoExpiration;
+            panel.DescriptionsVisible.Value = listener.DescriptionsVisible;
             panel.Sender.Set(listener.Publisher);
             panel.Marker.MarkerListener = listener;
 
-            panel.DisableExpiration.ValueChanged += f =>
+            panel.DescriptionsVisible.ValueChanged += f =>
             {
-                listener.EnableAutoExpiration = f;
+                listener.DescriptionsVisible = f;
             };
             panel.CloseButton.Clicked += () =>
             {
@@ -80,8 +80,8 @@ namespace Iviz.App
                         // TODO!
                         //listener.Visible = config.Visible;
                         break;
-                    case nameof(InteractiveMarkerConfiguration.EnableAutoExpiration):
-                        listener.EnableAutoExpiration = config.EnableAutoExpiration;
+                    case nameof(InteractiveMarkerConfiguration.DescriptionsVisible):
+                        listener.DescriptionsVisible = config.DescriptionsVisible;
                         break;
                     default:
                         Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");

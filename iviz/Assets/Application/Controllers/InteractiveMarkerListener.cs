@@ -19,7 +19,7 @@ namespace Iviz.Controllers
     public class InteractiveMarkerConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public string Topic { get; set; } = "";
-        [DataMember] public bool EnableAutoExpiration { get; set; }
+        [DataMember] public bool DescriptionsVisible { get; set; }
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public Resource.Module Module => Resource.Module.InteractiveMarker;
         [DataMember] public bool Visible { get; set; } = true;
@@ -48,19 +48,31 @@ namespace Iviz.Controllers
         public override IModuleData ModuleData { get; }
         public string Topic => config.Topic;
         
-        public bool EnableAutoExpiration
-        {
-            get => config.EnableAutoExpiration;
-            set => config.EnableAutoExpiration = value;
-        }
-
         public InteractiveMarkerConfiguration Config
         {
             get => config;
             set
             {
                 config.Topic = value.Topic;
-                EnableAutoExpiration = value.EnableAutoExpiration;
+                DescriptionsVisible = value.DescriptionsVisible;
+            }
+        }
+
+        public bool DescriptionsVisible
+        {
+            get => config.DescriptionsVisible;
+            set
+            {
+                if (config.DescriptionsVisible == value)
+                {
+                    return;
+                }
+                
+                config.DescriptionsVisible = value;
+                foreach (var imarkerObject in imarkers.Values)
+                {
+                    imarkerObject.DescriptionVisible = value;
+                }                
             }
         }
 
@@ -106,8 +118,8 @@ namespace Iviz.Controllers
             int lastSlash = config.Topic.LastIndexOf('/');
             string root = lastSlash == -1 ? config.Topic : config.Topic.Substring(0, lastSlash);
 
-            string feedbackTopic = root + "/feedback";
-            string fullTopic = root + "/update_full";
+            string feedbackTopic = $"{root}/feedback";
+            string fullTopic = $"{root}/update_full";
 
             Publisher = new Sender<InteractiveMarkerFeedback>(feedbackTopic);
             FullListener = new Listener<InteractiveMarkerInit>(fullTopic, HandlerFull);
@@ -118,7 +130,10 @@ namespace Iviz.Controllers
             base.StopController();
             GameThread.EverySecond -= CheckForExpiredMarkers;
 
-            foreach (var markerObject in imarkers.Values) DeleteMarkerObject(markerObject);
+            foreach (var markerObject in imarkers.Values)
+            {
+                DeleteMarkerObject(markerObject);
+            }
 
             imarkers.Clear();
             Publisher.Stop();
@@ -244,7 +259,7 @@ namespace Iviz.Controllers
 
         internal void OnInteractiveControlObjectMoved([NotNull] string imarkerId, [NotNull] string controlId, in Pose controlPose)
         {
-            Debug.Log("--> " + controlPose);
+            //Debug.Log("--> " + controlPose);
             InteractiveMarkerFeedback msg = new InteractiveMarkerFeedback
             (
                 RosUtils.CreateHeader(feedSeq++),

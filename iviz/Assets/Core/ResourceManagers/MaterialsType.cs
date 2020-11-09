@@ -4,6 +4,9 @@ namespace Iviz.Resources
 {
     public class MaterialsType
     {
+        public Info<Material> FontMaterial { get; }
+        public Info<Material> FontMaterialZWrite { get; }
+        
         public Info<Material> Lit { get; }
         public Info<Material> SimpleLit { get; }
         public Info<Material> TexturedLit { get; }
@@ -36,6 +39,9 @@ namespace Iviz.Resources
 
         public MaterialsType()
         {
+            FontMaterial = new Info<Material>("Materials/Font Material Normal");
+            FontMaterialZWrite = new Info<Material>("Materials/Font Material ZWrite");
+
             SimpleLit = new Info<Material>("Materials/SimpleWhite");
             Lit = new Info<Material>("Materials/White");
             TexturedLit = new Info<Material>("Materials/Textured Lit");

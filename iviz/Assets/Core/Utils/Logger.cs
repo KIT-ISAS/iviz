@@ -15,7 +15,7 @@ namespace Iviz.Core
         [NotNull] [DataMember] public string File { get; }
         [DataMember] public int Line { get; }
 
-        public LogMessage(LogLevel level, string message, string file, int line)
+        public LogMessage(LogLevel level, [NotNull] string message, [NotNull] string file, int line)
         {
             Level = level;
             Message = message;
@@ -26,6 +26,9 @@ namespace Iviz.Core
 
     public static class Logger
     {
+        const string NullMessage = "[null message]";
+        const string NullException = "[null exception]";
+
         public delegate void ExternalLogDelegate(in LogMessage msg);
 
         public static event Action<string> LogInternal;
@@ -53,7 +56,7 @@ namespace Iviz.Core
 
         public static void Internal([CanBeNull] string msg)
         {
-            var msgTxt = $"<b>[{DateTime.Now:HH:mm:ss}]</b> {msg ?? "[null message]"}";
+            var msgTxt = $"<b>[{DateTime.Now:HH:mm:ss}]</b> {msg ?? NullMessage}";
             LogInternal?.Invoke(msgTxt);
         }
 
@@ -63,11 +66,11 @@ namespace Iviz.Core
             str.Append("<b>[")
                 .AppendFormat("{0:HH:mm:ss}", DateTime.Now)
                 .Append("]</b> ")
-                .Append(msg ?? "[null message]");
+                .Append(msg ?? NullMessage);
 
             if (e == null)
             {
-                str.AppendLine().Append("<color=red>→ (null exception)</color>");
+                str.AppendLine().Append($"<color=red>→ ").Append(NullException).Append("</color>");
             }
             else
             {
@@ -91,21 +94,21 @@ namespace Iviz.Core
             UnityEngine.Debug.LogWarning(str);
         }
 
-        public static void External(LogLevel level, string msg, [CallerFilePath] string file = "",
+        public static void External(LogLevel level, [CanBeNull] string msg, [CallerFilePath] string file = "",
             [CallerLineNumber] int line = 0)
         {
-            LogExternal?.Invoke(new LogMessage(level, msg, file, line));
+            LogExternal?.Invoke(new LogMessage(level, msg ?? NullMessage, file, line));
         }
 
         public static void External([CanBeNull] string msg, [CanBeNull] Exception e, [CallerFilePath] string file = "",
             [CallerLineNumber] int line = 0)
         {
             var str = new StringBuilder();
-            str.Append(msg ?? "[null msg]");
+            str.Append(msg ?? NullMessage);
 
             if (e == null)
             {
-                str.AppendLine().Append("→ (null exception)");
+                str.AppendLine().Append("→ ").Append(NullException);
             }
             else
             {
@@ -121,8 +124,8 @@ namespace Iviz.Core
                 }
             }
 
-            LogExternal?.Invoke(new LogMessage(LogLevel.Error, msg, file, line));
-            UnityEngine.Debug.Log(str);
+            LogExternal?.Invoke(new LogMessage(LogLevel.Error, str.ToString(), file, line));
+            UnityEngine.Debug.Log(str.ToString());
         }
     }
 
