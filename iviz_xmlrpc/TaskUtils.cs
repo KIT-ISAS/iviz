@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Iviz.XmlRpc
@@ -15,12 +16,15 @@ namespace Iviz.XmlRpc
         /// </summary>
         /// <param name="task">The task to be awaited</param>
         /// <param name="timeoutInMs">The maximal amount to wait</param>
+        /// <param name="token">An optional token to cancel the waiting</param>
         /// <returns>An awaitable task, with true if the task in the argument finished before the given time.</returns>
-        public static async Task<bool> WaitFor(this Task task, int timeoutInMs)
+        public static async Task<bool> WaitFor(this Task task, int timeoutInMs, CancellationToken token = default)
         {
-            Task result = await Task.WhenAny(task, Task.Delay(timeoutInMs)).Caf();
+            Task result = await Task.WhenAny(task, Task.Delay(timeoutInMs, token)).Caf();
             return result == task;
         }
+        
+        
         
         /// <summary>
         /// Returns whether the task ran to completion (i.e., completed but not cancelled or faulted)

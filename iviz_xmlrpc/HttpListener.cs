@@ -74,14 +74,14 @@ namespace Iviz.XmlRpc
             }
 
             // now we close the listener
-            Logger.LogDebug($"{this}: Stopping listener");
+            Logger.LogDebugFormat("{0}: Stopping listener", this);
             listener.Stop();
 
             // now we close the underlying socket
             listener.Server.Close();
 
             // and hope that this is enough to leave AcceptTcpClientAsync()
-            Logger.LogDebug($"{this}: Listener dispose out");
+            Logger.LogDebugFormat("{0}: Listener dispose out", this);
         }
 
         /// <summary>
@@ -109,9 +109,7 @@ namespace Iviz.XmlRpc
             while (KeepRunning)
                 try
                 {
-                    //Logger.LogDebug($"{this}: Accepting request...");
                     TcpClient client = await listener.AcceptTcpClientAsync().Caf();
-                    //Logger.LogDebug($"{this}: Accept Out!");
 
                     if (!KeepRunning)
                     {
@@ -136,16 +134,16 @@ namespace Iviz.XmlRpc
                 }
                 catch (ObjectDisposedException)
                 {
-                    Logger.LogDebug($"{this}: Leaving thread");
+                    Logger.LogDebugFormat("{0}: Leaving thread", this);
                     break;
                 }
                 catch (Exception e)
                 {
-                    Logger.Log($"{this}: Leaving thread " + e);
+                    Logger.LogFormat("{0}: Leaving thread {1}", this, e);
                     break;
                 }
 
-            Logger.LogDebug($"{this}: Leaving thread normally");
+            Logger.LogDebugFormat("{0}: Leaving thread normally", this);
         }
         
         
@@ -169,7 +167,7 @@ namespace Iviz.XmlRpc
             int count = backgroundTasks.Count(tuple => (tuple.start - now).TotalMilliseconds > BackgroundTimeoutInMs);
             if (count > 0)
             {
-                Logger.Log($"{this}: There appear to be {count} tasks deadlocked!");
+                Logger.LogFormat("{0}: There appear to be {1} tasks deadlocked!", this, count);
             }
 
             try
@@ -178,7 +176,7 @@ namespace Iviz.XmlRpc
             }
             catch (Exception e)
             {
-                Logger.Log($"{this}: Got an exception while waiting: {e}");                
+                Logger.LogFormat("{0}: Got an exception while waiting: {1}", this, e);                
             }
         }
 
