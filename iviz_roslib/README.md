@@ -13,7 +13,9 @@ To use this library in your code, you can either:
 
 If you are in Unity, all you need to do is copy the four files and put them somewhere in your Assets directory.
 If you are recompiling the library, or adapting the code to your own libraries, keep in mind that Unity only supports .NETStandard 2.0 (not 2.1, and not Core).
-As newer versions of Unity usually provide their own version of __Newtonsoft.Json.dll__, you may have to remove  it if you get errors due to duplicated references.  
+
+Note: Newer versions of Unity (in particular, the Collections package) already provide their own version of __Newtonsoft.Json.dll__.
+If you get an error of "duplicate references" will need to remove it.  
 
 ## Examples
 

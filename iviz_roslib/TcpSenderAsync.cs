@@ -44,7 +44,7 @@ namespace Iviz.Roslib
         int bytesDropped;
         int bytesSent;
         bool disposed;
-        
+
         Endpoint? endpoint;
         Endpoint? remoteEndpoint;
 
@@ -99,11 +99,11 @@ namespace Iviz.Roslib
             }
             catch (Exception e)
             {
-                Logger.Log($"{this}: {e}");
+                Logger.LogFormat("{0}: {1}", this, e);
             }
 
             runningTs.Dispose();
-            Logger.LogDebug($"{this}: Disposed!");
+            Logger.LogDebugFormat("{0}: Disposed!", this);
         }
 
         public Endpoint Start(int timeoutInMs, SemaphoreSlim managerSignal)
@@ -250,8 +250,8 @@ namespace Iviz.Roslib
             {
                 if (receivedType == "*")
                 {
-                    Logger.LogDebug(
-                        $"{this}: Expected type '{topicInfo.Type}' but received instead '{receivedType}'. Continuing...");
+                    Logger.LogDebugFormat("{0}: Expected type '{1}' but received instead '{2}'. Continuing...",
+                        this, topicInfo.Type, receivedType);
                 }
                 else
                 {
@@ -264,8 +264,8 @@ namespace Iviz.Roslib
             {
                 if (receivedMd5Sum == "*")
                 {
-                    Logger.LogDebug(
-                        $"{this}: Expected md5 '{topicInfo.Md5Sum}' but received instead '{receivedMd5Sum}'. Continuing...");
+                    Logger.LogDebugFormat("{0}: Expected md5 '{1}' but received instead '{2}'. Continuing...", this,
+                        topicInfo.Md5Sum, receivedMd5Sum);
                 }
                 else
                 {
@@ -277,7 +277,7 @@ namespace Iviz.Roslib
             if (values.TryGetValue("tcp_nodelay", out string? receivedNoDelay) && receivedNoDelay == "1")
             {
                 tcpClient!.NoDelay = true;
-                Logger.LogDebug($"{this}: requested tcp_nodelay");
+                Logger.LogDebugFormat("{0}: requested tcp_nodelay", this);
             }
 
             return null;
@@ -295,7 +295,7 @@ namespace Iviz.Roslib
             string? errorMessage = ProcessRemoteHeader(fields);
             if (errorMessage != null)
             {
-                Logger.Log($"{this}: Failed handshake\n{errorMessage}");
+                Logger.LogFormat("{0}: Failed handshake\n{1}", this, errorMessage);
             }
 
             await SendResponseHeader(errorMessage).Caf();
@@ -305,9 +305,7 @@ namespace Iviz.Roslib
 
         async Task Run(int timeoutInMs, SemaphoreSlim? managerSignal)
         {
-            //Logger.LogDebug($"{this}: initialized!");
             status = SenderStatus.Waiting;
-
 
             for (int round = 0; round < MaxConnectionRetries && KeepRunning; round++)
             {
@@ -320,6 +318,7 @@ namespace Iviz.Roslib
                         managerSignal?.Release();
                     }
                     catch (ObjectDisposedException) { }
+
                     managerSignal = null;
 
                     if (!KeepRunning)
@@ -327,10 +326,11 @@ namespace Iviz.Roslib
                         break;
                     }
 
-                    if (!await connectionTask.WaitFor(timeoutInMs).Caf() || !connectionTask.RanToCompletion())
+                    if (!await connectionTask.WaitFor(timeoutInMs, runningTs.Token).Caf()
+                        || !connectionTask.RanToCompletion())
                     {
-                        Logger.Log(
-                            $"{this}: Connection timed out (round {round + 1}/{MaxConnectionRetries}): {connectionTask.Exception}");
+                        Logger.LogFormat("{0}: Connection timed out (round {1}/{2}): {3}",
+                            this, round + 1, MaxConnectionRetries, connectionTask.Exception);
                         continue;
                     }
 
@@ -340,7 +340,7 @@ namespace Iviz.Roslib
                     using (stream = tcpClient.GetStream())
                     {
                         status = SenderStatus.Active;
-                        Logger.LogDebug($"{this}: Started!");
+                        Logger.LogDebugFormat("{0}: Started!", this);
 
                         IPEndPoint remoteEndPoint = (IPEndPoint) tcpClient.Client.RemoteEndPoint;
                         remoteEndpoint = new Endpoint(remoteEndPoint);
@@ -353,11 +353,11 @@ namespace Iviz.Roslib
                 }
                 catch (Exception e) when (e is IOException || e is TimeoutException || e is SocketException)
                 {
-                    Logger.LogDebug($"{this}: {e}");
+                    Logger.LogDebugFormat("{0}: {1}", this, e);
                 }
                 catch (Exception e)
                 {
-                    Logger.Log($"{this}: {e}");
+                    Logger.LogFormat("{0}: {1}", this, e);
                 }
             }
 

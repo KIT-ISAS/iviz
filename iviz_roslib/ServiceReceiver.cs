@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
+using Nito.AsyncEx.Synchronous;
 using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.Roslib
@@ -126,6 +127,11 @@ namespace Iviz.Roslib
             await SerializeHeaderAsync().Caf();
 
             int totalLength = await ReceivePacketAsync().Caf();
+            if (totalLength == -1)
+            {
+                throw new RpcConnectionException("Partner closed the connection");
+            }
+
             List<string> responses = ParseHeader(totalLength);
 
             if (responses.Count == 0 || !responses[0].HasPrefix("error"))
@@ -138,13 +144,13 @@ namespace Iviz.Roslib
             int index = responses[0].IndexOf('=');
             throw new RosRpcException(index != -1
                 ? $"Error: {responses[0].Substring(index + 1)}"
-                : $"Error:{responses[0]}");
+                : $"Error: {responses[0]}");
         }
 
         public void Start()
         {
-            // we cheat here and just call the async version from sync
-            Task.Run(async () => { await StartAsync().Caf(); }).Wait();
+            // just call the async version from sync
+            Task.Run(async () => { await StartAsync().Caf(); }).WaitAndUnwrapException();
         }
 
         async Task<int> ReceivePacketAsync()
@@ -155,13 +161,18 @@ namespace Iviz.Roslib
                 int readNow = await stream.ReadAsync(readBuffer, numRead, 4 - numRead);
                 if (readNow == 0)
                 {
-                    return 0;
+                    return -1;
                 }
 
                 numRead += readNow;
             }
-
+            
             int length = BitConverter.ToInt32(readBuffer, 0);
+            if (length == 0)
+            {
+                return 0;
+            }
+            
             if (readBuffer.Length < length)
             {
                 readBuffer = new byte[length + BufferSizeIncrease];
@@ -173,7 +184,7 @@ namespace Iviz.Roslib
                 int readNow = await stream.ReadAsync(readBuffer, numRead, length - numRead);
                 if (readNow == 0)
                 {
-                    return 0;
+                    return -1;
                 }
 
                 numRead += readNow;
@@ -181,42 +192,6 @@ namespace Iviz.Roslib
 
             return length;
         }
-
-        int ReceivePacket()
-        {
-            int numRead = 0;
-            while (numRead < 4)
-            {
-                int readNow = stream.Read(readBuffer, numRead, 4 - numRead);
-                if (readNow == 0)
-                {
-                    return 0;
-                }
-
-                numRead += readNow;
-            }
-
-            int length = BitConverter.ToInt32(readBuffer, 0);
-            if (readBuffer.Length < length)
-            {
-                readBuffer = new byte[length + BufferSizeIncrease];
-            }
-
-            numRead = 0;
-            while (numRead < length)
-            {
-                int readNow = stream.Read(readBuffer, numRead, length - numRead);
-                if (readNow == 0)
-                {
-                    return 0;
-                }
-
-                numRead += readNow;
-            }
-
-            return length;
-        }
-
 
         public async Task<bool> ExecuteAsync(T service)
         {
@@ -227,7 +202,7 @@ namespace Iviz.Roslib
             }
             catch (Exception e)
             {
-                Logger.Log("ServiceReceiver: Error during service call:" + e);
+                Logger.LogFormat("ServiceReceiver: Error during service call:{0}", e);
                 success = false;
             }
 
@@ -241,23 +216,8 @@ namespace Iviz.Roslib
 
         public bool Execute(T service)
         {
-            bool success;
-            try
-            {
-                success = ExecuteImpl(service);
-            }
-            catch (Exception e)
-            {
-                Logger.Log("ServiceReceiver: Error during service call:" + e);
-                success = false;
-            }
-
-            if (!persistent)
-            {
-                Dispose();
-            }
-
-            return success;
+            // just call the async version from sync
+            return Task.Run(async () => await ExecuteAsync(service).Caf()).WaitAndUnwrapException();
         }
 
         async Task<bool> ExecuteImplAsync(T service)
@@ -276,57 +236,20 @@ namespace Iviz.Roslib
             int rcvLengthH = await stream.ReadAsync(readBuffer, 0, 1);
             if (rcvLengthH == 0)
             {
-                return false;
+                throw new RpcConnectionException("Partner closed the connection");
             }
 
             byte statusByte = readBuffer[0];
 
             int rcvLength = await ReceivePacketAsync();
-            if (rcvLength == 0)
+            if (rcvLength == -1)
             {
-                return false;
+                throw new RpcConnectionException("Partner closed the connection");
             }
 
             if (statusByte == ErrorByte)
             {
-                Logger.Log($"{this}: {BuiltIns.UTF8.GetString(readBuffer, 0, rcvLength)}");
-                return false;
-            }
-
-            service.Response = Buffer.Deserialize(service.Response, readBuffer, rcvLength);
-            return true;
-        }
-
-        bool ExecuteImpl(T service)
-        {
-            IRequest requestMsg = service.Request;
-            int msgLength = requestMsg.RosMessageLength;
-            if (writeBuffer.Length < msgLength)
-            {
-                writeBuffer = new byte[msgLength + BufferSizeIncrease];
-            }
-
-            uint sendLength = Buffer.Serialize(requestMsg, writeBuffer);
-            stream.Write(BitConverter.GetBytes(sendLength), 0, 4);
-            stream.Write(writeBuffer, 0, (int) sendLength);
-
-            int rcvLengthH = stream.Read(readBuffer, 0, 1);
-            if (rcvLengthH == 0)
-            {
-                return false;
-            }
-
-            byte statusByte = readBuffer[0];
-
-            int rcvLength = ReceivePacket();
-            if (rcvLength == 0)
-            {
-                return false;
-            }
-
-            if (statusByte == ErrorByte)
-            {
-                Logger.Log($"{this}: {BuiltIns.UTF8.GetString(readBuffer, 0, rcvLength)}");
+                Logger.LogFormat("{0}: {1}", this, BuiltIns.UTF8.GetString(readBuffer, 0, rcvLength));
                 return false;
             }
 

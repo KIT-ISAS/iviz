@@ -86,7 +86,7 @@ namespace Iviz.Roslib.XmlRpc
 
         async Task Run()
         {
-            Logger.LogDebug($"{this}: Starting!");
+            Logger.LogDebugFormat("{0}: Starting!", this);
 
             Task listenerTask = listener.StartAsync(StartContext, true);
 
@@ -102,10 +102,10 @@ namespace Iviz.Roslib.XmlRpc
             // and that is usually not enough. so we bail out
             if (!await listenerTask.WaitFor(2000).Caf())
             {
-                Logger.LogDebug($"{this}: Listener stuck. Abandoning.");
+                Logger.LogDebugFormat("{0}: Listener stuck. Abandoning.", this);
             }
 
-            Logger.LogDebug($"{this}: Leaving thread");
+            Logger.LogDebugFormat("{0}: Leaving thread", this);
         }
 
         async Task StartContext(HttpListenerContext context)
@@ -116,7 +116,7 @@ namespace Iviz.Roslib.XmlRpc
             }
             catch (Exception e)
             {
-                Logger.LogError(e);
+                Logger.LogErrorFormat("{0}: {1}", this, e);
             }
         }
 
@@ -225,9 +225,10 @@ namespace Iviz.Roslib.XmlRpc
             foreach (object publisherObj in publishers)
             {
                 if (!(publisherObj is string publisherStr) ||
-                    !Uri.TryCreate(publisherStr, UriKind.Absolute, out Uri? publisherUri))
+                    !Uri.TryCreate(publisherStr, UriKind.Absolute, out Uri? publisherUri) ||
+                    publisherUri == null)
                 {
-                    Logger.Log($"{this}: Invalid uri '{publisherObj}'");
+                    Logger.LogFormat("{0}: Invalid uri '{1}'", this, publisherObj);
                     continue;
                 }
 
@@ -283,7 +284,7 @@ namespace Iviz.Roslib.XmlRpc
             }
 
             return endpoint?.Hostname == null
-                ? new Arg[] {StatusCode.Error, $"Internal error [duplicate request]", 0}
+                ? new Arg[] {StatusCode.Error, "Internal error [duplicate request]", 0}
                 : OkResponse(new Arg[] {"TCPROS", endpoint.Hostname, endpoint.Port});
         }
     }

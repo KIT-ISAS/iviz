@@ -251,7 +251,7 @@ namespace Iviz.Roslib
 
             if (!response.IsValid)
             {
-                Logger.LogError($"{this}: Failed to validate reachability response.");
+                Logger.LogErrorFormat("{0}: Failed to validate reachability response.", this);
             }
             else if (response.Pid != Process.GetCurrentProcess().Id)
             {
@@ -259,7 +259,7 @@ namespace Iviz.Roslib
                 throw new UnreachableUriException($"My uri '{CallerUri}' appears to belong to someone else!");
             }
 
-            Logger.Log($"{this}: Initialized.");
+            Logger.LogFormat("{0}: Initialized.", this);
 
             if (ensureCleanSlate)
             {
@@ -362,7 +362,7 @@ namespace Iviz.Roslib
                     return uri;
                 }
 
-                Logger.Log($"RosClient: Environment variable for master uri '{envStr}' is not a valid uri!");
+                Logger.LogFormat("RosClient: Environment variable for master uri '{0}' is not a valid uri!", envStr);
                 return null;
             }
         }
@@ -1098,7 +1098,7 @@ namespace Iviz.Roslib
         {
             if (!TryGetSubscriber(topic, out IRosSubscriber subscriber))
             {
-                Logger.Log($"{this}: PublisherUpdate called for nonexisting topic '{topic}'");
+                Logger.LogFormat("{0}: PublisherUpdate called for nonexisting topic '{1}'", this, topic);
                 return;
             }
 
@@ -1108,7 +1108,7 @@ namespace Iviz.Roslib
             }
             catch (Exception e)
             {
-                Logger.Log($"{this}: PublisherUpdateRcp failed: {e}");
+                Logger.LogFormat("{0}: PublisherUpdateRcp failed: {1}", this, e);
             }
         }
 
@@ -1116,7 +1116,8 @@ namespace Iviz.Roslib
         {
             if (!TryGetPublisher(topic, out IRosPublisher publisher))
             {
-                Logger.Log($"{this}: '{remoteCallerId} is requesting topic '{topic}' but we don't publish it");
+                Logger.LogFormat("{0}: '{1} is requesting topic '{2}' but we don't publish it", this,
+                    remoteCallerId, topic);
                 return null;
             }
 
@@ -1126,7 +1127,7 @@ namespace Iviz.Roslib
             }
             catch (Exception e)
             {
-                Logger.Log($"{this}: RequestTopicRpc failed: {e}");
+                Logger.LogFormat("{0}: RequestTopicRpc failed: {1}", this, e);
                 return null;
             }
         }
@@ -1150,7 +1151,7 @@ namespace Iviz.Roslib
                 }
                 catch (Exception e)
                 {
-                    Logger.LogDebug($"Error unregistering publisher {publisher}: {e}");
+                    Logger.LogDebugFormat("Error unregistering publisher {0}: {1}", publisher, e);
                 }
             }
 
@@ -1166,7 +1167,7 @@ namespace Iviz.Roslib
                 }
                 catch (Exception e)
                 {
-                    Logger.LogDebug($"Error unregistering subscriber {subscriber}: {e}");
+                    Logger.LogDebugFormat("Error unregistering subscriber {0}: {1}", subscriber, e);
                 }
             }
 
@@ -1190,7 +1191,7 @@ namespace Iviz.Roslib
                 }
                 catch (Exception e)
                 {
-                    Logger.LogDebug($"Error unregistering subscriber {serviceSender}: {e}");
+                    Logger.LogDebugFormat("Error unregistering subscriber {0}: {1}", serviceSender, e);
                 }
             }
         }
@@ -1278,7 +1279,7 @@ namespace Iviz.Roslib
                         }
                         catch (Exception e)
                         {
-                            Logger.Log($"{this}: LookupNode for {sender.RemoteId} failed: {e}");
+                            Logger.LogFormat("{0}: LookupNode for {1} failed: {2}", this, sender.RemoteId, e);
                             continue;
                         }
 

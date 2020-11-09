@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
@@ -29,7 +26,7 @@ namespace Iviz.Roslib
         Endpoint? endpoint;
         int numReceived;
         int bytesReceived;
-        
+
         int connectionTimeoutInMs;
 
         readonly CancellationTokenSource runningTs = new CancellationTokenSource();
@@ -78,7 +75,7 @@ namespace Iviz.Roslib
             }
             catch (Exception e)
             {
-                Logger.Log($"{this}: {e}");
+                Logger.LogFormat("{0}: {1}", this, e);
             }
 
             runningTs.Dispose();
@@ -101,7 +98,8 @@ namespace Iviz.Roslib
             try
             {
                 await Task.Delay(-1, runningTs.Token);
-            } catch (OperationCanceledException) {}
+            }
+            catch (OperationCanceledException) { }
 
 #if !NETSTANDARD2_0
             if (stream != null)
@@ -114,8 +112,8 @@ namespace Iviz.Roslib
             tcpClient?.Dispose();
 
             await sessionTask;
-        }        
-        
+        }
+
         async Task SerializeHeader()
         {
             string[] contents =
@@ -127,7 +125,7 @@ namespace Iviz.Roslib
                 $"type={topicInfo.Type}",
                 requestNoDelay ? "tcp_nodelay=1" : "tcp_nodelay=0"
             };
-            
+
             int totalLength = 4 * contents.Length + contents.Sum(entry => entry.Length);
 
             byte[] array = new byte[totalLength + 4];
@@ -180,13 +178,18 @@ namespace Iviz.Roslib
 #endif
                 if (readNow == 0)
                 {
-                    return 0;
+                    return -1;
                 }
 
                 numRead += readNow;
             }
 
             int length = BitConverter.ToInt32(readBuffer, 0);
+            if (length == 0)
+            {
+                return 0;
+            }
+
             if (readBuffer.Length < length)
             {
                 readBuffer = new byte[length + BufferSizeIncrease];
@@ -234,7 +237,7 @@ namespace Iviz.Roslib
             try
             {
                 Task connectionTask = client.ConnectAsync(remoteEndpoint.Hostname, remoteEndpoint.Port);
-                if (!await connectionTask.WaitFor(connectionTimeoutInMs).Caf() ||
+                if (!await connectionTask.WaitFor(connectionTimeoutInMs, runningTs.Token).Caf() ||
                     !connectionTask.RanToCompletion() ||
                     client.Client?.LocalEndPoint == null)
                 {
@@ -242,14 +245,14 @@ namespace Iviz.Roslib
                     return null;
                 }
             }
-            catch (Exception e) when (e is IOException || e is SocketException)
+            catch (Exception e) when (e is IOException || e is SocketException || e is OperationCanceledException)
             {
                 client.Dispose();
                 return null;
             }
             catch (Exception e)
             {
-                Logger.Log($"{this}: {e}");
+                Logger.LogFormat("{0}: {1}", this, e);
                 client.Dispose();
                 return null;
             }
@@ -279,7 +282,7 @@ namespace Iviz.Roslib
                     continue;
                 }
 
-                Logger.Log($"{this}: Changed endpoint from {remoteEndpoint} to {newEndpoint}");
+                Logger.LogFormat("{0}: Changed endpoint from {1} to {2}", this, remoteEndpoint, newEndpoint);
                 remoteEndpoint = newEndpoint;
             }
 
@@ -292,17 +295,22 @@ namespace Iviz.Roslib
             {
                 tcpClient = null;
 
-                Logger.LogDebug($"{this}: Trying to connect!");
-                tcpClient = await KeepReconnecting().Caf();
+                Logger.LogDebugFormat("{0}: Trying to connect!", this);
+                
+                try
+                {
+                    tcpClient = await KeepReconnecting().Caf();
+                }
+                catch (OperationCanceledException) { }
+
                 if (tcpClient == null)
                 {
-                    Logger.LogDebug(KeepRunning
-                        ? $"{this}: Ran out of retries. Leaving!"
-                        : $"{this}: Disposed! Getting out.");
+                    Logger.LogDebugFormat(
+                        KeepRunning ? "{0}: Ran out of retries. Leaving!" : "{0}: Disposed! Getting out.", this);
                     break;
                 }
 
-                Logger.LogDebug($"{this}: Connected!");
+                Logger.LogDebugFormat("{0}: Connected!", this);
 
                 try
                 {
@@ -318,17 +326,17 @@ namespace Iviz.Roslib
                 }
                 catch (Exception e) when (e is IOException || e is SocketException || e is TimeoutException)
                 {
-                    Logger.LogDebug($"{this}: {e}");
+                    Logger.LogDebugFormat("{0}: {1}", this, e);
                 }
                 catch (Exception e)
                 {
-                    Logger.Log($"{this}: {e}");
+                    Logger.LogFormat("{0}: {1}", this, e);
                 }
             }
 
             tcpClient = null;
             stream = null;
-            Logger.Log($"{this}: Stopped!");
+            Logger.LogFormat("{0}: Stopped!", this);
         }
 
         async Task ProcessLoop()
@@ -341,9 +349,9 @@ namespace Iviz.Roslib
             while (KeepRunning)
             {
                 int rcvLength = await ReceivePacket();
-                if (rcvLength == 0)
+                if (rcvLength == -1)
                 {
-                    Logger.LogDebug($"{this}: Partner closed connection.");
+                    Logger.LogDebugFormat("{0}: Partner closed connection.", this);
                     return;
                 }
 
@@ -365,7 +373,7 @@ namespace Iviz.Roslib
 
             int index = responses[0].IndexOf('=');
             string errorMsg = index != -1 ? responses[0].Substring(index + 1) : responses[0];
-            Logger.LogDebug($"{this}: Partner sent error code: {errorMsg}");
+            Logger.LogDebugFormat("{0}: Partner sent error code: {1}", this, errorMsg);
             return false;
         }
 

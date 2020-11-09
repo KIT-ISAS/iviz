@@ -44,7 +44,8 @@ namespace Iviz.Roslib
 
             IPEndPoint localEndpoint = (IPEndPoint) listener.LocalEndpoint;
             Uri = new Uri($"rosrpc://{host}:{localEndpoint.Port}/");
-            Logger.LogDebug($"{this}: Starting {serviceInfo.Service} [{serviceInfo.Type}] at {Uri}");
+            Logger.LogDebugFormat("{0}: Starting {1} [{2}] at {3}",
+                this, serviceInfo.Service, serviceInfo.Type, Uri);
 
             task = Task.Run(StartAsync);
         }
@@ -61,7 +62,7 @@ namespace Iviz.Roslib
             listener.Stop();
             if (!await loopTask.WaitFor(2000).Caf())
             {
-                Logger.LogDebug($"{this}: Listener stuck. Abandoning.");
+                Logger.LogDebugFormat("{0}: Listener stuck. Abandoning.", this);
             }
         }
 
@@ -85,16 +86,15 @@ namespace Iviz.Roslib
             }
             catch (ObjectDisposedException)
             {
-                Logger.LogDebug($"{this}: Leaving thread."); // expected
                 return;
             }
             catch (Exception e)
             {
-                Logger.Log($"{this}: Stopped thread{e}");
+                Logger.LogFormat("{0}: Stopped thread {1}", this, e);
                 return;
             }
 
-            Logger.LogDebug($"{this}: Leaving thread (normally)"); // also expected
+            Logger.LogDebugFormat("{0}: Leaving thread (normally)", this); // also expected
         }
 
         void Cleanup()
@@ -102,8 +102,8 @@ namespace Iviz.Roslib
             ServiceSenderAsync<T>[] toRemove = connections.Where(connection => !connection.IsAlive).ToArray();
             foreach (ServiceSenderAsync<T> connection in toRemove)
             {
-                Logger.LogDebug(
-                    $"{this}: Removing service connection with '{connection.Hostname}' - dead x_x");
+                Logger.LogDebugFormat("{0}: Removing service connection with '{1}' - dead x_x", 
+                    this, connection.Hostname);
                 connection.Stop();
                 connections.Remove(connection);
             }

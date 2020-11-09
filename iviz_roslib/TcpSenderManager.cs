@@ -19,7 +19,7 @@ namespace Iviz.Roslib
         readonly RosPublisher<T> publisher;
         readonly TopicInfo<T> topicInfo;
         int maxQueueSizeInBytes;
-        
+
         bool latching;
         bool hasLatchedMessage;
         T latchedMessage = default!;
@@ -52,7 +52,7 @@ namespace Iviz.Roslib
                 latching = value;
                 if (!value)
                 {
-                    hasLatchedMessage = false; 
+                    hasLatchedMessage = false;
                 }
             }
         }
@@ -77,7 +77,7 @@ namespace Iviz.Roslib
 
         public Endpoint? CreateConnectionRpc(string remoteCallerId)
         {
-            Logger.LogDebug($"{this}: '{remoteCallerId}' is requesting {Topic}");
+            Logger.LogDebugFormat("{0}: '{1}' is requesting {2}", this, remoteCallerId, Topic);
             TcpSenderAsync<T> newSender = new TcpSenderAsync<T>(remoteCallerId, topicInfo, Latching);
 
             Endpoint endPoint;
@@ -90,19 +90,9 @@ namespace Iviz.Roslib
                     // in case of double requests, we kill the old connection
                     // this happens if our uri is set multiple times because a previous client did not
                     // shut down gracefully
-                    
-                    /*
-                    if (oldSender.IsAlive)
-                    {
-                        Logger.LogDebug(
-                            $"{this}: '{oldSender.RemoteCallerId}' duplicate.\n--Retaining \t{oldSender}\n--Killing \t{newSender}");
-                        newSender.Dispose();
-                        return oldSender;
-                    }
-                    */
 
-                    Logger.LogDebug(
-                        $"{this}: '{oldSender.RemoteCallerId}' duplicate.\n--Retaining \t{newSender}\n--Killing \t{oldSender}");
+                    Logger.LogDebugFormat("{0}: '{1}' duplicate.\n--Retaining \t{2}\n--Killing \t{3}",
+                        this, oldSender.RemoteCallerId, newSender, oldSender);
                     return newSender;
                 });
 
@@ -115,7 +105,7 @@ namespace Iviz.Roslib
                 {
                     // or maybe not. either the requester took too long, or did a double request,
                     // and this is the one that got killed
-                    Logger.Log($"{this}: Sender start timed out!");
+                    Logger.LogFormat("{0}: Sender start timed out!", this);
                 }
             }
 
@@ -126,7 +116,7 @@ namespace Iviz.Roslib
 
             newSender.MaxQueueSizeInBytes = MaxQueueSizeInBytes;
             publisher.RaiseNumConnectionsChanged();
-            
+
             // return null if this connection got killed, which gets translated later as an error response
             return !newSender.IsAlive ? null : endPoint;
         }
@@ -139,7 +129,7 @@ namespace Iviz.Roslib
                 sender.Dispose();
                 if (connectionsByCallerId.RemovePair(sender.RemoteCallerId, sender))
                 {
-                    Logger.LogDebug($"{this}: Removing connection with '{sender}' - dead x_x");
+                    Logger.LogDebugFormat("{0}: Removing connection with '{1}' - dead x_x", this, sender);
                 }
             }
 

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -72,7 +71,7 @@ namespace Iviz.Roslib
                 }
                 catch (Exception e)
                 {
-                    Logger.LogError($"{this}: Exception from callback : {e}");
+                    Logger.LogErrorFormat("{0}: Exception from callback : {1}", this, e);
                 }
             }
         }
@@ -151,10 +150,6 @@ namespace Iviz.Roslib
             }
 
             AssertIsAlive();
-
-#if DEBUG__
-            Logger.LogDebug($"{this}: Subscribing to '{Topic}' with type '{TopicType}'");
-#endif
 
             string id = GenerateId();
             callbacksById.Add(id, t => callback(t));

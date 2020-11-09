@@ -70,13 +70,18 @@ namespace Iviz.Roslib
                 int readNow = await stream.ReadAsync(readBuffer, numRead, 4 - numRead).Caf();
                 if (readNow == 0)
                 {
-                    return 0;
+                    return -1;
                 }
 
                 numRead += readNow;
             }
 
             int length = BitConverter.ToInt32(readBuffer, 0);
+            if (length == 0)
+            {
+                return 0;
+            }
+
             if (readBuffer.Length < length)
             {
                 readBuffer = new byte[length + BufferSizeIncrease];
@@ -88,7 +93,7 @@ namespace Iviz.Roslib
                 int readNow = await stream.ReadAsync(readBuffer, numRead, length - numRead).Caf();
                 if (readNow == 0)
                 {
-                    return 0;
+                    return -1;
                 }
 
                 numRead += readNow;
@@ -155,8 +160,8 @@ namespace Iviz.Roslib
             {
                 if (receivedMd5Sum == "*")
                 {
-                    Logger.LogDebug(
-                        $"{this}: Expected md5 '{serviceInfo.Md5Sum}' but received instead '{receivedMd5Sum}'. Continuing...");
+                    Logger.LogDebugFormat("{0}: Expected md5 '{1}' but received instead '{2}'. Continuing...", this,
+                        serviceInfo.Md5Sum, receivedMd5Sum);
                 }
                 else
                 {
@@ -169,8 +174,8 @@ namespace Iviz.Roslib
             {
                 if (receivedType == "*")
                 {
-                    Logger.LogDebug(
-                        $"{this}: Expected type '{serviceInfo.Type}' but received instead '{receivedType}'. Continuing...");
+                    Logger.LogDebugFormat("{0}: Expected type '{1}' but received instead '{2}'. Continuing...", this,
+                        serviceInfo.Type, receivedType);
                 }
                 else
                 {
@@ -182,7 +187,7 @@ namespace Iviz.Roslib
             if (values.TryGetValue("tcp_nodelay", out string? receivedNoDelay) && receivedNoDelay == "1")
             {
                 tcpClient.NoDelay = true;
-                Logger.LogDebug($"{this}: requested tcp_nodelay");
+                Logger.LogDebugFormat("{0}: requested tcp_nodelay", this);
             }
 
             return null;
@@ -238,7 +243,7 @@ namespace Iviz.Roslib
 
             if (errorMessage != null)
             {
-                Logger.Log($"{this}: Failed handshake\n{errorMessage}");
+                Logger.LogFormat("{0}: Failed handshake\n{1}", this, errorMessage);
             }
 
             await SendResponseHeader(errorMessage).Caf();
@@ -272,13 +277,13 @@ namespace Iviz.Roslib
             }
 
             byte[] statusByte = {0};
-                
+
             while (keepRunning)
             {
                 try
                 {
                     int rcvLength = await ReceivePacket().Caf();
-                    if (rcvLength == 0)
+                    if (rcvLength == -1)
                     {
                         Logger.LogDebug($"{this}: closed remotely.");
                         break;
@@ -290,7 +295,7 @@ namespace Iviz.Roslib
                     byte resultStatus;
                     string? errorMessage;
                     bool errorInResponse;
-                    
+
                     try
                     {
                         await callback(serviceMsg).Caf();
@@ -341,7 +346,7 @@ namespace Iviz.Roslib
                 }
                 catch (Exception e)
                 {
-                    Logger.Log($"{this}: {e}");
+                    Logger.Log(string.Format("{0}: {1}", this, e));
                 }
             }
 
@@ -350,7 +355,7 @@ namespace Iviz.Roslib
 
         public override string ToString()
         {
-            return $"[TcpSender {Hostname}:{Port} '{Service}' >>'{remoteCallerId}']";
+            return $"[ServiceSender {Hostname}:{Port} '{Service}' >>'{remoteCallerId}']";
         }
     }
 }

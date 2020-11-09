@@ -21,7 +21,8 @@ namespace Iviz.Roslib
         readonly RosSubscriber<T> subscriber;
         readonly TopicInfo<T> topicInfo;
 
-        public TcpReceiverManager(RosSubscriber<T> subscriber, RosClient client, TopicInfo<T> topicInfo, bool requestNoDelay)
+        public TcpReceiverManager(RosSubscriber<T> subscriber, RosClient client, TopicInfo<T> topicInfo,
+            bool requestNoDelay)
         {
             this.subscriber = subscriber;
             this.client = client;
@@ -40,7 +41,7 @@ namespace Iviz.Roslib
                 return connectionsByUri.Count;
             }
         }
-        
+
         void TryToCleanup()
         {
             IDisposable @lock;
@@ -50,7 +51,7 @@ namespace Iviz.Roslib
                 {
                     @lock = mutex.Lock(tokenSource.Token);
                 }
-                catch (TaskCanceledException)
+                catch (OperationCanceledException)
                 {
                     return;
                 }
@@ -70,6 +71,7 @@ namespace Iviz.Roslib
 
         public bool RequestNoDelay { get; }
         public int TimeoutInMs { get; set; } = DefaultTimeoutInMs;
+
         internal async Task<Endpoint?> RequestConnectionFromPublisherAsync(Uri remoteUri)
         {
             NodeClient.RequestTopicResponse response;
@@ -79,26 +81,28 @@ namespace Iviz.Roslib
             }
             catch (Exception e) when (e is TimeoutException || e is AggregateException || e is XmlRpcException)
             {
-                Logger.LogDebug($"{this}: Connection request to publisher {remoteUri} failed: {e}");
+                Logger.LogDebugFormat("{0}: Connection request to publisher {1} failed: {2}", 
+                    this, remoteUri, e);
                 return null;
             }
             catch (Exception e)
             {
-                Logger.LogError($"{this}: Connection request to publisher {remoteUri} failed: {e}");
+                Logger.LogErrorFormat("{0}: Connection request to publisher {1} failed: {2}", 
+                    this, remoteUri, e);
                 return null;
             }
 
             if (!response.IsValid || response.Protocol == null)
             {
-                Logger.LogDebug(
-                    $"{this}: Connection request to publisher {remoteUri} has failed: {response.StatusMessage}");
+                Logger.LogDebugFormat("{0}: Connection request to publisher {1} has failed: {2}", 
+                    this, remoteUri, response.StatusMessage);
                 return null;
             }
 
             if (response.Protocol.Port == 0)
             {
-                Logger.LogDebug(
-                    $"{this}: Connection request to publisher {remoteUri} returned an uninitialized address!");
+                Logger.LogDebugFormat("{0}: Connection request to publisher {1} returned an uninitialized address!",
+                    this, remoteUri);
                 return null;
             }
 
@@ -163,7 +167,7 @@ namespace Iviz.Roslib
                 subscriber.RaiseNumPublishersChanged();
             }
         }
-        
+
 
         bool Cleanup()
         {
@@ -171,7 +175,7 @@ namespace Iviz.Roslib
             foreach (TcpReceiverAsync<T> receiver in toDelete)
             {
                 connectionsByUri.Remove(receiver.RemoteUri);
-                Logger.Log($"{this}: Removing connection with '{receiver.RemoteUri}' - dead x_x");
+                Logger.LogFormat("{0}: Removing connection with '{1}' - dead x_x", this, receiver.RemoteUri);
                 receiver.Dispose();
             }
 
