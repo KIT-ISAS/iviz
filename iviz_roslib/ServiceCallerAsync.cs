@@ -12,7 +12,7 @@ using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.Roslib
 {
-    internal sealed class ServiceCallerAsync<T> : IServiceCaller, IDisposable where T : IService
+    internal sealed class ServiceCallerAsync<T> : IServiceCaller where T : IService
     {
         const int BufferSizeIncrease = 512;
         const byte ErrorByte = 0;
@@ -55,8 +55,8 @@ namespace Iviz.Roslib
             }
 
             disposed = true;
-            stream.Dispose();
-            tcpClient.Dispose();
+            stream?.Dispose();
+            tcpClient?.Dispose();
         }
 
         async Task SendHeaderAsync()
@@ -73,18 +73,18 @@ namespace Iviz.Roslib
 
             await Utils.WriteHeaderAsync(stream, contents).Caf();
         }
-        
-        public async Task StartAsync()
+
+        async Task ProcessHandshake()
         {
             await SendHeaderAsync().Caf();
 
-            int totalLength = await ReceivePacketAsync().Caf();
-            if (totalLength == -1)
+            int receivedLength = await ReceivePacketAsync().Caf();
+            if (receivedLength == -1)
             {
-                throw new IOException("Partner closed the connection");
+                throw new IOException("Connection closed during handshake");
             }
 
-            List<string> responses = Utils.ParseHeader(readBuffer, totalLength);
+            List<string> responses = Utils.ParseHeader(readBuffer, receivedLength);
 
             if (responses.Count == 0 || !responses[0].HasPrefix("error"))
             {
@@ -95,8 +95,13 @@ namespace Iviz.Roslib
 
             int index = responses[0].IndexOf('=');
             throw new RosRpcException(index != -1
-                ? $"Error: {responses[0].Substring(index + 1)}"
-                : $"Error: {responses[0]}");
+                ? $"Failed handshake: {responses[0].Substring(index + 1)}"
+                : $"Failed handshake: {responses[0]}");            
+        }
+        
+        public async Task StartAsync()
+        {
+            await ProcessHandshake();
         }
 
         public void Start()
@@ -193,11 +198,6 @@ namespace Iviz.Roslib
 
             service.Response = Buffer.Deserialize(service.Response, readBuffer, rcvLength);
             return true;
-        }
-
-        public void Stop()
-        {
-            tcpClient.Close();
         }
     }
 }

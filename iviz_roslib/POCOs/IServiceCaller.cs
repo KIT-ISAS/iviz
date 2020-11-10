@@ -1,8 +1,9 @@
+using System;
+
 namespace Iviz.Roslib
 {
-    internal interface IServiceCaller
+    internal interface IServiceCaller : IDisposable
     {
         string ServiceType { get; }
-        void Stop();
     }
 }

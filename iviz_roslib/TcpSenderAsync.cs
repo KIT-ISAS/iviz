@@ -114,12 +114,12 @@ namespace Iviz.Roslib
             IPEndPoint localEndpoint = (IPEndPoint) listener.LocalEndpoint;
             endpoint = new Endpoint(localEndpoint);
 
-            task = Task.Run(async () => await Run(timeoutInMs, managerSignal).Caf());
+            task = Task.Run(async () => await StartSession(timeoutInMs, managerSignal).Caf());
 
             return endpoint;
         }
 
-        async Task<byte[]?> ReceiveHeader()
+        async Task<byte[]?> ReceivePacket()
         {
             byte[] lengthBuffer = new byte[4];
             if (!await stream!.ReadChunkAsync(lengthBuffer, 4).Caf())
@@ -205,8 +205,7 @@ namespace Iviz.Roslib
             {
                 if (receivedType == "*")
                 {
-                    Logger.LogDebugFormat("{0}: Expected type '{1}' but received instead '{2}'. Continuing...",
-                        this, topicInfo.Type, receivedType);
+                    // OK
                 }
                 else
                 {
@@ -219,8 +218,7 @@ namespace Iviz.Roslib
             {
                 if (receivedMd5Sum == "*")
                 {
-                    Logger.LogDebugFormat("{0}: Expected md5 '{1}' but received instead '{2}'. Continuing...", this,
-                        topicInfo.Md5Sum, receivedMd5Sum);
+                    // OK
                 }
                 else
                 {
@@ -238,27 +236,26 @@ namespace Iviz.Roslib
             return null;
         }
 
-        async Task<bool> ProcessHandshake()
+        async Task ProcessHandshake()
         {
-            byte[]? readBuffer = await ReceiveHeader().Caf();
+            byte[]? readBuffer = await ReceivePacket().Caf();
             if (readBuffer == null)
             {
-                throw new TimeoutException("Connection closed during handshake.");
+                throw new IOException("Connection closed during handshake.");
             }
 
             List<string> fields = Utils.ParseHeader(readBuffer);
             string? errorMessage = ProcessRemoteHeader(fields);
-            if (errorMessage != null)
-            {
-                Logger.LogFormat("{0}: Failed handshake\n{1}", this, errorMessage);
-            }
 
             await SendHeader(errorMessage).Caf();
 
-            return errorMessage == null;
+            if (errorMessage != null)
+            {
+                throw new RosRpcException("Failed handshake: " + errorMessage);
+            }
         }
 
-        async Task Run(int timeoutInMs, SemaphoreSlim? managerSignal)
+        async Task StartSession(int timeoutInMs, SemaphoreSlim? managerSignal)
         {
             status = SenderStatus.Waiting;
 
@@ -316,24 +313,21 @@ namespace Iviz.Roslib
                 }
             }
 
+            status = SenderStatus.Dead;
+            listener?.Stop();
+            tcpClient = null;
+            stream = null;
+            
             try
             {
                 managerSignal?.Release();
             }
             catch (ObjectDisposedException) { }
-
-            status = SenderStatus.Dead;
-            listener?.Stop();
-            tcpClient = null;
-            stream = null;
         }
 
         async Task ProcessLoop()
         {
-            if (!await ProcessHandshake().Caf())
-            {
-                runningTs.Cancel();
-            }
+            await ProcessHandshake().Caf();
 
             List<(T msg, int msgLength)> localQueue = new List<(T, int)>();
 
@@ -361,11 +355,7 @@ namespace Iviz.Roslib
 
                 while (true)
                 {
-                    // we retrieve all the elements we can without blocking
-                    // to do that, we exploit the fact that, if no blocking is needed, the function will
-                    // return immediately in a completed state
-                    // otherwise, the request will block but be immediately cancelled in the background
-                    CancellationToken cancelledToken = new CancellationToken(true);
+                    CancellationToken cancelledToken = new CancellationToken(true); // ensure we don't block
                     var queueTask = messageQueue.DequeueAsync(cancelledToken);
                     if (!queueTask.RanToCompletion())
                     {

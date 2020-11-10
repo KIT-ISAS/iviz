@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
@@ -101,8 +102,9 @@ namespace Iviz.Roslib
         {
             return new ReadOnlyCollection<T>(t);
         }
-        
-        public static bool RemovePair<TT, TU>(this ConcurrentDictionary<TT, TU> dictionary, TT t, TU u) where TT : notnull
+
+        public static bool RemovePair<TT, TU>(this ConcurrentDictionary<TT, TU> dictionary, TT t, TU u)
+            where TT : notnull
         {
             if (dictionary == null)
             {
@@ -111,7 +113,7 @@ namespace Iviz.Roslib
 
             return ((ICollection<KeyValuePair<TT, TU>>) dictionary).Remove(new KeyValuePair<TT, TU>(t, u));
         }
-        
+
         public static int Sum<T>(this T[] ts, Func<T, int> selector)
         {
             int sum = 0;
@@ -122,7 +124,7 @@ namespace Iviz.Roslib
 
             return sum;
         }
-        
+
         public static bool Any<T>(this T[] ts, Predicate<T> predicate)
         {
             foreach (var t in ts)
@@ -154,13 +156,14 @@ namespace Iviz.Roslib
 
             return contents;
         }
-        
-        internal static async Task<bool> ReadChunkAsync(this NetworkStream stream, byte[] buffer, int toRead)
+
+        internal static async Task<bool> ReadChunkAsync(this NetworkStream stream, byte[] buffer, int toRead,
+            CancellationToken token = default)
         {
             int numRead = 0;
             while (numRead < toRead)
             {
-                int readNow = await stream!.ReadAsync(buffer, numRead, toRead - numRead).Caf();
+                int readNow = await stream!.ReadAsync(buffer, numRead, toRead - numRead, token).Caf();
                 if (readNow == 0)
                 {
                     return false;
@@ -187,7 +190,7 @@ namespace Iviz.Roslib
                 }
             }
 
-            await stream.WriteAsync(array, 0, array.Length).Caf();            
+            await stream.WriteAsync(array, 0, array.Length).Caf();
         }
 
 
@@ -213,6 +216,6 @@ namespace Iviz.Roslib
 
                 return hash1 + (hash2 * 1566083941);
             }
-        }        
+        }
     }
 }

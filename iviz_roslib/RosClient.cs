@@ -1176,7 +1176,7 @@ namespace Iviz.Roslib
 
             foreach (IServiceCaller receiver in receivers)
             {
-                receiver.Stop();
+                receiver.Dispose();
             }
 
             IServiceRequestManager[] serviceManagers = advertisedServicesByName.Values.ToArray();
@@ -1186,7 +1186,7 @@ namespace Iviz.Roslib
             {
                 try
                 {
-                    serviceSender.Stop();
+                    serviceSender.Dispose();
                     Master.UnregisterService(serviceSender.Service, serviceSender.Uri);
                 }
                 catch (Exception e)
@@ -1227,7 +1227,7 @@ namespace Iviz.Roslib
 
             foreach (IServiceCaller receiver in receivers)
             {
-                receiver.Stop();
+                receiver.Dispose();
             }
 
             IServiceRequestManager[] serviceManagers = advertisedServicesByName.Values.ToArray();
@@ -1235,7 +1235,7 @@ namespace Iviz.Roslib
 
             tasks.AddRange(serviceManagers.Select(async senderManager =>
             {
-                await senderManager.StopAsync().Caf();
+                await senderManager.DisposeAsync().Caf();
                 await Master.UnregisterServiceAsync(senderManager.Service, senderManager.Uri).Caf();
             }));
 
@@ -1506,7 +1506,7 @@ namespace Iviz.Roslib
 
             advertisedServicesByName.Remove(name);
 
-            advertisedService.Stop();
+            advertisedService.Dispose();
             Master.UnregisterService(name, advertisedService.Uri);
         }
 
@@ -1524,7 +1524,7 @@ namespace Iviz.Roslib
 
             advertisedServicesByName.Remove(name);
 
-            await advertisedService.StopAsync();
+            await advertisedService.DisposeAsync();
             await Master.UnregisterServiceAsync(name, advertisedService.Uri);
         }
 

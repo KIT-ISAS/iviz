@@ -22,6 +22,7 @@ namespace Iviz.Roslib
         readonly Task task;
 
         bool keepGoing;
+        bool disposed;
 
         public ServiceRequestManager(ServiceInfo<T> serviceInfo, string host, Func<T, Task> callback)
         {
@@ -102,8 +103,15 @@ namespace Iviz.Roslib
         }
 
 
-        public void Stop()
+        public void Dispose()
         {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+            
             signal.Release();
             task.Wait();
 
@@ -115,8 +123,15 @@ namespace Iviz.Roslib
             connections.Clear();
         }
 
-        public async Task StopAsync()
+        public async Task DisposeAsync()
         {
+            if (disposed)
+            {
+                return;
+            }
+            
+            disposed = true;
+
             signal.Release();
             await task.Caf();
 

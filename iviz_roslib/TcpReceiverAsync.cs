@@ -106,6 +106,62 @@ namespace Iviz.Roslib
 
             await sessionTask;
         }
+        
+        async Task<TcpClient?> TryToConnect()
+        {
+            TcpClient client = new TcpClient();
+            try
+            {
+                Task connectionTask = client.ConnectAsync(remoteEndpoint.Hostname, remoteEndpoint.Port);
+                if (await connectionTask.WaitFor(connectionTimeoutInMs, runningTs.Token).Caf() &&
+                    connectionTask.RanToCompletion())
+                {
+                    return client;
+                }
+            }
+            catch (Exception e) when (e is IOException || e is SocketException || e is OperationCanceledException)
+            {
+            }
+            catch (Exception e)
+            {
+                Logger.LogFormat("{0}: {1}", this, e);
+            }
+
+            client.Dispose();
+            return null;
+        }
+
+        async Task<TcpClient?> KeepReconnecting()
+        {
+            for (int i = 0; i < MaxConnectionRetries && KeepRunning; i++)
+            {
+                var client = await TryToConnect().Caf();
+                if (client != null)
+                {
+                    return client;
+                }
+
+                try
+                {
+                    await Task.Delay(WaitBetweenRetriesInMs, runningTs.Token).Caf();
+                }
+                catch (OperationCanceledException)
+                {
+                    return null;
+                }
+
+                Endpoint? newEndpoint = await manager.RequestConnectionFromPublisherAsync(RemoteUri).Caf();
+                if (newEndpoint == null || newEndpoint.Equals(remoteEndpoint))
+                {
+                    continue;
+                }
+
+                Logger.LogFormat("{0}: Changed endpoint from {1} to {2}", this, remoteEndpoint, newEndpoint);
+                remoteEndpoint = newEndpoint;
+            }
+
+            return null;
+        }
 
         async Task SendHeader()
         {
@@ -129,7 +185,7 @@ namespace Iviz.Roslib
         async Task<int> ReceivePacket()
 #endif
         {
-            if (!await stream!.ReadChunkAsync(readBuffer, 4))
+            if (!await stream!.ReadChunkAsync(readBuffer, 4, runningTs.Token))
             {
                 return -1;
             }
@@ -145,91 +201,35 @@ namespace Iviz.Roslib
                 readBuffer = new byte[length + BufferSizeIncrease];
             }
 
-            if (!await stream!.ReadChunkAsync(readBuffer, length))
+            if (!await stream!.ReadChunkAsync(readBuffer, length, runningTs.Token))
             {
                 return -1;
             }
 
             return length;
-        }
-
-
-        async Task<List<string>> DoHandshake()
+        }        
+        
+        async Task ProcessHandshake()
         {
             await SendHeader().Caf();
 
             int receivedLength = await ReceivePacket();
             if (receivedLength == -1)
             {
-                throw new IOException("Connection closed before handshake finished.");
+                throw new IOException("Connection closed during handshake");
             }
 
-            return Utils.ParseHeader(readBuffer, receivedLength);
-        }
-
-        async Task<TcpClient?> TryToConnect()
-        {
-            TcpClient client = new TcpClient();
-            try
+            List<string> responses = Utils.ParseHeader(readBuffer, receivedLength);
+            if (responses.Count == 0 || !responses[0].HasPrefix("error"))
             {
-                Task connectionTask = client.ConnectAsync(remoteEndpoint.Hostname, remoteEndpoint.Port);
-                if (!await connectionTask.WaitFor(connectionTimeoutInMs, runningTs.Token).Caf() ||
-                    !connectionTask.RanToCompletion() ||
-                    client.Client?.LocalEndPoint == null)
-                {
-                    client.Dispose();
-                    return null;
-                }
-            }
-            catch (Exception e) when (e is IOException || e is SocketException || e is OperationCanceledException)
-            {
-                client.Dispose();
-                return null;
-            }
-            catch (Exception e)
-            {
-                Logger.LogFormat("{0}: {1}", this, e);
-                client.Dispose();
-                return null;
+                return;
             }
 
-            return client;
-        }
-
-        async Task<TcpClient?> KeepReconnecting()
-        {
-            for (int i = 0; i < MaxConnectionRetries && KeepRunning; i++)
-            {
-                var client = await TryToConnect().Caf();
-                if (client != null)
-                {
-                    return client;
-                }
-
-                try
-                {
-                    await Task.Delay(WaitBetweenRetriesInMs, runningTs.Token).Caf();
-                }
-                catch (OperationCanceledException) { }
-
-                if (!KeepRunning)
-                {
-                    return null;
-                }
-
-                Endpoint? newEndpoint = await manager.RequestConnectionFromPublisherAsync(RemoteUri).Caf();
-                if (newEndpoint == null || newEndpoint.Equals(remoteEndpoint))
-                {
-                    continue;
-                }
-
-                Logger.LogFormat("{0}: Changed endpoint from {1} to {2}", this, remoteEndpoint, newEndpoint);
-                remoteEndpoint = newEndpoint;
-            }
-
-            return null;
-        }
-
+            int index = responses[0].IndexOf('=');
+            string errorMsg = index != -1 ? responses[0].Substring(index + 1) : responses[0];
+            throw new RosRpcException($"Failed handshake: {errorMsg}");
+        }        
+        
         async Task StartSession()
         {
             while (KeepRunning)
@@ -276,17 +276,14 @@ namespace Iviz.Roslib
 
         async Task ProcessLoop()
         {
-            if (!await ProcessHandshake().Caf())
-            {
-                return;
-            }
+            await ProcessHandshake().Caf();
 
             while (KeepRunning)
             {
                 int rcvLength = await ReceivePacket();
                 if (rcvLength == -1)
                 {
-                    Logger.LogDebugFormat("{0}: Partner closed connection.", this);
+                    Logger.LogDebugFormat("{0}: Partner closed connection", this);
                     return;
                 }
 
@@ -296,20 +293,6 @@ namespace Iviz.Roslib
                 numReceived++;
                 bytesReceived += rcvLength + 4;
             }
-        }
-
-        async Task<bool> ProcessHandshake()
-        {
-            List<string> responses = await DoHandshake().Caf();
-            if (responses.Count == 0 || !responses[0].HasPrefix("error"))
-            {
-                return true;
-            }
-
-            int index = responses[0].IndexOf('=');
-            string errorMsg = index != -1 ? responses[0].Substring(index + 1) : responses[0];
-            Logger.LogDebugFormat("{0}: Partner sent error code: {1}", this, errorMsg);
-            return false;
         }
 
         public override string ToString()

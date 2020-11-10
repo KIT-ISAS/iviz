@@ -34,7 +34,6 @@ namespace Iviz.Roslib
         byte[] readBuffer = new byte[1024];
         byte[] writeBuffer = new byte[1024];
 
-
         internal ServiceRequestAsync(ServiceInfo<TService> serviceInfo, TcpClient tcpClient, Func<TService, Task> callback)
         {
             stream = tcpClient.GetStream();
@@ -92,7 +91,6 @@ namespace Iviz.Roslib
             return length;
         }
 
-
         string? ProcessRemoteHeader(List<string> fields)
         {
             if (fields.Count < 3)
@@ -131,8 +129,7 @@ namespace Iviz.Roslib
             {
                 if (receivedMd5Sum == "*")
                 {
-                    Logger.LogDebugFormat("{0}: Expected md5 '{1}' but received instead '{2}'. Continuing...", this,
-                        serviceInfo.Md5Sum, receivedMd5Sum);
+                    // OK?
                 }
                 else
                 {
@@ -145,8 +142,7 @@ namespace Iviz.Roslib
             {
                 if (receivedType == "*")
                 {
-                    Logger.LogDebugFormat("{0}: Expected type '{1}' but received instead '{2}'. Continuing...", this,
-                        serviceInfo.Type, receivedType);
+                    // OK?
                 }
                 else
                 {
@@ -186,40 +182,33 @@ namespace Iviz.Roslib
             await Utils.WriteHeaderAsync(stream!, contents).Caf();
         }
 
-        async Task<bool> DoHandshake()
+        async Task ProcessHandshake()
         {
             int totalLength = await ReceivePacket().Caf();
             if (totalLength == -1)
             {
-                Logger.LogDebug($"{this}: closed remotely.");
-                return false;
+                throw new IOException("Connection closed during handshake.");
             }
             
             List<string> fields = Utils.ParseHeader(readBuffer, totalLength);
             string? errorMessage = ProcessRemoteHeader(fields);
 
-            if (errorMessage != null)
-            {
-                Logger.LogFormat("{0}: Failed handshake\n{1}", this, errorMessage);
-            }
-
             await SendHeader(errorMessage).Caf();
 
-            return errorMessage == null;
+            throw new RosRpcException("Failed handshake: " + errorMessage);
         }
 
         async Task Run()
         {
             try
             {
-                if (!await DoHandshake().Caf())
-                {
-                    keepRunning = false;
-                }
+                await ProcessHandshake().Caf();
             }
             catch (Exception e)
             {
                 Logger.Log($"{this}: {e}");
+                keepRunning = false;
+                return;
             }
 
             byte[] lengthArray = new byte[4];
