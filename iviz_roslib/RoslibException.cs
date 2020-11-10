@@ -11,7 +11,7 @@ namespace Iviz.Roslib
         {
         }
 
-        protected RoslibException(string message, Exception innerException) : base(message, innerException)
+        public RoslibException(string message, Exception innerException) : base(message, innerException)
         {
         }
 

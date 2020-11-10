@@ -19,6 +19,9 @@ using Nito.AsyncEx.Synchronous;
 namespace Iviz.Roslib
 {
     public interface IRosClient : IDisposable
+#if !NETSTANDARD2_0
+        , IAsyncDisposable
+#endif
     {
         string CallerId { get; }
         string Advertise<T>(string topic, out IRosPublisher<T> publisher) where T : IMessage;
@@ -470,7 +473,8 @@ namespace Iviz.Roslib
             return new NodeClient(CallerId, CallerUri, otherUri, (int) RpcNodeTimeout.TotalMilliseconds);
         }
 
-        RosSubscriber<T> CreateSubscriber<T>(string topic, bool requestNoDelay)
+        (string id, RosSubscriber<T> subscriber)
+            CreateSubscriber<T>(string topic, bool requestNoDelay, Action<T> firstCallback)
             where T : IMessage, IDeserializable<T>, new()
         {
             if (!IsValidResourceName(topic))
@@ -480,7 +484,9 @@ namespace Iviz.Roslib
 
             TopicInfo<T> topicInfo = new TopicInfo<T>(CallerId, topic, new T());
             int timeoutInMs = (int) TcpRosTimeout.TotalMilliseconds;
+
             RosSubscriber<T> subscription = new RosSubscriber<T>(this, topicInfo, requestNoDelay, timeoutInMs);
+            string id = subscription.Subscribe(firstCallback);
 
             subscribersByTopic[topic] = subscription;
 
@@ -495,10 +501,11 @@ namespace Iviz.Roslib
             Task.Run(async () => await subscription.Manager.PublisherUpdateRpcAsync(masterResponse.Publishers).Caf())
                 .WaitAndUnwrapException();
 
-            return subscription;
+            return (id, subscription);
         }
 
-        async Task<RosSubscriber<T>> CreateSubscriberAsync<T>(string topic, bool requestNoDelay)
+        async Task<(string id, RosSubscriber<T> subscriber)>
+            CreateSubscriberAsync<T>(string topic, bool requestNoDelay, Action<T> firstCallback)
             where T : IMessage, IDeserializable<T>, new()
         {
             if (!IsValidResourceName(topic))
@@ -508,7 +515,9 @@ namespace Iviz.Roslib
 
             TopicInfo<T> topicInfo = new TopicInfo<T>(CallerId, topic, new T());
             int timeoutInMs = (int) TcpRosTimeout.TotalMilliseconds;
+
             RosSubscriber<T> subscription = new RosSubscriber<T>(this, topicInfo, requestNoDelay, timeoutInMs);
+            string id = subscription.Subscribe(firstCallback);
 
             subscribersByTopic[topic] = subscription;
 
@@ -522,7 +531,7 @@ namespace Iviz.Roslib
 
             await subscription.Manager.PublisherUpdateRpcAsync(masterResponse.Publishers).Caf();
 
-            return subscription;
+            return (id, subscription);
         }
 
         /// <summary>
@@ -566,16 +575,16 @@ namespace Iviz.Roslib
 
             if (!TryGetSubscriber(topic, out IRosSubscriber baseSubscriber))
             {
-                subscriber = CreateSubscriber<T>(topic, requestNoDelay);
-            }
-            else
-            {
-                RosSubscriber<T>? newSubscriber = baseSubscriber as RosSubscriber<T>;
-                subscriber = newSubscriber ?? throw new InvalidMessageTypeException(
-                    $"There is already a subscriber with a different type [{baseSubscriber.TopicType}]");
+                string id;
+                (id, subscriber) = CreateSubscriber(topic, requestNoDelay, callback);
+                return id;
             }
 
+            RosSubscriber<T>? newSubscriber = baseSubscriber as RosSubscriber<T>;
+            subscriber = newSubscriber ?? throw new InvalidMessageTypeException(
+                $"There is already a subscriber with a different type [{baseSubscriber.TopicType}]");
             return subscriber.Subscribe(callback);
+
         }
 
         string IRosClient.Subscribe<T>(string topic, Action<T> callback, out IRosSubscriber<T> subscriber,
@@ -667,19 +676,14 @@ namespace Iviz.Roslib
                 throw new ArgumentNullException(nameof(callback));
             }
 
-            RosSubscriber<T> subscriber;
             if (!TryGetSubscriber(topic, out IRosSubscriber baseSubscriber))
             {
-                subscriber = await CreateSubscriberAsync<T>(topic, requestNoDelay).Caf();
-            }
-            else
-            {
-                var newSubscriber = baseSubscriber as RosSubscriber<T>;
-                subscriber = newSubscriber ?? throw new InvalidMessageTypeException(
-                    $"Existing subscriber message type {baseSubscriber.TopicType} does not match the given type.");
+                return await CreateSubscriberAsync(topic, requestNoDelay, callback).Caf();
             }
 
-
+            var newSubscriber = baseSubscriber as RosSubscriber<T>;
+            RosSubscriber<T> subscriber = newSubscriber ?? throw new InvalidMessageTypeException(
+                $"Existing subscriber message type {baseSubscriber.TopicType} does not match the given type.");
             return (subscriber.Subscribe(callback), subscriber);
         }
 
@@ -1340,25 +1344,23 @@ namespace Iviz.Roslib
             ServiceInfo<T> serviceInfo = new ServiceInfo<T>(CallerId, serviceName);
             try
             {
-                var serviceReceiver = new ServiceCallerAsync<T>(serviceInfo, serviceUri, true, persistent);
-
-                serviceReceiver.Start();
-                bool result = serviceReceiver.Execute(service);
-
-                if (persistent && serviceReceiver.IsAlive)
+                if (persistent)
                 {
-                    subscribedServicesByName.Add(serviceName, serviceReceiver);
+                    var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, serviceUri, true, persistent);
+                    serviceCaller.Start();
+                    subscribedServicesByName.Add(serviceName, serviceCaller);
+                    return serviceCaller.Execute(service);
                 }
                 else
                 {
-                    serviceReceiver.Dispose();
+                    using var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, serviceUri, true, persistent);
+                    serviceCaller.Start();
+                    return serviceCaller.Execute(service);
                 }
-
-                return result;
             }
             catch (Exception e)
             {
-                throw new TimeoutException($"Service uri '{serviceUri}' is not reachable", e);
+                throw new RoslibException($"Service uri '{serviceUri}' is not reachable", e);
             }
         }
 
@@ -1402,26 +1404,23 @@ namespace Iviz.Roslib
             ServiceInfo<T> serviceInfo = new ServiceInfo<T>(CallerId, serviceName);
             try
             {
-                ServiceCallerAsync<T> serviceCallerAsync =
-                    new ServiceCallerAsync<T>(serviceInfo, serviceUri, true, persistent);
-
-                await serviceCallerAsync.StartAsync().Caf();
-                bool result = await serviceCallerAsync.ExecuteAsync(service).Caf();
-
-                if (persistent && serviceCallerAsync.IsAlive)
+                if (persistent)
                 {
-                    subscribedServicesByName.Add(serviceName, serviceCallerAsync);
+                    var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, serviceUri, true, persistent);
+                    await serviceCaller.StartAsync().Caf();
+                    subscribedServicesByName.Add(serviceName, serviceCaller);
+                    return await serviceCaller.ExecuteAsync(service).Caf();
                 }
                 else
                 {
-                    serviceCallerAsync.Dispose();
+                    using var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, serviceUri, true, persistent);
+                    await serviceCaller.StartAsync().Caf();
+                    return await serviceCaller.ExecuteAsync(service).Caf();
                 }
-
-                return result;
             }
             catch (Exception e)
             {
-                throw new TimeoutException($"Service uri '{serviceUri}' is not reachable", e);
+                throw new RoslibException($"Service uri '{serviceUri}' is not reachable", e);
             }
         }
 
@@ -1532,6 +1531,13 @@ namespace Iviz.Roslib
         {
             Close();
         }
+
+#if !NETSTANDARD2_0
+        public async ValueTask DisposeAsync()
+        {
+            await CloseAsync();
+        }
+#endif
 
         public override string ToString()
         {

@@ -55,8 +55,8 @@ namespace Iviz.Roslib
             }
 
             disposed = true;
-            stream?.Dispose();
-            tcpClient?.Dispose();
+            stream.Dispose();
+            tcpClient.Dispose();
         }
 
         async Task SendHeaderAsync()
@@ -85,18 +85,15 @@ namespace Iviz.Roslib
             }
 
             List<string> responses = Utils.ParseHeader(readBuffer, receivedLength);
-
-            if (responses.Count == 0 || !responses[0].HasPrefix("error"))
+            if (responses.Count != 0 && responses[0].HasPrefix("error"))
             {
-                return;
+                tcpClient.Close();
+
+                int index = responses[0].IndexOf('=');
+                throw new RosRpcException(index != -1
+                    ? $"Failed handshake: {responses[0].Substring(index + 1)}"
+                    : $"Failed handshake: {responses[0]}");
             }
-
-            tcpClient.Close();
-
-            int index = responses[0].IndexOf('=');
-            throw new RosRpcException(index != -1
-                ? $"Failed handshake: {responses[0].Substring(index + 1)}"
-                : $"Failed handshake: {responses[0]}");            
         }
         
         public async Task StartAsync()
