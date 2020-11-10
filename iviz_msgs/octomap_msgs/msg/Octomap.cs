@@ -37,7 +37,7 @@ namespace Iviz.Msgs.OctomapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Octomap(ref Buffer b)
+        public Octomap(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Binary = b.Deserialize<bool>();

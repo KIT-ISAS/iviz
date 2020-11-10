@@ -29,7 +29,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TwistWithCovariance(ref Buffer b)
+        public TwistWithCovariance(ref Buffer b)
         {
             Twist = new Twist(ref b);
             Covariance = b.DeserializeStructArray<double>(36);

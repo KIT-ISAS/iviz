@@ -34,7 +34,7 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Odometry(ref Buffer b)
+        public Odometry(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             ChildFrameId = b.DeserializeString();

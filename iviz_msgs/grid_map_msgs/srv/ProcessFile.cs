@@ -70,7 +70,7 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal ProcessFileRequest(ref Buffer b)
+        public ProcessFileRequest(ref Buffer b)
         {
             FilePath = b.DeserializeString();
             TopicName = b.DeserializeString();
@@ -126,7 +126,7 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal ProcessFileResponse(ref Buffer b)
+        public ProcessFileResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
         }

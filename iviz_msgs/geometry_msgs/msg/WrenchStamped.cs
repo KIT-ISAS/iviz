@@ -25,7 +25,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal WrenchStamped(ref Buffer b)
+        public WrenchStamped(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Wrench = new Wrench(ref b);

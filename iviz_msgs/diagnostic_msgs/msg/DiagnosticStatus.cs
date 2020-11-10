@@ -40,7 +40,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal DiagnosticStatus(ref Buffer b)
+        public DiagnosticStatus(ref Buffer b)
         {
             Level = b.Deserialize<byte>();
             Name = b.DeserializeString();

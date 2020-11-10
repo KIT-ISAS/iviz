@@ -29,7 +29,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Point32(ref Buffer b)
+        public Point32(ref Buffer b)
         {
             b.Deserialize(out this);
         }

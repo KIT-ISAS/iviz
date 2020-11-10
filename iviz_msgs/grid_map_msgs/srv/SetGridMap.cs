@@ -66,7 +66,7 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal SetGridMapRequest(ref Buffer b)
+        public SetGridMapRequest(ref Buffer b)
         {
             Map = new GridMapMsgs.GridMap(ref b);
         }

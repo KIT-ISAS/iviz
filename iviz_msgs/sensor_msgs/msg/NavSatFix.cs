@@ -65,7 +65,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal NavSatFix(ref Buffer b)
+        public NavSatFix(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Status = new NavSatStatus(ref b);

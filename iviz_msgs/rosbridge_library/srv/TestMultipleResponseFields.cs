@@ -75,7 +75,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TestMultipleResponseFieldsResponse(ref Buffer b)
+        public TestMultipleResponseFieldsResponse(ref Buffer b)
         {
             @int = b.Deserialize<int>();
             @float = b.Deserialize<float>();

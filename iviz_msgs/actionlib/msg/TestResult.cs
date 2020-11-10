@@ -21,7 +21,7 @@ namespace Iviz.Msgs.Actionlib
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TestResult(ref Buffer b)
+        public TestResult(ref Buffer b)
         {
             Result = b.Deserialize<int>();
         }

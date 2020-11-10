@@ -28,7 +28,7 @@ namespace Iviz.Msgs.ShapeMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Mesh(ref Buffer b)
+        public Mesh(ref Buffer b)
         {
             Triangles = b.DeserializeArray<MeshTriangle>();
             for (int i = 0; i < Triangles.Length; i++)

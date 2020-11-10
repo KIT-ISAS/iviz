@@ -24,7 +24,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Feature(ref Buffer b)
+        public Feature(ref Buffer b)
         {
             Location = new GeometryMsgs.Point(ref b);
             Descriptor = b.DeserializeStructArray<StdMsgs.Float32>();

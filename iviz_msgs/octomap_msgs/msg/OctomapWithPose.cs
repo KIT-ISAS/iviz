@@ -30,7 +30,7 @@ namespace Iviz.Msgs.OctomapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal OctomapWithPose(ref Buffer b)
+        public OctomapWithPose(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Origin = new GeometryMsgs.Pose(ref b);

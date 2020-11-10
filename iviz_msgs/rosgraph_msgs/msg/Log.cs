@@ -52,7 +52,7 @@ namespace Iviz.Msgs.RosgraphMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Log(ref Buffer b)
+        public Log(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Level = b.Deserialize<byte>();

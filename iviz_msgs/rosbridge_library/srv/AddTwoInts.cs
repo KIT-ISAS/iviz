@@ -66,7 +66,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal AddTwoIntsRequest(ref Buffer b)
+        public AddTwoIntsRequest(ref Buffer b)
         {
             A = b.Deserialize<long>();
             B = b.Deserialize<long>();
@@ -114,7 +114,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal AddTwoIntsResponse(ref Buffer b)
+        public AddTwoIntsResponse(ref Buffer b)
         {
             Sum = b.Deserialize<long>();
         }

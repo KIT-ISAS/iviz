@@ -26,7 +26,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal PolygonStamped(ref Buffer b)
+        public PolygonStamped(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Polygon = new Polygon(ref b);

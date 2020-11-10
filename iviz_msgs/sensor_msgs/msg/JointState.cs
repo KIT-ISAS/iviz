@@ -52,7 +52,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal JointState(ref Buffer b)
+        public JointState(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Name = b.DeserializeStringArray();

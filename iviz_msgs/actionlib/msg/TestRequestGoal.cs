@@ -42,7 +42,7 @@ namespace Iviz.Msgs.Actionlib
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TestRequestGoal(ref Buffer b)
+        public TestRequestGoal(ref Buffer b)
         {
             TerminateStatus = b.Deserialize<int>();
             IgnoreCancel = b.Deserialize<bool>();

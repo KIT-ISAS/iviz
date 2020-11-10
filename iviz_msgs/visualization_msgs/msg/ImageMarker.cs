@@ -56,7 +56,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal ImageMarker(ref Buffer b)
+        public ImageMarker(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Ns = b.DeserializeString();

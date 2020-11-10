@@ -24,7 +24,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal MeshVertexTexCoords(ref Buffer b)
+        public MeshVertexTexCoords(ref Buffer b)
         {
             U = b.Deserialize<float>();
             V = b.Deserialize<float>();

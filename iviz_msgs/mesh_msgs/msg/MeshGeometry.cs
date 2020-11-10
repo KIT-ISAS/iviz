@@ -29,7 +29,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal MeshGeometry(ref Buffer b)
+        public MeshGeometry(ref Buffer b)
         {
             Vertices = b.DeserializeStructArray<GeometryMsgs.Point>();
             VertexNormals = b.DeserializeStructArray<GeometryMsgs.Point>();

@@ -38,7 +38,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal PointField(ref Buffer b)
+        public PointField(ref Buffer b)
         {
             Name = b.DeserializeString();
             Offset = b.Deserialize<uint>();

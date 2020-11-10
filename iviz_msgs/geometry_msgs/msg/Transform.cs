@@ -21,7 +21,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Transform(ref Buffer b)
+        public Transform(ref Buffer b)
         {
             b.Deserialize(out this);
         }

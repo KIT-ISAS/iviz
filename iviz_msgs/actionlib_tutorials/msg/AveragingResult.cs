@@ -24,7 +24,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal AveragingResult(ref Buffer b)
+        public AveragingResult(ref Buffer b)
         {
             Mean = b.Deserialize<float>();
             StdDev = b.Deserialize<float>();

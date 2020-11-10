@@ -25,7 +25,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Vector3Stamped(ref Buffer b)
+        public Vector3Stamped(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Vector = new Vector3(ref b);

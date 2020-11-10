@@ -65,7 +65,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal PublishersRequest(ref Buffer b)
+        public PublishersRequest(ref Buffer b)
         {
             Topic = b.DeserializeString();
         }
@@ -117,7 +117,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal PublishersResponse(ref Buffer b)
+        public PublishersResponse(ref Buffer b)
         {
             Publishers_ = b.DeserializeStringArray();
         }

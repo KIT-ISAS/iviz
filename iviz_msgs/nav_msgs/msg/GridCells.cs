@@ -30,7 +30,7 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GridCells(ref Buffer b)
+        public GridCells(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             CellWidth = b.Deserialize<float>();

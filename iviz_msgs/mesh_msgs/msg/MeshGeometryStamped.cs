@@ -29,7 +29,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal MeshGeometryStamped(ref Buffer b)
+        public MeshGeometryStamped(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Uuid = b.DeserializeString();

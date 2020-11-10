@@ -64,7 +64,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal SendBytesRequest(ref Buffer b)
+        public SendBytesRequest(ref Buffer b)
         {
             Count = b.Deserialize<long>();
         }
@@ -111,7 +111,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal SendBytesResponse(ref Buffer b)
+        public SendBytesResponse(ref Buffer b)
         {
             Data = b.DeserializeString();
         }

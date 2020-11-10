@@ -25,7 +25,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TriangleMeshStamped(ref Buffer b)
+        public TriangleMeshStamped(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Mesh = new MeshMsgs.TriangleMesh(ref b);

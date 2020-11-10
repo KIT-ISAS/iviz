@@ -22,7 +22,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Wrench(ref Buffer b)
+        public Wrench(ref Buffer b)
         {
             b.Deserialize(out this);
         }

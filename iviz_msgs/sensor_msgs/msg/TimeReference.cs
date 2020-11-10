@@ -29,7 +29,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TimeReference(ref Buffer b)
+        public TimeReference(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             TimeRef = b.Deserialize<time>();

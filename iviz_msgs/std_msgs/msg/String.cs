@@ -22,7 +22,7 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal String(ref Buffer b)
+        public String(ref Buffer b)
         {
             Data = b.DeserializeString();
         }

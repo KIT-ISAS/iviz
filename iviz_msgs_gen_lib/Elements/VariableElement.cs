@@ -1,9 +1,13 @@
+using System;
 using System.Collections.Generic;
+using Iviz.Msgs;
 
 namespace Iviz.MsgsGen
 {
     public sealed class VariableElement : IElement
     {
+        const string HeaderMd5 = "2176decaecbce78abc3b96ef049fabed";
+
         public const int NotAnArray = -1;
         public const int DynamicSizeArray = 0;
 
@@ -51,7 +55,7 @@ namespace Iviz.MsgsGen
 
             RosFieldName = fieldName;
 
-            CsFieldName = MsgParser.Sanitize(fieldName);
+            CsFieldName = MsgParser.CsIfiy(fieldName);
             if (CsFieldName == parentClassName)
             {
                 CsFieldName += "_"; // C# forbids fields with the same name as the class
@@ -103,7 +107,7 @@ namespace Iviz.MsgsGen
             {
                 string packageName = RosClassName.Substring(0, slashIndex);
                 string classProper = RosClassName.Substring(slashIndex + 1);
-                CsClassName = $"{MsgParser.Sanitize(packageName)}.{classProper}";
+                CsClassName = $"{MsgParser.CsIfiy(packageName)}.{classProper}";
             }
             else
             {
@@ -176,15 +180,34 @@ namespace Iviz.MsgsGen
                 return $"{ClassInfo.GetMd5()} {RosFieldName}";
             }
 
-            switch (ArraySize)
+            if (ClassInfo.IsBuiltinType(RosClassName))
             {
-                case NotAnArray:
-                    return $"{RosClassName} {RosFieldName}";
-                case DynamicSizeArray:
-                    return $"{RosClassName}[] {RosFieldName}";
-                default:
-                    return $"{RosClassName}[{ArraySize}] {RosFieldName}";
+                return ArraySize switch
+                {
+                    NotAnArray => $"{RosClassName} {RosFieldName}",
+                    DynamicSizeArray => $"{RosClassName}[] {RosFieldName}",
+                    _ => $"{RosClassName}[{ArraySize}] {RosFieldName}"
+                };
             }
+            
+            // now we start improvising
+            if (RosClassName == "std_msgs/Header")
+            {
+                return $"{HeaderMd5} {RosFieldName}";
+            }
+
+            // is it in the assembly?
+            string guessName = $"Iviz.Msgs.{MsgParser.CsIfiy(RosClassName).Replace("/", ".")}, Iviz.Msgs";
+            Type guessType = System.Type.GetType(guessName);
+            if (guessType == null)
+            {
+                // nope? we bail out
+                Console.WriteLine($"EE Cannot find md5 for {RosClassName}. Produced file will not be valid!");
+                return null;
+            }
+
+            string md5Sum = BuiltIns.GetMd5Sum(guessType);
+            return $"{md5Sum} {RosFieldName}";
         }
     }
 }

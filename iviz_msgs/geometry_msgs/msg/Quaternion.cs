@@ -25,7 +25,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Quaternion(ref Buffer b)
+        public Quaternion(ref Buffer b)
         {
             b.Deserialize(out this);
         }

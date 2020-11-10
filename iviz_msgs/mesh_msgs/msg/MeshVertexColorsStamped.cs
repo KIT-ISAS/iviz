@@ -29,7 +29,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal MeshVertexColorsStamped(ref Buffer b)
+        public MeshVertexColorsStamped(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Uuid = b.DeserializeString();

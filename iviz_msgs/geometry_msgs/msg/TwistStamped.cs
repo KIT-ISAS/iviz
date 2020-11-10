@@ -25,7 +25,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TwistStamped(ref Buffer b)
+        public TwistStamped(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Twist = new Twist(ref b);

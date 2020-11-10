@@ -28,7 +28,7 @@ namespace Iviz.Msgs.Actionlib
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TwoIntsActionFeedback(ref Buffer b)
+        public TwoIntsActionFeedback(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Status = new ActionlibMsgs.GoalStatus(ref b);

@@ -15,4 +15,8 @@
       </PackageReference>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\iviz_msgs\iviz_msgs.csproj" />
+    </ItemGroup>
+
 </Project>

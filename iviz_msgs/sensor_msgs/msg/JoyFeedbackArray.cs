@@ -23,7 +23,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal JoyFeedbackArray(ref Buffer b)
+        public JoyFeedbackArray(ref Buffer b)
         {
             Array = b.DeserializeArray<JoyFeedback>();
             for (int i = 0; i < Array.Length; i++)

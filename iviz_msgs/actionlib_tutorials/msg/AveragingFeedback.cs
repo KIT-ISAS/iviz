@@ -28,7 +28,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal AveragingFeedback(ref Buffer b)
+        public AveragingFeedback(ref Buffer b)
         {
             Sample = b.Deserialize<int>();
             Data = b.Deserialize<float>();

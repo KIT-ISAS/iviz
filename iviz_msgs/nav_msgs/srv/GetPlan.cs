@@ -75,7 +75,7 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetPlanRequest(ref Buffer b)
+        public GetPlanRequest(ref Buffer b)
         {
             Start = new GeometryMsgs.PoseStamped(ref b);
             Goal = new GeometryMsgs.PoseStamped(ref b);
@@ -135,7 +135,7 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetPlanResponse(ref Buffer b)
+        public GetPlanResponse(ref Buffer b)
         {
             Plan = new NavMsgs.Path(ref b);
         }

@@ -27,7 +27,7 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Float32MultiArray(ref Buffer b)
+        public Float32MultiArray(ref Buffer b)
         {
             Layout = new MultiArrayLayout(ref b);
             Data = b.DeserializeStructArray<float>();

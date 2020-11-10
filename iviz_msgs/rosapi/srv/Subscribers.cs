@@ -65,7 +65,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal SubscribersRequest(ref Buffer b)
+        public SubscribersRequest(ref Buffer b)
         {
             Topic = b.DeserializeString();
         }
@@ -117,7 +117,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal SubscribersResponse(ref Buffer b)
+        public SubscribersResponse(ref Buffer b)
         {
             Subscribers_ = b.DeserializeStringArray();
         }

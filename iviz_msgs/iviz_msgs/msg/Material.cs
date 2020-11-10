@@ -31,7 +31,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Material(ref Buffer b)
+        public Material(ref Buffer b)
         {
             Name = b.DeserializeString();
             Ambient = new Color32(ref b);

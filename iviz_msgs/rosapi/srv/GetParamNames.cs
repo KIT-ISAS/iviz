@@ -69,7 +69,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetParamNamesResponse(ref Buffer b)
+        public GetParamNamesResponse(ref Buffer b)
         {
             Names = b.DeserializeStringArray();
         }

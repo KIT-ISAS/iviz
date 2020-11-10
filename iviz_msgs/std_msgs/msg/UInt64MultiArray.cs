@@ -27,7 +27,7 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal UInt64MultiArray(ref Buffer b)
+        public UInt64MultiArray(ref Buffer b)
         {
             Layout = new MultiArrayLayout(ref b);
             Data = b.DeserializeStructArray<ulong>();

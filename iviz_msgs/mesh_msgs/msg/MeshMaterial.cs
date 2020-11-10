@@ -25,7 +25,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal MeshMaterial(ref Buffer b)
+        public MeshMaterial(ref Buffer b)
         {
             TextureIndex = b.Deserialize<uint>();
             Color = new StdMsgs.ColorRGBA(ref b);

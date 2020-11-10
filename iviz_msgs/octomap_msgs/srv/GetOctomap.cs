@@ -58,7 +58,7 @@ namespace Iviz.Msgs.OctomapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetOctomapRequest(ref Buffer b)
+        public GetOctomapRequest(ref Buffer b)
         {
         }
         
@@ -103,7 +103,7 @@ namespace Iviz.Msgs.OctomapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetOctomapResponse(ref Buffer b)
+        public GetOctomapResponse(ref Buffer b)
         {
             Map = new OctomapMsgs.Octomap(ref b);
         }

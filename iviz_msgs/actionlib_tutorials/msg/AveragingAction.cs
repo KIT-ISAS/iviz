@@ -29,7 +29,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal AveragingAction(ref Buffer b)
+        public AveragingAction(ref Buffer b)
         {
             ActionGoal = new AveragingActionGoal(ref b);
             ActionResult = new AveragingActionResult(ref b);

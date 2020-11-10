@@ -86,7 +86,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal BatteryState(ref Buffer b)
+        public BatteryState(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Voltage = b.Deserialize<float>();

@@ -51,7 +51,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal InteractiveMarker(ref Buffer b)
+        public InteractiveMarker(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Pose = new GeometryMsgs.Pose(ref b);

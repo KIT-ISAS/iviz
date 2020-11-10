@@ -72,7 +72,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal UpdateModuleRequest(ref Buffer b)
+        public UpdateModuleRequest(ref Buffer b)
         {
             Id = b.DeserializeString();
             Fields = b.DeserializeStringArray();
@@ -142,7 +142,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal UpdateModuleResponse(ref Buffer b)
+        public UpdateModuleResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();

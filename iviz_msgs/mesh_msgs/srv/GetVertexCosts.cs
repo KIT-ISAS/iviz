@@ -65,7 +65,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetVertexCostsRequest(ref Buffer b)
+        public GetVertexCostsRequest(ref Buffer b)
         {
             Uuid = b.DeserializeString();
         }
@@ -117,7 +117,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetVertexCostsResponse(ref Buffer b)
+        public GetVertexCostsResponse(ref Buffer b)
         {
             MeshVertexCostsStamped = new MeshMsgs.MeshVertexCostsStamped(ref b);
         }

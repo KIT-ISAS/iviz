@@ -28,7 +28,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal MeshTexture(ref Buffer b)
+        public MeshTexture(ref Buffer b)
         {
             Uuid = b.DeserializeString();
             TextureIndex = b.Deserialize<uint>();

@@ -36,7 +36,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal CompressedImage(ref Buffer b)
+        public CompressedImage(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Format = b.DeserializeString();

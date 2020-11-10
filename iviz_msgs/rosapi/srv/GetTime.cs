@@ -68,7 +68,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetTimeResponse(ref Buffer b)
+        public GetTimeResponse(ref Buffer b)
         {
             Time = b.Deserialize<time>();
         }

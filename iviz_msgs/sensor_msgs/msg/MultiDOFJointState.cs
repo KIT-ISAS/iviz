@@ -53,7 +53,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal MultiDOFJointState(ref Buffer b)
+        public MultiDOFJointState(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             JointNames = b.DeserializeStringArray();

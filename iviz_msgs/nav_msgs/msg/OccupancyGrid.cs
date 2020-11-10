@@ -33,7 +33,7 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal OccupancyGrid(ref Buffer b)
+        public OccupancyGrid(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Info = new MapMetaData(ref b);

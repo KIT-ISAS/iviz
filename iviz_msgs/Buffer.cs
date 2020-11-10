@@ -63,7 +63,7 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal string DeserializeString()
+        public string DeserializeString()
         {
             AssertInRange(4);
             uint count = *(uint*) ptr;
@@ -80,7 +80,7 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal string[] DeserializeStringArray()
+        public string[] DeserializeStringArray()
         {
             AssertInRange(4);
             uint count = *(uint*) ptr;
@@ -89,7 +89,7 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal string[] DeserializeStringArray(uint count)
+        public string[] DeserializeStringArray(uint count)
         {
             string[] val = new string[count];
             for (int i = 0; i < val.Length; i++)
@@ -101,7 +101,7 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal T Deserialize<T>() where T : unmanaged
+        public T Deserialize<T>() where T : unmanaged
         {
             AssertInRange((uint) sizeof(T));
             T val = *(T*) ptr;
@@ -110,7 +110,7 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void Deserialize<T>(out T t) where T : unmanaged
+        public void Deserialize<T>(out T t) where T : unmanaged
         {
             AssertInRange((uint) sizeof(T));
             t = *(T*) ptr;
@@ -118,7 +118,7 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal T[] DeserializeStructArray<T>() where T : unmanaged
+        public T[] DeserializeStructArray<T>() where T : unmanaged
         {
             AssertInRange(4);
             uint count = *(uint*) ptr;
@@ -127,7 +127,7 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal T[] DeserializeStructArray<T>(uint count) where T : unmanaged
+        public T[] DeserializeStructArray<T>(uint count) where T : unmanaged
         {
             AssertInRange(count * (uint) sizeof(T));
             T[] val = new T[count];
@@ -142,7 +142,7 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal T[] DeserializeArray<T>() where T : IMessage, new()
+        public T[] DeserializeArray<T>() where T : IMessage, new()
         {
             AssertInRange(4);
             uint count = *(uint*) ptr;
@@ -151,7 +151,7 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void Serialize<T>(in T val) where T : unmanaged
+        public void Serialize<T>(in T val) where T : unmanaged
         {
             AssertInRange((uint) sizeof(T));
             *(T*) ptr = val;
@@ -159,7 +159,7 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void Serialize(string val)
+        public void Serialize(string val)
         {
             uint count = (uint) BuiltIns.UTF8.GetByteCount(val);
             AssertInRange(4 + count);
@@ -175,7 +175,7 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void SerializeArray(string[] val, uint count)
+        public void SerializeArray(string[] val, uint count)
         {
             if (count == 0)
             {
@@ -195,7 +195,7 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void SerializeStructArray<T>(T[] val, uint count) where T : unmanaged
+        public void SerializeStructArray<T>(T[] val, uint count) where T : unmanaged
         {
             if (count == 0)
             {
@@ -218,7 +218,7 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void SerializeArray<T>(T[] val, uint count) where T : IMessage
+        public void SerializeArray<T>(T[] val, uint count) where T : IMessage
         {
             if (count == 0)
             {

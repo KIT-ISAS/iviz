@@ -22,7 +22,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TestUInt8(ref Buffer b)
+        public TestUInt8(ref Buffer b)
         {
             Data = b.DeserializeStructArray<byte>();
         }

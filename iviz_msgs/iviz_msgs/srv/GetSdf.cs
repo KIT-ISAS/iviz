@@ -66,7 +66,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetSdfRequest(ref Buffer b)
+        public GetSdfRequest(ref Buffer b)
         {
             Uri = b.DeserializeString();
         }
@@ -123,7 +123,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetSdfResponse(ref Buffer b)
+        public GetSdfResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
             Scene = new Scene(ref b);

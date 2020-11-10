@@ -104,6 +104,7 @@ namespace Iviz.MsgsGen
         };
 
         internal static bool IsClassForceStruct(string f) => ForceStructs.Contains(f);
+        internal static bool IsBuiltinType(string f) => BuiltInTypes.Contains(f);
 
         static readonly UTF8Encoding Utf8 = new UTF8Encoding(false);
 
@@ -142,7 +143,7 @@ namespace Iviz.MsgsGen
             Console.WriteLine($"-- Parsing '{path}'");
 
             RosPackage = package;
-            csPackage = MsgParser.Sanitize(package);
+            csPackage = MsgParser.CsIfiy(package);
             Name = Path.GetFileNameWithoutExtension(path);
             fullMessageText = File.ReadAllText(path);
 
@@ -181,7 +182,7 @@ namespace Iviz.MsgsGen
             Console.WriteLine($"-- Parsing synthetic '{package}/{name}'");
 
             RosPackage = package;
-            csPackage = MsgParser.Sanitize(package);
+            csPackage = MsgParser.CsIfiy(package);
             Name = name;
 
             elements = newElements.ToArray();
@@ -314,17 +315,18 @@ namespace Iviz.MsgsGen
                         {
                             fieldSize += variable.ClassInfo.FixedSize;
                         }
+                        else if (variable.CsClassName == "string")
+                        {
+                            fieldSize += 4;
+                            fieldsWithSize.Add($"size += BuiltIns.UTF8.GetByteCount({variable.CsFieldName});");
+                        }
+                        else if (variable.ClassIsStruct)
+                        {
+                            fieldsWithSize.Add($"size += {variable.CsClassName}.RosFixedMessageLength;");
+                        }
                         else
                         {
-                            if (variable.CsClassName == "string")
-                            {
-                                fieldSize += 4;
-                                fieldsWithSize.Add($"size += BuiltIns.UTF8.GetByteCount({variable.CsFieldName});");
-                            }
-                            else
-                            {
-                                fieldsWithSize.Add($"size += {variable.CsFieldName}.RosMessageLength;");
-                            }
+                            fieldsWithSize.Add($"size += {variable.CsFieldName}.RosMessageLength;");
                         }
                     }
                     else
@@ -478,7 +480,7 @@ namespace Iviz.MsgsGen
             }
 
             lines.Add("/// <summary> Constructor with buffer. </summary>");
-            lines.Add($"internal {name}(ref Buffer b)");
+            lines.Add($"public {name}(ref Buffer b)");
             lines.Add("{");
             if (forceStruct)
             {
@@ -847,8 +849,9 @@ namespace Iviz.MsgsGen
 
             lines.Add("");
 
+            string md5Property = GetMd5Property();
             lines.Add("    /// <summary> MD5 hash of a compact representation of the message. </summary>");
-            lines.Add($"    [Preserve] public const string RosMd5Sum = \"{GetMd5Property()}\";");
+            lines.Add($"    [Preserve] public const string RosMd5Sum = {(md5Property.Length == 0 ? "null" : $"\"{md5Property}\"")};");
 
             lines.Add("");
 
@@ -912,11 +915,13 @@ namespace Iviz.MsgsGen
         {
             GetMd5();
 
+            /*
 #pragma warning disable CA5351
             using MD5 md5Hash = MD5.Create();
 #pragma warning restore CA5351
-
             return GetMd5Hash(md5Hash, md5File);
+            */
+            return md5;
         }
 
         internal string GetMd5()
@@ -941,7 +946,13 @@ namespace Iviz.MsgsGen
                 }
             }
 
-            var md5Variables = variables.Select(x => x.GetEntryForMd5Hash());
+            var md5Variables = variables.Select(x => x.GetEntryForMd5Hash()).ToArray();
+            if (md5Variables.Any(md5String => md5String == null))
+            {
+                md5 = "";
+                return md5;
+            }
+            
             str.Append(string.Join("\n", md5Variables));
 
             md5File = str.ToString();

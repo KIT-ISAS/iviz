@@ -22,7 +22,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TestDurationArray(ref Buffer b)
+        public TestDurationArray(ref Buffer b)
         {
             Durations = b.DeserializeStructArray<duration>();
         }

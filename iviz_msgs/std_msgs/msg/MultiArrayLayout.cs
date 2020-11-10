@@ -46,7 +46,7 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal MultiArrayLayout(ref Buffer b)
+        public MultiArrayLayout(ref Buffer b)
         {
             Dim = b.DeserializeArray<MultiArrayDimension>();
             for (int i = 0; i < Dim.Length; i++)

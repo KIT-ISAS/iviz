@@ -26,7 +26,7 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Path(ref Buffer b)
+        public Path(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Poses = b.DeserializeArray<GeometryMsgs.PoseStamped>();

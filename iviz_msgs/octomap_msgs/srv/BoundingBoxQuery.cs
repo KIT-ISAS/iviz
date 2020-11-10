@@ -69,7 +69,7 @@ namespace Iviz.Msgs.OctomapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal BoundingBoxQueryRequest(ref Buffer b)
+        public BoundingBoxQueryRequest(ref Buffer b)
         {
             Min = new GeometryMsgs.Point(ref b);
             Max = new GeometryMsgs.Point(ref b);
@@ -110,7 +110,7 @@ namespace Iviz.Msgs.OctomapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal BoundingBoxQueryResponse(ref Buffer b)
+        public BoundingBoxQueryResponse(ref Buffer b)
         {
         }
         

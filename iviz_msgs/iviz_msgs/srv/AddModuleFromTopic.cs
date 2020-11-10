@@ -66,7 +66,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal AddModuleFromTopicRequest(ref Buffer b)
+        public AddModuleFromTopicRequest(ref Buffer b)
         {
             Topic = b.DeserializeString();
         }
@@ -123,7 +123,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal AddModuleFromTopicResponse(ref Buffer b)
+        public AddModuleFromTopicResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();

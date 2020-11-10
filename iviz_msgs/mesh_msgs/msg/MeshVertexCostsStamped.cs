@@ -32,7 +32,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal MeshVertexCostsStamped(ref Buffer b)
+        public MeshVertexCostsStamped(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Uuid = b.DeserializeString();

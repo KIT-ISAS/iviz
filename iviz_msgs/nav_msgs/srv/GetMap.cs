@@ -58,7 +58,7 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetMapRequest(ref Buffer b)
+        public GetMapRequest(ref Buffer b)
         {
         }
         
@@ -103,7 +103,7 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetMapResponse(ref Buffer b)
+        public GetMapResponse(ref Buffer b)
         {
             Map = new NavMsgs.OccupancyGrid(ref b);
         }

@@ -50,7 +50,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Imu(ref Buffer b)
+        public Imu(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Orientation = new GeometryMsgs.Quaternion(ref b);

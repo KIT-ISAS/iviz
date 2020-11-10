@@ -65,7 +65,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TestArrayRequestRequest(ref Buffer b)
+        public TestArrayRequestRequest(ref Buffer b)
         {
             @int = b.DeserializeStructArray<int>();
         }

@@ -28,7 +28,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Temperature(ref Buffer b)
+        public Temperature(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Temperature_ = b.Deserialize<double>();

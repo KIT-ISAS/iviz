@@ -64,7 +64,7 @@ namespace Iviz.Msgs.StdSrvs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal SetBoolRequest(ref Buffer b)
+        public SetBoolRequest(ref Buffer b)
         {
             Data = b.Deserialize<bool>();
         }
@@ -113,7 +113,7 @@ namespace Iviz.Msgs.StdSrvs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal SetBoolResponse(ref Buffer b)
+        public SetBoolResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();

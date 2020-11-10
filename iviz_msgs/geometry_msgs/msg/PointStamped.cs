@@ -25,7 +25,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal PointStamped(ref Buffer b)
+        public PointStamped(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Point = new Point(ref b);

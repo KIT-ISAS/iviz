@@ -39,7 +39,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Illuminance(ref Buffer b)
+        public Illuminance(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Illuminance_ = b.Deserialize<double>();

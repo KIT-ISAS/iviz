@@ -41,7 +41,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal MagneticField(ref Buffer b)
+        public MagneticField(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             MagneticField_ = new GeometryMsgs.Vector3(ref b);

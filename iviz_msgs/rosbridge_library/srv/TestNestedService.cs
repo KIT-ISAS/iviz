@@ -65,7 +65,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TestNestedServiceRequest(ref Buffer b)
+        public TestNestedServiceRequest(ref Buffer b)
         {
             Pose = new GeometryMsgs.Pose(ref b);
         }
@@ -112,7 +112,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TestNestedServiceResponse(ref Buffer b)
+        public TestNestedServiceResponse(ref Buffer b)
         {
             Data = new StdMsgs.Float64(ref b);
         }

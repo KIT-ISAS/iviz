@@ -39,7 +39,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Mesh(ref Buffer b)
+        public Mesh(ref Buffer b)
         {
             Name = b.DeserializeString();
             Vertices = b.DeserializeStructArray<Vector3f>();

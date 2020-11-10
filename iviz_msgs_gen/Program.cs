@@ -94,6 +94,7 @@ namespace Iviz.MsgsGen
 
             PackageInfo p = new PackageInfo();
             p.AddAllInPackagePath(fullInputPath, package);
+            p.ResolveAll();
 
             if (p.Messages.Count == 0 && p.Services.Count == 0)
             {
@@ -132,9 +133,9 @@ namespace Iviz.MsgsGen
             Console.WriteLine("Usage:");
             Console.WriteLine("    dotnet Iviz.MsgsGen.dll -h");
             Console.WriteLine("        Shows this text");
-            Console.WriteLine("    dotnet Iviz.MsgsGen.dll -p Package -o OutputFolder -i Files... ");
+            Console.WriteLine("    dotnet Iviz.MsgsGen.dll -o OutputFolder -p Package -i Files... ");
             Console.WriteLine("        Converts the given files (.msg, .srv, .action) into C# messages, and writes the result in OutputFolder");
-            Console.WriteLine("    dotnet Iviz.MsgsGen.dll -p Package -o OutputFolder -if InputFolder");
+            Console.WriteLine("    dotnet Iviz.MsgsGen.dll -o OutputFolder -p Package -if InputFolder");
             Console.WriteLine("        Searches all files in the input folder (.msg, .srv, .action), convers them into C# messages, and writes the result in OutputFolder");
             Console.WriteLine("    dotnet Iviz.MsgsGen.dll -r");
             Console.WriteLine("        Regenerates the default Iviz message files from the ros_msgs folder");

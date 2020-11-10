@@ -30,7 +30,7 @@ namespace Iviz.Msgs.ActionlibMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GoalID(ref Buffer b)
+        public GoalID(ref Buffer b)
         {
             Stamp = b.Deserialize<time>();
             Id = b.DeserializeString();

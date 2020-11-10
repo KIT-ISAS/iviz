@@ -22,7 +22,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal FibonacciGoal(ref Buffer b)
+        public FibonacciGoal(ref Buffer b)
         {
             Order = b.Deserialize<int>();
         }

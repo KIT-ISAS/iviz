@@ -65,7 +65,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TopicTypeRequest(ref Buffer b)
+        public TopicTypeRequest(ref Buffer b)
         {
             Topic = b.DeserializeString();
         }
@@ -117,7 +117,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TopicTypeResponse(ref Buffer b)
+        public TopicTypeResponse(ref Buffer b)
         {
             Type = b.DeserializeString();
         }

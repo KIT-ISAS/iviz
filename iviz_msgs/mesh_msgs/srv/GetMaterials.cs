@@ -65,7 +65,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetMaterialsRequest(ref Buffer b)
+        public GetMaterialsRequest(ref Buffer b)
         {
             Uuid = b.DeserializeString();
         }
@@ -117,7 +117,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetMaterialsResponse(ref Buffer b)
+        public GetMaterialsResponse(ref Buffer b)
         {
             MeshMaterialsStamped = new MeshMsgs.MeshMaterialsStamped(ref b);
         }

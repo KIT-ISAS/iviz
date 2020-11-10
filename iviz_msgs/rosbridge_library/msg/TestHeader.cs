@@ -22,7 +22,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TestHeader(ref Buffer b)
+        public TestHeader(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
         }

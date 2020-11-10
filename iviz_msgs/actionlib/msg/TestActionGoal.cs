@@ -28,7 +28,7 @@ namespace Iviz.Msgs.Actionlib
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TestActionGoal(ref Buffer b)
+        public TestActionGoal(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             GoalId = new ActionlibMsgs.GoalID(ref b);

@@ -18,6 +18,8 @@ namespace Iviz.MsgsGen
         int fixedSizeReq = ClassInfo.UninitializedSize;
         int fixedSizeResp = ClassInfo.UninitializedSize;
 
+        string md5;
+
         public ServiceInfo(string package, string path)
         {
             if (package == null)
@@ -38,7 +40,7 @@ namespace Iviz.MsgsGen
             Console.WriteLine($"-- Parsing '{path}'");
 
             RosPackage = package;
-            CsPackage = MsgParser.Sanitize(package);
+            CsPackage = MsgParser.CsIfiy(package);
             Name = Path.GetFileNameWithoutExtension(path);
             string[] lines = File.ReadAllLines(path);
             File.ReadAllText(path);
@@ -127,7 +129,7 @@ namespace Iviz.MsgsGen
                 lines.Add($"    {entry}");
             }
 
-            
+
             lines.Add("");
             IEnumerable<string> lengthProperty = ClassInfo.CreateLengthProperty(variables, fixedSize, false);
             foreach (string entry in lengthProperty)
@@ -157,6 +159,11 @@ namespace Iviz.MsgsGen
 
         string GetMd5()
         {
+            if (md5 != null)
+            {
+                return md5;
+            }
+            
             StringBuilder str = new StringBuilder();
 
             string[] constantsReq = elementsReq.OfType<ConstantElement>().Select(x => x.GetEntryForMd5Hash()).ToArray();
@@ -170,10 +177,16 @@ namespace Iviz.MsgsGen
                 }
             }
 
-            IEnumerable<string> hashVariables = variablesReq.Select(x => x.GetEntryForMd5Hash());
-            str.Append(string.Join("\n", hashVariables));
+            var reqHashVariables = variablesReq.Select(x => x.GetEntryForMd5Hash()).ToArray();
+            if (reqHashVariables.Any(md5String => md5String == null))
+            {
+                return "";
+            }
 
-            string[] constantsHash = elementsResp.OfType<ConstantElement>().Select(x => x.GetEntryForMd5Hash()).ToArray();
+            str.Append(string.Join("\n", reqHashVariables));
+
+            string[] constantsHash =
+                elementsResp.OfType<ConstantElement>().Select(x => x.GetEntryForMd5Hash()).ToArray();
 
             if (constantsHash.Any())
             {
@@ -184,22 +197,29 @@ namespace Iviz.MsgsGen
                 }
             }
 
-            IEnumerable<string> variablesHash = variablesResp.Select(x => x.GetEntryForMd5Hash());
-            str.Append(string.Join("\n", variablesHash));
+            var respHashVariables = variablesResp.Select(x => x.GetEntryForMd5Hash()).ToArray();
+            if (respHashVariables.Any(md5String => md5String == null))
+            {
+                return "";
+            }
+
+            str.Append(string.Join("\n", respHashVariables));
 
             string md5File = str.ToString();
 
-#pragma warning disable CA5351 
+#pragma warning disable CA5351
             using MD5 md5Hash = MD5.Create();
-#pragma warning restore CA5351             
-            
-            string md5 = ClassInfo.GetMd5Hash(md5Hash, md5File);
+#pragma warning restore CA5351
+
+            md5 = ClassInfo.GetMd5Hash(md5Hash, md5File);
 
             return md5;
         }
 
         IEnumerable<string> CreateServiceContent()
         {
+            CheckFixedSize();
+            string md5Property = GetMd5();
             return new[]
             {
                 "/// <summary> Request message. </summary>",
@@ -242,7 +262,7 @@ namespace Iviz.MsgsGen
                 $"[Preserve] public const string RosServiceType = \"{RosPackage}/{Name}\";",
                 "",
                 "/// <summary> MD5 hash of a compact representation of the service. </summary>",
-                $"[Preserve] public const string RosMd5Sum = \"{GetMd5()}\";"
+                $"[Preserve] public const string RosMd5Sum = {(md5Property.Length == 0 ? "null" : $"\"{md5Property}\"")};"
             };
         }
 

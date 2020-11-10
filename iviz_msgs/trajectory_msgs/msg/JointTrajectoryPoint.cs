@@ -36,7 +36,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal JointTrajectoryPoint(ref Buffer b)
+        public JointTrajectoryPoint(ref Buffer b)
         {
             Positions = b.DeserializeStructArray<double>();
             Velocities = b.DeserializeStructArray<double>();

@@ -36,7 +36,7 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Header(ref Buffer b)
+        public Header(ref Buffer b)
         {
             Seq = b.Deserialize<uint>();
             Stamp = b.Deserialize<time>();

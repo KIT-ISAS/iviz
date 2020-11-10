@@ -43,7 +43,7 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GridMap(ref Buffer b)
+        public GridMap(ref Buffer b)
         {
             Info = new GridMapInfo(ref b);
             Layers = b.DeserializeStringArray();

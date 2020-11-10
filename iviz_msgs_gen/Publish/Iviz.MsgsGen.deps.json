@@ -14,7 +14,15 @@
           "Iviz.MsgsGen.dll": {}
         }
       },
+      "Iviz.Msgs/1.0.0": {
+        "runtime": {
+          "Iviz.Msgs.dll": {}
+        }
+      },
       "Iviz.MsgsGen.Lib/1.0.0": {
+        "dependencies": {
+          "Iviz.Msgs": "1.0.0"
+        },
         "runtime": {
           "Iviz.MsgsGen.Lib.dll": {}
         }
@@ -23,6 +31,11 @@
   },
   "libraries": {
     "Iviz.MsgsGen/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Iviz.Msgs/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

@@ -22,7 +22,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TestHeaderArray(ref Buffer b)
+        public TestHeaderArray(ref Buffer b)
         {
             Header = b.DeserializeArray<StdMsgs.Header>();
             for (int i = 0; i < Header.Length; i++)

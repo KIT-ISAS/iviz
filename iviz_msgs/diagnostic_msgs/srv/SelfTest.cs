@@ -74,7 +74,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal SelfTestResponse(ref Buffer b)
+        public SelfTestResponse(ref Buffer b)
         {
             Id = b.DeserializeString();
             Passed = b.Deserialize<byte>();

@@ -33,7 +33,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TransformStamped(ref Buffer b)
+        public TransformStamped(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             ChildFrameId = b.DeserializeString();

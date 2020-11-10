@@ -9,7 +9,7 @@ namespace Iviz.MsgsGen
     internal static class MsgParser
     {
         static readonly CultureInfo Culture = CultureInfo.InvariantCulture;
-        
+
         internal static readonly Dictionary<string, string> BuiltInsMaps = new Dictionary<string, string>
         {
             {"bool", "bool"},
@@ -30,7 +30,7 @@ namespace Iviz.MsgsGen
             {"byte", "byte"},
         };
 
-        internal static string Sanitize(string name)
+        internal static string CsIfiy(string name)
         {
             StringBuilder str = new StringBuilder();
             str.Append(char.ToUpper(name[0], Culture));

@@ -26,7 +26,7 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal MultiArrayDimension(ref Buffer b)
+        public MultiArrayDimension(ref Buffer b)
         {
             Label = b.DeserializeString();
             Size = b.Deserialize<uint>();

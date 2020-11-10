@@ -65,7 +65,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal HasParamRequest(ref Buffer b)
+        public HasParamRequest(ref Buffer b)
         {
             Name = b.DeserializeString();
         }
@@ -116,7 +116,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal HasParamResponse(ref Buffer b)
+        public HasParamResponse(ref Buffer b)
         {
             Exists = b.Deserialize<bool>();
         }

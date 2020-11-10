@@ -23,7 +23,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal FibonacciFeedback(ref Buffer b)
+        public FibonacciFeedback(ref Buffer b)
         {
             Sequence = b.DeserializeStructArray<int>();
         }

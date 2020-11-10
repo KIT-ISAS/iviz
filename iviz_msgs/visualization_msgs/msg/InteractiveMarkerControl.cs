@@ -91,7 +91,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal InteractiveMarkerControl(ref Buffer b)
+        public InteractiveMarkerControl(ref Buffer b)
         {
             Name = b.DeserializeString();
             Orientation = new GeometryMsgs.Quaternion(ref b);

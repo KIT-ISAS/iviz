@@ -65,7 +65,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal DeleteParamRequest(ref Buffer b)
+        public DeleteParamRequest(ref Buffer b)
         {
             Name = b.DeserializeString();
         }

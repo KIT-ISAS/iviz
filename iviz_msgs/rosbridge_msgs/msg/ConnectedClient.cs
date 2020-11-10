@@ -24,7 +24,7 @@ namespace Iviz.Msgs.RosbridgeMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal ConnectedClient(ref Buffer b)
+        public ConnectedClient(ref Buffer b)
         {
             IpAddress = b.DeserializeString();
             ConnectionTime = b.Deserialize<time>();

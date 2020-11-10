@@ -65,7 +65,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetModelTextureRequest(ref Buffer b)
+        public GetModelTextureRequest(ref Buffer b)
         {
             Uri = b.DeserializeString();
         }
@@ -122,7 +122,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetModelTextureResponse(ref Buffer b)
+        public GetModelTextureResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
             Image = new SensorMsgs.CompressedImage(ref b);

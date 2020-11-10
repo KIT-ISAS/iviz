@@ -61,7 +61,7 @@ namespace Iviz.Msgs.RosgraphMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TopicStatistics(ref Buffer b)
+        public TopicStatistics(ref Buffer b)
         {
             Topic = b.DeserializeString();
             NodePub = b.DeserializeString();

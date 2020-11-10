@@ -25,7 +25,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal QuaternionStamped(ref Buffer b)
+        public QuaternionStamped(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Quaternion = new Quaternion(ref b);

@@ -32,7 +32,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Scene(ref Buffer b)
+        public Scene(ref Buffer b)
         {
             Name = b.DeserializeString();
             Filename = b.DeserializeString();

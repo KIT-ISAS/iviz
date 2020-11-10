@@ -32,7 +32,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal MeshMaterials(ref Buffer b)
+        public MeshMaterials(ref Buffer b)
         {
             Clusters = b.DeserializeArray<MeshMsgs.MeshFaceCluster>();
             for (int i = 0; i < Clusters.Length; i++)

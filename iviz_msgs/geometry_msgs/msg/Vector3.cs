@@ -28,7 +28,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Vector3(ref Buffer b)
+        public Vector3(ref Buffer b)
         {
             b.Deserialize(out this);
         }

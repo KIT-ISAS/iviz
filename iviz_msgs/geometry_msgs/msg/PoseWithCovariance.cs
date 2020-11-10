@@ -29,7 +29,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal PoseWithCovariance(ref Buffer b)
+        public PoseWithCovariance(ref Buffer b)
         {
             Pose = new Pose(ref b);
             Covariance = b.DeserializeStructArray<double>(36);

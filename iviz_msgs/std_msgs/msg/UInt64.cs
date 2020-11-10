@@ -18,7 +18,7 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal UInt64(ref Buffer b)
+        public UInt64(ref Buffer b)
         {
             b.Deserialize(out this);
         }

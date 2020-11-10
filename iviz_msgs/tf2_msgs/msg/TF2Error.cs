@@ -31,7 +31,7 @@ namespace Iviz.Msgs.Tf2Msgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal TF2Error(ref Buffer b)
+        public TF2Error(ref Buffer b)
         {
             Error = b.Deserialize<byte>();
             ErrorString = b.DeserializeString();

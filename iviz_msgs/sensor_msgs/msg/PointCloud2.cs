@@ -52,7 +52,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal PointCloud2(ref Buffer b)
+        public PointCloud2(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Height = b.Deserialize<uint>();

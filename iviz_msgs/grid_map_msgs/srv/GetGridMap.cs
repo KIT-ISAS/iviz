@@ -82,7 +82,7 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetGridMapRequest(ref Buffer b)
+        public GetGridMapRequest(ref Buffer b)
         {
             FrameId = b.DeserializeString();
             PositionX = b.Deserialize<double>();
@@ -155,7 +155,7 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetGridMapResponse(ref Buffer b)
+        public GetGridMapResponse(ref Buffer b)
         {
             Map = new GridMapMsgs.GridMap(ref b);
         }

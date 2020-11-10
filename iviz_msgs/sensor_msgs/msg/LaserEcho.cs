@@ -25,7 +25,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal LaserEcho(ref Buffer b)
+        public LaserEcho(ref Buffer b)
         {
             Echoes = b.DeserializeStructArray<float>();
         }

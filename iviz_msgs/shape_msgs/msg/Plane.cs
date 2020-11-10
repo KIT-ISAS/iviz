@@ -27,7 +27,7 @@ namespace Iviz.Msgs.ShapeMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Plane(ref Buffer b)
+        public Plane(ref Buffer b)
         {
             Coef = b.DeserializeStructArray<double>(4);
         }

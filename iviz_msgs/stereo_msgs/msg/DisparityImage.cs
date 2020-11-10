@@ -54,7 +54,7 @@ namespace Iviz.Msgs.StereoMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal DisparityImage(ref Buffer b)
+        public DisparityImage(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Image = new SensorMsgs.Image(ref b);

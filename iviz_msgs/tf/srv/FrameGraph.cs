@@ -69,7 +69,7 @@ namespace Iviz.Msgs.Tf
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal FrameGraphResponse(ref Buffer b)
+        public FrameGraphResponse(ref Buffer b)
         {
             DotGraph = b.DeserializeString();
         }

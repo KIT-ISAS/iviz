@@ -69,7 +69,7 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal SetMapRequest(ref Buffer b)
+        public SetMapRequest(ref Buffer b)
         {
             Map = new NavMsgs.OccupancyGrid(ref b);
             InitialPose = new GeometryMsgs.PoseWithCovarianceStamped(ref b);
@@ -126,7 +126,7 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal SetMapResponse(ref Buffer b)
+        public SetMapResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
         }

@@ -51,7 +51,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Image(ref Buffer b)
+        public Image(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Height = b.Deserialize<uint>();

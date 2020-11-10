@@ -22,7 +22,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Triangle(ref Buffer b)
+        public Triangle(ref Buffer b)
         {
             b.Deserialize(out this);
         }

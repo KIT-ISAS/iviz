@@ -68,7 +68,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetParamRequest(ref Buffer b)
+        public GetParamRequest(ref Buffer b)
         {
             Name = b.DeserializeString();
             @default = b.DeserializeString();
@@ -124,7 +124,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetParamResponse(ref Buffer b)
+        public GetParamResponse(ref Buffer b)
         {
             Value = b.DeserializeString();
         }

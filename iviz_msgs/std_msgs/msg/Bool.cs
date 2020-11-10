@@ -21,7 +21,7 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Bool(ref Buffer b)
+        public Bool(ref Buffer b)
         {
             Data = b.Deserialize<bool>();
         }

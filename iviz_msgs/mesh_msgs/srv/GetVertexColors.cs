@@ -65,7 +65,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetVertexColorsRequest(ref Buffer b)
+        public GetVertexColorsRequest(ref Buffer b)
         {
             Uuid = b.DeserializeString();
         }
@@ -117,7 +117,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal GetVertexColorsResponse(ref Buffer b)
+        public GetVertexColorsResponse(ref Buffer b)
         {
             MeshVertexColorsStamped = new MeshMsgs.MeshVertexColorsStamped(ref b);
         }

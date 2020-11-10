@@ -31,7 +31,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal FluidPressure(ref Buffer b)
+        public FluidPressure(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             FluidPressure_ = b.Deserialize<double>();

@@ -22,7 +22,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Vector3f(ref Buffer b)
+        public Vector3f(ref Buffer b)
         {
             b.Deserialize(out this);
         }

@@ -24,7 +24,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        internal Color32(ref Buffer b)
+        public Color32(ref Buffer b)
         {
             b.Deserialize(out this);
         }
