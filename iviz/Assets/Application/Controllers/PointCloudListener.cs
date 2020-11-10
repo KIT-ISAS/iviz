@@ -52,13 +52,9 @@ namespace Iviz.Controllers
         public PointCloudListener([NotNull] IModuleData moduleData)
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
-
             FieldNames = new ReadOnlyCollection<string>(fieldNames);
-
             node = SimpleDisplayNode.Instantiate("[PointCloudNode]");
-
             pointCloud = ResourcePool.GetOrCreateDisplay<PointListResource>(node.transform);
-
             Config = new PointCloudConfiguration();
         }
 
@@ -626,7 +622,7 @@ namespace Iviz.Controllers
         {
             base.StopController();
 
-            ResourcePool.Dispose(Resource.Displays.PointList, pointCloud.gameObject);
+            pointCloud?.DisposeDisplay();
 
             node.Stop();
             Object.Destroy(node.gameObject);

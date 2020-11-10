@@ -1,6 +1,4 @@
-﻿using Iviz.Controllers;
-using Iviz.Core;
-using Iviz.Displays;
+﻿using Iviz.Core;
 using UnityEngine;
 using UnityEngine.UI;
 using Iviz.Resources;

@@ -21,7 +21,8 @@ namespace Iviz.Controllers
         GameObject markerNode;
         bool markerIsInteractive;
 
-        string id;
+        string rosId;
+        
         [CanBeNull] InteractiveMarkerObject imarkerObject;
 
         void Awake()
@@ -31,10 +32,10 @@ namespace Iviz.Controllers
             markerNode.AddComponent<Billboard>().enabled = false;
         }
 
-        internal void Initialize(InteractiveMarkerObject newIMarkerObject, string newId)
+        internal void Initialize(InteractiveMarkerObject newIMarkerObject, string realId)
         {
             imarkerObject = newIMarkerObject;
-            id = newId;
+            rosId = realId;
         }
 
         public void Set([NotNull] InteractiveMarkerControl msg)
@@ -76,7 +77,7 @@ namespace Iviz.Controllers
             {
                 if (imarkerObject != null)
                 {
-                    imarkerObject.OnMoved(id);
+                    imarkerObject.OnMoved(rosId);
                 }
             };
 
@@ -86,6 +87,7 @@ namespace Iviz.Controllers
                 if (imarkerObject != null)
                 {
                     imarkerObject.PoseUpdateEnabled = false;
+                    imarkerObject.OnMouseEvent(rosId, null, MouseEventType.Down);
                 }
             };
             control.PointerUp += () =>
@@ -93,6 +95,7 @@ namespace Iviz.Controllers
                 if (imarkerObject != null)
                 {
                     imarkerObject.PoseUpdateEnabled = true;
+                    imarkerObject.OnMouseEvent(rosId, null, MouseEventType.Up);
                 }
             };
         }
@@ -232,7 +235,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            imarkerObject?.OnMouseEvent(id, transform.AsPose(), point, type);
+            imarkerObject?.OnMouseEvent(rosId, point, type);
         }
 
         public void Stop()

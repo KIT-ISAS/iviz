@@ -181,7 +181,7 @@ namespace Iviz.Controllers
             ImageTexture = new ImageTexture();
             Node = DisplayClickableNode.Instantiate("[ImageNode]");
             Node.ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData)); 
-            marker = ResourcePool.GetOrCreate<ImageResource>(Resource.Displays.Image);
+            marker = ResourcePool.GetOrCreateDisplay<ImageResource>();
             marker.Texture = ImageTexture;
             Node.Target = marker;
 
@@ -252,7 +252,7 @@ namespace Iviz.Controllers
         {
             base.StopController();
             marker.Texture = null;
-            ResourcePool.Dispose(Resource.Displays.Image, marker.gameObject);
+            marker.DisposeDisplay();
             marker = null;
 
             ImageTexture.Stop();

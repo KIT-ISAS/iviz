@@ -8,7 +8,6 @@ using Iviz.Roslib;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
-using Logger = UnityEngine.Logger;
 
 namespace Iviz.App
 {

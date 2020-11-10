@@ -172,7 +172,6 @@ namespace Iviz.Controllers
         public override void StartListening()
         {
             Listener = new Listener<GridMap>(config.Topic, Handler) {MaxQueueSize = (int) MaxQueueSize};
-            //name = "[" + config.Topic + "]";
         }
 
         static bool IsInvalidSize(double x)
@@ -238,7 +237,7 @@ namespace Iviz.Controllers
         {
             base.StopController();
 
-            ResourcePool.Dispose(Resource.Displays.GridMap, resource.gameObject);
+            resource.DisposeDisplay();
 
             link.Stop();
             UnityEngine.Object.Destroy(link.gameObject);

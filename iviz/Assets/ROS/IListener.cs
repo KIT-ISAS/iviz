@@ -38,7 +38,7 @@ namespace Iviz.Ros
 
         readonly List<float> timesOfArrival = new List<float>();
         readonly List<T> tmpMessageBag = new List<T>();
-        readonly bool callbackInGameThread;
+        readonly bool callbackInGameThread = true;
 
         int dropped;
         int lastMsgBytes;
@@ -57,9 +57,6 @@ namespace Iviz.Ros
 
             Logger.Internal($"Subscribing to <b>{topic}</b> <i>[{Type}]</i>.");
 
-            Connection.Subscribe(this);
-            Subscribed = true;
-
             GameThread.EverySecond += UpdateStats;
         }
 
@@ -69,12 +66,18 @@ namespace Iviz.Ros
             delayedHandler = handler ?? throw new ArgumentNullException(nameof(handler));
             callbackInGameThread = true;
             GameThread.EveryFrame += CallHandlerDelayed;
+
+            Connection.Subscribe(this);
+            Subscribed = true;
         }
 
         public Listener([NotNull] string topic, [NotNull] Func<T, bool> handler) : this(topic)
         {
             directHandler = handler ?? throw new ArgumentNullException(nameof(handler));
             callbackInGameThread = false;
+            
+            Connection.Subscribe(this);
+            Subscribed = true;
         }
 
         public string Topic { get; }

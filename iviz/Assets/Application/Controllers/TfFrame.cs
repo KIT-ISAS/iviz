@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using Iviz.App;
 using Iviz.Core;
 using Iviz.Displays;
-using Iviz.Resources;
 using JetBrains.Annotations;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
@@ -405,8 +403,8 @@ namespace Iviz.Controllers
             Id = "";
             trail.Name = "[Trail:In Trash]";
             timeline.Clear();
-            axis.Suspend();
-            trail.Suspend();
+            axis.DisposeDisplay();
+            trail.DisposeDisplay();
             TrailVisible = false;
         }
 

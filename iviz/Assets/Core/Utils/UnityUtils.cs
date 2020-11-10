@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Iviz.Displays;
 using Iviz.Msgs;
+using Iviz.Resources;
 using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -69,12 +71,12 @@ namespace Iviz.Core
             return false;
         }
 
-        public static Pose AsPose(this Transform t)
+        public static Pose AsPose([NotNull] this Transform t)
         {
             return new Pose(t.position, t.rotation);
         }
 
-        public static Pose AsLocalPose(this Transform t)
+        public static Pose AsLocalPose([NotNull] this Transform t)
         {
             return new Pose(t.localPosition, t.localRotation);
         }
@@ -279,5 +281,24 @@ namespace Iviz.Core
 
         public static IReadOnlyList<T> AsReadOnlyList<T>(this NativeArray<T> array) where T : struct => 
             new NativeArrayHelper<T>(array);
+
+        public static void DisposeDisplay<T>([CanBeNull] this T resource) where T : MonoBehaviour, IDisplay
+        {
+            if (resource != null)
+            {
+                resource.Suspend();
+                ResourcePool.DisposeDisplay(resource);
+            }
+        }
+
+        public static void DisposeResource<T>([CanBeNull] this T resource, [NotNull] Info<GameObject> info) where T : MonoBehaviour, IDisplay
+        {
+            if (resource != null)
+            {
+                resource.Suspend();
+                ResourcePool.Dispose(info, resource.gameObject);
+            }
+        }
+
     }
 }

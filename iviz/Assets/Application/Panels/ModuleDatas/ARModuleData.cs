@@ -5,7 +5,6 @@ using Iviz.Resources;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
-using Logger = Iviz.Msgs.Logger;
 
 namespace Iviz.App
 {

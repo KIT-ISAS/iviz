@@ -1,6 +1,4 @@
 ﻿using Iviz.Core;
-using UnityEditor.UI;
-using UnityEditorInternal;
 using UnityEngine;
 
 namespace Iviz.Displays

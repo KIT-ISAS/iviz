@@ -102,7 +102,7 @@ namespace Iviz.Controllers
             return color.a < 1 ? (bool?) true : null;
         }
 
-        public LineResource.DirectLineSetter GetLineSetterForList(Marker msg)
+        public LineResource.DirectLineSetter GetLineSetterForList([NotNull] Marker msg)
         {
             points = msg.Points;
             colors = msg.Colors;

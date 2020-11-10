@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Iviz.Controllers;
 using Iviz.Core;
-using Iviz.Resources;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -91,7 +90,7 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            resource = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, transform);
+            resource = ResourcePool.GetOrCreateDisplay<LineResource>(transform);
             resource.ElementScale = 0.003f;
             Color = new Color(1, 1, 0, 0.25f);
             ColliderEnabled = false;

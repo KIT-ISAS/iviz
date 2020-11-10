@@ -305,8 +305,7 @@ namespace Iviz.Controllers
         public override void StopController()
         {
             base.StopController();
-
-            ResourcePool.Dispose(Resource.Displays.Line, resource.gameObject);
+            resource.DisposeDisplay();
             node.Stop();
             UnityEngine.Object.Destroy(node.gameObject);
         }

@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Linq;
 using System.Collections.Generic;
-using Iviz.Controllers;
 using Iviz.Core;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json;
@@ -272,9 +271,9 @@ namespace Iviz.Displays
             {
                 while (horizontals.Count != size)
                 {
-                    ResourcePool.Dispose(Resource.Displays.Square, horizontals[horizontals.Count - 1].gameObject);
+                    horizontals[horizontals.Count - 1].DisposeResource(Resource.Displays.Square);
                     horizontals.RemoveAt(horizontals.Count - 1);
-                    ResourcePool.Dispose(Resource.Displays.Square, verticals[verticals.Count - 1].gameObject);
+                    verticals[verticals.Count - 1].DisposeResource(Resource.Displays.Square);
                     verticals.RemoveAt(verticals.Count - 1);
                 }
             }
@@ -312,14 +311,12 @@ namespace Iviz.Displays
         {
             foreach (var plane in horizontals)
             {
-                plane.Suspend();
-                ResourcePool.Dispose(Resource.Displays.Square, plane.gameObject);
+                plane.DisposeResource(Resource.Displays.Square);
             }
 
             foreach (var plane in verticals)
             {
-                plane.Suspend();
-                ResourcePool.Dispose(Resource.Displays.Square, plane.gameObject);
+                plane.DisposeResource(Resource.Displays.Square);
             }
         }
     }

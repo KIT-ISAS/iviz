@@ -233,8 +233,8 @@ namespace Iviz.Displays
 
         public void SplitForRecycle()
         {
-            ResourcePool.DisposeDisplay(pointCloud);
-            ResourcePool.DisposeDisplay(lines);
+            pointCloud?.DisposeDisplay();
+            lines?.DisposeDisplay();
         }
 
         public void Set(float angleMin, float angleIncrement, float rangeMin, float rangeMax, [NotNull] float[] ranges,
@@ -281,7 +281,8 @@ namespace Iviz.Displays
             }
 
             pointBuffer.Clear();
-            bool tmpUseIntensityNotRange = UseIntensityNotRange;
+
+            bool useIntensity = UseIntensityNotRange && intensities.Length != 0;
             for (int i = 0; i < ranges.Length; i++)
             {
                 float range = ranges[i];
@@ -292,8 +293,9 @@ namespace Iviz.Displays
 
                 float x = cache[i].x;
                 float z = cache[i].y;
-                pointBuffer.Add(new PointWithColor(x * range, 0, z * range,
-                    tmpUseIntensityNotRange ? intensities[i] : range));
+                pointBuffer.Add(new PointWithColor(
+                    x * range, 0, z * range,
+                    useIntensity ? intensities[i] : range));
             }
 
             Size = pointBuffer.Count;
@@ -325,9 +327,10 @@ namespace Iviz.Displays
         {
             int n = pointBuffer.Count;
             float maxLineDistanceSq = maxLineDistance * maxLineDistance;
-
             lineBuffer.Clear();
-            for (int i = 0; i < pointBuffer.Count; i++)
+            for (int i = 0;
+                i < pointBuffer.Count;
+                i++)
             {
                 PointWithColor pA = pointBuffer[i];
                 PointWithColor pB = pointBuffer[(i + 1) % n];

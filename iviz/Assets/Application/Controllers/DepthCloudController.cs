@@ -120,15 +120,14 @@ namespace Iviz.Controllers
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             node = SimpleDisplayNode.Instantiate("DepthImage");
-            resource = ResourcePool.GetOrCreate<DepthCloudResource>(Resource.Displays.DepthImageResource, node.transform);
+            resource = ResourcePool.GetOrCreateDisplay<DepthCloudResource>(node.transform);
             Config = new DepthCloudConfiguration();
         }
 
         public void StopController()
         {
-            resource.Suspend();
             node.Stop();
-            ResourcePool.Dispose(Resource.Displays.DepthImageResource, resource.gameObject);
+            resource.DisposeDisplay();
             UnityEngine.Object.Destroy(node.gameObject);
         }
 

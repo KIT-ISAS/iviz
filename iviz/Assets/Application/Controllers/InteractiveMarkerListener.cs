@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using Iviz.App;
 using Iviz.Core;
+using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
@@ -12,6 +12,8 @@ using Iviz.Roslib;
 using JetBrains.Annotations;
 using UnityEngine;
 using Object = UnityEngine.Object;
+using Pose = UnityEngine.Pose;
+using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Controllers
 {
@@ -225,7 +227,7 @@ namespace Iviz.Controllers
 
         internal void OnInteractiveControlObjectMouseEvent(
             string imarkerId, string controlId,
-            in Pose controlPose, in Vector3 position,
+            in Pose controlPose, in Vector3? position,
             MouseEventType type)
         {
             byte eventType;
@@ -253,8 +255,8 @@ namespace Iviz.Controllers
                 eventType,
                 TfListener.RelativePoseToRoot(controlPose).Unity2RosPose(),
                 0,
-                position.Unity2RosPoint(),
-                true
+                position?.Unity2RosPoint() ?? Point.Zero, 
+                position != null
             );
             Publisher.Publish(msg);
         }

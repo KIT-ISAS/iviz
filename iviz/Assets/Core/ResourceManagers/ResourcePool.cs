@@ -107,16 +107,16 @@ namespace Iviz.Displays
             Dispose(info, resource.gameObject);
         }
 
-        public static bool TryDisposeDisplay([NotNull] IDisplay resource)
+        public static bool TryDisposeDisplay([CanBeNull] IDisplay resource)
         {
             if (resource == null)
             {
-                throw new ArgumentNullException(nameof(resource));
+                return false;
             }
 
             if (!(resource is MonoBehaviour behaviour))
             {
-                throw new ArgumentException("Invalid resource type");
+                return false;
             }
 
             if (!Resource.Displays.TryGetResource(resource.GetType(), out Info<GameObject> info))

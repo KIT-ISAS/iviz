@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Iviz.Core;
 using Iviz.Displays;
@@ -659,8 +658,7 @@ namespace Iviz.Controllers
 
             if (resource != null && resourceInfo != null)
             {
-                resource.Suspend();
-                ResourcePool.Dispose(resourceInfo, resource.gameObject);
+                resource.DisposeResource(resourceInfo);
                 resource = null;
             }
 
@@ -836,8 +834,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            resource.Suspend();
-            ResourcePool.Dispose(resourceInfo, resource.gameObject);
+            resource.DisposeResource(resourceInfo);
             resource = null;
             resourceInfo = null;
         }

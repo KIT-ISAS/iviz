@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Iviz.Core;
-using Iviz.Resources;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -32,7 +31,7 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            resource = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, transform);
+            resource = ResourcePool.GetOrCreateDisplay<LineResource>(transform);
             resource.ElementScale = 0.01f;
             Color = Color.yellow;
         }

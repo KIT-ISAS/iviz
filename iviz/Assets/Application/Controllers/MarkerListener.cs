@@ -5,14 +5,11 @@ using System.Runtime.Serialization;
 using System.Text;
 using Iviz.App;
 using Iviz.Core;
-using Iviz.Displays;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
 using JetBrains.Annotations;
-using Microsoft.Win32;
-using UnityEditor.Timeline;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
 using Object = UnityEngine.Object;
@@ -151,7 +148,6 @@ namespace Iviz.Controllers
             }
         }
 
-        [NotNull]
         public string BriefDescription
         {
             get

@@ -34,7 +34,7 @@ namespace Iviz.Core
         public static event Action<string> LogInternal;
         public static event ExternalLogDelegate LogExternal;
 
-        public static void Info<T>(in T t)
+        public static void Info<T>(T t)
         {
             UnityEngine.Debug.Log(t);
         }

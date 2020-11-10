@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 using Iviz.Core;
 using Iviz.Displays;
@@ -13,17 +12,18 @@ namespace Iviz.Controllers
     {
         const string WarnStr = "<b>Warning:</b> ";
         const string ErrorStr = "<color=red>Error:</color> ";
-        
+
         readonly Dictionary<string, InteractiveMarkerControlObject> controls =
             new Dictionary<string, InteractiveMarkerControlObject>();
 
         readonly HashSet<string> controlsToDelete = new HashSet<string>();
         readonly StringBuilder description = new StringBuilder();
-        
+
         InteractiveMarkerListener listener;
         TextMarkerResource text;
         GameObject controlNode;
-        string id;
+
+        string rosId;
 
         Pose? cachedPose;
         bool poseUpdateEnabled = true;
@@ -46,7 +46,7 @@ namespace Iviz.Controllers
         {
             get => text.Visible;
             set => text.Visible = value;
-        } 
+        }
 
         Pose LocalPose
         {
@@ -77,10 +77,10 @@ namespace Iviz.Controllers
             text.VisibleOnTop = true;
         }
 
-        internal void Initialize(InteractiveMarkerListener newListener, string newId)
+        internal void Initialize(InteractiveMarkerListener newListener, string realId)
         {
             listener = newListener;
-            id = newId;
+            rosId = realId;
         }
 
         public void Set([NotNull] InteractiveMarker msg)
@@ -132,7 +132,7 @@ namespace Iviz.Controllers
                 }
 
                 InteractiveMarkerControlObject newControl = CreateControlObject();
-                newControl.Initialize(this, controlId);
+                newControl.Initialize(this, controlMsg.Name);
                 newControl.transform.SetParentLocal(controlNode.transform);
                 controls[controlId] = newControl;
 
@@ -145,11 +145,11 @@ namespace Iviz.Controllers
                 description.Append(WarnStr).Append(numUnnamed).Append(" controls have empty ids").AppendLine();
             }
 
-            foreach (string id in controlsToDelete)
+            foreach (string controlId in controlsToDelete)
             {
-                InteractiveMarkerControlObject control = controls[id];
+                InteractiveMarkerControlObject control = controls[controlId];
                 DeleteControlObject(control);
-                controls.Remove(id);
+                controls.Remove(controlId);
             }
         }
 
@@ -159,14 +159,15 @@ namespace Iviz.Controllers
             LocalPose = rosPose.Ros2Unity();
         }
 
-        internal void OnMouseEvent(string controlId, in Pose pose, in Vector3 point, MouseEventType type)
+        internal void OnMouseEvent(string rosControlId, in Vector3? point, MouseEventType type)
         {
-            listener?.OnInteractiveControlObjectMouseEvent(id, controlId, pose, point, type);
+            listener?.OnInteractiveControlObjectMouseEvent(rosId, rosControlId, controlNode.transform.AsLocalPose(),
+                point, type);
         }
 
-        internal void OnMoved(string controlId)
+        internal void OnMoved(string rosControlId)
         {
-            listener?.OnInteractiveControlObjectMoved(id, controlId, controlNode.transform.AsLocalPose());
+            listener?.OnInteractiveControlObjectMoved(rosId, rosControlId, controlNode.transform.AsLocalPose());
         }
 
         public override void Stop()
@@ -181,7 +182,7 @@ namespace Iviz.Controllers
             controlsToDelete.Clear();
 
             ResourcePool.DisposeDisplay(text);
-            
+
             Destroy(controlNode.gameObject);
         }
 

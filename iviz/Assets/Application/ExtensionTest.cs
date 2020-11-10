@@ -5,10 +5,8 @@ using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.Tf2Msgs;
-using Iviz.Resources;
 using Iviz.Ros;
 using UnityEngine;
-using UnityEngine.Rendering.PostProcessing;
 
 namespace Iviz.App
 {
@@ -49,6 +47,10 @@ namespace Iviz.App
             // get a line builder
             lines = ResourcePool.GetOrCreateDisplay<LineResource>();
 
+            //GameObject linesBaseObject = UnityEngine.Resources.Load<GameObject>("Displays/Line");
+            //lines = Instantiate(linesBaseObject).GetComponent<LineResource>();
+            
+
             // build some robots!
             GenerateRobot();
         }
@@ -83,6 +85,7 @@ namespace Iviz.App
 
         void GenerateRobot()
         {
+            
             IExternalServiceProvider Connection = null;
             // you can load your own urdf as a string
             string pandaUrdf = UnityEngine.Resources.Load<TextAsset>("Package/iviz/robots/panda").text;

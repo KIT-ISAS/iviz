@@ -2,10 +2,8 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Iviz.App;
 using Iviz.Core;
-using Iviz.Displays;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
@@ -21,6 +19,13 @@ namespace Iviz.Controllers
     {
         [NotNull] static RosConnection Connection => ConnectionManager.Connection;
 
+        static readonly (Resource.ModuleType module, string name)[] ModuleNames =
+            typeof(Resource.ModuleType).GetEnumValues()
+                .Cast<Resource.ModuleType>()
+                .Select(module => (module, module.ToString()))
+                .ToArray();
+        
+        
         public ControllerService()
         {
             Connection.AdvertiseService<AddModule>("add_module", AddModuleCallback);
@@ -37,45 +42,9 @@ namespace Iviz.Controllers
             srv.Response.Id = id ?? "";
         }
 
-        static Resource.ModuleType ModuleTypeFromString(string moduleType)
+        static Resource.ModuleType ModuleTypeFromString(string moduleName)
         {
-            switch (moduleType)
-            {
-                case nameof(Resource.ModuleType.Grid):
-                    return Resource.ModuleType.Grid;
-                case nameof(Resource.ModuleType.TF):
-                    return Resource.ModuleType.TF;
-                case nameof(Resource.ModuleType.PointCloud):
-                    return Resource.ModuleType.PointCloud;
-                case nameof(Resource.ModuleType.Image):
-                    return Resource.ModuleType.Image;
-                case nameof(Resource.ModuleType.Marker):
-                    return Resource.ModuleType.Marker;
-                case nameof(Resource.ModuleType.InteractiveMarker):
-                    return Resource.ModuleType.InteractiveMarker;
-                case nameof(Resource.ModuleType.JointState):
-                    return Resource.ModuleType.JointState;
-                case nameof(Resource.ModuleType.DepthCloud):
-                    return Resource.ModuleType.DepthCloud;
-                case nameof(Resource.ModuleType.LaserScan):
-                    return Resource.ModuleType.LaserScan;
-                case nameof(Resource.ModuleType.AugmentedReality):
-                    return Resource.ModuleType.AugmentedReality;
-                case nameof(Resource.ModuleType.Magnitude):
-                    return Resource.ModuleType.Magnitude;
-                case nameof(Resource.ModuleType.OccupancyGrid):
-                    return Resource.ModuleType.OccupancyGrid;
-                case nameof(Resource.ModuleType.Joystick):
-                    return Resource.ModuleType.Joystick;
-                case nameof(Resource.ModuleType.Path):
-                    return Resource.ModuleType.Path;
-                case nameof(Resource.ModuleType.GridMap):
-                    return Resource.ModuleType.GridMap;
-                case nameof(Resource.ModuleType.Robot):
-                    return Resource.ModuleType.Robot;
-                default:
-                    return Resource.ModuleType.Invalid;
-            }            
+            return ModuleNames.FirstOrDefault(entry => entry.name == moduleName).module;
         } 
         
         static (string id, bool success, string message) TryCreateModule([NotNull] string moduleType)

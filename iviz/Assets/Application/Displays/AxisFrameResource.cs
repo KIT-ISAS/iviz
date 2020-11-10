@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Iviz.Core;
+using UnityEngine;
 using Iviz.Resources;
 
 namespace Iviz.Displays
@@ -111,12 +112,9 @@ namespace Iviz.Displays
 
         public void SplitForRecycle()
         {
-            axisObjects[0].Suspend();
-            axisObjects[1].Suspend();
-            axisObjects[2].Suspend();
-            ResourcePool.Dispose(Resource.Displays.Cube, axisObjects[0].gameObject);
-            ResourcePool.Dispose(Resource.Displays.Cube, axisObjects[1].gameObject);
-            ResourcePool.Dispose(Resource.Displays.Cube, axisObjects[2].gameObject);
+            axisObjects[0].DisposeResource(Resource.Displays.Cube);
+            axisObjects[1].DisposeResource(Resource.Displays.Cube);
+            axisObjects[2].DisposeResource(Resource.Displays.Cube);
         }
 
         public override void Suspend()
