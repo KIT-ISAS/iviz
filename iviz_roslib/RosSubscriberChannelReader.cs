@@ -37,7 +37,7 @@ namespace Iviz.Roslib
         }
 
         /// <summary>
-        /// Constructor for the channel. Also calls <see cref="Start"/>.
+        /// Constructor for the channel. Also calls <see cref="Start(IRosClient, string, bool)"/>.
         /// </summary>
         /// <param name="client">A connected RosClient.</param>
         /// <param name="topic">The topic to listen to.</param>
