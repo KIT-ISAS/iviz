@@ -286,7 +286,7 @@ namespace Iviz.Roslib
         /// Other clients will use this address to connect to this node.
         /// Leave empty to generate one automatically. </param>
         /// <param name="ensureCleanSlate">Checks if masterUri has any previous subscriptions or advertisements, and unregisters them.</param>
-        public RosClient(string? masterUri = null,
+        public RosClient(string? masterUri,
             string? callerId = null,
             string? callerUri = null,
             bool ensureCleanSlate = true) :
