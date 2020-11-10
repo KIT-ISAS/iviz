@@ -32,13 +32,13 @@ namespace Iviz.XmlRpc
             
             if (!WaitAndUnwrapException(task, timeoutInMs) || !task.RanToCompletion())
             {
-                throw new TimeoutException($"HttpRequest: Host '{hostname}' timed out", task.Exception);
-            }
+                if (task.IsFaulted)
+                {
+                    throw new IOException($"HttpRequest: Connection to {hostname}:{port} failed", task.Exception?.InnerException);
+                }
 
-            if (client.Client?.LocalEndPoint == null)
-            {
-                throw new RpcConnectionException($"HttpRequest: Connection with '{hostname}' failed.");
-            }            
+                throw new TimeoutException($"HttpRequest: Host {hostname}:{port} timed out");
+            }
         }
 
         public async Task StartAsync(int timeoutInMs = DefaultTimeoutInMs)
@@ -49,13 +49,13 @@ namespace Iviz.XmlRpc
             Task task = client.ConnectAsync(hostname, port);
             if (!await task.WaitFor(timeoutInMs) || !task.RanToCompletion())
             {
-                throw new TimeoutException($"HttpRequest: Host '{hostname}' timed out", task.Exception);
-            }
+                if (task.IsFaulted)
+                {
+                    throw new IOException($"HttpRequest: Connection to {hostname}:{port} failed", task.Exception?.InnerException);
+                }
 
-            if (client.Client?.LocalEndPoint == null)
-            {
-                throw new RpcConnectionException($"HttpRequest: Connection with '{hostname}' failed.");
-            }            
+                throw new TimeoutException($"HttpRequest: Host {hostname}:{port} timed out");
+            }
         }
 
         string CreateRequest(string msgIn)
