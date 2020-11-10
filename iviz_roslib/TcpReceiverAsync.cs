@@ -101,20 +101,13 @@ namespace Iviz.Roslib
             }
             catch (OperationCanceledException) { }
 
-#if !NETSTANDARD2_0
-            if (stream != null)
-            {
-                await stream.DisposeAsync();
-            }
-#else
             stream?.Dispose();
-#endif
             tcpClient?.Dispose();
 
             await sessionTask;
         }
 
-        async Task SerializeHeader()
+        async Task SendHeader()
         {
             string[] contents =
             {
@@ -126,38 +119,9 @@ namespace Iviz.Roslib
                 requestNoDelay ? "tcp_nodelay=1" : "tcp_nodelay=0"
             };
 
-            int totalLength = 4 * contents.Length + contents.Sum(entry => entry.Length);
-
-            byte[] array = new byte[totalLength + 4];
-            using (BinaryWriter writer = new BinaryWriter(new MemoryStream(array)))
-            {
-                writer.Write(totalLength);
-                foreach (string entry in contents)
-                {
-                    writer.Write(entry.Length);
-                    writer.Write(BuiltIns.UTF8.GetBytes(entry));
-                }
-            }
-
-            await stream!.WriteAsync(array, 0, array.Length).Caf();
+            await Utils.WriteHeaderAsync(stream!, contents).Caf();
         }
 
-        List<string> ParseHeader(int totalLength)
-        {
-            int numRead = 0;
-
-            List<string> contents = new List<string>();
-            while (numRead < totalLength)
-            {
-                int length = BitConverter.ToInt32(readBuffer, numRead);
-                numRead += 4;
-                string entry = BuiltIns.UTF8.GetString(readBuffer, numRead, length);
-                numRead += length;
-                contents.Add(entry);
-            }
-
-            return contents;
-        }
 
 #if !NETSTANDARD2_0
         async ValueTask<int> ReceivePacket()
@@ -165,23 +129,9 @@ namespace Iviz.Roslib
         async Task<int> ReceivePacket()
 #endif
         {
-            int numRead = 0;
-            while (numRead < 4)
+            if (!await stream!.ReadChunkAsync(readBuffer, 4))
             {
-#if !NETSTANDARD2_0
-                int readNow =
-                    await stream!.ReadAsync(
-                        new Memory<byte>(readBuffer, numRead, 4 - numRead), 
-                        runningTs.Token);
-#else
-                int readNow = await stream!.ReadAsync(readBuffer, numRead, 4 - numRead, runningTs.Token).Caf();
-#endif
-                if (readNow == 0)
-                {
-                    return -1;
-                }
-
-                numRead += readNow;
+                return -1;
             }
 
             int length = BitConverter.ToInt32(readBuffer, 0);
@@ -195,23 +145,9 @@ namespace Iviz.Roslib
                 readBuffer = new byte[length + BufferSizeIncrease];
             }
 
-            numRead = 0;
-            while (numRead < length)
+            if (!await stream!.ReadChunkAsync(readBuffer, length))
             {
-#if !NETSTANDARD2_0
-                int readNow = await stream!.ReadAsync(
-                    new Memory<byte>(readBuffer, numRead, length - numRead),
-                    runningTs.Token);
-#else
-                int readNow = await stream!.ReadAsync(readBuffer, numRead, length - numRead, runningTs.Token).Caf();
-#endif
-
-                if (readNow == 0)
-                {
-                    return 0;
-                }
-
-                numRead += readNow;
+                return -1;
             }
 
             return length;
@@ -220,15 +156,15 @@ namespace Iviz.Roslib
 
         async Task<List<string>> DoHandshake()
         {
-            await SerializeHeader().Caf();
+            await SendHeader().Caf();
 
             int receivedLength = await ReceivePacket();
-            if (receivedLength == 0)
+            if (receivedLength == -1)
             {
-                throw new TimeoutException("Connection closed before handshake finished.");
+                throw new IOException("Connection closed before handshake finished.");
             }
 
-            return ParseHeader(receivedLength);
+            return Utils.ParseHeader(readBuffer, receivedLength);
         }
 
         async Task<TcpClient?> TryToConnect()
@@ -270,7 +206,12 @@ namespace Iviz.Roslib
                     return client;
                 }
 
-                await Task.Delay(WaitBetweenRetriesInMs, runningTs.Token).Caf();
+                try
+                {
+                    await Task.Delay(WaitBetweenRetriesInMs, runningTs.Token).Caf();
+                }
+                catch (OperationCanceledException) { }
+
                 if (!KeepRunning)
                 {
                     return null;
@@ -294,15 +235,9 @@ namespace Iviz.Roslib
             while (KeepRunning)
             {
                 tcpClient = null;
-
                 Logger.LogDebugFormat("{0}: Trying to connect!", this);
-                
-                try
-                {
-                    tcpClient = await KeepReconnecting().Caf();
-                }
-                catch (OperationCanceledException) { }
 
+                tcpClient = await KeepReconnecting().Caf();
                 if (tcpClient == null)
                 {
                     Logger.LogDebugFormat(

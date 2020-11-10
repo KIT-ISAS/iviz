@@ -8,23 +8,23 @@ using Iviz.Msgs;
 
 namespace Iviz.Roslib
 {
-    internal sealed class TcpSenderManager<T> where T : IMessage
+    internal sealed class TcpSenderManager<TMessage> where TMessage : IMessage
     {
         const int NewSenderTimeoutInMs = 1000;
         const int DefaultTimeoutInMs = 5000;
 
-        readonly ConcurrentDictionary<string, TcpSenderAsync<T>> connectionsByCallerId =
-            new ConcurrentDictionary<string, TcpSenderAsync<T>>();
+        readonly ConcurrentDictionary<string, TcpSenderAsync<TMessage>> connectionsByCallerId =
+            new ConcurrentDictionary<string, TcpSenderAsync<TMessage>>();
 
-        readonly RosPublisher<T> publisher;
-        readonly TopicInfo<T> topicInfo;
+        readonly RosPublisher<TMessage> publisher;
+        readonly TopicInfo<TMessage> topicInfo;
         int maxQueueSizeInBytes;
 
         bool latching;
         bool hasLatchedMessage;
-        T latchedMessage = default!;
+        TMessage latchedMessage = default!;
 
-        public TcpSenderManager(RosPublisher<T> publisher, TopicInfo<T> topicInfo)
+        public TcpSenderManager(RosPublisher<TMessage> publisher, TopicInfo<TMessage> topicInfo)
         {
             this.publisher = publisher;
             this.topicInfo = topicInfo;
@@ -68,7 +68,7 @@ namespace Iviz.Roslib
                 }
 
                 maxQueueSizeInBytes = value;
-                foreach (TcpSenderAsync<T> sender in connectionsByCallerId.Values)
+                foreach (TcpSenderAsync<TMessage> sender in connectionsByCallerId.Values)
                 {
                     sender.MaxQueueSizeInBytes = value;
                 }
@@ -78,7 +78,7 @@ namespace Iviz.Roslib
         public Endpoint? CreateConnectionRpc(string remoteCallerId)
         {
             Logger.LogDebugFormat("{0}: '{1}' is requesting {2}", this, remoteCallerId, Topic);
-            TcpSenderAsync<T> newSender = new TcpSenderAsync<T>(remoteCallerId, topicInfo, Latching);
+            TcpSenderAsync<TMessage> newSender = new TcpSenderAsync<TMessage>(remoteCallerId, topicInfo, Latching);
 
             Endpoint endPoint;
             using (SemaphoreSlim managerSignal = new SemaphoreSlim(0, 1))
@@ -123,8 +123,8 @@ namespace Iviz.Roslib
 
         void Cleanup()
         {
-            TcpSenderAsync<T>[] toDelete = connectionsByCallerId.Values.Where(sender => !sender.IsAlive).ToArray();
-            foreach (TcpSenderAsync<T> sender in toDelete)
+            TcpSenderAsync<TMessage>[] toDelete = connectionsByCallerId.Values.Where(sender => !sender.IsAlive).ToArray();
+            foreach (TcpSenderAsync<TMessage> sender in toDelete)
             {
                 sender.Dispose();
                 if (connectionsByCallerId.RemovePair(sender.RemoteCallerId, sender))
@@ -140,7 +140,7 @@ namespace Iviz.Roslib
             }
         }
 
-        public void Publish(in T msg)
+        public void Publish(in TMessage msg)
         {
             if (Latching)
             {
@@ -156,7 +156,7 @@ namespace Iviz.Roslib
 
         public void Stop()
         {
-            foreach (TcpSenderAsync<T> sender in connectionsByCallerId.Values)
+            foreach (TcpSenderAsync<TMessage> sender in connectionsByCallerId.Values)
             {
                 sender.Dispose();
             }

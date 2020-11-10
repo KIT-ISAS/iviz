@@ -44,11 +44,11 @@ namespace Iviz.Roslib
         readonly Dictionary<string, IRosSubscriber> subscribersByTopic = new Dictionary<string, IRosSubscriber>();
         readonly Dictionary<string, IRosPublisher> publishersByTopic = new Dictionary<string, IRosPublisher>();
 
-        readonly Dictionary<string, IServiceReceiver> subscribedServicesByName =
-            new Dictionary<string, IServiceReceiver>();
+        readonly Dictionary<string, IServiceCaller> subscribedServicesByName =
+            new Dictionary<string, IServiceCaller>();
 
-        readonly Dictionary<string, IServiceSenderManager> advertisedServicesByName =
-            new Dictionary<string, IServiceSenderManager>();
+        readonly Dictionary<string, IServiceRequestManager> advertisedServicesByName =
+            new Dictionary<string, IServiceRequestManager>();
 
         public delegate void ShutdownActionCall(
             string callerId, string reason,
@@ -1171,18 +1171,18 @@ namespace Iviz.Roslib
                 }
             }
 
-            IServiceReceiver[] receivers = subscribedServicesByName.Values.ToArray();
+            IServiceCaller[] receivers = subscribedServicesByName.Values.ToArray();
             subscribedServicesByName.Clear();
 
-            foreach (IServiceReceiver receiver in receivers)
+            foreach (IServiceCaller receiver in receivers)
             {
                 receiver.Stop();
             }
 
-            IServiceSenderManager[] serviceManagers = advertisedServicesByName.Values.ToArray();
+            IServiceRequestManager[] serviceManagers = advertisedServicesByName.Values.ToArray();
             advertisedServicesByName.Clear();
 
-            foreach (IServiceSenderManager serviceSender in serviceManagers)
+            foreach (IServiceRequestManager serviceSender in serviceManagers)
             {
                 try
                 {
@@ -1222,15 +1222,15 @@ namespace Iviz.Roslib
                 await Master.UnregisterSubscriberAsync(subscriber.Topic).Caf();
             }));
 
-            IServiceReceiver[] receivers = subscribedServicesByName.Values.ToArray();
+            IServiceCaller[] receivers = subscribedServicesByName.Values.ToArray();
             subscribedServicesByName.Clear();
 
-            foreach (IServiceReceiver receiver in receivers)
+            foreach (IServiceCaller receiver in receivers)
             {
                 receiver.Stop();
             }
 
-            IServiceSenderManager[] serviceManagers = advertisedServicesByName.Values.ToArray();
+            IServiceRequestManager[] serviceManagers = advertisedServicesByName.Values.ToArray();
             advertisedServicesByName.Clear();
 
             tasks.AddRange(serviceManagers.Select(async senderManager =>
@@ -1313,7 +1313,7 @@ namespace Iviz.Roslib
         {
             if (subscribedServicesByName.TryGetValue(serviceName, out var baseExistingReceiver))
             {
-                if (!(baseExistingReceiver is ServiceReceiver<T> existingReceiver))
+                if (!(baseExistingReceiver is ServiceCallerAsync<T> existingReceiver))
                 {
                     throw new InvalidMessageTypeException(
                         $"Existing connection with service type {baseExistingReceiver.ServiceType} does not match the given type.");
@@ -1340,7 +1340,7 @@ namespace Iviz.Roslib
             ServiceInfo<T> serviceInfo = new ServiceInfo<T>(CallerId, serviceName);
             try
             {
-                var serviceReceiver = new ServiceReceiver<T>(serviceInfo, serviceUri, true, persistent);
+                var serviceReceiver = new ServiceCallerAsync<T>(serviceInfo, serviceUri, true, persistent);
 
                 serviceReceiver.Start();
                 bool result = serviceReceiver.Execute(service);
@@ -1375,7 +1375,7 @@ namespace Iviz.Roslib
         {
             if (subscribedServicesByName.TryGetValue(serviceName, out var baseExistingReceiver))
             {
-                if (!(baseExistingReceiver is ServiceReceiver<T> existingReceiver))
+                if (!(baseExistingReceiver is ServiceCallerAsync<T> existingReceiver))
                 {
                     throw new InvalidMessageTypeException(
                         $"Existing connection with service type {baseExistingReceiver.ServiceType} does not match the given type.");
@@ -1402,19 +1402,19 @@ namespace Iviz.Roslib
             ServiceInfo<T> serviceInfo = new ServiceInfo<T>(CallerId, serviceName);
             try
             {
-                ServiceReceiver<T> serviceReceiver =
-                    new ServiceReceiver<T>(serviceInfo, serviceUri, true, persistent);
+                ServiceCallerAsync<T> serviceCallerAsync =
+                    new ServiceCallerAsync<T>(serviceInfo, serviceUri, true, persistent);
 
-                await serviceReceiver.StartAsync().Caf();
-                bool result = await serviceReceiver.ExecuteAsync(service).Caf();
+                await serviceCallerAsync.StartAsync().Caf();
+                bool result = await serviceCallerAsync.ExecuteAsync(service).Caf();
 
-                if (persistent && serviceReceiver.IsAlive)
+                if (persistent && serviceCallerAsync.IsAlive)
                 {
-                    subscribedServicesByName.Add(serviceName, serviceReceiver);
+                    subscribedServicesByName.Add(serviceName, serviceCallerAsync);
                 }
                 else
                 {
-                    serviceReceiver.Dispose();
+                    serviceCallerAsync.Dispose();
                 }
 
                 return result;
@@ -1432,7 +1432,7 @@ namespace Iviz.Roslib
                 return false;
             }
 
-            if (!(existingSender is ServiceSenderManager<T>))
+            if (!(existingSender is ServiceRequestManager<T>))
             {
                 throw new InvalidMessageTypeException(
                     $"Existing advertised service type {existingSender.ServiceType} does not match the given type.");
@@ -1461,7 +1461,7 @@ namespace Iviz.Roslib
             }
 
             ServiceInfo<T> serviceInfo = new ServiceInfo<T>(CallerId, serviceName, new T());
-            var advertisedService = new ServiceSenderManager<T>(serviceInfo, CallerUri.Host, Wrapper);
+            var advertisedService = new ServiceRequestManager<T>(serviceInfo, CallerUri.Host, Wrapper);
 
             advertisedServicesByName.Add(serviceName, advertisedService);
 
@@ -1484,7 +1484,7 @@ namespace Iviz.Roslib
             }
 
             ServiceInfo<T> serviceInfo = new ServiceInfo<T>(CallerId, serviceName, new T());
-            var advertisedService = new ServiceSenderManager<T>(serviceInfo, CallerUri.Host, callback);
+            var advertisedService = new ServiceRequestManager<T>(serviceInfo, CallerUri.Host, callback);
 
             advertisedServicesByName.Add(serviceName, advertisedService);
 

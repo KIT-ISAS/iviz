@@ -11,19 +11,10 @@ using Iviz.XmlRpc;
 
 namespace Iviz.Roslib
 {
-    internal interface IServiceSenderManager
-    {
-        string Service { get; }
-        string ServiceType { get; }
-        Uri Uri { get; }
-        void Stop();
-        Task StopAsync();
-    }
-
-    internal sealed class ServiceSenderManager<T> : IServiceSenderManager where T : IService
+    internal sealed class ServiceRequestManager<T> : IServiceRequestManager where T : IService
     {
         readonly Func<T, Task> callback;
-        readonly HashSet<ServiceSenderAsync<T>> connections = new HashSet<ServiceSenderAsync<T>>();
+        readonly HashSet<ServiceRequestAsync<T>> connections = new HashSet<ServiceRequestAsync<T>>();
 
         readonly TcpListener listener;
         readonly ServiceInfo<T> serviceInfo;
@@ -32,7 +23,7 @@ namespace Iviz.Roslib
 
         bool keepGoing;
 
-        public ServiceSenderManager(ServiceInfo<T> serviceInfo, string host, Func<T, Task> callback)
+        public ServiceRequestManager(ServiceInfo<T> serviceInfo, string host, Func<T, Task> callback)
         {
             this.serviceInfo = serviceInfo;
             this.callback = callback;
@@ -44,6 +35,7 @@ namespace Iviz.Roslib
 
             IPEndPoint localEndpoint = (IPEndPoint) listener.LocalEndpoint;
             Uri = new Uri($"rosrpc://{host}:{localEndpoint.Port}/");
+            
             Logger.LogDebugFormat("{0}: Starting {1} [{2}] at {3}",
                 this, serviceInfo.Service, serviceInfo.Type, Uri);
 
@@ -78,7 +70,7 @@ namespace Iviz.Roslib
                         break;
                     }
 
-                    var sender = new ServiceSenderAsync<T>(serviceInfo, client, callback);
+                    var sender = new ServiceRequestAsync<T>(serviceInfo, client, callback);
                     connections.Add(sender);
 
                     Cleanup();
@@ -99,8 +91,8 @@ namespace Iviz.Roslib
 
         void Cleanup()
         {
-            ServiceSenderAsync<T>[] toRemove = connections.Where(connection => !connection.IsAlive).ToArray();
-            foreach (ServiceSenderAsync<T> connection in toRemove)
+            ServiceRequestAsync<T>[] toRemove = connections.Where(connection => !connection.IsAlive).ToArray();
+            foreach (ServiceRequestAsync<T> connection in toRemove)
             {
                 Logger.LogDebugFormat("{0}: Removing service connection with '{1}' - dead x_x", 
                     this, connection.Hostname);
@@ -115,7 +107,7 @@ namespace Iviz.Roslib
             signal.Release();
             task.Wait();
 
-            foreach (ServiceSenderAsync<T> sender in connections)
+            foreach (ServiceRequestAsync<T> sender in connections)
             {
                 sender.Stop();
             }

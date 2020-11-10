@@ -1,4 +1,4 @@
-﻿//#define DEBUG__
+﻿
 
 using System;
 using System.Collections.Generic;
@@ -12,13 +12,7 @@ using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.Roslib
 {
-    internal interface IServiceReceiver
-    {
-        string ServiceType { get; }
-        void Stop();
-    }
-    
-    internal sealed class ServiceReceiver<T> : IServiceReceiver, IDisposable where T : IService
+    internal sealed class ServiceCallerAsync<T> : IServiceCaller, IDisposable where T : IService
     {
         const int BufferSizeIncrease = 512;
         const byte ErrorByte = 0;
@@ -37,11 +31,7 @@ namespace Iviz.Roslib
         public bool IsAlive => tcpClient.Connected;
         public string ServiceType => serviceInfo.Service;
 
-        public ServiceReceiver(
-            ServiceInfo<T> serviceInfo,
-            Uri remoteUri,
-            bool requestNoDelay,
-            bool persistent)
+        public ServiceCallerAsync(ServiceInfo<T> serviceInfo, Uri remoteUri, bool requestNoDelay, bool persistent)
         {
             this.serviceInfo = serviceInfo;
             this.requestNoDelay = requestNoDelay;
@@ -69,7 +59,7 @@ namespace Iviz.Roslib
             tcpClient.Dispose();
         }
 
-        async Task SerializeHeaderAsync()
+        async Task SendHeaderAsync()
         {
             string[] contents =
             {
@@ -77,62 +67,24 @@ namespace Iviz.Roslib
                 $"service={serviceInfo.Service}",
                 $"md5sum={serviceInfo.Md5Sum}",
                 $"type={serviceInfo.Type}",
-                $"tcp_nodelay={(requestNoDelay ? "1" : "0")}",
-                $"persistent={(persistent ? "1" : "0")}"
+                requestNoDelay ? "tcp_nodelay=1" : "tcp_nodelay=0",
+                persistent ? "persistent=1" : "persistent=0",
             };
-            
-            int totalLength = 4 * contents.Length + contents.Sum(entry => entry.Length);
 
-            byte[] array = new byte[totalLength + 4];
-            using (BinaryWriter writer = new BinaryWriter(new MemoryStream(array)))
-            {
-                writer.Write(totalLength);
-                foreach (string t in contents)
-                {
-                    writer.Write(t.Length);
-                    writer.Write(BuiltIns.UTF8.GetBytes(t));
-
-#if DEBUG__
-                Logger.Log(">>> " + contents[i]);
-#endif
-                }
-            }
-
-            await stream.WriteAsync(array, 0, array.Length).Caf();
+            await Utils.WriteHeaderAsync(stream, contents).Caf();
         }
-
-        List<string> ParseHeader(int totalLength)
-        {
-            int numRead = 0;
-
-            List<string> contents = new List<string>();
-            while (numRead < totalLength)
-            {
-                int length = BitConverter.ToInt32(readBuffer, numRead);
-                numRead += 4;
-                string entry = BuiltIns.UTF8.GetString(readBuffer, numRead, length);
-                numRead += length;
-                contents.Add(entry);
-
-#if DEBUG__
-                Logger.Log("<<< " + contents.Last());
-#endif
-            }
-
-            return contents;
-        }
-
+        
         public async Task StartAsync()
         {
-            await SerializeHeaderAsync().Caf();
+            await SendHeaderAsync().Caf();
 
             int totalLength = await ReceivePacketAsync().Caf();
             if (totalLength == -1)
             {
-                throw new RpcConnectionException("Partner closed the connection");
+                throw new IOException("Partner closed the connection");
             }
 
-            List<string> responses = ParseHeader(totalLength);
+            List<string> responses = Utils.ParseHeader(readBuffer, totalLength);
 
             if (responses.Count == 0 || !responses[0].HasPrefix("error"))
             {
@@ -155,16 +107,9 @@ namespace Iviz.Roslib
 
         async Task<int> ReceivePacketAsync()
         {
-            int numRead = 0;
-            while (numRead < 4)
+            if (!await stream.ReadChunkAsync(readBuffer, 4))
             {
-                int readNow = await stream.ReadAsync(readBuffer, numRead, 4 - numRead);
-                if (readNow == 0)
-                {
-                    return -1;
-                }
-
-                numRead += readNow;
+                return -1;
             }
             
             int length = BitConverter.ToInt32(readBuffer, 0);
@@ -178,16 +123,9 @@ namespace Iviz.Roslib
                 readBuffer = new byte[length + BufferSizeIncrease];
             }
 
-            numRead = 0;
-            while (numRead < length)
+            if (!await stream.ReadChunkAsync(readBuffer, length))
             {
-                int readNow = await stream.ReadAsync(readBuffer, numRead, length - numRead);
-                if (readNow == 0)
-                {
-                    return -1;
-                }
-
-                numRead += readNow;
+                return -1;
             }
 
             return length;
@@ -236,7 +174,7 @@ namespace Iviz.Roslib
             int rcvLengthH = await stream.ReadAsync(readBuffer, 0, 1);
             if (rcvLengthH == 0)
             {
-                throw new RpcConnectionException("Partner closed the connection");
+                throw new IOException("Partner closed the connection");
             }
 
             byte statusByte = readBuffer[0];
@@ -244,7 +182,7 @@ namespace Iviz.Roslib
             int rcvLength = await ReceivePacketAsync();
             if (rcvLength == -1)
             {
-                throw new RpcConnectionException("Partner closed the connection");
+                throw new IOException("Partner closed the connection");
             }
 
             if (statusByte == ErrorByte)

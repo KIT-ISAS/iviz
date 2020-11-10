@@ -1,7 +1,8 @@
-﻿//#define DEBUG__
+﻿
 
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -48,7 +49,6 @@ namespace Iviz.Roslib
         Endpoint? endpoint;
         Endpoint? remoteEndpoint;
 
-        //volatile bool keepRunning;
         int numDropped;
         int numSent;
         SenderStatus status;
@@ -119,59 +119,30 @@ namespace Iviz.Roslib
             return endpoint;
         }
 
-        static List<string> ParseHeader(byte[] readBuffer)
-        {
-            int numRead = 0;
-
-            List<string> contents = new List<string>();
-            while (numRead < readBuffer.Length)
-            {
-                int length = BitConverter.ToInt32(readBuffer, numRead);
-                numRead += 4;
-                string entry = BuiltIns.UTF8.GetString(readBuffer, numRead, length);
-                numRead += length;
-#if DEBUG__
-                Logger.Log("<<< " + entry);
-#endif
-                contents.Add(entry);
-            }
-
-            return contents;
-        }
-
         async Task<byte[]?> ReceiveHeader()
         {
             byte[] lengthBuffer = new byte[4];
-            int numRead = 0;
-            while (numRead < 4)
+            if (!await stream!.ReadChunkAsync(lengthBuffer, 4).Caf())
             {
-                int readNow = await stream!.ReadAsync(lengthBuffer, numRead, 4 - numRead).Caf();
-                if (readNow == 0)
-                {
-                    return null;
-                }
-
-                numRead += readNow;
+                return null;
+            }
+            
+            int length = BitConverter.ToInt32(lengthBuffer, 0);
+            if (length == 0)
+            {
+                return Array.Empty<byte>();
             }
 
-            int length = BitConverter.ToInt32(lengthBuffer, 0);
             byte[] readBuffer = new byte[length];
-            numRead = 0;
-            while (numRead < length)
+            if (!await stream!.ReadChunkAsync(readBuffer, length).Caf())
             {
-                int readNow = await stream!.ReadAsync(readBuffer, numRead, length - numRead).Caf();
-                if (readNow == 0)
-                {
-                    return null;
-                }
-
-                numRead += readNow;
+                return null;
             }
 
             return readBuffer;
         }
 
-        async Task SendResponseHeader(string? errorMessage)
+        async Task SendHeader(string? errorMessage)
         {
             string[] contents;
             if (errorMessage != null)
@@ -195,23 +166,7 @@ namespace Iviz.Roslib
                 };
             }
 
-            int totalLength = 4 * contents.Length + contents.Sum(entry => entry.Length);
-
-            byte[] array = new byte[4 + totalLength];
-            using (BinaryWriter writer = new BinaryWriter(new MemoryStream(array)))
-            {
-                writer.Write(totalLength);
-                foreach (string entry in contents)
-                {
-                    writer.Write(entry.Length);
-                    writer.Write(BuiltIns.UTF8.GetBytes(entry));
-#if DEBUG__
-                Logger.Log(">>> " + contents[i]);
-#endif
-                }
-            }
-
-            await stream!.WriteAsync(array, 0, array.Length).Caf();
+            await Utils.WriteHeaderAsync(stream!, contents).Caf();
         }
 
         string? ProcessRemoteHeader(List<string> fields)
@@ -291,14 +246,14 @@ namespace Iviz.Roslib
                 throw new TimeoutException("Connection closed during handshake.");
             }
 
-            List<string> fields = ParseHeader(readBuffer);
+            List<string> fields = Utils.ParseHeader(readBuffer);
             string? errorMessage = ProcessRemoteHeader(fields);
             if (errorMessage != null)
             {
                 Logger.LogFormat("{0}: Failed handshake\n{1}", this, errorMessage);
             }
 
-            await SendResponseHeader(errorMessage).Caf();
+            await SendHeader(errorMessage).Caf();
 
             return errorMessage == null;
         }
@@ -433,7 +388,7 @@ namespace Iviz.Roslib
                 }
                 else
                 {
-                    ApplyQueueSizeConstraint(localQueue, totalQueueSizeInBytes, MaxQueueSizeInBytes,
+                    DiscardOldMessages(localQueue, totalQueueSizeInBytes, MaxQueueSizeInBytes,
                         out startIndex, out newBytesDropped);
                 }
 
@@ -470,7 +425,7 @@ namespace Iviz.Roslib
             messageQueue.Enqueue(message);
         }
 
-        static void ApplyQueueSizeConstraint(List<(T msg, int msgLength)> queue,
+        static void DiscardOldMessages(List<(T msg, int msgLength)> queue,
             int totalQueueSizeInBytes, int maxQueueSizeInBytes, out int numDropped, out int bytesDropped)
         {
             int c = queue.Count - 1;

@@ -2,7 +2,11 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
+using System.Net.Sockets;
+using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.XmlRpc;
 using Newtonsoft.Json;
 
 namespace Iviz.Roslib
@@ -131,7 +135,62 @@ namespace Iviz.Roslib
 
             return false;
         }
+
+        internal static List<string> ParseHeader(byte[] readBuffer, int totalLength = -1)
+        {
+            int numRead = 0;
+            int toRead = totalLength != -1 ? totalLength : readBuffer.Length;
+
+            List<string> contents = new List<string>();
+            while (numRead < toRead)
+            {
+                int length = BitConverter.ToInt32(readBuffer, numRead);
+                numRead += 4;
+                string entry = BuiltIns.UTF8.GetString(readBuffer, numRead, length);
+                numRead += length;
+
+                contents.Add(entry);
+            }
+
+            return contents;
+        }
         
+        internal static async Task<bool> ReadChunkAsync(this NetworkStream stream, byte[] buffer, int toRead)
+        {
+            int numRead = 0;
+            while (numRead < toRead)
+            {
+                int readNow = await stream!.ReadAsync(buffer, numRead, toRead - numRead).Caf();
+                if (readNow == 0)
+                {
+                    return false;
+                }
+
+                numRead += readNow;
+            }
+
+            return true;
+        }
+
+        internal static async Task WriteHeaderAsync(NetworkStream stream, string[] contents)
+        {
+            int totalLength = 4 * contents.Length + contents.Sum(entry => entry.Length);
+
+            byte[] array = new byte[totalLength + 4];
+            using (BinaryWriter writer = new BinaryWriter(new MemoryStream(array)))
+            {
+                writer.Write(totalLength);
+                foreach (string t in contents)
+                {
+                    writer.Write(t.Length);
+                    writer.Write(BuiltIns.UTF8.GetBytes(t));
+                }
+            }
+
+            await stream.WriteAsync(array, 0, array.Length).Caf();            
+        }
+
+
         /// <summary>
         /// A string hash that does not change every run unlike GetHashCode
         /// </summary>
