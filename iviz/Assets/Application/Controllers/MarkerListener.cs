@@ -153,6 +153,8 @@ namespace Iviz.Controllers
             {
                 description.Append("<i>... and ").Append(markers.Count - maxToDisplay).Append(" more.</i>").AppendLine();
             }
+            
+            description.AppendLine().AppendLine();
         }
 
         public string BriefDescription

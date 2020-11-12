@@ -54,7 +54,7 @@ namespace Iviz.App
             panel.FrameSize.Value = listener.FrameSize;
             panel.ShowFrameLabels.Value = listener.FrameLabelsVisible;
             panel.ConnectToParent.Value = listener.ParentConnectorVisible;
-            panel.KeepOnlyUsedFrames.Value = listener.KeepOnlyUsedFrames;
+            panel.KeepAllFrames.Value = listener.KeepAllFrames;
             panel.Sender.Set(listener.Publisher);
             
             panel.HideButton.Clicked += () =>
@@ -74,9 +74,9 @@ namespace Iviz.App
             {
                 listener.ParentConnectorVisible = f;
             };
-            panel.KeepOnlyUsedFrames.ValueChanged += f =>
+            panel.KeepAllFrames.ValueChanged += f =>
             {
-                listener.KeepOnlyUsedFrames = f;
+                listener.KeepAllFrames = f;
             };
         }
 
@@ -100,8 +100,8 @@ namespace Iviz.App
                     case nameof(TfConfiguration.ParentConnectorVisible):
                         listener.ParentConnectorVisible = config.ParentConnectorVisible;
                         break;
-                    case nameof(TfConfiguration.KeepOnlyUsedFrames):
-                        listener.KeepOnlyUsedFrames = config.KeepOnlyUsedFrames;
+                    case nameof(TfConfiguration.KeepAllFrames):
+                        listener.KeepAllFrames = config.KeepAllFrames;
                         break;
                     default:
                         Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
