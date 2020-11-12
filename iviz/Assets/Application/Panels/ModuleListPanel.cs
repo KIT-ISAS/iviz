@@ -163,11 +163,6 @@ namespace Iviz.App
             CreateModule(Resource.ModuleType.TF, TfListener.DefaultTopic);
             CreateModule(Resource.ModuleType.Grid);
 
-            if (Settings.IsHololens)
-            {
-                hololensManager = new HololensManager();
-            }
-
             save.onClick.AddListener(saveConfigData.Show);
             load.onClick.AddListener(loadConfigData.Show);
 
@@ -269,7 +264,13 @@ namespace Iviz.App
             AllGuiVisible = AllGuiVisible; // initialize value
 
             initialized = true;
+
             InitFinished?.Invoke();
+            
+            if (Settings.IsHololens)
+            {
+                hololensManager = new HololensManager();
+            }
         }
 
         void OnConnectionStateChanged(ConnectionState state)

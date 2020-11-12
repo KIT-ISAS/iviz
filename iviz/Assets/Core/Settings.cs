@@ -9,7 +9,7 @@ namespace Iviz.Core
         /// Is this being run on an Android, IOS, or Hololens device?
         /// </summary>
         public const bool IsMobile =
-#if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID || UNITY_WSA)
+#if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
             true;
 #else
             false;
