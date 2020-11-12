@@ -1,7 +1,8 @@
 # Adds a module by type
 
 string module_type	# Module type
+string id		# Requested id to identify this module, or empty to autogenerate
 ---
 bool success		# Whether the retrieval succeeded
 string message		# An error message if success is false
-string id		# An id identifying this module
+string id		# An id identifying this module, or empty if error
